@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PyraCrypt - Extra Features Add-On</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>PyraCrypt Extra Features</h1>
+        <p>Threat Guard + Incident Playbooks + Marketing Funnel AI</p>
+      </div>
+      <button id="exportStateBtn" class="btn ghost">Export State</button>
+    </header>
+
+    <main class="layout">
+      <aside class="nav">
+        <button class="tab-btn active" data-tab="assistant">Threat Guard Assistant</button>
+        <button class="tab-btn" data-tab="prevention">Intrusion Prevention</button>
+        <button class="tab-btn" data-tab="playbooks">Incident Playbooks</button>
+        <button class="tab-btn" data-tab="funnel">Marketing Funnel AI</button>
+        <button class="tab-btn" data-tab="merge">App Merge Planner</button>
+      </aside>
+
+      <section class="panel-wrap">
+        <section id="assistant" class="panel active">
+          <h2>Threat Guard Assistant</h2>
+          <p class="muted">
+            Realistic model: AI helps with known/current attack patterns. It does not predict entirely novel threats with certainty.
+          </p>
+
+          <div class="grid two">
+            <div class="card">
+              <h3>Ask Security Assistant</h3>
+              <label for="assistantInput">Scenario</label>
+              <textarea
+                id="assistantInput"
+                rows="5"
+                placeholder="Example: How do I protect against phishing and credential theft in my app?"
+              ></textarea>
+              <button id="analyzeBtn" class="btn">Analyze Scenario</button>
+              <div id="assistantOutput" class="output"></div>
+            </div>
+
+            <div class="card">
+              <h3>AI vs AGI Clarifier</h3>
+              <ul>
+                <li>AI currently detects and classifies known patterns from training and telemetry.</li>
+                <li>Defensive AI is strongest when continuously updated with current threat intel.</li>
+                <li>No production system can guarantee perfect prediction of never-before-seen attacks.</li>
+                <li>Best practice is layered defense + response readiness.</li>
+              </ul>
+              <button id="loadDemoBtn" class="btn ghost">Load Screenshot-Aligned Demo Prompt</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="prevention" class="panel">
+          <h2>Intrusion Prevention Board</h2>
+          <p class="muted">Mark controls complete. Progress is saved locally.</p>
+          <div id="preventionList" class="checklist"></div>
+        </section>
+
+        <section id="playbooks" class="panel">
+          <h2>Incident Playbooks</h2>
+          <p class="muted">Select an incident type to execute a practical response sequence.</p>
+          <div class="grid two">
+            <div class="card">
+              <label for="playbookSelect">Incident Type</label>
+              <select id="playbookSelect"></select>
+              <button id="loadPlaybookBtn" class="btn">Load Playbook</button>
+            </div>
+            <div class="card">
+              <h3>Steps</h3>
+              <ol id="playbookSteps"></ol>
+            </div>
+          </div>
+        </section>
+
+        <section id="funnel" class="panel">
+          <h2>Marketing Funnel AI</h2>
+          <div class="grid two">
+            <div class="card">
+              <h3>Add Lead</h3>
+              <label for="leadName">Name</label>
+              <input id="leadName" type="text" placeholder="Lead name" />
+
+              <label for="leadProblem">Primary Security Problem</label>
+              <input id="leadProblem" type="text" placeholder="Ex: Ransomware concerns" />
+
+              <label for="leadStage">Funnel Stage</label>
+              <select id="leadStage">
+                <option>Awareness</option>
+                <option>Evaluation</option>
+                <option>Trial</option>
+                <option>Conversion</option>
+                <option>Retention</option>
+              </select>
+
+              <button id="addLeadBtn" class="btn">Add Lead</button>
+            </div>
+
+            <div class="card">
+              <h3>Lead Pipeline</h3>
+              <div id="leadList" class="lead-list"></div>
+              <button id="importStateBtn" class="btn ghost">Import State</button>
+              <input id="importInput" type="file" accept="application/json" hidden />
+            </div>
+          </div>
+        </section>
+
+        <section id="merge" class="panel">
+          <h2>App Merge Planner</h2>
+          <p class="muted">Track your combined app integration work from Replit to local project structure.</p>
+          <div class="card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source App</th>
+                  <th>Module Focus</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="mergeTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

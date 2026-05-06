@@ -1,0 +1,21 @@
+# Optional local stack: Postgres for Svivva (and any service using DATABASE_URL).
+# Svivva itself: cd Svivva && cp .env.example .env && edit DATABASE_URL → run pnpm dev (or npm run dev).
+#
+# Start only DB:
+#   docker compose up -d postgres
+#
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: svivva-postgres
+    environment:
+      POSTGRES_USER: svivva
+      POSTGRES_PASSWORD: svivva_local_dev
+      POSTGRES_DB: svivva
+    ports:
+      - "5432:5432"
+    volumes:
+      - svivva_pgdata:/var/lib/postgresql/data
+
+volumes:
+  svivva_pgdata:

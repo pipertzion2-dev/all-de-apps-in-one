@@ -1,0 +1,13 @@
+---
+description: Domains point at a host (Vercel/Netlify/etc.), not Cursor. Replit is optional; Cursor never hosts the public site.
+alwaysApply: false
+---
+
+# Domain, Cursor, and hosting
+
+- **Cursor cannot be the target of a custom domain.** It is a local editor, not a web host. There is no DNS setting that “connects the domain to Cursor.”
+- The user may want to **stop using Replit** for production: they must **deploy elsewhere** (Vercel, Netlify, Cloudflare Pages, Railway, Render, etc.), then point **GoDaddy DNS** at that provider’s records.
+- **Typical flow:** edit in Cursor → Git push → host builds/deploys → custom domain on the host → GoDaddy DNS matches the host’s instructions.
+- **Secrets** go in the **host’s** env vars for production; local `.env` in Cursor for development (gitignored).
+
+When the user asks to connect their domain “to Cursor,” clarify the above and point them to `.cursor/CONNECT.md` for the migration-off-Replit checklist.

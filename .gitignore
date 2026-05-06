@@ -1,0 +1,32 @@
+# Dependencies & builds
+node_modules/
+.next/
+.turbo/
+dist/
+build/
+out/
+.cache/
+coverage/
+
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# Logs & debug
+*.log
+npm-debug.log*
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: local agent / Replit state (large, machine-specific)
+**/.local/

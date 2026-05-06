@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev: Svivva",
+      "type": "shell",
+      "command": "npm run dev:svivva",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Dev: Pyracrypt web",
+      "type": "shell",
+      "command": "npm run dev:pyracrypt-web",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Dev: Pyracrypt API",
+      "type": "shell",
+      "command": "npm run dev:pyracrypt-api",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Dev: Mini apps (cyberwavy-hub)",
+      "type": "shell",
+      "command": "npm run dev:mini-apps",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Dev: AI Tools Hub",
+      "type": "shell",
+      "command": "npm run dev:ai-tools-hub",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "DB: Docker Postgres (up)",
+      "type": "shell",
+      "command": "npm run db:up",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+Use the attached SEO integration files and continue implementation in my Replit Next.js app.
+
+Goals:
+1) Ensure page-level canonical tags are correct on every indexable route.
+2) Ensure robots.txt and sitemap.xml are internally consistent.
+3) Ensure sitemap only contains indexable 200 URLs.
+4) Ensure each indexable template has exactly one H1.
+5) Run seo-audit.ts and resolve all high-priority issues.
+
+Files to integrate:
+- app/layout.tsx (updated)
+- app/robots.ts (updated)
+- app/sitemap.xml/route.ts (sitemap index route)
+- app/sitemaps/[id].xml/route.ts (chunked sitemap routes)
+- app/blog/page.tsx (updated metadata)
+- app/blog/[slug]/page.tsx (updated metadata + JSON-LD canonical reference)
+- lib/seo.ts (new helper)
+- lib/sitemap-data.ts (new sitemap data/chunk helper)
+- scripts/seo-audit.ts (new audit script)
+
+Execution requirements:
+- Preserve existing business logic/UI.
+- Do not break db schema or route behavior.
+- Make only SEO-focused changes.
+- Provide a before/after checklist and list any unresolved issues.
+
+Verification requirements:
+- Validate /robots.txt and /sitemap.xml respond with 200.
+- Validate canonical on homepage, blog index, and 3 blog posts.
+- Validate no URL in sitemap is blocked by robots.
+- Return command outputs for audit summary (high/medium/low issue counts).
