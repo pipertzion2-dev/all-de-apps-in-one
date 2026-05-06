@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FA
 import svivvaCrateOpen from "@/attached_assets/Svivva_Crate_1770908797554.png";
 import * as ChordKit from "@/lib/svivva-play/chordkit";
 import { resolveScale, composeCounterpoint, composeHocket, listScales, type VoicePart, type StyleName as ReichStyle } from "@/lib/svivva-play/reich-engine";
+import { SvivvaPlayStage3D, type PlayStageModel } from "@/components/svivva-play-stage-3d";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
 
@@ -121,6 +122,18 @@ const MODE_CONFIG: Record<PlayMode, { label: string; shortLabel: string; icon: R
   ensemble: { label: "Ensemble", shortLabel: "Ens", icon: Users, description: "Full band/orchestra arrangement up to 40 pieces", qualityTier: "professional" },
 };
 
+/** Lets algorithmic composition run before import (key/BPM editable like a scratch session). */
+const FALLBACK_ANALYSIS: AnalysisResult = {
+  bpm: 120,
+  key: "C major",
+  keyConfidence: 0,
+  timeSignature: "4/4",
+  chords: [],
+  sections: [],
+  downbeats: [],
+  styleCompatibility: [],
+};
+
 const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string }[]> = {
   composition: [
     { id: "interlocking_minimalism", label: "Interlocking Counterpoint", desc: "Complementary rhythmic patterns, phasing" },
@@ -175,6 +188,7 @@ export default function SvivvaPlayPage() {
   const [audioName, setAudioName] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const effectiveAnalysis = mode === "composition" ? (analysis ?? FALLBACK_ANALYSIS) : analysis;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState("");
@@ -244,6 +258,14 @@ export default function SvivvaPlayPage() {
   const [reichType, setReichType] = useState<"counterpoint" | "hocket">("counterpoint");
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
+
+  const playStageModel = useMemo<PlayStageModel>(() => {
+    if (mode === "patch") return "moog";
+    if (mode !== "composition") return "notebook";
+    if (reichStyle === "phase_canon") return "v1";
+    if (reichStyle === "shaw_interlace") return reichType === "hocket" ? "steelpan" : "vibraphone";
+    return reichType === "hocket" ? "vibraphone" : "piano";
+  }, [mode, reichStyle, reichType]);
 
   const [showNeuralPanel, setShowNeuralPanel] = useState(false);
   const [neuralPromptResult, setNeuralPromptResult] = useState<{ prompt: string; tags: string[]; qualityScore: number; modelSettings: { steps: number; cfgScale: number; duration: number } } | null>(null);
@@ -533,11 +555,12 @@ export default function SvivvaPlayPage() {
   }, [buildStemPlaybacks]);
 
   useEffect(() => {
-    if (stems.length > 0 && analysis?.bpm) {
-      const effectiveTempo = manualTempo ?? analysis.bpm;
-      loadStemsIntoEngine(stems, effectiveTempo);
-    }
-  }, [stems, analysis?.bpm, manualTempo, loadStemsIntoEngine]);
+    if (stems.length === 0) return;
+    const baseBpm = analysis?.bpm ?? (mode === "composition" ? FALLBACK_ANALYSIS.bpm : undefined);
+    if (baseBpm == null) return;
+    const effectiveTempo = manualTempo ?? baseBpm;
+    loadStemsIntoEngine(stems, effectiveTempo);
+  }, [stems, analysis?.bpm, manualTempo, mode, loadStemsIntoEngine]);
 
   useEffect(() => {
     if (!engineReady) return;
@@ -703,27 +726,30 @@ export default function SvivvaPlayPage() {
   }, [mode, stopPositionTracking]);
 
   useEffect(() => {
-    if (analysis) {
-      const keyStr = manualKey ?? analysis.key;
-      const rootMatch = keyStr.match(/^([A-G][b#]?)/);
-      if (rootMatch) setChordRoot(rootMatch[1]);
-    }
-  }, [analysis, manualKey]);
+    const keySrc = effectiveAnalysis;
+    if (!keySrc) return;
+    const keyStr = manualKey ?? keySrc.key;
+    const rootMatch = keyStr.match(/^([A-G][b#]?)/);
+    if (rootMatch) setChordRoot(rootMatch[1]);
+  }, [effectiveAnalysis, manualKey]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
-    if (!analysis) return;
     setIsGenerating(true);
     setPipelineStage("Composing locally...");
     setStems([]);
     setErrorMsg("");
     setReichVoices([]);
     try {
-      const keyStr = manualKey ?? analysis.key;
+      const keyStr = manualKey ?? analysis?.key ?? "C major";
       const rootMatch = keyStr.match(/^([A-G][b#]?)/);
       const rootNote = rootMatch ? rootMatch[1] : "C";
       const isMinor = /minor|m$/i.test(keyStr);
-      const scale = resolveScale(isMinor ? "minor" : "major", rootNote, reichScale);
-      const bpm = manualTempo ?? analysis.bpm;
+      const ragaMajor = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
+      const ragaMinor = ["raga_todi", "raga_bhairavi"] as const;
+      const pickedRaga = meend ? (isMinor ? ragaMinor[Math.floor(Math.random() * ragaMinor.length)] : ragaMajor[Math.floor(Math.random() * ragaMajor.length)]) : null;
+      const effectiveScaleName = pickedRaga ?? reichScale;
+      const scale = resolveScale(isMinor ? "minor" : "major", rootNote, effectiveScaleName);
+      const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
       if (!useSeed) setSeed(currentSeed);
 
@@ -732,32 +758,56 @@ export default function SvivvaPlayPage() {
         : composeHocket({ durationSec: reichDuration, bpm, scale, style: reichStyle, seed: currentSeed });
       setReichVoices(voices);
 
-      const newStems: StemData[] = voices.map((v, i) => ({
+      const hintRot = reichType === "hocket"
+        ? ["vibraphone", "steel_drums", "piano", "marimba", "rhodes", "synth_lead"]
+        : ["piano", "vibraphone", "marimba"];
+      const newStems: StemData[] = voices.map((v, i) => {
+        const midiEvents = v.notes.map(n => ({ note: n.note, velocity: n.velocity, startBeat: n.startBeat, duration: n.duration }));
+        const pitchbend: { beat: number; value: number }[] = [];
+        if (meend && i === 0) {
+          // Subtle meend ramps near the end of each note (MIDI pitchbend: -8192..8191).
+          for (const n of v.notes) {
+            const start = n.startBeat + Math.max(0.01, n.duration * 0.7);
+            const mid = n.startBeat + Math.max(0.02, n.duration * 0.85);
+            const end = n.startBeat + Math.max(0.03, n.duration * 0.98);
+            pitchbend.push(
+              { beat: start, value: 0 },
+              { beat: mid, value: 850 },
+              { beat: end, value: 0 }
+            );
+          }
+        }
+
+        return ({
         id: `voice-${i}`,
         name: v.name,
         role: i === 0 ? "melody" : "harmony",
         register: i < 2 ? "mid" : "high",
-        instrumentHint: "vibraphone",
+        instrumentHint: hintRot[i % hintRot.length],
         muted: false,
         soloed: false,
         pan: Math.round((i / Math.max(voices.length - 1, 1)) * 200 - 100),
         gainDb: 0,
-        midiEvents: v.notes.map(n => ({ note: n.note, velocity: n.velocity, startBeat: n.startBeat, duration: n.duration })),
-        expression: {},
+        midiEvents,
+        expression: meend && i === 0 ? { pitchbend } : {},
         articulations: [],
         qualityTier: "professional",
-      }));
+      })});
       setStems(newStems);
       setPipelineStage("Complete");
-      const ver = { id: String(Date.now()), seed: currentSeed, stemsCount: newStems.length, timestamp: Date.now(), label: `${reichType === "counterpoint" ? "Counterpoint" : "Hocket"} v${versionHistory.length + 1}`, stems: newStems, plan: null, patch: null };
-      setVersionHistory(prev => [...prev, ver]);
-      setActiveVersion(versionHistory.length);
+      setVersionHistory(prev => {
+        const labelPrefix = reichType === "counterpoint" ? "Counterpoint" : "Hocket";
+        const ver = { id: String(Date.now()), seed: currentSeed, stemsCount: newStems.length, timestamp: Date.now(), label: `${labelPrefix} v${prev.length + 1}`, stems: newStems, plan: null, patch: null };
+        const next = [...prev, ver];
+        setActiveVersion(next.length - 1);
+        return next;
+      });
     } catch (err) {
       setErrorMsg("Composition generation failed: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setIsGenerating(false);
     }
-  }, [analysis, manualKey, manualTempo, reichScale, reichType, reichStyle, reichDuration, seed, useSeed, versionHistory]);
+  }, [analysis, manualKey, manualTempo, reichScale, reichType, reichStyle, reichDuration, seed, useSeed, meend]);
 
   const ModeIcon = MODE_CONFIG[mode].icon;
 
@@ -1014,10 +1064,10 @@ export default function SvivvaPlayPage() {
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <span className="holo-icon flex-shrink-0"><FileAudio className="w-3.5 h-3.5" /></span>
                         <span className="text-[10px] sm:text-xs font-mono text-gray-200 flex-shrink-0" data-testid="text-audio-name">{audioName}</span>
-                        {analysis && (
+                        {effectiveAnalysis && (
                           <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
-                            <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">{manualKey ?? analysis.key}</Badge>
-                            <Badge className="bg-gray-700/20 text-gray-300 text-[8px] border-gray-600/30 py-0">{manualTempo ?? analysis.bpm} BPM</Badge>
+                            <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">{manualKey ?? effectiveAnalysis.key}</Badge>
+                            <Badge className="bg-gray-700/20 text-gray-300 text-[8px] border-gray-600/30 py-0">{manualTempo ?? effectiveAnalysis.bpm} BPM</Badge>
                           </div>
                         )}
                         <button onClick={clearAudio} className="flex-shrink-0 text-gray-500 hover:text-gray-400" data-testid="button-clear-audio"><X className="w-3 h-3" /></button>
@@ -1097,7 +1147,7 @@ export default function SvivvaPlayPage() {
                     border: "1px solid #1a1a1a",
                   }}>
 
-                  {!audioFile && !isAnalyzing && stems.length === 0 && !patchResult && (
+                  {!audioFile && mode !== "composition" && !isAnalyzing && stems.length === 0 && !patchResult && (
                     <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 text-center overflow-y-auto">
                       <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700/50 flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0"><ModeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" /></div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-200 mb-1">{MODE_CONFIG[mode].label}</h3>
@@ -1132,15 +1182,15 @@ export default function SvivvaPlayPage() {
                     </div>
                   )}
 
-                  {audioFile && !isAnalyzing && analysis && stems.length === 0 && !patchResult && !isGenerating && (
+                  {!isAnalyzing && effectiveAnalysis && stems.length === 0 && !patchResult && !isGenerating && (
                     <div className="flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto">
                       <div className="mb-5">
                         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Analysis</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                          <AnalysisCard label="Key" value={manualKey ?? analysis.key} sub={manualKey ? "manual override" : `${analysis.keyConfidence}% confidence`} color="#A05068" />
-                          <AnalysisCard label="BPM" value={String(manualTempo ?? analysis.bpm)} sub={manualTempo ? "manual override" : "tempo"} color="#A05068" />
-                          <AnalysisCard label="Time" value={analysis.timeSignature} sub="signature" color="#555" />
-                          <AnalysisCard label="Sections" value={String(analysis.sections?.length || 0)} sub="detected" color="#555" />
+                          <AnalysisCard label="Key" value={manualKey ?? effectiveAnalysis.key} sub={manualKey ? "manual override" : `${effectiveAnalysis.keyConfidence}% confidence`} color="#A05068" />
+                          <AnalysisCard label="BPM" value={String(manualTempo ?? effectiveAnalysis.bpm)} sub={manualTempo ? "manual override" : "tempo"} color="#A05068" />
+                          <AnalysisCard label="Time" value={effectiveAnalysis.timeSignature} sub="signature" color="#555" />
+                          <AnalysisCard label="Sections" value={String(effectiveAnalysis.sections?.length || 0)} sub="detected" color="#555" />
                         </div>
                       </div>
 
@@ -1156,23 +1206,23 @@ export default function SvivvaPlayPage() {
                               type="number"
                               min="30"
                               max="300"
-                              value={manualTempo ?? analysis.bpm}
+                              value={manualTempo ?? effectiveAnalysis.bpm}
                               onChange={e => setManualTempo(e.target.value ? parseInt(e.target.value) : null)}
                               className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
-                              placeholder={String(analysis.bpm)}
+                              placeholder={String(effectiveAnalysis.bpm)}
                               data-testid="input-manual-tempo"
                             />
-                            <span className="text-[9px] text-gray-500">{manualTempo ? `Custom: ${manualTempo}` : `Detected: ${analysis.bpm}`}</span>
+                            <span className="text-[9px] text-gray-500">{manualTempo ? `Custom: ${manualTempo}` : `Detected: ${effectiveAnalysis.bpm}`}</span>
                           </div>
                           <div className="flex flex-col gap-1.5">
                             <div className="flex items-center justify-between">
                               <label className="text-[10px] font-semibold text-gray-400 uppercase">Key</label>
-                              {analysis.keyConfidence && (
-                                <span className="text-[8px] text-gray-500">{analysis.keyConfidence}% confidence</span>
+                              {effectiveAnalysis.keyConfidence > 0 && (
+                                <span className="text-[8px] text-gray-500">{effectiveAnalysis.keyConfidence}% confidence</span>
                               )}
                             </div>
                             <select
-                              value={manualKey ?? analysis.key}
+                              value={manualKey ?? effectiveAnalysis.key}
                               onChange={e => setManualKey(e.target.value ? e.target.value : null)}
                               className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
                               data-testid="select-manual-key"
@@ -1216,12 +1266,12 @@ export default function SvivvaPlayPage() {
                                 <option value="Abm">Ab Minor</option>
                               </optgroup>
                             </select>
-                            <span className="text-[9px] text-gray-500">{manualKey ? `Custom: ${manualKey}` : `Detected: ${analysis.key}`}</span>
+                            <span className="text-[9px] text-gray-500">{manualKey ? `Custom: ${manualKey}` : `Detected: ${effectiveAnalysis.key}`}</span>
                           </div>
                         </div>
                       </div>
 
-                      {analysis.chords && analysis.chords.length > 0 && (
+                      {effectiveAnalysis.chords && effectiveAnalysis.chords.length > 0 && (
                         <div className="mb-5">
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Chord Timeline</h3>
@@ -1230,7 +1280,7 @@ export default function SvivvaPlayPage() {
                             </button>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {analysis.chords.slice(0, 32).map((chord, i) => (
+                            {effectiveAnalysis.chords.slice(0, 32).map((chord, i) => (
                               showChordEditor && editingChord === i ? (
                                 <input key={i} autoFocus defaultValue={chord.symbol}
                                   className="w-16 text-[10px] font-mono px-1.5 py-0.5 border border-[#A05068] rounded text-center focus:outline-none bg-[#1a1a1a] text-gray-200"
@@ -1249,17 +1299,17 @@ export default function SvivvaPlayPage() {
                                 </button>
                               )
                             ))}
-                            {analysis.chords.length > 32 && <Badge variant="secondary" className="text-[10px] text-gray-400">+{analysis.chords.length - 32} more</Badge>}
+                            {effectiveAnalysis.chords.length > 32 && <Badge variant="secondary" className="text-[10px] text-gray-400">+{effectiveAnalysis.chords.length - 32} more</Badge>}
                           </div>
                           {showChordEditor && <p className="text-[9px] text-gray-400 mt-1.5">Click any chord to edit. Edits persist through regeneration.</p>}
                         </div>
                       )}
 
-                      {analysis.sections && analysis.sections.length > 0 && (
+                      {effectiveAnalysis.sections && effectiveAnalysis.sections.length > 0 && (
                         <div className="mb-5">
                           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sections</h3>
                           <div className="flex flex-wrap gap-1.5">
-                            {analysis.sections.map((sec, i) => (
+                            {effectiveAnalysis.sections.map((sec, i) => (
                               <div key={i} className="flex items-center gap-1 px-2 py-1 bg-gray-800/50 rounded border border-gray-700">
                                 <span className="text-[10px] font-semibold text-gray-200">{sec.name}</span>
                                 <span className="text-[9px] text-gray-500">{Math.round(sec.t0)}s-{Math.round(sec.t1)}s</span>
@@ -1283,9 +1333,9 @@ export default function SvivvaPlayPage() {
                             <input value={chordSearch} onChange={e => setChordSearch(e.target.value)} placeholder="Search chords..." className="flex-1 min-w-[100px] text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]" data-testid="input-chord-search" />
                           </div>
                           <div className="mb-3 p-3 rounded-lg bg-[#0a1a1a] border border-gray-800">
-                            <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Diatonic Chords in {manualKey ?? analysis.key}</h4>
+                            <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Diatonic Chords in {manualKey ?? effectiveAnalysis.key}</h4>
                             <div className="flex flex-wrap gap-1.5">
-                              {ChordKit.chordsInKey(chordRoot, /minor|m$/i.test(manualKey ?? analysis.key) ? "minor" : "major").map(dc => {
+                              {ChordKit.chordsInKey(chordRoot, /minor|m$/i.test(manualKey ?? effectiveAnalysis.key) ? "minor" : "major").map(dc => {
                                 const v = ChordKit.voicing(dc.rootPc, dc.chordId, { octave: 3 });
                                 return (
                                   <button key={dc.degree} onClick={() => { setSelectedChordId(dc.chordId); setChordRoot(ChordKit.rootLabel(dc.rootPc)); }}
@@ -1373,6 +1423,19 @@ export default function SvivvaPlayPage() {
                             <label className="text-[10px] font-semibold text-gray-400 uppercase">Duration (seconds)</label>
                             <input type="range" min="4" max="60" value={reichDuration} onChange={e => setReichDuration(Number(e.target.value))} className="accent-[#A05068]" data-testid="slider-reich-duration" />
                             <span className="text-[9px] text-gray-500">{reichDuration}s</span>
+                          </div>
+                          <div className="mb-3 space-y-2">
+                            <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Play stage</h4>
+                            <SvivvaPlayStage3D model={playStageModel} className="shadow-inner" />
+                            <p className="text-[9px] text-gray-500 leading-relaxed">
+                              Visual matches your style: phase canon shows the V‑1 console; hocketing leans vibraphone & steel pan; counterpoint defaults to piano. Patch mode uses the modular synth model.
+                            </p>
+                          </div>
+                          <div className="mb-3 p-3 rounded-lg bg-[#0d0a12] border border-[#A05068]/25">
+                            <h4 className="text-[10px] font-semibold text-[#B87888] uppercase tracking-wider mb-1.5">Add‑ons integrated (clean)</h4>
+                            <p className="text-[9px] text-gray-400">
+                              Turn on <span className="text-gray-300">Indian Meend</span> to get raga-leaning scales (Bhairav/Marwa/Purvi/Todi/Bhairavi) plus subtle pitch‑bend expression on the lead voice — integrated directly into Svivva Play (no external zip stacks).
+                            </p>
                           </div>
                         </div>
                       )}
@@ -1654,14 +1717,14 @@ export default function SvivvaPlayPage() {
               </div>
 
               <div className="hidden lg:flex w-48 xl:w-56 p-3 xl:p-4 flex-col gap-3 flex-shrink-0 overflow-y-auto">
-                {analysis && (
+                {effectiveAnalysis && (
                   <div className="hidden md:block mt-3 lg:mt-4 space-y-2 lg:space-y-3">
                     <h4 className="text-[9px] lg:text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Session</h4>
                     <div className="space-y-1.5 text-[11px]">
                       <InfoRow label="Mode" value={MODE_CONFIG[mode].label} />
-                      <InfoRow label="Key" value={manualKey ?? analysis.key} />
-                      <InfoRow label="BPM" value={String(manualTempo ?? analysis.bpm)} />
-                      <InfoRow label="Time" value={analysis.timeSignature} />
+                      <InfoRow label="Key" value={manualKey ?? effectiveAnalysis.key} />
+                      <InfoRow label="BPM" value={String(manualTempo ?? effectiveAnalysis.bpm)} />
+                      <InfoRow label="Time" value={effectiveAnalysis.timeSignature} />
                       {stems.length > 0 && <InfoRow label="Stems" value={String(stems.length)} />}
                       {stems.length > 0 && <InfoRow label="Seed" value={String(seed)} />}
                       {versionHistory.length > 0 && <InfoRow label="Versions" value={String(versionHistory.length)} />}

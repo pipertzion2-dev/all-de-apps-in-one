@@ -94,7 +94,10 @@ export async function getSubscriptionPlanFromStripe(
 
   const item = sub.items.data[0];
   const price = item?.price;
-  const periodEnd = sub.current_period_end ?? null;
+  const periodEnd =
+    "current_period_end" in sub
+      ? (sub as Stripe.Subscription & { current_period_end?: number }).current_period_end ?? null
+      : null;
 
   if (!price) {
     return {

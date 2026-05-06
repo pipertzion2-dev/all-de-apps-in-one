@@ -13,6 +13,42 @@ import {
 import type { Analysis } from "@/lib/svivva-play/schemas";
 import { generateNeoSoulChords, getProgressionLabels } from "@/lib/svivva-play/chord-engine";
 
+function parseRootFromKey(key: string): string {
+  const m = (key || "").match(/^([A-G][b#]?)/);
+  return m ? m[1] : "C";
+}
+
+function isMinorKey(key: string): boolean {
+  return /minor|(^|\s)m($|\s)/i.test(key || "");
+}
+
+function pickIndianRagaKeyLabel(opts: { root: string; minor: boolean; seed: number }): string {
+  const major = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
+  const minor = ["raga_todi", "raga_bhairavi"] as const;
+  const list = opts.minor ? minor : major;
+  const picked = list[Math.abs(opts.seed) % list.length];
+  return `${opts.root} ${picked}`;
+}
+
+function meendPitchbendForEvents(events: { startBeat: number; duration: number }[]): { beat: number; value: number }[] {
+  const out: { beat: number; value: number }[] = [];
+  for (const e of events) {
+    const d = Math.max(0.05, e.duration || 0.25);
+    const start = Math.max(0, e.startBeat + d * 0.7);
+    const mid = Math.max(0, e.startBeat + d * 0.85);
+    const end = Math.max(0, e.startBeat + d * 0.98);
+    out.push({ beat: start, value: 0 }, { beat: mid, value: 850 }, { beat: end, value: 0 });
+  }
+  // Sort + lightly dedupe (keep first entry for a beat)
+  out.sort((a, b) => a.beat - b.beat);
+  const dedup: typeof out = [];
+  for (const p of out) {
+    const last = dedup[dedup.length - 1];
+    if (!last || Math.abs(last.beat - p.beat) > 1e-4) dedup.push(p);
+  }
+  return dedup;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -66,6 +102,18 @@ export async function POST(request: NextRequest) {
 
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
+
+    const analysisForGeneration: Analysis =
+      mode === "solo" && (settings.meend ?? false)
+        ? {
+            ...analysisData,
+            key: pickIndianRagaKeyLabel({
+              root: parseRootFromKey(analysisData.key),
+              minor: isMinorKey(analysisData.key),
+              seed,
+            }),
+          }
+        : analysisData;
 
     await db.insert(playGenerations).values({
       id: generationId,
@@ -213,7 +261,7 @@ export async function POST(request: NextRequest) {
     }
     // ──────────────────────────────────────────────────────────────────────
 
-    const planResult = await runPlan(analysisData, mode, stylePreset, {
+    const planResult = await runPlan(analysisForGeneration, mode, stylePreset, {
       ...settings,
       seed,
     });
@@ -231,7 +279,7 @@ export async function POST(request: NextRequest) {
     }).where(eq(playGenerations.id, generationId));
 
     const barCount = quality === "full" ? (plan.form?.total_bars || 64) : 16;
-    const midiResult = await runMidiGeneration(analysisData, plan, {
+    const midiResult = await runMidiGeneration(analysisForGeneration, plan, {
       startBar: 0,
       endBar: barCount,
     }, {
@@ -265,6 +313,20 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < midiOutput.stems.length; i++) {
       const midiStem = midiOutput.stems[i];
       const planStem = plan.stems[i] || plan.stems.find(s => s.name === midiStem.name);
+
+      if (
+        mode === "solo" &&
+        (settings.meend ?? false) &&
+        (planStem?.role === "lead" || planStem?.role === "melody" || planStem?.role === "vocal" || i === 0)
+      ) {
+        const pb = Array.isArray((midiStem as any).expression?.pitchbend) ? (midiStem as any).expression.pitchbend : [];
+        if (pb.length === 0 && Array.isArray(midiStem.midi_events) && midiStem.midi_events.length > 0) {
+          (midiStem as any).expression = {
+            ...(midiStem as any).expression,
+            pitchbend: meendPitchbendForEvents(midiStem.midi_events),
+          };
+        }
+      }
 
       const stemId = uuidv4();
       const events = midiStem.midi_events;

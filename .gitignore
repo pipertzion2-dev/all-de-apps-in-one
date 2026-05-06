@@ -33,3 +33,6 @@ Thumbs.db
 
 # Never commit nested Git metadata if reintroduced
 **/.git/
+
+# Local source drop folder for reference assets/zips
+SVIVVA ADD ONS/

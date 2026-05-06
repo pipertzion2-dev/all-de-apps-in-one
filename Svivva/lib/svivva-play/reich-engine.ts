@@ -18,6 +18,10 @@ const SCALE_DEFS: Record<string, number[]> = {
   whole_tone: [0, 2, 4, 6, 8, 10],
   raga_yaman: [0, 2, 4, 6, 7, 9, 11],
   raga_bhairav: [0, 1, 4, 5, 7, 8, 11],
+  raga_bhairavi: [0, 1, 3, 5, 7, 8, 10],
+  raga_marwa: [0, 1, 4, 6, 7, 9, 11],
+  raga_purvi: [0, 1, 4, 6, 7, 8, 11],
+  raga_todi: [0, 1, 3, 6, 7, 8, 11],
   arabic_hijaz: [0, 1, 4, 5, 7, 8, 11],
   japanese_in: [0, 1, 5, 7, 8],
 };
@@ -58,12 +62,18 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map(p => ((p - rootPc) % 12 + 12) % 12))].sort((a, b) => a - b);
 }
 
+function clampMidi(note: number): number {
+  return Math.max(36, Math.min(108, Math.round(note)));
+}
+
 function midiForDegree(rootPc: number, absPcs: number[], degree: number, baseOctave = 4): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
-  const octJump = Math.floor(degree / n);
-  const idx = ((degree % n) + n) % n;
-  return 12 * (baseOctave + octJump) + rootPc + rel[idx];
+  const safeDeg = Math.max(0, Math.min(degree, n * 8));
+  const octJump = Math.floor(safeDeg / n);
+  const idx = ((safeDeg % n) + n) % n;
+  const raw = 12 * (baseOctave + octJump) + rootPc + rel[idx];
+  return clampMidi(raw);
 }
 
 class Rng {
@@ -170,7 +180,7 @@ export function composeCounterpoint(opts: {
     const bo = voiceBaseOctave(v, 3, 4);
     const seqMidis = cellToMidis(scale.rootPc, scale.pitchClasses, baseCells[v], bo);
     const notes: MidiNote[] = [];
-    let s = v;
+    let s = v % Math.max(1, Math.min(3, total));
     let i = 0;
     while (s < total) {
       if (style === "shaw_interlace" && rng.next() < 0.12) { s += 3; i++; continue; }
@@ -178,6 +188,10 @@ export function composeCounterpoint(opts: {
       notes.push({ note: pitch, velocity: 78 + Math.floor(rng.next() * 12), startBeat: s * sixteenthBeats, duration: sixteenthBeats * 0.9 });
       s += 3;
       i++;
+    }
+    if (notes.length === 0) {
+      const fallback = clampMidi(12 * bo + scale.rootPc + (scale.pitchClasses[0] ?? 0));
+      notes.push({ note: fallback, velocity: 72, startBeat: v * sixteenthBeats * 0.5, duration: sixteenthBeats * 2 });
     }
     parts.push({ voiceIndex: v, notes, name: `Counterpoint Voice ${v + 1}` });
   }
@@ -215,7 +229,7 @@ export function composeHocket(opts: {
     const bo = voiceBaseOctave(v, 6, 4);
     const seqMidis = cellToMidis(scale.rootPc, scale.pitchClasses, cells[v], bo);
     const notes: MidiNote[] = [];
-    let s = v;
+    let s = v % Math.max(1, Math.min(6, total));
     let i = 0;
     while (s < total) {
       if (style === "shaw_interlace" && rng.next() < 0.18) { s += 6; i++; continue; }
@@ -223,6 +237,11 @@ export function composeHocket(opts: {
       notes.push({ note: pitch, velocity: 72 + Math.floor(rng.next() * 16), startBeat: s * sixteenthBeats, duration: sixteenthBeats * 0.95 });
       s += 6;
       i++;
+    }
+    if (notes.length === 0) {
+      const pc = scale.pitchClasses[v % scale.pitchClasses.length] ?? scale.rootPc;
+      const fallback = clampMidi(12 * bo + pc);
+      notes.push({ note: fallback, velocity: 70, startBeat: v * sixteenthBeats * 0.25, duration: sixteenthBeats * 2 });
     }
     parts.push({ voiceIndex: v, notes, name: `Hocket Voice ${v + 1}` });
   }
