@@ -1,0 +1,16 @@
+{
+  "name": "supplier-comparison-visualizer",
+  "version": "1.0.0",
+  "description": "Free supplier comparison visualizer tool — compare suppliers for your concept. No login. One step of the Svivva workflow.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "supplier comparison visualizer tool",
+    "supplier comparison visualizer online",
+    "free supplier comparison visualizer",
+    "ai supplier comparison visualizer"
+  ]
+}

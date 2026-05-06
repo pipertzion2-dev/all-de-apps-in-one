@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Repair Playground — Free Online Tool | Fix & Validate JSON</title>
+  <meta name="description" content="Free JSON repair playground online. Paste broken JSON, get instant repair, validation, and fixes. No signup. Try json repair playground tool for APIs and schemas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="logo">JSON Repair Playground</h1>
+    <p class="tagline">Fix malformed JSON instantly. No login required.</p>
+  </header>
+
+  <main class="three-panel">
+    <!-- Left: Input -->
+    <aside class="panel panel-input">
+      <h2 class="panel-title">Input</h2>
+      <p class="micro-copy">Paste or type JSON, or paste a prompt/schema that contains JSON. We’ll detect and repair common issues.</p>
+      <div class="input-actions">
+        <label class="file-label">
+          <span class="btn btn-secondary">Upload file</span>
+          <input type="file" id="fileInput" accept=".json,application/json,text/plain" hidden>
+        </label>
+        <button type="button" class="btn btn-secondary" id="btnSample">Load sample</button>
+        <button type="button" class="btn btn-secondary" id="btnClear">Clear</button>
+      </div>
+      <textarea
+        id="jsonInput"
+        class="input-area"
+        placeholder='Paste JSON here, e.g.:\n{ name: "test", items: [1, 2,] }'
+        spellcheck="false"
+        autofocus
+      ></textarea>
+      <div class="input-meta">
+        <span id="inputStats">—</span>
+      </div>
+    </aside>
+
+    <!-- Center: Results -->
+    <section class="panel panel-results">
+      <h2 class="panel-title">Results</h2>
+      <p class="micro-copy">Repaired output and list of fixes applied. Updates as you type.</p>
+      <div class="results-tabs">
+        <button type="button" class="tab active" data-tab="repaired">Repaired JSON</button>
+        <button type="button" class="tab" data-tab="fixes">Fixes applied</button>
+      </div>
+      <div id="repairedPane" class="tab-pane active">
+        <pre id="repairedOutput" class="output-pre"><code id="repairedCode">—</code></pre>
+        <div class="result-actions">
+          <button type="button" class="btn btn-accent" id="btnCopy">Copy repaired</button>
+        </div>
+      </div>
+      <div id="fixesPane" class="tab-pane">
+        <div id="fixesList" class="fixes-list">—</div>
+      </div>
+      <div id="resultStatus" class="result-status" aria-live="polite"></div>
+    </section>
+
+    <!-- Right: Guidance -->
+    <aside class="panel panel-guidance">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="micro-copy">What we checked and how to avoid these issues in your APIs and prompts.</p>
+      <div id="guidanceContent" class="guidance-content">
+        <p class="guidance-placeholder">Paste JSON in the left panel to see repair suggestions and explanations here.</p>
+      </div>
+      <div class="guidance-tips" id="guidanceTips">
+        <h3>Common JSON issues</h3>
+        <ul>
+          <li><strong>Trailing commas</strong> — JSON does not allow a comma after the last element in an array or object.</li>
+          <li><strong>Unquoted keys</strong> — All object keys must be double-quoted strings.</li>
+          <li><strong>Single quotes</strong> — Use double quotes (<code>"</code>) for strings.</li>
+          <li><strong>Comments</strong> — Standard JSON has no <code>//</code> or <code>/* */</code>; strip them before parsing.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Sticky bottom CTA -->
+  <footer class="sticky-cta">
+    <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" class="btn btn-cta" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script src="repair.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

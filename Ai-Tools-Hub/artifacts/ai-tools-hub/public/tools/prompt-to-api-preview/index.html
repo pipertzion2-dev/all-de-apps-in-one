@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Prompt to API Preview – Free Tool | Svivva</title>
+<meta name="description" content="Free prompt to API preview tool. Turn a plain-English description into a REST endpoint spec, curl command, and OpenAPI snippet instantly."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea,input{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;resize:none}
+textarea:focus,input:focus{border-color:#7c3aed}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.preset-btn{background:#16162a;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .2s}
+.preset-btn:hover{border-color:#7c3aed;color:#c4b5fd}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.tabs{display:flex;gap:1px;background:#0a0a0f;border-radius:8px;padding:3px;border:1px solid #2a2a40}
+.tab{flex:1;padding:7px;border:none;background:transparent;color:#888;font-family:inherit;font-size:13px;cursor:pointer;border-radius:6px;transition:all .2s;text-align:center}
+.tab.active{background:#7c3aed;color:#fff}
+.code-out{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre;font-family:'Courier New',monospace;color:#d4d4f0;overflow-x:auto;min-height:180px}
+.method-badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:12px;font-weight:700;letter-spacing:.05em;margin-right:8px}
+.get{background:#065f46;color:#34d399}.post{background:#1e3a5f;color:#60a5fa}.patch{background:#7c2d12;color:#fb923c}.delete{background:#450a0a;color:#f87171}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{background:#2a2a40;color:#fff}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100}
+.toast.show{opacity:1}
+.spec-header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.spec-path{font-family:'Courier New',monospace;font-size:14px;color:#a78bfa}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Developer Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>Prompt to API Preview</h1>
+    <p class="sub">Describe an API endpoint in plain English. Get a REST spec, curl command, and OpenAPI snippet instantly — no signup required.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>Presets</label>
+      <div class="presets">
+        <button class="preset-btn" onclick="setPrompt('Create a new user account with name and email')">Create user</button>
+        <button class="preset-btn" onclick="setPrompt('Get a list of all active projects')">List projects</button>
+        <button class="preset-btn" onclick="setPrompt('Update a payment method by ID')">Update payment</button>
+        <button class="preset-btn" onclick="setPrompt('Delete an API key by ID')">Delete API key</button>
+        <button class="preset-btn" onclick="setPrompt('Submit a product review with rating and tags')">Product review</button>
+        <button class="preset-btn" onclick="setPrompt('Search documents by keyword and date range')">Search docs</button>
+      </div>
+    </div>
+    <div>
+      <label>API Endpoint Description *</label>
+      <textarea id="prompt" rows="3" placeholder="e.g. Create a new user account with name, email, and role"></textarea>
+    </div>
+    <button class="primary" onclick="generate()">Preview Endpoint →</button>
+  </div>
+
+  <div class="card" id="outCard" style="display:none">
+    <div class="spec-header">
+      <span class="method-badge" id="methodBadge"></span>
+      <span class="spec-path" id="specPath"></span>
+      <span style="font-size:13px;color:#888" id="specSummary"></span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('request',this)">Request</button>
+      <button class="tab" onclick="switchTab('response',this)">Response</button>
+      <button class="tab" onclick="switchTab('curl',this)">cURL</button>
+      <button class="tab" onclick="switchTab('openapi',this)">OpenAPI</button>
+    </div>
+    <div class="code-out" id="codeOut"></div>
+    <div class="out-actions">
+      <button class="btn-sm" onclick="copyOut()">Copy</button>
+    </div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Build production APIs faster with Svivva →</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const STOP=new Set(['a','an','the','to','for','with','and','or','of','in','on','by','from','that','this','into','all','each','every','list','get','create','update','delete']);
+let currentSpec=null;
+
+function setPrompt(v){document.getElementById('prompt').value=v;}
+
+function selectMethod(prompt){
+  const p=prompt.trim().toLowerCase();
+  if(p.startsWith('get ')||p.startsWith('list ')||p.startsWith('fetch ')||p.startsWith('search ')) return 'GET';
+  if(p.startsWith('update ')||p.startsWith('edit ')||p.startsWith('modify ')) return 'PATCH';
+  if(p.startsWith('delete ')||p.startsWith('remove ')) return 'DELETE';
+  if(p.includes('update')||p.includes('edit')) return 'PATCH';
+  if(p.includes('delete')||p.includes('remove')) return 'DELETE';
+  return 'POST';
+}
+
+function slugify(prompt){
+  const words=prompt.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w&&!STOP.has(w));
+  return words.slice(0,3).join('-')||'resource';
+}
+
+function buildRequestJson(method){
+  if(method==='GET'||method==='DELETE') return null;
+  return {name:'Example name',description:'Short description',metadata:{source:'prompt-to-api-preview'}};
+}
+
+function buildResponseJson(method,slug){
+  if(method==='DELETE') return {status:'deleted',resource:slug,deletedAt:'1970-01-01T00:00:00.000Z'};
+  return {status:'ok',resource:slug,data:{id:'res_123',createdAt:'1970-01-01T00:00:00.000Z'}};
+}
+
+function buildCurl(spec){
+  if(!spec.requestJson) return `curl -X ${spec.method} "https://api.example.com${spec.path}?cursor=...&limit=25"`;
+  return `curl -X ${spec.method} "https://api.example.com${spec.path}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(spec.requestJson,null,2)}'`;
+}
+
+function buildOpenApi(spec){
+  return `paths:\n  ${spec.path}:\n    ${spec.method.toLowerCase()}:\n      summary: ${spec.summary}\n      responses:\n        "200":\n          description: OK\n          content:\n            application/json:\n              schema:\n                type: object`;
+}
+
+function generate(){
+  const prompt=document.getElementById('prompt').value.trim();
+  if(!prompt){alert('Please describe an API endpoint.');return;}
+  const method=selectMethod(prompt);
+  const slug=slugify(prompt);
+  const path=method==='GET'?`/${slug}s`:`/${slug}s${method==='DELETE'||method==='PATCH'?'/{id}':''}`;
+  const requestJson=buildRequestJson(method);
+  const responseJson=buildResponseJson(method,slug);
+  currentSpec={method,path,summary:`Preview for "${prompt}"`,requestJson,responseJson,curl:buildCurl({method,path,summary:'',requestJson,responseJson}),openapi:buildOpenApi({method,path,summary:`Preview for "${prompt}"`})};
+
+  document.getElementById('methodBadge').textContent=method;
+  document.getElementById('methodBadge').className='method-badge '+method.toLowerCase();
+  document.getElementById('specPath').textContent=path;
+  document.getElementById('specSummary').textContent=currentSpec.summary;
+  document.getElementById('outCard').style.display='flex';
+  switchTab('request',document.querySelector('.tab'));
+  document.getElementById('outCard').scrollIntoView({behavior:'smooth'});
+}
+
+let activeTab='request';
+function switchTab(tab,el){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderTab();
+}
+function renderTab(){
+  if(!currentSpec) return;
+  let content='';
+  if(activeTab==='request') content=currentSpec.requestJson?JSON.stringify(currentSpec.requestJson,null,2):'// No request body for '+currentSpec.method+' endpoints\n// Use query params: ?cursor=...&limit=25';
+  else if(activeTab==='response') content=JSON.stringify(currentSpec.responseJson,null,2);
+  else if(activeTab==='curl') content=currentSpec.curl;
+  else if(activeTab==='openapi') content=currentSpec.openapi;
+  document.getElementById('codeOut').textContent=content;
+}
+function copyOut(){navigator.clipboard.writeText(document.getElementById('codeOut').textContent);showToast();}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+</script>
+</body>
+</html>

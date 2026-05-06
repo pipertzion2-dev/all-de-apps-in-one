@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Synth Patch Designer - Build Signal Chains and Modular Patches Online | Svivva Play</title>
+  <meta name="description" content="Free online synth patch designer. Describe your sound and instantly get a signal chain, module list, effects routing, and gear suggestions for eurorack, modular, DAWs, and hardware synths. Powered by Svivva Play.">
+  <meta name="keywords" content="synth patch designer, modular synth patch builder, eurorack patch designer, signal chain builder, synth signal flow, patch routing tool, modular synthesis, synth patch generator, free patch designer, Svivva Play">
+  <link rel="canonical" href="https://svivva.com/tools/patch-designer">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Svivva">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Synth Patch Designer - Build Signal Chains Online | Svivva Play">
+  <meta property="og:description" content="Describe your sound and get an instant patch layout with signal chain, modules, effects, and gear suggestions. Free, no account needed. Powered by Svivva Play.">
+  <meta property="og:url" content="https://svivva.com/tools/patch-designer">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free Synth Patch Designer | Svivva Play">
+  <meta name="twitter:description" content="Describe your sound and get an instant patch layout with signal chain, modules, and routing. Free online tool by Svivva Play.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Synth Patch Designer",
+    "alternateName": "Svivva Play Patch Designer",
+    "url": "https://svivva.com/tools/patch-designer",
+    "description": "Free online synth patch designer. Describe your sound and get an instant signal chain, module list, effects routing, and gear suggestions for eurorack, modular synths, DAWs, and hardware.",
+    "applicationCategory": "MusicApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    },
+    "featureList": [
+      "Drone and ambient patch design",
+      "Sequence and pattern patch generation",
+      "Bass and lead synth voice design",
+      "Effects chain building",
+      "Live performance routing",
+      "Generative and aleatoric patch creation",
+      "Eurorack, DAW, and hardware synth support",
+      "Signal chain visualization",
+      "Module list with roles and routing"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Synth Patch Designer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Synth Patch Designer is a free online tool that generates patch layouts from text descriptions. Describe the sound you want and it produces a signal chain with modules, routing, and effects suggestions. It supports eurorack, modular synths, DAWs, and hardware. Powered by Svivva Play."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Svivva Play?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Svivva Play is the performance and patch design environment inside Svivva. It lets you build, version, route, and export patches across hardware synths, eurorack, DAWs, and software instruments. It supports live performance, multi-device sync, and collaboration between musicians."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What synths and gear does this patch designer support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The patch designer works with any format including eurorack modular, semi-modular synths like Moog, Behringer, and Arturia, DAWs like Ableton Live, Logic Pro, and Bitwig Studio, software modulars like VCV Rack and Reaktor, and hybrid hardware-software setups."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Synth Patch Designer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Synth Patch Designer is completely free with no account required. Svivva Play offers the full workflow with version history, live hardware routing, multi-device sync, collaboration, and production-ready patch exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What patch types can I design?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can design six types of patches: drone and ambient textures, sequences and rhythmic patterns, bass and lead synth voices, effects processing chains, live performance multi-source routing, and generative self-playing patches."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <h1 class="seo-h1">Free Synth Patch Designer <span class="h1-brand">by <a href="https://svivva.com">Svivva Play</a></span></h1>
+      <p class="intro-p">Describe the sound you want and get an instant patch layout - signal chain, modules, effects routing, and gear suggestions. This tool runs one step of the <a href="https://svivva.com">Svivva Play</a> patch design workflow, free with no account needed.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel panel-left">
+        <h2>Your sound</h2>
+        <form id="brief-form" class="brief-form">
+          <label for="description">Describe the patch or sound you want <span class="required">(required)</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Warm evolving ambient drone with slow filter sweeps, or aggressive acid bassline with distortion and delay" required></textarea>
+
+          <label for="mode">Patch type</label>
+          <select id="mode" name="mode" aria-label="Select patch type">
+            <option value="drone">Drone / Ambient - sustained textures and pads</option>
+            <option value="sequence">Sequence / Pattern - rhythmic and melodic loops</option>
+            <option value="bass">Bass / Lead - monophonic synth voices</option>
+            <option value="fx">Effects Chain - processing and sound design</option>
+            <option value="live">Live Performance - multi-source routing for jams</option>
+            <option value="generative">Generative / Aleatoric - self-playing patches</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional details</legend>
+            <label for="constraint-genre">Genre</label>
+            <input type="text" id="constraint-genre" name="genre" placeholder="e.g. ambient, techno, industrial, shoegaze">
+            <label for="constraint-gear">Gear / format</label>
+            <input type="text" id="constraint-gear" name="gear" placeholder="e.g. eurorack, Moog, Ableton, VCV Rack">
+            <label for="constraint-budget">Budget</label>
+            <input type="text" id="constraint-budget" name="budget" placeholder="e.g. <$500">
+            <label for="constraint-voices">Voices / layers</label>
+            <input type="text" id="constraint-voices" name="voices" placeholder="e.g. 2 oscillators, 4-voice poly">
+            <label for="constraint-players">Players (for jams)</label>
+            <input type="text" id="constraint-players" name="players" placeholder="e.g. 2-4 people">
+          </fieldset>
+
+          <button type="submit" class="btn-primary" id="btn-generate">Design patch</button>
+        </form>
+      </aside>
+
+      <section class="panel panel-center" aria-label="Patch preview">
+        <h2>Patch preview</h2>
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Describe the sound you want, pick a patch type, and hit "Design patch" to see your signal chain, module list, and routing.</p>
+        </div>
+        <div id="preview-result" class="preview-result hidden">
+          <div id="preview-artifact" class="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Patch readiness</span>
+            <div class="confidence-track"><div id="confidence-fill" class="confidence-fill" style="width: 0%"></div></div>
+            <span id="confidence-value" class="confidence-value">-</span>
+          </div>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">This is one step. In Svivva Play, version patches, sync devices, route live, and export to hardware.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this patch inside a full Svivva Play project.</a>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <h2>Inside Svivva Play</h2>
+        <div id="mapping-copy" class="mapping-copy">
+          <p>This tool generates a single patch layout. <strong><a href="https://svivva.com">Svivva Play</a></strong> is the full environment for building, performing, and sharing patches:</p>
+          <ul>
+            <li>Version history for every patch</li>
+            <li>Live routing between hardware and software</li>
+            <li>Multi-device sync for jams and performances</li>
+            <li>Export patches to eurorack, DAWs, and hardware</li>
+            <li>Collaborate on patches with other musicians</li>
+          </ul>
+        </div>
+        <div id="mapping-dynamic" class="mapping-dynamic hidden"></div>
+      </aside>
+    </main>
+
+    <nav class="cta-bar" aria-label="Call to action">
+      <a href="https://svivva.com" class="cta-bar-link" id="cta-bar">Try Svivva Play free - version, route, sync, and export your patches</a>
+    </nav>
+  </div>
+
+  <article class="seo-content" aria-label="About the Synth Patch Designer">
+    <h2>How the Synth Patch Designer Works</h2>
+    <p>The <strong>Synth Patch Designer</strong> is a free online tool that turns a text description of your sound into a complete patch layout. Instead of starting from a blank rack or an empty DAW session, you describe what you want to hear - a warm ambient drone, an aggressive acid sequence, a generative self-playing system - and the tool generates a signal chain, module list, effects routing, and gear suggestions in seconds.</p>
+
+    <p>This tool is built on one step of the <a href="https://svivva.com">Svivva Play</a> patch design pipeline. Svivva Play is the performance and patch design environment inside Svivva, built for musicians who work with hardware synths, eurorack modular, DAWs, software instruments, and hybrid setups. The Patch Designer gives you a preview of what that pipeline can produce, with no account or signup required.</p>
+
+    <h3>Supported Patch Types</h3>
+    <p>The tool supports six categories of patch design, each producing a different signal chain structure and module set. <strong>Drone and ambient patches</strong> generate layered oscillator setups with slow modulation, reverb, and delay chains designed for sustained textures. <strong>Sequence and pattern patches</strong> produce step-sequencer-driven signal flows with clock sources, gated envelopes, and rhythmic processing. <strong>Bass and lead patches</strong> focus on monophonic synth voices with filter envelopes, sub-oscillators, and drive for cutting through a mix.</p>
+
+    <p><strong>Effects chain patches</strong> build processing chains for any audio input - EQ, compression, distortion, modulation, delay, and reverb in a structured signal flow. <strong>Live performance patches</strong> generate multi-source routing setups with mixer channels, effects sends, and master bus processing for jams and live sets. <strong>Generative and aleatoric patches</strong> produce self-playing systems using random voltage sources, probability gates, quantizers, and feedback loops.</p>
+
+    <h3>Works With Any Gear</h3>
+    <p>The Patch Designer is format-agnostic. It works with <strong>eurorack modular</strong> systems, <strong>semi-modular synths</strong> from Moog, Behringer, and Arturia, <strong>DAWs</strong> like Ableton Live, Logic Pro, and Bitwig Studio, <strong>software modulars</strong> like VCV Rack and Reaktor, and any combination of hardware and software. You can specify your gear in the optional details and the patch layout will reflect what you have available.</p>
+
+    <h3>From Single Patch to Full Workflow</h3>
+    <p>This tool previews one step of the Svivva Play pipeline. In the full <a href="https://svivva.com">Svivva Play</a> environment, every patch gets version history so you can track changes and roll back. You can route signals live between hardware and software instruments, sync tempo and transport across multiple devices for collaborative jams, and export finished patches directly to your eurorack system, DAW session, or hardware preset format. Svivva Play also supports collaboration, so you can share patches with other musicians, get feedback, and build on each other's work.</p>
+
+    <h3>Who Is This For</h3>
+    <p>The Synth Patch Designer is for anyone who works with synthesizers, whether you are a bedroom producer sketching out your first eurorack rack, a sound designer building effects chains for film or game audio, a live performer planning signal routing for a hardware jam, or an experimental musician exploring generative and aleatoric composition. If you think in terms of oscillators, filters, envelopes, and signal flow, this tool gives you a structured starting point in seconds.</p>
+
+    <p>Ready to go beyond a single patch? <a href="https://svivva.com">Try Svivva Play free</a> and get the full workflow - version history, live routing, multi-device sync, collaboration, and production-ready exports for every patch you build.</p>
+  </article>
+
+  <section class="faq" aria-label="FAQ">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <h3>What is the Synth Patch Designer?</h3>
+      <p>It is a free online tool that generates a patch layout from a text description. You describe the sound you want - like "warm ambient drone with slow filter movement" or "acid bassline with distortion" - and it produces a signal chain with modules, routing, and effects suggestions. It is powered by one step of the <a href="https://svivva.com">Svivva Play</a> pipeline.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What is Svivva Play?</h3>
+      <p><a href="https://svivva.com">Svivva Play</a> is the performance and patch design environment inside Svivva. It lets you build, version, route, and export patches across hardware synths, eurorack, DAWs, and software instruments. It supports live performance, multi-device sync, and collaboration between musicians.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What synths and gear does this support?</h3>
+      <p>The patch designer works with any format - eurorack modular, semi-modular synths (Moog, Behringer, Arturia), DAWs (Ableton Live, Logic Pro, Bitwig Studio), software modulars (VCV Rack, Reaktor), and hybrid hardware-software setups. <a href="https://svivva.com">Svivva Play</a> handles routing across all of them.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What patch types can I design?</h3>
+      <p>You can design six types: drone and ambient textures, sequences and rhythmic patterns, bass and lead synth voices, effects processing chains, live performance multi-source routing, and generative self-playing patches. Each type produces a different signal chain structure and module set.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Is the Synth Patch Designer free?</h3>
+      <p>Yes. The Synth Patch Designer is completely free with no account required. <a href="https://svivva.com">Svivva Play</a> offers the full workflow with version history, live hardware routing, multi-device sync, collaboration, and production-ready patch exports.</p>
+    </div>
+    <p class="faq-link"><a href="https://svivva.com">Explore Svivva Play</a></p>
+  </section>
+
+  <footer class="site-footer">
+    <p>Built by <a href="https://svivva.com">Svivva</a> &middot; <a href="https://svivva.com">Svivva Play</a> &middot; <a href="https://svivva.com/projects">Projects</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

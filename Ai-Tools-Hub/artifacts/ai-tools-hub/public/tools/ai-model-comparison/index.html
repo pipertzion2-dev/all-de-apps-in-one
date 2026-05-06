@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Switch Simulator — Free Online Tool | Test Prompts Across AI Models</title>
+  <meta name="description" content="Free model switch simulator tool. Upload a prompt, schema, or API definition and see compatibility, token estimates, and cost across GPT-4, Claude, Gemini. No login required.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Model Switch Simulator</h1>
+      <p class="tagline">See how your prompt behaves across different AI models — compatibility, tokens, and cost in one view.</p>
+    </header>
+
+    <main class="panels">
+      <aside class="panel panel-left">
+        <h2>Input</h2>
+        <p class="microcopy">Paste your prompt, schema, or API config. Select models to compare (or leave default for all).</p>
+        <label for="prompt">Prompt / instructions</label>
+        <textarea id="prompt" rows="4" placeholder="e.g. You are a helpful assistant that returns JSON with fields: title, summary, tags."></textarea>
+        <label for="schema">Schema (optional)</label>
+        <textarea id="schema" rows="3" placeholder='e.g. { "type": "object", "properties": { "title": { "type": "string" } } }'></textarea>
+        <label for="apiConfig">API config (optional)</label>
+        <textarea id="apiConfig" rows="2" placeholder="e.g. temperature: 0.7, max_tokens: 1024"></textarea>
+        <label>Models to compare</label>
+        <div class="model-checkboxes" id="modelCheckboxes"></div>
+        <button type="button" class="cta-run" id="runBtn">Run simulation</button>
+      </aside>
+
+      <section class="panel panel-center">
+        <h2>Results</h2>
+        <p class="microcopy">Estimated tokens and cost per model, plus compatibility for schema-heavy prompts.</p>
+        <div class="results-placeholder" id="resultsPlaceholder">
+          <p>Enter a prompt and click <strong>Run simulation</strong> to see results here.</p>
+        </div>
+        <div class="results-container hidden" id="resultsContainer">
+          <div class="summary-cards" id="summaryCards"></div>
+          <div class="table-wrap">
+            <table class="results-table" id="resultsTable">
+              <thead><tr id="resultsThead"></tr></thead>
+              <tbody id="resultsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <h2>How to read this</h2>
+        <div class="guidance" id="guidance">
+          <p><strong>Compatibility score</strong> — How well the model handles structured output when you provide a schema. Higher is better for strict schemas.</p>
+          <p><strong>Est. tokens</strong> — Approximate input + output tokens per call. Use this to compare cost and rate limits.</p>
+          <p><strong>Est. cost per call</strong> — Rough cost in USD for one request at current list prices. Useful for budgeting before switching models.</p>
+          <p><strong>Schema-friendly</strong> — Indicates whether the model is a good fit when you enforce a JSON schema or similar.</p>
+          <p class="tip">Tip: Start with a small prompt to compare models, then scale in Svivva with versioning and monitoring.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="cta-bar">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+      <a href="https://svivva.com" class="cta-button" target="_blank" rel="noopener">Try Svivva for free</a>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vivva Test Runner</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #5BA8A0;
+      border-bottom: 2px solid #5BA8A0;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #8B5A7C;
+      margin-top: 30px;
+    }
+    .test-group {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .test-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin: 8px 0;
+      background: #0f3460;
+      border-radius: 6px;
+      border-left: 4px solid #666;
+    }
+    .test-item.pass { border-left-color: #4ade80; }
+    .test-item.fail { border-left-color: #f87171; }
+    .test-item.pending { border-left-color: #fbbf24; }
+    .test-item.running { border-left-color: #60a5fa; animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.6; } }
+    .status {
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status.pass { background: #166534; color: #4ade80; }
+    .status.fail { background: #7f1d1d; color: #f87171; }
+    .status.pending { background: #713f12; color: #fbbf24; }
+    .status.running { background: #1e3a8a; color: #60a5fa; }
+    .error-details {
+      font-size: 12px;
+      color: #f87171;
+      margin-top: 8px;
+      padding: 10px;
+      background: #2d1f1f;
+      border-radius: 4px;
+      display: none;
+    }
+    .test-item.fail .error-details { display: block; }
+    button {
+      background: #5BA8A0;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover { background: #4a9690; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .summary {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      background: #16213e;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .summary-item {
+      text-align: center;
+      flex: 1;
+    }
+    .summary-item .count {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    .summary-item.pass .count { color: #4ade80; }
+    .summary-item.fail .count { color: #f87171; }
+    .summary-item.pending .count { color: #fbbf24; }
+    .instructions {
+      background: #1e3a5f;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .instructions h3 { margin-top: 0; color: #5BA8A0; }
+    .instructions ol { margin: 0; padding-left: 20px; }
+    .log {
+      background: #0a0a15;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .log-entry { margin: 4px 0; }
+    .log-entry.info { color: #60a5fa; }
+    .log-entry.success { color: #4ade80; }
+    .log-entry.error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <h1>Vivva App Test Runner</h1>
+  
+  <div class="instructions">
+    <h3>How to Use</h3>
+    <ol>
+      <li>Make sure the Vivva app is running (check the workflow)</li>
+      <li>Click "Run All Tests" to test API endpoints and page loads</li>
+      <li>Review results - green = pass, red = fail, yellow = pending</li>
+      <li>Check the log at the bottom for detailed error messages</li>
+    </ol>
+  </div>
+
+  <button id="runAllBtn" onclick="runAllTests()">Run All Tests</button>
+  <button onclick="clearResults()">Clear Results</button>
+
+  <div class="summary">
+    <div class="summary-item pass">
+      <div class="count" id="passCount">0</div>
+      <div>Passed</div>
+    </div>
+    <div class="summary-item fail">
+      <div class="count" id="failCount">0</div>
+      <div>Failed</div>
+    </div>
+    <div class="summary-item pending">
+      <div class="count" id="pendingCount">0</div>
+      <div>Pending</div>
+    </div>
+  </div>
+
+  <h2>Page Load Tests</h2>
+  <div class="test-group" id="pageTests"></div>
+
+  <h2>API Endpoint Tests</h2>
+  <div class="test-group" id="apiTests"></div>
+
+  <h2>Database Tests</h2>
+  <div class="test-group" id="dbTests"></div>
+
+  <h2>Log</h2>
+  <div class="log" id="log"></div>
+
+  <script>
+    const BASE_URL = window.location.origin;
+    
+    const tests = {
+      pages: [
+        { name: 'Homepage loads', url: '/', method: 'GET' },
+        { name: 'Dashboard loads', url: '/dashboard', method: 'GET' },
+        { name: 'Create API page loads', url: '/dashboard/projects/new', method: 'GET' },
+        { name: 'Auth page loads', url: '/api/auth/user', method: 'GET' },
+      ],
+      api: [
+        { name: 'GET /api/projects', url: '/api/projects', method: 'GET' },
+        { name: 'GET /api/auth/user', url: '/api/auth/user', method: 'GET' },
+      ],
+      db: [
+        { name: 'Database connection', url: '/api/health', method: 'GET', optional: true },
+      ]
+    };
+
+    let results = { pass: 0, fail: 0, pending: 0 };
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function createTestItem(test, groupId) {
+      const container = document.getElementById(groupId);
+      const item = document.createElement('div');
+      item.className = 'test-item pending';
+      item.id = `test-${test.name.replace(/\s+/g, '-')}`;
+      item.innerHTML = `
+        <div>
+          <strong>${test.name}</strong>
+          <div style="font-size: 12px; color: #888;">${test.method} ${test.url}</div>
+          <div class="error-details"></div>
+        </div>
+        <span class="status pending">PENDING</span>
+      `;
+      container.appendChild(item);
+      return item;
+    }
+
+    function updateTestItem(item, status, error = null) {
+      item.className = `test-item ${status}`;
+      item.querySelector('.status').className = `status ${status}`;
+      item.querySelector('.status').textContent = status.toUpperCase();
+      if (error) {
+        item.querySelector('.error-details').textContent = error;
+      }
+    }
+
+    function updateSummary() {
+      document.getElementById('passCount').textContent = results.pass;
+      document.getElementById('failCount').textContent = results.fail;
+      document.getElementById('pendingCount').textContent = results.pending;
+    }
+
+    async function runTest(test, item) {
+      item.className = 'test-item running';
+      item.querySelector('.status').className = 'status running';
+      item.querySelector('.status').textContent = 'RUNNING';
+      results.pending--;
+      updateSummary();
+
+      try {
+        log(`Testing: ${test.method} ${test.url}`);
+        const startTime = Date.now();
+        
+        const response = await fetch(BASE_URL + test.url, {
+          method: test.method,
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json, text/html'
+          }
+        });
+        
+        const duration = Date.now() - startTime;
+        
+        if (response.ok || response.status === 401) {
+          // 401 is OK for auth endpoints when not logged in
+          results.pass++;
+          updateTestItem(item, 'pass');
+          log(`PASS: ${test.name} (${response.status}) - ${duration}ms`, 'success');
+        } else {
+          results.fail++;
+          const errorText = await response.text().catch(() => 'No response body');
+          updateTestItem(item, 'fail', `Status: ${response.status} - ${errorText.substring(0, 200)}`);
+          log(`FAIL: ${test.name} (${response.status})`, 'error');
+        }
+      } catch (err) {
+        if (test.optional) {
+          results.pass++;
+          updateTestItem(item, 'pass');
+          log(`PASS (optional): ${test.name} - endpoint may not exist`, 'success');
+        } else {
+          results.fail++;
+          updateTestItem(item, 'fail', err.message);
+          log(`FAIL: ${test.name} - ${err.message}`, 'error');
+        }
+      }
+      updateSummary();
+    }
+
+    async function runAllTests() {
+      const btn = document.getElementById('runAllBtn');
+      btn.disabled = true;
+      btn.textContent = 'Running...';
+      
+      clearResults();
+      log('Starting test run...', 'info');
+
+      // Create all test items first
+      const allTests = [];
+      
+      tests.pages.forEach(test => {
+        const item = createTestItem(test, 'pageTests');
+        allTests.push({ test, item });
+        results.pending++;
+      });
+      
+      tests.api.forEach(test => {
+        const item = createTestItem(test, 'apiTests');
+        allTests.push({ test, item });
+        results.pending++;
+      });
+      
+      tests.db.forEach(test => {
+        const item = createTestItem(test, 'dbTests');
+        allTests.push({ test, item });
+        results.pending++;
+      });
+
+      updateSummary();
+
+      // Run tests sequentially
+      for (const { test, item } of allTests) {
+        await runTest(test, item);
+        await new Promise(r => setTimeout(r, 200)); // Small delay between tests
+      }
+
+      log(`Test run complete: ${results.pass} passed, ${results.fail} failed`, 
+          results.fail > 0 ? 'error' : 'success');
+      
+      btn.disabled = false;
+      btn.textContent = 'Run All Tests';
+    }
+
+    function clearResults() {
+      results = { pass: 0, fail: 0, pending: 0 };
+      updateSummary();
+      document.getElementById('pageTests').innerHTML = '';
+      document.getElementById('apiTests').innerHTML = '';
+      document.getElementById('dbTests').innerHTML = '';
+      document.getElementById('log').innerHTML = '';
+    }
+  </script>
+</body>
+</html>

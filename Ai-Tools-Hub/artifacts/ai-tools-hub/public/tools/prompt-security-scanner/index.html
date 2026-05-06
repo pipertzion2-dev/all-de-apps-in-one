@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free prompt security scanner tool online. Scan prompts, schemas & API definitions for injection risks, data exposure & guardrails. No login required." />
+  <title>Prompt Security Scanner Tool – Free Online Scanner | Svivva</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Optional: add zc regular font file and uncomment in styles.css -->
+</head>
+<body>
+  <header class="site-header">
+    <h1>Prompt Security Scanner</h1>
+    <p class="tagline">Scan prompts, schemas, and API definitions for security risks — free and instant.</p>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2>Input</h2>
+      <div class="input-group">
+        <label for="input-type">Input type</label>
+        <select id="input-type" aria-label="Type of input to scan">
+          <option value="prompt">Prompt / system message</option>
+          <option value="schema">JSON Schema</option>
+          <option value="api">API definition (OpenAPI)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="model-hint">Model / runtime (optional)</label>
+        <select id="model-hint" aria-label="Target model or runtime">
+          <option value="any">Any model</option>
+          <option value="openai">OpenAI (GPT, etc.)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="google">Google (Gemini)</option>
+          <option value="custom">Custom / other</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="content">Paste or type your prompt, schema, or API definition</label>
+        <textarea id="content" rows="14" placeholder="Paste your prompt, JSON schema, or OpenAPI YAML/JSON here…" aria-label="Content to scan"></textarea>
+      </div>
+      <button type="button" id="scan-btn" class="btn-primary">Scan for security issues</button>
+      <p class="micro-copy">No data is sent to any server. Analysis runs in your browser.</p>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2>Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Run a scan to see security analysis, score, and findings here.</p>
+      </div>
+      <div id="results-container" class="results-container" hidden>
+        <div class="score-block">
+          <span class="score-label">Security score</span>
+          <div class="score-value" id="score-value">—</div>
+          <div class="score-bar"><div class="score-fill" id="score-fill"></div></div>
+        </div>
+        <div class="findings-table-wrap">
+          <table class="findings-table" id="findings-table">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Category</th>
+                <th>Finding</th>
+              </tr>
+            </thead>
+            <tbody id="findings-tbody"></tbody>
+          </table>
+        </div>
+        <div id="summary-text" class="summary-text"></div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2>Guidance</h2>
+      <div id="guidance-content" class="guidance-content">
+        <p class="guidance-intro">Use this panel to understand each finding and how to fix it.</p>
+        <div id="guidance-dynamic" class="guidance-dynamic"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar">
+    <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" class="cta-button" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

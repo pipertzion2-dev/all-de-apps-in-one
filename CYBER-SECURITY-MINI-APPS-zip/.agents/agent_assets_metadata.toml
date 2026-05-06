@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "b_nIYnEgd0BNIeRnihPYC"
+uri = "file://attached_assets/CyberWavy-Svivva-Connection-Guide.pdf"
+type = "pdf"
+title = "CyberWavy x Svivva — Connection Field Manual (v2.0, 5 pages, no blanks)"

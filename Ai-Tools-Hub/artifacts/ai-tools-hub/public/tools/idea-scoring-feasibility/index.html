@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Idea Scoring & Feasibility Tool Online | Svivva</title>
+  <meta name="description" content="Score your idea for free. This online idea scoring and feasibility tool evaluates your concept, hardware project, or team scenario in seconds. Get a readiness score, feasibility breakdown, and actionable next steps — no signup required. Powered by Svivva." />
+  <meta name="keywords" content="idea scoring tool, feasibility tool, idea validator, concept scoring, idea evaluation, product feasibility, free idea tool, idea readiness score, Svivva" />
+  <link rel="canonical" href="https://svivva.com/tools/idea-scoring" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:title" content="Free Idea Scoring & Feasibility Tool Online | Svivva" />
+  <meta property="og:description" content="Score and validate your idea in seconds. Get a feasibility breakdown, readiness score, and actionable next steps — free, no signup. Powered by Svivva's Idea Engine." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://svivva.com/tools/idea-scoring" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Idea Scoring & Feasibility Tool Online | Svivva" />
+  <meta name="twitter:description" content="Score and validate your idea in seconds. Feasibility breakdown, readiness score, and next steps — free, no signup." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Idea Scoring & Feasibility Tool",
+    "url": "https://svivva.com/tools/idea-scoring",
+    "description": "Free online tool to score and assess the feasibility of your concept, hardware project, product idea, or team scenario. Get a readiness score and actionable breakdown in seconds.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the idea scoring and feasibility tool do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short concept, product idea, or team scenario and produces an idea score, feasibility preview, and readiness indicator. It runs one step of Svivva's full pipeline, which includes versioning, collaboration, cost tracking, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the idea scoring tool free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online idea scoring tool is completely free and does not require login or signup. You can generate as many previews as you like. The full Svivva platform offers both free and paid tiers for advanced workflows."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I take my scored idea into a real project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Click 'Open this preview inside a real Svivva project' or sign up at svivva.com to run the full workflow with versioning, cost tracking, collaboration, and production-ready outputs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of ideas can I score?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can score hardware concepts, product ideas, team collaboration scenarios, digital builds, performance setups, and marketplace-ready projects. The tool supports six categories: Hardware, Play, Idea, Team, Marketplace, and Build."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is the readiness score calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The readiness score is based on the detail and specificity of your concept description, combined with any optional constraints you provide such as budget, materials, region, and collaboration size. More detail produces a higher confidence score."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <nav class="header-nav" aria-label="Main navigation">
+        <a href="https://svivva.com" class="brand-link">Svivva</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-current">Idea Scoring Tool</span>
+      </nav>
+      <h1>Free Idea Scoring & Feasibility Tool</h1>
+      <p class="intro">Score and assess the feasibility of your concept, product idea, or team scenario in seconds. This tool runs one step of <a href="https://svivva.com" class="inline-link">Svivva's</a> Idea Engine — the same engine that powers full-scale product workflows. No account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable stereo delay pedal, 2 knobs, 9V, analog" required></textarea>
+
+          <label for="mode">Mode or category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your idea score and feasibility preview will appear here.</p>
+          <p class="hint">Enter a short description and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="inline-link">Svivva's</a> Idea Engine: concept → idea score & feasibility preview. In the full platform you get versioning, multi-step flows, cost tracking, collaboration, and production-ready exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Concept → idea score & feasibility</strong></li>
+          <li>Next in full workflow: refinement, validation, roadmap, collaboration, exports</li>
+        </ul>
+        <h3>Why use an idea scoring tool?</h3>
+        <p>Before investing time, money, or resources into a new concept, you need a fast way to gauge whether it's worth pursuing. An idea scoring tool gives you a structured, objective assessment so you can compare ideas, identify gaps, and move forward with confidence.</p>
+        <p><a href="https://svivva.com" class="internal-link">Explore the full Svivva platform →</a></p>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <article class="seo-content">
+      <h2>How to Score and Validate Your Idea Before You Build</h2>
+      <p>Every successful product, hardware project, or creative venture starts with an idea. But not every idea is worth pursuing. The difference between a concept that gains traction and one that stalls often comes down to one thing: <strong>early validation</strong>. That is exactly what this free idea scoring and feasibility tool is designed to do — give you a fast, structured way to evaluate your concept before you commit real resources.</p>
+
+      <h3>What is idea scoring?</h3>
+      <p>Idea scoring is the process of evaluating a concept against a set of criteria to produce a readiness or feasibility score. Instead of relying on gut feeling, you define your idea in a short description, add optional constraints like budget, materials, or team size, and the tool calculates a score that reflects how well-defined and actionable your concept is. The more specific your input, the higher your readiness score — because specificity is a strong predictor of execution success.</p>
+
+      <h3>Who is this tool for?</h3>
+      <p>This idea scoring tool is built for makers, founders, product managers, engineers, and creative teams who need to evaluate concepts quickly. Whether you are designing a <a href="https://svivva.com" class="inline-link">hardware product</a>, planning a team collaboration workflow, scoping a digital build, or preparing something for a marketplace, the tool adapts to your category. It supports six modes — Hardware, Play, Idea, Team, Marketplace, and Build — each producing a different type of feasibility artifact tailored to that domain.</p>
+
+      <h3>How the readiness score works</h3>
+      <p>The readiness score is calculated based on the depth and detail of your concept description combined with the optional constraints you provide. A short, vague description produces a lower score. A detailed description with budget, materials, region, and collaboration size defined pushes the score higher. This mirrors real-world feasibility: the more clearly you can define what you want to build, who it is for, and what resources you have, the more likely you are to succeed. The score ranges from 35% to 95%, giving you a clear signal of where your idea stands.</p>
+
+      <h3>From score to full workflow</h3>
+      <p>This tool runs one isolated step of the <a href="https://svivva.com" class="inline-link">Svivva Idea Engine</a>. In the full platform, that single step expands into a complete pipeline: concept refinement, deeper validation, roadmapping, cost tracking, collaboration with your team, and production-ready exports. Think of this tool as the entry point. You get an instant preview of what your idea looks like when run through a structured process. If the result is promising, you can take it directly into a <a href="https://svivva.com/projects" class="inline-link">Svivva project</a> and continue building with full version control and team features.</p>
+
+      <h3>Why engineers and makers use free tools like this</h3>
+      <p>In engineering and product development, the cost of building the wrong thing far exceeds the cost of evaluating ideas upfront. A five-minute idea scoring session can save weeks of wasted effort. This is why structured idea validation has become standard practice in hardware startups, creative studios, and product teams. By making the scoring step free and accessible, <a href="https://svivva.com" class="inline-link">Svivva</a> lets anyone — from solo makers to distributed teams — run that critical first check without friction, signups, or cost.</p>
+
+      <p class="seo-cta"><strong>Ready to go beyond a score?</strong> <a href="https://svivva.com">Try Svivva free</a> and run the full idea-to-production workflow with versioning, collaboration, cost tracking, and exports.</p>
+    </article>
+
+    <footer class="site-footer">
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does the idea scoring and feasibility tool do?</summary>
+          <p>It takes your short concept, product idea, or team scenario and runs one step of <a href="https://svivva.com" class="inline-link">Svivva's</a> pipeline to produce an idea score, feasibility preview, and readiness indicator. It is a single-step preview of what the full platform does with versioning, collaboration, and exports.</p>
+        </details>
+        <details>
+          <summary>Is the idea scoring tool free?</summary>
+          <p>Yes. This online idea scoring tool is completely free and does not require login. You can generate previews as often as you like. The full <a href="https://svivva.com" class="inline-link">Svivva platform</a> has free and paid tiers.</p>
+        </details>
+        <details>
+          <summary>How do I take this preview into a real project?</summary>
+          <p>Click "Open this preview inside a real Svivva project" or <a href="https://svivva.com" class="inline-link">sign up at Svivva</a> to run the full workflow with versioning, cost tracking, and production-ready outputs.</p>
+        </details>
+        <details>
+          <summary>What types of ideas can I score?</summary>
+          <p>You can score hardware concepts, product ideas, team collaboration scenarios, digital builds, performance setups, and marketplace-ready projects. The tool supports six categories: Hardware, Play, Idea, Team, Marketplace, and Build.</p>
+        </details>
+        <details>
+          <summary>How is the readiness score calculated?</summary>
+          <p>The readiness score is based on the detail and specificity of your concept description, combined with any optional constraints you provide such as budget, materials, region, and collaboration size. More detail produces a higher confidence score.</p>
+        </details>
+      </section>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="https://svivva.com">Svivva</a>
+        <span class="footer-sep">·</span>
+        <a href="https://svivva.com/projects">Projects</a>
+        <span class="footer-sep">·</span>
+        <span class="footer-tagline">Hardware, Play, Idea Engine, B.U.I.L.D.</span>
+      </nav>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

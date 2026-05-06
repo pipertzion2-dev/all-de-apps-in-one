@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Repair Tool — Fix Broken JSON Online Free | Svivva</title>
+  <meta name="description" content="Free online JSON repair tool that instantly fixes broken JSON. Removes trailing commas, quotes unquoted keys, replaces single quotes, strips comments. No signup required. Paste malformed JSON and get valid output in milliseconds. Built by Svivva for developers working with APIs, LLM outputs, and config files.">
+  <meta name="keywords" content="json repair, fix json online, json validator, json fixer, broken json, malformed json, json formatter, json repair tool, repair json online free, fix invalid json">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/json-repair">
+
+  <meta property="og:title" content="JSON Repair Tool — Fix Broken JSON Online Free">
+  <meta property="og:description" content="Paste broken JSON, get instant repair. Fixes trailing commas, unquoted keys, single quotes, and comments. Free, no signup. Built by Svivva.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://svivva.com/tools/json-repair">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JSON Repair Tool — Fix Broken JSON Online Free">
+  <meta name="twitter:description" content="Paste broken JSON, get instant repair. Fixes trailing commas, unquoted keys, single quotes, and comments. Free, no signup.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "JSON Repair Tool",
+    "description": "Free online JSON repair tool that instantly fixes broken JSON. Removes trailing commas, quotes unquoted keys, replaces single quotes, and strips comments.",
+    "url": "https://svivva.com/tools/json-repair",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <h1 class="logo">JSON Repair Tool <span class="logo-sub">by <a href="https://svivva.com" class="header-link">Svivva</a></span></h1>
+        <p class="tagline">Fix malformed JSON instantly. Free, open, no login required.</p>
+      </div>
+      <nav class="header-nav">
+        <a href="https://svivva.com" class="nav-link">Svivva Home</a>
+        <a href="https://svivva.com" class="nav-link nav-cta">Get Svivva Free</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-input">
+      <h2 class="panel-title">Input</h2>
+      <p class="micro-copy">Paste or type JSON, or paste a prompt/schema that contains JSON. We'll detect and repair common issues.</p>
+      <div class="input-actions">
+        <label class="file-label">
+          <span class="btn btn-secondary">Upload file</span>
+          <input type="file" id="fileInput" accept=".json,application/json,text/plain" hidden>
+        </label>
+        <button type="button" class="btn btn-secondary" id="btnSample">Load sample</button>
+        <button type="button" class="btn btn-secondary" id="btnClear">Clear</button>
+      </div>
+      <textarea
+        id="jsonInput"
+        class="input-area"
+        placeholder='Paste JSON here, e.g.:\n{ name: "test", items: [1, 2,] }'
+        spellcheck="false"
+        autofocus
+      ></textarea>
+      <div class="input-meta">
+        <span id="inputStats">—</span>
+      </div>
+    </aside>
+
+    <section class="panel panel-results">
+      <h2 class="panel-title">Results</h2>
+      <p class="micro-copy">Repaired output and list of fixes applied. Updates as you type.</p>
+      <div class="results-tabs">
+        <button type="button" class="tab active" data-tab="repaired">Repaired JSON</button>
+        <button type="button" class="tab" data-tab="fixes">Fixes applied</button>
+      </div>
+      <div id="repairedPane" class="tab-pane active">
+        <pre id="repairedOutput" class="output-pre"><code id="repairedCode">—</code></pre>
+        <div class="result-actions">
+          <button type="button" class="btn btn-accent" id="btnCopy">Copy repaired</button>
+        </div>
+      </div>
+      <div id="fixesPane" class="tab-pane">
+        <div id="fixesList" class="fixes-list">—</div>
+      </div>
+      <div id="resultStatus" class="result-status" aria-live="polite"></div>
+    </section>
+
+    <aside class="panel panel-guidance">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="micro-copy">What we checked and how to avoid these issues in your APIs and prompts.</p>
+      <div id="guidanceContent" class="guidance-content">
+        <p class="guidance-placeholder">Paste JSON in the left panel to see repair suggestions and explanations here.</p>
+      </div>
+      <div class="guidance-tips" id="guidanceTips">
+        <h3>Common JSON issues</h3>
+        <ul>
+          <li><strong>Trailing commas</strong> — JSON does not allow a comma after the last element in an array or object.</li>
+          <li><strong>Unquoted keys</strong> — All object keys must be double-quoted strings.</li>
+          <li><strong>Single quotes</strong> — Use double quotes (<code>"</code>) for strings.</li>
+          <li><strong>Comments</strong> — Standard JSON has no <code>//</code> or <code>/* */</code>; strip them before parsing.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <section class="seo-content">
+    <div class="seo-inner">
+      <h2>Why You Need a JSON Repair Tool</h2>
+      <p>Working with JSON is a daily reality for developers, data engineers, and anyone building with APIs. But JSON is strict. A single trailing comma, an unquoted key, or a misplaced single quote can break your entire payload and grind your workflow to a halt. That is exactly why we built this free JSON repair tool — to save you time and frustration when dealing with malformed JSON.</p>
+
+      <h3>What This Tool Fixes</h3>
+      <p>This JSON repair tool automatically detects and fixes the most common JSON errors. It removes <strong>trailing commas</strong> that sneak in when you copy arrays or objects from JavaScript code. It converts <strong>single-quoted strings</strong> to the double quotes that JSON requires. It wraps <strong>unquoted object keys</strong> in proper double-quote notation. And it strips out <strong>comments</strong> — both single-line and block comments — that are valid in JavaScript but illegal in standard JSON. All of this happens instantly, right in your browser, with zero data sent to any server.</p>
+
+      <h3>Built for Real Workflows</h3>
+      <p>If you are working with <strong>LLM outputs</strong>, you know that language models frequently return JSON with minor formatting issues. GPT, Claude, and other models sometimes produce trailing commas, use single quotes, or include explanatory comments inside JSON blocks. Instead of manually hunting for these errors, paste the output here and get clean, valid JSON in milliseconds. This tool is also essential for debugging <strong>API responses</strong>, cleaning up <strong>configuration files</strong>, and validating <strong>webhook payloads</strong> before they hit your production systems.</p>
+
+      <h3>From Quick Fix to Production-Grade JSON Handling</h3>
+      <p>This tool solves the immediate problem: you have broken JSON and you need it fixed now. But if you are building products that rely on JSON — APIs, prompt pipelines, data integrations — you need more than a repair tool. You need automated validation, schema enforcement, versioning, and monitoring so that malformed JSON never reaches your users in the first place.</p>
+
+      <p>That is what <a href="https://svivva.com">Svivva</a> does. <a href="https://svivva.com">Svivva</a> helps engineering teams turn ad-hoc API testing into production-ready workflows with automated tests, version control, cost optimization, and real-time monitoring. If you are fixing JSON by hand today, <a href="https://svivva.com">Svivva</a> can help you build systems where it never breaks in the first place.</p>
+
+      <h3>How to Use This JSON Repair Tool</h3>
+      <ol>
+        <li><strong>Paste your JSON</strong> into the input panel on the left. You can also upload a <code>.json</code> file or load a sample to see how it works.</li>
+        <li><strong>Review the results</strong> in the center panel. The tool repairs your JSON in real time as you type and shows you the valid output.</li>
+        <li><strong>Check the fixes</strong> by switching to the "Fixes applied" tab to see exactly what was changed and why.</li>
+        <li><strong>Copy the repaired JSON</strong> with one click and use it in your API calls, configs, or code.</li>
+      </ol>
+
+      <p>No signup, no data collection, no limits. Just paste and fix. And when you are ready to go beyond manual fixes, <a href="https://svivva.com">try Svivva for free</a> to automate your entire JSON and API workflow.</p>
+    </div>
+  </section>
+
+  <footer class="sticky-cta">
+    <p class="cta-copy">You just fixed one payload. With <a href="https://svivva.com" class="cta-inline-link">Svivva</a>, you can automate JSON validation, API testing, versioning, and monitoring across your entire stack.</p>
+    <a href="https://svivva.com" class="btn btn-cta" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script src="repair.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

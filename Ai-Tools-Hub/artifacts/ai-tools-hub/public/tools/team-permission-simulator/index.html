@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Team Permission Simulator Online — Role &amp; Access Map Generator | Svivva</title>
+  <meta name="description" content="Free team permission simulator online. Generate roles, access levels, and collaboration permission maps for any team scenario in seconds. No signup required. Preview one step of Svivva's full collaboration workflow." />
+  <meta name="keywords" content="team permission simulator, role permission generator, team access control, collaboration permissions, role mapping tool, team roles and permissions, free permission tool, Svivva" />
+  <link rel="canonical" href="https://svivva.com/tools/team-permission-simulator" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Team Permission Simulator Online | Svivva" />
+  <meta property="og:description" content="Generate roles, access levels, and permission maps for any team scenario. Free, instant, no signup. One step of Svivva's full collaboration workflow." />
+  <meta property="og:url" content="https://svivva.com/tools/team-permission-simulator" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Team Permission Simulator Online | Svivva" />
+  <meta name="twitter:description" content="Generate roles, access levels, and permission maps for any team scenario. Free, instant, no signup." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Team Permission Simulator",
+    "url": "https://svivva.com/tools/team-permission-simulator",
+    "description": "Free online team permission simulator. Generate roles, access levels, and collaboration permission maps for any team scenario in seconds.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the team permission simulator do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short team scenario (who's involved, what you're building, collaboration size) and runs one step of Svivva's pipeline to produce a permission map, suggested roles, and readiness indicator. It's a single-step preview of what the full platform does with versioning, granular permissions, and exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the team permission simulator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online team permission simulator is free and does not require login. You can generate previews as often as you like. The full Svivva platform has free and paid tiers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I take this preview into a real project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use 'Open this preview inside a real Svivva project' or sign up at svivva.com to run the full workflow with versioning, real roles and permissions, cost tracking, and production-ready outputs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What team sizes does the simulator support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The simulator works for teams of any size. Enter your collaboration size in the optional constraints to get a more tailored permission map. From two-person startups to large cross-functional teams, the tool adapts roles and access levels accordingly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this for hardware and software teams?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Select the mode that fits your team: Hardware for electronics and physical product teams, Build for digital-physical workflows, Team for general collaboration, or any other category. Each mode generates a tailored permission map for that domain."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Free Team Permission Simulator Online</h1>
+      <p class="intro">Preview how roles and permissions could work for your team — the same step that runs inside <a href="https://svivva.com" class="internal-link">Svivva's</a> collaboration pipeline. Generate a production-style permission map in one click. No account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. 3-person hardware team: lead designer, firmware dev, QA. Building a MIDI controller." required></textarea>
+
+          <label for="mode">Mode or category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team" selected>Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate permission map</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your team permission and collaboration preview will appear here.</p>
+          <p class="hint">Enter a short description of your team scenario and click Generate permission map.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. Run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="internal-link">Svivva's</a> Collaboration &amp; permissions pipeline: team scenario &rarr; roles and permission map. In the full platform you get versioning, shared assets, granular roles, and production-ready exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Team scenario &rarr; permission / role map</strong></li>
+          <li>Next in full workflow: granular roles, shared assets, versioning, cost tracking, exports</li>
+        </ul>
+        <h3>Why use a team permission simulator?</h3>
+        <p>Setting up roles and access levels is one of the first decisions every team faces. Whether you are launching a hardware startup, organizing a creative project, or managing a cross-functional engineering squad, knowing who can view, edit, and share resources prevents bottlenecks and security gaps. This free simulator lets you model those decisions before committing to a platform.</p>
+        <p><a href="https://svivva.com" class="internal-link">Explore the full Svivva platform &rarr;</a></p>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <footer class="site-footer">
+      <section class="seo-content">
+        <h2>How the Team Permission Simulator Works</h2>
+        <p>The <strong>team permission simulator</strong> is a free online tool built by <a href="https://svivva.com" class="internal-link">Svivva</a> that generates a role-based permission map from a plain-language description of your team. Describe who is on your team, what you are building, and how large the collaboration is. The simulator analyzes your input and produces a table of suggested roles — such as Lead, Developer, QA, or Admin — along with their access levels for viewing, editing, and sharing project resources.</p>
+
+        <h3>Who is this tool for?</h3>
+        <p>This <strong>free team permission tool</strong> is designed for project managers, engineering leads, startup founders, and anyone setting up a new team or evaluating how permissions should be structured. It works across six categories: <strong>Hardware</strong> for electronics and physical product teams, <strong>Play</strong> for performance and creative workflows, <strong>Idea</strong> for early-stage concept scoring, <strong>Team</strong> for general collaboration and access control, <strong>Marketplace</strong> for API publishing readiness, and <strong>Build</strong> for digital-physical production flows. Each category tailors the output to the conventions and roles common in that domain.</p>
+
+        <h3>What you get from the permission map</h3>
+        <p>After clicking Generate, the simulator returns a permission map showing each role and whether it has View, Edit, or Share access. You also see a <strong>readiness score</strong> that reflects how much detail you provided — the more context you give about budget, materials, region, and team size, the higher the confidence in the generated map. This readiness indicator helps you gauge whether your team structure is well-defined enough to move into production tooling.</p>
+
+        <h3>From preview to production</h3>
+        <p>This simulator covers one step of <a href="https://svivva.com" class="internal-link">Svivva's</a> full collaboration pipeline. In the complete platform, the permission map feeds into versioning, shared asset management, granular role assignment, cost tracking, and production-ready exports. You can take any preview you generate here and continue building it inside a real <a href="https://svivva.com/projects" class="internal-link">Svivva project</a> — with all the infrastructure handled for you.</p>
+
+        <h3>Built for engineering teams, open to everyone</h3>
+        <p>Whether you are a two-person firmware team deciding who controls the schematic files or a ten-person product squad mapping out view-only stakeholders versus hands-on contributors, the simulator adapts to your scenario. There is no signup, no login wall, and no usage limit. Generate as many permission maps as you need, then move to <a href="https://svivva.com" class="internal-link">Svivva</a> when you are ready for the full workflow — versioning, collaboration, cost tracking, and exports included.</p>
+      </section>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does the team permission simulator do?</summary>
+          <p>It takes your short team scenario (who's involved, what you're building, collaboration size) and runs one step of <a href="https://svivva.com" class="internal-link">Svivva's</a> pipeline to produce a permission map, suggested roles, and readiness indicator. It's a single-step preview of what the full platform does with versioning, granular permissions, and exports.</p>
+        </details>
+        <details>
+          <summary>Is the team permission simulator free?</summary>
+          <p>Yes. This online team permission simulator is free and does not require login. You can generate previews as often as you like. The full <a href="https://svivva.com" class="internal-link">Svivva platform</a> has free and paid tiers.</p>
+        </details>
+        <details>
+          <summary>How do I take this preview into a real project?</summary>
+          <p>Use "Open this preview inside a real Svivva project" or sign up at <a href="https://svivva.com" class="internal-link">svivva.com</a> to run the full workflow with versioning, real roles and permissions, cost tracking, and production-ready outputs.</p>
+        </details>
+        <details>
+          <summary>What team sizes does the simulator support?</summary>
+          <p>The simulator works for teams of any size. Enter your collaboration size in the optional constraints to get a more tailored permission map. From two-person startups to large cross-functional teams, the tool adapts roles and access levels accordingly.</p>
+        </details>
+        <details>
+          <summary>Can I use this for hardware and software teams?</summary>
+          <p>Yes. Select the mode that fits your team: Hardware for electronics and physical product teams, Build for digital-physical workflows, Team for general collaboration, or any other category. Each mode generates a tailored permission map for that domain.</p>
+        </details>
+      </section>
+
+      <nav class="footer-links" aria-label="Svivva links">
+        <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D.</p>
+        <ul class="footer-nav">
+          <li><a href="https://svivva.com" class="internal-link">Svivva Home</a></li>
+          <li><a href="https://svivva.com/projects" class="internal-link">Projects</a></li>
+          <li><a href="https://svivva.com/pricing" class="internal-link">Pricing</a></li>
+        </ul>
+      </nav>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

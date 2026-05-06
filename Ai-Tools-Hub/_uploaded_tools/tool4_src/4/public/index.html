@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Latency Forecaster Tool – Free Online | Estimate API &amp; LLM Latency</title>
+  <meta name="description" content="Free API latency forecaster online. Upload your prompt, schema, or API definition and get instant latency analysis, scoring, and optimization tips. No login required." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">API Latency Forecaster</h1>
+    <p class="site-tagline">Estimate latency for your prompt, schema, and API config. Runs in your browser — no server needed. Free, no sign-up.</p>
+  </header>
+
+  <main class="three-panel">
+    <section class="panel left-panel" aria-label="Input">
+      <h2 class="panel-title">Input</h2>
+      <form id="analyze-form" class="input-form">
+        <label class="label" for="prompt">Prompt or request body</label>
+        <textarea id="prompt" name="prompt" rows="5" placeholder="Paste your system/user prompt or API request body here…" class="input-text"></textarea>
+
+        <label class="label" for="schema">Response schema (optional JSON)</label>
+        <textarea id="schema" name="schema" rows="4" placeholder='{"type":"object","properties":{…}}' class="input-text font-mono"></textarea>
+
+        <label class="label" for="model">Model</label>
+        <select id="model" name="model" class="input-select">
+          <option value="gpt-4">GPT-4</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="claude-3">Claude 3</option>
+        </select>
+
+        <label class="label" for="api-config">API config (optional)</label>
+        <input type="text" id="api-config" name="apiConfig" placeholder="e.g. POST /v1/chat/completions" class="input-text" />
+
+        <button type="submit" class="btn-primary" id="submit-btn">Forecast latency</button>
+      </form>
+    </section>
+
+    <section class="panel center-panel" aria-label="Results">
+      <h2 class="panel-title">Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p class="micro-copy">Enter a prompt and click “Forecast latency” to see estimated latency breakdown and score.</p>
+      </div>
+      <div id="results-content" class="results-content hidden">
+        <div class="score-block">
+          <span class="score-label">Latency score</span>
+          <span class="score-value" id="score-value">—</span>
+          <span class="score-suffix">/ 100</span>
+        </div>
+        <p class="total-latency" id="total-latency">—</p>
+        <div class="chart-container" id="chart-container"></div>
+        <table class="breakdown-table" id="breakdown-table" aria-label="Latency breakdown"></table>
+      </div>
+      <div id="results-loading" class="results-loading hidden">Analyzing…</div>
+      <div id="results-error" class="results-error hidden"></div>
+    </section>
+
+    <section class="panel right-panel" aria-label="Guidance">
+      <h2 class="panel-title">Guidance</h2>
+      <div id="guidance-default" class="guidance-block">
+        <p class="micro-copy">This tool estimates API latency from your prompt length, response schema, and model. Use it to compare configurations before deploying.</p>
+        <ul class="tips-list">
+          <li>Shorter prompts and simpler schemas usually mean lower latency.</li>
+          <li>Larger models add inference time; smaller models can cut latency when quality allows.</li>
+          <li>In production, measure p50/p95 with real traffic and use monitoring.</li>
+        </ul>
+      </div>
+      <div id="guidance-interpretation" class="guidance-block hidden">
+        <p class="micro-copy" id="guidance-summary">—</p>
+        <p class="micro-copy tips-title">Suggestions</p>
+        <ul class="tips-list" id="guidance-tips"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cta-bar" role="complementary">
+    <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. <a href="https://svivva.com" class="cta-link" target="_blank" rel="noopener">Try Svivva for free.</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

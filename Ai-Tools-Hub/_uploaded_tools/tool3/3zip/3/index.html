@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Prompt Linter — Free Online Tool to Lint, Score & Improve LLM Prompts</title>
+  <meta name="description" content="Free AI prompt linter tool. Paste your LLM prompt, JSON schema, or API definition and get instant scoring, clarity checks, injection safety analysis, and best-practice guidance. No sign-up required.">
+  <meta name="keywords" content="ai prompt linter, llm prompt linter, prompt linter tool, prompt linter online, free prompt linter, prompt engineering tool, llm prompt checker, prompt quality checker, prompt injection checker, ai prompt analyzer">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ai-prompt-linter.replit.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI Prompt Linter — Free Tool to Score & Improve LLM Prompts">
+  <meta property="og:description" content="Paste any LLM prompt and get instant analysis: clarity score, structure checks, injection safety, and actionable improvement tips. Free, no login.">
+  <meta property="og:url" content="https://ai-prompt-linter.replit.app/">
+  <meta property="og:site_name" content="AI Prompt Linter by Svivva">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Prompt Linter — Free Tool to Score & Improve LLM Prompts">
+  <meta name="twitter:description" content="Instant analysis for LLM prompts: clarity, structure, safety, and role checks. Free and open.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Prompt Linter",
+    "url": "https://ai-prompt-linter.replit.app/",
+    "description": "Free online tool to lint, score, and improve LLM prompts. Checks clarity, structure, prompt injection safety, and role definition.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <div>
+          <h1 class="logo">AI Prompt Linter</h1>
+          <p class="tagline">Lint, score, and improve your LLM prompts in seconds. Free and no sign-up required.</p>
+        </div>
+        <a href="https://svivva.com" class="header-cta" target="_blank" rel="noopener noreferrer">Svivva &rarr;</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <p class="helper">Paste your prompt, schema, or API definition below. You can also choose a preset to see example checks.</p>
+      <div class="input-group">
+        <label for="input-type">Input type</label>
+        <select id="input-type" aria-label="Type of input">
+          <option value="prompt">Prompt / instruction</option>
+          <option value="schema">JSON schema</option>
+          <option value="api">API definition (OpenAPI-style)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="model-hint">Model hint (optional)</label>
+        <select id="model-hint" aria-label="Target model">
+          <option value="">Any</option>
+          <option value="gpt-4">GPT-4 / Claude</option>
+          <option value="gpt-3">GPT-3.5 / smaller</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="prompt-text">Prompt, schema, or config</label>
+        <textarea id="prompt-text" rows="14" placeholder="Paste your prompt or JSON here…" aria-label="Prompt or schema content"></textarea>
+      </div>
+      <button type="button" class="cta-primary" id="btn-lint" aria-label="Run lint analysis">Lint prompt</button>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <p class="helper">Scores and findings appear here as soon as you run the linter.</p>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Click <strong>Lint prompt</strong> to see analysis.</p>
+      </div>
+      <div id="results-container" class="results-container" hidden>
+        <div class="score-card">
+          <span class="score-label">Overall score</span>
+          <span id="overall-score" class="score-value">&mdash;</span>
+          <span class="score-max">/ 100</span>
+        </div>
+        <div id="results-charts" class="results-charts"></div>
+        <div id="results-table-wrap" class="results-table-wrap">
+          <table id="results-table" class="results-table" role="table">
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>Status</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="helper">How to read and act on these results.</p>
+      <div id="guidance-content" class="guidance-content">
+        <div class="guidance-block">
+          <h3>Overall score</h3>
+          <p>Higher scores mean your prompt is clearer, well-structured, and aligned with common best practices. Aim for 70+ for production use.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>Checks explained</h3>
+          <p><strong>Clarity</strong> — Imperative, specific instructions score better. <strong>Structure</strong> — Sections and delimiters help models follow complex tasks. <strong>Safety</strong> — We flag possible injection or overly permissive phrasing.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>Schema & API</h3>
+          <p>If you paste JSON schema or API definitions, we validate structure and suggest improvements for consistency and documentation.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>Take it further</h3>
+          <p>This linter checks one prompt at a time. <a href="https://svivva.com" target="_blank" rel="noopener noreferrer">Svivva</a> lets you version, test, monitor, and optimize your entire prompt library in production.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <article class="seo-content">
+    <div class="seo-inner">
+      <h2>What Is an AI Prompt Linter?</h2>
+      <p>An <strong>AI prompt linter</strong> is a tool that analyzes the text you send to large language models — like GPT-4, Claude, Gemini, or Llama — and flags issues before you hit send. Think of it as a spell-checker for prompt engineering. Instead of catching typos, it catches vague instructions, missing role definitions, weak structure, and potential prompt-injection vulnerabilities.</p>
+
+      <p>Prompt quality has a direct impact on the output you get from any LLM. A poorly written prompt produces inconsistent, off-topic, or unsafe responses. A well-structured prompt with clear instructions, defined roles, and proper delimiters consistently returns higher-quality results — and uses fewer tokens doing it. That is exactly what this free <strong>LLM prompt linter</strong> helps you achieve.</p>
+
+      <h2>How the AI Prompt Linter Works</h2>
+      <p>Paste any prompt, JSON schema, or API definition into the input panel and click <strong>Lint prompt</strong>. The linter runs five core checks in under a second:</p>
+      <ul>
+        <li><strong>Content check</strong> — Verifies your prompt is not empty and estimates the token count so you can stay within model limits.</li>
+        <li><strong>Clarity analysis</strong> — Detects vague language like "maybe" or "try to" and rewards imperative instructions such as "You must" or "Return."</li>
+        <li><strong>Structure review</strong> — Looks for headers, delimiters, step numbering, or JSON blocks that help the model parse complex tasks.</li>
+        <li><strong>Safety scan</strong> — Flags phrasing that could be exploited through prompt injection, such as "ignore previous instructions" or "override system prompt."</li>
+        <li><strong>Role definition</strong> — Checks whether you have established a clear role or system context, which is critical for longer, production-grade prompts.</li>
+      </ul>
+      <p>If you select <em>JSON schema</em> or <em>API definition</em> as the input type, the linter also validates that your JSON is syntactically correct and contains meaningful content.</p>
+
+      <h2>Who Should Use This Tool?</h2>
+      <p>This <strong>prompt linter tool</strong> is built for anyone writing prompts at scale: AI engineers, product managers integrating LLMs into their apps, QA teams validating prompt libraries, and developers building agents or retrieval-augmented generation pipelines. If you write prompts that go into production, linting them first saves debugging time and reduces unpredictable model behavior.</p>
+
+      <h2>From One Prompt to a Production Pipeline</h2>
+      <p>Linting a single prompt is a good start — but production AI workloads involve dozens or hundreds of prompts that change over time. <a href="https://svivva.com">Svivva</a> picks up where this linter leaves off. With <a href="https://svivva.com">Svivva</a>, you can version every prompt, run automated regression tests against real model outputs, monitor latency and cost per call, and roll back instantly when a prompt update degrades quality. If you are serious about shipping reliable AI features, <a href="https://svivva.com">try Svivva for free</a> and move from ad-hoc prompting to an engineered workflow.</p>
+    </div>
+  </article>
+
+  <footer class="sticky-cta">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In <strong>Svivva</strong> you can turn this into a production-ready pipeline with automated tests, versioning, monitoring, and cost optimization.</p>
+      <a href="https://svivva.com" class="cta-link" target="_blank" rel="noopener noreferrer">Try Svivva for free</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

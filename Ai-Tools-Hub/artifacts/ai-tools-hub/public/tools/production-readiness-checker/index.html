@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Production Readiness Checker – Free Tool | Svivva</title>
+<meta name="description" content="Free AI production readiness checker. Evaluate your AI system across schema enforcement, testing, rollback, cost monitoring, and observability."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+input,textarea,select{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:#7c3aed}
+select option{background:#111118}
+textarea{resize:vertical;min-height:70px}
+.dim-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px}
+.dim-info{display:flex;flex-direction:column;gap:3px}
+.dim-name{font-size:14px;color:#e5e5e5;font-weight:500}
+.dim-desc{font-size:12px;color:#666}
+.dim-weight{font-size:11px;color:#7c3aed;letter-spacing:.05em}
+.dim-select{width:120px;font-size:13px}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.score-circle{width:100px;height:100px;border-radius:50%;border:4px solid #7c3aed;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto}
+.score-num{font-size:32px;color:#c4b5fd;font-weight:700}
+.score-lbl{font-size:11px;color:#888;letter-spacing:.1em}
+.radar-bar{display:flex;align-items:center;gap:10px;font-size:13px}
+.radar-track{flex:1;background:#1a1a2e;border-radius:4px;height:8px;overflow:hidden}
+.radar-fill{height:100%;border-radius:4px;transition:width .6s}
+.radar-val{width:36px;text-align:right;color:#888;font-size:12px}
+.gap-item{padding:10px 12px;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;font-size:13px}
+.gap-label{color:#e5e5e5;margin-bottom:3px}
+.gap-hint{color:#888;font-size:12px}
+.gap-status-no{color:#f87171;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.gap-status-partial{color:#fbbf24;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.step-title{font-size:14px;color:#c4b5fd;font-weight:600;margin-bottom:6px}
+.step-item{font-size:13px;color:#999;padding:6px 0;border-bottom:1px solid #1a1a2e}
+.step-item:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>AI Production Readiness Checker</h1>
+    <p class="sub">Evaluate your AI system across 6 critical dimensions. Get a readiness score, identify gaps, and receive next steps.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>System Name *</label>
+      <input id="sysName" type="text" placeholder="e.g. Customer Support AI, Invoice Extractor"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="dims"></div>
+    <div>
+      <label>Notes (optional)</label>
+      <textarea id="notes" placeholder="Any additional context, constraints, or known issues…" rows="2"></textarea>
+    </div>
+    <button class="primary" onclick="check()">Check Readiness →</button>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <div style="text-align:center;padding:10px 0">
+      <div class="score-circle" id="scoreCircle">
+        <span class="score-num" id="scoreNum">0</span>
+        <span class="score-lbl">/ 100</span>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#888" id="scoreLabel"></div>
+    </div>
+    <div>
+      <label style="margin-bottom:10px">Radar Summary</label>
+      <div id="radar" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div id="gapsSection" style="display:none">
+      <label style="margin-bottom:10px">Key Gaps</label>
+      <div id="gaps" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div>
+      <label style="margin-bottom:10px">Suggested Next Steps</label>
+      <div id="nextSteps" style="background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:14px;display:flex;flex-direction:column"></div>
+    </div>
+    <div>
+      <label style="margin-bottom:8px">What Good Looks Like</label>
+      <div style="background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:14px">
+        <div class="step-item">✓ Input and output schemas validated at every boundary</div>
+        <div class="step-item">✓ Automated tests and regression checks gate every deploy</div>
+        <div class="step-item">✓ Rollback plan documented, rehearsed, and observable</div>
+        <div class="step-item">✓ Cost, latency, and error budgets monitored with alerts</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="copyMarkdown()" style="background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:8px 16px;border-radius:6px;cursor:pointer">Copy Report</button>
+    </div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Automate production checks in your AI pipeline with Svivva →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const DIMS=[
+  {key:'schemaEnforcement',label:'Schema Enforcement',desc:'Do you validate inputs and outputs against a strict schema?',weight:18,hint:'Add strict schemas at the API boundary and validate inputs.'},
+  {key:'testingCoverage',label:'Testing Coverage',desc:'Do you have automated tests for critical paths?',weight:18,hint:'Increase coverage for critical paths and add integration tests.'},
+  {key:'regressionChecks',label:'Regression Checks',desc:'Do you run regression suites on every release?',weight:16,hint:'Run regression suites or model-evals on every release.'},
+  {key:'rollbackPlan',label:'Rollback Plan',desc:'Is your rollback plan documented and rehearsed?',weight:14,hint:'Document a rollback checklist and rehearse it quarterly.'},
+  {key:'costMonitoring',label:'Cost Monitoring',desc:'Do you track per-request cost and set budget alerts?',weight:12,hint:'Track per-request cost and set budget alerts.'},
+  {key:'observability',label:'Observability',desc:'Do you have dashboards for latency, errors, and usage?',weight:22,hint:'Create dashboards for latency, errors, and usage spikes.'},
+];
+const SCORE={no:0,partial:0.5,yes:1};
+const COLORS={no:'#f87171',partial:'#fbbf24',yes:'#34d399'};
+
+// Build dimension rows
+const dimsEl=document.getElementById('dims');
+DIMS.forEach(d=>{
+  dimsEl.innerHTML+=`<div class="dim-row">
+    <div class="dim-info">
+      <div class="dim-name">${d.label} <span class="dim-weight">${d.weight}%</span></div>
+      <div class="dim-desc">${d.desc}</div>
+    </div>
+    <select class="dim-select" id="dim-${d.key}">
+      <option value="no">No</option>
+      <option value="partial">Partial</option>
+      <option value="yes">Yes</option>
+    </select>
+  </div>`;
+});
+
+let lastResult=null;
+
+function check(){
+  const sysName=document.getElementById('sysName').value.trim();
+  if(!sysName){alert('Please enter your system name.');return;}
+  const fields={};
+  DIMS.forEach(d=>fields[d.key]=document.getElementById('dim-'+d.key).value);
+  const notes=document.getElementById('notes').value.trim();
+
+  // Compute score
+  const score=Math.round(DIMS.reduce((acc,d)=>acc+d.weight*SCORE[fields[d.key]],0));
+  const gaps=DIMS.filter(d=>fields[d.key]!=='yes').sort((a,b)=>b.weight-a.weight);
+  const nextSteps=gaps.slice(0,4).map(g=>g.hint);
+
+  // Score label
+  const lbl=score>=80?'Production Ready':score>=60?'Mostly Ready — fix gaps first':score>=40?'Needs Work Before Launch':'Not Ready for Production';
+  const scoreColor=score>=80?'#34d399':score>=60?'#fbbf24':score>=40?'#fb923c':'#f87171';
+
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreCircle').style.borderColor=scoreColor;
+  document.getElementById('scoreNum').style.color=scoreColor;
+  document.getElementById('scoreLabel').textContent=lbl;
+
+  // Radar
+  document.getElementById('radar').innerHTML=DIMS.map(d=>{
+    const pct=Math.round(SCORE[fields[d.key]]*100);
+    const color=COLORS[fields[d.key]];
+    return `<div class="radar-bar"><span style="width:170px;font-size:12px;color:#aaa">${d.label}</span><div class="radar-track"><div class="radar-fill" style="width:${pct}%;background:${color}"></div></div><span class="radar-val">${pct}%</span></div>`;
+  }).join('');
+
+  // Gaps
+  if(gaps.length>0){
+    document.getElementById('gapsSection').style.display='block';
+    document.getElementById('gaps').innerHTML=gaps.map(g=>`<div class="gap-item"><div class="gap-label">${g.label} <span class="gap-status-${fields[g.key]}">${fields[g.key]}</span></div><div class="gap-hint">${g.hint}</div></div>`).join('');
+  } else {
+    document.getElementById('gapsSection').style.display='none';
+  }
+
+  // Next steps
+  document.getElementById('nextSteps').innerHTML=nextSteps.length>0
+    ?nextSteps.map(s=>`<div class="step-item">→ ${s}</div>`).join('')
+    :'<div class="step-item">Keep iterating on automated checks and monitoring.</div>';
+
+  // Store for copy
+  lastResult={sysName,score,lbl,fields,gaps,nextSteps,notes};
+  document.getElementById('resultCard').style.display='flex';
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+}
+
+function copyMarkdown(){
+  if(!lastResult) return;
+  const {sysName,score,lbl,fields,gaps,nextSteps,notes}=lastResult;
+  const radarLines=DIMS.map(d=>{const pct=Math.round(SCORE[fields[d.key]]*100);const filled=Math.round(pct/10);return `- ${d.label}: ${'█'.repeat(filled)}${'░'.repeat(10-filled)} ${pct}%`;});
+  const lines=[`# ${sysName} — Production Readiness`,``,`**Readiness score:** ${score}/100 — ${lbl}`,``,`## Radar`,radarLines.join('\n'),``,`## Key Gaps`,gaps.length>0?gaps.map(g=>`- ${g.label} (${fields[g.key]})`).join('\n'):'None',``,`## Next Steps`,nextSteps.length>0?nextSteps.map(s=>`- ${s}`).join('\n'):'Keep iterating.',``,`## What Good Looks Like`,`- Input and output schemas validated at every boundary`,`- Automated tests and regression checks gate every deploy`,`- Rollback plan documented, rehearsed, and observable`,`- Cost, latency, and error budgets monitored with alerts`,...(notes?['',`## Notes`,`- ${notes}`]:[])];
+  navigator.clipboard.writeText(lines.join('\n'));
+}
+</script>
+</body>
+</html>

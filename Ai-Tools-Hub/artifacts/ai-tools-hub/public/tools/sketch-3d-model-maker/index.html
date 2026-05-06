@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Free AI sketch and 3D model maker. View Spline 3D scenes, generate AI reference images, and access the best 3D tools in one place. Powered by Svivva." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sketch &amp; 3D Model Maker — Free AI Image &amp; 3D Tool | Svivva</title>
+  <style>:root {
+  --bg: #0f1218;
+  --surface: #171b24;
+  --border: #2a3140;
+  --text: #e8eaef;
+  --muted: #8b93a5;
+  --accent: #6c9cff;
+  --accent-dim: #4a6fad;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.brand-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.brand-sub strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-bottom: 1.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.8rem;
+}
+
+.quick-nav-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.quick-nav-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.quick-nav-link:hover {
+  text-decoration: underline;
+}
+
+.start-banner {
+  margin: 0 0 0.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #2d3a4a;
+  background: linear-gradient(135deg, rgba(108, 156, 255, 0.08), rgba(108, 156, 255, 0.02));
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+@media (min-width: 520px) {
+  .start-banner {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.65rem;
+  }
+}
+
+.start-banner-title {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.35rem;
+}
+
+.section-lead {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.tool-card:hover {
+  border-color: var(--accent-dim);
+  background: #1a1f2a;
+}
+
+.tool-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tool-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.tool-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.section-spline .spline-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  align-items: stretch;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.spline-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.spline-input:focus {
+  outline: 2px solid var(--accent-dim);
+  outline-offset: 0;
+}
+
+.btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0a0c10;
+}
+
+.btn-accent:hover {
+  filter: brightness(1.08);
+}
+
+.spline-frame-wrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0a0c10;
+  min-height: min(60vh, 520px);
+}
+
+.spline-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(60vh, 520px);
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.spline-placeholder[hidden],
+.spline-viewer[hidden] {
+  display: none !important;
+}
+
+.spline-viewer {
+  display: block;
+  width: 100%;
+  height: min(60vh, 520px);
+}
+
+.footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--surface);
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.brand-sub .inline-code {
+  font-size: 0.78em;
+}
+
+.section-generate {
+  margin-top: 0.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.section-generate.feature-addon {
+  border-top: none;
+  margin-top: 1.35rem;
+  padding-top: 1.1rem;
+}
+
+.feature-addon {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1rem 1.25rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.feature-addon-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-addon-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.feature-addon-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.feature-addon-lead {
+  margin: 0 0 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 38rem;
+}
+
+.notice-compact {
+  margin-bottom: 0.65rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.textarea-compact {
+  min-height: 3.25rem;
+  font-size: 0.875rem;
+}
+
+.btn-feature {
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-feature:hover {
+  border-color: var(--accent);
+  background: rgba(108, 156, 255, 0.1);
+}
+
+.btn-feature:disabled {
+  opacity: 0.55;
+}
+
+.img-backend-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.img-backend-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.img-backend-select {
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.puter-model-row {
+  margin-bottom: 0.75rem;
+}
+
+.hint-puter {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.45;
+  max-width: 38rem;
+}
+
+.key-details {
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.key-details[hidden] {
+  display: none !important;
+}
+
+.key-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+}
+
+.key-summary::-webkit-details-marker {
+  display: none;
+}
+
+.key-summary::before {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+  opacity: 0.85;
+}
+
+.key-summary-note {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.key-details-inner {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.key-explainer {
+  margin: 0.75rem 0 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.notice {
+  font-size: 0.8rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+
+.notice-warn {
+  border: 1px solid #4a3d2d;
+  background: rgba(245, 158, 11, 0.08);
+  color: #e8c49a;
+}
+
+.notice-info {
+  border: 1px solid #2d4a3a;
+  background: rgba(74, 222, 128, 0.06);
+  color: #a8d4b8;
+}
+
+.key-row {
+  margin-bottom: 1rem;
+}
+
+.key-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.key-optional {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.key-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.key-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+.remember-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-label input {
+  accent-color: var(--accent);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.textarea:focus {
+  outline: 2px solid var(--accent-dim);
+  outline-offset: 0;
+}
+
+.textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.prompt-textarea {
+  margin-bottom: 0.65rem;
+}
+
+.gen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.gen-result-wrap {
+  margin-top: 1rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0a0c10;
+  max-width: 100%;
+}
+
+.gen-result-img {
+  display: block;
+  width: 100%;
+  max-width: 1024px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.revised-line {
+  font-size: 0.78rem;
+  margin: 0 0 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-accent:disabled {
+  filter: none;
+}
+</style>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-title">Sketch &amp; 3D Model Maker</div>
+        <p class="brand-sub">Your workspace for <strong>links to 3D tools</strong>, a <strong>Spline scene viewer</strong>, and quick ideation — no API key required for any of that. At the bottom there’s a <strong>small add-on</strong> that turns a line of text into a reference image when you need it.</p>
+      </div>
+    </header>
+
+    <nav class="quick-nav" aria-label="Jump to section">
+      <span class="quick-nav-label">Jump to</span>
+      <a class="quick-nav-link" href="#sec-tools">Apps &amp; links</a>
+      <a class="quick-nav-link" href="#sec-spline">3D viewer</a>
+      <a class="quick-nav-link" href="#sec-gen">Add-on · reference image</a>
+    </nav>
+
+    <main class="main">
+      <p class="start-banner" role="status">
+        <span class="start-banner-title">Start here</span>
+        <span class="start-banner-text">Open a tool or load a scene — that’s the core of this app.</span>
+      </p>
+
+      <section class="section" aria-labelledby="sec-tools">
+        <h2 class="section-title" id="sec-tools">Apps &amp; links</h2>
+        <p class="section-lead">Each card opens in a new tab. Sign in on those sites with your own accounts — nothing here blocks you.</p>
+        <div class="tool-grid">
+          <a class="tool-card" href="https://www.meshy.ai/chat" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">Meshy</span>
+            <span class="tool-desc">Text to 3D — sign in on their site</span>
+          </a>
+          <a class="tool-card" href="https://huggingface.co/spaces" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">Hugging Face Spaces</span>
+            <span class="tool-desc">Browse image &amp; AI demos</span>
+          </a>
+          <a class="tool-card" href="https://replicate.com" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">Replicate</span>
+            <span class="tool-desc">Run models with your token</span>
+          </a>
+          <a class="tool-card" href="https://platform.openai.com" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">OpenAI</span>
+            <span class="tool-desc">Images / API dashboard</span>
+          </a>
+          <a class="tool-card" href="https://leonardo.ai" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">Leonardo.AI</span>
+            <span class="tool-desc">Image generation</span>
+          </a>
+          <a class="tool-card" href="https://spline.design" target="_blank" rel="noopener noreferrer">
+            <span class="tool-name">Spline editor</span>
+            <span class="tool-desc">Build scenes, then paste URL below</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section section-spline" aria-labelledby="sec-spline">
+        <h2 class="section-title" id="sec-spline">Spline viewer</h2>
+        <p class="section-lead">Paste a public scene URL from Spline (Share → copy link). Press Enter or Load — no keys, no signup on this page.</p>
+        <div class="spline-controls">
+          <label class="visually-hidden" for="spline-url">Spline scene URL</label>
+          <input id="spline-url" class="input spline-input" type="url" placeholder="https://prod.spline.design/…/scene.splinecode" autocomplete="off" spellcheck="false" />
+          <button type="button" class="btn btn-accent" id="btn-load-spline">Load scene</button>
+        </div>
+        <div class="spline-frame-wrap" id="spline-wrap">
+          <div class="spline-placeholder" id="spline-placeholder">Paste a URL above to load your scene.</div>
+          <spline-viewer id="spline-viewer" class="spline-viewer" hidden></spline-viewer>
+        </div>
+      </section>
+
+      <aside class="section section-generate feature-addon" aria-labelledby="sec-gen">
+        <div class="feature-addon-head">
+          <span class="feature-addon-badge">Add-on</span>
+          <h2 class="feature-addon-title" id="sec-gen">Text → reference image</h2>
+        </div>
+        <p class="feature-addon-lead">Optional helper: get a quick still from a short description. Choose <strong>Puter.js</strong> to run generation in the browser (Puter may prompt sign-in / billing on their side), or <strong>Server</strong> to use this app’s OpenAI-backed route with a host or pasted key.</p>
+        <div class="img-backend-row">
+          <label class="img-backend-label" for="img-gen-backend">Generate with</label>
+          <select id="img-gen-backend" class="input img-backend-select" aria-describedby="puter-hint img-gen-server-hint">
+            <option value="puter">Puter.js — in this browser</option>
+            <option value="server">Server — OpenAI (host or your key)</option>
+          </select>
+        </div>
+        <p class="hint hint-puter" id="puter-hint" hidden>Puter.js loads from their CDN. If asked, sign in with Puter; usage is between you and them — no OpenAI key required here.</p>
+        <div class="img-backend-row puter-model-row" id="puter-model-wrap" hidden>
+          <label class="img-backend-label" for="puter-model">Puter model</label>
+          <select id="puter-model" class="input img-backend-select">
+            <option value="gpt-image-1-mini">GPT Image 1 Mini (default)</option>
+            <option value="dall-e-3">DALL·E 3</option>
+            <option value="gpt-image-1.5">GPT Image 1.5</option>
+            <option value="gemini-2.5-flash-image-preview">Gemini 2.5 Flash Image</option>
+          </select>
+        </div>
+        <p class="notice notice-info notice-compact" id="img-gen-server-hint" hidden>This add-on is already enabled on the server — no key needed here.</p>
+        <details class="key-details" id="key-access-details">
+          <summary class="key-summary">API access for this add-on <span class="key-summary-note">— only when generating</span></summary>
+          <div class="key-details-inner">
+            <p class="key-explainer">Only used when <strong>Generate with</strong> is set to Server and the host did not configure a key. Puter.js does not use this field.</p>
+            <div class="key-row">
+              <label class="key-label" for="user-openai-key">Key for this session (browser)</label>
+              <div class="key-input-row">
+                <input type="password" id="user-openai-key" class="input key-input" placeholder="Paste key only when generating here" autocomplete="off" spellcheck="false" />
+                <label class="remember-label"><input type="checkbox" id="remember-openai-key" /> Remember in this browser</label>
+              </div>
+            </div>
+          </div>
+        </details>
+        <p class="notice notice-warn" id="img-gen-error" hidden></p>
+        <label class="visually-hidden" for="img-prompt">Image prompt</label>
+        <textarea id="img-prompt" class="textarea prompt-textarea textarea-compact" rows="2" maxlength="4000" placeholder="Short description for a reference still…"></textarea>
+        <div class="gen-actions">
+          <button type="button" class="btn btn-feature" id="btn-prompt-image">Generate reference</button>
+          <button type="button" class="btn" id="btn-download-image" hidden>Download PNG</button>
+        </div>
+        <p class="hint revised-line" id="img-revised" hidden></p>
+        <div class="gen-result-wrap" id="img-result-wrap" hidden>
+          <img id="img-result" class="gen-result-img" alt="Generated reference image" />
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <code class="inline-code">npm start</code> → <code class="inline-code">http://localhost:3000</code>. Optional <code class="inline-code">.env</code>: <code class="inline-code">SPLINE_SCENE_URL</code> for a default scene; for the image add-on you can use <strong>Puter.js</strong> in the browser or set a server image API key so you do not have to paste one.
+    </footer>
+  </div>
+
+  <script src="https://js.puter.com/v2/"></script>
+  <script>(function () {
+  "use strict";
+
+  const LS_KEY = "creative_tools_openai_key";
+  const LS_BACKEND = "creative_tools_img_backend";
+
+  const imgPrompt = document.getElementById("img-prompt");
+  const btnPromptImage = document.getElementById("btn-prompt-image");
+  const btnDownloadImage = document.getElementById("btn-download-image");
+  const imgGenServerHint = document.getElementById("img-gen-server-hint");
+  const keyAccessDetails = document.getElementById("key-access-details");
+  const userOpenaiKey = document.getElementById("user-openai-key");
+  const rememberOpenaiKey = document.getElementById("remember-openai-key");
+  const imgResultWrap = document.getElementById("img-result-wrap");
+  const imgResult = document.getElementById("img-result");
+  const imgRevised = document.getElementById("img-revised");
+  const imgGenError = document.getElementById("img-gen-error");
+  const imgGenBackend = document.getElementById("img-gen-backend");
+  const puterHint = document.getElementById("puter-hint");
+  const puterModelWrap = document.getElementById("puter-model-wrap");
+  const puterModel = document.getElementById("puter-model");
+
+  let lastImageBase64 = "";
+  let lastMime = "image/png";
+  let serverHasOpenAiKey = false;
+  let puterJsReady = false;
+
+  const splineUrlInput = document.getElementById("spline-url");
+  const btnLoadSpline = document.getElementById("btn-load-spline");
+  const splineViewer = document.getElementById("spline-viewer");
+  const splinePlaceholder = document.getElementById("spline-placeholder");
+
+  function normalizeUrl(raw) {
+    const u = String(raw || "").trim();
+    if (!u) return "";
+    try {
+      const parsed = new URL(u);
+      if (!/^https?:$/i.test(parsed.protocol)) return "";
+      return parsed.href;
+    } catch {
+      return "";
+    }
+  }
+
+  function showViewer(hasUrl) {
+    if (!splineViewer || !splinePlaceholder) return;
+    if (hasUrl) {
+      splineViewer.removeAttribute("hidden");
+      splinePlaceholder.setAttribute("hidden", "");
+    } else {
+      splineViewer.setAttribute("hidden", "");
+      splinePlaceholder.removeAttribute("hidden");
+      splineViewer.removeAttribute("url");
+    }
+  }
+
+  function loadSplineScene() {
+    const url = normalizeUrl(splineUrlInput.value);
+    if (!url) {
+      splineUrlInput.focus();
+      return;
+    }
+    splineViewer.setAttribute("url", url);
+    showViewer(true);
+  }
+
+  if (btnLoadSpline && splineUrlInput) {
+    btnLoadSpline.addEventListener("click", loadSplineScene);
+    splineUrlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loadSplineScene();
+      }
+    });
+  }
+
+  async function loadEmbedConfig() {
+    try {
+      const r = await fetch("/api/embed-config");
+      if (!r.ok) return;
+      const j = await r.json();
+      const u = j.defaultSplineSceneUrl;
+      if (u && typeof u === "string" && splineUrlInput && splineViewer) {
+        splineUrlInput.value = u;
+        splineViewer.setAttribute("url", u);
+        showViewer(true);
+      }
+    } catch {
+      /* static file */
+    }
+  }
+
+  function detectPuter() {
+    try {
+      puterJsReady =
+        typeof globalThis.puter !== "undefined" &&
+        typeof globalThis.puter.ai?.txt2img === "function";
+    } catch {
+      puterJsReady = false;
+    }
+  }
+
+  function getBackend() {
+    const v = imgGenBackend?.value;
+    if (v === "server") return "server";
+    return "puter";
+  }
+
+  function syncPuterOptionState() {
+    const opt = imgGenBackend?.querySelector('option[value="puter"]');
+    if (!opt) return;
+    if (!puterJsReady) {
+      opt.disabled = true;
+      opt.textContent = "Puter.js — in this browser (script did not load)";
+      if (imgGenBackend?.value === "puter") imgGenBackend.value = "server";
+    } else {
+      opt.disabled = false;
+      opt.textContent = "Puter.js — in this browser";
+    }
+  }
+
+  function syncBackendUi() {
+    const backend = getBackend();
+    const serverPath = backend === "server";
+
+    if (puterModelWrap) {
+      puterModelWrap.hidden = serverPath || !puterJsReady;
+    }
+    if (puterHint) {
+      if (serverPath) {
+        puterHint.hidden = true;
+      } else {
+        puterHint.hidden = false;
+        puterHint.textContent = puterJsReady
+          ? "Puter.js runs in your browser. If asked, sign in with Puter; billing is between you and them — no OpenAI key required here."
+          : "Puter.js did not load (network or blocker). Choose Server or allow js.puter.com.";
+      }
+    }
+
+    if (keyAccessDetails) {
+      if (serverHasOpenAiKey) {
+        keyAccessDetails.hidden = true;
+      } else {
+        keyAccessDetails.hidden = !serverPath;
+      }
+    }
+
+    if (imgGenServerHint) {
+      imgGenServerHint.hidden = !serverHasOpenAiKey || !serverPath;
+    }
+
+    try {
+      localStorage.setItem(LS_BACKEND, backend);
+    } catch {
+      /* */
+    }
+  }
+
+  function loadSavedKey() {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved && userOpenaiKey) {
+        userOpenaiKey.value = saved;
+        if (rememberOpenaiKey) rememberOpenaiKey.checked = true;
+      }
+    } catch {
+      /* private mode */
+    }
+  }
+
+  function maybeSaveKey() {
+    if (!rememberOpenaiKey?.checked || !userOpenaiKey) return;
+    try {
+      const v = userOpenaiKey.value.trim();
+      if (v) localStorage.setItem(LS_KEY, v);
+      else localStorage.removeItem(LS_KEY);
+    } catch {
+      /* */
+    }
+  }
+
+  async function initImageGenHints() {
+    try {
+      const r = await fetch("/api/health");
+      if (!r.ok) throw new Error("no");
+      const j = await r.json();
+      serverHasOpenAiKey = Boolean(j.serverHasOpenAiKey ?? j.imageGenEnabled);
+    } catch {
+      serverHasOpenAiKey = false;
+    }
+    loadSavedKey();
+    detectPuter();
+    syncPuterOptionState();
+
+    try {
+      const saved = localStorage.getItem(LS_BACKEND);
+      if ((saved === "puter" || saved === "server") && imgGenBackend) {
+        imgGenBackend.value = saved;
+      }
+    } catch {
+      /* */
+    }
+    if (!puterJsReady && imgGenBackend?.value === "puter") {
+      imgGenBackend.value = "server";
+    }
+    syncBackendUi();
+  }
+
+  function getApiKeyForRequest() {
+    const typed = userOpenaiKey ? userOpenaiKey.value.trim() : "";
+    if (typed) return typed;
+    try {
+      return localStorage.getItem(LS_KEY) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function parseDataUrl(dataUrl) {
+    const m = /^data:([^;,]+);base64,(.+)$/i.exec(String(dataUrl || ""));
+    if (!m) return null;
+    return { mime: m[1].split(";")[0].trim(), base64: m[2] };
+  }
+
+  async function generateWithPuter(text) {
+    if (!puterJsReady) {
+      throw new Error("Puter.js is not available. Allow js.puter.com or use Server.");
+    }
+    const model = (puterModel?.value || "gpt-image-1-mini").trim();
+    const imgEl = await globalThis.puter.ai.txt2img(text, { model });
+    if (!imgEl?.src) throw new Error("Puter returned no image.");
+    const parts = parseDataUrl(imgEl.src);
+    if (parts) {
+      lastMime = parts.mime || "image/png";
+      lastImageBase64 = parts.base64;
+    } else {
+      lastMime = "image/png";
+      lastImageBase64 = "";
+    }
+    imgResult.src = imgEl.src;
+    imgResultWrap.hidden = false;
+    btnDownloadImage.hidden = false;
+    if (imgRevised) {
+      imgRevised.textContent = `Via Puter.js · ${model}`;
+      imgRevised.hidden = false;
+    }
+  }
+
+  async function generateWithServer(text) {
+    const apiKey = getApiKeyForRequest();
+    if (!apiKey && !serverHasOpenAiKey) {
+      if (keyAccessDetails) {
+        keyAccessDetails.hidden = false;
+        keyAccessDetails.open = true;
+        keyAccessDetails.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+      if (imgGenError) {
+        imgGenError.textContent =
+          "Expand “API access for this add-on” above and paste a key once, or ask whoever runs this app to configure the server so you do not have to.";
+        imgGenError.hidden = false;
+      }
+      userOpenaiKey?.focus();
+      throw new Error("__handled");
+    }
+
+    const body = { prompt: text };
+    if (apiKey) body.apiKey = apiKey;
+
+    const r = await fetch("/api/prompt-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(data.error || "Request failed");
+    }
+    const b64 = data.imageBase64;
+    if (!b64) throw new Error("No image returned");
+    lastMime = data.mimeType || "image/png";
+    lastImageBase64 = b64;
+    imgResult.src = `data:${lastMime};base64,${b64}`;
+    imgResultWrap.hidden = false;
+    btnDownloadImage.hidden = false;
+    maybeSaveKey();
+    if (data.revised_prompt && imgRevised) {
+      imgRevised.textContent = `Model used: ${data.revised_prompt}`;
+      imgRevised.hidden = false;
+    } else if (imgRevised) {
+      imgRevised.hidden = true;
+    }
+  }
+
+  async function generatePromptImage() {
+    const text = String(imgPrompt?.value || "").trim();
+    if (!text) {
+      imgPrompt?.focus();
+      return;
+    }
+
+    btnPromptImage.disabled = true;
+    btnPromptImage.textContent = "Generating…";
+    imgResultWrap.hidden = true;
+    btnDownloadImage.hidden = true;
+    if (imgRevised) imgRevised.hidden = true;
+    if (imgGenError) imgGenError.hidden = true;
+    lastImageBase64 = "";
+
+    try {
+      if (getBackend() === "puter") {
+        await generateWithPuter(text);
+      } else {
+        await generateWithServer(text);
+      }
+    } catch (e) {
+      if (e.message === "__handled") {
+        /* validation UI already set */
+      } else if (imgGenError) {
+        imgGenError.textContent = e.message || "Generation failed.";
+        imgGenError.hidden = false;
+      }
+    } finally {
+      btnPromptImage.disabled = false;
+      btnPromptImage.textContent = "Generate reference";
+    }
+  }
+
+  function downloadGeneratedImage() {
+    const href =
+      imgResult?.src?.startsWith("data:") && imgResult.src.length > 32
+        ? imgResult.src
+        : lastImageBase64
+          ? `data:${lastMime};base64,${lastImageBase64}`
+          : "";
+    if (!href) return;
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = "reference.png";
+    a.click();
+  }
+
+  if (rememberOpenaiKey && userOpenaiKey) {
+    rememberOpenaiKey.addEventListener("change", () => {
+      if (!rememberOpenaiKey.checked) {
+        try {
+          localStorage.removeItem(LS_KEY);
+        } catch {
+          /* */
+        }
+      } else {
+        maybeSaveKey();
+      }
+    });
+  }
+
+  if (imgGenBackend) {
+    imgGenBackend.addEventListener("change", syncBackendUi);
+  }
+
+  if (btnPromptImage) btnPromptImage.addEventListener("click", generatePromptImage);
+  if (btnDownloadImage) btnDownloadImage.addEventListener("click", downloadGeneratedImage);
+  if (imgPrompt) {
+    imgPrompt.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        generatePromptImage();
+      }
+    });
+  }
+
+  initImageGenHints();
+  loadEmbedConfig();
+})();
+</script>
+</body>
+</html>

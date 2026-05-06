@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Prompt Coverage Checker — Analyze Prompt vs JSON Schema Coverage | Svivva</title>
+  <meta name="description" content="Free prompt coverage checker tool. Paste your LLM prompt and JSON schema to instantly see which fields are covered and which are missing. No login required. Built by Svivva." />
+  <meta name="keywords" content="prompt coverage checker, prompt schema analyzer, LLM prompt testing, JSON schema coverage, prompt alignment tool, AI prompt quality, prompt engineering tool, Svivva" />
+  <link rel="canonical" href="https://svivva.com/tools/prompt-coverage-checker" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Svivva" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Prompt Coverage Checker — Analyze Prompt vs Schema Coverage" />
+  <meta property="og:description" content="Paste your LLM prompt and JSON schema to instantly visualize coverage gaps. Free, no sign-up. Built by Svivva." />
+  <meta property="og:url" content="https://svivva.com/tools/prompt-coverage-checker" />
+  <meta property="og:site_name" content="Svivva" />
+  <meta property="og:image" content="https://svivva.com/images/prompt-coverage-checker-og.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Prompt Coverage Checker — Analyze Prompt vs Schema Coverage" />
+  <meta name="twitter:description" content="Paste your LLM prompt and JSON schema to instantly visualize coverage gaps. Free, no sign-up. Built by Svivva." />
+  <meta name="twitter:image" content="https://svivva.com/images/prompt-coverage-checker-og.png" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Prompt Coverage Checker",
+    "url": "https://svivva.com/tools/prompt-coverage-checker",
+    "description": "Free online tool to check how well your LLM prompt covers a JSON schema or API definition. Instantly identify missing fields and improve prompt-schema alignment.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is prompt coverage?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Prompt coverage measures how many fields in your JSON schema or API definition are referenced in your LLM prompt. Higher coverage means the model is more likely to return complete, well-structured outputs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the Prompt Coverage Checker work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Paste your prompt and JSON schema into the tool. It extracts every key from the schema, then checks whether each key appears (directly or by implication) in your prompt text. You get a coverage percentage, a visual bar chart, and a field-by-field breakdown."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Prompt Coverage Checker free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The tool runs entirely in your browser with no login, no API key, and no usage limits. For production-grade prompt testing and monitoring, check out Svivva."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Prompt Coverage Checker</h1>
+      <p class="tagline">Check how well your LLM prompt covers your JSON schema or API definition — free, no sign-up. Built by <a href="https://svivva.com" class="header-link">Svivva</a>.</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2>Input</h2>
+      <label class="label">Your prompt</label>
+      <textarea id="prompt" class="input-text" rows="6" placeholder="Paste your system or user prompt here…"></textarea>
+      <label class="label">Schema or API definition (JSON)</label>
+      <textarea id="schema" class="input-text" rows="8" placeholder='{"name": "string", "age": "number", "tags": ["string"]}'></textarea>
+      <label class="label">Model</label>
+      <select id="model" class="input-select">
+        <option value="gpt-4">GPT-4</option>
+        <option value="gpt-4o">GPT-4o</option>
+        <option value="claude-3">Claude 3</option>
+        <option value="generic">Generic</option>
+      </select>
+      <button type="button" id="analyze" class="btn-primary">Analyze coverage</button>
+      <p class="micro-copy">Paste a JSON schema or list of required fields. We'll show which parts your prompt actually references.</p>
+    </aside>
+
+    <section class="panel panel-center">
+      <h2>Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Enter a prompt and schema, then click <strong>Analyze coverage</strong> to see how well your prompt covers the schema.</p>
+      </div>
+      <div id="results" class="results hidden">
+        <div class="score-block">
+          <span class="score-value" id="score-value">0</span>
+          <span class="score-label">Coverage score</span>
+        </div>
+        <div class="chart-block">
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+        <table class="coverage-table" id="coverage-table">
+          <thead><tr><th>Schema path</th><th>Covered</th></tr></thead>
+          <tbody id="coverage-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2>Guidance</h2>
+      <div id="guidance-default" class="guidance-content">
+        <p><strong>What is prompt coverage?</strong> It's how much of your schema or API your prompt actually refers to. Gaps can lead to missing or wrong outputs.</p>
+        <p><strong>How we score:</strong> We extract keys from your JSON schema and check whether each appears (or is implied) in your prompt. Higher score = better alignment.</p>
+        <p><strong>Tip:</strong> Mention required fields and constraints explicitly in the prompt for more reliable model behavior.</p>
+      </div>
+      <div id="guidance-interpret" class="guidance-content hidden">
+        <p id="interpret-summary"></p>
+        <p id="interpret-actions"></p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="seo-content">
+    <div class="seo-inner">
+      <h2>Why Prompt Coverage Matters for LLM Applications</h2>
+      <p>When you build applications powered by large language models like GPT-4, Claude, or Gemini, your prompt is the contract between your code and the model. If your prompt doesn't mention a required field from your JSON schema, the model may skip it, hallucinate a value, or return malformed output. That single gap can break downstream parsing, corrupt data pipelines, or cause silent failures in production.</p>
+
+      <p>The <strong>Prompt Coverage Checker</strong> solves this by giving you an instant, visual audit of prompt-to-schema alignment. Paste your system prompt and your expected JSON schema, and the tool extracts every key, then checks whether your prompt references it directly or by implication. You get a percentage score, a color-coded bar chart, and a field-by-field table so you know exactly what's covered and what's missing — all in under three seconds, right in your browser.</p>
+
+      <h3>How It Works</h3>
+      <p>The checker parses your JSON schema and walks every nested key path. It then scans your prompt text for each key, including partial matches on individual path segments longer than two characters. For example, if your schema contains <code>user.profile.displayName</code>, the tool checks whether your prompt mentions "displayName," "profile," or the full dotted path. The result is a coverage score from 0% to 100%, where higher means better alignment and fewer surprises at runtime.</p>
+
+      <h3>Who Should Use This Tool</h3>
+      <p>This tool is built for prompt engineers, backend developers integrating LLM APIs, and AI product teams shipping structured outputs. Whether you are prototyping a new feature or auditing an existing prompt before a release, the Prompt Coverage Checker helps you catch gaps before they reach users. It works with any model — GPT-4, GPT-4o, Claude 3, Mistral, Llama, or any other provider that accepts system prompts.</p>
+
+      <h3>From Checking to Production-Grade Prompt Management</h3>
+      <p>Checking coverage is just the first step. In production, prompts evolve with every sprint. Schema fields get added, renamed, or deprecated. Models get swapped for cost or latency reasons. A single manual check isn't enough — you need automated testing, version control, monitoring, and regression detection for every prompt in your system.</p>
+
+      <p>That's what <a href="https://svivva.com">Svivva</a> is built for. <a href="https://svivva.com">Svivva</a> turns your prompts into managed, testable assets with built-in evaluations, versioning, cost tracking, and alerting. If you find this free checker useful, <a href="https://svivva.com">try Svivva</a> to bring the same rigor to your entire prompt stack — from development through deployment.</p>
+
+      <h3>Frequently Asked Questions</h3>
+      <h4>Is this tool free?</h4>
+      <p>Yes. The Prompt Coverage Checker runs entirely in your browser. There is no login, no API key, and no usage limit.</p>
+
+      <h4>Does it send my prompt to a server?</h4>
+      <p>No. All analysis runs client-side in JavaScript. Your prompt and schema never leave your browser.</p>
+
+      <h4>Can I use it with non-JSON schemas?</h4>
+      <p>Yes. If you paste plain text instead of valid JSON, the tool treats each whitespace-separated token as a field name and checks coverage against those tokens.</p>
+
+      <h4>What is a good coverage score?</h4>
+      <p>Aim for 80% or higher. Scores below 50% usually mean your prompt is missing entire sections of the schema, which increases the risk of incomplete or incorrect model output. Use the field-by-field table to identify exactly which keys need attention.</p>
+    </div>
+  </section>
+
+  <footer class="cta-bar">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. <a href="https://svivva.com">Svivva</a> gives you automated testing, versioning, monitoring, and cost optimization for every prompt in production.</p>
+      <a href="https://svivva.com" class="cta-btn" target="_blank" rel="noopener">Try Svivva for free</a>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

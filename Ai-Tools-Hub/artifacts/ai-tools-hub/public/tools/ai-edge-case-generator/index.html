@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Edge Case Generator – Free Tool | Svivva</title>
+<meta name="description" content="Free AI edge case generator. Describe your AI workflow and get structured edge cases, adversarial inputs, and failure scenarios for testing."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:4px}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6;margin-bottom:4px}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea,input{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:14px;resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus,input:focus{border-color:#7c3aed}
+textarea{min-height:90px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.row{grid-template-columns:1fr}}
+.tabs{display:flex;gap:6px}
+.tab{padding:6px 14px;border-radius:6px;border:1px solid #2a2a40;background:transparent;color:#888;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.tab.active{background:#7c3aed;border-color:#7c3aed;color:#fff}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;letter-spacing:.03em;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+button.primary:disabled{background:#3a1a6e;cursor:not-allowed}
+.output-box{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;font-family:'Courier New',monospace;color:#d4d4f0;min-height:200px;max-height:420px;overflow-y:auto;word-break:break-word}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{background:#2a2a40;color:#fff}
+.preset-btn{background:#16162a;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .2s;text-align:left}
+.preset-btn:hover{border-color:#7c3aed;color:#c4b5fd}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.cta a:hover{color:#fff}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100}
+.toast.show{opacity:1}
+.err{color:#f87171;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Developer Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>AI Edge Case Generator</h1>
+    <p class="sub">Describe your AI workflow and get structured edge cases, adversarial inputs, and failure scenarios. Free and instant.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>Presets</label>
+      <div class="presets">
+        <button class="preset-btn" onclick="loadPreset(0)">Support chat summarizer</button>
+        <button class="preset-btn" onclick="loadPreset(1)">Insurance claim classifier</button>
+        <button class="preset-btn" onclick="loadPreset(2)">SQL from natural language</button>
+        <button class="preset-btn" onclick="loadPreset(3)">Invoice extraction</button>
+      </div>
+    </div>
+    <div>
+      <label>AI Workflow Description *</label>
+      <textarea id="desc" placeholder="e.g. Summarize customer support chats into a JSON ticket with priority and sentiment score." rows="4"></textarea>
+    </div>
+    <div class="row">
+      <div>
+        <label>Output Schema (optional)</label>
+        <textarea id="schema" placeholder="e.g. ticket_id, priority, sentiment, summary" rows="3"></textarea>
+      </div>
+      <div>
+        <label>Tech Stack (optional)</label>
+        <input id="stack" type="text" placeholder="e.g. GPT-4o + Node.js + Postgres"/>
+      </div>
+    </div>
+    <div>
+      <label>Constraints (optional)</label>
+      <input id="constraints" type="text" placeholder="e.g. No PII, max 2s response time, must include rationale"/>
+    </div>
+    <div>
+      <label>Output Format</label>
+      <div class="tabs">
+        <button class="tab active" onclick="setFmt('bullets',this)">Bullets</button>
+        <button class="tab" onclick="setFmt('json',this)">JSON</button>
+      </div>
+    </div>
+    <div id="err" class="err" style="display:none"></div>
+    <button class="primary" onclick="generate()" id="genBtn">Generate Edge Cases →</button>
+  </div>
+
+  <div class="card" id="outCard" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="font-size:13px;color:#888">Edge cases generated</span>
+      <div class="out-actions">
+        <button class="btn-sm" onclick="copyOut()">Copy</button>
+        <button class="btn-sm" onclick="downloadOut()">Download</button>
+      </div>
+    </div>
+    <div class="output-box" id="output"></div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Enforce these checks automatically in production with Svivva →</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+let fmt = 'bullets';
+const presets = [
+  { desc:'Summarize customer support chats into a JSON ticket with priority, customer name, and sentiment score.', schema:'ticket_id, priority, customer_name, sentiment, summary', stack:'GPT-4o + Node.js + Postgres', constraints:'No PII, max 2s response time.' },
+  { desc:'Classify insurance claims by severity and route to adjusters.', schema:'claim_id, severity, recommended_queue, rationale', stack:'Claude + Python + Redis', constraints:'Must include rationale and confidence.' },
+  { desc:'Generate SQL queries from natural language for analysts.', schema:'sql_query, parameters, explanation', stack:'GPT-4 + Node.js', constraints:'Read-only SELECT queries only.' },
+  { desc:'Extract invoice data from uploaded PDFs.', schema:'invoice_number, vendor, amount, date, line_items', stack:'GPT-4 Vision + Python', constraints:'Always include currency and tax breakdown.' },
+];
+function loadPreset(i){ const p=presets[i]; document.getElementById('desc').value=p.desc; document.getElementById('schema').value=p.schema; document.getElementById('stack').value=p.stack; document.getElementById('constraints').value=p.constraints; }
+function setFmt(f,el){ fmt=f; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+
+function generate(){
+  const desc=document.getElementById('desc').value.trim();
+  const schema=document.getElementById('schema').value.trim();
+  const stack=document.getElementById('stack').value.trim();
+  const constraints=document.getElementById('constraints').value.trim();
+  const errEl=document.getElementById('err');
+  errEl.style.display='none';
+  if(!desc){errEl.textContent='Please describe your AI workflow.';errEl.style.display='block';return;}
+  if(schema&&(schema.startsWith('{')||schema.startsWith('['))){try{JSON.parse(schema);}catch{errEl.textContent='Schema must be valid JSON.';errEl.style.display='block';return;}}
+  
+  const btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent='Generating…';
+  setTimeout(()=>{
+    const result=buildEdgeCases({desc,schema,stack,constraints,format:fmt});
+    document.getElementById('output').textContent=result;
+    document.getElementById('outCard').style.display='flex';
+    btn.disabled=false; btn.textContent='Generate Edge Cases →';
+    document.getElementById('outCard').scrollIntoView({behavior:'smooth'});
+  }, 300);
+}
+
+function buildEdgeCases({desc,schema,stack,constraints,format}){
+  const stackNote=stack?` (${stack})`:'';
+  const edgeCases=[
+    {label:'Empty or whitespace-only input',rationale:'Ensures the workflow handles missing content safely.'},
+    {label:'Extremely long input (10× normal length)',rationale:'Stress test length limits, truncation, and timeouts.'},
+    {label:'Mixed language and code-switched input',rationale:'Detects failures in language detection and entity parsing.'},
+    {label:'Zero-width or confusable characters',rationale:'Guards against hidden instructions or mismatched tokens.'},
+    {label:'Ambiguous user intent with missing context',rationale:'Validates fallback behavior when intent cannot be resolved.'},
+    {label:'Duplicate or repeated content',rationale:'Checks deduplication and idempotency logic.'},
+    {label:'Numbers and symbols only',rationale:'Validates that numeric-only inputs parse without error.'},
+    {label:'Inputs in unexpected languages',rationale:'Verifies graceful degradation for unsupported locales.'},
+  ];
+  const adversarial=[
+    {label:'Prompt injection to ignore system instructions',rationale:'Verifies system policy remains in control.'},
+    {label:'User asks to reveal hidden prompts or secrets',rationale:'Tests data exfiltration and privacy safeguards.'},
+    {label:'Instruction to output content in a different format',rationale:'Checks for format drift and schema violations.'},
+    {label:'Conflicting instructions in the same request',rationale:'Ensures deterministic conflict resolution.'},
+    {label:'Jailbreak using role-play or hypothetical framing',rationale:'Validates alignment guardrails.'},
+  ];
+  const failures=[
+    {label:'Malformed JSON or truncated response from the model',rationale:'Tests downstream parsing and error recovery.'},
+    {label:'Model returns null or empty string',rationale:'Validates fallback and retry logic.'},
+    {label:'Upstream tool or API timeout',rationale:'Checks circuit-breaker and graceful degradation.'},
+    {label:'Token limit exceeded mid-response',rationale:'Ensures partial outputs are handled safely.'},
+    {label:'Schema drift: unexpected field names or types',rationale:'Validates strict schema enforcement at boundaries.'},
+  ];
+  const schemaSpecific=schema?[
+    {label:`Field missing from output: all required fields absent`,rationale:`Schema expects: ${schema.substring(0,80)}.`},
+    {label:'Wrong data types for schema fields',rationale:'Checks type coercion and validation.'},
+    {label:'Extra or unexpected fields in the response',rationale:'Tests strict vs. permissive schema validation.'},
+  ]:[];
+
+  if(format==='json'){
+    const obj={workflow:desc,stack:stackNote||undefined,constraints:constraints||undefined,edgeCases:edgeCases.map(e=>({...e})),adversarialInputs:adversarial,failureScenarios:failures,...(schemaSpecific.length?{schemaTests:schemaSpecific}:{})};
+    return JSON.stringify(obj,null,2);
+  }
+
+  const lines=[`# AI Edge Case Report`,`## Workflow: ${desc}`];
+  if(stackNote) lines.push(`Stack: ${stackNote}`);
+  if(constraints) lines.push(`Constraints: ${constraints}`);
+  lines.push('');
+  lines.push('## Edge Cases');
+  edgeCases.forEach((e,i)=>lines.push(`${i+1}. **${e.label}**\n   → ${e.rationale}`));
+  if(schemaSpecific.length){lines.push('');lines.push('## Schema-Specific Tests');schemaSpecific.forEach((e,i)=>lines.push(`${i+1}. **${e.label}**\n   → ${e.rationale}`));}
+  lines.push('');lines.push('## Adversarial Inputs');
+  adversarial.forEach((e,i)=>lines.push(`${i+1}. **${e.label}**\n   → ${e.rationale}`));
+  lines.push('');lines.push('## Failure-Inducing Scenarios');
+  failures.forEach((e,i)=>lines.push(`${i+1}. **${e.label}**\n   → ${e.rationale}`));
+  return lines.join('\n');
+}
+
+function copyOut(){navigator.clipboard.writeText(document.getElementById('output').textContent);showToast();}
+function downloadOut(){
+  const text=document.getElementById('output').textContent;
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=fmt==='json'?'ai-edge-cases.json':'ai-edge-cases.txt'; a.click();
+}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+</script>
+</body>
+</html>

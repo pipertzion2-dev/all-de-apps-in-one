@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Confidence Heatmap Tool — Free Online | Analyze Prompt Confidence</title>
+  <meta name="description" content="Free prompt confidence heatmap tool. Upload a prompt or API definition and get instant confidence scoring and visualization. No login required.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Prompt Confidence Heatmap</h1>
+      <p class="tagline">Free online tool — analyze prompt confidence in seconds. No sign-up.</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <!-- Left: Input -->
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <p class="micro-copy">Paste your prompt, schema, or API definition below. The heatmap updates as you type.</p>
+
+      <label class="label" for="model-select">Model / endpoint (optional)</label>
+      <select id="model-select" class="input select">
+        <option value="generic">Generic completion</option>
+        <option value="chat">Chat / instruction</option>
+        <option value="structured">Structured output (JSON)</option>
+        <option value="rag">RAG / retrieval</option>
+      </select>
+
+      <label class="label" for="prompt-input">Prompt or schema</label>
+      <textarea id="prompt-input" class="input textarea" rows="12" placeholder="Paste your prompt, system message, or a short API/schema definition here..."></textarea>
+
+      <label class="label" for="schema-input">Additional context (optional)</label>
+      <textarea id="schema-input" class="input textarea textarea-sm" rows="4" placeholder="e.g. expected JSON schema, constraints, or examples"></textarea>
+
+      <button type="button" id="analyze-btn" class="btn primary">Analyze confidence</button>
+    </aside>
+
+    <!-- Center: Results / Heatmap -->
+    <section class="panel panel-center">
+      <h2 class="panel-title">Confidence heatmap</h2>
+      <p class="micro-copy">Scores show how confident the prompt is across dimensions. Darker = higher confidence.</p>
+
+      <div id="results-placeholder" class="results-placeholder">
+        <p class="placeholder-text">Enter a prompt and click <strong>Analyze confidence</strong> to see the heatmap.</p>
+      </div>
+
+      <div id="results-container" class="results-container hidden">
+        <div id="heatmap-wrapper" class="heatmap-wrapper"></div>
+        <div id="scores-table-wrapper" class="scores-table-wrapper"></div>
+      </div>
+    </section>
+
+    <!-- Right: Guidance -->
+    <aside class="panel panel-right">
+      <h2 class="panel-title">How to read this</h2>
+      <p class="micro-copy">Use these dimensions to improve your prompt before shipping to production.</p>
+
+      <div id="guidance-content" class="guidance-content">
+        <div class="guidance-block">
+          <strong>Clarity</strong> — Is the intent unambiguous? Clear instructions raise confidence.
+        </div>
+        <div class="guidance-block">
+          <strong>Specificity</strong> — Concrete examples and constraints improve reliability.
+        </div>
+        <div class="guidance-block">
+          <strong>Structure</strong> — Sections, bullets, and formatting help the model follow the prompt.
+        </div>
+        <div class="guidance-block">
+          <strong>Safety & guardrails</strong> — Boundaries and refusal instructions reduce harmful outputs.
+        </div>
+        <div class="guidance-block">
+          <strong>Output shape</strong> — Defined format (JSON, list, length) increases predictability.
+        </div>
+        <p class="micro-copy mt">Low scores? Refine that dimension and re-run. In production, use schema enforcement and monitoring.</p>
+      </div>
+
+      <div id="interpretation" class="interpretation hidden"></div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. <a href="https://svivva.com" target="_blank" rel="noopener" class="cta-link">Try Svivva for free.</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

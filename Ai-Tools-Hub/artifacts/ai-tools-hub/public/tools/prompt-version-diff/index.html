@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Prompt Version Diff Tool – Free | Svivva</title>
+<meta name="description" content="Free prompt version diff tool. Compare two prompts side by side, detect behavior risks, output format changes, and constraint drift."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:'Courier New',monospace;font-size:13px;outline:none;transition:border-color .2s;resize:vertical;min-height:140px}
+textarea:focus{border-color:#7c3aed}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.row2{grid-template-columns:1fr}}
+.opts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.check-lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:#aaa;cursor:pointer}
+input[type=checkbox]{accent-color:#7c3aed}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.diff-view{font-family:'Courier New',monospace;font-size:13px;line-height:1.7;border-radius:8px;overflow:hidden;border:1px solid #2a2a40}
+.diff-line{padding:2px 12px;white-space:pre-wrap;word-break:break-word}
+.diff-add{background:#064e3b33;color:#6ee7b7}.diff-add::before{content:'+ ';color:#34d399}
+.diff-del{background:#450a0a33;color:#fca5a5}.diff-del::before{content:'- ';color:#f87171}
+.diff-same{color:#666}.diff-same::before{content:'  '}
+.stat-row{display:flex;gap:16px;flex-wrap:wrap}
+.stat{font-size:13px;color:#aaa}.stat span{color:#c4b5fd;font-weight:700}
+.risk-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;font-size:13px}
+.risk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.risk-high{background:#f87171}.risk-med{background:#fbbf24}.risk-low{background:#34d399}
+.drift-box{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:14px;font-size:13px}
+.drift-item{padding:8px 0;border-bottom:1px solid #1a1a2e}
+.drift-item:last-child{border-bottom:none}
+.drift-label{color:#888;font-size:12px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.drift-a{color:#93c5fd}.drift-b{color:#86efac}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:7px 14px;border-radius:6px;cursor:pointer}
+.btn-sm:hover{background:#2a2a40;color:#fff}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100}
+.toast.show{opacity:1}
+.section-title{font-size:13px;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>Prompt Version Diff Tool</h1>
+    <p class="sub">Compare two prompt versions side by side. Detect tone changes, removed constraints, output format drift, and behavior risks before you ship.</p>
+  </div>
+
+  <div class="card">
+    <div class="row2">
+      <div>
+        <label>Prompt A (original)</label>
+        <textarea id="promptA" placeholder="Paste your current/original prompt here…"></textarea>
+      </div>
+      <div>
+        <label>Prompt B (new version)</label>
+        <textarea id="promptB" placeholder="Paste your new/updated prompt here…"></textarea>
+      </div>
+    </div>
+    <div class="opts">
+      <label class="check-lbl"><input type="checkbox" id="ignoreWhitespace" checked/> Ignore whitespace</label>
+      <label class="check-lbl"><input type="checkbox" id="ignoreCase"/> Ignore case</label>
+    </div>
+    <button class="primary" onclick="runDiff()">Compare Prompts →</button>
+  </div>
+
+  <div class="card" id="outCard" style="display:none">
+    <div class="stat-row" id="statsRow"></div>
+
+    <div>
+      <div class="section-title">Line-by-line diff</div>
+      <div class="diff-view" id="diffView"></div>
+    </div>
+
+    <div id="risksSection">
+      <div class="section-title">Risk Indicators</div>
+      <div id="risks" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <div id="driftSection">
+      <div class="section-title">Behavioral Drift Samples</div>
+      <div class="drift-box" id="drift"></div>
+    </div>
+
+    <div class="out-actions">
+      <button class="btn-sm" onclick="copyReport()">Copy Report</button>
+    </div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Track prompt versions automatically in production with Svivva →</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const TONE_KW=['formal','professional','friendly','casual','conversational','empathetic','cheerful','serious','direct','neutral'];
+const CONSTRAINT_KW=['must','only','never','always','do not',"don't",'should not','avoid','exactly','at most','at least','strictly'];
+const FORMAT_KW=['json','yaml','xml','markdown','bullet','bullets','table','csv','list','code block'];
+const DRIFT_INPUTS=[
+  {title:'Support triage',input:'Customer reports the app crashes after login with a 500 error.'},
+  {title:'Feature summary',input:'New analytics dashboard for conversion funnels and cohort trends.'},
+  {title:'Bug reproduction',input:'Steps: open settings, toggle dark mode twice, save, reopen.'},
+];
+
+function normalize(text,ignoreWS,ignoreCase){
+  let v=text;
+  if(ignoreWS) v=v.replace(/\s+/g,' ');
+  if(ignoreCase) v=v.toLowerCase();
+  return v;
+}
+
+function toLines(text){return text.split('\n');}
+
+function collectKW(text,kws){return kws.filter(k=>text.toLowerCase().includes(k));}
+function guessFormat(text){
+  const l=text.toLowerCase();
+  if(l.includes('json')) return 'JSON';
+  if(l.includes('yaml')) return 'YAML';
+  if(l.includes('table')) return 'table';
+  if(l.includes('bullet')) return 'bulleted list';
+  if(l.includes('markdown')) return 'markdown';
+  return 'plain text';
+}
+function mockOutput(prompt,input){const fmt=guessFormat(prompt);const trimmed=input.length>80?input.slice(0,80)+'…':input;return `Mocked (${fmt}) response for: ${trimmed}`;}
+
+function runDiff(){
+  const rawA=document.getElementById('promptA').value;
+  const rawB=document.getElementById('promptB').value;
+  const ignoreWS=document.getElementById('ignoreWhitespace').checked;
+  const ignoreCase=document.getElementById('ignoreCase').checked;
+  if(!rawA.trim()||!rawB.trim()){alert('Please enter both prompts.');return;}
+
+  const normA=normalize(rawA,ignoreWS,ignoreCase);
+  const normB=normalize(rawB,ignoreWS,ignoreCase);
+  const linesA=toLines(normA);
+  const linesB=toLines(normB);
+
+  // Simple diff
+  const diff=computeDiff(linesA,linesB);
+  const added=diff.filter(d=>d.type==='add').length;
+  const removed=diff.filter(d=>d.type==='del').length;
+  const unchanged=diff.filter(d=>d.type==='same').length;
+  const changeP=Math.round((added+removed)/(linesA.length+linesB.length||1)*100);
+
+  document.getElementById('statsRow').innerHTML=[
+    {v:'+'+added,l:'Lines added',c:'#34d399'},
+    {v:'-'+removed,l:'Lines removed',c:'#f87171'},
+    {v:unchanged,l:'Unchanged',c:'#c4b5fd'},
+    {v:changeP+'%',l:'Change ratio',c:'#fbbf24'},
+  ].map(s=>`<div class="stat">${s.l}: <span style="color:${s.c}">${s.v}</span></div>`).join('');
+
+  // Diff view
+  document.getElementById('diffView').innerHTML=diff.map(d=>`<div class="diff-line diff-${d.type}">${escHtml(d.line)}</div>`).join('');
+
+  // Risks
+  const toneA=collectKW(rawA,TONE_KW);const toneB=collectKW(rawB,TONE_KW);
+  const conA=collectKW(rawA,CONSTRAINT_KW);const conB=collectKW(rawB,CONSTRAINT_KW);
+  const fmtA=collectKW(rawA,FORMAT_KW);const fmtB=collectKW(rawB,FORMAT_KW);
+  const toneChange=toneA.join('|')!==toneB.join('|');
+  const conRemoved=conA.some(k=>!rawB.toLowerCase().includes(k));
+  const fmtChange=fmtA.join('|')!==fmtB.join('|');
+  const risks=[];
+  if(toneChange) risks.push({level:'high',msg:`Tone shift detected: [${toneA.join(', ')||'none'}] → [${toneB.join(', ')||'none'}]`});
+  if(conRemoved) risks.push({level:'high',msg:`Constraints removed: "${conA.filter(k=>!rawB.toLowerCase().includes(k)).join('", "')}" no longer present`});
+  if(fmtChange) risks.push({level:'med',msg:`Output format changed: [${fmtA.join(', ')||'unspecified'}] → [${fmtB.join(', ')||'unspecified'}]`});
+  if(changeP>30) risks.push({level:'med',msg:`High change ratio (${changeP}%) — significant prompt restructuring`});
+  if(risks.length===0) risks.push({level:'low',msg:'No major behavioral risks detected in this diff.'});
+
+  document.getElementById('risks').innerHTML=risks.map(r=>`<div class="risk-item"><div class="risk-dot risk-${r.level}"></div><span>${r.msg}</span></div>`).join('');
+
+  // Drift samples
+  const driftHtml=DRIFT_INPUTS.map(d=>`<div class="drift-item">
+    <div class="drift-label">${d.title}</div>
+    <div><strong style="font-size:11px;color:#555">Input:</strong> ${escHtml(d.input)}</div>
+    <div class="drift-a"><strong style="font-size:11px;color:#3b82f6">Prompt A:</strong> ${escHtml(mockOutput(rawA,d.input))}</div>
+    <div class="drift-b"><strong style="font-size:11px;color:#22c55e">Prompt B:</strong> ${escHtml(mockOutput(rawB,d.input))}</div>
+  </div>`).join('');
+  document.getElementById('drift').innerHTML=driftHtml;
+
+  document.getElementById('outCard').style.display='flex';
+  document.getElementById('outCard').scrollIntoView({behavior:'smooth'});
+}
+
+function computeDiff(linesA,linesB){
+  // Simple LCS-based diff
+  const m=linesA.length,n=linesB.length;
+  const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+  for(let i=m-1;i>=0;i--) for(let j=n-1;j>=0;j--) dp[i][j]=linesA[i]===linesB[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const result=[];let i=0,j=0;
+  while(i<m||j<n){
+    if(i<m&&j<n&&linesA[i]===linesB[j]){result.push({type:'same',line:linesA[i]});i++;j++;}
+    else if(j<n&&(i>=m||dp[i+1]?.[j]<=dp[i]?.[j+1])){result.push({type:'add',line:linesB[j]});j++;}
+    else{result.push({type:'del',line:linesA[i]});i++;}
+  }
+  return result;
+}
+
+function copyReport(){
+  const stats=document.getElementById('statsRow').textContent;
+  const risks=[...document.getElementById('risks').querySelectorAll('.risk-item')].map(el=>el.textContent.trim()).join('\n');
+  const text=`# Prompt Version Diff Report\n\n## Stats\n${stats}\n\n## Risks\n${risks}`;
+  navigator.clipboard.writeText(text);showToast();
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+</script>
+</body>
+</html>

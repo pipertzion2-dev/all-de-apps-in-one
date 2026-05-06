@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free MIDI Mapper & Audio Stem Export Tool Online | Svivva</title>
+  <meta name="description" content="Free online MIDI mapper and audio stem export tool. Map notes and CCs to hardware or software targets, preview stereo exports, and generate MIDI mapping tables instantly — no signup required. Built by Svivva.">
+  <meta name="keywords" content="MIDI mapper, free MIDI mapping tool, audio stem export, MIDI CC mapping, MIDI note mapping, audio export tool, stem export online, MIDI to hardware, MIDI mapping generator, Svivva">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/midi-mapper">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free MIDI Mapper & Audio Stem Export Tool Online | Svivva">
+  <meta property="og:description" content="Map MIDI notes and CCs to hardware or software targets, preview stereo audio exports, and generate mapping tables — free, no signup. Built by Svivva.">
+  <meta property="og:url" content="https://svivva.com/tools/midi-mapper">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free MIDI Mapper & Audio Stem Export Tool Online | Svivva">
+  <meta name="twitter:description" content="Map MIDI notes and CCs to hardware or software targets, preview stereo audio exports, and generate mapping tables — free, no signup. Built by Svivva.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free MIDI Mapper & Audio Stem Export Tool",
+    "url": "https://svivva.com/tools/midi-mapper",
+    "description": "Free online MIDI mapper and audio stem export tool. Map notes and CCs to hardware or software targets, preview stereo exports, and generate MIDI mapping tables instantly.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is this MIDI mapper and audio export tool really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This preview tool is completely free and does not require a login or signup. You get one step of the real Svivva pipeline — audio export plus MIDI mapping. The full platform includes additional steps and requires an account for versioning, collaboration, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What can I do with the MIDI mapping preview?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the preview to see how Svivva interprets your brief: you get a production-style stereo export preview and a MIDI mapping table showing note, CC, target, and parameter assignments. To use it in a real project with versioning and team features, open it in Svivva via the link below the preview."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool relate to Svivva's full workflow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool runs a single step (audio export and MIDI map) from the same pipeline used inside Svivva. The full workflow adds versioning, collaboration, cost tracking, BOM integration, and production-ready exports — all available when you try Svivva for free."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I map MIDI CC messages to hardware parameters?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The MIDI mapper supports mapping both MIDI notes and CC messages to any hardware or software target — including filter cutoff, resonance, pan, level, and custom parameters. Describe your routing in the text field and the tool generates the mapping table."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What audio formats does the stem export support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The preview generates a simulated stereo export to demonstrate the pipeline. In the full Svivva platform, you can export stems in production-ready formats including WAV, AIFF, and more, with versioning and collaboration built in."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="seo-header">
+      <h1>Free MIDI Mapper & Audio Stem Export Tool</h1>
+      <p class="intro">Map MIDI notes and CC messages to hardware or software targets and preview stereo audio stem exports — all in one step, completely free, no signup required. This tool runs a single step of <a href="https://svivva.com" class="internal-link">Svivva's</a> real production pipeline, the same logic used inside the full platform, so you get an authentic preview of how your audio description translates into a MIDI mapping table and exportable stems.</p>
+    </header>
+
+    <div class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="input-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. House track, 4 bars, kick + bass + pads; map velocity to filter cutoff" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="constraint-budget">Budget</label>
+            <input type="text" id="constraint-budget" name="budget" placeholder="e.g. under $500">
+            <label for="constraint-genre">Genre</label>
+            <input type="text" id="constraint-genre" name="genre" placeholder="e.g. techno, ambient">
+            <label for="constraint-region">Region</label>
+            <input type="text" id="constraint-region" name="region" placeholder="e.g. EU, US">
+            <label for="constraint-collab">Collaboration size</label>
+            <input type="text" id="constraint-collab" name="collab" placeholder="e.g. 2–5 people">
+          </fieldset>
+
+          <button type="submit" class="btn-primary" id="generate-btn">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your preview will appear here.</p>
+          <p class="hint">Submit a short description and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact">
+            <div class="waveform-container" id="waveform-container"></div>
+            <div class="midi-map-table-wrap">
+              <table class="midi-map-table" id="midi-map-table"></table>
+            </div>
+          </div>
+          <div class="readiness" id="readiness"></div>
+          <p class="mapping-explanation" id="mapping-explanation"></p>
+          <div class="cta-block">
+            <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+            <a href="https://svivva.com/open" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <div class="mapping-copy">
+          <h2>What you're previewing</h2>
+          <p id="step-description">This step: <strong>Export & MIDI map</strong> — one click turns your brief into a stereo export plus a MIDI mapping table (note/CC to target).</p>
+          <p>In the full <a href="https://svivva.com" class="internal-link">Svivva</a> workflow you get:</p>
+          <ul>
+            <li>Versioned exports and mappings</li>
+            <li>Collaboration and permissions</li>
+            <li>Cost tracking and BOM integration</li>
+            <li>Production-ready formats and API publishing</li>
+          </ul>
+          <p><a href="https://svivva.com/modules" class="internal-link">Explore the full Svivva module</a> for hardware, Play, Idea Engine, and B.U.I.L.D. flows.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="cta-bar" id="cta-bar">
+      <a href="https://svivva.com" class="cta-bar-link" id="cta-bar-link">Try Svivva free — full workflow, versioning & collaboration</a>
+    </footer>
+  </main>
+
+  <section class="seo-content" id="about">
+    <h2>How This Free MIDI Mapper & Audio Export Tool Works</h2>
+    <p>Whether you are a music producer building a hardware synth rig, a sound designer mapping MIDI CC messages to software parameters, or a beatmaker exporting stems for collaboration, this tool gives you an instant preview of how your audio brief translates into a structured MIDI mapping and stereo export. Describe your track in plain language — for example, "Techno beat, 8 bars, 909 kick and hi-hats, map velocity to filter cutoff" — choose a mode, and click Generate preview. Within seconds you will see a waveform visualization of your simulated export and a complete MIDI mapping table showing each note, CC assignment, target instrument or parameter, and routing.</p>
+
+    <h3>MIDI Mapping for Hardware and Software</h3>
+    <p>MIDI mapping is the process of assigning MIDI messages — notes, control change (CC) numbers, velocity, aftertouch — to specific parameters in your hardware synthesizer, drum machine, DAW, or plugin. A well-organized MIDI map lets you control filter cutoff, resonance, panning, volume, effects sends, and more from a single controller or sequencer. This tool generates that mapping table for you automatically based on your description, saving the manual work of building spreadsheets or patch sheets from scratch. Supported targets include kick, snare, hi-hat, bass, pads, lead, filter, resonance, pan, and custom parameters you define.</p>
+
+    <h3>Audio Stem Export for Producers and Teams</h3>
+    <p>Stem exporting is essential for mixing, mastering, collaboration, and live performance. Instead of bouncing a single stereo mix, stems let you separate your track into individual layers — drums, bass, synths, vocals — so each element can be processed, shared, or remixed independently. This preview tool shows you how <a href="https://svivva.com" class="internal-link">Svivva</a> handles that export step: your brief is interpreted, a stereo export is generated, and the result is paired with a MIDI mapping table that documents every routing decision. In the full <a href="https://svivva.com" class="internal-link">Svivva platform</a>, you can version each export, share with collaborators, track costs against a bill of materials, and push production-ready stems to the <a href="https://svivva.com/modules" class="internal-link">Svivva API Marketplace</a>.</p>
+
+    <h3>Built for Hardware Builders and Music Creators</h3>
+    <p>This tool is part of Svivva's engineering-as-marketing approach: give creators a genuinely useful utility that solves a real problem — MIDI mapping and audio export planning — while demonstrating what the full platform can do. Whether you are prototyping a hardware controller layout, planning a live set, mapping a new MIDI controller, or exporting stems for a remix project, this free tool handles the first step. When you are ready for the full workflow — with versioning, team collaboration, cost tracking, and production-ready exports — <a href="https://svivva.com" class="internal-link">try Svivva for free</a>.</p>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <h3>Is this MIDI mapper and audio export tool really free?</h3>
+      <p>Yes. This preview tool is completely free and does not require a login or signup. You get one step of the real <a href="https://svivva.com" class="internal-link">Svivva</a> pipeline — audio export plus MIDI mapping. The full platform includes additional steps and requires an account for versioning, collaboration, and production-ready exports.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What can I do with the MIDI mapping preview?</h3>
+      <p>Use the preview to see how Svivva interprets your brief: you get a production-style stereo export preview and a MIDI mapping table showing note, CC, target, and parameter assignments. To use it in a real project with versioning and team features, <a href="https://svivva.com/open" class="internal-link">open it in Svivva</a> via the link below the preview.</p>
+    </div>
+    <div class="faq-item">
+      <h3>How does this tool relate to Svivva's full workflow?</h3>
+      <p>This tool runs a single step (audio export and MIDI map) from the same pipeline used inside <a href="https://svivva.com" class="internal-link">Svivva</a>. The full workflow adds versioning, collaboration, cost tracking, BOM integration, and production-ready exports — all available when you <a href="https://svivva.com" class="internal-link">try Svivva for free</a>.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Can I map MIDI CC messages to hardware parameters?</h3>
+      <p>Yes. The MIDI mapper supports mapping both MIDI notes and CC messages to any hardware or software target — including filter cutoff, resonance, pan, level, and custom parameters. Describe your routing in the text field and the tool generates the mapping table automatically.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What audio formats does the stem export support?</h3>
+      <p>The preview generates a simulated stereo export to demonstrate the pipeline. In the full <a href="https://svivva.com" class="internal-link">Svivva platform</a>, you can export stems in production-ready formats including WAV, AIFF, and more, with versioning and collaboration built in.</p>
+    </div>
+    <p class="faq-link"><a href="https://svivva.com/modules">View the full Svivva module page</a></p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

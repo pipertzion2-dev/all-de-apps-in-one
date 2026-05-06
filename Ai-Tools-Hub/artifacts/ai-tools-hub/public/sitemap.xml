@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://svivva.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <!-- Built-in AI Tools -->
+  <url><loc>https://svivva.com/ai-chat</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/text-summarizer</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/ai-translator</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/code-explainer</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/grammar-checker</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/sentiment-analyzer</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/keyword-extractor</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/tone-rewriter</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/image-generator</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://svivva.com/quiz-generator</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <!-- AI Prompt Tools -->
+  <url><loc>https://svivva.com/prompt-coverage-checker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-prompt-linter</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-test-case-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-drift-detector</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-security-scanner</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-consistency-checker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-confidence-heatmap</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-compression-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <!-- Developer Tools -->
+  <url><loc>https://svivva.com/json-schema-analyzer</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/api-latency-calculator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/json-repair-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/json-schema-linter</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/evaluation-rule-builder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <!-- AI Model Tools -->
+  <url><loc>https://svivva.com/ai-model-comparison</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/synthetic-dataset-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-output-diff-visualizer</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <!-- Hardware & BOM -->
+  <url><loc>https://svivva.com/hardware-bom-tools</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-bom-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/bom-material-sourcing</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/hardware-cost-estimator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/manufacturing-readiness-checker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/hardware-documentation-exporter</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/supplier-comparison</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/product-build-flow-simulator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/hardware-compliance-checker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <!-- AI Model Tools -->
+  <url><loc>https://svivva.com/3d-model-from-text</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <!-- Music & Audio -->
+  <url><loc>https://svivva.com/chord-progression-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/patch-designer</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/melody-interpolator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/composition-mode-preview-studio</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ensemble-layering-playground</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-sound-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/midi-mapper</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/performance-preset-builder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/market-gap-analysis</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/idea-scoring-feasibility</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/idea-comparison-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/api-marketplace-listing-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/team-permission-simulator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/build-planner-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-edge-case-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-api-cost-simulator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/production-readiness-checker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-to-api-preview</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/few-shot-example-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/llm-output-validator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/json-chat-sandbox</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/prompt-version-diff</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/ai-regression-tester</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/json-schema-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/chord-creator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/sketch-3d-model-maker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/reich-composer</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/hypothesis-labs</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/topic-comparator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/trend-insight-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/impact-factor-finder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/argument-contradiction-finder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/research-hypothesis-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/causal-chain-mapper</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/assumption-mapping-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/metric-kpi-picker</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/reverse-cause-finder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/analogy-finder-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/stakeholder-analysis-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/quick-risk-assessment-tool</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/scenario-planner</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/variable-relationship-mapper</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/cognitive-bias-detector</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/research-brief-generator</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/hypothesis-to-experiment</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/free-decision-tree-builder</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/research-instrument-selector</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://svivva.com/cross-domain-idea-hybridizer</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+</urlset>

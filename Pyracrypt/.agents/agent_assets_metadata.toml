@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "cCjY6vzwhjbbExnrY0RVY"
+uri = "file://CyberWavy_Strategy.pdf"
+type = "pdf"
+title = "CyberWavy — Feature Brief & Cursor Traffic Strategy"
+
+[[outputs]]
+id = "gAqUI4nvUWLCdTeAp0uKv"
+uri = "file://Pyracrypt_Svivva_Strategy.pdf"
+type = "pdf"
+title = "Pyracrypt × Svivva Growth & Traffic Strategy"
+
+[[outputs]]
+id = "VtMovfYWa2w6poahkr3FC"
+uri = "file://attached_assets/Pyracrypt_YC_Pitch.pdf"
+type = "pdf"
+title = "Pyracrypt — YC Application Memo (Tightened)"

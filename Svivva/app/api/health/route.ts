@@ -1,0 +1,79 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
+import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
+import {
+  hasStripeConfigured,
+  hasStripeWebhookConfigured,
+} from "@/lib/env";
+import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
+
+export async function GET() {
+  const health: {
+    status: "ok" | "error";
+    timestamp: string;
+    siteUrl: string;
+    sitemapUrl: string;
+    database: {
+      connected: boolean;
+      latencyMs?: number;
+      error?: string;
+    };
+    environment: {
+      hasOpenAI: boolean;
+      hasStripe: boolean;
+      hasStripeWebhook: boolean;
+      orbitInternalSecret: boolean;
+      cronSecret: boolean;
+    };
+  } = {
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    siteUrl: getSiteUrl(),
+    sitemapUrl: getSitemapUrl(),
+    database: {
+      connected: false,
+    },
+    environment: {
+      hasOpenAI: !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY),
+      hasStripe: hasStripeConfigured(),
+      hasStripeWebhook: hasStripeWebhookConfigured(),
+      orbitInternalSecret: !!process.env.ORBIT_INTERNAL_SECRET?.trim(),
+      cronSecret: !!process.env.CRON_SECRET?.trim(),
+    },
+  };
+
+  try {
+    const start = Date.now();
+    await db.execute(sql`SELECT 1`);
+    const latencyMs = Date.now() - start;
+
+    health.database = {
+      connected: true,
+      latencyMs,
+    };
+  } catch (error) {
+    health.status = "error";
+    health.database = {
+      connected: false,
+      error: error instanceof Error ? error.message : "Unknown database error",
+    };
+  }
+
+  const statusCode = health.status === "ok" ? 200 : 503;
+
+  // Legacy + UI: Stripe settings page expects `stripe.connected` (see /dashboard/settings/stripe)
+  const stripeConnected = health.environment.hasStripe;
+  return NextResponse.json(
+    {
+      ...health,
+      stripe: {
+        connected: stripeConnected,
+        webhookConfigured: health.environment.hasStripeWebhook,
+        /** publishable + secret env vars (not Replit connector) */
+        envKeysComplete: hasCompleteStripeEnvKeys(),
+      },
+    },
+    { status: statusCode }
+  );
+}

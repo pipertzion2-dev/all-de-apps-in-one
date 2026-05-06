@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluation Rule Builder Tool — Free Online | Build & Test AI Evaluation Rules</title>
+  <meta name="description" content="Free evaluation rule builder tool online. Upload your prompt, schema, or API definition and get instant analysis, scoring, and suggested evaluation rules. No login required.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Evaluation Rule Builder</h1>
+      <p class="tagline">Free online tool — build and validate evaluation rules for prompts, schemas & APIs</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <!-- Left: Input -->
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <p class="micro-copy">Add your prompt, JSON schema, or API definition. The tool will suggest evaluation rules and score coverage.</p>
+
+      <div class="input-group">
+        <label for="input-type">Input type</label>
+        <select id="input-type" aria-describedby="input-type-hint">
+          <option value="prompt">Prompt</option>
+          <option value="schema">JSON Schema</option>
+          <option value="api">API definition</option>
+        </select>
+        <span id="input-type-hint" class="hint">Choose what you’re evaluating.</span>
+      </div>
+
+      <div class="input-group">
+        <label for="model">Model (for simulation)</label>
+        <select id="model">
+          <option value="gpt-4">GPT-4</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="claude-3">Claude 3</option>
+          <option value="claude-3-5">Claude 3.5</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="user-input">Content</label>
+        <textarea id="user-input" rows="12" placeholder="Paste your prompt, schema, or API spec here…"></textarea>
+        <span class="hint">Paste plain text or JSON. Analysis runs as you type.</span>
+      </div>
+
+      <button type="button" id="analyze-btn" class="btn-primary">Analyze & build rules</button>
+    </aside>
+
+    <!-- Center: Results -->
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <p class="micro-copy">Suggested evaluation rules, coverage score, and rule table. Use these to automate checks in production.</p>
+
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Enter content in the left panel and click <strong>Analyze & build rules</strong> to see evaluation rules and scores.</p>
+      </div>
+
+      <div id="results" class="results-container" hidden>
+        <div class="score-cards">
+          <div class="score-card">
+            <span class="score-value" id="score-coverage">—</span>
+            <span class="score-label">Coverage</span>
+          </div>
+          <div class="score-card">
+            <span class="score-value" id="score-rules">—</span>
+            <span class="score-label">Rules suggested</span>
+          </div>
+          <div class="score-card">
+            <span class="score-value" id="score-consistency">—</span>
+            <span class="score-label">Consistency</span>
+          </div>
+        </div>
+        <div class="rules-section">
+          <h3>Suggested evaluation rules</h3>
+          <div class="table-wrap">
+            <table class="rules-table" id="rules-table">
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Type</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody id="rules-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="viz-section">
+          <h3>Rule distribution</h3>
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Guidance -->
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="micro-copy">How to read and use these results.</p>
+
+      <div id="guidance-default" class="guidance-block">
+        <h3>What are evaluation rules?</h3>
+        <p>Evaluation rules define automated checks for your prompts and APIs: format checks, required fields, length limits, and safety or quality criteria.</p>
+        <h3>Using this tool</h3>
+        <p>Paste a <strong>prompt</strong>, <strong>JSON schema</strong>, or <strong>API definition</strong>. We analyze it and suggest rules you can use in tests or production.</p>
+        <h3>Next steps</h3>
+        <p>Copy the suggested rules into your test suite or use a platform like Svivva to enforce them automatically with versioning and monitoring.</p>
+      </div>
+
+      <div id="guidance-interpretation" class="guidance-block" hidden>
+        <h3>Interpreting your results</h3>
+        <div id="guidance-content"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar" role="banner">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. Try Svivva for free.</p>
+      <a href="https://svivva.com" class="cta-button" target="_blank" rel="noopener">Try Svivva for free</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

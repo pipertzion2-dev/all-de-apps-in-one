@@ -1,0 +1,16 @@
+{
+  "name": "prompt-coverage-visualizer",
+  "version": "1.0.0",
+  "description": "Free prompt coverage visualizer tool - analyze prompt vs schema coverage",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

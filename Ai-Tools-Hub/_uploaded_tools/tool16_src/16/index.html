@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schema Tightening Assistant — Free Online Tool | Tighten JSON & API Schemas</title>
+  <meta name="description" content="Free schema tightening assistant tool. Upload your prompt, schema, or API definition and get instant analysis, scoring, and recommendations. No login required." />
+  <style>
+    @font-face {
+      font-family: 'ZC';
+      src: url('fonts/Zc-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    :root {
+      --accent: #B45309;
+      --accent-light: #d46b1a;
+      --accent-bg: rgba(180, 83, 9, 0.08);
+      --panel-bg: #fafafa;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --font: 'ZC', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--font); font-size: 15px; color: var(--text); background: #fff; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      min-height: 100vh;
+      padding-bottom: 72px;
+    }
+    .panel {
+      border-right: 1px solid var(--border);
+      padding: 20px 24px;
+      overflow: auto;
+      background: var(--panel-bg);
+    }
+    .panel:last-of-type { border-right: none; }
+    .panel h2 {
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .panel label, .panel .label {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Left: Input */
+    .input-panel textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+      background: #fff;
+    }
+    .input-panel textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-bg);
+    }
+    .input-panel select {
+      font-family: var(--font);
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      margin-bottom: 16px;
+    }
+    .input-panel .hint {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
+    .btn-analyze {
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-analyze:hover { background: var(--accent-light); }
+    .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Center: Results */
+    .results-panel { background: #fff; }
+    .results-panel .empty {
+      font-family: var(--font);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .score-ring {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--score, 0) * 3.6deg), var(--border) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-ring-inner {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--accent);
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .metric {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-bg);
+    }
+    .metric .value { font-family: var(--font); font-weight: 600; font-size: 1.25rem; color: var(--accent); }
+    .metric .name { font-family: var(--font); font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    table.tightness-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font);
+      font-size: 0.85rem;
+    }
+    table.tightness-table th,
+    table.tightness-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    table.tightness-table th { color: var(--text-muted); font-weight: 500; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+    .badge-tight { background: rgba(180, 83, 9, 0.15); color: var(--accent); }
+    .badge-loose { background: #fef3c7; color: #92400e; }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+
+    /* Right: Guidance */
+    .guidance-panel .card {
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--accent-bg);
+      border-left: 4px solid var(--accent);
+      margin-bottom: 14px;
+    }
+    .guidance-panel .card h3 { font-size: 0.85rem; margin-bottom: 6px; color: var(--accent); }
+    .guidance-panel .card p { color: var(--text); line-height: 1.5; }
+    .guidance-panel .default-msg {
+      font-family: var(--font);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Sticky CTA */
+    .cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 24px;
+      background: var(--text);
+      color: #fff;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      text-align: center;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+    }
+    .cta-bar p { font-size: 0.9rem; max-width: 720px; }
+    .cta-bar a {
+      font-family: var(--font);
+      font-weight: 600;
+      color: var(--accent);
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .cta-bar a:hover { background: var(--accent-bg); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="panel input-panel">
+      <h2>Input</h2>
+      <label for="inputType">Input type</label>
+      <select id="inputType">
+        <option value="schema">JSON Schema</option>
+        <option value="openapi">OpenAPI / API definition</option>
+        <option value="prompt">Prompt or config text</option>
+      </select>
+      <span class="hint">Paste your schema, API spec, or prompt below.</span>
+      <label for="userInput">Paste your schema, API definition, or prompt</label>
+      <textarea id="userInput" placeholder='e.g. {\n  "type": "object",\n  "properties": { "name": { "type": "string" } },\n  "required": ["name"]\n}'></textarea>
+      <button type="button" class="btn-analyze" id="btnAnalyze">Analyze & tighten</button>
+    </aside>
+
+    <main class="panel results-panel">
+      <h2>Results</h2>
+      <div id="resultsContainer">
+        <div class="empty" id="resultsEmpty">Paste a schema or prompt and click &quot;Analyze & tighten&quot; to see tightness score and recommendations.</div>
+        <div id="resultsContent" style="display: none;"></div>
+      </div>
+    </main>
+
+    <aside class="panel guidance-panel">
+      <h2>Guidance</h2>
+      <div id="guidanceContainer">
+        <p class="default-msg">Tighter schemas reduce ambiguity for APIs and LLMs. We&apos;ll score required vs optional fields, nesting depth, and type strictness, then suggest concrete improvements.</p>
+        <div id="guidanceContent" style="display: none;"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="cta-bar">
+    <p>You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script>
+    (function () {
+      const userInput = document.getElementById('userInput');
+      const inputType = document.getElementById('inputType');
+      const btnAnalyze = document.getElementById('btnAnalyze');
+      const resultsEmpty = document.getElementById('resultsEmpty');
+      const resultsContent = document.getElementById('resultsContent');
+      const guidanceContent = document.getElementById('guidanceContent');
+      const defaultGuidance = document.querySelector('#guidanceContainer .default-msg');
+
+      function parseInput(raw, type) {
+        const text = (raw || '').trim();
+        if (!text) return { ok: false, error: 'Please paste a schema, API definition, or prompt.' };
+        if (type === 'schema' || type === 'openapi') {
+          try {
+            const json = JSON.parse(text);
+            return { ok: true, data: json, type };
+          } catch (e) {
+            return { ok: false, error: 'Invalid JSON. Check brackets and commas.' };
+          }
+        }
+        return { ok: true, data: { _raw: text }, type: 'prompt' };
+      }
+
+      function analyzeSchema(obj) {
+        const metrics = { required: 0, optional: 0, depth: 0, strictTypes: 0, total: 0, fields: [] };
+        function countProps(o, path, depth) {
+          metrics.depth = Math.max(metrics.depth, depth);
+          if (!o || typeof o !== 'object') return;
+          const keys = Object.keys(o);
+          const required = Array.isArray(o.required) ? o.required : [];
+          for (const k of keys) {
+            if (k === 'properties' && o.properties && typeof o.properties === 'object') {
+              metrics.total += Object.keys(o.properties).length;
+              for (const [pk, pv] of Object.entries(o.properties)) {
+                const isRequired = required.includes(pk);
+                if (isRequired) metrics.required++; else metrics.optional++;
+                const typeStrict = pv && (pv.enum || (pv.type && pv.type !== 'string'));
+                if (typeStrict) metrics.strictTypes++;
+                metrics.fields.push({ path: path ? path + '.' + pk : pk, required: isRequired, strict: !!typeStrict });
+                if (pv && typeof pv === 'object') countProps(pv, path ? path + '.' + pk : pk, depth + 1);
+              }
+              continue;
+            }
+            if (k === 'required') continue;
+            if (typeof o[k] === 'object' && o[k] !== null) countProps(o[k], path, depth + 1);
+          }
+        }
+        if (obj.openapi || obj.swagger) {
+          const paths = obj.paths || {};
+          const schemas = obj.components?.schemas || {};
+          countProps(schemas, '', 0);
+          Object.values(paths).forEach(p => { if (p && typeof p === 'object') countProps(p, '', 0); });
+        } else {
+          countProps(obj, '', 0);
+        }
+        if (metrics.total === 0 && typeof obj === 'object') {
+          metrics.total = 1;
+          metrics.optional = 1;
+          metrics.fields.push({ path: '(root)', required: false, strict: false });
+        }
+        return metrics;
+      }
+
+      function analyzePrompt(text) {
+        const words = (text || '').split(/\s+/).filter(Boolean);
+        const hasStructure = /(\{[\s\S]*\}|\[[\s\S]*\])/.test(text);
+        const lines = (text || '').split(/\n/).filter(Boolean).length;
+        return {
+          total: 1,
+          required: 0,
+          optional: 1,
+          depth: 0,
+          strictTypes: 0,
+          fields: [{ path: 'prompt', required: hasStructure, strict: words.length > 20 }],
+          promptMetrics: { words: words.length, lines, hasStructure }
+        };
+      }
+
+      function scoreTightness(metrics) {
+        const total = metrics.required + metrics.optional || 1;
+        const requiredRatio = metrics.required / total;
+        const strictRatio = metrics.strictTypes / total;
+        const depthPenalty = Math.min(metrics.depth * 5, 25);
+        const raw = (requiredRatio * 40) + (strictRatio * 40) - depthPenalty + 20;
+        return Math.max(0, Math.min(100, Math.round(raw)));
+      }
+
+      function runAnalysis() {
+        const parsed = parseInput(userInput.value, inputType.value);
+        if (!parsed.ok) {
+          resultsEmpty.textContent = parsed.error;
+          resultsEmpty.style.display = 'block';
+          resultsContent.style.display = 'none';
+          defaultGuidance.style.display = 'block';
+          guidanceContent.style.display = 'none';
+          return;
+        }
+        let metrics;
+        if (parsed.type === 'prompt') {
+          metrics = analyzePrompt(parsed.data._raw);
+        } else {
+          metrics = analyzeSchema(parsed.data);
+        }
+        const score = scoreTightness(metrics);
+        renderResults(score, metrics, parsed.type);
+        renderGuidance(score, metrics, parsed.type);
+        resultsEmpty.style.display = 'none';
+        resultsContent.style.display = 'block';
+        defaultGuidance.style.display = 'none';
+        guidanceContent.style.display = 'block';
+      }
+
+      function renderResults(score, metrics, type) {
+        const total = metrics.required + metrics.optional || 1;
+        resultsContent.innerHTML =
+          '<div class="score-ring" style="--score: ' + score + '"><div class="score-ring-inner">' + score + '</div></div>' +
+          '<p style="text-align:center;font-family:var(--font);font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Tightness score (0–100)</p>' +
+          '<div class="metrics">' +
+          '<div class="metric"><div class="value">' + metrics.required + '</div><div class="name">Required fields</div></div>' +
+          '<div class="metric"><div class="value">' + metrics.optional + '</div><div class="name">Optional fields</div></div>' +
+          '<div class="metric"><div class="value">' + metrics.depth + '</div><div class="name">Max depth</div></div>' +
+          '<div class="metric"><div class="value">' + (metrics.strictTypes || 0) + '</div><div class="name">Strict types</div></div>' +
+          '</div>' +
+          (metrics.fields.length ? '<table class="tightness-table"><thead><tr><th>Path</th><th>Required</th><th>Strict</th></tr></thead><tbody>' +
+            metrics.fields.slice(0, 15).map(f => '<tr><td>' + f.path + '</td><td><span class="badge ' + (f.required ? 'badge-tight' : 'badge-loose') + '">' + (f.required ? 'Yes' : 'No') + '</span></td><td><span class="badge ' + (f.strict ? 'badge-ok' : 'badge-loose') + '">' + (f.strict ? 'Yes' : 'No') + '</span></td></tr>').join('') +
+            (metrics.fields.length > 15 ? '<tr><td colspan="3" style="color:var(--text-muted);">+' + (metrics.fields.length - 15) + ' more</td></tr>' : '') +
+            '</tbody></table>' : '');
+      }
+
+      function renderGuidance(score, metrics, type) {
+        const tips = [];
+        const total = metrics.required + metrics.optional || 1;
+        const requiredRatio = total ? metrics.required / total : 0;
+        if (requiredRatio < 0.5 && total > 1) tips.push({ title: 'Add required fields', body: 'Mark more properties as required to reduce ambiguity and invalid requests.' });
+        if (metrics.depth > 2) tips.push({ title: 'Flatten nesting', body: 'Deep nesting makes validation and tooling harder. Prefer flatter structures where possible.' });
+        if (score < 50) tips.push({ title: 'Tighten types', body: 'Use enums or specific types instead of generic "string" where values are known.' });
+        if (score >= 70) tips.push({ title: 'Good baseline', body: 'Your schema is relatively tight. In production, use Svivva for versioning and monitoring.' });
+        if (tips.length === 0) tips.push({ title: 'Next step', body: 'Try adding a "required" array or stricter types, then re-run the analysis.' });
+        guidanceContent.innerHTML = tips.map(t => '<div class="card"><h3>' + t.title + '</h3><p>' + t.body + '</p></div>').join('');
+      }
+
+      btnAnalyze.addEventListener('click', function () {
+        btnAnalyze.disabled = true;
+        setTimeout(function () {
+          runAnalysis();
+          btnAnalyze.disabled = false;
+        }, 80);
+      });
+    })();
+  </script>
+</body>
+</html>

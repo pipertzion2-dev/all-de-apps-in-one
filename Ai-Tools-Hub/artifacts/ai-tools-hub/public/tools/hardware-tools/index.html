@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hardware Concept to Schematic Previewer – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free hardware concept to schematic previewer online. Turn your concept into a production-style schematic preview in seconds—no signup. One step of the full Svivva hardware pipeline." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Hardware Concept to Schematic Previewer</h1>
+      <p class="intro">Turn a short hardware or product concept into a single, production-style schematic preview—the same step that runs inside Svivva’s full pipeline. No account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <!-- Left: inputs -->
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable stereo delay pedal, 2 knobs, 9V, analog" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate preview</button>
+        </form>
+      </aside>
+
+      <!-- Center: preview -->
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your schematic preview will appear here.</p>
+          <p class="hint">Enter a short description and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+        </div>
+      </section>
+
+      <!-- Right: feature mapping -->
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of Svivva’s hardware pipeline: concept → schematic/BOM preview. In the full platform you get versioning, multi-step flows, cost tracking, collaboration, and production-ready exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Concept → schematic preview</strong></li>
+          <li>Next in full workflow: design iteration, BOM costing, 3D/mechanical, manufacturing prep</li>
+        </ul>
+        <p><a href="https://svivva.com/hardware" class="internal-link">Explore the full Hardware module on Svivva →</a></p>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <footer class="site-footer">
+      <section class="faq">
+        <h2>FAQ</h2>
+        <details>
+          <summary>What does this previewer do?</summary>
+          <p>It takes your short hardware or product concept and runs one step of Svivva’s pipeline to produce a schematic-style preview and optional BOM. It’s a single-step preview of what the full platform does with versioning, collaboration, and exports.</p>
+        </details>
+        <details>
+          <summary>Is the hardware concept to schematic previewer really free?</summary>
+          <p>Yes. This online tool is free and does not require login. You can generate previews as often as you like. The full Svivva platform has free and paid tiers.</p>
+        </details>
+        <details>
+          <summary>How do I get from this preview to a real project?</summary>
+          <p>Use “Open this preview inside a real Svivva project” or sign up at Svivva to run the full hardware workflow with versioning, cost tracking, and production-ready outputs.</p>
+        </details>
+      </section>
+      <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D.</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Build Flow Simulator – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free product build flow simulator. Enter a project brief and instantly preview one step of a real production pipeline—hardware schematics, BOMs, audio, collaboration maps, and more. No signup required. Powered by Svivva.">
+  <meta name="keywords" content="product build flow, hardware development simulator, product development pipeline, build flow tool, BOM generator, schematic preview, hardware prototyping, product design workflow, Svivva">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/product-build-flow-simulator">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Product Build Flow Simulator – Free Online Tool | Svivva">
+  <meta property="og:description" content="Preview one step of a real production pipeline for free. Enter a brief, pick a mode (hardware, audio, idea, team, marketplace, or build), and get a production-style artifact instantly. No login required.">
+  <meta property="og:url" content="https://svivva.com/tools/product-build-flow-simulator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Product Build Flow Simulator – Free Tool by Svivva">
+  <meta name="twitter:description" content="Simulate one step of a real product build pipeline. Hardware schematics, BOMs, audio previews, team maps, and more—free, no signup.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Product Build Flow Simulator",
+    "url": "https://svivva.com/tools/product-build-flow-simulator",
+    "description": "A free online tool that simulates one step of a real product development pipeline. Generate hardware schematics, BOMs, audio previews, collaboration maps, and build flows from a short project brief—no account required.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Product Build Flow Simulator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Product Build Flow Simulator is a free online tool that runs one step of Svivva's real production pipeline. You enter a short brief—a concept, musical intent, team scenario, or product idea—and get a production-style preview such as a schematic, BOM, audio clip, or flow diagram, without creating an account."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to sign up to use it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The simulator works without login. You can generate a preview and see how one step of the full Svivva workflow behaves. To run the full pipeline with versioning, collaboration, and exports, you can try Svivva free at svivva.com."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this relate to the full Svivva platform?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each preview maps to one step inside Svivva's platform—hardware pipeline, Play performance modes, Idea Engine, collaboration tools, API Marketplace, or B.U.I.L.D. flows. The full platform adds versioning, team permissions, cost tracking, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of build flows can I simulate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can simulate six categories: Hardware (schematic and BOM previews), Play (performance and audio previews), Idea (idea engine stage reports), Team (collaboration and setup maps), Marketplace (API publish previews), and Build (digital-to-physical flow previews)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this for hardware prototyping?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Hardware mode generates schematic block diagrams and bill-of-materials previews based on your brief. It gives you a starting point to evaluate feasibility before committing to a full design cycle inside Svivva's hardware pipeline."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="page-header">
+      <h1>Product Build Flow Simulator</h1>
+      <p class="intro">Turn a short brief into a production-style preview in one step. See how <a href="https://svivva.com" class="inline-link">Svivva's</a> pipeline turns concepts into hardware, music, or product flows—without signing up.</p>
+    </header>
+
+    <div class="three-panel">
+      <aside class="panel left-panel">
+        <form id="brief-form" class="brief-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable synth for live sets, 4 voices, battery-powered" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. $500">
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. ambient, techno">
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. wood, aluminum">
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU, US">
+            <label for="collab-size">Collaboration size</label>
+            <input type="text" id="collab-size" name="collab_size" placeholder="e.g. 2–5 people">
+          </fieldset>
+
+          <button type="submit" class="btn-primary" id="submit-btn">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Submit a brief to see a production-style preview of one <a href="https://svivva.com" class="inline-link">Svivva</a> pipeline step.</p>
+        </div>
+        <div id="preview-container" class="preview-container" hidden>
+          <div id="preview-artifact" class="preview-artifact"></div>
+          <div class="preview-meta">
+            <div class="confidence" id="confidence"></div>
+            <p class="preview-explanation" id="preview-explanation"></p>
+          </div>
+          <div class="preview-cta-block">
+            <p class="cta-copy">You've previewed one step. In <a href="https://svivva.com" class="inline-link">Svivva</a> you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports.</p>
+            <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary">Try Svivva free</a>
+            <a href="https://svivva.com/open" class="btn-cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <div id="mapping-default" class="mapping-content">
+          <h3>What you're previewing</h3>
+          <p>This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="inline-link">Svivva's</a> internal pipeline. Choose a mode to see which step you're simulating:</p>
+          <ul class="mapping-list">
+            <li><strong>Hardware</strong> — Schematic / BOM preview</li>
+            <li><strong>Play</strong> — Performance / audio preview</li>
+            <li><strong>Idea</strong> — Idea Engine stage report</li>
+            <li><strong>Team</strong> — Collaboration / setup map</li>
+            <li><strong>Marketplace</strong> — API / publish preview</li>
+            <li><strong>Build</strong> — Digital / physical flow</li>
+          </ul>
+        </div>
+        <div id="mapping-dynamic" class="mapping-content" hidden>
+          <h3 id="mapping-title"></h3>
+          <p id="mapping-body"></p>
+          <p class="upgrade-nudge">In the full platform you get versioning, team permissions, cost tracking, and production-ready exports for this workflow.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="sticky-cta-bar">
+      <p>Previewed one step. Run the full workflow in Svivva.</p>
+      <a href="https://svivva.com" class="btn-cta-bar" id="cta-bar">Try Svivva free</a>
+    </footer>
+  </main>
+
+  <section class="seo-content-section">
+    <h2>How the Product Build Flow Simulator works</h2>
+    <p>The Product Build Flow Simulator is a free, no-login tool that lets you preview one step of a real product development pipeline. Whether you are designing hardware, planning a performance, validating an idea, organizing a team, publishing to a marketplace, or mapping a digital-to-physical build flow, this simulator gives you a production-style artifact from a short project brief.</p>
+
+    <h3>Who is this for?</h3>
+    <p>This tool is built for hardware engineers, product designers, creative technologists, indie makers, and small teams who want to see what a structured product development workflow looks like before committing to a full platform. If you have ever sketched a circuit on a napkin, roughed out a bill of materials in a spreadsheet, or tried to coordinate a build across multiple collaborators, this simulator shows you how <a href="https://svivva.com" class="inline-link">Svivva</a> handles that same process with automation, versioning, and production-ready exports.</p>
+
+    <h3>Six modes, one pipeline</h3>
+    <p>Each mode maps to a real module inside <a href="https://svivva.com" class="inline-link">Svivva's platform</a>. The <strong>Hardware</strong> mode generates schematic block diagrams and BOM tables, giving you a quick feasibility check on component selection and board layout. <strong>Play</strong> mode produces audio and performance previews for musicians and sound designers working on live rigs or studio setups. <strong>Idea</strong> mode runs your concept through a structured validation stage, scoring readiness and suggesting next steps. <strong>Team</strong> mode maps out roles, permissions, and collaboration structure for multi-person projects. <strong>Marketplace</strong> mode previews what an API listing looks like when published, including auto-generated documentation. And <strong>Build</strong> mode ties everything together with a digital-to-physical flow that tracks materials, budget, and production steps.</p>
+
+    <h3>From preview to production</h3>
+    <p>This simulator runs one isolated step. Inside the full <a href="https://svivva.com" class="inline-link">Svivva</a> platform, you get the complete pipeline: version control for every artifact, real-time collaboration with granular permissions, integrated cost tracking across components and suppliers, and production-ready exports in industry-standard formats. Every preview you generate here maps directly to a workflow you can run end-to-end in Svivva.</p>
+
+    <p>Ready to go beyond a single step? <a href="https://svivva.com" class="inline-link">Try Svivva free</a> and run the full product build flow with your team.</p>
+  </section>
+
+  <section class="faq-section">
+    <h2>Frequently asked questions</h2>
+    <div class="faq-list">
+      <details>
+        <summary>What is the Product Build Flow Simulator?</summary>
+        <p>The Product Build Flow Simulator is a free online tool that runs one step of <a href="https://svivva.com" class="inline-link">Svivva's</a> real production pipeline. You enter a short brief—a concept, musical intent, team scenario, or product idea—and get a production-style preview such as a schematic, BOM, audio clip, or flow diagram, without creating an account.</p>
+      </details>
+      <details>
+        <summary>Do I need to sign up to use it?</summary>
+        <p>No. The simulator works without login. You can generate a preview and see how one step of the full <a href="https://svivva.com" class="inline-link">Svivva</a> workflow behaves. To run the full pipeline with versioning, collaboration, and exports, you can <a href="https://svivva.com" class="inline-link">try Svivva free</a>.</p>
+      </details>
+      <details>
+        <summary>How does this relate to the full Svivva platform?</summary>
+        <p>Each preview maps to one step inside <a href="https://svivva.com" class="inline-link">Svivva</a>—hardware pipeline, Play performance modes, Idea Engine, collaboration tools, API Marketplace, or B.U.I.L.D. flows. The full platform adds versioning, team permissions, cost tracking, and production-ready exports for that same workflow.</p>
+      </details>
+      <details>
+        <summary>What types of build flows can I simulate?</summary>
+        <p>You can simulate six categories: Hardware (schematic and BOM previews), Play (performance and audio previews), Idea (idea engine stage reports), Team (collaboration and setup maps), Marketplace (API publish previews), and Build (digital-to-physical flow previews). Each corresponds to a module in the <a href="https://svivva.com" class="inline-link">Svivva platform</a>.</p>
+      </details>
+      <details>
+        <summary>Can I use this for hardware prototyping?</summary>
+        <p>Yes. The Hardware mode generates schematic block diagrams and bill-of-materials previews based on your brief. It gives you a starting point to evaluate feasibility before committing to a full design cycle inside <a href="https://svivva.com/hardware" class="inline-link">Svivva's hardware pipeline</a>.</p>
+      </details>
+    </div>
+    <nav class="internal-links">
+      <h3>Explore more on Svivva</h3>
+      <ul>
+        <li><a href="https://svivva.com/build">B.U.I.L.D. Module</a></li>
+        <li><a href="https://svivva.com/hardware">Hardware Pipeline</a></li>
+        <li><a href="https://svivva.com/play">Svivva Play</a></li>
+        <li><a href="https://svivva.com/marketplace">API Marketplace</a></li>
+        <li><a href="https://svivva.com/ideas">Idea Engine</a></li>
+        <li><a href="https://svivva.com">Try Svivva Free</a></li>
+      </ul>
+    </nav>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Hardware Schematic Generator Online – Concept to Schematic & BOM Preview | Svivva</title>
+  <meta name="description" content="Free hardware schematic generator online. Turn any hardware concept into a production-style schematic preview and Bill of Materials in seconds. No signup required. Powered by Svivva's hardware pipeline." />
+  <meta name="keywords" content="hardware schematic generator, free schematic tool, concept to schematic, BOM generator, hardware design tool, circuit schematic online, PCB design preview, electronic schematic maker, hardware prototype tool, bill of materials generator" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/schematic-generator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Hardware Schematic Generator Online | Svivva" />
+  <meta property="og:description" content="Turn any hardware concept into a production-style schematic preview and Bill of Materials in seconds. No signup required." />
+  <meta property="og:url" content="https://svivva.com/tools/schematic-generator" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Hardware Schematic Generator Online | Svivva" />
+  <meta name="twitter:description" content="Turn any hardware concept into a production-style schematic preview and Bill of Materials in seconds. No signup required." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Hardware Schematic Generator Online",
+    "url": "https://svivva.com/tools/schematic-generator",
+    "description": "Free hardware schematic generator that turns any hardware concept into a production-style schematic preview and Bill of Materials. No signup required.",
+    "applicationCategory": "EngineeringApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does this hardware schematic generator do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short hardware or product concept and runs one step of Svivva's pipeline to produce a schematic-style preview and optional BOM. It is a single-step preview of what the full Svivva platform does with versioning, collaboration, and exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the hardware schematic generator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online tool is free and does not require login. You can generate previews as often as you like. The full Svivva platform has free and paid tiers for production workflows."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I go from this schematic preview to a real hardware project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the Open this preview inside a real Svivva project link, or sign up at svivva.com to run the full hardware workflow with versioning, cost tracking, and production-ready outputs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a Bill of Materials (BOM)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A Bill of Materials is a structured list of all components, parts, and materials needed to build a hardware product. This tool generates a preview BOM based on your concept description."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this tool for PCB design?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool generates a conceptual schematic preview, which is the first step before PCB layout. For full PCB design flows including layout, routing, and manufacturing prep, use Svivva's complete hardware pipeline."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Free Hardware Schematic Generator Online</h1>
+      <p class="intro">Turn a short hardware or product concept into a production-style <strong>schematic preview</strong> and <strong>Bill of Materials</strong> in seconds—the same step that runs inside <a href="https://svivva.com" class="header-link">Svivva's</a> full hardware pipeline. No account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable stereo delay pedal, 2 knobs, 9V, analog" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate Schematic Preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your schematic preview will appear here.</p>
+          <p class="hint">Enter a short description and click Generate Schematic Preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. Run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What You're Previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="internal-link">Svivva's</a> hardware pipeline: concept &rarr; schematic/BOM preview. In the full platform you get versioning, multi-step flows, cost tracking, collaboration, and production-ready exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Concept &rarr; schematic preview</strong></li>
+          <li>Next in full workflow: design iteration, BOM costing, 3D/mechanical, manufacturing prep</li>
+        </ul>
+        <h3>Related Svivva Tools</h3>
+        <ul class="related-links">
+          <li><a href="https://svivva.com/hardware" class="internal-link">Full Hardware Module</a> &mdash; Complete design-to-production pipeline</li>
+          <li><a href="https://svivva.com/play" class="internal-link">Svivva Play</a> &mdash; Prototype and experiment with ideas</li>
+          <li><a href="https://svivva.com/build" class="internal-link">B.U.I.L.D. Flows</a> &mdash; Structured build workflows</li>
+          <li><a href="https://svivva.com/marketplace" class="internal-link">API Marketplace</a> &mdash; Connect tools and services</li>
+        </ul>
+        <a href="https://svivva.com" class="sidebar-cta">Start Building on Svivva &rarr;</a>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+      <a href="landing.html" class="sticky-cta-secondary">See the full platform &rarr;</a>
+    </nav>
+
+    <article class="seo-content">
+      <h2>How the Free Hardware Schematic Generator Works</h2>
+      <p>Designing hardware starts with a concept, but getting from an idea to a structured schematic can be time-consuming and expensive. The <strong>free hardware schematic generator</strong> from <a href="https://svivva.com">Svivva</a> bridges that gap. Enter a short description of your hardware product—whether it's a guitar effects pedal, an IoT sensor board, a custom power supply, or any electronic device—and get an instant schematic preview with a preliminary <strong>Bill of Materials (BOM)</strong>.</p>
+
+      <h3>From Concept to Schematic in Seconds</h3>
+      <p>Traditional hardware design requires specialized EDA software, deep domain knowledge, and hours of manual work before you even see a basic block diagram. This tool automates the first step: translating a plain-language concept into a visual schematic layout and component list. It parses your description, identifies likely components (ICs, resistors, capacitors, connectors, enclosures), and generates a block-level schematic diagram rendered as SVG.</p>
+
+      <p>The generated <strong>BOM preview</strong> lists reference designators, part types, values, and quantities—giving you a starting point for component sourcing and cost estimation. You can refine results by adding optional constraints like budget limits, preferred materials (through-hole vs. SMD), target region for sourcing, and collaboration team size.</p>
+
+      <h3>One Step of a Complete Hardware Pipeline</h3>
+      <p>This schematic generator runs a single stage of the full <a href="https://svivva.com/hardware">Svivva hardware pipeline</a>. In the complete platform, this preview feeds into downstream stages: iterative design refinement, detailed BOM costing with supplier pricing, 3D mechanical modeling, design rule checks, and manufacturing preparation with Gerber file exports. Every step is versioned, so you can track changes, compare revisions, and collaborate with your team in real time.</p>
+
+      <h3>Who Is This Tool For?</h3>
+      <p>The hardware schematic generator is built for electronics engineers, hardware startups, makers, students, and anyone prototyping a physical product. Whether you're exploring an idea before committing to a full design cycle or need a quick schematic outline for a pitch deck, this tool gives you a production-style preview with zero friction. No login, no installation, no cost.</p>
+
+      <h3>Why Engineering Teams Choose Svivva</h3>
+      <p><a href="https://svivva.com">Svivva</a> is a complete hardware development platform that takes projects from initial concept through to manufacturing-ready outputs. Beyond schematic generation, Svivva offers <a href="https://svivva.com/play">rapid prototyping with Svivva Play</a>, <a href="https://svivva.com/build">structured build workflows with B.U.I.L.D.</a>, real-time collaboration with role-based permissions, integrated cost tracking across every design revision, and an <a href="https://svivva.com/marketplace">API Marketplace</a> for connecting your favorite design tools and services. Start with this free preview and scale into the full pipeline when you're ready.</p>
+
+      <p><strong><a href="https://svivva.com">Try Svivva free</a></strong> — no credit card required. Run the full hardware workflow with versioning, collaboration, and production-ready exports.</p>
+    </article>
+
+    <footer class="site-footer">
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does this hardware schematic generator do?</summary>
+          <p>It takes your short hardware or product concept and runs one step of <a href="https://svivva.com">Svivva's</a> pipeline to produce a schematic-style preview and BOM. It's a single-step preview of what the full platform does with versioning, collaboration, and exports.</p>
+        </details>
+        <details>
+          <summary>Is the hardware schematic generator really free?</summary>
+          <p>Yes. This online tool is completely free and does not require login or signup. You can generate schematic previews as often as you like. The full <a href="https://svivva.com">Svivva platform</a> has free and paid tiers for production workflows.</p>
+        </details>
+        <details>
+          <summary>How do I get from this preview to a real project?</summary>
+          <p>Click "Open this preview inside a real Svivva project" or <a href="https://svivva.com">sign up at Svivva</a> to run the full hardware workflow with versioning, cost tracking, and production-ready outputs including Gerber files and manufacturer-ready BOMs.</p>
+        </details>
+        <details>
+          <summary>What is a Bill of Materials (BOM)?</summary>
+          <p>A Bill of Materials is a structured list of all components, parts, and materials needed to build a hardware product. This tool generates a preview BOM based on your concept description, listing reference designators, part types, values, and quantities.</p>
+        </details>
+        <details>
+          <summary>Can I use this for PCB design?</summary>
+          <p>This tool generates a conceptual schematic preview—the first step before PCB layout. For full PCB design flows including schematic capture, layout, routing, design rule checks, and manufacturing prep, use <a href="https://svivva.com/hardware">Svivva's complete hardware pipeline</a>.</p>
+        </details>
+      </section>
+      <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D.</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

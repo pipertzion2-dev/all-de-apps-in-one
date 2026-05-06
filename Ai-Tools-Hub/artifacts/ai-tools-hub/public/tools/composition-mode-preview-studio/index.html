@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Composition Mode Preview Studio – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free composition mode preview studio by Svivva. Submit a brief and instantly get a production-style preview — schematic, BOM, audio clip, flow graph, or idea report. No signup required. Try it now.">
+  <meta name="keywords" content="composition mode, preview studio, free online tool, schematic generator, BOM preview, audio clip preview, flow graph, idea report, Svivva, product brief generator, creative workflow tool">
+  <meta name="author" content="Svivva">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/composition-mode-preview-studio">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Composition Mode Preview Studio – Free Online Tool | Svivva">
+  <meta property="og:description" content="Submit a brief and get a production-style preview in seconds — schematic, BOM, audio clip, flow graph, or idea report. Free, no signup required.">
+  <meta property="og:url" content="https://svivva.com/tools/composition-mode-preview-studio">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Composition Mode Preview Studio – Free Tool by Svivva">
+  <meta name="twitter:description" content="Turn any brief into a production-style preview — schematic, BOM, audio, flow graph, or idea report. Free and instant.">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Composition Mode Preview Studio",
+    "url": "https://svivva.com/tools/composition-mode-preview-studio",
+    "description": "Free online tool that turns a short brief into a production-style preview artifact — schematic, BOM, audio clip, flow graph, or idea report. One step of the Svivva pipeline, no signup required.",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Composition Mode Preview Studio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Composition Mode Preview Studio is a free online tool by Svivva that runs one step of a real production pipeline. You submit a short description and optional constraints such as mode, budget, genre, materials, region, or collaboration size. The tool returns a production-style preview — a schematic, BOM table, audio clip placeholder, flow graph, idea report, or setup map — plus a confidence indicator and an explanation of how that step maps to the full Svivva workflow. No account or login is required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Composition Mode Preview Studio really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The preview studio is completely free and requires no login or signup. The full Svivva platform offers a complete workflow with versioning, collaboration, cost tracking, and production-ready exports — and you can try that free as well at svivva.com."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the Composition Mode Preview Studio relate to Svivva?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool runs one isolated step from Svivva's internal pipeline. Depending on the mode you choose, the preview maps to a specific area of the Svivva platform: Hardware pipeline, Svivva Play performance modes, Idea Engine stages, collaboration and permissions, API Marketplace publishing, or B.U.I.L.D. digital and physical flows. You can open your preview inside a full Svivva project to continue building."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What output formats does the preview studio support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool generates six types of preview artifacts depending on the mode you select: schematics for Hardware mode, audio clip placeholders for Play mode, structured idea reports for Idea mode, setup maps for Team mode, flow graphs for Marketplace mode, and BOM tables for Build mode."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use the preview in a real project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. After generating a preview, you can open it inside a real Svivva project at svivva.com/projects. From there you get full versioning, team collaboration, cost tracking, and production-ready exports."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Composition Mode Preview Studio</h1>
+      <p class="intro">Get a fast, practical preview of a real <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> workflow without creating an account. Describe your concept, musical intent, team scenario, or product idea — we run one isolated step of Svivva's pipeline and return a production-style preview (schematic, BOM, audio clip, flow graph, or idea report), not a toy demo.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel panel-left">
+        <form id="brief-form" class="brief-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Warm pad melody for a hardware synth demo, 80 BPM, minor key" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play (performance / audio)</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="constraint-budget">Budget</label>
+            <input type="text" id="constraint-budget" name="budget" placeholder="e.g. under $500">
+            <label for="constraint-genre">Genre</label>
+            <input type="text" id="constraint-genre" name="genre" placeholder="e.g. ambient, techno">
+            <label for="constraint-materials">Materials</label>
+            <input type="text" id="constraint-materials" name="materials" placeholder="e.g. wood, PCB">
+            <label for="constraint-region">Region</label>
+            <input type="text" id="constraint-region" name="region" placeholder="e.g. EU, US">
+            <label for="constraint-collab">Collaboration size</label>
+            <input type="text" id="constraint-collab" name="collab" placeholder="e.g. 2–5 people">
+          </fieldset>
+
+          <button type="submit" id="submit-btn" class="btn-primary">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel panel-center">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your preview will appear here.</p>
+          <p class="hint">Submit a brief and choose a mode to run one step of the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> pipeline.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="label">Confidence / readiness</span>
+            <div class="bar"><div class="fill" id="confidence-fill"></div></div>
+            <span class="value" id="confidence-value"></span>
+          </div>
+          <p class="mapping-note" id="mapping-note"></p>
+          <p class="cta-below-preview">You've previewed one step. In <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. <a href="https://svivva.com" id="cta-below-link" class="cta-below-link" target="_blank" rel="noopener">Try Svivva free.</a></p>
+          <p class="cta-secondary-text"><a href="https://svivva.com/projects" id="cta-secondary-link" class="cta-secondary-link" target="_blank" rel="noopener">Open this preview inside a real Svivva project.</a></p>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <div class="mapping-content">
+          <h2>What you just previewed</h2>
+          <p id="step-explanation">This tool runs <strong>one step</strong> of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> pipeline: turning your brief into a single preview artifact (schematic, BOM, audio idea, flow graph, or idea report).</p>
+          <p id="step-current" class="step-current" hidden></p>
+          <p>In the full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> workflow you can:</p>
+          <ul>
+            <li>Run the full sequence with versioning</li>
+            <li>Collaborate with permissions</li>
+            <li>Track cost and iterations</li>
+            <li>Export production-ready outputs</li>
+          </ul>
+          <p class="upgrade-hint">Choose a mode above to see how this step maps to <a href="https://svivva.com" target="_blank" rel="noopener">Hardware pipeline, Svivva Play, Idea Engine, Team, API Marketplace, or B.U.I.L.D.</a> flows.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="cta-bar">
+      <div class="cta-bar-inner">
+        <p class="cta-copy">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</p>
+        <a href="https://svivva.com" id="cta-primary" class="cta-primary" target="_blank" rel="noopener">Try Svivva free</a>
+        <a href="https://svivva.com/projects" id="cta-secondary" class="cta-secondary" target="_blank" rel="noopener">Open this preview inside a real Svivva project.</a>
+      </div>
+    </footer>
+  </div>
+
+  <article class="seo-content" id="about">
+    <h2>What is the Composition Mode Preview Studio?</h2>
+    <p>The Composition Mode Preview Studio is a free online tool built by <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> that lets you experience one real step of a production workflow — without creating an account. Whether you are designing hardware, composing music, developing a product idea, organizing a team, publishing to a marketplace, or managing a digital-physical build, this tool generates a production-style preview artifact from a short text brief.</p>
+
+    <p>Traditional prototyping tools require signup, configuration, and a learning curve before you see any output. The Composition Mode Preview Studio removes that friction entirely. You type a brief description, select a mode, add optional constraints like budget, genre, materials, region, or collaboration size, and receive a preview in seconds. The result is not a placeholder or mockup — it is a structured artifact that maps directly to one step of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> internal pipeline.</p>
+
+    <h2>Six Modes, Six Artifact Types</h2>
+    <p>Each mode corresponds to a distinct area of the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva platform</a>:</p>
+    <ul>
+      <li><strong>Hardware</strong> — Generates a schematic block preview with optional materials context. Maps to the Svivva Hardware pipeline for electronics, enclosures, and physical product design.</li>
+      <li><strong>Play</strong> — Creates an audio clip placeholder with a melodic or rhythmic idea. Maps to <a href="https://svivva.com" target="_blank" rel="noopener">Svivva Play</a> performance and composition modes.</li>
+      <li><strong>Idea</strong> — Produces a structured idea report with concept summary and genre context. Maps to the Svivva Idea Engine for brainstorming, staging, and team alignment.</li>
+      <li><strong>Team</strong> — Outputs a setup map showing collaboration structure and roles. Maps to Svivva's collaboration and permissions system.</li>
+      <li><strong>Marketplace</strong> — Renders a flow graph for API or service publishing. Maps to the Svivva API Marketplace for discovery and versioning.</li>
+      <li><strong>Build</strong> — Generates a BOM (Bill of Materials) preview with budget tracking. Maps to <a href="https://svivva.com" target="_blank" rel="noopener">Svivva B.U.I.L.D.</a> for digital-physical production flows.</li>
+    </ul>
+
+    <h2>How It Works</h2>
+    <p>Enter a short description of your concept — a hardware synth demo, a melodic phrase, a product pitch, a team structure, or a build plan. Select the mode that matches your workflow. Optionally add constraints such as budget limits, genre preferences, target materials, geographic region, or team size. Click "Generate preview" and the studio runs one isolated step of the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> pipeline, returning a formatted artifact along with a confidence and readiness score.</p>
+
+    <p>Every preview includes a mapping explanation that shows exactly where this step fits within the full Svivva workflow. From there you can continue building inside a real <a href="https://svivva.com/projects" target="_blank" rel="noopener">Svivva project</a> with versioning, team collaboration, cost tracking, and production-ready exports.</p>
+
+    <h2>Why Use This Tool?</h2>
+    <p>The Composition Mode Preview Studio is designed for makers, engineers, musicians, designers, and product teams who want to validate an idea quickly before committing to a full workflow. It serves as an entry point into the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> ecosystem — giving you a real taste of what the platform produces, not a generic demo. Use it to test a concept, share a preview with collaborators, or simply explore what structured creative workflows look like in practice.</p>
+
+    <p>Ready to go beyond a single step? <a href="https://svivva.com" target="_blank" rel="noopener">Try Svivva free</a> and run the full pipeline with versioning, collaboration, and production-ready exports.</p>
+  </article>
+
+  <section class="faq" id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <h3>What is the Composition Mode Preview Studio?</h3>
+      <p>It's a free online tool by <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> that runs one step of a real production pipeline. You submit a short description and optional constraints (mode, budget, genre, materials, region, collaboration size). The tool returns a production-style preview — schematic, BOM table, audio clip, flow graph, idea report, or setup map — plus a confidence/readiness indicator and a short explanation of how it maps to the full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> workflow. No account required.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Is the Composition Mode Preview Studio really free?</h3>
+      <p>Yes. This preview is free and doesn't require login. The full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva platform</a> includes the complete workflow with versioning, collaboration, cost tracking, and production-ready exports — you can <a href="https://svivva.com" target="_blank" rel="noopener">try that free too</a>.</p>
+    </div>
+    <div class="faq-item">
+      <h3>How does this relate to Svivva?</h3>
+      <p>This tool maps to one of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> platform areas: Hardware pipeline, Svivva Play performance modes, Idea Engine stages, collaboration and permissions, API Marketplace publishing, or B.U.I.L.D. digital/physical flows. Use the CTA to run the full workflow on <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a>.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What output formats does the preview studio support?</h3>
+      <p>Six artifact types: schematics (Hardware), audio clip placeholders (Play), structured idea reports (Idea), setup maps (Team), flow graphs (Marketplace), and BOM tables (Build). Each maps to a specific pipeline area within <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a>.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Can I use the preview in a real project?</h3>
+      <p>Yes. After generating a preview, you can <a href="https://svivva.com/projects" target="_blank" rel="noopener">open it inside a real Svivva project</a>. From there you get full versioning, team collaboration, cost tracking, and production-ready exports.</p>
+    </div>
+    <p class="internal-link"><a href="https://svivva.com">Explore the full Svivva platform</a></p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

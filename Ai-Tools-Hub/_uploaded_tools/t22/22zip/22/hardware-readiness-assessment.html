@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Readiness Assessment Tool — Free Online MRL Checker | Svivva</title>
+  <meta name="description" content="Run a free hardware readiness assessment in under 60 seconds. Get a BOM estimate, MRL-style score, and schematic preview for any hardware concept — no signup required. Powered by Svivva.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/hardware-readiness-assessment">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hardware Readiness Assessment Tool — Free Online MRL Checker">
+  <meta property="og:description" content="Run a free hardware readiness assessment in under 60 seconds. BOM estimate, MRL score, schematic preview. No signup required.">
+  <meta property="og:url" content="https://svivva.com/tools/hardware-readiness-assessment">
+  <meta property="og:site_name" content="Svivva">
+  <meta property="og:image" content="https://svivva.com/og-hardware-readiness-assessment.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hardware Readiness Assessment Tool — Free Online MRL Checker">
+  <meta name="twitter:description" content="Run a free hardware readiness assessment in under 60 seconds. No signup required.">
+  <meta name="twitter:image" content="https://svivva.com/og-hardware-readiness-assessment.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Hardware Readiness Assessment Tool",
+    "url": "https://svivva.com/tools/hardware-readiness-assessment",
+    "description": "Free hardware readiness assessment tool. Get a BOM estimate, MRL-style score, and schematic preview for any hardware concept in under 60 seconds.",
+    "isPartOf": { "@type": "WebSite", "name": "Svivva", "url": "https://svivva.com" },
+    "mainEntity": {
+      "@type": "WebApplication",
+      "name": "Hardware Readiness Assessment",
+      "applicationCategory": "Engineering Tool",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a hardware readiness assessment?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A hardware readiness assessment evaluates how prepared a hardware concept is for production. It checks your BOM complexity, cost feasibility, component availability, and scope definition against your target constraints — returning a readiness score that tells you where you stand before committing to prototyping or manufacturing." }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does a hardware readiness assessment take?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Using this free tool, a hardware readiness assessment takes under 60 seconds. Describe your concept, add optional constraints like budget, materials, and region, and click Check readiness. A full assessment in the Svivva platform — with supplier data, real BOM management, and versioning — takes as long as your project requires." }
+      },
+      {
+        "@type": "Question",
+        "name": "What does MRL mean in hardware assessment?",
+        "acceptedAnswer": { "@type": "Answer", "text": "MRL stands for Manufacturing Readiness Level. It is a standardized scale (1 through 10) used to assess how mature a manufacturing process is — from initial concept (MRL 1) through proven full-rate production (MRL 10). This tool provides a simplified MRL-style score to help you understand where your hardware concept stands before moving to design or production." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this hardware assessment tool free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The hardware readiness assessment tool is completely free and requires no signup or login. For full hardware pipeline management — BOM with real supplier data, schematic versioning, cost tracking, and team collaboration — use the Svivva platform." }
+      },
+      {
+        "@type": "Question",
+        "name": "What information do I need to run a hardware readiness assessment?",
+        "acceptedAnswer": { "@type": "Answer", "text": "You only need a short description of your hardware concept — for example, 'Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM'. Optional: add budget, materials, and region constraints for a more accurate score. The more specific your inputs, the more useful the readiness preview." }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preload" href="fonts/Zc-Regular.ttf" as="font" type="font/ttf" crossorigin>
+
+  <style>
+    @font-face {
+      font-family: 'Zc';
+      font-style: normal;
+      font-weight: 400;
+      src: url('fonts/Zc-Regular.ttf') format('truetype');
+    }
+
+    :root {
+      --font: 'Zc', system-ui, sans-serif;
+      --accent: #2563EB;
+      --accent-hover: #1d4ed8;
+      --accent-muted: rgba(37, 99, 235, 0.13);
+      --bg: #0F0F12;
+      --surface: #18181C;
+      --surface-elevated: #1F1F24;
+      --text: #E4E4E7;
+      --text-muted: #A1A1AA;
+      --border: #27272A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { font-family: var(--font); font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+
+    body { margin: 0; background: var(--bg); color: var(--text); }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2rem;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .nav-link:hover { color: var(--text); text-decoration: none; }
+
+    .btn-nav {
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-nav:hover { background: var(--accent-hover); text-decoration: none; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem 4rem 2rem;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-muted);
+      border: 1px solid rgba(37,99,235,0.25);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      margin: 0 0 1rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 2rem 0;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-primary-lg {
+      display: inline-block;
+      font-size: 1.0625rem;
+      font-weight: 700;
+      padding: 0.85rem 2.25rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary-lg:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .hero-secondary-cta {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+    }
+
+    .hero-secondary-cta a { color: var(--accent); }
+
+    .hero-trust {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .trust-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .trust-value {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .trust-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* ── PROBLEM ── */
+    .problem {
+      padding: 4rem 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .section-inner.wide {
+      max-width: 1060px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.75rem 0;
+    }
+
+    .section-title {
+      font-size: 1.625rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0 0 2.5rem 0;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .problem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .problem-card .problem-icon {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .problem-card h3 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .problem-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-it-works {
+      padding: 4rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .step-number {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-muted);
+      border: 1px solid rgba(37,99,235,0.25);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ── WHAT YOU GET ── */
+    .what-you-get {
+      padding: 4rem 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .outcomes-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .outcome-row {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .outcome-arrow {
+      font-size: 1rem;
+      color: var(--accent);
+      font-weight: 700;
+      min-width: 1.25rem;
+      margin-top: 0.1rem;
+    }
+
+    .outcome-row strong {
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .outcome-row p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* ── FREE TOOL CTA BAND ── */
+    .tool-band {
+      background: var(--accent-muted);
+      border-top: 1px solid rgba(37,99,235,0.3);
+      border-bottom: 1px solid rgba(37,99,235,0.3);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .tool-band h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 0.75rem 0;
+    }
+
+    .tool-band p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin: 0 0 1.75rem 0;
+      line-height: 1.6;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tool-band-ctas {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 0;
+    }
+
+    .btn-tool-primary {
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.75rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-tool-primary:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .btn-tool-secondary {
+      font-size: 0.9375rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .btn-tool-secondary:hover { text-decoration: underline; }
+
+    /* ── SVIVVA UPGRADE ── */
+    .upgrade-section {
+      padding: 4rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .upgrade-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .upgrade-copy h2 {
+      font-size: 1.625rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+    }
+
+    .upgrade-copy p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .upgrade-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.75rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .upgrade-features li {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .upgrade-features li::before {
+      content: "✓";
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .btn-upgrade-primary {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.75rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-upgrade-primary:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .upgrade-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .upgrade-panel-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 1rem 0;
+    }
+
+    .pipeline-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pipeline-steps li {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .pipeline-steps li:last-child { border-bottom: none; }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .step-dot.active {
+      background: var(--accent);
+    }
+
+    .step-tag {
+      margin-left: auto;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-muted);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* ── FAQ ── */
+    .faq-section {
+      padding: 4rem 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item summary {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      list-style: none;
+      padding: 1.1rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      content: "+";
+      color: var(--accent);
+      font-size: 1.25rem;
+      font-weight: 400;
+      flex-shrink: 0;
+    }
+
+    .faq-item[open] summary::after { content: "−"; }
+
+    .faq-item p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0 0 1.1rem 0;
+      padding-right: 2rem;
+    }
+
+    /* ── SEO ARTICLE ── */
+    .seo-article {
+      padding: 4rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .seo-article h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2rem 0 0.75rem 0;
+    }
+
+    .seo-article h2:first-child { margin-top: 0; }
+
+    .seo-article p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin: 0 0 1rem 0;
+    }
+
+    .seo-article strong { color: var(--text); font-weight: 600; }
+
+    /* ── BOTTOM CTA ── */
+    .bottom-cta {
+      padding: 5rem 2rem;
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .bottom-cta h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .bottom-cta p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 2rem 0;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .bottom-cta-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-bottom-primary {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      padding: 0.85rem 2.25rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-bottom-primary:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .btn-bottom-secondary {
+      font-size: 0.9375rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .btn-bottom-secondary:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2rem; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .outcomes-list { grid-template-columns: 1fr; }
+      .upgrade-grid { grid-template-columns: 1fr; }
+      .nav-links .nav-link { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+      .hero h1 { font-size: 1.625rem; }
+      .hero-trust { gap: 1.25rem; }
+      .problem, .how-it-works, .what-you-get, .faq-section, .seo-article, .upgrade-section { padding: 3rem 1.25rem; }
+      .tool-band { padding: 2.5rem 1.25rem; }
+      .bottom-cta { padding: 3.5rem 1.25rem; }
+      .footer { flex-direction: column; align-items: flex-start; }
+      .nav { padding: 0.75rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="https://svivva.com" class="nav-brand" id="nav-brand">Svivva</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link" id="nav-tool-link">Free Readiness Checker</a>
+      <a href="https://svivva.com" class="nav-link" id="nav-platform-link">Platform</a>
+      <a href="https://svivva.com" class="btn-nav" id="nav-cta">Try Svivva free</a>
+    </div>
+  </nav>
+
+  <!-- HERO — CTA above the fold, outcome-focused -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Free Hardware Readiness Assessment</p>
+      <h1>Stop building hardware that isn't ready for production.</h1>
+      <p class="hero-sub">A hardware readiness assessment catches scope gaps, BOM cost mismatches, and MRL-level misalignments before they become expensive. Run yours free in under 60 seconds — no signup, no credit card.</p>
+      <div class="hero-ctas">
+        <a href="index.html" class="btn-primary-lg" id="hero-cta-primary">Run my free hardware assessment</a>
+        <p class="hero-secondary-cta">Need the full pipeline? <a href="https://svivva.com" id="hero-cta-svivva">Try Svivva — includes BOM management, versioning, and team collaboration.</a></p>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item">
+          <span class="trust-value">&lt; 60s</span>
+          <span class="trust-label">Time to get your score</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-value">Free</span>
+          <span class="trust-label">No signup required</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-value">6 modes</span>
+          <span class="trust-label">Hardware, Build, Idea + more</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-value">BOM + MRL</span>
+          <span class="trust-label">Estimate + readiness score</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM — what happens without a readiness check -->
+  <section class="problem">
+    <div class="section-inner wide">
+      <p class="section-label">The Problem</p>
+      <h2 class="section-title">Most hardware projects fail before the first prototype — because no one checked readiness first.</h2>
+      <p class="section-sub">Skipping a hardware readiness assessment is the most expensive mistake teams make. Here is what it looks like in practice.</p>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <span class="problem-icon">⚠</span>
+          <h3>BOM cost surprises at prototype</h3>
+          <p>You order components for the first prototype and realize your BOM is 40% over budget. No one validated the cost breakdown at the concept stage. You revise the design and lose six weeks.</p>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">⚠</span>
+          <h3>Scope misalignment between team and manufacturer</h3>
+          <p>Your team scoped the project for a small run, your manufacturer quoted for high-volume. The gap wasn't caught until you received the quote. Timeline slips, budget needs renegotiation.</p>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">⚠</span>
+          <h3>Concept complexity exceeds team readiness</h3>
+          <p>The concept was ambitious. The team's MRL — their actual ability to execute the manufacturing process — wasn't evaluated against the complexity before design started. The project stalls at schematic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works">
+    <div class="section-inner">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">A hardware readiness assessment in three steps.</h2>
+      <p class="section-sub">This free tool runs one isolated step of the <a href="https://svivva.com">Svivva pipeline</a> — so you get a real production-style preview, not a quiz result.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Describe your concept</h3>
+          <p>Write a short description of your hardware concept. Add optional constraints — budget target, materials, region, or collaboration size — to increase the accuracy of your readiness score.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Get your BOM estimate and MRL score</h3>
+          <p>The tool generates a preliminary Bill of Materials with estimated unit costs, a schematic placeholder, and a Manufacturing Readiness Level score between 0–100 with a readiness label.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Use it or take it to Svivva</h3>
+          <p>Use the preview to frame early conversations with your team, manufacturer, or investors. Or open the same concept inside a full <a href="https://svivva.com">Svivva project</a> to run the complete pipeline with real supplier data and versioning.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT YOU GET -->
+  <section class="what-you-get">
+    <div class="section-inner">
+      <p class="section-label">What You Get</p>
+      <h2 class="section-title">Everything the free hardware assessment returns.</h2>
+      <p class="section-sub">Not a quiz. Not a vague score. A production-style preview built on the same logic as Svivva's hardware pipeline.</p>
+      <div class="outcomes-list">
+        <div class="outcome-row">
+          <span class="outcome-arrow">→</span>
+          <div>
+            <strong>Preliminary Bill of Materials (BOM)</strong>
+            <p>Component-level breakdown with estimated unit costs, quantities, and a total BOM estimate. Use it to validate budget feasibility before committing to a design.</p>
+          </div>
+        </div>
+        <div class="outcome-row">
+          <span class="outcome-arrow">→</span>
+          <div>
+            <strong>MRL-style readiness score (0–100)</strong>
+            <p>A readiness percentage that reflects how well-defined your concept is — from Exploration through Draft-ready to Production-ready — based on your inputs and constraints.</p>
+          </div>
+        </div>
+        <div class="outcome-row">
+          <span class="outcome-arrow">→</span>
+          <div>
+            <strong>Schematic layout placeholder</strong>
+            <p>A preview of how the system would be laid out — inputs, controls, connectors, MCU, and outputs — so you can see the shape of the design before opening any CAD tool.</p>
+          </div>
+        </div>
+        <div class="outcome-row">
+          <span class="outcome-arrow">→</span>
+          <div>
+            <strong>Pipeline step mapping</strong>
+            <p>A visual of where your concept sits inside the full hardware pipeline — Concept → Schematic → BOM → Cost Tracking → Export — and what comes next in Svivva.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE TOOL CTA BAND -->
+  <div class="tool-band">
+    <h2>Run your hardware readiness assessment — free, right now.</h2>
+    <p>No signup. No login. No credit card. Describe your concept and get your BOM estimate and MRL score in under 60 seconds.</p>
+    <div class="tool-band-ctas">
+      <a href="index.html" class="btn-tool-primary" id="band-cta-primary">Run the free assessment</a>
+      <a href="https://svivva.com" class="btn-tool-secondary" id="band-cta-secondary">Or start the full Svivva workflow →</a>
+    </div>
+  </div>
+
+  <!-- SVIVVA UPGRADE -->
+  <section class="upgrade-section">
+    <div class="section-inner wide">
+      <div class="upgrade-grid">
+        <div class="upgrade-copy">
+          <p class="section-label">The Full Pipeline</p>
+          <h2>When you are ready to go beyond the assessment.</h2>
+          <p>The free tool previews one step. Svivva runs the entire hardware pipeline — from concept brief through production-ready export — with the tools teams actually need to ship.</p>
+          <ul class="upgrade-features">
+            <li>Real supplier data in your BOM, not estimates</li>
+            <li>Cost tracking across every design revision</li>
+            <li>Full schematic layout with version history</li>
+            <li>Team permissions and collaboration workflows</li>
+            <li>Production-ready export formats</li>
+            <li>Digital twin support for physical builds</li>
+          </ul>
+          <a href="https://svivva.com" class="btn-upgrade-primary" id="upgrade-cta">Start your full workflow in Svivva — free</a>
+        </div>
+        <div class="upgrade-panel">
+          <p class="upgrade-panel-label">Hardware pipeline in Svivva</p>
+          <ul class="pipeline-steps">
+            <li><span class="step-dot active"></span> Concept brief input</li>
+            <li><span class="step-dot active"></span> Readiness assessment <span class="step-tag">You are here</span></li>
+            <li><span class="step-dot"></span> BOM generation (real supplier data)</li>
+            <li><span class="step-dot"></span> Schematic layout + versioning</li>
+            <li><span class="step-dot"></span> Cost tracking across revisions</li>
+            <li><span class="step-dot"></span> Team review and permissions</li>
+            <li><span class="step-dot"></span> Production-ready export</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="section-inner">
+      <p class="section-label">FAQ</p>
+      <h2 class="section-title">Common questions about hardware readiness assessments.</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>What is a hardware readiness assessment?</summary>
+          <p>A hardware readiness assessment evaluates how prepared a hardware concept is for production. It checks your BOM complexity, cost feasibility, component scope, and constraint definition — returning a readiness score so you know where you stand before committing to prototyping or manufacturing. This tool provides a free, instant version of that assessment using the same logic as the <a href="https://svivva.com">Svivva hardware pipeline</a>.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What does MRL mean in a hardware assessment?</summary>
+          <p>MRL stands for Manufacturing Readiness Level. It is a standardized scale running from MRL 1 (basic manufacturing implications identified) through MRL 10 (full-rate production demonstrated). This tool returns a simplified MRL-style score that tells you whether your concept is at the Exploration, Draft-ready, or Production-ready stage — so you can have honest conversations with your team and manufacturers about where you actually are.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How is this different from a full hardware development assessment?</summary>
+          <p>This free tool previews one step of the full pipeline — the readiness check. It gives you a BOM estimate, readiness score, and schematic placeholder based on your concept description. A full hardware development assessment in <a href="https://svivva.com">Svivva</a> covers every step: concept input, real BOM generation with supplier data, schematic layout with versioning, cost tracking across revisions, team review, and production-ready export.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How long does a hardware readiness assessment take?</summary>
+          <p>Using this free tool, your assessment is ready in under 60 seconds. Describe your hardware concept, add optional constraints like budget and materials, and click Check readiness. You get a BOM estimate and MRL score immediately — no waiting, no forms, no account creation.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is this tool accurate for production-grade hardware projects?</summary>
+          <p>The tool provides a concept-stage preview — useful for validating budget feasibility, scoping conversations, and early team alignment. For production-grade accuracy — real component pricing, supplier availability by region, and cost tracking across design iterations — use the <a href="https://svivva.com">full Svivva platform</a>.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What types of hardware projects work with this tool?</summary>
+          <p>Electronics and PCBs, audio and music hardware, enclosures and mechanical builds, IoT devices, custom instruments, embedded systems, and any other physical product concept with identifiable BOM components. The <a href="index.html">Manufacturing Readiness Checker</a> also supports non-hardware concepts including ideas, team scenarios, marketplace products, and audio setups.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEO ARTICLE -->
+  <article class="seo-article">
+    <div class="section-inner">
+      <h2>What Is a Hardware Readiness Assessment and When Do You Need One?</h2>
+      <p>A <strong>hardware readiness assessment</strong> is a structured evaluation of how prepared a hardware concept is for production. It measures the gap between where your concept currently is — defined only in broad terms, or in careful detail — and what manufacturing actually requires. The assessment typically covers four areas: scope definition, BOM cost feasibility, manufacturing process maturity, and team or supplier readiness.</p>
+      <p>In formal engineering programs, this is formalized as a <strong>Manufacturing Readiness Level (MRL)</strong> review — a standardized framework used across defense, aerospace, and industrial manufacturing to gate project progression from one phase to the next. But the same logic applies to any hardware project, from a consumer electronics startup to a custom audio hardware build: if you have not assessed readiness, you are guessing at whether your concept is achievable within your constraints.</p>
+
+      <h2>When to Run a Hardware Readiness Assessment</h2>
+      <p>The three most critical moments for a hardware readiness assessment are: <strong>before the first prototype order</strong>, before presenting to a manufacturer or investor, and after any major design change that affects the BOM or cost structure. Running a check at each of these points surfaces mismatches before they become expensive to fix.</p>
+      <p>Engineers who use readiness assessments at the concept stage — before spending time on schematic design — consistently report fewer costly redesigns. The reason is straightforward: it is far cheaper to discover that your target BOM cost is unreachable at the concept stage than after you have completed schematic layout and PCB design.</p>
+      <p>This free tool gives you a concept-stage assessment in under 60 seconds. For ongoing readiness tracking across design iterations — including version history, real supplier pricing in your BOM, and cost tracking across revisions — the full <a href="https://svivva.com">Svivva platform</a> provides the same pipeline logic with the depth production-grade projects require.</p>
+
+      <h2>How to Read Your Hardware Readiness Score</h2>
+      <p>The readiness score this tool returns is an MRL-style percentage: a number between 0 and 100 with a label of Exploration, Draft-ready, or Production-ready. A score below 70% typically means key constraints — budget, materials, region, or scope — are still undefined. A score above 85% indicates your concept is well-defined enough to begin detailed design with confidence.</p>
+      <p>Use your score as a conversation starter, not a final verdict. Share it with your team before kickoff. Bring it to early supplier conversations. Use it to frame your first investor discussion. And when you are ready to move from concept to full pipeline, open the same brief inside a <a href="https://svivva.com">Svivva project</a> — every mode in this tool maps directly to a pipeline stage in the platform.</p>
+
+      <h2>Related Tools and Resources</h2>
+      <p>Beyond hardware readiness, the <a href="index.html">Manufacturing Readiness Checker</a> also supports Play (audio and music setup readiness), Idea (concept scoping and validation), Team (collaboration readiness), Marketplace (API and product listing readiness), and Build (physical builds with digital twin support). Each mode previews one step of the full <a href="https://svivva.com">Svivva pipeline</a>.</p>
+    </div>
+  </article>
+
+  <!-- BOTTOM CTA -->
+  <section class="bottom-cta">
+    <h2>Ready to check your hardware readiness?</h2>
+    <p>It takes under 60 seconds. No signup. No credit card. Get your BOM estimate and MRL score now — then take it to Svivva to run the full pipeline.</p>
+    <div class="bottom-cta-buttons">
+      <a href="index.html" class="btn-bottom-primary" id="bottom-cta-tool">Run the free assessment</a>
+      <a href="https://svivva.com" class="btn-bottom-secondary" id="bottom-cta-svivva">Start the full Svivva workflow →</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <a href="https://svivva.com" class="footer-brand">Svivva</a>
+    <div class="footer-links">
+      <a href="index.html">Manufacturing Readiness Checker</a>
+      <a href="hardware-readiness-assessment.html">Hardware Assessment</a>
+      <a href="https://svivva.com">Platform</a>
+      <a href="https://svivva.com/projects">Projects</a>
+    </div>
+    <p class="footer-copy">Free tool by Svivva. No account required.</p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+      function track(event, data) {
+        if (typeof window.gtag === 'function') window.gtag('event', event, data);
+        if (typeof window.analytics !== 'undefined' && window.analytics.track) window.analytics.track(event, data);
+        console.log('[Analytics]', event, data);
+      }
+
+      function bindClick(id, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', function () { track('CTA click', { location: label, page: 'hardware-readiness-assessment' }); });
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        track('page_view', { page: 'hardware-readiness-assessment', keyword: 'hardware readiness assessment' });
+        bindClick('hero-cta-primary', 'hero_primary');
+        bindClick('hero-cta-svivva', 'hero_svivva_link');
+        bindClick('nav-cta', 'nav_bar');
+        bindClick('nav-tool-link', 'nav_tool');
+        bindClick('nav-platform-link', 'nav_platform');
+        bindClick('band-cta-primary', 'tool_band_primary');
+        bindClick('band-cta-secondary', 'tool_band_secondary');
+        bindClick('upgrade-cta', 'upgrade_section');
+        bindClick('bottom-cta-tool', 'bottom_tool');
+        bindClick('bottom-cta-svivva', 'bottom_svivva');
+        bindClick('nav-brand', 'nav_brand');
+      });
+    })();
+  </script>
+</body>
+</html>

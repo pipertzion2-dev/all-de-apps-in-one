@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Idea Comparison Tool Online — Compare Concepts Instantly | Svivva</title>
+  <meta name="description" content="Free idea comparison tool to compare versions of your concept, product idea, or team scenario side by side. View idea history, track changes, and evaluate readiness — no signup required. Powered by Svivva." />
+  <meta name="keywords" content="idea comparison tool, compare ideas online, idea version history, concept comparison, idea tracker, product idea comparison, Svivva" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/idea-comparison" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Idea Comparison Tool Online — Compare Concepts Instantly" />
+  <meta property="og:description" content="Compare versions of your concept, product idea, or team scenario side by side. View idea history and track changes — free, no signup. Powered by Svivva." />
+  <meta property="og:url" content="https://svivva.com/tools/idea-comparison" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Idea Comparison Tool Online — Compare Concepts Instantly" />
+  <meta name="twitter:description" content="Compare versions of your concept, product idea, or team scenario side by side. Free idea history and comparison viewer by Svivva." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Idea Comparison Tool",
+    "url": "https://svivva.com/tools/idea-comparison",
+    "description": "Compare versions of your concept, product idea, or team scenario side by side. View idea history, track changes, and evaluate readiness online for free.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the idea comparison tool do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short concept, product idea, or team scenario and produces an idea history timeline and a side-by-side comparison view of versions or variants. It is a single-step preview of what the full Svivva platform does with full versioning, collaboration, and exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the idea comparison tool free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online idea comparison tool is completely free and does not require login or signup. You can generate previews as often as you like. The full Svivva platform offers free and paid tiers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I take this comparison into a real project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Click 'Open this preview inside a real Svivva project' or sign up at svivva.com to run the full workflow with version history, comparison tools, cost tracking, and production-ready outputs."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Free Idea Comparison Tool Online</h1>
+      <p class="intro">Compare versions of your concept, product idea, or team scenario side by side — instantly and for free. This tool runs one step of <a href="https://svivva.com" class="internal-link">Svivva's</a> full Idea Engine pipeline. No account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable stereo delay pedal, 2 knobs, 9V, analog" required></textarea>
+
+          <label for="mode">Mode or category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate comparison</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your idea history and comparison preview will appear here.</p>
+          <p class="hint">Enter a short description and click Generate comparison.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step — try Svivva free for the full workflow with versioning, collaboration, cost tracking, and production-ready exports.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project →</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This idea comparison tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="internal-link">Svivva's</a> Idea Engine: concept → idea history and comparison preview. In the full platform you get complete version history, side-by-side comparison, collaboration, cost tracking, and production-ready exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Concept → idea history and comparison view</strong></li>
+          <li>Next in full workflow: full versioning, diff views, collaboration, exports</li>
+        </ul>
+        <h3>Why compare ideas?</h3>
+        <p>Comparing ideas side by side helps you spot gaps, validate assumptions, and move faster from concept to execution. Whether you are evaluating hardware designs, creative projects, or team workflows, structured comparison saves time and reduces risk.</p>
+        <p><a href="https://svivva.com" class="internal-link">Explore the full Svivva platform →</a></p>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <footer class="site-footer">
+      <section class="seo-content">
+        <h2>How the Idea Comparison Tool Works</h2>
+        <p>The <strong>idea comparison tool</strong> by <a href="https://svivva.com" class="internal-link">Svivva</a> is a free online utility designed for anyone who needs to compare ideas, track concept evolution, or evaluate multiple versions of a product, project, or scenario. Whether you are a hardware engineer comparing circuit designs, a product manager weighing feature sets, or a creative professional exploring variations of a concept, this tool gives you a structured way to visualize and compare your thinking.</p>
+
+        <p>Enter a short description of your idea — a product concept, a team workflow, a creative brief, or any scenario you want to explore. Choose a category that fits your domain: Hardware, Play, Idea, Team, Marketplace, or Build. Optionally add constraints like budget, genre, materials, region, or collaboration size. The tool instantly generates an <strong>idea history timeline</strong> showing how your concept evolves through stages — from draft to refined to validated to scoped — and a <strong>side-by-side comparison table</strong> that breaks your idea into variants so you can evaluate focus areas and readiness scores at a glance.</p>
+
+        <p>This is one step from <a href="https://svivva.com" class="internal-link">Svivva's</a> full Idea Engine pipeline. In the complete platform, every idea gets full version history with diffs, multi-step workflows, team collaboration with roles and permissions, cost tracking, and production-ready exports. The comparison tool you see here is the starting point — a preview of the structured thinking that powers the entire <a href="https://svivva.com" class="internal-link">Svivva</a> workflow.</p>
+
+        <h3>Who is this for?</h3>
+        <p>This free idea comparison tool is built for makers, engineers, designers, product managers, and teams who think in iterations. If you have ever tried to compare two versions of a concept in a spreadsheet or a messy document, this tool replaces that friction with a clean, structured view. It works for hardware product ideas, software concepts, creative projects, team scenarios, and marketplace listings — any domain where comparing versions matters.</p>
+
+        <h3>From comparison to full workflow</h3>
+        <p>The comparison you generate here is just the beginning. Inside <a href="https://svivva.com" class="internal-link">Svivva</a>, the same engine powers a complete pipeline: idea capture, structured comparison, validation, roadmapping, collaboration, cost analysis, and export. Every step is versioned. Every change is tracked. Every decision has context. If you find this tool useful, <a href="https://svivva.com" class="internal-link">try the full Svivva platform for free</a> — no credit card required.</p>
+      </section>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does the idea comparison tool do?</summary>
+          <p>It takes your short concept, product idea, or team scenario and generates an idea history timeline and a side-by-side comparison view of versions or variants. It is a single-step preview of what the full <a href="https://svivva.com" class="internal-link">Svivva</a> platform does with full versioning, collaboration, and exports.</p>
+        </details>
+        <details>
+          <summary>Is the idea comparison tool free?</summary>
+          <p>Yes. This online tool is completely free and does not require login or signup. You can generate comparisons as often as you like. The full <a href="https://svivva.com" class="internal-link">Svivva</a> platform has free and paid tiers.</p>
+        </details>
+        <details>
+          <summary>How do I take this comparison into a real project?</summary>
+          <p>Click "Open this preview inside a real Svivva project" or sign up at <a href="https://svivva.com" class="internal-link">svivva.com</a> to run the full workflow with version history, comparison tools, cost tracking, and production-ready outputs.</p>
+        </details>
+        <details>
+          <summary>What categories can I compare ideas in?</summary>
+          <p>The tool supports six categories: Hardware (circuit designs, physical products), Play (performance setups, creative tools), Idea (general concepts and brainstorms), Team (collaboration flows and workflows), Marketplace (API and listing readiness), and Build (digital and physical build flows). Each category tailors the comparison output to your domain.</p>
+        </details>
+        <details>
+          <summary>Can I use this tool for product development?</summary>
+          <p>Absolutely. The idea comparison tool is designed for iterative thinking — exactly what product development requires. Use it to compare early-stage concepts, evaluate variants with different constraints, and track how your idea evolves. For full product development workflows, <a href="https://svivva.com" class="internal-link">explore Svivva's complete platform</a>.</p>
+        </details>
+      </section>
+
+      <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D. | <a href="https://svivva.com/tools/idea-comparison" class="internal-link">Idea Comparison Tool</a></p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

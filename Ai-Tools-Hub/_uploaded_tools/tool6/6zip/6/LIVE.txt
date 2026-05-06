@@ -1,0 +1,13 @@
+GET A LIVE URL (so you can see the app in any browser)
+======================================================
+
+1. Double-click:  Make Live.command
+
+2. A browser tab will open (Netlify Drop) and this folder will open in Finder.
+
+3. Drag the file  deploy.zip  from this folder onto the Netlify web page.
+
+4. Netlify will give you a URL like:  https://something-random.netlify.app
+   That is your live app. Open it, bookmark it, share it. No signup required.
+
+Done. The app is live.

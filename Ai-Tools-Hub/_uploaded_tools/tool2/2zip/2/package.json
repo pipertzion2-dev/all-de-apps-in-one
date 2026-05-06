@@ -1,0 +1,14 @@
+{
+  "name": "schema-field-impact-analyzer",
+  "version": "1.0.0",
+  "description": "Free schema field impact analyzer tool for prompts and API definitions",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

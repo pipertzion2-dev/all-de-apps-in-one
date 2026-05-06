@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Cost Estimator Sandbox | Free Online Tool | Svivva</title>
+  <meta name="description" content="Free hardware cost estimator sandbox tool online. Preview one step of the Svivva hardware pipeline: BOM, cost estimate, and schematic—no login. Try the full workflow in Svivva.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Three-panel layout -->
+    <aside class="panel panel-left">
+      <header class="panel-header">
+        <h1 class="page-title">Hardware Cost Estimator Sandbox</h1>
+        <p class="intro">Submit a short brief—concept, musical intent, team scenario, or product idea—and get a production-style hardware cost preview in one step. No account needed.</p>
+      </header>
+
+      <form id="brief-form" class="brief-form">
+        <label for="description">Short description <span class="required">*</span></label>
+        <textarea id="description" name="description" rows="4" placeholder="e.g. Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM" required></textarea>
+
+        <label for="mode">Mode / category</label>
+        <select id="mode" name="mode">
+          <option value="hardware">Hardware</option>
+          <option value="play">Play</option>
+          <option value="idea">Idea</option>
+          <option value="team">Team</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="build">Build</option>
+        </select>
+
+        <fieldset class="constraints">
+          <legend>Optional constraints</legend>
+          <label for="budget">Budget</label>
+          <input type="text" id="budget" name="budget" placeholder="e.g. $150">
+          <label for="genre">Genre / style</label>
+          <input type="text" id="genre" name="genre" placeholder="e.g. ambient, modular">
+          <label for="materials">Materials</label>
+          <input type="text" id="materials" name="materials" placeholder="e.g. wood, aluminum">
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region" placeholder="e.g. EU, US">
+          <label for="collab-size">Collaboration size</label>
+          <input type="text" id="collab-size" name="collab_size" placeholder="e.g. 2–4 people">
+        </fieldset>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Generate preview</button>
+      </form>
+    </aside>
+
+    <main class="panel panel-center">
+      <div class="preview-wrapper">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your cost estimate preview will appear here.</p>
+          <p class="hint">Fill the form and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden></div>
+        <div id="confidence-bar" class="confidence-bar" hidden>
+          <span class="confidence-label">Readiness</span>
+          <div class="confidence-track"><div id="confidence-fill" class="confidence-fill"></div></div>
+          <span id="confidence-value" class="confidence-value">—</span>
+        </div>
+      </div>
+      <div class="cta-block cta-below-preview" id="cta-below-preview" hidden>
+        <p class="cta-primary-text">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</p>
+        <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary" target="_blank" rel="noopener noreferrer">Open this preview inside a real Svivva project</a>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <div class="mapping-card">
+        <h2>This step in Svivva</h2>
+        <p id="mapping-explainer">Select a mode and generate a preview to see which exact step of the Svivva pipeline this matches.</p>
+        <ul id="mapping-steps" class="mapping-steps"></ul>
+        <p class="upgrade-copy">In the full platform you get: version history, team permissions, cost tracking, and export to production formats.</p>
+      </div>
+      <div class="faq-block">
+        <h2>FAQ</h2>
+        <details>
+          <summary>What does the Hardware Cost Estimator Sandbox do?</summary>
+          <p>It runs one isolated step of Svivva's real hardware pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview—BOM table, cost estimate, or schematic placeholder—so you can see how Svivva would support your project.</p>
+        </details>
+        <details>
+          <summary>Is it really free and do I need to sign up?</summary>
+          <p>Yes. This sandbox is free and requires no login. You can generate previews as often as you like. To run the full workflow with versioning and cost tracking, you'd use the main Svivva platform.</p>
+        </details>
+        <details>
+          <summary>How does this relate to the full Svivva workflow?</summary>
+          <p>This tool exposes the hardware cost estimation step. In Svivva, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports—with versioning and collaboration.</p>
+        </details>
+        <p class="internal-link"><a href="https://svivva.com">Explore the main Svivva platform →</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Sticky bottom CTA bar -->
+  <footer class="sticky-cta-bar">
+    <p class="sticky-cta-text">Preview one step free. Run the full workflow in Svivva.</p>
+    <a href="https://svivva.com" class="btn-sticky-cta" id="sticky-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Tools Hub"
+version = "1.0.0"
+id = "artifacts/ai-tools-hub"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 21297
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/ai-tools-hub run dev"
+
+[services.env]
+PORT = "21297"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/ai-tools-hub", "run", "build"]
+publicDir = "artifacts/ai-tools-hub/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

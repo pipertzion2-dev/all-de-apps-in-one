@@ -1,0 +1,21 @@
+# Replit — import this folder or push from Git, then Run.
+# Docs: https://docs.replit.com/replit-workspace/configuring-repl
+
+run = "npm run dev"
+
+entrypoint = "package.json"
+
+modules = ["nodejs-20", "web"]
+
+[nix]
+channel = "stable-24_05"
+
+# Deploy: `node server.mjs` serves /dist + POST /api/ai-insight (set OPENAI_API_KEY on Replit for AI tips).
+[deployment]
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+# Webview ↔ your dev/preview server (PORT defaults to 5000 in vite.config.ts if unset).
+[[ports]]
+localPort = 5000
+externalPort = 80

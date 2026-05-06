@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+h1 { color: #5BA8A0; border-bottom: 3px solid #5BA8A0; padding-bottom: 10px; }
+h2 { color: #6B2C4A; margin-top: 30px; }
+.test-case { background: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #5BA8A0; border-radius: 4px; }
+.test-case h3 { margin: 0 0 10px 0; color: #333; }
+.steps { margin-left: 20px; }
+.steps li { margin: 8px 0; }
+.expected { background: #e8f5f3; padding: 10px; margin-top: 10px; border-radius: 4px; }
+.checkbox { width: 18px; height: 18px; border: 2px solid #5BA8A0; display: inline-block; margin-right: 10px; vertical-align: middle; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background: #5BA8A0; color: white; }
+.header-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
+.pass-fail { width: 80px; }
+</style>
+</head>
+<body>
+
+<h1>Vivva Desktop Testing Checklist</h1>
+
+<div class="header-info">
+<div><strong>Tester Name:</strong> _______________________</div>
+<div><strong>Date:</strong> _______________________</div>
+<div><strong>Browser:</strong> _______________________</div>
+</div>
+
+<h2>1. Authentication Tests</h2>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-1.1: Login with Replit</h3>
+<ol class="steps">
+<li>Navigate to the homepage</li>
+<li>Click "Sign In" or "Log In with Replit" button</li>
+<li>Complete Replit authentication</li>
+<li>Observe redirect back to app</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> User is logged in and redirected to dashboard. User avatar/name appears in header.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-1.2: Access Protected Routes</h3>
+<ol class="steps">
+<li>Log out of the application</li>
+<li>Try to access /dashboard/projects/new directly</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> User is redirected to login page or shown login prompt.</div>
+</div>
+
+<h2>2. API Creation Flow</h2>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-2.1: Navigate to Create New API</h3>
+<ol class="steps">
+<li>Log in to the application</li>
+<li>Click "Create New API" or navigate to /dashboard/projects/new</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> API Creator panel appears with step indicator showing DEFINE - CONFIGURE - FINISH</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-2.2: DEFINE Phase - Enter API Details</h3>
+<ol class="steps">
+<li>Enter a prompt describing the API (e.g., "Analyze sentiment of customer reviews")</li>
+<li>Enter expected output format (e.g., "{ sentiment: positive/negative/neutral, score: 0-100 }")</li>
+<li>Click the "Tune" button</li>
+<li>Adjust sliders: Creativity, Detail Level, Schema Strictness</li>
+<li>Toggle: Confidence Scores, Metadata options</li>
+<li>Click "Continue" or "Next"</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> All inputs accept text. Sliders show real-time feedback. Toggles work. Advances to CONFIGURE phase.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-2.3: CONFIGURE Phase - Answer Questions</h3>
+<ol class="steps">
+<li>Review each configuration question presented</li>
+<li>Provide answers for each question</li>
+<li>Navigate through all questions</li>
+<li>Click "Continue" to proceed</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Questions are relevant to the API prompt. Progress indicator updates. Advances to FINISH phase.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-2.4: FINISH Phase - Set Identity</h3>
+<ol class="steps">
+<li>View AI-suggested names for the API</li>
+<li>Select or enter a custom name</li>
+<li>Choose an icon from available options</li>
+<li>Select a color palette</li>
+<li>Observe live preview card updating</li>
+<li>Click "Create API" button</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Preview card updates in real-time. API is created successfully. Redirects to project detail page.</div>
+</div>
+
+<h2>3. API Tuner Controls</h2>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-3.1: Creativity Slider</h3>
+<ol class="steps">
+<li>Open the Tune panel</li>
+<li>Move Creativity slider from 0% to 100%</li>
+<li>Observe label text changing</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Label changes from "Conservative & predictable" to "Creative & experimental"</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-3.2: Toggle Switches</h3>
+<ol class="steps">
+<li>Click "Include Confidence Scores" toggle</li>
+<li>Click "Include Metadata" toggle</li>
+<li>Toggle each on and off</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Toggles switch states visually. Settings are retained.</div>
+</div>
+
+<h2>4. Visual & UI Tests</h2>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-4.1: Dark Mode Toggle</h3>
+<ol class="steps">
+<li>Locate theme toggle (sun/moon icon)</li>
+<li>Click to switch between light and dark mode</li>
+<li>Navigate through different pages</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> All pages render correctly in both modes. Text is readable. No broken colors.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-4.2: Responsive Layout (Desktop)</h3>
+<ol class="steps">
+<li>View app at 1920x1080 resolution</li>
+<li>Resize browser to 1280x720</li>
+<li>Check all major pages</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Layout adjusts appropriately. No horizontal scrolling. All elements visible.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-4.3: Step Indicator Navigation</h3>
+<ol class="steps">
+<li>Observe step indicator: DEFINE - CONFIGURE - FINISH</li>
+<li>Complete each phase</li>
+<li>Verify current step is highlighted</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Current step is visually distinct. Completed steps show checkmark or different style.</div>
+</div>
+
+<h2>5. Error Handling</h2>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-5.1: Empty Form Submission</h3>
+<ol class="steps">
+<li>Try to proceed without entering a prompt</li>
+<li>Try to proceed without entering expected output</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Validation messages appear. Form does not submit until required fields are filled.</div>
+</div>
+
+<div class="test-case">
+<h3><span class="checkbox"></span> TC-5.2: Network Error Handling</h3>
+<ol class="steps">
+<li>Disconnect from internet (or simulate offline)</li>
+<li>Try to create an API</li>
+<li>Reconnect and retry</li>
+</ol>
+<div class="expected"><strong>Expected:</strong> Error message displays gracefully. App recovers when connection restored.</div>
+</div>
+
+<h2>Test Summary</h2>
+
+<table>
+<tr>
+<th>Category</th>
+<th>Total Tests</th>
+<th>Passed</th>
+<th>Failed</th>
+<th>Notes</th>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>API Creation Flow</td>
+<td>4</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>API Tuner Controls</td>
+<td>2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Visual & UI</td>
+<td>3</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<th>TOTAL</th>
+<th>13</th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</table>
+
+<div style="margin-top: 40px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+<strong>Tester Signature:</strong> _______________________ <strong>Date:</strong> _____________
+</div>
+
+</body>
+</html>

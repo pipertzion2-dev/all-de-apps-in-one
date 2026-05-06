@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://svivva.com/tools/ai-test-case-generator/sitemap.xml

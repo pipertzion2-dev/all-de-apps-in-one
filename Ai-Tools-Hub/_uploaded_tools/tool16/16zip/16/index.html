@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JSON Schema Linter — Free API Schema Tightness Checker | Svivva</title>
+  <meta name="description" content="Free JSON Schema linter that scores your API schema tightness from 0–100. Instantly find missing required fields, loose types, and over-nesting. No login required." />
+
+  <link rel="canonical" href="https://schema-linter.svivva.com" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://schema-linter.svivva.com" />
+  <meta property="og:title" content="JSON Schema Linter — Free API Schema Tightness Checker | Svivva" />
+  <meta property="og:description" content="Paste your JSON Schema or OpenAPI definition and get an instant tightness score with field-by-field recommendations. Free, no login, results in under a second." />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="JSON Schema Linter — Free API Schema Tightness Checker" />
+  <meta name="twitter:description" content="Score your JSON Schema or OpenAPI definition for tightness. Find missing required fields, loose types, and deep nesting instantly. Free tool by Svivva." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "JSON Schema Linter",
+    "description": "Free JSON Schema linter and tightness scorer. Paste any JSON Schema or OpenAPI definition to get an instant 0–100 tightness score with field-by-field recommendations.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://schema-linter.svivva.com",
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <style>
+    @font-face {
+      font-family: 'ZC';
+      src: url('fonts/Zc-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    :root {
+      --accent: #B45309;
+      --accent-light: #d46b1a;
+      --accent-bg: rgba(180, 83, 9, 0.08);
+      --panel-bg: #fafafa;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --font: 'ZC', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--font); font-size: 15px; color: var(--text); background: #fff; }
+
+    /* Page header / hero */
+    .page-header {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .page-header h1 {
+      font-family: var(--font);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .page-header p {
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 780px;
+    }
+    .page-header .header-links {
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+    .page-header .header-links a {
+      color: var(--accent);
+      text-decoration: none;
+      margin-right: 18px;
+    }
+    .page-header .header-links a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      min-height: 60vh;
+    }
+    .panel {
+      border-right: 1px solid var(--border);
+      padding: 20px 24px;
+      overflow: auto;
+      background: var(--panel-bg);
+    }
+    .panel:last-of-type { border-right: none; }
+    .panel h2 {
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .panel label, .panel .label {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Left: Input */
+    .input-panel textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+      background: #fff;
+    }
+    .input-panel textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-bg);
+    }
+    .input-panel select {
+      font-family: var(--font);
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      margin-bottom: 16px;
+    }
+    .input-panel .hint {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
+    .btn-analyze {
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-analyze:hover { background: var(--accent-light); }
+    .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Center: Results */
+    .results-panel { background: #fff; }
+    .results-panel .empty {
+      font-family: var(--font);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .score-ring {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--score, 0) * 3.6deg), var(--border) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-ring-inner {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--accent);
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .metric {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-bg);
+    }
+    .metric .value { font-family: var(--font); font-weight: 600; font-size: 1.25rem; color: var(--accent); }
+    .metric .name { font-family: var(--font); font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    table.tightness-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font);
+      font-size: 0.85rem;
+    }
+    table.tightness-table th,
+    table.tightness-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    table.tightness-table th { color: var(--text-muted); font-weight: 500; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+    .badge-tight { background: rgba(180, 83, 9, 0.15); color: var(--accent); }
+    .badge-loose { background: #fef3c7; color: #92400e; }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+
+    /* Right: Guidance */
+    .guidance-panel .card {
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--accent-bg);
+      border-left: 4px solid var(--accent);
+      margin-bottom: 14px;
+    }
+    .guidance-panel .card h3 { font-size: 0.85rem; margin-bottom: 6px; color: var(--accent); }
+    .guidance-panel .card p { color: var(--text); line-height: 1.5; }
+    .guidance-panel .default-msg {
+      font-family: var(--font);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Content section */
+    .content-section {
+      padding: 48px 40px 56px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+    .content-section .inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .content-section h2 {
+      font-family: var(--font);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 32px 0 10px;
+    }
+    .content-section h2:first-child { margin-top: 0; }
+    .content-section p {
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .content-section ul, .content-section ol {
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    .content-section li { margin-bottom: 6px; }
+    .content-section strong { color: var(--text); font-weight: 600; }
+    .content-section a { color: var(--accent); text-decoration: none; }
+    .content-section a:hover { text-decoration: underline; }
+    .content-cta {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .content-cta:hover { background: var(--accent-light); text-decoration: none; }
+
+    /* Sticky CTA */
+    .cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 24px;
+      background: var(--text);
+      color: #fff;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      text-align: center;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+    }
+    .cta-bar p { font-size: 0.9rem; max-width: 720px; }
+    .cta-bar a {
+      font-family: var(--font);
+      font-weight: 600;
+      color: var(--accent);
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .cta-bar a:hover { background: var(--accent-bg); color: var(--accent); }
+
+    /* Padding so footer doesn't overlap content */
+    body { padding-bottom: 80px; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <h1>JSON Schema Linter &amp; Tightness Scorer</h1>
+    <p>A tight schema is the foundation of a reliable API. Paste any JSON Schema, OpenAPI 3.x definition, or structured prompt to get an instant tightness score from 0 to 100 — with a field-by-field breakdown showing which properties are required, which have strict types, and where deep nesting is adding risk. Free, no account required.</p>
+    <nav class="header-links" aria-label="Related tools">
+      <a href="https://svivva.com" rel="noopener">Svivva — Production API Platform</a>
+      <a href="https://svivva.com" rel="noopener">API Monitoring &amp; Versioning</a>
+      <a href="https://svivva.com" rel="noopener">Automated API Testing</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="panel input-panel">
+      <h2>Input</h2>
+      <label for="inputType">Input type</label>
+      <select id="inputType">
+        <option value="schema">JSON Schema</option>
+        <option value="openapi">OpenAPI / API definition</option>
+        <option value="prompt">Prompt or config text</option>
+      </select>
+      <span class="hint">Paste your schema, API spec, or prompt below.</span>
+      <label for="userInput">Paste your schema, API definition, or prompt</label>
+      <textarea id="userInput" placeholder='e.g. {\n  "type": "object",\n  "properties": { "name": { "type": "string" } },\n  "required": ["name"]\n}'></textarea>
+      <button type="button" class="btn-analyze" id="btnAnalyze">Analyze &amp; tighten</button>
+    </aside>
+
+    <main class="panel results-panel">
+      <h2>Results</h2>
+      <div id="resultsContainer">
+        <div class="empty" id="resultsEmpty">Paste a schema or prompt and click &quot;Analyze &amp; tighten&quot; to see tightness score and recommendations.</div>
+        <div id="resultsContent" style="display: none;"></div>
+      </div>
+    </main>
+
+    <aside class="panel guidance-panel">
+      <h2>Guidance</h2>
+      <div id="guidanceContainer">
+        <p class="default-msg">Tighter schemas reduce ambiguity for APIs and LLMs. We&apos;ll score required vs optional fields, nesting depth, and type strictness, then suggest concrete improvements.</p>
+        <div id="guidanceContent" style="display: none;"></div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="content-section" aria-label="About the JSON Schema Linter">
+    <div class="inner">
+
+      <h2>What Is Schema Tightness?</h2>
+      <p>Schema tightness measures how precisely a JSON Schema or OpenAPI definition constrains its data. A tight schema leaves little room for ambiguity: fields are marked as <strong>required</strong> where applicable, types are specific (<code>integer</code>, <code>boolean</code>, <code>enum</code>) rather than generic strings, and nesting is kept shallow enough for validators — and LLM function-calling — to reason about reliably.</p>
+      <p>This JSON Schema linter calculates a tightness score using three signals:</p>
+      <ul>
+        <li><strong>Required field ratio</strong> — the percentage of properties marked required. The higher, the better.</li>
+        <li><strong>Strict type ratio</strong> — properties using enums or non-string types score higher than bare <code>"type": "string"</code> declarations.</li>
+        <li><strong>Nesting depth</strong> — deep structures lose points because they are harder to validate and more likely to contain implicit optional paths.</li>
+      </ul>
+      <p>A score of 70 or above is a solid baseline for production APIs. Anything below 40 typically means your API will silently accept malformed payloads.</p>
+
+      <h2>How the JSON Schema Linter Works</h2>
+      <ol>
+        <li><strong>Paste your schema</strong> — supports JSON Schema Draft 4–7, OpenAPI 3.x (components/schemas and paths), or any structured prompt text.</li>
+        <li><strong>Select the input type</strong> — choose JSON Schema, OpenAPI/API definition, or Prompt/config text. The linter adjusts its analysis accordingly.</li>
+        <li><strong>Read the score and fix the gaps</strong> — the results panel shows your 0–100 tightness score alongside a field-by-field table. The guidance panel tells you exactly what to fix: which fields should be required, where to use enums, and when to flatten your structure.</li>
+      </ol>
+      <p>The entire analysis runs client-side in under one second. No data is stored on our servers.</p>
+
+      <h2>Why Tight Schemas Matter for APIs and AI</h2>
+      <p>Loose schemas create three categories of problems in production.</p>
+      <p><strong>For REST APIs,</strong> under-constrained schemas mean your server must handle garbage inputs — null where an integer was expected, missing required fields treated as optional, freeform strings where only three values are valid. Each of these becomes a production bug or a security surface.</p>
+      <p><strong>For OpenAI function calling and LLM tool use,</strong> schema tightness directly affects model accuracy. Models make significantly fewer errors calling functions defined by tight schemas than loose ones. Every optional field is a decision point where the model can hallucinate a value or omit a critical one — tight schemas eliminate that ambiguity at the definition layer.</p>
+      <p><strong>For teams,</strong> tight schemas double as living documentation. When a field is required with a specific type, there is nothing left to interpret. New engineers and external consumers understand the contract immediately, without reading prose documentation.</p>
+
+      <h2>From Schema to Production with Svivva</h2>
+      <p>This linter shows you where your schema stands today. <a href="https://svivva.com" rel="noopener">Svivva</a> takes it the rest of the way — turning a validated schema into a production API with <strong>automated test generation, schema versioning, request monitoring, and cost optimization</strong> for AI workloads. Teams using Svivva go from a scored schema to a monitored, versioned API endpoint in minutes rather than days.</p>
+      <p>No credit card required to start.</p>
+      <a href="https://svivva.com" class="content-cta" rel="noopener" target="_blank">Try Svivva for free &rarr;</a>
+
+    </div>
+  </section>
+
+  <footer class="cta-bar">
+    <p>You just tested one schema. In <a href="https://svivva.com" style="color:#d97706;" rel="noopener">Svivva</a> you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script>
+    (function () {
+      const userInput = document.getElementById('userInput');
+      const inputType = document.getElementById('inputType');
+      const btnAnalyze = document.getElementById('btnAnalyze');
+      const resultsEmpty = document.getElementById('resultsEmpty');
+      const resultsContent = document.getElementById('resultsContent');
+      const guidanceContent = document.getElementById('guidanceContent');
+      const defaultGuidance = document.querySelector('#guidanceContainer .default-msg');
+
+      function parseInput(raw, type) {
+        const text = (raw || '').trim();
+        if (!text) return { ok: false, error: 'Please paste a schema, API definition, or prompt.' };
+        if (type === 'schema' || type === 'openapi') {
+          try {
+            const json = JSON.parse(text);
+            return { ok: true, data: json, type };
+          } catch (e) {
+            return { ok: false, error: 'Invalid JSON. Check brackets and commas.' };
+          }
+        }
+        return { ok: true, data: { _raw: text }, type: 'prompt' };
+      }
+
+      function analyzeSchema(obj) {
+        const metrics = { required: 0, optional: 0, depth: 0, strictTypes: 0, total: 0, fields: [] };
+        function countProps(o, path, depth) {
+          metrics.depth = Math.max(metrics.depth, depth);
+          if (!o || typeof o !== 'object') return;
+          const keys = Object.keys(o);
+          const required = Array.isArray(o.required) ? o.required : [];
+          for (const k of keys) {
+            if (k === 'properties' && o.properties && typeof o.properties === 'object') {
+              metrics.total += Object.keys(o.properties).length;
+              for (const [pk, pv] of Object.entries(o.properties)) {
+                const isRequired = required.includes(pk);
+                if (isRequired) metrics.required++; else metrics.optional++;
+                const typeStrict = pv && (pv.enum || (pv.type && pv.type !== 'string'));
+                if (typeStrict) metrics.strictTypes++;
+                metrics.fields.push({ path: path ? path + '.' + pk : pk, required: isRequired, strict: !!typeStrict });
+                if (pv && typeof pv === 'object') countProps(pv, path ? path + '.' + pk : pk, depth + 1);
+              }
+              continue;
+            }
+            if (k === 'required') continue;
+            if (typeof o[k] === 'object' && o[k] !== null) countProps(o[k], path, depth + 1);
+          }
+        }
+        if (obj.openapi || obj.swagger) {
+          const paths = obj.paths || {};
+          const schemas = obj.components?.schemas || {};
+          countProps(schemas, '', 0);
+          Object.values(paths).forEach(p => { if (p && typeof p === 'object') countProps(p, '', 0); });
+        } else {
+          countProps(obj, '', 0);
+        }
+        if (metrics.total === 0 && typeof obj === 'object') {
+          metrics.total = 1;
+          metrics.optional = 1;
+          metrics.fields.push({ path: '(root)', required: false, strict: false });
+        }
+        return metrics;
+      }
+
+      function analyzePrompt(text) {
+        const words = (text || '').split(/\s+/).filter(Boolean);
+        const hasStructure = /(\{[\s\S]*\}|\[[\s\S]*\])/.test(text);
+        const lines = (text || '').split(/\n/).filter(Boolean).length;
+        return {
+          total: 1,
+          required: 0,
+          optional: 1,
+          depth: 0,
+          strictTypes: 0,
+          fields: [{ path: 'prompt', required: hasStructure, strict: words.length > 20 }],
+          promptMetrics: { words: words.length, lines, hasStructure }
+        };
+      }
+
+      function scoreTightness(metrics) {
+        const total = metrics.required + metrics.optional || 1;
+        const requiredRatio = metrics.required / total;
+        const strictRatio = metrics.strictTypes / total;
+        const depthPenalty = Math.min(metrics.depth * 5, 25);
+        const raw = (requiredRatio * 40) + (strictRatio * 40) - depthPenalty + 20;
+        return Math.max(0, Math.min(100, Math.round(raw)));
+      }
+
+      function runAnalysis() {
+        const parsed = parseInput(userInput.value, inputType.value);
+        if (!parsed.ok) {
+          resultsEmpty.textContent = parsed.error;
+          resultsEmpty.style.display = 'block';
+          resultsContent.style.display = 'none';
+          defaultGuidance.style.display = 'block';
+          guidanceContent.style.display = 'none';
+          return;
+        }
+        let metrics;
+        if (parsed.type === 'prompt') {
+          metrics = analyzePrompt(parsed.data._raw);
+        } else {
+          metrics = analyzeSchema(parsed.data);
+        }
+        const score = scoreTightness(metrics);
+        renderResults(score, metrics, parsed.type);
+        renderGuidance(score, metrics, parsed.type);
+        resultsEmpty.style.display = 'none';
+        resultsContent.style.display = 'block';
+        defaultGuidance.style.display = 'none';
+        guidanceContent.style.display = 'block';
+      }
+
+      function renderResults(score, metrics, type) {
+        resultsContent.innerHTML =
+          '<div class="score-ring" style="--score: ' + score + '"><div class="score-ring-inner">' + score + '</div></div>' +
+          '<p style="text-align:center;font-family:var(--font);font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Tightness score (0–100)</p>' +
+          '<div class="metrics">' +
+          '<div class="metric"><div class="value">' + metrics.required + '</div><div class="name">Required fields</div></div>' +
+          '<div class="metric"><div class="value">' + metrics.optional + '</div><div class="name">Optional fields</div></div>' +
+          '<div class="metric"><div class="value">' + metrics.depth + '</div><div class="name">Max depth</div></div>' +
+          '<div class="metric"><div class="value">' + (metrics.strictTypes || 0) + '</div><div class="name">Strict types</div></div>' +
+          '</div>' +
+          (metrics.fields.length ? '<table class="tightness-table"><thead><tr><th>Path</th><th>Required</th><th>Strict</th></tr></thead><tbody>' +
+            metrics.fields.slice(0, 15).map(f => '<tr><td>' + f.path + '</td><td><span class="badge ' + (f.required ? 'badge-tight' : 'badge-loose') + '">' + (f.required ? 'Yes' : 'No') + '</span></td><td><span class="badge ' + (f.strict ? 'badge-ok' : 'badge-loose') + '">' + (f.strict ? 'Yes' : 'No') + '</span></td></tr>').join('') +
+            (metrics.fields.length > 15 ? '<tr><td colspan="3" style="color:var(--text-muted);">+' + (metrics.fields.length - 15) + ' more</td></tr>' : '') +
+            '</tbody></table>' : '');
+      }
+
+      function renderGuidance(score, metrics, type) {
+        const tips = [];
+        const total = metrics.required + metrics.optional || 1;
+        const requiredRatio = total ? metrics.required / total : 0;
+        if (requiredRatio < 0.5 && total > 1) tips.push({ title: 'Add required fields', body: 'Mark more properties as required to reduce ambiguity and invalid requests.' });
+        if (metrics.depth > 2) tips.push({ title: 'Flatten nesting', body: 'Deep nesting makes validation and tooling harder. Prefer flatter structures where possible.' });
+        if (score < 50) tips.push({ title: 'Tighten types', body: 'Use enums or specific types instead of generic "string" where values are known.' });
+        if (score >= 70) tips.push({ title: 'Good baseline', body: 'Your schema is relatively tight. In production, use <a href="https://svivva.com" rel="noopener">Svivva</a> for versioning, monitoring, and automated tests.' });
+        if (tips.length === 0) tips.push({ title: 'Next step', body: 'Try adding a "required" array or stricter types, then re-run the analysis. When you\'re ready for production, <a href="https://svivva.com" rel="noopener">Svivva</a> handles versioning and monitoring.' });
+        guidanceContent.innerHTML = tips.map(t => '<div class="card"><h3>' + t.title + '</h3><p>' + t.body + '</p></div>').join('');
+      }
+
+      btnAnalyze.addEventListener('click', function () {
+        btnAnalyze.disabled = true;
+        setTimeout(function () {
+          runAnalysis();
+          btnAnalyze.disabled = false;
+        }, 80);
+      });
+    })();
+  </script>
+</body>
+</html>

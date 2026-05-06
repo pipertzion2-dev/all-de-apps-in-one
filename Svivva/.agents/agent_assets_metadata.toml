@@ -1,0 +1,44 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "wjEdfeAyNg5e2FHsipA05"
+uri = "file://public/svivva-marketing-strategy.pdf"
+type = "pdf"
+title = "Svivva Marketing Strategy — Step-by-Step Action Plan"
+
+[[outputs]]
+id = "7BWQZ8ItY1uCMr4nkebQk"
+uri = "file://svivva-yc-application.pdf"
+type = "pdf"
+title = "Svivva — YC Application Brief"
+
+[[outputs]]
+id = "jYhielAWn2ePRWfjDCyd8"
+uri = "file://svivva-launch-plan.pdf"
+type = "pdf"
+title = "Svivva Launch Plan"
+
+[[outputs]]
+id = "s_botW8pBZJl2SrBdXBXV"
+uri = "file://svivva-growth-strategy.pdf"
+type = "pdf"
+title = "Svivva Customer Acquisition Strategy"
+
+[[outputs]]
+id = "Qq-p_KOTRzdRmbPp3gjIG"
+uri = "file://public/svivva-marketing-guide.pdf"
+type = "pdf"
+title = "Svivva Traffic & Marketing Playbook"
+
+[[outputs]]
+id = "O0u7Zp1SViJ9mZ2MVl-Ns"
+uri = "file://svivva-marketing-plan.pdf"
+type = "pdf"
+title = "Svivva Marketing Action Plan"
+
+[[outputs]]
+id = "ucr7E_dB_gGqPttwB0Qjn"
+uri = "file://attached_assets/Svivva_YC_Application.pdf"
+type = "pdf"
+title = "Svivva — Y Combinator Application Brief"

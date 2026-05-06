@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta name="description" content="Free AI Test Case Explorer tool online. Upload your prompt, schema, or API definition and get instant analysis, scoring, and test case suggestions. No login required." />
+  <title>AI Test Case Explorer — Free Online Tool</title>
+  <link rel="stylesheet" href="font-embed.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=5" />
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">AI Test Case Explorer</h1>
+    <p class="site-tagline">Upload a prompt, schema, or API definition and get instant analysis and test case suggestions. Free, no login.</p>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <div class="input-group">
+        <label for="input-type">What are you testing?</label>
+        <select id="input-type" aria-describedby="input-type-hint">
+          <option value="prompt">Prompt</option>
+          <option value="schema">JSON Schema</option>
+          <option value="api">API definition (OpenAPI-style)</option>
+        </select>
+        <span id="input-type-hint" class="hint">Choose prompt, schema, or API to analyze.</span>
+      </div>
+      <div class="input-group">
+        <label for="model">Model / endpoint (optional)</label>
+        <select id="model">
+          <option value="generic">Generic LLM</option>
+          <option value="gpt-4">GPT-4</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="content">Paste or type your content</label>
+        <textarea id="content" rows="12" placeholder="Paste your prompt, JSON schema, or API YAML/JSON here…" aria-describedby="content-hint"></textarea>
+        <span id="content-hint" class="hint">We analyze locally; nothing is stored.</span>
+      </div>
+      <button type="button" id="analyze-btn" class="btn-primary">Analyze</button>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Run an analysis to see scores, test case suggestions, and structure here.</p>
+      </div>
+      <div id="results" class="results-content" hidden>
+        <div id="score-cards" class="score-cards"></div>
+        <div id="results-table-wrap" class="table-wrap"></div>
+        <div id="results-viz" class="results-viz"></div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <div id="guidance" class="guidance-content">
+        <p><strong>What this tool does</strong></p>
+        <p>We parse your prompt, schema, or API definition and score testability, list variables and constraints, and suggest example test cases. Use this to quickly explore how testable your AI or API setup is.</p>
+        <p><strong>Tips</strong></p>
+        <ul>
+          <li>Clear placeholders (e.g. <code>{{variable}}</code>) improve test case generation.</li>
+          <li>Structured schemas produce more precise test suggestions.</li>
+          <li>In production, pair this with automated runs and versioning.</li>
+        </ul>
+        <div id="guidance-dynamic" class="guidance-dynamic"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar" role="complementary">
+    <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. Try Svivva for free.</p>
+    <a id="cta-link" href="#" class="cta-button">Try Svivva for free</a>
+  </footer>
+
+  <script src="app.js?v=5"></script>
+</body>
+</html>

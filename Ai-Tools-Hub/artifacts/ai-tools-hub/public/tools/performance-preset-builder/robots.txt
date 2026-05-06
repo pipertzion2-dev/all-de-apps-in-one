@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://svivva.com/sitemap.xml

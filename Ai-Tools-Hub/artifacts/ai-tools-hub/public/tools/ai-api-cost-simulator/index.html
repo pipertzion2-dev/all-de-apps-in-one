@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI API Cost Simulator – Free Calculator | Svivva</title>
+<meta name="description" content="Free AI API cost simulator. Calculate and compare LLM costs across models based on token usage, prompt length, and request volume."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea,input,select{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s}
+textarea:focus,input:focus,select:focus{border-color:#7c3aed}
+textarea{resize:vertical;min-height:80px}
+select option{background:#111118}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:540px){.grid2,.grid3{grid-template-columns:1fr}}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.result-grid{grid-template-columns:1fr}}
+.stat-box{background:#0d0d15;border:1px solid #2a2a40;border-radius:10px;padding:16px;text-align:center}
+.stat-val{font-size:26px;color:#c4b5fd;font-weight:700;margin-bottom:4px}
+.stat-lbl{font-size:12px;color:#666;letter-spacing:.1em;text-transform:uppercase}
+.breakdown{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:14px;font-size:13px;line-height:1.8;font-family:'Courier New',monospace;color:#d4d4f0;white-space:pre-wrap}
+.model-badge{display:inline-block;background:#1a1a2e;border:1px solid #7c3aed44;border-radius:6px;padding:3px 10px;font-size:12px;color:#a78bfa;margin-bottom:8px}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.cta a:hover{color:#fff}
+.compare-note{font-size:12px;color:#666;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Developer Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>AI API Cost Simulator</h1>
+    <p class="sub">Estimate and compare LLM API costs based on token usage and request volume. Model A vs Model B comparison supported.</p>
+  </div>
+
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label>Model A</label>
+        <select id="modelA" onchange="updateRates()">
+          <option value="gpt-4o">GPT-4o ($5/$15 per 1M)</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo ($10/$30 per 1M)</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo ($0.5/$1.5 per 1M)</option>
+          <option value="claude-3-5-sonnet">Claude 3.5 Sonnet ($3/$15 per 1M)</option>
+          <option value="claude-3-haiku">Claude 3 Haiku ($0.25/$1.25 per 1M)</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro ($3.5/$10.5 per 1M)</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.075/$0.3 per 1M)</option>
+          <option value="custom">Custom rates</option>
+        </select>
+      </div>
+      <div>
+        <label>Model B (optional comparison)</label>
+        <select id="modelB">
+          <option value="none">— No comparison —</option>
+          <option value="gpt-4o">GPT-4o ($5/$15 per 1M)</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo ($10/$30 per 1M)</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo ($0.5/$1.5 per 1M)</option>
+          <option value="claude-3-5-sonnet">Claude 3.5 Sonnet ($3/$15 per 1M)</option>
+          <option value="claude-3-haiku">Claude 3 Haiku ($0.25/$1.25 per 1M)</option>
+          <option value="gemini-1.5-pro">Gemini 1.5 Pro ($3.5/$10.5 per 1M)</option>
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.075/$0.3 per 1M)</option>
+          <option value="custom">Custom rates</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2" id="customRates" style="display:none">
+      <div>
+        <label>Input rate ($ per 1M tokens)</label>
+        <input type="number" id="customIn" placeholder="5.00" step="0.01"/>
+      </div>
+      <div>
+        <label>Output rate ($ per 1M tokens)</label>
+        <input type="number" id="customOut" placeholder="15.00" step="0.01"/>
+      </div>
+    </div>
+    <div>
+      <label>System Prompt (paste or type)</label>
+      <textarea id="promptA" placeholder="e.g. You are a helpful assistant. Answer concisely and accurately." rows="3"></textarea>
+    </div>
+    <div>
+      <label>Avg User Message</label>
+      <textarea id="userMsg" placeholder="e.g. What are the best practices for prompt engineering?" rows="2"></textarea>
+    </div>
+    <div>
+      <label>Avg Expected Output</label>
+      <textarea id="output" placeholder="e.g. Here are the top 5 prompt engineering practices..." rows="2"></textarea>
+    </div>
+    <div class="grid3">
+      <div>
+        <label>Calls per day</label>
+        <input type="number" id="callsDay" placeholder="1000" value="1000"/>
+      </div>
+      <div>
+        <label>Days per month</label>
+        <input type="number" id="daysMonth" placeholder="30" value="30"/>
+      </div>
+      <div>
+        <label>Token unit</label>
+        <select id="tokenUnit">
+          <option value="1m">Per 1M tokens</option>
+          <option value="1k">Per 1K tokens</option>
+        </select>
+      </div>
+    </div>
+    <button class="primary" onclick="calc()">Calculate Cost →</button>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <div id="modelALabel" class="model-badge"></div>
+    <div class="result-grid" id="statsA"></div>
+    <div id="modelBSection" style="display:none">
+      <div style="margin-top:14px;margin-bottom:10px"><div id="modelBLabel" class="model-badge"></div></div>
+      <div class="result-grid" id="statsB"></div>
+      <div style="margin-top:14px">
+        <label>Cost Comparison</label>
+        <div class="breakdown" id="comparison"></div>
+      </div>
+    </div>
+    <div style="margin-top:4px">
+      <label>Full Breakdown</label>
+      <div class="breakdown" id="breakdownText"></div>
+    </div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Track and optimize LLM costs at scale with Svivva →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODELS = {
+  'gpt-4o':{in:5,out:15,name:'GPT-4o'},
+  'gpt-4-turbo':{in:10,out:30,name:'GPT-4 Turbo'},
+  'gpt-3.5-turbo':{in:0.5,out:1.5,name:'GPT-3.5 Turbo'},
+  'claude-3-5-sonnet':{in:3,out:15,name:'Claude 3.5 Sonnet'},
+  'claude-3-haiku':{in:0.25,out:1.25,name:'Claude 3 Haiku'},
+  'gemini-1.5-pro':{in:3.5,out:10.5,name:'Gemini 1.5 Pro'},
+  'gemini-1.5-flash':{in:0.075,out:0.3,name:'Gemini 1.5 Flash'},
+};
+
+function updateRates(){
+  const mA=document.getElementById('modelA').value;
+  document.getElementById('customRates').style.display=mA==='custom'?'grid':'none';
+}
+
+function tokEst(text){return Math.max(0,Math.ceil(text.length/4));}
+function fmt$(n){return n<0.01?'$'+n.toFixed(5):'$'+n.toFixed(2);}
+function fmtBig(n){return n>=1000?'$'+n.toLocaleString('en-US',{maximumFractionDigits:2}):'$'+n.toFixed(2);}
+
+function calcCost(inputTok,outputTok,callsMonth,inRate,outRate){
+  const totalIn=inputTok*callsMonth;
+  const totalOut=outputTok*callsMonth;
+  const costPerCall=(inputTok*inRate+outputTok*outRate)/1e6;
+  const monthlyTotal=(totalIn*inRate+totalOut*outRate)/1e6;
+  return {inputTok,outputTok,totalIn,totalOut,costPerCall,monthlyTotal};
+}
+
+function getRates(selectId){
+  const val=document.getElementById(selectId).value;
+  if(val==='none') return null;
+  if(val==='custom'){
+    const inR=parseFloat(document.getElementById('customIn').value)||5;
+    const outR=parseFloat(document.getElementById('customOut').value)||15;
+    return {in:inR,out:outR,name:'Custom'};
+  }
+  return MODELS[val]||null;
+}
+
+function makeStats(c,containerId){
+  const el=document.getElementById(containerId);
+  el.innerHTML=[
+    {v:c.inputTok.toLocaleString(),l:'Input tokens/call'},
+    {v:c.outputTok.toLocaleString(),l:'Output tokens/call'},
+    {v:fmt$(c.costPerCall),l:'Cost per call'},
+    {v:fmtBig(c.monthlyTotal),l:'Monthly cost'},
+  ].map(s=>`<div class="stat-box"><div class="stat-val">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
+}
+
+function calc(){
+  const sysPrompt=document.getElementById('promptA').value;
+  const userMsg=document.getElementById('userMsg').value;
+  const out=document.getElementById('output').value;
+  const callsDay=parseFloat(document.getElementById('callsDay').value)||1000;
+  const daysMonth=parseFloat(document.getElementById('daysMonth').value)||30;
+  const callsMonth=callsDay*daysMonth;
+
+  const inputTok=tokEst(sysPrompt)+tokEst(userMsg);
+  const outputTok=tokEst(out)||Math.ceil(inputTok*0.4);
+
+  const rA=getRates('modelA');
+  if(!rA){alert('Please select a model.');return;}
+
+  const cA=calcCost(inputTok,outputTok,callsMonth,rA.in,rA.out);
+  document.getElementById('modelALabel').textContent=rA.name;
+  makeStats(cA,'statsA');
+
+  const lines=[`Model: ${rA.name}`,`Input tokens/call: ${inputTok.toLocaleString()} (~${sysPrompt.length+userMsg.length} chars)`,`Output tokens/call: ${outputTok.toLocaleString()}`,`Calls/day: ${callsDay.toLocaleString()} × ${daysMonth} days = ${callsMonth.toLocaleString()}/mo`,`Total input tokens/mo: ${cA.totalIn.toLocaleString()}`,`Total output tokens/mo: ${cA.totalOut.toLocaleString()}`,`Input rate: $${rA.in}/1M, Output rate: $${rA.out}/1M`,`Cost per call: ${fmt$(cA.costPerCall)}`,`Monthly cost: ${fmtBig(cA.monthlyTotal)}`,`Annual estimate: ${fmtBig(cA.monthlyTotal*12)}`];
+
+  const rB=getRates('modelB');
+  if(rB){
+    const cB=calcCost(inputTok,outputTok,callsMonth,rB.in,rB.out);
+    document.getElementById('modelBLabel').textContent=rB.name;
+    makeStats(cB,'statsB');
+    document.getElementById('modelBSection').style.display='block';
+    const diff=cB.monthlyTotal-cA.monthlyTotal;
+    const pct=Math.abs(diff/cA.monthlyTotal*100).toFixed(1);
+    const cheaper=diff>0?rA.name:rB.name;
+    document.getElementById('comparison').textContent=`${rA.name}: ${fmtBig(cA.monthlyTotal)}/mo\n${rB.name}: ${fmtBig(cB.monthlyTotal)}/mo\nDifference: ${fmt$(Math.abs(diff))} (${pct}%)\n${cheaper} is cheaper by ${fmtBig(Math.abs(diff))}/month`;
+  } else {
+    document.getElementById('modelBSection').style.display='none';
+  }
+
+  document.getElementById('breakdownText').textContent=lines.join('\n');
+  document.getElementById('resultCard').style.display='flex';
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

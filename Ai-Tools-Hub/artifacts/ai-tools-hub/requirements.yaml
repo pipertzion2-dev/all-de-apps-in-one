@@ -1,0 +1,12 @@
+packages:
+  "framer-motion": "For fluid page transitions, micro-interactions, and staggered list animations"
+  "clsx": "For conditional class name merging in UI components"
+  "tailwind-merge": "For merging tailwind utility classes safely"
+  "react-markdown": "For rendering structured markdown from AI responses"
+  "remark-gfm": "For Github flavored markdown support in the chat and explanations"
+  "react-syntax-highlighter": "For beautiful code block highlighting in explanations"
+
+images:
+  - path: "artifacts/ai-tools-hub/public/images/hero-bg.png"
+    description: "Dark, premium tech background. Abstract deep space with glowing vivid purple and electric blue volumetric light leaks, geometric wireframes, and subtle grain texture. Very cinematic, minimalist, and atmospheric."
+    aspect_ratio: "16:9"

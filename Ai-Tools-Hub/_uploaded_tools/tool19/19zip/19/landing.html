@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Bill of Materials Generator — Instant BOM for Hardware & Product Teams | Svivva</title>
+  <meta name="description" content="Generate a bill of materials in seconds. Free BOM generator for hardware engineers, product designers, and makers. Describe your concept, get a production-style BOM preview instantly. No signup required. Powered by Svivva.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/bom-generator">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Bill of Materials Generator — Instant BOM for Hardware & Product Teams">
+  <meta property="og:description" content="Generate a BOM for your hardware concept or product idea in seconds. Free, no signup. Powered by Svivva.">
+  <meta property="og:url" content="https://svivva.com/bom-generator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free Bill of Materials Generator — Instant BOM for Hardware & Product Teams">
+  <meta name="twitter:description" content="Generate a BOM for your hardware concept or product idea in seconds. Free, no signup. Powered by Svivva.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Free Bill of Materials Generator",
+    "description": "Instant bill of materials generator for hardware engineers and product teams. Describe your concept and get a production-style BOM preview in under 3 seconds.",
+    "url": "https://svivva.com/bom-generator",
+    "applicationCategory": "Engineering Tool",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a bill of materials generator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A bill of materials (BOM) generator is a tool that takes your product concept or hardware description and outputs a structured list of components, materials, and specifications needed to build it. This free BOM generator from Svivva lets you describe your concept in plain language and instantly returns a production-style material match preview."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this BOM generator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The BOM preview tool is completely free and requires no login or signup. You can generate as many BOM previews as you need. For full BOM exports, cost tracking, version history, and team collaboration, you can upgrade to the full Svivva platform."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of projects can I generate a BOM for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can generate BOM previews for hardware products (synthesizers, enclosures, PCB assemblies, electronics), physical product prototypes, musical instrument builds, IoT devices, and digital/physical hybrid builds. The tool supports Hardware, Play, Idea, Team, Marketplace, and Build modes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this different from a full BOM tool like Svivva?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This free tool generates a single-step BOM preview — perfect for validation and early-stage scoping. The full Svivva platform connects that BOM to cost tracking, version history, schematic layout, team permissions, supplier sourcing, and production-ready exports across the entire hardware pipeline."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How fast does the BOM generator work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Results are generated in under 3 seconds. Describe your concept, set optional constraints like budget, materials, or region, and click Generate BOM Preview."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="lp-nav">
+    <a href="https://svivva.com" class="lp-nav-logo">Svivva</a>
+    <div class="lp-nav-links">
+      <a href="https://svivva.com/tools">All Tools</a>
+      <a href="https://svivva.com/pricing">Pricing</a>
+      <a href="index.html">BOM Tool</a>
+      <a href="https://svivva.com" class="lp-nav-cta">Try Svivva Free</a>
+    </div>
+  </nav>
+
+  <!-- HERO — CTA above the fold -->
+  <section class="hero">
+    <div class="hero-badge">&#9889; Free Tool &mdash; No Signup Required</div>
+    <h1>The Free <em>Bill of Materials Generator</em> for Hardware &amp; Product Teams</h1>
+    <p class="hero-sub">Describe your concept in plain language. Get a production-style BOM preview in under 3 seconds. Built by <a href="https://svivva.com">Svivva</a> — the platform that powers the full hardware pipeline.</p>
+    <div class="hero-cta-row">
+      <a href="index.html" class="btn-hero-primary">Generate Your BOM — Free</a>
+      <a href="https://svivva.com" class="btn-hero-secondary" target="_blank" rel="noopener noreferrer">Try the Full Svivva Platform</a>
+    </div>
+    <div class="hero-trust">
+      <span><span class="trust-dot"></span> No account needed</span>
+      <span><span class="trust-dot"></span> Results in under 3 seconds</span>
+      <span><span class="trust-dot"></span> Hardware, music, product &amp; build modes</span>
+      <span><span class="trust-dot"></span> Powered by Svivva</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- PROBLEM -->
+  <section class="section">
+    <p class="section-label">The Problem</p>
+    <h2 class="section-title">BOM creation slows every hardware team down</h2>
+    <p class="section-sub">Before you can source a single component, you need a bill of materials. Most teams waste hours in spreadsheets before they even know if their concept is feasible.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">&#128197;</div>
+        <h3>Manual spreadsheets take hours</h3>
+        <p>Building a BOM from scratch means hunting component specs, checking availability, and formatting rows — before you have validated anything about the product concept.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">&#128270;</div>
+        <h3>Material sourcing is fragmented</h3>
+        <p>Knowing which enclosure material, PCB spec, or connector type fits your concept requires experience most early-stage designers do not yet have on hand.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">&#128683;</div>
+        <h3>Enterprise tools are overkill to start</h3>
+        <p>Full PLM and ERP systems require data you do not have at the concept stage. You need a fast, low-friction way to generate a draft BOM and validate direction.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-inner">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">From concept to BOM preview in 3 steps</h2>
+      <p class="section-sub">No forms to fill, no account to create. Just describe what you are building and get a structured material match in seconds.</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Describe your concept</h3>
+          <p>Write a short description of your hardware, product idea, or musical build — for example, "portable synth, wooden enclosure, lo-fi, under $200 BOM."</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Set your mode &amp; constraints</h3>
+          <p>Choose a mode — Hardware, Play, Idea, Team, Marketplace, or Build. Optionally add budget, preferred materials, region, or collaboration size.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Get your BOM preview</h3>
+          <p>In under 3 seconds you receive a structured material match with component suggestions, a readiness score, and a clear next step inside <a href="https://svivva.com">Svivva</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USE CASES -->
+  <section class="section">
+    <p class="section-label">Use Cases</p>
+    <h2 class="section-title">Built for every kind of hardware project</h2>
+    <p class="section-sub">Whether you are building a synthesizer, a consumer electronics prototype, or a team product — there is a mode for your workflow.</p>
+    <div class="use-cases-grid">
+      <div class="use-case-card">
+        <span class="use-case-tag">Hardware</span>
+        <h3>Electronics &amp; PCB builds</h3>
+        <p>Get a BOM table with suggested enclosure materials (birch ply, aluminum), PCB layer spec, connector types, and control components matched to your budget and region.</p>
+      </div>
+      <div class="use-case-card">
+        <span class="use-case-tag">Play</span>
+        <h3>Musical instrument &amp; performance rigs</h3>
+        <p>Match your musical intent to a setup map — input chains, FX routing, and output configuration matched to your genre and performance style.</p>
+      </div>
+      <div class="use-case-card">
+        <span class="use-case-tag">Idea</span>
+        <h3>Product concept validation</h3>
+        <p>Validate a product idea against material feasibility before committing to a design cycle. Get a structured idea report you can expand in <a href="https://svivva.com">Svivva's Idea Engine</a>.</p>
+      </div>
+      <div class="use-case-card">
+        <span class="use-case-tag">Team</span>
+        <h3>Collaborative product development</h3>
+        <p>Scope materials, permissions, and handoff workflows for multi-person hardware teams before you write a single line of code or cut a single component.</p>
+      </div>
+      <div class="use-case-card">
+        <span class="use-case-tag">Build</span>
+        <h3>Digital &amp; physical hybrid projects</h3>
+        <p>Match materials across digital and physical flows for projects that span firmware, hardware, and software — all within the <a href="https://svivva.com">Svivva B.U.I.L.D. pipeline</a>.</p>
+      </div>
+      <div class="use-case-card">
+        <span class="use-case-tag">Marketplace</span>
+        <h3>API &amp; product listing scoping</h3>
+        <p>Preview the publish path for turning a product idea into an <a href="https://svivva.com/tools">API marketplace listing</a> — from material match to distribution in one flow.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- COMPARISON TABLE -->
+  <div class="comparison-section">
+    <div class="comparison-inner">
+      <p class="section-label">Free Tool vs Full Platform</p>
+      <h2 class="section-title">What you get free — and what you unlock in Svivva</h2>
+      <p class="section-sub">This free BOM generator is one step of the full <a href="https://svivva.com">Svivva</a> hardware pipeline. Here is exactly what each gives you.</p>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Free BOM Generator</th>
+            <th>Full Svivva Platform</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BOM preview (material match)</td>
+            <td><span class="check">&#10003;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>6 project modes (Hardware, Play, Idea, Team, Marketplace, Build)</td>
+            <td><span class="check">&#10003;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Budget &amp; region constraints</td>
+            <td><span class="check">&#10003;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>No signup required</td>
+            <td><span class="check">&#10003;</span></td>
+            <td><span class="cross">Requires account</span></td>
+          </tr>
+          <tr>
+            <td>Full BOM export (CSV, PDF)</td>
+            <td><span class="cross">Preview only</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Cost tracking across pipeline</td>
+            <td><span class="cross">&mdash;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Version history &amp; branching</td>
+            <td><span class="cross">&mdash;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Team permissions &amp; collaboration</td>
+            <td><span class="cross">&mdash;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Schematic layout &amp; digital twin</td>
+            <td><span class="cross">&mdash;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Production-ready export formats</td>
+            <td><span class="cross">&mdash;</span></td>
+            <td><span class="check">&#10003;</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="comparison-cta">
+        <a href="https://svivva.com" class="btn-hero-primary" target="_blank" rel="noopener noreferrer">Get Full Access — Try Svivva Free</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <section class="section">
+    <p class="section-label">FAQ</p>
+    <h2 class="section-title">Common questions about the BOM generator</h2>
+    <p class="section-sub">Everything you need to know before you start. Takes under a minute to read.</p>
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary>What is a bill of materials generator?</summary>
+        <p>A bill of materials (BOM) generator takes your product concept or hardware description and outputs a structured list of components, materials, and specifications needed to build it. This free BOM generator from <a href="https://svivva.com">Svivva</a> lets you describe your concept in plain language and instantly returns a production-style material match preview — no spreadsheet required.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is this BOM generator really free?</summary>
+        <p>Yes. The BOM preview tool is completely free and requires no login or signup. You can generate as many previews as you need. For full BOM exports, cost tracking, version history, and team collaboration, you can upgrade to the <a href="https://svivva.com">full Svivva platform</a>.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What types of projects can I generate a BOM for?</summary>
+        <p>You can generate BOM previews for hardware products (synthesizers, enclosures, PCB assemblies, electronics), physical product prototypes, musical instrument builds, IoT devices, and digital/physical hybrid builds. The tool supports Hardware, Play, Idea, Team, Marketplace, and Build modes — all powered by the same pipeline as <a href="https://svivva.com">Svivva</a>.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How is this different from a full BOM tool like Svivva?</summary>
+        <p>This free tool generates a single-step BOM preview — perfect for validation and early-stage scoping. The <a href="https://svivva.com">full Svivva platform</a> connects that BOM to cost tracking, version history, schematic layout, team permissions, supplier sourcing, and production-ready exports across the entire hardware pipeline.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How fast does the BOM generator work?</summary>
+        <p>Results are generated in under 3 seconds. Describe your concept, set optional constraints like budget, materials, or region, and click Generate BOM Preview. No loading screens, no waiting for a backend — the preview appears directly in your browser. <a href="index.html">Try it now.</a></p>
+      </details>
+      <details class="faq-item">
+        <summary>Can I use this to generate a BOM for a musical instrument?</summary>
+        <p>Yes. Switch to Play mode and describe your musical setup — the tool will return a setup map with an input chain, FX routing, and output configuration matched to your genre and intent. This is the same step that powers the Play pipeline inside <a href="https://svivva.com">Svivva</a>.</p>
+      </details>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEO TEXT -->
+  <section class="seo-section">
+    <div class="seo-inner">
+      <h2>About This Free Bill of Materials Generator</h2>
+      <p>This <strong>bill of materials generator</strong> is built by <a href="https://svivva.com">Svivva</a> as a free, single-step tool that exposes one part of the full hardware production pipeline. It is designed for hardware engineers, product designers, indie makers, and creative technologists who need to move quickly from concept to a structured material list without the overhead of a full PLM system at the idea stage.</p>
+      <h3>Why Svivva built this free tool</h3>
+      <p>Engineering as marketing: the best way to show what a production platform can do is to put one part of it in the hands of engineers for free. This BOM generator is step two of the Svivva hardware pipeline — the same step that runs inside the full platform for teams managing versioned BOM workflows, cost tracking, and production exports. By using this tool, you get a direct preview of how Svivva approaches material sourcing before committing to a full account.</p>
+      <h3>Related tools and resources</h3>
+      <p>If you find the BOM preview useful, the next step is the <a href="https://svivva.com">full Svivva platform</a> — where the same material match connects to schematic layout, cost tracking, team permissions, and production-ready export formats. You can also explore <a href="https://svivva.com/tools">all free Svivva tools</a> or read about the <a href="https://svivva.com/projects">project collaboration features</a> available in the platform.</p>
+    </div>
+  </section>
+
+  <!-- BOTTOM CTA -->
+  <section class="bottom-cta">
+    <h2>Ready to generate your bill of materials?</h2>
+    <p>Start with the free BOM preview. When you need the full pipeline — exports, cost tracking, version history, and team collaboration — Svivva is ready.</p>
+    <div class="bottom-cta-row">
+      <a href="index.html" class="btn-hero-primary">Generate BOM Free — No Signup</a>
+      <a href="https://svivva.com" class="btn-hero-secondary" target="_blank" rel="noopener noreferrer">Explore Svivva Platform</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <span class="lp-footer-brand">Svivva</span>
+      <div class="lp-footer-links">
+        <a href="https://svivva.com">Platform</a>
+        <a href="https://svivva.com/tools">Tools</a>
+        <a href="https://svivva.com/projects">Projects</a>
+        <a href="https://svivva.com/pricing">Pricing</a>
+        <a href="index.html">BOM Generator Tool</a>
+      </div>
+      <p class="lp-footer-copy">&copy; 2025 Svivva. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

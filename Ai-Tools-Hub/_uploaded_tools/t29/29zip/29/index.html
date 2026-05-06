@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Melody Interpolator – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free AI melody interpolator tool. Turn a concept into a production-style melody preview in seconds. No signup required. Powered by one step of the Svivva pipeline.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/melody-interpolator">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI Melody Interpolator – Free Online Tool | Svivva">
+  <meta property="og:description" content="Turn a concept into a production-style melody preview in seconds. No signup required. One step of the Svivva workflow.">
+  <meta property="og:url" content="https://svivva.com/tools/melody-interpolator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Melody Interpolator – Free Online Tool | Svivva">
+  <meta name="twitter:description" content="Turn a concept into a production-style melody preview in seconds. No signup required. One step of the Svivva workflow.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Melody Interpolator",
+    "url": "https://svivva.com/tools/melody-interpolator",
+    "description": "Free AI melody interpolator that turns a short concept brief into a production-style melody preview. No account required.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the AI Melody Interpolator do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short description and optional constraints (mode, budget, genre, etc.) and runs one step of Svivva's pipeline to produce a single preview—e.g. a melody idea, schematic, BOM, flow graph, or idea report. No account required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the AI melody interpolator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online preview is completely free and doesn't require login. The full Svivva platform offers additional steps, versioning, collaboration, and production exports—you can try that free too."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool relate to Svivva?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool exposes one isolated step that exists inside Svivva's pipeline. It covers Hardware, Play, Idea Engine, Team, Marketplace, and B.U.I.L.D. modes. The full Svivva platform runs the complete workflow with versioning, cost tracking, collaboration, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What modes are available in the AI Melody Interpolator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool offers six modes: Play (performance and audio melody ideas), Hardware (schematic and BOM previews), Idea Engine (structured idea reports), Team (collaboration setup maps), Marketplace (API flow graphs), and Build (digital-physical production flows)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to create an account to use this tool?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The AI Melody Interpolator is completely free and requires no signup, login, or account. Just describe your concept, choose a mode, and generate your preview instantly."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>AI Melody Interpolator</h1>
+      <p class="intro">Turn a short brief into a production-style preview in one step. Describe your concept, musical intent, or product idea and get a real preview artifact — a melody idea, schematic, audio clip, flow graph, or idea report — without signing up. This tool runs one isolated step of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> internal pipeline.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel panel-left">
+        <form id="brief-form" class="brief-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Warm pad melody for a hardware synth demo, 80 BPM, minor key" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="play">Play (performance / audio)</option>
+            <option value="hardware">Hardware</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="constraint-budget">Budget</label>
+            <input type="text" id="constraint-budget" name="budget" placeholder="e.g. under $500">
+            <label for="constraint-genre">Genre</label>
+            <input type="text" id="constraint-genre" name="genre" placeholder="e.g. ambient, techno">
+            <label for="constraint-materials">Materials</label>
+            <input type="text" id="constraint-materials" name="materials" placeholder="e.g. wood, PCB">
+            <label for="constraint-region">Region</label>
+            <input type="text" id="constraint-region" name="region" placeholder="e.g. EU, US">
+            <label for="constraint-collab">Collaboration size</label>
+            <input type="text" id="constraint-collab" name="collab" placeholder="e.g. 2-5 people">
+          </fieldset>
+
+          <button type="submit" id="submit-btn" class="btn-primary">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel panel-center">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your preview will appear here.</p>
+          <p class="hint">Submit a brief and choose a mode to run one step of the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> pipeline.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="label">Confidence / readiness</span>
+            <div class="bar"><div class="fill" id="confidence-fill"></div></div>
+            <span class="value" id="confidence-value"></span>
+          </div>
+          <p class="mapping-note" id="mapping-note"></p>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <div class="mapping-content">
+          <h2>What you just previewed</h2>
+          <p id="step-explanation">This tool runs <strong>one step</strong> of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> pipeline: turning your brief into a single preview artifact (melody idea, schematic, flow, or report).</p>
+          <p id="step-current" class="step-current" hidden></p>
+          <p>In the full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> workflow you can:</p>
+          <ul>
+            <li>Run the full sequence with versioning</li>
+            <li>Collaborate with permissions</li>
+            <li>Track cost and iterations</li>
+            <li>Export production-ready outputs</li>
+          </ul>
+          <p class="upgrade-hint">Choose a mode above to see how this step maps to Hardware, Play, Idea Engine, Team, Marketplace, or B.U.I.L.D. flows.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="cta-bar">
+      <div class="cta-bar-inner">
+        <a href="https://svivva.com" id="cta-primary" class="cta-primary" target="_blank" rel="noopener">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+        <a href="https://svivva.com/projects" id="cta-secondary" class="cta-secondary" target="_blank" rel="noopener">Open this preview inside a real Svivva project.</a>
+      </div>
+    </footer>
+  </div>
+
+  <section class="seo-content" id="about">
+    <article>
+      <h2>What Is the AI Melody Interpolator?</h2>
+      <p>The AI Melody Interpolator is a free online tool that lets musicians, producers, and creative teams turn a short concept brief into a production-style preview in seconds. Whether you are sketching a melody idea for a hardware synth demo, mapping out a collaboration workflow, or prototyping an API integration, this tool generates a single-step preview artifact so you can evaluate your direction before committing to a full production pipeline.</p>
+      <p>Most AI melody generators stop at a single output format. The AI Melody Interpolator goes further by offering six distinct modes — Play, Hardware, Idea Engine, Team, Marketplace, and Build — each producing a different type of artifact. In Play mode you get a melody and audio-style idea. In Hardware mode you receive a schematic and bill-of-materials preview. Idea Engine returns a structured idea report. Team mode outputs a collaboration setup map. Marketplace generates an API flow graph. And Build creates a digital-physical production flow aligned with the B.U.I.L.D. framework.</p>
+
+      <h2>How It Works</h2>
+      <p>Using the AI Melody Interpolator takes three steps. First, write a short description of your concept — something like "warm pad melody for a hardware synth demo, 80 BPM, minor key." Second, choose a mode that matches the kind of output you need. Third, optionally add constraints such as budget, genre, materials, region, or collaboration size. Click "Generate preview" and the tool runs one isolated step of the <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> pipeline to produce your artifact along with a confidence score that indicates how production-ready the result is.</p>
+      <p>No signup is needed, no account is required, and the tool is completely free. The preview you receive is a real artifact drawn from the same pipeline that powers the full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva platform</a> — just limited to a single step so you can try it instantly.</p>
+
+      <h2>Why Use This Tool?</h2>
+      <p>If you are a music producer looking for an AI melody generator that goes beyond basic MIDI output, this tool helps you evaluate a melodic direction before spending hours in a DAW. If you are a hardware designer, the schematic preview lets you validate a concept before committing to a full bill of materials. Product teams can use the Idea Engine mode to structure early-stage thinking into a report they can share with stakeholders, and developers can prototype marketplace integrations with a flow graph before writing any code.</p>
+      <p>The AI Melody Interpolator is built as one entry point into the broader <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> ecosystem. After previewing a single step here, you can move into Svivva to run the full workflow with versioning, real-time collaboration, cost tracking, and production-ready exports. Think of this tool as the starting line — <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> is the full race.</p>
+
+      <div class="seo-cta">
+        <a href="https://svivva.com" target="_blank" rel="noopener" class="btn-primary">Try the full Svivva platform free</a>
+      </div>
+    </article>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <h3>What does the AI Melody Interpolator do?</h3>
+      <p>It takes your short description and optional constraints (mode, budget, genre, etc.) and runs one step of <a href="https://svivva.com" target="_blank" rel="noopener">Svivva's</a> pipeline to produce a single preview — a melody idea, schematic, BOM, flow graph, or idea report. No account required.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Is the AI melody interpolator really free?</h3>
+      <p>Yes. This online preview is completely free and doesn't require login. The full <a href="https://svivva.com" target="_blank" rel="noopener">Svivva platform</a> has more steps, versioning, collaboration, and production exports — you can try that free too.</p>
+    </div>
+    <div class="faq-item">
+      <h3>How does this relate to Svivva?</h3>
+      <p>This tool exposes one isolated step that exists inside <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> (Hardware pipeline, Play modes, Idea Engine, Team, Marketplace, or B.U.I.L.D.). Use the button above to run the full workflow on Svivva.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What modes are available?</h3>
+      <p>Six modes: Play (performance and audio), Hardware (schematic and BOM), Idea Engine (structured reports), Team (collaboration setup), Marketplace (API flow graphs), and Build (digital-physical production flows). Each mode produces a different artifact type from the same <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> pipeline.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Do I need to create an account?</h3>
+      <p>No. The AI Melody Interpolator requires no signup, login, or account. Describe your concept, pick a mode, and generate your preview instantly. When you are ready for the full workflow, <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> offers a free tier as well.</p>
+    </div>
+    <p class="internal-link"><a href="https://svivva.com">Explore the full Svivva platform</a></p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

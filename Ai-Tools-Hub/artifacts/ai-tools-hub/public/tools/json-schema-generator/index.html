@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>JSON Schema Generator – Free Online Tool | Svivva</title>
+<meta name="description" content="Free JSON schema generator. Paste any JSON object and instantly generate a valid JSON Schema (draft-07). Supports nested objects, arrays, and enums."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:'Courier New',monospace;font-size:13px;outline:none;transition:border-color .2s;resize:vertical}
+textarea:focus{border-color:#7c3aed}
+.opts{display:flex;gap:14px;flex-wrap:wrap}
+.check-lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:#aaa;cursor:pointer}
+input[type=checkbox]{accent-color:#7c3aed}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.row2{grid-template-columns:1fr}}
+.code-out{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre;font-family:'Courier New',monospace;color:#d4d4f0;overflow-x:auto;min-height:240px;max-height:500px;overflow-y:auto}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.preset-btn{background:#16162a;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer}
+.preset-btn:hover{border-color:#7c3aed;color:#c4b5fd}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:7px 14px;border-radius:6px;cursor:pointer}
+.btn-sm:hover{background:#2a2a40;color:#fff}
+.err{color:#f87171;font-size:13px;padding:10px;background:#1a0505;border:1px solid #7f1d1d;border-radius:8px}
+.stat-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:#888}
+.stat-row span{color:#c4b5fd}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Developer Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>JSON Schema Generator</h1>
+    <p class="sub">Paste any JSON object and instantly generate a valid JSON Schema (draft-07). Supports nested objects, arrays, nullable fields, and enum detection.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>JSON Examples (paste multiple to detect enums)</label>
+      <div class="presets" style="margin-bottom:8px">
+        <button class="preset-btn" onclick="loadPreset(0)">User object</button>
+        <button class="preset-btn" onclick="loadPreset(1)">API response</button>
+        <button class="preset-btn" onclick="loadPreset(2)">Support ticket</button>
+        <button class="preset-btn" onclick="loadPreset(3)">LLM output</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>JSON Sample 1 *</label>
+          <textarea id="json1" rows="12" placeholder='{"id": 1, "name": "Alice", "role": "admin", "active": true}'></textarea>
+        </div>
+        <div>
+          <label>JSON Sample 2 (optional — for enum detection)</label>
+          <textarea id="json2" rows="12" placeholder='{"id": 2, "name": "Bob", "role": "user", "active": false}'></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="opts">
+      <label class="check-lbl"><input type="checkbox" id="addRequired" checked/> Mark all fields as required</label>
+      <label class="check-lbl"><input type="checkbox" id="detectEnum" checked/> Detect enums from multiple samples</label>
+      <label class="check-lbl"><input type="checkbox" id="addDesc"/> Add field descriptions</label>
+      <label class="check-lbl"><input type="checkbox" id="strictAdditional"/> Disallow additional properties</label>
+    </div>
+    <div id="errBox" style="display:none" class="err"></div>
+    <button class="primary" onclick="generate()">Generate Schema →</button>
+  </div>
+
+  <div class="card" id="outCard" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div class="stat-row" id="statRow"></div>
+      <div class="out-actions">
+        <button class="btn-sm" onclick="copyOut()">Copy</button>
+        <button class="btn-sm" onclick="downloadOut()">Download</button>
+      </div>
+    </div>
+    <div class="code-out" id="schemaOut"></div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Enforce JSON Schema validation in your AI pipeline with Svivva →</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const PRESETS=[
+  {j1:`{
+  "id": 1,
+  "name": "Alice",
+  "email": "alice@example.com",
+  "role": "admin",
+  "active": true,
+  "created_at": "2024-01-01T00:00:00Z"
+}`,j2:`{
+  "id": 2,
+  "name": "Bob",
+  "email": "bob@example.com",
+  "role": "user",
+  "active": false,
+  "created_at": "2024-01-15T00:00:00Z"
+}`},
+  {j1:`{
+  "ok": true,
+  "status": "success",
+  "data": {
+    "id": "res_123",
+    "resource": "project",
+    "created_at": "1970-01-01T00:00:00Z"
+  },
+  "request_id": "req_abc"
+}`,j2:`{
+  "ok": false,
+  "status": "error",
+  "error": "Not found",
+  "request_id": "req_xyz"
+}`},
+  {j1:`{
+  "ticket_id": "T-001",
+  "severity": "high",
+  "category": "checkout",
+  "summary": "Payment fails on mobile",
+  "assigned_to": "alice",
+  "resolved": false
+}`,j2:`{
+  "ticket_id": "T-002",
+  "severity": "low",
+  "category": "ui",
+  "summary": "Button misaligned on Firefox",
+  "assigned_to": "bob",
+  "resolved": true
+}`},
+  {j1:`{
+  "sentiment": "positive",
+  "score": 0.87,
+  "confidence": 0.95,
+  "highlights": ["great service", "fast delivery"],
+  "model": "gpt-4o"
+}`,j2:`{
+  "sentiment": "negative",
+  "score": -0.72,
+  "confidence": 0.88,
+  "highlights": ["long wait", "rude staff"],
+  "model": "gpt-4o"
+}`},
+];
+function loadPreset(i){document.getElementById('json1').value=PRESETS[i].j1;document.getElementById('json2').value=PRESETS[i].j2||'';}
+
+function generate(){
+  const j1str=document.getElementById('json1').value.trim();
+  const j2str=document.getElementById('json2').value.trim();
+  const errBox=document.getElementById('errBox');
+  errBox.style.display='none';
+  let obj1,obj2=null;
+  try{obj1=JSON.parse(j1str);}catch(e){errBox.textContent='Sample 1: '+e.message;errBox.style.display='block';return;}
+  if(j2str){try{obj2=JSON.parse(j2str);}catch(e){errBox.textContent='Sample 2: '+e.message;errBox.style.display='block';return;}}
+
+  const opts={
+    required:document.getElementById('addRequired').checked,
+    detectEnum:document.getElementById('detectEnum').checked&&!!obj2,
+    addDesc:document.getElementById('addDesc').checked,
+    strict:document.getElementById('strictAdditional').checked,
+  };
+
+  const schema=buildSchema(obj1,obj2,opts,'');
+  const out=JSON.stringify(schema,null,2);
+  document.getElementById('schemaOut').textContent=out;
+
+  const fields=countFields(schema);
+  document.getElementById('statRow').innerHTML=`Fields: <span>${fields}</span>&nbsp;&nbsp;Lines: <span>${out.split('\n').length}</span>&nbsp;&nbsp;Schema: <span>JSON Schema draft-07</span>`;
+  document.getElementById('outCard').style.display='flex';
+  document.getElementById('outCard').scrollIntoView({behavior:'smooth'});
+}
+
+function buildSchema(obj1,obj2,opts,path){
+  const type=Array.isArray(obj1)?'array':typeof obj1;
+  if(type==='object'&&obj1!==null){
+    const schema={'$schema':'http://json-schema.org/draft-07/schema#','type':'object','properties':{}};
+    if(opts.required) schema.required=Object.keys(obj1);
+    if(opts.strict) schema.additionalProperties=false;
+    Object.entries(obj1).forEach(([k,v])=>{
+      const v2=obj2&&typeof obj2==='object'&&k in obj2?obj2[k]:undefined;
+      schema.properties[k]=buildFieldSchema(v,v2,k,opts);
+    });
+    return schema;
+  }
+  return buildFieldSchema(obj1,obj2,'root',opts);
+}
+
+function buildFieldSchema(v1,v2,key,opts){
+  const s={};
+  if(opts.addDesc) s.description=`The ${key.replace(/_/g,' ')} field.`;
+  const t=Array.isArray(v1)?'array':v1===null?'null':typeof v1;
+
+  if(t==='array'){
+    s.type='array';
+    if(v1.length>0) s.items=buildFieldSchema(v1[0],v2&&v2[0],key+'[]',opts);
+    return s;
+  }
+  if(t==='null'){s.type=['string','null'];return s;}
+  if(t==='object'&&v1!==null){
+    s.type='object';s.properties={};
+    if(opts.required) s.required=Object.keys(v1);
+    Object.entries(v1).forEach(([k,cv])=>{
+      const cv2=v2&&typeof v2==='object'&&k in v2?v2[k]:undefined;
+      s.properties[k]=buildFieldSchema(cv,cv2,k,opts);
+    });
+    return s;
+  }
+  s.type=t;
+
+  // Enum detection
+  if(opts.detectEnum&&v2!==undefined&&v1!==v2&&t==='string'){
+    s.enum=[v1,v2];
+    return s;
+  }
+
+  // Format hints
+  if(t==='string'){
+    if(/^\d{4}-\d{2}-\d{2}T/.test(v1)) s.format='date-time';
+    else if(/^\d{4}-\d{2}-\d{2}$/.test(v1)) s.format='date';
+    else if(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v1)) s.format='email';
+    else if(v1.startsWith('http')) s.format='uri';
+  }
+  if(t==='number'){
+    if(Number.isInteger(v1)) s.type='integer';
+    if(v1>=0&&v1<=1&&key.toLowerCase().includes('score')||key.toLowerCase().includes('confidence')) {s.minimum=0;s.maximum=1;}
+  }
+  return s;
+}
+
+function countFields(schema,depth=0){
+  if(!schema||typeof schema!=='object'||depth>5) return 0;
+  let count=0;
+  if(schema.properties){count+=Object.keys(schema.properties).length;Object.values(schema.properties).forEach(p=>count+=countFields(p,depth+1));}
+  if(schema.items) count+=countFields(schema.items,depth+1);
+  return count;
+}
+
+function copyOut(){navigator.clipboard.writeText(document.getElementById('schemaOut').textContent);showToast();}
+function downloadOut(){
+  const blob=new Blob([document.getElementById('schemaOut').textContent],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='schema.json';a.click();
+}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+</script>
+</body>
+</html>

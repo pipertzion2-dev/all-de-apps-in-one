@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free AI prompt security scanner tool. Detect prompt injection, sensitive data exposure, missing guardrails, and overly permissive instructions in prompts, JSON schemas, and OpenAPI definitions. Runs entirely in your browser — no login, no data sent to any server. Built by Svivva." />
+  <meta name="keywords" content="prompt security scanner, AI prompt injection checker, prompt injection detection, LLM security tool, AI security scanner, prompt vulnerability scanner, OpenAI prompt security, Claude prompt security, Gemini prompt security, API security scanner, JSON schema security, free AI security tool, Svivva" />
+  <meta name="author" content="Svivva" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/prompt-security-scanner" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Prompt Security Scanner – Free AI Prompt Injection & Security Checker | Svivva" />
+  <meta property="og:description" content="Scan AI prompts, JSON schemas, and API definitions for injection risks, data exposure, and missing guardrails. Free, instant, and private — runs in your browser." />
+  <meta property="og:url" content="https://svivva.com/tools/prompt-security-scanner" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Prompt Security Scanner – Free AI Prompt Injection Checker | Svivva" />
+  <meta name="twitter:description" content="Detect prompt injection, PII leaks, and missing guardrails in your AI prompts and schemas. Free and private — no data leaves your browser." />
+
+  <title>Prompt Security Scanner – Free AI Prompt Injection & Security Checker | Svivva</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Prompt Security Scanner",
+    "url": "https://svivva.com/tools/prompt-security-scanner",
+    "description": "Free AI prompt security scanner that detects prompt injection, sensitive data exposure, missing guardrails, and overly permissive instructions. Scans prompts, JSON schemas, and OpenAPI definitions entirely in the browser.",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    },
+    "featureList": [
+      "Prompt injection detection",
+      "Sensitive data and PII scanning",
+      "Guardrail and output constraint analysis",
+      "JSON Schema security checks",
+      "OpenAPI definition scanning",
+      "Browser-only analysis — no data sent to servers"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="https://svivva.com" class="header-logo" rel="noopener">Svivva</a>
+      <nav class="header-nav" aria-label="Main navigation">
+        <a href="https://svivva.com" rel="noopener">Home</a>
+        <a href="https://svivva.com/tools/prompt-security-scanner" aria-current="page">Prompt Scanner</a>
+      </nav>
+    </div>
+    <h1>Prompt Security Scanner</h1>
+    <p class="tagline">Free AI prompt injection checker — scan prompts, schemas, and API definitions for security risks instantly.</p>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2>Input</h2>
+      <div class="input-group">
+        <label for="input-type">Input type</label>
+        <select id="input-type" aria-label="Type of input to scan">
+          <option value="prompt">Prompt / system message</option>
+          <option value="schema">JSON Schema</option>
+          <option value="api">API definition (OpenAPI)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="model-hint">Model / runtime (optional)</label>
+        <select id="model-hint" aria-label="Target model or runtime">
+          <option value="any">Any model</option>
+          <option value="openai">OpenAI (GPT, etc.)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="google">Google (Gemini)</option>
+          <option value="custom">Custom / other</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="content">Paste or type your prompt, schema, or API definition</label>
+        <textarea id="content" rows="14" placeholder="Paste your prompt, JSON schema, or OpenAPI YAML/JSON here…" aria-label="Content to scan"></textarea>
+      </div>
+      <button type="button" id="scan-btn" class="btn-primary">Scan for security issues</button>
+      <p class="micro-copy">No data is sent to any server. Analysis runs entirely in your browser.</p>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2>Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Run a scan to see security analysis, score, and findings here.</p>
+      </div>
+      <div id="results-container" class="results-container" hidden>
+        <div class="score-block">
+          <span class="score-label">Security score</span>
+          <div class="score-value" id="score-value">—</div>
+          <div class="score-bar"><div class="score-fill" id="score-fill"></div></div>
+        </div>
+        <div class="findings-table-wrap">
+          <table class="findings-table" id="findings-table">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Category</th>
+                <th>Finding</th>
+              </tr>
+            </thead>
+            <tbody id="findings-tbody"></tbody>
+          </table>
+        </div>
+        <div id="summary-text" class="summary-text"></div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2>Guidance</h2>
+      <div id="guidance-content" class="guidance-content">
+        <p class="guidance-intro">Use this panel to understand each finding and how to fix it.</p>
+        <div id="guidance-dynamic" class="guidance-dynamic"></div>
+      </div>
+    </aside>
+  </main>
+
+  <section class="seo-content" aria-label="About this tool">
+    <div class="seo-content-inner">
+      <h2>Why You Need a Prompt Security Scanner</h2>
+      <p>As AI-powered applications move from prototype to production, <strong>prompt security</strong> becomes a critical concern. A single vulnerable system prompt can expose your application to <strong>prompt injection attacks</strong>, leak sensitive data like API keys or personal information, or produce harmful outputs that damage user trust. The Prompt Security Scanner by <a href="https://svivva.com" rel="noopener">Svivva</a> helps you catch these risks before they reach your users.</p>
+
+      <h3>What This Tool Detects</h3>
+      <p>This free <strong>AI prompt security scanner</strong> performs pattern-based analysis on three types of input: system prompts, JSON schemas, and OpenAPI definitions. It checks for the most common and dangerous security issues in LLM-powered applications:</p>
+      <ul>
+        <li><strong>Prompt injection and role override</strong> — Detects phrases like "ignore previous instructions" or "you are now" that attackers use to hijack your system prompt and make the model behave in unintended ways.</li>
+        <li><strong>Sensitive data exposure</strong> — Scans for hardcoded API keys, bearer tokens, social security numbers, and email addresses that should never appear in prompts or schemas.</li>
+        <li><strong>Overly permissive instructions</strong> — Flags broad directives such as "do anything" or "no restrictions" that increase the risk of misuse and unpredictable outputs.</li>
+        <li><strong>Missing guardrails</strong> — Identifies prompts that lack explicit boundaries like "must not" or "never," which are essential for controlling model behavior in production.</li>
+        <li><strong>No output format constraint</strong> — Warns when prompts do not specify a response format such as JSON or structured markdown, making downstream validation harder.</li>
+        <li><strong>Schema and API security gaps</strong> — Checks JSON schemas for missing required fields and OpenAPI definitions for absent authentication schemes.</li>
+      </ul>
+
+      <h3>How It Works</h3>
+      <p>Paste your prompt, schema, or API definition into the input panel, select the input type and target model, and click <em>Scan for security issues</em>. The scanner runs entirely in your browser using JavaScript-based regex pattern matching. No data is transmitted to any server, so your proprietary prompts and API definitions stay completely private. Results appear instantly with a security score from 0 to 100, a findings table sorted by severity, and actionable guidance for each issue.</p>
+
+      <h3>Who This Tool Is For</h3>
+      <p>Whether you are an AI engineer building <a href="https://svivva.com" rel="noopener">production-grade AI applications</a>, a product manager reviewing prompt designs, or a security professional auditing LLM integrations, this scanner gives you a fast first-pass check. It works with prompts written for OpenAI GPT models, Anthropic Claude, Google Gemini, and any other LLM runtime.</p>
+
+      <h3>Built for Every AI Stack</h3>
+      <p>The scanner works with any LLM provider or framework. Whether you are writing system prompts for OpenAI's GPT-4, crafting instructions for Anthropic Claude, building with Google Gemini, or integrating an open-source model through a custom runtime, the same prompt security principles apply. Injection risks, data leakage, and missing guardrails are universal problems across every AI stack, and this tool helps you address them before shipping.</p>
+
+      <h3>From Scanning to Production with Svivva</h3>
+      <p>This scanner is a starting point. For teams that need to go further, <a href="https://svivva.com" rel="noopener">Svivva</a> provides a complete platform to turn prompts into production-ready APIs with automated testing, version control, real-time monitoring, and cost optimization. Scan a prompt here, then take it to <a href="https://svivva.com" rel="noopener">Svivva</a> to build, test, deploy, and iterate — all in one place. Start with a free scan, then move to <a href="https://svivva.com" rel="noopener">Svivva</a> when you are ready to ship secure AI to production.</p>
+    </div>
+  </section>
+
+  <footer class="cta-bar">
+    <p class="cta-copy">You just tested one prompt. In <a href="https://svivva.com" class="cta-inline-link" rel="noopener">Svivva</a> you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" class="cta-button" target="_blank" rel="noopener">Try Svivva for free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

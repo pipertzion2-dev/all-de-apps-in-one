@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>JSON Schema Validator & API Schema Management Tool | Svivva</title>
+  <meta name="description" content="Validate, version, and monitor JSON Schemas and OpenAPI definitions in production. Catch schema violations before your users do. Free to start — no credit card required." />
+
+  <link rel="canonical" href="https://svivva.com/json-schema-validator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://svivva.com/json-schema-validator" />
+  <meta property="og:title" content="JSON Schema Validator & API Schema Management | Svivva" />
+  <meta property="og:description" content="Stop shipping APIs that silently accept broken data. Svivva validates, versions, and monitors your JSON Schemas in production. Free to start." />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JSON Schema Validator & API Schema Management | Svivva" />
+  <meta name="twitter:description" content="Validate, version, and monitor JSON Schemas in production. Catch broken payloads before your users do. Free to start with Svivva." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Svivva — JSON Schema Validator & API Management",
+    "description": "Validate, version, and monitor JSON Schemas and OpenAPI definitions in production. Automated testing, schema versioning, and real-time request monitoring for API teams.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free tier available"
+    },
+    "url": "https://svivva.com",
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <style>
+    @font-face {
+      font-family: 'ZC';
+      src: url('fonts/Zc-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    :root {
+      --accent: #B45309;
+      --accent-light: #d46b1a;
+      --accent-bg: rgba(180, 83, 9, 0.08);
+      --accent-dark: #92400e;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --font: 'ZC', system-ui, sans-serif;
+      --max: 900px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); font-size: 16px; color: var(--text); background: #fff; line-height: 1.6; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 0.9rem;
+    }
+    .nav-links a { color: var(--text-muted); }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .btn-nav {
+      padding: 9px 20px;
+      background: var(--accent);
+      color: #fff !important;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .btn-nav:hover { background: var(--accent-light); text-decoration: none !important; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 72px 40px 64px;
+      text-align: center;
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-block;
+      padding: 14px 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background: var(--accent-light); text-decoration: none; }
+    .btn-secondary {
+      display: inline-block;
+      padding: 14px 28px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+    .hero-note {
+      margin-top: 14px;
+      font-size: 0.82rem;
+      color: #999;
+    }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .trust-strip span::before {
+      content: "✓ ";
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 64px 40px;
+    }
+    .section-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    section h2 {
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    section > .section-inner > p,
+    .section-inner > p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    /* ── PROBLEM CARDS ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .problem-card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fafafa;
+    }
+    .problem-card .icon {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .problem-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .problem-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── FEATURES ── */
+    .features-section { background: #fafafa; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 28px 24px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .feature-card .feat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--accent-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      counter-reset: steps;
+    }
+    .step {
+      counter-increment: steps;
+      padding: 28px 24px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-bg);
+      border-radius: 0 10px 10px 0;
+      position: relative;
+    }
+    .step-num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.25;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── FREE TOOL BRIDGE ── */
+    .bridge-section {
+      background: var(--text);
+      color: #fff;
+    }
+    .bridge-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .bridge-inner h2 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .bridge-inner p {
+      font-size: 0.95rem;
+      color: #aaa;
+      line-height: 1.65;
+      max-width: 500px;
+      margin: 0;
+    }
+    .btn-bridge {
+      display: inline-block;
+      padding: 13px 28px;
+      background: #fff;
+      color: var(--accent);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .btn-bridge:hover { background: var(--accent-bg); text-decoration: none; }
+
+    /* ── FAQ ── */
+    .faq-list {
+      display: grid;
+      gap: 16px;
+      max-width: 720px;
+    }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+    .faq-item h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .faq-item p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+    .faq-item a { color: var(--accent); }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: var(--accent);
+      text-align: center;
+    }
+    .final-cta h2 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    .final-cta p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.8);
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.65;
+    }
+    .btn-final {
+      display: inline-block;
+      padding: 15px 36px;
+      background: #fff;
+      color: var(--accent);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+    }
+    .btn-final:hover { background: #fef3c7; text-decoration: none; }
+    .final-note {
+      margin-top: 14px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .hero { padding: 48px 20px 40px; }
+      section { padding: 48px 20px; }
+      .bridge-inner { flex-direction: column; text-align: center; }
+      footer { justify-content: center; text-align: center; }
+      .trust-strip { padding: 14px 20px; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="https://svivva.com" rel="noopener">Svivva</a>
+    <div class="nav-links">
+      <a href="/">Free Schema Linter</a>
+      <a href="https://svivva.com" rel="noopener">Platform</a>
+      <a href="#how-it-works">How it works</a>
+      <a class="btn-nav" href="https://svivva.com" rel="noopener" target="_blank">Start Free</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" style="padding-bottom: 56px;">
+    <div class="hero-eyebrow">JSON Schema Validator &amp; API Schema Management</div>
+    <h1>Stop Shipping APIs That Accept <em>Broken Data</em></h1>
+    <p>Svivva validates, monitors, and versions your JSON Schemas and OpenAPI definitions in production — so you catch schema violations before your users do.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="https://svivva.com" rel="noopener" target="_blank">Start Free — No Credit Card</a>
+      <a class="btn-secondary" href="/">Try the Free Schema Linter</a>
+    </div>
+    <p class="hero-note">Works with JSON Schema Draft 4–7 &nbsp;·&nbsp; OpenAPI 3.x &nbsp;·&nbsp; GraphQL</p>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip">
+    <span>JSON Schema Draft 4–7</span>
+    <span>OpenAPI 3.x &amp; Swagger 2.0</span>
+    <span>Real-time request monitoring</span>
+    <span>Automated test generation</span>
+    <span>Schema versioning &amp; diffs</span>
+  </div>
+
+  <!-- PROBLEM -->
+  <section>
+    <div class="section-inner">
+      <p class="section-label">The Problem</p>
+      <h2>Loose Schemas Are Costing You More Than You Think</h2>
+      <p>Most teams ship schemas that are too permissive — and only discover it when something breaks in production. Here is what that looks like in practice.</p>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="icon">🚨</div>
+          <h3>Silent Bad Data</h3>
+          <p>Under-constrained schemas accept null values, missing required fields, and freeform strings where only three values are valid — then pass them straight to your database or downstream service.</p>
+        </div>
+        <div class="problem-card">
+          <div class="icon">🤖</div>
+          <h3>LLM Function Calls Fail</h3>
+          <p>When using OpenAI function calling or tool use, loose schemas cause hallucinated values and omitted required fields. Schema tightness directly determines how accurately AI agents call your API.</p>
+        </div>
+        <div class="problem-card">
+          <div class="icon">📉</div>
+          <h3>No Visibility in Production</h3>
+          <p>Without schema monitoring, you have no idea how many malformed requests are hitting your API daily — until a customer reports a bug or data corruption surfaces in your analytics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section">
+    <div class="section-inner">
+      <p class="section-label">The Solution</p>
+      <h2>Svivva Enforces Schema Tightness at Every Layer</h2>
+      <p>From your first draft to live production traffic, Svivva gives your team the tools to define, validate, and monitor your API schemas continuously — not just once.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feat-icon">🔍</div>
+          <h3>JSON Schema Validator</h3>
+          <p>Validate any JSON Schema or OpenAPI definition instantly. Get a tightness score, field-by-field breakdown, and concrete recommendations — in under a second.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">🧪</div>
+          <h3>Automated Test Generation</h3>
+          <p>Svivva generates test cases directly from your schema — covering required fields, type constraints, and enum boundaries. No manual test writing required.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">📦</div>
+          <h3>Schema Versioning &amp; Diffs</h3>
+          <p>Track every change to your schema with full version history and visual diffs. Catch breaking changes before they reach consumers. Works with OpenAPI and JSON Schema.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">📡</div>
+          <h3>Production Request Monitoring</h3>
+          <p>Monitor live API traffic against your schema in real time. Get alerted when a request violates your constraints — with the exact field and value that failed validation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="section-inner">
+      <p class="section-label">How It Works</p>
+      <h2>From Loose Schema to Production-Grade API in 3 Steps</h2>
+      <p>Svivva integrates into your existing workflow without changing how you write APIs. You bring the schema; Svivva handles validation, testing, and monitoring.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Score Your Schema</h3>
+          <p>Paste your JSON Schema or OpenAPI definition into the <a href="/">free JSON Schema Linter</a>. Get an instant tightness score and a prioritized list of exactly what to fix — required fields, type strictness, nesting depth.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Connect to Svivva</h3>
+          <p>Import your tightened schema into Svivva. Svivva auto-generates test cases, sets up version tracking, and connects to your API endpoint in minutes. No configuration files, no YAML boilerplate.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Monitor &amp; Iterate</h3>
+          <p>Ship with confidence. Svivva monitors every live request against your schema, surfaces violations in real time, and tracks how your schema evolves — so breaking changes never surprise you again.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE TOOL BRIDGE -->
+  <section class="bridge-section" style="padding: 48px 40px;">
+    <div class="bridge-inner">
+      <div>
+        <h2>Not sure how tight your schema is?</h2>
+        <p>Use the free JSON Schema Linter to get an instant 0–100 tightness score. Paste any JSON Schema, OpenAPI definition, or structured prompt — no account required, results in under a second.</p>
+      </div>
+      <a class="btn-bridge" href="/">Try the Free Linter &rarr;</a>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="section-inner">
+      <p class="section-label">FAQ</p>
+      <h2>Common Questions About JSON Schema Validation</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <h3>What is a JSON Schema validator?</h3>
+          <p>A JSON Schema validator checks whether a JSON document conforms to a schema definition — verifying required fields are present, types are correct, and values satisfy constraints like enums and ranges. The <a href="/">free linter on this site</a> goes a step further by scoring how tightly your schema is written and recommending specific improvements.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What is the difference between a JSON Schema linter and a validator?</h3>
+          <p>A validator checks data against a schema. A linter checks the schema itself — flagging missing required fields, overly permissive types, and deep nesting that will cause problems at runtime. Use the <a href="/">JSON Schema Linter</a> to improve your schema definition, then use Svivva to validate live traffic against it.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Does Svivva support OpenAPI 3.x and Swagger?</h3>
+          <p>Yes. Svivva supports JSON Schema Draft 4–7, OpenAPI 3.x, and Swagger 2.0. You can import a spec directly from a URL, paste it manually, or connect a GitHub repository for continuous schema tracking.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How does schema tightness affect LLM and AI tool calling?</h3>
+          <p>When using OpenAI function calling, Anthropic tool use, or any LLM agent framework, the model reads your schema to decide which fields to include and what values to generate. Loose schemas — with too many optional fields or vague string types — directly cause hallucinated values, missing required data, and function call failures. Tighter schemas produce more reliable AI agent behavior. See the <a href="/">free tightness scorer</a> to benchmark yours.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Is the JSON Schema Linter free to use?</h3>
+          <p>Yes. The <a href="/">JSON Schema Linter</a> is completely free, requires no account, and runs entirely in your browser. Your schema data is never stored. Svivva's production platform — for monitoring, versioning, and automated testing — has a free tier that you can <a href="https://svivva.com" rel="noopener">start with at any time</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="section-inner" style="text-align: center;">
+      <h2>Start shipping APIs that never accept broken data.</h2>
+      <p>Join teams using Svivva to validate, version, and monitor their JSON Schemas in production. Free to start. No credit card required.</p>
+      <a class="btn-final" href="https://svivva.com" rel="noopener" target="_blank">Get Started Free &rarr;</a>
+      <p class="final-note">Or start with the <a href="/" style="color: rgba(255,255,255,0.7); text-decoration: underline;">free JSON Schema Linter</a> — no account needed.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      <a href="https://svivva.com" rel="noopener" style="font-weight: 700; color: var(--accent);">Svivva</a>
+      &nbsp;—&nbsp; API Schema Management &amp; JSON Schema Validator
+    </div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <a href="/">JSON Schema Linter (free tool)</a>
+      <a href="https://svivva.com" rel="noopener">Platform</a>
+      <a href="https://svivva.com" rel="noopener">Pricing</a>
+    </div>
+  </footer>
+
+</body>
+</html>

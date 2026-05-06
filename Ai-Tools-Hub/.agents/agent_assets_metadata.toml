@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "bFQGxyjkH3F7wgCuvjaul"
+uri = "file://exports/svivva-tools-pitch.pdf"
+type = "pdf"
+title = "svivva-tools — YC-style brief"

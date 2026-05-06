@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free AI BOM Generator Online – Bill of Materials Tool | Svivva</title>
+  <meta name="description" content="Generate a bill of materials (BOM) from a short project description in seconds. Free AI BOM generator online—no signup required. Preview one step of the Svivva hardware pipeline, then run the full workflow with versioning, collaboration, and production-ready exports.">
+  <meta name="keywords" content="AI BOM generator, bill of materials generator, free BOM tool, hardware BOM, PCB BOM generator, electronic components list, Svivva">
+  <link rel="canonical" href="https://svivva.com/tools/ai-bom-generator">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free AI BOM Generator Online – Bill of Materials Tool | Svivva">
+  <meta property="og:description" content="Turn a short project brief into a production-style bill of materials in seconds. Free, no signup. Powered by Svivva.">
+  <meta property="og:url" content="https://svivva.com/tools/ai-bom-generator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free AI BOM Generator Online | Svivva">
+  <meta name="twitter:description" content="Generate a bill of materials from a short description. Free AI BOM tool—no signup required.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI BOM Generator",
+    "url": "https://svivva.com/tools/ai-bom-generator",
+    "description": "Free AI-powered bill of materials generator. Enter a project description and get a production-style BOM preview instantly—no signup required.",
+    "applicationCategory": "EngineeringApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the AI BOM Generator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The AI BOM Generator is a free, no-login tool that runs one isolated step of Svivva's real hardware pipeline. You submit a short project brief and get a production-style bill of materials preview so you can see what the full workflow offers before signing up."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the AI BOM Generator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can use it online without creating an account. The preview covers a single pipeline step. The full workflow with versioning, collaboration, and exports is available inside Svivva with a free trial."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool map to the Svivva platform?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each mode (Hardware, Play, Idea, Team, Marketplace, Build) corresponds to a specific part of Svivva. The AI BOM Generator previews the BOM extraction step of the hardware pipeline. In the full platform you get schematic sync, versioning, cost tracking, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of projects can I generate a BOM for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can describe any hardware or electronics project—MIDI controllers, sensor boards, IoT devices, robotics kits, audio gear, and more. The tool generates a preview BOM with part references, values, packages, quantities, and estimated costs."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <nav class="header-nav">
+        <a href="https://svivva.com" class="header-brand">Svivva</a>
+        <span class="header-sep">/</span>
+        <span class="header-tool-name">AI BOM Generator</span>
+        <div class="header-links">
+          <a href="https://svivva.com/platform">Platform</a>
+          <a href="https://svivva.com/docs">Docs</a>
+          <a href="https://svivva.com/pricing">Pricing</a>
+        </div>
+      </nav>
+      <h1 class="seo-h1">Free AI BOM Generator Online</h1>
+      <p class="intro-p">Turn a short project brief into a production-style bill of materials in seconds. This tool runs one step of <a href="https://svivva.com">Svivva's</a> real hardware pipeline so you can preview what the full platform delivers—no account, no install, no cost.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <h2 class="panel-title">Your brief</h2>
+        <form id="brief-form" class="brief-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Compact MIDI controller with 8 knobs, USB-C, open-source firmware" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label><span>Budget</span><input type="text" id="budget" name="budget" placeholder="e.g. $50"></label>
+            <label><span>Genre / type</span><input type="text" id="genre" name="genre" placeholder="e.g. synth"></label>
+            <label><span>Materials</span><input type="text" id="materials" name="materials" placeholder="e.g. PCB + enclosure"></label>
+            <label><span>Region</span><input type="text" id="region" name="region" placeholder="e.g. US"></label>
+            <label><span>Collaboration size</span><input type="text" id="collaborationSize" name="collaborationSize" placeholder="e.g. 3 people"></label>
+          </fieldset>
+
+          <button type="submit" class="btn-primary" id="generate-btn">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <h2 class="panel-title">Preview</h2>
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Enter a description and click <strong>Generate preview</strong> to see a production-style preview from one step of the Svivva workflow.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div id="preview-artifact" class="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div id="confidence-fill" class="confidence-fill"></div></div>
+            <span id="confidence-value" class="confidence-value">—%</span>
+          </div>
+          <p id="preview-explanation" class="preview-explanation"></p>
+          <div class="cta-block">
+            <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+            <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2 class="panel-title">Feature mapping</h2>
+        <div id="mapping-copy" class="mapping-copy">
+          <p>This playground runs <strong>one step</strong> of the <a href="https://svivva.com">Svivva</a> pipeline. Choose a mode to see which step is previewed.</p>
+          <ul>
+            <li><strong>Hardware</strong> — <a href="https://svivva.com/hardware">BOM extraction</a> from your concept.</li>
+            <li><strong>Play</strong> — <a href="https://svivva.com/play">Performance and session</a> preview.</li>
+            <li><strong>Idea</strong> — <a href="https://svivva.com/idea-engine">Idea Engine</a> concept stage.</li>
+            <li><strong>Team</strong> — <a href="https://svivva.com/collaboration">Collaboration and permissions</a> setup.</li>
+            <li><strong>Marketplace</strong> — <a href="https://svivva.com/marketplace">API publishing</a> flow.</li>
+            <li><strong>Build</strong> — <a href="https://svivva.com/build">B.U.I.L.D.</a> digital/physical flow.</li>
+          </ul>
+          <p>In the full platform you get versioning, collaboration, cost tracking, and production-ready exports for the entire workflow.</p>
+          <a href="https://svivva.com" class="link-internal">Explore all Svivva modules →</a>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="cta-bar">
+      <a href="https://svivva.com" class="cta-bar-link" id="cta-bar-link">Try Svivva free — run the full workflow with versioning, collaboration & production exports</a>
+    </footer>
+  </div>
+
+  <section class="seo-content block" aria-label="About the AI BOM Generator">
+    <h2 class="seo-content-h2">What is an AI BOM Generator?</h2>
+    <p>A bill of materials (BOM) is the backbone of every hardware project. It lists every component—resistors, capacitors, microcontrollers, connectors, PCBs—along with values, package sizes, quantities, and estimated costs. Traditionally, engineers build BOMs by hand in spreadsheets after finishing a schematic, a process that takes hours, invites copy-paste errors, and falls out of sync the moment a design changes.</p>
+    <p>An <strong>AI BOM generator</strong> flips that workflow. Instead of waiting until the schematic is complete, you describe your project in plain language—"compact MIDI controller with 8 rotary encoders, USB-C power, open-source firmware"—and the tool produces a preliminary BOM in seconds. The result is not a final production file, but it gives you an immediate sense of component count, cost envelope, and feasibility before you invest time in detailed design.</p>
+    <h3>How the Svivva AI BOM Generator works</h3>
+    <p>This free tool runs a single step of <a href="https://svivva.com">Svivva's</a> hardware pipeline: the BOM extraction stage. Enter a short brief, choose the <strong>Hardware</strong> mode, and click Generate. The engine returns a structured table with reference designators, part descriptions, values, packages, quantities, and estimated unit costs, plus a confidence score that indicates how complete the extraction is.</p>
+    <p>Because the tool is intentionally scoped to one pipeline step, it loads instantly, requires no signup, and works on any device. It is designed as a preview so you can evaluate the output quality before moving to the full <a href="https://svivva.com">Svivva platform</a>, where you get schematic synchronization, version-controlled BOMs, multi-user collaboration, cost tracking across suppliers, and production-ready exports in CSV, Excel, and pick-and-place formats.</p>
+    <h3>Beyond hardware: six modes for different project types</h3>
+    <p>While the BOM generator is the flagship mode, this playground also offers preview steps for five other parts of the Svivva ecosystem. <strong>Play</strong> mode previews audio session routing for musicians and producers. <strong>Idea</strong> mode runs the concept-validation stage of the <a href="https://svivva.com/idea-engine">Idea Engine</a>. <strong>Team</strong> mode maps collaboration roles and permissions. <strong>Marketplace</strong> mode outlines the API publishing flow. <strong>Build</strong> mode previews the <a href="https://svivva.com/build">B.U.I.L.D.</a> pipeline that bridges digital design and physical prototyping. Each mode returns a structured artifact and a confidence score, giving you a concrete taste of what the full workflow delivers.</p>
+    <h3>Who is this for?</h3>
+    <p>Hardware engineers, product designers, electronics hobbyists, startup founders scoping a new device, and procurement teams estimating early-stage costs. If you have ever wished you could get a rough BOM before opening your EDA tool, this is the starting point. When you are ready for the complete pipeline—schematic capture, real-time collaboration, supplier price comparison, and one-click manufacturing exports—<a href="https://svivva.com">sign up for Svivva free</a> and pick up right where the preview left off.</p>
+  </section>
+
+  <section class="faq block" aria-label="FAQ">
+    <h2 class="faq-h2">Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>What is the AI BOM Generator?</h3>
+        <p>The AI BOM Generator is a free, no-login tool that runs one isolated step of <a href="https://svivva.com">Svivva's</a> real hardware pipeline. You submit a short project brief and get a production-style bill of materials preview so you can see what the full workflow offers before signing up.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the AI BOM Generator really free?</h3>
+        <p>Yes. You can use it online without creating an account. The preview covers a single pipeline step. The full workflow with versioning, collaboration, and exports is available inside <a href="https://svivva.com">Svivva</a> with a free trial.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How does this tool map to the Svivva platform?</h3>
+        <p>Each mode (Hardware, Play, Idea, Team, Marketplace, Build) corresponds to a specific part of <a href="https://svivva.com">Svivva</a>. The AI BOM Generator previews the BOM extraction step of the hardware pipeline. In the full platform you get schematic sync, versioning, cost tracking, and production-ready exports.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What types of projects can I generate a BOM for?</h3>
+        <p>You can describe any hardware or electronics project—MIDI controllers, sensor boards, IoT devices, robotics kits, audio gear, and more. The tool generates a preview BOM with part references, values, packages, quantities, and estimated costs.</p>
+      </div>
+    </div>
+    <p class="faq-link"><a href="https://svivva.com">Svivva — explore the full platform →</a></p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://svivva.com">Svivva Home</a>
+        <a href="https://svivva.com/platform">Platform</a>
+        <a href="https://svivva.com/hardware">Hardware</a>
+        <a href="https://svivva.com/build">B.U.I.L.D.</a>
+        <a href="https://svivva.com/idea-engine">Idea Engine</a>
+        <a href="https://svivva.com/pricing">Pricing</a>
+        <a href="https://svivva.com/docs">Docs</a>
+        <a href="/landing">About this tool</a>
+      </div>
+      <p class="footer-copy">Built by <a href="https://svivva.com">Svivva</a>. Free AI BOM Generator — preview one step, then run the full workflow.</p>
+    </div>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

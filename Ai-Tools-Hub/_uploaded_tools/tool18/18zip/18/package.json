@@ -1,0 +1,13 @@
+{
+  "name": "ai-bom-generator-playground",
+  "version": "1.0.0",
+  "description": "Free AI BOM Generator Playground - preview one step of the Svivva workflow",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,30 @@
+kind = "web"
+  previewPath = "/"
+  title = "Cybersecurity Wavy"
+  version = "1.0.0"
+  id = "artifacts/cybersec-app"
+  router = "path"
+
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
+
+  [[services]]
+  name = "web"
+  paths = [ "/" ]
+  localPort = 24686
+
+  [services.development]
+  run = "pnpm --filter @workspace/cybersec-app run dev"
+
+  [services.production]
+  build = "pnpm --filter @workspace/cybersec-app run build && pip install -r backend/requirements.txt"
+  run = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1"
+
+  [services.production.health.startup]
+  path = "/health"
+
+  [services.env]
+  PORT = "24686"
+  BASE_PATH = "/"
+  

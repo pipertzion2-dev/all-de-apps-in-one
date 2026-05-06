@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+
+  <title>AI Test Case Generator — Free Online Tool | Svivva</title>
+  <meta name="description" content="Generate AI test cases instantly. Paste your prompt, JSON schema, or API definition and get testability scores, suggested test cases, and actionable coverage guidance. Free, no login required. Built by Svivva." />
+
+  <meta name="keywords" content="AI test case generator, AI testing tool, prompt testing, JSON schema test cases, API test generator, LLM testing, AI quality assurance, automated test generation, test case suggestions, GPT testing, Claude testing, Gemini testing, OpenAPI testing, free testing tool" />
+  <meta name="author" content="Svivva" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/ai-test-case-generator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI Test Case Generator — Free Online Tool | Svivva" />
+  <meta property="og:description" content="Paste your prompt, JSON schema, or API definition and instantly generate test cases with testability scoring. Free, no login. Built by Svivva." />
+  <meta property="og:url" content="https://svivva.com/tools/ai-test-case-generator" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Test Case Generator — Free Online Tool | Svivva" />
+  <meta name="twitter:description" content="Paste your prompt, JSON schema, or API definition and instantly generate test cases with testability scoring. Free, no login. Built by Svivva." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Test Case Generator",
+    "url": "https://svivva.com/tools/ai-test-case-generator",
+    "description": "Free online AI test case generator. Analyze prompts, JSON schemas, and API definitions to get testability scores and suggested test cases instantly.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is an AI test case generator?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An AI test case generator analyzes your prompts, schemas, or API definitions and automatically suggests test cases to validate behavior, coverage, and edge cases. It helps engineering teams ship reliable AI-powered features faster."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool score testability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool scores testability from 0 to 100 based on structure, placeholders, required fields, and endpoint definitions in your input. Higher scores mean the input is easier to test systematically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this AI test case generator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this tool is completely free with no login required. Paste your content, click Analyze, and get results in under 3 seconds."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="font-embed.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=6" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-brand">
+      <a href="https://svivva.com" class="brand-link" title="Svivva — AI-powered API platform">Svivva</a>
+      <span class="brand-sep">|</span>
+      <span class="brand-tool">Tools</span>
+    </div>
+    <h1 class="site-title">AI Test Case Generator</h1>
+    <p class="site-tagline">Paste your prompt, JSON schema, or API definition and instantly generate test cases with testability scoring. Free, no login required.</p>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <div class="input-group">
+        <label for="input-type">What are you testing?</label>
+        <select id="input-type" aria-describedby="input-type-hint">
+          <option value="prompt">Prompt</option>
+          <option value="schema">JSON Schema</option>
+          <option value="api">API definition (OpenAPI-style)</option>
+        </select>
+        <span id="input-type-hint" class="hint">Choose prompt, schema, or API to analyze.</span>
+      </div>
+      <div class="input-group">
+        <label for="model">Model / endpoint (optional)</label>
+        <select id="model">
+          <option value="generic">Generic LLM</option>
+          <option value="gpt-4">GPT-4</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="content">Paste or type your content</label>
+        <textarea id="content" rows="12" placeholder="Paste your prompt, JSON schema, or API YAML/JSON here…" aria-describedby="content-hint"></textarea>
+        <span id="content-hint" class="hint">We analyze locally; nothing is stored.</span>
+      </div>
+      <button type="button" id="analyze-btn" class="btn-primary">Generate Test Cases</button>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Click "Generate Test Cases" to see testability scores, suggested test cases, and structural analysis here.</p>
+      </div>
+      <div id="results" class="results-content" hidden>
+        <div id="score-cards" class="score-cards"></div>
+        <div id="results-table-wrap" class="table-wrap"></div>
+        <div id="results-viz" class="results-viz"></div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <div id="guidance" class="guidance-content">
+        <p><strong>What this tool does</strong></p>
+        <p>We parse your prompt, schema, or API definition and score testability, list variables and constraints, and suggest example test cases. Use this to quickly explore how testable your AI or API setup is.</p>
+        <p><strong>Tips</strong></p>
+        <ul>
+          <li>Clear placeholders (e.g. <code>{{variable}}</code>) improve test case generation.</li>
+          <li>Structured schemas produce more precise test suggestions.</li>
+          <li>In production, pair this with <a href="https://svivva.com" title="Svivva — automated API testing and monitoring">automated runs and versioning on Svivva</a>.</li>
+        </ul>
+        <div id="guidance-dynamic" class="guidance-dynamic"></div>
+      </div>
+    </aside>
+  </main>
+
+  <article class="seo-content" aria-label="About this AI test case generator">
+    <h2>What Is an AI Test Case Generator?</h2>
+    <p>An <strong>AI test case generator</strong> is a tool that analyzes your AI prompts, JSON schemas, and API definitions to automatically produce test case suggestions. Instead of manually writing every test, you paste your content and the generator identifies variables, required fields, endpoints, and structural patterns that need coverage. The result is a prioritized list of test cases — boundary tests, smoke tests, type validations, status code assertions — ready to implement in your test suite.</p>
+
+    <p>This matters because AI-powered features are notoriously difficult to test. Prompts change frequently, schemas evolve, and API contracts shift across versions. Without systematic test generation, teams ship regressions, miss edge cases, and lose confidence in their releases. An AI test case generator closes that gap by giving you structured, repeatable test suggestions the moment your input changes.</p>
+
+    <h2>How This Free Tool Works</h2>
+    <p>This <strong>free AI test case generator</strong> supports three input modes designed to cover the most common patterns in AI and API development:</p>
+
+    <ul>
+      <li><strong>Prompt analysis:</strong> Paste any LLM prompt and the tool detects placeholders like <code>{{variable}}</code>, task-like structures, and length patterns. It generates parameterized test cases for each variable, plus smoke tests for the full prompt. Works with GPT-4, Claude, Gemini, and any generic LLM format.</li>
+      <li><strong>JSON Schema analysis:</strong> Upload a JSON schema and the tool identifies required and optional fields, data types, and constraints. It suggests validation tests for each field — valid values, null inputs, empty strings, and type violations — so you can build comprehensive contract tests.</li>
+      <li><strong>API definition analysis:</strong> Paste an OpenAPI or Swagger-style definition and get endpoint-level test suggestions. The generator recommends path tests with valid and invalid payloads plus response code assertions for documented 2xx, 4xx, and 5xx status codes.</li>
+    </ul>
+
+    <p>Every analysis runs in under 3 seconds and produces a <strong>testability score</strong> from 0 to 100. The score reflects how structured, parameterized, and testable your input is. Higher scores mean more automated coverage is possible. Lower scores come with specific guidance on how to improve — add placeholders, attach schemas, or define response codes.</p>
+
+    <h2>Why Engineering Teams Use This</h2>
+    <p>Quality engineering for AI products is different from traditional software testing. Prompts are non-deterministic. Schemas change with every model update. API surfaces grow across versions. This tool gives engineering teams a fast way to audit testability before writing a single test, reducing wasted effort and catching structural gaps early.</p>
+
+    <p>Use it during prompt engineering to validate that your templates have enough structure for regression testing. Use it during API design reviews to ensure contracts are testable before development starts. Use it before releases to confirm your test coverage matches your current schema.</p>
+
+    <h2>Take It Further with Svivva</h2>
+    <p>This free tool gives you analysis and suggestions. <a href="https://svivva.com" title="Svivva — production-ready AI and API platform">Svivva</a> turns those suggestions into production-ready automated tests with versioning, monitoring, cost optimization, and continuous quality tracking. If you are building AI-powered APIs that need to be reliable at scale, <a href="https://svivva.com" title="Try Svivva for free">try Svivva for free</a> and go from test case suggestions to fully automated quality pipelines.</p>
+  </article>
+
+  <footer class="cta-bar" role="complementary">
+    <p class="cta-copy">You just generated test cases for one input. With <a href="https://svivva.com" title="Svivva">Svivva</a> you can automate testing, versioning, monitoring, and cost optimization for production AI and API workflows.</p>
+    <a id="cta-link" href="https://svivva.com" class="cta-button" title="Try Svivva for free">Try Svivva for Free</a>
+  </footer>
+
+  <footer class="site-footer">
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="https://svivva.com" title="Svivva home">Svivva Home</a>
+      <a href="https://svivva.com/tools" title="Free developer tools by Svivva">All Tools</a>
+    </nav>
+    <p class="footer-copy">Built by <a href="https://svivva.com" title="Svivva">Svivva</a> — production-ready AI and API infrastructure.</p>
+  </footer>
+
+  <script src="app.js?v=6"></script>
+</body>
+</html>

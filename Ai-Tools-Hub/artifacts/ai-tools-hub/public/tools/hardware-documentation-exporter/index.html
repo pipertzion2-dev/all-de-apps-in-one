@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Documentation Exporter | Free Online Tool | Svivva</title>
+  <meta name="description" content="Free hardware documentation exporter tool. Generate schematics, BOM tables, cost estimates, and production-style docs from your hardware concept in seconds. No login required. Powered by Svivva.">
+  <meta name="keywords" content="hardware documentation exporter, hardware documentation tool, free BOM generator, schematic exporter, hardware docs online, bill of materials generator, hardware production docs, Svivva">
+  <link rel="canonical" href="https://svivva.com/tools/hardware-documentation-exporter">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hardware Documentation Exporter — Free Online Tool | Svivva">
+  <meta property="og:description" content="Export schematics, BOM tables, and production-ready hardware docs from a concept description. Free, no login. Powered by Svivva.">
+  <meta property="og:url" content="https://svivva.com/tools/hardware-documentation-exporter">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hardware Documentation Exporter — Free Online Tool | Svivva">
+  <meta name="twitter:description" content="Export schematics, BOM tables, and production-ready hardware docs from a concept description. Free, no login.">
+
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Svivva">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hardware Documentation Exporter",
+    "url": "https://svivva.com/tools/hardware-documentation-exporter",
+    "description": "Free online tool to generate schematics, BOM tables, cost estimates, and production-style hardware documentation from a concept description.",
+    "applicationCategory": "EngineeringApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    },
+    "featureList": [
+      "BOM table generation",
+      "Schematic preview export",
+      "Cost estimation",
+      "Production readiness scoring",
+      "Flow graph generation",
+      "Idea report generation"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the Hardware Documentation Exporter do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It runs one isolated step of Svivva's real pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview—schematic, BOM table, flow graph, idea report, or setup map—plus a readiness indicator, so you can see how your docs map to the full Svivva workflow."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Hardware Documentation Exporter free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This exporter is completely free and requires no login or account. You can generate as many previews as you like. To run the full workflow with versioning, cost tracking, and production exports, use the main Svivva platform."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool map to the full Svivva workflow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool exposes one step of the Svivva pipeline (e.g. Concept to Schematic, Intent to Clip, Idea to Report). In Svivva, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports—with versioning and collaboration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of hardware documentation can I export?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool supports six modes: Hardware (schematic + BOM), Build (3D placeholder + BOM), Play (audio/setup map), Idea (idea report), Team (collaboration setup map), and Marketplace (flow graph). Each mode generates documentation tailored to that stage of hardware development."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this for BOM generation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. In Hardware and Build modes, the tool generates a Bill of Materials (BOM) table with estimated unit costs, quantities, and a total with contingency. For full BOM management with supplier data, version history, and cost tracking, use Svivva's complete hardware pipeline."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="fonts/Zc-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="panel panel-left">
+      <header class="panel-header">
+        <h1 class="page-title">Hardware Documentation Exporter</h1>
+        <p class="intro">Turn your hardware concept into a production-style preview in one step. Describe your product, build, or idea — get a schematic preview, BOM table, flow graph, or idea report instantly. No account needed.</p>
+      </header>
+
+      <form id="brief-form" class="brief-form">
+        <label for="description">Short description <span class="required">*</span></label>
+        <textarea id="description" name="description" rows="4" placeholder="e.g. Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM" required></textarea>
+
+        <label for="mode">Mode / category</label>
+        <select id="mode" name="mode">
+          <option value="hardware">Hardware</option>
+          <option value="play">Play</option>
+          <option value="idea">Idea</option>
+          <option value="team">Team</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="build">Build</option>
+        </select>
+
+        <fieldset class="constraints">
+          <legend>Optional constraints</legend>
+          <label for="budget">Budget</label>
+          <input type="text" id="budget" name="budget" placeholder="e.g. $150">
+          <label for="genre">Genre / style</label>
+          <input type="text" id="genre" name="genre" placeholder="e.g. ambient, modular">
+          <label for="materials">Materials</label>
+          <input type="text" id="materials" name="materials" placeholder="e.g. wood, aluminum">
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region" placeholder="e.g. EU, US">
+          <label for="collab-size">Collaboration size</label>
+          <input type="text" id="collab-size" name="collab_size" placeholder="e.g. 2–4 people">
+        </fieldset>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Export preview</button>
+      </form>
+    </aside>
+
+    <main class="panel panel-center">
+      <div class="preview-wrapper">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your hardware documentation preview will appear here.</p>
+          <p class="hint">Fill the form and click Export preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden></div>
+        <div id="readiness-bar" class="readiness-bar" hidden>
+          <span class="readiness-label">Readiness</span>
+          <div class="readiness-track"><div id="readiness-fill" class="readiness-fill"></div></div>
+          <span id="readiness-value" class="readiness-value">—</span>
+          <span id="readiness-badge" class="readiness-badge"></span>
+        </div>
+      </div>
+      <div class="cta-block cta-below-preview" id="cta-below-preview" hidden>
+        <p class="cta-primary-text">You've previewed one step. In <a href="https://svivva.com">Svivva</a> you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports.</p>
+        <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary" target="_blank" rel="noopener noreferrer">Open this preview inside a real Svivva project</a>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <div class="mapping-card">
+        <h2>This step in Svivva</h2>
+        <p id="mapping-explainer">Select a mode and run an export to see which exact step of the <a href="https://svivva.com">Svivva pipeline</a> this previews.</p>
+        <ul id="mapping-steps" class="mapping-steps"></ul>
+        <p class="upgrade-copy">In the <a href="https://svivva.com">full platform</a> you get: version history, team permissions, cost tracking, and export to production formats.</p>
+      </div>
+      <div class="faq-block">
+        <h2>FAQ</h2>
+        <details>
+          <summary>What does the Hardware Documentation Exporter do?</summary>
+          <p>It runs one isolated step of <a href="https://svivva.com">Svivva's</a> real pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview — schematic, BOM table, flow graph, idea report, or setup map — plus a readiness indicator, so you can see how your docs map to the full Svivva workflow.</p>
+        </details>
+        <details>
+          <summary>Is it free and do I need to sign up?</summary>
+          <p>Yes. This exporter is completely free and requires no login. You can generate previews as often as you like. To run the full workflow with versioning and cost tracking, use the main <a href="https://svivva.com">Svivva platform</a>.</p>
+        </details>
+        <details>
+          <summary>How does this map to the full Svivva workflow?</summary>
+          <p>This tool exposes one step (e.g. Concept → Schematic, Intent → Clip, Idea → Report). In <a href="https://svivva.com">Svivva</a>, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports — with versioning and collaboration.</p>
+        </details>
+        <details>
+          <summary>What types of hardware documentation can I export?</summary>
+          <p>The tool supports six modes: Hardware (schematic + BOM preview), Build (3D placeholder + BOM), Play (audio and setup map), Idea (idea report and doc summary), Team (collaboration setup map), and Marketplace (flow graph). Each mode generates documentation suited to that stage of <a href="https://svivva.com">hardware development in Svivva</a>.</p>
+        </details>
+        <details>
+          <summary>Can I use this for BOM generation?</summary>
+          <p>Yes. In Hardware and Build modes, the exporter generates a Bill of Materials table with estimated unit costs, quantities, and a total with contingency. For full BOM management with supplier data, version history, and cost tracking, use <a href="https://svivva.com">Svivva's complete hardware pipeline</a>.</p>
+        </details>
+        <details>
+          <summary>What is the readiness score?</summary>
+          <p>The readiness indicator shows how production-ready your documentation is based on how much detail you provide. Adding constraints like budget, materials, and region increases the score. In <a href="https://svivva.com">Svivva</a>, readiness tracking is integrated across every stage of your hardware pipeline.</p>
+        </details>
+        <p class="internal-link"><a href="https://svivva.com">Explore the main Svivva platform →</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="seo-content">
+    <div class="seo-content-inner">
+      <h2>Export Hardware Documentation in Seconds</h2>
+      <p>The Hardware Documentation Exporter is a free online tool built by <a href="https://svivva.com">Svivva</a> that lets hardware engineers, makers, and product designers generate production-style documentation from a simple concept description. Whether you are building a custom synthesizer, designing an IoT device, or prototyping consumer electronics, this tool gives you an instant preview of the documentation your project needs — including schematic layouts, bill of materials tables, cost estimates, and production readiness scores.</p>
+
+      <p>Most hardware teams spend hours setting up documentation before they can even evaluate whether a concept is viable. This exporter removes that friction. Describe your idea in plain language, set optional constraints like budget, materials, or region, and get a structured preview in under three seconds. The output includes a BOM table with estimated unit costs and quantities, a schematic placeholder showing where your design would sit in a real layout, and a readiness indicator that scores how complete your documentation is.</p>
+
+      <h3>Six Modes for Every Stage of Hardware Development</h3>
+      <p>The exporter supports six distinct modes, each tailored to a different stage of the hardware lifecycle. <strong>Hardware mode</strong> generates a schematic preview and BOM table for physical products. <strong>Build mode</strong> adds a 3D placeholder alongside the BOM for hands-on builds. <strong>Play mode</strong> creates audio and setup maps for music hardware and performance rigs. <strong>Idea mode</strong> produces an idea report with feasibility notes. <strong>Team mode</strong> generates collaboration setup maps for multi-person projects. <strong>Marketplace mode</strong> outputs a flow graph showing how your product fits into distribution and API workflows.</p>
+
+      <h3>From Preview to Production with Svivva</h3>
+      <p>This tool exposes a single step of the <a href="https://svivva.com">Svivva</a> platform's full hardware pipeline. In the complete workflow, you get version history for every document revision, team permissions and collaboration tools, real-time cost tracking against your budget, and export to production-ready formats. The same documentation you preview here becomes the foundation of a full project inside Svivva — with supplier data, schematic layout tools, digital twins, and handoff workflows built in.</p>
+
+      <p>Whether you are an independent maker evaluating a weekend project or an engineering team scoping a new product line, the Hardware Documentation Exporter gives you a fast, structured starting point. <a href="https://svivva.com">Try the full Svivva platform</a> to take your hardware documentation from concept to production.</p>
+    </div>
+  </section>
+
+  <footer class="sticky-cta-bar">
+    <p class="sticky-cta-text">Preview one step free. Run the full workflow in <a href="https://svivva.com">Svivva</a>.</p>
+    <a href="https://svivva.com" class="btn-sticky-cta" id="sticky-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

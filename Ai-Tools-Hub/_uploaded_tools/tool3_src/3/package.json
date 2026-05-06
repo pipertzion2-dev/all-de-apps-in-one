@@ -1,0 +1,17 @@
+{
+  "name": "llm-prompt-linter",
+  "version": "1.0.0",
+  "description": "Free LLM prompt linter tool — lint, score, and improve prompts. No login required.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "llm prompt linter",
+    "llm prompt linter tool",
+    "llm prompt linter online",
+    "llm prompt linter free",
+    "prompt engineering"
+  ]
+}

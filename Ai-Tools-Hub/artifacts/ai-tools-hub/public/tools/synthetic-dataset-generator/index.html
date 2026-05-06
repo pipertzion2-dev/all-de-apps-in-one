@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synthetic Dataset Generator — Free Online Tool | Create Test Data from Schema</title>
+  <meta name="description" content="Free synthetic dataset generator tool. Upload a prompt, schema, or API definition and get instant analysis, scoring, and sample data. No login required." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Synthetic Dataset Generator</h1>
+      <p class="tagline">Free online tool — create test data from your schema or prompt. No sign-up.</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <p class="microcopy">Paste a JSON schema, API spec, or a text prompt describing the data you need.</p>
+      <div class="input-tabs">
+        <button type="button" class="tab active" data-tab="schema">Schema / API</button>
+        <button type="button" class="tab" data-tab="prompt">Prompt</button>
+      </div>
+      <div class="tab-panel active" id="schema-panel">
+        <label for="schema-input" class="sr-only">JSON Schema or API definition</label>
+        <textarea id="schema-input" class="input-box" rows="12" placeholder='{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer"},"email":{"type":"string","format":"email"}}}'></textarea>
+      </div>
+      <div class="tab-panel" id="prompt-panel">
+        <label for="prompt-input" class="sr-only">Natural language prompt</label>
+        <textarea id="prompt-input" class="input-box" rows="12" placeholder="e.g. A list of 100 e-commerce orders with: order_id, customer_email, total_usd, status (pending|shipped|delivered), created_at"></textarea>
+      </div>
+      <div class="options-row">
+        <label for="model-select" class="option-label">Generation style</label>
+        <select id="model-select" class="select">
+          <option value="balanced">Balanced (default)</option>
+          <option value="realistic">Realistic names & values</option>
+          <option value="edge-cases">Include edge cases</option>
+        </select>
+      </div>
+      <div class="options-row">
+        <label for="row-count" class="option-label">Sample rows</label>
+        <input type="number" id="row-count" class="input-num" value="10" min="1" max="100" />
+      </div>
+      <button type="button" id="analyze-btn" class="btn-primary">Generate & analyze</button>
+    </aside>
+
+    <section class="panel panel-center">
+      <h2 class="panel-title">Results</h2>
+      <p class="microcopy">Scores, sample data, and field overview. Updates as you change input.</p>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Enter a schema or prompt and click <strong>Generate & analyze</strong> to see results here.</p>
+      </div>
+      <div id="results-content" class="results-content hidden">
+        <div class="score-cards" id="score-cards"></div>
+        <div class="chart-section">
+          <h3 class="subsection-title">Field overview</h3>
+          <div id="field-chart" class="field-chart"></div>
+        </div>
+        <div class="table-section">
+          <h3 class="subsection-title">Sample synthetic data</h3>
+          <div class="table-wrap">
+            <table id="sample-table" class="data-table"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="microcopy">How to read and use these results.</p>
+      <div id="guidance-static" class="guidance-block">
+        <h3>What we analyze</h3>
+        <ul>
+          <li><strong>Schema clarity</strong> — Are types and constraints clear?</li>
+          <li><strong>Field coverage</strong> — How many fields we can generate.</li>
+          <li><strong>Diversity score</strong> — Variety suggested for sample data.</li>
+        </ul>
+        <h3>Tips</h3>
+        <ul>
+          <li>Use JSON Schema for best results; we also accept OpenAPI-style <code>properties</code>.</li>
+          <li>For prompts, be specific: field names, types, and example values improve output.</li>
+          <li>Choose &quot;Include edge cases&quot; to stress-test validation and UI.</li>
+        </ul>
+      </div>
+      <div id="guidance-dynamic" class="guidance-block hidden"></div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. Try Svivva for free.</p>
+      <a href="https://svivva.com" class="cta-btn" target="_blank" rel="noopener">Try Svivva for free</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

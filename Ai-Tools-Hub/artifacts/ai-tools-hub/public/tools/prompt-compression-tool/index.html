@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prompt Compression Tool — Free Online | Compress Prompts for AI & APIs</title>
+  <meta name="description" content="Free prompt compression tool online. Analyze and compress prompts for AI, APIs, and prompt engineering. Get token estimates, redundancy scores, and optimization tips instantly." />
+  <link rel="preload" href="fonts/Zc-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Prompt Compression Tool</h1>
+      <p class="tagline">Free online tool — analyze and compress prompts for AI & APIs. No signup.</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <!-- Left: Input -->
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <label class="input-label" for="prompt-input">Paste your prompt, schema, or API definition</label>
+      <textarea id="prompt-input" class="prompt-textarea" placeholder="Paste or type your prompt here…" rows="12"></textarea>
+      <div class="input-options">
+        <label class="input-label">Model / tokenizer</label>
+        <select id="model-select" class="select" aria-label="Token estimation model">
+          <option value="gpt-4">GPT-4 / Claude (≈4 chars/token)</option>
+          <option value="gpt-3">GPT-3.5 (≈4 chars/token)</option>
+          <option value="generic">Generic (≈4 chars/token)</option>
+        </select>
+      </div>
+      <button type="button" id="analyze-btn" class="btn-primary">Analyze & compress</button>
+      <p class="helper">Paste any prompt or API doc. Analysis runs in your browser — nothing is sent to a server.</p>
+    </aside>
+
+    <!-- Center: Results -->
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p class="placeholder-text">Enter a prompt and click <strong>Analyze & compress</strong> to see token estimates, redundancy, and a compressed version.</p>
+      </div>
+      <div id="results-content" class="results-content" hidden>
+        <div class="metric-cards">
+          <div class="metric-card">
+            <span class="metric-value" id="metric-tokens">—</span>
+            <span class="metric-label">Est. tokens</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value" id="metric-score">—</span>
+            <span class="metric-label">Compression score</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value" id="metric-savings">—</span>
+            <span class="metric-label">Potential savings</span>
+          </div>
+        </div>
+        <div class="result-section">
+          <h3 class="result-heading">Compressed prompt</h3>
+          <div id="compressed-output" class="compressed-output"></div>
+          <button type="button" id="copy-compressed" class="btn-secondary">Copy compressed</button>
+        </div>
+        <div class="result-section">
+          <h3 class="result-heading">Redundancy highlights</h3>
+          <div id="redundancy-list" class="redundancy-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Guidance -->
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <div id="guidance-default" class="guidance-block">
+        <p><strong>What this tool does</strong></p>
+        <p>It estimates token usage, finds redundant or verbose phrasing, and suggests a shorter version of your prompt. Use it to cut cost and latency before calling AI or API endpoints.</p>
+        <p><strong>Compression score</strong></p>
+        <p>0–100: higher means more of the prompt could be shortened without losing meaning (repetition, filler, long instructions).</p>
+        <p><strong>In production</strong></p>
+        <p>Tools like <strong>Svivva</strong> turn optimized prompts into versioned APIs with tests, monitoring, and cost control.</p>
+      </div>
+      <div id="guidance-dynamic" class="guidance-block" hidden></div>
+    </aside>
+  </main>
+
+  <footer class="cta-bar">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. <a href="https://svivva.com" target="_blank" rel="noopener" class="cta-link">Try Svivva for free.</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

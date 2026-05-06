@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free API Latency Calculator – Estimate LLM & API Response Time Online | Svivva</title>
+  <meta name="description" content="Free API latency calculator. Paste your prompt, schema, or API definition and instantly estimate end-to-end response time, see a latency breakdown by component, and get optimization tips. No login required. Built by Svivva." />
+  <meta name="keywords" content="API latency calculator, API response time estimator, LLM latency calculator, GPT latency test, API performance tool, prompt latency estimator, API speed test, Svivva" />
+  <meta name="author" content="Svivva" />
+  <link rel="canonical" href="https://svivva.com/tools/api-latency-calculator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free API Latency Calculator – Estimate LLM & API Response Time" />
+  <meta property="og:description" content="Paste your prompt and schema to instantly estimate API latency, see a component breakdown, and get optimization tips. Free, no sign-up. Built by Svivva." />
+  <meta property="og:url" content="https://svivva.com/tools/api-latency-calculator" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free API Latency Calculator – Estimate LLM & API Response Time" />
+  <meta name="twitter:description" content="Instant API latency estimation with component breakdown and optimization tips. Free, no login. Built by Svivva." />
+
+  <meta name="robots" content="index, follow" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "API Latency Calculator",
+    "url": "https://svivva.com/tools/api-latency-calculator",
+    "description": "Free online tool to estimate API and LLM latency. Paste your prompt and schema, choose a model, and get an instant latency breakdown with optimization tips.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does the API latency calculator work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The calculator estimates end-to-end API latency by analyzing your prompt length, response schema complexity, and model selection. It breaks the total latency into three components — network round-trip time, serialization overhead, and model inference time — and gives you a score from 0 to 100."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this API latency tool free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The API Latency Calculator is completely free with no sign-up or login required. It runs entirely in your browser."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which LLM models are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool supports GPT-4, GPT-4 Turbo, GPT-3.5 Turbo, and Claude 3. Each model has different inference characteristics that affect the latency estimate."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="https://svivva.com" class="header-brand" rel="noopener" target="_blank">Svivva</a>
+      <nav class="header-nav" aria-label="Main navigation">
+        <a href="https://svivva.com/tools" target="_blank" rel="noopener">All Tools</a>
+        <a href="https://svivva.com" class="nav-cta" target="_blank" rel="noopener">Get Svivva Free</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 class="hero-h1">API Latency Calculator</h1>
+    <p class="hero-sub">Estimate end-to-end latency for any LLM prompt, response schema, and API configuration. Paste your inputs, pick a model, and get an instant latency breakdown with a score and optimization tips — free, no sign-up required.</p>
+  </section>
+
+  <main class="three-panel">
+    <section class="panel left-panel" aria-label="Input">
+      <h2 class="panel-title">Input</h2>
+      <form id="analyze-form" class="input-form">
+        <label class="label" for="prompt">Prompt or request body</label>
+        <textarea id="prompt" name="prompt" rows="5" placeholder="Paste your system/user prompt or API request body here…" class="input-text"></textarea>
+
+        <label class="label" for="schema">Response schema (optional JSON)</label>
+        <textarea id="schema" name="schema" rows="4" placeholder='{"type":"object","properties":{…}}' class="input-text font-mono"></textarea>
+
+        <label class="label" for="model">Model</label>
+        <select id="model" name="model" class="input-select">
+          <option value="gpt-4">GPT-4</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="claude-3">Claude 3</option>
+        </select>
+
+        <label class="label" for="api-config">API config (optional)</label>
+        <input type="text" id="api-config" name="apiConfig" placeholder="e.g. POST /v1/chat/completions" class="input-text" />
+
+        <button type="submit" class="btn-primary" id="submit-btn">Calculate Latency</button>
+      </form>
+    </section>
+
+    <section class="panel center-panel" aria-label="Results">
+      <h2 class="panel-title">Results</h2>
+      <div id="results-placeholder" class="results-placeholder">
+        <p class="micro-copy">Enter a prompt and click "Calculate Latency" to see your estimated latency breakdown and score.</p>
+      </div>
+      <div id="results-content" class="results-content hidden">
+        <div class="score-block">
+          <span class="score-label">Latency score</span>
+          <span class="score-value" id="score-value">—</span>
+          <span class="score-suffix">/ 100</span>
+        </div>
+        <p class="total-latency" id="total-latency">—</p>
+        <div class="chart-container" id="chart-container"></div>
+        <table class="breakdown-table" id="breakdown-table" aria-label="Latency breakdown"></table>
+      </div>
+      <div id="results-loading" class="results-loading hidden">Analyzing…</div>
+      <div id="results-error" class="results-error hidden"></div>
+    </section>
+
+    <section class="panel right-panel" aria-label="Guidance">
+      <h2 class="panel-title">Guidance</h2>
+      <div id="guidance-default" class="guidance-block">
+        <p class="micro-copy">This tool estimates API latency from your prompt length, response schema, and model. Use it to compare configurations before deploying.</p>
+        <ul class="tips-list">
+          <li>Shorter prompts and simpler schemas usually mean lower latency.</li>
+          <li>Larger models add inference time; smaller models can cut latency when quality allows.</li>
+          <li>In production, measure p50/p95 with real traffic and use monitoring.</li>
+        </ul>
+      </div>
+      <div id="guidance-interpretation" class="guidance-block hidden">
+        <p class="micro-copy" id="guidance-summary">—</p>
+        <p class="micro-copy tips-title">Suggestions</p>
+        <ul class="tips-list" id="guidance-tips"></ul>
+      </div>
+      <div class="guidance-cta">
+        <p class="micro-copy">Need production-grade latency monitoring? <a href="https://svivva.com" class="cta-link" target="_blank" rel="noopener">Try Svivva</a> — automated tests, versioning, and real-time API performance tracking.</p>
+      </div>
+    </section>
+  </main>
+
+  <article class="seo-content" aria-label="About this tool">
+    <div class="seo-inner">
+      <h2>What Is an API Latency Calculator?</h2>
+      <p>An API latency calculator is a tool that estimates the total time it takes for an API call to complete — from the moment a request leaves your application to the moment a response arrives. For teams building on large language models like GPT-4, GPT-3.5 Turbo, or Claude 3, latency is one of the most critical performance metrics. High latency degrades user experience, increases timeout rates, and drives up infrastructure costs. This free calculator built by <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> helps you estimate and optimize latency before you write a single line of production code.</p>
+
+      <h2>How the Latency Estimate Works</h2>
+      <p>The calculator breaks your estimated end-to-end latency into three components. <strong>Network round-trip time (RTT)</strong> accounts for the time your request spends traveling to the API endpoint and back — influenced by payload size and geographic distance. <strong>Serialization overhead</strong> measures the cost of encoding and decoding your request and response, which increases with complex JSON schemas. <strong>Model inference time</strong> is the largest contributor for most LLM calls and scales with input token count and model size. The tool uses your prompt length, schema complexity, and model selection to produce a deterministic, p95-style latency estimate in milliseconds, plus a score from 0 to 100.</p>
+
+      <h2>Why Latency Matters for LLM-Powered APIs</h2>
+      <p>When you integrate a large language model into a product, every millisecond of latency is felt by your users. Chat interfaces stall. Auto-complete features lag. Agentic workflows time out. Even small optimizations — trimming prompt length, simplifying response schemas, or choosing a faster model — can reduce p95 latency by 20–40%. This calculator gives you a fast way to compare different configurations side by side so you can find the right trade-off between quality and speed. It is designed for engineers, architects, and technical product managers who want to make informed decisions about their API stack before deploying to production.</p>
+
+      <h2>When to Use This Tool</h2>
+      <p>Use the API Latency Calculator during design and prototyping — before you commit to a prompt structure, schema shape, or model. Run multiple scenarios to see how latency changes when you shorten a system prompt, flatten a nested response schema, or swap GPT-4 for GPT-3.5 Turbo. The optimization tips generated alongside each estimate give you concrete, actionable suggestions to reduce latency. If you need to go further — with automated latency testing, version-controlled prompts, real-time monitoring, and cost optimization across your entire API surface — <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a> turns this single-prompt workflow into a full production pipeline.</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>How accurate is the latency estimate?</h3>
+      <p>The calculator produces a deterministic, p95-style estimate based on prompt length, schema size, and model characteristics. It is designed for relative comparison — helping you see which configuration is faster — rather than predicting exact production latency, which depends on server load, network conditions, and provider-side queuing.</p>
+
+      <h3>Do I need an API key or account?</h3>
+      <p>No. The tool runs entirely in your browser. No API keys, no login, no data sent to third parties. Your prompts and schemas stay on your machine.</p>
+
+      <h3>Can I use this for non-LLM APIs?</h3>
+      <p>The calculator is optimized for LLM API calls, but the latency components — network RTT, serialization, and processing time — apply to any REST or RPC endpoint. You can use it as a rough estimator for any API where payload size and processing complexity are the main latency drivers.</p>
+    </div>
+  </article>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-cta">
+        <p>You just estimated latency for one prompt. With <a href="https://svivva.com" class="cta-link" target="_blank" rel="noopener">Svivva</a>, you can turn this into a production-ready API with automated tests, versioning, real-time monitoring, and cost optimization.</p>
+        <a href="https://svivva.com" class="btn-primary footer-btn" target="_blank" rel="noopener">Try Svivva for Free</a>
+      </div>
+      <div class="footer-links">
+        <a href="https://svivva.com" target="_blank" rel="noopener">Svivva Home</a>
+        <a href="https://svivva.com/tools" target="_blank" rel="noopener">All Tools</a>
+        <a href="https://svivva.com/blog" target="_blank" rel="noopener">Blog</a>
+        <a href="https://svivva.com/docs" target="_blank" rel="noopener">Docs</a>
+      </div>
+      <p class="footer-copy">Built by <a href="https://svivva.com" target="_blank" rel="noopener">Svivva</a></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

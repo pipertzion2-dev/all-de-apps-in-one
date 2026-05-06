@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Chord Progression Generator | Create Chord Progressions Online — Svivva</title>
+  <meta name="description" content="Generate chord progressions instantly with this free online chord progression generator. Describe your musical idea, pick a genre, and get production-ready chords in seconds. No signup required. Powered by Svivva Play.">
+  <meta name="keywords" content="chord progression generator, free chord generator, online chord maker, chord progression maker, music chord generator, chord builder, Svivva Play">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/chord-progression-generator">
+
+  <meta property="og:title" content="Free Chord Progression Generator — Svivva">
+  <meta property="og:description" content="Generate chord progressions instantly. Describe your musical idea, pick a genre, and get production-ready chords in seconds. No signup required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://svivva.com/tools/chord-progression-generator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free Chord Progression Generator — Svivva">
+  <meta name="twitter:description" content="Generate chord progressions instantly. Describe your idea, pick a genre, get chords. No signup required.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Chord Progression Generator",
+    "url": "https://svivva.com/tools/chord-progression-generator",
+    "description": "Generate chord progressions instantly from a text description. Choose a genre, describe your musical idea, and get production-ready chord sets in seconds.",
+    "applicationCategory": "MusicApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is this chord progression generator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This chord progression generator is completely free and does not require an account or signup. You can generate as many chord progressions as you like. The full Svivva platform offers additional features like versioning, collaboration, and production-ready exports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this chord generator work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Describe your musical idea in plain language — for example, 'upbeat pop chorus' or 'moody jazz progression' — and the generator matches your description to production-style chord sets. You can also specify a genre and mode for more targeted results."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use the generated chord progressions in my music?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool previews one step of the Svivva Play pipeline. For production use, versioning, team collaboration, and export-ready stems and notation, open your progression inside a full Svivva project."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What genres does the chord progression generator support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The generator supports pop, jazz, electronic, moody/minor, and upbeat/major styles. It analyzes keywords in your description to select the best chord palette for your intent."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Svivva Play?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Svivva Play is a module within the Svivva platform that handles music creation workflows — from chord generation to arrangement, collaboration, and production-ready exports. This free tool exposes one step of that pipeline so you can try it without signing up."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <!-- Left panel: inputs -->
+    <aside class="panel panel-left">
+      <header class="panel-header">
+        <h2 class="panel-title">Chord Progression Generator</h2>
+      </header>
+      <form id="brief-form" class="brief-form">
+        <label for="description">Short description <span class="required">*</span></label>
+        <textarea id="description" name="description" rows="4" placeholder="e.g. Upbeat pop chorus, moody minor progression for a hardware demo, 4-bar loop for a team video…" required></textarea>
+
+        <label for="mode">Mode / category</label>
+        <select id="mode" name="mode">
+          <option value="play">Play</option>
+          <option value="hardware">Hardware</option>
+          <option value="idea">Idea</option>
+          <option value="team">Team</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="build">Build</option>
+        </select>
+
+        <fieldset class="constraints">
+          <legend>Optional constraints</legend>
+          <label for="genre">Genre</label>
+          <input type="text" id="genre" name="genre" placeholder="e.g. Pop, Jazz, Electronic">
+
+          <label for="budget">Budget</label>
+          <input type="text" id="budget" name="budget" placeholder="e.g. Low, Mid, Pro">
+
+          <label for="materials">Materials</label>
+          <input type="text" id="materials" name="materials" placeholder="e.g. Synth, guitar, DAW">
+
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region" placeholder="e.g. US, EU">
+
+          <label for="collab-size">Collaboration size</label>
+          <input type="text" id="collab-size" name="collab_size" placeholder="e.g. Solo, 2–5, 5+">
+        </fieldset>
+
+        <button type="submit" class="btn-primary" id="generate-btn">Generate preview</button>
+      </form>
+    </aside>
+
+    <!-- Center panel: preview -->
+    <section class="panel panel-center">
+      <header class="panel-header">
+        <h2 class="panel-title">Preview</h2>
+      </header>
+      <div id="preview-area" class="preview-area">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Submit a short description and optional constraints, then click <strong>Generate preview</strong> to see your chord progression and how it maps to Svivva Play.</p>
+        </div>
+        <div id="preview-content" class="preview-content hidden">
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value">—%</span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+      </div>
+      <div id="cta-block" class="cta-block hidden">
+        <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+        <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+      </div>
+    </section>
+
+    <!-- Right panel: feature mapping -->
+    <aside class="panel panel-right">
+      <header class="panel-header">
+        <h2 class="panel-title">Svivva mapping</h2>
+      </header>
+      <div class="mapping-content">
+        <p>This tool runs <strong>one isolated step</strong> of Svivva’s real pipeline: chord generation from your brief.</p>
+        <p>In the full Svivva Play workflow you can:</p>
+        <ul>
+          <li>Version and branch chord sets</li>
+          <li>Collaborate with your team on arrangements</li>
+          <li>Track cost and usage per project</li>
+          <li>Export production-ready stems and notation</li>
+          <li>Connect to Hardware, Idea Engine, and B.U.I.L.D. flows</li>
+        </ul>
+        <p class="mapping-note">The preview above shows what this single step produces; the rest of the pipeline is available inside Svivva.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Sticky bottom CTA bar -->
+  <footer class="sticky-cta-bar">
+    <a href="https://svivva.com" class="sticky-cta-link" id="sticky-cta">Try Svivva free — run the full workflow</a>
+  </footer>
+
+  <article class="seo-block">
+    <h1>Free Chord Progression Generator</h1>
+    <p class="intro">Need a chord progression fast — for a track, a hardware demo, a product video, or just to get unstuck creatively? This free chord progression generator lets you describe your musical idea in plain language and get a production-style chord set in seconds. No signup, no login, no paywall.</p>
+
+    <section class="seo-body">
+      <h2>How the Chord Progression Generator Works</h2>
+      <p>Most chord generators give you random output or force you to click through music theory menus. This one works differently. You describe what you want in your own words — something like "upbeat pop chorus," "moody minor progression for a product demo," or "jazzy four-bar loop" — and the generator analyzes your description to select a chord palette that fits your intent.</p>
+      <p>You can also specify a genre (pop, jazz, electronic, and more) and a mode to shape the output further. The tool evaluates your brief and returns a chord progression along with a readiness score, so you know how well your description mapped to a usable result. The entire process takes less than a second.</p>
+
+      <h2>Who This Tool Is For</h2>
+      <p>This chord progression generator is built for songwriters, producers, content creators, and anyone who needs chords quickly without diving into theory. Whether you are sketching a hook for a demo, scoring a short video, prototyping a hardware synth patch, or brainstorming with a collaborator, this tool gives you a starting point you can build on.</p>
+      <p>It is also useful for teams working on creative projects together. Describe your concept, generate a chord set, and share the result as a reference point — all without creating an account or installing any software.</p>
+
+      <h2>What You Get vs. the Full Svivva Workflow</h2>
+      <p>This free tool runs one real step from the <a href="https://svivva.com/play">Svivva Play</a> pipeline: chord generation from a brief. It is the same logic that powers the first stage of a full Svivva project. The difference is scope. Here you get a single chord set. Inside <a href="https://svivva.com">Svivva</a>, that chord set feeds into a complete workflow where you can version and branch progressions, collaborate with your team on arrangements, track costs per project, export production-ready stems and notation, and connect your work to other Svivva modules like <a href="https://svivva.com">Hardware</a>, <a href="https://svivva.com">Idea Engine</a>, and <a href="https://svivva.com">B.U.I.L.D.</a>.</p>
+      <p>Think of this tool as a window into what Svivva can do. If the chord output is useful, the full platform gives you everything you need to take it from idea to finished production.</p>
+
+      <h2>Supported Genres and Styles</h2>
+      <p>The generator currently supports pop, jazz, electronic, moody/minor, and upbeat/major chord palettes. It reads keywords from your description — words like "bright," "dark," "swing," "synth," or "hook" — and selects the best matching progression. More styles and custom tuning options are available inside <a href="https://svivva.com/play">Svivva Play</a>.</p>
+    </section>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <details>
+        <summary>Is this chord progression generator really free?</summary>
+        <p>Yes. This tool is completely free and requires no account or signup. Generate as many chord progressions as you want. The full <a href="https://svivva.com">Svivva</a> platform offers additional capabilities like versioning, team collaboration, and production exports.</p>
+      </details>
+      <details>
+        <summary>How does this chord generator work?</summary>
+        <p>Describe your musical idea in plain language — for example, "upbeat pop chorus" or "moody jazz loop" — and the generator matches your description to production-style chord sets. You can also specify a genre and mode for more targeted results.</p>
+      </details>
+      <details>
+        <summary>Can I use the generated chord progressions in my music?</summary>
+        <p>This tool previews one step of the <a href="https://svivva.com/play">Svivva Play</a> pipeline. For production use, versioning, team collaboration, and export-ready stems and notation, open your progression inside a full <a href="https://svivva.com">Svivva project</a>.</p>
+      </details>
+      <details>
+        <summary>What genres does the chord progression generator support?</summary>
+        <p>The generator supports pop, jazz, electronic, moody/minor, and upbeat/major styles. It analyzes keywords in your description to select the best chord palette. Additional styles and fine-tuning are available in <a href="https://svivva.com/play">Svivva Play</a>.</p>
+      </details>
+      <details>
+        <summary>What is Svivva Play?</summary>
+        <p><a href="https://svivva.com/play">Svivva Play</a> is a module within the <a href="https://svivva.com">Svivva</a> platform for music creation workflows — from chord generation to arrangement, collaboration, and production-ready exports. This free tool exposes one step of that pipeline so you can try it without signing up.</p>
+      </details>
+    </section>
+
+    <div class="seo-cta">
+      <p>Ready to go beyond a single chord set? <a href="https://svivva.com">Try Svivva free</a> and run the full creative workflow — versioning, collaboration, cost tracking, and production-ready exports included.</p>
+    </div>
+
+    <nav class="internal-links">
+      <p>Explore more from Svivva:</p>
+      <ul>
+        <li><a href="https://svivva.com/play">Svivva Play</a> — performance modes, arrangement tools, and integrations</li>
+        <li><a href="https://svivva.com/projects">Svivva Projects</a> — open this preview inside a real project</li>
+        <li><a href="https://svivva.com">Svivva Home</a> — the full platform for creative and technical workflows</li>
+      </ul>
+    </nav>
+  </article>
+
+  <script src="app.js"></script>
+</body>
+</html>

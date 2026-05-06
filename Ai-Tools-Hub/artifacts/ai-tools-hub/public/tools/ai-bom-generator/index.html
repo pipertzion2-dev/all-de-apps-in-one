@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI BOM Generator Playground – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free AI BOM generator playground online. Preview one step of the Svivva workflow: generate BOMs, schematics, and idea reports—no signup. Try the full workflow in Svivva.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- zc regular: use local font or fallback; set --font-primary to your zc font-family -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1 class="seo-h1">AI BOM Generator Playground</h1>
+      <p class="intro-p">Turn a short brief into a production-style preview in one step—no account required. This tool runs a single step of Svivva’s real pipeline so you can see what’s possible before committing to the full platform.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <h2 class="panel-title">Your brief</h2>
+        <form id="brief-form" class="brief-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Compact MIDI controller with 8 knobs, USB-C, open-source firmware" required></textarea>
+
+          <label for="mode">Mode / category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label><span>Budget</span><input type="text" id="budget" name="budget" placeholder="e.g. $50"></label>
+            <label><span>Genre / type</span><input type="text" id="genre" name="genre" placeholder="e.g. synth"></label>
+            <label><span>Materials</span><input type="text" id="materials" name="materials" placeholder="e.g. PCB + enclosure"></label>
+            <label><span>Region</span><input type="text" id="region" name="region" placeholder="e.g. US"></label>
+            <label><span>Collaboration size</span><input type="text" id="collaborationSize" name="collaborationSize" placeholder="e.g. 3 people"></label>
+          </fieldset>
+
+          <button type="submit" class="btn-primary" id="generate-btn">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <h2 class="panel-title">Preview</h2>
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Enter a description and click <strong>Generate preview</strong> to see a production-style preview from one step of the Svivva workflow.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div id="preview-artifact" class="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div id="confidence-fill" class="confidence-fill"></div></div>
+            <span id="confidence-value" class="confidence-value">—%</span>
+          </div>
+          <p id="preview-explanation" class="preview-explanation"></p>
+          <div class="cta-block">
+            <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary">You’ve previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+            <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2 class="panel-title">Feature mapping</h2>
+        <div id="mapping-copy" class="mapping-copy">
+          <p>This playground runs <strong>one step</strong> of the Svivva pipeline. Choose a mode to see which step is previewed.</p>
+          <ul>
+            <li><strong>Hardware</strong> → BOM extraction from your concept.</li>
+            <li><strong>Play</strong> → Performance/session preview.</li>
+            <li><strong>Idea</strong> → Idea Engine concept stage.</li>
+            <li><strong>Team</strong> → Collaboration & permissions setup.</li>
+            <li><strong>Marketplace</strong> → API publishing flow.</li>
+            <li><strong>Build</strong> → B.U.I.L.D. digital/physical flow.</li>
+          </ul>
+          <p>In the full platform you get versioning, collaboration, cost tracking, and production-ready exports for the entire workflow.</p>
+          <a href="https://svivva.com" class="link-internal">Explore Svivva modules →</a>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="cta-bar">
+      <a href="https://svivva.com" class="cta-bar-link" id="cta-bar-link">Try Svivva free — run the full workflow with versioning, collaboration & production exports</a>
+    </footer>
+  </div>
+
+  <section class="faq block" aria-label="FAQ">
+    <h2 class="faq-h2">FAQ</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>What is the AI BOM Generator Playground?</h3>
+        <p>The playground is a free, no-login tool that runs one isolated step of Svivva’s real pipeline. You submit a short brief and get a production-style preview (e.g. BOM table, idea report, or flow) so you can see what the full workflow offers before signing up.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the AI BOM Generator Playground really free?</h3>
+        <p>Yes. You can use it online without creating an account. The preview is a single step; the full workflow with versioning, collaboration, and exports is available inside Svivva (free trial available).</p>
+      </div>
+      <div class="faq-item">
+        <h3>How does this map to Svivva?</h3>
+        <p>Each mode (Hardware, Play, Idea, Team, Marketplace, Build) corresponds to a specific part of Svivva. The right panel and the preview explanation show which step you’re seeing and what additional steps exist in the full platform.</p>
+      </div>
+    </div>
+    <p class="faq-link"><a href="https://svivva.com">Svivva — full platform</a></p>
+  </section>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

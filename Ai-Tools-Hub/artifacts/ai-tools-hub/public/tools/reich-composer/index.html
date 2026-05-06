@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reich Composer — Steve Reich Style Music Generator | Svivva</title>
+  <meta name="description" content="Generate Steve Reich-style phasing and counterpoint music in the browser. Pick a scale, tempo, and style — then listen to minimalist patterns play live. Free music tool by Svivva." />
+  <meta name="robots" content="index, follow" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #5eb8ff;
+      --accent-dim: #3d8fd9;
+      --good: #6bcf7f;
+      --warn: #e8c547;
+      --bad: #ff7b7b;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(165deg, #0f1419 0%, #151d2e 50%, #0f1419 100%);
+      color: var(--text);
+      font-family: "SF Pro Text", system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+    header { margin-bottom: 1.75rem; }
+    header h1 { font-size: 1.65rem; font-weight: 650; letter-spacing: -0.02em; margin: 0 0 0.35rem; }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1.1rem;
+    }
+    .card h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 1rem; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.35rem; }
+    select, input[type="range"] {
+      width: 100%;
+      background: #0f1419;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.9rem;
+    }
+    input[type="range"] { padding: 0.3rem 0; cursor: pointer; }
+    .range-row { display: flex; align-items: center; gap: 0.75rem; }
+    .range-row span { min-width: 2.5rem; text-align: right; font-size: 0.85rem; color: var(--accent); font-weight: 500; }
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    button {
+      font: inherit;
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #0f1419; }
+    .btn-danger { background: var(--bad); color: #fff; }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text); }
+    .vis-wrap {
+      background: #0a0f18;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    canvas { display: block; width: 100%; height: 120px; }
+    .voice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .voice-strip {
+      background: #0a0f18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .voice-strip .vname { color: var(--text); font-weight: 600; font-size: 0.78rem; margin-bottom: 0.3rem; }
+    .note-cells { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 0.3rem; }
+    .note-cell {
+      width: 16px; height: 16px; border-radius: 3px;
+      background: var(--border);
+      transition: background 0.05s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; color: transparent;
+    }
+    .note-cell.active { background: var(--accent); color: #0f1419; }
+    .status-bar {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: #0a0f18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+    }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.1s; }
+    .pulse.playing { background: var(--good); animation: throb 1s infinite; }
+    @keyframes throb { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .info-row { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; }
+    .info-row span strong { color: var(--text); }
+    .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.72rem; background: rgba(94,184,255,0.12); border: 1px solid rgba(94,184,255,0.3); color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Reich Composer</h1>
+    <p>Generate Steve Reich–style phasing and counterpoint patterns live in the browser using any scale.</p>
+  </header>
+
+  <div class="card">
+    <h2>Configuration</h2>
+    <div class="grid3">
+      <div>
+        <label>Root note</label>
+        <select id="selRoot">
+          <option>C</option><option>C#</option><option>D</option><option>Eb</option>
+          <option>E</option><option>F</option><option>F#</option><option>G</option>
+          <option>Ab</option><option>A</option><option>Bb</option><option>B</option>
+        </select>
+      </div>
+      <div>
+        <label>Scale / Mode</label>
+        <select id="selScale">
+          <option value="major">Major (Ionian)</option>
+          <option value="minor">Natural Minor</option>
+          <option value="dorian" selected>Dorian</option>
+          <option value="phrygian">Phrygian</option>
+          <option value="lydian">Lydian</option>
+          <option value="mixolydian">Mixolydian</option>
+          <option value="locrian">Locrian</option>
+          <option value="pentatonic_major">Pentatonic Major</option>
+          <option value="pentatonic_minor">Pentatonic Minor</option>
+          <option value="blues">Blues</option>
+          <option value="whole_tone">Whole Tone</option>
+          <option value="diminished">Diminished (octatonic)</option>
+        </select>
+      </div>
+      <div>
+        <label>Style</label>
+        <select id="selStyle">
+          <option value="phase_canon">Phase Canon (Piano Phase)</option>
+          <option value="electric" selected>Electric Counterpoint</option>
+          <option value="hocket">Hocket (6-voice)</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem;">
+      <div>
+        <label>Tempo — <span id="bpmLabel">120</span> BPM</label>
+        <div class="range-row">
+          <input type="range" id="rangeBpm" min="60" max="240" value="120" />
+          <span id="bpmVal">120</span>
+        </div>
+      </div>
+      <div>
+        <label>Cell length (notes)</label>
+        <select id="selCell">
+          <option value="8">8</option>
+          <option value="12" selected>12</option>
+          <option value="16">16</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:1rem;">
+      <label>Waveform (timbre)</label>
+      <select id="selWave" style="max-width:200px">
+        <option value="triangle" selected>Triangle (mellow)</option>
+        <option value="sine">Sine (pure)</option>
+        <option value="sawtooth">Sawtooth (bright)</option>
+        <option value="square">Square (buzzy)</option>
+      </select>
+    </div>
+    <div class="btn-row" style="margin-top:1.25rem;">
+      <button class="btn-primary" id="btnPlay">▶ Play</button>
+      <button class="btn-danger" id="btnStop" disabled>■ Stop</button>
+      <button class="btn-secondary" id="btnSeed">↻ New pattern</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Live visualiser</h2>
+    <div class="vis-wrap">
+      <canvas id="cvs"></canvas>
+    </div>
+    <div id="voiceGrid" class="voice-grid"></div>
+    <div class="status-bar">
+      <div class="pulse" id="pulse"></div>
+      <span id="statusTxt">Stopped — press Play to start</span>
+    </div>
+    <div class="info-row" id="infoRow"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ── Scale definitions (semitone intervals from root) ──────────────────────────
+const SCALES = {
+  major:            [0,2,4,5,7,9,11],
+  minor:            [0,2,3,5,7,8,10],
+  dorian:           [0,2,3,5,7,9,10],
+  phrygian:         [0,1,3,5,7,8,10],
+  lydian:           [0,2,4,6,7,9,11],
+  mixolydian:       [0,2,4,5,7,9,10],
+  locrian:          [0,1,3,5,6,8,10],
+  pentatonic_major: [0,2,4,7,9],
+  pentatonic_minor: [0,3,5,7,10],
+  blues:            [0,3,5,6,7,10],
+  whole_tone:       [0,2,4,6,8,10],
+  diminished:       [0,2,3,5,6,8,9,11],
+};
+
+const NOTE_NAMES = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+
+function rootPc(name) {
+  return NOTE_NAMES.indexOf(name);
+}
+
+// ── MIDI note number → frequency ─────────────────────────────────────────────
+function midiToHz(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// ── Build a melodic cell from scale pitch-classes ────────────────────────────
+function buildCell(rootPcVal, pcs, cellLen, seed, baseOctave) {
+  const rng = mulberry32(seed);
+  const notes = [];
+  for (let i = 0; i < cellLen; i++) {
+    const deg = Math.floor(rng() * pcs.length);
+    const pc = (rootPcVal + pcs[deg]) % 12;
+    // distribute across 2 octaves
+    const octave = baseOctave + Math.floor(rng() * 2);
+    notes.push(12 * (octave + 1) + pc);
+  }
+  return notes;
+}
+
+function rotateCell(cell, n) {
+  const len = cell.length;
+  const r = ((n % len) + len) % len;
+  return [...cell.slice(r), ...cell.slice(0, r)];
+}
+
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let ctx = null;
+let isPlaying = false;
+let scheduleTimer = null;
+let currentSeed = Math.floor(Math.random() * 999999);
+let voices = [];
+let pointers = []; // current step index per voice
+let nextNoteTimes = []; // AudioContext time for next note
+let stepSize = 0; // seconds per 16th
+let waveform = 'triangle';
+let voicePhaseOffset = []; // phase offset fractions per voice
+
+// ── UI elements ───────────────────────────────────────────────────────────────
+const selRoot  = document.getElementById('selRoot');
+const selScale = document.getElementById('selScale');
+const selStyle = document.getElementById('selStyle');
+const rangeBpm = document.getElementById('rangeBpm');
+const bpmVal   = document.getElementById('bpmVal');
+const bpmLabel = document.getElementById('bpmLabel');
+const selCell  = document.getElementById('selCell');
+const selWave  = document.getElementById('selWave');
+const btnPlay  = document.getElementById('btnPlay');
+const btnStop  = document.getElementById('btnStop');
+const btnSeed  = document.getElementById('btnSeed');
+const pulse    = document.getElementById('pulse');
+const statusTxt= document.getElementById('statusTxt');
+const infoRow  = document.getElementById('infoRow');
+const voiceGrid= document.getElementById('voiceGrid');
+const cvs      = document.getElementById('cvs');
+const cvCtx    = cvs.getContext('2d');
+
+rangeBpm.addEventListener('input', () => {
+  bpmVal.textContent = rangeBpm.value;
+  bpmLabel.textContent = rangeBpm.value;
+  if (isPlaying) updateTempo();
+});
+
+btnSeed.addEventListener('click', () => {
+  currentSeed = Math.floor(Math.random() * 999999);
+  if (isPlaying) { stopPlayback(); startPlayback(); }
+  else buildInfo();
+});
+
+btnPlay.addEventListener('click', startPlayback);
+btnStop.addEventListener('click', stopPlayback);
+selWave.addEventListener('change', () => { waveform = selWave.value; });
+
+// ── Build voices from current config ─────────────────────────────────────────
+function buildVoices() {
+  const root = rootPc(selRoot.value);
+  const pcs  = SCALES[selScale.value] || SCALES.dorian;
+  const cellLen = parseInt(selCell.value, 10);
+  const style = selStyle.value;
+  const numVoices = style === 'hocket' ? 6 : 3;
+  voices = [];
+  voicePhaseOffset = [];
+
+  const master = buildCell(root, pcs, cellLen, currentSeed, 3);
+
+  if (style === 'phase_canon') {
+    for (let v = 0; v < 3; v++) {
+      voices.push(rotateCell(master, v * 2));
+      voicePhaseOffset.push(v * 0.015); // micro phase drift
+    }
+  } else if (style === 'electric') {
+    const rotations = [0, 4, 8];
+    for (let v = 0; v < 3; v++) {
+      voices.push(rotateCell(master, rotations[v % rotations.length]));
+      voicePhaseOffset.push(0);
+    }
+  } else { // hocket
+    // 6 voices, each plays every 6th note of the cell, offset
+    for (let v = 0; v < 6; v++) {
+      const hcell = master.map((n, i) => (i % 6 === v ? n : null));
+      voices.push(hcell);
+      voicePhaseOffset.push(0);
+    }
+  }
+  return voices;
+}
+
+// ── Voice UI strips ───────────────────────────────────────────────────────────
+const VOICE_COLORS = ['#5eb8ff','#6bcf7f','#e8c547','#ff7b7b','#c084fc','#fb923c'];
+
+function buildVoiceUI() {
+  voiceGrid.innerHTML = '';
+  voiceGrid.style.gridTemplateColumns = voices.length <= 3 ? 'repeat(3,1fr)' : 'repeat(3,1fr)';
+  voices.forEach((cell, vi) => {
+    const strip = document.createElement('div');
+    strip.className = 'voice-strip';
+    strip.id = 'vs_' + vi;
+    const name = document.createElement('div');
+    name.className = 'vname';
+    name.style.color = VOICE_COLORS[vi] || '#5eb8ff';
+    name.textContent = 'Voice ' + (vi + 1);
+    strip.appendChild(name);
+    const cells = document.createElement('div');
+    cells.className = 'note-cells';
+    cell.forEach((n, si) => {
+      const c = document.createElement('div');
+      c.className = 'note-cell';
+      c.id = 'nc_' + vi + '_' + si;
+      if (n !== null) {
+        const noteName = NOTE_NAMES[n % 12];
+        c.title = noteName;
+        c.style.background = 'rgba(255,255,255,0.07)';
+      } else {
+        c.style.opacity = '0.3';
+      }
+      cells.appendChild(c);
+    });
+    strip.appendChild(cells);
+    voiceGrid.appendChild(strip);
+  });
+}
+
+function highlightStep(vi, si) {
+  const prev = document.querySelector('.note-cell.active[id^="nc_' + vi + '_"]');
+  if (prev) { prev.classList.remove('active'); prev.style.background = ''; }
+  const el = document.getElementById('nc_' + vi + '_' + si);
+  if (el) { el.classList.add('active'); el.style.background = VOICE_COLORS[vi] || '#5eb8ff'; }
+}
+
+// ── Build info row ────────────────────────────────────────────────────────────
+function buildInfo() {
+  buildVoices();
+  buildVoiceUI();
+  const root = selRoot.value;
+  const scaleName = selScale.options[selScale.selectedIndex].text;
+  infoRow.innerHTML =
+    '<span><strong>' + root + ' ' + scaleName + '</strong></span>' +
+    '<span>Voices: <strong>' + voices.length + '</strong></span>' +
+    '<span>Cell: <strong>' + voices[0].length + ' notes</strong></span>' +
+    '<span class="tag">' + selStyle.options[selStyle.selectedIndex].text + '</span>';
+}
+buildInfo();
+
+// ── Scheduling ────────────────────────────────────────────────────────────────
+const SCHEDULE_AHEAD = 0.1;
+const SCHEDULE_INTERVAL = 25;
+
+function getBpm() { return parseInt(rangeBpm.value, 10); }
+
+function getStepSec() {
+  return 60 / getBpm() / 4; // 16th note
+}
+
+function scheduleNote(voiceIdx, stepIdx, when) {
+  const cell = voices[voiceIdx];
+  const midi = cell[stepIdx % cell.length];
+  if (midi === null) return;
+  const hz = midiToHz(midi);
+  const dur = getStepSec() * 0.75;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = waveform;
+  osc.frequency.setValueAtTime(hz, when);
+  gain.gain.setValueAtTime(0, when);
+  gain.gain.linearRampToValueAtTime(0.15 / voices.length, when + 0.005);
+  gain.gain.setValueAtTime(0.15 / voices.length, when + dur * 0.7);
+  gain.gain.linearRampToValueAtTime(0, when + dur);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(when);
+  osc.stop(when + dur + 0.01);
+}
+
+function scheduler() {
+  if (!isPlaying) return;
+  const now = ctx.currentTime;
+
+  for (let vi = 0; vi < voices.length; vi++) {
+    // Apply phase offset (for phase canon style)
+    const phaseShiftSec = voicePhaseOffset[vi] * getStepSec() * voices[vi].length;
+    while (nextNoteTimes[vi] < now + SCHEDULE_AHEAD) {
+      const si = pointers[vi] % voices[vi].length;
+      scheduleNote(vi, si, nextNoteTimes[vi]);
+      // schedule visual highlight
+      const capturedVi = vi, capturedSi = si, capturedTime = nextNoteTimes[vi];
+      const delay = Math.max(0, (capturedTime - ctx.currentTime) * 1000);
+      setTimeout(() => { if (isPlaying) highlightStep(capturedVi, capturedSi); }, delay);
+      pointers[vi]++;
+      nextNoteTimes[vi] += getStepSec() + (vi === 1 && selStyle.value === 'phase_canon' ? 0.002 : 0);
+    }
+  }
+
+  scheduleTimer = setTimeout(scheduler, SCHEDULE_INTERVAL);
+}
+
+function updateTempo() {
+  // tempo changes take effect naturally as getStepSec() is called each tick
+}
+
+// ── Canvas visualiser ─────────────────────────────────────────────────────────
+let analyser = null;
+let analyserData = null;
+
+function setupAnalyser() {
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 256;
+  analyserData = new Uint8Array(analyser.frequencyBinCount);
+  ctx.destination._connected = true;
+}
+
+function drawVis() {
+  if (!isPlaying) {
+    cvCtx.fillStyle = '#0a0f18';
+    cvCtx.fillRect(0, 0, cvs.width, cvs.height);
+    cvCtx.fillStyle = 'rgba(94,184,255,0.15)';
+    cvCtx.font = '13px system-ui';
+    cvCtx.textAlign = 'center';
+    cvCtx.fillText('Press Play to start', cvs.width / 2, cvs.height / 2 + 5);
+    return;
+  }
+  requestAnimationFrame(drawVis);
+
+  const W = cvs.width, H = cvs.height;
+  cvCtx.fillStyle = 'rgba(10,15,24,0.4)';
+  cvCtx.fillRect(0, 0, W, H);
+
+  const now = Date.now();
+  voices.forEach((cell, vi) => {
+    const si = (pointers[vi] - 1 + cell.length) % cell.length;
+    const midi = cell[si];
+    if (midi === null) return;
+    const x = ((vi * 137 + si * 23 + now * 0.01) % W + W) % W;
+    const y = H - ((midi - 48) / 36) * (H * 0.8) - H * 0.1;
+    const col = VOICE_COLORS[vi] || '#5eb8ff';
+    cvCtx.beginPath();
+    cvCtx.arc(x, y, 4, 0, Math.PI * 2);
+    cvCtx.fillStyle = col;
+    cvCtx.fill();
+    cvCtx.beginPath();
+    cvCtx.arc(x, y, 8, 0, Math.PI * 2);
+    cvCtx.strokeStyle = col + '44';
+    cvCtx.lineWidth = 1;
+    cvCtx.stroke();
+  });
+
+  // Draw waveform hint
+  const time = now * 0.001;
+  cvCtx.beginPath();
+  cvCtx.strokeStyle = 'rgba(94,184,255,0.12)';
+  cvCtx.lineWidth = 1;
+  for (let x = 0; x < W; x++) {
+    const y2 = H / 2 + Math.sin(x * 0.05 + time) * 15 + Math.sin(x * 0.12 - time * 1.3) * 8;
+    x === 0 ? cvCtx.moveTo(x, y2) : cvCtx.lineTo(x, y2);
+  }
+  cvCtx.stroke();
+}
+
+// ── Start / stop ──────────────────────────────────────────────────────────────
+function startPlayback() {
+  if (isPlaying) return;
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (ctx.state === 'suspended') ctx.resume();
+
+  buildVoices();
+  buildVoiceUI();
+
+  const now = ctx.currentTime + 0.05;
+  pointers = voices.map(() => 0);
+  nextNoteTimes = voices.map((_, vi) => now + voicePhaseOffset[vi] * getStepSec() * (voices[vi]?.length || 12));
+  isPlaying = true;
+  waveform = selWave.value;
+
+  btnPlay.disabled = true;
+  btnStop.disabled = false;
+  pulse.classList.add('playing');
+  statusTxt.textContent = 'Playing — ' + selRoot.value + ' ' + selScale.options[selScale.selectedIndex].text;
+
+  scheduler();
+  cvs.width = cvs.offsetWidth * (window.devicePixelRatio || 1);
+  cvs.height = 120 * (window.devicePixelRatio || 1);
+  drawVis();
+}
+
+function stopPlayback() {
+  isPlaying = false;
+  clearTimeout(scheduleTimer);
+  btnPlay.disabled = false;
+  btnStop.disabled = true;
+  pulse.classList.remove('playing');
+  statusTxt.textContent = 'Stopped';
+  document.querySelectorAll('.note-cell.active').forEach(el => {
+    el.classList.remove('active');
+    el.style.background = '';
+  });
+  drawVis();
+}
+
+// ── Initial draw ──────────────────────────────────────────────────────────────
+cvs.width = cvs.offsetWidth * (window.devicePixelRatio || 1) || 640;
+cvs.height = 120 * (window.devicePixelRatio || 1);
+drawVis();
+
+selRoot.addEventListener('change', buildInfo);
+selScale.addEventListener('change', buildInfo);
+selStyle.addEventListener('change', buildInfo);
+selCell.addEventListener('change', buildInfo);
+
+})();
+</script>
+</body>
+</html>

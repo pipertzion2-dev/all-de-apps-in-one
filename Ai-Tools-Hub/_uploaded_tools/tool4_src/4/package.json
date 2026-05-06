@@ -1,0 +1,13 @@
+{
+  "name": "api-latency-forecaster",
+  "version": "1.0.0",
+  "description": "Free API Latency Forecaster tool - analyze prompt/schema latency",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

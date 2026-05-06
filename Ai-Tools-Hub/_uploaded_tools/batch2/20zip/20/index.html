@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Hardware Cost Estimator — BOM Calculator &amp; Prototype Pricing | Svivva</title>
+  <meta name="description" content="Estimate hardware production costs instantly. Free BOM calculator for PCB, enclosure, and prototype pricing. No signup required. Try the full hardware workflow in Svivva.">
+  <meta name="keywords" content="hardware cost estimator, BOM calculator, bill of materials calculator, prototype cost estimate, PCB cost calculator, hardware production cost, enclosure pricing, Svivva">
+  <link rel="canonical" href="https://svivva.com/tools/hardware-cost-estimator">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Hardware Cost Estimator — BOM Calculator | Svivva">
+  <meta property="og:description" content="Estimate hardware production costs instantly. Free BOM calculator for PCB, enclosure, and prototype pricing. No signup. Powered by Svivva.">
+  <meta property="og:url" content="https://svivva.com/tools/hardware-cost-estimator">
+  <meta property="og:site_name" content="Svivva">
+
+  <meta property="og:image" content="https://svivva.com/og-hardware-cost-estimator.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Free Hardware Cost Estimator — BOM Calculator | Svivva">
+  <meta name="twitter:description" content="Estimate hardware production costs instantly. Free BOM calculator for PCB, enclosure, and prototype pricing. No signup. Powered by Svivva.">
+  <meta name="twitter:image" content="https://svivva.com/og-hardware-cost-estimator.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hardware Cost Estimator",
+    "url": "https://svivva.com/tools/hardware-cost-estimator",
+    "description": "Free hardware cost estimator and BOM calculator. Get instant prototype pricing for PCB, enclosure, connectors, and controls. No signup required.",
+    "applicationCategory": "EngineeringApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the Hardware Cost Estimator do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It runs one isolated step of Svivva's real hardware pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview—BOM table, cost estimate, or schematic placeholder—so you can see how Svivva would support your project."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Hardware Cost Estimator free? Do I need to sign up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this tool is completely free and requires no login or signup. You can generate as many cost estimates as you like. To run the full workflow with versioning, collaboration, and cost tracking, use the main Svivva platform."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this relate to the full Svivva hardware workflow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool exposes the hardware cost estimation step. In Svivva, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports—with versioning and collaboration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of hardware projects can I estimate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can estimate costs for any hardware concept: custom PCBs, enclosures, synths, controllers, IoT devices, prototypes, and more. The tool covers materials, components, connectors, controls, and MCU costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How accurate are the cost estimates?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This sandbox provides production-style estimates based on common component pricing. For validated, supplier-backed quotes and full BOM tracking, use the complete Svivva hardware pipeline."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=3">
+</head>
+<body>
+  <div class="app">
+    <aside class="panel panel-left">
+      <header class="panel-header">
+        <h1 class="page-title">Free Hardware Cost Estimator</h1>
+        <p class="intro">Describe your hardware concept — product, synth, controller, IoT device, or prototype — and get an instant BOM and cost estimate. No signup needed. Powered by <a href="https://svivva.com" class="inline-link">Svivva</a>.</p>
+      </header>
+
+      <form id="brief-form" class="brief-form">
+        <label for="description">Project description <span class="required">*</span></label>
+        <textarea id="description" name="description" rows="4" placeholder="e.g. Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM" required></textarea>
+
+        <label for="mode">Mode / category</label>
+        <select id="mode" name="mode">
+          <option value="hardware">Hardware</option>
+          <option value="play">Play</option>
+          <option value="idea">Idea</option>
+          <option value="team">Team</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="build">Build</option>
+        </select>
+
+        <fieldset class="constraints">
+          <legend>Optional constraints</legend>
+          <label for="budget">Budget</label>
+          <input type="text" id="budget" name="budget" placeholder="e.g. $150">
+          <label for="genre">Genre / style</label>
+          <input type="text" id="genre" name="genre" placeholder="e.g. ambient, modular">
+          <label for="materials">Materials</label>
+          <input type="text" id="materials" name="materials" placeholder="e.g. wood, aluminum">
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region" placeholder="e.g. EU, US">
+          <label for="collab-size">Collaboration size</label>
+          <input type="text" id="collab-size" name="collab_size" placeholder="e.g. 2–4 people">
+        </fieldset>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Generate cost estimate</button>
+      </form>
+    </aside>
+
+    <main class="panel panel-center">
+      <div class="preview-wrapper">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your hardware cost estimate will appear here.</p>
+          <p class="hint">Fill in your project details and click Generate cost estimate.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden></div>
+        <div id="confidence-bar" class="confidence-bar" hidden>
+          <span class="confidence-label">Readiness</span>
+          <div class="confidence-track"><div id="confidence-fill" class="confidence-fill"></div></div>
+          <span id="confidence-value" class="confidence-value">—</span>
+        </div>
+      </div>
+      <div class="cta-block cta-below-preview" id="cta-below-preview" hidden>
+        <p class="cta-primary-text">You've previewed one step. In <a href="https://svivva.com" class="inline-link-accent">Svivva</a> you get the full workflow: versioning, collaboration, cost tracking, and production-ready exports.</p>
+        <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary" target="_blank" rel="noopener noreferrer">Open this estimate inside a Svivva project</a>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <div class="mapping-card">
+        <h2>Where This Fits in the Svivva Pipeline</h2>
+        <p id="mapping-explainer">Select a mode and generate a cost estimate to see which step of the <a href="https://svivva.com" class="inline-link">Svivva hardware pipeline</a> this matches.</p>
+        <ul id="mapping-steps" class="mapping-steps"></ul>
+        <p class="upgrade-copy">In the full <a href="https://svivva.com" class="inline-link">Svivva</a> platform you get: version history, team permissions, cost tracking, and export to production formats.</p>
+      </div>
+      <div class="faq-block">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does the Hardware Cost Estimator do?</summary>
+          <p>It runs one isolated step of <a href="https://svivva.com" class="inline-link">Svivva's</a> real hardware pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview — BOM table, cost estimate, or schematic placeholder — so you can see how Svivva would handle your project.</p>
+        </details>
+        <details>
+          <summary>Is it free? Do I need to sign up?</summary>
+          <p>Yes. This estimator is completely free and requires no login. Generate as many estimates as you like. To unlock the full workflow — versioning, collaboration, cost tracking, production exports — use the <a href="https://svivva.com" class="inline-link">Svivva platform</a>.</p>
+        </details>
+        <details>
+          <summary>How does this relate to the full Svivva workflow?</summary>
+          <p>This tool exposes the cost estimation step. In <a href="https://svivva.com" class="inline-link">Svivva</a>, the same step sits inside the full flow: <a href="https://svivva.com/hardware" class="inline-link">hardware pipeline</a>, BOM generation, schematic layout, cost tracking, and production-ready exports — with versioning and team collaboration.</p>
+        </details>
+        <details>
+          <summary>What hardware projects can I estimate?</summary>
+          <p>Any hardware concept: custom PCBs, enclosures, synths, MIDI controllers, IoT devices, wearables, and prototypes. The tool covers materials, components, connectors, controls, and MCU costs. For supplier-backed quotes, use <a href="https://svivva.com" class="inline-link">Svivva</a>.</p>
+        </details>
+        <details>
+          <summary>How accurate are the estimates?</summary>
+          <p>This sandbox provides production-style estimates based on common component pricing. For validated, supplier-backed quotes and full BOM tracking with version control, run the complete pipeline inside <a href="https://svivva.com" class="inline-link">Svivva</a>.</p>
+        </details>
+        <p class="internal-link"><a href="https://svivva.com">Explore the full Svivva platform →</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="seo-content">
+    <div class="seo-content-inner">
+      <h2>Why Use a Hardware Cost Estimator?</h2>
+      <p>Building hardware is expensive, and surprises in production costs can stall a project for months. Whether you are designing a custom PCB, prototyping an IoT sensor, building a synthesizer, or planning a short-run consumer product, knowing your bill of materials cost before you commit to a design saves time, money, and engineering hours. A <strong>hardware cost estimator</strong> gives you that visibility up front.</p>
+
+      <p>This free tool lets you describe any hardware concept in plain language — a portable synth with a wooden enclosure, a USB-C controller with eight knobs, a Bluetooth sensor node for industrial monitoring — and instantly receive a production-style <strong>BOM (bill of materials) estimate</strong>. It breaks down costs for enclosures, PCBs, connectors, controls, and microcontrollers so you can validate your budget before sourcing a single part.</p>
+
+      <h2>How the Hardware Cost Estimator Works</h2>
+      <p>Enter a short project description and optional constraints such as target budget, preferred materials, or manufacturing region. The estimator generates an itemized BOM table with estimated per-unit costs for each major component category: enclosure and housing, printed circuit board, connectors and power, user-facing controls (potentiometers, switches, encoders), and the MCU or USB interface. A readiness score shows how well-defined your concept is, helping you understand where to add detail before moving to full production planning.</p>
+
+      <p>The tool supports six modes. <strong>Hardware</strong> mode produces a classic BOM and cost estimate. <strong>Build</strong> mode combines digital-twin workflows with physical component pricing. <strong>Play</strong> mode matches audio setups and FX chains to gear costs. <strong>Idea</strong> mode scopes feasibility for early-stage concepts. <strong>Team</strong> mode matches collaboration scope to project cost. <strong>Marketplace</strong> mode maps product ideas to listing and distribution costs.</p>
+
+      <h2>From Estimate to Production with Svivva</h2>
+      <p>This estimator exposes one step of the <a href="https://svivva.com" class="inline-link">Svivva</a> hardware pipeline. In the full platform, the same cost estimation step connects to a complete production workflow: <a href="https://svivva.com/hardware" class="inline-link">BOM generation</a>, schematic layout, version-controlled design iterations, team collaboration with granular permissions, real-time cost tracking as your design evolves, and export to production-ready formats your manufacturer can use directly.</p>
+
+      <p>If you are a solo maker building a one-off prototype, this free estimator may be all you need to validate your budget. If you are part of a team shipping a product — or managing multiple hardware projects — <a href="https://svivva.com" class="inline-link">Svivva</a> gives you the infrastructure to go from concept to production without spreadsheets, email chains, or disconnected tools. Version history, cost diffs between revisions, supplier-backed pricing, and production-ready exports are all built in.</p>
+
+      <p>Engineers and hardware teams use cost estimation early in the design cycle to avoid over-engineering, identify expensive components before committing to a schematic, and communicate realistic budgets to stakeholders. By making this step free and instant, we lower the barrier to starting any hardware project — and give you a direct path into the <a href="https://svivva.com" class="inline-link">Svivva platform</a> when you are ready to scale beyond a single estimate.</p>
+
+      <div class="seo-cta">
+        <p><strong>Ready to go beyond a cost estimate?</strong> Run the full hardware workflow — BOM generation, schematic layout, cost tracking, and team collaboration — inside Svivva.</p>
+        <a href="https://svivva.com" class="btn-cta-primary" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="https://svivva.com/hardware" class="btn-cta-secondary" target="_blank" rel="noopener noreferrer">Explore the hardware pipeline →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="sticky-cta-bar">
+    <p class="sticky-cta-text">Free hardware cost estimate. Full production workflow in <a href="https://svivva.com" class="inline-link-footer">Svivva</a>.</p>
+    <a href="https://svivva.com" class="btn-sticky-cta" id="sticky-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

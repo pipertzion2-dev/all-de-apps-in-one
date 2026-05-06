@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manufacturing Readiness Checker — Free Online MRL Assessment Tool | Svivva</title>
+  <meta name="description" content="Free manufacturing readiness checker and MRL assessment tool. Instantly evaluate your concept's production readiness with BOM estimates, schematic previews, and readiness scores. No signup required. Powered by Svivva.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://svivva.com/tools/manufacturing-readiness-checker">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Manufacturing Readiness Checker — Free MRL Assessment Tool">
+  <meta property="og:description" content="Instantly evaluate your concept's production readiness. Get BOM estimates, schematic previews, and a readiness score — free, no signup. Powered by Svivva.">
+  <meta property="og:url" content="https://svivva.com/tools/manufacturing-readiness-checker">
+  <meta property="og:site_name" content="Svivva">
+  <meta property="og:image" content="https://svivva.com/og-manufacturing-readiness-checker.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Manufacturing Readiness Checker — Free MRL Assessment Tool">
+  <meta name="twitter:description" content="Instantly evaluate your concept's production readiness. Get BOM estimates, schematic previews, and a readiness score — free, no signup. Powered by Svivva.">
+  <meta name="twitter:url" content="https://svivva.com/tools/manufacturing-readiness-checker">
+  <meta name="twitter:image" content="https://svivva.com/og-manufacturing-readiness-checker.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Manufacturing Readiness Checker",
+    "url": "https://svivva.com/tools/manufacturing-readiness-checker",
+    "description": "Free online manufacturing readiness level (MRL) assessment tool. Evaluate production readiness for hardware concepts, product ideas, and build projects with instant BOM estimates, schematic previews, and readiness scores.",
+    "applicationCategory": "Engineering Tool",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the Manufacturing Readiness Checker do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It runs one isolated step of Svivva's real pipeline: you describe your concept (product, music hardware, or build idea), and the tool returns a production-style preview — schematic, BOM table, flow graph, idea report, or setup map — plus a readiness indicator, so you can see how ready you are and how Svivva would support your project."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the Manufacturing Readiness Checker free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This checker is completely free and requires no login or signup. You can run readiness checks as often as you like. To run the full workflow with versioning, cost tracking, and collaboration, use the main Svivva platform."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a Manufacturing Readiness Level (MRL)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Manufacturing Readiness Level (MRL) is a measure used to assess the maturity of manufacturing processes, from initial concept through full-rate production. This tool provides a simplified MRL-style assessment for hardware concepts, product ideas, and build projects."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this tool relate to the full Svivva platform?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This tool exposes one step of the Svivva pipeline (e.g. Concept to Schematic, Intent to Clip, Idea to Report). In Svivva, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports — with versioning and collaboration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of projects can I check readiness for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The tool supports six categories: Hardware (electronics, enclosures, PCBs), Play (audio and music setups), Idea (concept validation and scoping), Team (collaboration readiness), Marketplace (API and product listing readiness), and Build (physical builds with digital twin support)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this tool for BOM estimation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. When you select the Hardware or Build mode, the tool generates a preliminary Bill of Materials (BOM) with estimated unit costs and a total cost preview. For full BOM management with supplier data, cost tracking, and export, use the full Svivva platform."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preload" href="fonts/Zc-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ABOVE-THE-FOLD HERO: outcome-focused, CTA above the form -->
+  <section class="hero-bar">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <p class="hero-eyebrow">Free Manufacturing Readiness Assessment Tool</p>
+        <h1 class="hero-headline">Know if your concept is ready to manufacture — before you spend a dollar on prototypes.</h1>
+        <p class="hero-sub">Get a BOM estimate, schematic preview, and MRL-style readiness score in under 60 seconds. No signup. No cost. Powered by the same pipeline as <a href="https://svivva.com" class="hero-link" id="hero-cta-link">Svivva</a>.</p>
+      </div>
+      <div class="hero-ctas">
+        <a href="#brief-form" class="btn-hero-primary" id="hero-cta-primary">Check readiness now</a>
+        <a href="https://svivva.com" class="btn-hero-secondary" id="hero-cta-secondary" target="_blank" rel="noopener noreferrer">See the full Svivva workflow →</a>
+      </div>
+    </div>
+    <div class="hero-outcomes">
+      <div class="outcome-chip">Catch BOM cost surprises early</div>
+      <div class="outcome-chip">Align scope before building</div>
+      <div class="outcome-chip">Know your MRL before ordering parts</div>
+      <div class="outcome-chip">Move from concept to production-ready</div>
+    </div>
+  </section>
+
+  <div class="app" id="brief-form-anchor">
+    <aside class="panel panel-left">
+      <header class="panel-header">
+        <h2 class="panel-title">Manufacturing Readiness Checker</h2>
+        <p class="intro">Submit a short brief — hardware concept, product idea, team scenario, or musical intent — and see one isolated step of <a href="https://svivva.com" class="inline-link">Svivva's</a> real pipeline. No account needed.</p>
+      </header>
+
+      <form id="brief-form" class="brief-form">
+        <label for="description">Short description <span class="required">*</span></label>
+        <textarea id="description" name="description" rows="4" placeholder="e.g. Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM" required></textarea>
+
+        <label for="mode">Mode / category</label>
+        <select id="mode" name="mode">
+          <option value="hardware">Hardware</option>
+          <option value="play">Play</option>
+          <option value="idea">Idea</option>
+          <option value="team">Team</option>
+          <option value="marketplace">Marketplace</option>
+          <option value="build">Build</option>
+        </select>
+
+        <fieldset class="constraints">
+          <legend>Optional constraints</legend>
+          <label for="budget">Budget</label>
+          <input type="text" id="budget" name="budget" placeholder="e.g. $150">
+          <label for="genre">Genre / style</label>
+          <input type="text" id="genre" name="genre" placeholder="e.g. ambient, modular">
+          <label for="materials">Materials</label>
+          <input type="text" id="materials" name="materials" placeholder="e.g. wood, aluminum">
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region" placeholder="e.g. EU, US">
+          <label for="collab-size">Collaboration size</label>
+          <input type="text" id="collab-size" name="collab_size" placeholder="e.g. 2–4 people">
+        </fieldset>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Check readiness</button>
+      </form>
+    </aside>
+
+    <main class="panel panel-center">
+      <div class="preview-wrapper">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your manufacturing readiness preview will appear here.</p>
+          <p class="hint">Fill the form and click Check readiness.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden></div>
+        <div id="readiness-bar" class="readiness-bar" hidden>
+          <span class="readiness-label">Readiness</span>
+          <div class="readiness-track"><div id="readiness-fill" class="readiness-fill"></div></div>
+          <span id="readiness-value" class="readiness-value">—</span>
+          <span id="readiness-badge" class="readiness-badge"></span>
+        </div>
+      </div>
+      <div class="cta-block cta-below-preview" id="cta-below-preview" hidden>
+        <p class="cta-label">One step previewed. The full workflow ships products.</p>
+        <p class="cta-primary-text">Svivva gives you version history, team permissions, real supplier data in your BOM, cost tracking across every iteration, and production-ready exports. This is what your concept looks like inside a real pipeline.</p>
+        <a href="https://svivva.com" class="btn-cta-primary" id="cta-primary" target="_blank" rel="noopener noreferrer">Run the full workflow in Svivva</a>
+        <a href="https://svivva.com/projects" class="btn-cta-secondary" id="cta-secondary" target="_blank" rel="noopener noreferrer">Open this inside a real Svivva project →</a>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <div class="mapping-card">
+        <h2>This Step in the Svivva Pipeline</h2>
+        <p id="mapping-explainer">Select a mode and run a check to see which exact step of the <a href="https://svivva.com" class="inline-link">Svivva pipeline</a> this previews.</p>
+        <ul id="mapping-steps" class="mapping-steps"></ul>
+        <p class="upgrade-copy">In the full platform you get: version history, team permissions, cost tracking, and export to production formats.</p>
+        <a href="https://svivva.com" class="btn-upgrade" id="upgrade-cta" target="_blank" rel="noopener noreferrer">Get the full pipeline in Svivva</a>
+      </div>
+      <div class="faq-block">
+        <h2>FAQ</h2>
+        <details>
+          <summary>What does the Manufacturing Readiness Checker do?</summary>
+          <p>It runs one isolated step of Svivva's real pipeline: you describe your concept and the tool returns a production-style preview — schematic, BOM table, flow graph, idea report, or setup map — plus a readiness score showing how close you are to production. See how <a href="https://svivva.com" class="inline-link">Svivva</a> would support your full workflow.</p>
+        </details>
+        <details>
+          <summary>Is it free and do I need to sign up?</summary>
+          <p>Yes, completely free and no login required. Run as many checks as you like. For the full workflow with versioning and cost tracking, use the <a href="https://svivva.com" class="inline-link">Svivva platform</a>.</p>
+        </details>
+        <details>
+          <summary>What is a Manufacturing Readiness Level (MRL)?</summary>
+          <p>MRL is a standardized engineering measure — from early concept (MRL 1) through proven full-rate production (MRL 10) — used to assess manufacturing maturity. This tool gives you a simplified MRL-style score for any hardware concept or build project, so you know where you stand before committing to production.</p>
+        </details>
+        <details>
+          <summary>How does this map to the full Svivva workflow?</summary>
+          <p>This tool exposes one step (Concept → Schematic, Intent → Clip, Idea → Report). In <a href="https://svivva.com" class="inline-link">Svivva</a>, the same step sits inside the full flow: hardware pipeline, BOM generation, schematic layout, cost tracking, and production-ready exports — with versioning and collaboration.</p>
+        </details>
+        <details>
+          <summary>What types of projects can I check?</summary>
+          <p>Hardware (PCBs, enclosures, electronics), Play (audio setups), Idea (concept validation), Team (collaboration readiness), Marketplace (API and product listing), and Build (physical builds with digital twin support). Each maps to a step in the <a href="https://svivva.com" class="inline-link">Svivva platform</a>.</p>
+        </details>
+        <details>
+          <summary>Can I use this for BOM estimation?</summary>
+          <p>Yes. Hardware and Build modes generate a preliminary Bill of Materials with estimated unit costs and a total cost preview. For full BOM management — supplier data, cost tracking across revisions, and export — use <a href="https://svivva.com" class="inline-link">Svivva</a>.</p>
+        </details>
+        <p class="internal-link"><a href="https://svivva.com">Get the full Svivva pipeline →</a></p>
+        <p class="internal-link"><a href="hardware-readiness-assessment.html">Hardware readiness assessment guide →</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- KEYWORD CLUSTER SECTION: targets buyer-intent searches -->
+  <section class="use-cases">
+    <div class="use-cases-inner">
+      <h2 class="use-cases-title">What engineers use this tool to solve</h2>
+      <p class="use-cases-sub">Each search below represents a real problem this tool addresses. The full solution lives in <a href="https://svivva.com">Svivva</a>.</p>
+      <div class="use-cases-grid">
+        <div class="use-case-card">
+          <h3>Hardware readiness assessment</h3>
+          <p>Before ordering components or opening Altium, run a readiness check to confirm your concept scope, BOM complexity, and cost target are aligned. Catch gaps at the concept stage, not the prototype stage.</p>
+          <a href="hardware-readiness-assessment.html" class="use-case-link">Full hardware assessment guide →</a>
+        </div>
+        <div class="use-case-card">
+          <h3>BOM estimation and cost validation</h3>
+          <p>Get a preliminary Bill of Materials with estimated unit costs in under 60 seconds. Use it to validate budget feasibility before committing to a design — then move to full BOM management in Svivva with real supplier data.</p>
+          <a href="https://svivva.com" class="use-case-link" target="_blank" rel="noopener noreferrer">Full BOM management in Svivva →</a>
+        </div>
+        <div class="use-case-card">
+          <h3>Production readiness level calculator</h3>
+          <p>Manufacturing Readiness Level (MRL) assessments tell you how far your concept is from full-rate production. This tool gives you a fast MRL-style score — use it to frame early conversations with manufacturers, investors, or your team.</p>
+          <a href="https://svivva.com" class="use-case-link" target="_blank" rel="noopener noreferrer">Track MRL across versions in Svivva →</a>
+        </div>
+        <div class="use-case-card">
+          <h3>Product concept validation tool</h3>
+          <p>Have an idea but unsure if it's production-feasible? Run it through the Idea or Build mode to get a scoping preview and a clear readiness path from concept through production — before investing in design or prototyping.</p>
+          <a href="https://svivva.com" class="use-case-link" target="_blank" rel="noopener noreferrer">Validate and build in Svivva →</a>
+        </div>
+        <div class="use-case-card">
+          <h3>Hardware project scoping software</h3>
+          <p>Struggling to scope a hardware project before kickoff? The Team and Hardware modes evaluate whether your collaboration size, cost constraints, and technical scope are aligned — so you start the right project, not the wrong one.</p>
+          <a href="https://svivva.com" class="use-case-link" target="_blank" rel="noopener noreferrer">Full project scoping in Svivva →</a>
+        </div>
+        <div class="use-case-card">
+          <h3>Schematic and flow preview tool</h3>
+          <p>See a schematic layout placeholder, audio flow map, or API flow graph based on your concept description — without opening any CAD or design tools. Get the shape of the system before committing to the detail.</p>
+          <a href="https://svivva.com" class="use-case-link" target="_blank" rel="noopener noreferrer">Full schematic workflow in Svivva →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTCOME GRID: what the full platform delivers (not features, outcomes) -->
+  <section class="outcomes-section">
+    <div class="outcomes-inner">
+      <h2 class="outcomes-title">What you get when you move to the full Svivva workflow</h2>
+      <p class="outcomes-sub">This tool previews one step. <a href="https://svivva.com">Svivva</a> runs the entire pipeline — from concept through production-ready output — with the tools teams actually need to ship.</p>
+      <div class="outcomes-grid">
+        <div class="outcome-item">
+          <span class="outcome-icon">→</span>
+          <div>
+            <strong>Ship hardware without BOM surprises</strong>
+            <p>Real supplier data, cost tracking across every revision, and BOM export in production formats — not estimates.</p>
+          </div>
+        </div>
+        <div class="outcome-item">
+          <span class="outcome-icon">→</span>
+          <div>
+            <strong>Never lose a design revision again</strong>
+            <p>Full version history across schematic, BOM, and project files. Roll back, branch, and compare any stage.</p>
+          </div>
+        </div>
+        <div class="outcome-item">
+          <span class="outcome-icon">→</span>
+          <div>
+            <strong>Align your team before prototyping starts</strong>
+            <p>Team permissions, scoped access, and collaboration workflows built for hardware projects — not spreadsheets.</p>
+          </div>
+        </div>
+        <div class="outcome-item">
+          <span class="outcome-icon">→</span>
+          <div>
+            <strong>Go from concept to manufacturer-ready</strong>
+            <p>Production-ready exports, digital twin support, and a pipeline that takes your concept all the way through.</p>
+          </div>
+        </div>
+      </div>
+      <div class="outcomes-cta">
+        <a href="https://svivva.com" class="btn-outcomes-cta" id="outcomes-cta" target="_blank" rel="noopener noreferrer">Start your full workflow in Svivva — free</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="seo-content">
+    <div class="seo-content-inner">
+      <h2>What Is a Manufacturing Readiness Checker?</h2>
+      <p>A manufacturing readiness checker is a tool that evaluates how prepared a product concept is for production. In formal engineering contexts, this assessment is often called a <strong>Manufacturing Readiness Level (MRL)</strong> evaluation — a framework originally developed by the U.S. Department of Defense to gauge manufacturing maturity from initial concept through full-rate production. The scale runs from MRL 1 (basic manufacturing implications identified) through MRL 10 (full-rate production demonstrated and lean practices in place).</p>
+      <p>This free online tool by <a href="https://svivva.com">Svivva</a> provides a simplified, instant version of that assessment. Describe your concept — hardware product, audio setup, team collaboration scenario, or product idea — and the checker returns a production-style preview with a readiness score. It is built for engineers, makers, product designers, and founders who need a fast sanity check before committing resources to prototyping or production.</p>
+
+      <h2>How the Manufacturing Readiness Assessment Works</h2>
+      <p>The checker evaluates your concept across several dimensions depending on the mode you select. For <strong>hardware and build projects</strong>, it generates a preliminary Bill of Materials (BOM) with estimated component costs, a schematic placeholder, and a readiness percentage reflecting how well-defined your concept is. Adding constraints like budget, materials, and region increases the accuracy of the readiness score.</p>
+      <p>For <strong>idea and marketplace modes</strong>, the tool scopes your concept against feasibility indicators and returns a readiness path — a step-by-step outline of what it would take to move from concept to production or publication. For <strong>team and collaboration modes</strong>, it evaluates whether your collaboration size, cost scope, and workflow requirements are aligned for the type of project you are planning.</p>
+      <p>Each mode maps directly to one step in the <a href="https://svivva.com">Svivva</a> platform pipeline. The preview you see here is not a simulation — it is the same logic that runs inside a full Svivva project, isolated so you can try it without creating an account.</p>
+
+      <h2>Common Use Cases: When to Run a Manufacturing Readiness Check</h2>
+      <p>A <strong>hardware readiness assessment</strong> is most valuable at three points in a project: before the first prototype order, before presenting to a manufacturer or investor, and after a major design change that affects the BOM or cost structure. Running a check at each of these points surfaces mismatches before they become expensive to fix.</p>
+      <p>For teams using this as a <strong>BOM estimation tool</strong>, the Hardware and Build modes give a fast cost baseline — useful for early budget conversations, grant applications, and supplier RFQs. The estimate is intentionally simplified; for full BOM management with live supplier pricing, use the <a href="https://svivva.com">Svivva platform</a> where BOM data connects directly to your schematic and cost tracking workflow.</p>
+      <p>As a <strong>production readiness level calculator</strong>, the tool converts your concept description into an MRL-style score that you can use to frame conversations with your team or manufacturing partners. A score below 70% typically signals that key constraints — materials, region, budget, or scope — are still undefined and should be resolved before committing to a design.</p>
+
+      <h2>Who Should Use This Tool?</h2>
+      <p><strong>Hardware engineers</strong> use it to get a quick BOM estimate and check whether component choices fit within a target cost. <strong>Product designers</strong> use it to validate whether an idea is scoped tightly enough for a first prototype. <strong>Founders and project leads</strong> use it to assess whether their team size and budget align with the complexity of what they are building. <strong>Makers and hobbyists</strong> use it to sanity-check a build before ordering parts.</p>
+      <p>If you need more than a preview — version history, team permissions, real supplier data in your BOM, or production-ready exports — the full <a href="https://svivva.com">Svivva platform</a> picks up exactly where this tool leaves off. Every mode in the checker corresponds to a pipeline stage in Svivva, so your work carries over seamlessly.</p>
+
+      <h2>Why Manufacturing Readiness Matters</h2>
+      <p>Skipping a readiness assessment is one of the most common reasons hardware projects stall. Engineers commit to a design without validating cost feasibility, teams begin prototyping without aligning on scope, and founders order components before confirming supplier availability in their target region. A quick readiness check surfaces these mismatches early, before they become expensive.</p>
+      <p>Whether you are building a portable synthesizer, designing a custom enclosure, scoping a new product line, or planning a collaborative hardware project, checking readiness first saves time and money. <a href="https://svivva.com">Run the full workflow in Svivva</a> — every step from concept through production, with the tools you need to ship.</p>
+    </div>
+  </article>
+
+  <footer class="sticky-cta-bar">
+    <p class="sticky-cta-text">Stop guessing. Know your readiness score in 60 seconds.</p>
+    <a href="https://svivva.com" class="btn-sticky-cta" id="sticky-cta" target="_blank" rel="noopener noreferrer">Run the full workflow in Svivva</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

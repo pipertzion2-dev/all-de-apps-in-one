@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Output Diff Visualizer — Free Online Tool</title>
+  <meta name="description" content="Compare and visualize differences between AI model outputs. Free AI output diff visualizer tool online for prompt engineering." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="logo">AI Output Diff Visualizer</h1>
+      <p class="tagline">Compare AI outputs side-by-side with real-time diff and scoring</p>
+    </header>
+
+    <main class="panels">
+      <aside class="panel panel-left">
+        <h2 class="panel-title">Input</h2>
+        <div class="form-group">
+          <label for="prompt">Prompt / instruction</label>
+          <textarea id="prompt" rows="4" placeholder="e.g. Summarize the following in 2 sentences..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="output-a">Output A (baseline or v1)</label>
+          <textarea id="output-a" rows="6" placeholder="Paste first AI response here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="output-b">Output B (compare or v2)</label>
+          <textarea id="output-b" rows="6" placeholder="Paste second AI response here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="schema">Schema (optional)</label>
+          <textarea id="schema" rows="3" placeholder='{"type":"object","properties":{...}}'></textarea>
+          <span class="helper">JSON schema for structure validation</span>
+        </div>
+        <div class="form-group">
+          <label for="api-config">API config / definition (optional)</label>
+          <textarea id="api-config" rows="2" placeholder="OpenAPI snippet or endpoint config..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="model-a">Model A</label>
+            <select id="model-a">
+              <option value="gpt-4">GPT-4</option>
+              <option value="gpt-3.5">GPT-3.5</option>
+              <option value="claude-3">Claude 3</option>
+              <option value="custom">Custom / other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="model-b">Model B</label>
+            <select id="model-b">
+              <option value="gpt-3.5">GPT-3.5</option>
+              <option value="gpt-4">GPT-4</option>
+              <option value="claude-3">Claude 3</option>
+              <option value="custom">Custom / other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="run-diff" class="btn btn-primary">Run diff</button>
+          <button type="button" id="clear-all" class="btn btn-secondary">Clear</button>
+        </div>
+      </aside>
+
+      <section class="panel panel-center">
+        <h2 class="panel-title">Diff & results</h2>
+        <div class="diff-toolbar">
+          <span class="diff-mode-label">Mode:</span>
+          <label class="radio-label"><input type="radio" name="diff-mode" value="unified" checked /> Unified</label>
+          <label class="radio-label"><input type="radio" name="diff-mode" value="side-by-side" /> Side-by-side</label>
+          <label class="radio-label"><input type="radio" name="diff-mode" value="words" /> Words</label>
+        </div>
+        <div id="diff-container" class="diff-container">
+          <div id="diff-placeholder" class="diff-placeholder">
+            <p>Enter Output A and Output B in the left panel, then click <strong>Run diff</strong> to see the comparison.</p>
+          </div>
+          <div id="diff-output" class="diff-output" aria-live="polite" hidden></div>
+        </div>
+        <div id="stats-bar" class="stats-bar" hidden>
+          <span class="stat" id="stat-similarity">Similarity: —</span>
+          <span class="stat" id="stat-additions">Additions: 0</span>
+          <span class="stat" id="stat-deletions">Deletions: 0</span>
+          <span class="stat" id="stat-time">Time: &lt;1s</span>
+        </div>
+      </section>
+
+      <aside class="panel panel-right">
+        <h2 class="panel-title">Guidance</h2>
+        <div id="guidance-content" class="guidance-content">
+          <div class="guidance-block">
+            <h3>What this tool does</h3>
+            <p>Compare two AI outputs (e.g. from different models or prompt versions) with a visual diff. Use it to:</p>
+            <ul>
+              <li>Spot wording and structure changes</li>
+              <li>Check consistency after prompt edits</li>
+              <li>Compare model behavior on the same prompt</li>
+            </ul>
+          </div>
+          <div class="guidance-block" id="interpretation-block">
+            <h3>Interpretation</h3>
+            <p id="interpretation-text">Run a diff to see interpretation and tips here.</p>
+          </div>
+          <div class="guidance-block">
+            <h3>Tips</h3>
+            <ul>
+              <li>Paste raw text; formatting is preserved where possible.</li>
+              <li>Optional schema helps validate structured outputs (JSON).</li>
+              <li>Use side-by-side for long outputs, unified for a single flow.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="sticky-cta">
+      <div class="cta-inner">
+        <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. <a href="https://svivva.com" target="_blank" rel="noopener" class="cta-link">Try Svivva for free.</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="diff.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

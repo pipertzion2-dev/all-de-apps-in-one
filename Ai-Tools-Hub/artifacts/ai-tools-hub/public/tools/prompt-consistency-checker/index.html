@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Consistency Scorer – Free Online Tool</title>
+  <meta name="description" content="Free prompt consistency scorer tool. Upload your prompt or schema and get instant consistency analysis, scoring, and improvement tips.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Prompt Consistency Scorer</h1>
+    <p>Analyze your prompt or API definition for terminology, structure, and schema alignment—free, no sign-up.</p>
+  </header>
+
+  <div class="layout">
+    <!-- Left: input -->
+    <aside class="panel panel-input">
+      <h2>Input</h2>
+      <label for="prompt">Prompt or instructions</label>
+      <textarea id="prompt" placeholder="Paste your prompt, system message, or API instructions here…"></textarea>
+      <label for="schema">Optional: schema or API definition (JSON)</label>
+      <textarea id="schema" placeholder='{"name": "string", "count": "number"}'></textarea>
+      <label for="model">Model / context</label>
+      <select id="model">
+        <option value="any">Any model</option>
+        <option value="gpt-4">GPT-4</option>
+        <option value="claude">Claude</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <button type="button" class="btn-primary" id="analyze">Score consistency</button>
+      <p class="microcopy">Paste your prompt above. Add a JSON schema to check field alignment. Results appear in the center panel.</p>
+    </aside>
+
+    <!-- Center: results -->
+    <main class="panel panel-results">
+      <h2>Results</h2>
+      <div id="state-empty" class="state-empty">
+        Enter a prompt and click “Score consistency” to see your consistency score and breakdown.
+      </div>
+      <div id="state-loading" class="state-loading">Analyzing…</div>
+      <div id="results" style="display: none;">
+        <div class="score-circle" id="score-circle" aria-hidden="true">
+          <div class="score-circle-inner" id="score-value">0</div>
+        </div>
+        <p class="microcopy" style="text-align: center;">Overall consistency score (0–100)</p>
+        <div id="category-bars"></div>
+        <table class="results-table" id="results-table">
+          <thead>
+            <tr><th>Metric</th><th>Value</th></tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+        <div>
+          <h3 style="font-size: 0.9rem; color: var(--accent); margin-bottom: 0.35rem;">Issues</h3>
+          <ul class="issues-list" id="issues-list"></ul>
+        </div>
+        <div>
+          <h3 style="font-size: 0.9rem; color: var(--accent); margin-bottom: 0.35rem;">Suggestions</h3>
+          <ul class="suggestions-list" id="suggestions-list"></ul>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right: guidance -->
+    <aside class="panel panel-guidance">
+      <h2>Guidance</h2>
+      <div class="guidance-block">
+        <h3>What is prompt consistency?</h3>
+        <p>Consistency means using the same terms for the same concepts, keeping a clear structure, and aligning your prompt with your schema or API so the model behaves predictably.</p>
+      </div>
+      <div class="guidance-block">
+        <h3>How we score</h3>
+        <p>We evaluate terminology (repeated use of the same words for the same idea), structure (sections, bullets, numbering), clarity (sentence length), and—if you provide a schema—how well the prompt references your fields.</p>
+      </div>
+      <div class="guidance-block">
+        <h3>Improving your score</h3>
+        <p>Use one term per concept, add clear headings or steps, keep instructions between 10–25 words per sentence, and mention key schema field names in the prompt.</p>
+      </div>
+      <div class="guidance-block">
+        <h3>Schema alignment</h3>
+        <p>Paste a JSON schema or API definition in the left panel. We check that your prompt refers to those field names so the model is more likely to output valid, structured data.</p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="cta-bar">
+    You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. <a href="https://svivva.com" target="_blank" rel="noopener">Try Svivva for free.</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Online Build Planner Tool — Schematic, BOM &amp; Workflow Generator | Svivva</title>
+  <meta name="description" content="Free online build planner tool. Generate hardware schematics, bill of materials, flow graphs, and production workflow previews in seconds. No signup required. Powered by Svivva." />
+  <meta name="keywords" content="build planner, BOM generator, schematic generator, hardware build tool, product workflow planner, free online build tool, Svivva" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/build-planner" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Free Online Build Planner Tool — Schematic, BOM &amp; Workflow Generator" />
+  <meta property="og:description" content="Generate hardware schematics, BOMs, flow graphs, and production workflow previews in seconds. No signup. Powered by Svivva." />
+  <meta property="og:url" content="https://svivva.com/tools/build-planner" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Online Build Planner Tool | Svivva" />
+  <meta name="twitter:description" content="Generate hardware schematics, BOMs, flow graphs, and production previews in seconds. Free, no signup." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Online Build Planner Tool",
+    "url": "https://svivva.com/tools/build-planner",
+    "description": "Free online build planner tool that generates hardware schematics, bill of materials, flow graphs, idea reports, and production workflow previews. No signup required.",
+    "applicationCategory": "Engineering Tool",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>Free Online Build Planner Tool</h1>
+      <p class="intro">Plan and preview real production workflows in seconds — schematics, bill of materials, flow graphs, idea reports, and setup maps — without creating an account. Enter a short brief describing your hardware concept, musical project, product idea, or team scenario, choose a category, and get a production-style preview powered by one step of the <a href="https://svivva.com" class="internal-link">Svivva</a> pipeline.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. Portable stereo delay pedal, 2 knobs, 9V, analog" required></textarea>
+
+          <label for="mode">Mode or category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your build planner preview will appear here.</p>
+          <p class="hint">Enter a short description, choose a mode, and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. Run the full workflow in Svivva with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="internal-link">Svivva's</a> B.U.I.L.D. digital/physical flows: your brief &rarr; one production-style preview (schematic, BOM, flow, idea report, or setup map). In the full platform you get the complete pipeline: versioning, build steps, materials, costing, and exports.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Brief &rarr; single-step preview</strong></li>
+          <li>Next in full workflow: design iteration, costing, 3D/mechanical, collaboration, production-ready exports</li>
+        </ul>
+        <p><a href="https://svivva.com" class="internal-link">Explore the full Svivva platform &rarr;</a></p>
+      </aside>
+    </main>
+
+    <section class="seo-content">
+      <h2>How the Free Online Build Planner Works</h2>
+      <p>The Svivva build planner is a free online tool designed for hardware engineers, product designers, musicians, and creative teams who need a fast way to validate concepts before committing to a full development cycle. Instead of spending hours configuring toolchains or setting up project scaffolding, you describe your concept in plain language, select the workflow category that matches your project, and receive a production-grade preview in seconds.</p>
+
+      <h3>Supported Workflow Categories</h3>
+      <p>The build planner covers six distinct workflow categories, each mapping to a real step in the <a href="https://svivva.com" class="internal-link">Svivva</a> production pipeline:</p>
+      <ul>
+        <li><strong>Hardware</strong> — Generates a schematic diagram and bill of materials (BOM) table from your concept description. Useful for electronics prototyping, circuit design, and hardware startups evaluating component choices early.</li>
+        <li><strong>Play</strong> — Produces a performance setup map and audio waveform preview. Built for musicians, sound designers, and live performers working with routing, stems, and signal chains.</li>
+        <li><strong>Idea</strong> — Returns a feasibility score and structured idea report. Ideal for product managers and founders who need quick validation before deeper research or team alignment.</li>
+        <li><strong>Team</strong> — Maps a collaboration flow showing roles, permissions, and shared asset handoffs. Designed for distributed teams planning how work moves between contributors.</li>
+        <li><strong>Marketplace</strong> — Checks publish readiness with a structured checklist covering scope, documentation, and packaging requirements. Useful for anyone preparing an API, module, or component for distribution.</li>
+        <li><strong>Build</strong> — Generates a 3D placeholder preview representing the digital-to-physical production flow. Covers build steps, materials, costing, and export preparation.</li>
+      </ul>
+
+      <h3>Why Use a Build Planner</h3>
+      <p>Most production workflows — whether hardware, software, or creative — start with the same problem: turning a rough idea into something structured enough to act on. A build planner bridges that gap. It takes unstructured input and returns a concrete, reviewable artifact you can share with collaborators, use to estimate costs, or refine into a full project specification.</p>
+      <p>This tool runs one isolated step of the pipeline. When you are ready for the complete workflow — with versioning, multi-step builds, cost tracking, team collaboration, and production-ready exports — <a href="https://svivva.com" class="internal-link">Svivva</a> provides the full platform. No credit card required to get started.</p>
+
+      <h3>Built for Engineers, Designers, and Makers</h3>
+      <p>Whether you are building a guitar pedal, prototyping an IoT sensor board, planning a live audio setup, or evaluating a product idea with your team, the build planner gives you a structured starting point in seconds. Add optional constraints like budget, materials, genre, and region to increase the readiness score and produce more targeted output.</p>
+      <p><a href="https://svivva.com" class="cta-inline">Start using the full Svivva platform free &rarr;</a></p>
+    </section>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <footer class="site-footer">
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>What does the free online build planner tool do?</summary>
+          <p>It takes your short structured brief — a hardware concept, musical intent, team scenario, or product idea — and runs one isolated step of Svivva's real internal pipeline. You get a production-style preview such as a schematic, BOM table, flow graph, idea report, or setup map, plus a readiness indicator showing how detailed your input is. No login required.</p>
+        </details>
+        <details>
+          <summary>Is the build planner tool free?</summary>
+          <p>Yes. This online build planner tool is completely free and does not require an account or login. You can generate previews as often as you like. The full <a href="https://svivva.com" class="internal-link">Svivva platform</a> has free and paid tiers for complete production workflows.</p>
+        </details>
+        <details>
+          <summary>How do I take this preview into a full project?</summary>
+          <p>Click "Open this preview inside a real Svivva project" or sign up at <a href="https://svivva.com" class="internal-link">svivva.com</a> to run the full workflow with versioning, cost tracking, collaboration, and production-ready exports.</p>
+        </details>
+        <details>
+          <summary>What is a BOM generator?</summary>
+          <p>A BOM (bill of materials) generator creates a structured list of components, parts, and quantities needed to build a hardware project. The build planner generates a preview BOM from your concept description. In <a href="https://svivva.com" class="internal-link">Svivva</a>, you get full BOM management with costing, sourcing, and version tracking.</p>
+        </details>
+        <details>
+          <summary>Can I use the build planner for software projects?</summary>
+          <p>The build planner is optimized for hardware, creative, and product workflows. For software-specific build systems, <a href="https://svivva.com" class="internal-link">Svivva's</a> full platform includes digital flow support alongside physical production pipelines.</p>
+        </details>
+      </section>
+      <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D.</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

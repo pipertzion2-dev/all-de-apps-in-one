@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Marketplace Listing Generator – Free Online Tool | Svivva</title>
+  <meta name="description" content="Free API marketplace listing generator. Create production-style API listing previews with title, slug, endpoints, tags, and pricing tier in seconds. No signup required. Powered by Svivva." />
+  <meta name="keywords" content="API marketplace listing generator, API listing tool, create API listing, API marketplace, API documentation, free API tool, Svivva" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://svivva.com/tools/api-marketplace-listing-generator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="API Marketplace Listing Generator – Free Online Tool | Svivva" />
+  <meta property="og:description" content="Generate production-style API marketplace listings instantly. Free tool by Svivva — no signup required." />
+  <meta property="og:url" content="https://svivva.com/tools/api-marketplace-listing-generator" />
+  <meta property="og:site_name" content="Svivva" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="API Marketplace Listing Generator – Free Online Tool | Svivva" />
+  <meta name="twitter:description" content="Generate production-style API marketplace listings instantly. Free tool by Svivva — no signup required." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "API Marketplace Listing Generator",
+    "url": "https://svivva.com/tools/api-marketplace-listing-generator",
+    "description": "Free online tool to generate production-style API marketplace listing previews with title, slug, endpoints, tags, and pricing tier. Powered by Svivva.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Svivva",
+      "url": "https://svivva.com"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does the API marketplace listing generator do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It takes your short concept, product idea, or API description and produces a production-style marketplace listing preview: title, description snippet, endpoint summary, pricing tier placeholder, and tags. It runs one step of Svivva's API Marketplace publishing pipeline."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the API marketplace listing generator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This online tool is completely free and does not require login or signup. You can generate listing previews as often as you like. The full Svivva platform has free and paid tiers for production workflows."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I publish a real API listing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sign up at Svivva to run the full API Marketplace workflow: packaging, documentation, versioning, and one-click publish to the marketplace."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is an API marketplace listing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An API marketplace listing is a structured page that describes your API to potential consumers. It typically includes a title, description, endpoint documentation, pricing tier, and tags so developers can discover and evaluate your API before integrating it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this tool for any type of API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The generator works with REST APIs, hardware APIs, collaboration APIs, and more. Select a mode or category that fits your project and the tool adapts the listing preview accordingly."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <h1>API Marketplace Listing Generator</h1>
+      <p class="intro">Generate a production-style API marketplace listing preview from your concept, product idea, or API description. This free tool runs one isolated step of <a href="https://svivva.com" class="internal-link">Svivva's</a> API Marketplace pipeline — no account required.</p>
+    </header>
+
+    <main class="three-panel">
+      <aside class="panel left-panel">
+        <form id="preview-form" class="inputs-form">
+          <label for="description">Short description <span class="required">*</span></label>
+          <textarea id="description" name="description" rows="4" placeholder="e.g. REST API for synth preset discovery, tags and search by genre" required></textarea>
+
+          <label for="mode">Mode or category</label>
+          <select id="mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace" selected>Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <fieldset class="constraints">
+            <legend>Optional constraints</legend>
+            <label for="budget">Budget</label>
+            <input type="text" id="budget" name="budget" placeholder="e.g. &lt;$200" />
+            <label for="genre">Genre / style</label>
+            <input type="text" id="genre" name="genre" placeholder="e.g. synth, guitar" />
+            <label for="materials">Materials</label>
+            <input type="text" id="materials" name="materials" placeholder="e.g. PCB, through-hole" />
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" placeholder="e.g. EU" />
+            <label for="collab_size">Collaboration size</label>
+            <input type="text" id="collab_size" name="collab_size" placeholder="e.g. 2–4" />
+          </fieldset>
+
+          <button type="submit" class="btn-generate" id="btn-generate">Generate preview</button>
+        </form>
+      </aside>
+
+      <section class="panel center-panel">
+        <div id="preview-placeholder" class="preview-placeholder">
+          <p>Your API marketplace listing preview will appear here.</p>
+          <p class="hint">Enter a short description and click Generate preview.</p>
+        </div>
+        <div id="preview-output" class="preview-output" hidden>
+          <div class="preview-artifact" id="preview-artifact"></div>
+          <div class="confidence-bar">
+            <span class="confidence-label">Readiness</span>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+            <span class="confidence-value" id="confidence-value"></span>
+          </div>
+          <p class="preview-explanation" id="preview-explanation"></p>
+        </div>
+        <div class="cta-below-preview">
+          <a href="https://svivva.com" class="cta-primary" id="cta-primary">You've previewed one step. In Svivva you can run the full workflow with versioning, collaboration, cost tracking, and production-ready exports. Try Svivva free.</a>
+          <a href="https://svivva.com/projects" class="cta-secondary" id="cta-secondary">Open this preview inside a real Svivva project.</a>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <h2>What you're previewing</h2>
+        <p id="mapping-copy">This tool runs <strong>one isolated step</strong> of <a href="https://svivva.com" class="internal-link">Svivva's</a> API Marketplace: concept to listing preview (title, description snippet, endpoints, pricing tier). In the full platform you get API packaging, docs, versioning, and publish to the marketplace.</p>
+        <ul class="mapping-steps">
+          <li>Current step: <strong>Concept to API marketplace listing preview</strong></li>
+          <li>Next in full workflow: API packaging, docs, listing publish, versioning</li>
+        </ul>
+        <p><a href="https://svivva.com/marketplace" class="internal-link">Explore the API Marketplace module on Svivva</a></p>
+        <p><a href="https://svivva.com/tools" class="internal-link">Browse all Svivva free tools</a></p>
+      </aside>
+    </main>
+
+    <nav class="sticky-cta-bar" aria-label="Primary call to action">
+      <a href="https://svivva.com" class="sticky-cta" id="sticky-cta">Try Svivva free — full workflow, no credit card</a>
+    </nav>
+
+    <section class="seo-content">
+      <h2>What is an API marketplace listing?</h2>
+      <p>An API marketplace listing is the public-facing page that introduces your API to potential consumers. It is how developers discover, evaluate, and decide whether to integrate your service. A strong listing includes a clear title, a concise description, well-organized endpoint documentation, a pricing tier, and relevant tags that help your API surface in search results within the marketplace.</p>
+
+      <p>Writing an effective API marketplace listing from scratch takes time. You need to distill your API's value into a short description that speaks to developers, choose a memorable slug, define which endpoints to highlight, and assign tags that match the way buyers search. Most teams skip this step or treat it as an afterthought, which means their APIs get buried in crowded marketplaces.</p>
+
+      <h2>How the API marketplace listing generator works</h2>
+      <p>This free tool automates the first and most tedious step of publishing an API: drafting the listing. Enter a short description of your API concept, select a category, and optionally add constraints like budget, region, or collaboration size. The generator produces a complete listing preview including a formatted title, URL-ready slug, description snippet, mock endpoint table, pricing tier suggestion, and discovery tags. The entire process takes seconds, not hours.</p>
+
+      <p>The output is designed to mirror what a production API marketplace listing looks like. You get a realistic preview that you can use to validate your concept, pitch to stakeholders, or refine before publishing. The readiness score gives you a quick signal on how complete your input is and how strong the resulting listing would be in a real marketplace.</p>
+
+      <h2>Why use this tool?</h2>
+      <p>Whether you are a solo developer launching your first API or a product team evaluating which services to expose through a marketplace, this generator gives you a fast, structured starting point. Instead of staring at a blank page, you get a formatted draft that follows marketplace best practices. You can iterate quickly, try different descriptions and categories, and compare outputs side by side.</p>
+
+      <p>This tool runs one isolated step of <a href="https://svivva.com" class="internal-link">Svivva's</a> full API Marketplace pipeline. In <a href="https://svivva.com" class="internal-link">Svivva</a>, you can take a listing preview and run it through the complete workflow: API packaging, documentation generation, versioning, collaboration with your team, cost tracking, and one-click publish to the marketplace. The free tool gives you a taste of what the platform can do. When you are ready for the full pipeline, <a href="https://svivva.com" class="internal-link">Svivva</a> picks up right where this tool leaves off.</p>
+
+      <h2>Who is this tool for?</h2>
+      <ul class="seo-list">
+        <li><strong>API developers</strong> who want to preview how their service will appear in a marketplace before committing to a full listing.</li>
+        <li><strong>Product managers</strong> who need to validate API concepts quickly and share structured previews with their team.</li>
+        <li><strong>Startup founders</strong> exploring whether their idea has marketplace potential and what the listing would look like.</li>
+        <li><strong>Technical writers</strong> looking for a structured starting point for API documentation and marketplace copy.</li>
+      </ul>
+
+      <p>No signup, no payment, no installation. Enter your concept and generate a listing preview in seconds. When you are ready to publish for real, <a href="https://svivva.com" class="internal-link">create a free Svivva account</a> and run the full workflow.</p>
+    </section>
+
+    <footer class="site-footer">
+      <section class="faq">
+        <h2>Frequently asked questions</h2>
+        <details>
+          <summary>What does the API marketplace listing generator do?</summary>
+          <p>It takes your short concept, product idea, or API description and runs one step of <a href="https://svivva.com" class="internal-link">Svivva's</a> pipeline to produce a production-style marketplace listing preview: title, description snippet, endpoint summary, pricing tier placeholder, and tags. It is a single-step preview of what the full platform does with complete API packaging, docs, and publish.</p>
+        </details>
+        <details>
+          <summary>Is the API marketplace listing generator free?</summary>
+          <p>Yes. This online tool is completely free and does not require login. You can generate listing previews as often as you like. The full <a href="https://svivva.com" class="internal-link">Svivva platform</a> has free and paid tiers.</p>
+        </details>
+        <details>
+          <summary>How do I publish a real API listing?</summary>
+          <p>Sign up at <a href="https://svivva.com" class="internal-link">Svivva</a> to run the full API Marketplace workflow: packaging, documentation, versioning, and one-click publish to the marketplace.</p>
+        </details>
+        <details>
+          <summary>What is an API marketplace listing?</summary>
+          <p>An API marketplace listing is a structured page that describes your API to potential consumers. It typically includes a title, description, endpoint documentation, pricing tier, and tags so developers can discover and evaluate your API before integrating it.</p>
+        </details>
+        <details>
+          <summary>Can I use this tool for any type of API?</summary>
+          <p>Yes. The generator works with REST APIs, hardware APIs, collaboration APIs, and more. Select a mode or category that fits your project and the tool adapts the listing preview accordingly.</p>
+        </details>
+      </section>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="https://svivva.com" class="internal-link">Svivva</a>
+        <a href="https://svivva.com/marketplace" class="internal-link">API Marketplace</a>
+        <a href="https://svivva.com/tools" class="internal-link">Free Tools</a>
+        <a href="https://svivva.com/docs" class="internal-link">Documentation</a>
+      </nav>
+      <p class="footer-link"><a href="https://svivva.com">Svivva</a> — Hardware, Play, Idea Engine, B.U.I.L.D.</p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

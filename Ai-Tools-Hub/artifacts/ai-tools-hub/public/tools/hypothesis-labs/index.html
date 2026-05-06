@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Fast, shareable hypothesis previews—no login. Sketch ideas here; validate and run discovery on the full platform." />
+    <title>Hypothesis Labs — insight previews</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- ── Fetch interceptor: replaces the Python/Flask backend with pure JS ── -->
+    <script>
+    (function() {
+      'use strict';
+
+      // ── Helpers ────────────────────────────────────────────────────────────
+      function _seed(s) {
+        let h = 5381;
+        for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+        return Math.abs(h);
+      }
+      function _pick(seed, items) { return items[((seed % items.length) + items.length) % items.length]; }
+      function _clean(s) { return ((s || '').trim().replace(/\s+/g,' ').slice(0,280)) || 'this topic'; }
+
+      // ── Systems catalog ────────────────────────────────────────────────────
+      const SYSTEMS = [
+        {"id":"quadcopter","name":"Quadcopter Drone","nodes":["rotors","imu","gps","esc","battery"],"edges":[["rotors","esc"],["esc","battery"],["imu","gps"]]},
+        {"id":"hydraulic_press","name":"Hydraulic Press Line","nodes":["ram","fluid","dies","pump","valve"],"edges":[["pump","fluid"],["fluid","ram"],["ram","dies"]]},
+        {"id":"mems_gyro","name":"MEMS Inertial Module","nodes":["gyro","accel","dsp","mcu","bus"],"edges":[["gyro","dsp"],["accel","dsp"],["dsp","mcu"]]},
+        {"id":"solar_tracker","name":"Solar Tracker Array","nodes":["panels","encoders","motors","controller","grid"],"edges":[["panels","controller"],["encoders","controller"],["controller","motors"]]},
+        {"id":"cryocooler","name":"Stirling Cryocooler","nodes":["piston","regenerator","cold_head","displacer","housing"],"edges":[["piston","regenerator"],["regenerator","cold_head"],["cold_head","displacer"]]},
+        {"id":"lidar_pod","name":"Solid-State LiDAR Pod","nodes":["vcsel","mirror","spad","fpga","interface"],"edges":[["vcsel","mirror"],["mirror","spad"],["spad","fpga"]]},
+        {"id":"maglev_bearing","name":"Active Maglev Bearing","nodes":["magnets","gap_sensors","amplifier","dsp","shaft"],"edges":[["gap_sensors","dsp"],["dsp","amplifier"],["amplifier","magnets"]]},
+        {"id":"fuel_cell_stack","name":"PEM Fuel Cell Stack","nodes":["membrane","humidifier","compressor","bop","inverter"],"edges":[["compressor","humidifier"],["humidifier","membrane"],["membrane","bop"]]},
+        {"id":"robotic_arm_6dof","name":"6-DOF Industrial Arm","nodes":["links","harmonics","ft_sensor","controller","teach_pendant"],"edges":[["links","harmonics"],["ft_sensor","controller"],["controller","links"]]},
+        {"id":"wave_energy","name":"Point Absorber WEC","nodes":["buoy","pto","mooring","converter","grid_tie"],"edges":[["buoy","pto"],["pto","converter"],["converter","grid_tie"]]}
+      ];
+
+      // ── Tools catalog ──────────────────────────────────────────────────────
+      const TOOLS_META = [
+        {"id":"compare-anything","name":"Compare Anything","blurb":"Two topics → one crisp hypothesis + story."},
+        {"id":"trend-insight","name":"Trend Insight Generator","blurb":"Possible trends and relationships for a topic."},
+        {"id":"what-impacts-x","name":"What Impacts X?","blurb":"Factor map and hypothetical links."},
+        {"id":"contradiction-finder","name":"Contradiction Finder","blurb":"Surface tensions between two claims."},
+        {"id":"quick-hypothesis","name":"Quick Hypothesis Generator","blurb":"3–5 testable starters from a prompt."},
+        {"id":"cross-domain-hybrid","name":"Cross-Domain Hybridization Engine","blurb":"Blend hardware systems → emergent hybrids."},
+        {"id":"causal-sketch","name":"Causal Chain Sketcher","blurb":"Minimal nodes/edges narrative."},
+        {"id":"assumption-map","name":"Assumption Surface","blurb":"Hidden assumptions + falsify hooks."},
+        {"id":"metric-picker","name":"Metric Picker","blurb":"North-star / leading / guardrail framing."},
+        {"id":"reverse-hypothesis","name":"Reverse Hypothesis","blurb":"From observed effect to plausible causes."},
+        {"id":"analogy-bridge","name":"Analogous Domain Bridge","blurb":"Transfer patterns across domains."},
+        {"id":"stakeholder-lens","name":"Stakeholder Lens","blurb":"Four perspectives + alignment risk."},
+        {"id":"risk-snapshot","name":"Risk Snapshot","blurb":"Fast risk categories for a topic."},
+        {"id":"scenario-split","name":"Scenario Split","blurb":"Base vs stress branching sketch."},
+        {"id":"variable-web","name":"Variable Relationship Web","blurb":"Hypothesized variable links."},
+        {"id":"bias-spotter","name":"Bias Spotter","blurb":"Gentle debiasing prompts for a claim."},
+        {"id":"research-brief","name":"One-Paragraph Research Brief","blurb":"Decision-centered mini brief."},
+        {"id":"hypothesis-to-test","name":"Hypothesis Sharpener","blurb":"Vague idea → more testable form."},
+        {"id":"decision-tree-lite","name":"Decision Tree Lite","blurb":"Simple if/then decision scaffolding."},
+        {"id":"instrument-scanner","name":"Instrument Scanner","blurb":"Measurement gaps + quick wins."}
+      ];
+
+      // ── Tool logic (ported from Python) ───────────────────────────────────
+      function compare_anything(a, b) {
+        a = _clean(a); b = _clean(b);
+        const seed = _seed(a + '||' + b);
+        const templates = [
+          [`As ${a} intensifies, ${b} may rise non-linearly once coordination costs cross a threshold.`, `Mechanism sketch: feedback between adoption friction and measurement quality creates a tipping band rather than a smooth slope.`],
+          [`A plausible tension: gains in ${a} could erode prerequisites for ${b} unless buffering capacity is explicitly added.`, `Mechanism sketch: resource reallocation starves the secondary loop until lagged indicators catch up.`],
+          [`${a} and ${b} may co-move positively under transparency, and negatively under competitive secrecy.`, `Mechanism sketch: information asymmetry switches the coupling sign between incentive alignment and rent-seeking.`],
+        ];
+        const [hyp, explain] = templates[seed % templates.length];
+        return { hypothesis: hyp, explanation: explain, limits: "Exploratory synthesis only—no causal identification, experiments, or dataset validation." };
+      }
+
+      function trend_insight(topic) {
+        const t = _clean(topic); const seed = _seed('trend:' + t);
+        const trends = [
+          `Consolidation around measurable proxies for "${t}" as teams standardize dashboards.`,
+          `Tooling sprawl for "${t}" followed by a pullback toward governed pipelines.`,
+          `Regulatory or buyer pressure making "${t}" an auditable workflow, not a narrative.`,
+          `Edge cases of "${t}" becoming the main story as baseline performance saturates.`,
+        ];
+        const rels = [
+          `Latency of feedback loops ↔ perceived ROI of initiatives touching "${t}".`,
+          `Incentive design ↔ willingness to instrument "${t}" honestly.`,
+          `Data freshness ↔ decision quality under uncertainty about "${t}".`,
+          `Cross-team alignment ↔ stability of metrics defining "${t}".`,
+        ];
+        return { topic: t, possible_trends: [0,1,2,3].map(i=>_pick(seed+i,trends)), predicted_relationships: [0,1,2].map(i=>_pick(seed+10+i,rels)), limits: "Speculative pattern language—not forecast-backed or empirically validated." };
+      }
+
+      function what_impacts_x(topic) {
+        const t = _clean(topic); const seed = _seed('impact:' + t);
+        const factors = ["Upstream supply constraints","Measurement definitions (what counts)","Seasonality and cohort mix","Org incentives and ownership","Competitive reactions","Technology adoption S-curves","Policy or procurement rules","Talent density and retention"];
+        const rels = [
+          {kind:"moderator", statement:`Team maturity moderates how strongly external shocks move "${t}".`},
+          {kind:"mediator", statement:`Operational cadence mediates the path from strategy pledges to outcomes in "${t}".`},
+          {kind:"threshold", statement:`There may be a threshold beyond which small changes in instrumentation dominate narrative shifts for "${t}".`},
+        ];
+        const chosen = []; for (let i=0;i<6;i++) { const f=_pick(seed+i,factors); if(!chosen.includes(f)) chosen.push(f); }
+        return { topic: t, factors: chosen, hypothetical_relationships: [rels[seed%rels.length], rels[(seed+1)%rels.length]], limits: "Heuristic factor map—no effect sizes, confound control, or testing." };
+      }
+
+      function contradiction_finder(a, b) {
+        a = _clean(a); b = _clean(b);
+        const seed = _seed(a + '!!' + b);
+        const tensions = [
+          "Competing time horizons: one claim optimizes short-cycle learning; the other assumes long-cycle compounding.",
+          "Unit of analysis mismatch: one argument works at team level, the other at system level—and they disagree when the levels interact.",
+          "Assumption conflict: one claim requires stable measurement; the other assumes definitions shift under observation.",
+          "Incentive misalignment: local optimization satisfies both claims individually but breaks system-level coherence.",
+        ];
+        const hooks = [
+          "Test whether the tension collapses once you fix the time horizon.",
+          "Ask: at what scale does each claim hold, and is that scale reachable?",
+          "Look for a common ancestor metric both claims implicitly compete over.",
+          "Find the boundary condition where both claims are simultaneously satisfied.",
+        ];
+        return { claim_a: a, claim_b: b, tension: _pick(seed, tensions), resolution_hook: _pick(seed+1, hooks), limits: "Structural analysis only—not a logical proof of contradiction." };
+      }
+
+      function quick_hypothesis(prompt) {
+        const t = _clean(prompt); const seed = _seed('qh:' + t);
+        const starters = [
+          `If ${t} increases by one standard deviation, then early-stage outcomes improve measurably within one cycle.`,
+          `${t} is the proximate driver, but the root cause is an upstream measurement gap that makes the effect appear larger than it is.`,
+          `Removing one coordination friction in ${t} yields disproportionate gains because the current state is inside a bottleneck, not on the frontier.`,
+          `${t} has a diminishing-returns profile: the first intervention unit captures most available slack.`,
+          `The relationship between ${t} and outcomes is contingent on a moderating variable that is currently unmeasured.`,
+        ];
+        return { prompt: t, hypotheses: [0,1,2].map(i=>_pick(seed+i,starters)), limits: "Generative prompts only—no testing, power analysis, or design guidance." };
+      }
+
+      function causal_sketch(topic) {
+        const t = _clean(topic); const seed = _seed('cs:' + t);
+        const nodes = [`Initial state of ${t}`, "Friction / bottleneck", "Intervention point", "Short-run effect", "Long-run equilibrium"];
+        const narrative = [
+          `A shock enters via "${t}" → amplified by a feedback loop → dissipates when the system hits a natural ceiling.`,
+          `"${t}" connects upstream constraints to downstream latency: reducing the constraint shortens the lag non-linearly.`,
+          `Causal chain runs through trust signals: "${t}" → social proof → adoption → scale effects → lock-in or churn.`,
+        ];
+        return { topic: t, nodes, edges: [["Initial state","Friction"],["Friction","Intervention"],["Intervention","Short-run effect"],["Short-run effect","Long-run equilibrium"]], narrative: _pick(seed, narrative), limits: "Narrative sketch—no DAG fitting, observational data, or confound adjustment." };
+      }
+
+      function assumption_map(topic) {
+        const t = _clean(topic); const seed = _seed('am:' + t);
+        const assumptions = [
+          {assumption: `"${t}" has a stable, shared definition across stakeholders`, falsify: "Ask three teams to write their definition independently and compare."},
+          {assumption: `Current measurement captures the right signal for "${t}"`, falsify: "Find one decision in the last quarter that would have changed with a different metric."},
+          {assumption: `The relationship in "${t}" is roughly linear in the relevant range`, falsify: "Check residuals at extremes; look for floor or ceiling effects."},
+          {assumption: `Actors affecting "${t}" have aligned incentives`, falsify: "Map who benefits if the stated goal is achieved vs. who bears the cost."},
+        ];
+        return { topic: t, assumptions: [_pick(seed,assumptions), _pick(seed+1,assumptions), _pick(seed+2,assumptions)].filter((v,i,a)=>a.findIndex(x=>x.assumption===v.assumption)===i), limits: "Heuristic surface—not a formal assumption elicitation protocol." };
+      }
+
+      function metric_picker(topic) {
+        const t = _clean(topic); const seed = _seed('mp:' + t);
+        const metrics = [
+          ["north_star", `Rate of meaningful progress on "${t}" per unit of team-week`],
+          ["leading", `Early signals: volume of inputs feeding "${t}" in the prior period`],
+          ["guardrail", `Quality floor: incidents or regressions attributable to "${t}" changes`],
+          ["lagging", `Outcome confirmation: downstream metric that "${t}" is supposed to move`],
+        ];
+        return { topic: t, suggested_metrics: [0,1,2].map(i=>{ const [role,name]=metrics[(seed+i)%metrics.length]; return {role,name}; }), limits: "Role-based framing only—not calibrated to your instrumentation stack." };
+      }
+
+      function reverse_hypothesis(effect) {
+        const e = _clean(effect); const seed = _seed('rh:' + e);
+        const causes = [
+          {cause: `A latent structural shift in the upstream process preceded "${e}" by one or two cycles.`, mechanism: "Lag between cause and effect obscures the driver in standard dashboards."},
+          {cause: `An incentive-driven reporting change produced the appearance of "${e}" without an underlying shift.`, mechanism: "Measurement games surface as real signal when audits are infrequent."},
+          {cause: `Selection effects changed the composition of the population experiencing "${e}".`, mechanism: "Cohort mix shifts can move aggregate metrics while within-group trends stay flat."},
+          {cause: `An environmental shock (policy, market, technology) coincided with "${e}".`, mechanism: "Confounded timing makes correlation appear causal."},
+        ];
+        return { effect: e, plausible_causes: [_pick(seed,causes), _pick(seed+1,causes)].filter((v,i,a)=>a.findIndex(x=>x.cause===v.cause)===i), limits: "Abductive sketching only—no counterfactual testing or causal discovery." };
+      }
+
+      function analogy_bridge(a, b) {
+        a = _clean(a); b = _clean(b);
+        const seed = _seed('ab:' + a + '|' + b);
+        const patterns = [
+          {pattern: "Feedback stabilization", transfer: `${b} may borrow ${a}'s approach to detecting drift early and closing the loop before error accumulates.`},
+          {pattern: "Tiered redundancy", transfer: `${a} uses layered fallbacks; ${b} could adopt a similar guard-rail hierarchy to contain cascades.`},
+          {pattern: "Rate-limiting", transfer: `${a} paces inputs to avoid saturation; ${b} could implement similar admission control on its highest-variance inputs.`},
+        ];
+        return { domain_a: a, domain_b: b, bridge: _pick(seed, patterns), limits: "Structural analogy only—fit must be validated against domain constraints." };
+      }
+
+      function stakeholder_lens(topic) {
+        const t = _clean(topic); const seed = _seed('sl:' + t);
+        const perspectives = [
+          {role:"Operator / builder", view: `"${t}" is a throughput constraint. Improvements are valued only if they don't add overhead.`},
+          {role:"Decision-maker / sponsor", view: `"${t}" is a signal of organizational health. Visibility and auditability matter as much as the metric itself.`},
+          {role:"End user / customer", view: `"${t}" is invisible unless it fails. Speed, reliability, and consistency are what they notice.`},
+          {role:"Regulator / auditor", view: `"${t}" must be documented, attributable, and reversible. Informal gains are discounted.`},
+        ];
+        return { topic: t, perspectives, alignment_risk: `Operators may optimize "${t}" locally in ways that reduce auditability, creating tension with sponsor and regulator views.`, limits: "Archetypal framing—real stakeholders will have nuanced, overlapping positions." };
+      }
+
+      function risk_snapshot(topic) {
+        const t = _clean(topic); const seed = _seed('rs:' + t);
+        const cats = [
+          {category:"Measurement risk", description:`The metric defining "${t}" drifts or gets gamed, decoupling the signal from the underlying outcome.`},
+          {category:"Execution risk", description:`The team capable of moving "${t}" is stretched or misaligned, slowing iteration.`},
+          {category:"External risk", description:`A market or regulatory shift changes the rules for "${t}" mid-cycle.`},
+          {category:"Feedback risk", description:`The loop from action to measurement of "${t}" is too slow to course-correct in time.`},
+        ];
+        return { topic: t, risk_categories: [_pick(seed,cats), _pick(seed+1,cats), _pick(seed+2,cats)].filter((v,i,a)=>a.findIndex(x=>x.category===v.category)===i), limits: "Heuristic risk surface—not a quantified risk assessment." };
+      }
+
+      function scenario_split(topic) {
+        const t = _clean(topic);
+        return { topic: t, branches: [{label:"Base case", description:`"${t}" proceeds at current trajectory; incremental gains, stable constraints.`},{label:"Upside case", description:`A catalyst unlocks "${t}" faster than expected; first-mover dynamics kick in.`},{label:"Stress case", description:`A constraint tightens or an assumption fails; "${t}" slows or regresses.`}], limits: "Qualitative branching only—no probability weights or Monte Carlo simulation." };
+      }
+
+      function variable_web(topic) {
+        const t = _clean(topic); const seed = _seed('vw:' + t);
+        const vars = [`${t} rate`, `upstream input volume`, `measurement latency`, `team bandwidth`, `external demand signal`, `feedback loop speed`];
+        const rels = [`${vars[seed%6]} → (positive) → ${vars[(seed+2)%6]}`, `${vars[(seed+1)%6]} → (negative moderator) → ${vars[(seed+3)%6]}`, `${vars[(seed+4)%6]} ↔ (bidirectional) ↔ ${vars[(seed+5)%6]}`];
+        return { topic: t, variables: vars.slice(0,4), relationships: rels, limits: "Hypothetical web—no regression analysis or structural equation modeling." };
+      }
+
+      function bias_spotter(claim) {
+        const c = _clean(claim); const seed = _seed('bs:' + c);
+        const biases = [
+          {bias:"Confirmation bias", prompt:`What evidence would falsify "${c}"? Have you actively sought it?`},
+          {bias:"Availability bias", prompt:`Is "${c}" vivid because recent or dramatic examples made it memorable rather than common?`},
+          {bias:"Scope insensitivity", prompt:`Does "${c}" hold at half the scale? At ten times the scale? If not, revisit.`},
+          {bias:"Attribution error", prompt:`Does "${c}" attribute outcomes to intention when system constraints may be the better explanation?`},
+        ];
+        return { claim: c, spotted: [_pick(seed,biases), _pick(seed+1,biases)].filter((v,i,a)=>a.findIndex(x=>x.bias===v.bias)===i), limits: "Heuristic prompts only—not a calibrated debiasing protocol." };
+      }
+
+      function research_brief(topic) {
+        const t = _clean(topic); const seed = _seed('rb:' + t);
+        const decisions = [`whether to invest more in "${t}"`, `how to sequence interventions on "${t}"`, `what success looks like for "${t}" at 90 days`];
+        const gaps = [`The causal mechanism linking "${t}" inputs to outcomes is not well established.`, `Current instrumentation for "${t}" may not isolate the effect of interest.`, `Stakeholder definitions of "${t}" success diverge and have not been reconciled.`];
+        return { topic: t, brief: `This brief supports the decision about ${_pick(seed,decisions)}. The key open question is: does the mechanism assumed for "${t}" hold under the conditions we can actually control? The biggest evidence gap is: ${_pick(seed+1,gaps).toLowerCase()} A three-week focused effort—mapping the causal chain, auditing the metric, and running one structured stakeholder alignment—would reduce uncertainty enough to act.`, limits: "Template-generated brief—requires domain validation before use in decisions." };
+      }
+
+      function hypothesis_to_test(vague) {
+        const v = _clean(vague);
+        return { input: v, testable: `If we change one lever in "${v}" for cohort A only, then metric M moves within T weeks relative to cohort B, assuming no simultaneous shocks to M.`, operationalize: ["Define cohort A/B with exclusion rules","Choose M with stable definition and collection path","Pre-register surprises and stopping rules"], limits: "No power calculation or design-of-experiments automation." };
+      }
+
+      function decision_tree_lite(topic) {
+        const t = _clean(topic);
+        return { topic: t, branches: [{if:"Signal is strong and reversible",then:"Run a small controlled trial."},{if:"Signal is weak but stakes are high",then:"Invest in measurement first."},{if:"Signal is strong but irreversible",then:"Stage rollout with kill switches."}], limits: "Rule-of-thumb branching—not an optimization model." };
+      }
+
+      function instrument_scanner(topic) {
+        const t = _clean(topic);
+        return { topic: t, gaps: ["Handoff points without timestamps","Manual approvals without reasons logged","Definitions that change month-to-month"], quick_wins: ["Add one automatic event at the critical handoff","Snapshot metric definitions weekly"], limits: "Heuristic audit—no data lineage integration." };
+      }
+
+      function hybridize(a_id, b_id) {
+        const sysMap = {}; SYSTEMS.forEach(s => sysMap[s.id] = s);
+        const a = sysMap[a_id], b = sysMap[b_id];
+        if (!a || !b) return { error: 'Unknown system id' };
+        const seed = _seed(a_id + '|' + b_id);
+        const merged = [...new Set([...a.nodes, ...b.nodes])];
+        const blends = [
+          ["interpolate","Parameter fusion averages dynamics while preserving safety envelopes."],
+          ["bridge","A bridging subgraph couples fast sensing from one side with slow, high-force actuation from the other."],
+          ["heterotic","Cross-domain feedback re-times control loops, producing a hybrid bandwidth neither system achieves alone."],
+          ["latent_coupling","Shared latent states align disturbances so residuals become predictable—enabling anticipatory compensation."],
+          ["mode_splitting","Operating modes split: one lineage handles transients; the other handles steady-state efficiency."],
+        ];
+        const emergent = [
+          "A stabilization loop inherits low-latency sensing but trades peak power for smoother trajectories.",
+          "Thermal and mechanical timescales decouple, creating a guard-railed envelope where efficiency spikes briefly after disturbances.",
+          "Sensor fusion crosses domains, exposing a constraint surface that is invisible to either system in isolation.",
+          "Safety monitors inherit dual evidence paths—reducing false trips while tightening reaction to genuine faults.",
+          "Energy buffering emerges: one subsystem's slack becomes the other's shock absorber without explicit storage hardware.",
+        ];
+        const titles = ["Heterotic coupling assembly","Cross-manifold actuator fusion","Dual-timescale hybrid stack","Bridged observability platform","Guard-railed co-design prototype"];
+        const count = 4 + (seed % 2);
+        const hybrids = [];
+        for (let i=0;i<count;i++) {
+          const s = seed + i*9973;
+          hybrids.push({ id:`h${i+1}`, title:`Hybrid #${i+1}: ${_pick(s,titles)}`, description:_pick(s+1,blends)[1], from_a:`Inherits ${a.nodes.slice(0,3).join(', ')} motifs and ${_pick(s+2,['bandwidth','precision','thermal headroom','fault tolerance'])} shaping from ${a.name}.`, from_b:`Carries ${b.nodes.slice(0,3).join(', ')} structure and ${_pick(s+3,['duty cycles','control authority','sensor diversity','energy routing'])} traits from ${b.name}.`, emergent:_pick(s+4,emergent), novelty_score: 72+(s%23), blend_mode:_pick(s+5,blends)[0] });
+        }
+        return { system_a:{id:a.id,name:a.name}, system_b:{id:b.id,name:b.name}, graph_summary:{nodes_merged:merged.length, edge_policy:_pick(seed+99,["max-degree cap","bipartite bridge","spanning merge","clique relax"])}, hybrids };
+      }
+
+      const HANDLERS = {
+        'compare-anything': b => compare_anything(b.a||'',b.b||''),
+        'trend-insight': b => trend_insight(b.topic||''),
+        'what-impacts-x': b => what_impacts_x(b.topic||''),
+        'contradiction-finder': b => contradiction_finder(b.a||'',b.b||''),
+        'quick-hypothesis': b => quick_hypothesis(b.prompt||''),
+        'causal-sketch': b => causal_sketch(b.topic||''),
+        'assumption-map': b => assumption_map(b.topic||''),
+        'metric-picker': b => metric_picker(b.topic||''),
+        'reverse-hypothesis': b => reverse_hypothesis(b.effect||''),
+        'analogy-bridge': b => analogy_bridge(b.a||'',b.b||''),
+        'stakeholder-lens': b => stakeholder_lens(b.topic||''),
+        'risk-snapshot': b => risk_snapshot(b.topic||''),
+        'scenario-split': b => scenario_split(b.topic||''),
+        'variable-web': b => variable_web(b.topic||''),
+        'bias-spotter': b => bias_spotter(b.claim||''),
+        'research-brief': b => research_brief(b.topic||''),
+        'hypothesis-to-test': b => hypothesis_to_test(b.vague||''),
+        'decision-tree-lite': b => decision_tree_lite(b.topic||''),
+        'instrument-scanner': b => instrument_scanner(b.topic||''),
+      };
+
+      // ── Routing interceptors: make React Router think basename is '/' ───────
+      const BASE = '/tools/hypothesis-labs';
+
+      // Strip BASE prefix from pathname so React Router routes work correctly
+      try {
+        const desc = Object.getOwnPropertyDescriptor(Location.prototype, 'pathname');
+        if (desc && desc.get) {
+          const origGet = desc.get;
+          Object.defineProperty(Location.prototype, 'pathname', {
+            get() {
+              let p = origGet.call(this);
+              if (p.startsWith(BASE)) p = p.slice(BASE.length) || '/';
+              // Normalize /index.html → / for the initial iframe src load
+              if (p === '/index.html') p = '/';
+              return p;
+            },
+            configurable: true,
+          });
+        }
+      } catch(e) { /* fallback: no-op */ }
+      const _origPush = history.pushState.bind(history);
+      const _origReplace = history.replaceState.bind(history);
+      history.pushState = function(state, title, url) {
+        if (url && !url.startsWith(BASE)) url = BASE + (url.startsWith('/') ? url : '/' + url);
+        return _origPush(state, title, url);
+      };
+      history.replaceState = function(state, title, url) {
+        if (url && !url.startsWith(BASE)) url = BASE + (url.startsWith('/') ? url : '/' + url);
+        return _origReplace(state, title, url);
+      };
+
+      // ── Fetch interceptor ──────────────────────────────────────────────────
+      const _origFetch = window.fetch.bind(window);
+      window.fetch = async function(input, init) {
+        const url = typeof input === 'string' ? input : input.url;
+
+        // GET /api/tools
+        if (url === '/api/tools' && (!init || init.method === 'GET' || !init.method)) {
+          return new Response(JSON.stringify({ tools: TOOLS_META }), { status:200, headers:{'Content-Type':'application/json'} });
+        }
+
+        // GET /api/cdhe/systems
+        if (url === '/api/cdhe/systems') {
+          return new Response(JSON.stringify(SYSTEMS), { status:200, headers:{'Content-Type':'application/json'} });
+        }
+
+        // POST /api/cdhe/hybridize
+        if (url === '/api/cdhe/hybridize' && init && init.method === 'POST') {
+          const body = JSON.parse(init.body || '{}');
+          const result = hybridize(body.system_a_id, body.system_b_id);
+          return new Response(JSON.stringify(result), { status:200, headers:{'Content-Type':'application/json'} });
+        }
+
+        // POST /api/tools/:id/run
+        const runMatch = url.match(/^\/api\/tools\/([^\/]+)\/run$/);
+        if (runMatch && init && init.method === 'POST') {
+          const toolId = runMatch[1];
+          const body = JSON.parse(init.body || '{}');
+          const handler = HANDLERS[toolId];
+          if (!handler) return new Response(JSON.stringify({error:'Unknown tool'}), { status:404, headers:{'Content-Type':'application/json'} });
+          const result = handler(body);
+          return new Response(JSON.stringify(result), { status:200, headers:{'Content-Type':'application/json'} });
+        }
+
+        // POST /api/share — stub (return dummy share id)
+        if (url === '/api/share' && init && init.method === 'POST') {
+          return new Response(JSON.stringify({id:'local-'+Date.now(), path:'/share/local'}), { status:200, headers:{'Content-Type':'application/json'} });
+        }
+
+        // GET /api/share/:id — stub
+        if (url.startsWith('/api/share/')) {
+          return new Response(JSON.stringify({error:'Sharing requires the full Svivva platform.'}), { status:404, headers:{'Content-Type':'application/json'} });
+        }
+
+        return _origFetch(input, init);
+      };
+    })();
+    </script>
+
+    <script type="module" crossorigin src="./assets/index-DxLaJvFM.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Bvgmvtcb.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

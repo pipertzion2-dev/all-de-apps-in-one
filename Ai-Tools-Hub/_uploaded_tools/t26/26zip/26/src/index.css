@@ -1,0 +1,45 @@
+@font-face {
+  font-family: 'zc';
+  src: url('/fonts/Zc-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --accent: #B45309;
+  --accent-hover: #9a4608;
+  --bg: #0f0f12;
+  --panel: #18181c;
+  --border: #2a2a30;
+  --text: #e4e4e7;
+  --text-muted: #a1a1aa;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'zc', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

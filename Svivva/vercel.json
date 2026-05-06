@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/run-scheduled?job=seo",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/run-scheduled?job=growth",
+      "schedule": "0 7 * * 0"
+    }
+  ]
+}

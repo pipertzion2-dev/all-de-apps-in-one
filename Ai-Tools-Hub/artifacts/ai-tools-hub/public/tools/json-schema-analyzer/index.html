@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema Field Impact Analyzer — Free Online Tool</title>
+  <meta name="description" content="Free schema field impact analyzer tool. Upload a prompt, schema, or API definition and get instant impact scoring and visualization. No login required.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Schema Field Impact Analyzer</h1>
+    <p class="tagline">See which schema fields matter most for your prompts and APIs</p>
+  </header>
+
+  <main class="three-panel">
+    <section class="panel left-panel" aria-label="Input">
+      <h2>Input</h2>
+      <label for="input-type">Input type</label>
+      <select id="input-type" class="zc-font">
+        <option value="schema">Schema / JSON</option>
+        <option value="api">API definition</option>
+      </select>
+      <label for="schema-input">Schema or API definition (JSON)</label>
+      <textarea id="schema-input" class="zc-font" rows="10" placeholder='{"properties":{"message":{"type":"string"},"role":{"type":"string","enum":["user","assistant"]}}}'></textarea>
+      <label for="prompt-input">Optional: prompt or instruction (for impact context)</label>
+      <textarea id="prompt-input" class="zc-font" rows="3" placeholder="e.g. You are a helpful assistant. Respond using the message and role fields."></textarea>
+      <label for="model-pref">Model preference (optional)</label>
+      <select id="model-pref" class="zc-font">
+        <option value="">— Any —</option>
+        <option value="gpt-4">GPT-4</option>
+        <option value="claude">Claude</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <button type="button" id="analyze-btn" class="cta-button zc-font">Analyze impact</button>
+      <p class="micro-copy">Paste any JSON Schema, OpenAPI snippet, or object with <code>properties</code>. No data is stored.</p>
+    </section>
+
+    <section class="panel center-panel" aria-label="Results">
+      <h2>Results</h2>
+      <div id="results-placeholder" class="results-placeholder zc-font">
+        <p>Run an analysis to see field impact scores and charts here.</p>
+      </div>
+      <div id="results-container" class="results-container hidden">
+        <div id="summary" class="summary zc-font"></div>
+        <div class="chart-wrap">
+          <canvas id="impact-chart" aria-label="Impact score bar chart"></canvas>
+        </div>
+        <div class="table-wrap">
+          <table id="fields-table" class="zc-font">
+            <thead><tr><th>Field</th><th>Impact</th><th>Required</th><th>Type</th></tr></thead>
+            <tbody id="fields-tbody"></tbody>
+          </table>
+        </div>
+        <p id="meta-timing" class="meta-timing zc-font"></p>
+      </div>
+    </section>
+
+    <section class="panel right-panel" aria-label="Guidance">
+      <h2>Interpretation</h2>
+      <div id="guidance-placeholder" class="guidance-placeholder zc-font">
+        <p>After you run an analysis, we’ll show short guidance here on how to read the scores and what to do next.</p>
+      </div>
+      <ul id="guidance-list" class="guidance-list zc-font hidden"></ul>
+    </section>
+  </main>
+
+  <footer class="sticky-cta">
+    <p class="cta-copy zc-font">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</p>
+    <a href="https://svivva.com" target="_blank" rel="noopener" class="cta-link zc-font">Try Svivva for free</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

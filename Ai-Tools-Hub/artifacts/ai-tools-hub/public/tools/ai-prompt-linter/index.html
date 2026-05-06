@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Prompt Linter — Free Online Tool | Lint & Improve Your Prompts</title>
+  <meta name="description" content="Free LLM prompt linter tool. Upload your prompt, schema, or API definition and get instant analysis, scoring, and best-practice guidance. No login required.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">LLM Prompt Linter</h1>
+      <p class="tagline">Lint, score, and improve your prompts in seconds. Free & no sign-up.</p>
+    </div>
+  </header>
+
+  <main class="three-panel">
+    <aside class="panel panel-left">
+      <h2 class="panel-title">Input</h2>
+      <p class="helper">Paste your prompt, schema, or API definition below. You can also choose a preset to see example checks.</p>
+      <div class="input-group">
+        <label for="input-type">Input type</label>
+        <select id="input-type" aria-label="Type of input">
+          <option value="prompt">Prompt / instruction</option>
+          <option value="schema">JSON schema</option>
+          <option value="api">API definition (OpenAPI-style)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="model-hint">Model hint (optional)</label>
+        <select id="model-hint" aria-label="Target model">
+          <option value="">Any</option>
+          <option value="gpt-4">GPT-4 / Claude</option>
+          <option value="gpt-3">GPT-3.5 / smaller</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="prompt-text">Prompt, schema, or config</label>
+        <textarea id="prompt-text" rows="14" placeholder="Paste your prompt or JSON here…" aria-label="Prompt or schema content"></textarea>
+      </div>
+      <button type="button" class="cta-primary" id="btn-lint" aria-label="Run lint analysis">Lint prompt</button>
+    </aside>
+
+    <section class="panel panel-center" aria-live="polite">
+      <h2 class="panel-title">Results</h2>
+      <p class="helper">Scores and findings appear here as soon as you run the linter.</p>
+      <div id="results-placeholder" class="results-placeholder">
+        <p>Click <strong>Lint prompt</strong> to see analysis.</p>
+      </div>
+      <div id="results-container" class="results-container" hidden>
+        <div class="score-card">
+          <span class="score-label">Overall score</span>
+          <span id="overall-score" class="score-value">—</span>
+          <span class="score-max">/ 100</span>
+        </div>
+        <div id="results-charts" class="results-charts"></div>
+        <div id="results-table-wrap" class="results-table-wrap">
+          <table id="results-table" class="results-table" role="table">
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>Status</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel panel-right">
+      <h2 class="panel-title">Guidance</h2>
+      <p class="helper">How to read and act on these results.</p>
+      <div id="guidance-content" class="guidance-content">
+        <div class="guidance-block">
+          <h3>Overall score</h3>
+          <p>Higher scores mean your prompt is clearer, well-structured, and aligned with common best practices. Aim for 70+ for production use.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>Checks explained</h3>
+          <p><strong>Clarity</strong> — Imperative, specific instructions score better. <strong>Structure</strong> — Sections and delimiters help models follow complex tasks. <strong>Safety</strong> — We flag possible injection or overly permissive phrasing.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>Schema & API</h3>
+          <p>If you paste JSON schema or API definitions, we validate structure and suggest improvements for consistency and documentation.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="sticky-cta">
+    <div class="cta-inner">
+      <p class="cta-copy">You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization. Try Svivva for free.</p>
+      <a href="https://svivva.com" class="cta-link" target="_blank" rel="noopener noreferrer">Try Svivva for free</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

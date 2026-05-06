@@ -1,0 +1,76 @@
+You are an expert full■stack developer and growth engineer.
+I am uploading 50 zip files. Each zip file contains a mini web app tool.
+Your job is to automatically integrate all of them into ONE application
+called the “Svivva AI Tools Hub”.
+Domain: svivva.com
+Goals:
+• Keep each tool's UI separate so each tool feels like its own app.
+• Create SEO landing pages for each tool.
+• Route tools under /tools/tool-name.
+• Funnel users into the main Svivva application.
+• Optimize everything for Google search traffic.
+Project structure:
+/svivva-tools-hub
+■
+■■■ server.js
+■■■ package.json
+■■■ public
+■
+■■■ tools
+■ ■■■ tool1
+■ ■■■ tool2
+■ ■■■ tool3
+■ ■■■ tool50
+■
+■■■ landing-pages
+■ ■■■ tool1.html
+■ ■■■ tool2.html
+■ ■■■ tool50.html
+■
+■■■ components
+■ ■■■ navbar
+■ ■■■ footer
+■ ■■■ related-tools
+■
+■■■ seo
+■■■ sitemap.xml
+■■■ robots.txt
+Instructions:
+1. Automatically extract every uploaded zip file into the /tools folder.
+2. Each folder should keep the original UI and code intact so the tool still works.
+3. Create routing so tools load at:
+/tools/tool-name
+Example:
+svivva.com/tools/audio-cleaner4. For each tool automatically generate an SEO landing page.
+Example:
+svivva.com/audio-cleaner
+Landing pages must include:
+• Headline describing the tool
+• Subheadline explaining the benefit
+• “Try Tool” button linking to /tools/tool-name
+• Feature list
+• Step-by-step usage section
+• FAQ section
+• Internal links to other tools
+5. Add a marketing funnel section on every page:
+• “Upgrade to Full Svivva Suite”
+• “Unlock All AI Tools”
+• “Create Account”
+6. Create a Related Tools section that automatically links to 4–5 other tools.
+7. Generate SEO metadata for every page:
+• title
+• meta description
+• structured data schema
+8. Generate sitemap.xml containing every tool page.
+9. Add Google Analytics integration placeholder.
+10. Add a homepage listing all tools with categories such as:
+• Audio Tools
+• Writing Tools
+• Video Tools
+• AI Utilities
+11. Optimize the design so every tool looks like part of the Svivva platform.
+12. Ensure all tools run inside one deployment.
+End result:
+A single Replit application containing 50 tools, 50 SEO landing pages,
+a homepage directory, and a marketing funnel directing users to the
+main Svivva application.

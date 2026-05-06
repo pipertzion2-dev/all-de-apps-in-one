@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Browse and generate chords by root, style, and voicing. Filter by jazz, gospel, neo-soul, and more. Free chord generator powered by Svivva." />
+  <meta name="robots" content="index, follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chord Creator — AI Chord Generator | Svivva</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --panel: #1a1a21;
+      --border: #2e2e38;
+      --text: #e8e8ed;
+      --muted: #8b8b9a;
+      --accent: #6c9eff;
+      --accent-dim: #3d5a8c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .row:last-child { margin-bottom: 0; }
+    label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    select, input[type="search"], input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.9rem;
+      min-width: 5rem;
+    }
+    input[type="search"] { flex: 1; min-width: 140px; }
+    .chord-list {
+      max-height: min(48vh, 420px);
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+    .chord-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .chord-row:last-child { border-bottom: 0; }
+    .chord-row:hover, .chord-row.active {
+      background: rgba(108, 158, 255, 0.08);
+    }
+    .chord-row .sym { color: var(--accent); font-weight: 500; }
+    .chord-row .meta { color: var(--muted); font-size: 0.8rem; text-align: right; }
+    .detail {
+      font-size: 0.9rem;
+    }
+    .detail strong { color: var(--accent); font-weight: 500; }
+    .tags { font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem; }
+    code.pill {
+      display: inline-block;
+      background: var(--bg);
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+    }
+    button {
+      background: var(--accent-dim);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+    .ext-hint {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    textarea.analysis-json {
+      width: 100%;
+      min-height: 140px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.6rem;
+      resize: vertical;
+    }
+    pre.analysis-out {
+      margin: 0.5rem 0 0;
+      padding: 0.65rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      overflow: auto;
+      max-height: 320px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bar-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+    .bar-cell {
+      min-width: 3.2rem;
+      padding: 0.35rem 0.45rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.72rem;
+      text-align: center;
+    }
+    .bar-cell .rn { color: var(--muted); font-size: 0.65rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ChordKit</h1>
+    <p class="sub">For Replit: include three scripts (see bottom), then call <code class="pill">ReplitChord.go(yourData)</code> — any common chord array / key / bpm field names work. Below: browse chords or paste analysis JSON.</p>
+
+    <div class="panel">
+      <div class="row">
+        <div>
+          <label>Root</label><br />
+          <select id="root"></select>
+        </div>
+        <div>
+          <label>Style filter</label><br />
+          <select id="tag">
+            <option value="">All tags</option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:160px;">
+          <label>Search</label><br />
+          <input type="search" id="q" placeholder="Symbol, name, id…" />
+        </div>
+        <div style="align-self:flex-end;">
+          <button type="button" id="randomBtn">Random in filter</button>
+        </div>
+      </div>
+      <div class="chord-list" id="list" aria-label="Chord list"></div>
+    </div>
+
+    <div class="panel detail" id="detail">
+      <p style="margin:0;">Select a chord to see spellings and voicing hooks.</p>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin:0 0 0.5rem; font-size:1rem; font-weight:600;">Audio analysis → arranged chords</h2>
+      <p style="margin:0 0 0.75rem; color:var(--muted); font-size:0.85rem;">
+        Uses <code class="pill">ReplitChord.go(JSON)</code> — same as in your app. Times are in <strong>seconds</strong> unless you set <code class="pill">timesInMilliseconds: true</code> in the second argument or <code class="pill">"timeUnit": "ms"</code> on the payload.
+      </p>
+      <textarea class="analysis-json" id="analysisJson" aria-label="Analysis JSON"></textarea>
+      <div class="row" style="margin-top:0.65rem;">
+        <button type="button" id="arrangeBtn">Arrange</button>
+        <span id="arrangeErr" style="color:#f88; font-size:0.85rem;"></span>
+      </div>
+      <div class="bar-strip" id="barStrip" aria-label="Chord per bar"></div>
+      <pre class="analysis-out" id="analysisOut"></pre>
+    </div>
+
+    <p class="ext-hint">
+      <strong style="color:var(--text);">Scripts (in order):</strong>
+      <code class="pill">chord-generator.js</code> → <code class="pill">analysis-bridge.js</code> → <code class="pill">replit-easy.js</code>.
+      <strong style="color:var(--text);">One call:</strong>
+      <code class="pill">var r = ReplitChord.go(analyzerOutput);</code>
+      then <code class="pill">r.timeline</code>, <code class="pill">r.bars</code>, <code class="pill">r.romanLine</code>, <code class="pill">r.warnings</code>. Full detail in <code class="pill">r._full</code>. Playback: each <code class="pill">timeline[i].midi</code> or <code class="pill">ChordKit.voicing()</code>.
+    </p>
+  </div>
+
+  <script>/**
+ * ChordKit — embeddable chord generator for Replit / static HTML / bundlers.
+ *
+ * Style tags include: steely-dan, quincy-jones, jobim (bossa), tom-johnson (minimal
+ * ensemble colors; not the same as Antonio Carlos Jobim — use `jobim` for bossa).
+ *
+ * Embed (global):
+ *   <script src="chord-generator.js"></script>
+ *   ChordKit.list({ tag: 'steely-dan' }); ChordKit.notes('D', 'mu_major');
+ *
+ * Embed (ES module):
+ *   import * as ChordKit from './chord-generator.js';
+ */
+(function (global) {
+  'use strict';
+
+  var NOTE_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  var NOTE_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  function parseRoot(root) {
+    if (typeof root === 'number' && root >= 0 && root <= 11) return root;
+    var s = String(root).trim();
+    if (!s) return 0;
+    var m = s.match(/^([A-Ga-g])([#b♯♭]?)/);
+    if (!m) return 0;
+    var letter = m[1].toUpperCase();
+    var acc = m[2];
+    var base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[letter];
+    if (acc === '#' || acc === '♯') base = (base + 1) % 12;
+    if (acc === 'b' || acc === '♭') base = (base + 11) % 12;
+    return base;
+  }
+
+  function rootLabel(pc, preferFlats) {
+    var names = preferFlats ? NOTE_FLAT : NOTE_SHARP;
+    return names[((pc % 12) + 12) % 12];
+  }
+
+  function uniqSortedIntervals(arr) {
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < arr.length; i++) {
+      var n = ((arr[i] % 12) + 12) % 12;
+      if (!seen[n]) {
+        seen[n] = true;
+        out.push(n);
+      }
+    }
+    return out.sort(function (a, b) { return a - b; });
+  }
+
+  function mergeIntervals(base, add) {
+    var all = base.slice();
+    for (var i = 0; i < add.length; i++) all.push(add[i]);
+    return uniqSortedIntervals(all);
+  }
+
+  /**
+   * Map sorted pitch-class set (0–11, first tone = root class) to rising semitone offsets from root.
+   * Each voice is the smallest pitch at or above the previous voice that matches its pitch class.
+   */
+  function intervalsToSemitonesFromRoot(intervals) {
+    if (!intervals.length) return [];
+    var semis = [intervals[0]];
+    for (var i = 1; i < intervals.length; i++) {
+      var t = intervals[i];
+      var prev = semis[semis.length - 1];
+      var candidate = t;
+      while (candidate <= prev) candidate += 12;
+      semis.push(candidate);
+    }
+    return semis;
+  }
+
+  function spellNotes(rootPc, intervals, options) {
+    options = options || {};
+    var preferFlats = options.preferFlats;
+    var names = preferFlats ? NOTE_FLAT : NOTE_SHARP;
+    var rootName = rootLabel(rootPc, preferFlats);
+    var semis = intervalsToSemitonesFromRoot(intervals);
+    var out = [];
+    for (var i = 0; i < semis.length; i++) {
+      var pc = (rootPc + semis[i]) % 12;
+      if (pc < 0) pc += 12;
+      out.push(names[pc]);
+    }
+    return { rootName: rootName, notes: out, midi: semis.map(function (s) { return 60 + rootPc + s; }) };
+  }
+
+  var registry = {};
+  var listCache = null;
+
+  function register(id, symbol, name, intervals, tags) {
+    if (registry[id]) return;
+    registry[id] = {
+      id: id,
+      symbol: symbol,
+      name: name,
+      intervals: uniqSortedIntervals(intervals),
+      tags: tags || []
+    };
+  }
+
+  function addTag(tags, t) {
+    if (tags.indexOf(t) === -1) tags.push(t);
+  }
+
+  /* ——— Core triads & sus ——— */
+  register('maj', '', 'Major triad', [0, 4, 7], ['triad', 'basic']);
+  register('min', 'm', 'Minor triad', [0, 3, 7], ['triad', 'basic', 'brazilian', 'neo-soul', 'gospel']);
+  register('dim', 'dim', 'Diminished triad', [0, 3, 6], ['triad', 'basic', 'jazz']);
+  register('aug', 'aug', 'Augmented triad', [0, 4, 8], ['triad', 'basic', 'jazz']);
+  register('sus2', 'sus2', 'Suspended 2nd', [0, 2, 7], ['triad', 'sus', 'neo-soul']);
+  register('sus4', 'sus4', 'Suspended 4th', [0, 5, 7], ['triad', 'sus', 'gospel', 'brazilian']);
+  register('add9', 'add9', 'Add 9', [0, 4, 7, 14], ['triad', 'extension', 'neo-soul']);
+  register('madd9', 'madd9', 'Minor add 9', [0, 3, 7, 14], ['triad', 'extension', 'brazilian', 'neo-soul']);
+
+  /* ——— Seventh chords ——— */
+  register('maj7', 'maj7', 'Major 7th', [0, 4, 7, 11], ['7th', 'jazz', 'brazilian', 'neo-soul']);
+  register('min7', 'm7', 'Minor 7th', [0, 3, 7, 10], ['7th', 'jazz', 'brazilian', 'neo-soul', 'gospel']);
+  register('dom7', '7', 'Dominant 7th', [0, 4, 7, 10], ['7th', 'jazz', 'brazilian', 'gospel']);
+  register('min7b5', 'm7♭5', 'Half-diminished', [0, 3, 6, 10], ['7th', 'jazz', 'brazilian']);
+  register('dim7', 'dim7', 'Diminished 7th', [0, 3, 6, 9], ['7th', 'jazz', 'gospel']);
+  register('mM7', 'mM7', 'Minor-major 7th', [0, 3, 7, 11], ['7th', 'jazz', 'brazilian', 'neo-soul']);
+  register('aug7', 'aug7', 'Augmented 7th', [0, 4, 8, 10], ['7th', 'jazz']);
+  register('maj7sus4', 'maj7sus4', 'Major 7 sus4', [0, 5, 7, 11], ['7th', 'sus', 'neo-soul']);
+  register('7sus4', '7sus4', 'Dominant 7 sus4', [0, 5, 7, 10], ['7th', 'sus', 'gospel', 'neo-soul']);
+
+  /* ——— Sixth / 6-9 (MPB & jazz) ——— */
+  register('maj6', '6', 'Major 6th', [0, 4, 7, 9], ['6th', 'brazilian', 'jazz']);
+  register('min6', 'm6', 'Minor 6th', [0, 3, 7, 9], ['6th', 'brazilian', 'jazz']);
+  register('maj69', '6/9', 'Major 6/9', [0, 4, 7, 9, 14], ['6th', 'brazilian', 'neo-soul', 'jazz']);
+  register('min69', 'm6/9', 'Minor 6/9', [0, 3, 7, 9, 14], ['6th', 'brazilian', 'neo-soul']);
+
+  /* ——— Ninth family ——— */
+  register('maj9', 'maj9', 'Major 9th', [0, 4, 7, 11, 14], ['9th', 'jazz', 'brazilian', 'neo-soul']);
+  register('min9', 'm9', 'Minor 9th', [0, 3, 7, 10, 14], ['9th', 'jazz', 'brazilian', 'neo-soul', 'gospel']);
+  register('dom9', '9', 'Dominant 9th', [0, 4, 7, 10, 14], ['9th', 'jazz', 'brazilian', 'gospel']);
+  register('maj7b9', 'maj7♭9', 'Major 7 ♭9', [0, 4, 7, 11, 13], ['9th', 'altered', 'exotic']);
+  register('min7b9', 'm7♭9', 'Minor 7 ♭9', [0, 3, 7, 10, 13], ['9th', 'altered', 'brazilian', 'jazz']);
+  register('7b9', '7♭9', 'Dominant 7 ♭9', [0, 4, 7, 10, 13], ['9th', 'altered', 'jazz', 'brazilian', 'gospel']);
+  register('7sharp9', '7♯9', 'Dominant 7 ♯9', [0, 4, 7, 10, 15], ['9th', 'altered', 'jazz', 'neo-soul']);
+  register('mM9', 'mM9', 'Minor-major 9', [0, 3, 7, 11, 14], ['9th', 'jazz', 'brazilian', 'neo-soul']);
+  register('maj9sus4', 'maj9sus4', 'Maj9 sus4', [0, 5, 7, 11, 14], ['9th', 'sus', 'neo-soul']);
+
+  /* ——— Eleventh family ——— */
+  register('min11', 'm11', 'Minor 11th', [0, 3, 7, 10, 14, 17], ['11th', 'jazz', 'brazilian', 'neo-soul', 'gospel']);
+  register('dom11', '11', 'Dominant 11th', [0, 4, 7, 10, 14, 17], ['11th', 'jazz']);
+  register('maj7sharp11', 'maj7♯11', 'Lydian major 7', [0, 4, 7, 11, 18], ['11th', 'jazz', 'brazilian', 'neo-soul']);
+  register('7sharp11', '7♯11', 'Dominant 7 ♯11', [0, 4, 7, 10, 18], ['11th', 'altered', 'jazz', 'brazilian']);
+  register('min11omit9', 'm11(omit9)', 'Minor 11 (no 9)', [0, 3, 7, 10, 17], ['11th', 'neo-soul', 'piano']);
+
+  /* ——— Thirteenth family ——— */
+  register('maj13', 'maj13', 'Major 13th', [0, 4, 7, 11, 14, 21], ['13th', 'jazz', 'brazilian']);
+  register('min13', 'm13', 'Minor 13th', [0, 3, 7, 10, 14, 21], ['13th', 'jazz', 'neo-soul', 'gospel']);
+  register('dom13', '13', 'Dominant 13th', [0, 4, 7, 10, 14, 21], ['13th', 'jazz', 'brazilian', 'gospel']);
+  register('maj13sharp11', 'maj13♯11', 'Major 13 ♯11', [0, 4, 7, 11, 14, 18, 21], ['13th', 'jazz', 'brazilian', 'ivan-lins']);
+  register('13sharp11', '13♯11', 'Dominant 13 ♯11', [0, 4, 7, 10, 14, 18, 21], ['13th', 'jazz', 'brazilian']);
+  register('7b13', '7♭13', 'Dominant 7 ♭13', [0, 4, 7, 10, 20], ['13th', 'altered', 'jazz']);
+  register('7b9b13', '7♭9♭13', 'Dominant altered', [0, 4, 7, 10, 13, 20], ['13th', 'altered', 'jazz', 'brazilian']);
+  register('7sharp9b13', '7♯9♭13', 'Dominant ♯9 ♭13', [0, 4, 7, 10, 15, 20], ['13th', 'altered', 'neo-soul']);
+  register('alt', 'alt', 'Altered scale chord', [0, 4, 8, 10, 13, 15, 18, 20], ['altered', 'jazz', 'neo-soul', 'glasper']);
+
+  /* ——— Quartal / stacked 4ths (common in modern jazz & neo-soul) ——— */
+  register('quartal3', 'quartal(3)', 'Three-note quartal', [0, 5, 10], ['quartal', 'neo-soul', 'piano']);
+  register('quartal4', 'quartal(4)', 'Four-note quartal', [0, 5, 10, 15], ['quartal', 'neo-soul', 'glasper']);
+  register('quartal5', 'quartal(5)', 'Five-note quartal', [0, 5, 10, 15, 20], ['quartal', 'neo-soul']);
+
+  /* ——— Poly / slash-style sonorities (intervals from bass; use slash in your UI) ——— */
+  register('maj_over_sharp5', 'maj(♯5)', 'Major ♯5', [0, 4, 8], ['triad', 'lydian', 'neo-soul']);
+  register('maj7sharp5', 'maj7♯5', 'Major 7 ♯5', [0, 4, 8, 11], ['7th', 'lydian', 'neo-soul']);
+  register('minmaj9sharp11', 'mM9♯11', 'Minor-major 9 ♯11', [0, 3, 7, 11, 14, 18], ['extension', 'exotic', 'neo-soul']);
+
+  /* ——— Gospel / cluster presets (semitones within octave; dense = cluster) ——— */
+  register('cluster_maj2', 'cluster(maj2)', 'Major 2nd cluster', [0, 2, 4], ['cluster', 'gospel', 'dense']);
+  register('cluster_min3', 'cluster(min3)', 'Minor 3rd stack', [0, 3, 6], ['cluster', 'gospel']);
+  register('cluster_4_half', 'cluster(½)', 'Half-step cluster', [0, 1, 2], ['cluster', 'gospel', 'dense']);
+  register('cluster_dom_shell', 'shell+cluster', 'Dom shell tight', [0, 4, 7, 10, 11], ['cluster', 'gospel', 'dense']);
+  register('spread_triad_add2', 'add2 spread', 'Add-2 color', [0, 2, 4, 7], ['gospel', 'neo-soul']);
+  register('power5', '5', 'Power (fifth)', [0, 7], ['basic', 'rock']);
+
+  /* Generate dominant alterations (combinations of b9 #9 #11 b13 on dom7) */
+  var domBase = [0, 4, 7, 10];
+  var altTones = [
+    { semi: 13, sym: '♭9' },
+    { semi: 14, sym: '9' },
+    { semi: 15, sym: '♯9' },
+    { semi: 17, sym: '11' },
+    { semi: 18, sym: '♯11' },
+    { semi: 20, sym: '♭13' },
+    { semi: 21, sym: '13' }
+  ];
+  var genTags = ['generated', 'dominant', 'jazz'];
+
+  function bitmaskToAlts(mask) {
+    var parts = [];
+    var semis = [];
+    for (var b = 0; b < altTones.length; b++) {
+      if (mask & (1 << b)) {
+        parts.push(altTones[b].sym.replace(/♭/g, 'b').replace(/♯/g, 's'));
+        semis.push(altTones[b].semi);
+      }
+    }
+    return { parts: parts, semis: semis };
+  }
+
+  for (var mask = 1; mask < 128; mask++) {
+    var info = bitmaskToAlts(mask);
+    if (info.semis.length > 5) continue;
+    var id = 'dom7alt_' + info.parts.join('_');
+    if (id.length > 48) id = 'dom7alt_' + mask;
+    var sym = '7(' + info.parts.join(',') + ')';
+    var intervals = mergeIntervals(domBase, info.semis);
+    var tags = genTags.slice();
+    addTag(tags, 'neo-soul');
+    addTag(tags, 'glasper');
+    addTag(tags, 'steely-dan');
+    addTag(tags, 'quincy-jones');
+    addTag(tags, 'studio');
+    register(id, sym, 'Dominant altered combination', intervals, tags);
+  }
+
+  /* maj7 + optional 9 #11 13 combinations */
+  var maj7b = [0, 4, 7, 11];
+  var majExt = [
+    { semi: 14, sym: '9' },
+    { semi: 18, sym: '♯11' },
+    { semi: 21, sym: '13' }
+  ];
+  for (var m2 = 1; m2 < 8; m2++) {
+    var parts2 = [];
+    var sem2 = [];
+    for (var b2 = 0; b2 < 3; b2++) {
+      if (m2 & (1 << b2)) {
+        parts2.push(majExt[b2].sym.replace(/♯/g, '#'));
+        sem2.push(majExt[b2].semi);
+      }
+    }
+    if (!sem2.length) continue;
+    var id2 = 'maj7ext_' + parts2.join('_');
+    register(
+      id2,
+      'maj7(' + parts2.join(',') + ')',
+      'Major 7 extended',
+      mergeIntervals(maj7b, sem2),
+      ['maj7', 'generated', 'brazilian', 'ivan-lins', 'steely-dan', 'quincy-jones', 'studio']
+    );
+  }
+
+  /* min7 + 9, 11, b13 combinations (common in MPB) */
+  var min7b = [0, 3, 7, 10];
+  var minExt = [
+    { semi: 14, sym: '9' },
+    { semi: 17, sym: '11' },
+    { semi: 20, sym: '♭13' }
+  ];
+  for (var m3 = 1; m3 < 8; m3++) {
+    var parts3 = [];
+    var sem3 = [];
+    for (var b3 = 0; b3 < 3; b3++) {
+      if (m3 & (1 << b3)) {
+        parts3.push(minExt[b3].sym.replace(/♭/g, 'b').replace(/♯/g, '#'));
+        sem3.push(minExt[b3].semi);
+      }
+    }
+    register(
+      'min7ext_' + parts3.join('_'),
+      'm7(' + parts3.join(',') + ')',
+      'Minor 7 extended',
+      mergeIntervals(min7b, sem3),
+      ['m7', 'generated', 'brazilian', 'neo-soul', 'quincy-jones', 'studio']
+    );
+  }
+
+  /* Additional explicit “Ivan Lins / MPB” colors */
+  register('maj7b6', 'maj7♭6', 'Major 7 ♭6', [0, 4, 7, 8, 11], ['brazilian', 'ivan-lins', 'jazz']);
+  register('minmaj7add11', 'mM7add11', 'Minor-major 7 add 11', [0, 3, 7, 11, 17], ['brazilian', 'neo-soul', 'jazz']);
+  register('dom7b5', '7♭5', 'Dominant 7 ♭5', [0, 4, 6, 10], ['7th', 'jazz', 'brazilian']);
+  register('dom7sharp5', '7♯5', 'Dominant 7 ♯5', [0, 4, 8, 10], ['7th', 'jazz']);
+  register('9sus4', '9sus4', '9 sus4', [0, 2, 5, 7, 10], ['sus', 'gospel', 'neo-soul']);
+  register('13sus4', '13sus4', '13 sus4', [0, 5, 7, 10, 14, 21], ['sus', 'gospel', 'jazz']);
+
+  /* ——— Steely Dan / LA studio jazz-rock ——— */
+  register('mu_major', 'add2', 'Mu major (add 2)', [0, 2, 4, 7], ['steely-dan', 'studio', 'add2']);
+  register('maj7add2', 'maj7(add2)', 'Major 7 add 2', [0, 2, 4, 7, 11], ['steely-dan', 'studio', 'add2']);
+  register('maj9omit3', 'maj9(omit3)', 'Major 9 (no 3rd)', [0, 11, 14], ['steely-dan', 'studio', 'exotic']);
+  register('maj7omit3addsharp11', 'maj7(omit3)♯11', 'Lydian float (no 3)', [0, 11, 18], ['steely-dan', 'studio']);
+  register('7sharp9sharp5', '7♯9♯5', 'Dominant ♯9 ♯5', [0, 4, 8, 10, 15], ['steely-dan', 'altered', 'studio']);
+  register('7b9sharp11', '7♭9♯11', 'Dominant ♭9 ♯11', [0, 4, 7, 10, 13, 18], ['steely-dan', 'jazz', 'studio']);
+  register('7sharp9sharp11', '7♯9♯11', 'Dominant ♯9 ♯11', [0, 4, 7, 10, 15, 18], ['steely-dan', 'altered']);
+  register('7b9sharp5', '7♭9♯5', 'Dominant ♭9 ♯5', [0, 4, 8, 10, 13], ['steely-dan', 'altered']);
+  register('maj7sharp5add9', 'maj7♯5(add9)', 'Major 7 ♯5 add 9', [0, 4, 8, 11, 14], ['steely-dan', 'studio', 'lydian']);
+  register('maj7addsharp13', 'maj7(add♯13)', 'Major 7 add ♯13', [0, 4, 7, 11, 22], ['steely-dan', 'studio']);
+  register('minadd11', 'madd11', 'Minor add 11', [0, 3, 5, 7], ['steely-dan', 'jazz', 'studio']);
+  register('minadd9omit5', 'madd9(no5)', 'Minor add 9 omit 5', [0, 3, 14], ['steely-dan', 'studio']);
+  register('sus13flat9', '13sus♭9', '13 sus ♭9', [0, 5, 7, 10, 13, 21], ['steely-dan', 'quincy-jones', 'studio']);
+  register('maj69omit3', '6/9(omit3)', 'Six-nine (no 3rd)', [0, 9, 14], ['steely-dan', 'studio', 'exotic']);
+  register('dom7omit5', '7(no5)', 'Dominant 7 omit 5', [0, 4, 10], ['steely-dan', 'studio', 'jobim']);
+  register('dom9omit5', '9(no5)', 'Dominant 9 omit 5', [0, 4, 10, 14], ['steely-dan', 'quincy-jones', 'studio']);
+  register('maj13omit9', 'maj13(omit9)', 'Major 13 omit 9', [0, 4, 7, 11, 21], ['steely-dan', 'studio']);
+  register('min11omit7', 'm11(omit7)', 'Minor 11 omit 7', [0, 3, 7, 14, 17], ['steely-dan', 'studio']);
+  register('7sharp11omit5', '7♯11(no5)', 'Dominant ♯11 omit 5', [0, 4, 10, 18], ['steely-dan', 'jazz']);
+  register('maj7add6', 'maj7(add6)', 'Major 7 add 6', [0, 4, 7, 9, 11], ['steely-dan', 'studio']);
+  register('min7add4', 'm7(add4)', 'Minor 7 add 4', [0, 3, 5, 7, 10], ['steely-dan', 'studio']);
+
+  /* ——— Antonio Carlos Jobim / classic bossa changes ——— */
+  register('maj7flat5', 'maj7♭5', 'Major 7 ♭5', [0, 4, 6, 11], ['jobim', 'brazilian', 'jazz']);
+  register('min9omit5', 'm9(no5)', 'Minor 9 omit 5', [0, 3, 10, 14], ['jobim', 'brazilian', 'studio']);
+  register('dom7b9omit5', '7♭9(no5)', 'Dominant ♭9 omit 5', [0, 4, 10, 13], ['jobim', 'brazilian']);
+  register('maj7add13', 'maj7(add13)', 'Major 7 add 13', [0, 4, 7, 11, 21], ['jobim', 'brazilian', 'ivan-lins']);
+  register('dim7pass', 'dim7(pass)', 'Diminished passing (4-note)', [0, 3, 6, 9], ['jobim', 'brazilian', 'jazz']);
+  register('min11omit5', 'm11(no5)', 'Minor 11 omit 5', [0, 3, 10, 14, 17], ['jobim', 'brazilian', 'studio']);
+  register('maj7sharp11sharp5', 'maj7♯11♯5', 'Lydian augmented color', [0, 4, 8, 11, 18], ['jobim', 'brazilian', 'steely-dan', 'studio']);
+  register('dom7sharp11sharp9', '7♯11♯9', 'Dominant ♯11 ♯9', [0, 4, 7, 10, 15, 18], ['quincy-jones', 'steely-dan', 'altered']);
+  register('maj9sharp11', 'maj9♯11', 'Major 9 ♯11', [0, 4, 7, 11, 14, 18], ['quincy-jones', 'steely-dan', 'studio']);
+  register('min9sharp11', 'm9♯11', 'Minor 9 ♯11', [0, 3, 7, 10, 14, 18], ['neo-soul', 'quincy-jones', 'studio']);
+  register('dom7omit3', '7(no3)', 'Dominant 7 omit 3 (power-blues shell)', [0, 7, 10], ['steely-dan', 'studio']);
+  register('dom9omit3', '9(no3)', 'Dominant 9 omit 3', [0, 7, 10, 14], ['quincy-jones', 'studio']);
+
+  /* ——— Tom Johnson–style minimal / analytical sonorities (ensemble colors) ——— */
+  register('tj_open4', 'open4', 'Open fourth dyad', [0, 5], ['tom-johnson', 'minimal', 'studio']);
+  register('tj_open5', 'open5+', 'Open fifth + add-2', [0, 2, 7], ['tom-johnson', 'minimal', 'studio']);
+  register('tj_trichord_014', '014', 'Trichord 0-1-4', [0, 1, 4], ['tom-johnson', 'minimal', 'dense']);
+  register('tj_trichord_015', '015', 'Trichord 0-1-5', [0, 1, 5], ['tom-johnson', 'minimal']);
+  register('tj_sec5', '♭2+5', 'Minor 2nd with fifth', [0, 1, 7], ['tom-johnson', 'minimal', 'dense']);
+  register('tj_quartal3', 'quartal(3)', 'Three-note quartal (TJ tag)', [0, 5, 10], ['tom-johnson', 'quartal', 'studio']);
+
+  /* Upper-structure triads over dominant shell (Quincy / LA session voicing vocabulary) */
+  function triadPitchClasses(qual, rootDeg) {
+    var d = ((rootDeg % 12) + 12) % 12;
+    if (qual === 'M') return [d, (d + 4) % 12, (d + 7) % 12];
+    if (qual === 'm') return [d, (d + 3) % 12, (d + 7) % 12];
+    if (qual === 'dim') return [d, (d + 3) % 12, (d + 6) % 12];
+    return [d, (d + 4) % 12, (d + 8) % 12];
+  }
+
+  var usDegLabels = { 1: '♭9', 2: '9', 3: '♯9', 5: '11', 6: '♯11', 8: '♭13', 9: '13', 10: '♭7', 11: 'M7' };
+  var usDegrees = [1, 2, 3, 5, 6, 8, 9, 11];
+  var usQuals = [
+    { q: 'M', lab: 'maj' },
+    { q: 'm', lab: 'min' },
+    { q: 'dim', lab: 'dim' },
+    { q: 'aug', lab: 'aug' }
+  ];
+  for (var ui = 0; ui < usDegrees.length; ui++) {
+    var deg = usDegrees[ui];
+    var lab = usDegLabels[deg] || String(deg);
+    for (var uq = 0; uq < usQuals.length; uq++) {
+      var qu = usQuals[uq];
+      var tpcs = triadPitchClasses(qu.q, deg);
+      var merged = mergeIntervals(domBase, tpcs);
+      if (merged.length < 5) continue;
+      var idUs = 'us7_' + qu.lab + '_r' + deg;
+      var symUs = '7/' + qu.lab + '(' + lab + ')';
+      register(
+        idUs,
+        symUs,
+        'Dominant + upper ' + qu.lab + ' on ' + lab,
+        merged,
+        ['quincy-jones', 'upper-structure', 'studio', 'steely-dan', 'generated-us']
+      );
+    }
+  }
+
+  /* Dominant + upper-structure on ♭II (tritone-related) — common Steely / session color */
+  var domShellNoRoot = [4, 7, 10];
+  var tritoneTriads = [
+    { q: 'M', pcs: triadPitchClasses('M', 1) },
+    { q: 'm', pcs: triadPitchClasses('m', 1) }
+  ];
+  for (var ti = 0; ti < tritoneTriads.length; ti++) {
+    var tt = tritoneTriads[ti];
+    var idTt = 'us7_tt_' + tt.q + '_bII';
+    register(
+      idTt,
+      '7/' + tt.q + '(♭II)',
+      'Dom shell + triad from ♭II',
+      mergeIntervals(domShellNoRoot, tt.pcs),
+      ['steely-dan', 'quincy-jones', 'upper-structure', 'tritone', 'studio']
+    );
+  }
+
+  function invalidateListCache() {
+    listCache = null;
+  }
+
+  function getAll() {
+    if (!listCache) {
+      listCache = Object.keys(registry).map(function (k) { return registry[k]; });
+      listCache.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    }
+    return listCache.slice();
+  }
+
+  function list(filters) {
+    filters = filters || {};
+    var all = getAll();
+    return all.filter(function (c) {
+      if (filters.tag && c.tags.indexOf(filters.tag) === -1) return false;
+      if (filters.q) {
+        var q = String(filters.q).toLowerCase();
+        if (c.id.toLowerCase().indexOf(q) === -1 && c.name.toLowerCase().indexOf(q) === -1 && c.symbol.toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function get(id) {
+    return registry[id] || null;
+  }
+
+  function notes(root, chordId, options) {
+    var def = get(chordId);
+    if (!def) return null;
+    var pc = parseRoot(root);
+    return spellNotes(pc, def.intervals, options);
+  }
+
+  /** MIDI note numbers from C4=60, close stack */
+  function midiVoicing(root, chordId, baseOctave) {
+    baseOctave = baseOctave == null ? 4 : baseOctave;
+    var n = notes(root, chordId, {});
+    if (!n) return [];
+    var rootMidi = 12 * (baseOctave + 1) + parseRoot(root);
+    var offs = intervalsToSemitonesFromRoot(get(chordId).intervals);
+    return offs.map(function (s) {
+      return rootMidi + s;
+    });
+  }
+
+  function invertPitchClasses(pcs, inversion) {
+    inversion = inversion || 0;
+    var arr = pcs.slice().sort(function (a, b) { return a - b; });
+    var n = arr.length;
+    var inv = inversion % n;
+    if (inv < 0) inv += n;
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      out.push(arr[(i + inv) % n]);
+    }
+    return out;
+  }
+
+  /**
+   * Gospel / piano spread: invert chord tones and spread across octaves.
+   * inversion: 0..n-1 bass rotation on pitch classes
+   * spread: extra octave gaps between voices (0 = close)
+   */
+  function voicing(root, chordId, opts) {
+    opts = opts || {};
+    var def = get(chordId);
+    if (!def) return null;
+    var pc = parseRoot(root);
+    var inv = opts.inversion || 0;
+    var spread = opts.spread || 0;
+    var pcs = def.intervals.map(function (x) { return (pc + x) % 12; });
+    var order = invertPitchClasses(pcs, inv);
+    var midi = [];
+    var octave = opts.octave == null ? 3 : opts.octave;
+    var base = 12 * (octave + 1);
+    var last = -1;
+    for (var i = 0; i < order.length; i++) {
+      var pitch = order[i];
+      var m = base + pitch;
+      while (m <= last) m += 12;
+      m += spread * i * 12;
+      while (m <= last) m += 12;
+      midi.push(m);
+      last = m;
+    }
+    var names = [];
+    var useFlat = opts.preferFlats;
+    for (var j = 0; j < midi.length; j++) {
+      names.push(rootLabel(midi[j] % 12, useFlat));
+    }
+    return { midi: midi, notes: names, chordId: chordId, inversion: inv };
+  }
+
+  /** Random chord from optional tag (useful for practice UI) */
+  function randomChord(tag) {
+    var pool = tag ? list({ tag: tag }) : getAll();
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /** e.g. displaySymbol('Db', 'min9') → "Dbm9" */
+  function displaySymbol(root, chordId) {
+    var def = get(chordId);
+    if (!def) return String(root);
+    var r = rootLabel(parseRoot(root), false);
+    return r + (def.symbol || '');
+  }
+
+  /** Custom chord from semitone intervals (0 = root) */
+  function registerCustom(id, symbol, name, intervals, tags) {
+    register(id, symbol, name, intervals, tags);
+    invalidateListCache();
+  }
+
+  var TAGS = [
+    'basic', 'triad', '7th', '9th', '11th', '13th', 'altered', 'sus', 'quartal', 'cluster',
+    'brazilian', 'ivan-lins', 'neo-soul', 'glasper', 'gospel', 'jazz', 'piano', 'generated',
+    'steely-dan', 'quincy-jones', 'jobim', 'tom-johnson', 'studio', 'upper-structure', 'minimal',
+    'generated-us', 'tritone', 'add2', 'lydian', 'exotic'
+  ];
+
+  var ChordKit = {
+    parseRoot: parseRoot,
+    rootLabel: rootLabel,
+    list: list,
+    get: get,
+    getAll: getAll,
+    notes: notes,
+    midiVoicing: midiVoicing,
+    voicing: voicing,
+    randomChord: randomChord,
+    displaySymbol: displaySymbol,
+    registerCustom: registerCustom,
+    TAGS: TAGS,
+    /** Total registered chord types */
+    count: function () { return Object.keys(registry).length; }
+  };
+
+  global.ChordKit = ChordKit;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ChordKit;
+  }
+})(typeof window !== 'undefined' ? window : typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+  <script>/**
+ * AudioChordArranger — connect key/chord detection output to ChordKit for Replit.
+ *
+ * Load order (browser):
+ *   <script src="chord-generator.js"></script>
+ *   <script src="analysis-bridge.js"></script>
+ *
+ * Node:
+ *   require('./chord-generator.js');
+ *   const A = require('./analysis-bridge.js');
+ */
+(function (global) {
+  'use strict';
+
+  var CK = global.ChordKit;
+  if (!CK) {
+    throw new Error('ChordKit not found. Load chord-generator.js before analysis-bridge.js');
+  }
+
+  var ROOT_RE = /^([A-Ga-g])([#b\u266F\u266D\u266F\u266D♯♭]?)/;
+
+  /** Expected shape you can POST from your analyzer (all fields optional except one chord list). */
+  var EXAMPLE_PAYLOAD = {
+    key: { root: 'Eb', mode: 'major' },
+    tempoBpm: 92,
+    timeSignature: [4, 4],
+    chords: [
+      { t0: 0, t1: 3.2, symbol: 'Ebmaj7' },
+      { t0: 3.2, t1: 6.4, symbol: 'Cm7' },
+      { t0: 6.4, t1: 9.6, symbol: 'Fm7' },
+      { t0: 9.6, t1: 12.8, symbol: 'Bb7' }
+    ]
+  };
+
+  function clamp(n, lo, hi) {
+    return Math.max(lo, Math.min(hi, n));
+  }
+
+  function normalizeMode(m) {
+    if (!m && m !== 0) return 'major';
+    var s = String(m).toLowerCase().trim();
+    if (s === 'maj' || s === 'major' || s === 'ionian') return 'major';
+    if (s === 'min' || s === 'minor' || s === 'aeolian' || s === 'natural minor') return 'minor';
+    return s.indexOf('min') >= 0 ? 'minor' : 'major';
+  }
+
+  /**
+   * Normalize key from analyzer: string "Eb major", object { root, mode }, or { tonicPc, mode }.
+   */
+  function normalizeKey(keyInput) {
+    if (keyInput == null) {
+      return { rootStr: 'C', rootPc: 0, mode: 'major', scalePcs: scalePitchClasses(0, 'major') };
+    }
+    if (typeof keyInput === 'string') {
+      var m = keyInput.trim().match(/^([A-Ga-g][#b♯♭]?)\s*(.*)$/);
+      if (m) {
+        return finalizeKey(m[1], normalizeMode(m[2] || 'major'));
+      }
+      return normalizeKey({ root: 'C', mode: 'major' });
+    }
+    var rootStr = keyInput.root || keyInput.tonic || keyInput.note || 'C';
+    if (typeof keyInput.tonicPc === 'number') {
+      var pc = ((keyInput.tonicPc % 12) + 12) % 12;
+      rootStr = CK.rootLabel(pc, false);
+      return finalizeKey(rootStr, normalizeMode(keyInput.mode));
+    }
+    return finalizeKey(String(rootStr), normalizeMode(keyInput.mode));
+  }
+
+  function finalizeKey(rootStr, mode) {
+    var rootPc = CK.parseRoot(rootStr);
+    return {
+      rootStr: CK.rootLabel(rootPc, /b/.test(String(rootStr))),
+      rootPc: rootPc,
+      mode: mode,
+      scalePcs: scalePitchClasses(rootPc, mode)
+    };
+  }
+
+  function scalePitchClasses(rootPc, mode) {
+    var major = [0, 2, 4, 5, 7, 9, 11];
+    var naturalMinor = [0, 2, 3, 5, 7, 8, 10];
+    var intervals = mode === 'minor' ? naturalMinor : major;
+    return intervals.map(function (i) {
+      return (rootPc + i) % 12;
+    });
+  }
+
+  function parseRootToken(str) {
+    var m = String(str).trim().match(ROOT_RE);
+    if (!m) return null;
+    var acc = m[2] || '';
+    return m[1].toUpperCase() + acc.replace(/♯/g, '#').replace(/♭/g, 'b');
+  }
+
+  /**
+   * Parse "F#m7/E" → { rootStr, bassStr|null, qualityRaw }.
+   */
+  function parseChordLabel(label) {
+    var s = String(label || '').trim();
+    if (!s) return null;
+    var bassStr = null;
+    var slash = s.lastIndexOf('/');
+    if (slash > 0) {
+      var maybeBass = s.slice(slash + 1).trim();
+      if (parseRootToken(maybeBass)) {
+        bassStr = parseRootToken(maybeBass);
+        s = s.slice(0, slash).trim();
+      }
+    }
+    var rm = s.match(ROOT_RE);
+    if (!rm) return null;
+    var rootStr = rm[1].toUpperCase() + (rm[2] || '').replace(/♯/g, '#').replace(/♭/g, 'b');
+    var qualityRaw = s.slice(rm[0].length).trim();
+    return { rootStr: rootStr, bassStr: bassStr, qualityRaw: qualityRaw };
+  }
+
+  function normalizeQuality(q) {
+    var t = String(q || '').trim();
+    if (!t) return '';
+    t = t
+      .replace(/\u0394/g, 'maj7')
+      .replace(/△/g, 'maj7')
+      .replace(/−/g, 'm')
+      .replace(/\s+/g, '')
+      .replace(/major/gi, 'maj')
+      .replace(/minor/gi, 'min')
+      .replace(/diminished/gi, 'dim')
+      .replace(/augmented/gi, 'aug')
+      .replace(/dominant/gi, '');
+    t = t.toLowerCase();
+    t = t.replace(/maj7/g, 'maj7').replace(/ma7/g, 'maj7').replace(/m7b5/g, 'm7b5');
+    t = t.replace(/#11/g, 'sharp11').replace(/#9/g, 'sharp9').replace(/#5/g, 'sharp5');
+    t = t.replace(/b9/g, 'b9').replace(/b13/g, 'b13').replace(/b5/g, 'b5');
+    return t;
+  }
+
+  /**
+   * Map normalized quality string → ChordKit id (best effort for detector output).
+   */
+  function qualityToChordId(qualityRaw) {
+    var q = normalizeQuality(qualityRaw);
+    if (q === '' || q === 'maj' || q === 'major') return 'maj';
+    var table = {
+      m: 'min',
+      min: 'min',
+      '-': 'min',
+      dim: 'dim',
+      o: 'dim',
+      aug: 'aug',
+      '+': 'aug',
+      '5': 'power5',
+      sus: 'sus4',
+      sus2: 'sus2',
+      sus4: 'sus4',
+      add9: 'add9',
+      '6': 'maj6',
+      m6: 'min6',
+      '6/9': 'maj69',
+      '69': 'maj69',
+      maj6: 'maj6',
+      maj7: 'maj7',
+      mmaj7: 'mM7',
+      mma7: 'mM7',
+      minmaj7: 'mM7',
+      m7: 'min7',
+      min7: 'min7',
+      maj9: 'maj9',
+      m9: 'min9',
+      min9: 'min9',
+      '9': 'dom9',
+      '7': 'dom7',
+      maj11: 'dom11',
+      m11: 'min11',
+      '11': 'dom11',
+      maj13: 'maj13',
+      m13: 'min13',
+      '13': 'dom13',
+      m7b5: 'min7b5',
+      dim7: 'dim7',
+      '7sus4': '7sus4',
+      '9sus4': '9sus4',
+      maj7sharp11: 'maj7sharp11',
+      maj7s11: 'maj7sharp11',
+      '7sharp11': '7sharp11',
+      '7#11': '7sharp11',
+      '7b9': '7b9',
+      '7sharp9': '7sharp9',
+      '7#9': '7sharp9',
+      maj69: 'maj69',
+      mu: 'mu_major',
+      add2: 'mu_major',
+      quartal3: 'quartal3'
+    };
+    if (table[q]) return table[q];
+    if (CK.get(q)) return q;
+    if (q.indexOf('maj13') >= 0 && q.indexOf('sharp11') >= 0) return 'maj13sharp11';
+    if (q.indexOf('13') >= 0 && q.indexOf('sharp11') >= 0) return '13sharp11';
+    if (q.indexOf('maj7') >= 0 && q.indexOf('sharp11') >= 0) return 'maj7sharp11';
+    if (q.indexOf('m7') >= 0 && q.indexOf('b5') >= 0) return 'min7b5';
+    if (q.indexOf('maj7') >= 0 && q.indexOf('b5') >= 0) return 'maj7flat5';
+    if (q.indexOf('maj9') >= 0 && q.indexOf('sharp11') >= 0) return 'maj9sharp11';
+    if (q.indexOf('m9') >= 0 && q.indexOf('sharp11') >= 0) return 'min9sharp11';
+    if (q.indexOf('maj7') >= 0 && q.indexOf('add2') >= 0) return 'maj7add2';
+    if (q === 'maj9omit3' || q === 'maj9(no3)') return 'maj9omit3';
+    return null;
+  }
+
+  function resolveChordId(parsed) {
+    if (!parsed) return { chordId: null, warning: 'empty label' };
+    var id = qualityToChordId(parsed.qualityRaw);
+    if (!id) {
+      return {
+        chordId: null,
+        warning: 'unknown quality "' + parsed.qualityRaw + '" for ChordKit mapping'
+      };
+    }
+    if (!CK.get(id)) {
+      return { chordId: null, warning: 'ChordKit missing id "' + id + '"' };
+    }
+    return { chordId: id, warning: null };
+  }
+
+  function degreeInKey(chordRootPc, key) {
+    var diff = (chordRootPc - key.rootPc + 12) % 12;
+    var major = [0, 2, 4, 5, 7, 9, 11];
+    var naturalMinor = [0, 2, 3, 5, 7, 8, 10];
+    var intervals = key.mode === 'minor' ? naturalMinor : major;
+    for (var i = 0; i < intervals.length; i++) {
+      if (intervals[i] === diff) return i + 1;
+    }
+    return null;
+  }
+
+  var ROMAN_MAJOR = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii'];
+  var ROMAN_MINOR = ['i', 'ii', 'III', 'iv', 'v', 'VI', 'VII'];
+
+  function romanNumeralSimple(degree, keyMode, chordId) {
+    if (!degree) return '—';
+    var base = keyMode === 'minor' ? ROMAN_MINOR[degree - 1] : ROMAN_MAJOR[degree - 1];
+    if (!base) return '—';
+    var def = CK.get(chordId);
+    if (!def) return base;
+    var sym = def.symbol || '';
+    if (sym === 'dim' || sym === 'o') return base + '°';
+    if (sym === 'dim7') return base + '°7';
+    if (sym === 'min7b5' || sym === 'm7♭5' || sym.indexOf('m7♭5') === 0) return base + 'ø7';
+    if (sym === '' || sym === 'maj') return base;
+    if (sym.indexOf('maj7') === 0) return base + 'maj7';
+    if (sym.indexOf('m') === 0 || sym === 'min7' || sym === 'm7') {
+      var rest = sym.replace(/^m(in)?/, '') || '7';
+      if (rest === '7' || rest === '9' || rest === '11' || rest === '13') return base + rest;
+      return base + (sym === 'm' ? '' : sym.replace(/^m/, ''));
+    }
+    if (/^[79]|^1[13]/.test(sym) || sym === '7' || sym === '9' || sym === '11' || sym === '13') {
+      return base + sym;
+    }
+    if (sym.indexOf('sus') >= 0) return base + '(sus)';
+    return base + sym;
+  }
+
+  function normalizeRawSegment(raw, index) {
+    if (!raw || typeof raw !== 'object') return null;
+    var t0 = raw.t0;
+    var t1 = raw.t1;
+    if (t0 == null && raw.start != null) t0 = raw.start;
+    if (t1 == null && raw.end != null) t1 = raw.end;
+    if (t0 == null && Array.isArray(raw.time) && raw.time.length >= 2) {
+      t0 = raw.time[0];
+      t1 = raw.time[1];
+    }
+    if (t0 == null || t1 == null) {
+      return { _bad: true, index: index, reason: 'missing t0/t1 or start/end' };
+    }
+    var symbol = raw.symbol || raw.chord || raw.label || raw.name || '';
+    return { t0: Number(t0), t1: Number(t1), symbol: String(symbol), raw: raw };
+  }
+
+  function mergeAdjacentSame(segments) {
+    if (!segments.length) return [];
+    var out = [];
+    var cur = Object.assign({}, segments[0]);
+    for (var i = 1; i < segments.length; i++) {
+      var s = segments[i];
+      if (s.symbol === cur.symbol && Math.abs(s.t0 - cur.t1) < 1e-6) {
+        cur.t1 = s.t1;
+      } else {
+        out.push(cur);
+        cur = Object.assign({}, s);
+      }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function enrichSegment(seg, key, options) {
+    options = options || {};
+    var preferFlats = options.preferFlats != null ? options.preferFlats : /b/.test(key.rootStr);
+    var parsed = parseChordLabel(seg.symbol);
+    var res = resolveChordId(parsed);
+    var chordRootPc = parsed ? CK.parseRoot(parsed.rootStr) : null;
+    var degree = chordRootPc != null ? degreeInKey(chordRootPc, key) : null;
+    var roman = romanNumeralSimple(degree, key.mode, res.chordId);
+    var display = seg.symbol;
+    if (parsed && res.chordId) {
+      var rlab = CK.rootLabel(chordRootPc, preferFlats);
+      var defSym = CK.get(res.chordId).symbol || '';
+      display = rlab + defSym;
+    }
+    var spell =
+      parsed && res.chordId
+        ? CK.notes(parsed.rootStr, res.chordId, { preferFlats: preferFlats })
+        : null;
+    var midi =
+      parsed && res.chordId
+        ? CK.midiVoicing(parsed.rootStr, res.chordId, options.voicingOctave == null ? 4 : options.voicingOctave)
+        : [];
+
+    return {
+      t0: seg.t0,
+      t1: seg.t1,
+      duration: seg.t1 - seg.t0,
+      symbol: seg.symbol,
+      displaySymbol: display,
+      rootStr: parsed ? parsed.rootStr : null,
+      bassStr: parsed ? parsed.bassStr : null,
+      chordId: res.chordId,
+      chordKit: res.chordId ? CK.get(res.chordId) : null,
+      degree: degree,
+      diatonic: degree != null,
+      roman: roman,
+      notes: spell ? spell.notes : null,
+      midiClose: spell ? spell.midi : null,
+      midiVoicing: midi,
+      warning: res.warning,
+      slash: parsed && parsed.bassStr ? parsed.bassStr + ' in bass' : null
+    };
+  }
+
+  /**
+   * Main entry: pass output from your audio pipeline; get sorted timeline + bar grid + Roman summary.
+   *
+   * @param {object} input — { key, chords|segments|timeline, tempoBpm?, timeSignature? }
+   * @param {object} options — { mergeDuplicates, preferFlats, voicingOctave, quantizeBars }
+   */
+  function arrangeFromAnalysis(input, options) {
+    options = options || {};
+    var warnings = [];
+    var key = normalizeKey(input.key != null ? input.key : input);
+
+    var rawList = input.chords || input.segments || input.timeline || input.detections || [];
+    if (!Array.isArray(rawList)) {
+      warnings.push('chord list was not an array; expected chords / segments / timeline');
+      rawList = [];
+    }
+
+    var normalized = [];
+    for (var i = 0; i < rawList.length; i++) {
+      var n = normalizeRawSegment(rawList[i], i);
+      if (n && n._bad) {
+        warnings.push('segment ' + i + ': ' + n.reason);
+        continue;
+      }
+      if (n) normalized.push(n);
+    }
+
+    normalized.sort(function (a, b) {
+      return a.t0 - b.t0;
+    });
+
+    if (options.mergeDuplicates !== false) {
+      normalized = mergeAdjacentSame(normalized);
+    }
+
+    var enriched = normalized.map(function (seg) {
+      return enrichSegment(seg, key, options);
+    });
+
+    enriched.forEach(function (e) {
+      if (e.warning) warnings.push(e.symbol + ': ' + e.warning);
+      if (e.degree == null && e.chordId) warnings.push(e.displaySymbol + ': not diatonic in ' + key.rootStr + ' ' + key.mode);
+    });
+
+    var bpm = input.tempoBpm != null ? Number(input.tempoBpm) : options.tempoBpm != null ? Number(options.tempoBpm) : null;
+    var ts = input.timeSignature || options.timeSignature || [4, 4];
+    var beatsPerBar = ts[0] || 4;
+
+    var grid = null;
+    if (bpm && bpm > 0) {
+      grid = buildMeasureGrid(enriched, bpm, beatsPerBar, options);
+    }
+
+    var romanLine = enriched
+      .map(function (e) {
+        return e.roman;
+      })
+      .join(' | ');
+
+    return {
+      key: key,
+      tempoBpm: bpm,
+      timeSignature: ts,
+      segments: enriched,
+      measureGrid: grid,
+      romanLine: romanLine,
+      warnings: warnings,
+      examplePayload: EXAMPLE_PAYLOAD
+    };
+  }
+
+  function findSegmentAt(segments, t) {
+    for (var i = 0; i < segments.length; i++) {
+      var s = segments[i];
+      if (t >= s.t0 && t < s.t1) return s;
+    }
+    for (var j = segments.length - 1; j >= 0; j--) {
+      var s2 = segments[j];
+      if (t >= s2.t0) return s2;
+    }
+    return segments[0] || null;
+  }
+
+  /**
+   * One cell per bar: chord active near bar start (25% into bar).
+   */
+  function buildMeasureGrid(segments, bpm, beatsPerBar, options) {
+    options = options || {};
+    var secPerBeat = 60 / bpm;
+    var barSec = secPerBeat * beatsPerBar;
+    var endT = 0;
+    for (var i = 0; i < segments.length; i++) {
+      if (segments[i].t1 > endT) endT = segments[i].t1;
+    }
+    var nBars = Math.max(1, Math.ceil(endT / barSec));
+    var rows = [];
+    for (var b = 0; b < nBars; b++) {
+      var tProbe = b * barSec + barSec * (options.gridProbe || 0.25);
+      var hit = findSegmentAt(segments, tProbe);
+      rows.push({
+        bar: b + 1,
+        t0: b * barSec,
+        t1: (b + 1) * barSec,
+        segment: hit,
+        displaySymbol: hit ? hit.displaySymbol : '—',
+        roman: hit ? hit.roman : '—',
+        chordId: hit ? hit.chordId : null
+      });
+    }
+    return { barDurationSec: barSec, beatsPerBar: beatsPerBar, rows: rows };
+  }
+
+  /** Hook: when your key detector finishes, call this then re-run arrange with new key. */
+  function onKeyDetected(keyPayload) {
+    return normalizeKey(keyPayload);
+  }
+
+  var AudioChordArranger = {
+    EXAMPLE_PAYLOAD: EXAMPLE_PAYLOAD,
+    normalizeKey: normalizeKey,
+    parseChordLabel: parseChordLabel,
+    qualityToChordId: qualityToChordId,
+    arrangeFromAnalysis: arrangeFromAnalysis,
+    mergeAdjacentSame: mergeAdjacentSame,
+    buildMeasureGrid: buildMeasureGrid,
+    enrichSegment: enrichSegment,
+    onKeyDetected: onKeyDetected,
+    degreeInKey: degreeInKey
+  };
+
+  global.AudioChordArranger = AudioChordArranger;
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = AudioChordArranger;
+  }
+})(typeof window !== 'undefined' ? window : typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+  <script>/**
+ * ReplitChord — one entry point for Replit: pass whatever your audio step produced.
+ *
+ * Load after chord-generator.js + analysis-bridge.js:
+ *   <script src="chord-generator.js"></script>
+ *   <script src="analysis-bridge.js"></script>
+ *   <script src="replit-easy.js"></script>
+ *
+ *   var out = ReplitChord.go(yourAnalyzerOutput);
+ *
+ * Node:
+ *   require('./chord-generator.js');
+ *   require('./analysis-bridge.js');
+ *   const ReplitChord = require('./replit-easy.js');
+ */
+(function (global) {
+  'use strict';
+
+  var A = global.AudioChordArranger;
+  if (!A) {
+    throw new Error('Load chord-generator.js then analysis-bridge.js before replit-easy.js');
+  }
+
+  function pickChordArray(obj) {
+    if (Array.isArray(obj)) return obj;
+    var keys = ['chords', 'segments', 'timeline', 'detections', 'progression', 'harmony', 'events', 'items', 'changes'];
+    for (var k = 0; k < keys.length; k++) {
+      if (Array.isArray(obj[keys[k]])) return obj[keys[k]];
+    }
+    if (obj.analysis && Array.isArray(obj.analysis.chords)) return obj.analysis.chords;
+    if (obj.result && Array.isArray(obj.result.chords)) return obj.result.chords;
+    if (obj.audio && Array.isArray(obj.audio.chords)) return obj.audio.chords;
+    if (obj.track && Array.isArray(obj.track.chords)) return obj.track.chords;
+    return [];
+  }
+
+  function pickKey(obj) {
+    if (obj == null) return { root: 'C', mode: 'major' };
+    if (typeof obj.key === 'string') return obj.key;
+    if (obj.key != null && typeof obj.key === 'object') return obj.key;
+    var alt =
+      obj.detectedKey ||
+      obj.estimatedKey ||
+      obj.keyEstimate ||
+      obj.key_signature ||
+      obj.keySignature ||
+      obj.tonality;
+    if (typeof alt === 'string') return alt;
+    if (alt != null && typeof alt === 'object') return alt;
+    if (obj.tonic != null && obj.mode != null) return { root: obj.tonic, mode: obj.mode };
+    if (obj.keyRoot != null && obj.keyMode != null) return { root: obj.keyRoot, mode: obj.keyMode };
+    return { root: 'C', mode: 'major' };
+  }
+
+  function pickBpm(obj) {
+    var b =
+      obj.tempoBpm != null
+        ? obj.tempoBpm
+        : obj.bpm != null
+          ? obj.bpm
+          : obj.tempo != null
+            ? obj.tempo
+            : obj.detectedBpm != null
+              ? obj.detectedBpm
+              : obj.estimatedBpm != null
+                ? obj.estimatedBpm
+                : obj.beatsPerMinute != null
+                  ? obj.beatsPerMinute
+                  : null;
+    if (b != null && Number(b) > 0) return Number(b);
+    return null;
+  }
+
+  function pickTimeSignature(obj) {
+    var ts = obj.timeSignature || obj.ts || obj.meter || obj.time_sig;
+    if (Array.isArray(ts) && ts.length >= 2) return [ts[0], ts[1]];
+    if (typeof ts === 'string' && ts.indexOf('/') >= 0) {
+      var p = ts.split('/');
+      return [parseInt(p[0], 10) || 4, parseInt(p[1], 10) || 4];
+    }
+    return [4, 4];
+  }
+
+  /**
+   * Milliseconds → seconds only when explicitly requested (auto-guess is unsafe for long tracks).
+   */
+  function shouldTreatAsMs(list, obj, options) {
+    if (options && options.timesInSeconds === true) return false;
+    if (options && options.timesInMilliseconds === true) return true;
+    if (obj && (obj.durationUnit === 'ms' || obj.timeUnit === 'ms' || obj.timeUnit === 'milliseconds')) {
+      return true;
+    }
+    return false;
+  }
+
+  function coerceSegment(raw, timeScale) {
+    timeScale = timeScale || 1;
+    var t0 =
+      raw.t0 != null
+        ? raw.t0
+        : raw.start != null
+          ? raw.start
+          : raw.from != null
+            ? raw.from
+            : raw.begin != null
+              ? raw.begin
+              : Array.isArray(raw.time)
+                ? raw.time[0]
+                : raw.msStart != null
+                  ? raw.msStart
+                  : null;
+    var t1 =
+      raw.t1 != null
+        ? raw.t1
+        : raw.end != null
+          ? raw.end
+          : raw.to != null
+            ? raw.to
+            : raw.until != null
+              ? raw.until
+              : Array.isArray(raw.time)
+                ? raw.time[1]
+                : raw.msEnd != null
+                  ? raw.msEnd
+                  : null;
+    var sym =
+      raw.symbol != null
+        ? raw.symbol
+        : raw.chord != null
+          ? raw.chord
+          : raw.label != null
+            ? raw.label
+            : raw.name != null
+              ? raw.name
+              : raw.ch != null
+                ? raw.ch
+                : raw.value != null
+                  ? raw.value
+                  : '';
+    return {
+      t0: t0 != null ? Number(t0) * timeScale : null,
+      t1: t1 != null ? Number(t1) * timeScale : null,
+      symbol: String(sym)
+    };
+  }
+
+  /** String-only progression → fake timings (1 second per chord). */
+  function stringListToSegments(arr) {
+    var out = [];
+    for (var i = 0; i < arr.length; i++) {
+      out.push({ t0: i, t1: i + 1, symbol: String(arr[i]) });
+    }
+    return out;
+  }
+
+  /**
+   * Turn almost anything into { key, tempoBpm, timeSignature, chords } for AudioChordArranger.
+   */
+  function toPayload(obj, options) {
+    options = options || {};
+    var list = pickChordArray(obj);
+    if (!list.length && typeof obj === 'object' && obj != null && typeof obj.chord === 'string') {
+      list = [{ t0: 0, t1: 1, symbol: obj.chord }];
+    }
+    if (list.length && typeof list[0] === 'string') {
+      list = stringListToSegments(list);
+    }
+    var asMs = shouldTreatAsMs(list, obj, options);
+    var scale = asMs ? 0.001 : 1;
+    var chords = [];
+    for (var i = 0; i < list.length; i++) {
+      var c = coerceSegment(list[i], scale);
+      if (c.symbol && c.t0 != null && c.t1 != null) {
+        chords.push({ t0: c.t0, t1: c.t1, symbol: c.symbol });
+      }
+    }
+    return {
+      key: pickKey(obj),
+      tempoBpm: pickBpm(obj),
+      timeSignature: pickTimeSignature(obj),
+      chords: chords,
+      _meta: { assumedMilliseconds: asMs, segmentCount: chords.length }
+    };
+  }
+
+  /**
+   * Single call: pass analyzer object, JSON string, or chord name array.
+   * @returns {object} Easy fields + _full (full arrangeFromAnalysis) or { ok:false, error }
+   */
+  function go(input, options) {
+    options = options || {};
+    var obj = input;
+    if (typeof input === 'string') {
+      try {
+        obj = JSON.parse(input);
+      } catch (e) {
+        return { ok: false, error: 'Could not parse JSON: ' + (e.message || String(e)) };
+      }
+    }
+    if (Array.isArray(input) && (input.length === 0 || typeof input[0] === 'string')) {
+      obj = { chords: stringListToSegments(input), key: options.key || { root: 'C', mode: 'major' }, tempoBpm: options.tempoBpm };
+    }
+    if (obj == null || typeof obj !== 'object') {
+      return { ok: false, error: 'Expected an object, JSON string, or string[] of chord names' };
+    }
+
+    var payload = toPayload(obj, options);
+    if (!payload.chords.length) {
+      return {
+        ok: false,
+        error: 'No timed chords found. Put them in chords[], segments[], timeline[], or pass ["Cm7","F7"]',
+        hint: 'Each item needs a symbol/chord/label and start/end (or t0/t1, or time:[a,b])',
+        sample: A.EXAMPLE_PAYLOAD
+      };
+    }
+
+    var result = A.arrangeFromAnalysis(payload, options);
+
+    var timeline = result.segments.map(function (s) {
+      return {
+        start: s.t0,
+        end: s.t1,
+        chord: s.displaySymbol,
+        roman: s.roman,
+        id: s.chordId,
+        midi: s.midiVoicing,
+        notes: s.notes
+      };
+    });
+
+    var bars = null;
+    if (result.measureGrid && result.measureGrid.rows) {
+      bars = result.measureGrid.rows.map(function (r) {
+        return { bar: r.bar, chord: r.displaySymbol, roman: r.roman, startSec: r.t0, endSec: r.t1 };
+      });
+    }
+
+    var keyLabel = result.key.rootStr + ' ' + result.key.mode;
+
+    return {
+      ok: true,
+      key: keyLabel,
+      bpm: result.tempoBpm,
+      romanLine: result.romanLine,
+      timeline: timeline,
+      bars: bars,
+      warnings: result.warnings,
+      assumedMilliseconds: payload._meta.assumedMilliseconds,
+      _full: result
+    };
+  }
+
+  var ReplitChord = {
+    go: go,
+    toPayload: toPayload,
+    HELP:
+      'ReplitChord.go(analyzerOutput) — pass any object with chords/segments/timeline, optional key/bpm. ' +
+      'Or go(["Am7","D7","Gmaj7"], { key: { root: "G", mode: "major" }, tempoBpm: 120 }).'
+  };
+
+  global.ReplitChord = ReplitChord;
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ReplitChord;
+  }
+})(typeof window !== 'undefined' ? window : typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+  <script>
+    (function () {
+      var roots = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+      var rootEl = document.getElementById('root');
+      roots.forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r;
+        o.textContent = r;
+        rootEl.appendChild(o);
+      });
+
+      var tagEl = document.getElementById('tag');
+      ChordKit.TAGS.forEach(function (t) {
+        var o = document.createElement('option');
+        o.value = t;
+        o.textContent = t;
+        tagEl.appendChild(o);
+      });
+
+      var listEl = document.getElementById('list');
+      var detailEl = document.getElementById('detail');
+      var qEl = document.getElementById('q');
+      var activeId = null;
+
+      function filtered() {
+        return ChordKit.list({ tag: tagEl.value || undefined, q: qEl.value || undefined });
+      }
+
+      function renderList() {
+        var items = filtered();
+        listEl.innerHTML = '';
+        items.forEach(function (c) {
+          var row = document.createElement('div');
+          row.className = 'chord-row' + (c.id === activeId ? ' active' : '');
+          row.dataset.id = c.id;
+          var left = document.createElement('div');
+          left.innerHTML = '<span class="sym">' + escapeHtml(ChordKit.displaySymbol(rootEl.value, c.id)) + '</span> · ' + escapeHtml(c.name);
+          var right = document.createElement('div');
+          right.className = 'meta';
+          right.textContent = c.id;
+          row.appendChild(left);
+          row.appendChild(right);
+          row.addEventListener('click', function () {
+            activeId = c.id;
+            renderList();
+            renderDetail();
+          });
+          listEl.appendChild(row);
+        });
+      }
+
+      function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function renderDetail() {
+        if (!activeId) {
+          detailEl.innerHTML = '<p style="margin:0;">Select a chord.</p>';
+          return;
+        }
+        var c = ChordKit.get(activeId);
+        var r = rootEl.value;
+        var spell = ChordKit.notes(r, activeId, { preferFlats: /b/.test(r) });
+        var v = ChordKit.voicing(r, activeId, { inversion: 0, spread: 0, octave: 3, preferFlats: /b/.test(r) });
+        var vSpread = ChordKit.voicing(r, activeId, { inversion: 1, spread: 1, octave: 3, preferFlats: /b/.test(r) });
+        detailEl.innerHTML =
+          '<p style="margin:0 0 0.5rem;"><strong>' + escapeHtml(ChordKit.displaySymbol(r, activeId)) + '</strong> · ' + escapeHtml(c.name) + '</p>' +
+          '<p style="margin:0.35rem 0;"><code class="pill">id</code> ' + escapeHtml(c.id) + '</p>' +
+          '<p style="margin:0.35rem 0;"><code class="pill">close</code> ' + escapeHtml(spell.notes.join(' · ')) + '</p>' +
+          '<p style="margin:0.35rem 0;"><code class="pill">midi close</code> ' + escapeHtml(spell.midi.join(', ')) + '</p>' +
+          '<p style="margin:0.35rem 0;"><code class="pill">voicing inv1+spread</code> MIDI ' + escapeHtml(vSpread.midi.join(', ')) + '</p>' +
+          '<p class="tags">Tags: ' + escapeHtml(c.tags.join(', ')) + '</p>';
+      }
+
+      rootEl.addEventListener('change', function () {
+        renderList();
+        renderDetail();
+      });
+      tagEl.addEventListener('change', renderList);
+      qEl.addEventListener('input', function () {
+        renderList();
+      });
+      document.getElementById('randomBtn').addEventListener('click', function () {
+        var pool = filtered();
+        if (!pool.length) return;
+        activeId = pool[Math.floor(Math.random() * pool.length)].id;
+        renderList();
+        renderDetail();
+      });
+
+      activeId = 'maj9';
+      renderList();
+      renderDetail();
+
+      var aj = document.getElementById('analysisJson');
+      var ao = document.getElementById('analysisOut');
+      var ae = document.getElementById('arrangeErr');
+      var bs = document.getElementById('barStrip');
+      if (aj && typeof ReplitChord !== 'undefined' && typeof AudioChordArranger !== 'undefined') {
+        aj.value = JSON.stringify(AudioChordArranger.EXAMPLE_PAYLOAD, null, 2);
+        document.getElementById('arrangeBtn').addEventListener('click', function () {
+          ae.textContent = '';
+          try {
+            var easy = ReplitChord.go(aj.value, { mergeDuplicates: true, voicingOctave: 4 });
+            if (!easy.ok) {
+              ae.textContent = easy.error || 'Failed';
+              ao.textContent = easy.hint ? easy.hint + '\n\n' + JSON.stringify(easy.sample || {}, null, 2) : '';
+              bs.innerHTML = '';
+              return;
+            }
+            bs.innerHTML = '';
+            if (easy.bars) {
+              easy.bars.forEach(function (row) {
+                var d = document.createElement('div');
+                d.className = 'bar-cell';
+                d.innerHTML = '<div>' + escapeHtml(row.chord) + '</div><div class="rn">' + escapeHtml(row.roman) + '</div>';
+                bs.appendChild(d);
+              });
+            }
+            var slim = {
+              ok: easy.ok,
+              key: easy.key,
+              bpm: easy.bpm,
+              romanLine: easy.romanLine,
+              assumedMilliseconds: easy.assumedMilliseconds,
+              warnings: easy.warnings,
+              timeline: easy.timeline
+            };
+            ao.textContent = JSON.stringify(slim, null, 2);
+          } catch (e) {
+            ae.textContent = e.message || String(e);
+            ao.textContent = '';
+            bs.innerHTML = '';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

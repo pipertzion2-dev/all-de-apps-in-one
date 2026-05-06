@@ -30,3 +30,6 @@ Thumbs.db
 
 # Optional: local agent / Replit state (large, machine-specific)
 **/.local/
+
+# Never commit nested Git metadata if reintroduced
+**/.git/

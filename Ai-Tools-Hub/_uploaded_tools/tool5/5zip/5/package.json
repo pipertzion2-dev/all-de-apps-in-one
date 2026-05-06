@@ -1,0 +1,10 @@
+{
+  "name": "ai-test-case-explorer",
+  "version": "1.0.0",
+  "description": "Free AI Test Case Explorer tool — prompt, schema, API analysis with test case suggestions",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "private": true
+}

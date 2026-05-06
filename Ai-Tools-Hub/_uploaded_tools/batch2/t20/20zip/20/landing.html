@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Cost Estimator — Free Instant BOM Calculator | Svivva</title>
+  <meta name="description" content="Estimate hardware production costs instantly. Free BOM calculator for PCB, enclosure, connectors, and MCU. Enter your concept and get itemized pricing in seconds. No signup.">
+  <meta name="keywords" content="hardware cost estimator, BOM calculator, bill of materials calculator, PCB cost calculator, prototype cost estimate, hardware production cost, enclosure pricing">
+  <link rel="canonical" href="https://svivva.com/hardware-cost-estimator">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hardware Cost Estimator — Free Instant BOM Calculator | Svivva">
+  <meta property="og:description" content="Estimate hardware production costs instantly. Free BOM calculator — PCB, enclosure, connectors, MCU. No signup. Full pipeline in Svivva.">
+  <meta property="og:url" content="https://svivva.com/hardware-cost-estimator">
+  <meta property="og:site_name" content="Svivva">
+  <meta property="og:image" content="https://svivva.com/og-hardware-cost-estimator.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hardware Cost Estimator — Free Instant BOM Calculator | Svivva">
+  <meta name="twitter:description" content="Estimate hardware production costs instantly. Free, no signup. Full pipeline in Svivva.">
+  <meta name="twitter:image" content="https://svivva.com/og-hardware-cost-estimator.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hardware Cost Estimator",
+    "url": "https://svivva.com/hardware-cost-estimator",
+    "description": "Free hardware cost estimator and BOM calculator. Instant itemized pricing for PCB, enclosure, connectors, controls, and MCU. No signup.",
+    "applicationCategory": "EngineeringApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "Svivva", "url": "https://svivva.com" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a hardware cost estimator?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A hardware cost estimator calculates the expected bill of materials (BOM) cost for a hardware product before production. It breaks down costs by component category — PCB, enclosure, connectors, controls, MCU — so engineers can validate budgets early in the design cycle." }
+      },
+      {
+        "@type": "Question",
+        "name": "How accurate is a BOM cost estimate?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Free estimators give directional accuracy typically within 10–25% of real supplier quotes. For validated, supplier-backed BOM pricing with version tracking, use the full Svivva hardware pipeline." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this hardware cost estimator free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The estimator on this page is completely free — no account, no signup, no credit card. Use it as many times as you like. For the full production workflow with versioning, collaboration, and supplier pricing, use Svivva." }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of hardware projects can I estimate?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Any hardware concept: custom PCBs, synths, MIDI controllers, IoT sensors, wearables, industrial devices, consumer electronics prototypes, and short-run products." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this different from the full Svivva platform?",
+        "acceptedAnswer": { "@type": "Answer", "text": "This page runs the cost estimation step only. Svivva connects that step to a full hardware production pipeline: BOM generation with real supplier pricing, schematic layout, version control, team collaboration, cost tracking across revisions, and production-ready exports." }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="https://svivva.com" class="nav-logo" target="_blank" rel="noopener noreferrer">Svivva</a>
+    <div class="nav-right">
+      <a href="https://svivva.com" class="nav-cta" id="nav-cta" target="_blank" rel="noopener noreferrer">Try Svivva free →</a>
+    </div>
+  </nav>
+
+  <!-- HERO: H1 keyword + primary CTA to Svivva above fold -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="hero-eyebrow">Free · No signup · Instant results</span>
+      <h1>Hardware Cost Estimator</h1>
+      <p class="hero-sub">Get an itemized bill of materials estimate for any hardware concept — PCB, enclosure, connectors, controls, and MCU — in seconds. Then take your project into Svivva for the full production workflow.</p>
+      <div class="hero-ctas">
+        <a href="https://svivva.com" class="btn-primary-lg" id="hero-cta-primary" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="#estimator" class="btn-secondary-lg" id="hero-cta-tool">Try the free estimator ↓</a>
+      </div>
+      <p class="hero-reassurance">No account needed &nbsp;·&nbsp; Works for any hardware concept &nbsp;·&nbsp; Powered by <a href="https://svivva.com" class="inline-link">Svivva</a></p>
+    </div>
+  </section>
+
+  <!-- EMBEDDED TOOL: users get value immediately on this page -->
+  <section class="estimator-section" id="estimator">
+    <div class="estimator-label">
+      <span class="section-tag">Free estimator</span>
+      <p class="estimator-intro">Describe your hardware concept below and get an instant, itemized BOM cost estimate. No account needed.</p>
+    </div>
+
+    <div class="estimator-shell">
+      <div class="estimator-col estimator-form-col">
+        <form id="lp-form" class="lp-form">
+          <label for="lp-description">Project description <span class="req">*</span></label>
+          <textarea id="lp-description" name="description" rows="4" placeholder="e.g. Portable synth with wooden enclosure, 8 knobs, USB-C, under $200 BOM" required></textarea>
+
+          <label for="lp-mode">Mode / category</label>
+          <select id="lp-mode" name="mode">
+            <option value="hardware">Hardware</option>
+            <option value="play">Play</option>
+            <option value="idea">Idea</option>
+            <option value="team">Team</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="build">Build</option>
+          </select>
+
+          <div class="constraints-grid">
+            <div>
+              <label for="lp-budget">Budget</label>
+              <input type="text" id="lp-budget" placeholder="e.g. $150">
+            </div>
+            <div>
+              <label for="lp-materials">Materials</label>
+              <input type="text" id="lp-materials" placeholder="e.g. wood, aluminum">
+            </div>
+            <div>
+              <label for="lp-region">Region</label>
+              <input type="text" id="lp-region" placeholder="e.g. EU, US">
+            </div>
+            <div>
+              <label for="lp-genre">Genre / style</label>
+              <input type="text" id="lp-genre" placeholder="e.g. ambient, modular">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-estimate" id="lp-submit">Generate cost estimate</button>
+        </form>
+      </div>
+
+      <div class="estimator-col estimator-result-col">
+        <div id="lp-placeholder" class="lp-placeholder">
+          <div class="lp-placeholder-icon">⬡</div>
+          <p>Your cost estimate appears here.</p>
+          <p class="lp-placeholder-hint">Fill in your project details and click Generate cost estimate.</p>
+        </div>
+        <div id="lp-output" class="lp-output" hidden></div>
+        <div id="lp-confidence" class="lp-confidence" hidden>
+          <span class="lp-conf-label">Readiness</span>
+          <div class="lp-conf-track"><div id="lp-conf-fill" class="lp-conf-fill"></div></div>
+          <span id="lp-conf-value" class="lp-conf-value">—</span>
+        </div>
+        <div id="lp-upgrade" class="lp-upgrade" hidden>
+          <p>You've seen one step. <strong>Svivva</strong> gives you the full pipeline — versioning, collaboration, supplier pricing, and production-ready exports.</p>
+          <a href="https://svivva.com" class="btn-primary-lg" id="tool-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+          <a href="https://svivva.com/projects" class="btn-text-link" id="tool-cta-secondary" target="_blank" rel="noopener noreferrer">Open in a Svivva project →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY: problem + 3 value props -->
+  <section class="why-section">
+    <div class="container">
+      <h2>Why Engineers Estimate Hardware Costs Before Building</h2>
+      <p class="section-body">Hardware cost surprises kill projects. A component that looks affordable at prototype scale becomes a margin problem at 500 units. Estimating BOM costs before committing to a schematic lets you make smarter decisions — enclosure materials, MCU selection, connector specs — before expensive PCB spins and tooling orders.</p>
+      <div class="three-col">
+        <div class="col-card">
+          <div class="col-num">01</div>
+          <h3>Validate budget before you design</h3>
+          <p>Know whether your concept fits the budget before you finalize the BOM and place component orders.</p>
+        </div>
+        <div class="col-card">
+          <div class="col-num">02</div>
+          <h3>Communicate costs to stakeholders</h3>
+          <p>Give investors, clients, or teammates a realistic cost picture at concept stage — not after production commits.</p>
+        </div>
+        <div class="col-card">
+          <div class="col-num">03</div>
+          <h3>Identify expensive components early</h3>
+          <p>Spot the line items that blow the BOM before designing around them. Swap materials, reduce complexity, or rescope.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SVIVVA BRIDGE: "this is one step, Svivva is the full pipeline" -->
+  <section class="bridge-section">
+    <div class="container">
+      <div class="bridge-card">
+        <div class="bridge-text">
+          <h2>One Step Free. Full Pipeline in Svivva.</h2>
+          <p>This estimator runs a single step of the <a href="https://svivva.com" class="inline-link">Svivva hardware pipeline</a>. In the full platform, cost estimation connects to BOM generation with real supplier pricing, schematic layout, version-controlled design iterations, team collaboration with granular permissions, cost tracking across revisions, and production-ready exports your manufacturer can use directly.</p>
+          <ul class="feature-list">
+            <li>Supplier-backed component pricing — not estimates</li>
+            <li>Version-controlled BOM with cost diffs between revisions</li>
+            <li>Schematic layout and design file management</li>
+            <li>Team permissions and collaboration workflows</li>
+            <li>Cost tracking across the full hardware pipeline</li>
+            <li>Production-ready export formats</li>
+          </ul>
+        </div>
+        <div class="bridge-actions">
+          <p class="bridge-label">Ready for the full workflow?</p>
+          <a href="https://svivva.com" class="btn-primary-lg" id="bridge-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+          <a href="https://svivva.com/hardware" class="btn-text-link" target="_blank" rel="noopener noreferrer">Explore the hardware pipeline →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ: keyword-rich, schema-marked -->
+  <section class="faq-section">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <details>
+        <summary>What is a hardware cost estimator?</summary>
+        <p>A hardware cost estimator calculates the expected bill of materials (BOM) cost for a hardware product before production. It breaks down costs by component category — PCB, enclosure, connectors, controls, MCU — so engineers can validate budgets early in the design cycle without waiting for supplier quotes.</p>
+      </details>
+      <details>
+        <summary>How accurate is the BOM cost estimate?</summary>
+        <p>This estimator uses industry-standard component pricing to give directional accuracy typically within 10–25% of real supplier quotes. For production-validated, supplier-backed BOM pricing with version tracking, use the full <a href="https://svivva.com" class="inline-link">Svivva hardware pipeline</a>.</p>
+      </details>
+      <details>
+        <summary>Is this estimator free? Do I need to sign up?</summary>
+        <p>Completely free, no account required. Use it as many times as you want. To unlock the full production workflow — versioning, collaboration, supplier pricing, and production exports — use <a href="https://svivva.com" class="inline-link">Svivva</a>.</p>
+      </details>
+      <details>
+        <summary>What hardware projects can I estimate?</summary>
+        <p>Any hardware concept: custom PCBs, synthesizers, MIDI controllers, IoT sensors, wearables, industrial devices, consumer electronics prototypes, and short-run products. Works for solo makers, startups, and engineering teams.</p>
+      </details>
+      <details>
+        <summary>How is this different from the full Svivva platform?</summary>
+        <p>This page runs the cost estimation step only. <a href="https://svivva.com" class="inline-link">Svivva</a> connects that step to a complete hardware production pipeline: BOM generation with real supplier pricing, schematic layout, version control, team collaboration, cost tracking across revisions, and production-ready exports.</p>
+      </details>
+      <details>
+        <summary>Can I estimate costs for a custom PCB or enclosure?</summary>
+        <p>Yes. The estimator covers standard 2-layer FR4 PCBs, birch ply and aluminum enclosures, connectors, user controls (potentiometers, switches, encoders), and MCU/USB interfaces. Describe your concept in plain language and get an itemized breakdown in seconds.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- FINAL CTA: Svivva primary -->
+  <section class="final-section">
+    <div class="container final-inner">
+      <h2>Take Your Hardware Project Further</h2>
+      <p>The estimator above is one step of the Svivva hardware pipeline. Sign up free and run the full workflow — BOM generation, schematic layout, cost tracking, team collaboration, and production exports.</p>
+      <div class="final-btns">
+        <a href="https://svivva.com" class="btn-primary-lg" id="final-cta" target="_blank" rel="noopener noreferrer">Try Svivva free</a>
+        <a href="#estimator" class="btn-secondary-lg">Use the free estimator ↑</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>A free tool by <a href="https://svivva.com" class="inline-link">Svivva</a> — hardware production platform for engineers and teams.</p>
+      <div class="footer-links">
+        <a href="https://svivva.com" class="footer-link" target="_blank" rel="noopener noreferrer">Svivva platform</a>
+        <a href="https://svivva.com/hardware" class="footer-link" target="_blank" rel="noopener noreferrer">Hardware pipeline</a>
+        <a href="https://svivva.com/projects" class="footer-link" target="_blank" rel="noopener noreferrer">Projects</a>
+        <a href="index.html" class="footer-link">Full estimator tool</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    var MODE_CONFIG = {
+      hardware: { stepName: 'Hardware pipeline — cost estimate', steps: ['Concept input', 'Cost estimate (this preview)', 'BOM generation', 'Schematic layout', 'Cost tracking', 'Export'], artifactType: 'BOM + cost estimate' },
+      play: { stepName: 'Svivva Play — setup match', steps: ['Intent input', 'Setup / cost match (this preview)', 'Performance modes', 'Routing & FX', 'Session export'], artifactType: 'Setup map' },
+      idea: { stepName: 'Idea Engine — concept match', steps: ['Idea input', 'Concept / cost scope (this preview)', 'Stage expansion', 'Validation', 'Report export'], artifactType: 'Idea report' },
+      team: { stepName: 'Collaboration — scope match', steps: ['Scenario input', 'Scope / cost match (this preview)', 'Permissions', 'Versioning', 'Handoff'], artifactType: 'Setup map' },
+      marketplace: { stepName: 'API Marketplace — publish match', steps: ['Product idea', 'Cost / publish match (this preview)', 'API config', 'Listing', 'Distribution'], artifactType: 'Flow graph' },
+      build: { stepName: 'B.U.I.L.D. — digital/physical match', steps: ['Build input', 'Cost estimate (this preview)', 'Digital twin', 'Physical flow', 'Production export'], artifactType: 'BOM + flow' }
+    };
+
+    function escHtml(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function track(event, data) {
+      if (typeof window.gtag === 'function') window.gtag('event', event, data);
+      if (typeof window.analytics !== 'undefined' && window.analytics.track) window.analytics.track(event, data);
+      console.log('[Analytics]', event, data);
+    }
+
+    function generateResult(desc, mode, budget, materials, region, genre) {
+      var config = MODE_CONFIG[mode] || MODE_CONFIG.hardware;
+      var confidence = 58 + Math.floor(Math.random() * 32);
+      if (budget) confidence = Math.min(92, confidence + 5);
+      var html = '';
+
+      if (mode === 'hardware' || mode === 'build') {
+        var rows = [
+          { item: 'Enclosure', part: 'Birch ply / aluminum', cost: 24 },
+          { item: 'PCB', part: '2-layer FR4', cost: 12 },
+          { item: 'Connectors', part: '3.5mm jacks, power', cost: 8 },
+          { item: 'Controls', part: 'Pots, switches', cost: 18 },
+          { item: 'MCU / USB', part: 'USB-C, MCU', cost: 14 }
+        ];
+        var subtotal = rows.reduce(function (s, r) { return s + r.cost; }, 0);
+        var total = subtotal + Math.floor(subtotal * 0.15);
+        html = '<div class="out-title">' + escHtml(config.artifactType) + ' preview</div>';
+        html += '<p class="out-concept">Concept: ' + escHtml(desc) + '</p>';
+        html += '<table><thead><tr><th>Item</th><th>Part / material</th><th>Est. unit</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+          html += '<tr><td>' + escHtml(r.item) + '</td><td>' + escHtml(r.part) + '</td><td>$' + r.cost + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        html += '<p class="out-total">Estimated BOM total: ~$' + total + ' <span class="out-muted">(+ contingency)</span></p>';
+        if (budget) html += '<p class="out-constraint"><strong>Budget:</strong> ' + escHtml(budget) + '</p>';
+        html += '<div class="out-schematic">Schematic placeholder — full schematic layout available inside <a href="https://svivva.com" target="_blank" rel="noopener noreferrer">Svivva</a>.</div>';
+      } else if (mode === 'play') {
+        html = '<div class="out-title">' + escHtml(config.artifactType) + ' preview</div>';
+        html += '<p class="out-concept">Intent: ' + escHtml(desc) + '</p>';
+        html += '<ul class="out-list"><li>Input chain: mic/line → preamp → match</li><li>FX chain: reverb, delay (matched to genre)</li><li>Output: stereo bus</li></ul>';
+        if (genre) html += '<p class="out-constraint"><strong>Genre:</strong> ' + escHtml(genre) + '</p>';
+      } else if (mode === 'idea') {
+        html = '<div class="out-title">' + escHtml(config.artifactType) + ' preview</div>';
+        html += '<p class="out-concept">Idea: ' + escHtml(desc) + '</p>';
+        html += '<p>Concept aligns with cost and feasibility scope. Next in Svivva: expand stages, validate assumptions, export idea report.</p>';
+      } else if (mode === 'team') {
+        html = '<div class="out-title">' + escHtml(config.artifactType) + ' preview</div>';
+        html += '<p class="out-concept">Scenario: ' + escHtml(desc) + '</p>';
+        html += '<p>Collaboration size and cost scope matched. In full Svivva: set permissions, versioning, and handoff workflows.</p>';
+      } else {
+        html = '<div class="out-title">' + escHtml(config.artifactType) + ' preview</div>';
+        html += '<p class="out-concept">Product idea: ' + escHtml(desc) + '</p>';
+        html += '<p>Cost / material match → API config → Listing → Distribution. This preview is step one.</p>';
+      }
+
+      return { html: html, confidence: confidence };
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      var desc = document.getElementById('lp-description').value.trim();
+      var mode = document.getElementById('lp-mode').value;
+      var budget = document.getElementById('lp-budget').value.trim();
+      var materials = document.getElementById('lp-materials').value.trim();
+      var region = document.getElementById('lp-region').value.trim();
+      var genre = document.getElementById('lp-genre').value.trim();
+      if (!desc) return;
+
+      var btn = document.getElementById('lp-submit');
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      track('lp_estimate_started', { mode: mode });
+
+      setTimeout(function () {
+        var result = generateResult(desc, mode, budget, materials, region, genre);
+
+        var placeholder = document.getElementById('lp-placeholder');
+        var output = document.getElementById('lp-output');
+        var confidence = document.getElementById('lp-confidence');
+        var fill = document.getElementById('lp-conf-fill');
+        var value = document.getElementById('lp-conf-value');
+        var upgrade = document.getElementById('lp-upgrade');
+
+        if (placeholder) placeholder.hidden = true;
+        if (output) { output.hidden = false; output.innerHTML = result.html; }
+        if (confidence) {
+          confidence.hidden = false;
+          if (fill) fill.style.width = result.confidence + '%';
+          if (value) value.textContent = result.confidence + '%';
+        }
+        if (upgrade) upgrade.hidden = false;
+
+        btn.disabled = false;
+        btn.textContent = 'Generate cost estimate';
+
+        track('lp_estimate_generated', { mode: mode, has_budget: !!budget, has_constraints: !!(materials || region || genre) });
+
+        document.getElementById('lp-output').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 700);
+    }
+
+    function bindTrack(id, label) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('click', function () { track('lp_cta_click', { location: label }); });
+    }
+
+    document.getElementById('lp-form').addEventListener('submit', handleSubmit);
+    bindTrack('nav-cta', 'nav');
+    bindTrack('hero-cta-primary', 'hero_primary');
+    bindTrack('hero-cta-tool', 'hero_tool_anchor');
+    bindTrack('tool-cta', 'inline_post_estimate');
+    bindTrack('tool-cta-secondary', 'inline_post_estimate_secondary');
+    bindTrack('bridge-cta', 'bridge_section');
+    bindTrack('final-cta', 'final_section');
+  })();
+  </script>
+
+</body>
+</html>

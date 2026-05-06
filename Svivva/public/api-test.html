@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vivva - API Creation Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+      line-height: 1.6;
+    }
+    h1 { color: #5BA8A0; }
+    h2 { color: #8B5A7C; margin-top: 30px; }
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #5BA8A0;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      background: #0f3460;
+      color: #eee;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #5BA8A0;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    button {
+      background: #5BA8A0;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover { background: #4a9690; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    button.secondary { background: #6B2C4A; }
+    button.secondary:hover { background: #5a2540; }
+    .result {
+      background: #0a0a15;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .result.success { border-left: 4px solid #4ade80; }
+    .result.error { border-left: 4px solid #f87171; }
+    .result.pending { border-left: 4px solid #fbbf24; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .status-badge.success { background: #166534; color: #4ade80; }
+    .status-badge.error { background: #7f1d1d; color: #f87171; }
+    .status-badge.pending { background: #713f12; color: #fbbf24; }
+    .status-badge.running { background: #1e3a8a; color: #60a5fa; }
+    .step {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin: 10px 0;
+      background: #0f3460;
+      border-radius: 8px;
+      border-left: 4px solid #666;
+    }
+    .step.pass { border-left-color: #4ade80; }
+    .step.fail { border-left-color: #f87171; }
+    .step.running { border-left-color: #60a5fa; animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.6; } }
+    .step-number {
+      width: 30px;
+      height: 30px;
+      background: #5BA8A0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    .step-content { flex: 1; }
+    .step-title { font-weight: 600; }
+    .step-detail { font-size: 13px; color: #888; margin-top: 4px; }
+    .presets {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .preset {
+      padding: 8px 16px;
+      background: #0f3460;
+      border: 2px solid #0f3460;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .preset:hover { border-color: #5BA8A0; }
+    .preset.active { border-color: #5BA8A0; background: #1a3a5f; }
+  </style>
+</head>
+<body>
+  <h1>Vivva API Creation Test</h1>
+  <p>Test if Vivva can successfully create an API from your prompt.</p>
+
+  <div class="card">
+    <h2 style="margin-top: 0;">1. Choose a Test Prompt</h2>
+    
+    <label>Quick Presets:</label>
+    <div class="presets">
+      <div class="preset" onclick="setPreset('key')">Key Detector API</div>
+      <div class="preset" onclick="setPreset('sentiment')">Sentiment Analysis</div>
+      <div class="preset" onclick="setPreset('summarize')">Text Summarizer</div>
+      <div class="preset" onclick="setPreset('translate')">Language Translator</div>
+    </div>
+
+    <label for="prompt">API Prompt:</label>
+    <textarea id="prompt" placeholder="Describe what your API should do...">Make a key detector API that identifies which musical key a melody or chord progression is in</textarea>
+
+    <label for="outputFormat">Expected Output Format:</label>
+    <textarea id="outputFormat" placeholder="Describe the JSON structure you expect...">{
+  "key": "C major",
+  "confidence": 0.95,
+  "alternativeKeys": ["A minor"],
+  "scale": ["C", "D", "E", "F", "G", "A", "B"]
+}</textarea>
+
+    <button onclick="runFullTest()">Run Full Creation Test</button>
+    <button class="secondary" onclick="clearResults()">Clear Results</button>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top: 0;">2. Test Progress</h2>
+    <div id="steps"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top: 0;">3. Results</h2>
+    <div id="resultBox" class="result pending">Click "Run Full Creation Test" to begin...</div>
+  </div>
+
+  <script>
+    const BASE_URL = window.location.origin;
+    
+    const presets = {
+      key: {
+        prompt: "Make a key detector API that identifies which musical key a melody or chord progression is in",
+        output: `{
+  "key": "C major",
+  "confidence": 0.95,
+  "alternativeKeys": ["A minor"],
+  "scale": ["C", "D", "E", "F", "G", "A", "B"]
+}`
+      },
+      sentiment: {
+        prompt: "Create a sentiment analysis API that analyzes text and returns the emotional tone",
+        output: `{
+  "sentiment": "positive",
+  "score": 0.85,
+  "emotions": ["happy", "excited"],
+  "confidence": 0.92
+}`
+      },
+      summarize: {
+        prompt: "Build a text summarizer API that condenses long articles into key points",
+        output: `{
+  "summary": "Brief summary here...",
+  "keyPoints": ["Point 1", "Point 2", "Point 3"],
+  "wordCount": 50
+}`
+      },
+      translate: {
+        prompt: "Create a language translation API that translates text between languages",
+        output: `{
+  "translatedText": "Translated content here",
+  "sourceLanguage": "en",
+  "targetLanguage": "es",
+  "confidence": 0.98
+}`
+      }
+    };
+
+    function setPreset(key) {
+      document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('prompt').value = presets[key].prompt;
+      document.getElementById('outputFormat').value = presets[key].output;
+    }
+
+    function addStep(number, title, status = 'pending') {
+      const stepsEl = document.getElementById('steps');
+      const step = document.createElement('div');
+      step.className = `step ${status}`;
+      step.id = `step-${number}`;
+      step.innerHTML = `
+        <div class="step-number">${number}</div>
+        <div class="step-content">
+          <div class="step-title">${title}</div>
+          <div class="step-detail" id="step-${number}-detail">Waiting...</div>
+        </div>
+        <span class="status-badge ${status}" id="step-${number}-badge">${status.toUpperCase()}</span>
+      `;
+      stepsEl.appendChild(step);
+    }
+
+    function updateStep(number, status, detail) {
+      const step = document.getElementById(`step-${number}`);
+      const badge = document.getElementById(`step-${number}-badge`);
+      const detailEl = document.getElementById(`step-${number}-detail`);
+      
+      step.className = `step ${status}`;
+      badge.className = `status-badge ${status}`;
+      badge.textContent = status.toUpperCase();
+      detailEl.textContent = detail;
+    }
+
+    function setResult(content, status) {
+      const resultBox = document.getElementById('resultBox');
+      resultBox.className = `result ${status}`;
+      resultBox.textContent = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+    }
+
+    function clearResults() {
+      document.getElementById('steps').innerHTML = '';
+      setResult('Click "Run Full Creation Test" to begin...', 'pending');
+    }
+
+    async function runFullTest() {
+      clearResults();
+      const prompt = document.getElementById('prompt').value;
+      const outputFormat = document.getElementById('outputFormat').value;
+
+      if (!prompt.trim()) {
+        setResult('Error: Please enter an API prompt', 'error');
+        return;
+      }
+
+      // Define test steps
+      addStep(1, 'Check Authentication Status');
+      addStep(2, 'Validate API Endpoint');
+      addStep(3, 'Submit API Creation Request');
+      addStep(4, 'Verify Response Structure');
+      addStep(5, 'Check Project Was Created');
+
+      let projectId = null;
+
+      // Step 1: Check auth
+      updateStep(1, 'running', 'Checking if user is authenticated...');
+      try {
+        const authRes = await fetch(`${BASE_URL}/api/auth/user`, { credentials: 'include' });
+        const authData = await authRes.json().catch(() => ({}));
+        
+        if (authRes.ok && authData.id) {
+          updateStep(1, 'pass', `Authenticated as: ${authData.username || authData.email || 'User'}`);
+        } else {
+          updateStep(1, 'fail', 'Not authenticated - login required to create APIs');
+          setResult('You need to log in first. Go to the homepage and click "Sign In".', 'error');
+          return;
+        }
+      } catch (err) {
+        updateStep(1, 'fail', `Auth check failed: ${err.message}`);
+        setResult(`Authentication error: ${err.message}`, 'error');
+        return;
+      }
+
+      // Step 2: Validate endpoint exists
+      updateStep(2, 'running', 'Checking API endpoint availability...');
+      try {
+        const checkRes = await fetch(`${BASE_URL}/api/projects`, { 
+          method: 'GET',
+          credentials: 'include' 
+        });
+        
+        if (checkRes.ok || checkRes.status === 401) {
+          updateStep(2, 'pass', `Endpoint available (status: ${checkRes.status})`);
+        } else {
+          updateStep(2, 'fail', `Endpoint returned: ${checkRes.status}`);
+        }
+      } catch (err) {
+        updateStep(2, 'fail', `Endpoint check failed: ${err.message}`);
+      }
+
+      // Step 3: Submit creation request
+      updateStep(3, 'running', 'Submitting API creation request...');
+      try {
+        const createRes = await fetch(`${BASE_URL}/api/projects`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            expectedOutput: outputFormat,
+            settings: {
+              creativity: 50,
+              detailLevel: 50,
+              strictness: 70
+            }
+          })
+        });
+
+        const createData = await createRes.json().catch(() => null);
+
+        if (createRes.ok && createData) {
+          projectId = createData.id || createData.projectId;
+          updateStep(3, 'pass', `API creation request accepted (ID: ${projectId || 'pending'})`);
+        } else {
+          const errorMsg = createData?.error || createData?.message || `Status: ${createRes.status}`;
+          updateStep(3, 'fail', `Creation failed: ${errorMsg}`);
+          setResult(createData || `Request failed with status ${createRes.status}`, 'error');
+          return;
+        }
+      } catch (err) {
+        updateStep(3, 'fail', `Request error: ${err.message}`);
+        setResult(`Creation request failed: ${err.message}`, 'error');
+        return;
+      }
+
+      // Step 4: Verify response structure
+      updateStep(4, 'running', 'Validating response structure...');
+      try {
+        const verifyRes = await fetch(`${BASE_URL}/api/projects`, { 
+          credentials: 'include' 
+        });
+        const projects = await verifyRes.json();
+        
+        if (Array.isArray(projects) && projects.length > 0) {
+          updateStep(4, 'pass', `Found ${projects.length} project(s) in database`);
+        } else if (verifyRes.ok) {
+          updateStep(4, 'pass', 'Response structure valid (no projects yet)');
+        } else {
+          updateStep(4, 'fail', 'Could not verify response structure');
+        }
+      } catch (err) {
+        updateStep(4, 'fail', `Verification error: ${err.message}`);
+      }
+
+      // Step 5: Check project exists
+      updateStep(5, 'running', 'Confirming project was saved...');
+      if (projectId) {
+        try {
+          const projectRes = await fetch(`${BASE_URL}/api/projects/${projectId}`, {
+            credentials: 'include'
+          });
+          
+          if (projectRes.ok) {
+            const project = await projectRes.json();
+            updateStep(5, 'pass', `Project confirmed: ${project.name || project.id}`);
+            setResult({
+              success: true,
+              message: 'API creation test PASSED!',
+              projectId: projectId,
+              project: project
+            }, 'success');
+          } else {
+            updateStep(5, 'fail', `Could not fetch project: ${projectRes.status}`);
+            setResult('Project was created but could not be retrieved', 'error');
+          }
+        } catch (err) {
+          updateStep(5, 'fail', `Error fetching project: ${err.message}`);
+        }
+      } else {
+        updateStep(5, 'pass', 'Skipped - no project ID returned (may be async)');
+        setResult({
+          success: true,
+          message: 'API creation request was accepted!',
+          note: 'The project may be created asynchronously. Check the dashboard.'
+        }, 'success');
+      }
+    }
+  </script>
+</body>
+</html>

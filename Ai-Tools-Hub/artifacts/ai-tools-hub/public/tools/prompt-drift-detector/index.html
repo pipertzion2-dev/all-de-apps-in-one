@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Prompt Drift Detector — Free Online Tool | Analyze Prompt & Schema Drift</title>
+  <meta name="description" content="Free prompt drift detector tool. Upload your prompt, schema, or API definition and get instant drift analysis, scoring, and recommendations. No signup required.">
+  <style>
+    /* No external fonts — works when opened as file (file://) or on any server */
+    :root {
+      --font: 'zc', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --accent: #7C3AED;
+      --accent-dim: rgba(124, 58, 237, 0.12);
+      --accent-hover: #6D28D9;
+      --bg: #FAFAFA;
+      --panel-bg: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111827;
+      --text-muted: #6B7280;
+      --success: #059669;
+      --warn: #D97706;
+      --danger: #DC2626;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      font-weight: 400;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr;
+      min-height: calc(100vh - 56px);
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+      .panel-right { grid-column: 1 / -1; }
+    }
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel:last-of-type { border-right: none; }
+
+    .panel h2 {
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.75rem 0;
+      letter-spacing: 0.02em;
+    }
+    .panel label {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    textarea, select {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-bg);
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    textarea::placeholder { color: #9CA3AF; }
+    select { cursor: pointer; max-width: 100%; }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .score-ring {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 1rem;
+      position: relative;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring .bg { stroke: var(--border); }
+    .score-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+    .score-ring .value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 1.75rem;
+      color: var(--text);
+    }
+    .score-label {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .drift-list { list-style: none; padding: 0; margin: 0; }
+    .drift-list li {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      padding: 0.5rem 0.6rem;
+      margin-bottom: 0.4rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-left: 3px solid var(--border);
+    }
+    .drift-list li.low { border-left-color: var(--success); background: rgba(5, 150, 105, 0.08); }
+    .drift-list li.medium { border-left-color: var(--warn); background: rgba(217, 119, 6, 0.08); }
+    .drift-list li.high { border-left-color: var(--danger); background: rgba(220, 38, 38, 0.08); }
+    .drift-list .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .drift-list li.low .dot { background: var(--success); }
+    .drift-list li.medium .dot { background: var(--warn); }
+    .drift-list li.high .dot { background: var(--danger); }
+
+    .guidance-block {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      background: var(--accent-dim);
+      border-radius: 8px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+    .guidance-block strong { color: var(--text); }
+    .guidance-block h3 { font-size: 0.9rem; margin: 0 0 0.35rem 0; color: var(--text); }
+
+    .cta-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--text);
+      color: #fff;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      text-align: center;
+      z-index: 100;
+      border-top: 1px solid var(--border);
+    }
+    .cta-bar a {
+      color: var(--accent);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .cta-bar a:hover { text-decoration: underline; }
+
+    .header {
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .microcopy {
+      font-family: var(--font);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .empty-state {
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .empty-state.center-panel { padding: 3rem 1rem; }
+    .app-identity {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-align: center;
+      padding: 0.35rem 1rem;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-identity">Mini App #16 — Prompt Drift Detector (this is the correct app)</div>
+  <header class="header">Prompt Drift Detector — Free Online Tool</header>
+
+  <div class="layout">
+    <aside class="panel panel-left">
+      <h2>Input</h2>
+      <label for="prompt">Prompt or system instruction</label>
+      <textarea id="prompt" placeholder="Paste your prompt, template, or instruction set here..."></textarea>
+      <label for="schema">Schema or API definition (optional)</label>
+      <textarea id="schema" placeholder="JSON schema, OpenAPI snippet, or response shape..."></textarea>
+      <label for="model">Model / endpoint type</label>
+      <select id="model">
+        <option value="openai">OpenAI (GPT-4 / 3.5)</option>
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="generic">Generic / Custom</option>
+      </select>
+      <p class="microcopy">We analyze your prompt and schema locally. Nothing is sent to external servers.</p>
+      <button type="button" class="btn" id="analyze">Analyze drift risk</button>
+    </aside>
+
+    <main class="panel panel-center">
+      <h2>Results</h2>
+      <div id="results">
+        <div class="empty-state center-panel" id="results-empty">
+          Enter a prompt (and optionally a schema) in the left panel, then click <strong>Analyze drift risk</strong> to see drift analysis and scores.
+        </div>
+        <div id="results-content" style="display: none;">
+          <div class="score-label">Overall drift risk score (lower is better)</div>
+          <div class="score-ring">
+            <svg width="140" height="140" viewBox="0 0 140 140">
+              <circle class="bg" cx="70" cy="70" r="60" fill="none" stroke-width="10"/>
+              <circle class="fill" id="score-ring-fill" cx="70" cy="70" r="60" fill="none" stroke-width="10" stroke-dasharray="377" stroke-dashoffset="377"/>
+            </svg>
+            <span class="value" id="score-value">0</span>
+          </div>
+          <div class="score-label" id="score-summary"></div>
+          <h2 style="margin-top: 1rem;">Drift factors</h2>
+          <ul class="drift-list" id="drift-list"></ul>
+        </div>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <h2>Guidance</h2>
+      <div id="guidance">
+        <div class="guidance-block">
+          <h3>What is prompt drift?</h3>
+          <p>Prompt drift is when your prompt, schema, or API behavior changes over time—through edits, model updates, or inconsistent constraints—leading to unexpected outputs or integration failures.</p>
+        </div>
+        <div class="guidance-block" id="guidance-dynamic">
+          <p class="empty-state">Run an analysis to see interpretation and recommendations for your prompt.</p>
+        </div>
+        <div class="guidance-block">
+          <h3>In production</h3>
+          <p>Schema enforcement, automated tests, versioning, and monitoring help prevent drift. Svivva provides these for production-ready APIs.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="cta-bar">
+    <span>You just tested one prompt. In Svivva you can turn this into a production-ready API with automated tests, versioning, monitoring, and cost optimization.</span>
+    <a href="https://svivva.com" target="_blank" rel="noopener">Try Svivva for free</a>
+  </div>
+
+  <script>
+    (function () {
+      const promptEl = document.getElementById('prompt');
+      const schemaEl = document.getElementById('schema');
+      const modelEl = document.getElementById('model');
+      const analyzeBtn = document.getElementById('analyze');
+      const resultsEmpty = document.getElementById('results-empty');
+      const resultsContent = document.getElementById('results-content');
+      const scoreRingFill = document.getElementById('score-ring-fill');
+      const scoreValue = document.getElementById('score-value');
+      const scoreSummary = document.getElementById('score-summary');
+      const driftList = document.getElementById('drift-list');
+      const guidanceDynamic = document.getElementById('guidance-dynamic');
+
+      const CIRCUMFERENCE = 2 * Math.PI * 60;
+
+      function runAnalysis() {
+        const promptText = (promptEl.value || '').trim();
+        const schemaText = (schemaEl.value || '').trim();
+        const model = modelEl.value;
+
+        if (!promptText) {
+          resultsEmpty.style.display = 'block';
+          resultsContent.style.display = 'none';
+          resultsEmpty.textContent = 'Enter at least a prompt in the left panel, then click Analyze drift risk.';
+          return;
+        }
+
+        resultsEmpty.style.display = 'none';
+        resultsContent.style.display = 'block';
+        analyzeBtn.disabled = true;
+
+        setTimeout(function () {
+          const result = analyzeDrift(promptText, schemaText, model);
+          renderResults(result);
+          analyzeBtn.disabled = false;
+        }, Math.min(800, 3000));
+      }
+
+      function analyzeDrift(promptText, schemaText, model) {
+        const factors = [];
+        let score = 100;
+
+        if (promptText.length < 30) {
+          factors.push({ id: 'short', severity: 'high', label: 'Very short prompt — more likely to drift under model or context changes' });
+          score -= 25;
+        } else if (promptText.length < 80) {
+          factors.push({ id: 'short', severity: 'medium', label: 'Short prompt — consider adding constraints to reduce drift' });
+          score -= 12;
+        } else {
+          factors.push({ id: 'length', severity: 'low', label: 'Reasonable prompt length — easier to keep consistent' });
+        }
+
+        const hasRole = /you are|act as|assistant|system/i.test(promptText);
+        if (!hasRole && promptText.length > 20) {
+          factors.push({ id: 'role', severity: 'medium', label: 'No clear role or persona — outputs may vary across runs' });
+          score -= 10;
+        } else if (hasRole) {
+          factors.push({ id: 'role', severity: 'low', label: 'Role or persona present — helps stabilize behavior' });
+        }
+
+        const hasConstraints = /must|never|always|do not|don't|required|format|json|output/i.test(promptText);
+        if (!hasConstraints) {
+          factors.push({ id: 'constraints', severity: 'high', label: 'Few explicit constraints — high drift risk' });
+          score -= 20;
+        } else {
+          factors.push({ id: 'constraints', severity: 'low', label: 'Some constraints present — lowers drift risk' });
+        }
+
+        if (schemaText) {
+          let schemaValid = false;
+          try {
+            const parsed = JSON.parse(schemaText);
+            schemaValid = typeof parsed === 'object';
+          } catch (_) {
+            if (schemaText.includes('openapi') || schemaText.includes('schema') || schemaText.includes('properties')) schemaValid = true;
+          }
+          if (schemaValid) {
+            factors.push({ id: 'schema', severity: 'low', label: 'Schema/API definition provided — good for validation' });
+          } else {
+            factors.push({ id: 'schema', severity: 'medium', label: 'Schema may be incomplete — validate structure in production' });
+            score -= 8;
+          }
+        } else {
+          factors.push({ id: 'schema', severity: 'medium', label: 'No schema — add one to detect output drift' });
+          score -= 10;
+        }
+
+        const hasVersion = /\d+\.\d+|version|v\d/i.test(promptText);
+        if (!hasVersion && promptText.length > 100) {
+          factors.push({ id: 'version', severity: 'medium', label: 'No version or changelog — harder to track drift over time' });
+          score -= 8;
+        } else if (hasVersion) {
+          factors.push({ id: 'version', severity: 'low', label: 'Version or reference present — aids versioning' });
+        }
+
+        const vagueWords = (promptText.match(/\b(good|nice|better|appropriate|properly|correctly)\b/gi) || []).length;
+        if (vagueWords >= 2) {
+          factors.push({ id: 'vague', severity: 'high', label: 'Vague terms (e.g. "good", "appropriate") — subjective and prone to drift' });
+          score -= 15;
+        } else if (vagueWords === 1) {
+          factors.push({ id: 'vague', severity: 'medium', label: 'Some vague wording — prefer measurable criteria' });
+          score -= 5;
+        }
+
+        score = Math.max(0, Math.min(100, score));
+        return { score, factors };
+      }
+
+      function renderResults(result) {
+        const { score, factors } = result;
+        const offset = CIRCUMFERENCE - (score / 100) * CIRCUMFERENCE;
+        scoreRingFill.style.strokeDashoffset = offset;
+        scoreValue.textContent = score;
+
+        if (score >= 70) scoreSummary.textContent = 'Lower drift risk. Keep schema and tests in sync in production.';
+        else if (score >= 40) scoreSummary.textContent = 'Moderate drift risk. Add constraints and schema validation.';
+        else scoreSummary.textContent = 'Higher drift risk. Tighten prompt and add versioning and monitoring.';
+
+        driftList.innerHTML = factors.map(function (f) {
+          return '<li class="' + f.severity + '"><span class="dot"></span>' + escapeHtml(f.label) + '</li>';
+        }).join('');
+
+        guidanceDynamic.innerHTML =
+          '<h3>Interpretation</h3>' +
+          '<p><strong>Score ' + score + '/100.</strong> ' + escapeHtml(scoreSummary.textContent) + '</p>' +
+          '<p>In Svivva you can enforce this schema, generate evaluations, version prompts, and monitor cost and latency to catch drift early.</p>';
+      }
+
+      function escapeHtml(s) {
+        const div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      analyzeBtn.addEventListener('click', runAnalysis);
+      promptEl.addEventListener('keydown', function (e) { if (e.ctrlKey && e.key === 'Enter') runAnalysis(); });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "evaluation-rule-builder",
+  "version": "1.0.0",
+  "description": "Free evaluation rule builder tool — build and validate evaluation rules for prompts, schemas & APIs",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "main": "server.js"
+}

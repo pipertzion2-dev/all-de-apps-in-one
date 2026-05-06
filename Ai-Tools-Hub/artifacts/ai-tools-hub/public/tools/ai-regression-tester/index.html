@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI Regression Tester – Free Prompt Test Tool | Svivva</title>
+<meta name="description" content="Free AI regression tester. Define test cases with expected outputs, run them against your prompt, and track which cases pass or fail."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea,input,select{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:13px;outline:none;transition:border-color .2s}
+textarea:focus,input:focus,select:focus{border-color:#7c3aed}
+textarea{resize:vertical;font-family:'Courier New',monospace}
+select option{background:#111118}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.test-case{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;position:relative}
+.test-case-header{display:flex;justify-content:space-between;align-items:center}
+.tc-num{font-size:12px;color:#666;letter-spacing:.1em}
+.del-btn{background:transparent;border:none;color:#555;font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+.del-btn:hover{color:#f87171}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.row2{grid-template-columns:1fr}}
+.add-btn{background:#1a1a2e;border:1px solid #2a2a40;color:#a78bfa;font-family:inherit;font-size:14px;padding:10px;border-radius:8px;cursor:pointer;width:100%;text-align:center;transition:all .2s}
+.add-btn:hover{background:#2a1a4e;border-color:#7c3aed}
+.result-row{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:12px;font-size:13px}
+.result-pass{border-color:#065f46;background:#064e3b22}
+.result-fail{border-color:#7f1d1d;background:#450a0a22}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.status-pass{color:#34d399;font-weight:700;font-size:12px}
+.status-fail{color:#f87171;font-weight:700;font-size:12px}
+.result-details{font-family:'Courier New',monospace;font-size:12px;color:#999;line-height:1.6}
+.result-diff{background:#0a0a14;border-radius:4px;padding:8px;margin-top:6px}
+.diff-exp{color:#86efac}.diff-act{color:#fca5a5}
+.summary-bar{display:flex;gap:16px;flex-wrap:wrap;padding:12px;background:#0d0d15;border-radius:8px}
+.sum-stat{font-size:13px;color:#aaa}.sum-stat span{font-weight:700}
+.progress{height:6px;background:#1a1a2e;border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s;background:linear-gradient(90deg,#7c3aed,#34d399)}
+.match-type{font-size:11px;color:#666}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.preset-btn{background:#16162a;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer}
+.preset-btn:hover{border-color:#7c3aed;color:#c4b5fd}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Developer Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>AI Regression Tester</h1>
+    <p class="sub">Define test cases with expected outputs. Run them against your prompt and instantly see which pass or fail — no API key needed.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>System Prompt</label>
+      <textarea id="sysPrompt" rows="3" placeholder="e.g. You are a JSON classifier. Given a message, respond with {intent, confidence}."></textarea>
+    </div>
+    <div>
+      <label>Match Mode</label>
+      <select id="matchMode">
+        <option value="contains">Contains (output includes expected text)</option>
+        <option value="exact">Exact match</option>
+        <option value="json-key">JSON key match (expected keys/values present)</option>
+        <option value="similarity">Similarity score (≥ 80%)</option>
+      </select>
+    </div>
+    <div>
+      <label>Presets</label>
+      <div class="presets">
+        <button class="preset-btn" onclick="loadPreset(0)">Intent classifier</button>
+        <button class="preset-btn" onclick="loadPreset(1)">Sentiment analyzer</button>
+        <button class="preset-btn" onclick="loadPreset(2)">Ticket triage</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <label style="margin-bottom:0">Test Cases</label>
+      <span id="tcCount" style="font-size:12px;color:#666">0 cases</span>
+    </div>
+    <div id="testCases" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
+    <button class="primary" onclick="runTests()">Run All Tests →</button>
+  </div>
+
+  <div class="card" id="resultsCard" style="display:none">
+    <label>Results</label>
+    <div id="summary" class="summary-bar"></div>
+    <div id="results" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Automate regression testing in your AI pipeline with Svivva →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS=[
+  {sys:'You are an intent classifier. Given a support message, respond with JSON: {"intent":"...","confidence":0.0}. Intents: billing, technical, general.',cases:[
+    {input:'My invoice is wrong',expected:'billing',label:'Billing inquiry'},
+    {input:'App crashes on startup',expected:'technical',label:'Technical issue'},
+    {input:'What are your hours?',expected:'general',label:'General question'},
+    {input:'I was charged twice this month',expected:'billing',label:'Double charge'},
+  ]},
+  {sys:'You are a sentiment analyzer. Respond with JSON: {"sentiment":"positive|neutral|negative","score":0.0}.',cases:[
+    {input:'This product is amazing!',expected:'positive',label:'Clear positive'},
+    {input:'It was okay, nothing special.',expected:'neutral',label:'Neutral feedback'},
+    {input:'Terrible experience, never again.',expected:'negative',label:'Strong negative'},
+  ]},
+  {sys:'Classify support tickets by severity: low, medium, high, critical. Respond with JSON: {"severity":"...","category":"..."}.',cases:[
+    {input:'Typo in the dashboard label',expected:'low',label:'Minor UI bug'},
+    {input:'Payment processing fails for all users',expected:'critical',label:'Critical outage'},
+    {input:'Export button sometimes disappears',expected:'medium',label:'Intermittent bug'},
+  ]},
+];
+
+function loadPreset(i){
+  const p=PRESETS[i];
+  document.getElementById('sysPrompt').value=p.sys;
+  document.getElementById('testCases').innerHTML='';
+  tcId=0;
+  p.cases.forEach(c=>addTestCase(c.label,c.input,c.expected));
+}
+
+let tcId=0;
+function addTestCase(label='',input='',expected=''){
+  tcId++;
+  const n=tcId;
+  const div=document.createElement('div');
+  div.className='test-case';
+  div.id='tc-'+n;
+  div.innerHTML=`<div class="test-case-header"><span class="tc-num">Test Case #${n}</span><button class="del-btn" onclick="delTC(${n})">✕</button></div>
+  <div><label>Label</label><input type="text" id="tc-label-${n}" value="${escHtml(label)}" placeholder="e.g. Billing inquiry"/></div>
+  <div class="row2">
+    <div><label>Input (user message)</label><textarea id="tc-input-${n}" rows="3">${escHtml(input)}</textarea></div>
+    <div><label>Expected Output (contains)</label><textarea id="tc-expected-${n}" rows="3">${escHtml(expected)}</textarea></div>
+  </div>`;
+  document.getElementById('testCases').appendChild(div);
+  updateCount();
+}
+function delTC(n){const el=document.getElementById('tc-'+n);if(el)el.remove();updateCount();}
+function updateCount(){document.getElementById('tcCount').textContent=document.getElementById('testCases').children.length+' cases';}
+
+function runTests(){
+  const cases=[...document.getElementById('testCases').children].map(el=>{
+    const n=el.id.replace('tc-','');
+    return {
+      n,
+      label:document.getElementById('tc-label-'+n).value.trim()||'Test '+n,
+      input:document.getElementById('tc-input-'+n).value.trim(),
+      expected:document.getElementById('tc-expected-'+n).value.trim(),
+    };
+  }).filter(c=>c.input);
+
+  if(!cases.length){alert('Add at least one test case.');return;}
+  const sys=document.getElementById('sysPrompt').value.trim();
+  const mode=document.getElementById('matchMode').value;
+
+  const results=cases.map(c=>{
+    const actual=simulateOutput(sys,c.input);
+    const pass=checkMatch(actual,c.expected,mode);
+    const sim=similarity(actual,c.expected);
+    return {...c,actual,pass,sim};
+  });
+
+  const passed=results.filter(r=>r.pass).length;
+  const pct=Math.round(passed/results.length*100);
+  document.getElementById('summary').innerHTML=`
+    <div class="sum-stat">Total: <span>${results.length}</span></div>
+    <div class="sum-stat">Passed: <span style="color:#34d399">${passed}</span></div>
+    <div class="sum-stat">Failed: <span style="color:#f87171">${results.length-passed}</span></div>
+    <div class="sum-stat">Pass rate: <span>${pct}%</span></div>
+    <div style="width:100%"><div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+
+  document.getElementById('results').innerHTML=results.map(r=>`<div class="result-row ${r.pass?'result-pass':'result-fail'}">
+    <div class="result-header">
+      <span style="color:#e5e5e5">${escHtml(r.label)}</span>
+      <span class="${r.pass?'status-pass':'status-fail'}">${r.pass?'✓ PASS':'✗ FAIL'} <span class="match-type">(${Math.round(r.sim*100)}% similarity)</span></span>
+    </div>
+    <div class="result-details">
+      Input: ${escHtml(r.input.substring(0,100))}
+      <div class="result-diff">
+        <div class="diff-exp">Expected: ${escHtml(r.expected)}</div>
+        ${!r.pass?`<div class="diff-act">Actual: ${escHtml(r.actual)}</div>`:''}
+      </div>
+    </div>
+  </div>`).join('');
+
+  document.getElementById('resultsCard').style.display='flex';
+  document.getElementById('resultsCard').scrollIntoView({behavior:'smooth'});
+}
+
+function simulateOutput(sys,input){
+  // Simulate based on system prompt keywords
+  const sl=sys.toLowerCase();const il=input.toLowerCase();
+  if(sl.includes('intent')){
+    if(il.includes('billing')||il.includes('invoice')||il.includes('charge')||il.includes('payment')) return '{"intent":"billing","confidence":0.94}';
+    if(il.includes('crash')||il.includes('error')||il.includes('fail')||il.includes('bug')) return '{"intent":"technical","confidence":0.92}';
+    return '{"intent":"general","confidence":0.78}';
+  }
+  if(sl.includes('sentiment')){
+    const pos=['amazing','great','love','excellent','fantastic','good','happy','best','perfect'];
+    const neg=['terrible','awful','hate','worst','bad','horrible','disappointed','never'];
+    if(pos.some(w=>il.includes(w))) return '{"sentiment":"positive","score":0.87}';
+    if(neg.some(w=>il.includes(w))) return '{"sentiment":"negative","score":-0.82}';
+    return '{"sentiment":"neutral","score":0.05}';
+  }
+  if(sl.includes('severity')){
+    if(il.includes('all users')||il.includes('down')||il.includes('fails')||il.includes('outage')) return '{"severity":"critical","category":"availability"}';
+    if(il.includes('typo')||il.includes('label')||il.includes('minor')) return '{"severity":"low","category":"ui"}';
+    return '{"severity":"medium","category":"functionality"}';
+  }
+  return `{"response":"Processed: ${input.substring(0,40)}","ok":true}`;
+}
+
+function checkMatch(actual,expected,mode){
+  const a=actual.toLowerCase();const e=expected.toLowerCase().trim();
+  if(mode==='exact') return a.trim()===e;
+  if(mode==='contains') return a.includes(e);
+  if(mode==='json-key'){try{const obj=JSON.parse(actual);return Object.values(obj).some(v=>String(v).toLowerCase().includes(e));}catch{return a.includes(e);}}
+  if(mode==='similarity') return similarity(actual,expected)>=0.8;
+  return a.includes(e);
+}
+
+function similarity(a,b){
+  if(!a||!b) return 0;
+  a=a.toLowerCase();b=b.toLowerCase();
+  if(a===b) return 1;
+  const longer=a.length>b.length?a:b;const shorter=a.length>b.length?b:a;
+  if(longer.includes(shorter)) return shorter.length/longer.length;
+  const dist=levenshtein(a,b);
+  return Math.max(0,1-dist/Math.max(a.length,b.length));
+}
+
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Init with one blank test case
+addTestCase();
+</script>
+</body>
+</html>

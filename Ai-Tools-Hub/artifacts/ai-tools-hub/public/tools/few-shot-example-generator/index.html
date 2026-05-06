@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Few-Shot Example Generator – Free Prompt Tool | Svivva</title>
+<meta name="description" content="Free few-shot example generator. Create structured few-shot prompts with good, bad, and edge case examples for any AI task."/>
+<style>
+@font-face{font-family:'Zc';src:url('/fonts/Zc-Regular.ttf') format('truetype')}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zc',system-ui,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding:24px 16px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.badge{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+h1{font-size:clamp(22px,5vw,34px);color:#fff;line-height:1.15;margin-bottom:8px}
+p.sub{font-size:14px;color:#999;line-height:1.6}
+.card{background:#111118;border:1px solid #222230;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#777;display:block;margin-bottom:5px}
+textarea,input,select{width:100%;background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:10px 12px;color:#e5e5e5;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s}
+textarea:focus,input:focus,select:focus{border-color:#7c3aed}
+textarea{resize:vertical}
+select option{background:#111118}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.row2{grid-template-columns:1fr}}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.preset-btn{background:#16162a;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .2s}
+.preset-btn:hover{border-color:#7c3aed;color:#c4b5fd}
+.tabs{display:flex;gap:1px;background:#0a0a0f;border-radius:8px;padding:3px;border:1px solid #2a2a40}
+.tab{flex:1;padding:7px;border:none;background:transparent;color:#888;font-family:inherit;font-size:13px;cursor:pointer;border-radius:6px;transition:all .2s}
+.tab.active{background:#7c3aed;color:#fff}
+button.primary{background:#7c3aed;border:none;color:#fff;font-family:inherit;font-size:15px;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;font-weight:600;transition:background .2s}
+button.primary:hover{background:#6d28d9}
+.code-out{background:#0d0d15;border:1px solid #2a2a40;border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;font-family:'Courier New',monospace;color:#d4d4f0;min-height:200px;max-height:500px;overflow-y:auto;word-break:break-word}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{background:#1a1a2e;border:1px solid #2a2a40;color:#aaa;font-family:inherit;font-size:13px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{background:#2a2a40;color:#fff}
+.cta{background:#111118;border:1px solid #7c3aed33;border-radius:12px;padding:16px;text-align:center}
+.cta a{color:#c4b5fd;text-decoration:none;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:100}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="badge">Free Prompt Tool by <a href="https://svivva.com" target="_blank" style="color:#a78bfa;text-decoration:none">Svivva</a></div>
+    <h1>Few-Shot Example Generator</h1>
+    <p class="sub">Generate structured few-shot prompts with good, bad, and edge case examples. Copy directly into your AI system prompt.</p>
+  </div>
+
+  <div class="card">
+    <div>
+      <label>Presets</label>
+      <div class="presets">
+        <button class="preset-btn" onclick="loadPreset(0)">Product review JSON</button>
+        <button class="preset-btn" onclick="loadPreset(1)">Support ticket triage</button>
+        <button class="preset-btn" onclick="loadPreset(2)">Meeting summary</button>
+        <button class="preset-btn" onclick="loadPreset(3)">Sentiment analysis</button>
+      </div>
+    </div>
+    <div>
+      <label>Task Description *</label>
+      <textarea id="task" rows="2" placeholder="e.g. Classify support tickets by severity and category"></textarea>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Example Input</label>
+        <textarea id="input" rows="3" placeholder="e.g. Customer reports login fails on iOS with 503 error"></textarea>
+      </div>
+      <div>
+        <label>Expected Output</label>
+        <textarea id="output" rows="3" placeholder='e.g. {"severity":"high","category":"auth","action":"escalate"}'></textarea>
+      </div>
+    </div>
+    <div>
+      <label>Notes / Constraints (optional)</label>
+      <input type="text" id="notes" placeholder="e.g. Always include severity and category. Return compact JSON."/>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Number of examples</label>
+        <select id="numExamples">
+          <option value="2">2 examples</option>
+          <option value="3" selected>3 examples</option>
+          <option value="4">4 examples</option>
+          <option value="5">5 examples</option>
+        </select>
+      </div>
+      <div>
+        <label>Output Format</label>
+        <div class="tabs" style="margin-top:0">
+          <button class="tab active" onclick="setFmt('markdown',this)">Markdown</button>
+          <button class="tab" onclick="setFmt('json',this)">JSON</button>
+        </div>
+      </div>
+    </div>
+    <button class="primary" onclick="generate()">Generate Examples →</button>
+  </div>
+
+  <div class="card" id="outCard" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="font-size:13px;color:#888">Few-shot examples ready</span>
+      <div class="out-actions">
+        <button class="btn-sm" onclick="copyOut()">Copy</button>
+        <button class="btn-sm" onclick="downloadOut()">Download</button>
+      </div>
+    </div>
+    <div class="code-out" id="codeOut"></div>
+    <div class="cta">
+      <a href="https://svivva.com" target="_blank">Scale few-shot prompting across your AI pipeline with Svivva →</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+const PRESETS=[
+  {task:'Extract structured JSON from short product reviews.',input:"Love it! Battery lasted 3 days, but the case scratches easily.",output:'{"sentiment":"positive","pros":["battery life"],"cons":["case scratches"]}',notes:'Return compact JSON on one line. Use lowercase keys only.'},
+  {task:'Classify inbound support tickets into severity and category.',input:'My checkout fails on iOS Safari with error 503.',output:'{"severity":"high","category":"checkout","next_step":"escalate"}',notes:'Always include severity, category, and next_step.'},
+  {task:'Summarize meeting notes into action items.',input:'We agreed to ship the billing patch Friday. Mike will update tests.',output:'- Ship billing patch by Friday\n- Mike updates tests',notes:'Use bullet points. Be concise.'},
+  {task:'Analyze customer feedback sentiment.',input:'The new UI is clean but the loading time doubled.',output:'{"sentiment":"mixed","positive":["clean UI"],"negative":["slow load"]}',notes:'Always identify both positive and negative aspects.'},
+];
+let fmt='markdown';
+function loadPreset(i){const p=PRESETS[i];document.getElementById('task').value=p.task;document.getElementById('input').value=p.input;document.getElementById('output').value=p.output;document.getElementById('notes').value=p.notes;}
+function setFmt(f,el){fmt=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+
+function buildTemplate(task,inp,out,notes,n){
+  const isJson=out.trim().startsWith('{');
+  const good=[];
+  const bad=[];
+  const edge=[];
+
+  // Good examples
+  good.push({label:'Example 1 (Good)',input:inp||'Sample input that clearly states the requirement',output:out||'Well-structured output matching the expected format',explanation:'Clear, complete input with an unambiguous output.'});
+  if(n>=2) good.push({label:'Example 2 (Good)',input:(inp||'Sample input')+' — follow-up variant',output:out||'Correct output format maintained',explanation:'Slight variation in input, output format remains consistent.'});
+  if(n>=4) good.push({label:'Example 3 (Good)',input:'Extended input with more context and detail',output:out||'Output adapts appropriately to more context',explanation:'More context provided; output scales correctly.'});
+
+  // Bad examples
+  bad.push({label:'Example (Bad)',input:'',output:isJson?'{}':'(no output)',explanation:'Empty input should return a graceful error or empty result, not crash.'});
+  if(n>=3) bad.push({label:'Example (Bad)',input:'!!!@@@###',output:isJson?'{"error":"invalid_input"}':'Invalid input — cannot process symbols only',explanation:'Special character-only input must be handled gracefully.'});
+
+  // Edge examples
+  edge.push({label:'Example (Edge)',input:inp?inp.toUpperCase():'ALL CAPS INPUT — sometimes users shout',output:out||'Case-normalized output',explanation:'Input normalization: uppercase or mixed-case should produce consistent output.'});
+  if(n>=5) edge.push({label:'Example (Edge)',input:'Very long input that exceeds normal length expectations and tests truncation behavior in the pipeline',output:out||'Truncated or summarized output',explanation:'Long inputs must be handled without token overflow.'});
+
+  return {good,bad,edge};
+}
+
+function generate(){
+  const task=document.getElementById('task').value.trim();
+  const inp=document.getElementById('input').value.trim();
+  const out=document.getElementById('output').value.trim();
+  const notes=document.getElementById('notes').value.trim();
+  const n=parseInt(document.getElementById('numExamples').value);
+  if(!task){alert('Please describe your task.');return;}
+
+  const {good,bad,edge}=buildTemplate(task,inp,out,notes,n);
+
+  if(fmt==='json'){
+    const obj={task,notes:notes||undefined,examples:{good,bad,edge}};
+    document.getElementById('codeOut').textContent=JSON.stringify(obj,null,2);
+  } else {
+    const lines=[`Task: ${task}`];
+    if(notes) lines.push(`Notes: ${notes}`);
+    lines.push('');
+    [[good,'Good Examples'],[bad,'Bad Examples'],[edge,'Edge Examples']].forEach(([examples,title])=>{
+      lines.push(title);lines.push('');
+      examples.forEach(ex=>{
+        lines.push(ex.label);
+        lines.push(`Input: ${ex.input||'(empty)'}`);
+        lines.push(`Output: ${ex.output}`);
+        lines.push(`Why: ${ex.explanation}`);
+        lines.push('');
+      });
+    });
+    document.getElementById('codeOut').textContent=lines.join('\n');
+  }
+  document.getElementById('outCard').style.display='flex';
+  document.getElementById('outCard').scrollIntoView({behavior:'smooth'});
+}
+function copyOut(){navigator.clipboard.writeText(document.getElementById('codeOut').textContent);showToast();}
+function downloadOut(){
+  const blob=new Blob([document.getElementById('codeOut').textContent],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fmt==='json'?'few-shot-examples.json':'few-shot-examples.txt';a.click();
+}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+</script>
+</body>
+</html>
