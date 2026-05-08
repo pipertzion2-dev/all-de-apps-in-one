@@ -40,6 +40,11 @@
     --sidebar-accent-foreground: 180 15% 15%;
     --sidebar-border: 170 15% 88%;
     --sidebar-ring: 170 45% 50%;
+
+    /* Motion tokens — custom curves have more punch than CSS defaults */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .dark {
@@ -89,17 +94,23 @@
 }
 
 @layer utilities {
+  /* Specific properties (not "all") + custom curve. Hover gated on fine pointers
+     so touch-tap doesn't trigger a sticky hover state on phones. */
   .hover-elevate {
-    @apply transition-all duration-150;
+    transition: filter 160ms var(--ease-out), transform 160ms var(--ease-out);
   }
-  .hover-elevate:hover {
-    @apply brightness-110;
+  @media (hover: hover) and (pointer: fine) {
+    .hover-elevate:hover {
+      filter: brightness(1.1);
+    }
   }
   .active-elevate-2 {
-    @apply transition-all duration-150;
+    transition: filter 160ms var(--ease-out), transform 120ms var(--ease-out);
   }
+  /* Scale on press makes the UI feel like it's listening. Subtle (0.97). */
   .active-elevate-2:active {
-    @apply brightness-125;
+    filter: brightness(1.25);
+    transform: scale(0.97);
   }
   .gradient-text {
     background: linear-gradient(135deg, #3F2A2C 0%, #7A4F3A 10%, #6B3A67 28%, #425884 46%, #D782B2 64%, #F3AFC4 78%, #6B7B59 90%, #4A5A3D 100%);
@@ -228,4 +239,25 @@
   background-size: 300% 300%;
   animation: seeds-holo-sparkle 5s ease infinite;
   z-index: -1;
+}
+
+/* Honor system motion preference — reduce, don't eliminate. Opacity/color
+   transitions still aid comprehension; what we kill is movement and scale. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-float,
+  .seeds-holo-text,
+  .seeds-holo-border::before {
+    animation: none !important;
+  }
+  .active-elevate-2:active {
+    transform: none !important;
+  }
 }
