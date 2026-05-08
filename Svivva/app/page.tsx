@@ -416,7 +416,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className={`relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-all duration-700 ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}>
+      <section className={`relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
             <Badge variant="secondary" className="px-4 py-1.5">
@@ -518,7 +518,7 @@ export default function LandingPage() {
               <div className="inline-flex flex-row items-center gap-2 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                 <button
                   onClick={() => mode !== "digital" && toggleMode()}
-                  className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-md transition-all duration-300 whitespace-nowrap ${mode === "digital" ? "bg-background shadow-sm" : "opacity-60 hover:opacity-80"}`}
+                  className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-md transition-[background-color,box-shadow,opacity,transform] duration-200 ease-out-strong active:scale-[0.98] whitespace-nowrap ${mode === "digital" ? "bg-background shadow-sm" : "opacity-60 hover:opacity-80"}`}
                   data-testid="button-build-toggle-digital"
                 >
                   <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-md overflow-hidden flex-shrink-0">
@@ -531,7 +531,7 @@ export default function LandingPage() {
                 </button>
                 <button
                   onClick={() => mode !== "physical" && toggleMode()}
-                  className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-md transition-all duration-300 whitespace-nowrap ${mode === "physical" ? "bg-background shadow-sm" : "opacity-60 hover:opacity-80"}`}
+                  className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-md transition-[background-color,box-shadow,opacity,transform] duration-200 ease-out-strong active:scale-[0.98] whitespace-nowrap ${mode === "physical" ? "bg-background shadow-sm" : "opacity-60 hover:opacity-80"}`}
                   data-testid="button-build-toggle-physical"
                 >
                   <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-md overflow-hidden flex-shrink-0">
