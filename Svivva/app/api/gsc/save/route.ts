@@ -3,9 +3,10 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { createSign } from "crypto";
 import { getSitemapUrl } from "@/lib/site-url";
+import { submitSitemapToGSC } from "@/lib/google-indexing";
 
 export const dynamic = "force-dynamic";
 
@@ -45,15 +46,39 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { action } = body;
 
-  // submit_sitemap can run without user context (internal scheduler or authenticated user)
+  // submit_sitemap can run without user context (internal scheduler or authenticated user).
+  // Google: real Webmasters v3 API via service-account JWT (the legacy ?ping= endpoint was
+  // retired June 2023). Bing: legacy ping endpoint still alive.
   if (action === "submit_sitemap") {
     try {
       const sitemapUrl = getSitemapUrl();
-      const [googleRes, bingRes] = await Promise.all([
-        fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, { signal: AbortSignal.timeout(10000) }),
-        fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, { signal: AbortSignal.timeout(10000) }),
-      ]);
-      return NextResponse.json({ success: true, google: googleRes.status, bing: bingRes.status });
+
+      // Find the admin's stored service-account + site URL.
+      // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
+      const adminUserId = process.env.ADMIN_USER_ID || "";
+      const [creds] = adminUserId
+        ? await db.select({ sa: seedCredentials.googleServiceAccountJson, site: seedCredentials.googleSiteUrl })
+            .from(seedCredentials)
+            .where(eq(seedCredentials.userId, adminUserId))
+            .limit(1)
+        : await db.select({ sa: seedCredentials.googleServiceAccountJson, site: seedCredentials.googleSiteUrl })
+            .from(seedCredentials)
+            .where(and(eq(seedCredentials.googleIndexingEnabled, true), isNotNull(seedCredentials.googleServiceAccountJson), isNotNull(seedCredentials.googleSiteUrl)))
+            .orderBy(desc(seedCredentials.updatedAt))
+            .limit(1);
+
+      const googlePromise = creds?.sa && creds?.site
+        ? submitSitemapToGSC(creds.sa, creds.site, sitemapUrl)
+        : Promise.resolve({ ok: false as const, error: "No service account configured (paste JSON at /dashboard/gsc-connect)" });
+
+      const bingPromise = fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, {
+        signal: AbortSignal.timeout(10000),
+      })
+        .then((r) => ({ ok: r.ok, status: r.status }))
+        .catch((e) => ({ ok: false, status: 0, error: String(e) }));
+
+      const [google, bing] = await Promise.all([googlePromise, bingPromise]);
+      return NextResponse.json({ success: true, sitemapUrl, google, bing });
     } catch (e: any) {
       return NextResponse.json({ error: e.message }, { status: 500 });
     }

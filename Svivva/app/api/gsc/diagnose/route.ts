@@ -75,9 +75,11 @@ export async function GET() {
   });
 
   // Step 2 — sitemap accessible
+  // Use GET (not HEAD): Next.js sitemap routes don't always answer HEAD,
+  // which would cause spurious "fail" status here.
   let sitemapOk = false;
   try {
-    const smRes = await fetch(canonicalSitemap, { signal: AbortSignal.timeout(8000), method: "HEAD" });
+    const smRes = await fetch(canonicalSitemap, { signal: AbortSignal.timeout(8000), method: "GET" });
     sitemapOk = smRes.ok;
     steps.push({
       id: "sitemap_accessible",

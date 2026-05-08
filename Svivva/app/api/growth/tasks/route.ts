@@ -35,26 +35,22 @@ export async function POST(req: NextRequest) {
   const mainSitemap = getSitemapUrl();
   const pyracryptSitemap = getPyracryptSitemapUrl();
 
-  // 1. Ping Svivva sitemap
+  // 1. Ping Svivva sitemap (Bing only — Google retired ?ping= in June 2023.
+  //    The real GSC submission happens via the scheduler's submit_sitemap action,
+  //    which calls the Webmasters v3 API with a stored service-account.)
   try {
-    const [g, b] = await Promise.all([
-      fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(mainSitemap)}`, { signal: AbortSignal.timeout(8000) }),
-      fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(mainSitemap)}`, { signal: AbortSignal.timeout(8000) }),
-    ]);
-    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "svivva", status: "completed", details: { google: g.status, bing: b.status } });
-    results.push({ task: "Svivva sitemap ping", status: "ok", detail: `Google ${g.status}, Bing ${b.status}` });
+    const b = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(mainSitemap)}`, { signal: AbortSignal.timeout(8000) });
+    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "svivva", status: "completed", details: { bing: b.status } });
+    results.push({ task: "Svivva sitemap ping", status: "ok", detail: `Bing ${b.status}` });
   } catch (e: any) {
     results.push({ task: "Svivva sitemap ping", status: "error", detail: e.message });
   }
 
-  // 2. Ping Pyracrypt sitemap
+  // 2. Ping Pyracrypt sitemap (Bing only)
   try {
-    const [g, b] = await Promise.all([
-      fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`, { signal: AbortSignal.timeout(8000) }),
-      fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`, { signal: AbortSignal.timeout(8000) }),
-    ]);
-    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "pyracrypt", status: "completed", details: { google: g.status, bing: b.status } });
-    results.push({ task: "Pyracrypt sitemap ping", status: "ok", detail: `Google ${g.status}, Bing ${b.status}` });
+    const b = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`, { signal: AbortSignal.timeout(8000) });
+    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "pyracrypt", status: "completed", details: { bing: b.status } });
+    results.push({ task: "Pyracrypt sitemap ping", status: "ok", detail: `Bing ${b.status}` });
   } catch (e: any) {
     results.push({ task: "Pyracrypt sitemap ping", status: "error", detail: e.message });
   }
