@@ -231,7 +231,7 @@ export default function DashboardLayout({
                 data-testid="button-platform-toggle"
               >
                 <div 
-                  className={`absolute top-0.5 bottom-0.5 w-7 rounded-full bg-primary shadow-md transition-all duration-300 ease-out ${mode === "physical" ? "left-[calc(100%-1.875rem)]" : "left-0.5"}`}
+                  className={`absolute top-0.5 bottom-0.5 w-7 rounded-full bg-primary shadow-md transition-[left] duration-300 ease-drawer ${mode === "physical" ? "left-[calc(100%-1.875rem)]" : "left-0.5"}`}
                 />
                 <div className="absolute inset-0 flex items-center px-1">
                   <div className={`relative w-6 h-6 rounded-full overflow-hidden z-10 transition-transform duration-300 ${mode === "digital" ? "scale-100" : "scale-75 opacity-50"}`}>
