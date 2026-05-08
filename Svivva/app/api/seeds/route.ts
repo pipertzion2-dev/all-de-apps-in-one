@@ -294,9 +294,8 @@ export async function POST(request: NextRequest) {
         })
       );
 
-      try {
-        await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(getSitemapUrl())}`, { method: "GET", signal: AbortSignal.timeout(3000) });
-      } catch { /* Non-critical */ }
+      // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
+      // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
       return NextResponse.json({
         success: true,

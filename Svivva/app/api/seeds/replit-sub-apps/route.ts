@@ -121,11 +121,8 @@ export async function POST(req: Request) {
       results.push({ name: subApp.name, skipped: false, slugs, parentSlugs });
     }
 
-    try {
-      await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(getSitemapUrl())}`, {
-        signal: AbortSignal.timeout(3000),
-      });
-    } catch { /* non-critical */ }
+    // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
+    // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
     return NextResponse.json({
       success: true,

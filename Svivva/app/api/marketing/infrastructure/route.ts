@@ -5,6 +5,7 @@ import { eq, like, count } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { sql } from "drizzle-orm";
+import { submitSitemapToGSC } from "@/lib/google-indexing";
 
 const GODADDY_API = "https://api.godaddy.com/v1";
 const ROOT_CATEGORIES = ["seo-landing", "seed-marketing"];
@@ -86,12 +87,24 @@ export async function POST(req: Request) {
 
     if (action === "submit-sitemap") {
       const sitemapUrl = `${googleSiteUrl || baseUrl}/sitemap.xml`;
-      const results = await Promise.allSettled([
-        fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, { signal: AbortSignal.timeout(5000) }),
-        fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, { signal: AbortSignal.timeout(5000) }),
-      ]);
-      const googleOk = results[0].status === "fulfilled" && (results[0].value as Response).ok;
-      const bingOk = results[1].status === "fulfilled" && (results[1].value as Response).ok;
+
+      // Look up service account for the real Webmasters API submission.
+      const [creds] = await db.select({ sa: seedCredentials.googleServiceAccountJson })
+        .from(seedCredentials)
+        .where(eq(seedCredentials.userId, user.id))
+        .limit(1);
+
+      // Google: real Webmasters v3 API (legacy ?ping= retired June 2023).
+      const googlePromise = creds?.sa && googleSiteUrl
+        ? submitSitemapToGSC(creds.sa, googleSiteUrl, sitemapUrl).then((r) => r.ok)
+        : Promise.resolve(false);
+
+      // Bing: legacy ping endpoint still alive.
+      const bingPromise = fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, {
+        signal: AbortSignal.timeout(5000),
+      }).then((r) => r.ok).catch(() => false);
+
+      const [googleOk, bingOk] = await Promise.all([googlePromise, bingPromise]);
 
       if (googleSiteUrl) {
         await db.execute(sql`

@@ -5,6 +5,7 @@ import { eq, like, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { submitSitemapToGSC } from "@/lib/google-indexing";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 const GODADDY_API = "https://api.godaddy.com/v1";
@@ -90,13 +91,14 @@ async function submitIndexNow(urls: string[], creds: any) {
   } catch { return false; }
 }
 
-// ── Ping Google sitemap ───────────────────────────────────────────────────────
-async function pingGoogleSitemap(siteUrl: string) {
+// ── Submit sitemap to Google Search Console (Webmasters v3 API) ──────────────
+// The legacy ?ping= endpoint was retired in June 2023; we now submit via the real API,
+// which requires a service-account JSON saved at /dashboard/gsc-connect.
+async function submitGoogleSitemap(siteUrl: string, serviceAccountJson: string | null) {
   const sitemapUrl = `${siteUrl.replace(/\/$/, "")}/sitemap.xml`;
-  try {
-    await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, { signal: AbortSignal.timeout(5000) });
-    return { pinged: true, sitemapUrl };
-  } catch { return { pinged: false, sitemapUrl }; }
+  if (!serviceAccountJson) return { ok: false, sitemapUrl, error: "No service account configured" };
+  const result = await submitSitemapToGSC(serviceAccountJson, siteUrl, sitemapUrl);
+  return { ok: result.ok, sitemapUrl, error: result.error };
 }
 
 // ── Create GoDaddy CNAME ──────────────────────────────────────────────────────
@@ -182,13 +184,21 @@ export async function POST(req: NextRequest) {
       log.push({ step: "Bing/Yandex (IndexNow)", status: "skip", detail: "No new pages to submit" });
     }
 
-    // ── Step 5: Google sitemap ping ──────────────────────────────────────────
+    // ── Step 5: Submit sitemap to Google Search Console ──────────────────────
     const googleSiteUrl = creds?.googleSiteUrl;
     if (googleSiteUrl) {
-      const googleResult = await pingGoogleSitemap(googleSiteUrl);
-      log.push({ step: "Google", status: googleResult.pinged ? "ok" : "skip", detail: googleResult.pinged ? `Sitemap pinged: ${googleResult.sitemapUrl}` : `Ping failed — submit manually at search.google.com/search-console → Sitemaps` });
+      const googleResult = await submitGoogleSitemap(googleSiteUrl, creds?.googleServiceAccountJson || null);
+      log.push({
+        step: "Google",
+        status: googleResult.ok ? "ok" : "skip",
+        detail: googleResult.ok
+          ? `Sitemap submitted to Google Search Console: ${googleResult.sitemapUrl}`
+          : googleResult.error?.includes("No service account")
+            ? `Skipped — paste a service-account JSON at /dashboard/gsc-connect to enable.`
+            : `Submit failed (${googleResult.error}) — submit manually at search.google.com/search-console → Sitemaps`,
+      });
     } else {
-      log.push({ step: "Google", status: "skip", detail: "Add your site URL in the Traffic Connections panel to ping Google automatically" });
+      log.push({ step: "Google", status: "skip", detail: "Add your site URL in the Traffic Connections panel to enable Google sitemap submission" });
     }
 
     const summaryParts = [];
