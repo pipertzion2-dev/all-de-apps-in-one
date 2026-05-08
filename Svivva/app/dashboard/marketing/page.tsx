@@ -112,11 +112,24 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
     setGooglePinging(true);
     setGooglePingResult(null);
     try {
-      const sitemapUrl = url.replace(/\/$/, "") + "/sitemap.xml";
-      await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
-      setGooglePingResult(`✓ Pinged Google with ${sitemapUrl}`);
-    } catch { setGooglePingResult("Ping sent (result unknown — Google doesn't confirm)"); }
-    finally { setGooglePinging(false); }
+      // Real Webmasters v3 submission via /api/gsc/save (the legacy ?ping= endpoint
+      // was retired June 2023; this hits the real GSC API using the saved service account).
+      const r = await fetch("/api/gsc/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "submit_sitemap" }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (body?.google?.ok) {
+        setGooglePingResult(`✓ Submitted to Google Search Console: ${body.sitemapUrl}`);
+      } else if (body?.google?.error?.includes("No service account")) {
+        setGooglePingResult("Add a service-account JSON at /dashboard/gsc-connect to enable Google submission.");
+      } else {
+        setGooglePingResult(`Google submission failed: ${body?.google?.error || "Unknown error"}`);
+      }
+    } catch (e: any) {
+      setGooglePingResult(`Request failed: ${e?.message || "Unknown error"}`);
+    } finally { setGooglePinging(false); }
   };
 
   // Derived preview values

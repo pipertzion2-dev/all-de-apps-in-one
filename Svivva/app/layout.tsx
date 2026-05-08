@@ -7,15 +7,30 @@ import { Toaster } from "@/components/ui/toaster";
 import { PlatformProvider } from "@/lib/platform-context";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
 export async function generateMetadata(): Promise<Metadata> {
-  let googleVerificationToken: string | null = null;
-  try {
-    const rows = await db.select({ tok: seedCredentials.googleVerificationToken }).from(seedCredentials).limit(1);
-    googleVerificationToken = rows[0]?.tok ?? null;
-  } catch {}
+  // Verification token resolution order:
+  //   1. GOOGLE_SITE_VERIFICATION env var (deterministic, recommended for prod)
+  //   2. DB row scoped to ADMIN_USER_ID (avoids the multi-tenant footgun of picking "any user's row")
+  //   3. DB fallback: first row that has a token (compat with existing setups)
+  let googleVerificationToken: string | null = process.env.GOOGLE_SITE_VERIFICATION || null;
+  if (!googleVerificationToken) {
+    try {
+      const adminUserId = process.env.ADMIN_USER_ID || "";
+      const rows = adminUserId
+        ? await db.select({ tok: seedCredentials.googleVerificationToken })
+            .from(seedCredentials)
+            .where(eq(seedCredentials.userId, adminUserId))
+            .limit(1)
+        : await db.select({ tok: seedCredentials.googleVerificationToken })
+            .from(seedCredentials)
+            .limit(1);
+      googleVerificationToken = rows[0]?.tok ?? null;
+    } catch {}
+  }
 
   const title = "Svivva — From seed to symphony. AI APIs in 11 minutes.";
   const description =

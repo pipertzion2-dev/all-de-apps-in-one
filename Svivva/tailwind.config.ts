@@ -59,6 +59,17 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
         },
       },
+      transitionTimingFunction: {
+        // Strong ease-out for entering UI (custom curve has more punch than CSS default)
+        "out-strong": "cubic-bezier(0.23, 1, 0.32, 1)",
+        // Strong ease-in-out for on-screen movement
+        "in-out-strong": "cubic-bezier(0.77, 0, 0.175, 1)",
+        // iOS-style drawer curve (from Ionic)
+        drawer: "cubic-bezier(0.32, 0.72, 0, 1)",
+      },
+      transitionDuration: {
+        instant: "0ms",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -70,8 +81,8 @@ export default {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "accordion-down": "accordion-down 200ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "accordion-up": "accordion-up 200ms cubic-bezier(0.23, 1, 0.32, 1)",
       },
     },
   },

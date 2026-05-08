@@ -55,9 +55,8 @@ export async function POST(req: Request) {
         VALUES (${user.id}, ${siteUrl})
         ON CONFLICT (user_id) DO UPDATE SET google_site_url = ${siteUrl}
       `);
-      try {
-        await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(siteUrl + "/sitemap.xml")}`, { signal: AbortSignal.timeout(4000) });
-      } catch { /* non-critical */ }
+      // Note: Google sitemap ping removed (?ping= retired June 2023).
+      // The user can submit the sitemap manually at /dashboard/gsc-connect once they paste a service account.
       return NextResponse.json({ success: true, siteUrl });
     }
 

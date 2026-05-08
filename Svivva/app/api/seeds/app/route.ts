@@ -80,9 +80,8 @@ export async function POST(req: Request) {
       ON CONFLICT DO NOTHING
     `);
 
-    try {
-      await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(getSitemapUrl())}`, { signal: AbortSignal.timeout(3000) });
-    } catch { /* non-critical */ }
+    // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
+    // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
     return NextResponse.json({ success: true, appKey, slugs, skipped: existing.length > 0 });
   } catch (e) {
