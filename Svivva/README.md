@@ -21,7 +21,7 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 ## Core Scripts
 
 - `npm run dev` - run local development server.
-- `npm run build` - build production output.
+- `npm run build` - full self-hosted build (`next build` + `dist/` launcher). **Vercel** ignores this and runs `next build` only (see `vercel.json`).
 - `npm run start` - run production build output.
 - `npm run check` - run TypeScript checks.
 - `npm run lint` - run ESLint checks.
@@ -39,15 +39,22 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 
 See `docs/PROJECT_STRUCTURE.md` for conventions and where new files should go.
 
-## Production and a GoDaddy (or any) domain
+## Deploy on Vercel (short checklist)
 
-GitHub stores your code; it does not host the public website by itself. Point your domain at a host (for example [Vercel](https://vercel.com)) and connect DNS at GoDaddy to that host.
+GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.js app.
 
-1. Push this repo to GitHub (you already have the remote; `git push origin main`).
-2. In Vercel: **Add New Project** → import the GitHub repo → set **Root Directory** to `Svivva` if you only deploy that app.
-3. Copy environment variables from `Svivva/.env.example` into the Vercel project settings (production and preview as needed), including `DATABASE_URL`, `NEXTAUTH_*`, and `NEXT_PUBLIC_SITE_URL` (use your real site URL, e.g. `https://yourdomain.com`).
-4. Deploy. Vercel will show a `*.vercel.app` URL.
-5. In Vercel: **Project → Settings → Domains** → add `yourdomain.com` and `www.yourdomain.com`. Vercel shows the exact DNS records (usually apex **A** records to their IPs and **CNAME** for `www`).
-6. In GoDaddy: **DNS** for the domain → add or edit those records to match Vercel. Propagation can take a few minutes to a few hours.
+1. Push this repo to GitHub.
+2. Vercel → **Add New… → Project** → **Import** your repo.
+3. **Root Directory:** set to **`Svivva`** (required — do not leave blank).
+4. Framework should detect **Next.js**. Build uses `vercel.json`: `npm ci` then `next build`.
+5. **Environment variables** (Production — copy names from `.env.example`):
+   - **`DATABASE_URL`** — hosted Postgres (e.g. Neon/Vercel Postgres).
+   - **`NEXTAUTH_SECRET`** — long random string.
+   - **`NEXT_PUBLIC_SITE_URL`** — `https://your-domain.com` (no trailing slash). Until you add a domain, you can use your `https://….vercel.app` URL.
+   - **`CRON_SECRET`** — long random string (Vercel Cron calls `/api/cron/run-scheduled` with `Authorization: Bearer …`; without this, cron returns 401).
+   - Add **`ORBIT_INTERNAL_SECRET`** if you use internal SEO/growth routes the same way as locally.
+   - Stripe / OpenAI / OIDC keys as needed for those features.
+6. **Deploy.** First deploy does **not** run `drizzle-kit push`. Against production Postgres run **`npm run db:push`** once from your machine (with prod `DATABASE_URL` in env), or apply migrations your platform supports.
+7. Optional: **Settings → Domains** add `yourdomain.com`; put the DNS records Vercel shows into GoDaddy (apex **A** / **www** **CNAME**).
 
-If you use another host (Netlify, Railway, etc.), the pattern is the same: deploy from GitHub there, then follow that provider’s DNS instructions in GoDaddy.
+Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup.
