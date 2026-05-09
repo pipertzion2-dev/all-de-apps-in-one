@@ -42,6 +42,10 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 
 See `docs/PROJECT_STRUCTURE.md` for conventions and where new files should go.
 
+### `attached_assets/` (Svivva)
+
+Only **eight** PNGs are kept in git — the ones imported via `@/attached_assets/…` in the app. Everything else was bulk from Replit and is **not** committed (saves hundreds of MB on clone and deploy). `npm run verify` enforces the allowlist via `scripts/verify-attached-assets.mjs`. If you add a new imported image, update that script and **`.vercelignore`** negations together.
+
 ## Deploy on Vercel (short checklist)
 
 GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.js app.

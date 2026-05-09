@@ -23,3 +23,7 @@ PYRACRYPT EXTRA FEATURES ADD ON
 
 **/*.min.js
 **/*.min.css
+
+# Vercel / Docker text configs (no stable Prettier parser)
+**/.vercelignore
+**/Dockerfile*

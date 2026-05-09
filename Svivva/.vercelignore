@@ -18,7 +18,7 @@ tmp
 *.webm
 *.zip
 
-# attached_assets is huge; only these 8 files are imported via @/attached_assets/…
+# attached_assets: only the 8 PNGs committed to git are imported via @/attached_assets/…
 attached_assets/**
 !attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 !attached_assets/Svivva_print_2_1769474625495.png

@@ -14,6 +14,8 @@ Monorepo of multiple apps. The production-ready **Next.js** product lives in **`
 
 Bulk vendor drops (`Ai-Tools-Hub/_uploaded_tools`, `Ai-Tools-Hub/artifacts`) are excluded from repo-wide Prettier; see **`.prettierignore`**.
 
+**Heavy binaries:** `Ai-Tools-Hub/attached_assets/` and similar still contain large zips used by that workspace; do not duplicate them under **`Svivva/attached_assets/`** — Svivva keeps an **8-file allowlist** enforced in `npm run verify` (see **`Svivva/README.md`**).
+
 ## Repo-wide formatting
 
 From the **repository root**:
