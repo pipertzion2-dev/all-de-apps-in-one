@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { spawn } from "child_process";
 import { getInternalAppOrigin } from "../lib/internal-app-origin";
 
