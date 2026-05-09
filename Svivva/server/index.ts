@@ -1,6 +1,11 @@
 import { spawn } from "child_process";
 import { getInternalAppOrigin } from "../lib/internal-app-origin";
 
+// Next `-p`, schedulers (`getInternalAppOrigin`), and INTERNAL_APP_ORIGIN fallbacks must agree.
+// macOS often has AirPlay Receiver listening on :5000 — set PORT=3000 (and matching NEXT_PUBLIC_SITE_URL) in `.env` if `EADDRINUSE` on 5000.
+process.env.PORT ??= "5000";
+const devPort = process.env.PORT;
+
 const log = (message: string, source = "next") => {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -92,13 +97,14 @@ function startGrowthScheduler() {
 
 log("Starting Next.js development server...");
 
-const nextProcess = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", "5000"], {
+const nextProcess = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", devPort], {
   cwd: process.cwd(),
   stdio: "inherit",
   shell: true,
   env: {
     ...process.env,
     NODE_ENV: process.env.NODE_ENV || "development",
+    PORT: devPort,
   },
 });
 

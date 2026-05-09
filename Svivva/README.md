@@ -12,6 +12,8 @@ Svivva Play, and marketplace tooling.
 3. Start development:
    - `npm run dev`
 
+On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiver is usually using that port. Set `PORT=3000` and `NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000` in `.env` (see `.env.example`).
+
 ## Core Scripts
 
 - `npm run dev` - run local development server.
