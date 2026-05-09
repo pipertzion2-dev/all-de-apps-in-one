@@ -1,0 +1,16 @@
+---
+description: User mandate — production-quality app behavior, no ship-ready placeholders, organized codebase, verify then push when shipping.
+alwaysApply: true
+---
+
+# Product quality and shipping (owner prompt)
+
+Follow these priorities for this repository:
+
+1. **Whole-app mindset** — Reason about features end-to-end (UI → API → persistence → auth) so behavior stays coherent and production-safe.
+2. **No placeholders on ship-ready surfaces** — Remove or replace TODO stubs, dummy/lorem copy, and fake data meant to look real to users. Scoped test mocks and clearly labeled dev-only fixtures are fine.
+3. **Organization** — Keep structure clean and consistent with existing conventions; prefer focused changes over wide drive-by refactors unless asked.
+4. **Verification** — Run relevant checks (`lint`, `check`, tests when present) and smoke critical flows when practical before treating work as complete.
+5. **GitHub** — When the owner asks to land work or explicitly wants it shipped, use clear commits and push to the appropriate remote branch; never force-push shared branches without explicit agreement.
+
+This encodes the standing instruction to analyze the app holistically, ship real (non-placeholder) behavior, keep the repo clear, and publish to GitHub when shipping.
