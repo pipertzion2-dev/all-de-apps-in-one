@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
 import { generateSeedMarketingPages } from "@/lib/llm/seeds";
 import type { SeedAppSpec } from "@/lib/schema";
 import { sql } from "drizzle-orm";
-import { like, eq, and } from "drizzle-orm";
-import { getSitemapUrl } from "@/lib/site-url";
+import { eq } from "drizzle-orm";
+import { badRequest, ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 interface SubAppInput {
   name: string;
@@ -18,9 +17,8 @@ interface SubAppInput {
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const { replId, replTitle, subApps } = (await req.json()) as {
       replId: string;
@@ -29,7 +27,7 @@ export async function POST(req: Request) {
     };
 
     if (!replId || !subApps?.length) {
-      return NextResponse.json({ error: "replId and subApps required" }, { status: 400 });
+      return badRequest("replId and subApps required");
     }
 
     const results = [];
@@ -124,13 +122,13 @@ export async function POST(req: Request) {
     // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
     // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
-    return NextResponse.json({
+    return ok({
       success: true,
       results,
       totalPages: results.reduce((acc, r) => acc + r.slugs.length, 0),
     });
   } catch (e) {
     console.error("replit-sub-apps error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

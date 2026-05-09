@@ -1,0 +1,35 @@
+# Vercel CLI: exclude heavy paths so uploads stay small and stable.
+# (Git-based deploys also benefit when these patterns match untracked noise locally.)
+
+# Dependencies & caches
+node_modules
+.next
+.turbo
+.cache
+dist
+coverage
+.local
+tmp
+*.tsbuildinfo
+
+# Large media / archives not used by Next imports
+*.mov
+*.mp4
+*.webm
+*.zip
+
+# attached_assets is huge; only these 8 files are imported via @/attached_assets/…
+attached_assets/**
+!attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
+!attached_assets/Svivva_print_2_1769474625495.png
+!attached_assets/Svivva_official_3_1769474625495.png
+!attached_assets/Svivva_Seeds_6_1771888740460.png
+!attached_assets/5C21F641-65DD-4255-A832-F60282E2CBF0_1771895543298.png
+!attached_assets/IMG_1493_1770509047497.png
+!attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png
+!attached_assets/Svivva_Crate_1770908797554.png
+
+# Repo noise
+*.pdf
+uv.lock
+**/.DS_Store

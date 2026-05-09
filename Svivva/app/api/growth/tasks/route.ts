@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
@@ -6,15 +6,16 @@ import { growthTasks } from "@/lib/schema";
 import { desc } from "drizzle-orm";
 import { getInternalAppOrigin } from "@/lib/internal-app-origin";
 import { getSitemapUrl, getPyracryptSitemapUrl } from "@/lib/site-url";
+import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!user || !isAdmin(user)) return forbidden();
 
   const tasks = await db.select().from(growthTasks).orderBy(desc(growthTasks.runAt)).limit(100);
-  return NextResponse.json({ tasks });
+  return ok({ tasks });
 }
 
 export async function POST(req: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   if (!isInternal) {
     const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!user || !isAdmin(user)) return forbidden();
   }
 
   const internalSecret = process.env.ORBIT_INTERNAL_SECRET || "";
@@ -76,5 +77,5 @@ export async function POST(req: NextRequest) {
     details: { results, triggeredBy: isInternal ? "internal_scheduler" : "manual", timestamp: new Date().toISOString() },
   });
 
-  return NextResponse.json({ success: true, results });
+  return ok({ success: true, results });
 }

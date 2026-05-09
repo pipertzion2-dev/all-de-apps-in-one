@@ -1,22 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
 import { generateSeedMarketingPages } from "@/lib/llm/seeds";
 import type { SeedAppSpec } from "@/lib/schema";
 import { sql } from "drizzle-orm";
 import { eq } from "drizzle-orm";
-import { getSitemapUrl } from "@/lib/site-url";
+import { badRequest, ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const { name, url, description, platform, hostingProvider, domain, subApps } = await req.json();
-    if (!name || !url) return NextResponse.json({ error: "name and url are required" }, { status: 400 });
+    if (!name || !url) return badRequest("name and url are required");
 
     const appKey = `app:${user.id}:${name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`;
 
@@ -83,9 +81,9 @@ export async function POST(req: Request) {
     // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
     // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
-    return NextResponse.json({ success: true, appKey, slugs, skipped: existing.length > 0 });
+    return ok({ success: true, appKey, slugs, skipped: existing.length > 0 });
   } catch (e) {
     console.error("seeds/app error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

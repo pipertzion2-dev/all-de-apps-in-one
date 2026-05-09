@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
-import { eq, like, count } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { eq, count } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { submitSitemapToGSC } from "@/lib/google-indexing";
+import { badRequest, ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 const GODADDY_API = "https://api.godaddy.com/v1";
 const ROOT_CATEGORIES = ["seo-landing", "seed-marketing"];
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
@@ -69,18 +68,17 @@ export async function GET() {
       },
     };
 
-    return NextResponse.json(infrastructure);
+    return ok(infrastructure);
   } catch (e) {
     console.error("marketing infrastructure GET error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const { action, replitDomain, googleSiteUrl } = await req.json();
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
@@ -113,16 +111,16 @@ export async function POST(req: Request) {
         `);
       }
 
-      return NextResponse.json({ success: true, google: googleOk, bing: bingOk, sitemapUrl });
+      return ok({ success: true, google: googleOk, bing: bingOk, sitemapUrl });
     }
 
     if (action === "godaddy-cname") {
       const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
       if (!creds?.godaddyApiKey || !creds?.godaddyApiSecret || !creds?.godaddyDomain) {
-        return NextResponse.json({ error: "GoDaddy credentials and domain required" }, { status: 400 });
+        return badRequest("GoDaddy credentials and domain required");
       }
       if (!replitDomain) {
-        return NextResponse.json({ error: "Replit deployment domain required (e.g. yourapp.replit.app)" }, { status: 400 });
+        return badRequest("Replit deployment domain required (e.g. yourapp.replit.app)");
       }
 
       const authHeader = `sso-key ${creds.godaddyApiKey}:${creds.godaddyApiSecret}`;
@@ -143,10 +141,10 @@ export async function POST(req: Request) {
       const dnsBody = await dnsRes.json().catch(() => ({}));
 
       if (!dnsRes.ok) {
-        return NextResponse.json({ error: `GoDaddy DNS error: ${dnsBody.message || dnsRes.status}` }, { status: 400 });
+        return badRequest(`GoDaddy DNS error: ${dnsBody.message || dnsRes.status}`);
       }
 
-      return NextResponse.json({
+      return ok({
         success: true,
         domain: creds.godaddyDomain,
         replitDomain: cleanReplitDomain,
@@ -173,12 +171,12 @@ export async function POST(req: Request) {
       const tested = results.map((r, i) => r.status === "fulfilled" ? r.value : { url: "error", status: 0, ok: false });
       const passed = tested.filter((t) => t.ok).length;
 
-      return NextResponse.json({ success: true, tested: tested.length, passed, failed: tested.length - passed, results: tested });
+      return ok({ success: true, tested: tested.length, passed, failed: tested.length - passed, results: tested });
     }
 
-    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+    return badRequest("Unknown action");
   } catch (e) {
     console.error("marketing infrastructure POST error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

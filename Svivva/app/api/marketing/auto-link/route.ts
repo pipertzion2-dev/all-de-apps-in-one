@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedCredentials, seoLandingPages } from "@/lib/schema";
-import { eq, like, sql } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { eq } from "drizzle-orm";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { submitSitemapToGSC } from "@/lib/google-indexing";
+import { ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 const GODADDY_API = "https://api.godaddy.com/v1";
@@ -120,9 +120,8 @@ async function createGodaddyCname(creds: any, subdomain: string, targetDomain: s
 // ═══════════════════════════════════════════════════════════════════════════════
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
     const rawCreds = creds as any;
@@ -207,7 +206,7 @@ export async function POST(req: NextRequest) {
     if (newUrls.length > 0 && indexOk) summaryParts.push(`${newUrls.length} URLs submitted to Bing/Yandex`);
     if (googleSiteUrl) summaryParts.push("Google sitemap pinged");
 
-    return NextResponse.json({
+    return ok({
       success: true,
       createdPages,
       newUrls,
@@ -216,6 +215,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     console.error("Auto-link error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

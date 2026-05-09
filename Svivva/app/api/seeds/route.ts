@@ -4,15 +4,13 @@ import { seedSessions, seeds, seoLandingPages } from "@/lib/schema";
 import { parsePdfToSeeds, generateEngineeringDocs, generateMarketingContent, generateCodeScaffold, applyPromptToSeed, generateSeedMarketingPages } from "@/lib/llm/seeds";
 import { eq, desc, inArray } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { getCurrentUser } from "@/lib/auth/session";
-import { getSitemapUrl } from "@/lib/site-url";
+import { requireUser } from "@/lib/auth/require-user";
+import { badRequest, notFound, ok, serverError } from "@/lib/http-response";
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireUser();
+    if (error || !user) return error!;
 
     const sessions = await db
       .select()
@@ -46,19 +44,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ sessions, seeds: allSeeds, marketingPagesBySeed });
+    return ok({ sessions, seeds: allSeeds, marketingPagesBySeed });
   } catch (error) {
     console.error("Seeds GET error:", error);
-    return NextResponse.json({ error: "Failed to fetch seeds" }, { status: 500 });
+    return serverError("Failed to fetch seeds");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireUser();
+    if (error || !user) return error!;
 
     const contentType = request.headers.get("content-type") || "";
 
@@ -67,11 +63,11 @@ export async function POST(request: NextRequest) {
       const file = formData.get("pdf") as File | null;
 
       if (!file) {
-        return NextResponse.json({ error: "No PDF file provided" }, { status: 400 });
+        return badRequest("No PDF file provided");
       }
 
       if (!file.name.endsWith(".pdf") && file.type !== "application/pdf") {
-        return NextResponse.json({ error: "File must be a PDF" }, { status: 400 });
+        return badRequest("File must be a PDF");
       }
 
       const sessionId = uuidv4();
@@ -99,14 +95,14 @@ export async function POST(request: NextRequest) {
 
       if (!pdfText.trim()) {
         await db.update(seedSessions).set({ status: "error" }).where(eq(seedSessions.id, sessionId));
-        return NextResponse.json({ error: "Could not extract text from PDF" }, { status: 400 });
+        return badRequest("Could not extract text from PDF");
       }
 
       const result = await parsePdfToSeeds(pdfText);
 
       if (!result.success || result.seeds.length === 0) {
         await db.update(seedSessions).set({ status: "error" }).where(eq(seedSessions.id, sessionId));
-        return NextResponse.json({ error: result.error || "No application specs found in PDF" }, { status: 400 });
+        return badRequest(result.error || "No application specs found in PDF");
       }
 
       const seedRecords = result.seeds.map((spec) => ({
@@ -127,7 +123,7 @@ export async function POST(request: NextRequest) {
         seedCount: seedRecords.length,
       }).where(eq(seedSessions.id, sessionId));
 
-      return NextResponse.json({
+      return ok({
         sessionId,
         seedCount: seedRecords.length,
         seeds: seedRecords.map((r) => ({ id: r.id, appName: r.appName, status: r.status })),
@@ -140,7 +136,7 @@ export async function POST(request: NextRequest) {
     if (action === "build" && seedId) {
       const [seed] = await db.select().from(seeds).where(eq(seeds.id, seedId));
       if (!seed) {
-        return NextResponse.json({ error: "Seed not found" }, { status: 404 });
+        return notFound("Seed not found");
       }
 
       const [ownerSession] = await db.select().from(seedSessions).where(eq(seedSessions.id, seed.sessionId));
@@ -181,7 +177,7 @@ export async function POST(request: NextRequest) {
         error: errorMessages || null,
       }).where(eq(seeds.id, seedId));
 
-      return NextResponse.json({
+      return ok({
         success: true,
         status: hasError ? "partial" : "complete",
         seedId,
@@ -234,14 +230,14 @@ export async function POST(request: NextRequest) {
 
       await Promise.all(buildPromises);
 
-      return NextResponse.json({ success: true, built: sessionSeeds.length });
+      return ok({ success: true, built: sessionSeeds.length });
     }
 
     if (action === "generate-pages") {
       const targetSeedIds: string[] = body.seedIds || (body.sessionId ? (await db.select({ id: seeds.id }).from(seeds).where(eq(seeds.sessionId, body.sessionId))).map((r) => r.id) : []);
 
       if (targetSeedIds.length === 0) {
-        return NextResponse.json({ error: "No seeds specified" }, { status: 400 });
+        return badRequest("No seeds specified");
       }
 
       const validSeeds = [];
@@ -253,7 +249,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (validSeeds.length === 0) {
-        return NextResponse.json({ error: "No valid seeds found" }, { status: 404 });
+        return notFound("No valid seeds found");
       }
 
       const results = await Promise.all(
@@ -297,7 +293,7 @@ export async function POST(request: NextRequest) {
       // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
       // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
-      return NextResponse.json({
+      return ok({
         success: true,
         results,
         totalPages: results.reduce((acc, r) => acc + r.slugs.length, 0),
@@ -309,11 +305,11 @@ export async function POST(request: NextRequest) {
       const prompt: string = body.prompt;
 
       if (!Array.isArray(seedIds) || seedIds.length === 0 || typeof prompt !== "string" || !prompt.trim()) {
-        return NextResponse.json({ error: "seedIds (array) and prompt (string) are required" }, { status: 400 });
+        return badRequest("seedIds (array) and prompt (string) are required");
       }
 
       if (seedIds.length > 20) {
-        return NextResponse.json({ error: "Maximum 20 seeds per batch prompt" }, { status: 400 });
+        return badRequest("Maximum 20 seeds per batch prompt");
       }
 
       const targetSeeds = [];
@@ -327,7 +323,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (targetSeeds.length === 0) {
-        return NextResponse.json({ error: "No valid seeds found" }, { status: 404 });
+        return notFound("No valid seeds found");
       }
 
       for (const seed of targetSeeds) {
@@ -370,7 +366,7 @@ export async function POST(request: NextRequest) {
         })
       );
 
-      return NextResponse.json({
+      return ok({
         success: true,
         results,
         applied: results.filter((r) => r.success).length,
@@ -379,9 +375,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return badRequest("Invalid action");
   } catch (error) {
     console.error("Seeds POST error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverError();
   }
 }

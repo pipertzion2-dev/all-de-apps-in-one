@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedCredentials, seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
 import { generateSeedMarketingPages } from "@/lib/llm/seeds";
 import type { SeedAppSpec } from "@/lib/schema";
-import { getSitemapUrl } from "@/lib/site-url";
+import { badRequest, ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 const REPLIT_GQL = "https://replit.com/graphql";
 
@@ -29,14 +28,13 @@ query GetUserRepls($username: String!, $count: Int) {
 
 export async function POST() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
     const replitUsername = creds?.replitUsername || null;
     if (!replitUsername) {
-      return NextResponse.json({ error: "Replit not connected. Enter your Replit username in Connected Services first." }, { status: 400 });
+      return badRequest("Replit not connected. Enter your Replit username in Connected Services first.");
     }
 
     const gqlRes = await fetch(REPLIT_GQL, {
@@ -54,7 +52,7 @@ export async function POST() {
     if (!gqlRes.ok) {
       const body = await gqlRes.text().catch(() => "");
       console.error("[replit-apps] GQL error:", gqlRes.status, body.slice(0, 200));
-      return NextResponse.json({ error: `Replit API error: ${gqlRes.status} ${gqlRes.statusText}` }, { status: 400 });
+      return badRequest(`Replit API error: ${gqlRes.status} ${gqlRes.statusText}`);
     }
 
     const gqlData = await gqlRes.json();
@@ -62,7 +60,7 @@ export async function POST() {
     const username = gqlData?.data?.userByUsername?.username || replitUsername;
 
     if (gqlData.errors?.length > 0) {
-      return NextResponse.json({ error: `Replit API: ${gqlData.errors[0].message}` }, { status: 400 });
+      return badRequest(`Replit API: ${gqlData.errors[0].message}`);
     }
 
     const apps = items.map((r: Record<string, unknown>) => {
@@ -135,7 +133,7 @@ export async function POST() {
     // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
     // GSC picks up new pages via the periodic submit_sitemap scheduler.
 
-    return NextResponse.json({
+    return ok({
       success: true,
       username,
       totalApps: apps.length,
@@ -145,6 +143,6 @@ export async function POST() {
     });
   } catch (e) {
     console.error("Replit apps error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
-import { eq, like } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
+import { like } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import { ok, serverError } from "@/lib/http-response";
+import { requireUser } from "@/lib/auth/require-user";
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { user, error } = await requireUser();
+    if (error || !user) return error!;
 
     const pages = await db
       .select({
@@ -79,9 +80,9 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ apps: Object.values(parentMap) });
+    return ok({ apps: Object.values(parentMap) });
   } catch (e) {
     console.error("replit-apps-list error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }

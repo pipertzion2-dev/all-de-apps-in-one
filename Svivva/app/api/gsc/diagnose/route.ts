@@ -1,44 +1,16 @@
-import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { createSign } from "crypto";
 import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
+import {
+  getGoogleServiceAccountAccessToken,
+  GoogleServiceAccount,
+} from "@/lib/google-service-account";
+import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
-
-interface ServiceAccount {
-  private_key: string;
-  client_email: string;
-  token_uri: string;
-  project_id?: string;
-}
-
-function base64url(str: string | Buffer): string {
-  const b = typeof str === "string" ? Buffer.from(str) : str;
-  return b.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
-async function getAccessToken(sa: ServiceAccount, scope: string): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-  const payload = base64url(JSON.stringify({ iss: sa.client_email, scope, aud: sa.token_uri, exp: now + 3600, iat: now }));
-  const sigInput = `${header}.${payload}`;
-  const sign = createSign("RSA-SHA256");
-  sign.update(sigInput);
-  const sig = base64url(sign.sign(sa.private_key));
-  const jwt = `${sigInput}.${sig}`;
-  const res = await fetch(sa.token_uri, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!res.ok) { const t = await res.text(); throw new Error(`Token: ${res.status} — ${t.slice(0, 200)}`); }
-  return (await res.json()).access_token;
-}
 
 export type DiagStep = {
   id: string;
@@ -50,7 +22,7 @@ export type DiagStep = {
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!user || !isAdmin(user)) return forbidden();
 
   const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
 
@@ -114,15 +86,18 @@ export async function GET() {
   }
 
   // Step 4 — service account (optional enhancement)
-  let sa: ServiceAccount | null = null;
+  let sa: GoogleServiceAccount | null = null;
   try {
     const saJson = creds?.googleServiceAccountJson || null;
-    if (saJson) sa = JSON.parse(saJson);
+    if (saJson) sa = JSON.parse(saJson) as GoogleServiceAccount;
   } catch { /* ignore */ }
 
   if (sa) {
     try {
-      await getAccessToken(sa, "https://www.googleapis.com/auth/webmasters.readonly");
+      await getGoogleServiceAccountAccessToken(
+        sa,
+        "https://www.googleapis.com/auth/webmasters.readonly"
+      );
       steps.push({
         id: "service_account",
         label: "Service account (optional)",
@@ -149,7 +124,7 @@ export async function GET() {
   const passing = steps.filter((s) => s.status === "ok").length;
   const total = steps.filter((s) => s.status !== "skip").length;
 
-  return NextResponse.json({
+  return ok({
     steps,
     score: total > 0 ? Math.round((passing / total) * 100) : 0,
     siteUrl: rawUrl,

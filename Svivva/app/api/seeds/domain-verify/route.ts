@@ -2,22 +2,21 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
 import { sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import dns from "dns/promises";
+import { badRequest, ok, serverError } from "@/lib/http-response";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error } = await requireAdminUser();
+    if (error || !user) return error!;
 
     const { action, domain, siteUrl } = await req.json();
 
     if (action === "generate") {
-      if (!domain) return NextResponse.json({ error: "domain required" }, { status: 400 });
+      if (!domain) return badRequest("domain required");
       const token = `svivva-verify-${randomBytes(12).toString("hex")}`;
 
       await db.execute(sql`
@@ -26,13 +25,13 @@ export async function POST(req: Request) {
         ON CONFLICT (user_id) DO UPDATE SET custom_domain = ${domain}, domain_token = ${token}, domain_verified = false
       `);
 
-      return NextResponse.json({ token, domain, record: `TXT @ "${token}"` });
+      return ok({ token, domain, record: `TXT @ "${token}"` });
     }
 
     if (action === "check") {
       const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
       if (!creds?.domainToken || !creds?.customDomain) {
-        return NextResponse.json({ error: "No verification token found. Generate one first." }, { status: 400 });
+        return badRequest("No verification token found. Generate one first.");
       }
 
       let verified = false;
@@ -45,11 +44,11 @@ export async function POST(req: Request) {
         await db.execute(sql`UPDATE seed_credentials SET domain_verified = true WHERE user_id = ${user.id}`);
       }
 
-      return NextResponse.json({ verified, domain: creds.customDomain, token: creds.domainToken });
+      return ok({ verified, domain: creds.customDomain, token: creds.domainToken });
     }
 
     if (action === "save-google") {
-      if (!siteUrl) return NextResponse.json({ error: "siteUrl required" }, { status: 400 });
+      if (!siteUrl) return badRequest("siteUrl required");
       await db.execute(sql`
         INSERT INTO seed_credentials (user_id, google_site_url)
         VALUES (${user.id}, ${siteUrl})
@@ -57,12 +56,12 @@ export async function POST(req: Request) {
       `);
       // Note: Google sitemap ping removed (?ping= retired June 2023).
       // The user can submit the sitemap manually at /dashboard/gsc-connect once they paste a service account.
-      return NextResponse.json({ success: true, siteUrl });
+      return ok({ success: true, siteUrl });
     }
 
-    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+    return badRequest("Unknown action");
   } catch (e) {
     console.error("domain-verify error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return serverError(String(e));
   }
 }
