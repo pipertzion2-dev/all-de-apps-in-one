@@ -34,6 +34,7 @@ import {
   Target,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
+import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { ReplitUsernameConnector } from "@/components/replit-username-connector";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import {
@@ -2252,6 +2253,8 @@ export default function LaunchpadPage() {
         <div className="rounded-2xl border-2 border-border bg-card p-4">
           <ConnectionsHub />
         </div>
+
+        {tab === "svivva" && <OrbitStripeSetup isAdmin={!!me?.isAdmin} />}
 
         {/* ── Marketing Status (DB-verified) ── */}
         {orbitStatus &&
