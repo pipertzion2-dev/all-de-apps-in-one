@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
-    "build:vercel": "next build",
+    "build:vercel": "npm run verify && next build",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
+    "verify": "npm run check && npm run lint && node scripts/owner-note-verify.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

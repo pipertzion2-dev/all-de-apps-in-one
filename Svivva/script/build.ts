@@ -12,6 +12,8 @@ function run(cmd: string, label: string) {
 }
 
 async function buildAll() {
+  run("npm run verify", "Owner-note verify gate (note → scripts/owner-note-verify.mjs)…");
+
   // Push DB schema so all tables exist before Next.js tries to query them
   if (process.env.DATABASE_URL) {
     try {

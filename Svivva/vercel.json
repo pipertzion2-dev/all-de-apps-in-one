@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "npm ci",
-  "buildCommand": "next build",
+  "buildCommand": "npm run build:vercel",
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",

@@ -24,6 +24,7 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 - `npm run build` - full self-hosted build (`next build` + `dist/` launcher). **Vercel** ignores this and runs `next build` only (see `vercel.json`).
 - `npm run start` - run production build output.
 - `npm run check` - run TypeScript checks.
+- `npm run verify` - owner-note gate: `check` + `lint` + dummy-copy scan (see `scripts/owner-note-verify.mjs`). Runs automatically before `next build` via `npm run build:vercel` and `npm run build`.
 - `npm run lint` - run ESLint checks.
 - `npm run format:check` - check Prettier formatting.
 - `npm run format` - write Prettier formatting.

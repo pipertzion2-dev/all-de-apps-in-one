@@ -1,0 +1,31 @@
+# Runs the owner-note gate on every push/PR touching Svivva (same as local `npm run verify`).
+# Verbatim note lives in Svivva/scripts/owner-note-verify.mjs and is enforced again in `npm run build:vercel`.
+name: Svivva owner-note verify
+
+on:
+  push:
+    paths:
+      - "Svivva/**"
+      - ".github/workflows/svivva-owner-note-verify.yml"
+  pull_request:
+    paths:
+      - "Svivva/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Svivva
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Svivva/package-lock.json
+      - run: npm ci
+      - run: npm run verify
