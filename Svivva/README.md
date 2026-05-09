@@ -6,10 +6,14 @@ Svivva Play, and marketplace tooling.
 
 ## Quick Start
 
-1. Copy `.env.example` to `.env` and fill required keys.
-2. Install dependencies:
+1. Install dependencies:
    - `npm install`
-3. Start development:
+2. Start Postgres (from monorepo root, one folder above `Svivva`):
+   - `docker compose up -d postgres`
+3. Copy `.env.example` to `.env` and set secrets (`NEXTAUTH_SECRET`, API keys). `DATABASE_URL` defaults match Docker (`svivva` / `svivva_local_dev`).
+4. Apply the schema:
+   - `npm run db:push`
+5. Start development:
    - `npm run dev`
 
 On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiver is usually using that port. Set `PORT=3000` and `NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000` in `.env` (see `.env.example`).
