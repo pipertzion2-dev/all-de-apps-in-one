@@ -610,6 +610,35 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
     return () => clearInterval(interval);
   }, []);
 
+  const createInstrumentCase = useCallback(() => {
+    const group = new THREE.Group();
+
+    const caseGeometry = new THREE.BoxGeometry(6, 0.5, 4);
+    const caseMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd4d4d8,
+      metalness: 0.1,
+      roughness: 0.8,
+    });
+    const caseMesh = new THREE.Mesh(caseGeometry, caseMaterial);
+    caseMesh.position.y = 0.25;
+    caseMesh.receiveShadow = true;
+    caseMesh.castShadow = true;
+    group.add(caseMesh);
+
+    const bevelGeometry = new THREE.BoxGeometry(6.1, 0.1, 4.1);
+    const bevelMesh = new THREE.Mesh(bevelGeometry, caseMaterial);
+    bevelMesh.position.y = 0.55;
+    group.add(bevelMesh);
+
+    const frontPanelGeometry = new THREE.BoxGeometry(6, 0.8, 0.5);
+    const frontPanelMesh = new THREE.Mesh(frontPanelGeometry, caseMaterial);
+    frontPanelMesh.position.set(0, 0.1, 2.25);
+    frontPanelMesh.rotation.x = -0.2;
+    group.add(frontPanelMesh);
+
+    return group;
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -670,45 +699,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
       renderer.dispose();
       container.removeChild(renderer.domElement);
     };
-  }, []);
-
-  const createInstrumentCase = useCallback(() => {
-    const group = new THREE.Group();
-
-    const caseGeometry = new THREE.BoxGeometry(6, 0.5, 4);
-    const caseMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd4d4d8,
-      metalness: 0.1,
-      roughness: 0.8,
-    });
-    const caseMesh = new THREE.Mesh(caseGeometry, caseMaterial);
-    caseMesh.position.y = 0.25;
-    caseMesh.receiveShadow = true;
-    caseMesh.castShadow = true;
-    group.add(caseMesh);
-
-    const bevelGeometry = new THREE.BoxGeometry(6.1, 0.1, 4.1);
-    const bevelMesh = new THREE.Mesh(bevelGeometry, caseMaterial);
-    bevelMesh.position.y = 0.55;
-    group.add(bevelMesh);
-
-    const frontPanelGeometry = new THREE.BoxGeometry(6, 0.8, 0.5);
-    const frontPanelMesh = new THREE.Mesh(frontPanelGeometry, caseMaterial);
-    frontPanelMesh.position.set(0, 0.1, 2.25);
-    frontPanelMesh.rotation.x = -0.2;
-    group.add(frontPanelMesh);
-
-    return group;
-  }, []);
-
-  const handleAnswerSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      generateSuggestions();
-    }
-  }, [currentQuestionIndex, questions.length]);
+  }, [createInstrumentCase]);
 
   const generateSuggestions = useCallback(async () => {
     setIsLoading(true);
@@ -731,6 +722,15 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
     }
     setIsLoading(false);
   }, [projectId, prompt, answers]);
+
+  const handleAnswerSelect = useCallback((questionId: string, value: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      void generateSuggestions();
+    }
+  }, [currentQuestionIndex, questions.length, generateSuggestions]);
 
   const handleComplete = useCallback(() => {
     if (selectedName && selectedIcon && selectedPalette && onComplete) {
@@ -924,7 +924,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
           <TestModeScreen projectId={projectId} />
         );
     }
-  }, [mode, currentQuestion, currentQuestionIndex, questions, answers, prompt, suggestions, selectedName, selectedIcon, selectedPalette, handleAnswerSelect, handleComplete]);
+  }, [mode, currentQuestion, currentQuestionIndex, questions, answers, prompt, suggestions, selectedName, selectedIcon, selectedPalette, handleAnswerSelect, handleComplete, projectId]);
 
   return (
     <div className="relative w-full h-[700px] rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10">

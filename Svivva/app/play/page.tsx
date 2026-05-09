@@ -336,7 +336,7 @@ export default function SvivvaPlayPage() {
     } finally {
       setIsAnalyzing(false);
     }
-  }, [mode]);
+  }, [mode, userPrompt]);
 
   const buildSettings = useCallback(() => {
     const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
@@ -359,7 +359,7 @@ export default function SvivvaPlayPage() {
       default:
         return base;
     }
-  }, [mode, density, complexity, harmonyMode, meend, userPrompt, tension, rootMovement, voiceLeading, compingPattern, risk, callResponse, soloType, styleStrength, keepHarmony, synthFamily, macroBrightness, macroMovement, macroBite, macroSpace, vocalistEnabled, selectedPreset]);
+  }, [mode, density, complexity, harmonyMode, meend, userPrompt, useSeed, seed, tension, rootMovement, voiceLeading, compingPattern, risk, callResponse, soloType, styleStrength, keepHarmony, synthFamily, macroBrightness, macroMovement, macroBite, macroSpace, vocalistEnabled, selectedPreset]);
 
   const handleGenerate = useCallback(async (quality: "preview" | "full" = "preview") => {
     if (!sessionId || !analysis) return;
@@ -692,7 +692,7 @@ export default function SvivvaPlayPage() {
       if (data.error) { setErrorMsg(data.error); } else { setNeuralPromptResult(data); }
     } catch { setErrorMsg("Neural prompt generation failed."); }
     finally { setIsGeneratingPrompt(false); }
-  }, [analysis, stems, mode, selectedPreset, neuralGenre, neuralMood, neuralEnergy, neuralQuality]);
+  }, [analysis, stems, mode, selectedPreset, neuralGenre, neuralMood, neuralEnergy, neuralQuality, manualKey, manualTempo]);
 
   const copyNeuralPrompt = useCallback(() => {
     if (!neuralPromptResult) return;

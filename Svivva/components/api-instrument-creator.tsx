@@ -57,6 +57,66 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     return () => clearInterval(interval);
   }, []);
 
+  const generateTailoredQuestions = useCallback(async (userPrompt: string) => {
+    setIsGenerating(true);
+    await new Promise(r => setTimeout(r, 400));
+
+    const words = userPrompt.toLowerCase();
+    const questions: TailoredQuestion[] = [];
+
+    if (words.includes("analyz") || words.includes("review") || words.includes("sentiment")) {
+      questions.push({ id: "depth", question: "Analysis depth?", options: ["Light", "Medium", "Deep", "Full"] });
+    } else if (words.includes("generat") || words.includes("creat") || words.includes("write")) {
+      questions.push({ id: "creativity", question: "Creativity level?", options: ["Low", "Medium", "High", "Max"] });
+    } else {
+      questions.push({ id: "style", question: "Processing style?", options: ["Fast", "Balanced", "Deep", "Max"] });
+    }
+
+    questions.push({ id: "output", question: "Output detail?", options: ["Brief", "Standard", "Detailed", "Full"] });
+    questions.push({ id: "tone", question: "Response tone?", options: ["Pro", "Friendly", "Tech", "Casual"] });
+
+    setTailoredQuestions(questions);
+    setPhase("questions");
+    setIsGenerating(false);
+  }, []);
+
+  const generateBrandSuggestions = useCallback(async () => {
+    setIsGenerating(true);
+    await new Promise(r => setTimeout(r, 300));
+
+    const words = prompt.split(" ");
+    const keyword = words.find(w => w.length > 3) || "API";
+    const cap = keyword.charAt(0).toUpperCase() + keyword.slice(1, 6).toLowerCase();
+
+    const mock: BrandSuggestion = {
+      names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
+      icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
+      palettes: [
+        { name: "Svivva", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
+        { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
+        { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
+      ],
+    };
+
+    setSuggestions(mock);
+    setSelectedName(mock.names[0]);
+    setSelectedIcon(mock.icons[0]);
+    setSelectedPalette(mock.palettes[0]);
+    setPhase("brand");
+    setIsGenerating(false);
+  }, [prompt]);
+
+  const handleOptionSelect = useCallback((questionId: string, value: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setTimeout(() => {
+      if (currentQuestionIndex < tailoredQuestions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+      } else {
+        void generateBrandSuggestions();
+      }
+    }, 150);
+  }, [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions]);
+
   const drawScreen = useCallback(() => {
     const canvas = screenCanvasRef.current;
     if (!canvas) return;
@@ -286,67 +346,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     }
 
     if (screenTextureRef.current) screenTextureRef.current.needsUpdate = true;
-  }, [phase, prompt, isGenerating, tailoredQuestions, currentQuestionIndex, answers, suggestions, selectedName, selectedIcon, selectedPalette, hoveredButton, isFocused, cursorVisible, onComplete]);
-
-  const generateTailoredQuestions = useCallback(async (userPrompt: string) => {
-    setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 400));
-    
-    const words = userPrompt.toLowerCase();
-    const questions: TailoredQuestion[] = [];
-    
-    if (words.includes("analyz") || words.includes("review") || words.includes("sentiment")) {
-      questions.push({ id: "depth", question: "Analysis depth?", options: ["Light", "Medium", "Deep", "Full"] });
-    } else if (words.includes("generat") || words.includes("creat") || words.includes("write")) {
-      questions.push({ id: "creativity", question: "Creativity level?", options: ["Low", "Medium", "High", "Max"] });
-    } else {
-      questions.push({ id: "style", question: "Processing style?", options: ["Fast", "Balanced", "Deep", "Max"] });
-    }
-    
-    questions.push({ id: "output", question: "Output detail?", options: ["Brief", "Standard", "Detailed", "Full"] });
-    questions.push({ id: "tone", question: "Response tone?", options: ["Pro", "Friendly", "Tech", "Casual"] });
-    
-    setTailoredQuestions(questions);
-    setPhase("questions");
-    setIsGenerating(false);
-  }, []);
-
-  const generateBrandSuggestions = useCallback(async () => {
-    setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 300));
-    
-    const words = prompt.split(" ");
-    const keyword = words.find(w => w.length > 3) || "API";
-    const cap = keyword.charAt(0).toUpperCase() + keyword.slice(1, 6).toLowerCase();
-    
-    const mock: BrandSuggestion = {
-      names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
-      icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
-      palettes: [
-        { name: "Svivva", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
-        { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
-        { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
-      ],
-    };
-    
-    setSuggestions(mock);
-    setSelectedName(mock.names[0]);
-    setSelectedIcon(mock.icons[0]);
-    setSelectedPalette(mock.palettes[0]);
-    setPhase("brand");
-    setIsGenerating(false);
-  }, [prompt]);
-
-  const handleOptionSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    setTimeout(() => {
-      if (currentQuestionIndex < tailoredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        generateBrandSuggestions();
-      }
-    }, 150);
-  }, [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions]);
+  }, [phase, prompt, isGenerating, tailoredQuestions, currentQuestionIndex, answers, suggestions, selectedName, selectedIcon, selectedPalette, hoveredButton, isFocused, cursorVisible, onComplete, generateTailoredQuestions, handleOptionSelect]);
 
   useEffect(() => {
     drawScreen();
@@ -543,6 +543,8 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         container.removeChild(renderer.domElement);
       }
     };
+  // Scene mounts once; screen canvas is updated via the [drawScreen] effect.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid rebuilding Three.js scene on every drawScreen identity change
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {

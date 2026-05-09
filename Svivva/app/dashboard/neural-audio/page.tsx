@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,41 +114,41 @@ export default function NeuralAudioPage() {
 
   const setLoadingKey = (key: string, val: boolean) => setLoading((prev) => ({ ...prev, [key]: val }));
 
-  const fetchDatasets = async () => {
+  const fetchDatasets = useCallback(async () => {
     setLoadingKey("datasets", true);
     try {
       const res = await fetch("/api/neural-audio/datasets");
       if (res.ok) setDatasets(await res.json());
     } catch { /* ignore */ }
     setLoadingKey("datasets", false);
-  };
+  }, []);
 
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     setLoadingKey("models", true);
     try {
       const res = await fetch("/api/neural-audio/models");
       if (res.ok) setModels(await res.json());
     } catch { /* ignore */ }
     setLoadingKey("models", false);
-  };
+  }, []);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoadingKey("jobs", true);
     try {
       const res = await fetch("/api/neural-audio/jobs");
       if (res.ok) setJobs(await res.json());
     } catch { /* ignore */ }
     setLoadingKey("jobs", false);
-  };
+  }, []);
 
-  const fetchGuide = async () => {
+  const fetchGuide = useCallback(async () => {
     setLoadingKey("guide", true);
     try {
       const res = await fetch("/api/neural-audio/guide");
       if (res.ok) setGuide(await res.json());
     } catch { /* ignore */ }
     setLoadingKey("guide", false);
-  };
+  }, []);
 
   const fetchItems = async (datasetId: string) => {
     setLoadingKey(`items-${datasetId}`, true);
@@ -163,14 +163,14 @@ export default function NeuralAudioPage() {
   };
 
   useEffect(() => {
-    fetchDatasets();
-    fetchModels();
-    fetchJobs();
-  }, []);
+    void fetchDatasets();
+    void fetchModels();
+    void fetchJobs();
+  }, [fetchDatasets, fetchModels, fetchJobs]);
 
   useEffect(() => {
-    if (activeTab === "guide" && !guide) fetchGuide();
-  }, [activeTab]);
+    if (activeTab === "guide" && !guide) void fetchGuide();
+  }, [activeTab, guide, fetchGuide]);
 
   const handleCreateDataset = async () => {
     if (!datasetForm.name || !datasetForm.description || !datasetForm.genre) return;

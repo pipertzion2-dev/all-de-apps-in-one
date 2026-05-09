@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -605,10 +606,12 @@ export default function HardwareBuilderPage() {
                 <CardContent>
                   <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted/50 relative">
                     {sketchImageSrc ? (
-                      <img
+                      <Image
                         src={sketchImageSrc}
                         alt="AI-generated sketch"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                         data-testid="img-generated-sketch"
                       />
                     ) : (

@@ -32,6 +32,10 @@ interface TeamMember {
   lastActive?: string;
 }
 
+interface TeamWithMembers {
+  members?: TeamMember[];
+}
+
 interface Comment {
   id: string;
   author: string;
@@ -93,11 +97,11 @@ export default function CollaboratePage() {
     setPendingInvites(loadInvites());
   }, []);
 
-  const teams: { id: string; name: string; members?: TeamMember[] }[] = teamsData || [];
-  const projects: { id: string; name: string; status?: string; description?: string }[] = projectsData || [];
+  const teams = useMemo(() => teamsData ?? [], [teamsData]);
+  const projects = useMemo(() => projectsData ?? [], [projectsData]);
 
   const uniqueMembers: TeamMember[] = useMemo(() => {
-    const all: TeamMember[] = teams.flatMap((t) =>
+    const all: TeamMember[] = teams.flatMap((t: TeamWithMembers) =>
       (t.members || []).map((m: TeamMember) => ({ ...m }))
     );
     if (user) {

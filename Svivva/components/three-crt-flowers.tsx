@@ -1049,7 +1049,7 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
         container.removeChild(renderer.domElement);
       }
     };
-  }, [preset, dimensions]);
+  }, [preset, dimensions, isIntro]);
 
   if (!webGLAvailable) {
     return null;

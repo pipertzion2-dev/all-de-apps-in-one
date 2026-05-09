@@ -38,3 +38,16 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 - `docs/` - architecture and contributor docs.
 
 See `docs/PROJECT_STRUCTURE.md` for conventions and where new files should go.
+
+## Production and a GoDaddy (or any) domain
+
+GitHub stores your code; it does not host the public website by itself. Point your domain at a host (for example [Vercel](https://vercel.com)) and connect DNS at GoDaddy to that host.
+
+1. Push this repo to GitHub (you already have the remote; `git push origin main`).
+2. In Vercel: **Add New Project** → import the GitHub repo → set **Root Directory** to `Svivva` if you only deploy that app.
+3. Copy environment variables from `Svivva/.env.example` into the Vercel project settings (production and preview as needed), including `DATABASE_URL`, `NEXTAUTH_*`, and `NEXT_PUBLIC_SITE_URL` (use your real site URL, e.g. `https://yourdomain.com`).
+4. Deploy. Vercel will show a `*.vercel.app` URL.
+5. In Vercel: **Project → Settings → Domains** → add `yourdomain.com` and `www.yourdomain.com`. Vercel shows the exact DNS records (usually apex **A** records to their IPs and **CNAME** for `www`).
+6. In GoDaddy: **DNS** for the domain → add or edit those records to match Vercel. Propagation can take a few minutes to a few hours.
+
+If you use another host (Netlify, Railway, etc.), the pattern is the same: deploy from GitHub there, then follow that provider’s DNS instructions in GoDaddy.

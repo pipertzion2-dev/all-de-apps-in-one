@@ -12,7 +12,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const containerEl = containerRef.current;
+    if (!containerEl) return;
 
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
@@ -33,7 +34,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         const { FontLoader } = await import("three/examples/jsm/loaders/FontLoader.js");
         const { TextGeometry } = await import("three/examples/jsm/geometries/TextGeometry.js");
 
-        const container = containerRef.current;
+        const container = containerEl;
         if (!container) return;
 
         const width = container.clientWidth;
@@ -148,9 +149,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         animate();
 
         const handleResize = () => {
-          if (!containerRef.current) return;
-          const newWidth = containerRef.current.clientWidth;
-          const newHeight = containerRef.current.clientHeight;
+          const newWidth = containerEl.clientWidth;
+          const newHeight = containerEl.clientHeight;
           camera.aspect = newWidth / newHeight;
           camera.updateProjectionMatrix();
           renderer.setSize(newWidth, newHeight);
@@ -181,9 +181,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         if (mesh.geometry) mesh.geometry.dispose();
         if (mesh.material) mesh.material.dispose();
       });
-      const container = containerRef.current;
-      if (container && renderer?.domElement && container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
+      if (containerEl && renderer?.domElement && containerEl.contains(renderer.domElement)) {
+        containerEl.removeChild(renderer.domElement);
       }
     };
   }, [mode]);

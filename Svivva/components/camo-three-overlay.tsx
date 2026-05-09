@@ -164,7 +164,7 @@ export function CamoThreeOverlay({ preset = 'hero', className = '', isIntro = fa
     resizeObserver.observe(container);
     
     return () => resizeObserver.disconnect();
-  }, [seed]);
+  }, [seed, preset]);
 
   const isCheckout = preset === 'checkout';
 
