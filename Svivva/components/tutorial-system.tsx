@@ -69,12 +69,12 @@ const tutorials: Record<string, TutorialConfig> = {
       {
         title: "The BUILD System",
         description:
-          "Follow 5 simple steps: Bring your vision → define Users → select materials (Into) → generate designs (Logical) → Delivery.",
+          "Follow 5 simple steps: Bring your vision → define Users → select materials (Into) → layout preview & optional sketch (Logical) → Delivery.",
       },
       {
-        title: "AI Sketches & Schematics",
+        title: "Layout preview & optional sketch",
         description:
-          "In the design step, AI generates reference sketches and technical schematics for your product.",
+          "Logical step shows a dimension preview from your brief, plus an optional DALL-E reference sketch when signed in and OpenAI is configured.",
       },
       {
         title: "Manufacturer Research",

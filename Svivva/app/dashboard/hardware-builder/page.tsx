@@ -15,13 +15,11 @@ import { SchematicViewer } from "@/components/schematic-viewer";
 import {
   ArrowRight,
   ArrowLeft,
-  Box,
   DollarSign,
   CheckCircle2,
   Sparkles,
   Loader2,
   Package,
-  Layers,
   Palette,
   Settings2,
   FileText,
@@ -72,7 +70,7 @@ const buildSteps: BuildStep[] = [
     id: "logical",
     letter: "L",
     title: "Logical",
-    description: "Generate schematics & 3D models",
+    description: "Layout preview & optional AI sketch",
     completed: false,
   },
   {
@@ -134,12 +132,8 @@ export default function HardwareBuilderPage() {
   const [materials, setMaterials] = useState<string[]>([]);
   const [manufacturingMethod, setManufacturingMethod] = useState("");
 
-  const [generatedSchematic, setGeneratedSchematic] = useState(false);
-  const [generated3DModel, setGenerated3DModel] = useState(false);
   const [generatedSketch, setGeneratedSketch] = useState(false);
 
-  const [splineUrl, setSplineUrl] = useState("");
-  const [splineLoaded, setSplineLoaded] = useState(false);
   const [sketchPrompt, setSketchPrompt] = useState("");
   const [sketchGenerating, setSketchGenerating] = useState(false);
   const [sketchImageSrc, setSketchImageSrc] = useState("");
@@ -150,7 +144,7 @@ export default function HardwareBuilderPage() {
     { id: "1", label: "Product specifications finalized", checked: false, category: "Planning" },
     { id: "2", label: "Material sourcing complete", checked: false, category: "Materials" },
     { id: "3", label: "Budget approved", checked: false, category: "Budget" },
-    { id: "4", label: "3D model reviewed", checked: false, category: "Design" },
+    { id: "4", label: "Design references reviewed", checked: false, category: "Design" },
     {
       id: "5",
       label: "Manufacturing partner identified",
@@ -256,32 +250,6 @@ export default function HardwareBuilderPage() {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  const handleGenerate = async (type: "schematic" | "3d" | "sketch") => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    if (type === "schematic") setGeneratedSchematic(true);
-    if (type === "3d") setGenerated3DModel(true);
-    if (type === "sketch") setGeneratedSketch(true);
-
-    setIsProcessing(false);
-  };
-
-  const handleLoadSpline = useCallback(() => {
-    const raw = splineUrl.trim();
-    if (!raw) return;
-    try {
-      const parsed = new URL(raw);
-      if (parsed.protocol !== "https:") return;
-      const host = parsed.hostname.toLowerCase();
-      if (!host.endsWith(".spline.design") && host !== "spline.design") return;
-      setSplineLoaded(true);
-      setGenerated3DModel(true);
-    } catch {
-      return;
-    }
-  }, [splineUrl]);
 
   const handleGenerateSketch = useCallback(async () => {
     const text = sketchPrompt.trim();
@@ -599,113 +567,25 @@ export default function HardwareBuilderPage() {
       case 3:
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="border-primary/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" />
-                    Schematic
-                    {generatedSchematic && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
-                    )}
+                    Layout preview
                   </CardTitle>
+                  <CardDescription className="text-xs">
+                    Illustrative dimensions from your brief — not a CAD export or AI 3D model.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="aspect-square rounded-lg overflow-hidden mb-3">
-                    {generatedSchematic ? (
-                      <SchematicViewer
-                        productName={productName}
-                        productCategory={productCategory}
-                        materials={materials}
-                        requirements={requirements}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted/50 flex items-center justify-center">
-                        <Layers className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleGenerate("schematic")}
-                    disabled={isProcessing || generatedSchematic}
-                    data-testid="button-generate-schematic"
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : generatedSchematic ? (
-                      "Generated"
-                    ) : (
-                      "Generate"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-primary/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Box className="w-4 h-4 text-primary" />
-                    3D Model
-                    {splineLoaded && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-muted/50 relative">
-                    {splineLoaded ? (
-                      <iframe
-                        src={splineUrl.trim()}
-                        className="w-full h-full border-0"
-                        sandbox="allow-scripts allow-same-origin"
-                        referrerPolicy="no-referrer"
-                        allow="autoplay; fullscreen"
-                        title="Spline 3D Viewer"
-                        data-testid="iframe-spline-viewer"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
-                        <Box className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground text-center">
-                          Paste a Spline scene URL
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="https://prod.spline.design/.../scene.splinecode"
-                      value={splineUrl}
-                      onChange={(e) => setSplineUrl(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleLoadSpline();
-                      }}
-                      className="text-xs h-8"
-                      data-testid="input-spline-url"
+                    <SchematicViewer
+                      productName={productName}
+                      productCategory={productCategory}
+                      materials={materials}
+                      requirements={requirements}
                     />
-                    <div className="flex gap-1.5">
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={handleLoadSpline}
-                        disabled={!splineUrl.trim()}
-                        data-testid="button-load-spline"
-                      >
-                        {splineLoaded ? "Reload" : "Load Scene"}
-                      </Button>
-                      <Button size="sm" variant="outline" className="px-2" asChild>
-                        <a
-                          href="https://spline.design"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-testid="link-spline-editor"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </Button>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -812,24 +692,6 @@ export default function HardwareBuilderPage() {
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="border-primary/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">AI Suggestions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p className="flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    Based on your requirements, consider adding reinforced corners for durability.
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    Your budget allows for premium materials. Consider titanium for key components.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         );
 

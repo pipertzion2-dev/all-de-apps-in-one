@@ -29,7 +29,6 @@ import {
   Terminal,
   Sparkles,
   Layers,
-  Cpu,
   Database,
   RefreshCw,
   Wrench,
@@ -107,7 +106,7 @@ const pricingTiers = [
       "Unlimited hardware projects",
       "100,000 API requests/month",
       "AI material sourcing",
-      "3D model generation",
+      "Hardware layout preview & optional AI sketches",
       "Svivva Play — full access",
       "Svivva Seeds — multi-app builder",
       "Auto-rollback & versioning",
@@ -1058,19 +1057,19 @@ export default function LandingPage() {
                   },
                   {
                     icon: Ruler,
-                    title: "Precision Schematics",
+                    title: "Dimensional preview",
                     description:
-                      "Generate detailed technical drawings and blueprints to exact specifications.",
-                    highlight: "CAD Export",
-                    code: "schematic.export()",
+                      "See illustrative dimensions inferred from your product category and requirements — a planning aid, not engineering drawings.",
+                    highlight: "From your brief",
+                    code: "layout.preview()",
                   },
                   {
-                    icon: Cpu,
-                    title: "3D Model Generation",
+                    icon: Palette,
+                    title: "Optional reference images",
                     description:
-                      "Create production-ready 3D models with accurate dimensions and material properties.",
-                    highlight: "STL Ready",
-                    code: "model.render3D()",
+                      "Generate 2D reference sketches from prompts (DALL-E 3) when your deployment has OpenAI configured — not CAD or mesh output.",
+                    highlight: "DALL-E 3",
+                    code: "images.generate()",
                   },
                   {
                     icon: Settings2,
@@ -1377,7 +1376,7 @@ export default function LandingPage() {
                 <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
                     <Ruler className="w-5 h-5 text-[#D782B2]" />
-                    <span className="font-semibold text-[#D782B2]">2. AI Schematics</span>
+                    <span className="font-semibold text-[#D782B2]">2. Layout preview</span>
                   </div>
                   <div className="p-5 space-y-3">
                     <div className="flex justify-between text-xs">
@@ -1397,8 +1396,8 @@ export default function LandingPage() {
                       <span className="text-gray-200">Snap-fit joints</span>
                     </div>
                     <div className="pt-3 flex items-center gap-2 text-gray-400 font-sans text-xs">
-                      <Box className="w-3.5 h-3.5 text-[#D782B2]" />
-                      <span>3D model ready for export</span>
+                      <Ruler className="w-3.5 h-3.5 text-[#D782B2]" />
+                      <span>Preview updates from your brief</span>
                     </div>
                   </div>
                 </Card>
@@ -1424,9 +1423,10 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div className="pt-2 flex flex-wrap gap-1">
-                      <Badge className="bg-green-500/20 text-green-400 text-[10px]">STL</Badge>
-                      <Badge className="bg-blue-500/20 text-blue-400 text-[10px]">STEP</Badge>
-                      <Badge className="bg-purple-500/20 text-purple-400 text-[10px]">PDF</Badge>
+                      <Badge className="bg-purple-500/20 text-purple-400 text-[10px]">
+                        PDF blueprint
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-400 text-[10px]">Sourcing</Badge>
                     </div>
                   </div>
                 </Card>
