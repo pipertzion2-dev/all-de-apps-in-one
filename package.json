@@ -8,6 +8,7 @@
     "dev:pyracrypt-api": "cd \"Pyracrypt/artifacts/api-server\" && pnpm dev",
     "dev:mini-apps": "cd \"CYBER-SECURITY-MINI-APPS-zip/cyberwavy-hub\" && npm run dev",
     "dev:ai-tools-hub": "cd \"Ai-Tools-Hub\" && pnpm --filter \"@workspace/ai-tools-hub\" dev",
-    "db:up": "docker compose up -d postgres"
+    "db:up": "docker compose up -d postgres",
+    "secrets:svivva": "node Svivva/scripts/gen-deploy-secrets.mjs"
   }
 }

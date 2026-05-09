@@ -1,0 +1,73 @@
+# Deploy Svivva to Vercel using the CLI (prebuilt).
+#
+# Use EITHER this workflow OR Vercel’s built-in “Git” integration for the same repo —
+# not both, or every push will trigger two production deploys. To rely only on Vercel’s
+# Git connection: disable this workflow in GitHub → Actions → … → Disable workflow.
+#
+# One-time GitHub repo secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN        — https://vercel.com/account/tokens
+#   VERCEL_ORG_ID       — Project → Settings → General (or run `vercel link` in Svivva and read .vercel/project.json)
+#   VERCEL_PROJECT_ID   — same
+#
+name: Deploy Svivva (Vercel production)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Svivva/**"
+      - ".github/workflows/vercel-svivva-production.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-svivva-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Avoid failing every push until secrets exist: set repo variable VERCEL_CI_DEPLOY=true
+    # (Settings → Secrets and variables → Actions → Variables). Manual runs always execute.
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.VERCEL_CI_DEPLOY == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Svivva/package-lock.json
+
+      - name: Install dependencies (Svivva)
+        working-directory: Svivva
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@53.3.1
+
+      - name: Pull Vercel configuration & env (production)
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build (Vercel prebuilt)
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy prebuilt → production
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"

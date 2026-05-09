@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:push": "drizzle-kit push",
+    "secrets:for-deploy": "node scripts/gen-deploy-secrets.mjs",
     "stripe:seed": "tsx scripts/seed-products.ts"
   },
   "engines": {

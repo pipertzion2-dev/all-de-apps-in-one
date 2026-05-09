@@ -27,6 +27,7 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 - `npm run lint` - run ESLint checks.
 - `npm run format:check` - check Prettier formatting.
 - `npm run format` - write Prettier formatting.
+- `npm run secrets:for-deploy` - print random `NEXTAUTH_SECRET` / `CRON_SECRET` / `ORBIT_INTERNAL_SECRET` for pasting into Vercel.
 
 ## Project Layout
 
@@ -58,3 +59,19 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 7. Optional: **Settings → Domains** add `yourdomain.com`; put the DNS records Vercel shows into GoDaddy (apex **A** / **www** **CNAME**).
 
 Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup.
+
+### GitHub Actions deploy (optional)
+
+The repo includes **`.github/workflows/vercel-svivva-production.yml`**. It runs **`vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`** from this folder.
+
+- Enable with GitHub repository variable **`VERCEL_CI_DEPLOY`** = **`true`** plus secrets **`VERCEL_TOKEN`**, **`VERCEL_ORG_ID`**, **`VERCEL_PROJECT_ID`** (see root **`README.md`** Path B).
+- If you use **Vercel’s Git integration** instead, disable that workflow to avoid double deploys.
+
+### Local CLI deploy (optional)
+
+```bash
+cd Svivva
+npx vercel@53.3.1 login
+npx vercel@53.3.1 link    # creates .vercel/project.json (gitignored)
+npx vercel@53.3.1 deploy --prod
+```
