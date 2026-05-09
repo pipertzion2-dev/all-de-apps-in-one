@@ -8,6 +8,7 @@ import { PlatformProvider } from "@/lib/platform-context";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   let googleVerificationToken: string | null = process.env.GOOGLE_SITE_VERIFICATION || null;
   if (!googleVerificationToken) {
     try {
-      const adminUserId = process.env.ADMIN_USER_ID || "";
+      const adminUserId = getPrimaryAdminUserId() || "";
       const rows = adminUserId
         ? await db
             .select({ tok: seedCredentials.googleVerificationToken })

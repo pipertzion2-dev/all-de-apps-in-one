@@ -1,119 +1,18 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
-import { eq, sql, isNotNull, desc } from "drizzle-orm";
+import { seoLandingPages, blogPosts } from "@/lib/schema";
+import { eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
+import { getSiteUrl } from "@/lib/site-url";
+import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
+import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 
 export const maxDuration = 300;
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
-
-async function getAllSiteUrls(): Promise<string[]> {
-  const staticUrls = [
-    BASE_URL,
-    `${BASE_URL}/blog`,
-    `${BASE_URL}/tools`,
-    `${BASE_URL}/pyracrypt`,
-    `${BASE_URL}/about`,
-    `${BASE_URL}/docs`,
-  ];
-  const posts = await db
-    .select({ slug: blogPosts.slug })
-    .from(blogPosts)
-    .where(eq(blogPosts.published, true));
-  const pages = await db
-    .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
-    .from(seoLandingPages)
-    .where(eq(seoLandingPages.published, true));
-
-  return [
-    ...staticUrls,
-    ...posts.map((p) => `${BASE_URL}/blog/${p.slug}`),
-    // All seoLandingPages are served at root /{slug} — never /tools/{slug}
-    ...pages.map((p) => `${BASE_URL}/${p.slug}`),
-  ];
-}
-
-async function submitIndexNow(
-  userId: string,
-  urls: string[],
-): Promise<{ ok: boolean; count: number; message: string }> {
-  try {
-    // Query without user_id filter — key is admin-only and there's only ever one entry
-    const [credRow] = await db
-      .select({ indexnowKey: seedCredentials.indexnowKey })
-      .from(seedCredentials)
-      .where(isNotNull(seedCredentials.indexnowKey))
-      .orderBy(desc(seedCredentials.updatedAt))
-      .limit(1);
-    const key = credRow?.indexnowKey;
-    if (!key)
-      return {
-        ok: false,
-        count: 0,
-        message: "No IndexNow key found — run IndexNow Setup in the Svivva tab first.",
-      };
-
-    const host = BASE_URL.replace(/^https?:\/\//, "");
-    // Standard IndexNow key location: /{key}.txt served via middleware rewrite
-    const keyLocation = `${BASE_URL}/${key}.txt`;
-    const CHUNK = 9000;
-    let lastStatus = 0;
-    let submitted = 0;
-
-    for (let i = 0; i < urls.length; i += CHUNK) {
-      const chunk = urls.slice(i, i + CHUNK);
-      const body = JSON.stringify({ host, key, keyLocation, urlList: chunk });
-      const [r1] = await Promise.allSettled([
-        fetch("https://api.indexnow.org/indexnow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json; charset=utf-8" },
-          body,
-          signal: AbortSignal.timeout(30000),
-        }),
-      ]);
-      // Bing fire-and-forget in parallel
-      fetch("https://www.bing.com/indexnow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body,
-        signal: AbortSignal.timeout(30000),
-      }).catch(() => {});
-      lastStatus = r1.status === "fulfilled" ? (r1.value as Response).status : 0;
-      submitted += chunk.length;
-    }
-
-    const ok = lastStatus === 200 || lastStatus === 202;
-    // Only record submission timestamp when IndexNow actually accepted it
-    if (ok) {
-      await db
-        .update(seedCredentials)
-        .set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
-    }
-
-    const statusMsg =
-      lastStatus === 403
-        ? `IndexNow key verification failed (403) — key file served at ${keyLocation} was rejected. Check the key matches.`
-        : lastStatus === 422
-          ? `IndexNow invalid URL format (422) — some URLs may be malformed`
-          : lastStatus === 400
-            ? `IndexNow bad request (400)`
-            : lastStatus === 0
-              ? `IndexNow: no response (timeout)`
-              : `IndexNow returned HTTP ${lastStatus}`;
-
-    return {
-      ok,
-      count: submitted,
-      message: ok ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow` : statusMsg,
-    };
-  } catch (e) {
-    return { ok: false, count: 0, message: `IndexNow error: ${String(e).slice(0, 120)}` };
-  }
-}
+const BASE_URL = getSiteUrl();
 
 // Missing AEO queries (4 already exist, these 6 are missing)
 const MISSING_AEO_QUERIES = [
@@ -242,11 +141,11 @@ export async function POST() {
 
     // 3 — Submit ALL URLs to IndexNow
     steps.push("Collecting all published URLs…");
-    const allUrls = await getAllSiteUrls();
+    const allUrls = await getAllSiteUrlsForIndexing();
     totalUrls = allUrls.length;
     steps.push(`Found ${totalUrls} published URLs`);
 
-    const indexResult = await submitIndexNow(user.id, allUrls);
+    const indexResult = await submitIndexNowBatched(allUrls);
     steps.push(indexResult.message);
 
     return NextResponse.json({

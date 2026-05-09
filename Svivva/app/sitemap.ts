@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+/** Public URL paths must stay aligned with `lib/indexing/site-urls.ts` (IndexNow / Orbit). */
 import { db } from "@/server/db";
 import { blogPosts, seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";

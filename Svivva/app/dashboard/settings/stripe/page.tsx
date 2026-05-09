@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, ExternalLink, Loader2 } from "lucide-react";
@@ -124,7 +125,11 @@ export default function StripeSetupPage() {
               <p className="text-sm text-muted-foreground">
                 Set <strong>STRIPE_SECRET_KEY</strong> and <strong>STRIPE_PUBLISHABLE_KEY</strong>{" "}
                 (or <strong>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</strong>) in your deployment
-                environment, or use the Replit Stripe connector on Replit.
+                environment, use the Replit Stripe connector on Replit, or paste the same keys under{" "}
+                <Link href="/dashboard/settings/runtime-keys" className="text-primary underline">
+                  Settings → Runtime keys
+                </Link>{" "}
+                (admin) so the server loads them from Postgres on boot.
               </p>
               <ol className="space-y-3 text-sm list-decimal list-inside">
                 <li>
@@ -163,6 +168,46 @@ export default function StripeSetupPage() {
               </ol>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Reusing a Stripe account you already set up</CardTitle>
+          <CardDescription>No second Stripe account required</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Open your{" "}
+            <a
+              href={STRIPE_DASHBOARD}
+              className="text-primary underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              existing Stripe Dashboard
+            </a>{" "}
+            and copy the same <strong>Secret</strong> and <strong>Publishable</strong> keys into
+            this deployment (Vercel env or{" "}
+            <Link href="/dashboard/settings/runtime-keys" className="text-primary underline">
+              Runtime keys
+            </Link>
+            ).
+          </p>
+          <p>
+            If the public site URL changed, create a <strong>new webhook endpoint</strong> in Stripe
+            pointing at{" "}
+            <code className="text-xs break-all rounded bg-muted px-1 py-0.5">
+              {siteUrl}/api/stripe/webhook
+            </code>{" "}
+            and update <code className="text-xs">STRIPE_WEBHOOK_SECRET</code> with the new signing
+            secret. Existing customers and products stay in Stripe; only the endpoint URL and env
+            need to match this app.
+          </p>
+          <p>
+            Use <strong>test</strong> vs <strong>live</strong> keys consistently with the mode
+            toggle in the Stripe Dashboard so checkout and webhooks hit the same account mode.
+          </p>
         </CardContent>
       </Card>
 

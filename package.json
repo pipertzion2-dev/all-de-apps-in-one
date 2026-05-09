@@ -1,10 +1,17 @@
 {
   "name": "all-de-apps-workspace",
   "private": true,
-  "description": "Meta-scripts to run sibling projects locally (each app keeps its own package.json).",
+  "description": "Meta-scripts for sibling apps. verify:all is strict (CI): install Svivva (npm i), Pyracrypt & Ai-Tools-Hub (pnpm i), cyberwavy-hub (npm i). Local-only escapes: SKIP_PNPM_WORKSPACES=1, SKIP_CYBERWAVY_VERIFY=1.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "verify:svivva": "cd \"Svivva\" && npm run verify",
+    "verify:pnpm-workspaces": "node scripts/workspace-typecheck.mjs",
+    "verify:cyberwavy": "node scripts/verify-cyberwavy.mjs",
+    "verify:all": "npm run verify:svivva && npm run verify:cyberwavy && npm run verify:pnpm-workspaces",
     "dev:svivva": "cd \"Svivva\" && npm run dev",
     "dev:pyracrypt-web": "cd \"Pyracrypt/artifacts/cybersec-app\" && pnpm dev",
     "dev:pyracrypt-api": "cd \"Pyracrypt/artifacts/api-server\" && pnpm dev",

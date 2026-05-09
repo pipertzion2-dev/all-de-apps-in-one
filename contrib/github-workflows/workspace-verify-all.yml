@@ -1,0 +1,40 @@
+# Strict full-repo gate (same as `npm run verify:all` at repo root after installs).
+# Install: copy this file to .github/workflows/workspace-verify-all.yml
+# (GitHub OAuth tokens without the "workflow" scope cannot push workflow files.)
+name: Workspace verify all
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Enable pnpm
+        run: corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+      - name: Install Svivva
+        run: cd Svivva && npm ci
+
+      - name: Install Pyracrypt
+        run: cd Pyracrypt && pnpm install --frozen-lockfile
+
+      - name: Install Ai-Tools-Hub
+        run: cd Ai-Tools-Hub && pnpm install --frozen-lockfile
+
+      - name: Install cyberwavy-hub
+        run: cd CYBER-SECURITY-MINI-APPS-zip/cyberwavy-hub && npm ci
+
+      - name: verify:all
+        run: npm run verify:all

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { getPrimaryAdminUserId, isAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
       // Find the admin's stored service-account + site URL.
       // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
-      const adminUserId = process.env.ADMIN_USER_ID || "";
+      const adminUserId = getPrimaryAdminUserId() || "";
       const [creds] = adminUserId
         ? await db
             .select({
@@ -125,11 +125,10 @@ export async function POST(req: NextRequest) {
       return badRequest(`Service account auth failed: ${e.message}`);
     }
     try {
-      const result = await db
+      await db
         .update(seedCredentials)
         .set({ googleServiceAccountJson: json, googleIndexingEnabled: true, updatedAt: new Date() })
         .where(eq(seedCredentials.userId, user.id));
-      console.log("[gsc/save] UPDATE result:", JSON.stringify(result));
     } catch (e: any) {
       console.error("[gsc/save] UPDATE failed:", e?.message);
       return serverError(`DB save failed: ${e.message}`);

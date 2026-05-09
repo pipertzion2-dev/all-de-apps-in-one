@@ -13,8 +13,14 @@
 # Vendor / bulk drops (keep formatting scoped to maintained source)
 Ai-Tools-Hub/_uploaded_tools
 Ai-Tools-Hub/artifacts
+Pyracrypt/artifacts
 SVIVVA ADD ONS
 PYRACRYPT EXTRA FEATURES ADD ON
+
+# Secrets and local env (never format)
+**/.env
+**/.env.*
+!**/.env.example
 
 # Lockfiles (noisy, machine-generated)
 **/package-lock.json

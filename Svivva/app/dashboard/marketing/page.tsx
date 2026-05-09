@@ -1701,8 +1701,9 @@ export default function MarketingDashboard() {
                   <Shield className="w-3 h-3" /> Admin setup
                 </p>
                 <p className="text-muted-foreground mt-1">
-                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in Secrets to
-                  keep this page admin-only:
+                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in production
+                  secrets so only you (and optional comma-separated co-owners) can use Orbit,
+                  Growth, and marketing APIs. Your id is below:
                 </p>
                 <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-2.5 py-1.5 mt-1 font-mono break-all">
                   <span className="flex-1 text-xs">{me.user.id}</span>

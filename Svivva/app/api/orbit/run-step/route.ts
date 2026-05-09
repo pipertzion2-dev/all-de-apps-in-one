@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
-import { eq, sql, isNotNull, desc, inArray } from "drizzle-orm";
+import { eq, sql, inArray } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
+import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
+import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 
 export const maxDuration = 300;
 
@@ -159,99 +162,6 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
   return tools;
 }
 
-async function getAllSiteUrls(): Promise<string[]> {
-  const staticUrls = [
-    BASE_URL,
-    `${BASE_URL}/blog`,
-    `${BASE_URL}/tools`,
-    `${BASE_URL}/about`,
-    `${BASE_URL}/pricing`,
-    `${BASE_URL}/docs`,
-  ];
-  const posts = await db
-    .select({ slug: blogPosts.slug })
-    .from(blogPosts)
-    .where(eq(blogPosts.published, true));
-  const pages = await db
-    .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
-    .from(seoLandingPages)
-    .where(eq(seoLandingPages.published, true));
-  return [
-    ...staticUrls,
-    ...posts.map((p) => `${BASE_URL}/blog/${p.slug}`),
-    // All seoLandingPages are served at root /{slug} — never /tools/{slug}
-    ...pages.map((p) => `${BASE_URL}/${p.slug}`),
-  ];
-}
-
-async function submitToIndexNow(
-  userId: string,
-  urls: string[],
-): Promise<{ ok: boolean; count: number; message: string }> {
-  try {
-    // Query without user_id filter — key is admin-only and there's only ever one entry
-    const [credRow] = await db
-      .select({ indexnowKey: seedCredentials.indexnowKey })
-      .from(seedCredentials)
-      .where(isNotNull(seedCredentials.indexnowKey))
-      .orderBy(desc(seedCredentials.updatedAt))
-      .limit(1);
-    const key = credRow?.indexnowKey;
-    if (!key)
-      return { ok: false, count: 0, message: "No IndexNow key — run IndexNow Setup first." };
-    const host = BASE_URL.replace(/^https?:\/\//, "");
-    // Standard IndexNow key location: /{key}.txt served via middleware rewrite
-    const keyLocation = `${BASE_URL}/${key}.txt`;
-    const CHUNK = 9000;
-    let lastStatus = 0;
-    let submitted = 0;
-    for (let i = 0; i < urls.length; i += CHUNK) {
-      const chunk = urls.slice(i, i + CHUNK);
-      const body = JSON.stringify({ host, key, keyLocation, urlList: chunk });
-      const [r1] = await Promise.allSettled([
-        fetch("https://api.indexnow.org/indexnow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json; charset=utf-8" },
-          body,
-          signal: AbortSignal.timeout(30000),
-        }),
-      ]);
-      // Fire-and-forget Bing in parallel without blocking
-      fetch("https://www.bing.com/indexnow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body,
-        signal: AbortSignal.timeout(30000),
-      }).catch(() => {});
-      lastStatus = r1.status === "fulfilled" ? r1.value.status : 0;
-      submitted += chunk.length;
-    }
-    const ok = lastStatus === 200 || lastStatus === 202;
-    if (ok) {
-      await db
-        .update(seedCredentials)
-        .set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
-    }
-    const statusMsg =
-      lastStatus === 403
-        ? `IndexNow: key verification failed (403) — key file must be accessible at ${keyLocation}`
-        : lastStatus === 422
-          ? `IndexNow: invalid URL format (422) — check URL list`
-          : lastStatus === 400
-            ? `IndexNow: bad request (400)`
-            : lastStatus === 0
-              ? `IndexNow: no response (timeout or network error)`
-              : `IndexNow returned HTTP ${lastStatus}`;
-    return {
-      ok,
-      count: submitted,
-      message: ok ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow` : statusMsg,
-    };
-  } catch (e) {
-    return { ok: false, count: 0, message: `IndexNow error: ${String(e).slice(0, 120)}` };
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     const internalSecret = req.headers.get("x-internal-secret");
@@ -259,19 +169,29 @@ export async function POST(req: NextRequest) {
     let user: Awaited<ReturnType<typeof getCurrentUser>> = null;
     if (!isInternalCall) {
       user = await getCurrentUser();
-      console.log("[orbit/run-step] user:", user?.id ?? "null");
       if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // For internal calls, fall back to admin user ID so IndexNow lookups still work
-    const userId: string = isInternalCall
-      ? "51602957"
-      : String((user as NonNullable<typeof user>).id);
+    let userId: string;
+    if (isInternalCall) {
+      const internalId = await resolveOrbitInternalUserId();
+      if (!internalId) {
+        return NextResponse.json(
+          {
+            error:
+              "Orbit internal user not configured: set ORBIT_INTERNAL_USER_ID or create seed_credentials.",
+          },
+          { status: 503 },
+        );
+      }
+      userId = internalId;
+    } else {
+      userId = String((user as NonNullable<typeof user>).id);
+    }
 
     const body = await req.json();
     const { stepId } = body;
-    console.log("[orbit/run-step] stepId:", stepId);
 
     // ── STEP: IndexNow setup + submit ────────────────────────────────────────
     if (stepId === "svivva-indexnow") {
@@ -281,10 +201,10 @@ export async function POST(req: NextRequest) {
         VALUES (${randomBytes(8).toString("hex")}, ${userId}, ${key}, NOW())
         ON CONFLICT (user_id) DO UPDATE SET indexnow_key = ${key}, updated_at = NOW()
       `);
-      const urls = await getAllSiteUrls();
-      const submit = await submitToIndexNow(userId, urls);
+      const urls = await getAllSiteUrlsForIndexing();
+      const submit = await submitIndexNowBatched(urls, { indexnowKey: key });
       return NextResponse.json({
-        summary: `✓ IndexNow key generated: ${key.slice(0, 8)}…\n${submit.message}\n✓ Key served at ${BASE_URL}/api/indexnow-key\n✓ Search engines: Bing, Yandex, Yahoo, DuckDuckGo`,
+        summary: `✓ IndexNow key generated: ${key.slice(0, 8)}…\n${submit.message}\n✓ Key served at ${BASE_URL}/${key}.txt\n✓ Search engines: Bing, Yandex, Yahoo, DuckDuckGo`,
         details: { key: key.slice(0, 8) + "…", urlCount: urls.length, submitted: submit.ok },
       });
     }
@@ -393,7 +313,7 @@ export async function POST(req: NextRequest) {
       }
 
       const newUrls = created.filter((c) => !c.title.startsWith("[existing]")).map((c) => c.url);
-      const indexResult = newUrls.length > 0 ? await submitToIndexNow(userId, newUrls) : null;
+      const indexResult = newUrls.length > 0 ? await submitIndexNowBatched(newUrls) : null;
       const lines = [
         `✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`,
         `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`,
@@ -496,7 +416,7 @@ export async function POST(req: NextRequest) {
       const newUrls = created
         .filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url)
         .map((c) => c.url);
-      if (newUrls.length) await submitToIndexNow(userId, newUrls);
+      if (newUrls.length) await submitIndexNowBatched(newUrls);
       const pageList = created.map((c) => `• ${c.title}`).join("\n");
       return NextResponse.json({
         summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ Targeting: "[Competitor] alternative" searches\n\n${pageList}`,
@@ -577,7 +497,7 @@ export async function POST(req: NextRequest) {
       const newUrls = created
         .filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url)
         .map((c) => c.url);
-      if (newUrls.length) await submitToIndexNow(userId, newUrls);
+      if (newUrls.length) await submitIndexNowBatched(newUrls);
       const postList = created
         .map((c) => `• ${c.title.replace("[existing] ", "").replace("[error] ", "⚠ ")}`)
         .join("\n");
@@ -634,11 +554,11 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Submit sitemap ─────────────────────────────────────────────────
     if (stepId === "svivva-submit") {
-      const urls = await getAllSiteUrls();
+      const urls = await getAllSiteUrlsForIndexing();
 
       // Fire all IndexNow + Bing ping requests fire-and-forget — never block waiting for them
       // (Cloud Run kills long-running requests; these network calls don't need to block the UI)
-      submitToIndexNow(userId, urls).catch(() => {});
+      submitIndexNowBatched(urls).catch(() => {});
       const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
       fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
         signal: AbortSignal.timeout(10000),
@@ -849,7 +769,7 @@ Return JSON with these 4 keys:
         }
       }
 
-      if (newPageUrls.length > 0) await submitToIndexNow(userId, newPageUrls);
+      if (newPageUrls.length > 0) await submitIndexNowBatched(newPageUrls);
 
       const totalPages = allCreated.reduce((n, a) => n + a.pages.length, 0);
       const processedInChunk = allCreated.filter((a) => a.pages.length > 0).length;
@@ -975,7 +895,7 @@ Return JSON with these 4 keys:
       }
 
       const urls = created.filter((c) => c.url).map((c) => c.url);
-      if (urls.length > 0) await submitToIndexNow(userId, urls);
+      if (urls.length > 0) await submitIndexNowBatched(urls);
 
       return NextResponse.json({
         summary: [
@@ -1070,7 +990,7 @@ Return JSON with these 4 keys:
       }
 
       const urls = outputs.map((o) => o.url);
-      if (urls.length > 0) await submitToIndexNow(userId, urls);
+      if (urls.length > 0) await submitIndexNowBatched(urls);
 
       return NextResponse.json({
         summary: [
@@ -1139,7 +1059,7 @@ Return JSON with these 4 keys:
       }
 
       const urls = created.map((c) => c.url);
-      if (urls.length > 0) await submitToIndexNow(userId, urls);
+      if (urls.length > 0) await submitIndexNowBatched(urls);
 
       return NextResponse.json({
         summary: [
@@ -1288,7 +1208,7 @@ Return JSON:
         }
       }
 
-      if (createdPages.length > 0) await submitToIndexNow(userId, createdPages);
+      if (createdPages.length > 0) await submitIndexNowBatched(createdPages);
 
       return NextResponse.json({
         summary: [
@@ -1592,7 +1512,7 @@ Return JSON:
 
     // ── STEP: Index ALL app pages + hub + categories ──────────────────────────
     if (stepId === "mini-index") {
-      const allUrls = await getAllSiteUrls();
+      const allUrls = await getAllSiteUrlsForIndexing();
 
       // Also directly query seed-marketing pages to make sure we have them all
       const seedPages = await db
@@ -1608,7 +1528,7 @@ Return JSON:
       const finalUrls = Array.from(allSet);
 
       const seoPageCount = seedUrls.length;
-      const allResult = await submitToIndexNow(userId, finalUrls);
+      const allResult = await submitIndexNowBatched(finalUrls);
 
       // Ping Bing sitemap (Google deprecated their ping endpoint in 2023)
       const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
@@ -2140,7 +2060,7 @@ Return JSON:
         }
       }
 
-      if (created.length) await submitToIndexNow(userId, created);
+      if (created.length) await submitIndexNowBatched(created);
 
       return NextResponse.json({
         summary: [
@@ -2586,7 +2506,7 @@ Return JSON:
         }
       }
 
-      if (pagesCreated.length) await submitToIndexNow(userId, pagesCreated);
+      if (pagesCreated.length) await submitIndexNowBatched(pagesCreated);
 
       return NextResponse.json({
         summary: [
@@ -3257,7 +3177,7 @@ Return JSON:
         }
       }
 
-      if (created.length) await submitToIndexNow(userId, created);
+      if (created.length) await submitIndexNowBatched(created);
 
       return NextResponse.json({
         summary: [
@@ -3791,7 +3711,7 @@ Return JSON:
         }
       }
 
-      if (pagesCreated.length) await submitToIndexNow(userId, pagesCreated);
+      if (pagesCreated.length) await submitIndexNowBatched(pagesCreated);
 
       const techChecklist = (schemaData.technicalChecklist || [])
         .map((item: string) => `☐ ${item}`)
@@ -3924,7 +3844,7 @@ Return JSON:
         .filter((r) => r.status === "fulfilled")
         .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
       const newUrls = created.map((c) => c.url);
-      if (newUrls.length) submitToIndexNow(userId, newUrls).catch(() => {});
+      if (newUrls.length) submitIndexNowBatched(newUrls).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${created.length} integration pages created (${skipped.length} already existed)`,
@@ -4031,11 +3951,7 @@ Return JSON:
       const indCreated = indResults
         .filter((r) => r.status === "fulfilled")
         .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
-      if (indCreated.length)
-        submitToIndexNow(
-          userId,
-          indCreated.map((c) => c.url),
-        ).catch(() => {});
+      if (indCreated.length) submitIndexNowBatched(indCreated.map((c) => c.url)).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${indCreated.length} industry use case pages created (${indSkipped.length} already existed)`,
@@ -4221,11 +4137,7 @@ Return JSON:
       const tmplCreated = tmplResults
         .filter((r) => r.status === "fulfilled")
         .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
-      if (tmplCreated.length)
-        submitToIndexNow(
-          userId,
-          tmplCreated.map((c) => c.url),
-        ).catch(() => {});
+      if (tmplCreated.length) submitIndexNowBatched(tmplCreated.map((c) => c.url)).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${tmplCreated.length} API template pages created (${tmplSkipped.length} already existed)`,
@@ -4319,11 +4231,7 @@ Return JSON:
       const paaCreated = paaResults
         .filter((r) => r.status === "fulfilled")
         .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
-      if (paaCreated.length)
-        submitToIndexNow(
-          userId,
-          paaCreated.map((c) => c.url),
-        ).catch(() => {});
+      if (paaCreated.length) submitIndexNowBatched(paaCreated.map((c) => c.url)).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${paaCreated.length} PAA pages created (${paaSkipped.length} already existed)`,

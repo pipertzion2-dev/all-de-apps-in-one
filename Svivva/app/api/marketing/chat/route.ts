@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { getPrimaryAdminUserId, isAdmin } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
@@ -13,7 +13,7 @@ async function callInternal(path: string, body: object) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-internal-admin": process.env.ADMIN_USER_ID || "",
+      "x-internal-admin": getPrimaryAdminUserId() || "",
     },
     body: JSON.stringify(body),
   });
