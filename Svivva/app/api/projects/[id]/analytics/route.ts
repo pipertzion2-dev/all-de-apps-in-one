@@ -58,8 +58,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         and(
           eq(analyticsRollups.projectId, id),
           eq(analyticsRollups.interval, interval),
-          gte(analyticsRollups.periodStart, startDate)
-        )
+          gte(analyticsRollups.periodStart, startDate),
+        ),
       )
       .orderBy(analyticsRollups.periodStart);
 
@@ -72,12 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         createdAt: usageLogs.createdAt,
       })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.projectId, id),
-          gte(usageLogs.createdAt, startDate)
-        )
-      )
+      .where(and(eq(usageLogs.projectId, id), gte(usageLogs.createdAt, startDate)))
       .orderBy(desc(usageLogs.createdAt))
       .limit(100);
 
@@ -93,12 +88,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         totalTokens: sql<number>`coalesce(sum(${usageLogs.tokensUsed}), 0)::int`,
       })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.projectId, id),
-          gte(usageLogs.createdAt, startDate)
-        )
-      );
+      .where(and(eq(usageLogs.projectId, id), gte(usageLogs.createdAt, startDate)));
 
     const hourlyData = await db
       .select({
@@ -108,12 +98,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         errors: sql<number>`count(*) filter (where ${usageLogs.status} != 'success')::int`,
       })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.projectId, id),
-          gte(usageLogs.createdAt, startDate)
-        )
-      )
+      .where(and(eq(usageLogs.projectId, id), gte(usageLogs.createdAt, startDate)))
       .groupBy(sql`date_trunc('hour', ${usageLogs.createdAt})`)
       .orderBy(sql`date_trunc('hour', ${usageLogs.createdAt})`);
 
@@ -128,9 +113,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       totalTokens: 0,
     };
 
-    const errorRate = summary.totalCalls > 0 
-      ? ((summary.failedCalls / summary.totalCalls) * 100).toFixed(2)
-      : "0.00";
+    const errorRate =
+      summary.totalCalls > 0
+        ? ((summary.failedCalls / summary.totalCalls) * 100).toFixed(2)
+        : "0.00";
 
     return NextResponse.json({
       project: {
@@ -142,9 +128,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       summary: {
         ...summary,
         errorRate: parseFloat(errorRate),
-        successRate: summary.totalCalls > 0 
-          ? parseFloat(((summary.successCalls / summary.totalCalls) * 100).toFixed(2))
-          : 100,
+        successRate:
+          summary.totalCalls > 0
+            ? parseFloat(((summary.successCalls / summary.totalCalls) * 100).toFixed(2))
+            : 100,
       },
       latencyPercentiles: {
         p50: summary.p50Latency,

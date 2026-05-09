@@ -2,22 +2,35 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Store, 
-  Search, 
-  Star, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Store,
+  Search,
+  Star,
   Download,
   DollarSign,
   TrendingUp,
   Sparkles,
-  Filter
+  Filter,
 } from "lucide-react";
 
 interface MarketplaceListing {
@@ -69,7 +82,7 @@ function StarRating({ rating, count }: { rating: number | null; count: number })
   if (!rating || count === 0) {
     return <span className="text-xs text-muted-foreground">No reviews</span>;
   }
-  
+
   return (
     <div className="flex items-center gap-1">
       <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
@@ -90,7 +103,7 @@ export default function MarketplacePage() {
       const params = new URLSearchParams();
       if (searchQuery) params.set("search", searchQuery);
       if (category !== "all") params.set("category", category);
-      
+
       const res = await fetch(`/api/marketplace?${params}`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch marketplace");
       return res.json();
@@ -102,13 +115,15 @@ export default function MarketplacePage() {
   };
 
   const listings = data?.listings || [];
-  const featuredListings = listings.filter(l => l.featuredAt);
-  const regularListings = listings.filter(l => !l.featuredAt);
+  const featuredListings = listings.filter((l) => l.featuredAt);
+  const regularListings = listings.filter((l) => !l.featuredAt);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="text-marketplace-title">Marketplace</h1>
+        <h1 className="text-3xl font-bold" data-testid="text-marketplace-title">
+          Marketplace
+        </h1>
         <p className="text-muted-foreground">Discover and purchase pre-built AI APIs</p>
       </div>
 
@@ -132,7 +147,9 @@ export default function MarketplacePage() {
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+              <SelectItem key={cat.value} value={cat.value}>
+                {cat.label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -150,8 +167,8 @@ export default function MarketplacePage() {
             <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No listings found</h3>
             <p className="text-muted-foreground">
-              {searchQuery || category !== "all" 
-                ? "Try adjusting your search or filters" 
+              {searchQuery || category !== "all"
+                ? "Try adjusting your search or filters"
                 : "Be the first to list your API on the marketplace!"}
             </p>
           </CardContent>
@@ -194,9 +211,15 @@ export default function MarketplacePage() {
   );
 }
 
-function ListingCard({ listing, featured = false }: { listing: MarketplaceListing; featured?: boolean }) {
+function ListingCard({
+  listing,
+  featured = false,
+}: {
+  listing: MarketplaceListing;
+  featured?: boolean;
+}) {
   return (
-    <Card 
+    <Card
       className={`hover-elevate cursor-pointer ${featured ? "border-yellow-500/50" : ""}`}
       data-testid={`card-listing-${listing.id}`}
     >

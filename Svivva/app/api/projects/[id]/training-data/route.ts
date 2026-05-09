@@ -23,10 +23,12 @@ const AddBatchTrainingSchema = z.object({
 const ImportTrainingSchema = z.object({
   format: z.enum(["json", "csv"]),
   data: z.string(),
-  mapping: z.object({
-    inputField: z.string().default("input"),
-    outputField: z.string().default("output"),
-  }).optional(),
+  mapping: z
+    .object({
+      inputField: z.string().default("input"),
+      outputField: z.string().default("output"),
+    })
+    .optional(),
 });
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
@@ -79,15 +81,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    
+
     if (body.examples) {
       const parsed = AddBatchTrainingSchema.parse(body);
-      
+
       const existingCount = await db
         .select()
         .from(trainingExamples)
         .where(eq(trainingExamples.versionId, latestVersion.id));
-      
+
       const toInsert = parsed.examples.map((example, index) => ({
         id: uuidv4(),
         versionId: latestVersion.id,
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       });
     } else {
       const parsed = AddTrainingExampleSchema.parse(body);
-      
+
       const existingCount = await db
         .select()
         .from(trainingExamples)
@@ -128,7 +130,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Validation error", details: error.errors },
+        { status: 400 },
+      );
     }
     console.error("Add training data error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

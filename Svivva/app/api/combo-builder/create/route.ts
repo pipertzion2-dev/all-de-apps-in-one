@@ -29,10 +29,7 @@ export async function POST(request: NextRequest) {
     const { bundleName, brand, apis, companyDescription, goals } = await request.json();
 
     if (!apis || apis.length === 0) {
-      return NextResponse.json(
-        { error: "At least one API is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "At least one API is required" }, { status: 400 });
     }
 
     const createdProjects: { id: string; name: string; status: string }[] = [];
@@ -116,9 +113,6 @@ This API is part of the "${bundleName}" product suite.`;
     });
   } catch (error) {
     console.error("Combo builder create error:", error);
-    return NextResponse.json(
-      { error: "Failed to create API bundle" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create API bundle" }, { status: 500 });
   }
 }

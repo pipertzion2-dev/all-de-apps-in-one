@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 
 function idOf(
-  ref: string | Stripe.Customer | Stripe.DeletedCustomer | Stripe.Subscription | null | undefined
+  ref: string | Stripe.Customer | Stripe.DeletedCustomer | Stripe.Subscription | null | undefined,
 ): string | null {
   if (ref == null) return null;
   if (typeof ref === "string") return ref;

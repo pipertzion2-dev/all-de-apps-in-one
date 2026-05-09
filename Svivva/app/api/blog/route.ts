@@ -20,9 +20,7 @@ export async function GET(request: NextRequest) {
       .where(and(...conditions))
       .orderBy(desc(blogPosts.publishedAt));
 
-    const filtered = tag
-      ? posts.filter((p) => p.tags.includes(tag))
-      : posts;
+    const filtered = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
 
     return NextResponse.json(filtered);
   } catch (error) {

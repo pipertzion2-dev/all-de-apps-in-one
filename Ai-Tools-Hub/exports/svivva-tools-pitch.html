@@ -1,759 +1,1943 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>svivva-tools — YC-style brief</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
-    color: #0f0815;
-    background: #faf9fc;
-    line-height: 1.5;
-    font-size: 15px;
-  }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 0 20px 80px; }
-  .hero {
-    background: linear-gradient(135deg, #0f0815 0%, #2e1065 100%);
-    color: #fff;
-    padding: 48px 24px 56px;
-    margin-bottom: 32px;
-  }
-  .hero-inner { max-width: 940px; margin: 0 auto; padding: 0 20px; }
-  .eyebrow { color: #a78bfa; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; }
-  h1.title { font-size: clamp(34px, 7vw, 54px); font-weight: 800; margin: 8px 0 16px; letter-spacing: -0.02em; }
-  .lead { color: #ddd6fe; font-size: clamp(15px, 2.3vw, 19px); max-width: 720px; line-height: 1.4; }
-  .meta { color: #a78bfa; font-size: 12px; margin-top: 14px; }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>svivva-tools — YC-style brief</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+        color: #0f0815;
+        background: #faf9fc;
+        line-height: 1.5;
+        font-size: 15px;
+      }
+      .wrap {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 0 20px 80px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #0f0815 0%, #2e1065 100%);
+        color: #fff;
+        padding: 48px 24px 56px;
+        margin-bottom: 32px;
+      }
+      .hero-inner {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      .eyebrow {
+        color: #a78bfa;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+      h1.title {
+        font-size: clamp(34px, 7vw, 54px);
+        font-weight: 800;
+        margin: 8px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      .lead {
+        color: #ddd6fe;
+        font-size: clamp(15px, 2.3vw, 19px);
+        max-width: 720px;
+        line-height: 1.4;
+      }
+      .meta {
+        color: #a78bfa;
+        font-size: 12px;
+        margin-top: 14px;
+      }
 
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: -28px auto 32px; max-width: 940px; padding: 0 20px; position: relative; z-index: 2; }
-  @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
-  .stat {
-    background: #fff; border: 1px solid #ede9fe; border-radius: 12px;
-    padding: 14px 14px 12px; box-shadow: 0 4px 12px rgba(15,8,21,.05);
-  }
-  .stat .v { font-size: 28px; font-weight: 800; color: #7c3aed; line-height: 1; }
-  .stat .l { font-size: 12px; font-weight: 700; margin-top: 6px; }
-  .stat .s { font-size: 11px; color: #6b7280; margin-top: 2px; }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: -28px auto 32px;
+        max-width: 940px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+      }
+      @media (max-width: 600px) {
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .stat {
+        background: #fff;
+        border: 1px solid #ede9fe;
+        border-radius: 12px;
+        padding: 14px 14px 12px;
+        box-shadow: 0 4px 12px rgba(15, 8, 21, 0.05);
+      }
+      .stat .v {
+        font-size: 28px;
+        font-weight: 800;
+        color: #7c3aed;
+        line-height: 1;
+      }
+      .stat .l {
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+      .stat .s {
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 2px;
+      }
 
-  section.block { margin: 28px 0; }
-  h2.section {
-    font-size: 22px; font-weight: 800; margin-bottom: 10px;
-    padding-bottom: 6px; border-bottom: 2px solid #ede9fe;
-  }
-  h2.section::before {
-    content: ""; display: inline-block; width: 6px; height: 18px; background: #7c3aed;
-    margin-right: 10px; vertical-align: -3px; border-radius: 2px;
-  }
-  h3.sub { font-size: 14px; font-weight: 700; color: #5b21b6; margin: 12px 0 4px; }
-  p { margin: 6px 0; }
-  ul.bul { margin: 6px 0 6px 18px; }
-  ul.bul li { margin: 3px 0; }
+      section.block {
+        margin: 28px 0;
+      }
+      h2.section {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #ede9fe;
+      }
+      h2.section::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 18px;
+        background: #7c3aed;
+        margin-right: 10px;
+        vertical-align: -3px;
+        border-radius: 2px;
+      }
+      h3.sub {
+        font-size: 14px;
+        font-weight: 700;
+        color: #5b21b6;
+        margin: 12px 0 4px;
+      }
+      p {
+        margin: 6px 0;
+      }
+      ul.bul {
+        margin: 6px 0 6px 18px;
+      }
+      ul.bul li {
+        margin: 3px 0;
+      }
 
-  .stages { display: grid; gap: 8px; margin-top: 8px; }
-  .stage {
-    display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start;
-    background: #fff; border: 1px solid #ede9fe; border-radius: 10px; padding: 10px 14px;
-  }
-  .stage .n { background: #7c3aed; color: #fff; width: 28px; height: 28px; border-radius: 50%;
-    display: grid; place-items: center; font-weight: 800; font-size: 13px; }
-  .stage h4 { font-size: 14px; font-weight: 700; }
-  .stage p { font-size: 13px; color: #374151; margin-top: 2px; }
+      .stages {
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 12px;
+        align-items: start;
+        background: #fff;
+        border: 1px solid #ede9fe;
+        border-radius: 10px;
+        padding: 10px 14px;
+      }
+      .stage .n {
+        background: #7c3aed;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        font-size: 13px;
+      }
+      .stage h4 {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .stage p {
+        font-size: 13px;
+        color: #374151;
+        margin-top: 2px;
+      }
 
-  .comp { display: grid; gap: 8px; margin-top: 8px; }
-  .row { background: #fff; border: 1px solid #ede9fe; border-radius: 10px; padding: 10px 14px; }
-  .row h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .row .them { color: #b45309; font-size: 13px; }
-  .row .us { color: #047857; font-size: 13px; margin-top: 2px; }
-  .row b { font-weight: 700; }
+      .comp {
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .row {
+        background: #fff;
+        border: 1px solid #ede9fe;
+        border-radius: 10px;
+        padding: 10px 14px;
+      }
+      .row h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .row .them {
+        color: #b45309;
+        font-size: 13px;
+      }
+      .row .us {
+        color: #047857;
+        font-size: 13px;
+        margin-top: 2px;
+      }
+      .row b {
+        font-weight: 700;
+      }
 
-  .arch { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-  @media (max-width: 600px) { .arch { grid-template-columns: 1fr; } }
-  .arch .a { background: #fff; border: 1px solid #ede9fe; border-radius: 10px; padding: 12px; }
-  .arch .a h4 { font-size: 13px; font-weight: 700; color: #7c3aed; font-family: ui-monospace, monospace; }
-  .arch .a p { font-size: 13px; color: #374151; margin-top: 4px; }
+      .arch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      @media (max-width: 600px) {
+        .arch {
+          grid-template-columns: 1fr;
+        }
+      }
+      .arch .a {
+        background: #fff;
+        border: 1px solid #ede9fe;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .arch .a h4 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #7c3aed;
+        font-family: ui-monospace, monospace;
+      }
+      .arch .a p {
+        font-size: 13px;
+        color: #374151;
+        margin-top: 4px;
+      }
 
-  section.cat { margin-top: 22px; }
-  .cat-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 2px solid var(--c); padding-bottom: 4px; margin-bottom: 6px; }
-  .cat-head h2 { font-size: 18px; font-weight: 800; color: var(--c); }
-  .cat-head .count { font-size: 12px; color: #6b7280; font-weight: 600; }
-  .cat-blurb { font-size: 13px; color: #4b5563; margin-bottom: 10px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: #fff; border: 1px solid #ede9fe; border-left: 3px solid var(--c);
-    border-radius: 8px; padding: 10px 12px; min-height: 100%;
-  }
-  .card header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-  .card h3 { font-size: 14px; font-weight: 700; line-height: 1.2; }
-  .card .slug { font-size: 10px; color: #9ca3af; font-family: ui-monospace, monospace; white-space: nowrap; }
-  .card .tag { font-size: 12px; color: #374151; line-height: 1.35; }
-  .card .feat { list-style: none; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-  .card .feat li {
-    font-size: 10px; background: #f5f3ff; color: #5b21b6;
-    padding: 2px 6px; border-radius: 4px; line-height: 1.3;
-  }
+      section.cat {
+        margin-top: 22px;
+      }
+      .cat-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        border-bottom: 2px solid var(--c);
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+      }
+      .cat-head h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--c);
+      }
+      .cat-head .count {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 600;
+      }
+      .cat-blurb {
+        font-size: 13px;
+        color: #4b5563;
+        margin-bottom: 10px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      @media (max-width: 800px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 500px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #ede9fe;
+        border-left: 3px solid var(--c);
+        border-radius: 8px;
+        padding: 10px 12px;
+        min-height: 100%;
+      }
+      .card header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .card h3 {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .card .slug {
+        font-size: 10px;
+        color: #9ca3af;
+        font-family: ui-monospace, monospace;
+        white-space: nowrap;
+      }
+      .card .tag {
+        font-size: 12px;
+        color: #374151;
+        line-height: 1.35;
+      }
+      .card .feat {
+        list-style: none;
+        margin-top: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .card .feat li {
+        font-size: 10px;
+        background: #f5f3ff;
+        color: #5b21b6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        line-height: 1.3;
+      }
 
-  .cta {
-    background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff;
-    padding: 22px; border-radius: 14px; margin-top: 28px; text-align: center;
-  }
-  .cta h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-  .cta p { color: #ddd6fe; font-size: 14px; }
-  .cta a { display: inline-block; margin-top: 12px; background: #fff; color: #5b21b6;
-    padding: 10px 22px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 14px; }
+      .cta {
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: #fff;
+        padding: 22px;
+        border-radius: 14px;
+        margin-top: 28px;
+        text-align: center;
+      }
+      .cta h2 {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .cta p {
+        color: #ddd6fe;
+        font-size: 14px;
+      }
+      .cta a {
+        display: inline-block;
+        margin-top: 12px;
+        background: #fff;
+        color: #5b21b6;
+        padding: 10px 22px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+      }
 
-  footer { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; }
+      footer {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 11px;
+        margin-top: 32px;
+      }
 
-  @media print {
-    body { background: #fff; font-size: 12px; }
-    .hero { padding: 24px; }
-    .stats { margin-top: -16px; }
-    .grid { grid-template-columns: repeat(3, 1fr) !important; }
-    section.cat { page-break-inside: avoid; }
-    .card { break-inside: avoid; }
-  }
-</style>
-</head>
-<body>
+      @media print {
+        body {
+          background: #fff;
+          font-size: 12px;
+        }
+        .hero {
+          padding: 24px;
+        }
+        .stats {
+          margin-top: -16px;
+        }
+        .grid {
+          grid-template-columns: repeat(3, 1fr) !important;
+        }
+        section.cat {
+          page-break-inside: avoid;
+        }
+        .card {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">SVIVVA · ENGINEERING-AS-MARKETING</div>
+        <h1 class="title">svivva-tools</h1>
+        <p class="lead">
+          A hub of 84 free AI mini apps that turns long-tail Google searches into Svivva customers.
+        </p>
+        <div class="meta">
+          Built on Replit · pnpm monorepo · 3 artifacts · shipped to svivva.com
+        </div>
+      </div>
+    </header>
 
-<header class="hero">
-  <div class="hero-inner">
-    <div class="eyebrow">SVIVVA · ENGINEERING-AS-MARKETING</div>
-    <h1 class="title">svivva-tools</h1>
-    <p class="lead">A hub of 84 free AI mini apps that turns long-tail Google searches into Svivva customers.</p>
-    <div class="meta">Built on Replit · pnpm monorepo · 3 artifacts · shipped to svivva.com</div>
-  </div>
-</header>
-
-<div class="stats">
-  <div class="stat"><div class="v">84</div><div class="l">mini apps</div><div class="s">live & shipping</div></div>
-  <div class="stat"><div class="v">98</div><div class="l">SEO pages</div><div class="s">sitemap-indexed</div></div>
-  <div class="stat"><div class="v">10</div><div class="l">categories</div><div class="s">distinct verticals</div></div>
-  <div class="stat"><div class="v">$0</div><div class="l">CAC ceiling</div><div class="s">organic by design</div></div>
-</div>
-
-<main class="wrap">
-
-  <section class="block">
-    <h2 class="section">The one-liner</h2>
-    <p>Most "free AI tools" sites are paywalled, fake, or thin. We shipped 84 fully-working mini apps — each with its own keyword-targeted SEO landing page — so people Googling narrow intent ("free decision tree maker", "json schema generator", "cognitive bias detector") land on a real working tool, get value in under 10 seconds, then funnel into the full Svivva platform.</p>
-  </section>
-
-  <section class="block">
-    <h2 class="section">The problem</h2>
-    <p>Acquiring developers, researchers, and operators is expensive and slow. Three failure modes dominate:</p>
-    <h3 class="sub">1. The paywalled "free tool" trap</h3>
-    <p>Most AI utility sites lock the actual output behind a signup. Visitors smell the gate within 3 seconds and leave with a bad impression of the brand.</p>
-    <h3 class="sub">2. The thin SEO bait</h3>
-    <p>Other sites publish a page per keyword that returns a half-broken result powered by a single LLM call. They rank briefly, but Google's helpful-content updates are crushing them.</p>
-    <h3 class="sub">3. Paid ads in AI verticals</h3>
-    <p>A Google Ads click in dev/AI keywords runs $4–$20. When the budget stops, traffic stops. No compounding, no asset, no defensibility.</p>
-  </section>
-
-  <section class="block">
-    <h2 class="section">The solution</h2>
-    <p>svivva-tools is engineering-as-marketing taken to its logical conclusion: ship the actual tool people are searching for, give it away free with no friction, and let the experience itself do the selling.</p>
-    <ul class="bul">
-      <li>84 working mini apps spanning 10 verticals — every tool is real, no fake demos, no signup walls.</li>
-      <li>Each tool gets a structured landing page at svivva.com/&lt;slug&gt;: tagline, features, three-step how-to, FAQs, related tools.</li>
-      <li>Tools embed in an iframe inline — visitor reads the page, clicks "Try Free →", and is using the tool within one second.</li>
-      <li>A persistent "Svivva Seeds" frosted-glass ad surfaces the parent platform on every page — non-blocking, dismissible, always present.</li>
-      <li>Every page is fully prerendered HTML for Google, with sitemap entries, semantic headings, and FAQ schema.</li>
-    </ul>
-  </section>
-
-  <section class="block">
-    <h2 class="section">Why now</h2>
-    <h3 class="sub">Client-side AI primitives</h3>
-    <p>Models, audio synthesis, schema validation, even small LLMs run entirely in the browser. Most of the 84 tools have zero server cost per use.</p>
-    <h3 class="sub">Replit + pnpm monorepo workflow</h3>
-    <p>Adding tool #85 takes hours, not weeks. Single workspace, shared TypeScript config, three artifacts deploying independently.</p>
-    <h3 class="sub">Google still rewards real utility</h3>
-    <p>Helpful-content updates favor pages that solve the searcher's actual problem. A working tool inline with structured supporting content is exactly what those updates were designed to surface.</p>
-  </section>
-
-  <section class="block">
-    <h2 class="section">How the funnel converts</h2>
-    <div class="stages">
-      <div class="stage"><div class="n">1</div><div><h4>Discover</h4><p>A searcher types "cognitive bias detector" or "json schema generator" into Google. They land on svivva.com/&lt;slug&gt; — fast static HTML, lighthouse-perfect.</p></div></div>
-      <div class="stage"><div class="n">2</div><div><h4>Convert (use)</h4><p>They click "Try [tool] Free →". The actual working app launches in an iframe on the same page. No signup, no email gate, no rate limit. Value delivered in under 10 seconds.</p></div></div>
-      <div class="stage"><div class="n">3</div><div><h4>Notice the brand</h4><p>The persistent Svivva Seeds banner sits at the bottom describing what the full platform does. Frosted-glass styling, dismissible, always present without blocking the tool.</p></div></div>
-      <div class="stage"><div class="n">4</div><div><h4>Click through</h4><p>When ready (often after using 2–3 tools across the hub), they hit "Grow with Svivva →" or "Unlock All 50+ Tools" and arrive at svivva.com proper.</p></div></div>
-      <div class="stage"><div class="n">5</div><div><h4>Compound</h4><p>Every shipped tool adds a new long-tail keyword surface. They share the same domain authority and funnel into the same product. The 85th tool ranks faster than the 1st.</p></div></div>
+    <div class="stats">
+      <div class="stat">
+        <div class="v">84</div>
+        <div class="l">mini apps</div>
+        <div class="s">live & shipping</div>
+      </div>
+      <div class="stat">
+        <div class="v">98</div>
+        <div class="l">SEO pages</div>
+        <div class="s">sitemap-indexed</div>
+      </div>
+      <div class="stat">
+        <div class="v">10</div>
+        <div class="l">categories</div>
+        <div class="s">distinct verticals</div>
+      </div>
+      <div class="stat">
+        <div class="v">$0</div>
+        <div class="l">CAC ceiling</div>
+        <div class="s">organic by design</div>
+      </div>
     </div>
-  </section>
 
-  <section class="block">
-    <h2 class="section">Competitive position</h2>
-    <div class="comp">
-      <div class="row"><h4>Free AI tool aggregators</h4>
-        <div class="them"><b>Theirs:</b> Listicles linking to 3rd-party tools. No control, no moat, no funnel.</div>
-        <div class="us"><b>Ours:</b> We own the tool, the page, and the funnel.</div></div>
-      <div class="row"><h4>Single-purpose SaaS</h4>
-        <div class="them"><b>Theirs:</b> Build one good tool, charge for it. Capped TAM, paywall friction.</div>
-        <div class="us"><b>Ours:</b> 84 free entry points, one paid platform behind them.</div></div>
-      <div class="row"><h4>Generic AI assistants</h4>
-        <div class="them"><b>Theirs:</b> One chat box, infinite use cases. High cognitive load on the user.</div>
-        <div class="us"><b>Ours:</b> Each tool is named, scoped, and Google-discoverable.</div></div>
-      <div class="row"><h4>Content marketing blogs</h4>
-        <div class="them"><b>Theirs:</b> Articles about how to do something. Slow ranking, easy to skim and bounce.</div>
-        <div class="us"><b>Ours:</b> Tool pages let users do the thing on the page — sticky.</div></div>
-    </div>
-  </section>
+    <main class="wrap">
+      <section class="block">
+        <h2 class="section">The one-liner</h2>
+        <p>
+          Most "free AI tools" sites are paywalled, fake, or thin. We shipped 84 fully-working mini
+          apps — each with its own keyword-targeted SEO landing page — so people Googling narrow
+          intent ("free decision tree maker", "json schema generator", "cognitive bias detector")
+          land on a real working tool, get value in under 10 seconds, then funnel into the full
+          Svivva platform.
+        </p>
+      </section>
 
-  <section class="block">
-    <h2 class="section">How the Repl is built</h2>
-    <p>A pnpm monorepo running on Replit with three artifacts that share a single TypeScript root and a Postgres database.</p>
-    <div class="arch">
-      <div class="a"><h4>artifacts/ai-tools-hub</h4><p>React + Vite SPA. Hosts the 84 landing pages, routing (Wouter), embedded-tool iframes, the Svivva Seeds ad, and the homepage category browser. This is what visitors see.</p></div>
-      <div class="a"><h4>artifacts/api-server</h4><p>Node + Express. Hosts AI proxy endpoints (chat, summarization, image gen), rate-limited public APIs the embedded tools call, and lead-capture endpoints.</p></div>
-      <div class="a"><h4>artifacts/mockup-sandbox</h4><p>Isolated Vite preview server. Used during design exploration — every component variant gets its own URL so we can iframe several side-by-side and pick the winner.</p></div>
-      <div class="a"><h4>PostgreSQL</h4><p>Single Replit-managed database shared across artifacts. Stores per-tool usage events, lead captures, A/B test assignments.</p></div>
-    </div>
+      <section class="block">
+        <h2 class="section">The problem</h2>
+        <p>
+          Acquiring developers, researchers, and operators is expensive and slow. Three failure
+          modes dominate:
+        </p>
+        <h3 class="sub">1. The paywalled "free tool" trap</h3>
+        <p>
+          Most AI utility sites lock the actual output behind a signup. Visitors smell the gate
+          within 3 seconds and leave with a bad impression of the brand.
+        </p>
+        <h3 class="sub">2. The thin SEO bait</h3>
+        <p>
+          Other sites publish a page per keyword that returns a half-broken result powered by a
+          single LLM call. They rank briefly, but Google's helpful-content updates are crushing
+          them.
+        </p>
+        <h3 class="sub">3. Paid ads in AI verticals</h3>
+        <p>
+          A Google Ads click in dev/AI keywords runs $4–$20. When the budget stops, traffic stops.
+          No compounding, no asset, no defensibility.
+        </p>
+      </section>
 
-    <h3 class="sub">How a new tool gets shipped</h3>
-    <ul class="bul">
-      <li><b>Drop the bundle.</b> Place a self-contained HTML/JS bundle into <code>public/tools/&lt;slug&gt;/</code>. Vanilla JS, prebuilt React, Spline embed — anything that runs in an iframe.</li>
-      <li><b>Register the tool.</b> Add one entry to <code>src/data/tools.ts</code> with name, tagline, description, category, features, three-step how-to, FAQs. ~25 lines of TypeScript.</li>
-      <li><b>Wire the SEO.</b> Append the slug to <code>public/sitemap.xml</code>. The landing page is auto-generated from the tools.ts entry.</li>
-      <li><b>Optional: deep-link.</b> For multi-tool bundles, add <code>iframeSrc</code> to override the default iframe URL.</li>
-      <li><b>Done.</b> Restart the workflow. The page renders at <code>svivva.com/&lt;slug&gt;</code>, the iframe loads, Google indexes within days.</li>
-    </ul>
+      <section class="block">
+        <h2 class="section">The solution</h2>
+        <p>
+          svivva-tools is engineering-as-marketing taken to its logical conclusion: ship the actual
+          tool people are searching for, give it away free with no friction, and let the experience
+          itself do the selling.
+        </p>
+        <ul class="bul">
+          <li>
+            84 working mini apps spanning 10 verticals — every tool is real, no fake demos, no
+            signup walls.
+          </li>
+          <li>
+            Each tool gets a structured landing page at svivva.com/&lt;slug&gt;: tagline, features,
+            three-step how-to, FAQs, related tools.
+          </li>
+          <li>
+            Tools embed in an iframe inline — visitor reads the page, clicks "Try Free →", and is
+            using the tool within one second.
+          </li>
+          <li>
+            A persistent "Svivva Seeds" frosted-glass ad surfaces the parent platform on every page
+            — non-blocking, dismissible, always present.
+          </li>
+          <li>
+            Every page is fully prerendered HTML for Google, with sitemap entries, semantic
+            headings, and FAQ schema.
+          </li>
+        </ul>
+      </section>
 
-    <h3 class="sub">A clever bit: deep-linking into bundled apps</h3>
-    <p>Hypothesis Labs is one prebuilt React app containing 20 sub-tools. Each sub-tool has its own SEO landing page on the hub, but they all iframe the same bundle, deep-linking via routes like <code>/tools/hypothesis-labs/t/compare-anything</code>. A custom Vite middleware serves the bundled HTML for every sub-route, and a <code>Location.prototype.pathname</code> patch strips the prefix so the embedded React Router thinks it is at the root. Result: 20 SEO pages, one shared bundle, zero rebuilds.</p>
-  </section>
+      <section class="block">
+        <h2 class="section">Why now</h2>
+        <h3 class="sub">Client-side AI primitives</h3>
+        <p>
+          Models, audio synthesis, schema validation, even small LLMs run entirely in the browser.
+          Most of the 84 tools have zero server cost per use.
+        </p>
+        <h3 class="sub">Replit + pnpm monorepo workflow</h3>
+        <p>
+          Adding tool #85 takes hours, not weeks. Single workspace, shared TypeScript config, three
+          artifacts deploying independently.
+        </p>
+        <h3 class="sub">Google still rewards real utility</h3>
+        <p>
+          Helpful-content updates favor pages that solve the searcher's actual problem. A working
+          tool inline with structured supporting content is exactly what those updates were designed
+          to surface.
+        </p>
+      </section>
 
-  <section class="block">
-    <h2 class="section">The 84 mini apps</h2>
-    <p>Every tool below is live, free, and individually indexed at svivva.com/&lt;slug&gt;. Names are written for Google search intent — what a user actually types, not internal jargon.</p>
-    
-    <section class="cat">
-      <div class="cat-head" style="--c:#0d9488">
-        <h2>Research &amp; Analysis</h2>
-        <span class="count">20 tools</span>
-      </div>
-      <p class="cat-blurb">Twenty fast structured-thinking tools for researchers, founders, and analysts. From cognitive bias detection to causal chain mapping — every one is an SEO long-tail for someone who already needs structured help.</p>
-      <div class="grid">
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Topic Comparator</h3><span class="slug">/topic-comparator</span></header>
-        <p class="tag">Side-by-side comparison of any two concepts, fields, or ideas — instant structured breakdown.</p>
-        <ul class="feat"><li>Side-by-side structured comparison</li><li>Covers mechanics, use cases &amp; tradeoffs</li><li>Works for any domain — tech, science, history, business</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Trend Insight Generator</h3><span class="slug">/trend-insight-generator</span></header>
-        <p class="tag">Explore emerging signals, forces, and implications for any topic — free trend analysis tool.</p>
-        <ul class="feat"><li>Driving forces and signals analysis</li><li>Likely short and long-term implications</li><li>Countertrends and risks</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Impact Factor Finder</h3><span class="slug">/impact-factor-finder</span></header>
-        <p class="tag">Discover what causes, accelerates, or blocks any outcome — structured factor analysis.</p>
-        <ul class="feat"><li>Direct causes vs accelerators vs inhibitors</li><li>Feedback loops and second-order effects</li><li>Contextual and environmental factors</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Argument Contradiction Finder</h3><span class="slug">/argument-contradiction-finder</span></header>
-        <p class="tag">Spot logical contradictions between two claims, theories, or positions in seconds.</p>
-        <ul class="feat"><li>Direct contradictions and logical conflicts</li><li>Implicit tensions and assumptions that clash</li><li>Possible reconciliations and nuances</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Research Hypothesis Generator</h3><span class="slug">/research-hypothesis-generator</span></header>
-        <p class="tag">Turn a research question or topic into testable hypotheses with variables and predictions.</p>
-        <ul class="feat"><li>Multiple hypothesis variants per prompt</li><li>Independent and dependent variables identified</li><li>Directional predictions (positive, negative, null)</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Causal Chain Mapper</h3><span class="slug">/causal-chain-mapper</span></header>
-        <p class="tag">Sketch the full causal chain from root cause to downstream effect for any topic.</p>
-        <ul class="feat"><li>Multi-step causal chain from trigger to consequence</li><li>Second and third-order effects</li><li>Feedback loops and reinforcing cycles</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Assumption Mapper</h3><span class="slug">/assumption-mapping-tool</span></header>
-        <p class="tag">Surface hidden assumptions behind any idea, plan, or claim — free assumption audit tool.</p>
-        <ul class="feat"><li>Explicit and hidden assumption detection</li><li>Confidence and risk rating per assumption</li><li>Categories: factual, behavioral, technical, market</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Metric &amp; KPI Picker</h3><span class="slug">/metric-kpi-picker</span></header>
-        <p class="tag">Find the right metrics and KPIs to track for any goal, project, or research question.</p>
-        <ul class="feat"><li>Prioritized metric recommendations</li><li>Leading vs lagging indicator distinction</li><li>Measurement method for each metric</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Reverse Cause Finder</h3><span class="slug">/reverse-cause-finder</span></header>
-        <p class="tag">Start with an effect or outcome and work backwards to find probable causes — free reverse analysis tool.</p>
-        <ul class="feat"><li>Probable causes ranked by likelihood</li><li>Diagnostic questions for each cause</li><li>Alternative explanations and confounders</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Cross-Domain Analogy Finder</h3><span class="slug">/analogy-finder-tool</span></header>
-        <p class="tag">Bridge two unrelated fields and surface structural analogies for creative problem solving.</p>
-        <ul class="feat"><li>Structural analogies between any two domains</li><li>Shared mechanisms and patterns</li><li>Explanatory analogies for teaching and writing</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Stakeholder Analysis Tool</h3><span class="slug">/stakeholder-analysis-tool</span></header>
-        <p class="tag">Map every stakeholder for any decision, project, or policy — interests, power, and concerns.</p>
-        <ul class="feat"><li>Full stakeholder identification and classification</li><li>Interest and power level for each stakeholder</li><li>Likely concerns and objections per group</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Quick Risk Assessment Tool</h3><span class="slug">/quick-risk-assessment-tool</span></header>
-        <p class="tag">Get a fast risk snapshot for any project, idea, or decision — likelihood, impact, and mitigations.</p>
-        <ul class="feat"><li>Top risks by likelihood and impact</li><li>Mitigation strategy for each risk</li><li>Blind spots and overlooked risks</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Best / Worst / Base Scenario Planner</h3><span class="slug">/scenario-planner</span></header>
-        <p class="tag">Generate optimistic, pessimistic, and realistic scenarios for any decision or forecast.</p>
-        <ul class="feat"><li>Best, worst, and base case scenarios</li><li>Key assumptions and triggers per scenario</li><li>Leading indicators to watch for each path</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Variable Relationship Mapper</h3><span class="slug">/variable-relationship-mapper</span></header>
-        <p class="tag">Map all variables related to any topic — independent, dependent, mediating, and confounding.</p>
-        <ul class="feat"><li>Independent, dependent, mediating, and moderating variables</li><li>Confounding variables and controls</li><li>Variable operationalization suggestions</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Cognitive Bias Detector</h3><span class="slug">/cognitive-bias-detector</span></header>
-        <p class="tag">Check any claim, argument, or plan for cognitive biases that might be distorting your thinking.</p>
-        <ul class="feat"><li>Identifies cognitive biases affecting your claim</li><li>Explains each bias with a real-world example</li><li>Debiasing strategies for each detected bias</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Research Brief Generator</h3><span class="slug">/research-brief-generator</span></header>
-        <p class="tag">Write a structured research brief for any topic in seconds — background, questions, and scope.</p>
-        <ul class="feat"><li>Background and context section</li><li>Primary and secondary research questions</li><li>Scope, exclusions, and constraints</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Hypothesis to Experiment Designer</h3><span class="slug">/hypothesis-to-experiment</span></header>
-        <p class="tag">Turn a vague hunch or hypothesis into a rigorous, testable experiment design.</p>
-        <ul class="feat"><li>Refines vague hypotheses into testable form</li><li>Variables, controls, and success criteria</li><li>Sample size and study design guidance</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Free Decision Tree Builder</h3><span class="slug">/free-decision-tree-builder</span></header>
-        <p class="tag">Build a structured decision tree for any choice or process — instant text-based decision flow.</p>
-        <ul class="feat"><li>Structured decision branches and conditions</li><li>Text-based format — no drawing required</li><li>Works for business, medical, and technical decisions</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Research Instrument Selector</h3><span class="slug">/research-instrument-selector</span></header>
-        <p class="tag">Find the right survey, scale, or measurement tool for your research question.</p>
-        <ul class="feat"><li>Validated surveys and psychometric scales</li><li>Interview and observation frameworks</li><li>Reliability and validity notes for each instrument</li></ul>
-      </article>
-      <article class="card" style="--c:#0d9488">
-        <header><h3>Cross-Domain Idea Hybridizer</h3><span class="slug">/cross-domain-idea-hybridizer</span></header>
-        <p class="tag">Combine two hardware systems or technologies to generate emergent hybrid architectures and innovation ideas.</p>
-        <ul class="feat"><li>5 hybrid architectures per combination</li><li>Novelty score and blend mode for each hybrid</li><li>Traits inherited from each parent system</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#ea580c">
-        <h2>Developer Tools</h2>
-        <span class="count">14 tools</span>
-      </div>
-      <p class="cat-blurb">Fourteen utilities developers Google for: linters, schema generators, regex helpers, doc tools. Pure utility, zero signup, every tool a keyword surface.</p>
-      <div class="grid">
-      <article class="card" style="--c:#ea580c">
-        <header><h3>JSON Schema Analyzer</h3><span class="slug">/json-schema-analyzer</span></header>
-        <p class="tag">Analyze and validate any JSON schema in seconds.</p>
-        <ul class="feat"><li>Schema validation</li><li>Field type analysis</li><li>Nested schema support</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>API Latency Calculator</h3><span class="slug">/api-latency-calculator</span></header>
-        <p class="tag">Forecast your AI API latency before you go live.</p>
-        <ul class="feat"><li>Latency forecasting</li><li>Multi-model comparison</li><li>Token-based estimates</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>JSON Repair Tool</h3><span class="slug">/json-repair-tool</span></header>
-        <p class="tag">Fix broken JSON from AI outputs automatically.</p>
-        <ul class="feat"><li>Auto-repair malformed JSON</li><li>Handles truncated responses</li><li>Side-by-side diff view</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>JSON Schema Linter</h3><span class="slug">/json-schema-linter</span></header>
-        <p class="tag">Lint your JSON schemas for errors and best practices.</p>
-        <ul class="feat"><li>Syntax error detection</li><li>Best practice warnings</li><li>Type consistency checks</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>API Marketplace Listing Generator</h3><span class="slug">/api-marketplace-listing-generator</span></header>
-        <p class="tag">Generate production-style API marketplace listings in seconds.</p>
-        <ul class="feat"><li>API listing generation</li><li>Endpoint and tag preview</li><li>Pricing tier output</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>Team Permission Simulator</h3><span class="slug">/team-permission-simulator</span></header>
-        <p class="tag">Generate role and access maps for any team scenario instantly.</p>
-        <ul class="feat"><li>Role and permission mapping</li><li>Access level generation</li><li>Team scenario support</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>AI Edge Case Generator</h3><span class="slug">/ai-edge-case-generator</span></header>
-        <p class="tag">Generate edge cases, adversarial inputs, and failure scenarios for your AI workflow.</p>
-        <ul class="feat"><li>Edge case generation</li><li>Adversarial input detection</li><li>Failure scenario mapping</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>AI API Cost Simulator</h3><span class="slug">/ai-api-cost-simulator</span></header>
-        <p class="tag">Estimate and compare LLM API costs by model, volume, and prompt length.</p>
-        <ul class="feat"><li>Multi-model cost comparison</li><li>Token estimation</li><li>Monthly cost projection</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>Production Readiness Checker</h3><span class="slug">/production-readiness-checker</span></header>
-        <p class="tag">Score your AI system across 6 critical dimensions before you ship.</p>
-        <ul class="feat"><li>6-dimension readiness score</li><li>Weighted gap analysis</li><li>Actionable next steps</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>Prompt to API Preview</h3><span class="slug">/prompt-to-api-preview</span></header>
-        <p class="tag">Turn any plain-English API description into a REST spec, curl command, and OpenAPI snippet.</p>
-        <ul class="feat"><li>Endpoint spec generation</li><li>curl command output</li><li>OpenAPI YAML snippet</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>LLM Output Validator</h3><span class="slug">/llm-output-validator</span></header>
-        <p class="tag">Validate LLM JSON responses against a schema in one click.</p>
-        <ul class="feat"><li>JSON Schema validation</li><li>Type and enum checking</li><li>Required field detection</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>JSON Only Chat Sandbox</h3><span class="slug">/json-chat-sandbox</span></header>
-        <p class="tag">Test AI chat responses against a JSON schema in a live sandbox.</p>
-        <ul class="feat"><li>Real-time schema validation</li><li>Chat session simulation</li><li>System prompt testing</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>AI Regression Tester</h3><span class="slug">/ai-regression-tester</span></header>
-        <p class="tag">Run test cases against your AI prompt and instantly see which pass or fail.</p>
-        <ul class="feat"><li>Test case management</li><li>Multiple match modes</li><li>Similarity scoring</li></ul>
-      </article>
-      <article class="card" style="--c:#ea580c">
-        <header><h3>JSON Schema Generator</h3><span class="slug">/json-schema-generator</span></header>
-        <p class="tag">Paste any JSON object and generate a valid JSON Schema instantly.</p>
-        <ul class="feat"><li>Automatic type inference</li><li>Enum detection from samples</li><li>Format hints (date-time, email, URI)</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#8b5cf6">
-        <h2>AI Prompt Tools</h2>
-        <span class="count">13 tools</span>
-      </div>
-      <p class="cat-blurb">Thirteen prompt engineering aids — coverage analyzers, drift detectors, test case generators. Tools the prompt-eng audience wishes existed.</p>
-      <div class="grid">
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Coverage Checker</h3><span class="slug">/prompt-coverage-checker</span></header>
-        <p class="tag">Instantly see which fields your prompt is missing.</p>
-        <ul class="feat"><li>Schema vs prompt gap analysis</li><li>Visual coverage heatmap</li><li>Instant feedback</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>AI Prompt Linter</h3><span class="slug">/ai-prompt-linter</span></header>
-        <p class="tag">Lint your AI prompts for clarity, ambiguity, and best practices.</p>
-        <ul class="feat"><li>Ambiguity detection</li><li>Best practice rules</li><li>Severity levels</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>AI Test Case Generator</h3><span class="slug">/ai-test-case-generator</span></header>
-        <p class="tag">Generate test cases for your AI prompts automatically.</p>
-        <ul class="feat"><li>Automatic edge case generation</li><li>Multiple test categories</li><li>Schema-aware testing</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Drift Detector</h3><span class="slug">/prompt-drift-detector</span></header>
-        <p class="tag">Detect when your AI outputs start drifting from the original intent.</p>
-        <ul class="feat"><li>Output drift detection</li><li>Before/after comparison</li><li>Semantic similarity scoring</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Security Scanner</h3><span class="slug">/prompt-security-scanner</span></header>
-        <p class="tag">Scan your prompts for injection vulnerabilities and security risks.</p>
-        <ul class="feat"><li>Injection detection</li><li>Jailbreak pattern matching</li><li>Risk severity scoring</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Consistency Checker</h3><span class="slug">/prompt-consistency-checker</span></header>
-        <p class="tag">Score your prompt for consistency and clarity.</p>
-        <ul class="feat"><li>Consistency scoring</li><li>Terminology analysis</li><li>Structure checks</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Confidence Heatmap</h3><span class="slug">/prompt-confidence-heatmap</span></header>
-        <p class="tag">Visualize which parts of your prompt the AI is most confident about.</p>
-        <ul class="feat"><li>Token-level confidence scoring</li><li>Color-coded heatmap</li><li>Weak spot identification</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Compression Tool</h3><span class="slug">/prompt-compression-tool</span></header>
-        <p class="tag">Shrink your prompts without losing quality.</p>
-        <ul class="feat"><li>Token count reduction</li><li>Quality-preserving compression</li><li>Compression ratio display</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Market Gap Analysis Tool</h3><span class="slug">/market-gap-analysis</span></header>
-        <p class="tag">Scan your product idea for untapped market opportunities in seconds.</p>
-        <ul class="feat"><li>Market opportunity scanning</li><li>Competitive gap identification</li><li>Product validation output</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Idea Scoring &amp; Feasibility Tool</h3><span class="slug">/idea-scoring-feasibility</span></header>
-        <p class="tag">Score your idea for feasibility and readiness in seconds.</p>
-        <ul class="feat"><li>Idea readiness scoring</li><li>Feasibility breakdown</li><li>Actionable next steps</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Idea Comparison Tool</h3><span class="slug">/idea-comparison-tool</span></header>
-        <p class="tag">Compare concept versions side by side and track idea history.</p>
-        <ul class="feat"><li>Side-by-side idea comparison</li><li>Version history tracking</li><li>Readiness evaluation</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Few-Shot Example Generator</h3><span class="slug">/few-shot-example-generator</span></header>
-        <p class="tag">Generate structured few-shot examples with good, bad, and edge cases for any AI task.</p>
-        <ul class="feat"><li>Good/bad/edge case examples</li><li>Markdown and JSON output</li><li>Preset templates</li></ul>
-      </article>
-      <article class="card" style="--c:#8b5cf6">
-        <header><h3>Prompt Version Diff Tool</h3><span class="slug">/prompt-version-diff</span></header>
-        <p class="tag">Compare two prompt versions and detect tone shifts, removed constraints, and output format drift.</p>
-        <ul class="feat"><li>Line-by-line diff view</li><li>Tone and constraint risk detection</li><li>Output format drift analysis</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#d97706">
-        <h2>Hardware &amp; BOM</h2>
-        <span class="count">10 tools</span>
-      </div>
-      <p class="cat-blurb">Ten hardware engineering tools: BOM builders, component selectors, datasheet helpers. An unusually under-served SEO niche with high commercial intent.</p>
-      <div class="grid">
-      <article class="card" style="--c:#d97706">
-        <header><h3>Hardware BOM Tools</h3><span class="slug">/hardware-bom-tools</span></header>
-        <p class="tag">Manage and preview hardware bills of materials with AI.</p>
-        <ul class="feat"><li>BOM generation</li><li>Component analysis</li><li>Cost estimation</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>AI BOM Generator</h3><span class="slug">/ai-bom-generator</span></header>
-        <p class="tag">Generate bills of materials from a single description.</p>
-        <ul class="feat"><li>Multi-domain BOM generation</li><li>Hardware and play modes</li><li>Cost breakdowns</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>BOM Material Sourcing</h3><span class="slug">/bom-material-sourcing</span></header>
-        <p class="tag">Find and compare sources for every item in your BOM.</p>
-        <ul class="feat"><li>Supplier suggestions</li><li>Price comparisons</li><li>Availability checks</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Hardware Cost Estimator</h3><span class="slug">/hardware-cost-estimator</span></header>
-        <p class="tag">Estimate BOM and prototype costs instantly — no signup required.</p>
-        <ul class="feat"><li>BOM cost calculation</li><li>PCB and enclosure pricing</li><li>Prototype vs production estimates</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Manufacturing Readiness Checker</h3><span class="slug">/manufacturing-readiness-checker</span></header>
-        <p class="tag">Instantly evaluate how production-ready your hardware concept is.</p>
-        <ul class="feat"><li>MRL score calculation</li><li>BOM preview generation</li><li>Schematic outline</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Hardware Documentation Exporter</h3><span class="slug">/hardware-documentation-exporter</span></header>
-        <p class="tag">Generate schematics, BOM tables, and production docs in seconds.</p>
-        <ul class="feat"><li>Schematic generation</li><li>BOM table export</li><li>Cost estimate docs</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Supplier Comparison Tool</h3><span class="slug">/supplier-comparison</span></header>
-        <p class="tag">Compare suppliers side by side — lead times, costs, and regions.</p>
-        <ul class="feat"><li>Side-by-side supplier comparison</li><li>Lead time and cost data</li><li>Regional supplier options</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Product Build Flow Simulator</h3><span class="slug">/product-build-flow-simulator</span></header>
-        <p class="tag">Preview one real production pipeline step — instantly, no signup.</p>
-        <ul class="feat"><li>Pipeline step preview</li><li>Multi-mode support</li><li>Hardware, audio, and idea flows</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Hardware Compliance Checker</h3><span class="slug">/hardware-compliance-checker</span></header>
-        <p class="tag">Scan your hardware concept for compliance risks and regulatory flags.</p>
-        <ul class="feat"><li>Compliance risk scan</li><li>Regulatory flag detection</li><li>Risk score overview</li></ul>
-      </article>
-      <article class="card" style="--c:#d97706">
-        <header><h3>Build Planner Tool</h3><span class="slug">/build-planner-tool</span></header>
-        <p class="tag">Generate schematics, BOMs, and production workflows from a brief.</p>
-        <ul class="feat"><li>Schematic generation</li><li>BOM preview</li><li>Flow graph output</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#e11d48">
-        <h2>Music &amp; Audio</h2>
-        <span class="count">10 tools</span>
-      </div>
-      <p class="cat-blurb">Ten music &amp; audio tools — chord generators, scale browsers, generative composers. Creative-coding audience that overlaps with builders Svivva targets.</p>
-      <div class="grid">
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Chord Progression Generator</h3><span class="slug">/chord-progression-generator</span></header>
-        <p class="tag">Generate chord progressions instantly — free, no signup.</p>
-        <ul class="feat"><li>Instant chord progression output</li><li>Multi-mode support</li><li>Genre and mood targeting</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Synth Patch Designer</h3><span class="slug">/patch-designer</span></header>
-        <p class="tag">Describe your sound — get a full signal chain and modular patch.</p>
-        <ul class="feat"><li>Signal chain generation</li><li>Modular patch mapping</li><li>Module-level detail</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>AI Melody Interpolator</h3><span class="slug">/melody-interpolator</span></header>
-        <p class="tag">Turn a concept into a production-style melody in under 3 seconds.</p>
-        <ul class="feat"><li>Instant melody preview</li><li>Note and rhythm output</li><li>Multi-mode pipeline support</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Composition Mode Preview Studio</h3><span class="slug">/composition-mode-preview-studio</span></header>
-        <p class="tag">Submit a brief and instantly preview a composition pipeline step.</p>
-        <ul class="feat"><li>Composition step preview</li><li>Multi-mode pipeline support</li><li>Production-style output</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Ensemble Layering Playground</h3><span class="slug">/ensemble-layering-playground</span></header>
-        <p class="tag">Preview multi-instrument ensemble layers from a single brief.</p>
-        <ul class="feat"><li>Ensemble layer preview</li><li>Instrument role assignment</li><li>Spatial placement output</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>AI Sound Generator</h3><span class="slug">/ai-sound-generator</span></header>
-        <p class="tag">Generate production-style sound previews from a text prompt in seconds.</p>
-        <ul class="feat"><li>Text-to-sound generation</li><li>Production-style previews</li><li>Beat, melody, and texture support</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>MIDI Mapper &amp; Stem Exporter</h3><span class="slug">/midi-mapper</span></header>
-        <p class="tag">Map MIDI notes and CCs — then preview stereo stem exports instantly.</p>
-        <ul class="feat"><li>MIDI note and CC mapping</li><li>Stereo stem export preview</li><li>Hardware and software targets</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Performance Preset Builder</h3><span class="slug">/performance-preset-builder</span></header>
-        <p class="tag">Build production-style performance presets from your creative brief in seconds.</p>
-        <ul class="feat"><li>Performance preset generation</li><li>Live set structure output</li><li>Creative brief input</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Chord Creator (ChordKit)</h3><span class="slug">/chord-creator</span></header>
-        <p class="tag">Browse, filter, and generate chords by root, style, and voicing — no signup required.</p>
-        <ul class="feat"><li>400+ chord types</li><li>Filter by style tag (jazz, gospel, neo-soul, etc.)</li><li>MIDI voicing data for each chord</li></ul>
-      </article>
-      <article class="card" style="--c:#e11d48">
-        <header><h3>Reich Composer</h3><span class="slug">/reich-composer</span></header>
-        <p class="tag">Generate Steve Reich–style phasing and counterpoint music live in the browser.</p>
-        <ul class="feat"><li>Phase canon, electric counterpoint, and hocket patterns</li><li>12 scales including modes, pentatonic, blues, and whole tone</li><li>Live Web Audio playback — no server required</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#0891b2">
-        <h2>AI Model Tools</h2>
-        <span class="count">6 tools</span>
-      </div>
-      <p class="cat-blurb">Six tools for working with AI models — comparison, evaluation, regression testing. Catches the technical side of the AI buyer journey.</p>
-      <div class="grid">
-      <article class="card" style="--c:#0891b2">
-        <header><h3>AI Model Comparison</h3><span class="slug">/ai-model-comparison</span></header>
-        <p class="tag">Compare AI models by cost, tokens, and compatibility — instantly.</p>
-        <ul class="feat"><li>Multi-model simulation</li><li>Cost estimation</li><li>Token count comparison</li></ul>
-      </article>
-      <article class="card" style="--c:#0891b2">
-        <header><h3>Synthetic Dataset Generator</h3><span class="slug">/synthetic-dataset-generator</span></header>
-        <p class="tag">Generate realistic test datasets from any JSON schema.</p>
-        <ul class="feat"><li>Schema-to-dataset generation</li><li>Multiple data modes</li><li>Edge case generation</li></ul>
-      </article>
-      <article class="card" style="--c:#0891b2">
-        <header><h3>AI Output Diff Visualizer</h3><span class="slug">/ai-output-diff-visualizer</span></header>
-        <p class="tag">Compare two AI outputs side by side with a diff view.</p>
-        <ul class="feat"><li>Line-by-line diff</li><li>Semantic change detection</li><li>Color-coded changes</li></ul>
-      </article>
-      <article class="card" style="--c:#0891b2">
-        <header><h3>Evaluation Rule Builder</h3><span class="slug">/evaluation-rule-builder</span></header>
-        <p class="tag">Build custom rules to evaluate AI output quality.</p>
-        <ul class="feat"><li>Rule definition interface</li><li>Weighted scoring</li><li>Pass/fail thresholds</li></ul>
-      </article>
-      <article class="card" style="--c:#0891b2">
-        <header><h3>3D Model From Text Preview</h3><span class="slug">/3d-model-from-text</span></header>
-        <p class="tag">Describe any project. See an AI-generated workflow preview in seconds.</p>
-        <ul class="feat"><li>Multi-mode previews</li><li>Hardware, play, idea, and build modes</li><li>Confidence &amp; readiness scores</li></ul>
-      </article>
-      <article class="card" style="--c:#0891b2">
-        <header><h3>Sketch &amp; 3D Model Maker</h3><span class="slug">/sketch-3d-model-maker</span></header>
-        <p class="tag">View Spline 3D scenes and generate AI reference images — free, no signup needed.</p>
-        <ul class="feat"><li>Live Spline 3D scene viewer</li><li>AI reference image generation</li><li>Links to top 3D tools (Meshy, Leonardo, Replicate)</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#a855f7">
-        <h2>Content &amp; Writing</h2>
-        <span class="count">7 tools</span>
-      </div>
-      <p class="cat-blurb">Seven content tools: AI chat, summarization, grammar, sentiment, tone — the broad demand layer that introduces casual users to the brand.</p>
-      <div class="grid">
-      <article class="card" style="--c:#a855f7">
-        <header><h3>AI Chat</h3><span class="slug">/ai-chat</span></header>
-        <p class="tag">Chat with advanced AI instantly — no setup required.</p>
-        <ul class="feat"><li>Real-time streaming responses</li><li>Multi-turn conversation</li><li>Powered by GPT-4o</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Text Summarizer</h3><span class="slug">/text-summarizer</span></header>
-        <p class="tag">Paste any text. Get a crisp summary in seconds.</p>
-        <ul class="feat"><li>Handles long documents</li><li>Preserves key points</li><li>One-click summary</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Grammar Checker</h3><span class="slug">/grammar-checker</span></header>
-        <p class="tag">Write with confidence — catch every grammar mistake.</p>
-        <ul class="feat"><li>Grammar and punctuation fixes</li><li>Style suggestions</li><li>Explains each correction</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Keyword Extractor</h3><span class="slug">/keyword-extractor</span></header>
-        <p class="tag">Extract the most important keywords from any content.</p>
-        <ul class="feat"><li>Top keyword ranking</li><li>Topic extraction</li><li>SEO-ready output</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Tone Rewriter</h3><span class="slug">/tone-rewriter</span></header>
-        <p class="tag">Rewrite anything in a different tone — professional, casual, bold.</p>
-        <ul class="feat"><li>5+ tone styles</li><li>Preserves original meaning</li><li>Great for emails and copy</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Image Generator</h3><span class="slug">/image-generator</span></header>
-        <p class="tag">Describe an image. See it come to life.</p>
-        <ul class="feat"><li>DALL-E 3 powered</li><li>High-resolution output</li><li>Any style or subject</li></ul>
-      </article>
-      <article class="card" style="--c:#a855f7">
-        <header><h3>Quiz Generator</h3><span class="slug">/quiz-generator</span></header>
-        <p class="tag">Turn any topic into a ready-to-use quiz instantly.</p>
-        <ul class="feat"><li>Any subject or topic</li><li>Multiple-choice format</li><li>Adjustable difficulty</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#db2777">
-        <h2>Data Tools</h2>
-        <span class="count">2 tools</span>
-      </div>
-      <p class="cat-blurb">Two data tools: keyword extraction and Hypothesis Labs (the parent app for the 20 research tools above).</p>
-      <div class="grid">
-      <article class="card" style="--c:#db2777">
-        <header><h3>Sentiment Analyzer</h3><span class="slug">/sentiment-analyzer</span></header>
-        <p class="tag">Understand the emotion behind any text in seconds.</p>
-        <ul class="feat"><li>Positive/negative/neutral scoring</li><li>Emotion detection</li><li>Confidence scores</li></ul>
-      </article>
-      <article class="card" style="--c:#db2777">
-        <header><h3>Hypothesis Labs</h3><span class="slug">/hypothesis-labs</span></header>
-        <p class="tag">20 research thinking tools — compare, hypothesize, and map assumptions in seconds.</p>
-        <ul class="feat"><li>20 research tools in one app</li><li>Compare Anything, Trend Insight, Causal Sketcher</li><li>Cross-Domain Hybridization Engine</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#16a34a">
-        <h2>Code Tools</h2>
-        <span class="count">1 tools</span>
-      </div>
-      <p class="cat-blurb">One core code tool: code explanation. A high-volume search term that converts curious learners into Svivva-aware visitors.</p>
-      <div class="grid">
-      <article class="card" style="--c:#16a34a">
-        <header><h3>Code Explainer</h3><span class="slug">/code-explainer</span></header>
-        <p class="tag">Paste any code snippet — get a plain-English explanation.</p>
-        <ul class="feat"><li>Supports 30+ languages</li><li>Line-by-line breakdowns</li><li>Explains logic and intent</li></ul>
-      </article></div>
-    </section>
-    <section class="cat">
-      <div class="cat-head" style="--c:#2563eb">
-        <h2>Language Tools</h2>
-        <span class="count">1 tools</span>
-      </div>
-      <p class="cat-blurb">One translator tool. Universal demand; introduces Svivva to international audiences.</p>
-      <div class="grid">
-      <article class="card" style="--c:#2563eb">
-        <header><h3>AI Translator</h3><span class="slug">/ai-translator</span></header>
-        <p class="tag">Translate any text into 50+ languages instantly.</p>
-        <ul class="feat"><li>50+ languages supported</li><li>Context-aware translation</li><li>Formal and informal tone</li></ul>
-      </article></div>
-    </section>
-  </section>
+      <section class="block">
+        <h2 class="section">How the funnel converts</h2>
+        <div class="stages">
+          <div class="stage">
+            <div class="n">1</div>
+            <div>
+              <h4>Discover</h4>
+              <p>
+                A searcher types "cognitive bias detector" or "json schema generator" into Google.
+                They land on svivva.com/&lt;slug&gt; — fast static HTML, lighthouse-perfect.
+              </p>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="n">2</div>
+            <div>
+              <h4>Convert (use)</h4>
+              <p>
+                They click "Try [tool] Free →". The actual working app launches in an iframe on the
+                same page. No signup, no email gate, no rate limit. Value delivered in under 10
+                seconds.
+              </p>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="n">3</div>
+            <div>
+              <h4>Notice the brand</h4>
+              <p>
+                The persistent Svivva Seeds banner sits at the bottom describing what the full
+                platform does. Frosted-glass styling, dismissible, always present without blocking
+                the tool.
+              </p>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="n">4</div>
+            <div>
+              <h4>Click through</h4>
+              <p>
+                When ready (often after using 2–3 tools across the hub), they hit "Grow with Svivva
+                →" or "Unlock All 50+ Tools" and arrive at svivva.com proper.
+              </p>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="n">5</div>
+            <div>
+              <h4>Compound</h4>
+              <p>
+                Every shipped tool adds a new long-tail keyword surface. They share the same domain
+                authority and funnel into the same product. The 85th tool ranks faster than the 1st.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <section class="block">
-    <h2 class="section">Roadmap</h2>
-    <ul class="bul">
-      <li><b>Next 30 days:</b> ship 20 more research tools, add per-tool usage analytics dashboard, A/B test the Svivva Seeds ad copy.</li>
-      <li><b>Next 90 days:</b> reach 150 tools, launch a "tool of the week" newsletter to build retention beyond search, ship the API for embedding tools on third-party sites.</li>
-      <li><b>Next 180 days:</b> 200+ tools, programmatic SEO for tool combinations ("X vs Y" comparison pages auto-generated from any two tools), API revenue line item.</li>
-    </ul>
-  </section>
+      <section class="block">
+        <h2 class="section">Competitive position</h2>
+        <div class="comp">
+          <div class="row">
+            <h4>Free AI tool aggregators</h4>
+            <div class="them">
+              <b>Theirs:</b> Listicles linking to 3rd-party tools. No control, no moat, no funnel.
+            </div>
+            <div class="us"><b>Ours:</b> We own the tool, the page, and the funnel.</div>
+          </div>
+          <div class="row">
+            <h4>Single-purpose SaaS</h4>
+            <div class="them">
+              <b>Theirs:</b> Build one good tool, charge for it. Capped TAM, paywall friction.
+            </div>
+            <div class="us"><b>Ours:</b> 84 free entry points, one paid platform behind them.</div>
+          </div>
+          <div class="row">
+            <h4>Generic AI assistants</h4>
+            <div class="them">
+              <b>Theirs:</b> One chat box, infinite use cases. High cognitive load on the user.
+            </div>
+            <div class="us"><b>Ours:</b> Each tool is named, scoped, and Google-discoverable.</div>
+          </div>
+          <div class="row">
+            <h4>Content marketing blogs</h4>
+            <div class="them">
+              <b>Theirs:</b> Articles about how to do something. Slow ranking, easy to skim and
+              bounce.
+            </div>
+            <div class="us">
+              <b>Ours:</b> Tool pages let users do the thing on the page — sticky.
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <section class="block">
-    <h2 class="section">The ask</h2>
-    <p>Keep shipping. Every new mini app is another keyword surface, another funnel entry point, another proof point that Svivva ships real software fast. No paid acquisition required, no permission needed — just write the app, register the slug, and let Google do the work.</p>
-  </section>
+      <section class="block">
+        <h2 class="section">How the Repl is built</h2>
+        <p>
+          A pnpm monorepo running on Replit with three artifacts that share a single TypeScript root
+          and a Postgres database.
+        </p>
+        <div class="arch">
+          <div class="a">
+            <h4>artifacts/ai-tools-hub</h4>
+            <p>
+              React + Vite SPA. Hosts the 84 landing pages, routing (Wouter), embedded-tool iframes,
+              the Svivva Seeds ad, and the homepage category browser. This is what visitors see.
+            </p>
+          </div>
+          <div class="a">
+            <h4>artifacts/api-server</h4>
+            <p>
+              Node + Express. Hosts AI proxy endpoints (chat, summarization, image gen),
+              rate-limited public APIs the embedded tools call, and lead-capture endpoints.
+            </p>
+          </div>
+          <div class="a">
+            <h4>artifacts/mockup-sandbox</h4>
+            <p>
+              Isolated Vite preview server. Used during design exploration — every component variant
+              gets its own URL so we can iframe several side-by-side and pick the winner.
+            </p>
+          </div>
+          <div class="a">
+            <h4>PostgreSQL</h4>
+            <p>
+              Single Replit-managed database shared across artifacts. Stores per-tool usage events,
+              lead captures, A/B test assignments.
+            </p>
+          </div>
+        </div>
 
-  <div class="cta">
-    <h2>Try it →</h2>
-    <p>Browse all 84 tools, then see what the full Svivva platform can do for your business.</p>
-    <a href="https://svivva.com">svivva.com</a>
-  </div>
+        <h3 class="sub">How a new tool gets shipped</h3>
+        <ul class="bul">
+          <li>
+            <b>Drop the bundle.</b> Place a self-contained HTML/JS bundle into
+            <code>public/tools/&lt;slug&gt;/</code>. Vanilla JS, prebuilt React, Spline embed —
+            anything that runs in an iframe.
+          </li>
+          <li>
+            <b>Register the tool.</b> Add one entry to <code>src/data/tools.ts</code> with name,
+            tagline, description, category, features, three-step how-to, FAQs. ~25 lines of
+            TypeScript.
+          </li>
+          <li>
+            <b>Wire the SEO.</b> Append the slug to <code>public/sitemap.xml</code>. The landing
+            page is auto-generated from the tools.ts entry.
+          </li>
+          <li>
+            <b>Optional: deep-link.</b> For multi-tool bundles, add <code>iframeSrc</code> to
+            override the default iframe URL.
+          </li>
+          <li>
+            <b>Done.</b> Restart the workflow. The page renders at
+            <code>svivva.com/&lt;slug&gt;</code>, the iframe loads, Google indexes within days.
+          </li>
+        </ul>
 
-  <footer>svivva-tools · YC-style brief · save this page as PDF from your browser if needed</footer>
-</main>
-</body>
+        <h3 class="sub">A clever bit: deep-linking into bundled apps</h3>
+        <p>
+          Hypothesis Labs is one prebuilt React app containing 20 sub-tools. Each sub-tool has its
+          own SEO landing page on the hub, but they all iframe the same bundle, deep-linking via
+          routes like <code>/tools/hypothesis-labs/t/compare-anything</code>. A custom Vite
+          middleware serves the bundled HTML for every sub-route, and a
+          <code>Location.prototype.pathname</code> patch strips the prefix so the embedded React
+          Router thinks it is at the root. Result: 20 SEO pages, one shared bundle, zero rebuilds.
+        </p>
+      </section>
+
+      <section class="block">
+        <h2 class="section">The 84 mini apps</h2>
+        <p>
+          Every tool below is live, free, and individually indexed at svivva.com/&lt;slug&gt;. Names
+          are written for Google search intent — what a user actually types, not internal jargon.
+        </p>
+
+        <section class="cat">
+          <div class="cat-head" style="--c: #0d9488">
+            <h2>Research &amp; Analysis</h2>
+            <span class="count">20 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Twenty fast structured-thinking tools for researchers, founders, and analysts. From
+            cognitive bias detection to causal chain mapping — every one is an SEO long-tail for
+            someone who already needs structured help.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Topic Comparator</h3>
+                <span class="slug">/topic-comparator</span>
+              </header>
+              <p class="tag">
+                Side-by-side comparison of any two concepts, fields, or ideas — instant structured
+                breakdown.
+              </p>
+              <ul class="feat">
+                <li>Side-by-side structured comparison</li>
+                <li>Covers mechanics, use cases &amp; tradeoffs</li>
+                <li>Works for any domain — tech, science, history, business</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Trend Insight Generator</h3>
+                <span class="slug">/trend-insight-generator</span>
+              </header>
+              <p class="tag">
+                Explore emerging signals, forces, and implications for any topic — free trend
+                analysis tool.
+              </p>
+              <ul class="feat">
+                <li>Driving forces and signals analysis</li>
+                <li>Likely short and long-term implications</li>
+                <li>Countertrends and risks</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Impact Factor Finder</h3>
+                <span class="slug">/impact-factor-finder</span>
+              </header>
+              <p class="tag">
+                Discover what causes, accelerates, or blocks any outcome — structured factor
+                analysis.
+              </p>
+              <ul class="feat">
+                <li>Direct causes vs accelerators vs inhibitors</li>
+                <li>Feedback loops and second-order effects</li>
+                <li>Contextual and environmental factors</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Argument Contradiction Finder</h3>
+                <span class="slug">/argument-contradiction-finder</span>
+              </header>
+              <p class="tag">
+                Spot logical contradictions between two claims, theories, or positions in seconds.
+              </p>
+              <ul class="feat">
+                <li>Direct contradictions and logical conflicts</li>
+                <li>Implicit tensions and assumptions that clash</li>
+                <li>Possible reconciliations and nuances</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Research Hypothesis Generator</h3>
+                <span class="slug">/research-hypothesis-generator</span>
+              </header>
+              <p class="tag">
+                Turn a research question or topic into testable hypotheses with variables and
+                predictions.
+              </p>
+              <ul class="feat">
+                <li>Multiple hypothesis variants per prompt</li>
+                <li>Independent and dependent variables identified</li>
+                <li>Directional predictions (positive, negative, null)</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Causal Chain Mapper</h3>
+                <span class="slug">/causal-chain-mapper</span>
+              </header>
+              <p class="tag">
+                Sketch the full causal chain from root cause to downstream effect for any topic.
+              </p>
+              <ul class="feat">
+                <li>Multi-step causal chain from trigger to consequence</li>
+                <li>Second and third-order effects</li>
+                <li>Feedback loops and reinforcing cycles</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Assumption Mapper</h3>
+                <span class="slug">/assumption-mapping-tool</span>
+              </header>
+              <p class="tag">
+                Surface hidden assumptions behind any idea, plan, or claim — free assumption audit
+                tool.
+              </p>
+              <ul class="feat">
+                <li>Explicit and hidden assumption detection</li>
+                <li>Confidence and risk rating per assumption</li>
+                <li>Categories: factual, behavioral, technical, market</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Metric &amp; KPI Picker</h3>
+                <span class="slug">/metric-kpi-picker</span>
+              </header>
+              <p class="tag">
+                Find the right metrics and KPIs to track for any goal, project, or research
+                question.
+              </p>
+              <ul class="feat">
+                <li>Prioritized metric recommendations</li>
+                <li>Leading vs lagging indicator distinction</li>
+                <li>Measurement method for each metric</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Reverse Cause Finder</h3>
+                <span class="slug">/reverse-cause-finder</span>
+              </header>
+              <p class="tag">
+                Start with an effect or outcome and work backwards to find probable causes — free
+                reverse analysis tool.
+              </p>
+              <ul class="feat">
+                <li>Probable causes ranked by likelihood</li>
+                <li>Diagnostic questions for each cause</li>
+                <li>Alternative explanations and confounders</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Cross-Domain Analogy Finder</h3>
+                <span class="slug">/analogy-finder-tool</span>
+              </header>
+              <p class="tag">
+                Bridge two unrelated fields and surface structural analogies for creative problem
+                solving.
+              </p>
+              <ul class="feat">
+                <li>Structural analogies between any two domains</li>
+                <li>Shared mechanisms and patterns</li>
+                <li>Explanatory analogies for teaching and writing</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Stakeholder Analysis Tool</h3>
+                <span class="slug">/stakeholder-analysis-tool</span>
+              </header>
+              <p class="tag">
+                Map every stakeholder for any decision, project, or policy — interests, power, and
+                concerns.
+              </p>
+              <ul class="feat">
+                <li>Full stakeholder identification and classification</li>
+                <li>Interest and power level for each stakeholder</li>
+                <li>Likely concerns and objections per group</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Quick Risk Assessment Tool</h3>
+                <span class="slug">/quick-risk-assessment-tool</span>
+              </header>
+              <p class="tag">
+                Get a fast risk snapshot for any project, idea, or decision — likelihood, impact,
+                and mitigations.
+              </p>
+              <ul class="feat">
+                <li>Top risks by likelihood and impact</li>
+                <li>Mitigation strategy for each risk</li>
+                <li>Blind spots and overlooked risks</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Best / Worst / Base Scenario Planner</h3>
+                <span class="slug">/scenario-planner</span>
+              </header>
+              <p class="tag">
+                Generate optimistic, pessimistic, and realistic scenarios for any decision or
+                forecast.
+              </p>
+              <ul class="feat">
+                <li>Best, worst, and base case scenarios</li>
+                <li>Key assumptions and triggers per scenario</li>
+                <li>Leading indicators to watch for each path</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Variable Relationship Mapper</h3>
+                <span class="slug">/variable-relationship-mapper</span>
+              </header>
+              <p class="tag">
+                Map all variables related to any topic — independent, dependent, mediating, and
+                confounding.
+              </p>
+              <ul class="feat">
+                <li>Independent, dependent, mediating, and moderating variables</li>
+                <li>Confounding variables and controls</li>
+                <li>Variable operationalization suggestions</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Cognitive Bias Detector</h3>
+                <span class="slug">/cognitive-bias-detector</span>
+              </header>
+              <p class="tag">
+                Check any claim, argument, or plan for cognitive biases that might be distorting
+                your thinking.
+              </p>
+              <ul class="feat">
+                <li>Identifies cognitive biases affecting your claim</li>
+                <li>Explains each bias with a real-world example</li>
+                <li>Debiasing strategies for each detected bias</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Research Brief Generator</h3>
+                <span class="slug">/research-brief-generator</span>
+              </header>
+              <p class="tag">
+                Write a structured research brief for any topic in seconds — background, questions,
+                and scope.
+              </p>
+              <ul class="feat">
+                <li>Background and context section</li>
+                <li>Primary and secondary research questions</li>
+                <li>Scope, exclusions, and constraints</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Hypothesis to Experiment Designer</h3>
+                <span class="slug">/hypothesis-to-experiment</span>
+              </header>
+              <p class="tag">
+                Turn a vague hunch or hypothesis into a rigorous, testable experiment design.
+              </p>
+              <ul class="feat">
+                <li>Refines vague hypotheses into testable form</li>
+                <li>Variables, controls, and success criteria</li>
+                <li>Sample size and study design guidance</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Free Decision Tree Builder</h3>
+                <span class="slug">/free-decision-tree-builder</span>
+              </header>
+              <p class="tag">
+                Build a structured decision tree for any choice or process — instant text-based
+                decision flow.
+              </p>
+              <ul class="feat">
+                <li>Structured decision branches and conditions</li>
+                <li>Text-based format — no drawing required</li>
+                <li>Works for business, medical, and technical decisions</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Research Instrument Selector</h3>
+                <span class="slug">/research-instrument-selector</span>
+              </header>
+              <p class="tag">
+                Find the right survey, scale, or measurement tool for your research question.
+              </p>
+              <ul class="feat">
+                <li>Validated surveys and psychometric scales</li>
+                <li>Interview and observation frameworks</li>
+                <li>Reliability and validity notes for each instrument</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0d9488">
+              <header>
+                <h3>Cross-Domain Idea Hybridizer</h3>
+                <span class="slug">/cross-domain-idea-hybridizer</span>
+              </header>
+              <p class="tag">
+                Combine two hardware systems or technologies to generate emergent hybrid
+                architectures and innovation ideas.
+              </p>
+              <ul class="feat">
+                <li>5 hybrid architectures per combination</li>
+                <li>Novelty score and blend mode for each hybrid</li>
+                <li>Traits inherited from each parent system</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #ea580c">
+            <h2>Developer Tools</h2>
+            <span class="count">14 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Fourteen utilities developers Google for: linters, schema generators, regex helpers, doc
+            tools. Pure utility, zero signup, every tool a keyword surface.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>JSON Schema Analyzer</h3>
+                <span class="slug">/json-schema-analyzer</span>
+              </header>
+              <p class="tag">Analyze and validate any JSON schema in seconds.</p>
+              <ul class="feat">
+                <li>Schema validation</li>
+                <li>Field type analysis</li>
+                <li>Nested schema support</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>API Latency Calculator</h3>
+                <span class="slug">/api-latency-calculator</span>
+              </header>
+              <p class="tag">Forecast your AI API latency before you go live.</p>
+              <ul class="feat">
+                <li>Latency forecasting</li>
+                <li>Multi-model comparison</li>
+                <li>Token-based estimates</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>JSON Repair Tool</h3>
+                <span class="slug">/json-repair-tool</span>
+              </header>
+              <p class="tag">Fix broken JSON from AI outputs automatically.</p>
+              <ul class="feat">
+                <li>Auto-repair malformed JSON</li>
+                <li>Handles truncated responses</li>
+                <li>Side-by-side diff view</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>JSON Schema Linter</h3>
+                <span class="slug">/json-schema-linter</span>
+              </header>
+              <p class="tag">Lint your JSON schemas for errors and best practices.</p>
+              <ul class="feat">
+                <li>Syntax error detection</li>
+                <li>Best practice warnings</li>
+                <li>Type consistency checks</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>API Marketplace Listing Generator</h3>
+                <span class="slug">/api-marketplace-listing-generator</span>
+              </header>
+              <p class="tag">Generate production-style API marketplace listings in seconds.</p>
+              <ul class="feat">
+                <li>API listing generation</li>
+                <li>Endpoint and tag preview</li>
+                <li>Pricing tier output</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>Team Permission Simulator</h3>
+                <span class="slug">/team-permission-simulator</span>
+              </header>
+              <p class="tag">Generate role and access maps for any team scenario instantly.</p>
+              <ul class="feat">
+                <li>Role and permission mapping</li>
+                <li>Access level generation</li>
+                <li>Team scenario support</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>AI Edge Case Generator</h3>
+                <span class="slug">/ai-edge-case-generator</span>
+              </header>
+              <p class="tag">
+                Generate edge cases, adversarial inputs, and failure scenarios for your AI workflow.
+              </p>
+              <ul class="feat">
+                <li>Edge case generation</li>
+                <li>Adversarial input detection</li>
+                <li>Failure scenario mapping</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>AI API Cost Simulator</h3>
+                <span class="slug">/ai-api-cost-simulator</span>
+              </header>
+              <p class="tag">
+                Estimate and compare LLM API costs by model, volume, and prompt length.
+              </p>
+              <ul class="feat">
+                <li>Multi-model cost comparison</li>
+                <li>Token estimation</li>
+                <li>Monthly cost projection</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>Production Readiness Checker</h3>
+                <span class="slug">/production-readiness-checker</span>
+              </header>
+              <p class="tag">Score your AI system across 6 critical dimensions before you ship.</p>
+              <ul class="feat">
+                <li>6-dimension readiness score</li>
+                <li>Weighted gap analysis</li>
+                <li>Actionable next steps</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>Prompt to API Preview</h3>
+                <span class="slug">/prompt-to-api-preview</span>
+              </header>
+              <p class="tag">
+                Turn any plain-English API description into a REST spec, curl command, and OpenAPI
+                snippet.
+              </p>
+              <ul class="feat">
+                <li>Endpoint spec generation</li>
+                <li>curl command output</li>
+                <li>OpenAPI YAML snippet</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>LLM Output Validator</h3>
+                <span class="slug">/llm-output-validator</span>
+              </header>
+              <p class="tag">Validate LLM JSON responses against a schema in one click.</p>
+              <ul class="feat">
+                <li>JSON Schema validation</li>
+                <li>Type and enum checking</li>
+                <li>Required field detection</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>JSON Only Chat Sandbox</h3>
+                <span class="slug">/json-chat-sandbox</span>
+              </header>
+              <p class="tag">Test AI chat responses against a JSON schema in a live sandbox.</p>
+              <ul class="feat">
+                <li>Real-time schema validation</li>
+                <li>Chat session simulation</li>
+                <li>System prompt testing</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>AI Regression Tester</h3>
+                <span class="slug">/ai-regression-tester</span>
+              </header>
+              <p class="tag">
+                Run test cases against your AI prompt and instantly see which pass or fail.
+              </p>
+              <ul class="feat">
+                <li>Test case management</li>
+                <li>Multiple match modes</li>
+                <li>Similarity scoring</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #ea580c">
+              <header>
+                <h3>JSON Schema Generator</h3>
+                <span class="slug">/json-schema-generator</span>
+              </header>
+              <p class="tag">Paste any JSON object and generate a valid JSON Schema instantly.</p>
+              <ul class="feat">
+                <li>Automatic type inference</li>
+                <li>Enum detection from samples</li>
+                <li>Format hints (date-time, email, URI)</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #8b5cf6">
+            <h2>AI Prompt Tools</h2>
+            <span class="count">13 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Thirteen prompt engineering aids — coverage analyzers, drift detectors, test case
+            generators. Tools the prompt-eng audience wishes existed.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Coverage Checker</h3>
+                <span class="slug">/prompt-coverage-checker</span>
+              </header>
+              <p class="tag">Instantly see which fields your prompt is missing.</p>
+              <ul class="feat">
+                <li>Schema vs prompt gap analysis</li>
+                <li>Visual coverage heatmap</li>
+                <li>Instant feedback</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>AI Prompt Linter</h3>
+                <span class="slug">/ai-prompt-linter</span>
+              </header>
+              <p class="tag">Lint your AI prompts for clarity, ambiguity, and best practices.</p>
+              <ul class="feat">
+                <li>Ambiguity detection</li>
+                <li>Best practice rules</li>
+                <li>Severity levels</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>AI Test Case Generator</h3>
+                <span class="slug">/ai-test-case-generator</span>
+              </header>
+              <p class="tag">Generate test cases for your AI prompts automatically.</p>
+              <ul class="feat">
+                <li>Automatic edge case generation</li>
+                <li>Multiple test categories</li>
+                <li>Schema-aware testing</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Drift Detector</h3>
+                <span class="slug">/prompt-drift-detector</span>
+              </header>
+              <p class="tag">
+                Detect when your AI outputs start drifting from the original intent.
+              </p>
+              <ul class="feat">
+                <li>Output drift detection</li>
+                <li>Before/after comparison</li>
+                <li>Semantic similarity scoring</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Security Scanner</h3>
+                <span class="slug">/prompt-security-scanner</span>
+              </header>
+              <p class="tag">Scan your prompts for injection vulnerabilities and security risks.</p>
+              <ul class="feat">
+                <li>Injection detection</li>
+                <li>Jailbreak pattern matching</li>
+                <li>Risk severity scoring</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Consistency Checker</h3>
+                <span class="slug">/prompt-consistency-checker</span>
+              </header>
+              <p class="tag">Score your prompt for consistency and clarity.</p>
+              <ul class="feat">
+                <li>Consistency scoring</li>
+                <li>Terminology analysis</li>
+                <li>Structure checks</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Confidence Heatmap</h3>
+                <span class="slug">/prompt-confidence-heatmap</span>
+              </header>
+              <p class="tag">
+                Visualize which parts of your prompt the AI is most confident about.
+              </p>
+              <ul class="feat">
+                <li>Token-level confidence scoring</li>
+                <li>Color-coded heatmap</li>
+                <li>Weak spot identification</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Compression Tool</h3>
+                <span class="slug">/prompt-compression-tool</span>
+              </header>
+              <p class="tag">Shrink your prompts without losing quality.</p>
+              <ul class="feat">
+                <li>Token count reduction</li>
+                <li>Quality-preserving compression</li>
+                <li>Compression ratio display</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Market Gap Analysis Tool</h3>
+                <span class="slug">/market-gap-analysis</span>
+              </header>
+              <p class="tag">
+                Scan your product idea for untapped market opportunities in seconds.
+              </p>
+              <ul class="feat">
+                <li>Market opportunity scanning</li>
+                <li>Competitive gap identification</li>
+                <li>Product validation output</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Idea Scoring &amp; Feasibility Tool</h3>
+                <span class="slug">/idea-scoring-feasibility</span>
+              </header>
+              <p class="tag">Score your idea for feasibility and readiness in seconds.</p>
+              <ul class="feat">
+                <li>Idea readiness scoring</li>
+                <li>Feasibility breakdown</li>
+                <li>Actionable next steps</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Idea Comparison Tool</h3>
+                <span class="slug">/idea-comparison-tool</span>
+              </header>
+              <p class="tag">Compare concept versions side by side and track idea history.</p>
+              <ul class="feat">
+                <li>Side-by-side idea comparison</li>
+                <li>Version history tracking</li>
+                <li>Readiness evaluation</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Few-Shot Example Generator</h3>
+                <span class="slug">/few-shot-example-generator</span>
+              </header>
+              <p class="tag">
+                Generate structured few-shot examples with good, bad, and edge cases for any AI
+                task.
+              </p>
+              <ul class="feat">
+                <li>Good/bad/edge case examples</li>
+                <li>Markdown and JSON output</li>
+                <li>Preset templates</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #8b5cf6">
+              <header>
+                <h3>Prompt Version Diff Tool</h3>
+                <span class="slug">/prompt-version-diff</span>
+              </header>
+              <p class="tag">
+                Compare two prompt versions and detect tone shifts, removed constraints, and output
+                format drift.
+              </p>
+              <ul class="feat">
+                <li>Line-by-line diff view</li>
+                <li>Tone and constraint risk detection</li>
+                <li>Output format drift analysis</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #d97706">
+            <h2>Hardware &amp; BOM</h2>
+            <span class="count">10 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Ten hardware engineering tools: BOM builders, component selectors, datasheet helpers. An
+            unusually under-served SEO niche with high commercial intent.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Hardware BOM Tools</h3>
+                <span class="slug">/hardware-bom-tools</span>
+              </header>
+              <p class="tag">Manage and preview hardware bills of materials with AI.</p>
+              <ul class="feat">
+                <li>BOM generation</li>
+                <li>Component analysis</li>
+                <li>Cost estimation</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>AI BOM Generator</h3>
+                <span class="slug">/ai-bom-generator</span>
+              </header>
+              <p class="tag">Generate bills of materials from a single description.</p>
+              <ul class="feat">
+                <li>Multi-domain BOM generation</li>
+                <li>Hardware and play modes</li>
+                <li>Cost breakdowns</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>BOM Material Sourcing</h3>
+                <span class="slug">/bom-material-sourcing</span>
+              </header>
+              <p class="tag">Find and compare sources for every item in your BOM.</p>
+              <ul class="feat">
+                <li>Supplier suggestions</li>
+                <li>Price comparisons</li>
+                <li>Availability checks</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Hardware Cost Estimator</h3>
+                <span class="slug">/hardware-cost-estimator</span>
+              </header>
+              <p class="tag">Estimate BOM and prototype costs instantly — no signup required.</p>
+              <ul class="feat">
+                <li>BOM cost calculation</li>
+                <li>PCB and enclosure pricing</li>
+                <li>Prototype vs production estimates</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Manufacturing Readiness Checker</h3>
+                <span class="slug">/manufacturing-readiness-checker</span>
+              </header>
+              <p class="tag">Instantly evaluate how production-ready your hardware concept is.</p>
+              <ul class="feat">
+                <li>MRL score calculation</li>
+                <li>BOM preview generation</li>
+                <li>Schematic outline</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Hardware Documentation Exporter</h3>
+                <span class="slug">/hardware-documentation-exporter</span>
+              </header>
+              <p class="tag">Generate schematics, BOM tables, and production docs in seconds.</p>
+              <ul class="feat">
+                <li>Schematic generation</li>
+                <li>BOM table export</li>
+                <li>Cost estimate docs</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Supplier Comparison Tool</h3>
+                <span class="slug">/supplier-comparison</span>
+              </header>
+              <p class="tag">Compare suppliers side by side — lead times, costs, and regions.</p>
+              <ul class="feat">
+                <li>Side-by-side supplier comparison</li>
+                <li>Lead time and cost data</li>
+                <li>Regional supplier options</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Product Build Flow Simulator</h3>
+                <span class="slug">/product-build-flow-simulator</span>
+              </header>
+              <p class="tag">Preview one real production pipeline step — instantly, no signup.</p>
+              <ul class="feat">
+                <li>Pipeline step preview</li>
+                <li>Multi-mode support</li>
+                <li>Hardware, audio, and idea flows</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Hardware Compliance Checker</h3>
+                <span class="slug">/hardware-compliance-checker</span>
+              </header>
+              <p class="tag">
+                Scan your hardware concept for compliance risks and regulatory flags.
+              </p>
+              <ul class="feat">
+                <li>Compliance risk scan</li>
+                <li>Regulatory flag detection</li>
+                <li>Risk score overview</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #d97706">
+              <header>
+                <h3>Build Planner Tool</h3>
+                <span class="slug">/build-planner-tool</span>
+              </header>
+              <p class="tag">Generate schematics, BOMs, and production workflows from a brief.</p>
+              <ul class="feat">
+                <li>Schematic generation</li>
+                <li>BOM preview</li>
+                <li>Flow graph output</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #e11d48">
+            <h2>Music &amp; Audio</h2>
+            <span class="count">10 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Ten music &amp; audio tools — chord generators, scale browsers, generative composers.
+            Creative-coding audience that overlaps with builders Svivva targets.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Chord Progression Generator</h3>
+                <span class="slug">/chord-progression-generator</span>
+              </header>
+              <p class="tag">Generate chord progressions instantly — free, no signup.</p>
+              <ul class="feat">
+                <li>Instant chord progression output</li>
+                <li>Multi-mode support</li>
+                <li>Genre and mood targeting</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Synth Patch Designer</h3>
+                <span class="slug">/patch-designer</span>
+              </header>
+              <p class="tag">Describe your sound — get a full signal chain and modular patch.</p>
+              <ul class="feat">
+                <li>Signal chain generation</li>
+                <li>Modular patch mapping</li>
+                <li>Module-level detail</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>AI Melody Interpolator</h3>
+                <span class="slug">/melody-interpolator</span>
+              </header>
+              <p class="tag">Turn a concept into a production-style melody in under 3 seconds.</p>
+              <ul class="feat">
+                <li>Instant melody preview</li>
+                <li>Note and rhythm output</li>
+                <li>Multi-mode pipeline support</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Composition Mode Preview Studio</h3>
+                <span class="slug">/composition-mode-preview-studio</span>
+              </header>
+              <p class="tag">Submit a brief and instantly preview a composition pipeline step.</p>
+              <ul class="feat">
+                <li>Composition step preview</li>
+                <li>Multi-mode pipeline support</li>
+                <li>Production-style output</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Ensemble Layering Playground</h3>
+                <span class="slug">/ensemble-layering-playground</span>
+              </header>
+              <p class="tag">Preview multi-instrument ensemble layers from a single brief.</p>
+              <ul class="feat">
+                <li>Ensemble layer preview</li>
+                <li>Instrument role assignment</li>
+                <li>Spatial placement output</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>AI Sound Generator</h3>
+                <span class="slug">/ai-sound-generator</span>
+              </header>
+              <p class="tag">
+                Generate production-style sound previews from a text prompt in seconds.
+              </p>
+              <ul class="feat">
+                <li>Text-to-sound generation</li>
+                <li>Production-style previews</li>
+                <li>Beat, melody, and texture support</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>MIDI Mapper &amp; Stem Exporter</h3>
+                <span class="slug">/midi-mapper</span>
+              </header>
+              <p class="tag">
+                Map MIDI notes and CCs — then preview stereo stem exports instantly.
+              </p>
+              <ul class="feat">
+                <li>MIDI note and CC mapping</li>
+                <li>Stereo stem export preview</li>
+                <li>Hardware and software targets</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Performance Preset Builder</h3>
+                <span class="slug">/performance-preset-builder</span>
+              </header>
+              <p class="tag">
+                Build production-style performance presets from your creative brief in seconds.
+              </p>
+              <ul class="feat">
+                <li>Performance preset generation</li>
+                <li>Live set structure output</li>
+                <li>Creative brief input</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Chord Creator (ChordKit)</h3>
+                <span class="slug">/chord-creator</span>
+              </header>
+              <p class="tag">
+                Browse, filter, and generate chords by root, style, and voicing — no signup
+                required.
+              </p>
+              <ul class="feat">
+                <li>400+ chord types</li>
+                <li>Filter by style tag (jazz, gospel, neo-soul, etc.)</li>
+                <li>MIDI voicing data for each chord</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #e11d48">
+              <header>
+                <h3>Reich Composer</h3>
+                <span class="slug">/reich-composer</span>
+              </header>
+              <p class="tag">
+                Generate Steve Reich–style phasing and counterpoint music live in the browser.
+              </p>
+              <ul class="feat">
+                <li>Phase canon, electric counterpoint, and hocket patterns</li>
+                <li>12 scales including modes, pentatonic, blues, and whole tone</li>
+                <li>Live Web Audio playback — no server required</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #0891b2">
+            <h2>AI Model Tools</h2>
+            <span class="count">6 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Six tools for working with AI models — comparison, evaluation, regression testing.
+            Catches the technical side of the AI buyer journey.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>AI Model Comparison</h3>
+                <span class="slug">/ai-model-comparison</span>
+              </header>
+              <p class="tag">Compare AI models by cost, tokens, and compatibility — instantly.</p>
+              <ul class="feat">
+                <li>Multi-model simulation</li>
+                <li>Cost estimation</li>
+                <li>Token count comparison</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>Synthetic Dataset Generator</h3>
+                <span class="slug">/synthetic-dataset-generator</span>
+              </header>
+              <p class="tag">Generate realistic test datasets from any JSON schema.</p>
+              <ul class="feat">
+                <li>Schema-to-dataset generation</li>
+                <li>Multiple data modes</li>
+                <li>Edge case generation</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>AI Output Diff Visualizer</h3>
+                <span class="slug">/ai-output-diff-visualizer</span>
+              </header>
+              <p class="tag">Compare two AI outputs side by side with a diff view.</p>
+              <ul class="feat">
+                <li>Line-by-line diff</li>
+                <li>Semantic change detection</li>
+                <li>Color-coded changes</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>Evaluation Rule Builder</h3>
+                <span class="slug">/evaluation-rule-builder</span>
+              </header>
+              <p class="tag">Build custom rules to evaluate AI output quality.</p>
+              <ul class="feat">
+                <li>Rule definition interface</li>
+                <li>Weighted scoring</li>
+                <li>Pass/fail thresholds</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>3D Model From Text Preview</h3>
+                <span class="slug">/3d-model-from-text</span>
+              </header>
+              <p class="tag">
+                Describe any project. See an AI-generated workflow preview in seconds.
+              </p>
+              <ul class="feat">
+                <li>Multi-mode previews</li>
+                <li>Hardware, play, idea, and build modes</li>
+                <li>Confidence &amp; readiness scores</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #0891b2">
+              <header>
+                <h3>Sketch &amp; 3D Model Maker</h3>
+                <span class="slug">/sketch-3d-model-maker</span>
+              </header>
+              <p class="tag">
+                View Spline 3D scenes and generate AI reference images — free, no signup needed.
+              </p>
+              <ul class="feat">
+                <li>Live Spline 3D scene viewer</li>
+                <li>AI reference image generation</li>
+                <li>Links to top 3D tools (Meshy, Leonardo, Replicate)</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #a855f7">
+            <h2>Content &amp; Writing</h2>
+            <span class="count">7 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Seven content tools: AI chat, summarization, grammar, sentiment, tone — the broad demand
+            layer that introduces casual users to the brand.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>AI Chat</h3>
+                <span class="slug">/ai-chat</span>
+              </header>
+              <p class="tag">Chat with advanced AI instantly — no setup required.</p>
+              <ul class="feat">
+                <li>Real-time streaming responses</li>
+                <li>Multi-turn conversation</li>
+                <li>Powered by GPT-4o</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Text Summarizer</h3>
+                <span class="slug">/text-summarizer</span>
+              </header>
+              <p class="tag">Paste any text. Get a crisp summary in seconds.</p>
+              <ul class="feat">
+                <li>Handles long documents</li>
+                <li>Preserves key points</li>
+                <li>One-click summary</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Grammar Checker</h3>
+                <span class="slug">/grammar-checker</span>
+              </header>
+              <p class="tag">Write with confidence — catch every grammar mistake.</p>
+              <ul class="feat">
+                <li>Grammar and punctuation fixes</li>
+                <li>Style suggestions</li>
+                <li>Explains each correction</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Keyword Extractor</h3>
+                <span class="slug">/keyword-extractor</span>
+              </header>
+              <p class="tag">Extract the most important keywords from any content.</p>
+              <ul class="feat">
+                <li>Top keyword ranking</li>
+                <li>Topic extraction</li>
+                <li>SEO-ready output</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Tone Rewriter</h3>
+                <span class="slug">/tone-rewriter</span>
+              </header>
+              <p class="tag">Rewrite anything in a different tone — professional, casual, bold.</p>
+              <ul class="feat">
+                <li>5+ tone styles</li>
+                <li>Preserves original meaning</li>
+                <li>Great for emails and copy</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Image Generator</h3>
+                <span class="slug">/image-generator</span>
+              </header>
+              <p class="tag">Describe an image. See it come to life.</p>
+              <ul class="feat">
+                <li>DALL-E 3 powered</li>
+                <li>High-resolution output</li>
+                <li>Any style or subject</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #a855f7">
+              <header>
+                <h3>Quiz Generator</h3>
+                <span class="slug">/quiz-generator</span>
+              </header>
+              <p class="tag">Turn any topic into a ready-to-use quiz instantly.</p>
+              <ul class="feat">
+                <li>Any subject or topic</li>
+                <li>Multiple-choice format</li>
+                <li>Adjustable difficulty</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #db2777">
+            <h2>Data Tools</h2>
+            <span class="count">2 tools</span>
+          </div>
+          <p class="cat-blurb">
+            Two data tools: keyword extraction and Hypothesis Labs (the parent app for the 20
+            research tools above).
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #db2777">
+              <header>
+                <h3>Sentiment Analyzer</h3>
+                <span class="slug">/sentiment-analyzer</span>
+              </header>
+              <p class="tag">Understand the emotion behind any text in seconds.</p>
+              <ul class="feat">
+                <li>Positive/negative/neutral scoring</li>
+                <li>Emotion detection</li>
+                <li>Confidence scores</li>
+              </ul>
+            </article>
+            <article class="card" style="--c: #db2777">
+              <header>
+                <h3>Hypothesis Labs</h3>
+                <span class="slug">/hypothesis-labs</span>
+              </header>
+              <p class="tag">
+                20 research thinking tools — compare, hypothesize, and map assumptions in seconds.
+              </p>
+              <ul class="feat">
+                <li>20 research tools in one app</li>
+                <li>Compare Anything, Trend Insight, Causal Sketcher</li>
+                <li>Cross-Domain Hybridization Engine</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #16a34a">
+            <h2>Code Tools</h2>
+            <span class="count">1 tools</span>
+          </div>
+          <p class="cat-blurb">
+            One core code tool: code explanation. A high-volume search term that converts curious
+            learners into Svivva-aware visitors.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #16a34a">
+              <header>
+                <h3>Code Explainer</h3>
+                <span class="slug">/code-explainer</span>
+              </header>
+              <p class="tag">Paste any code snippet — get a plain-English explanation.</p>
+              <ul class="feat">
+                <li>Supports 30+ languages</li>
+                <li>Line-by-line breakdowns</li>
+                <li>Explains logic and intent</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+        <section class="cat">
+          <div class="cat-head" style="--c: #2563eb">
+            <h2>Language Tools</h2>
+            <span class="count">1 tools</span>
+          </div>
+          <p class="cat-blurb">
+            One translator tool. Universal demand; introduces Svivva to international audiences.
+          </p>
+          <div class="grid">
+            <article class="card" style="--c: #2563eb">
+              <header>
+                <h3>AI Translator</h3>
+                <span class="slug">/ai-translator</span>
+              </header>
+              <p class="tag">Translate any text into 50+ languages instantly.</p>
+              <ul class="feat">
+                <li>50+ languages supported</li>
+                <li>Context-aware translation</li>
+                <li>Formal and informal tone</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="block">
+        <h2 class="section">Roadmap</h2>
+        <ul class="bul">
+          <li>
+            <b>Next 30 days:</b> ship 20 more research tools, add per-tool usage analytics
+            dashboard, A/B test the Svivva Seeds ad copy.
+          </li>
+          <li>
+            <b>Next 90 days:</b> reach 150 tools, launch a "tool of the week" newsletter to build
+            retention beyond search, ship the API for embedding tools on third-party sites.
+          </li>
+          <li>
+            <b>Next 180 days:</b> 200+ tools, programmatic SEO for tool combinations ("X vs Y"
+            comparison pages auto-generated from any two tools), API revenue line item.
+          </li>
+        </ul>
+      </section>
+
+      <section class="block">
+        <h2 class="section">The ask</h2>
+        <p>
+          Keep shipping. Every new mini app is another keyword surface, another funnel entry point,
+          another proof point that Svivva ships real software fast. No paid acquisition required, no
+          permission needed — just write the app, register the slug, and let Google do the work.
+        </p>
+      </section>
+
+      <div class="cta">
+        <h2>Try it →</h2>
+        <p>Browse all 84 tools, then see what the full Svivva platform can do for your business.</p>
+        <a href="https://svivva.com">svivva.com</a>
+      </div>
+
+      <footer>
+        svivva-tools · YC-style brief · save this page as PDF from your browser if needed
+      </footer>
+    </main>
+  </body>
 </html>

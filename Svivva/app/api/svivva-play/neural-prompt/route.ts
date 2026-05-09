@@ -68,8 +68,7 @@ function formatStemAnalysis(stems: Stem[]): string {
       const avgVelocity = Math.round(
         stem.midiEvents
           .filter((e) => e.type === "noteOn" && e.velocity)
-          .reduce((sum, e) => sum + (e.velocity || 0), 0) /
-          Math.max(noteCount, 1)
+          .reduce((sum, e) => sum + (e.velocity || 0), 0) / Math.max(noteCount, 1),
       );
 
       return `- ${stem.name} (${stem.role}): ${stem.instrumentHint}, ${noteCount} notes, avg velocity ${avgVelocity}`;
@@ -102,14 +101,14 @@ export async function POST(request: NextRequest) {
     if (!analysis || !stems || stems.length === 0) {
       return NextResponse.json(
         { error: "Missing required fields: analysis and stems" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!analysis.bpm || !analysis.key || !analysis.timeSignature) {
       return NextResponse.json(
         { error: "Missing required analysis fields: bpm, key, timeSignature" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -192,10 +191,7 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
 
     const contentBlock = response.choices[0].message.content;
     if (!contentBlock) {
-      return NextResponse.json(
-        { error: "No response content from OpenAI" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "No response content from OpenAI" }, { status: 500 });
     }
 
     let parsedResponse: PromptResponse;
@@ -204,7 +200,7 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
     } catch {
       return NextResponse.json(
         { error: "Failed to parse OpenAI response as JSON" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -217,7 +213,7 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
     ) {
       return NextResponse.json(
         { error: "Invalid response structure from OpenAI" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -227,15 +223,15 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
     // Ensure model settings are within reasonable bounds
     parsedResponse.modelSettings.steps = Math.max(
       20,
-      Math.min(100, parsedResponse.modelSettings.steps)
+      Math.min(100, parsedResponse.modelSettings.steps),
     );
     parsedResponse.modelSettings.cfgScale = Math.max(
       1,
-      Math.min(15, parsedResponse.modelSettings.cfgScale)
+      Math.min(15, parsedResponse.modelSettings.cfgScale),
     );
     parsedResponse.modelSettings.duration = Math.max(
       10,
-      Math.min(600, parsedResponse.modelSettings.duration)
+      Math.min(600, parsedResponse.modelSettings.duration),
     );
 
     return NextResponse.json(parsedResponse);
@@ -243,15 +239,9 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
     console.error("Neural prompt generation error:", error);
 
     if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { error: "Invalid JSON in request body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Neural prompt generation failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Neural prompt generation failed" }, { status: 500 });
   }
 }

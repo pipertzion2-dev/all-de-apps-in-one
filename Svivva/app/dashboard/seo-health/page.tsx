@@ -7,7 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, AlertTriangle, XCircle, Info, ExternalLink, RefreshCw, Send } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Info,
+  ExternalLink,
+  RefreshCw,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
 
 type Check = {
@@ -29,10 +37,34 @@ type HealthData = {
 };
 
 const STATUS_META = {
-  ok: { Icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/30", label: "Healthy" },
-  warn: { Icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Attention" },
-  fail: { Icon: XCircle, color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/30", label: "Broken" },
-  info: { Icon: Info, color: "text-sky-500", bg: "bg-sky-500/10", border: "border-sky-500/30", label: "Info" },
+  ok: {
+    Icon: CheckCircle2,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/30",
+    label: "Healthy",
+  },
+  warn: {
+    Icon: AlertTriangle,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/30",
+    label: "Attention",
+  },
+  fail: {
+    Icon: XCircle,
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
+    border: "border-rose-500/30",
+    label: "Broken",
+  },
+  info: {
+    Icon: Info,
+    color: "text-sky-500",
+    bg: "bg-sky-500/10",
+    border: "border-sky-500/30",
+    label: "Info",
+  },
 } as const;
 
 export default function SeoHealthPage() {
@@ -57,7 +89,10 @@ export default function SeoHealthPage() {
       return d;
     },
     onSuccess: (d) => {
-      setSubmitMsg({ text: `Submitted ${d.urlCount} URLs to ${d.submittedTo?.join(" + ") ?? "IndexNow"}.`, ok: true });
+      setSubmitMsg({
+        text: `Submitted ${d.urlCount} URLs to ${d.submittedTo?.join(" + ") ?? "IndexNow"}.`,
+        ok: true,
+      });
       qc.invalidateQueries({ queryKey: ["/api/seo/health"] });
     },
     onError: (e: Error) => setSubmitMsg({ text: e.message, ok: false }),
@@ -67,15 +102,21 @@ export default function SeoHealthPage() {
     <div className="container max-w-6xl py-8 space-y-6" data-testid="page-seo-health">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">Search Engine Health</h1>
+          <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
+            Search Engine Health
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Live signals telling you whether Google, Bing, and friends can find — and trust — your site.
+            Live signals telling you whether Google, Bing, and friends can find — and trust — your
+            site.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
-            onClick={() => { setSubmitMsg(null); indexNowMutation.mutate(); }}
+            onClick={() => {
+              setSubmitMsg(null);
+              indexNowMutation.mutate();
+            }}
             disabled={indexNowMutation.isPending}
             data-testid="btn-indexnow-submit"
           >
@@ -130,7 +171,11 @@ export default function SeoHealthPage() {
                   <div className="flex items-baseline gap-3 mt-1">
                     <span
                       className={`text-5xl font-bold tabular-nums ${
-                        data.score >= 85 ? "text-emerald-500" : data.score >= 60 ? "text-amber-500" : "text-rose-500"
+                        data.score >= 85
+                          ? "text-emerald-500"
+                          : data.score >= 60
+                            ? "text-amber-500"
+                            : "text-rose-500"
                       }`}
                       data-testid="text-score"
                     >
@@ -143,13 +188,25 @@ export default function SeoHealthPage() {
                   </p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-500" data-testid="badge-ok">
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/40 text-emerald-500"
+                    data-testid="badge-ok"
+                  >
                     {data.summary.ok} healthy
                   </Badge>
-                  <Badge variant="outline" className="border-amber-500/40 text-amber-500" data-testid="badge-warn">
+                  <Badge
+                    variant="outline"
+                    className="border-amber-500/40 text-amber-500"
+                    data-testid="badge-warn"
+                  >
                     {data.summary.warn} need attention
                   </Badge>
-                  <Badge variant="outline" className="border-rose-500/40 text-rose-500" data-testid="badge-fail">
+                  <Badge
+                    variant="outline"
+                    className="border-rose-500/40 text-rose-500"
+                    data-testid="badge-fail"
+                  >
                     {data.summary.fail} broken
                   </Badge>
                 </div>
@@ -163,7 +220,11 @@ export default function SeoHealthPage() {
               const meta = STATUS_META[c.status];
               const Icon = meta.Icon;
               return (
-                <Card key={c.id} className={`border ${meta.border}`} data-testid={`card-check-${c.id}`}>
+                <Card
+                  key={c.id}
+                  className={`border ${meta.border}`}
+                  data-testid={`card-check-${c.id}`}
+                >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -173,19 +234,30 @@ export default function SeoHealthPage() {
                         {c.label}
                       </CardTitle>
                       {c.value !== undefined && (
-                        <span className="text-xs font-mono text-muted-foreground" data-testid={`value-${c.id}`}>
+                        <span
+                          className="text-xs font-mono text-muted-foreground"
+                          data-testid={`value-${c.id}`}
+                        >
                           {c.value}
                         </span>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3" data-testid={`detail-${c.id}`}>
+                    <p
+                      className="text-sm text-muted-foreground line-clamp-3"
+                      data-testid={`detail-${c.id}`}
+                    >
                       {c.detail}
                     </p>
                     {c.link && (
                       <Link href={c.link.href}>
-                        <Button variant="ghost" size="sm" className="px-0 mt-2 h-auto text-[#5BA8A0] hover:text-[#5BA8A0]/80 hover:bg-transparent" data-testid={`link-${c.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="px-0 mt-2 h-auto text-[#5BA8A0] hover:text-[#5BA8A0]/80 hover:bg-transparent"
+                          data-testid={`link-${c.id}`}
+                        >
                           {c.link.label} →
                         </Button>
                       </Link>
@@ -201,7 +273,8 @@ export default function SeoHealthPage() {
             <CardHeader>
               <CardTitle>Verify in the wild</CardTitle>
               <CardDescription>
-                These open in the official tools — what they show is the ground truth, not our guess.
+                These open in the official tools — what they show is the ground truth, not our
+                guess.
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Svivva Blog | AI API Development Guides & Tutorials",
-  description: "Guides, tutorials, and insights on building AI-powered APIs. Learn prompt engineering, schema validation, API versioning, and more.",
+  description:
+    "Guides, tutorials, and insights on building AI-powered APIs. Learn prompt engineering, schema validation, API versioning, and more.",
   alternates: {
     canonical: "/blog",
   },

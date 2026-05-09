@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Zc';
-  src: url('/fonts/Zc-Regular.ttf') format('truetype');
+  font-family: "Zc";
+  src: url("/fonts/Zc-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -84,10 +84,12 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Zc', sans-serif;
+    font-family: "Zc", sans-serif;
   }
   @media (max-width: 640px) {
-    input, textarea, select {
+    input,
+    textarea,
+    select {
       font-size: 16px !important;
     }
   }
@@ -97,7 +99,9 @@
   /* Specific properties (not "all") + custom curve. Hover gated on fine pointers
      so touch-tap doesn't trigger a sticky hover state on phones. */
   .hover-elevate {
-    transition: filter 160ms var(--ease-out), transform 160ms var(--ease-out);
+    transition:
+      filter 160ms var(--ease-out),
+      transform 160ms var(--ease-out);
   }
   @media (hover: hover) and (pointer: fine) {
     .hover-elevate:hover {
@@ -105,7 +109,9 @@
     }
   }
   .active-elevate-2 {
-    transition: filter 160ms var(--ease-out), transform 120ms var(--ease-out);
+    transition:
+      filter 160ms var(--ease-out),
+      transform 120ms var(--ease-out);
   }
   /* Scale on press makes the UI feel like it's listening. Subtle (0.97). */
   .active-elevate-2:active {
@@ -113,13 +119,23 @@
     transform: scale(0.97);
   }
   .gradient-text {
-    background: linear-gradient(135deg, #3F2A2C 0%, #7A4F3A 10%, #6B3A67 28%, #425884 46%, #D782B2 64%, #F3AFC4 78%, #6B7B59 90%, #4A5A3D 100%);
+    background: linear-gradient(
+      135deg,
+      #3f2a2c 0%,
+      #7a4f3a 10%,
+      #6b3a67 28%,
+      #425884 46%,
+      #d782b2 64%,
+      #f3afc4 78%,
+      #6b7b59 90%,
+      #4a5a3d 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .solid-accent {
-    color: #5BA8A0;
+    color: #5ba8a0;
   }
   .gradient-border {
     @apply relative;
@@ -130,9 +146,23 @@
     inset: 0;
     padding: 1px;
     border-radius: inherit;
-    background: linear-gradient(135deg, #3F2A2C, #7A4F3A, #6B3A67, #425884, #D782B2, #F3AFC4, #6B7B59, #4A5A3D);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    background: linear-gradient(
+      135deg,
+      #3f2a2c,
+      #7a4f3a,
+      #6b3a67,
+      #425884,
+      #d782b2,
+      #f3afc4,
+      #6b7b59,
+      #4a5a3d
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
@@ -141,7 +171,9 @@
     @apply backdrop-blur-xl bg-black/20 border border-white/5;
   }
   .glow {
-    box-shadow: 0 0 60px rgba(150, 169, 171, 0.1), 0 0 120px rgba(107, 58, 103, 0.06);
+    box-shadow:
+      0 0 60px rgba(150, 169, 171, 0.1),
+      0 0 120px rgba(107, 58, 103, 0.06);
   }
   .glow-rose {
     box-shadow: 0 0 60px rgba(215, 130, 178, 0.12);
@@ -149,7 +181,8 @@
 }
 
 @keyframes subtle-tilt {
-  0%, 100% {
+  0%,
+  100% {
     transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0);
   }
   25% {
@@ -173,7 +206,8 @@
 }
 
 @keyframes scrollBounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -183,13 +217,25 @@
 
 .seeds-holo-text {
   background:
-    radial-gradient(circle at 20% 40%, rgba(255,255,255,0.9) 0%, transparent 2%),
-    radial-gradient(circle at 65% 25%, rgba(255,250,245,0.85) 0%, transparent 1.5%),
-    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.8) 0%, transparent 2.5%),
-    radial-gradient(circle at 40% 80%, rgba(255,248,240,0.75) 0%, transparent 1.8%),
-    radial-gradient(circle at 10% 60%, rgba(255,255,255,0.7) 0%, transparent 1.2%),
-    radial-gradient(circle at 90% 45%, rgba(255,252,248,0.65) 0%, transparent 2%),
-    linear-gradient(135deg, #6B2C4A 0%, #A05068 10%, #8B4578 22%, #C48A8A 34%, #7E5090 46%, #B87888 56%, #6BBFBF 68%, #9E6DA0 78%, #6B2C4A 88%, #A05068 100%);
+    radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.9) 0%, transparent 2%),
+    radial-gradient(circle at 65% 25%, rgba(255, 250, 245, 0.85) 0%, transparent 1.5%),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.8) 0%, transparent 2.5%),
+    radial-gradient(circle at 40% 80%, rgba(255, 248, 240, 0.75) 0%, transparent 1.8%),
+    radial-gradient(circle at 10% 60%, rgba(255, 255, 255, 0.7) 0%, transparent 1.2%),
+    radial-gradient(circle at 90% 45%, rgba(255, 252, 248, 0.65) 0%, transparent 2%),
+    linear-gradient(
+      135deg,
+      #6b2c4a 0%,
+      #a05068 10%,
+      #8b4578 22%,
+      #c48a8a 34%,
+      #7e5090 46%,
+      #b87888 56%,
+      #6bbfbf 68%,
+      #9e6da0 78%,
+      #6b2c4a 88%,
+      #a05068 100%
+    );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -198,33 +244,59 @@
 }
 
 @keyframes spin3d {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  100% {
+    transform: rotateX(360deg) rotateY(360deg);
+  }
 }
 
 @keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes spin2d {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes waveformPulse {
-  0% { transform: scaleY(1); }
-  100% { transform: scaleY(0.4); }
+  0% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0.4);
+  }
 }
 
 @keyframes seeds-holo-sparkle {
-  0% { background-position: 0% 0%; }
-  25% { background-position: 100% 30%; }
-  50% { background-position: 50% 100%; }
-  75% { background-position: 100% 50%; }
-  100% { background-position: 0% 0%; }
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 30%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+  75% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
 }
-
 
 .seeds-holo-border {
   position: relative;
@@ -235,7 +307,19 @@
   position: absolute;
   inset: -2px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #6B2C4A 0%, #A05068 10%, #8B4578 22%, #C48A8A 34%, #7E5090 46%, #B87888 56%, #6BBFBF 68%, #9E6DA0 78%, #6B2C4A 88%, #A05068 100%);
+  background: linear-gradient(
+    135deg,
+    #6b2c4a 0%,
+    #a05068 10%,
+    #8b4578 22%,
+    #c48a8a 34%,
+    #7e5090 46%,
+    #b87888 56%,
+    #6bbfbf 68%,
+    #9e6da0 78%,
+    #6b2c4a 88%,
+    #a05068 100%
+  );
   background-size: 300% 300%;
   animation: seeds-holo-sparkle 5s ease infinite;
   z-index: -1;

@@ -70,7 +70,10 @@ export async function POST(request: Request) {
     const json = await request.json().catch(() => null);
     const parsed = patchSchema.safeParse(json);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid body", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid body", details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
 
     const body = parsed.data;
@@ -79,8 +82,10 @@ export async function POST(request: Request) {
     if ("openaiApiKey" in body) patch.openaiApiKey = toPatchValue(body.openaiApiKey);
     if ("openaiBaseUrl" in body) patch.openaiBaseUrl = toPatchValue(body.openaiBaseUrl);
     if ("stripeSecretKey" in body) patch.stripeSecretKey = toPatchValue(body.stripeSecretKey);
-    if ("stripePublishableKey" in body) patch.stripePublishableKey = toPatchValue(body.stripePublishableKey);
-    if ("stripeWebhookSecret" in body) patch.stripeWebhookSecret = toPatchValue(body.stripeWebhookSecret);
+    if ("stripePublishableKey" in body)
+      patch.stripePublishableKey = toPatchValue(body.stripePublishableKey);
+    if ("stripeWebhookSecret" in body)
+      patch.stripeWebhookSecret = toPatchValue(body.stripeWebhookSecret);
     if ("nextPublicSiteUrl" in body) patch.nextPublicSiteUrl = toPatchValue(body.nextPublicSiteUrl);
 
     if (Object.keys(patch).length === 0) {

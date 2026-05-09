@@ -31,11 +31,7 @@ ${JSON.stringify(outputSchema, null, 2)}
 Return ONLY the JSON object, no explanations or markdown.`;
 }
 
-function buildRepairPrompt(
-  original: string,
-  errors: string[],
-  outputSchema: JsonSchema
-): string {
+function buildRepairPrompt(original: string, errors: string[], outputSchema: JsonSchema): string {
   return `The following JSON output has validation errors:
 
 \`\`\`json
@@ -53,7 +49,7 @@ Return ONLY the corrected JSON object, no explanations.`;
 
 export async function executeRuntime(
   userInput: string,
-  config: RuntimeConfig
+  config: RuntimeConfig,
 ): Promise<RuntimeResult> {
   const { systemPrompt, outputSchema, maxTokens = 4096 } = config;
 

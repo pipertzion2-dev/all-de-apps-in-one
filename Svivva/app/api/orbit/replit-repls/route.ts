@@ -59,7 +59,7 @@ export async function GET() {
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://replit.com",
+        Referer: "https://replit.com",
         "User-Agent": "Mozilla/5.0 Svivva/1.0",
       },
       body: JSON.stringify({

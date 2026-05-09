@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     if (!companyDescription || !primaryAPIPrompt) {
       return NextResponse.json(
         { error: "Company description and primary API prompt are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +70,7 @@ Suggest complementary APIs that would help this business achieve their goals and
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { role: "user", content: userPrompt },
       ],
       response_format: { type: "json_object" },
       temperature: 0.8,
@@ -91,9 +91,6 @@ Suggest complementary APIs that would help this business achieve their goals and
     return NextResponse.json(analysis);
   } catch (error) {
     console.error("Combo builder analyze error:", error);
-    return NextResponse.json(
-      { error: "Failed to analyze business context" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to analyze business context" }, { status: 500 });
   }
 }

@@ -19,7 +19,12 @@ async function indexnowSubmit(urls: string[]): Promise<{ submitted: boolean; cou
     const res = await fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ host, key, keyLocation: `${BASE_URL}/.well-known/indexnow`, urlList: urls }),
+      body: JSON.stringify({
+        host,
+        key,
+        keyLocation: `${BASE_URL}/.well-known/indexnow`,
+        urlList: urls,
+      }),
       signal: AbortSignal.timeout(20000),
     });
     return { submitted: res.status === 200 || res.status === 202, count: urls.length };
@@ -43,7 +48,8 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: "You are an expert SEO strategist for AI SaaS tools. Generate a mix of high-intent, medium-competition keywords that will drive traffic to an AI API builder platform.",
+            content:
+              "You are an expert SEO strategist for AI SaaS tools. Generate a mix of high-intent, medium-competition keywords that will drive traffic to an AI API builder platform.",
           },
           {
             role: "user",
@@ -68,7 +74,11 @@ export async function POST(req: NextRequest) {
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "SEO strategist for an AI API builder SaaS called Svivva. Generate keywords that will bring in developers, product teams, and startup founders looking to build AI-powered features." },
+          {
+            role: "system",
+            content:
+              "SEO strategist for an AI API builder SaaS called Svivva. Generate keywords that will bring in developers, product teams, and startup founders looking to build AI-powered features.",
+          },
           {
             role: "user",
             content: `Generate ${numPages + numPosts} unique, untapped keyword ideas for Svivva. Mix commercial and informational. Focus on long-tail keywords with specific intent (e.g. "how to build an AI API without coding", "OpenAI response schema validation", "AI API version control tool"). Return JSON: { seoPages: [string] (${numPages} keywords for landing pages), blogTopics: [string] (${numPosts} topics for blog articles) }`,
@@ -76,19 +86,33 @@ export async function POST(req: NextRequest) {
         ],
       });
 
-      const { seoPages = [], blogTopics = [] } = JSON.parse(keywordCompletion.choices[0].message.content || "{}");
+      const { seoPages = [], blogTopics = [] } = JSON.parse(
+        keywordCompletion.choices[0].message.content || "{}",
+      );
 
       for (const keyword of seoPages.slice(0, numPages)) {
         try {
-          const slug = keyword.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 60);
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+          const slug = keyword
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "")
+            .slice(0, 60);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
           const finalSlug = existing.length ? `${slug}-${randomBytes(3).toString("hex")}` : slug;
 
           const gen = await openai.chat.completions.create({
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "SEO copywriter for Svivva AI API Builder. Write conversion-focused landing page content." },
+              {
+                role: "system",
+                content:
+                  "SEO copywriter for Svivva AI API Builder. Write conversion-focused landing page content.",
+              },
               {
                 role: "user",
                 content: `Landing page for keyword: "${keyword}". Return JSON: { title, metaTitle (max 60 chars), metaDescription (max 155 chars), content (3 short paragraphs HTML), headline, subheadline }`,
@@ -117,21 +141,40 @@ export async function POST(req: NextRequest) {
           newUrls.push(url);
           log.push({ type: "landing_page", title: data.title || keyword, url, action: "created" });
         } catch (e) {
-          log.push({ type: "landing_page", title: keyword, url: "", action: `error: ${(e as Error).message.slice(0, 60)}` });
+          log.push({
+            type: "landing_page",
+            title: keyword,
+            url: "",
+            action: `error: ${(e as Error).message.slice(0, 60)}`,
+          });
         }
       }
 
       for (const topic of blogTopics.slice(0, numPosts)) {
         try {
-          const keywordTag = topic.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 60);
-          const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, keywordTag)).limit(1);
-          const finalSlug = existing.length ? `${keywordTag}-${randomBytes(3).toString("hex")}` : keywordTag;
+          const keywordTag = topic
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "")
+            .slice(0, 60);
+          const existing = await db
+            .select({ id: blogPosts.id })
+            .from(blogPosts)
+            .where(eq(blogPosts.slug, keywordTag))
+            .limit(1);
+          const finalSlug = existing.length
+            ? `${keywordTag}-${randomBytes(3).toString("hex")}`
+            : keywordTag;
 
           const gen = await openai.chat.completions.create({
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "Technical SEO blogger for Svivva. Write substantive, useful articles that rank on Google and convert readers to Svivva users." },
+              {
+                role: "system",
+                content:
+                  "Technical SEO blogger for Svivva. Write substantive, useful articles that rank on Google and convert readers to Svivva users.",
+              },
               {
                 role: "user",
                 content: `Blog article for: "${topic}". Return JSON: { title, excerpt (1-2 sentences), content (markdown article 600-900 words with H2 headings, practical examples, and CTA for Svivva at the end), metaTitle, metaDescription, tags (array of 3-5 strings) }`,
@@ -159,7 +202,12 @@ export async function POST(req: NextRequest) {
           newUrls.push(url);
           log.push({ type: "blog_article", title: data.title || topic, url, action: "created" });
         } catch (e) {
-          log.push({ type: "blog_article", title: topic, url: "", action: `error: ${(e as Error).message.slice(0, 60)}` });
+          log.push({
+            type: "blog_article",
+            title: topic,
+            url: "",
+            action: `error: ${(e as Error).message.slice(0, 60)}`,
+          });
         }
       }
 
@@ -180,21 +228,39 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "generate-social-batch") {
-      const pages = await db.select({ slug: seoLandingPages.slug, title: seoLandingPages.title })
-        .from(seoLandingPages).where(eq(seoLandingPages.published, true)).limit(5);
-      const posts = await db.select({ slug: blogPosts.slug, title: blogPosts.title })
-        .from(blogPosts).where(eq(blogPosts.published, true)).limit(5);
+      const pages = await db
+        .select({ slug: seoLandingPages.slug, title: seoLandingPages.title })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.published, true))
+        .limit(5);
+      const posts = await db
+        .select({ slug: blogPosts.slug, title: blogPosts.title })
+        .from(blogPosts)
+        .where(eq(blogPosts.published, true))
+        .limit(5);
 
       const allContent = [
-        ...pages.map((p) => ({ title: p.title, url: `${BASE_URL}/${p.slug}`, type: "landing page" })),
-        ...posts.map((p) => ({ title: p.title, url: `${BASE_URL}/blog/${p.slug}`, type: "blog post" })),
+        ...pages.map((p) => ({
+          title: p.title,
+          url: `${BASE_URL}/${p.slug}`,
+          type: "landing page",
+        })),
+        ...posts.map((p) => ({
+          title: p.title,
+          url: `${BASE_URL}/blog/${p.slug}`,
+          type: "blog post",
+        })),
       ];
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Social media manager for Svivva AI API Builder. Write punchy, engaging posts that drive traffic." },
+          {
+            role: "system",
+            content:
+              "Social media manager for Svivva AI API Builder. Write punchy, engaging posts that drive traffic.",
+          },
           {
             role: "user",
             content: `Generate social media posts for these Svivva pages: ${JSON.stringify(allContent)}. Return JSON: { posts: [{ platform: "twitter|linkedin|reddit", title, copy, url, hashtags }] } — one post per piece of content per platform.`,

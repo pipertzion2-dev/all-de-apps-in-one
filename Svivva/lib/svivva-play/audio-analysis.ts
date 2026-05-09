@@ -1,8 +1,7 @@
-
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 const MAJOR_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
-const MINOR_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+const MINOR_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
 
 export interface AudioAnalysisResult {
   bpm: number;
@@ -12,7 +11,11 @@ export interface AudioAnalysisResult {
 
 function correlate(chromagram: number[], profile: number[]): number {
   const n = 12;
-  let sumXY = 0, sumX = 0, sumY = 0, sumX2 = 0, sumY2 = 0;
+  let sumXY = 0,
+    sumX = 0,
+    sumY = 0,
+    sumX2 = 0,
+    sumY2 = 0;
   for (let i = 0; i < n; i++) {
     sumXY += chromagram[i] * profile[i];
     sumX += chromagram[i];
@@ -41,8 +44,7 @@ function detectKey(audioBuffer: AudioBuffer): { key: string; confidence: number 
   const analyzeLength = Math.min(mono.length, sampleRate * 60);
   const startOffset = Math.floor((mono.length - analyzeLength) / 2);
 
-  const offlineCtx = typeof OfflineAudioContext !== "undefined"
-    ? null : null;
+  const offlineCtx = typeof OfflineAudioContext !== "undefined" ? null : null;
 
   const fftSize = 4096;
   const chromagram = new Float64Array(12);
@@ -51,7 +53,7 @@ function detectKey(audioBuffer: AudioBuffer): { key: string; confidence: number 
 
   const hann = new Float64Array(fftSize);
   for (let i = 0; i < fftSize; i++) {
-    hann[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
+    hann[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (fftSize - 1)));
   }
 
   for (let frame = 0; frame < numFrames; frame++) {
@@ -74,10 +76,11 @@ function detectKey(audioBuffer: AudioBuffer): { key: string; confidence: number 
       let energy = 0;
       for (let octave = 1; octave <= 7; octave++) {
         const freq = 440 * Math.pow(2, (noteIdx - 9 + (octave - 4) * 12) / 12);
-        const bin = Math.round(freq * fftSize / sampleRate);
+        const bin = Math.round((freq * fftSize) / sampleRate);
         if (bin > 0 && bin < fftSize / 2 - 1) {
           const weight = 1.0 / octave;
-          energy += (magnitudes[bin - 1] + magnitudes[bin] * 2 + magnitudes[bin + 1]) * weight / 4;
+          energy +=
+            ((magnitudes[bin - 1] + magnitudes[bin] * 2 + magnitudes[bin + 1]) * weight) / 4;
         }
       }
       chromagram[noteIdx] += energy;
@@ -119,9 +122,10 @@ function detectKey(audioBuffer: AudioBuffer): { key: string; confidence: number 
     }
   }
 
-  const confidence = Math.min(99, Math.max(30, Math.round(
-    ((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50
-  )));
+  const confidence = Math.min(
+    99,
+    Math.max(30, Math.round(((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50)),
+  );
 
   return { key: bestKey, confidence };
 }
@@ -142,7 +146,7 @@ function fftInPlace(real: Float64Array, imag: Float64Array, n: number): void {
 
   for (let size = 2; size <= n; size *= 2) {
     const half = size / 2;
-    const angle = -2 * Math.PI / size;
+    const angle = (-2 * Math.PI) / size;
     for (let i = 0; i < n; i += size) {
       for (let j = 0; j < half; j++) {
         const cos = Math.cos(angle * j);
@@ -190,8 +194,8 @@ function detectBPMFallback(audioBuffer: AudioBuffer): number {
 
   const minBPM = 60;
   const maxBPM = 180;
-  const minLag = Math.floor(dsRate * 60 / maxBPM);
-  const maxLag = Math.floor(dsRate * 60 / minBPM);
+  const minLag = Math.floor((dsRate * 60) / maxBPM);
+  const maxLag = Math.floor((dsRate * 60) / minBPM);
 
   let bestLag = minLag;
   let bestCorr = -Infinity;
@@ -210,7 +214,7 @@ function detectBPMFallback(audioBuffer: AudioBuffer): number {
     }
   }
 
-  let bpm = dsRate * 60 / bestLag;
+  let bpm = (dsRate * 60) / bestLag;
   if (bpm < 60) bpm *= 2;
   if (bpm > 180) bpm /= 2;
 

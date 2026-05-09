@@ -23,9 +23,7 @@ export const ListOpenaiConversationsResponseItem = zod.object({
   title: zod.string(),
   createdAt: zod.date(),
 });
-export const ListOpenaiConversationsResponse = zod.array(
-  ListOpenaiConversationsResponseItem,
-);
+export const ListOpenaiConversationsResponse = zod.array(ListOpenaiConversationsResponseItem);
 
 /**
  * @summary Create a new conversation
@@ -77,9 +75,7 @@ export const ListOpenaiMessagesResponseItem = zod.object({
   content: zod.string(),
   createdAt: zod.date(),
 });
-export const ListOpenaiMessagesResponse = zod.array(
-  ListOpenaiMessagesResponseItem,
-);
+export const ListOpenaiMessagesResponse = zod.array(ListOpenaiMessagesResponseItem);
 
 /**
  * @summary Send a text message and receive a streaming text response
@@ -171,14 +167,7 @@ export const ExtractKeywordsResponse = zod.object({
  */
 export const RewriteToneBody = zod.object({
   text: zod.string(),
-  tone: zod.enum([
-    "professional",
-    "casual",
-    "formal",
-    "friendly",
-    "persuasive",
-    "empathetic",
-  ]),
+  tone: zod.enum(["professional", "casual", "formal", "friendly", "persuasive", "empathetic"]),
 });
 
 /**

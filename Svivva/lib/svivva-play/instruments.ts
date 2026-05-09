@@ -3,7 +3,14 @@ export interface InstrumentPreset {
   oscillator: { type: string; partialCount?: number };
   envelope: { attack: number; decay: number; sustain: number; release: number };
   filter?: { type: string; frequency: number; rolloff: number; Q: number };
-  filterEnvelope?: { attack: number; decay: number; sustain: number; release: number; baseFrequency: number; octaves: number };
+  filterEnvelope?: {
+    attack: number;
+    decay: number;
+    sustain: number;
+    release: number;
+    baseFrequency: number;
+    octaves: number;
+  };
   modulationIndex?: number;
   harmonicity?: number;
   detune?: number;
@@ -18,9 +25,7 @@ const PIANO: InstrumentPreset = {
   envelope: { attack: 0.005, decay: 1.2, sustain: 0.1, release: 1.5 },
   filter: { type: "lowpass", frequency: 4000, rolloff: -12, Q: 1 },
   volume: -6,
-  fx: [
-    { type: "reverb", wet: 0.25, decay: 2.5, preDelay: 0.01 },
-  ],
+  fx: [{ type: "reverb", wet: 0.25, decay: 2.5, preDelay: 0.01 }],
 };
 
 const ELECTRIC_PIANO: InstrumentPreset = {
@@ -41,7 +46,14 @@ const BASS: InstrumentPreset = {
   oscillator: { type: "sawtooth" },
   envelope: { attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3 },
   filter: { type: "lowpass", frequency: 800, rolloff: -24, Q: 2 },
-  filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.5, baseFrequency: 200, octaves: 2.5 },
+  filterEnvelope: {
+    attack: 0.01,
+    decay: 0.2,
+    sustain: 0.3,
+    release: 0.5,
+    baseFrequency: 200,
+    octaves: 2.5,
+  },
   volume: -4,
   portamento: 0.05,
 };
@@ -51,7 +63,14 @@ const SYNTH_BASS: InstrumentPreset = {
   oscillator: { type: "square" },
   envelope: { attack: 0.005, decay: 0.2, sustain: 0.6, release: 0.2 },
   filter: { type: "lowpass", frequency: 1200, rolloff: -24, Q: 4 },
-  filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.2, release: 0.3, baseFrequency: 100, octaves: 3 },
+  filterEnvelope: {
+    attack: 0.005,
+    decay: 0.15,
+    sustain: 0.2,
+    release: 0.3,
+    baseFrequency: 100,
+    octaves: 3,
+  },
   volume: -3,
 };
 
@@ -99,9 +118,7 @@ const BRASS: InstrumentPreset = {
   modulationIndex: 6,
   harmonicity: 1,
   volume: -8,
-  fx: [
-    { type: "reverb", wet: 0.2, decay: 1.8, preDelay: 0.01 },
-  ],
+  fx: [{ type: "reverb", wet: 0.2, decay: 1.8, preDelay: 0.01 }],
 };
 
 const ORGAN: InstrumentPreset = {
@@ -122,9 +139,7 @@ const GUITAR: InstrumentPreset = {
   oscillator: { type: "triangle" },
   envelope: { attack: 0.002, decay: 0.8, sustain: 0.1, release: 1.0 },
   volume: -6,
-  fx: [
-    { type: "reverb", wet: 0.2, decay: 1.5, preDelay: 0.01 },
-  ],
+  fx: [{ type: "reverb", wet: 0.2, decay: 1.5, preDelay: 0.01 }],
 };
 
 const MARIMBA: InstrumentPreset = {
@@ -132,9 +147,7 @@ const MARIMBA: InstrumentPreset = {
   oscillator: { type: "sine" },
   envelope: { attack: 0.001, decay: 0.6, sustain: 0.02, release: 0.8 },
   volume: -6,
-  fx: [
-    { type: "reverb", wet: 0.3, decay: 2.0, preDelay: 0.01 },
-  ],
+  fx: [{ type: "reverb", wet: 0.3, decay: 2.0, preDelay: 0.01 }],
 };
 
 const VIBRAPHONE: InstrumentPreset = {
@@ -156,9 +169,7 @@ const FLUTE: InstrumentPreset = {
   envelope: { attack: 0.1, decay: 0.2, sustain: 0.8, release: 0.5 },
   filter: { type: "bandpass", frequency: 2000, rolloff: -12, Q: 1 },
   volume: -10,
-  fx: [
-    { type: "reverb", wet: 0.3, decay: 2.5, preDelay: 0.02 },
-  ],
+  fx: [{ type: "reverb", wet: 0.3, decay: 2.5, preDelay: 0.02 }],
 };
 
 const WOODWIND: InstrumentPreset = {
@@ -168,9 +179,7 @@ const WOODWIND: InstrumentPreset = {
   modulationIndex: 2.5,
   harmonicity: 2,
   volume: -10,
-  fx: [
-    { type: "reverb", wet: 0.25, decay: 2.0, preDelay: 0.02 },
-  ],
+  fx: [{ type: "reverb", wet: 0.25, decay: 2.0, preDelay: 0.02 }],
 };
 
 const BELL: InstrumentPreset = {
@@ -180,9 +189,7 @@ const BELL: InstrumentPreset = {
   modulationIndex: 8,
   harmonicity: 5.07,
   volume: -10,
-  fx: [
-    { type: "reverb", wet: 0.45, decay: 4.0, preDelay: 0.03 },
-  ],
+  fx: [{ type: "reverb", wet: 0.45, decay: 4.0, preDelay: 0.03 }],
 };
 
 const PERCUSSION: InstrumentPreset = {
@@ -242,9 +249,7 @@ const SITAR: InstrumentPreset = {
   oscillator: { type: "sawtooth" },
   envelope: { attack: 0.002, decay: 1.5, sustain: 0.05, release: 2.0 },
   volume: -6,
-  fx: [
-    { type: "reverb", wet: 0.3, decay: 3.0, preDelay: 0.02 },
-  ],
+  fx: [{ type: "reverb", wet: 0.3, decay: 3.0, preDelay: 0.02 }],
 };
 
 const DEFAULT_PRESET: InstrumentPreset = {
@@ -252,9 +257,7 @@ const DEFAULT_PRESET: InstrumentPreset = {
   oscillator: { type: "triangle" },
   envelope: { attack: 0.02, decay: 0.3, sustain: 0.5, release: 0.5 },
   volume: -8,
-  fx: [
-    { type: "reverb", wet: 0.2, decay: 2.0, preDelay: 0.01 },
-  ],
+  fx: [{ type: "reverb", wet: 0.2, decay: 2.0, preDelay: 0.01 }],
 };
 
 const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
@@ -262,9 +265,9 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   "acoustic piano": PIANO,
   "grand piano": PIANO,
   "electric piano": ELECTRIC_PIANO,
-  "rhodes": ELECTRIC_PIANO,
-  "wurlitzer": ELECTRIC_PIANO,
-  "ep": ELECTRIC_PIANO,
+  rhodes: ELECTRIC_PIANO,
+  wurlitzer: ELECTRIC_PIANO,
+  ep: ELECTRIC_PIANO,
   bass: BASS,
   "electric bass": BASS,
   "acoustic bass": BASS,
@@ -291,7 +294,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   horn: BRASS,
   "horn section": BRASS,
   organ: ORGAN,
-  "hammond": ORGAN,
+  hammond: ORGAN,
   guitar: GUITAR,
   "acoustic guitar": GUITAR,
   "electric guitar": GUITAR,
@@ -300,7 +303,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   xylophone: MARIMBA,
   glockenspiel: MARIMBA,
   vibraphone: VIBRAPHONE,
-  "vibes": VIBRAPHONE,
+  vibes: VIBRAPHONE,
   flute: FLUTE,
   piccolo: FLUTE,
   recorder: FLUTE,
@@ -337,17 +340,17 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   vocal: VOCAL_SYNTH,
   voice: VOCAL_SYNTH,
   "vocal synth": VOCAL_SYNTH,
-  "vocoder": VOCAL_SYNTH,
+  vocoder: VOCAL_SYNTH,
   choir: VOCAL_SYNTH,
   "backing vocals": VOCAL_SYNTH,
   arpeggio: ARPEGGIO,
-  "arpeggiated": ARPEGGIO,
-  "arp": ARPEGGIO,
+  arpeggiated: ARPEGGIO,
+  arp: ARPEGGIO,
   sitar: SITAR,
-  "tanpura": SITAR,
-  "veena": SITAR,
-  "sarangi": SITAR,
-  "tabla": PERCUSSION,
+  tanpura: SITAR,
+  veena: SITAR,
+  sarangi: SITAR,
+  tabla: PERCUSSION,
 };
 
 const ROLE_FALLBACKS: Record<string, InstrumentPreset> = {

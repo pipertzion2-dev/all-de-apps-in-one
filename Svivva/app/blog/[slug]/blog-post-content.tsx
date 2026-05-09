@@ -52,7 +52,10 @@ function renderMarkdown(md: string): string {
       .trim()}</code></pre>`;
   });
 
-  html = html.replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-sm">$1</code>');
+  html = html.replace(
+    /`([^`]+)`/g,
+    '<code class="bg-muted px-1.5 py-0.5 rounded text-sm">$1</code>',
+  );
 
   html = html.replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold mt-8 mb-3">$1</h3>');
   html = html.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>');
@@ -66,13 +69,10 @@ function renderMarkdown(md: string): string {
 
   html = html.replace(
     /(<li[^>]*>.*<\/li>\n?)+/g,
-    (match) => `<ul class="my-4 space-y-1">${match}</ul>`
+    (match) => `<ul class="my-4 space-y-1">${match}</ul>`,
   );
 
-  html = html.replace(
-    /^(?!<[huplo])(.*\S.*)$/gm,
-    '<p class="my-3 leading-relaxed">$1</p>'
-  );
+  html = html.replace(/^(?!<[huplo])(.*\S.*)$/gm, '<p class="my-3 leading-relaxed">$1</p>');
 
   return html;
 }
@@ -101,11 +101,29 @@ export default function BlogPostContent({
         data-testid="nav-blog-post"
       >
         <Link href="/" data-testid="link-logo">
-          <Image src={svivvaLogo} alt="Svivva" width={100} height={32} className="h-7 w-auto object-contain" />
+          <Image
+            src={svivvaLogo}
+            alt="Svivva"
+            width={100}
+            height={32}
+            className="h-7 w-auto object-contain"
+          />
         </Link>
         <div className="flex items-center gap-4 flex-wrap">
-          <Link href="/blog" className="text-sm font-medium text-foreground" data-testid="link-blog">Blog</Link>
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-dashboard">Dashboard</Link>
+          <Link
+            href="/blog"
+            className="text-sm font-medium text-foreground"
+            data-testid="link-blog"
+          >
+            Blog
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            data-testid="link-dashboard"
+          >
+            Dashboard
+          </Link>
           <ThemeToggle />
         </div>
       </nav>
@@ -130,16 +148,18 @@ export default function BlogPostContent({
               {post.category}
             </Badge>
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs" data-testid={`badge-tag-${tag}`}>
+              <Badge
+                key={tag}
+                variant="outline"
+                className="text-xs"
+                data-testid={`badge-tag-${tag}`}
+              >
                 {tag}
               </Badge>
             ))}
           </div>
 
-          <h1
-            className="text-3xl md:text-4xl font-bold mb-4"
-            data-testid="text-post-title"
-          >
+          <h1 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-post-title">
             {post.title}
           </h1>
 
@@ -187,8 +207,13 @@ export default function BlogPostContent({
       </article>
 
       {relatedPosts.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 py-12 border-t border-border" data-testid="section-related">
-          <h2 className="text-2xl font-bold mb-6" data-testid="text-related-title">Related Posts</h2>
+        <section
+          className="max-w-6xl mx-auto px-6 py-12 border-t border-border"
+          data-testid="section-related"
+        >
+          <h2 className="text-2xl font-bold mb-6" data-testid="text-related-title">
+            Related Posts
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedPosts.map((rp) => (
               <Link key={rp.id} href={`/blog/${rp.slug}`} data-testid={`card-related-${rp.slug}`}>
@@ -202,7 +227,10 @@ export default function BlogPostContent({
                   </Badge>
                   <h3 className="text-base font-semibold mb-2 line-clamp-2">{rp.title}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{rp.excerpt}</p>
-                  <div className="mt-3 flex items-center gap-1 text-sm font-medium" style={{ color: "#5BA8A0" }}>
+                  <div
+                    className="mt-3 flex items-center gap-1 text-sm font-medium"
+                    style={{ color: "#5BA8A0" }}
+                  >
                     Read more <ArrowRight className="h-3 w-3" />
                   </div>
                 </Card>
@@ -221,12 +249,15 @@ export default function BlogPostContent({
       >
         <div className="relative z-10 max-w-2xl mx-auto">
           <div className="absolute inset-0 -z-10 bg-black/40 rounded-md" />
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3" data-testid="text-cta-title">
+          <h2
+            className="text-2xl md:text-3xl font-bold text-white mb-3"
+            data-testid="text-cta-title"
+          >
             Build AI APIs faster with Svivva
           </h2>
           <p className="text-white/80 mb-6">
-            Turn prompts into production-ready APIs with schema enforcement,
-            evaluations, and instant deployment.
+            Turn prompts into production-ready APIs with schema enforcement, evaluations, and
+            instant deployment.
           </p>
           <Link href="/dashboard">
             <Button

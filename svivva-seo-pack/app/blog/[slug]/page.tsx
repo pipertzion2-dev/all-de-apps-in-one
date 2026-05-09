@@ -28,7 +28,13 @@ async function getRelatedPosts(post: BlogPost): Promise<BlogPost[]> {
     return await db
       .select()
       .from(blogPosts)
-      .where(and(eq(blogPosts.published, true), ne(blogPosts.slug, post.slug), eq(blogPosts.category, post.category)))
+      .where(
+        and(
+          eq(blogPosts.published, true),
+          ne(blogPosts.slug, post.slug),
+          eq(blogPosts.category, post.category),
+        ),
+      )
       .limit(3);
   } catch (err) {
     console.error("[blog/slug] getRelatedPosts failed:", err);
@@ -74,11 +80,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
 

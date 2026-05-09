@@ -1,5 +1,5 @@
-import { sql } from 'drizzle-orm';
-import { db } from '@workspace/db';
+import { sql } from "drizzle-orm";
+import { db } from "@workspace/db";
 
 export class Storage {
   async listProductsWithPrices(active = true) {
@@ -25,15 +25,13 @@ export class Storage {
         FROM paginated_products p
         LEFT JOIN stripe.prices pr ON pr.product = p.id AND pr.active = true
         ORDER BY p.id, pr.unit_amount
-      `
+      `,
     );
     return result.rows;
   }
 
   async getPrice(priceId: string) {
-    const result = await db.execute(
-      sql`SELECT * FROM stripe.prices WHERE id = ${priceId}`
-    );
+    const result = await db.execute(sql`SELECT * FROM stripe.prices WHERE id = ${priceId}`);
     return result.rows[0] || null;
   }
 }

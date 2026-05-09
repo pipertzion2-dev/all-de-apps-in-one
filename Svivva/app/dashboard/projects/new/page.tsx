@@ -17,9 +17,9 @@ export default function NewProjectPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   const createProject = useMutation({
-    mutationFn: async (data: { 
-      name: string; 
-      description: string; 
+    mutationFn: async (data: {
+      name: string;
+      description: string;
       prompt: string;
       branding?: {
         name: string;
@@ -33,12 +33,12 @@ export default function NewProjectPage() {
         body: JSON.stringify(data),
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to create project");
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {

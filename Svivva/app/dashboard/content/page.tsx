@@ -154,7 +154,7 @@ export default function ContentManagementPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([fetchBlogPosts(), fetchSeoPages(), fetchCategories()]).finally(() =>
-      setLoading(false)
+      setLoading(false),
     );
   }, [fetchBlogPosts, fetchSeoPages, fetchCategories]);
 

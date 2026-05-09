@@ -15,7 +15,7 @@ async function performAutopsy(
   errorMessage: string | null,
   systemPrompt: string,
   outputSchema: Record<string, unknown>,
-  recentFailures: { input: string | null; error: string | null }[]
+  recentFailures: { input: string | null; error: string | null }[],
 ): Promise<{
   rootCause: string;
   causeChain: string[];
@@ -77,7 +77,9 @@ ${recentFailures.map((f, i) => `${i + 1}. Input: "${f.input?.substring(0, 100)}"
       contributingFactors: parsed.contributingFactors || [],
       suggestedFix: parsed.suggestedFix || "Review the system prompt for edge cases",
       fixedPrompt: parsed.fixedPrompt || systemPrompt,
-      severity: ["critical", "high", "medium", "low"].includes(parsed.severity) ? parsed.severity : "medium",
+      severity: ["critical", "high", "medium", "low"].includes(parsed.severity)
+        ? parsed.severity
+        : "medium",
     };
   } catch {
     return {
@@ -107,14 +109,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const recentFailures = await db.select({
-      input: usageLogs.input,
-      error: usageLogs.error,
-    }).from(usageLogs)
-      .where(and(
-        eq(usageLogs.projectId, projectId),
-        eq(usageLogs.status, "error")
-      ))
+    const recentFailures = await db
+      .select({
+        input: usageLogs.input,
+        error: usageLogs.error,
+      })
+      .from(usageLogs)
+      .where(and(eq(usageLogs.projectId, projectId), eq(usageLogs.status, "error")))
       .orderBy(desc(usageLogs.createdAt))
       .limit(5);
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       errorMsg || null,
       project.systemPrompt,
       project.outputSchema as Record<string, unknown>,
-      recentFailures
+      recentFailures,
     );
 
     const autopsyId = uuidv4();
@@ -160,7 +161,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const autopsies = await db.select().from(apiAutopsies)
+    const autopsies = await db
+      .select()
+      .from(apiAutopsies)
       .where(eq(apiAutopsies.projectId, projectId))
       .orderBy(desc(apiAutopsies.createdAt))
       .limit(20);

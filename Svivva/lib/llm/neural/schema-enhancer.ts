@@ -33,7 +33,7 @@ Return a JSON object with:
 
 export async function enhanceSchema(
   outputSchema: JsonSchema,
-  systemPrompt: string
+  systemPrompt: string,
 ): Promise<SchemaEnhancementResult> {
   try {
     const response = await openai.chat.completions.create({

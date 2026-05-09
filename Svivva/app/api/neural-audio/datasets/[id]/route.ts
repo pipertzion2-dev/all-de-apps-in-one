@@ -3,17 +3,11 @@ import { db } from "@/lib/db";
 import { audioDatasets, audioDatasetItems } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
-    const [dataset] = await db
-      .select()
-      .from(audioDatasets)
-      .where(eq(audioDatasets.id, id));
+    const [dataset] = await db.select().from(audioDatasets).where(eq(audioDatasets.id, id));
 
     if (!dataset) {
       return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
@@ -32,18 +26,12 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
 
-    const [existing] = await db
-      .select()
-      .from(audioDatasets)
-      .where(eq(audioDatasets.id, id));
+    const [existing] = await db.select().from(audioDatasets).where(eq(audioDatasets.id, id));
 
     if (!existing) {
       return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
@@ -64,15 +52,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
 
-    const [existing] = await db
-      .select()
-      .from(audioDatasets)
-      .where(eq(audioDatasets.id, id));
+    const [existing] = await db.select().from(audioDatasets).where(eq(audioDatasets.id, id));
 
     if (!existing) {
       return NextResponse.json({ error: "Dataset not found" }, { status: 404 });

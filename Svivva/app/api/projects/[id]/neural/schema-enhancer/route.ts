@@ -8,10 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { type JsonSchema } from "@/lib/spec";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -40,10 +37,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -69,15 +63,18 @@ export async function POST(
     }
 
     const analysisId = uuidv4();
-    const [analysis] = await db.insert(neuralSchemaAnalyses).values({
-      id: analysisId,
-      projectId: id,
-      originalSchema: outputSchema,
-      suggestedSchema: result.suggestedSchema,
-      rationale: result.rationale || "",
-      riskLevel: result.riskLevel || "medium",
-      improvements: result.improvements || [],
-    }).returning();
+    const [analysis] = await db
+      .insert(neuralSchemaAnalyses)
+      .values({
+        id: analysisId,
+        projectId: id,
+        originalSchema: outputSchema,
+        suggestedSchema: result.suggestedSchema,
+        rationale: result.rationale || "",
+        riskLevel: result.riskLevel || "medium",
+        improvements: result.improvements || [],
+      })
+      .returning();
 
     return NextResponse.json(analysis, { status: 201 });
   } catch (error) {
@@ -86,10 +83,7 @@ export async function POST(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {

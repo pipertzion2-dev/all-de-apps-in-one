@@ -1,115 +1,115 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = 'wavy_admin_secret'
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+const STORAGE_KEY = "wavy_admin_secret";
+const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function getBootstrap() {
-  const r = await fetch(`${API_BASE}/api/admin/bootstrap`)
-  if (!r.ok) throw new Error(await r.text())
-  return r.json()
+  const r = await fetch(`${API_BASE}/api/admin/bootstrap`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
 }
 
 async function getOverview(secret) {
   const r = await fetch(`${API_BASE}/api/admin/overview`, {
-    headers: { 'X-Admin-Secret': secret },
-  })
+    headers: { "X-Admin-Secret": secret },
+  });
   if (!r.ok) {
-    const t = await r.text()
-    throw new Error(t || `HTTP ${r.status}`)
+    const t = await r.text();
+    throw new Error(t || `HTTP ${r.status}`);
   }
-  return r.json()
+  return r.json();
 }
 
 async function getTemplate(secret) {
   const r = await fetch(`${API_BASE}/api/admin/replit-env-template`, {
-    headers: { 'X-Admin-Secret': secret },
-  })
-  if (!r.ok) throw new Error(await r.text())
-  return r.json()
+    headers: { "X-Admin-Secret": secret },
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
 }
 
 export default function AdminConsole() {
-  const [bootstrap, setBootstrap] = useState(null)
-  const [secret, setSecret] = useState(() => sessionStorage.getItem(STORAGE_KEY) || '')
-  const [overview, setOverview] = useState(null)
-  const [template, setTemplate] = useState('')
-  const [err, setErr] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [bootstrap, setBootstrap] = useState(null);
+  const [secret, setSecret] = useState(() => sessionStorage.getItem(STORAGE_KEY) || "");
+  const [overview, setOverview] = useState(null);
+  const [template, setTemplate] = useState("");
+  const [err, setErr] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Admin · Pyracrypt'
+    document.title = "Admin · Pyracrypt";
     getBootstrap()
       .then(setBootstrap)
       .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
   const loadLocked = useCallback(async (s) => {
-    setErr(null)
-    const o = await getOverview(s)
-    setOverview(o)
-    sessionStorage.setItem(STORAGE_KEY, s)
+    setErr(null);
+    const o = await getOverview(s);
+    setOverview(o);
+    sessionStorage.setItem(STORAGE_KEY, s);
     try {
-      const t = await getTemplate(s)
-      setTemplate(t.content || '')
+      const t = await getTemplate(s);
+      setTemplate(t.content || "");
     } catch {
-      setTemplate(o.replit_env_template || '')
+      setTemplate(o.replit_env_template || "");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (!bootstrap?.admin_secret_configured) return undefined
-    const s = sessionStorage.getItem(STORAGE_KEY)
-    if (!s) return undefined
-    let cancelled = false
-    ;(async () => {
+    if (!bootstrap?.admin_secret_configured) return undefined;
+    const s = sessionStorage.getItem(STORAGE_KEY);
+    if (!s) return undefined;
+    let cancelled = false;
+    (async () => {
       try {
-        const o = await getOverview(s)
-        if (cancelled) return
-        setOverview(o)
-        sessionStorage.setItem(STORAGE_KEY, s)
+        const o = await getOverview(s);
+        if (cancelled) return;
+        setOverview(o);
+        sessionStorage.setItem(STORAGE_KEY, s);
         try {
-          const t = await getTemplate(s)
-          if (!cancelled) setTemplate(t.content || '')
+          const t = await getTemplate(s);
+          if (!cancelled) setTemplate(t.content || "");
         } catch {
-          if (!cancelled) setTemplate(o.replit_env_template || '')
+          if (!cancelled) setTemplate(o.replit_env_template || "");
         }
       } catch (e) {
         if (!cancelled) {
-          setErr(e?.message || 'Session unlock failed')
-          sessionStorage.removeItem(STORAGE_KEY)
+          setErr(e?.message || "Session unlock failed");
+          sessionStorage.removeItem(STORAGE_KEY);
         }
       }
-    })()
+    })();
     return () => {
-      cancelled = true
-    }
-  }, [bootstrap])
+      cancelled = true;
+    };
+  }, [bootstrap]);
 
   const unlock = async () => {
-    setErr(null)
-    setOverview(null)
-    setTemplate('')
+    setErr(null);
+    setOverview(null);
+    setTemplate("");
     try {
-      await loadLocked(secret)
+      await loadLocked(secret);
     } catch (e) {
-      setErr(e?.message || 'Unlock failed')
-      sessionStorage.removeItem(STORAGE_KEY)
+      setErr(e?.message || "Unlock failed");
+      sessionStorage.removeItem(STORAGE_KEY);
     }
-  }
+  };
 
   const copyTemplate = () => {
-    const text = template || overview?.replit_env_template || ''
-    if (!text) return
-    navigator.clipboard.writeText(text)
-  }
+    const text = template || overview?.replit_env_template || "";
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+  };
 
   const logout = () => {
-    sessionStorage.removeItem(STORAGE_KEY)
-    setSecret('')
-    setOverview(null)
-    setTemplate('')
-  }
+    sessionStorage.removeItem(STORAGE_KEY);
+    setSecret("");
+    setOverview(null);
+    setTemplate("");
+  };
 
   return (
     <div className="u-bg u-text min-h-full">
@@ -118,7 +118,8 @@ export default function AdminConsole() {
           <div>
             <h1 className="text-base font-semibold u-danger">Administrator console</h1>
             <p className="mt-1 text-xs u-muted">
-              Hidden from the main app UI. Open <span className="u-text">/admin</span> on your deployment only.
+              Hidden from the main app UI. Open <span className="u-text">/admin</span> on your
+              deployment only.
             </p>
           </div>
           <a href="/" className="text-xs u-primary underline">
@@ -129,7 +130,11 @@ export default function AdminConsole() {
 
       <main className="mx-auto max-w-4xl space-y-6 p-6">
         {loading ? <p className="text-sm u-muted">Loading bootstrap…</p> : null}
-        {err ? <div className="rounded-lg border u-border u-bg-danger-soft p-3 text-sm u-danger">{err}</div> : null}
+        {err ? (
+          <div className="rounded-lg border u-border u-bg-danger-soft p-3 text-sm u-danger">
+            {err}
+          </div>
+        ) : null}
 
         {bootstrap ? (
           <section className="u-card u-border rounded-xl p-4 shadow-sm">
@@ -146,8 +151,8 @@ export default function AdminConsole() {
         <section className="u-card u-border rounded-xl p-4 shadow-sm">
           <h2 className="text-sm font-semibold u-text">Admin secret</h2>
           <p className="mt-1 text-xs u-muted">
-            Must match server env <span className="font-mono u-text">ADMIN_SECRET</span> (Replit Secrets). End users
-            never see this screen.
+            Must match server env <span className="font-mono u-text">ADMIN_SECRET</span> (Replit
+            Secrets). End users never see this screen.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <input
@@ -174,7 +179,8 @@ export default function AdminConsole() {
           </div>
           {!bootstrap?.admin_secret_configured ? (
             <p className="mt-3 text-xs font-medium u-danger">
-              ADMIN_SECRET is not set on the server. Add it in Replit → Secrets, restart Run, then return here.
+              ADMIN_SECRET is not set on the server. Add it in Replit → Secrets, restart Run, then
+              return here.
             </p>
           ) : null}
         </section>
@@ -205,8 +211,8 @@ export default function AdminConsole() {
             <section className="u-card u-border rounded-xl p-4 shadow-sm">
               <h2 className="text-sm font-semibold u-text">Integrations roadmap</h2>
               <p className="mt-1 text-xs u-muted">
-                <span className="u-text">available</span> = used by the app today. <span className="u-text">planned</span>{' '}
-                = env keys reserved for you to wire next.
+                <span className="u-text">available</span> = used by the app today.{" "}
+                <span className="u-text">planned</span> = env keys reserved for you to wire next.
               </p>
               <ul className="mt-3 space-y-3">
                 {overview.integrations?.map((row) => (
@@ -216,7 +222,7 @@ export default function AdminConsole() {
                       <span className="text-xs uppercase u-accent">{row.status}</span>
                     </div>
                     <p className="mt-1 text-xs u-muted">{row.notes}</p>
-                    <p className="mt-1 font-mono text-xs u-primary">{row.env?.join(' · ')}</p>
+                    <p className="mt-1 font-mono text-xs u-primary">{row.env?.join(" · ")}</p>
                   </li>
                 ))}
               </ul>
@@ -248,5 +254,5 @@ export default function AdminConsole() {
         ) : null}
       </main>
     </div>
-  )
+  );
 }

@@ -13,35 +13,55 @@ const reqSchema = z.object({
   materials: z.array(z.string()).optional().default([]),
   manufacturingMethod: z.string().max(200).optional().default(""),
   budgetRange: z.number().optional().default(5000),
-  manufacturers: z.array(z.object({
-    name: z.string(),
-    website: z.string().optional(),
-    specialty: z.string().optional(),
-    estimatedCost: z.string().optional(),
-    moq: z.string().optional(),
-    location: z.string().optional(),
-    leadTime: z.string().optional(),
-  })).optional().default([]),
-  materialSuppliers: z.array(z.object({
-    material: z.string(),
-    supplier: z.string(),
-    website: z.string().optional(),
-    priceRange: z.string().optional(),
-  })).optional().default([]),
-  platforms: z.array(z.object({
-    name: z.string(),
-    website: z.string().optional(),
-    description: z.string().optional(),
-  })).optional().default([]),
+  manufacturers: z
+    .array(
+      z.object({
+        name: z.string(),
+        website: z.string().optional(),
+        specialty: z.string().optional(),
+        estimatedCost: z.string().optional(),
+        moq: z.string().optional(),
+        location: z.string().optional(),
+        leadTime: z.string().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
+  materialSuppliers: z
+    .array(
+      z.object({
+        material: z.string(),
+        supplier: z.string(),
+        website: z.string().optional(),
+        priceRange: z.string().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
+  platforms: z
+    .array(
+      z.object({
+        name: z.string(),
+        website: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
   recommendation: z.string().max(2000).optional().default(""),
-  hybrids: z.array(z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    fromSystemA: z.string().optional(),
-    fromSystemB: z.string().optional(),
-    emergentBehavior: z.string().optional(),
-    noveltyScore: z.number().optional(),
-  })).optional().default([]),
+  hybrids: z
+    .array(
+      z.object({
+        title: z.string(),
+        description: z.string().optional(),
+        fromSystemA: z.string().optional(),
+        fromSystemB: z.string().optional(),
+        emergentBehavior: z.string().optional(),
+        noveltyScore: z.number().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
 function drawLine(doc: PDFKit.PDFDocument, y: number) {
@@ -87,7 +107,14 @@ export async function POST(req: NextRequest) {
     doc.rect(0, 0, doc.page.width, 120).fill("#1a1a2e");
     doc.fontSize(28).fillColor("#5BA8A0").text("SVIVVA", 50, 35, { align: "left" });
     doc.fontSize(10).fillColor("#ffffff").text("Hardware Builder — Product Blueprint", 50, 70);
-    doc.fontSize(9).fillColor("#aaaaaa").text(`Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, 50, 88);
+    doc
+      .fontSize(9)
+      .fillColor("#aaaaaa")
+      .text(
+        `Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+        50,
+        88,
+      );
     doc.fontSize(9).fillColor("#aaaaaa").text("hello@svivva.com", 50, 100);
 
     doc.y = 140;
@@ -98,17 +125,28 @@ export async function POST(req: NextRequest) {
     }
     doc.moveDown(0.5);
     if (data.productDescription) {
-      doc.fontSize(10).fillColor("#555555").text(data.productDescription, 50, undefined, { width: 495 });
+      doc
+        .fontSize(10)
+        .fillColor("#555555")
+        .text(data.productDescription, 50, undefined, { width: 495 });
     }
 
     sectionTitle(doc, "1. Target Market & Use Cases");
     doc.fontSize(10).fillColor("#333333");
     if (data.targetUsers) {
-      doc.font("Helvetica-Bold").text("Target Users: ", { continued: true }).font("Helvetica").text(data.targetUsers, { width: 495 });
+      doc
+        .font("Helvetica-Bold")
+        .text("Target Users: ", { continued: true })
+        .font("Helvetica")
+        .text(data.targetUsers, { width: 495 });
       doc.moveDown(0.3);
     }
     if (data.useCases) {
-      doc.font("Helvetica-Bold").text("Use Cases: ", { continued: true }).font("Helvetica").text(data.useCases, { width: 495 });
+      doc
+        .font("Helvetica-Bold")
+        .text("Use Cases: ", { continued: true })
+        .font("Helvetica")
+        .text(data.useCases, { width: 495 });
     }
 
     sectionTitle(doc, "2. Technical Specifications");
@@ -126,15 +164,26 @@ export async function POST(req: NextRequest) {
       doc.moveDown(0.3);
     }
     if (data.manufacturingMethod) {
-      doc.font("Helvetica-Bold").text("Manufacturing Method: ", { continued: true }).font("Helvetica").text(data.manufacturingMethod);
+      doc
+        .font("Helvetica-Bold")
+        .text("Manufacturing Method: ", { continued: true })
+        .font("Helvetica")
+        .text(data.manufacturingMethod);
     }
-    doc.font("Helvetica-Bold").text("Budget: ", { continued: true }).font("Helvetica").text(`$${data.budgetRange.toLocaleString()}`);
+    doc
+      .font("Helvetica-Bold")
+      .text("Budget: ", { continued: true })
+      .font("Helvetica")
+      .text(`$${data.budgetRange.toLocaleString()}`);
 
     if (data.manufacturers.length > 0) {
       sectionTitle(doc, "3. Recommended Manufacturers");
       doc.fontSize(10);
       data.manufacturers.forEach((m, i) => {
-        doc.font("Helvetica-Bold").fillColor("#1a1a2e").text(`${i + 1}. ${m.name}`);
+        doc
+          .font("Helvetica-Bold")
+          .fillColor("#1a1a2e")
+          .text(`${i + 1}. ${m.name}`);
         doc.font("Helvetica").fillColor("#555555");
         if (m.specialty) doc.text(`   Specialty: ${m.specialty}`);
         if (m.estimatedCost) doc.text(`   Est. Cost: ${m.estimatedCost}`);
@@ -179,7 +228,10 @@ export async function POST(req: NextRequest) {
       sectionTitle(doc, "7. Hybrid Innovation Concepts");
       doc.fontSize(10);
       data.hybrids.forEach((h, i) => {
-        doc.font("Helvetica-Bold").fillColor("#6B2C4A").text(`${i + 1}. ${h.title}${h.noveltyScore ? ` (${h.noveltyScore}% novel)` : ""}`);
+        doc
+          .font("Helvetica-Bold")
+          .fillColor("#6B2C4A")
+          .text(`${i + 1}. ${h.title}${h.noveltyScore ? ` (${h.noveltyScore}% novel)` : ""}`);
         doc.font("Helvetica").fillColor("#555555");
         if (h.description) doc.text(`   ${h.description}`);
         if (h.emergentBehavior) doc.text(`   Emergent: ${h.emergentBehavior}`);
@@ -190,7 +242,13 @@ export async function POST(req: NextRequest) {
     doc.moveDown(1);
     drawLine(doc, doc.y);
     doc.moveDown(0.5);
-    doc.fontSize(8).fillColor("#999999").text("This blueprint was generated by Svivva Hardware Builder. For questions, contact hello@svivva.com", { align: "center" });
+    doc
+      .fontSize(8)
+      .fillColor("#999999")
+      .text(
+        "This blueprint was generated by Svivva Hardware Builder. For questions, contact hello@svivva.com",
+        { align: "center" },
+      );
     doc.text("© Svivva " + new Date().getFullYear(), { align: "center" });
 
     doc.end();

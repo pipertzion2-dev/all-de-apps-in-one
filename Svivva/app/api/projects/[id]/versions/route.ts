@@ -2,13 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { versionRepository, projectRepository } from "@/lib/repositories";
 import { insertProjectVersionSchema } from "@/lib/schema";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    
+
     const project = await projectRepository.findById(id);
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -22,10 +19,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -39,7 +33,7 @@ export async function POST(
       id,
       body.systemPrompt ?? project.systemPrompt,
       body.outputSchema ?? project.outputSchema,
-      body.changeSummary
+      body.changeSummary,
     );
 
     return NextResponse.json(version, { status: 201 });

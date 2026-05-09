@@ -49,10 +49,26 @@ type PulseData = {
 };
 
 const typeConfig: Record<string, { label: string; color: string; Icon: typeof Zap }> = {
-  insight: { label: "Insight", color: "bg-blue-500/15 text-blue-400 border-blue-500/30", Icon: Activity },
-  opportunity: { label: "Opportunity", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", Icon: TrendingUp },
-  risk: { label: "Risk", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", Icon: AlertTriangle },
-  action: { label: "Action", color: "bg-purple-500/15 text-purple-400 border-purple-500/30", Icon: Lightbulb },
+  insight: {
+    label: "Insight",
+    color: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    Icon: Activity,
+  },
+  opportunity: {
+    label: "Opportunity",
+    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    Icon: TrendingUp,
+  },
+  risk: {
+    label: "Risk",
+    color: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    Icon: AlertTriangle,
+  },
+  action: {
+    label: "Action",
+    color: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+    Icon: Lightbulb,
+  },
 };
 
 export default function PulsePage() {
@@ -82,9 +98,24 @@ export default function PulsePage() {
     { label: "APIs Live", value: snap?.projectCount ?? "—", icon: Cpu, color: "text-primary" },
     { label: "Calls (24h)", value: snap?.calls24h ?? "—", icon: Zap, color: "text-amber-400" },
     { label: "Calls (7d)", value: snap?.calls7d ?? "—", icon: BarChart3, color: "text-blue-400" },
-    { label: "Avg Latency", value: snap?.avgLatency != null ? `${snap.avgLatency}ms` : "—", icon: Clock, color: "text-emerald-400" },
-    { label: "Success Rate", value: snap?.successRate != null ? `${snap.successRate}%` : "—", icon: Shield, color: "text-green-400" },
-    { label: "Eval Score", value: snap?.evalPassRate != null ? `${snap.evalPassRate}%` : "—", icon: Activity, color: "text-purple-400" },
+    {
+      label: "Avg Latency",
+      value: snap?.avgLatency != null ? `${snap.avgLatency}ms` : "—",
+      icon: Clock,
+      color: "text-emerald-400",
+    },
+    {
+      label: "Success Rate",
+      value: snap?.successRate != null ? `${snap.successRate}%` : "—",
+      icon: Shield,
+      color: "text-green-400",
+    },
+    {
+      label: "Eval Score",
+      value: snap?.evalPassRate != null ? `${snap.evalPassRate}%` : "—",
+      icon: Activity,
+      color: "text-purple-400",
+    },
   ];
 
   return (
@@ -107,7 +138,11 @@ export default function PulsePage() {
           disabled={loading}
           data-testid="button-refresh-pulse"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          {loading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <RefreshCw className="w-4 h-4" />
+          )}
           Refresh
         </Button>
       </div>
@@ -118,7 +153,13 @@ export default function PulsePage() {
             <AlertTriangle className="w-8 h-8 text-red-400 mx-auto" />
             <p className="text-sm font-medium">Couldn't load Pulse data</p>
             <p className="text-xs text-muted-foreground">Something went wrong. Try refreshing.</p>
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2" data-testid="button-retry-pulse">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              className="gap-2"
+              data-testid="button-retry-pulse"
+            >
               <RefreshCw className="w-4 h-4" />
               Retry
             </Button>
@@ -152,7 +193,10 @@ export default function PulsePage() {
                     <s.icon className={`w-4 h-4 ${s.color}`} />
                     <span className="text-[11px] text-muted-foreground">{s.label}</span>
                   </div>
-                  <p className="text-xl font-bold tabular-nums" data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <p
+                    className="text-xl font-bold tabular-nums"
+                    data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
                     {typeof s.value === "number" ? s.value.toLocaleString() : s.value}
                   </p>
                 </CardContent>
@@ -167,8 +211,12 @@ export default function PulsePage() {
                   <Activity className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Pulse Summary</p>
-                  <p className="text-sm font-medium" data-testid="text-pulse-headline">{insights.headline}</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Pulse Summary
+                  </p>
+                  <p className="text-sm font-medium" data-testid="text-pulse-headline">
+                    {insights.headline}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -176,16 +224,23 @@ export default function PulsePage() {
 
           {insights?.items && insights.items.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-base font-semibold text-muted-foreground">Intelligence Briefing</h2>
+              <h2 className="text-base font-semibold text-muted-foreground">
+                Intelligence Briefing
+              </h2>
               {insights.items.map((item, i) => {
                 const config = typeConfig[item.type] || typeConfig.insight;
                 const TypeIcon = config.Icon;
                 return (
-                  <Card key={i} className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 transition-colors">
+                  <Card
+                    key={i}
+                    className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 transition-colors"
+                  >
                     <CardContent className="py-5 px-6">
                       <div className="flex items-start gap-4">
                         <div className="pt-0.5 shrink-0">
-                          <span className="text-2xl" role="img">{item.icon}</span>
+                          <span className="text-2xl" role="img">
+                            {item.icon}
+                          </span>
                         </div>
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -195,7 +250,9 @@ export default function PulsePage() {
                             </Badge>
                             <h3 className="text-sm font-semibold">{item.title}</h3>
                           </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed">{item.body}</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {item.body}
+                          </p>
                           <div className="flex items-center gap-2 pt-1">
                             <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0" />
                             <p className="text-sm text-primary font-medium">{item.action}</p>
@@ -216,7 +273,9 @@ export default function PulsePage() {
                   <Cpu className="w-4 h-4 text-primary" />
                   Project Breakdown
                 </CardTitle>
-                <CardDescription className="text-xs">API call volume by project (last 30 days)</CardDescription>
+                <CardDescription className="text-xs">
+                  API call volume by project (last 30 days)
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -234,7 +293,9 @@ export default function PulsePage() {
                           </div>
                           <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
                             <span>{p.calls7d.toLocaleString()} / 7d</span>
-                            <span className="font-medium text-foreground">{p.calls30d.toLocaleString()} / 30d</span>
+                            <span className="font-medium text-foreground">
+                              {p.calls30d.toLocaleString()} / 30d
+                            </span>
                           </div>
                         </div>
                         <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">

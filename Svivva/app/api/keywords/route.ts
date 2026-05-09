@@ -8,10 +8,7 @@ const VALID_STATUSES = ["planned", "writing", "published"];
 
 export async function GET() {
   try {
-    const keywords = await db
-      .select()
-      .from(seoKeywords)
-      .orderBy(desc(seoKeywords.createdAt));
+    const keywords = await db.select().from(seoKeywords).orderBy(desc(seoKeywords.createdAt));
 
     return NextResponse.json(keywords);
   } catch (error) {
@@ -29,7 +26,8 @@ export async function POST(request: NextRequest) {
 
     const values = {
       keyword: body.keyword.trim(),
-      searchVolume: typeof body.searchVolume === "number" ? Math.max(0, Math.round(body.searchVolume)) : 0,
+      searchVolume:
+        typeof body.searchVolume === "number" ? Math.max(0, Math.round(body.searchVolume)) : 0,
       intent: VALID_INTENTS.includes(body.intent) ? body.intent : "medium",
       status: VALID_STATUSES.includes(body.status) ? body.status : "planned",
       assignedPage: typeof body.assignedPage === "string" ? body.assignedPage : null,

@@ -33,7 +33,7 @@ export async function scoreOutputQuality(
   input: string,
   output: Record<string, unknown>,
   outputSchema: JsonSchema,
-  systemPrompt: string
+  systemPrompt: string,
 ): Promise<QualityGateResult> {
   try {
     const response = await openai.chat.completions.create({

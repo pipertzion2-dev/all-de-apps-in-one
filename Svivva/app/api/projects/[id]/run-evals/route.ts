@@ -3,7 +3,14 @@ import { projectRepository, versionRepository } from "@/lib/repositories";
 import { runEvalSuite, type EvalCaseInput } from "@/lib/llm/eval-runner";
 import { type JsonSchema } from "@/lib/spec";
 import { db } from "@/lib/db";
-import { evalSuites, evalCases, evalRuns, evalRunResults, projects, projectVersions } from "@/lib/schema";
+import {
+  evalSuites,
+  evalCases,
+  evalRuns,
+  evalRunResults,
+  projects,
+  projectVersions,
+} from "@/lib/schema";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { eq, desc } from "drizzle-orm";
@@ -26,18 +33,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found", projectId },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
     }
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {
-      return NextResponse.json(
-        { error: "No version found for project" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No version found for project" }, { status: 404 });
     }
 
     let body: z.infer<typeof RunEvalsInputSchema>;
@@ -67,20 +68,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!suite) {
       return NextResponse.json(
         { error: "No eval suite found. Generate evals first." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    let cases = await db
-      .select()
-      .from(evalCases)
-      .where(eq(evalCases.suiteId, suite.id));
+    let cases = await db.select().from(evalCases).where(eq(evalCases.suiteId, suite.id));
 
     if (cases.length === 0) {
-      return NextResponse.json(
-        { error: "No eval cases in suite" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No eval cases in suite" }, { status: 404 });
     }
 
     if (maxCases && cases.length > maxCases) {
@@ -165,7 +160,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         rollbackVersion = previousVersion.version;
         rollbackReason = `Pass rate ${(runResult.passRate * 100).toFixed(1)}% below threshold ${(threshold * 100).toFixed(1)}%`;
 
-        console.log(`[EvalRunner] ROLLBACK: ${rollbackReason}. Rolled back to version ${rollbackVersion}`);
+        console.log(
+          `[EvalRunner] ROLLBACK: ${rollbackReason}. Rolled back to version ${rollbackVersion}`,
+        );
       } else {
         rollbackReason = "No previous version to rollback to";
         console.log(`[EvalRunner] Cannot rollback: ${rollbackReason}`);
@@ -215,8 +212,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Run evals error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown",
+      },
+      { status: 500 },
     );
   }
 }
@@ -227,16 +227,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const suites = await db
-      .select()
-      .from(evalSuites)
-      .where(eq(evalSuites.projectId, projectId));
+    const suites = await db.select().from(evalSuites).where(eq(evalSuites.projectId, projectId));
 
     const runs = await Promise.all(
       suites.map(async (suite) => {
@@ -260,7 +254,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           startedAt: run.startedAt,
           completedAt: run.completedAt,
         }));
-      })
+      }),
     );
 
     const allRuns = runs.flat().sort((a, b) => {
@@ -277,9 +271,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Get eval runs error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

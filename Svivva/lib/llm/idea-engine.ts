@@ -134,7 +134,13 @@ export async function generateIdeas(input: IdeaEngineInput): Promise<IdeaEngineO
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      return { success: false, ideas: [], marketGaps: [], competitorInsights: [], error: "No response from AI" };
+      return {
+        success: false,
+        ideas: [],
+        marketGaps: [],
+        competitorInsights: [],
+        error: "No response from AI",
+      };
     }
 
     const parsed = JSON.parse(content);

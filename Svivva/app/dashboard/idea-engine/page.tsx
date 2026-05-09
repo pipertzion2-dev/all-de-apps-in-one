@@ -44,23 +44,62 @@ interface IdeaSession {
 }
 
 const PIPELINE_STAGES = [
-  { id: "scanning", label: "Market Scan", icon: Radar, description: "Scanning for gaps and opportunities" },
-  { id: "analyzing", label: "Gap Analysis", icon: Search, description: "Identifying underserved niches" },
-  { id: "generating", label: "Idea Generation", icon: Brain, description: "Crafting novel concepts" },
+  {
+    id: "scanning",
+    label: "Market Scan",
+    icon: Radar,
+    description: "Scanning for gaps and opportunities",
+  },
+  {
+    id: "analyzing",
+    label: "Gap Analysis",
+    icon: Search,
+    description: "Identifying underserved niches",
+  },
+  {
+    id: "generating",
+    label: "Idea Generation",
+    icon: Brain,
+    description: "Crafting novel concepts",
+  },
   { id: "scoring", label: "Scoring", icon: Star, description: "Rating feasibility and potential" },
   { id: "complete", label: "Complete", icon: Gem, description: "Ideas ready to explore" },
 ];
 
 const DIGITAL_INDUSTRIES = [
-  "FinTech", "HealthTech", "EdTech", "E-Commerce", "DevTools",
-  "AI/ML", "Cybersecurity", "Real Estate", "Legal Tech", "Climate Tech",
-  "Gaming", "Social Media", "Supply Chain", "HR Tech", "IoT",
+  "FinTech",
+  "HealthTech",
+  "EdTech",
+  "E-Commerce",
+  "DevTools",
+  "AI/ML",
+  "Cybersecurity",
+  "Real Estate",
+  "Legal Tech",
+  "Climate Tech",
+  "Gaming",
+  "Social Media",
+  "Supply Chain",
+  "HR Tech",
+  "IoT",
 ];
 
 const PHYSICAL_INDUSTRIES = [
-  "Consumer Electronics", "Wearables", "Home & Living", "Outdoor Gear",
-  "Fitness", "Audio", "Sustainability", "Fashion Tech", "Kitchen",
-  "Pet Tech", "Kids & Education", "Workspace", "Travel", "Health Devices", "Art & Craft",
+  "Consumer Electronics",
+  "Wearables",
+  "Home & Living",
+  "Outdoor Gear",
+  "Fitness",
+  "Audio",
+  "Sustainability",
+  "Fashion Tech",
+  "Kitchen",
+  "Pet Tech",
+  "Kids & Education",
+  "Workspace",
+  "Travel",
+  "Health Devices",
+  "Art & Craft",
 ];
 
 function ScoreBar({ value, label, color }: { value: number; label: string; color: string }) {
@@ -99,9 +138,16 @@ function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode
               {index + 1}
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-base truncate" data-testid={`text-idea-title-${index}`}>{idea.title}</h3>
+              <h3
+                className="font-semibold text-base truncate"
+                data-testid={`text-idea-title-${index}`}
+              >
+                {idea.title}
+              </h3>
               <div className="flex items-center gap-2 flex-wrap mt-1">
-                <Badge variant="secondary" className="text-[10px]">{idea.category}</Badge>
+                <Badge variant="secondary" className="text-[10px]">
+                  {idea.category}
+                </Badge>
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Star className="w-3 h-3" style={{ color: accentColor }} />
                   {avgScore}/100
@@ -124,7 +170,12 @@ function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode
         <div className="p-3 rounded-lg bg-muted/50 border border-border">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accentColor }} />
-            <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: accentColor }}>Unique Twist</span>
+            <span
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: accentColor }}
+            >
+              Unique Twist
+            </span>
           </div>
           <p className="text-sm">{idea.uniqueTwist}</p>
         </div>
@@ -140,7 +191,9 @@ function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Market Gap</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Market Gap
+                </span>
               </div>
               <p className="text-sm">{idea.marketGap}</p>
             </div>
@@ -148,12 +201,19 @@ function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Next Steps</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Next Steps
+                </span>
               </div>
               <ul className="space-y-1.5">
                 {idea.nextSteps.map((step, i) => (
                   <li key={i} className="text-sm flex items-start gap-2">
-                    <span className="text-xs font-mono mt-0.5 flex-shrink-0" style={{ color: accentColor }}>{i + 1}.</span>
+                    <span
+                      className="text-xs font-mono mt-0.5 flex-shrink-0"
+                      style={{ color: accentColor }}
+                    >
+                      {i + 1}.
+                    </span>
                     {step}
                   </li>
                 ))}
@@ -162,7 +222,9 @@ function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode
 
             <div className="flex flex-wrap gap-1.5">
               {idea.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-[10px]">{tag}</Badge>
+                <Badge key={tag} variant="outline" className="text-[10px]">
+                  {tag}
+                </Badge>
               ))}
             </div>
           </div>
@@ -184,20 +246,24 @@ function PipelineStages({ currentStage }: { currentStage: string }) {
 
         return (
           <div key={stage.id} className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <div className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-500 ${
-              isCurrent
-                ? "bg-primary text-primary-foreground"
-                : isActive
-                  ? "bg-primary/20 text-primary"
-                  : "bg-muted text-muted-foreground"
-            }`}>
+            <div
+              className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-500 ${
+                isCurrent
+                  ? "bg-primary text-primary-foreground"
+                  : isActive
+                    ? "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground"
+              }`}
+            >
               <Icon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{stage.label}</span>
             </div>
             {i < PIPELINE_STAGES.length - 1 && (
-              <div className={`w-4 sm:w-8 h-0.5 rounded transition-all duration-500 ${
-                isActive ? "bg-primary" : "bg-muted"
-              }`} />
+              <div
+                className={`w-4 sm:w-8 h-0.5 rounded transition-all duration-500 ${
+                  isActive ? "bg-primary" : "bg-muted"
+                }`}
+              />
             )}
           </div>
         );
@@ -240,7 +306,11 @@ export default function IdeaEnginePage() {
       const res = await authFetch("/api/idea-engine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, industry: industry || undefined, context: context || undefined }),
+        body: JSON.stringify({
+          mode,
+          industry: industry || undefined,
+          context: context || undefined,
+        }),
       });
 
       clearInterval(stageTimer);
@@ -272,17 +342,23 @@ export default function IdeaEnginePage() {
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3" data-testid="text-page-title">
+          <h1
+            className="text-2xl sm:text-3xl font-bold flex items-center gap-3"
+            data-testid="text-page-title"
+          >
             <Lightbulb className="w-7 h-7" style={{ color: accentColor }} />
             Idea Engine
           </h1>
           <p className="text-muted-foreground mt-1">
-            AI-powered discovery of untapped {mode === "digital" ? "API and software" : "product and hardware"} opportunities
+            AI-powered discovery of untapped{" "}
+            {mode === "digital" ? "API and software" : "product and hardware"} opportunities
           </p>
         </div>
         {activeSession && activeSession.score !== null && (
           <div className="text-right">
-            <div className="text-3xl font-bold" style={{ color: accentColor }}>{activeSession.score}</div>
+            <div className="text-3xl font-bold" style={{ color: accentColor }}>
+              {activeSession.score}
+            </div>
             <div className="text-xs text-muted-foreground">Avg Score</div>
           </div>
         )}
@@ -308,7 +384,7 @@ export default function IdeaEnginePage() {
                   variant={industry === ind ? "default" : "outline"}
                   className="cursor-pointer toggle-elevate text-xs"
                   onClick={() => setIndustry(industry === ind ? "" : ind)}
-                  data-testid={`badge-industry-${ind.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                  data-testid={`badge-industry-${ind.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
                 >
                   {ind}
                 </Badge>
@@ -325,9 +401,11 @@ export default function IdeaEnginePage() {
           <div>
             <label className="text-sm font-medium mb-2 block">Additional Context (optional)</label>
             <Textarea
-              placeholder={mode === "digital"
-                ? "e.g. I want to build APIs for the creator economy, focusing on things that don't exist yet..."
-                : "e.g. I'm interested in sustainable consumer electronics with modular designs..."}
+              placeholder={
+                mode === "digital"
+                  ? "e.g. I want to build APIs for the creator economy, focusing on things that don't exist yet..."
+                  : "e.g. I'm interested in sustainable consumer electronics with modular designs..."
+              }
               value={context}
               onChange={(e) => setContext(e.target.value)}
               className="resize-none"
@@ -360,7 +438,8 @@ export default function IdeaEnginePage() {
             <div className="pt-2">
               <PipelineStages currentStage={pipelineStage} />
               <p className="text-xs text-muted-foreground text-center mt-3 animate-pulse">
-                {PIPELINE_STAGES.find((s) => s.id === pipelineStage)?.description || "Processing..."}
+                {PIPELINE_STAGES.find((s) => s.id === pipelineStage)?.description ||
+                  "Processing..."}
               </p>
             </div>
           )}
@@ -372,7 +451,9 @@ export default function IdeaEnginePage() {
           <CardContent className="p-6 text-center">
             <Lightbulb className="w-10 h-10 mx-auto mb-3 text-destructive" />
             <h3 className="font-semibold mb-1">Generation Failed</h3>
-            <p className="text-sm text-muted-foreground">Something went wrong while generating ideas. Please try again.</p>
+            <p className="text-sm text-muted-foreground">
+              Something went wrong while generating ideas. Please try again.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -391,7 +472,10 @@ export default function IdeaEnginePage() {
                 <ul className="space-y-2">
                   {(activeSession.marketGaps || []).map((gap, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: accentColor }} />
+                      <span
+                        className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: accentColor }}
+                      />
                       {gap}
                     </li>
                   ))}
@@ -408,7 +492,10 @@ export default function IdeaEnginePage() {
                 <ul className="space-y-2">
                   {(activeSession.competitorInsights || []).map((insight, i) => (
                     <li key={i} className="text-sm flex items-start gap-2">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: accentColor }} />
+                      <span
+                        className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: accentColor }}
+                      />
                       {insight}
                     </li>
                   ))}
@@ -463,12 +550,12 @@ export default function IdeaEnginePage() {
                       {session.mode === "digital" ? "Digital" : "Physical"}
                     </Badge>
                     {session.score !== null && (
-                      <span className="text-sm font-bold" style={{ color: accentColor }}>{session.score}</span>
+                      <span className="text-sm font-bold" style={{ color: accentColor }}>
+                        {session.score}
+                      </span>
                     )}
                   </div>
-                  <p className="text-sm font-medium truncate">
-                    {session.industry || "General"}
-                  </p>
+                  <p className="text-sm font-medium truncate">{session.industry || "General"}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {session.ideas?.length || 0} ideas generated
                   </p>
@@ -488,7 +575,9 @@ export default function IdeaEnginePage() {
             <Lightbulb className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No ideas generated yet</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Select an industry and add context above to discover untapped {mode === "digital" ? "API" : "product"} opportunities that nobody else has thought of.
+              Select an industry and add context above to discover untapped{" "}
+              {mode === "digital" ? "API" : "product"} opportunities that nobody else has thought
+              of.
             </p>
           </CardContent>
         </Card>

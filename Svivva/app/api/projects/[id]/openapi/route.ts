@@ -73,11 +73,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const baseUrl = request.nextUrl.origin;
     const outputSchema = project.outputSchema as Record<string, unknown>;
-    const inputSchema = (project as Record<string, unknown>).inputSchema as Record<string, unknown> | undefined;
-    
+    const inputSchema = (project as Record<string, unknown>).inputSchema as
+      | Record<string, unknown>
+      | undefined;
+
     const endpointPath = "main";
 
-    const requestSchema = inputSchema 
+    const requestSchema = inputSchema
       ? {
           type: "object",
           properties: {
@@ -147,7 +149,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                       properties: {
                         success: { type: "boolean" },
                         data: convertJsonSchemaToOpenAPI(outputSchema),
-                        processingTime: { type: "number", description: "Processing time in milliseconds" },
+                        processingTime: {
+                          type: "number",
+                          description: "Processing time in milliseconds",
+                        },
                         version: { type: "string", description: "API version used" },
                       },
                     },
@@ -228,7 +233,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     };
 
     const download = request.nextUrl.searchParams.get("download");
-    
+
     if (download === "true") {
       const filename = `${project.slug}-openapi.json`;
       return new NextResponse(JSON.stringify(openApiSpec, null, 2), {

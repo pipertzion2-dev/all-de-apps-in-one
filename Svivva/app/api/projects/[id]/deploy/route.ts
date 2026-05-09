@@ -5,10 +5,7 @@ import { projects, projectVersions, deployments } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -17,10 +14,7 @@ export async function POST(
 
     const { id } = await params;
 
-    const projectRows = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, id));
+    const projectRows = await db.select().from(projects).where(eq(projects.id, id));
 
     if (!projectRows[0]) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });

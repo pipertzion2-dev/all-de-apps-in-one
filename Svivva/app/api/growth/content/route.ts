@@ -32,7 +32,13 @@ function getProducts(): Record<ProductKey, ProductInfo> {
         "Svivva lets developers and entrepreneurs build, deploy, and monetize AI-powered APIs without deep ML expertise. From seed to symphony in 11 minutes.",
       audience: "developers, entrepreneurs, SaaS builders, non-technical founders",
       competitors: ["Zapier", "Make (Integromat)", "Bubble", "n8n", "Retool", "Langchain"],
-      keywords: ["AI API builder", "no-code AI", "GPT API wrapper", "AI automation", "build AI product"],
+      keywords: [
+        "AI API builder",
+        "no-code AI",
+        "GPT API wrapper",
+        "AI automation",
+        "build AI product",
+      ],
     },
     pyracrypt: {
       name: "Pyracrypt",
@@ -42,7 +48,13 @@ function getProducts(): Record<ProductKey, ProductInfo> {
         "Pyracrypt encrypts your files directly in the browser using AES-256 and ChaCha20. Files never touch a server. Zero knowledge architecture.",
       audience: "privacy-conscious users, journalists, lawyers, activists, developers",
       competitors: ["Cryptomator", "VeraCrypt", "BoxCryptor", "7-Zip encryption"],
-      keywords: ["browser encryption", "file encryption online", "AES-256 encrypt", "zero knowledge encryption", "private file encryption"],
+      keywords: [
+        "browser encryption",
+        "file encryption online",
+        "AES-256 encrypt",
+        "zero knowledge encryption",
+        "private file encryption",
+      ],
     },
     mini_apps: {
       name: "Svivva Mini Apps",
@@ -114,7 +126,9 @@ Provide ALL of these, clearly labeled:
 4. TOPICS (5 relevant PH topics to select)
 5. HUNTER NOTE (what to say when asking people to support you)`,
 
-  blog_outline: (p) => `Create a detailed SEO blog post outline for ${p.name} targeting high-intent keywords.
+  blog_outline: (
+    p,
+  ) => `Create a detailed SEO blog post outline for ${p.name} targeting high-intent keywords.
 Product: ${p.description}
 Keywords to target: ${p.keywords.join(", ")}
 Competitors: ${p.competitors.join(", ")}
@@ -163,7 +177,9 @@ Create:
 
 Note: This content goes in FAQ sections or dedicated knowledge pages on the website.`,
 
-  competitor_comparison: (p) => `Write SEO-optimized comparison content for "${p.name} vs competitors".
+  competitor_comparison: (
+    p,
+  ) => `Write SEO-optimized comparison content for "${p.name} vs competitors".
 Product: ${p.description}
 Competitors: ${p.competitors.join(", ")}
 
@@ -249,7 +265,8 @@ export async function POST(req: NextRequest) {
     messages: [
       {
         role: "system",
-        content: "You are an expert growth marketer and copywriter specializing in SaaS, AI tools, and developer products. Write content that is genuine, specific, and actually useful — not generic marketing fluff. Every piece of content should feel like it was written by the actual founder who deeply understands the product and its users.",
+        content:
+          "You are an expert growth marketer and copywriter specializing in SaaS, AI tools, and developer products. Write content that is genuine, specific, and actually useful — not generic marketing fluff. Every piece of content should feel like it was written by the actual founder who deeply understands the product and its users.",
       },
       { role: "user", content: prompt },
     ],
@@ -272,7 +289,9 @@ export async function POST(req: NextRequest) {
     email_newsletter: "Email Newsletter",
   };
 
-  await db.insert(growthContent).values({ product, contentType, title: titles[contentType] || contentType, content });
+  await db
+    .insert(growthContent)
+    .values({ product, contentType, title: titles[contentType] || contentType, content });
 
   return NextResponse.json({ content, title: titles[contentType] || contentType });
 }
@@ -282,7 +301,8 @@ export async function GET(req: NextRequest) {
   if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const product = req.nextUrl.searchParams.get("product");
-  const rows = await db.select()
+  const rows = await db
+    .select()
     .from(growthContent)
     .where(product ? eq(growthContent.product, product) : undefined)
     .orderBy(desc(growthContent.createdAt))

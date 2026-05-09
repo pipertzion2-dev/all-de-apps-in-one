@@ -11,12 +11,13 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const [[{ totalUsers }], [{ totalProjects }], [{ totalApiCalls }], [{ totalSeoPages }]] = await Promise.all([
-      db.select({ totalUsers: count() }).from(users),
-      db.select({ totalProjects: count() }).from(projects),
-      db.select({ totalApiCalls: count() }).from(usageLogs),
-      db.select({ totalSeoPages: count() }).from(seoLandingPages),
-    ]);
+    const [[{ totalUsers }], [{ totalProjects }], [{ totalApiCalls }], [{ totalSeoPages }]] =
+      await Promise.all([
+        db.select({ totalUsers: count() }).from(users),
+        db.select({ totalProjects: count() }).from(projects),
+        db.select({ totalApiCalls: count() }).from(usageLogs),
+        db.select({ totalSeoPages: count() }).from(seoLandingPages),
+      ]);
 
     return NextResponse.json({
       totalUsers: Number(totalUsers ?? 0),

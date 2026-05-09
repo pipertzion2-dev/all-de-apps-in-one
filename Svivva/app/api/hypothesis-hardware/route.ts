@@ -8,21 +8,29 @@ import { z } from "zod";
 
 const discoverSchema = z.object({
   question: z.string().min(3).max(500),
-  hardwareContext: z.object({
-    productType: z.string().max(200).optional().default(""),
-    materials: z.string().max(500).optional().default(""),
-    industry: z.string().max(200).optional().default(""),
-    constraints: z.string().max(500).optional().default(""),
-  }).optional().default({}),
-  selectedSources: z.array(z.object({
-    id: z.string(),
-    name: z.string().max(200),
-    type: z.enum(["digital_api", "external_api", "hardware_component", "seeds_app"]),
-    description: z.string().max(500).optional().default(""),
-    url: z.string().max(500).optional().default(""),
-    inputSchema: z.string().max(2000).optional().default(""),
-    sampleResponse: z.string().max(2000).optional().default(""),
-  })).min(1).max(6),
+  hardwareContext: z
+    .object({
+      productType: z.string().max(200).optional().default(""),
+      materials: z.string().max(500).optional().default(""),
+      industry: z.string().max(200).optional().default(""),
+      constraints: z.string().max(500).optional().default(""),
+    })
+    .optional()
+    .default({}),
+  selectedSources: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().max(200),
+        type: z.enum(["digital_api", "external_api", "hardware_component", "seeds_app"]),
+        description: z.string().max(500).optional().default(""),
+        url: z.string().max(500).optional().default(""),
+        inputSchema: z.string().max(2000).optional().default(""),
+        sampleResponse: z.string().max(2000).optional().default(""),
+      }),
+    )
+    .min(1)
+    .max(6),
   includeDigitalApis: z.boolean().optional().default(false),
   previousInsights: z.array(z.string()).max(20).optional().default([]),
 });
@@ -59,7 +67,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = discoverSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
     }
 
     const { question, hardwareContext, selectedSources, previousInsights } = parsed.data;
@@ -78,11 +89,14 @@ export async function POST(req: NextRequest) {
       hardwareContext.materials && `Materials: ${hardwareContext.materials}`,
       hardwareContext.industry && `Industry: ${hardwareContext.industry}`,
       hardwareContext.constraints && `Constraints: ${hardwareContext.constraints}`,
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-    const prevContext = previousInsights.length > 0
-      ? `\n\nPREVIOUSLY DISCOVERED (do NOT repeat — build on them or find new angles):\n${previousInsights.map((s, i) => `${i + 1}. ${s}`).join("\n")}`
-      : "";
+    const prevContext =
+      previousInsights.length > 0
+        ? `\n\nPREVIOUSLY DISCOVERED (do NOT repeat — build on them or find new angles):\n${previousInsights.map((s, i) => `${i + 1}. ${s}`).join("\n")}`
+        : "";
 
     const completion = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
@@ -213,5 +227,9 @@ Return JSON:
 }
 
 function tryParseJson(s: string): Record<string, unknown> {
-  try { return JSON.parse(s); } catch { return {}; }
+  try {
+    return JSON.parse(s);
+  } catch {
+    return {};
+  }
 }

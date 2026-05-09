@@ -17,10 +17,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
@@ -81,10 +78,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
@@ -108,11 +102,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (description !== undefined) updateData.description = description;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
 
-    const [updated] = await db
-      .update(teams)
-      .set(updateData)
-      .where(eq(teams.id, id))
-      .returning();
+    const [updated] = await db.update(teams).set(updateData).where(eq(teams.id, id)).returning();
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -130,10 +120,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });

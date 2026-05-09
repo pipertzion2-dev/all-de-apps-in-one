@@ -3,8 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Shield, Lock, Key, FileText, ArrowRight,
-  ShieldCheck, Eye, Zap, Check, Star
+  Shield,
+  Lock,
+  Key,
+  FileText,
+  ArrowRight,
+  ShieldCheck,
+  Eye,
+  Zap,
+  Check,
+  Star,
 } from "lucide-react";
 
 const TEAL = "#5BA8A0";
@@ -12,12 +20,36 @@ const BURG = "#6B2C4A";
 const PYRACRYPT_URL = "https://new-venture-pipertzion2.replit.app";
 
 const features = [
-  { icon: Shield,      title: "Military-Grade Encryption",  desc: "AES-256 and ChaCha20 algorithms lock your files before they ever leave your device." },
-  { icon: Eye,         title: "Zero-Knowledge Architecture", desc: "Nothing is uploaded. All processing happens locally in your browser — your keys stay yours alone." },
-  { icon: Zap,         title: "Instant, No Account Needed", desc: "Open the tool and start protecting files in seconds. No sign-up. No waiting." },
-  { icon: FileText,    title: "Any File Type",              desc: "Documents, images, archives, executables — Pyracrypt handles all of them without limits." },
-  { icon: Key,         title: "Brute-Force Resistant Keys", desc: "PBKDF2 with 600,000 iterations makes automated attack attempts computationally infeasible." },
-  { icon: ShieldCheck, title: "Open & Auditable",           desc: "Client-side code you can inspect yourself. No black boxes. No tracking. No surprises." },
+  {
+    icon: Shield,
+    title: "Military-Grade Encryption",
+    desc: "AES-256 and ChaCha20 algorithms lock your files before they ever leave your device.",
+  },
+  {
+    icon: Eye,
+    title: "Zero-Knowledge Architecture",
+    desc: "Nothing is uploaded. All processing happens locally in your browser — your keys stay yours alone.",
+  },
+  {
+    icon: Zap,
+    title: "Instant, No Account Needed",
+    desc: "Open the tool and start protecting files in seconds. No sign-up. No waiting.",
+  },
+  {
+    icon: FileText,
+    title: "Any File Type",
+    desc: "Documents, images, archives, executables — Pyracrypt handles all of them without limits.",
+  },
+  {
+    icon: Key,
+    title: "Brute-Force Resistant Keys",
+    desc: "PBKDF2 with 600,000 iterations makes automated attack attempts computationally infeasible.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Open & Auditable",
+    desc: "Client-side code you can inspect yourself. No black boxes. No tracking. No surprises.",
+  },
 ];
 
 const plans = [
@@ -91,11 +123,26 @@ const plans = [
 ];
 
 const faqs = [
-  { q: "Is the free plan really free?", a: "Yes — completely free, no sign-up, no limits on the core tool. Paid plans unlock advanced scanning, team seats, and reporting." },
-  { q: "Where do my files go?", a: "Nowhere. Pyracrypt processes everything locally in your browser using the Web Crypto API. Files never touch a server." },
-  { q: "Can I decrypt files without Pyracrypt?", a: "Yes. Pyracrypt uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key." },
-  { q: "What makes the paid plans different?", a: "The free plan gives you one scan per day and a basic report. Pro unlocks unlimited scans and all five protection modes. Team adds multi-seat access, API hooks, and Slack alerts. Enterprise adds white-label reports and a dedicated AI engine." },
-  { q: "Is this connected to Svivva's AI platform?", a: "Pyracrypt is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core." },
+  {
+    q: "Is the free plan really free?",
+    a: "Yes — completely free, no sign-up, no limits on the core tool. Paid plans unlock advanced scanning, team seats, and reporting.",
+  },
+  {
+    q: "Where do my files go?",
+    a: "Nowhere. Pyracrypt processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
+  },
+  {
+    q: "Can I decrypt files without Pyracrypt?",
+    a: "Yes. Pyracrypt uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
+  },
+  {
+    q: "What makes the paid plans different?",
+    a: "The free plan gives you one scan per day and a basic report. Pro unlocks unlimited scans and all five protection modes. Team adds multi-seat access, API hooks, and Slack alerts. Enterprise adds white-label reports and a dedicated AI engine.",
+  },
+  {
+    q: "Is this connected to Svivva's AI platform?",
+    a: "Pyracrypt is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+  },
 ];
 
 export default function PyracryptPage() {
@@ -104,11 +151,12 @@ export default function PyracryptPage() {
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white overflow-x-hidden">
-
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#080c14]/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>← Svivva</Link>
+          <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>
+            ← Svivva
+          </Link>
           <div className="flex items-center gap-3">
             <span className="text-xs text-white/40">Integrates with the Svivva platform</span>
             <a
@@ -138,7 +186,9 @@ export default function PyracryptPage() {
             <span className="text-white/50">From Threats No One Sees Coming</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Encrypt, scan, and shield any file in your browser using AES-256. Nothing leaves your device. No accounts needed. Trusted by individuals and teams who take data privacy seriously.
+            Encrypt, scan, and shield any file in your browser using AES-256. Nothing leaves your
+            device. No accounts needed. Trusted by individuals and teams who take data privacy
+            seriously.
           </p>
         </div>
 
@@ -146,7 +196,9 @@ export default function PyracryptPage() {
         <div className="relative mx-auto max-w-4xl">
           <div
             className="absolute -inset-8 rounded-3xl opacity-30 blur-3xl pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at center, ${TEAL}40 0%, ${BURG}20 60%, transparent 100%)` }}
+            style={{
+              background: `radial-gradient(ellipse at center, ${TEAL}40 0%, ${BURG}20 60%, transparent 100%)`,
+            }}
           />
           <div
             className="relative rounded-2xl overflow-hidden"
@@ -160,7 +212,10 @@ export default function PyracryptPage() {
             {/* Title bar */}
             <div
               className="flex items-center gap-3 px-4 py-3"
-              style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+              }}
             >
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
@@ -169,10 +224,15 @@ export default function PyracryptPage() {
               </div>
               <div
                 className="flex-1 mx-3 flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-white/40"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
               >
                 <Lock className="w-3 h-3 text-[#28C840]" />
-                <span className="truncate font-medium tracking-wide">Pyracrypt — Encrypted & Secure</span>
+                <span className="truncate font-medium tracking-wide">
+                  Pyracrypt — Encrypted & Secure
+                </span>
               </div>
             </div>
 
@@ -221,7 +281,8 @@ export default function PyracryptPage() {
                   <div>
                     <p className="text-lg font-bold text-white mb-2">Pyracrypt</p>
                     <p className="text-sm text-white/50 mb-6 max-w-sm">
-                      Encrypted file protection, right in your browser. No uploads. No accounts. Just shield.
+                      Encrypted file protection, right in your browser. No uploads. No accounts.
+                      Just shield.
                     </p>
                     <a
                       href={PYRACRYPT_URL}
@@ -239,7 +300,10 @@ export default function PyracryptPage() {
 
             <div
               className="flex items-center justify-between px-4 py-2.5"
-              style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
+              }}
             >
               <span className="text-[11px] text-white/25">Works with the Svivva platform</span>
               <a
@@ -276,13 +340,18 @@ export default function PyracryptPage() {
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <h2 className="text-2xl font-black text-center mb-3">Why Pyracrypt?</h2>
-        <p className="text-center text-white/40 mb-12 text-sm">No cloud. No backdoors. No compromises.</p>
+        <p className="text-center text-white/40 mb-12 text-sm">
+          No cloud. No backdoors. No compromises.
+        </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
             <div
               key={f.title}
               className="rounded-2xl p-5"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
@@ -316,9 +385,7 @@ export default function PyracryptPage() {
                   background: isPopular
                     ? `linear-gradient(135deg, ${TEAL}18, ${TEAL}08)`
                     : "rgba(255,255,255,0.03)",
-                  border: isPopular
-                    ? `1.5px solid ${TEAL}60`
-                    : "1px solid rgba(255,255,255,0.07)",
+                  border: isPopular ? `1.5px solid ${TEAL}60` : "1px solid rgba(255,255,255,0.07)",
                   boxShadow: isPopular ? `0 0 32px ${TEAL}18` : "none",
                 }}
               >
@@ -353,8 +420,11 @@ export default function PyracryptPage() {
                     plan.ctaStyle === "solid"
                       ? { background: TEAL, color: "#fff" }
                       : plan.ctaStyle === "burg"
-                      ? { background: BURG, color: "#fff" }
-                      : { border: `1px solid rgba(255,255,255,0.15)`, color: "rgba(255,255,255,0.6)" }
+                        ? { background: BURG, color: "#fff" }
+                        : {
+                            border: `1px solid rgba(255,255,255,0.15)`,
+                            color: "rgba(255,255,255,0.6)",
+                          }
                   }
                 >
                   {plan.cta} {plan.ctaStyle !== "border" && <ArrowRight className="w-3.5 h-3.5" />}
@@ -373,7 +443,10 @@ export default function PyracryptPage() {
             <div
               key={faq.q}
               className="rounded-2xl p-5"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}
             >
               <p className="font-bold text-white text-sm mb-2">{faq.q}</p>
               <p className="text-sm text-white/50 leading-relaxed">{faq.a}</p>
@@ -386,11 +459,16 @@ export default function PyracryptPage() {
       <section className="border-t border-white/5 py-16 text-center px-4">
         <div
           className="inline-block rounded-3xl px-10 py-10 max-w-lg"
-          style={{ background: `linear-gradient(135deg, ${TEAL}10, ${BURG}10)`, border: `1px solid ${TEAL}20` }}
+          style={{
+            background: `linear-gradient(135deg, ${TEAL}10, ${BURG}10)`,
+            border: `1px solid ${TEAL}20`,
+          }}
         >
           <Lock className="w-10 h-10 mx-auto mb-4" style={{ color: TEAL }} />
           <h3 className="text-xl font-black mb-3">Your files deserve a shield</h3>
-          <p className="text-sm text-white/50 mb-6">Start free. Upgrade when your team needs more firepower.</p>
+          <p className="text-sm text-white/50 mb-6">
+            Start free. Upgrade when your team needs more firepower.
+          </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <a
               href={PYRACRYPT_URL}

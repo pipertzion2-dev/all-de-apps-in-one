@@ -30,26 +30,129 @@ interface CommandItem {
 }
 
 const digitalCommands: CommandItem[] = [
-  { title: "Home", href: "/dashboard", icon: LayoutDashboard, keywords: ["dashboard", "home", "main"], section: "Navigate" },
-  { title: "Projects", href: "/dashboard/projects", icon: FolderOpen, keywords: ["projects", "apis", "my apps"], section: "Navigate" },
-  { title: "API Builder", href: "/dashboard/api-builder", icon: Package, keywords: ["build", "create", "api", "new"], section: "Build" },
-  { title: "Hypothesis Lab", href: "/dashboard/hypothesis", icon: FlaskConical, keywords: ["hypothesis", "test", "experiment", "lab"], section: "Build" },
-  { title: "Idea Engine", href: "/dashboard/idea-engine", icon: Lightbulb, keywords: ["ideas", "discover", "opportunities", "market"], section: "Grow" },
-  { title: "Launch Studio", href: "/dashboard/launch-studio", icon: Sparkles, keywords: ["launch", "marketing", "landing page", "social"], section: "Grow" },
-  { title: "Pulse", href: "/dashboard/pulse", icon: HeartPulse, keywords: ["pulse", "analytics", "intelligence", "insights"], section: "Grow" },
-  { title: "Collaborate", href: "/dashboard/collaborate", icon: Users, keywords: ["team", "collaborate", "invite", "members"], section: "Grow" },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, keywords: ["settings", "account", "preferences", "billing"], section: "Account" },
-  { title: "Orbit", href: "/dashboard/launchpad", icon: Rocket, keywords: ["orbit", "admin", "marketing", "seo"], section: "Account", adminOnly: true },
+  {
+    title: "Home",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    keywords: ["dashboard", "home", "main"],
+    section: "Navigate",
+  },
+  {
+    title: "Projects",
+    href: "/dashboard/projects",
+    icon: FolderOpen,
+    keywords: ["projects", "apis", "my apps"],
+    section: "Navigate",
+  },
+  {
+    title: "API Builder",
+    href: "/dashboard/api-builder",
+    icon: Package,
+    keywords: ["build", "create", "api", "new"],
+    section: "Build",
+  },
+  {
+    title: "Hypothesis Lab",
+    href: "/dashboard/hypothesis",
+    icon: FlaskConical,
+    keywords: ["hypothesis", "test", "experiment", "lab"],
+    section: "Build",
+  },
+  {
+    title: "Idea Engine",
+    href: "/dashboard/idea-engine",
+    icon: Lightbulb,
+    keywords: ["ideas", "discover", "opportunities", "market"],
+    section: "Grow",
+  },
+  {
+    title: "Launch Studio",
+    href: "/dashboard/launch-studio",
+    icon: Sparkles,
+    keywords: ["launch", "marketing", "landing page", "social"],
+    section: "Grow",
+  },
+  {
+    title: "Pulse",
+    href: "/dashboard/pulse",
+    icon: HeartPulse,
+    keywords: ["pulse", "analytics", "intelligence", "insights"],
+    section: "Grow",
+  },
+  {
+    title: "Collaborate",
+    href: "/dashboard/collaborate",
+    icon: Users,
+    keywords: ["team", "collaborate", "invite", "members"],
+    section: "Grow",
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+    keywords: ["settings", "account", "preferences", "billing"],
+    section: "Account",
+  },
+  {
+    title: "Orbit",
+    href: "/dashboard/launchpad",
+    icon: Rocket,
+    keywords: ["orbit", "admin", "marketing", "seo"],
+    section: "Account",
+    adminOnly: true,
+  },
 ];
 
 const physicalCommands: CommandItem[] = [
-  { title: "Home", href: "/dashboard", icon: LayoutDashboard, keywords: ["dashboard", "home", "main"], section: "Navigate" },
-  { title: "Projects", href: "/dashboard/projects", icon: FolderOpen, keywords: ["projects", "products", "my products"], section: "Navigate" },
-  { title: "Hardware Builder", href: "/dashboard/hardware-builder", icon: Box, keywords: ["build", "create", "hardware", "product", "new"], section: "Build" },
-  { title: "Hypothesis Lab", href: "/dashboard/hypothesis-hardware", icon: FlaskConical, keywords: ["hypothesis", "innovation", "experiment"], section: "Build" },
-  { title: "Idea Engine", href: "/dashboard/idea-engine", icon: Lightbulb, keywords: ["ideas", "discover", "opportunities"], section: "Grow" },
-  { title: "Collaborate", href: "/dashboard/collaborate", icon: Users, keywords: ["team", "collaborate", "invite"], section: "Grow" },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, keywords: ["settings", "account", "preferences"], section: "Account" },
+  {
+    title: "Home",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    keywords: ["dashboard", "home", "main"],
+    section: "Navigate",
+  },
+  {
+    title: "Projects",
+    href: "/dashboard/projects",
+    icon: FolderOpen,
+    keywords: ["projects", "products", "my products"],
+    section: "Navigate",
+  },
+  {
+    title: "Hardware Builder",
+    href: "/dashboard/hardware-builder",
+    icon: Box,
+    keywords: ["build", "create", "hardware", "product", "new"],
+    section: "Build",
+  },
+  {
+    title: "Hypothesis Lab",
+    href: "/dashboard/hypothesis-hardware",
+    icon: FlaskConical,
+    keywords: ["hypothesis", "innovation", "experiment"],
+    section: "Build",
+  },
+  {
+    title: "Idea Engine",
+    href: "/dashboard/idea-engine",
+    icon: Lightbulb,
+    keywords: ["ideas", "discover", "opportunities"],
+    section: "Grow",
+  },
+  {
+    title: "Collaborate",
+    href: "/dashboard/collaborate",
+    icon: Users,
+    keywords: ["team", "collaborate", "invite"],
+    section: "Grow",
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+    keywords: ["settings", "account", "preferences"],
+    section: "Account",
+  },
 ];
 
 export function CommandPalette() {
@@ -104,10 +207,13 @@ export function CommandPalette() {
     setSelectedIndex(0);
   }, [query]);
 
-  const navigate = useCallback((href: string) => {
-    setOpen(false);
-    router.push(href);
-  }, [router]);
+  const navigate = useCallback(
+    (href: string) => {
+      setOpen(false);
+      router.push(href);
+    },
+    [router],
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -125,7 +231,10 @@ export function CommandPalette() {
 
   return (
     <div className="fixed inset-0 z-50" data-testid="command-palette">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={() => setOpen(false)}
+      />
       <div className="absolute top-[12%] sm:top-[20%] left-1/2 -translate-x-1/2 w-full max-w-lg">
         <div className="bg-card border border-border/50 rounded-xl shadow-2xl overflow-hidden mx-3 sm:mx-4">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border/30">
@@ -139,15 +248,21 @@ export function CommandPalette() {
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
               data-testid="input-command-search"
             />
-            <kbd className="text-[10px] text-muted-foreground/40 bg-muted/30 px-1.5 py-0.5 rounded border border-border/20">ESC</kbd>
+            <kbd className="text-[10px] text-muted-foreground/40 bg-muted/30 px-1.5 py-0.5 rounded border border-border/20">
+              ESC
+            </kbd>
           </div>
           <div className="max-h-[300px] overflow-y-auto py-1">
             {filtered.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">No results found</div>
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No results found
+              </div>
             ) : (
               sections.map((section) => (
                 <div key={section}>
-                  <p className="px-4 pt-2 pb-1 text-[10px] text-muted-foreground/40 uppercase tracking-widest font-medium">{section}</p>
+                  <p className="px-4 pt-2 pb-1 text-[10px] text-muted-foreground/40 uppercase tracking-widest font-medium">
+                    {section}
+                  </p>
                   {filtered
                     .filter((c) => c.section === section)
                     .map((cmd) => {
@@ -158,7 +273,9 @@ export function CommandPalette() {
                           onClick={() => navigate(cmd.href)}
                           onMouseEnter={() => setSelectedIndex(globalIdx)}
                           className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2 text-left text-sm transition-colors ${
-                            globalIdx === selectedIndex ? "bg-[#5BA8A0]/10 text-foreground" : "text-muted-foreground hover:text-foreground"
+                            globalIdx === selectedIndex
+                              ? "bg-[#5BA8A0]/10 text-foreground"
+                              : "text-muted-foreground hover:text-foreground"
                           }`}
                           data-testid={`cmd-${cmd.title.toLowerCase().replace(/\s+/g, "-")}`}
                         >
@@ -180,13 +297,17 @@ export function CommandPalette() {
 export function SearchTrigger() {
   return (
     <button
-      onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+      onClick={() =>
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))
+      }
       className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border/30 bg-muted/20 hover:bg-muted/40 transition-colors text-muted-foreground text-xs"
       data-testid="button-search-trigger"
     >
       <Search className="w-3.5 h-3.5" />
       <span className="hidden sm:inline">Search</span>
-      <kbd className="text-[10px] text-muted-foreground/40 bg-muted/20 px-1 py-0.5 rounded border border-border/20 hidden sm:inline">⌘K</kbd>
+      <kbd className="text-[10px] text-muted-foreground/40 bg-muted/20 px-1 py-0.5 rounded border border-border/20 hidden sm:inline">
+        ⌘K
+      </kbd>
     </button>
   );
 }

@@ -31,12 +31,18 @@ Return a JSON object with:
 export async function optimizePrompt(
   systemPrompt: string,
   outputSchema: JsonSchema,
-  trainingExamples?: { input: string; output: Record<string, unknown> }[]
+  trainingExamples?: { input: string; output: Record<string, unknown> }[],
 ): Promise<PromptOptimizationResult> {
   try {
-    const examplesContext = trainingExamples && trainingExamples.length > 0
-      ? `\n\nExisting training examples for context:\n${trainingExamples.slice(0, 3).map((e, i) => `Example ${i + 1}:\nInput: ${e.input}\nOutput: ${JSON.stringify(e.output)}`).join("\n\n")}`
-      : "";
+    const examplesContext =
+      trainingExamples && trainingExamples.length > 0
+        ? `\n\nExisting training examples for context:\n${trainingExamples
+            .slice(0, 3)
+            .map(
+              (e, i) => `Example ${i + 1}:\nInput: ${e.input}\nOutput: ${JSON.stringify(e.output)}`,
+            )
+            .join("\n\n")}`
+        : "";
 
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,

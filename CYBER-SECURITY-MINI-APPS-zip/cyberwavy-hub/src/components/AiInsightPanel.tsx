@@ -51,13 +51,17 @@ export function AiInsightPanel({ toolSlug, toolTitle, toolSummary }: Props) {
   };
 
   return (
-    <div className="ai-insight-panel card" style={{ marginTop: "1.25rem", background: "rgba(255,255,255,0.42)" }}>
+    <div
+      className="ai-insight-panel card"
+      style={{ marginTop: "1.25rem", background: "rgba(255,255,255,0.42)" }}
+    >
       <h2 className="app-title" style={{ fontSize: "1.05rem", marginTop: 0 }}>
         Smart security tips
       </h2>
       <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-        Optional AI-powered tips (add your own one-line result summary for better personalization). Works best when you set{" "}
-        <code>OPENAI_API_KEY</code> on the server — otherwise you still get instant expert-style tips below.
+        Optional AI-powered tips (add your own one-line result summary for better personalization).
+        Works best when you set <code>OPENAI_API_KEY</code> on the server — otherwise you still get
+        instant expert-style tips below.
       </p>
       <label>Your result summary (optional)</label>
       <textarea
@@ -71,16 +75,28 @@ export function AiInsightPanel({ toolSlug, toolTitle, toolSummary }: Props) {
         <button type="button" className="btn-primary" disabled={loading} onClick={runAi}>
           {loading ? "Generating…" : "Get tips"}
         </button>
-        <button type="button" className="btn-primary btn-ghost" disabled={loading} onClick={showLocal}>
+        <button
+          type="button"
+          className="btn-primary btn-ghost"
+          disabled={loading}
+          onClick={showLocal}
+        >
           Instant tips (no AI)
         </button>
       </div>
       {aiText ? (
         <div style={{ marginTop: "1rem" }}>
           <span className="badge" style={{ marginBottom: "0.5rem", display: "inline-block" }}>
-            {source === "openai" ? "AI tips" : source === "error" ? "Tips (offline)" : "Expert tips"}
+            {source === "openai"
+              ? "AI tips"
+              : source === "error"
+                ? "Tips (offline)"
+                : "Expert tips"}
           </span>
-          <div className="ai-insight-text" style={{ fontSize: 14, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+          <div
+            className="ai-insight-text"
+            style={{ fontSize: 14, whiteSpace: "pre-wrap", lineHeight: 1.5 }}
+          >
             {aiText}
           </div>
         </div>

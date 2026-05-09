@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { marketplaceListings, marketplaceReviews, marketplacePurchases, users, projects } from "@/lib/schema";
+import {
+  marketplaceListings,
+  marketplaceReviews,
+  marketplacePurchases,
+  users,
+  projects,
+} from "@/lib/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 interface RouteParams {
@@ -75,8 +81,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           and(
             eq(marketplacePurchases.listingId, id),
             eq(marketplacePurchases.buyerId, user.id),
-            eq(marketplacePurchases.status, "completed")
-          )
+            eq(marketplacePurchases.status, "completed"),
+          ),
         );
       hasPurchased = !!purchase;
     }
@@ -116,25 +122,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      shortDescription,
-      category,
-      tags,
-      priceType,
-      priceAmount,
-      status,
-    } = body as {
-      title?: string;
-      description?: string;
-      shortDescription?: string;
-      category?: string;
-      tags?: string[];
-      priceType?: string;
-      priceAmount?: number;
-      status?: string;
-    };
+    const { title, description, shortDescription, category, tags, priceType, priceAmount, status } =
+      body as {
+        title?: string;
+        description?: string;
+        shortDescription?: string;
+        category?: string;
+        tags?: string[];
+        priceType?: string;
+        priceAmount?: number;
+        status?: string;
+      };
 
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (title) updateData.title = title;

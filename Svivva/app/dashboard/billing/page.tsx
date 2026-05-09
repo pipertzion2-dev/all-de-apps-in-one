@@ -32,12 +32,7 @@ const defaultPlans = [
     price: "$0",
     period: "forever",
     description: "Perfect for trying out Svivva",
-    features: [
-      "1 project",
-      "100 API calls/month",
-      "Basic eval suite",
-      "Community support",
-    ],
+    features: ["1 project", "100 API calls/month", "Basic eval suite", "Community support"],
     priceId: null as string | null,
     tier: "free",
   },
@@ -120,15 +115,15 @@ export default function BillingPage() {
   useEffect(() => {
     if (pricesData?.products) {
       const updatedPlans = [...defaultPlans];
-      
+
       for (const product of pricesData.products as Product[]) {
         const tier = product.metadata?.tier;
         if (tier && product.prices.length > 0) {
-          const monthlyPrice = product.prices.find(
-            (p: Price) => p.recurring?.interval === "month"
-          ) || product.prices[0];
-          
-          const planIndex = updatedPlans.findIndex(p => p.tier === tier);
+          const monthlyPrice =
+            product.prices.find((p: Price) => p.recurring?.interval === "month") ||
+            product.prices[0];
+
+          const planIndex = updatedPlans.findIndex((p) => p.tier === tier);
           if (planIndex !== -1 && monthlyPrice) {
             updatedPlans[planIndex] = {
               ...updatedPlans[planIndex],
@@ -138,7 +133,7 @@ export default function BillingPage() {
           }
         }
       }
-      
+
       setPlans(updatedPlans);
     }
   }, [pricesData]);
@@ -168,12 +163,12 @@ export default function BillingPage() {
         method: "POST",
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to open billing portal");
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -190,7 +185,7 @@ export default function BillingPage() {
     },
   });
 
-  const handleUpgrade = (plan: typeof plans[0]) => {
+  const handleUpgrade = (plan: (typeof plans)[0]) => {
     if (plan.priceId) {
       setLoadingPlan(plan.name);
       trackUpgrade(plan.tier);
@@ -201,7 +196,7 @@ export default function BillingPage() {
     }
   };
 
-  const currentPlanData = plans.find(p => p.tier === currentPlan);
+  const currentPlanData = plans.find((p) => p.tier === currentPlan);
 
   return (
     <div className="space-y-6">
@@ -233,8 +228,8 @@ export default function BillingPage() {
               </div>
             </div>
             {currentPlan === "free" && (
-              <Button 
-                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" 
+              <Button
+                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                 data-testid="button-upgrade"
                 onClick={() => handleUpgrade(plans[1])}
                 disabled={checkoutMutation.isPending || !plans[1].priceId}
@@ -257,8 +252,8 @@ export default function BillingPage() {
           {plans.map((plan) => {
             const isCurrent = plan.tier === currentPlan;
             return (
-              <Card 
-                key={plan.name} 
+              <Card
+                key={plan.name}
                 className={`relative ${plan.popular ? "border-[#5BA8A0] border-2 shadow-lg shadow-[#5BA8A0]/10 mt-3" : ""}`}
               >
                 {plan.popular && (
@@ -269,9 +264,7 @@ export default function BillingPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
                     {plan.name}
-                    {isCurrent && (
-                      <Badge variant="outline">Current</Badge>
-                    )}
+                    {isCurrent && <Badge variant="outline">Current</Badge>}
                   </CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
@@ -285,7 +278,7 @@ export default function BillingPage() {
                       <span className="text-sm text-muted-foreground">forever</span>
                     )}
                   </div>
-                  
+
                   <ul className="space-y-2.5">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm">
@@ -295,10 +288,14 @@ export default function BillingPage() {
                     ))}
                   </ul>
 
-                  <Button 
+                  <Button
                     className={`w-full ${plan.popular && !isCurrent ? "bg-[#5BA8A0] hover:bg-[#4A9790]" : ""}`}
                     variant={isCurrent ? "outline" : plan.popular ? "default" : "outline"}
-                    disabled={isCurrent || loadingPlan === plan.name || (plan.tier !== "enterprise" && plan.tier !== "free" && !plan.priceId)}
+                    disabled={
+                      isCurrent ||
+                      loadingPlan === plan.name ||
+                      (plan.tier !== "enterprise" && plan.tier !== "free" && !plan.priceId)
+                    }
                     onClick={() => handleUpgrade(plan)}
                     data-testid={`button-plan-${plan.name.toLowerCase()}`}
                   >
@@ -338,13 +335,13 @@ export default function BillingPage() {
             </div>
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">
-                {subscriptionData?.subscription 
+                {subscriptionData?.subscription
                   ? "Manage your payment method in the billing portal"
                   : "No payment method on file"}
               </p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               data-testid="button-manage-billing"
               onClick={() => portalMutation.mutate()}
               disabled={portalMutation.isPending}

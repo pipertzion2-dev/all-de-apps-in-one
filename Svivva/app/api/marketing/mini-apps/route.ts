@@ -13,10 +13,17 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
 async function getCredentials() {
   try {
-    const rows = await db.execute(sql`SELECT indexnow_key, google_service_account_json FROM seed_credentials LIMIT 1`);
+    const rows = await db.execute(
+      sql`SELECT indexnow_key, google_service_account_json FROM seed_credentials LIMIT 1`,
+    );
     const row = (rows as any)[0];
-    return { indexnowKey: row?.indexnow_key || null, serviceAccountJson: row?.google_service_account_json || null };
-  } catch { return { indexnowKey: null, serviceAccountJson: null }; }
+    return {
+      indexnowKey: row?.indexnow_key || null,
+      serviceAccountJson: row?.google_service_account_json || null,
+    };
+  } catch {
+    return { indexnowKey: null, serviceAccountJson: null };
+  }
 }
 
 async function indexnowSubmit(urls: string[], indexnowKey: string) {
@@ -26,18 +33,27 @@ async function indexnowSubmit(urls: string[], indexnowKey: string) {
     const res = await fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ host, key: indexnowKey, keyLocation: `${BASE_URL}/.well-known/indexnow`, urlList: urls }),
+      body: JSON.stringify({
+        host,
+        key: indexnowKey,
+        keyLocation: `${BASE_URL}/.well-known/indexnow`,
+        urlList: urls,
+      }),
       signal: AbortSignal.timeout(20000),
     });
     return { submitted: res.status === 200 || res.status === 202, count: urls.length };
-  } catch { return { submitted: false, count: 0 }; }
+  } catch {
+    return { submitted: false, count: 0 };
+  }
 }
 
 async function googleIndexingSubmit(urls: string[], serviceAccountJson: string | null) {
   if (!serviceAccountJson || !urls.length) return { submitted: 0, errors: [] };
   try {
     return await submitUrlsToGoogleIndexingApi(serviceAccountJson, urls);
-  } catch { return { submitted: 0, errors: ["Service account error"] }; }
+  } catch {
+    return { submitted: 0, errors: ["Service account error"] };
+  }
 }
 
 export async function GET() {
@@ -47,7 +63,14 @@ export async function GET() {
     if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const pages = await db
-      .select({ id: seoLandingPages.id, slug: seoLandingPages.slug, title: seoLandingPages.title, toolUrl: seoLandingPages.toolUrl, metaDescription: seoLandingPages.metaDescription, relatedSlugs: seoLandingPages.relatedSlugs })
+      .select({
+        id: seoLandingPages.id,
+        slug: seoLandingPages.slug,
+        title: seoLandingPages.title,
+        toolUrl: seoLandingPages.toolUrl,
+        metaDescription: seoLandingPages.metaDescription,
+        relatedSlugs: seoLandingPages.relatedSlugs,
+      })
       .from(seoLandingPages)
       .where(like(seoLandingPages.toolUrl, "replit:%"));
 
@@ -73,8 +96,15 @@ export async function POST(req: NextRequest) {
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "You are an expert at breaking down a large SaaS platform into distinct, marketable micro-tools for SEO. Each tool should feel like a standalone product." },
-          { role: "user", content: `App: "${appName}" at ${appUrl}. Description: "${appDescription}"\n\nBreak this into ${count} distinct mini-apps, tools, or features. Return JSON: { apps: [{ name: string (2-4 words), path: string (/tools/slug), description: string (1-2 sentences, who it's for and what it does) }] }` },
+          {
+            role: "system",
+            content:
+              "You are an expert at breaking down a large SaaS platform into distinct, marketable micro-tools for SEO. Each tool should feel like a standalone product.",
+          },
+          {
+            role: "user",
+            content: `App: "${appName}" at ${appUrl}. Description: "${appDescription}"\n\nBreak this into ${count} distinct mini-apps, tools, or features. Return JSON: { apps: [{ name: string (2-4 words), path: string (/tools/slug), description: string (1-2 sentences, who it's for and what it does) }] }`,
+          },
         ],
       });
       const { apps = [] } = JSON.parse(completion.choices[0].message.content || "{}");
@@ -84,7 +114,8 @@ export async function POST(req: NextRequest) {
     // ── GENERATE PAGES BATCH ─────────────────────────────────────────────────
     if (action === "generate-pages-batch") {
       const { apps, replId, replTitle, replUrl, batchStart = 0, batchSize = 5 } = body;
-      if (!apps?.length || !replId) return NextResponse.json({ error: "apps and replId required" }, { status: 400 });
+      if (!apps?.length || !replId)
+        return NextResponse.json({ error: "apps and replId required" }, { status: 400 });
 
       const { indexnowKey, serviceAccountJson } = await getCredentials();
 
@@ -95,14 +126,23 @@ export async function POST(req: NextRequest) {
         .where(like(seoLandingPages.toolUrl, `replit:${replId}:%`));
 
       const batch = apps.slice(batchStart, batchStart + batchSize);
-      const created: { name: string; slug: string; url: string; ok: boolean; error?: string }[] = [];
+      const created: { name: string; slug: string; url: string; ok: boolean; error?: string }[] =
+        [];
       const newUrls: string[] = [];
       const newSlugs: { slug: string; title: string }[] = [];
 
       for (const app of batch) {
         try {
-          const baseSlug = app.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 55);
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, baseSlug)).limit(1);
+          const baseSlug = app.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 55);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, baseSlug))
+            .limit(1);
           const slug = existing.length ? `${baseSlug}-${randomBytes(2).toString("hex")}` : baseSlug;
           const subKey = `replit:${replId}:sub:${baseSlug}`;
 
@@ -117,7 +157,10 @@ export async function POST(req: NextRequest) {
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: `You are an expert SEO copywriter for "${replTitle || "a creative SaaS platform"}". Write conversion-optimized content for individual tool landing pages. Always include real, specific benefits and FAQ questions that people actually Google.` },
+              {
+                role: "system",
+                content: `You are an expert SEO copywriter for "${replTitle || "a creative SaaS platform"}". Write conversion-optimized content for individual tool landing pages. Always include real, specific benefits and FAQ questions that people actually Google.`,
+              },
               {
                 role: "user",
                 content: `Write a complete landing page for the tool: "${app.name}"
@@ -147,7 +190,9 @@ Return JSON with these exact keys:
           });
 
           const data = JSON.parse(gen.choices[0].message.content || "{}");
-          const faqBlock = data.faq?.length ? `\n[FAQ_JSON]${JSON.stringify(data.faq)}[/FAQ_JSON]` : "";
+          const faqBlock = data.faq?.length
+            ? `\n[FAQ_JSON]${JSON.stringify(data.faq)}[/FAQ_JSON]`
+            : "";
 
           const fullContent = `<p>${data.content || app.description}</p>${faqBlock}`;
 
@@ -183,34 +228,62 @@ Return JSON with these exact keys:
           newSlugs.push({ slug, title: data.metaTitle || app.name });
           created.push({ name: app.name, slug, url: pageUrl, ok: true });
         } catch (e) {
-          created.push({ name: app.name, slug: "", url: "", ok: false, error: (e as Error).message.slice(0, 100) });
+          created.push({
+            name: app.name,
+            slug: "",
+            url: "",
+            ok: false,
+            error: (e as Error).message.slice(0, 100),
+          });
         }
       }
 
       // Back-fill relatedSlugs for pages generated in this batch
       if (newSlugs.length > 1) {
         for (const { slug } of newSlugs) {
-          const relatedForThis = newSlugs.filter((s) => s.slug !== slug).slice(0, 4).map((s) => s.slug);
+          const relatedForThis = newSlugs
+            .filter((s) => s.slug !== slug)
+            .slice(0, 4)
+            .map((s) => s.slug);
           if (relatedForThis.length > 0) {
-            await db.execute(sql`UPDATE seo_landing_pages SET related_slugs = ${relatedForThis} WHERE slug = ${slug}`);
+            await db.execute(
+              sql`UPDATE seo_landing_pages SET related_slugs = ${relatedForThis} WHERE slug = ${slug}`,
+            );
           }
         }
       }
 
       // Submit to IndexNow + Google Indexing API in parallel
       const [indexnow, googleIndexing] = await Promise.all([
-        indexnowKey ? indexnowSubmit(newUrls, indexnowKey) : Promise.resolve({ submitted: false, count: 0 }),
+        indexnowKey
+          ? indexnowSubmit(newUrls, indexnowKey)
+          : Promise.resolve({ submitted: false, count: 0 }),
         googleIndexingSubmit(newUrls, serviceAccountJson),
       ]);
 
       const remaining = Math.max(0, apps.length - (batchStart + batchSize));
-      return NextResponse.json({ created, indexnow, googleIndexing, batchStart, batchEnd: batchStart + batchSize, remaining, totalApps: apps.length });
+      return NextResponse.json({
+        created,
+        indexnow,
+        googleIndexing,
+        batchStart,
+        batchEnd: batchStart + batchSize,
+        remaining,
+        totalApps: apps.length,
+      });
     }
 
     // ── GENERATE COMPARISON PAGES ─────────────────────────────────────────────
     if (action === "generate-comparison-pages") {
-      const { apps, replId, replTitle, replUrl, competitors = ["GarageBand", "FL Studio", "Ableton", "Logic Pro"] } = body;
-      if (!apps?.length || !replId) return NextResponse.json({ error: "apps and replId required" }, { status: 400 });
+      const {
+        apps,
+        replId,
+        replTitle,
+        replUrl,
+        competitors = ["GarageBand", "FL Studio", "Ableton", "Logic Pro"],
+      } = body;
+      if (!apps?.length || !replId)
+        return NextResponse.json({ error: "apps and replId required" }, { status: 400 });
 
       const { indexnowKey, serviceAccountJson } = await getCredentials();
 
@@ -223,7 +296,11 @@ Return JSON with these exact keys:
         const competitor = competitors[Math.floor(Math.random() * competitors.length)];
         const compSlug = `${app.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-vs-${competitor.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-        const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, compSlug)).limit(1);
+        const existing = await db
+          .select({ id: seoLandingPages.id })
+          .from(seoLandingPages)
+          .where(eq(seoLandingPages.slug, compSlug))
+          .limit(1);
         if (existing.length > 0) continue;
 
         try {
@@ -231,7 +308,11 @@ Return JSON with these exact keys:
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "SEO expert writing comparison landing pages. Be balanced but naturally favor the featured tool." },
+              {
+                role: "system",
+                content:
+                  "SEO expert writing comparison landing pages. Be balanced but naturally favor the featured tool.",
+              },
               {
                 role: "user",
                 content: `Write a "${app.name} vs ${competitor}" comparison page. ${app.name} is part of ${replTitle} at ${replUrl}. ${app.description}
@@ -256,7 +337,9 @@ Return JSON: {
           });
 
           const data = JSON.parse(gen.choices[0].message.content || "{}");
-          const faqBlock = data.faq?.length ? `\n[FAQ_JSON]${JSON.stringify(data.faq)}[/FAQ_JSON]` : "";
+          const faqBlock = data.faq?.length
+            ? `\n[FAQ_JSON]${JSON.stringify(data.faq)}[/FAQ_JSON]`
+            : "";
 
           await db.insert(seoLandingPages).values({
             slug: compSlug,
@@ -285,7 +368,9 @@ Return JSON: {
       }
 
       const [indexnow, googleIndexing] = await Promise.all([
-        indexnowKey ? indexnowSubmit(newUrls, indexnowKey) : Promise.resolve({ submitted: false, count: 0 }),
+        indexnowKey
+          ? indexnowSubmit(newUrls, indexnowKey)
+          : Promise.resolve({ submitted: false, count: 0 }),
         googleIndexingSubmit(newUrls, serviceAccountJson),
       ]);
 

@@ -8,40 +8,128 @@ export const maxDuration = 90;
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SKIP_PATHS = new Set([
-  "/", "/home", "/index", "/about", "/contact", "/login", "/logout",
-  "/register", "/signup", "/signin", "/privacy", "/terms", "/tos",
-  "/blog", "/docs", "/documentation", "/help", "/faq", "/support",
-  "/settings", "/profile", "/dashboard", "/account", "/404", "/500",
-  "/sitemap", "/robots", "/pricing", "/plans", "/upgrade", "/changelog",
-  "/tools", "/apps", "/features", "/categories", "/search",
+  "/",
+  "/home",
+  "/index",
+  "/about",
+  "/contact",
+  "/login",
+  "/logout",
+  "/register",
+  "/signup",
+  "/signin",
+  "/privacy",
+  "/terms",
+  "/tos",
+  "/blog",
+  "/docs",
+  "/documentation",
+  "/help",
+  "/faq",
+  "/support",
+  "/settings",
+  "/profile",
+  "/dashboard",
+  "/account",
+  "/404",
+  "/500",
+  "/sitemap",
+  "/robots",
+  "/pricing",
+  "/plans",
+  "/upgrade",
+  "/changelog",
+  "/tools",
+  "/apps",
+  "/features",
+  "/categories",
+  "/search",
 ]);
 
 // Path PREFIXES that should be filtered (blog posts, comparison pages, etc.)
-const SKIP_PREFIXES = ["/blog/", "/svivva-vs-", "/tools/best-", "/tools/build-", "/tools/cheapest-", "/tools/enforce-"];
+const SKIP_PREFIXES = [
+  "/blog/",
+  "/svivva-vs-",
+  "/tools/best-",
+  "/tools/build-",
+  "/tools/cheapest-",
+  "/tools/enforce-",
+];
 
 // Endings that confirm a slug is a real tool (used only for JS-bundle extraction)
 const TOOL_ENDINGS = [
   // Security/scan
-  "-checker", "-scanner", "-tester", "-inspector", "-detector", "-analyzer",
-  "-validator", "-auditor", "-grader", "-monitor", "-profiler",
+  "-checker",
+  "-scanner",
+  "-tester",
+  "-inspector",
+  "-detector",
+  "-analyzer",
+  "-validator",
+  "-auditor",
+  "-grader",
+  "-monitor",
+  "-profiler",
   // Data / encode / decode
-  "-decoder", "-encoder", "-parser", "-formatter", "-converter",
-  "-extractor", "-viewer", "-reader", "-diff",
+  "-decoder",
+  "-encoder",
+  "-parser",
+  "-formatter",
+  "-converter",
+  "-extractor",
+  "-viewer",
+  "-reader",
+  "-diff",
   // Generate / build
-  "-generator", "-builder", "-maker", "-creator", "-composer",
-  "-planner", "-simulator", "-sandbox", "-studio",
+  "-generator",
+  "-builder",
+  "-maker",
+  "-creator",
+  "-composer",
+  "-planner",
+  "-simulator",
+  "-sandbox",
+  "-studio",
   // Look up / find
-  "-lookup", "-finder", "-tracker", "-searcher", "-mapper", "-explorer",
+  "-lookup",
+  "-finder",
+  "-tracker",
+  "-searcher",
+  "-mapper",
+  "-explorer",
   // Compute / calculate
-  "-calculator", "-estimator", "-predictor", "-ranker", "-optimizer",
+  "-calculator",
+  "-estimator",
+  "-predictor",
+  "-ranker",
+  "-optimizer",
   // Run / test
-  "-runner", "-tester", "-debugger", "-linter", "-evaluator",
+  "-runner",
+  "-tester",
+  "-debugger",
+  "-linter",
+  "-evaluator",
   // Misc tool words
-  "-tool", "-toolkit", "-audit", "-test", "-check", "-scan",
-  "-hub", "-labs", "-reporter", "-harvester", "-comparator",
+  "-tool",
+  "-toolkit",
+  "-audit",
+  "-test",
+  "-check",
+  "-scan",
+  "-hub",
+  "-labs",
+  "-reporter",
+  "-harvester",
+  "-comparator",
   // Cybersecurity specific
-  "-payload", "-fuzzer", "-sniffer", "-injector", "-cracker",
-  "-bruteforcer", "-recon", "-enumarator",
+  "-payload",
+  "-fuzzer",
+  "-sniffer",
+  "-injector",
+  "-cracker",
+  "-bruteforcer",
+  "-recon",
+  "-enumarator",
 ];
 
 function isToolSlug(s: string): boolean {
@@ -59,7 +147,8 @@ function isGenericPath(p: string): boolean {
   // Filter comparison pages, lp pages, article-style slugs
   if (/\/svivva-vs-/.test(clean)) return true;
   if (/\/best-[a-z]/.test(clean)) return true;
-  if (/\.(xml|txt|ico|png|jpg|jpeg|svg|css|js|json|webp|woff|woff2|mp4|pdf)$/i.test(clean)) return true;
+  if (/\.(xml|txt|ico|png|jpg|jpeg|svg|css|js|json|webp|woff|woff2|mp4|pdf)$/i.test(clean))
+    return true;
   if (/^\/\d+$/.test(clean)) return true;
   return false;
 }
@@ -67,12 +156,20 @@ function isGenericPath(p: string): boolean {
 function pathToName(p: string): string {
   const segs = p.split("/").filter(Boolean);
   const last = segs[segs.length - 1] || p;
-  return last.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).trim();
+  return last
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
 }
 
 function extractMetaContent(html: string, attr: string): string {
-  const re = new RegExp(`<meta[^>]+(?:name|property)=["']${attr}["'][^>]+content=["']([^"']+)["']`, "i");
-  const m = html.match(re) || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']description["']/i);
+  const re = new RegExp(
+    `<meta[^>]+(?:name|property)=["']${attr}["'][^>]+content=["']([^"']+)["']`,
+    "i",
+  );
+  const m =
+    html.match(re) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']description["']/i);
   return m?.[1] || "";
 }
 
@@ -141,7 +238,9 @@ function dedupeTools(
           bySlug.set(slug, t); // replace Repl URL with better URL
         }
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
 
   return [...bySlug.values()];
@@ -158,13 +257,28 @@ async function fetchSitemapXml(url: string): Promise<string | null> {
     if (!r.ok) return null;
     const text = await r.text();
     const trimmed = text.trimStart();
-    if (trimmed.startsWith("<?xml") || trimmed.startsWith("<urlset") || trimmed.startsWith("<sitemapindex")) return text;
+    if (
+      trimmed.startsWith("<?xml") ||
+      trimmed.startsWith("<urlset") ||
+      trimmed.startsWith("<sitemapindex")
+    )
+      return text;
     return null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-async function collectLocsFromSitemap(smUrl: string): Promise<{ locs: string[]; crossDomains: Set<string>; smHost: string }> {
-  const smHost = (() => { try { return new URL(smUrl).hostname; } catch { return ""; } })();
+async function collectLocsFromSitemap(
+  smUrl: string,
+): Promise<{ locs: string[]; crossDomains: Set<string>; smHost: string }> {
+  const smHost = (() => {
+    try {
+      return new URL(smUrl).hostname;
+    } catch {
+      return "";
+    }
+  })();
   const locs: string[] = [];
   const crossDomains = new Set<string>();
 
@@ -174,10 +288,13 @@ async function collectLocsFromSitemap(smUrl: string): Promise<{ locs: string[]; 
   const allLocs = [...smText.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((m) => m[1].trim());
 
   // Sub-sitemap index: fetch child sitemaps
-  const subUrls = [...smText.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/gi)].map((m) => m[1].trim());
+  const subUrls = [...smText.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>/gi)].map((m) =>
+    m[1].trim(),
+  );
   const subTexts = await Promise.all(subUrls.slice(0, 5).map((u) => fetchSitemapXml(u)));
   for (const subText of subTexts) {
-    if (subText) allLocs.push(...[...subText.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((m) => m[1].trim()));
+    if (subText)
+      allLocs.push(...[...subText.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((m) => m[1].trim()));
   }
 
   for (const loc of allLocs) {
@@ -185,7 +302,9 @@ async function collectLocsFromSitemap(smUrl: string): Promise<{ locs: string[]; 
     try {
       const h = new URL(loc).hostname;
       if (h && h !== smHost) crossDomains.add(h);
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
 
   return { locs, crossDomains, smHost };
@@ -203,7 +322,13 @@ export async function POST(req: NextRequest) {
     const replUrl: string = (body.replUrl || "").trim().replace(/\/$/, "");
     if (!replUrl) return NextResponse.json({ error: "replUrl is required" }, { status: 400 });
 
-    const replHost = (() => { try { return new URL(replUrl).hostname; } catch { return ""; } })();
+    const replHost = (() => {
+      try {
+        return new URL(replUrl).hostname;
+      } catch {
+        return "";
+      }
+    })();
     const rawToolMap = new Map<string, { name: string; url: string; description: string }>();
     let source = "none";
     let homeHtml = "";
@@ -225,7 +350,9 @@ export async function POST(req: NextRequest) {
         metaDescription = extractMetaContent(homeHtml, "description");
         pageTitle = extractTitle(homeHtml);
       }
-    } catch { /* continue */ }
+    } catch {
+      /* continue */
+    }
 
     // ── Step 2: Sitemap ───────────────────────────────────────────────────────
     const { locs, crossDomains } = await collectLocsFromSitemap(`${replUrl}/sitemap.xml`);
@@ -238,14 +365,18 @@ export async function POST(req: NextRequest) {
     }
 
     const allSitemapLocs = [...locs, ...crossLocs];
-    console.log(`[discover-tools] sitemap locs: ${locs.length}, cross-domain locs: ${crossLocs.length}`);
+    console.log(
+      `[discover-tools] sitemap locs: ${locs.length}, cross-domain locs: ${crossLocs.length}`,
+    );
 
     for (const loc of allSitemapLocs) {
       try {
         const parsed = new URL(loc);
         const path = parsed.pathname;
         if (!isGenericPath(path)) addTool(pathToName(path), loc);
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
     if (rawToolMap.size > 0) source = "sitemap";
 
@@ -270,8 +401,11 @@ export async function POST(req: NextRequest) {
                 const replicUrl = `${replUrl}${routePrefix}/${slug}`;
                 // Check if a cross-domain entry with this slug already exists
                 const crossDomainMatch = [...rawToolMap.values()].find((t) => {
-                  try { return new URL(t.url).hostname !== replHost && t.url.endsWith(`/${slug}`); }
-                  catch { return false; }
+                  try {
+                    return new URL(t.url).hostname !== replHost && t.url.endsWith(`/${slug}`);
+                  } catch {
+                    return false;
+                  }
                 });
                 if (!crossDomainMatch) addTool(pathToName(`/${slug}`), replicUrl);
               }
@@ -279,7 +413,9 @@ export async function POST(req: NextRequest) {
               else source = "sitemap+bundle";
             }
           }
-        } catch { /* continue */ }
+        } catch {
+          /* continue */
+        }
       }
     }
 
@@ -294,13 +430,19 @@ export async function POST(req: NextRequest) {
         if (raw.startsWith("http://") || raw.startsWith("https://")) {
           full = raw;
         } else if (raw.startsWith("/")) {
-          try { full = new URL(raw, replUrl).href; } catch { continue; }
+          try {
+            full = new URL(raw, replUrl).href;
+          } catch {
+            continue;
+          }
         } else continue;
         try {
           const parsed = new URL(full);
           if (parsed.hostname !== replHost) continue;
           if (!isGenericPath(parsed.pathname)) addTool(pathToName(parsed.pathname), full);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
       if (rawToolMap.size > 0 && source === "none") source = "html-links";
     }
@@ -340,15 +482,19 @@ Return JSON: { "tools": [{ "name": string, "url": string, "description": string 
         const parsed = JSON.parse(res.choices[0].message.content || "{}");
         console.log(`[discover-tools] AI returned: ${parsed.tools?.length ?? 0}`);
         if (Array.isArray(parsed.tools) && parsed.tools.length > 0) {
-          const enriched = parsed.tools.slice(0, toEnrich.length).map((t: Record<string, string>, i: number) => ({
-            name: t.name || toEnrich[i]?.name || "Tool",
-            url: toEnrich[i]?.url || t.url, // always keep original URL
-            description: t.description || "",
-          }));
+          const enriched = parsed.tools
+            .slice(0, toEnrich.length)
+            .map((t: Record<string, string>, i: number) => ({
+              name: t.name || toEnrich[i]?.name || "Tool",
+              url: toEnrich[i]?.url || t.url, // always keep original URL
+              description: t.description || "",
+            }));
           const finalTools = [...enriched, ...deduped.slice(toEnrich.length)];
           return NextResponse.json({ tools: finalTools, source, count: finalTools.length });
         }
-      } catch (e) { console.log(`[discover-tools] AI error: ${e}`); }
+      } catch (e) {
+        console.log(`[discover-tools] AI error: ${e}`);
+      }
 
       return NextResponse.json({ tools: deduped, source, count: deduped.length });
     }
@@ -374,21 +520,31 @@ Return JSON: { "tools": [{ "name": string, "url": string, "description": string 
         });
         const parsed = JSON.parse(res.choices[0].message.content || "{}");
         if (Array.isArray(parsed.tools) && parsed.tools.length > 0) {
-          return NextResponse.json({ tools: parsed.tools, source: "ai-meta", count: parsed.tools.length });
+          return NextResponse.json({
+            tools: parsed.tools,
+            source: "ai-meta",
+            count: parsed.tools.length,
+          });
         }
-      } catch { /* fall through */ }
+      } catch {
+        /* fall through */
+      }
     }
 
     // Extract a clean app name from the page title (strip taglines after " - ", " | ", " — ")
     const cleanAppName = pageTitle
-      ? pageTitle.split(/\s[-|—]\s/)[0].trim().slice(0, 60)
+      ? pageTitle
+          .split(/\s[-|—]\s/)[0]
+          .trim()
+          .slice(0, 60)
       : "";
 
     return NextResponse.json({
       tools: [],
       source: "none",
       appName: cleanAppName,
-      error: "No tools found. Make sure the URL is your live deployed Replit app and it's publicly accessible.",
+      error:
+        "No tools found. Make sure the URL is your live deployed Replit app and it's publicly accessible.",
     });
   } catch (e) {
     console.error("[discover-tools] fatal:", e);

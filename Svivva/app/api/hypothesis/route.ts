@@ -9,13 +9,19 @@ import { z } from "zod";
 const discoverSchema = z.object({
   question: z.string().min(3).max(500),
   projectIds: z.array(z.string()).min(0).max(4),
-  externalApis: z.array(z.object({
-    name: z.string().max(200),
-    url: z.string().url("Must be a valid URL").max(500),
-    description: z.string().max(500).optional().default(""),
-    inputSchema: z.string().max(2000).optional().default(""),
-    sampleResponse: z.string().max(2000).optional().default(""),
-  })).max(4).optional().default([]),
+  externalApis: z
+    .array(
+      z.object({
+        name: z.string().max(200),
+        url: z.string().url("Must be a valid URL").max(500),
+        description: z.string().max(500).optional().default(""),
+        inputSchema: z.string().max(2000).optional().default(""),
+        sampleResponse: z.string().max(2000).optional().default(""),
+      }),
+    )
+    .max(4)
+    .optional()
+    .default([]),
   previousInsights: z.array(z.string()).max(20).optional().default([]),
 });
 
@@ -51,13 +57,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = discoverSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
     }
 
     const { question, projectIds, externalApis: extApis, previousInsights } = parsed.data;
     const realIds = projectIds.filter((id) => id !== "__none__");
 
-    let svivvaSummaries: { name: string; type: string; purpose: string; outputFields: string[]; sampleOutput: string }[] = [];
+    let svivvaSummaries: {
+      name: string;
+      type: string;
+      purpose: string;
+      outputFields: string[];
+      sampleOutput: string;
+    }[] = [];
 
     if (realIds.length > 0) {
       const selectedProjects = await db
@@ -82,7 +97,11 @@ export async function POST(req: NextRequest) {
           purpose: p.description || p.systemPrompt.slice(0, 200),
           outputFields: Object.keys(props),
           sampleOutput: JSON.stringify(
-            Object.fromEntries(Object.entries(props).slice(0, 5).map(([k, v]) => [k, `<${(v as Record<string, string>)?.type || "value"}>`])),
+            Object.fromEntries(
+              Object.entries(props)
+                .slice(0, 5)
+                .map(([k, v]) => [k, `<${(v as Record<string, string>)?.type || "value"}>`]),
+            ),
           ),
         };
       });
@@ -103,9 +122,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Select at least one API to analyze" }, { status: 400 });
     }
 
-    const prevContext = previousInsights.length > 0
-      ? `\n\nPREVIOUSLY DISCOVERED (do NOT repeat these — build on them or find new angles):\n${previousInsights.map((s, i) => `${i + 1}. ${s}`).join("\n")}`
-      : "";
+    const prevContext =
+      previousInsights.length > 0
+        ? `\n\nPREVIOUSLY DISCOVERED (do NOT repeat these — build on them or find new angles):\n${previousInsights.map((s, i) => `${i + 1}. ${s}`).join("\n")}`
+        : "";
 
     const completion = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
@@ -219,5 +239,9 @@ Return JSON:
 }
 
 function tryParseJson(s: string): Record<string, unknown> {
-  try { return JSON.parse(s); } catch { return {}; }
+  try {
+    return JSON.parse(s);
+  } catch {
+    return {};
+  }
 }

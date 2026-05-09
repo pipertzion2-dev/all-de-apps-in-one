@@ -37,11 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "seedId is required" }, { status: 400 });
     }
 
-    const [seed] = await db
-      .select()
-      .from(seeds)
-      .where(eq(seeds.id, seedId))
-      .limit(1);
+    const [seed] = await db.select().from(seeds).where(eq(seeds.id, seedId)).limit(1);
 
     if (!seed) {
       return NextResponse.json({ error: "Seed not found" }, { status: 404 });
@@ -50,12 +46,7 @@ export async function POST(request: NextRequest) {
     const [session] = await db
       .select()
       .from(seedSessions)
-      .where(
-        and(
-          eq(seedSessions.id, seed.sessionId),
-          eq(seedSessions.userId, user.id)
-        )
-      )
+      .where(and(eq(seedSessions.id, seed.sessionId), eq(seedSessions.userId, user.id)))
       .limit(1);
 
     if (!session) {
@@ -67,7 +58,7 @@ export async function POST(request: NextRequest) {
     if (!generatedCode || Object.keys(generatedCode).length === 0) {
       return NextResponse.json(
         { error: "No generated code available. Build this seed first." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -179,9 +170,6 @@ PORT=3000
     });
   } catch (error) {
     console.error("Seeds deploy error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate deployment package" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate deployment package" }, { status: 500 });
   }
 }

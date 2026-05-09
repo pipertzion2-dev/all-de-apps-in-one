@@ -51,19 +51,19 @@ export async function GET() {
       .innerJoin(teams, eq(teamMembers.teamId, teams.id))
       .where(eq(teamMembers.userId, user.id));
 
-    const ownedWithRole = ownedTeams.map(t => ({ ...t, role: "owner" as const }));
-    const memberWithRole = memberTeams.map(t => ({ 
+    const ownedWithRole = ownedTeams.map((t) => ({ ...t, role: "owner" as const }));
+    const memberWithRole = memberTeams.map((t) => ({
       id: t.id,
       name: t.name,
       slug: t.slug,
       description: t.description,
       avatarUrl: t.avatarUrl,
       createdAt: t.createdAt,
-      role: t.memberRole 
+      role: t.memberRole,
     }));
-    
+
     const allTeams = [...ownedWithRole, ...memberWithRole];
-    const uniqueTeams = Array.from(new Map(allTeams.map(t => [t.id, t])).values());
+    const uniqueTeams = Array.from(new Map(allTeams.map((t) => [t.id, t])).values());
 
     return NextResponse.json(uniqueTeams);
   } catch (error) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const parsed = createTeamSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         .from(teams)
         .where(eq(teams.slug, slug))
         .limit(1);
-      
+
       if (existing.length === 0) break;
       slug = `${baseSlug}-${counter}`;
       counter++;

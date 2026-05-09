@@ -6,11 +6,11 @@
 
 What you want is:
 
-| Piece | Role |
-|--------|------|
-| **Cursor** | Edit code on your machine; run Git; sometimes run deploy CLI. |
-| **A host** (Vercel, Netlify, Cloudflare Pages, Railway, etc.) | Runs the live site and gives you DNS targets for your domain. |
-| **GoDaddy** | DNS only: points your domain at **that host**, not at Cursor or Replit. |
+| Piece                                                         | Role                                                                    |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Cursor**                                                    | Edit code on your machine; run Git; sometimes run deploy CLI.           |
+| **A host** (Vercel, Netlify, Cloudflare Pages, Railway, etc.) | Runs the live site and gives you DNS targets for your domain.           |
+| **GoDaddy**                                                   | DNS only: points your domain at **that host**, not at Cursor or Replit. |
 
 So: **leave Replit for hosting**, pick a host, point GoDaddy there. You still use **Cursor** to work on the project every day.
 
@@ -34,10 +34,10 @@ So: **leave Replit for hosting**, pick a host, point GoDaddy there. You still us
 
 Fill in when you know them:
 
-| What | Your value |
-|------|------------|
-| Your domain | `________________` |
-| New host | `________________` |
+| What                 | Your value         |
+| -------------------- | ------------------ |
+| Your domain          | `________________` |
+| New host             | `________________` |
 | GitHub repo (if any) | `________________` |
 
 ---

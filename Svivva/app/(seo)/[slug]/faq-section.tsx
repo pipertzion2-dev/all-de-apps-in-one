@@ -27,7 +27,10 @@ export default function FaqSection({ items }: { items: { q: string; a: string }[
             )}
           </button>
           {openIndex === i && (
-            <div className="px-5 pb-4 text-white/60 leading-relaxed" data-testid={`text-faq-answer-${i}`}>
+            <div
+              className="px-5 pb-4 text-white/60 leading-relaxed"
+              data-testid={`text-faq-answer-${i}`}
+            >
               {item.a}
             </div>
           )}

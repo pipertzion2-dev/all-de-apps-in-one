@@ -16,11 +16,17 @@ function isReplitDomain(d: string) {
  */
 function getOAuthHostname(request: NextRequest): string {
   if (process.env.REPLIT_OAUTH_DOMAIN) {
-    try { return new URL(process.env.REPLIT_OAUTH_DOMAIN.startsWith("http") ? process.env.REPLIT_OAUTH_DOMAIN : `https://${process.env.REPLIT_OAUTH_DOMAIN}`).host; } catch {}
+    try {
+      return new URL(
+        process.env.REPLIT_OAUTH_DOMAIN.startsWith("http")
+          ? process.env.REPLIT_OAUTH_DOMAIN
+          : `https://${process.env.REPLIT_OAUTH_DOMAIN}`,
+      ).host;
+    } catch {}
   }
   if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
   if (process.env.REPLIT_DOMAINS) {
-    const domains = process.env.REPLIT_DOMAINS.split(",").map(d => d.trim());
+    const domains = process.env.REPLIT_DOMAINS.split(",").map((d) => d.trim());
     const replitDomain = domains.find(isReplitDomain);
     if (replitDomain) return replitDomain;
   }
@@ -32,7 +38,9 @@ function getOAuthHostname(request: NextRequest): string {
 function getAppHostname(request: NextRequest): string {
   // Custom domain always wins (set NEXT_PUBLIC_SITE_URL=https://svivva.com in production)
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    try { return new URL(process.env.NEXT_PUBLIC_SITE_URL).host; } catch {}
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).host;
+    } catch {}
   }
   // Dev: Replit injects REPLIT_DEV_DOMAIN automatically
   if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
@@ -44,9 +52,9 @@ function getAppHostname(request: NextRequest): string {
 }
 
 export async function GET(request: NextRequest) {
-  const appHostname   = getAppHostname(request);
+  const appHostname = getAppHostname(request);
   const oauthHostname = getOAuthHostname(request);
-  const appBase       = `https://${appHostname}`;
+  const appBase = `https://${appHostname}`;
 
   // Read redirectAfter and stored callbackBase from cookie (best effort — may be absent cross-domain)
   let redirectAfter: string | null = null;
@@ -74,7 +82,7 @@ export async function GET(request: NextRequest) {
   if (state && !redirectAfter) {
     try {
       const rows = await db.execute(
-        sql`SELECT redirect_after, callback_base FROM oauth_states WHERE state = ${state} LIMIT 1`
+        sql`SELECT redirect_after, callback_base FROM oauth_states WHERE state = ${state} LIMIT 1`,
       );
       const row = rows.rows?.[0] ?? (Array.isArray(rows) ? rows[0] : null);
       if (row?.redirect_after) redirectAfter = row.redirect_after as string;
@@ -139,7 +147,10 @@ export async function GET(request: NextRequest) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Callback error:", msg);
     return NextResponse.redirect(
-      new URL(`/login?error=callback_failed&detail=${encodeURIComponent(msg.slice(0, 120))}`, appBase)
+      new URL(
+        `/login?error=callback_failed&detail=${encodeURIComponent(msg.slice(0, 120))}`,
+        appBase,
+      ),
     );
   }
 }

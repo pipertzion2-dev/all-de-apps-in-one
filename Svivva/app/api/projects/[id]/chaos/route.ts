@@ -24,7 +24,10 @@ const CHAOS_CATEGORIES = [
   "format_mismatch",
 ];
 
-async function generateChaosInputs(systemPrompt: string, outputSchema: Record<string, unknown>): Promise<{ input: string; category: string }[]> {
+async function generateChaosInputs(
+  systemPrompt: string,
+  outputSchema: Record<string, unknown>,
+): Promise<{ input: string; category: string }[]> {
   const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
     messages: [
@@ -74,13 +77,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const [latestVersion] = await db.select().from(projectVersions)
+    const [latestVersion] = await db
+      .select()
+      .from(projectVersions)
       .where(eq(projectVersions.projectId, projectId))
       .orderBy(desc(projectVersions.version))
       .limit(1);
 
     const systemPrompt = latestVersion?.systemPrompt || project.systemPrompt;
-    const outputSchema = (latestVersion?.outputSchema || project.outputSchema) as Record<string, unknown>;
+    const outputSchema = (latestVersion?.outputSchema || project.outputSchema) as Record<
+      string,
+      unknown
+    >;
 
     const runId = uuidv4();
     await db.insert(chaosRuns).values({
@@ -152,16 +160,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const failedInputs = totalInputs - passedInputs;
     const resilienceScore = totalInputs > 0 ? Math.round((passedInputs / totalInputs) * 100) : 0;
 
-    await db.update(chaosRuns).set({
-      status: "completed",
-      totalInputs,
-      passedInputs,
-      failedInputs,
-      resilienceScore,
-      categories,
-      results,
-      completedAt: new Date(),
-    }).where(eq(chaosRuns.id, runId));
+    await db
+      .update(chaosRuns)
+      .set({
+        status: "completed",
+        totalInputs,
+        passedInputs,
+        failedInputs,
+        resilienceScore,
+        categories,
+        results,
+        completedAt: new Date(),
+      })
+      .where(eq(chaosRuns.id, runId));
 
     return NextResponse.json({
       id: runId,
@@ -176,11 +187,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Chaos mode error:", error);
     try {
-      const pendingRuns = await db.select().from(chaosRuns)
+      const pendingRuns = await db
+        .select()
+        .from(chaosRuns)
         .where(eq(chaosRuns.projectId, projectId));
       for (const run of pendingRuns) {
         if (run.status === "running") {
-          await db.update(chaosRuns).set({ status: "failed", completedAt: new Date() }).where(eq(chaosRuns.id, run.id));
+          await db
+            .update(chaosRuns)
+            .set({ status: "failed", completedAt: new Date() })
+            .where(eq(chaosRuns.id, run.id));
         }
       }
     } catch {}
@@ -192,7 +208,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const runs = await db.select().from(chaosRuns)
+    const runs = await db
+      .select()
+      .from(chaosRuns)
       .where(eq(chaosRuns.projectId, projectId))
       .orderBy(desc(chaosRuns.createdAt))
       .limit(10);

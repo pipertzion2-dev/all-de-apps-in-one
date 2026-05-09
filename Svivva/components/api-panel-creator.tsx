@@ -33,7 +33,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
   const panelMeshRef = useRef<THREE.Mesh | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
-  
+
   const [prompt, setPrompt] = useState("");
   const [phase, setPhase] = useState<"prompt" | "questions" | "brand">("prompt");
   const [tailoredQuestions, setTailoredQuestions] = useState<TailoredQuestion[]>([]);
@@ -43,35 +43,60 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
   const [suggestions, setSuggestions] = useState<BrandSuggestion | null>(null);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const [selectedPalette, setSelectedPalette] = useState<{ name: string; colors: { primary: string; secondary: string; accent: string } } | null>(null);
+  const [selectedPalette, setSelectedPalette] = useState<{
+    name: string;
+    colors: { primary: string; secondary: string; accent: string };
+  } | null>(null);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(true);
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  const buttonsRef = useRef<Map<string, { x: number; y: number; w: number; h: number; action: () => void }>>(new Map());
+  const buttonsRef = useRef<
+    Map<string, { x: number; y: number; w: number; h: number; action: () => void }>
+  >(new Map());
 
   useEffect(() => {
-    const interval = setInterval(() => setCursorVisible(v => !v), 530);
+    const interval = setInterval(() => setCursorVisible((v) => !v), 530);
     return () => clearInterval(interval);
   }, []);
 
   const generateTailoredQuestions = useCallback(async (userPrompt: string) => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 600));
 
     const words = userPrompt.toLowerCase();
     const questions: TailoredQuestion[] = [];
 
     if (words.includes("analyz") || words.includes("review") || words.includes("sentiment")) {
-      questions.push({ id: "depth", question: "Analysis depth?", options: ["Quick", "Standard", "Deep", "Full"] });
+      questions.push({
+        id: "depth",
+        question: "Analysis depth?",
+        options: ["Quick", "Standard", "Deep", "Full"],
+      });
     } else if (words.includes("generat") || words.includes("creat") || words.includes("write")) {
-      questions.push({ id: "creativity", question: "Creativity level?", options: ["Low", "Medium", "High", "Max"] });
+      questions.push({
+        id: "creativity",
+        question: "Creativity level?",
+        options: ["Low", "Medium", "High", "Max"],
+      });
     } else {
-      questions.push({ id: "style", question: "Processing style?", options: ["Fast", "Balanced", "Thorough", "Max"] });
+      questions.push({
+        id: "style",
+        question: "Processing style?",
+        options: ["Fast", "Balanced", "Thorough", "Max"],
+      });
     }
 
-    questions.push({ id: "output", question: "Output detail?", options: ["Brief", "Standard", "Detailed", "Full"] });
-    questions.push({ id: "tone", question: "Response tone?", options: ["Pro", "Friendly", "Tech", "Casual"] });
+    questions.push({
+      id: "output",
+      question: "Output detail?",
+      options: ["Brief", "Standard", "Detailed", "Full"],
+    });
+    questions.push({
+      id: "tone",
+      question: "Response tone?",
+      options: ["Pro", "Friendly", "Tech", "Casual"],
+    });
 
     setTailoredQuestions(questions);
     setPhase("questions");
@@ -80,10 +105,10 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
 
   const generateBrandSuggestions = useCallback(async () => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 400));
 
     const words = prompt.split(" ");
-    const keyword = words.find(w => w.length > 3) || "API";
+    const keyword = words.find((w) => w.length > 3) || "API";
     const cap = keyword.charAt(0).toUpperCase() + keyword.slice(1, 6).toLowerCase();
 
     const mock: BrandSuggestion = {
@@ -105,16 +130,19 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     setIsGenerating(false);
   }, [prompt]);
 
-  const handleOptionSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    setTimeout(() => {
-      if (currentQuestionIndex < tailoredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        void generateBrandSuggestions();
-      }
-    }, 200);
-  }, [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions]);
+  const handleOptionSelect = useCallback(
+    (questionId: string, value: string) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: value }));
+      setTimeout(() => {
+        if (currentQuestionIndex < tailoredQuestions.length - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+        } else {
+          void generateBrandSuggestions();
+        }
+      }, 200);
+    },
+    [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions],
+  );
 
   const drawScreen = useCallback(() => {
     const canvas = screenCanvasRef.current;
@@ -139,12 +167,12 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     // Top bar area
     const topBarY = 30;
     const topBarH = 50;
-    
+
     // Bottom bar
     const bottomBarY = H - 60;
     ctx.fillStyle = "#1a1a1a";
     ctx.fillRect(20, bottomBarY, W - 40, 40);
-    
+
     // Version text
     ctx.fillStyle = "#5BA8A0";
     ctx.font = "italic 24px Georgia, serif";
@@ -183,10 +211,16 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.fillStyle = "#1a1a1a";
       ctx.font = "16px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("import", importBtnX + importBtnW/2, topBarY + 32);
+      ctx.fillText("import", importBtnX + importBtnW / 2, topBarY + 32);
       ctx.textAlign = "left";
 
-      buttonsRef.current.set("import", { x: importBtnX, y: topBarY, w: importBtnW, h: topBarH, action: () => {} });
+      buttonsRef.current.set("import", {
+        x: importBtnX,
+        y: topBarY,
+        w: importBtnW,
+        h: topBarH,
+        action: () => {},
+      });
 
       // Main content area
       const mainY = 100;
@@ -229,13 +263,19 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.fillStyle = canExport ? "#fff" : "#888";
       ctx.font = "16px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("export", exportBtnX + exportBtnW/2, exportBtnY + 32);
+      ctx.fillText("export", exportBtnX + exportBtnW / 2, exportBtnY + 32);
       ctx.textAlign = "left";
 
       if (canExport) {
-        buttonsRef.current.set("export", { x: exportBtnX, y: exportBtnY, w: exportBtnW, h: exportBtnH, action: () => {
-          if (!isGenerating) generateTailoredQuestions(prompt);
-        }});
+        buttonsRef.current.set("export", {
+          x: exportBtnX,
+          y: exportBtnY,
+          w: exportBtnW,
+          h: exportBtnH,
+          action: () => {
+            if (!isGenerating) generateTailoredQuestions(prompt);
+          },
+        });
       }
     }
 
@@ -248,7 +288,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.strokeStyle = "#1a1a1a";
       ctx.lineWidth = 3;
       ctx.strokeRect(30, topBarY, 740, topBarH);
-      
+
       ctx.fillStyle = "#1a1a1a";
       ctx.font = "bold 18px monospace";
       ctx.fillText(q.question, 45, topBarY + 32);
@@ -290,17 +330,24 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.fillStyle = sel ? "#fff" : "#1a1a1a";
         ctx.font = "bold 16px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(opt, x + optW/2, startY + 45);
+        ctx.fillText(opt, x + optW / 2, startY + 45);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`opt-${opt}`, { x, y: startY, w: optW, h: optH, action: () => handleOptionSelect(q.id, opt) });
+        buttonsRef.current.set(`opt-${opt}`, {
+          x,
+          y: startY,
+          w: optW,
+          h: optH,
+          action: () => handleOptionSelect(q.id, opt),
+        });
       });
 
       // Progress bar
       const barY = mainY + 280;
       tailoredQuestions.forEach((_, i) => {
         const bx = 60 + i * 240;
-        ctx.fillStyle = i < currentQuestionIndex ? "#5BA8A0" : i === currentQuestionIndex ? "#5BA8A080" : "#ddd";
+        ctx.fillStyle =
+          i < currentQuestionIndex ? "#5BA8A0" : i === currentQuestionIndex ? "#5BA8A080" : "#ddd";
         ctx.fillRect(bx, barY, 220, 8);
         ctx.strokeStyle = "#1a1a1a";
         ctx.lineWidth = 1;
@@ -315,7 +362,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.strokeStyle = "#1a1a1a";
       ctx.lineWidth = 3;
       ctx.strokeRect(30, topBarY, 740, topBarH);
-      
+
       ctx.fillStyle = "#1a1a1a";
       ctx.font = "bold 18px monospace";
       ctx.fillText("Customize Your API Brand", 45, topBarY + 32);
@@ -349,10 +396,16 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.fillStyle = sel ? "#fff" : "#1a1a1a";
         ctx.font = "bold 14px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(n, x + w/2, mainY + 64);
+        ctx.fillText(n, x + w / 2, mainY + 64);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`name-${n}`, { x, y: mainY + 40, w, h: 36, action: () => setSelectedName(n) });
+        buttonsRef.current.set(`name-${n}`, {
+          x,
+          y: mainY + 40,
+          w,
+          h: 36,
+          action: () => setSelectedName(n),
+        });
         x += w + 15;
       });
 
@@ -361,7 +414,14 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.font = "12px monospace";
       ctx.fillText("ICON", 50, mainY + 105);
 
-      const iconSymbols: Record<string, string> = { Zap: "Z", Target: "T", Sparkles: "S", Rocket: "R", Brain: "B", Cpu: "C" };
+      const iconSymbols: Record<string, string> = {
+        Zap: "Z",
+        Target: "T",
+        Sparkles: "S",
+        Rocket: "R",
+        Brain: "B",
+        Cpu: "C",
+      };
       x = 50;
       suggestions.icons.forEach((icon) => {
         const sel = selectedIcon === icon;
@@ -379,7 +439,13 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.fillText(iconSymbols[icon] || "?", x + 25, mainY + 148);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`icon-${icon}`, { x, y: mainY + 115, w: 50, h: 50, action: () => setSelectedIcon(icon) });
+        buttonsRef.current.set(`icon-${icon}`, {
+          x,
+          y: mainY + 115,
+          w: 50,
+          h: 50,
+          action: () => setSelectedIcon(icon),
+        });
         x += 60;
       });
 
@@ -411,7 +477,13 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.fillText(p.name, x + 80, mainY + 285);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`pal-${p.name}`, { x, y: mainY + 205, w: 160, h: 90, action: () => setSelectedPalette(p) });
+        buttonsRef.current.set(`pal-${p.name}`, {
+          x,
+          y: mainY + 205,
+          w: 160,
+          h: 90,
+          action: () => setSelectedPalette(p),
+        });
         x += 175;
       });
 
@@ -421,7 +493,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const exportBtnW = 90;
       const exportBtnH = 50;
       const canCreate = selectedName && selectedIcon && selectedPalette;
-      
+
       ctx.fillStyle = canCreate ? (hoveredButton === "create" ? "#4a9890" : "#5BA8A0") : "#ccc";
       ctx.fillRect(exportBtnX, exportBtnY, exportBtnW, exportBtnH);
       ctx.strokeStyle = "#1a1a1a";
@@ -430,13 +502,24 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       ctx.fillStyle = canCreate ? "#fff" : "#888";
       ctx.font = "14px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("create", exportBtnX + exportBtnW/2, exportBtnY + 32);
+      ctx.fillText("create", exportBtnX + exportBtnW / 2, exportBtnY + 32);
       ctx.textAlign = "left";
 
       if (canCreate) {
-        buttonsRef.current.set("create", { x: exportBtnX, y: exportBtnY, w: exportBtnW, h: exportBtnH, action: () => {
-          onComplete({ prompt, name: selectedName!, icon: selectedIcon!, palette: selectedPalette!.colors });
-        }});
+        buttonsRef.current.set("create", {
+          x: exportBtnX,
+          y: exportBtnY,
+          w: exportBtnW,
+          h: exportBtnH,
+          action: () => {
+            onComplete({
+              prompt,
+              name: selectedName!,
+              icon: selectedIcon!,
+              palette: selectedPalette!.colors,
+            });
+          },
+        });
       }
     }
 
@@ -452,7 +535,24 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     }
 
     if (screenTextureRef.current) screenTextureRef.current.needsUpdate = true;
-  }, [phase, prompt, isGenerating, tailoredQuestions, currentQuestionIndex, answers, suggestions, selectedName, selectedIcon, selectedPalette, hoveredButton, isFocused, cursorVisible, onComplete, generateTailoredQuestions, handleOptionSelect]);
+  }, [
+    phase,
+    prompt,
+    isGenerating,
+    tailoredQuestions,
+    currentQuestionIndex,
+    answers,
+    suggestions,
+    selectedName,
+    selectedIcon,
+    selectedPalette,
+    hoveredButton,
+    isFocused,
+    cursorVisible,
+    onComplete,
+    generateTailoredQuestions,
+    handleOptionSelect,
+  ]);
 
   useEffect(() => {
     drawScreen();
@@ -471,7 +571,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     // Orthographic camera for flat view - fit panel exactly
     const panelAspect = 900 / 600; // 1.5
     const containerAspect = width / height;
-    
+
     let frustumWidth, frustumHeight;
     if (containerAspect > panelAspect) {
       // Container is wider - fit to height
@@ -482,11 +582,14 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       frustumWidth = 9.5;
       frustumHeight = frustumWidth / containerAspect;
     }
-    
+
     const camera = new THREE.OrthographicCamera(
-      -frustumWidth / 2, frustumWidth / 2,
-      frustumHeight / 2, -frustumHeight / 2,
-      0.1, 100
+      -frustumWidth / 2,
+      frustumWidth / 2,
+      frustumHeight / 2,
+      -frustumHeight / 2,
+      0.1,
+      100,
     );
     camera.position.z = 10;
     cameraRef.current = camera;
@@ -538,7 +641,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       if (intersects.length > 0 && intersects[0].uv) {
         return {
           x: intersects[0].uv.x * 900,
-          y: (1 - intersects[0].uv.y) * 600
+          y: (1 - intersects[0].uv.y) * 600,
         };
       }
       return null;
@@ -555,7 +658,12 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const coords = getCanvasCoords(clientX, clientY);
       if (coords) {
         buttonsRef.current.forEach((btn) => {
-          if (coords.x >= btn.x && coords.x <= btn.x + btn.w && coords.y >= btn.y && coords.y <= btn.y + btn.h) {
+          if (
+            coords.x >= btn.x &&
+            coords.x <= btn.x + btn.w &&
+            coords.y >= btn.y &&
+            coords.y <= btn.y + btn.h
+          ) {
             btn.action();
           }
         });
@@ -570,7 +678,12 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const coords = getCanvasCoords(clientX, clientY);
       if (coords) {
         buttonsRef.current.forEach((btn, key) => {
-          if (coords.x >= btn.x && coords.x <= btn.x + btn.w && coords.y >= btn.y && coords.y <= btn.y + btn.h) {
+          if (
+            coords.x >= btn.x &&
+            coords.x <= btn.x + btn.w &&
+            coords.y >= btn.y &&
+            coords.y <= btn.y + btn.h
+          ) {
             found = key;
           }
         });
@@ -589,7 +702,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const w = container.clientWidth;
       const h = container.clientHeight;
       const contAspect = w / h;
-      
+
       let fW, fH;
       if (contAspect > panelAspect) {
         fH = 6.5;
@@ -598,7 +711,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         fW = 9.5;
         fH = fW / contAspect;
       }
-      
+
       camera.left = -fW / 2;
       camera.right = fW / 2;
       camera.top = fH / 2;
@@ -620,20 +733,26 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         container.removeChild(renderer.domElement);
       }
     };
-  // Scene mounts once; canvas redraws via the [drawScreen] effect.
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid rebuilding Three.js scene on every drawScreen identity change
+    // Scene mounts once; canvas redraws via the [drawScreen] effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid rebuilding Three.js scene on every drawScreen identity change
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && prompt.length >= 10 && !isGenerating && phase === "prompt") {
-      generateTailoredQuestions(prompt);
-    }
-  }, [prompt, isGenerating, phase, generateTailoredQuestions]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && prompt.length >= 10 && !isGenerating && phase === "prompt") {
+        generateTailoredQuestions(prompt);
+      }
+    },
+    [prompt, isGenerating, phase, generateTailoredQuestions],
+  );
 
   return (
     <div className="relative">
-      <div ref={containerRef} className="w-full h-[500px] sm:h-[550px] rounded-lg overflow-hidden" />
-      
+      <div
+        ref={containerRef}
+        className="w-full h-[500px] sm:h-[550px] rounded-lg overflow-hidden"
+      />
+
       <input
         ref={hiddenInputRef}
         type="text"
@@ -647,7 +766,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         data-testid="input-prompt"
         autoFocus
       />
-      
+
       <p className="text-center text-xs text-muted-foreground mt-3">
         Click the panel to focus, then type your prompt
       </p>

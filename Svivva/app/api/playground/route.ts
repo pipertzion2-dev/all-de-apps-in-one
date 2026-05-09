@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { playgroundSessions, playgroundCollaborators, playgroundRequests, projects, users } from "@/lib/schema";
+import {
+  playgroundSessions,
+  playgroundCollaborators,
+  playgroundRequests,
+  projects,
+  users,
+} from "@/lib/schema";
 import { eq, and, or, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -20,22 +26,26 @@ const updateSessionSchema = z.object({
   description: z.string().max(500).optional(),
   visibility: z.enum(["private", "link", "public"]).optional(),
   allowEditing: z.boolean().optional(),
-  savedRequest: z.object({
-    method: z.string(),
-    headers: z.record(z.string()),
-    body: z.string(),
-  }).optional(),
-  savedResponse: z.object({
-    status: z.number(),
-    body: z.unknown(),
-    latencyMs: z.number(),
-    timestamp: z.string(),
-  }).optional(),
+  savedRequest: z
+    .object({
+      method: z.string(),
+      headers: z.record(z.string()),
+      body: z.string(),
+    })
+    .optional(),
+  savedResponse: z
+    .object({
+      status: z.number(),
+      body: z.unknown(),
+      latencyMs: z.number(),
+      timestamp: z.string(),
+    })
+    .optional(),
 });
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
-  
+
   const { searchParams } = new URL(request.url);
   const projectId = searchParams.get("projectId");
   const shareToken = searchParams.get("shareToken");
@@ -92,7 +102,11 @@ export async function GET(request: NextRequest) {
       session: { ...session, project, owner },
       collaborators,
       history,
-      canEdit: user ? (session.ownerId === user.id || (session.allowEditing && collaborators.some(c => c.user.id === user.id && c.role === "editor"))) : false,
+      canEdit: user
+        ? session.ownerId === user.id ||
+          (session.allowEditing &&
+            collaborators.some((c) => c.user.id === user.id && c.role === "editor"))
+        : false,
     });
   }
 
@@ -125,10 +139,7 @@ export async function GET(request: NextRequest) {
   const conditions = projectId
     ? and(
         eq(playgroundSessions.projectId, projectId),
-        or(
-          eq(playgroundSessions.ownerId, user.id),
-          eq(playgroundSessions.visibility, "public")
-        )
+        or(eq(playgroundSessions.ownerId, user.id), eq(playgroundSessions.visibility, "public")),
       )
     : eq(playgroundSessions.ownerId, user.id);
 
@@ -165,15 +176,15 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const parsed = createSessionSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const { projectId, name, description, visibility, allowEditing } = parsed.data;
 
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, projectId));
+  const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -207,7 +218,10 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const parsed = updateSessionSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const { sessionId, ...updates } = parsed.data;
@@ -229,8 +243,8 @@ export async function PATCH(request: NextRequest) {
         and(
           eq(playgroundCollaborators.sessionId, sessionId),
           eq(playgroundCollaborators.userId, user.id),
-          eq(playgroundCollaborators.role, "editor")
-        )
+          eq(playgroundCollaborators.role, "editor"),
+        ),
       );
 
     if (!collab && !session.allowEditing) {

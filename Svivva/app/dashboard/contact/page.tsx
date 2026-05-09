@@ -71,9 +71,7 @@ export default function ContactPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">
-                Name
-              </label>
+              <label className="text-sm font-semibold text-foreground">Name</label>
               <input
                 type="text"
                 placeholder="Your name"
@@ -85,9 +83,7 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">
-                Email
-              </label>
+              <label className="text-sm font-semibold text-foreground">Email</label>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -99,9 +95,7 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">
-                Subject
-              </label>
+              <label className="text-sm font-semibold text-foreground">Subject</label>
               <input
                 type="text"
                 placeholder="What is this about?"
@@ -113,9 +107,7 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">
-                Message
-              </label>
+              <label className="text-sm font-semibold text-foreground">Message</label>
               <textarea
                 placeholder="Your message..."
                 value={message}
@@ -147,7 +139,8 @@ export default function ContactPage() {
               Email: hello@svivva.com
             </p>
             <p className="text-xs text-blue-800 dark:text-blue-300">
-              We typically respond within 24 hours. For urgent matters, please mention that in your message.
+              We typically respond within 24 hours. For urgent matters, please mention that in your
+              message.
             </p>
           </div>
         </CardContent>

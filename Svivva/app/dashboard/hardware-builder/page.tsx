@@ -12,8 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { SchematicViewer } from "@/components/schematic-viewer";
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   ArrowLeft,
   Box,
   DollarSign,
@@ -47,11 +47,41 @@ interface BuildStep {
 }
 
 const buildSteps: BuildStep[] = [
-  { id: "bring", letter: "B", title: "Bring", description: "Describe your product vision", completed: false },
-  { id: "users", letter: "U", title: "Users", description: "Define target users & requirements", completed: false },
-  { id: "into", letter: "I", title: "Into", description: "Material scouting & budget", completed: false },
-  { id: "logical", letter: "L", title: "Logical", description: "Generate schematics & 3D models", completed: false },
-  { id: "delivery", letter: "D", title: "Delivery", description: "Export & manufacturing checklist", completed: false },
+  {
+    id: "bring",
+    letter: "B",
+    title: "Bring",
+    description: "Describe your product vision",
+    completed: false,
+  },
+  {
+    id: "users",
+    letter: "U",
+    title: "Users",
+    description: "Define target users & requirements",
+    completed: false,
+  },
+  {
+    id: "into",
+    letter: "I",
+    title: "Into",
+    description: "Material scouting & budget",
+    completed: false,
+  },
+  {
+    id: "logical",
+    letter: "L",
+    title: "Logical",
+    description: "Generate schematics & 3D models",
+    completed: false,
+  },
+  {
+    id: "delivery",
+    letter: "D",
+    title: "Delivery",
+    description: "Export & manufacturing checklist",
+    completed: false,
+  },
 ];
 
 interface ChecklistItem {
@@ -79,7 +109,9 @@ interface SavedHardwareProduct {
 
 function saveHardwareProduct(product: SavedHardwareProduct) {
   try {
-    const existing: SavedHardwareProduct[] = JSON.parse(localStorage.getItem(HW_PRODUCTS_KEY) || "[]");
+    const existing: SavedHardwareProduct[] = JSON.parse(
+      localStorage.getItem(HW_PRODUCTS_KEY) || "[]",
+    );
     const updated = [product, ...existing.filter((p) => p.id !== product.id)].slice(0, 50);
     localStorage.setItem(HW_PRODUCTS_KEY, JSON.stringify(updated));
   } catch {}
@@ -89,19 +121,19 @@ export default function HardwareBuilderPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [steps, setSteps] = useState<BuildStep[]>(buildSteps);
-  
+
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [productCategory, setProductCategory] = useState("");
-  
+
   const [targetUsers, setTargetUsers] = useState("");
   const [useCases, setUseCases] = useState("");
   const [requirements, setRequirements] = useState<string[]>([]);
-  
+
   const [budgetRange, setBudgetRange] = useState([5000]);
   const [materials, setMaterials] = useState<string[]>([]);
   const [manufacturingMethod, setManufacturingMethod] = useState("");
-  
+
   const [generatedSchematic, setGeneratedSchematic] = useState(false);
   const [generated3DModel, setGenerated3DModel] = useState(false);
   const [generatedSketch, setGeneratedSketch] = useState(false);
@@ -113,19 +145,38 @@ export default function HardwareBuilderPage() {
   const [sketchImageSrc, setSketchImageSrc] = useState("");
   const [sketchError, setSketchError] = useState("");
   const [sketchRevisedPrompt, setSketchRevisedPrompt] = useState("");
-  
+
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: "1", label: "Product specifications finalized", checked: false, category: "Planning" },
     { id: "2", label: "Material sourcing complete", checked: false, category: "Materials" },
     { id: "3", label: "Budget approved", checked: false, category: "Budget" },
     { id: "4", label: "3D model reviewed", checked: false, category: "Design" },
-    { id: "5", label: "Manufacturing partner identified", checked: false, category: "Manufacturing" },
+    {
+      id: "5",
+      label: "Manufacturing partner identified",
+      checked: false,
+      category: "Manufacturing",
+    },
     { id: "6", label: "Prototype schedule set", checked: false, category: "Timeline" },
   ]);
 
   const [sourcingResults, setSourcingResults] = useState<{
-    manufacturers: { name: string; website: string; specialty: string; fit?: string; estimatedCost: string; moq: string; location: string; leadTime: string }[];
-    materialSuppliers: { material: string; supplier: string; website: string; priceRange: string }[];
+    manufacturers: {
+      name: string;
+      website: string;
+      specialty: string;
+      fit?: string;
+      estimatedCost: string;
+      moq: string;
+      location: string;
+      leadTime: string;
+    }[];
+    materialSuppliers: {
+      material: string;
+      supplier: string;
+      website: string;
+      priceRange: string;
+    }[];
     platforms: { name: string; website: string; type?: string; description: string }[];
     recommendation: string;
   } | null>(null);
@@ -137,7 +188,16 @@ export default function HardwareBuilderPage() {
   const [systemBName, setSystemBName] = useState("");
   const [systemBDesc, setSystemBDesc] = useState("");
   const [hybridResults, setHybridResults] = useState<{
-    hybrids: { title: string; description: string; fromSystemA: string; fromSystemB: string; emergentBehavior: string; noveltyScore: number; feasibility: string; potentialApplications: string[] }[];
+    hybrids: {
+      title: string;
+      description: string;
+      fromSystemA: string;
+      fromSystemB: string;
+      emergentBehavior: string;
+      noveltyScore: number;
+      feasibility: string;
+      potentialApplications: string[];
+    }[];
     sharedRepresentation?: string;
     blendingStrategy?: string;
   } | null>(null);
@@ -147,29 +207,45 @@ export default function HardwareBuilderPage() {
   const [expandedManufacturer, setExpandedManufacturer] = useState<number | null>(null);
 
   const requirementOptions = [
-    "Durability", "Lightweight", "Waterproof", "Heat resistant", 
-    "Eco-friendly", "Modular design", "Easy assembly", "Compact size"
+    "Durability",
+    "Lightweight",
+    "Waterproof",
+    "Heat resistant",
+    "Eco-friendly",
+    "Modular design",
+    "Easy assembly",
+    "Compact size",
   ];
 
   const materialOptions = [
-    "Aluminum", "Steel", "Plastic (ABS)", "Carbon fiber", 
-    "Wood", "Glass", "Silicone", "Titanium"
+    "Aluminum",
+    "Steel",
+    "Plastic (ABS)",
+    "Carbon fiber",
+    "Wood",
+    "Glass",
+    "Silicone",
+    "Titanium",
   ];
 
   const manufacturingMethods = [
-    "3D Printing", "CNC Machining", "Injection Molding", 
-    "Laser Cutting", "Sheet Metal Fabrication", "Hand Assembly"
+    "3D Printing",
+    "CNC Machining",
+    "Injection Molding",
+    "Laser Cutting",
+    "Sheet Metal Fabrication",
+    "Hand Assembly",
   ];
 
   const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       setIsProcessing(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const updatedSteps = [...steps];
       updatedSteps[currentStep].completed = true;
       setSteps(updatedSteps);
-      
+
       setCurrentStep(currentStep + 1);
       setIsProcessing(false);
     }
@@ -183,12 +259,12 @@ export default function HardwareBuilderPage() {
 
   const handleGenerate = async (type: "schematic" | "3d" | "sketch") => {
     setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     if (type === "schematic") setGeneratedSchematic(true);
     if (type === "3d") setGenerated3DModel(true);
     if (type === "sketch") setGeneratedSketch(true);
-    
+
     setIsProcessing(false);
   };
 
@@ -271,7 +347,15 @@ export default function HardwareBuilderPage() {
     } finally {
       setSourcingLoading(false);
     }
-  }, [productName, productDescription, productCategory, materials, manufacturingMethod, budgetRange, requirements]);
+  }, [
+    productName,
+    productDescription,
+    productCategory,
+    materials,
+    manufacturingMethod,
+    budgetRange,
+    requirements,
+  ]);
 
   const handleHybridize = useCallback(async () => {
     if (!systemAName.trim() || !systemBName.trim()) return;
@@ -281,7 +365,12 @@ export default function HardwareBuilderPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemA: { name: systemAName, description: systemADesc, components: materials, properties: requirements },
+          systemA: {
+            name: systemAName,
+            description: systemADesc,
+            components: materials,
+            properties: requirements,
+          },
           systemB: { name: systemBName, description: systemBDesc },
         }),
       });
@@ -331,11 +420,23 @@ export default function HardwareBuilderPage() {
     } finally {
       setPdfGenerating(false);
     }
-  }, [productName, productDescription, productCategory, targetUsers, useCases, requirements, materials, manufacturingMethod, budgetRange, sourcingResults, hybridResults]);
+  }, [
+    productName,
+    productDescription,
+    productCategory,
+    targetUsers,
+    useCases,
+    requirements,
+    materials,
+    manufacturingMethod,
+    budgetRange,
+    sourcingResults,
+    hybridResults,
+  ]);
 
   const toggleRequirement = (req: string) => {
     if (requirements.includes(req)) {
-      setRequirements(requirements.filter(r => r !== req));
+      setRequirements(requirements.filter((r) => r !== req));
     } else {
       setRequirements([...requirements, req]);
     }
@@ -343,16 +444,16 @@ export default function HardwareBuilderPage() {
 
   const toggleMaterial = (mat: string) => {
     if (materials.includes(mat)) {
-      setMaterials(materials.filter(m => m !== mat));
+      setMaterials(materials.filter((m) => m !== mat));
     } else {
       setMaterials([...materials, mat]);
     }
   };
 
   const toggleChecklistItem = (id: string) => {
-    setChecklist(checklist.map(item => 
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
+    setChecklist(
+      checklist.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)),
+    );
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -504,7 +605,9 @@ export default function HardwareBuilderPage() {
                   <CardTitle className="text-sm flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" />
                     Schematic
-                    {generatedSchematic && <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />}
+                    {generatedSchematic && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -529,7 +632,13 @@ export default function HardwareBuilderPage() {
                     disabled={isProcessing || generatedSchematic}
                     data-testid="button-generate-schematic"
                   >
-                    {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : generatedSchematic ? "Generated" : "Generate"}
+                    {isProcessing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : generatedSchematic ? (
+                      "Generated"
+                    ) : (
+                      "Generate"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -539,7 +648,9 @@ export default function HardwareBuilderPage() {
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Box className="w-4 h-4 text-primary" />
                     3D Model
-                    {splineLoaded && <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />}
+                    {splineLoaded && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -557,7 +668,9 @@ export default function HardwareBuilderPage() {
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
                         <Box className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground text-center">Paste a Spline scene URL</span>
+                        <span className="text-[10px] text-muted-foreground text-center">
+                          Paste a Spline scene URL
+                        </span>
                       </div>
                     )}
                   </div>
@@ -566,7 +679,9 @@ export default function HardwareBuilderPage() {
                       placeholder="https://prod.spline.design/.../scene.splinecode"
                       value={splineUrl}
                       onChange={(e) => setSplineUrl(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleLoadSpline(); }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleLoadSpline();
+                      }}
                       className="text-xs h-8"
                       data-testid="input-spline-url"
                     />
@@ -580,13 +695,13 @@ export default function HardwareBuilderPage() {
                       >
                         {splineLoaded ? "Reload" : "Load Scene"}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="px-2"
-                        asChild
-                      >
-                        <a href="https://spline.design" target="_blank" rel="noopener noreferrer" data-testid="link-spline-editor">
+                      <Button size="sm" variant="outline" className="px-2" asChild>
+                        <a
+                          href="https://spline.design"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-testid="link-spline-editor"
+                        >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       </Button>
@@ -600,7 +715,9 @@ export default function HardwareBuilderPage() {
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Palette className="w-4 h-4 text-primary" />
                     AI Sketch
-                    {generatedSketch && <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />}
+                    {generatedSketch && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -619,22 +736,34 @@ export default function HardwareBuilderPage() {
                         {sketchGenerating ? (
                           <>
                             <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                            <span className="text-[10px] text-muted-foreground">Generating with DALL-E 3...</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              Generating with DALL-E 3...
+                            </span>
                           </>
                         ) : (
                           <>
                             <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                            <span className="text-[10px] text-muted-foreground text-center">Describe your product to generate a reference sketch</span>
+                            <span className="text-[10px] text-muted-foreground text-center">
+                              Describe your product to generate a reference sketch
+                            </span>
                           </>
                         )}
                       </div>
                     )}
                   </div>
                   {sketchError && (
-                    <p className="text-[10px] text-red-400 mb-2 px-1" data-testid="text-sketch-error">{sketchError}</p>
+                    <p
+                      className="text-[10px] text-red-400 mb-2 px-1"
+                      data-testid="text-sketch-error"
+                    >
+                      {sketchError}
+                    </p>
                   )}
                   {sketchRevisedPrompt && (
-                    <p className="text-[9px] text-muted-foreground mb-2 px-1 line-clamp-2" title={sketchRevisedPrompt}>
+                    <p
+                      className="text-[9px] text-muted-foreground mb-2 px-1 line-clamp-2"
+                      title={sketchRevisedPrompt}
+                    >
                       {sketchRevisedPrompt}
                     </p>
                   )}
@@ -713,15 +842,29 @@ export default function HardwareBuilderPage() {
                   <Settings2 className="w-5 h-5 text-primary" />
                   Manufacturing Checklist
                 </CardTitle>
-                <CardDescription>Complete all items before proceeding to manufacturing</CardDescription>
+                <CardDescription>
+                  Complete all items before proceeding to manufacturing
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {checklist.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <Checkbox id={item.id} checked={item.checked} onCheckedChange={() => toggleChecklistItem(item.id)} data-testid={`checkbox-${item.id}`} />
-                      <Label htmlFor={item.id} className="flex-1 cursor-pointer">{item.label}</Label>
-                      <Badge variant="secondary" className="text-xs">{item.category}</Badge>
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30"
+                    >
+                      <Checkbox
+                        id={item.id}
+                        checked={item.checked}
+                        onCheckedChange={() => toggleChecklistItem(item.id)}
+                        data-testid={`checkbox-${item.id}`}
+                      />
+                      <Label htmlFor={item.id} className="flex-1 cursor-pointer">
+                        {item.label}
+                      </Label>
+                      <Badge variant="secondary" className="text-xs">
+                        {item.category}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -734,44 +877,102 @@ export default function HardwareBuilderPage() {
                   <Factory className="w-5 h-5 text-[#5BA8A0]" />
                   Find Manufacturers & Suppliers
                 </CardTitle>
-                <CardDescription>AI researches specific manufacturers, material suppliers, and platforms for your product</CardDescription>
+                <CardDescription>
+                  AI researches specific manufacturers, material suppliers, and platforms for your
+                  product
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button onClick={handleFindManufacturers} disabled={sourcingLoading} className="gap-2 w-full" data-testid="button-find-manufacturers">
-                  {sourcingLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Researching manufacturers...</> : <><Search className="w-4 h-4" /> Research Manufacturers & Suppliers</>}
+                <Button
+                  onClick={handleFindManufacturers}
+                  disabled={sourcingLoading}
+                  className="gap-2 w-full"
+                  data-testid="button-find-manufacturers"
+                >
+                  {sourcingLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Researching manufacturers...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4" /> Research Manufacturers & Suppliers
+                    </>
+                  )}
                 </Button>
 
                 {sourcingResults && (
                   <div className="space-y-4 mt-4">
                     {sourcingResults.recommendation && (
                       <div className="p-3 rounded-lg bg-[#5BA8A0]/10 border border-[#5BA8A0]/20">
-                        <p className="text-sm flex items-start gap-2"><Sparkles className="w-4 h-4 text-[#5BA8A0] shrink-0 mt-0.5" />{sourcingResults.recommendation}</p>
+                        <p className="text-sm flex items-start gap-2">
+                          <Sparkles className="w-4 h-4 text-[#5BA8A0] shrink-0 mt-0.5" />
+                          {sourcingResults.recommendation}
+                        </p>
                       </div>
                     )}
 
                     {sourcingResults.manufacturers?.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2"><Factory className="w-4 h-4" /> Recommended Manufacturers</h4>
+                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                          <Factory className="w-4 h-4" /> Recommended Manufacturers
+                        </h4>
                         <div className="space-y-2">
                           {sourcingResults.manufacturers.map((m, i) => (
                             <div key={i} className="border rounded-lg overflow-hidden">
-                              <button onClick={() => setExpandedManufacturer(expandedManufacturer === i ? null : i)} className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors" data-testid={`button-manufacturer-${i}`}>
+                              <button
+                                onClick={() =>
+                                  setExpandedManufacturer(expandedManufacturer === i ? null : i)
+                                }
+                                className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                                data-testid={`button-manufacturer-${i}`}
+                              >
                                 <div>
                                   <span className="font-medium text-sm">{m.name}</span>
-                                  <span className="text-xs text-muted-foreground ml-2">{m.location}</span>
+                                  <span className="text-xs text-muted-foreground ml-2">
+                                    {m.location}
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">{m.estimatedCost}</Badge>
-                                  {expandedManufacturer === i ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                  <Badge variant="outline" className="text-xs">
+                                    {m.estimatedCost}
+                                  </Badge>
+                                  {expandedManufacturer === i ? (
+                                    <ChevronUp className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4" />
+                                  )}
                                 </div>
                               </button>
                               {expandedManufacturer === i && (
                                 <div className="px-3 pb-3 space-y-1 text-xs text-muted-foreground border-t pt-2">
-                                  <p><span className="font-medium text-foreground">Specialty:</span> {m.specialty}</p>
-                                  {m.fit && <p><span className="font-medium text-foreground">Why:</span> {m.fit}</p>}
-                                  <p><span className="font-medium text-foreground">Min Order:</span> {m.moq}</p>
-                                  <p><span className="font-medium text-foreground">Lead Time:</span> {m.leadTime}</p>
-                                  {m.website && <a href={m.website} target="_blank" rel="noopener noreferrer" className="text-[#5BA8A0] hover:underline flex items-center gap-1"><Globe className="w-3 h-3" /> {m.website}</a>}
+                                  <p>
+                                    <span className="font-medium text-foreground">Specialty:</span>{" "}
+                                    {m.specialty}
+                                  </p>
+                                  {m.fit && (
+                                    <p>
+                                      <span className="font-medium text-foreground">Why:</span>{" "}
+                                      {m.fit}
+                                    </p>
+                                  )}
+                                  <p>
+                                    <span className="font-medium text-foreground">Min Order:</span>{" "}
+                                    {m.moq}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium text-foreground">Lead Time:</span>{" "}
+                                    {m.leadTime}
+                                  </p>
+                                  {m.website && (
+                                    <a
+                                      href={m.website}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[#5BA8A0] hover:underline flex items-center gap-1"
+                                    >
+                                      <Globe className="w-3 h-3" /> {m.website}
+                                    </a>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -782,14 +983,25 @@ export default function HardwareBuilderPage() {
 
                     {sourcingResults.materialSuppliers?.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2"><Package className="w-4 h-4" /> Material Suppliers</h4>
+                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                          <Package className="w-4 h-4" /> Material Suppliers
+                        </h4>
                         <div className="grid gap-2 sm:grid-cols-2">
                           {sourcingResults.materialSuppliers.map((s, i) => (
                             <div key={i} className="p-2.5 border rounded-lg text-xs space-y-0.5">
                               <p className="font-medium text-sm">{s.material}</p>
                               <p className="text-muted-foreground">{s.supplier}</p>
                               <p className="text-muted-foreground">{s.priceRange}</p>
-                              {s.website && <a href={s.website} target="_blank" rel="noopener noreferrer" className="text-[#5BA8A0] hover:underline flex items-center gap-1"><Globe className="w-3 h-3" /> Visit</a>}
+                              {s.website && (
+                                <a
+                                  href={s.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#5BA8A0] hover:underline flex items-center gap-1"
+                                >
+                                  <Globe className="w-3 h-3" /> Visit
+                                </a>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -798,13 +1010,24 @@ export default function HardwareBuilderPage() {
 
                     {sourcingResults.platforms?.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2"><Globe className="w-4 h-4" /> Manufacturing Platforms</h4>
+                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                          <Globe className="w-4 h-4" /> Manufacturing Platforms
+                        </h4>
                         <div className="grid gap-2 sm:grid-cols-3">
                           {sourcingResults.platforms.map((p, i) => (
                             <div key={i} className="p-2.5 border rounded-lg text-xs">
                               <p className="font-medium text-sm">{p.name}</p>
                               <p className="text-muted-foreground mt-0.5">{p.description}</p>
-                              {p.website && <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-[#5BA8A0] hover:underline flex items-center gap-1 mt-1"><ExternalLink className="w-3 h-3" /> Open</a>}
+                              {p.website && (
+                                <a
+                                  href={p.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#5BA8A0] hover:underline flex items-center gap-1 mt-1"
+                                >
+                                  <ExternalLink className="w-3 h-3" /> Open
+                                </a>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -817,15 +1040,25 @@ export default function HardwareBuilderPage() {
 
             <Card className="border-[#6B2C4A]/30">
               <CardHeader>
-                <button onClick={() => setShowHybridizer(!showHybridizer)} className="flex items-center justify-between w-full text-left" data-testid="button-toggle-hybridizer">
+                <button
+                  onClick={() => setShowHybridizer(!showHybridizer)}
+                  className="flex items-center justify-between w-full text-left"
+                  data-testid="button-toggle-hybridizer"
+                >
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Merge className="w-5 h-5 text-[#6B2C4A]" />
                       Cross-Domain Hybridizer
                     </CardTitle>
-                    <CardDescription>Combine two systems to discover hybrid innovations</CardDescription>
+                    <CardDescription>
+                      Combine two systems to discover hybrid innovations
+                    </CardDescription>
                   </div>
-                  {showHybridizer ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  {showHybridizer ? (
+                    <ChevronUp className="w-5 h-5" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5" />
+                  )}
                 </button>
               </CardHeader>
               {showHybridizer && (
@@ -833,24 +1066,62 @@ export default function HardwareBuilderPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2 p-3 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5">
                       <Label className="text-xs font-medium text-[#5BA8A0]">System A</Label>
-                      <Input placeholder="e.g., Solar Panel Array" value={systemAName} onChange={(e) => setSystemAName(e.target.value)} data-testid="input-system-a-name" />
-                      <Textarea placeholder="Describe the system..." value={systemADesc} onChange={(e) => setSystemADesc(e.target.value)} className="min-h-[60px] text-xs" data-testid="input-system-a-desc" />
+                      <Input
+                        placeholder="e.g., Solar Panel Array"
+                        value={systemAName}
+                        onChange={(e) => setSystemAName(e.target.value)}
+                        data-testid="input-system-a-name"
+                      />
+                      <Textarea
+                        placeholder="Describe the system..."
+                        value={systemADesc}
+                        onChange={(e) => setSystemADesc(e.target.value)}
+                        className="min-h-[60px] text-xs"
+                        data-testid="input-system-a-desc"
+                      />
                     </div>
                     <div className="space-y-2 p-3 rounded-lg border border-[#6B2C4A]/20 bg-[#6B2C4A]/5">
                       <Label className="text-xs font-medium text-[#6B2C4A]">System B</Label>
-                      <Input placeholder="e.g., Water Filtration System" value={systemBName} onChange={(e) => setSystemBName(e.target.value)} data-testid="input-system-b-name" />
-                      <Textarea placeholder="Describe the system..." value={systemBDesc} onChange={(e) => setSystemBDesc(e.target.value)} className="min-h-[60px] text-xs" data-testid="input-system-b-desc" />
+                      <Input
+                        placeholder="e.g., Water Filtration System"
+                        value={systemBName}
+                        onChange={(e) => setSystemBName(e.target.value)}
+                        data-testid="input-system-b-name"
+                      />
+                      <Textarea
+                        placeholder="Describe the system..."
+                        value={systemBDesc}
+                        onChange={(e) => setSystemBDesc(e.target.value)}
+                        className="min-h-[60px] text-xs"
+                        data-testid="input-system-b-desc"
+                      />
                     </div>
                   </div>
 
-                  <Button onClick={handleHybridize} disabled={hybridLoading || !systemAName.trim() || !systemBName.trim()} className="gap-2 w-full" style={{ background: "#6B2C4A" }} data-testid="button-hybridize">
-                    {hybridLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating hybrids...</> : <><Zap className="w-4 h-4" /> Generate Hybrid Systems</>}
+                  <Button
+                    onClick={handleHybridize}
+                    disabled={hybridLoading || !systemAName.trim() || !systemBName.trim()}
+                    className="gap-2 w-full"
+                    style={{ background: "#6B2C4A" }}
+                    data-testid="button-hybridize"
+                  >
+                    {hybridLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Generating hybrids...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-4 h-4" /> Generate Hybrid Systems
+                      </>
+                    )}
                   </Button>
 
                   {hybridResults && (
                     <div className="space-y-3 mt-2">
                       {hybridResults.blendingStrategy && (
-                        <p className="text-xs text-muted-foreground italic p-2 rounded bg-muted/30">{hybridResults.blendingStrategy}</p>
+                        <p className="text-xs text-muted-foreground italic p-2 rounded bg-muted/30">
+                          {hybridResults.blendingStrategy}
+                        </p>
                       )}
                       {hybridResults.hybrids?.map((h, i) => (
                         <Card key={i} className="border-[#6B2C4A]/20">
@@ -858,20 +1129,43 @@ export default function HardwareBuilderPage() {
                             <div className="flex items-center justify-between">
                               <h4 className="font-medium text-sm">{h.title}</h4>
                               <div className="flex items-center gap-2">
-                                {h.feasibility && <Badge variant="outline" className="text-[10px]">{h.feasibility}</Badge>}
-                                <Badge className="text-[10px]" style={{ background: `hsl(${h.noveltyScore * 1.2}, 60%, 45%)` }}>{h.noveltyScore}% novel</Badge>
+                                {h.feasibility && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {h.feasibility}
+                                  </Badge>
+                                )}
+                                <Badge
+                                  className="text-[10px]"
+                                  style={{ background: `hsl(${h.noveltyScore * 1.2}, 60%, 45%)` }}
+                                >
+                                  {h.noveltyScore}% novel
+                                </Badge>
                               </div>
                             </div>
                             <p className="text-xs text-muted-foreground">{h.description}</p>
                             <div className="grid gap-1 text-xs mt-1">
-                              <p><span className="font-medium text-[#5BA8A0]">From A:</span> {h.fromSystemA}</p>
-                              <p><span className="font-medium text-[#6B2C4A]">From B:</span> {h.fromSystemB}</p>
-                              <p className="flex items-start gap-1"><Zap className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" /><span><span className="font-medium">Emergent:</span> {h.emergentBehavior}</span></p>
+                              <p>
+                                <span className="font-medium text-[#5BA8A0]">From A:</span>{" "}
+                                {h.fromSystemA}
+                              </p>
+                              <p>
+                                <span className="font-medium text-[#6B2C4A]">From B:</span>{" "}
+                                {h.fromSystemB}
+                              </p>
+                              <p className="flex items-start gap-1">
+                                <Zap className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
+                                <span>
+                                  <span className="font-medium">Emergent:</span>{" "}
+                                  {h.emergentBehavior}
+                                </span>
+                              </p>
                             </div>
                             {h.potentialApplications?.length > 0 && (
                               <div className="flex gap-1 flex-wrap mt-1">
                                 {h.potentialApplications.map((app, j) => (
-                                  <Badge key={j} variant="secondary" className="text-[10px]">{app}</Badge>
+                                  <Badge key={j} variant="secondary" className="text-[10px]">
+                                    {app}
+                                  </Badge>
                                 ))}
                               </div>
                             )}
@@ -890,10 +1184,25 @@ export default function HardwareBuilderPage() {
                   <CheckCircle2 className="w-12 h-12 text-primary mx-auto" />
                   <h3 className="text-lg font-semibold">Ready for Manufacturing</h3>
                   <p className="text-sm text-muted-foreground">
-                    Download your complete product blueprint as a PDF with all specs, manufacturers, and recommendations.
+                    Download your complete product blueprint as a PDF with all specs, manufacturers,
+                    and recommendations.
                   </p>
-                  <Button onClick={handleDownloadBlueprint} disabled={pdfGenerating} className="gap-2" size="lg" data-testid="button-download-blueprint">
-                    {pdfGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...</> : <><FileText className="w-4 h-4" /> Download Product Blueprint (PDF)</>}
+                  <Button
+                    onClick={handleDownloadBlueprint}
+                    disabled={pdfGenerating}
+                    className="gap-2"
+                    size="lg"
+                    data-testid="button-download-blueprint"
+                  >
+                    {pdfGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4" /> Download Product Blueprint (PDF)
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -940,8 +1249,8 @@ export default function HardwareBuilderPage() {
                       step.completed
                         ? "bg-green-500 text-white"
                         : index === currentStep
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {step.completed ? <CheckCircle2 className="w-5 h-5" /> : step.letter}

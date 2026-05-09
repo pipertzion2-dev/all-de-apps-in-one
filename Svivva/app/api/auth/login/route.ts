@@ -14,7 +14,13 @@ function isReplitDomain(d: string) {
 function getOAuthHostname(request: NextRequest): string {
   // Hard override — set REPLIT_OAUTH_DOMAIN=<your>.replit.app in production secrets
   if (process.env.REPLIT_OAUTH_DOMAIN) {
-    try { return new URL(process.env.REPLIT_OAUTH_DOMAIN.startsWith("http") ? process.env.REPLIT_OAUTH_DOMAIN : `https://${process.env.REPLIT_OAUTH_DOMAIN}`).host; } catch {}
+    try {
+      return new URL(
+        process.env.REPLIT_OAUTH_DOMAIN.startsWith("http")
+          ? process.env.REPLIT_OAUTH_DOMAIN
+          : `https://${process.env.REPLIT_OAUTH_DOMAIN}`,
+      ).host;
+    } catch {}
   }
 
   // Dev: Replit injects REPLIT_DEV_DOMAIN automatically
@@ -22,14 +28,19 @@ function getOAuthHostname(request: NextRequest): string {
 
   // Auto-detect: find any Replit-owned domain from the comma-separated REPLIT_DOMAINS list
   if (process.env.REPLIT_DOMAINS) {
-    const domains = process.env.REPLIT_DOMAINS.split(",").map(d => d.trim());
+    const domains = process.env.REPLIT_DOMAINS.split(",").map((d) => d.trim());
     const replitDomain = domains.find(isReplitDomain);
     if (replitDomain) return replitDomain;
   }
 
   // Last resort: raw host header — if this is a Replit domain, use it; otherwise we're stuck
   const host = request.headers.get("host") || request.nextUrl.hostname;
-  console.warn("[auth/login] No Replit domain found — using host header:", host, "| REPLIT_DOMAINS:", process.env.REPLIT_DOMAINS);
+  console.warn(
+    "[auth/login] No Replit domain found — using host header:",
+    host,
+    "| REPLIT_DOMAINS:",
+    process.env.REPLIT_DOMAINS,
+  );
   return host;
 }
 
@@ -37,7 +48,9 @@ function getOAuthHostname(request: NextRequest): string {
 function getAppHostname(request: NextRequest): string {
   // Custom domain always wins (set NEXT_PUBLIC_SITE_URL=https://svivva.com in production)
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    try { return new URL(process.env.NEXT_PUBLIC_SITE_URL).host; } catch {}
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).host;
+    } catch {}
   }
   // Dev: Replit injects REPLIT_DEV_DOMAIN automatically
   if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
@@ -50,7 +63,7 @@ function getAppHostname(request: NextRequest): string {
 
 export async function GET(request: NextRequest) {
   const oauthHostname = getOAuthHostname(request);
-  const appHostname  = getAppHostname(request);
+  const appHostname = getAppHostname(request);
   const redirectAfter = request.nextUrl.searchParams.get("redirect") || undefined;
 
   try {
@@ -61,7 +74,10 @@ export async function GET(request: NextRequest) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Login error:", msg);
     return NextResponse.redirect(
-      new URL(`/login?error=auth_failed&detail=${encodeURIComponent(msg.slice(0, 120))}`, `https://${appHostname}`)
+      new URL(
+        `/login?error=auth_failed&detail=${encodeURIComponent(msg.slice(0, 120))}`,
+        `https://${appHostname}`,
+      ),
     );
   }
 }

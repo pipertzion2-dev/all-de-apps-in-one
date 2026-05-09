@@ -5,8 +5,11 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
@@ -23,7 +26,7 @@ export function ThreeEvalGrid() {
     }
     if (!containerRef.current) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     const container = containerRef.current;
@@ -35,20 +38,23 @@ export function ThreeEvalGrid() {
     camera.position.set(15, 15, 15);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    const passColor = new THREE.Color(0x63B3A6);
-    const failColor = new THREE.Color(0xE57373);
-    const pendingColor = new THREE.Color(0x96A9AB);
+    const passColor = new THREE.Color(0x63b3a6);
+    const failColor = new THREE.Color(0xe57373);
+    const pendingColor = new THREE.Color(0x96a9ab);
 
-    const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[] = [];
+    const disposables: {
+      geometry?: THREE.BufferGeometry;
+      material?: THREE.Material | THREE.Material[];
+    }[] = [];
 
     const gridSize = 8;
     const cubes: THREE.Mesh[] = [];
@@ -69,11 +75,7 @@ export function ThreeEvalGrid() {
         disposables.push({ geometry, material });
 
         const cube = new THREE.Mesh(geometry, material);
-        cube.position.set(
-          (x - gridSize / 2 + 0.5) * 1.2,
-          0,
-          (z - gridSize / 2 + 0.5) * 1.2
-        );
+        cube.position.set((x - gridSize / 2 + 0.5) * 1.2, 0, (z - gridSize / 2 + 0.5) * 1.2);
         cube.userData = {
           state: state,
           targetY: 0,
@@ -86,11 +88,13 @@ export function ThreeEvalGrid() {
       }
     }
 
-    const edgesGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(gridSize * 1.2, 0.1, gridSize * 1.2));
-    const edgesMaterial = new THREE.LineBasicMaterial({ 
-      color: 0x7BA3AC, 
-      transparent: true, 
-      opacity: 0.3 
+    const edgesGeometry = new THREE.EdgesGeometry(
+      new THREE.BoxGeometry(gridSize * 1.2, 0.1, gridSize * 1.2),
+    );
+    const edgesMaterial = new THREE.LineBasicMaterial({
+      color: 0x7ba3ac,
+      transparent: true,
+      opacity: 0.3,
     });
     disposables.push({ geometry: edgesGeometry, material: edgesMaterial });
     const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
@@ -117,9 +121,9 @@ export function ThreeEvalGrid() {
     }
 
     const particleGeometry = new THREE.BufferGeometry();
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    particleGeometry.setAttribute('aColor', new THREE.BufferAttribute(particleColors, 3));
-    particleGeometry.setAttribute('aPhase', new THREE.BufferAttribute(particlePhases, 1));
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute("aColor", new THREE.BufferAttribute(particleColors, 3));
+    particleGeometry.setAttribute("aPhase", new THREE.BufferAttribute(particlePhases, 1));
 
     const particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -165,15 +169,18 @@ export function ThreeEvalGrid() {
     let isVisible = true;
     const clock = new THREE.Clock();
 
-    const observer = new IntersectionObserver((entries) => {
-      isVisible = entries[0]?.isIntersecting ?? true;
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0.1 },
+    );
     observer.observe(container);
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       if (!isVisible) return;
-      
+
       const elapsed = clock.getElapsedTime();
 
       cubes.forEach((cube, index) => {
@@ -181,7 +188,7 @@ export function ThreeEvalGrid() {
 
         if (elapsed > delay && !cube.userData.activated) {
           cube.userData.activated = true;
-          cube.userData.targetY = state > 0.7 ? 2 : (state > 0.5 ? 1 : 0.5);
+          cube.userData.targetY = state > 0.7 ? 2 : state > 0.5 ? 1 : 0.5;
         }
 
         if (cube.userData.activated) {
@@ -226,22 +233,22 @@ export function ThreeEvalGrid() {
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       observer.disconnect();
       cancelAnimationFrame(animationId);
-      
+
       disposables.forEach(({ geometry, material }) => {
         geometry?.dispose();
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach((m) => m.dispose());
         } else {
           material?.dispose();
         }
       });
-      
+
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -253,11 +260,5 @@ export function ThreeEvalGrid() {
     return null;
   }
 
-  return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0"
-      style={{ pointerEvents: 'none' }}
-    />
-  );
+  return <div ref={containerRef} className="absolute inset-0" style={{ pointerEvents: "none" }} />;
 }

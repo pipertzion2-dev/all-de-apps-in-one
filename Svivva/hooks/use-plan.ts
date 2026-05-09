@@ -10,7 +10,8 @@ export function usePlan() {
 
   const { data, isLoading } = useQuery<{ plan: Plan }>({
     queryKey: ["/api/stripe/subscription"],
-    queryFn: () => fetch("/api/stripe/subscription", { credentials: "include" }).then(r => r.json()),
+    queryFn: () =>
+      fetch("/api/stripe/subscription", { credentials: "include" }).then((r) => r.json()),
     enabled: isAuthenticated,
     staleTime: 60_000,
   });

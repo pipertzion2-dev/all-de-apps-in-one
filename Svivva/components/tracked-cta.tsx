@@ -21,7 +21,12 @@ export function TrackedCta({
       href={href}
       className={className}
       data-testid={testId}
-      onClick={() => trackButtonClick(label, typeof window !== "undefined" ? window.location.pathname : undefined)}
+      onClick={() =>
+        trackButtonClick(
+          label,
+          typeof window !== "undefined" ? window.location.pathname : undefined,
+        )
+      }
     >
       {children}
     </Link>

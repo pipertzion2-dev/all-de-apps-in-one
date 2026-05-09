@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       messages: [
         {
           role: "system",
-          content: `You are a technical documentation expert. Generate a clear, step-by-step guide for adding training data to an AI API. The guide should be practical and easy to follow.`
+          content: `You are a technical documentation expert. Generate a clear, step-by-step guide for adding training data to an AI API. The guide should be practical and easy to follow.`,
         },
         {
           role: "user",
@@ -46,10 +46,18 @@ System Prompt: ${latestVersion.systemPrompt}
 Output Schema: ${JSON.stringify(latestVersion.outputSchema, null, 2)}
 Current Training Examples: ${examples.length}
 
-${examples.length > 0 ? `Example training data:
-${examples.map((e, i) => `Example ${i + 1}:
+${
+  examples.length > 0
+    ? `Example training data:
+${examples
+  .map(
+    (e, i) => `Example ${i + 1}:
 Input: ${e.input}
-Output: ${JSON.stringify(e.output, null, 2)}`).join('\n\n')}` : ''}
+Output: ${JSON.stringify(e.output, null, 2)}`,
+  )
+  .join("\n\n")}`
+    : ""
+}
 
 Generate a comprehensive guide that includes:
 1. Overview of what makes good training data for this specific API
@@ -59,8 +67,8 @@ Generate a comprehensive guide that includes:
 5. Common mistakes to avoid
 6. Example inputs and expected outputs based on the schema
 
-Format the guide in Markdown.`
-        }
+Format the guide in Markdown.`,
+        },
       ],
       max_tokens: 3000,
     });
@@ -77,7 +85,7 @@ Format the guide in Markdown.`
       metadata: {
         outputSchema: latestVersion.outputSchema,
         systemPrompt: latestVersion.systemPrompt,
-      }
+      },
     });
   } catch (error) {
     console.error("Generate training guide error:", error);

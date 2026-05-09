@@ -30,7 +30,9 @@ function pickIndianRagaKeyLabel(opts: { root: string; minor: boolean; seed: numb
   return `${opts.root} ${picked}`;
 }
 
-function meendPitchbendForEvents(events: { startBeat: number; duration: number }[]): { beat: number; value: number }[] {
+function meendPitchbendForEvents(
+  events: { startBeat: number; duration: number }[],
+): { beat: number; value: number }[] {
   const out: { beat: number; value: number }[] = [];
   for (const e of events) {
     const d = Math.max(0.05, e.duration || 0.25);
@@ -79,7 +81,10 @@ export async function POST(request: NextRequest) {
 
     let analysisData: Analysis | null = null;
     if (session.analysisId) {
-      const analyses = await db.select().from(playAnalyses).where(eq(playAnalyses.id, session.analysisId));
+      const analyses = await db
+        .select()
+        .from(playAnalyses)
+        .where(eq(playAnalyses.id, session.analysisId));
       if (analyses[0]) {
         const a = analyses[0];
         analysisData = {
@@ -131,8 +136,14 @@ export async function POST(request: NextRequest) {
       });
 
       if (!patchResult.success || !patchResult.data) {
-        await db.update(playGenerations).set({ status: "failed" }).where(eq(playGenerations.id, generationId));
-        return NextResponse.json({ error: patchResult.error || "Patch design failed" }, { status: 500 });
+        await db
+          .update(playGenerations)
+          .set({ status: "failed" })
+          .where(eq(playGenerations.id, generationId));
+        return NextResponse.json(
+          { error: patchResult.error || "Patch design failed" },
+          { status: 500 },
+        );
       }
 
       const patchData = patchResult.data;
@@ -149,11 +160,14 @@ export async function POST(request: NextRequest) {
         status: "complete",
       });
 
-      await db.update(playGenerations).set({
-        status: "complete",
-        plan: patchData as any,
-        completedAt: new Date(),
-      }).where(eq(playGenerations.id, generationId));
+      await db
+        .update(playGenerations)
+        .set({
+          status: "complete",
+          plan: patchData as any,
+          completedAt: new Date(),
+        })
+        .where(eq(playGenerations.id, generationId));
 
       return NextResponse.json({
         generationId,
@@ -197,7 +211,7 @@ export async function POST(request: NextRequest) {
 
       for (const stem of chordStems) {
         const stemId = uuidv4();
-        const events = stem.midiEvents.map(e => ({
+        const events = stem.midiEvents.map((e) => ({
           note: e.note,
           velocity: e.velocity,
           start_beat: e.startBeat,
@@ -236,12 +250,19 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      await db.update(playGenerations).set({
-        status: "complete",
-        plan: { chordProgression: chordNames, key: analysisData.key, bpm: analysisData.bpm } as any,
-        midiData: { stems: chordStems } as any,
-        completedAt: new Date(),
-      }).where(eq(playGenerations.id, generationId));
+      await db
+        .update(playGenerations)
+        .set({
+          status: "complete",
+          plan: {
+            chordProgression: chordNames,
+            key: analysisData.key,
+            bpm: analysisData.bpm,
+          } as any,
+          midiData: { stems: chordStems } as any,
+          completedAt: new Date(),
+        })
+        .where(eq(playGenerations.id, generationId));
 
       return NextResponse.json({
         generationId,
@@ -267,29 +288,49 @@ export async function POST(request: NextRequest) {
     });
 
     if (!planResult.success || !planResult.data) {
-      await db.update(playGenerations).set({ status: "failed" }).where(eq(playGenerations.id, generationId));
-      return NextResponse.json({ error: planResult.error || "Arrangement planning failed" }, { status: 500 });
+      await db
+        .update(playGenerations)
+        .set({ status: "failed" })
+        .where(eq(playGenerations.id, generationId));
+      return NextResponse.json(
+        { error: planResult.error || "Arrangement planning failed" },
+        { status: 500 },
+      );
     }
 
     const plan = planResult.data;
 
-    await db.update(playGenerations).set({
-      status: "generating_midi",
-      plan: plan as any,
-    }).where(eq(playGenerations.id, generationId));
+    await db
+      .update(playGenerations)
+      .set({
+        status: "generating_midi",
+        plan: plan as any,
+      })
+      .where(eq(playGenerations.id, generationId));
 
-    const barCount = quality === "full" ? (plan.form?.total_bars || 64) : 16;
-    const midiResult = await runMidiGeneration(analysisForGeneration, plan, {
-      startBar: 0,
-      endBar: barCount,
-    }, {
-      ...settings,
-      seed,
-    });
+    const barCount = quality === "full" ? plan.form?.total_bars || 64 : 16;
+    const midiResult = await runMidiGeneration(
+      analysisForGeneration,
+      plan,
+      {
+        startBar: 0,
+        endBar: barCount,
+      },
+      {
+        ...settings,
+        seed,
+      },
+    );
 
     if (!midiResult.success || !midiResult.data) {
-      await db.update(playGenerations).set({ status: "failed" }).where(eq(playGenerations.id, generationId));
-      return NextResponse.json({ error: midiResult.error || "MIDI generation failed" }, { status: 500 });
+      await db
+        .update(playGenerations)
+        .set({ status: "failed" })
+        .where(eq(playGenerations.id, generationId));
+      return NextResponse.json(
+        { error: midiResult.error || "MIDI generation failed" },
+        { status: 500 },
+      );
     }
 
     const midiOutput = midiResult.data;
@@ -312,15 +353,24 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < midiOutput.stems.length; i++) {
       const midiStem = midiOutput.stems[i];
-      const planStem = plan.stems[i] || plan.stems.find(s => s.name === midiStem.name);
+      const planStem = plan.stems[i] || plan.stems.find((s) => s.name === midiStem.name);
 
       if (
         mode === "solo" &&
         (settings.meend ?? false) &&
-        (planStem?.role === "lead" || planStem?.role === "melody" || planStem?.role === "vocal" || i === 0)
+        (planStem?.role === "lead" ||
+          planStem?.role === "melody" ||
+          planStem?.role === "vocal" ||
+          i === 0)
       ) {
-        const pb = Array.isArray((midiStem as any).expression?.pitchbend) ? (midiStem as any).expression.pitchbend : [];
-        if (pb.length === 0 && Array.isArray(midiStem.midi_events) && midiStem.midi_events.length > 0) {
+        const pb = Array.isArray((midiStem as any).expression?.pitchbend)
+          ? (midiStem as any).expression.pitchbend
+          : [];
+        if (
+          pb.length === 0 &&
+          Array.isArray(midiStem.midi_events) &&
+          midiStem.midi_events.length > 0
+        ) {
           (midiStem as any).expression = {
             ...(midiStem as any).expression,
             pitchbend: meendPitchbendForEvents(midiStem.midi_events),
@@ -362,11 +412,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await db.update(playGenerations).set({
-      status: "complete",
-      midiData: { stems: midiOutput.stems } as any,
-      completedAt: new Date(),
-    }).where(eq(playGenerations.id, generationId));
+    await db
+      .update(playGenerations)
+      .set({
+        status: "complete",
+        midiData: { stems: midiOutput.stems } as any,
+        completedAt: new Date(),
+      })
+      .where(eq(playGenerations.id, generationId));
 
     const isMeendApplicable = plan.meend_applicable_stems || [];
 
@@ -381,7 +434,8 @@ export async function POST(request: NextRequest) {
         meendApplicableStems: isMeendApplicable,
       },
       qualityTier: "professional",
-      qualityNote: "MIDI output is professional quality. Audio preview rendering is available as BETA.",
+      qualityNote:
+        "MIDI output is professional quality. Audio preview rendering is available as BETA.",
       pipeline: {
         stage: "complete",
         stages: ["plan", "midi_generation"],

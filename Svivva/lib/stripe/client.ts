@@ -25,7 +25,7 @@ async function getCredentialsFromReplitConnector() {
 
   if (!hostname || !xReplitToken) {
     throw new Error(
-      "Stripe: set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY (or NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY), or run on Replit with the Stripe connector."
+      "Stripe: set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY (or NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY), or run on Replit with the Stripe connector.",
     );
   }
 

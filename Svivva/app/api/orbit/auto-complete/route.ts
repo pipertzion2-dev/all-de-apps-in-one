@@ -20,7 +20,10 @@ async function getAllSiteUrls(): Promise<string[]> {
     `${BASE_URL}/about`,
     `${BASE_URL}/docs`,
   ];
-  const posts = await db.select({ slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.published, true));
+  const posts = await db
+    .select({ slug: blogPosts.slug })
+    .from(blogPosts)
+    .where(eq(blogPosts.published, true));
   const pages = await db
     .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
     .from(seoLandingPages)
@@ -36,7 +39,7 @@ async function getAllSiteUrls(): Promise<string[]> {
 
 async function submitIndexNow(
   userId: string,
-  urls: string[]
+  urls: string[],
 ): Promise<{ ok: boolean; count: number; message: string }> {
   try {
     // Query without user_id filter — key is admin-only and there's only ever one entry
@@ -47,7 +50,12 @@ async function submitIndexNow(
       .orderBy(desc(seedCredentials.updatedAt))
       .limit(1);
     const key = credRow?.indexnowKey;
-    if (!key) return { ok: false, count: 0, message: "No IndexNow key found — run IndexNow Setup in the Svivva tab first." };
+    if (!key)
+      return {
+        ok: false,
+        count: 0,
+        message: "No IndexNow key found — run IndexNow Setup in the Svivva tab first.",
+      };
 
     const host = BASE_URL.replace(/^https?:\/\//, "");
     // Standard IndexNow key location: /{key}.txt served via middleware rewrite
@@ -81,23 +89,26 @@ async function submitIndexNow(
     const ok = lastStatus === 200 || lastStatus === 202;
     // Only record submission timestamp when IndexNow actually accepted it
     if (ok) {
-      await db.update(seedCredentials)
+      await db
+        .update(seedCredentials)
         .set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
     }
 
     const statusMsg =
-      lastStatus === 403 ? `IndexNow key verification failed (403) — key file served at ${keyLocation} was rejected. Check the key matches.`
-      : lastStatus === 422 ? `IndexNow invalid URL format (422) — some URLs may be malformed`
-      : lastStatus === 400 ? `IndexNow bad request (400)`
-      : lastStatus === 0   ? `IndexNow: no response (timeout)`
-      : `IndexNow returned HTTP ${lastStatus}`;
+      lastStatus === 403
+        ? `IndexNow key verification failed (403) — key file served at ${keyLocation} was rejected. Check the key matches.`
+        : lastStatus === 422
+          ? `IndexNow invalid URL format (422) — some URLs may be malformed`
+          : lastStatus === 400
+            ? `IndexNow bad request (400)`
+            : lastStatus === 0
+              ? `IndexNow: no response (timeout)`
+              : `IndexNow returned HTTP ${lastStatus}`;
 
     return {
       ok,
       count: submitted,
-      message: ok
-        ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow`
-        : statusMsg,
+      message: ok ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow` : statusMsg,
     };
   } catch (e) {
     return { ok: false, count: 0, message: `IndexNow error: ${String(e).slice(0, 120)}` };
@@ -188,7 +199,9 @@ Return JSON:
           toolUrl: BASE_URL,
         });
         createdUrls.push(`${BASE_URL}/${finalSlug}`);
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
 
     return { created: createdUrls.length, urls: createdUrls };
@@ -220,7 +233,9 @@ export async function POST() {
       const ping = await fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
         signal: AbortSignal.timeout(10000),
       });
-      steps.push(ping.ok ? "✓ Bing sitemap ping sent" : "⚠ Bing ping did not respond (non-critical)");
+      steps.push(
+        ping.ok ? "✓ Bing sitemap ping sent" : "⚠ Bing ping did not respond (non-critical)",
+      );
     } catch {
       steps.push("⚠ Bing ping timed out (non-critical)");
     }

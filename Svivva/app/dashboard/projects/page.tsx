@@ -84,12 +84,22 @@ function DeployButton({ project }: { project: Project }) {
         </div>
         <div className="flex gap-1.5">
           <Link href={cardUrl!} target="_blank" className="flex-1">
-            <Button variant="outline" size="sm" className="w-full gap-1 text-[11px] border-[#5BA8A0]/30 text-[#5BA8A0] hover:bg-[#5BA8A0]/10" data-testid={`button-view-card-${project.id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1 text-[11px] border-[#5BA8A0]/30 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
+              data-testid={`button-view-card-${project.id}`}
+            >
               <Share2 className="w-3 h-3" /> API Card
             </Button>
           </Link>
           <Link href={cardUrl!} target="_blank" className="flex-1">
-            <Button variant="outline" size="sm" className="w-full gap-1 text-[11px]" data-testid={`button-open-live-${project.id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1 text-[11px]"
+              data-testid={`button-open-live-${project.id}`}
+            >
               <ExternalLink className="w-3 h-3" /> Open
             </Button>
           </Link>
@@ -155,7 +165,10 @@ export default function ProjectsPage() {
           <p className="text-muted-foreground">Manage your AI API projects</p>
         </div>
         <Link href="/dashboard/projects/new">
-          <Button className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" data-testid="button-new-project">
+          <Button
+            className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+            data-testid="button-new-project"
+          >
             <Plus className="w-4 h-4" />
             New Project
           </Button>
@@ -167,11 +180,12 @@ export default function ProjectsPage() {
           <CardContent className="py-12 text-center">
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No projects yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first AI API to get started
-            </p>
+            <p className="text-muted-foreground mb-4">Create your first AI API to get started</p>
             <Link href="/dashboard/projects/new">
-              <Button className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" data-testid="button-create-first-project">
+              <Button
+                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                data-testid="button-create-first-project"
+              >
                 <Plus className="w-4 h-4" />
                 Create Project
               </Button>
@@ -181,7 +195,11 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projectList.map((project) => (
-            <Card key={project.id} className="hover-elevate" data-testid={`card-project-${project.id}`}>
+            <Card
+              key={project.id}
+              className="hover-elevate"
+              data-testid={`card-project-${project.id}`}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
@@ -196,7 +214,11 @@ export default function ProjectsPage() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" data-testid={`button-project-menu-${project.id}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        data-testid={`button-project-menu-${project.id}`}
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -245,13 +267,19 @@ export default function ProjectsPage() {
                   </Badge>
                   {project.status === "deployed" && (
                     <Link href={`/api-card/${project.id}`} target="_blank">
-                      <Badge variant="outline" className="gap-1 cursor-pointer hover:bg-muted border-[#5BA8A0]/40 text-[#5BA8A0]">
+                      <Badge
+                        variant="outline"
+                        className="gap-1 cursor-pointer hover:bg-muted border-[#5BA8A0]/40 text-[#5BA8A0]"
+                      >
                         <Share2 className="w-3 h-3" /> API Card
                       </Badge>
                     </Link>
                   )}
                   <Link href={`/dashboard/projects/${project.id}/apex`}>
-                    <Badge variant="outline" className="gap-1 cursor-pointer hover:bg-muted border-purple-500/40 text-purple-400">
+                    <Badge
+                      variant="outline"
+                      className="gap-1 cursor-pointer hover:bg-muted border-purple-500/40 text-purple-400"
+                    >
                       <Zap className="w-3 h-3" /> APEX
                     </Badge>
                   </Link>

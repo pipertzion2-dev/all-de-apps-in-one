@@ -12,13 +12,30 @@ const ROOT_CATEGORIES = ["seo-landing", "seed-marketing"];
 
 async function getAllSiteUrls(): Promise<string[]> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
-  const staticUrls = [baseUrl, `${baseUrl}/blog`, `${baseUrl}/tools`, `${baseUrl}/about`, `${baseUrl}/contact`, `${baseUrl}/docs`];
+  const staticUrls = [
+    baseUrl,
+    `${baseUrl}/blog`,
+    `${baseUrl}/tools`,
+    `${baseUrl}/about`,
+    `${baseUrl}/contact`,
+    `${baseUrl}/docs`,
+  ];
 
-  const posts = await db.select({ slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.published, true));
-  const pages = await db.select({ slug: seoLandingPages.slug, category: seoLandingPages.category }).from(seoLandingPages).where(eq(seoLandingPages.published, true));
+  const posts = await db
+    .select({ slug: blogPosts.slug })
+    .from(blogPosts)
+    .where(eq(blogPosts.published, true));
+  const pages = await db
+    .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
+    .from(seoLandingPages)
+    .where(eq(seoLandingPages.published, true));
 
   const blogUrls = posts.map((p) => `${baseUrl}/blog/${p.slug}`);
-  const pageUrls = pages.map((p) => ROOT_CATEGORIES.includes(p.category || "") ? `${baseUrl}/${p.slug}` : `${baseUrl}/tools/${p.slug}`);
+  const pageUrls = pages.map((p) =>
+    ROOT_CATEGORIES.includes(p.category || "")
+      ? `${baseUrl}/${p.slug}`
+      : `${baseUrl}/tools/${p.slug}`,
+  );
 
   return [...staticUrls, ...blogUrls, ...pageUrls];
 }
@@ -29,7 +46,11 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
     const urls = await getAllSiteUrls();
 
@@ -63,7 +84,11 @@ export async function POST(req: NextRequest) {
     const { action } = body;
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
 
     if (action === "indexnow-setup") {
       const key = randomBytes(16).toString("hex");
@@ -81,7 +106,8 @@ export async function POST(req: NextRequest) {
 
     if (action === "indexnow-submit") {
       const key = creds?.indexnowKey;
-      if (!key) return NextResponse.json({ error: "Generate an IndexNow key first" }, { status: 400 });
+      if (!key)
+        return NextResponse.json({ error: "Generate an IndexNow key first" }, { status: 400 });
 
       const urls = await getAllSiteUrls();
       const host = baseUrl.replace(/^https?:\/\//, "");
@@ -89,14 +115,24 @@ export async function POST(req: NextRequest) {
       const res = await fetch("https://api.indexnow.org/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ host, key, keyLocation: `${baseUrl}/.well-known/indexnow`, urlList: urls }),
+        body: JSON.stringify({
+          host,
+          key,
+          keyLocation: `${baseUrl}/.well-known/indexnow`,
+          urlList: urls,
+        }),
         signal: AbortSignal.timeout(30000),
       });
 
       const bingRes = await fetch("https://www.bing.com/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ host, key, keyLocation: `${baseUrl}/.well-known/indexnow`, urlList: urls }),
+        body: JSON.stringify({
+          host,
+          key,
+          keyLocation: `${baseUrl}/.well-known/indexnow`,
+          urlList: urls,
+        }),
         signal: AbortSignal.timeout(30000),
       }).catch(() => null);
 
@@ -110,21 +146,31 @@ export async function POST(req: NextRequest) {
         success: ok,
         urlsSubmitted: urls.length,
         indexnow: { status: res.status, ok },
-        bing: { status: bingRes?.status || 0, ok: bingRes?.status === 200 || bingRes?.status === 202 },
-        message: ok ? `Submitted ${urls.length} URLs to IndexNow (Bing, Yandex, Yahoo). Indexing begins within hours.` : `IndexNow returned ${res.status} — check your key URL is accessible.`,
+        bing: {
+          status: bingRes?.status || 0,
+          ok: bingRes?.status === 200 || bingRes?.status === 202,
+        },
+        message: ok
+          ? `Submitted ${urls.length} URLs to IndexNow (Bing, Yandex, Yahoo). Indexing begins within hours.`
+          : `IndexNow returned ${res.status} — check your key URL is accessible.`,
       });
     }
 
     if (action === "save-service-account") {
       const { serviceAccountJson, siteUrl } = body;
-      if (!serviceAccountJson) return NextResponse.json({ error: "Service account JSON required" }, { status: 400 });
+      if (!serviceAccountJson)
+        return NextResponse.json({ error: "Service account JSON required" }, { status: 400 });
 
       let parsed: any;
       try {
         parsed = JSON.parse(serviceAccountJson);
-        if (!parsed.private_key || !parsed.client_email) throw new Error("Missing private_key or client_email");
+        if (!parsed.private_key || !parsed.client_email)
+          throw new Error("Missing private_key or client_email");
       } catch (e) {
-        return NextResponse.json({ error: `Invalid JSON: ${(e as Error).message}` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Invalid JSON: ${(e as Error).message}` },
+          { status: 400 },
+        );
       }
 
       await db.execute(sql`
@@ -137,25 +183,42 @@ export async function POST(req: NextRequest) {
           updated_at = NOW()
       `);
 
-      return NextResponse.json({ success: true, email: parsed.client_email, message: "Service account saved. Ready to submit URLs to Google." });
+      return NextResponse.json({
+        success: true,
+        email: parsed.client_email,
+        message: "Service account saved. Ready to submit URLs to Google.",
+      });
     }
 
     if (action === "google-submit-sitemap") {
-      if (!creds?.googleServiceAccountJson) return NextResponse.json({ error: "Save a Google service account first" }, { status: 400 });
+      if (!creds?.googleServiceAccountJson)
+        return NextResponse.json({ error: "Save a Google service account first" }, { status: 400 });
       const siteUrl = body.siteUrl || creds?.googleSiteUrl;
-      if (!siteUrl) return NextResponse.json({ error: "Site URL required (e.g. https://svivva.com)" }, { status: 400 });
+      if (!siteUrl)
+        return NextResponse.json(
+          { error: "Site URL required (e.g. https://svivva.com)" },
+          { status: 400 },
+        );
       const sitemapUrl = `${baseUrl}/sitemap.xml`;
       const result = await submitSitemapToGSC(creds.googleServiceAccountJson, siteUrl, sitemapUrl);
       return NextResponse.json({ ...result, sitemapUrl, siteUrl });
     }
 
     if (action === "google-index-urls") {
-      if (!creds?.googleServiceAccountJson) return NextResponse.json({ error: "Save a Google service account first" }, { status: 400 });
+      if (!creds?.googleServiceAccountJson)
+        return NextResponse.json({ error: "Save a Google service account first" }, { status: 400 });
       const urls = await getAllSiteUrls();
       const batch = urls.slice(0, 200);
       const result = await submitUrlsToGoogleIndexingApi(creds.googleServiceAccountJson, batch);
-      await db.execute(sql`UPDATE seed_credentials SET last_google_indexing = NOW(), updated_at = NOW() WHERE user_id = ${user.id}`);
-      return NextResponse.json({ ...result, total: urls.length, batched: batch.length, message: `Submitted ${result.submitted}/${batch.length} URLs to Google Indexing API.` });
+      await db.execute(
+        sql`UPDATE seed_credentials SET last_google_indexing = NOW(), updated_at = NOW() WHERE user_id = ${user.id}`,
+      );
+      return NextResponse.json({
+        ...result,
+        total: urls.length,
+        batched: batch.length,
+        message: `Submitted ${result.submitted}/${batch.length} URLs to Google Indexing API.`,
+      });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });

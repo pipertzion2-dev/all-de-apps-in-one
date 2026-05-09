@@ -7,10 +7,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -39,10 +36,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -67,14 +61,11 @@ export async function POST(
       const logs = await db
         .select()
         .from(usageLogs)
-        .where(and(
-          eq(usageLogs.projectId, id),
-          eq(usageLogs.status, "error")
-        ))
+        .where(and(eq(usageLogs.projectId, id), eq(usageLogs.status, "error")))
         .orderBy(desc(usageLogs.createdAt))
         .limit(50);
 
-      failureRecords = logs.map(log => ({
+      failureRecords = logs.map((log) => ({
         input: (log.input as string) || "",
         error: (log.error as string) || "",
         output: log.output as Record<string, unknown> | undefined,
@@ -98,34 +89,37 @@ export async function POST(
     const insertedAnomalies = [];
     for (const anomaly of result.anomalies || []) {
       const anomalyId = uuidv4();
-      const [inserted] = await db.insert(neuralAnomalies).values({
-        id: anomalyId,
-        projectId: id,
-        signalType: anomaly.signalType,
-        severity: anomaly.severity,
-        title: anomaly.title,
-        description: anomaly.description,
-        pattern: anomaly.pattern,
-        recommendations: anomaly.recommendations,
-      }).returning();
+      const [inserted] = await db
+        .insert(neuralAnomalies)
+        .values({
+          id: anomalyId,
+          projectId: id,
+          signalType: anomaly.signalType,
+          severity: anomaly.severity,
+          title: anomaly.title,
+          description: anomaly.description,
+          pattern: anomaly.pattern,
+          recommendations: anomaly.recommendations,
+        })
+        .returning();
       insertedAnomalies.push(inserted);
     }
 
-    return NextResponse.json({
-      anomalies: insertedAnomalies,
-      summary: result.summary,
-      analyzedCount: failureRecords.length,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        anomalies: insertedAnomalies,
+        summary: result.summary,
+        analyzedCount: failureRecords.length,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error detecting anomalies:", error);
     return NextResponse.json({ error: "Failed to detect anomalies" }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {

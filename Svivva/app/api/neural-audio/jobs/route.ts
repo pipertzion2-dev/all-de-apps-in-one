@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
         .where(eq(neuralTrainingJobs.ownerId, ownerId))
         .orderBy(desc(neuralTrainingJobs.createdAt));
     } else {
-      jobs = await db
-        .select()
-        .from(neuralTrainingJobs)
-        .orderBy(desc(neuralTrainingJobs.createdAt));
+      jobs = await db.select().from(neuralTrainingJobs).orderBy(desc(neuralTrainingJobs.createdAt));
     }
 
     return NextResponse.json(jobs);
@@ -38,24 +35,27 @@ export async function POST(request: NextRequest) {
     if (!modelId || !datasetId || !ownerId) {
       return NextResponse.json(
         { error: "modelId, datasetId, and ownerId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const id = uuidv4();
 
-    const [job] = await db.insert(neuralTrainingJobs).values({
-      id,
-      modelId,
-      datasetId,
-      ownerId,
-      status: "queued",
-      progress: 0,
-      epochs: epochs || 100,
-      learningRate: learningRate || "0.0001",
-      batchSize: batchSize || 8,
-      createdAt: new Date(),
-    }).returning();
+    const [job] = await db
+      .insert(neuralTrainingJobs)
+      .values({
+        id,
+        modelId,
+        datasetId,
+        ownerId,
+        status: "queued",
+        progress: 0,
+        epochs: epochs || 100,
+        learningRate: learningRate || "0.0001",
+        batchSize: batchSize || 8,
+        createdAt: new Date(),
+      })
+      .returning();
 
     return NextResponse.json(job, { status: 201 });
   } catch (error) {

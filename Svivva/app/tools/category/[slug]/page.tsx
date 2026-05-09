@@ -15,7 +15,11 @@ type PageCat = typeof pageCategories.$inferSelect;
 
 async function fetchCategory(slug: string): Promise<PageCat | null> {
   try {
-    const [cat] = await db.select().from(pageCategories).where(eq(pageCategories.slug, slug)).limit(1);
+    const [cat] = await db
+      .select()
+      .from(pageCategories)
+      .where(eq(pageCategories.slug, slug))
+      .limit(1);
     return cat || null;
   } catch {
     return null;
@@ -32,7 +36,10 @@ async function fetchAllCategories(): Promise<PageCat[]> {
 
 async function fetchToolsByCategory(categorySlug: string): Promise<SeoPage[]> {
   try {
-    return await db.select().from(seoLandingPages).where(eq(seoLandingPages.category, categorySlug));
+    return await db
+      .select()
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.category, categorySlug));
   } catch {
     return [];
   }
@@ -51,9 +58,7 @@ export async function generateMetadata({
   return {
     title: category.metaTitle || `${category.name} Tools | Svivva`,
     description:
-      category.metaDescription ||
-      category.description ||
-      `Browse ${category.name} tools on Svivva`,
+      category.metaDescription || category.description || `Browse ${category.name} tools on Svivva`,
     openGraph: {
       title: category.metaTitle || `${category.name} Tools | Svivva`,
       description:
@@ -65,11 +70,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function CategoryPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [category, tools, allCategories] = await Promise.all([
     fetchCategory(slug),
@@ -101,13 +102,7 @@ export default async function CategoryPage({
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image
-              src={svivvaLogo}
-              alt="Svivva"
-              width={120}
-              height={36}
-              priority
-            />
+            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
           </Link>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -158,9 +153,7 @@ export default async function CategoryPage({
       <section className="max-w-5xl mx-auto px-6 pb-16">
         {tools.length === 0 ? (
           <div className="text-center py-16" data-testid="text-no-tools">
-            <p className="text-white/40 text-lg">
-              No tools in this category yet.
-            </p>
+            <p className="text-white/40 text-lg">No tools in this category yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -190,9 +183,7 @@ export default async function CategoryPage({
                   {tool.keyword}
                 </p>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  {tool.content.length > 120
-                    ? tool.content.slice(0, 120) + "..."
-                    : tool.content}
+                  {tool.content.length > 120 ? tool.content.slice(0, 120) + "..." : tool.content}
                 </p>
               </Link>
             ))}

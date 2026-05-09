@@ -21,12 +21,22 @@ export async function GET() {
       .from(seoLandingPages)
       .where(like(seoLandingPages.toolUrl, "replit:%"));
 
-    const parentMap: Record<string, {
-      replId: string;
-      title: string;
-      pages: { slug: string; title: string }[];
-      subApps: { id: string; name: string; path: string; url: string; description: string; pages: { slug: string; title: string }[] }[];
-    }> = {};
+    const parentMap: Record<
+      string,
+      {
+        replId: string;
+        title: string;
+        pages: { slug: string; title: string }[];
+        subApps: {
+          id: string;
+          name: string;
+          path: string;
+          url: string;
+          description: string;
+          pages: { slug: string; title: string }[];
+        }[];
+      }
+    > = {};
 
     for (const p of pages) {
       if (!p.toolUrl) continue;
@@ -53,18 +63,25 @@ export async function GET() {
     }
 
     const subAppRows = await db.execute(
-      sql`SELECT * FROM replit_sub_apps WHERE user_id = ${user.id} ORDER BY created_at ASC`
+      sql`SELECT * FROM replit_sub_apps WHERE user_id = ${user.id} ORDER BY created_at ASC`,
     );
 
     for (const row of subAppRows.rows as Record<string, unknown>[]) {
       const replId = row.parent_repl_id as string;
       const subName = row.sub_app_name as string;
       if (!parentMap[replId]) {
-        parentMap[replId] = { replId, title: row.parent_repl_title as string, pages: [], subApps: [] };
+        parentMap[replId] = {
+          replId,
+          title: row.parent_repl_title as string,
+          pages: [],
+          subApps: [],
+        };
       }
       const existing = parentMap[replId].subApps.find((s) => s.id === subName);
       if (!existing) {
-        const slugs: string[] = Array.isArray(row.marketing_slugs) ? row.marketing_slugs as string[] : [];
+        const slugs: string[] = Array.isArray(row.marketing_slugs)
+          ? (row.marketing_slugs as string[])
+          : [];
         parentMap[replId].subApps.push({
           id: subName,
           name: subName,

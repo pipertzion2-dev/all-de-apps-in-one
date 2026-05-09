@@ -1,11 +1,11 @@
-import { Router, type IRouter } from 'express';
-import { storage } from '../storage.js';
-import { getUncachableStripeClient, getStripePublishableKey } from '../stripeClient.js';
+import { Router, type IRouter } from "express";
+import { storage } from "../storage.js";
+import { getUncachableStripeClient, getStripePublishableKey } from "../stripeClient.js";
 
 const router: IRouter = Router();
 
 // Get publishable key for frontend
-router.get('/stripe/config', async (_req, res) => {
+router.get("/stripe/config", async (_req, res) => {
   try {
     const publishableKey = await getStripePublishableKey();
     res.json({ publishableKey });
@@ -15,7 +15,7 @@ router.get('/stripe/config', async (_req, res) => {
 });
 
 // List products with prices
-router.get('/stripe/products', async (_req, res) => {
+router.get("/stripe/products", async (_req, res) => {
   try {
     const rows = await storage.listProductsWithPrices();
     const productsMap = new Map<string, any>();
@@ -45,19 +45,19 @@ router.get('/stripe/products', async (_req, res) => {
 });
 
 // Create checkout session (no auth required — email collected by Stripe)
-router.post('/stripe/checkout', async (req, res) => {
+router.post("/stripe/checkout", async (req, res) => {
   try {
     const { priceId, email } = req.body;
-    if (!priceId) return res.status(400).json({ error: 'priceId is required' });
+    if (!priceId) return res.status(400).json({ error: "priceId is required" });
 
     const stripe = await getUncachableStripeClient();
 
-    const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: 'subscription',
+      mode: "subscription",
       customer_email: email || undefined,
       success_url: `${baseUrl}/?checkout=success`,
       cancel_url: `${baseUrl}/pricing?checkout=cancel`,

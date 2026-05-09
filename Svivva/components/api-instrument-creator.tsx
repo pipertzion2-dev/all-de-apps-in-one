@@ -35,7 +35,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const screenMeshRef = useRef<THREE.Mesh | null>(null);
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
-  
+
   const [prompt, setPrompt] = useState("");
   const [phase, setPhase] = useState<"prompt" | "questions" | "brand">("prompt");
   const [tailoredQuestions, setTailoredQuestions] = useState<TailoredQuestion[]>([]);
@@ -45,35 +45,60 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
   const [suggestions, setSuggestions] = useState<BrandSuggestion | null>(null);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const [selectedPalette, setSelectedPalette] = useState<{ name: string; colors: { primary: string; secondary: string; accent: string } } | null>(null);
+  const [selectedPalette, setSelectedPalette] = useState<{
+    name: string;
+    colors: { primary: string; secondary: string; accent: string };
+  } | null>(null);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(true);
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  const buttonsRef = useRef<Map<string, { x: number; y: number; w: number; h: number; action: () => void }>>(new Map());
+  const buttonsRef = useRef<
+    Map<string, { x: number; y: number; w: number; h: number; action: () => void }>
+  >(new Map());
 
   useEffect(() => {
-    const interval = setInterval(() => setCursorVisible(v => !v), 530);
+    const interval = setInterval(() => setCursorVisible((v) => !v), 530);
     return () => clearInterval(interval);
   }, []);
 
   const generateTailoredQuestions = useCallback(async (userPrompt: string) => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 400));
 
     const words = userPrompt.toLowerCase();
     const questions: TailoredQuestion[] = [];
 
     if (words.includes("analyz") || words.includes("review") || words.includes("sentiment")) {
-      questions.push({ id: "depth", question: "Analysis depth?", options: ["Light", "Medium", "Deep", "Full"] });
+      questions.push({
+        id: "depth",
+        question: "Analysis depth?",
+        options: ["Light", "Medium", "Deep", "Full"],
+      });
     } else if (words.includes("generat") || words.includes("creat") || words.includes("write")) {
-      questions.push({ id: "creativity", question: "Creativity level?", options: ["Low", "Medium", "High", "Max"] });
+      questions.push({
+        id: "creativity",
+        question: "Creativity level?",
+        options: ["Low", "Medium", "High", "Max"],
+      });
     } else {
-      questions.push({ id: "style", question: "Processing style?", options: ["Fast", "Balanced", "Deep", "Max"] });
+      questions.push({
+        id: "style",
+        question: "Processing style?",
+        options: ["Fast", "Balanced", "Deep", "Max"],
+      });
     }
 
-    questions.push({ id: "output", question: "Output detail?", options: ["Brief", "Standard", "Detailed", "Full"] });
-    questions.push({ id: "tone", question: "Response tone?", options: ["Pro", "Friendly", "Tech", "Casual"] });
+    questions.push({
+      id: "output",
+      question: "Output detail?",
+      options: ["Brief", "Standard", "Detailed", "Full"],
+    });
+    questions.push({
+      id: "tone",
+      question: "Response tone?",
+      options: ["Pro", "Friendly", "Tech", "Casual"],
+    });
 
     setTailoredQuestions(questions);
     setPhase("questions");
@@ -82,10 +107,10 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
   const generateBrandSuggestions = useCallback(async () => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 300));
 
     const words = prompt.split(" ");
-    const keyword = words.find(w => w.length > 3) || "API";
+    const keyword = words.find((w) => w.length > 3) || "API";
     const cap = keyword.charAt(0).toUpperCase() + keyword.slice(1, 6).toLowerCase();
 
     const mock: BrandSuggestion = {
@@ -106,16 +131,19 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     setIsGenerating(false);
   }, [prompt]);
 
-  const handleOptionSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    setTimeout(() => {
-      if (currentQuestionIndex < tailoredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        void generateBrandSuggestions();
-      }
-    }, 150);
-  }, [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions]);
+  const handleOptionSelect = useCallback(
+    (questionId: string, value: string) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: value }));
+      setTimeout(() => {
+        if (currentQuestionIndex < tailoredQuestions.length - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+        } else {
+          void generateBrandSuggestions();
+        }
+      }, 150);
+    },
+    [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions],
+  );
 
   const drawScreen = useCallback(() => {
     const canvas = screenCanvasRef.current;
@@ -168,18 +196,24 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       const btnW = 100;
       const btnH = 60;
       const canGo = prompt.length >= 10;
-      
+
       ctx.fillStyle = canGo ? "#5BA8A0" : "#222";
       ctx.fillRect(btnX, 120, btnW, btnH);
       ctx.fillStyle = canGo ? "#080810" : "#555";
       ctx.font = "bold 26px monospace";
       ctx.textAlign = "center";
-      ctx.fillText(isGenerating ? "..." : "GO", btnX + btnW/2, 160);
+      ctx.fillText(isGenerating ? "..." : "GO", btnX + btnW / 2, 160);
       ctx.textAlign = "left";
 
-      buttonsRef.current.set("go", { x: btnX, y: 120, w: btnW, h: btnH, action: () => {
-        if (prompt.length >= 10 && !isGenerating) generateTailoredQuestions(prompt);
-      }});
+      buttonsRef.current.set("go", {
+        x: btnX,
+        y: 120,
+        w: btnW,
+        h: btnH,
+        action: () => {
+          if (prompt.length >= 10 && !isGenerating) generateTailoredQuestions(prompt);
+        },
+      });
 
       ctx.fillStyle = "#444";
       ctx.font = "14px monospace";
@@ -196,7 +230,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
     if (phase === "questions" && tailoredQuestions[currentQuestionIndex]) {
       const q = tailoredQuestions[currentQuestionIndex];
-      
+
       ctx.fillStyle = "#5BA8A0";
       ctx.font = "bold 28px monospace";
       ctx.fillText(q.question, 40, 55);
@@ -224,20 +258,31 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         ctx.fillStyle = sel ? "#5BA8A0" : hov ? "#7ac8c0" : "#999";
         ctx.font = "bold 20px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(opt, x + optW/2, startY + 45);
+        ctx.fillText(opt, x + optW / 2, startY + 45);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`opt-${opt}`, { x, y: startY, w: optW, h: optH, action: () => handleOptionSelect(q.id, opt) });
+        buttonsRef.current.set(`opt-${opt}`, {
+          x,
+          y: startY,
+          w: optW,
+          h: optH,
+          action: () => handleOptionSelect(q.id, opt),
+        });
       });
 
       const barY = 220;
       ctx.fillStyle = "#333";
       ctx.font = "12px monospace";
       ctx.fillText("PROGRESS", 40, barY);
-      
+
       tailoredQuestions.forEach((_, i) => {
         const bx = 40 + i * 100;
-        ctx.fillStyle = i < currentQuestionIndex ? "#5BA8A0" : i === currentQuestionIndex ? "rgba(91,168,160,0.5)" : "#1a1a28";
+        ctx.fillStyle =
+          i < currentQuestionIndex
+            ? "#5BA8A0"
+            : i === currentQuestionIndex
+              ? "rgba(91,168,160,0.5)"
+              : "#1a1a28";
         ctx.fillRect(bx, barY + 10, 85, 20);
       });
     }
@@ -264,10 +309,16 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         ctx.fillStyle = sel ? "#080810" : "#999";
         ctx.font = "bold 16px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(n, x + w/2, 112);
+        ctx.fillText(n, x + w / 2, 112);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`name-${n}`, { x, y: 85, w, h: 40, action: () => setSelectedName(n) });
+        buttonsRef.current.set(`name-${n}`, {
+          x,
+          y: 85,
+          w,
+          h: 40,
+          action: () => setSelectedName(n),
+        });
         x += w + 15;
       });
 
@@ -294,7 +345,13 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         ctx.fillText(ic, x + 25, 195);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`icon-${iconNames[i]}`, { x, y: 160, w: 50, h: 50, action: () => setSelectedIcon(iconNames[i]) });
+        buttonsRef.current.set(`icon-${iconNames[i]}`, {
+          x,
+          y: 160,
+          w: 50,
+          h: 50,
+          action: () => setSelectedIcon(iconNames[i]),
+        });
         x += 60;
       });
 
@@ -324,7 +381,13 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         ctx.fillText(p.name, x + 60, 318);
         ctx.textAlign = "left";
 
-        buttonsRef.current.set(`pal-${p.name}`, { x, y: 250, w: 120, h: 80, action: () => setSelectedPalette(p) });
+        buttonsRef.current.set(`pal-${p.name}`, {
+          x,
+          y: 250,
+          w: 120,
+          h: 80,
+          action: () => setSelectedPalette(p),
+        });
         x += 135;
       });
 
@@ -338,15 +401,43 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       ctx.fillText("CREATE API", btnX + 100, 310);
       ctx.textAlign = "left";
 
-      buttonsRef.current.set("create", { x: btnX, y: 270, w: 200, h: 60, action: () => {
-        if (selectedName && selectedIcon && selectedPalette) {
-          onComplete({ prompt, name: selectedName, icon: selectedIcon, palette: selectedPalette.colors });
-        }
-      }});
+      buttonsRef.current.set("create", {
+        x: btnX,
+        y: 270,
+        w: 200,
+        h: 60,
+        action: () => {
+          if (selectedName && selectedIcon && selectedPalette) {
+            onComplete({
+              prompt,
+              name: selectedName,
+              icon: selectedIcon,
+              palette: selectedPalette.colors,
+            });
+          }
+        },
+      });
     }
 
     if (screenTextureRef.current) screenTextureRef.current.needsUpdate = true;
-  }, [phase, prompt, isGenerating, tailoredQuestions, currentQuestionIndex, answers, suggestions, selectedName, selectedIcon, selectedPalette, hoveredButton, isFocused, cursorVisible, onComplete, generateTailoredQuestions, handleOptionSelect]);
+  }, [
+    phase,
+    prompt,
+    isGenerating,
+    tailoredQuestions,
+    currentQuestionIndex,
+    answers,
+    suggestions,
+    selectedName,
+    selectedIcon,
+    selectedPalette,
+    hoveredButton,
+    isFocused,
+    cursorVisible,
+    onComplete,
+    generateTailoredQuestions,
+    handleOptionSelect,
+  ]);
 
   useEffect(() => {
     drawScreen();
@@ -380,23 +471,31 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     mainLight.position.set(2, 8, 6);
     scene.add(mainLight);
 
-    const tealLight = new THREE.PointLight(0x5BA8A0, 0.5);
+    const tealLight = new THREE.PointLight(0x5ba8a0, 0.5);
     tealLight.position.set(-6, 4, 6);
     scene.add(tealLight);
 
-    const burgundyLight = new THREE.PointLight(0x6B2C4A, 0.3);
+    const burgundyLight = new THREE.PointLight(0x6b2c4a, 0.3);
     burgundyLight.position.set(6, 3, -4);
     scene.add(burgundyLight);
 
     const group = new THREE.Group();
 
-    const caseMat = new THREE.MeshStandardMaterial({ color: 0xd8d4d0, metalness: 0.05, roughness: 0.85 });
+    const caseMat = new THREE.MeshStandardMaterial({
+      color: 0xd8d4d0,
+      metalness: 0.05,
+      roughness: 0.85,
+    });
     const caseGeom = new THREE.BoxGeometry(10, 0.5, 6);
     const caseMesh = new THREE.Mesh(caseGeom, caseMat);
     caseMesh.position.y = 0.25;
     group.add(caseMesh);
 
-    const rearMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22, metalness: 0.3, roughness: 0.6 });
+    const rearMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1a22,
+      metalness: 0.3,
+      roughness: 0.6,
+    });
     const rearPanel = new THREE.Mesh(new THREE.BoxGeometry(10, 2.5, 0.3), rearMat);
     rearPanel.position.set(0, 1.5, -2.85);
     group.add(rearPanel);
@@ -417,18 +516,30 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     screenMeshRef.current = screen;
     group.add(screen);
 
-    const screenFrameMat = new THREE.MeshStandardMaterial({ color: 0x101018, metalness: 0.4, roughness: 0.5 });
+    const screenFrameMat = new THREE.MeshStandardMaterial({
+      color: 0x101018,
+      metalness: 0.4,
+      roughness: 0.5,
+    });
     const screenFrame = new THREE.Mesh(new THREE.BoxGeometry(8.4, 4.4, 0.15), screenFrameMat);
     screenFrame.position.set(0, 2.2, -2.6);
     screenFrame.rotation.x = -0.2;
     group.add(screenFrame);
 
-    const accentMat = new THREE.MeshStandardMaterial({ color: 0x5BA8A0, emissive: 0x5BA8A0, emissiveIntensity: 0.4 });
+    const accentMat = new THREE.MeshStandardMaterial({
+      color: 0x5ba8a0,
+      emissive: 0x5ba8a0,
+      emissiveIntensity: 0.4,
+    });
     const accentStrip = new THREE.Mesh(new THREE.BoxGeometry(8, 0.1, 0.2), accentMat);
     accentStrip.position.set(0, 0.56, 1.5);
     group.add(accentStrip);
 
-    const padMat = new THREE.MeshStandardMaterial({ color: 0x909098, metalness: 0.65, roughness: 0.3 });
+    const padMat = new THREE.MeshStandardMaterial({
+      color: 0x909098,
+      metalness: 0.65,
+      roughness: 0.3,
+    });
     for (let row = 0; row < 2; row++) {
       for (let col = 0; col < 4; col++) {
         const pad = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.9), padMat);
@@ -437,14 +548,22 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       }
     }
 
-    const knobMat = new THREE.MeshStandardMaterial({ color: 0x606068, metalness: 0.7, roughness: 0.25 });
+    const knobMat = new THREE.MeshStandardMaterial({
+      color: 0x606068,
+      metalness: 0.7,
+      roughness: 0.25,
+    });
     for (let i = 0; i < 4; i++) {
       const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.3, 16), knobMat);
       knob.position.set(3 + i * 0.9, 0.65, 0.5);
       group.add(knob);
     }
 
-    const buttonMat = new THREE.MeshStandardMaterial({ color: 0x808088, metalness: 0.5, roughness: 0.35 });
+    const buttonMat = new THREE.MeshStandardMaterial({
+      color: 0x808088,
+      metalness: 0.5,
+      roughness: 0.35,
+    });
     for (let i = 0; i < 3; i++) {
       const btn = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.5), buttonMat);
       btn.position.set(3.2 + i * 0.8, 0.58, -0.8);
@@ -467,7 +586,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
       const intersects = raycasterRef.current.intersectObject(screen);
-      
+
       if (intersects.length > 0 && intersects[0].uv) {
         return { u: intersects[0].uv.x, v: intersects[0].uv.y };
       }
@@ -486,7 +605,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       if (uv) {
         const x = uv.u * 800;
         const y = (1 - uv.v) * 400;
-        
+
         buttonsRef.current.forEach((btn) => {
           if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
             btn.action();
@@ -505,7 +624,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       if (uv) {
         const x = uv.u * 800;
         const y = (1 - uv.v) * 400;
-        
+
         buttonsRef.current.forEach((btn, key) => {
           if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
             found = key;
@@ -543,20 +662,27 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         container.removeChild(renderer.domElement);
       }
     };
-  // Scene mounts once; screen canvas is updated via the [drawScreen] effect.
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid rebuilding Three.js scene on every drawScreen identity change
+    // Scene mounts once; screen canvas is updated via the [drawScreen] effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid rebuilding Three.js scene on every drawScreen identity change
   }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && prompt.length >= 10 && !isGenerating && phase === "prompt") {
-      generateTailoredQuestions(prompt);
-    }
-  }, [prompt, isGenerating, phase, generateTailoredQuestions]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && prompt.length >= 10 && !isGenerating && phase === "prompt") {
+        generateTailoredQuestions(prompt);
+      }
+    },
+    [prompt, isGenerating, phase, generateTailoredQuestions],
+  );
 
   return (
     <div className="relative">
-      <div ref={containerRef} className="w-full h-[500px] sm:h-[550px]" style={{ background: "#0a0a10" }} />
-      
+      <div
+        ref={containerRef}
+        className="w-full h-[500px] sm:h-[550px]"
+        style={{ background: "#0a0a10" }}
+      />
+
       <input
         ref={hiddenInputRef}
         type="text"
@@ -570,7 +696,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         data-testid="input-prompt"
         autoFocus
       />
-      
+
       <p className="text-center text-xs text-gray-500 mt-3">
         Click the screen to focus, then type your prompt
       </p>

@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Create payment intent error:", error);
-    return NextResponse.json({ error: "Failed to initialize payment. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to initialize payment. Please try again." },
+      { status: 500 },
+    );
   }
 }

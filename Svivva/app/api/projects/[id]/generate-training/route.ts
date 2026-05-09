@@ -25,18 +25,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found", projectId },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
     }
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {
-      return NextResponse.json(
-        { error: "No version found for project" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No version found for project" }, { status: 404 });
     }
 
     let body: z.infer<typeof GenerateTrainingInputSchema>;
@@ -53,13 +47,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       latestVersion.systemPrompt,
       latestVersion.outputSchema as JsonSchema,
       count,
-      minApproved
+      minApproved,
     );
 
     if (!result.success) {
       return NextResponse.json(
         { error: "Failed to generate training data", details: result.error },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -107,8 +101,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Generate training error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown",
+      },
+      { status: 500 },
     );
   }
 }
@@ -119,18 +116,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {
-      return NextResponse.json(
-        { error: "No version found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No version found" }, { status: 404 });
     }
 
     const examples = await db
@@ -153,9 +144,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Get training error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

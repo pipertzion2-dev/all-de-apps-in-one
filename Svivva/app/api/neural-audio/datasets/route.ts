@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
         .where(eq(audioDatasets.ownerId, ownerId))
         .orderBy(desc(audioDatasets.createdAt));
     } else {
-      datasets = await db
-        .select()
-        .from(audioDatasets)
-        .orderBy(desc(audioDatasets.createdAt));
+      datasets = await db.select().from(audioDatasets).orderBy(desc(audioDatasets.createdAt));
     }
 
     return NextResponse.json(datasets);
@@ -38,26 +35,29 @@ export async function POST(request: NextRequest) {
     if (!name || !description || !genre) {
       return NextResponse.json(
         { error: "name, description, and genre are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const id = uuidv4();
     const now = new Date();
 
-    const [dataset] = await db.insert(audioDatasets).values({
-      id,
-      ownerId: ownerId || "anonymous",
-      name,
-      description,
-      genre,
-      status: "draft",
-      totalItems: 0,
-      totalDurationSec: 0,
-      validationStatus: "pending",
-      createdAt: now,
-      updatedAt: now,
-    }).returning();
+    const [dataset] = await db
+      .insert(audioDatasets)
+      .values({
+        id,
+        ownerId: ownerId || "anonymous",
+        name,
+        description,
+        genre,
+        status: "draft",
+        totalItems: 0,
+        totalDurationSec: 0,
+        validationStatus: "pending",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
 
     return NextResponse.json(dataset, { status: 201 });
   } catch (error) {

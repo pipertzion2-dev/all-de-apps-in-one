@@ -69,12 +69,36 @@ interface SeedRecord {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; icon: typeof CheckCircle; label: string }> = {
-  parsed: { color: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: FileText, label: "Parsed" },
-  queued: { color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: Clock, label: "Queued" },
-  building: { color: "bg-orange-500/10 text-orange-500 border-orange-500/20", icon: Loader2, label: "Building" },
-  complete: { color: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle, label: "Complete" },
-  partial: { color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: AlertCircle, label: "Partial" },
-  error: { color: "bg-red-500/10 text-red-500 border-red-500/20", icon: AlertCircle, label: "Error" },
+  parsed: {
+    color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    icon: FileText,
+    label: "Parsed",
+  },
+  queued: {
+    color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+    icon: Clock,
+    label: "Queued",
+  },
+  building: {
+    color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+    icon: Loader2,
+    label: "Building",
+  },
+  complete: {
+    color: "bg-green-500/10 text-green-500 border-green-500/20",
+    icon: CheckCircle,
+    label: "Complete",
+  },
+  partial: {
+    color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+    icon: AlertCircle,
+    label: "Partial",
+  },
+  error: {
+    color: "bg-red-500/10 text-red-500 border-red-500/20",
+    icon: AlertCircle,
+    label: "Error",
+  },
 };
 
 function SeedCard({
@@ -124,12 +148,16 @@ function SeedCard({
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold truncate">{seed.appName}</h3>
-              <p className="text-xs text-muted-foreground truncate">{seed.spec.problemStatement?.slice(0, 80)}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {seed.spec.problemStatement?.slice(0, 80)}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant="outline" className={statusInfo.color}>
-              <StatusIcon className={`w-3 h-3 mr-1 ${seed.status === "building" ? "animate-spin" : ""}`} />
+              <StatusIcon
+                className={`w-3 h-3 mr-1 ${seed.status === "building" ? "animate-spin" : ""}`}
+              />
               {statusInfo.label}
             </Badge>
           </div>
@@ -151,11 +179,20 @@ function SeedCard({
         )}
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="secondary" className="text-xs">{seed.spec.features?.length || 0} features</Badge>
-          <Badge variant="secondary" className="text-xs">{seed.spec.apiEndpoints?.length || 0} endpoints</Badge>
-          <Badge variant="secondary" className="text-xs">{seed.spec.uiComponents?.length || 0} components</Badge>
+          <Badge variant="secondary" className="text-xs">
+            {seed.spec.features?.length || 0} features
+          </Badge>
+          <Badge variant="secondary" className="text-xs">
+            {seed.spec.apiEndpoints?.length || 0} endpoints
+          </Badge>
+          <Badge variant="secondary" className="text-xs">
+            {seed.spec.uiComponents?.length || 0} components
+          </Badge>
           {marketingPages.length > 0 && (
-            <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20 gap-1">
+            <Badge
+              variant="outline"
+              className="text-xs bg-green-500/10 text-green-600 border-green-500/20 gap-1"
+            >
               <Globe className="w-2.5 h-2.5" />
               {marketingPages.length} pages live
             </Badge>
@@ -173,8 +210,7 @@ function SeedCard({
                 className="inline-flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline"
                 data-testid={`link-marketing-page-${slug}`}
               >
-                <ExternalLink className="w-2.5 h-2.5" />
-                /{slug}
+                <ExternalLink className="w-2.5 h-2.5" />/{slug}
               </a>
             ))}
           </div>
@@ -209,7 +245,21 @@ function SeedCard({
                 variant="outline"
                 className="gap-1"
                 onClick={() => {
-                  const blob = new Blob([JSON.stringify({ spec: seed.spec, engineeringDocs: seed.engineeringDocs, marketingContent: seed.marketingContent, generatedCode: seed.generatedCode }, null, 2)], { type: "application/json" });
+                  const blob = new Blob(
+                    [
+                      JSON.stringify(
+                        {
+                          spec: seed.spec,
+                          engineeringDocs: seed.engineeringDocs,
+                          marketingContent: seed.marketingContent,
+                          generatedCode: seed.generatedCode,
+                        },
+                        null,
+                        2,
+                      ),
+                    ],
+                    { type: "application/json" },
+                  );
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
@@ -243,7 +293,11 @@ function SeedCard({
                 const tabConfig = {
                   spec: { icon: FileText, label: "Spec", available: true },
                   docs: { icon: BookOpen, label: "Docs", available: !!seed.engineeringDocs },
-                  marketing: { icon: Megaphone, label: "Marketing", available: !!seed.marketingContent },
+                  marketing: {
+                    icon: Megaphone,
+                    label: "Marketing",
+                    available: !!seed.marketingContent,
+                  },
                   code: { icon: Code2, label: "Code", available: !!seed.generatedCode },
                 };
                 const config = tabConfig[tab];
@@ -267,52 +321,130 @@ function SeedCard({
             <div className="bg-muted/30 rounded-lg p-4 text-sm space-y-3 max-h-96 overflow-y-auto">
               {activeTab === "spec" && (
                 <>
-                  <div><span className="font-medium text-foreground">Target Users:</span> <span className="text-muted-foreground">{seed.spec.targetUsers}</span></div>
-                  <div><span className="font-medium text-foreground">Business Model:</span> <span className="text-muted-foreground">{seed.spec.businessModel}</span></div>
+                  <div>
+                    <span className="font-medium text-foreground">Target Users:</span>{" "}
+                    <span className="text-muted-foreground">{seed.spec.targetUsers}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Business Model:</span>{" "}
+                    <span className="text-muted-foreground">{seed.spec.businessModel}</span>
+                  </div>
                   <div>
                     <span className="font-medium text-foreground">Features:</span>
                     <ul className="list-disc pl-5 mt-1 text-muted-foreground space-y-0.5">
-                      {seed.spec.features?.map((f, i) => <li key={i}>{f}</li>)}
+                      {seed.spec.features?.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
                     </ul>
                   </div>
                   <div>
                     <span className="font-medium text-foreground">API Endpoints:</span>
                     <ul className="list-disc pl-5 mt-1 text-muted-foreground space-y-0.5">
-                      {seed.spec.apiEndpoints?.map((e, i) => <li key={i}>{e}</li>)}
+                      {seed.spec.apiEndpoints?.map((e, i) => (
+                        <li key={i}>{e}</li>
+                      ))}
                     </ul>
                   </div>
                   <div>
                     <span className="font-medium text-foreground">Database:</span>
-                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.spec.databaseSchema}</pre>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.spec.databaseSchema}
+                    </pre>
                   </div>
                 </>
               )}
               {activeTab === "docs" && seed.engineeringDocs && (
                 <>
-                  <div><span className="font-medium text-foreground">System Architecture:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.systemArchitecture}</pre></div>
-                  <div><span className="font-medium text-foreground">API Documentation:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.apiDocumentation}</pre></div>
-                  <div><span className="font-medium text-foreground">Database Diagram:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.databaseDiagram}</pre></div>
-                  <div><span className="font-medium text-foreground">Deployment Guide:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.deploymentGuide}</pre></div>
-                  <div><span className="font-medium text-foreground">Testing Strategy:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.testingStrategy}</pre></div>
-                  <div><span className="font-medium text-foreground">CI/CD Pipeline:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.engineeringDocs.cicdPipeline}</pre></div>
+                  <div>
+                    <span className="font-medium text-foreground">System Architecture:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.systemArchitecture}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">API Documentation:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.apiDocumentation}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Database Diagram:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.databaseDiagram}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Deployment Guide:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.deploymentGuide}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Testing Strategy:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.testingStrategy}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">CI/CD Pipeline:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.engineeringDocs.cicdPipeline}
+                    </pre>
+                  </div>
                 </>
               )}
               {activeTab === "marketing" && seed.marketingContent && (
                 <>
-                  <div><span className="font-medium text-foreground">Value Proposition:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.valueProposition}</pre></div>
-                  <div><span className="font-medium text-foreground">Landing Page Copy:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.landingPageCopy}</pre></div>
-                  <div><span className="font-medium text-foreground">Competitive Differentiation:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.competitiveDifferentiation}</pre></div>
-                  <div><span className="font-medium text-foreground">Investor Pitch:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.investorPitchSummary}</pre></div>
-                  <div><span className="font-medium text-foreground">App Store Description:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.appStoreDescription}</pre></div>
-                  <div><span className="font-medium text-foreground">Launch Email Sequence:</span><pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{seed.marketingContent.launchEmailSequence}</pre></div>
+                  <div>
+                    <span className="font-medium text-foreground">Value Proposition:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.valueProposition}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Landing Page Copy:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.landingPageCopy}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">
+                      Competitive Differentiation:
+                    </span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.competitiveDifferentiation}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Investor Pitch:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.investorPitchSummary}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">App Store Description:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.appStoreDescription}
+                    </pre>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Launch Email Sequence:</span>
+                    <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                      {seed.marketingContent.launchEmailSequence}
+                    </pre>
+                  </div>
                 </>
               )}
               {activeTab === "code" && seed.generatedCode && (
                 <>
                   {Object.entries(seed.generatedCode).map(([filePath, content]) => (
                     <div key={filePath}>
-                      <span className="font-medium text-foreground font-mono text-xs">{filePath}</span>
-                      <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap bg-background/50 rounded p-2 border border-border/50">{content}</pre>
+                      <span className="font-medium text-foreground font-mono text-xs">
+                        {filePath}
+                      </span>
+                      <pre className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap bg-background/50 rounded p-2 border border-border/50">
+                        {content}
+                      </pre>
                     </div>
                   ))}
                 </>
@@ -322,9 +454,7 @@ function SeedCard({
         )}
 
         {seed.error && (
-          <div className="text-xs text-red-500 bg-red-500/5 rounded-lg p-2">
-            {seed.error}
-          </div>
+          <div className="text-xs text-red-500 bg-red-500/5 rounded-lg p-2">{seed.error}</div>
         )}
 
         <SeedDeployDialog
@@ -369,7 +499,11 @@ export default function SeedsPage() {
     });
   };
 
-  const { data, isLoading } = useQuery<{ sessions: SeedSession[]; seeds: SeedRecord[]; marketingPagesBySeed: Record<string, string[]> }>({
+  const { data, isLoading } = useQuery<{
+    sessions: SeedSession[];
+    seeds: SeedRecord[];
+    marketingPagesBySeed: Record<string, string[]>;
+  }>({
     queryKey: ["/api/seeds"],
     queryFn: () => authFetch("/api/seeds").then((r) => r.json()),
     refetchInterval: 5000,
@@ -476,7 +610,13 @@ export default function SeedsPage() {
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
-              <Image src={svivvaLogo} alt="Svivva" width={100} height={32} className="h-5 sm:h-6 w-auto object-contain" />
+              <Image
+                src={svivvaLogo}
+                alt="Svivva"
+                width={100}
+                height={32}
+                className="h-5 sm:h-6 w-auto object-contain"
+              />
             </Link>
             <div className="flex items-center gap-2">
               <div className="relative w-6 h-6 rounded overflow-hidden">
@@ -487,12 +627,22 @@ export default function SeedsPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="text-xs" data-testid="button-seeds-back-dashboard">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                data-testid="button-seeds-back-dashboard"
+              >
                 Dashboard
               </Button>
             </Link>
             <Link href="/play">
-              <Button variant="ghost" size="sm" className="text-xs seeds-holo-text" data-testid="button-seeds-to-play">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs seeds-holo-text"
+                data-testid="button-seeds-to-play"
+              >
                 &#9835; Play
               </Button>
             </Link>
@@ -506,14 +656,24 @@ export default function SeedsPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                <Image src={seedsLogo} alt="Svivva Seeds" fill sizes="56px" className="object-cover" />
+                <Image
+                  src={seedsLogo}
+                  alt="Svivva Seeds"
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
               </div>
               <div>
-                <h1 className="text-2xl font-bold flex items-center gap-2" data-testid="text-seeds-title">
+                <h1
+                  className="text-2xl font-bold flex items-center gap-2"
+                  data-testid="text-seeds-title"
+                >
                   Svivva Seeds
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously.
+                  Upload a structured PDF blueprint and generate multiple production-ready
+                  applications simultaneously.
                 </p>
               </div>
             </div>
@@ -543,19 +703,30 @@ export default function SeedsPage() {
           {/* Marketing funnel shortcut banner */}
           <a
             href="#seeds-marketing"
-            onClick={(e) => { e.preventDefault(); document.getElementById("seeds-marketing")?.scrollIntoView({ behavior: "smooth" }); }}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("seeds-marketing")?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-[#6B2C4A]/40 hover:border-[#6B2C4A] transition-all cursor-pointer group"
             style={{ background: "linear-gradient(135deg, #6B2C4A08 0%, #5BA8A008 100%)" }}
             data-testid="link-seeds-marketing-banner"
           >
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}>
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+              style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
+            >
               <Rocket className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-base text-foreground">Seeds Marketing Funnel</p>
-              <p className="text-sm text-muted-foreground">Link your apps · Set up your domain · Get AI-powered traffic → scroll down ↓</p>
+              <p className="text-sm text-muted-foreground">
+                Link your apps · Set up your domain · Get AI-powered traffic → scroll down ↓
+              </p>
             </div>
-            <div className="px-4 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0 group-hover:opacity-90 transition-opacity shadow" style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}>
+            <div
+              className="px-4 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0 group-hover:opacity-90 transition-opacity shadow"
+              style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
+            >
               Open Marketing
             </div>
           </a>
@@ -568,7 +739,8 @@ export default function SeedsPage() {
               <div>
                 <h3 className="font-semibold text-lg">Upload PDF Blueprint</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Upload a structured multi-application PDF. Each app spec will be parsed into a separate Seed.
+                  Upload a structured multi-application PDF. Each app spec will be parsed into a
+                  separate Seed.
                 </p>
               </div>
               <input
@@ -619,7 +791,9 @@ export default function SeedsPage() {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-500">{allSeeds.filter((s) => s.status === "complete").length}</div>
+                <div className="text-2xl font-bold text-green-500">
+                  {allSeeds.filter((s) => s.status === "complete").length}
+                </div>
                 <div className="text-xs text-muted-foreground mt-1">Built</div>
               </CardContent>
             </Card>
@@ -628,7 +802,10 @@ export default function SeedsPage() {
           {/* Seeds Marketing Funnel — clearly labeled section */}
           <div id="seeds-marketing" className="space-y-3 scroll-mt-8">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}>
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
+              >
                 <Rocket className="w-3.5 h-3.5 text-white" />
               </div>
               <h2 className="text-lg font-bold text-foreground">Seeds Marketing Funnel</h2>
@@ -637,24 +814,43 @@ export default function SeedsPage() {
 
             {/* Orbit CTA banner */}
             <Link href="/dashboard/launchpad">
-              <div className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
-                style={{ background: "linear-gradient(135deg, #6B2C4A18, #5BA8A018)", borderColor: "#5BA8A040" }}>
+              <div
+                className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
+                style={{
+                  background: "linear-gradient(135deg, #6B2C4A18, #5BA8A018)",
+                  borderColor: "#5BA8A040",
+                }}
+              >
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}>
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
+                    >
                       <Rocket className="w-4 h-4 text-white" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-black text-foreground">Orbit — Full Marketing Strategy</p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full text-white font-semibold"
-                          style={{ background: "#5BA8A0" }}>10 steps</span>
+                        <p className="text-sm font-black text-foreground">
+                          Orbit — Full Marketing Strategy
+                        </p>
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full text-white font-semibold"
+                          style={{ background: "#5BA8A0" }}
+                        >
+                          10 steps
+                        </span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">IndexNow · 20 SEO pages · 8 comparisons · 10 blog posts · social packs · mini app import — all one-click</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        IndexNow · 20 SEO pages · 8 comparisons · 10 blog posts · social packs ·
+                        mini app import — all one-click
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm font-bold flex-shrink-0" style={{ color: "#5BA8A0" }}>
+                  <div
+                    className="flex items-center gap-1.5 text-sm font-bold flex-shrink-0"
+                    style={{ color: "#5BA8A0" }}
+                  >
                     Open Orbit <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -688,9 +884,22 @@ export default function SeedsPage() {
                   </p>
                 </div>
                 <div className="max-w-md mx-auto text-left space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Your PDF should include for each app:</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Your PDF should include for each app:
+                  </p>
                   <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
-                    {["App Name", "Problem Statement", "Target Users", "Feature List", "User Flows", "Database Schema", "API Endpoints", "UI Components", "Business Model", "Deployment Prefs"].map((item) => (
+                    {[
+                      "App Name",
+                      "Problem Statement",
+                      "Target Users",
+                      "Feature List",
+                      "User Flows",
+                      "Database Schema",
+                      "API Endpoints",
+                      "UI Components",
+                      "Business Model",
+                      "Deployment Prefs",
+                    ].map((item) => (
                       <div key={item} className="flex items-center gap-1">
                         <CheckCircle className="w-3 h-3 text-[#5BA8A0] flex-shrink-0" />
                         {item}
@@ -705,7 +914,9 @@ export default function SeedsPage() {
           {sessions.map((session) => {
             const sessionSeeds = allSeeds.filter((s) => s.sessionId === session.id);
             const allParsed = sessionSeeds.every((s) => s.status === "parsed");
-            const anyBuilding = sessionSeeds.some((s) => s.status === "building" || s.status === "queued");
+            const anyBuilding = sessionSeeds.some(
+              (s) => s.status === "building" || s.status === "queued",
+            );
 
             return (
               <div key={session.id} className="space-y-4" data-testid={`session-${session.id}`}>
@@ -735,7 +946,9 @@ export default function SeedsPage() {
                         ) : (
                           <Square className="w-3.5 h-3.5" />
                         )}
-                        {sessionSeeds.every((s) => selectedSeeds.has(s.id)) ? "Deselect All" : "Select All"}
+                        {sessionSeeds.every((s) => selectedSeeds.has(s.id))
+                          ? "Deselect All"
+                          : "Select All"}
                       </Button>
                     )}
                     {!selectionMode && (
@@ -803,11 +1016,17 @@ export default function SeedsPage() {
             {!promptBarOpen ? (
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge variant="secondary" className="bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/20">
+                  <Badge
+                    variant="secondary"
+                    className="bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/20"
+                  >
                     {selectedSeeds.size} app{selectedSeeds.size !== 1 ? "s" : ""} selected
                   </Badge>
                   <span className="text-muted-foreground text-xs">
-                    {allSeeds.filter((s) => selectedSeeds.has(s.id)).map((s) => s.appName).join(", ")}
+                    {allSeeds
+                      .filter((s) => selectedSeeds.has(s.id))
+                      .map((s) => s.appName)
+                      .join(", ")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -840,7 +1059,8 @@ export default function SeedsPage() {
                   <div className="flex items-center gap-2 text-sm">
                     <Wand2 className="w-4 h-4 text-[#5BA8A0]" />
                     <span className="font-medium">
-                      Editing {selectedSeeds.size} app{selectedSeeds.size !== 1 ? "s" : ""} simultaneously
+                      Editing {selectedSeeds.size} app{selectedSeeds.size !== 1 ? "s" : ""}{" "}
+                      simultaneously
                     </span>
                   </div>
                   <Button
@@ -860,8 +1080,16 @@ export default function SeedsPage() {
                     placeholder="Describe the changes to apply to all selected apps... e.g. 'Add a user authentication system with OAuth2 and role-based access control'"
                     className="min-h-[60px] max-h-[120px] resize-none text-sm"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && multiPrompt.trim() && !multiPromptMutation.isPending) {
-                        multiPromptMutation.mutate({ seedIds: Array.from(selectedSeeds), prompt: multiPrompt.trim() });
+                      if (
+                        e.key === "Enter" &&
+                        (e.metaKey || e.ctrlKey) &&
+                        multiPrompt.trim() &&
+                        !multiPromptMutation.isPending
+                      ) {
+                        multiPromptMutation.mutate({
+                          seedIds: Array.from(selectedSeeds),
+                          prompt: multiPrompt.trim(),
+                        });
                       }
                     }}
                     data-testid="input-multi-prompt"
@@ -870,7 +1098,10 @@ export default function SeedsPage() {
                     className="gap-1.5 bg-[#5BA8A0] self-end px-4"
                     disabled={!multiPrompt.trim() || multiPromptMutation.isPending}
                     onClick={() => {
-                      multiPromptMutation.mutate({ seedIds: Array.from(selectedSeeds), prompt: multiPrompt.trim() });
+                      multiPromptMutation.mutate({
+                        seedIds: Array.from(selectedSeeds),
+                        prompt: multiPrompt.trim(),
+                      });
                     }}
                     data-testid="button-submit-multi-prompt"
                   >
@@ -888,7 +1119,8 @@ export default function SeedsPage() {
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Press Ctrl+Enter to submit. The prompt will be applied to each selected app in parallel.
+                  Press Ctrl+Enter to submit. The prompt will be applied to each selected app in
+                  parallel.
                 </p>
               </div>
             )}
@@ -914,7 +1146,9 @@ function SeedsAdminFooter() {
   return (
     <div className="mt-12 mb-8 px-4">
       <div className="max-w-5xl mx-auto border-t border-border/50 pt-6">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">Admin tools</p>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+          Admin tools
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link
             href="/dashboard/seo-health"
@@ -927,7 +1161,9 @@ function SeedsAdminFooter() {
                 Sitemap, IndexNow, meta tags, indexing signals.
               </div>
             </div>
-            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">→</span>
+            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
+              →
+            </span>
           </Link>
           <Link
             href="/dashboard/gsc-connect"
@@ -940,19 +1176,24 @@ function SeedsAdminFooter() {
                 Diagnose and fix your GSC connection.
               </div>
             </div>
-            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">→</span>
+            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
+              →
+            </span>
           </Link>
         </div>
 
         {/* GSC Setup Steps */}
         <div className="mt-5">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">GSC setup — to reach 100% connection health</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+            GSC setup — to reach 100% connection health
+          </p>
           <div className="space-y-2">
             {[
               {
                 n: "1",
                 title: "Create a service account in Google Cloud",
-                detail: "IAM & Admin → Service Accounts → create account → Keys → Add Key → JSON → download",
+                detail:
+                  "IAM & Admin → Service Accounts → create account → Keys → Add Key → JSON → download",
                 href: "https://console.cloud.google.com/iam-admin/serviceaccounts",
                 cta: "Open Google Cloud Console →",
               },
@@ -966,7 +1207,8 @@ function SeedsAdminFooter() {
               {
                 n: "3",
                 title: "Paste the JSON key in the GSC Connect page",
-                detail: "Open GSC Connect below, expand Step 3, paste the downloaded JSON → Save & verify",
+                detail:
+                  "Open GSC Connect below, expand Step 3, paste the downloaded JSON → Save & verify",
                 href: "/dashboard/gsc-connect",
                 cta: "Open GSC Connect →",
               },
@@ -979,11 +1221,17 @@ function SeedsAdminFooter() {
                 className="flex items-start gap-3 p-3 rounded-lg border border-border/40 hover:bg-muted/20 transition-colors group"
                 data-testid={`link-gsc-step-${step.n}`}
               >
-                <span className="shrink-0 w-5 h-5 rounded-full bg-[#5BA8A0] text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{step.n}</span>
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#5BA8A0] text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+                  {step.n}
+                </span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold">{step.title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{step.detail}</div>
-                  <div className="text-[11px] text-[#5BA8A0] mt-1 group-hover:underline">{step.cta}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    {step.detail}
+                  </div>
+                  <div className="text-[11px] text-[#5BA8A0] mt-1 group-hover:underline">
+                    {step.cta}
+                  </div>
                 </div>
               </a>
             ))}

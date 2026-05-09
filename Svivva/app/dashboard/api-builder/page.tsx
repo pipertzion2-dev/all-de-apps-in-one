@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Sparkles, 
-  Building2, 
-  Layers, 
-  Palette, 
-  Rocket, 
-  ArrowRight, 
+import {
+  Sparkles,
+  Building2,
+  Layers,
+  Palette,
+  Rocket,
+  ArrowRight,
   ArrowLeft,
   Check,
   Lightbulb,
@@ -30,7 +30,7 @@ import {
   Zap,
   Users,
   Globe,
-  Star
+  Star,
 } from "lucide-react";
 
 interface SuggestedAPI {
@@ -60,7 +60,7 @@ export default function APIBuilderPage() {
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingBrand, setIsGeneratingBrand] = useState(false);
-  
+
   // Step 1: Business Context
   const [companyDescription, setCompanyDescription] = useState("");
   const [primaryAPIPrompt, setPrimaryAPIPrompt] = useState("");
@@ -70,14 +70,14 @@ export default function APIBuilderPage() {
     const prefill = searchParams.get("prefill");
     if (prefill) setPrimaryAPIPrompt(decodeURIComponent(prefill));
   }, [searchParams]);
-  
+
   // Step 2: Analysis Results
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
-  
+
   // Step 3: Brand Selection
   const [selectedBrand, setSelectedBrand] = useState<BrandSuggestion | null>(null);
   const [customBrandName, setCustomBrandName] = useState("");
-  
+
   // Step 4: Final Bundle
   const [bundleName, setBundleName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -88,7 +88,7 @@ export default function APIBuilderPage() {
 
   const analyzeAndSuggest = async () => {
     setIsAnalyzing(true);
-    
+
     try {
       const response = await fetch("/api/combo-builder/analyze", {
         method: "POST",
@@ -97,12 +97,12 @@ export default function APIBuilderPage() {
         body: JSON.stringify({
           companyDescription,
           primaryAPIPrompt,
-          goals
-        })
+          goals,
+        }),
       });
-      
+
       if (!response.ok) throw new Error("Analysis failed");
-      
+
       const data = await response.json();
       setAnalysis(data);
       setStep(2);
@@ -115,27 +115,27 @@ export default function APIBuilderPage() {
 
   const generateMoreBrands = async () => {
     setIsGeneratingBrand(true);
-    
+
     try {
-      const selectedAPIs = analysis?.suggestedAPIs.filter(api => api.selected) || [];
+      const selectedAPIs = analysis?.suggestedAPIs.filter((api) => api.selected) || [];
       const response = await fetch("/api/combo-builder/brand", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           companyDescription,
-          selectedAPIs: selectedAPIs.map(api => api.name),
-          goals
-        })
+          selectedAPIs: selectedAPIs.map((api) => api.name),
+          goals,
+        }),
       });
-      
+
       if (!response.ok) throw new Error("Brand generation failed");
-      
+
       const data = await response.json();
       if (analysis) {
         setAnalysis({
           ...analysis,
-          brandSuggestions: [...analysis.brandSuggestions, ...data.brandSuggestions]
+          brandSuggestions: [...analysis.brandSuggestions, ...data.brandSuggestions],
         });
       }
     } catch (error) {
@@ -154,9 +154,9 @@ export default function APIBuilderPage() {
 
   const createBundle = async () => {
     setIsCreating(true);
-    
+
     try {
-      const selectedAPIs = analysis?.suggestedAPIs.filter(api => api.selected) || [];
+      const selectedAPIs = analysis?.suggestedAPIs.filter((api) => api.selected) || [];
       const response = await fetch("/api/combo-builder/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -166,12 +166,12 @@ export default function APIBuilderPage() {
           brand: selectedBrand || { name: customBrandName },
           apis: selectedAPIs,
           companyDescription,
-          goals
-        })
+          goals,
+        }),
       });
-      
+
       if (!response.ok) throw new Error("Bundle creation failed");
-      
+
       const data = await response.json();
       setStep(5); // Success step
     } catch (error) {
@@ -181,7 +181,7 @@ export default function APIBuilderPage() {
     }
   };
 
-  const selectedCount = analysis?.suggestedAPIs.filter(api => api.selected).length || 0;
+  const selectedCount = analysis?.suggestedAPIs.filter((api) => api.selected).length || 0;
 
   return (
     <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
@@ -203,7 +203,9 @@ export default function APIBuilderPage() {
       {/* Progress */}
       <div className="space-y-2">
         <div className="flex justify-between text-xs sm:text-sm">
-          <span className="text-muted-foreground">{step >= 5 ? "Complete" : `Step ${displayStep} of ${totalSteps}`}</span>
+          <span className="text-muted-foreground">
+            {step >= 5 ? "Complete" : `Step ${displayStep} of ${totalSteps}`}
+          </span>
           <span className="text-[#5BA8A0] font-medium">{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" />
@@ -214,8 +216,8 @@ export default function APIBuilderPage() {
             { full: "Brand Identity", short: "Brand" },
             { full: "Launch Bundle", short: "Launch" },
           ].map(({ full, short }, i) => (
-            <div 
-              key={full} 
+            <div
+              key={full}
               className={`text-[10px] sm:text-xs ${step > i ? "text-[#5BA8A0]" : step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}
             >
               <span className="hidden sm:inline">{full}</span>
@@ -284,15 +286,16 @@ export default function APIBuilderPage() {
                 <div className="text-sm">
                   <p className="font-medium text-[#5BA8A0]">AI-Powered Analysis</p>
                   <p className="text-muted-foreground">
-                    Our AI will analyze your business context to suggest complementary APIs that work 
-                    together, along with brand identity suggestions to create a market-ready product.
+                    Our AI will analyze your business context to suggest complementary APIs that
+                    work together, along with brand identity suggestions to create a market-ready
+                    product.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end">
-              <Button 
+              <Button
                 onClick={analyzeAndSuggest}
                 disabled={!companyDescription || !primaryAPIPrompt || isAnalyzing}
                 className="bg-[#5BA8A0] w-full sm:w-auto"
@@ -334,15 +337,21 @@ export default function APIBuilderPage() {
             <CardContent>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-card rounded-lg p-4 border">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Industry</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Industry
+                  </p>
                   <p className="font-medium">{analysis.industry}</p>
                 </div>
                 <div className="bg-card rounded-lg p-4 border">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Target Audience</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Target Audience
+                  </p>
                   <p className="font-medium">{analysis.targetAudience}</p>
                 </div>
                 <div className="bg-card rounded-lg p-4 border">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Core Value</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Core Value
+                  </p>
                   <p className="font-medium">{analysis.coreValue}</p>
                 </div>
               </div>
@@ -375,23 +384,28 @@ export default function APIBuilderPage() {
                   key={index}
                   onClick={() => toggleAPI(index)}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    api.selected 
-                      ? "border-[#5BA8A0] bg-[#5BA8A0]/10" 
+                    api.selected
+                      ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
                       : "border-border hover:border-[#5BA8A0]/50"
                   }`}
                   data-testid={`card-api-suggestion-${index}`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      api.selected ? "border-[#5BA8A0] bg-[#5BA8A0]" : "border-muted-foreground"
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                        api.selected ? "border-[#5BA8A0] bg-[#5BA8A0]" : "border-muted-foreground"
+                      }`}
+                    >
                       {api.selected && <Check className="w-4 h-4 text-white" />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-semibold">{api.name}</h4>
                         {index === 0 && (
-                          <Badge variant="secondary" className="text-[10px] bg-[#D782B2]/20 text-[#D782B2]">
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] bg-[#D782B2]/20 text-[#D782B2]"
+                          >
                             Primary
                           </Badge>
                         )}
@@ -408,11 +422,16 @@ export default function APIBuilderPage() {
           </Card>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-            <Button variant="outline" onClick={() => setStep(1)} className="order-2 sm:order-1" data-testid="button-back-step1">
+            <Button
+              variant="outline"
+              onClick={() => setStep(1)}
+              className="order-2 sm:order-1"
+              data-testid="button-back-step1"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <Button 
+            <Button
               onClick={() => setStep(3)}
               disabled={selectedCount === 0}
               className="bg-[#5BA8A0] order-1 sm:order-2"
@@ -442,9 +461,9 @@ export default function APIBuilderPage() {
                     </CardDescription>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={generateMoreBrands}
                   disabled={isGeneratingBrand}
                   data-testid="button-generate-brands"
@@ -470,16 +489,20 @@ export default function APIBuilderPage() {
                     setCustomBrandName("");
                   }}
                   className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
-                    selectedBrand === brand 
-                      ? "border-[#D782B2] bg-[#D782B2]/10" 
+                    selectedBrand === brand
+                      ? "border-[#D782B2] bg-[#D782B2]/10"
                       : "border-border hover:border-[#D782B2]/50"
                   }`}
                   data-testid={`card-brand-${index}`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      selectedBrand === brand ? "border-[#D782B2] bg-[#D782B2]" : "border-muted-foreground"
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedBrand === brand
+                          ? "border-[#D782B2] bg-[#D782B2]"
+                          : "border-muted-foreground"
+                      }`}
+                    >
                       {selectedBrand === brand && <Check className="w-4 h-4 text-white" />}
                     </div>
                     <div className="flex-1">
@@ -487,17 +510,21 @@ export default function APIBuilderPage() {
                         <h4 className="text-xl font-bold">{brand.name}</h4>
                         <div className="flex gap-1">
                           {brand.colorScheme.map((color, i) => (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               className="w-5 h-5 rounded-full border border-white/20"
                               style={{ backgroundColor: color }}
                             />
                           ))}
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground italic mb-3">&quot;{brand.tagline}&quot;</p>
+                      <p className="text-sm text-muted-foreground italic mb-3">
+                        &quot;{brand.tagline}&quot;
+                      </p>
                       <div className="bg-card rounded-lg p-3 border">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Logo Concept</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                          Logo Concept
+                        </p>
                         <p className="text-sm">{brand.logoDescription}</p>
                       </div>
                     </div>
@@ -507,7 +534,9 @@ export default function APIBuilderPage() {
 
               {/* Custom Brand Option */}
               <div className="border-t pt-4 mt-4">
-                <Label className="text-sm text-muted-foreground mb-2 block">Or enter your own brand name:</Label>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  Or enter your own brand name:
+                </Label>
                 <Input
                   placeholder="Enter your brand name..."
                   value={customBrandName}
@@ -523,11 +552,16 @@ export default function APIBuilderPage() {
           </Card>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-            <Button variant="outline" onClick={() => setStep(2)} className="order-2 sm:order-1" data-testid="button-back-step2">
+            <Button
+              variant="outline"
+              onClick={() => setStep(2)}
+              className="order-2 sm:order-1"
+              data-testid="button-back-step2"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <Button 
+            <Button
               onClick={() => setStep(4)}
               disabled={!selectedBrand && !customBrandName}
               className="bg-[#D782B2] order-1 sm:order-2"
@@ -567,7 +601,9 @@ export default function APIBuilderPage() {
                   <div>
                     <h3 className="text-2xl font-bold">{bundleName || "Your API Bundle"}</h3>
                     {selectedBrand && (
-                      <p className="text-muted-foreground italic">&quot;{selectedBrand.tagline}&quot;</p>
+                      <p className="text-muted-foreground italic">
+                        &quot;{selectedBrand.tagline}&quot;
+                      </p>
                     )}
                   </div>
                 </div>
@@ -575,8 +611,8 @@ export default function APIBuilderPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-sm text-muted-foreground">Brand Colors:</span>
                     {selectedBrand.colorScheme.map((color, i) => (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         className="w-6 h-6 rounded-full border border-white/20"
                         style={{ backgroundColor: color }}
                       />
@@ -592,13 +628,18 @@ export default function APIBuilderPage() {
                   Included APIs ({selectedCount})
                 </h4>
                 <div className="space-y-2">
-                  {analysis.suggestedAPIs.filter(api => api.selected).map((api, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                      <Zap className="w-4 h-4 text-[#5BA8A0]" />
-                      <span className="font-medium">{api.name}</span>
-                      <span className="text-sm text-muted-foreground">- {api.purpose}</span>
-                    </div>
-                  ))}
+                  {analysis.suggestedAPIs
+                    .filter((api) => api.selected)
+                    .map((api, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+                      >
+                        <Zap className="w-4 h-4 text-[#5BA8A0]" />
+                        <span className="font-medium">{api.name}</span>
+                        <span className="text-sm text-muted-foreground">- {api.purpose}</span>
+                      </div>
+                    ))}
                 </div>
               </div>
 
@@ -610,7 +651,7 @@ export default function APIBuilderPage() {
                     { icon: Layers, text: `${selectedCount} Production-Ready APIs` },
                     { icon: Globe, text: "Auto-Generated Documentation" },
                     { icon: Users, text: "SDK for Python & Node.js" },
-                    { icon: Star, text: "Marketplace-Ready Listing" }
+                    { icon: Star, text: "Marketplace-Ready Listing" },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
                       <Check className="w-4 h-4 text-[#5BA8A0]" />
@@ -624,11 +665,16 @@ export default function APIBuilderPage() {
           </Card>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-            <Button variant="outline" onClick={() => setStep(3)} className="order-2 sm:order-1" data-testid="button-back-step3">
+            <Button
+              variant="outline"
+              onClick={() => setStep(3)}
+              className="order-2 sm:order-1"
+              data-testid="button-back-step3"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <Button 
+            <Button
               onClick={createBundle}
               disabled={isCreating}
               className="bg-gradient-to-r from-[#5BA8A0] to-[#D782B2] order-1 sm:order-2"
@@ -664,10 +710,14 @@ export default function APIBuilderPage() {
               </p>
             </div>
             <div className="flex justify-center gap-4">
-              <Button variant="outline" onClick={() => window.location.href = "/dashboard"} data-testid="button-view-dashboard">
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/dashboard")}
+                data-testid="button-view-dashboard"
+              >
                 View Dashboard
               </Button>
-              <Button 
+              <Button
                 className="bg-[#5BA8A0]"
                 onClick={() => {
                   setStep(1);

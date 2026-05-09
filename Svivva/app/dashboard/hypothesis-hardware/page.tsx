@@ -151,39 +151,98 @@ type SavedHardwareProduct = {
 };
 
 function loadSaved(): SavedDiscovery[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 function saveToDisk(items: SavedDiscovery[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 function loadComponents(): HardwareComponent[] {
-  try { return JSON.parse(localStorage.getItem(COMP_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(COMP_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 function saveComponents(items: HardwareComponent[]) {
   localStorage.setItem(COMP_KEY, JSON.stringify(items));
 }
 function loadHardwareProducts(): SavedHardwareProduct[] {
-  try { return JSON.parse(localStorage.getItem(HW_PRODUCTS_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(HW_PRODUCTS_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
-function isDuplicate(question: string, ids: string[], saved: SavedDiscovery[]): SavedDiscovery | null {
+function isDuplicate(
+  question: string,
+  ids: string[],
+  saved: SavedDiscovery[],
+): SavedDiscovery | null {
   const q = question.toLowerCase().trim();
-  return saved.find((d) => d.question.toLowerCase().trim() === q && d.sourceIds?.length === ids.length && d.sourceIds.every((a) => ids.includes(a))) || null;
+  return (
+    saved.find(
+      (d) =>
+        d.question.toLowerCase().trim() === q &&
+        d.sourceIds?.length === ids.length &&
+        d.sourceIds.every((a) => ids.includes(a)),
+    ) || null
+  );
 }
 
 const resultConfig: Record<string, { label: string; color: string; Icon: typeof CheckCircle2 }> = {
-  confirmed: { label: "Confirmed", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", Icon: CheckCircle2 },
-  rejected: { label: "Rejected", color: "bg-red-500/15 text-red-400 border-red-500/30", Icon: XCircle },
-  unclear: { label: "Unclear", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", Icon: HelpCircle },
+  confirmed: {
+    label: "Confirmed",
+    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    Icon: CheckCircle2,
+  },
+  rejected: {
+    label: "Rejected",
+    color: "bg-red-500/15 text-red-400 border-red-500/30",
+    Icon: XCircle,
+  },
+  unclear: {
+    label: "Unclear",
+    color: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    Icon: HelpCircle,
+  },
 };
 
 const categoryConfig: Record<string, { label: string; color: string; icon: typeof Cpu }> = {
-  material_innovation: { label: "Material Innovation", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: Layers },
-  process_optimization: { label: "Process Optimization", color: "bg-blue-500/15 text-blue-400 border-blue-500/30", icon: Cog },
-  iot_integration: { label: "IoT Integration", color: "bg-purple-500/15 text-purple-400 border-purple-500/30", icon: CircuitBoard },
-  cross_domain: { label: "Cross-Domain", color: "bg-orange-500/15 text-orange-400 border-orange-500/30", icon: Zap },
-  supply_chain: { label: "Supply Chain", color: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30", icon: Factory },
-  hybrid_product: { label: "Hybrid Product", color: "bg-pink-500/15 text-pink-400 border-pink-500/30", icon: Box },
+  material_innovation: {
+    label: "Material Innovation",
+    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    icon: Layers,
+  },
+  process_optimization: {
+    label: "Process Optimization",
+    color: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    icon: Cog,
+  },
+  iot_integration: {
+    label: "IoT Integration",
+    color: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+    icon: CircuitBoard,
+  },
+  cross_domain: {
+    label: "Cross-Domain",
+    color: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    icon: Zap,
+  },
+  supply_chain: {
+    label: "Supply Chain",
+    color: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+    icon: Factory,
+  },
+  hybrid_product: {
+    label: "Hybrid Product",
+    color: "bg-pink-500/15 text-pink-400 border-pink-500/30",
+    icon: Box,
+  },
 };
 
 const examplePrompts = [
@@ -194,10 +253,16 @@ const examplePrompts = [
 ];
 
 const sourceTypeLabels: Record<string, { label: string; color: string }> = {
-  hardware_product: { label: "Your Product", color: "bg-orange-500/15 text-orange-400 border-orange-500/40" },
+  hardware_product: {
+    label: "Your Product",
+    color: "bg-orange-500/15 text-orange-400 border-orange-500/40",
+  },
   digital_api: { label: "Digital API", color: "bg-blue-500/10 text-blue-400 border-blue-500/30" },
   external_api: { label: "External", color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" },
-  hardware_component: { label: "Component", color: "bg-orange-500/10 text-orange-400 border-orange-500/30" },
+  hardware_component: {
+    label: "Component",
+    color: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+  },
   seeds_app: { label: "Seeds", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" },
 };
 
@@ -214,13 +279,20 @@ export default function HypothesisHardwarePage() {
   const [duplicateWarning, setDuplicateWarning] = useState<SavedDiscovery | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [hwContext, setHwContext] = useState<HardwareContext>({ productType: "", materials: "", industry: "", constraints: "" });
+  const [hwContext, setHwContext] = useState<HardwareContext>({
+    productType: "",
+    materials: "",
+    industry: "",
+    constraints: "",
+  });
 
   const [savedDiscoveries, setSavedDiscoveries] = useState<SavedDiscovery[]>([]);
   const [components, setComponents] = useState<HardwareComponent[]>([]);
   const [hardwareProducts, setHardwareProducts] = useState<SavedHardwareProduct[]>([]);
   const [newComp, setNewComp] = useState<Partial<HardwareComponent>>({});
-  const [addingType, setAddingType] = useState<"hardware_component" | "external_api" | "seeds_app">("hardware_component");
+  const [addingType, setAddingType] = useState<"hardware_component" | "external_api" | "seeds_app">(
+    "hardware_component",
+  );
 
   useEffect(() => {
     setSavedDiscoveries(loadSaved());
@@ -228,7 +300,9 @@ export default function HypothesisHardwarePage() {
     setHardwareProducts(loadHardwareProducts());
   }, []);
 
-  const { data: digitalData, isLoading: digitalLoading } = useQuery<{ digitalProjects: DigitalProject[] }>({
+  const { data: digitalData, isLoading: digitalLoading } = useQuery<{
+    digitalProjects: DigitalProject[];
+  }>({
     queryKey: ["/api/hypothesis-hardware"],
     queryFn: async () => {
       const r = await authFetch("/api/hypothesis-hardware");
@@ -274,7 +348,7 @@ export default function HypothesisHardwarePage() {
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 6 ? [...prev, id] : prev
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 6 ? [...prev, id] : prev,
     );
   }
 
@@ -287,7 +361,9 @@ export default function HypothesisHardwarePage() {
 
   function startSelect() {
     if (allSelectable.length === 0 && components.length === 0 && digitalProjects.length === 0) {
-      setError("Add at least one data source — a hardware component, external API, or connect your digital APIs.");
+      setError(
+        "Add at least one data source — a hardware component, external API, or connect your digital APIs.",
+      );
       return;
     }
     setError(null);
@@ -299,7 +375,10 @@ export default function HypothesisHardwarePage() {
 
     if (!force) {
       const dup = isDuplicate(question, selectedIds, savedDiscoveries);
-      if (dup) { setDuplicateWarning(dup); return; }
+      if (dup) {
+        setDuplicateWarning(dup);
+        return;
+      }
     }
 
     setDuplicateWarning(null);
@@ -317,59 +396,64 @@ export default function HypothesisHardwarePage() {
     ];
     let i = 0;
     setProgress(stages[0]);
-    const interval = setInterval(() => { i++; if (i < stages.length) setProgress(stages[i]); }, 2000);
+    const interval = setInterval(() => {
+      i++;
+      if (i < stages.length) setProgress(stages[i]);
+    }, 2000);
 
     try {
-      const sources = selectedIds.map((id) => {
-        const sel = allSelectable.find((s) => s.id === id);
-        if (!sel) return null;
+      const sources = selectedIds
+        .map((id) => {
+          const sel = allSelectable.find((s) => s.id === id);
+          if (!sel) return null;
 
-        if (sel.sourceType === "hardware_product" && sel.hardwareProduct) {
-          const hp = sel.hardwareProduct;
+          if (sel.sourceType === "hardware_product" && sel.hardwareProduct) {
+            const hp = sel.hardwareProduct;
+            return {
+              id,
+              name: hp.name,
+              type: "hardware_component" as const,
+              description: `${hp.description}. Target users: ${hp.targetUsers}. Use cases: ${hp.useCases}`,
+              url: "",
+              inputSchema: JSON.stringify({
+                category: hp.category,
+                requirements: hp.requirements,
+                manufacturingMethod: hp.manufacturingMethod,
+                budgetPerUnit: hp.budgetRange,
+              }),
+              sampleResponse: JSON.stringify({
+                materials: hp.materials,
+                requirements: hp.requirements,
+                category: hp.category,
+              }),
+            };
+          }
+
+          if (sel.sourceType === "digital_api") {
+            const proj = digitalProjects.find((p) => `digital_${p.id}` === id);
+            return {
+              id,
+              name: sel.name,
+              type: "digital_api" as const,
+              description: proj?.description || "",
+              url: "",
+              inputSchema: "",
+              sampleResponse: "",
+            };
+          }
+
+          const comp = sel.raw as HardwareComponent;
           return {
             id,
-            name: hp.name,
-            type: "hardware_component" as const,
-            description: `${hp.description}. Target users: ${hp.targetUsers}. Use cases: ${hp.useCases}`,
-            url: "",
-            inputSchema: JSON.stringify({
-              category: hp.category,
-              requirements: hp.requirements,
-              manufacturingMethod: hp.manufacturingMethod,
-              budgetPerUnit: hp.budgetRange,
-            }),
-            sampleResponse: JSON.stringify({
-              materials: hp.materials,
-              requirements: hp.requirements,
-              category: hp.category,
-            }),
+            name: comp.name,
+            type: comp.type,
+            description: comp.description,
+            url: comp.url,
+            inputSchema: comp.inputSchema,
+            sampleResponse: comp.sampleResponse,
           };
-        }
-
-        if (sel.sourceType === "digital_api") {
-          const proj = digitalProjects.find((p) => `digital_${p.id}` === id);
-          return {
-            id,
-            name: sel.name,
-            type: "digital_api" as const,
-            description: proj?.description || "",
-            url: "",
-            inputSchema: "",
-            sampleResponse: "",
-          };
-        }
-
-        const comp = sel.raw as HardwareComponent;
-        return {
-          id,
-          name: comp.name,
-          type: comp.type,
-          description: comp.description,
-          url: comp.url,
-          inputSchema: comp.inputSchema,
-          sampleResponse: comp.sampleResponse,
-        };
-      }).filter(Boolean);
+        })
+        .filter(Boolean);
 
       const previousInsights = savedDiscoveries
         .flatMap((d) => d.hypotheses.filter((h) => h.result === "confirmed").map((h) => h.insight))
@@ -505,11 +589,19 @@ export default function HypothesisHardwarePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Hypothesis Lab</h1>
-            <p className="text-muted-foreground text-sm">Hardware Innovation Engine — discover what to build next</p>
+            <p className="text-muted-foreground text-sm">
+              Hardware Innovation Engine — discover what to build next
+            </p>
           </div>
         </div>
         {step !== "ask" && activeTab === "discover" && (
-          <Button variant="outline" size="sm" className="gap-2" onClick={reset} data-testid="button-reset">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={reset}
+            data-testid="button-reset"
+          >
             <RotateCcw className="w-4 h-4" />
             Start Over
           </Button>
@@ -535,14 +627,18 @@ export default function HypothesisHardwarePage() {
             <Wrench className="w-4 h-4" />
             Source Registry
             {components.length > 0 && (
-              <Badge variant="secondary" className="text-[10px] ml-1">{components.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1">
+                {components.length}
+              </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="feed" className="gap-2" data-testid="tab-feed">
             <Bookmark className="w-4 h-4" />
             Insight Feed
             {savedDiscoveries.length > 0 && (
-              <Badge variant="secondary" className="text-[10px] ml-1">{savedDiscoveries.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1">
+                {savedDiscoveries.length}
+              </Badge>
             )}
           </TabsTrigger>
         </TabsList>
@@ -556,7 +652,9 @@ export default function HypothesisHardwarePage() {
                     <Box className="w-10 h-10 text-orange-400 mx-auto" />
                     <h2 className="text-lg font-semibold">What do you want to discover?</h2>
                     <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                      Ask a question about your hardware, manufacturing, or physical products. The system connects to your digital APIs, Seeds apps, and external data to find innovations you&apos;d never think of.
+                      Ask a question about your hardware, manufacturing, or physical products. The
+                      system connects to your digital APIs, Seeds apps, and external data to find
+                      innovations you&apos;d never think of.
                     </p>
                   </div>
                   <div className="flex gap-3 max-w-xl mx-auto">
@@ -568,7 +666,12 @@ export default function HypothesisHardwarePage() {
                       className="flex-1"
                       data-testid="input-question"
                     />
-                    <Button onClick={startContext} disabled={!question.trim()} className="gap-2 shrink-0 bg-orange-600 hover:bg-orange-700" data-testid="button-discover">
+                    <Button
+                      onClick={startContext}
+                      disabled={!question.trim()}
+                      className="gap-2 shrink-0 bg-orange-600 hover:bg-orange-700"
+                      data-testid="button-discover"
+                    >
                       <Search className="w-4 h-4" />
                       Discover
                     </Button>
@@ -593,21 +696,27 @@ export default function HypothesisHardwarePage() {
                   <CardContent className="pt-5 pb-4 px-4 text-center space-y-2">
                     <Wrench className="w-5 h-5 text-orange-400 mx-auto" />
                     <p className="text-xs font-semibold">Hardware + Digital</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">Connect physical products with your digital APIs and Seeds apps</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Connect physical products with your digital APIs and Seeds apps
+                    </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-card/30 border-border/30">
                   <CardContent className="pt-5 pb-4 px-4 text-center space-y-2">
                     <Lightbulb className="w-5 h-5 text-orange-400 mx-auto" />
                     <p className="text-xs font-semibold">Never-Seen Ideas</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">AI finds cross-domain innovations no one has thought of</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      AI finds cross-domain innovations no one has thought of
+                    </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-card/30 border-border/30">
                   <CardContent className="pt-5 pb-4 px-4 text-center space-y-2">
                     <Factory className="w-5 h-5 text-orange-400 mx-auto" />
                     <p className="text-xs font-semibold">Manufacturing Ready</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">Get actionable insights with cost impact and next steps</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Get actionable insights with cost impact and next steps
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -629,7 +738,10 @@ export default function HypothesisHardwarePage() {
                     <Box className="w-4 h-4 text-orange-400" />
                     Hardware Context
                   </CardTitle>
-                  <CardDescription className="text-xs">Optional — helps the AI generate more relevant innovations for your specific situation.</CardDescription>
+                  <CardDescription className="text-xs">
+                    Optional — helps the AI generate more relevant innovations for your specific
+                    situation.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -638,7 +750,9 @@ export default function HypothesisHardwarePage() {
                       <Input
                         placeholder="e.g., Smart thermostat, Industrial sensor"
                         value={hwContext.productType}
-                        onChange={(e) => setHwContext({ ...hwContext, productType: e.target.value })}
+                        onChange={(e) =>
+                          setHwContext({ ...hwContext, productType: e.target.value })
+                        }
                         data-testid="input-product-type"
                       />
                     </div>
@@ -667,13 +781,19 @@ export default function HypothesisHardwarePage() {
                       <Input
                         placeholder="e.g., Budget under $10/unit, waterproof"
                         value={hwContext.constraints}
-                        onChange={(e) => setHwContext({ ...hwContext, constraints: e.target.value })}
+                        onChange={(e) =>
+                          setHwContext({ ...hwContext, constraints: e.target.value })
+                        }
                         data-testid="input-constraints"
                       />
                     </div>
                   </div>
                   <div className="flex justify-end pt-2">
-                    <Button onClick={startSelect} className="gap-2 bg-orange-600 hover:bg-orange-700" data-testid="button-next-select">
+                    <Button
+                      onClick={startSelect}
+                      className="gap-2 bg-orange-600 hover:bg-orange-700"
+                      data-testid="button-next-select"
+                    >
                       <ArrowRight className="w-4 h-4" />
                       Select Data Sources
                     </Button>
@@ -689,11 +809,22 @@ export default function HypothesisHardwarePage() {
                 <CardContent className="py-4 px-5 flex items-center gap-3">
                   <Search className="w-4 h-4 text-orange-400 shrink-0" />
                   {isEditing ? (
-                    <Input value={question} onChange={(e) => setQuestion(e.target.value)} className="flex-1 h-8 text-sm" data-testid="input-edit-question" />
+                    <Input
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      className="flex-1 h-8 text-sm"
+                      data-testid="input-edit-question"
+                    />
                   ) : (
                     <p className="text-sm font-medium truncate flex-1">&quot;{question}&quot;</p>
                   )}
-                  <Button variant="ghost" size="sm" className="shrink-0 h-7 w-7 p-0" onClick={() => setIsEditing(!isEditing)} data-testid="button-toggle-edit">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 h-7 w-7 p-0"
+                    onClick={() => setIsEditing(!isEditing)}
+                    data-testid="button-toggle-edit"
+                  >
                     <Pencil className="w-3.5 h-3.5" />
                   </Button>
                 </CardContent>
@@ -706,12 +837,28 @@ export default function HypothesisHardwarePage() {
                       <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium">Duplicate detected</p>
-                        <p className="text-xs text-muted-foreground">You already ran this exact combo on {new Date(duplicateWarning.savedAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground">
+                          You already ran this exact combo on{" "}
+                          {new Date(duplicateWarning.savedAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      <Button size="sm" variant="outline" onClick={() => loadDiscovery(duplicateWarning)} data-testid="button-view-existing">View Existing</Button>
-                      <Button size="sm" onClick={() => runDiscovery(true)} data-testid="button-run-anyway">Run Anyway</Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => loadDiscovery(duplicateWarning)}
+                        data-testid="button-view-existing"
+                      >
+                        View Existing
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => runDiscovery(true)}
+                        data-testid="button-run-anyway"
+                      >
+                        Run Anyway
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -720,22 +867,40 @@ export default function HypothesisHardwarePage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-semibold">Select data sources to cross-analyze</h2>
-                    <p className="text-xs text-muted-foreground">Choose 1-6 sources. Mix hardware components, digital APIs, Seeds apps, and external data.</p>
+                    <h2 className="text-base font-semibold">
+                      Select data sources to cross-analyze
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Choose 1-6 sources. Mix hardware components, digital APIs, Seeds apps, and
+                      external data.
+                    </p>
                   </div>
-                  <Badge variant="outline" className="text-xs">{selectedIds.length}/6 selected</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {selectedIds.length}/6 selected
+                  </Badge>
                 </div>
 
                 {digitalLoading ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-28 rounded-xl" />
+                    ))}
                   </div>
                 ) : allSelectable.length === 0 ? (
                   <Card className="bg-muted/20">
                     <CardContent className="py-8 text-center space-y-2">
                       <p className="text-sm text-muted-foreground">No sources available yet.</p>
-                      <p className="text-xs text-muted-foreground/60">Register hardware components, connect your digital APIs, or add external data sources.</p>
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("registry")} className="gap-2 mt-2" data-testid="button-goto-registry">
+                      <p className="text-xs text-muted-foreground/60">
+                        Register hardware components, connect your digital APIs, or add external
+                        data sources.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("registry")}
+                        className="gap-2 mt-2"
+                        data-testid="button-goto-registry"
+                      >
                         <Plus className="w-4 h-4" />
                         Add Source
                       </Button>
@@ -745,7 +910,8 @@ export default function HypothesisHardwarePage() {
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {allSelectable.map((item) => {
                       const selected = selectedIds.includes(item.id);
-                      const stl = sourceTypeLabels[item.sourceType] || sourceTypeLabels.hardware_component;
+                      const stl =
+                        sourceTypeLabels[item.sourceType] || sourceTypeLabels.hardware_component;
                       return (
                         <button
                           key={item.id}
@@ -756,17 +922,31 @@ export default function HypothesisHardwarePage() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               <p className="font-medium text-sm truncate">{item.name}</p>
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.desc}</p>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {item.desc}
+                              </p>
                             </div>
-                            <div className={`p-1 rounded-md shrink-0 ${selected ? "bg-orange-500 text-white" : "bg-muted/50"}`}>
-                              {selected ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                            <div
+                              className={`p-1 rounded-md shrink-0 ${selected ? "bg-orange-500 text-white" : "bg-muted/50"}`}
+                            >
+                              {selected ? (
+                                <Minus className="w-3.5 h-3.5" />
+                              ) : (
+                                <Plus className="w-3.5 h-3.5" />
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className={`text-[10px] ${stl.color}`}>{stl.label}</Badge>
+                            <Badge variant="outline" className={`text-[10px] ${stl.color}`}>
+                              {stl.label}
+                            </Badge>
                             {item.hasSchema && (
-                              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                <FileJson className="w-2.5 h-2.5 mr-0.5" />schema
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              >
+                                <FileJson className="w-2.5 h-2.5 mr-0.5" />
+                                schema
                               </Badge>
                             )}
                           </div>
@@ -778,7 +958,12 @@ export default function HypothesisHardwarePage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => runDiscovery()} disabled={selectedIds.length === 0} className="gap-2 bg-orange-600 hover:bg-orange-700" data-testid="button-run-discovery">
+                <Button
+                  onClick={() => runDiscovery()}
+                  disabled={selectedIds.length === 0}
+                  className="gap-2 bg-orange-600 hover:bg-orange-700"
+                  data-testid="button-run-discovery"
+                >
                   <Microscope className="w-4 h-4" />
                   Run Discovery
                 </Button>
@@ -797,7 +982,9 @@ export default function HypothesisHardwarePage() {
                 </div>
                 <div className="space-y-2">
                   <p className="font-semibold">{progress}</p>
-                  <p className="text-xs text-muted-foreground">Connecting hardware + digital + Seeds ecosystem</p>
+                  <p className="text-xs text-muted-foreground">
+                    Connecting hardware + digital + Seeds ecosystem
+                  </p>
                 </div>
                 <Loader2 className="w-5 h-5 animate-spin mx-auto text-orange-400" />
               </CardContent>
@@ -814,11 +1001,22 @@ export default function HypothesisHardwarePage() {
                         <BrainCircuit className="w-5 h-5 text-orange-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Discovery Summary</p>
-                        <p className="text-sm font-medium" data-testid="text-summary">{results.summary}</p>
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                          Discovery Summary
+                        </p>
+                        <p className="text-sm font-medium" data-testid="text-summary">
+                          {results.summary}
+                        </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="gap-2 shrink-0" onClick={saveDiscovery} disabled={alreadySaved} data-testid="button-save">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 shrink-0"
+                      onClick={saveDiscovery}
+                      disabled={alreadySaved}
+                      data-testid="button-save"
+                    >
                       <Bookmark className="w-4 h-4" />
                       {alreadySaved ? "Saved" : "Save"}
                     </Button>
@@ -828,9 +1026,16 @@ export default function HypothesisHardwarePage() {
 
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold text-muted-foreground">
-                  {results.hypotheses.length} Innovation{results.hypotheses.length === 1 ? "" : "s"} Discovered
+                  {results.hypotheses.length} Innovation{results.hypotheses.length === 1 ? "" : "s"}{" "}
+                  Discovered
                 </h2>
-                <Button variant="outline" size="sm" onClick={remix} className="gap-2" data-testid="button-remix">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={remix}
+                  className="gap-2"
+                  data-testid="button-remix"
+                >
                   <RotateCcw className="w-4 h-4" />
                   Remix
                 </Button>
@@ -839,14 +1044,21 @@ export default function HypothesisHardwarePage() {
               {results.hypotheses.map((h, i) => {
                 const rc = resultConfig[h.result] || resultConfig.unclear;
                 const ResultIcon = rc.Icon;
-                const cat = categoryConfig[h.category] || { label: h.category, color: "bg-muted text-muted-foreground border-border", icon: Zap };
+                const cat = categoryConfig[h.category] || {
+                  label: h.category,
+                  color: "bg-muted text-muted-foreground border-border",
+                  icon: Zap,
+                };
                 const CatIcon = cat.icon;
                 const isExpanded = expandedHypothesis === h.id;
                 const exp = typeof h.experiment === "object" ? h.experiment : null;
                 const val = h.validation;
 
                 return (
-                  <Card key={h.id || i} className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-orange-500/20 transition-colors">
+                  <Card
+                    key={h.id || i}
+                    className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-orange-500/20 transition-colors"
+                  >
                     <CardContent className="py-6 px-6 space-y-4">
                       <div className="flex-1 min-w-0 space-y-3">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -859,7 +1071,10 @@ export default function HypothesisHardwarePage() {
                             {cat.label}
                           </Badge>
                           {h.innovationScore && (
-                            <Badge variant="outline" className="text-[10px] bg-yellow-500/10 text-yellow-400 border-yellow-500/30">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
+                            >
                               <Lightbulb className="w-3 h-3 mr-1" />
                               Innovation: {h.innovationScore}
                             </Badge>
@@ -867,22 +1082,30 @@ export default function HypothesisHardwarePage() {
                         </div>
 
                         <div>
-                          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Hypothesis</p>
+                          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                            Hypothesis
+                          </p>
                           <p className="text-sm font-semibold">{h.hypothesis}</p>
                         </div>
 
                         <div>
-                          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Insight</p>
+                          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                            Insight
+                          </p>
                           <p className="text-sm leading-relaxed">{h.insight}</p>
                         </div>
 
                         {h.nextSteps && h.nextSteps.length > 0 && (
                           <div>
-                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Next Steps</p>
+                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                              Next Steps
+                            </p>
                             <div className="space-y-1">
                               {h.nextSteps.map((ns, ni) => (
                                 <div key={ni} className="flex items-start gap-2 text-[11px]">
-                                  <span className="text-orange-400 font-bold shrink-0">{ni + 1}.</span>
+                                  <span className="text-orange-400 font-bold shrink-0">
+                                    {ni + 1}.
+                                  </span>
                                   <span>{ns}</span>
                                 </div>
                               ))}
@@ -898,11 +1121,15 @@ export default function HypothesisHardwarePage() {
                                 style={{ width: `${h.confidence}%` }}
                               />
                             </div>
-                            <span className="text-xs font-medium tabular-nums">{h.confidence}%</span>
+                            <span className="text-xs font-medium tabular-nums">
+                              {h.confidence}%
+                            </span>
                           </div>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {h.sourcesUsed?.map((s, j) => (
-                              <Badge key={j} variant="secondary" className="text-[10px]">{s}</Badge>
+                              <Badge key={j} variant="secondary" className="text-[10px]">
+                                {s}
+                              </Badge>
                             ))}
                           </div>
                         </div>
@@ -912,7 +1139,11 @@ export default function HypothesisHardwarePage() {
                           className="flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 transition-colors pt-1"
                           data-testid={`button-expand-${i}`}
                         >
-                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          {isExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
                           {isExpanded ? "Hide" : "Show"} experiment details
                         </button>
 
@@ -922,23 +1153,36 @@ export default function HypothesisHardwarePage() {
                               <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                   <Beaker className="w-4 h-4 text-orange-400" />
-                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Experiment Design</p>
+                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Experiment Design
+                                  </p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">{exp.description}</p>
                                 {exp.scenarios && exp.scenarios.length > 0 && (
                                   <div className="space-y-2">
-                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Test Scenarios</p>
+                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                                      Test Scenarios
+                                    </p>
                                     <div className="grid gap-2">
                                       {exp.scenarios.map((sc, si) => (
-                                        <div key={si} className="p-3 rounded-lg bg-muted/20 border border-border/30">
+                                        <div
+                                          key={si}
+                                          className="p-3 rounded-lg bg-muted/20 border border-border/30"
+                                        >
                                           <p className="text-xs font-medium mb-1">{sc.label}</p>
                                           <div className="flex flex-col sm:flex-row gap-2">
                                             <div className="flex-1">
-                                              <p className="text-[10px] text-muted-foreground mb-0.5">Inputs</p>
-                                              <pre className="text-[10px] font-mono bg-black/20 rounded p-1.5 overflow-x-auto">{JSON.stringify(sc.inputs, null, 1)}</pre>
+                                              <p className="text-[10px] text-muted-foreground mb-0.5">
+                                                Inputs
+                                              </p>
+                                              <pre className="text-[10px] font-mono bg-black/20 rounded p-1.5 overflow-x-auto">
+                                                {JSON.stringify(sc.inputs, null, 1)}
+                                              </pre>
                                             </div>
                                             <div className="flex-1">
-                                              <p className="text-[10px] text-muted-foreground mb-0.5">Expected</p>
+                                              <p className="text-[10px] text-muted-foreground mb-0.5">
+                                                Expected
+                                              </p>
                                               <p className="text-[11px]">{sc.expectedBehavior}</p>
                                             </div>
                                           </div>
@@ -949,11 +1193,17 @@ export default function HypothesisHardwarePage() {
                                 )}
                                 {exp.dataSourcesUsed && (
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <p className="text-[10px] text-muted-foreground">Sources used:</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      Sources used:
+                                    </p>
                                     {exp.dataSourcesUsed.map((a, ai) => (
                                       <span key={ai} className="flex items-center gap-1">
-                                        {ai > 0 && <ArrowRight className="w-3 h-3 text-muted-foreground" />}
-                                        <Badge variant="outline" className="text-[10px]">{a}</Badge>
+                                        {ai > 0 && (
+                                          <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                                        )}
+                                        <Badge variant="outline" className="text-[10px]">
+                                          {a}
+                                        </Badge>
                                       </span>
                                     ))}
                                   </div>
@@ -965,15 +1215,30 @@ export default function HypothesisHardwarePage() {
                               <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                   <Microscope className="w-4 h-4 text-orange-400" />
-                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Simulated Execution</p>
+                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Simulated Execution
+                                  </p>
                                 </div>
                                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
                                   {h.execution.map((ex, ei) => (
-                                    <div key={ei} className="flex items-start gap-3 text-[11px] p-2 rounded bg-muted/10 border border-border/20">
-                                      <Badge variant="outline" className="text-[9px] shrink-0">{ex.scenario}</Badge>
-                                      <span className="text-muted-foreground shrink-0">{ex.sourceName}</span>
-                                      <pre className="font-mono text-[10px] bg-black/20 rounded px-1.5 py-0.5 overflow-x-auto flex-1">{JSON.stringify(ex.output)}</pre>
-                                      {ex.unit && <span className="text-[9px] text-muted-foreground/50 shrink-0">{ex.unit}</span>}
+                                    <div
+                                      key={ei}
+                                      className="flex items-start gap-3 text-[11px] p-2 rounded bg-muted/10 border border-border/20"
+                                    >
+                                      <Badge variant="outline" className="text-[9px] shrink-0">
+                                        {ex.scenario}
+                                      </Badge>
+                                      <span className="text-muted-foreground shrink-0">
+                                        {ex.sourceName}
+                                      </span>
+                                      <pre className="font-mono text-[10px] bg-black/20 rounded px-1.5 py-0.5 overflow-x-auto flex-1">
+                                        {JSON.stringify(ex.output)}
+                                      </pre>
+                                      {ex.unit && (
+                                        <span className="text-[9px] text-muted-foreground/50 shrink-0">
+                                          {ex.unit}
+                                        </span>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -984,32 +1249,49 @@ export default function HypothesisHardwarePage() {
                               <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                   <ShieldCheck className="w-4 h-4 text-orange-400" />
-                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Validation</p>
+                                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Validation
+                                  </p>
                                 </div>
                                 {val.patternsFound && val.patternsFound.length > 0 && (
                                   <div>
-                                    <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">Patterns</p>
+                                    <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">
+                                      Patterns
+                                    </p>
                                     {val.patternsFound.map((p, pi) => (
-                                      <div key={pi} className="flex items-start gap-2 text-[11px] mb-1">
-                                        <TrendingUp className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" /><span>{p}</span>
+                                      <div
+                                        key={pi}
+                                        className="flex items-start gap-2 text-[11px] mb-1"
+                                      >
+                                        <TrendingUp className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" />
+                                        <span>{p}</span>
                                       </div>
                                     ))}
                                   </div>
                                 )}
-                                {val.contradictions && val.contradictions.filter(Boolean).length > 0 && (
-                                  <div>
-                                    <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">Contradictions</p>
-                                    {val.contradictions.filter(Boolean).map((c, ci) => (
-                                      <div key={ci} className="flex items-start gap-2 text-[11px] mb-1">
-                                        <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" /><span>{c}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                                {val.contradictions &&
+                                  val.contradictions.filter(Boolean).length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">
+                                        Contradictions
+                                      </p>
+                                      {val.contradictions.filter(Boolean).map((c, ci) => (
+                                        <div
+                                          key={ci}
+                                          className="flex items-start gap-2 text-[11px] mb-1"
+                                        >
+                                          <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
+                                          <span>{c}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 {val.costImpact && (
                                   <div className="flex items-start gap-2 text-[11px] p-2 rounded bg-emerald-500/5 border border-emerald-500/20">
                                     <TrendingUp className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" />
-                                    <span className="text-emerald-300 font-medium">{val.costImpact}</span>
+                                    <span className="text-emerald-300 font-medium">
+                                      {val.costImpact}
+                                    </span>
                                   </div>
                                 )}
                                 {val.statisticalNote && (
@@ -1024,15 +1306,33 @@ export default function HypothesisHardwarePage() {
                         )}
 
                         <div className="flex items-center gap-2 pt-2 border-t border-border/30">
-                          <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8" onClick={() => turnIntoHardware(h)} data-testid={`button-build-hw-${i}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-xs h-8"
+                            onClick={() => turnIntoHardware(h)}
+                            data-testid={`button-build-hw-${i}`}
+                          >
                             <Box className="w-3.5 h-3.5" />
                             Build Hardware
                           </Button>
-                          <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8" onClick={() => turnIntoDigitalApi(h)} data-testid={`button-build-api-${i}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-xs h-8"
+                            onClick={() => turnIntoDigitalApi(h)}
+                            data-testid={`button-build-api-${i}`}
+                          >
                             <Package className="w-3.5 h-3.5" />
                             Turn into API
                           </Button>
-                          <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8" onClick={remix} data-testid={`button-remix-${i}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-xs h-8"
+                            onClick={remix}
+                            data-testid={`button-remix-${i}`}
+                          >
                             <RotateCcw className="w-3.5 h-3.5" />
                             Remix
                           </Button>
@@ -1053,15 +1353,18 @@ export default function HypothesisHardwarePage() {
                 <Wrench className="w-5 h-5 text-orange-400" />
                 Source Registry
               </CardTitle>
-              <CardDescription>Register hardware components, external APIs, and Seeds apps. Your digital Svivva APIs are auto-connected.</CardDescription>
+              <CardDescription>
+                Register hardware components, external APIs, and Seeds apps. Your digital Svivva
+                APIs are auto-connected.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2 mb-2">
-                {([
+                {[
                   { type: "hardware_component" as const, label: "Hardware Component", icon: Cpu },
                   { type: "external_api" as const, label: "External API", icon: Globe },
                   { type: "seeds_app" as const, label: "Seeds App", icon: Zap },
-                ]).map((t) => (
+                ].map((t) => (
                   <Button
                     key={t.type}
                     variant={addingType === t.type ? "default" : "outline"}
@@ -1079,19 +1382,35 @@ export default function HypothesisHardwarePage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <label className="text-xs font-medium">
-                    {addingType === "hardware_component" ? "Component Name *" : addingType === "seeds_app" ? "Seeds App Name *" : "API Name *"}
+                    {addingType === "hardware_component"
+                      ? "Component Name *"
+                      : addingType === "seeds_app"
+                        ? "Seeds App Name *"
+                        : "API Name *"}
                   </label>
                   <Input
-                    placeholder={addingType === "hardware_component" ? "e.g., Temperature Sensor" : addingType === "seeds_app" ? "e.g., My Fitness App" : "e.g., Weather API"}
+                    placeholder={
+                      addingType === "hardware_component"
+                        ? "e.g., Temperature Sensor"
+                        : addingType === "seeds_app"
+                          ? "e.g., My Fitness App"
+                          : "e.g., Weather API"
+                    }
                     value={newComp.name || ""}
                     onChange={(e) => setNewComp({ ...newComp, name: e.target.value })}
                     data-testid="input-comp-name"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium">{addingType === "hardware_component" ? "Data Sheet URL" : "Endpoint URL"}</label>
+                  <label className="text-xs font-medium">
+                    {addingType === "hardware_component" ? "Data Sheet URL" : "Endpoint URL"}
+                  </label>
                   <Input
-                    placeholder={addingType === "hardware_component" ? "https://docs.example.com/sensor" : "https://api.example.com/v1"}
+                    placeholder={
+                      addingType === "hardware_component"
+                        ? "https://docs.example.com/sensor"
+                        : "https://api.example.com/v1"
+                    }
                     value={newComp.url || ""}
                     onChange={(e) => setNewComp({ ...newComp, url: e.target.value })}
                     data-testid="input-comp-url"
@@ -1101,7 +1420,11 @@ export default function HypothesisHardwarePage() {
               <div className="space-y-1">
                 <label className="text-xs font-medium">Description</label>
                 <Input
-                  placeholder={addingType === "hardware_component" ? "Measures ambient temperature, outputs 0-5V analog signal" : "Returns data about..."}
+                  placeholder={
+                    addingType === "hardware_component"
+                      ? "Measures ambient temperature, outputs 0-5V analog signal"
+                      : "Returns data about..."
+                  }
                   value={newComp.description || ""}
                   onChange={(e) => setNewComp({ ...newComp, description: e.target.value })}
                   data-testid="input-comp-desc"
@@ -1109,9 +1432,17 @@ export default function HypothesisHardwarePage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium">{addingType === "hardware_component" ? "Specs / Input Schema (JSON)" : "Input Schema (JSON)"}</label>
+                  <label className="text-xs font-medium">
+                    {addingType === "hardware_component"
+                      ? "Specs / Input Schema (JSON)"
+                      : "Input Schema (JSON)"}
+                  </label>
                   <Textarea
-                    placeholder={addingType === "hardware_component" ? '{\n  "range": "-40 to 125°C",\n  "accuracy": "±0.5°C",\n  "voltage": "3.3-5V"\n}' : '{\n  "location": "string"\n}'}
+                    placeholder={
+                      addingType === "hardware_component"
+                        ? '{\n  "range": "-40 to 125°C",\n  "accuracy": "±0.5°C",\n  "voltage": "3.3-5V"\n}'
+                        : '{\n  "location": "string"\n}'
+                    }
                     value={newComp.inputSchema || ""}
                     onChange={(e) => setNewComp({ ...newComp, inputSchema: e.target.value })}
                     className="font-mono text-xs h-24 resize-none"
@@ -1119,9 +1450,17 @@ export default function HypothesisHardwarePage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium">{addingType === "hardware_component" ? "Sample Output (JSON)" : "Sample Response (JSON)"}</label>
+                  <label className="text-xs font-medium">
+                    {addingType === "hardware_component"
+                      ? "Sample Output (JSON)"
+                      : "Sample Response (JSON)"}
+                  </label>
                   <Textarea
-                    placeholder={addingType === "hardware_component" ? '{\n  "temperature": 23.5,\n  "unit": "celsius",\n  "timestamp": "2025-01-15T10:00:00Z"\n}' : '{\n  "temp": 72,\n  "humidity": 45\n}'}
+                    placeholder={
+                      addingType === "hardware_component"
+                        ? '{\n  "temperature": 23.5,\n  "unit": "celsius",\n  "timestamp": "2025-01-15T10:00:00Z"\n}'
+                        : '{\n  "temp": 72,\n  "humidity": 45\n}'
+                    }
                     value={newComp.sampleResponse || ""}
                     onChange={(e) => setNewComp({ ...newComp, sampleResponse: e.target.value })}
                     className="font-mono text-xs h-24 resize-none"
@@ -1129,9 +1468,20 @@ export default function HypothesisHardwarePage() {
                   />
                 </div>
               </div>
-              <Button onClick={addComponent} disabled={!newComp.name?.trim()} size="sm" className="gap-2 bg-orange-600 hover:bg-orange-700" data-testid="button-add-comp">
+              <Button
+                onClick={addComponent}
+                disabled={!newComp.name?.trim()}
+                size="sm"
+                className="gap-2 bg-orange-600 hover:bg-orange-700"
+                data-testid="button-add-comp"
+              >
                 <Plus className="w-4 h-4" />
-                Add {addingType === "hardware_component" ? "Component" : addingType === "seeds_app" ? "Seeds App" : "API"}
+                Add{" "}
+                {addingType === "hardware_component"
+                  ? "Component"
+                  : addingType === "seeds_app"
+                    ? "Seeds App"
+                    : "API"}
               </Button>
             </CardContent>
           </Card>
@@ -1142,7 +1492,10 @@ export default function HypothesisHardwarePage() {
                 <Box className="w-4 h-4 text-orange-400" />
                 Your Hardware Products ({hardwareProducts.length})
               </h3>
-              <p className="text-xs text-muted-foreground/60">Products you&apos;ve built in the Hardware Builder — auto-available for hypothesis testing.</p>
+              <p className="text-xs text-muted-foreground/60">
+                Products you&apos;ve built in the Hardware Builder — auto-available for hypothesis
+                testing.
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {hardwareProducts.map((hp) => (
                   <Card key={hp.id} className="bg-card/30 border-orange-500/20">
@@ -1150,9 +1503,16 @@ export default function HypothesisHardwarePage() {
                       <Box className="w-4 h-4 text-orange-400 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{hp.name}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{hp.category} — {hp.materials.join(", ") || "No materials"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {hp.category} — {hp.materials.join(", ") || "No materials"}
+                        </p>
                       </div>
-                      <Badge variant="outline" className="text-[9px] ml-auto shrink-0 bg-orange-500/15 text-orange-400 border-orange-500/40">product</Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] ml-auto shrink-0 bg-orange-500/15 text-orange-400 border-orange-500/40"
+                      >
+                        product
+                      </Badge>
                     </CardContent>
                   </Card>
                 ))}
@@ -1173,9 +1533,16 @@ export default function HypothesisHardwarePage() {
                       <Package className="w-4 h-4 text-primary shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{p.name}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{p.description || `/${p.slug}`}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {p.description || `/${p.slug}`}
+                        </p>
                       </div>
-                      <Badge variant="outline" className="text-[9px] ml-auto shrink-0 bg-blue-500/10 text-blue-400 border-blue-500/30">digital</Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] ml-auto shrink-0 bg-blue-500/10 text-blue-400 border-blue-500/30"
+                      >
+                        digital
+                      </Badge>
                     </CardContent>
                   </Card>
                 ))}
@@ -1185,7 +1552,9 @@ export default function HypothesisHardwarePage() {
 
           {components.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">Registered Sources ({components.length})</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Registered Sources ({components.length})
+              </h3>
               {components.map((c) => {
                 const stl = sourceTypeLabels[c.type] || sourceTypeLabels.hardware_component;
                 return (
@@ -1194,15 +1563,43 @@ export default function HypothesisHardwarePage() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            {c.type === "hardware_component" ? <Cpu className="w-4 h-4 text-orange-400 shrink-0" /> : c.type === "seeds_app" ? <Zap className="w-4 h-4 text-emerald-400 shrink-0" /> : <Globe className="w-4 h-4 text-cyan-400 shrink-0" />}
+                            {c.type === "hardware_component" ? (
+                              <Cpu className="w-4 h-4 text-orange-400 shrink-0" />
+                            ) : c.type === "seeds_app" ? (
+                              <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+                            ) : (
+                              <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
+                            )}
                             <p className="font-medium text-sm">{c.name}</p>
-                            <Badge variant="outline" className={`text-[9px] ${stl.color}`}>{stl.label}</Badge>
-                            {c.inputSchema && <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"><FileJson className="w-2.5 h-2.5 mr-0.5" />schema</Badge>}
+                            <Badge variant="outline" className={`text-[9px] ${stl.color}`}>
+                              {stl.label}
+                            </Badge>
+                            {c.inputSchema && (
+                              <Badge
+                                variant="outline"
+                                className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              >
+                                <FileJson className="w-2.5 h-2.5 mr-0.5" />
+                                schema
+                              </Badge>
+                            )}
                           </div>
-                          {c.url && <p className="text-xs text-muted-foreground mt-1 truncate">{c.url}</p>}
-                          {c.description && <p className="text-xs text-muted-foreground/70 mt-0.5">{c.description}</p>}
+                          {c.url && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate">{c.url}</p>
+                          )}
+                          {c.description && (
+                            <p className="text-xs text-muted-foreground/70 mt-0.5">
+                              {c.description}
+                            </p>
+                          )}
                         </div>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 shrink-0" onClick={() => removeComponent(c.id)} data-testid={`button-remove-${c.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-red-400 shrink-0"
+                          onClick={() => removeComponent(c.id)}
+                          data-testid={`button-remove-${c.id}`}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1213,26 +1610,40 @@ export default function HypothesisHardwarePage() {
             </div>
           )}
 
-          {components.length === 0 && digitalProjects.length === 0 && hardwareProducts.length === 0 && (
-            <div className="text-center py-12 space-y-3">
-              <Wrench className="w-10 h-10 text-muted-foreground/30 mx-auto" />
-              <p className="text-sm text-muted-foreground">No sources available yet</p>
-              <p className="text-xs text-muted-foreground/60">Build a product in the Hardware Builder, create digital APIs, or register components here to start discovering innovations</p>
-            </div>
-          )}
+          {components.length === 0 &&
+            digitalProjects.length === 0 &&
+            hardwareProducts.length === 0 && (
+              <div className="text-center py-12 space-y-3">
+                <Wrench className="w-10 h-10 text-muted-foreground/30 mx-auto" />
+                <p className="text-sm text-muted-foreground">No sources available yet</p>
+                <p className="text-xs text-muted-foreground/60">
+                  Build a product in the Hardware Builder, create digital APIs, or register
+                  components here to start discovering innovations
+                </p>
+              </div>
+            )}
         </TabsContent>
 
         <TabsContent value="feed" className="space-y-6 mt-6">
           {savedDiscoveries.length > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground">Saved Discoveries ({savedDiscoveries.length})</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Saved Discoveries ({savedDiscoveries.length})
+              </h3>
               {savedDiscoveries.map((d) => (
-                <Card key={d.id} className="bg-card/50 border-border/50 hover:border-orange-500/20 transition-colors cursor-pointer" onClick={() => loadDiscovery(d)} data-testid={`card-discovery-${d.id}`}>
+                <Card
+                  key={d.id}
+                  className="bg-card/50 border-border/50 hover:border-orange-500/20 transition-colors cursor-pointer"
+                  onClick={() => loadDiscovery(d)}
+                  data-testid={`card-discovery-${d.id}`}
+                >
                   <CardContent className="py-4 px-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold truncate">{d.question}</p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{d.summary}</p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {d.summary}
+                        </p>
                         <div className="flex items-center gap-3 mt-2">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground/60">
                             <Clock className="w-3 h-3" />
@@ -1241,20 +1652,64 @@ export default function HypothesisHardwarePage() {
                           <div className="flex items-center gap-1">
                             {d.hypotheses.slice(0, 3).map((h, i) => {
                               const rc = resultConfig[h.result] || resultConfig.unclear;
-                              return <Badge key={i} variant="outline" className={`text-[9px] ${rc.color}`}>{rc.label}</Badge>;
+                              return (
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className={`text-[9px] ${rc.color}`}
+                                >
+                                  {rc.label}
+                                </Badge>
+                              );
                             })}
-                            {d.hypotheses.length > 3 && <span className="text-[10px] text-muted-foreground">+{d.hypotheses.length - 3}</span>}
+                            {d.hypotheses.length > 3 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                +{d.hypotheses.length - 3}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); loadDiscovery(d); }} data-testid={`button-load-${d.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            loadDiscovery(d);
+                          }}
+                          data-testid={`button-load-${d.id}`}
+                        >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-orange-400" onClick={(e) => { e.stopPropagation(); setQuestion(d.question); setSelectedIds(d.sourceIds || []); if (d.hardwareContext) setHwContext(d.hardwareContext); setIsEditing(true); setStep("select"); setActiveTab("discover"); }} data-testid={`button-remix-feed-${d.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-orange-400"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuestion(d.question);
+                            setSelectedIds(d.sourceIds || []);
+                            if (d.hardwareContext) setHwContext(d.hardwareContext);
+                            setIsEditing(true);
+                            setStep("select");
+                            setActiveTab("discover");
+                          }}
+                          data-testid={`button-remix-feed-${d.id}`}
+                        >
                           <RotateCcw className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400" onClick={(e) => { e.stopPropagation(); deleteDiscovery(d.id); }} data-testid={`button-delete-${d.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-red-400"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDiscovery(d.id);
+                          }}
+                          data-testid={`button-delete-${d.id}`}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1267,7 +1722,9 @@ export default function HypothesisHardwarePage() {
             <div className="text-center py-12 space-y-3">
               <Bookmark className="w-10 h-10 text-muted-foreground/30 mx-auto" />
               <p className="text-sm text-muted-foreground">No saved discoveries yet</p>
-              <p className="text-xs text-muted-foreground/60">Run a discovery and save the results to build your innovation memory</p>
+              <p className="text-xs text-muted-foreground/60">
+                Run a discovery and save the results to build your innovation memory
+              </p>
             </div>
           )}
         </TabsContent>

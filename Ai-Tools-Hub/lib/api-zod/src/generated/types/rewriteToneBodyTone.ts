@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type RewriteToneBodyTone =
-  (typeof RewriteToneBodyTone)[keyof typeof RewriteToneBodyTone];
+export type RewriteToneBodyTone = (typeof RewriteToneBodyTone)[keyof typeof RewriteToneBodyTone];
 
 export const RewriteToneBodyTone = {
   professional: "professional",

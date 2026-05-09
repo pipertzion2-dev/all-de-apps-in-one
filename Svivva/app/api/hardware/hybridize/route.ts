@@ -71,7 +71,10 @@ Generate 3-5 hybrid systems. Return JSON:
     });
 
     const raw = resp.choices[0]?.message?.content || "{}";
-    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const cleaned = raw
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
     const result = JSON.parse(cleaned);
     return NextResponse.json(result);
   } catch (err: unknown) {

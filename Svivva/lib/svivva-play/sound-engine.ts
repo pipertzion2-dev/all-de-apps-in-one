@@ -27,7 +27,13 @@ export interface StemPlayback {
 }
 
 interface StemChannel {
-  synth: Tone.PolySynth | Tone.MonoSynth | Tone.MembraneSynth | Tone.MetalSynth | Tone.PluckSynth | Tone.NoiseSynth;
+  synth:
+    | Tone.PolySynth
+    | Tone.MonoSynth
+    | Tone.MembraneSynth
+    | Tone.MetalSynth
+    | Tone.PluckSynth
+    | Tone.NoiseSynth;
   panner: Tone.Panner;
   volume: Tone.Volume;
   effects: Tone.ToneAudioNode[];
@@ -56,7 +62,11 @@ export class SvivvaSoundEngine {
       this.masterVolume = new Tone.Volume(3).toDestination();
       console.log("🎵 Master volume connected at 3dB, volume dB:", this.masterVolume.volume.value);
       this.isInitialized = true;
-      console.log("🎵 Sound engine initialized, destination:", Tone.getDestination().numberOfOutputs, "outputs");
+      console.log(
+        "🎵 Sound engine initialized, destination:",
+        Tone.getDestination().numberOfOutputs,
+        "outputs",
+      );
     } catch (err) {
       console.error("🔴 Sound engine init error:", err);
       throw err;
@@ -93,25 +103,61 @@ export class SvivvaSoundEngine {
       try {
         switch (fx.type) {
           case "reverb":
-            effects.push(new Tone.Reverb({ wet: fx.wet, decay: (fx.decay as number) || 2, preDelay: (fx.preDelay as number) || 0.01 }));
+            effects.push(
+              new Tone.Reverb({
+                wet: fx.wet,
+                decay: (fx.decay as number) || 2,
+                preDelay: (fx.preDelay as number) || 0.01,
+              }),
+            );
             break;
           case "delay":
-            effects.push(new Tone.FeedbackDelay({ wet: fx.wet, delayTime: (fx.delayTime as number) || 0.25, feedback: (fx.feedback as number) || 0.3 }));
+            effects.push(
+              new Tone.FeedbackDelay({
+                wet: fx.wet,
+                delayTime: (fx.delayTime as number) || 0.25,
+                feedback: (fx.feedback as number) || 0.3,
+              }),
+            );
             break;
           case "chorus":
-            effects.push(new Tone.Chorus({ wet: fx.wet, frequency: (fx.frequency as number) || 1.5, delayTime: (fx.delayTime as number) || 3.5, depth: (fx.depth as number) || 0.5 }).start());
+            effects.push(
+              new Tone.Chorus({
+                wet: fx.wet,
+                frequency: (fx.frequency as number) || 1.5,
+                delayTime: (fx.delayTime as number) || 3.5,
+                depth: (fx.depth as number) || 0.5,
+              }).start(),
+            );
             break;
           case "distortion":
-            effects.push(new Tone.Distortion({ wet: fx.wet, distortion: (fx.amount as number) || 0.3 }));
+            effects.push(
+              new Tone.Distortion({ wet: fx.wet, distortion: (fx.amount as number) || 0.3 }),
+            );
             break;
           case "phaser":
-            effects.push(new Tone.Phaser({ wet: fx.wet, frequency: (fx.frequency as number) || 0.5, octaves: (fx.octaves as number) || 3, baseFrequency: (fx.baseFrequency as number) || 350 }));
+            effects.push(
+              new Tone.Phaser({
+                wet: fx.wet,
+                frequency: (fx.frequency as number) || 0.5,
+                octaves: (fx.octaves as number) || 3,
+                baseFrequency: (fx.baseFrequency as number) || 350,
+              }),
+            );
             break;
           case "compressor":
-            effects.push(new Tone.Compressor({ threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }));
+            effects.push(
+              new Tone.Compressor({ threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }),
+            );
             break;
           case "eq":
-            effects.push(new Tone.EQ3({ low: (fx.low as number) || 0, mid: (fx.mid as number) || 0, high: (fx.high as number) || 0 }));
+            effects.push(
+              new Tone.EQ3({
+                low: (fx.low as number) || 0,
+                mid: (fx.mid as number) || 0,
+                high: (fx.high as number) || 0,
+              }),
+            );
             break;
         }
       } catch {
@@ -152,33 +198,46 @@ export class SvivvaSoundEngine {
         return new Tone.MonoSynth({
           oscillator: { type: oscType },
           envelope: preset.envelope,
-          filter: preset.filter ? {
-            type: preset.filter.type as BiquadFilterType,
-            frequency: preset.filter.frequency,
-            rolloff: preset.filter.rolloff as Tone.FilterRollOff,
-            Q: preset.filter.Q,
-          } : undefined,
-          filterEnvelope: preset.filterEnvelope ? {
-            attack: preset.filterEnvelope.attack,
-            decay: preset.filterEnvelope.decay,
-            sustain: preset.filterEnvelope.sustain,
-            release: preset.filterEnvelope.release,
-            baseFrequency: preset.filterEnvelope.baseFrequency,
-            octaves: preset.filterEnvelope.octaves,
-          } : undefined,
+          filter: preset.filter
+            ? {
+                type: preset.filter.type as BiquadFilterType,
+                frequency: preset.filter.frequency,
+                rolloff: preset.filter.rolloff as Tone.FilterRollOff,
+                Q: preset.filter.Q,
+              }
+            : undefined,
+          filterEnvelope: preset.filterEnvelope
+            ? {
+                attack: preset.filterEnvelope.attack,
+                decay: preset.filterEnvelope.decay,
+                sustain: preset.filterEnvelope.sustain,
+                release: preset.filterEnvelope.release,
+                baseFrequency: preset.filterEnvelope.baseFrequency,
+                octaves: preset.filterEnvelope.octaves,
+              }
+            : undefined,
           volume: preset.volume ?? -8,
           portamento: preset.portamento ?? 0,
         });
       case "membrane":
         return new Tone.MembraneSynth({
-          envelope: { attack: preset.envelope.attack, decay: preset.envelope.decay, sustain: preset.envelope.sustain, release: preset.envelope.release },
+          envelope: {
+            attack: preset.envelope.attack,
+            decay: preset.envelope.decay,
+            sustain: preset.envelope.sustain,
+            release: preset.envelope.release,
+          },
           volume: preset.volume ?? -4,
           pitchDecay: 0.05,
           octaves: 6,
         });
       case "metal":
         return new Tone.MetalSynth({
-          envelope: { attack: preset.envelope.attack, decay: preset.envelope.decay, release: preset.envelope.release },
+          envelope: {
+            attack: preset.envelope.attack,
+            decay: preset.envelope.decay,
+            release: preset.envelope.release,
+          },
           volume: preset.volume ?? -12,
           harmonicity: 5.1,
           modulationIndex: 32,
@@ -212,10 +271,15 @@ export class SvivvaSoundEngine {
   }
 
   loadStems(stems: StemPlayback[]) {
-    console.log("🎵 Loading", stems.length, "stems, masterVolume:", this.masterVolume ? "connected" : "null (will use destination)");
+    console.log(
+      "🎵 Loading",
+      stems.length,
+      "stems, masterVolume:",
+      this.masterVolume ? "connected" : "null (will use destination)",
+    );
     this.dispose();
     const transport = Tone.getTransport();
-    
+
     // Ensure transport is stopped and reset
     if (transport.state === "started" || transport.state === "paused") {
       transport.stop();
@@ -290,7 +354,9 @@ export class SvivvaSoundEngine {
     const maxBeatDuration = maxBeat > 0 ? this.beatToSeconds(maxBeat) : 0;
     const releaseBuffer = 0.5; // Minimal buffer for synth release
     this.duration = maxBeatDuration + releaseBuffer;
-    console.log(`🎵 Song duration: ${maxBeat} beats = ${maxBeatDuration.toFixed(2)}s + ${releaseBuffer}s buffer = ${this.duration.toFixed(2)}s total`);
+    console.log(
+      `🎵 Song duration: ${maxBeat} beats = ${maxBeatDuration.toFixed(2)}s + ${releaseBuffer}s buffer = ${this.duration.toFixed(2)}s total`,
+    );
   }
 
   updateMix(stemName: string, opts: { muted?: boolean; pan?: number; gainDb?: number }) {
@@ -308,14 +374,14 @@ export class SvivvaSoundEngine {
   }
 
   applySoloState(stems: { name: string; soloed: boolean; muted: boolean; gainDb: number }[]) {
-    const anySoloed = stems.some(s => s.soloed);
+    const anySoloed = stems.some((s) => s.soloed);
     for (const stem of stems) {
       const ch = this.channels.get(stem.name);
       if (!ch) continue;
       if (anySoloed) {
-        ch.volume.volume.value = stem.soloed ? (stem.gainDb || 0) : -Infinity;
+        ch.volume.volume.value = stem.soloed ? stem.gainDb || 0 : -Infinity;
       } else {
-        ch.volume.volume.value = stem.muted ? -Infinity : (stem.gainDb || 0);
+        ch.volume.volume.value = stem.muted ? -Infinity : stem.gainDb || 0;
       }
     }
   }
@@ -324,8 +390,17 @@ export class SvivvaSoundEngine {
     try {
       if (!this.isInitialized) await this.init();
       const transport = Tone.getTransport();
-      console.log("🎵 Starting playback, channels:", this.channels.size, "duration:", this.duration, "transport state:", transport.state, "position:", transport.position);
-      
+      console.log(
+        "🎵 Starting playback, channels:",
+        this.channels.size,
+        "duration:",
+        this.duration,
+        "transport state:",
+        transport.state,
+        "position:",
+        transport.position,
+      );
+
       // Only start if not already running
       if (transport.state !== "started") {
         transport.start();
@@ -407,7 +482,9 @@ export class SvivvaSoundEngine {
               } else if (synth instanceof Tone.PolySynth) {
                 synth.triggerAttackRelease(note, evtDur, t, vel);
               }
-            } catch { /* skip */ }
+            } catch {
+              /* skip */
+            }
           }, time);
         }
       }
@@ -431,8 +508,10 @@ export class SvivvaSoundEngine {
         ch.synth.dispose();
         ch.panner.dispose();
         ch.volume.dispose();
-        ch.effects.forEach(fx => fx.dispose());
-      } catch { /* skip */ }
+        ch.effects.forEach((fx) => fx.dispose());
+      } catch {
+        /* skip */
+      }
     }
     this.channels.clear();
     this.isPlaying = false;
@@ -479,7 +558,7 @@ function audioBufferToWav(buffer: Tone.ToneAudioBuffer): ArrayBuffer {
   for (let i = 0; i < length; i++) {
     for (let c = 0; c < numChannels; c++) {
       const sample = Math.max(-1, Math.min(1, channels[c][i]));
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
       offset += 2;
     }
   }

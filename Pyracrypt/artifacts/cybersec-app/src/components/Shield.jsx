@@ -1,22 +1,22 @@
-import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
-import { cssVarColor } from '../utils/cssVarColor'
+import { cssVarColor } from "../utils/cssVarColor";
 
 export function Shield({ expanded, phase }) {
-  const ref = useRef()
-  const accent = useMemo(() => cssVarColor('--accent'), [])
-  const success = useMemo(() => cssVarColor('--success'), [])
+  const ref = useRef();
+  const accent = useMemo(() => cssVarColor("--accent"), []);
+  const success = useMemo(() => cssVarColor("--success"), []);
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime
-    if (!ref.current) return
-    const breathe = 1 + Math.sin(t * 2.2) * 0.02
-    const base = expanded ? 1.25 : 1.05
-    ref.current.scale.setScalar(base * breathe)
-  })
+    const t = state.clock.elapsedTime;
+    if (!ref.current) return;
+    const breathe = 1 + Math.sin(t * 2.2) * 0.02;
+    const base = expanded ? 1.25 : 1.05;
+    ref.current.scale.setScalar(base * breathe);
+  });
 
-  const color = phase === 'REMEDY' ? success : accent
+  const color = phase === "REMEDY" ? success : accent;
 
   return (
     <mesh ref={ref}>
@@ -35,5 +35,5 @@ export function Shield({ expanded, phase }) {
         clearcoatRoughness={0.15}
       />
     </mesh>
-  )
+  );
 }

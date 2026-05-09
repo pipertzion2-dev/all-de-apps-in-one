@@ -2,24 +2,84 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import * as THREE from "three";
-import { 
-  Zap, Brain, Sparkles, Target, Rocket, Shield, Globe, Code,
-  MessageSquare, Image, FileText, BarChart, Database, Lock,
-  Cpu, Layers, Bot, Wand2, Flame, Heart, Star, Gem,
-  Crown, Trophy, Lightbulb, Compass, Anchor, Feather,
-  ChevronLeft, ChevronRight, Play, Square, Import, Upload,
-  Palette, Briefcase, Smile, Check, ArrowRight, X
+import {
+  Zap,
+  Brain,
+  Sparkles,
+  Target,
+  Rocket,
+  Shield,
+  Globe,
+  Code,
+  MessageSquare,
+  Image,
+  FileText,
+  BarChart,
+  Database,
+  Lock,
+  Cpu,
+  Layers,
+  Bot,
+  Wand2,
+  Flame,
+  Heart,
+  Star,
+  Gem,
+  Crown,
+  Trophy,
+  Lightbulb,
+  Compass,
+  Anchor,
+  Feather,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Square,
+  Import,
+  Upload,
+  Palette,
+  Briefcase,
+  Smile,
+  Check,
+  ArrowRight,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Zap, Brain, Sparkles, Target, Rocket, Shield, Globe, Code,
-  MessageSquare, Image, FileText, BarChart, Database, Lock,
-  Cpu, Layers, Bot, Wand2, Flame, Heart, Star, Gem,
-  Crown, Trophy, Lightbulb, Compass, Anchor, Feather,
-  Palette, Briefcase, Smile
+  Zap,
+  Brain,
+  Sparkles,
+  Target,
+  Rocket,
+  Shield,
+  Globe,
+  Code,
+  MessageSquare,
+  Image,
+  FileText,
+  BarChart,
+  Database,
+  Lock,
+  Cpu,
+  Layers,
+  Bot,
+  Wand2,
+  Flame,
+  Heart,
+  Star,
+  Gem,
+  Crown,
+  Trophy,
+  Lightbulb,
+  Compass,
+  Anchor,
+  Feather,
+  Palette,
+  Briefcase,
+  Smile,
 };
 
 interface OnboardingQuestion {
@@ -41,7 +101,11 @@ interface BrandSuggestion {
 
 interface ApiInstrumentProps {
   projectId: string;
-  onComplete?: (data: { name: string; icon: string; palette: { primary: string; secondary: string; accent: string } }) => void;
+  onComplete?: (data: {
+    name: string;
+    icon: string;
+    palette: { primary: string; secondary: string; accent: string };
+  }) => void;
   initialPrompt?: string;
 }
 
@@ -104,7 +168,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
         showError("Invalid JSON in output field. Please enter valid JSON.");
         return;
       }
-      
+
       const res = await fetch(`/api/projects/${projectId}/training-data`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,7 +176,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add");
-      
+
       setNewInput("");
       setNewOutput("{}");
       setIsAdding(false);
@@ -130,7 +194,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete");
-      
+
       showSuccess("Example deleted!");
       loadExamples();
     } catch (err) {
@@ -147,7 +211,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
         showError("Invalid JSON in output field. Please enter valid JSON.");
         return;
       }
-      
+
       const res = await fetch(`/api/projects/${projectId}/training-data/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -155,7 +219,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update");
-      
+
       setEditingId(null);
       showSuccess("Example updated!");
       loadExamples();
@@ -169,16 +233,17 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       const res = await fetch(`/api/projects/${projectId}/training-data`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to export");
-      
+
       const exportData = {
         projectId,
         exportedAt: new Date().toISOString(),
-        examples: data.examples?.map((e: TrainingExample) => ({
-          input: e.input,
-          output: e.output,
-        })) || [],
+        examples:
+          data.examples?.map((e: TrainingExample) => ({
+            input: e.input,
+            output: e.output,
+          })) || [],
       };
-      
+
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -188,7 +253,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       showSuccess("Training data exported!");
     } catch (err) {
       showError(err instanceof Error ? err.message : "Failed to export");
@@ -213,18 +278,18 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
         e.target.value = "";
         return;
       }
-      
+
       const res = await fetch(`/api/projects/${projectId}/training-data/import`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          format: "json", 
-          data: JSON.stringify(jsonData.examples || jsonData)
+        body: JSON.stringify({
+          format: "json",
+          data: JSON.stringify(jsonData.examples || jsonData),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to import");
-      
+
       showSuccess(`Imported ${data.imported} examples!`);
       loadExamples();
     } catch (err) {
@@ -244,7 +309,7 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate");
-      
+
       showSuccess(`Generated ${data.approved || 0} training examples!`);
       loadExamples();
     } catch (err) {
@@ -272,23 +337,41 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
             onChange={handleFileImport}
             data-testid="input-file-import"
           />
-          <Button size="sm" variant="outline" className="gap-1" onClick={handleImportClick} data-testid="button-import">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={handleImportClick}
+            data-testid="button-import"
+          >
             <Import className="w-3 h-3" /> Import
           </Button>
-          <Button size="sm" variant="outline" className="gap-1" onClick={handleExport} data-testid="button-export">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={handleExport}
+            data-testid="button-export"
+          >
             <Upload className="w-3 h-3" /> Export
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-3 p-2 rounded bg-red-500/20 border border-red-500/30 text-red-300 text-sm" data-testid="alert-error">
+        <div
+          className="mb-3 p-2 rounded bg-red-500/20 border border-red-500/30 text-red-300 text-sm"
+          data-testid="alert-error"
+        >
           {error}
         </div>
       )}
-      
+
       {successMsg && (
-        <div className="mb-3 p-2 rounded bg-green-500/20 border border-green-500/30 text-green-300 text-sm" data-testid="alert-success">
+        <div
+          className="mb-3 p-2 rounded bg-green-500/20 border border-green-500/30 text-green-300 text-sm"
+          data-testid="alert-success"
+        >
           {successMsg}
         </div>
       )}
@@ -304,10 +387,20 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
               <Bot className="w-12 h-12 mx-auto mb-3 text-gray-500 opacity-50" />
               <p className="text-gray-400 mb-4">No training examples yet</p>
               <div className="flex justify-center gap-2">
-                <Button size="sm" onClick={() => setIsAdding(true)} className="bg-amber-500" data-testid="button-add-first">
+                <Button
+                  size="sm"
+                  onClick={() => setIsAdding(true)}
+                  className="bg-amber-500"
+                  data-testid="button-add-first"
+                >
                   Add Custom Example
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleGenerate} data-testid="button-generate">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleGenerate}
+                  data-testid="button-generate"
+                >
                   <Sparkles className="w-3 h-3 mr-1" /> Generate with AI
                 </Button>
               </div>
@@ -332,15 +425,30 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
                     data-testid="input-new-output"
                   />
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)} data-testid="button-cancel-add">Cancel</Button>
-                    <Button size="sm" className="bg-amber-500" onClick={handleAdd} disabled={!newInput.trim()} data-testid="button-save-add">Save</Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setIsAdding(false)}
+                      data-testid="button-cancel-add"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-amber-500"
+                      onClick={handleAdd}
+                      disabled={!newInput.trim()}
+                      data-testid="button-save-add"
+                    >
+                      Save
+                    </Button>
                   </div>
                 </div>
               )}
 
               {examples.map((ex) => (
-                <div 
-                  key={ex.id} 
+                <div
+                  key={ex.id}
                   className="p-3 rounded-lg border border-white/10 bg-white/5 group hover:border-amber-400/30 transition-colors"
                   data-testid={`example-${ex.id}`}
                 >
@@ -360,8 +468,22 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
                         data-testid={`input-edit-output-${ex.id}`}
                       />
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} data-testid={`button-cancel-edit-${ex.id}`}>Cancel</Button>
-                        <Button size="sm" className="bg-amber-500" onClick={() => handleUpdate(ex.id)} data-testid={`button-save-edit-${ex.id}`}>Update</Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingId(null)}
+                          data-testid={`button-cancel-edit-${ex.id}`}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-amber-500"
+                          onClick={() => handleUpdate(ex.id)}
+                          data-testid={`button-save-edit-${ex.id}`}
+                        >
+                          Update
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -405,10 +527,20 @@ function TrainModeScreen({ projectId }: { projectId: string }) {
 
               {!isAdding && examples.length > 0 && (
                 <div className="flex justify-center gap-2 pt-2">
-                  <Button size="sm" variant="outline" onClick={() => setIsAdding(true)} data-testid="button-add-more">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsAdding(true)}
+                    data-testid="button-add-more"
+                  >
                     Add Custom
                   </Button>
-                  <Button size="sm" variant="outline" onClick={handleGenerate} data-testid="button-generate-more">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleGenerate}
+                    data-testid="button-generate-more"
+                  >
                     <Sparkles className="w-3 h-3 mr-1" /> Generate More
                   </Button>
                 </div>
@@ -442,7 +574,7 @@ function TestModeScreen({ projectId }: { projectId: string }) {
       });
       const data = await res.json();
       setLatency(Date.now() - startTime);
-      
+
       if (!res.ok) {
         setError(data.error || "Request failed");
       } else {
@@ -481,8 +613,8 @@ function TestModeScreen({ projectId }: { projectId: string }) {
           />
         </div>
 
-        <Button 
-          onClick={runTest} 
+        <Button
+          onClick={runTest}
           disabled={isRunning || !testInput.trim()}
           className="bg-blue-500 gap-2"
           data-testid="button-run-test"
@@ -502,9 +634,11 @@ function TestModeScreen({ projectId }: { projectId: string }) {
 
         <div className="flex-1 flex flex-col">
           <label className="text-xs text-gray-500 mb-1">Output</label>
-          <div 
+          <div
             className={`flex-1 rounded-lg p-3 overflow-auto ${
-              error ? "bg-red-500/10 border border-red-500/30" : "bg-black/30 border border-white/10"
+              error
+                ? "bg-red-500/10 border border-red-500/30"
+                : "bg-black/30 border border-white/10"
             }`}
             data-testid="container-test-output"
           >
@@ -560,7 +694,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const animationRef = useRef<number>(0);
-  
+
   const [mode, setMode] = useState<InstrumentMode>("define");
   const [prompt, setPrompt] = useState(initialPrompt);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -569,14 +703,17 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
   const [suggestions, setSuggestions] = useState<BrandSuggestion | null>(null);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const [selectedPalette, setSelectedPalette] = useState<{ name: string; colors: { primary: string; secondary: string; accent: string } } | null>(null);
+  const [selectedPalette, setSelectedPalette] = useState<{
+    name: string;
+    colors: { primary: string; secondary: string; accent: string };
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [waveformData, setWaveformData] = useState<number[]>(Array(32).fill(0));
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/suggestions`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.questions) setQuestions(data.questions);
         if (data.brand) {
           setSuggestions({
@@ -588,7 +725,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
           if (data.brand.icon) setSelectedIcon(data.brand.icon);
           if (data.brand.colorPalette) {
             const matchingPalette = data.brand.suggestedPalettes?.find(
-              (p: { colors: { primary: string } }) => p.colors.primary === data.brand.colorPalette?.primary
+              (p: { colors: { primary: string } }) =>
+                p.colors.primary === data.brand.colorPalette?.primary,
             );
             if (matchingPalette) setSelectedPalette(matchingPalette);
           }
@@ -599,12 +737,12 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setWaveformData(prev => 
+      setWaveformData((prev) =>
         prev.map((_, i) => {
           const base = Math.sin(Date.now() * 0.002 + i * 0.3) * 0.3;
           const noise = (Math.random() - 0.5) * 0.2;
           return 0.5 + base + noise;
-        })
+        }),
       );
     }, 50);
     return () => clearInterval(interval);
@@ -670,7 +808,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
     mainLight.castShadow = true;
     scene.add(mainLight);
 
-    const rimLight = new THREE.PointLight(0x5BA8A0, 0.5);
+    const rimLight = new THREE.PointLight(0x5ba8a0, 0.5);
     rimLight.position.set(-3, 2, 2);
     scene.add(rimLight);
 
@@ -709,8 +847,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "complete",
-          context: { prompt, existingAnswers: answers }
-        })
+          context: { prompt, existingAnswers: answers },
+        }),
       });
       const data = await response.json();
       if (data.branding) {
@@ -723,14 +861,17 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
     setIsLoading(false);
   }, [projectId, prompt, answers]);
 
-  const handleAnswerSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      void generateSuggestions();
-    }
-  }, [currentQuestionIndex, questions.length, generateSuggestions]);
+  const handleAnswerSelect = useCallback(
+    (questionId: string, value: string) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: value }));
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex((prev) => prev + 1);
+      } else {
+        void generateSuggestions();
+      }
+    },
+    [currentQuestionIndex, questions.length, generateSuggestions],
+  );
 
   const handleComplete = useCallback(() => {
     if (selectedName && selectedIcon && selectedPalette && onComplete) {
@@ -758,10 +899,12 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 Step {currentQuestionIndex + 1}/{questions.length || 3}
               </Badge>
             </div>
-            
+
             {currentQuestion ? (
               <div className="flex-1 flex flex-col">
-                <h2 className="text-xl font-semibold text-white mb-4">{currentQuestion.question}</h2>
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  {currentQuestion.question}
+                </h2>
                 <div className="grid grid-cols-2 gap-3 flex-1">
                   {currentQuestion.options.map((option) => {
                     const IconComponent = ICON_MAP[option.icon] || Zap;
@@ -778,7 +921,9 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         data-testid={`option-${option.value}`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${isSelected ? "bg-[#5BA8A0]" : "bg-white/10 group-hover:bg-[#5BA8A0]/30"}`}>
+                          <div
+                            className={`p-2 rounded-lg ${isSelected ? "bg-[#5BA8A0]" : "bg-white/10 group-hover:bg-[#5BA8A0]/30"}`}
+                          >
                             <IconComponent className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1">
@@ -830,7 +975,12 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 <span className="text-[#6B3A67] text-sm font-mono">BRAND MODE</span>
               </div>
               {selectedName && selectedIcon && selectedPalette && (
-                <Button size="sm" onClick={handleComplete} className="bg-[#5BA8A0]" data-testid="button-finalize">
+                <Button
+                  size="sm"
+                  onClick={handleComplete}
+                  className="bg-[#5BA8A0]"
+                  data-testid="button-finalize"
+                >
                   Finalize Brand
                 </Button>
               )}
@@ -900,9 +1050,18 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         data-testid={`palette-${palette.name}`}
                       >
                         <div className="flex gap-1 mb-2">
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.colors.primary }} />
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.colors.secondary }} />
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.colors.accent }} />
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: palette.colors.primary }}
+                          />
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: palette.colors.secondary }}
+                          />
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: palette.colors.accent }}
+                          />
                         </div>
                         <div className="text-xs text-gray-400">{palette.name}</div>
                       </button>
@@ -915,25 +1074,35 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
         );
 
       case "train":
-        return (
-          <TrainModeScreen projectId={projectId} />
-        );
+        return <TrainModeScreen projectId={projectId} />;
 
       case "test":
-        return (
-          <TestModeScreen projectId={projectId} />
-        );
+        return <TestModeScreen projectId={projectId} />;
     }
-  }, [mode, currentQuestion, currentQuestionIndex, questions, answers, prompt, suggestions, selectedName, selectedIcon, selectedPalette, handleAnswerSelect, handleComplete, projectId]);
+  }, [
+    mode,
+    currentQuestion,
+    currentQuestionIndex,
+    questions,
+    answers,
+    prompt,
+    suggestions,
+    selectedName,
+    selectedIcon,
+    selectedPalette,
+    handleAnswerSelect,
+    handleComplete,
+    projectId,
+  ]);
 
   return (
     <div className="relative w-full h-[700px] rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10">
       <div ref={containerRef} className="absolute inset-0 opacity-30" />
-      
+
       <div className="relative z-10 h-full flex flex-col p-6">
         <div className="flex-1 flex gap-6">
           <div className="flex-1 relative">
-            <div 
+            <div
               className="absolute inset-0 rounded-xl overflow-hidden"
               style={{
                 background: "linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.95) 100%)",
@@ -941,13 +1110,14 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 border: "2px solid rgba(91, 168, 160, 0.3)",
               }}
             >
-              <div 
+              <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)",
+                  background:
+                    "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)",
                 }}
               />
-              
+
               <div className="relative z-10 p-6 h-full">
                 {isLoading ? (
                   <div className="h-full flex items-center justify-center">
@@ -967,8 +1137,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             <button
               onClick={() => setMode("define")}
               className={`flex-1 rounded-xl transition-all ${
-                mode === "define" 
-                  ? "bg-gradient-to-br from-[#5BA8A0] to-[#4A9790]" 
+                mode === "define"
+                  ? "bg-gradient-to-br from-[#5BA8A0] to-[#4A9790]"
                   : "bg-white/5 hover:bg-white/10"
               }`}
               style={{
@@ -985,8 +1155,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             <button
               onClick={() => setMode("train")}
               className={`flex-1 rounded-xl transition-all ${
-                mode === "train" 
-                  ? "bg-gradient-to-br from-amber-500 to-amber-600" 
+                mode === "train"
+                  ? "bg-gradient-to-br from-amber-500 to-amber-600"
                   : "bg-white/5 hover:bg-white/10"
               }`}
               style={{
@@ -1003,8 +1173,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             <button
               onClick={() => setMode("brand")}
               className={`flex-1 rounded-xl transition-all ${
-                mode === "brand" 
-                  ? "bg-gradient-to-br from-purple-500 to-purple-600" 
+                mode === "brand"
+                  ? "bg-gradient-to-br from-purple-500 to-purple-600"
                   : "bg-white/5 hover:bg-white/10"
               }`}
               style={{
@@ -1021,8 +1191,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             <button
               onClick={() => setMode("test")}
               className={`flex-1 rounded-xl transition-all ${
-                mode === "test" 
-                  ? "bg-gradient-to-br from-blue-500 to-blue-600" 
+                mode === "test"
+                  ? "bg-gradient-to-br from-blue-500 to-blue-600"
                   : "bg-white/5 hover:bg-white/10"
               }`}
               style={{
@@ -1039,7 +1209,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
         </div>
 
         <div className="mt-6 flex items-center gap-4">
-          <div 
+          <div
             className="flex-1 h-16 rounded-lg overflow-hidden relative"
             style={{
               background: `linear-gradient(135deg, 
@@ -1074,7 +1244,10 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 }}
                 data-testid={`button-control-${i}`}
               >
-                <Icon className="w-5 h-5 text-zinc-700" style={{ transform: i === 0 || i === 1 ? "scaleX(-1)" : "none" }} />
+                <Icon
+                  className="w-5 h-5 text-zinc-700"
+                  style={{ transform: i === 0 || i === 1 ? "scaleX(-1)" : "none" }}
+                />
               </button>
             ))}
           </div>
@@ -1083,8 +1256,13 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
 
       <style jsx>{`
         @keyframes camoShift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
       `}</style>
     </div>

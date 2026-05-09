@@ -25,7 +25,10 @@ function uniqSortedIntervals(arr: number[]): number[] {
   const out: number[] = [];
   for (const v of arr) {
     const n = ((v % 12) + 12) % 12;
-    if (!seen[n]) { seen[n] = true; out.push(n); }
+    if (!seen[n]) {
+      seen[n] = true;
+      out.push(n);
+    }
   }
   return out.sort((a, b) => a - b);
 }
@@ -56,24 +59,50 @@ export interface ChordDef {
 const registry: Record<string, ChordDef> = {};
 let listCache: ChordDef[] | null = null;
 
-function register(id: string, symbol: string, name: string, intervals: number[], tags: string[] = []) {
+function register(
+  id: string,
+  symbol: string,
+  name: string,
+  intervals: number[],
+  tags: string[] = [],
+) {
   if (registry[id]) return;
   registry[id] = { id, symbol, name, intervals: uniqSortedIntervals(intervals), tags };
 }
 
-function addTag(tags: string[], t: string) { if (!tags.includes(t)) tags.push(t); }
+function addTag(tags: string[], t: string) {
+  if (!tags.includes(t)) tags.push(t);
+}
 
 register("maj", "", "Major triad", [0, 4, 7], ["triad", "basic"]);
-register("min", "m", "Minor triad", [0, 3, 7], ["triad", "basic", "brazilian", "neo-soul", "gospel"]);
+register(
+  "min",
+  "m",
+  "Minor triad",
+  [0, 3, 7],
+  ["triad", "basic", "brazilian", "neo-soul", "gospel"],
+);
 register("dim", "dim", "Diminished triad", [0, 3, 6], ["triad", "basic", "jazz"]);
 register("aug", "aug", "Augmented triad", [0, 4, 8], ["triad", "basic", "jazz"]);
 register("sus2", "sus2", "Suspended 2nd", [0, 2, 7], ["triad", "sus", "neo-soul"]);
 register("sus4", "sus4", "Suspended 4th", [0, 5, 7], ["triad", "sus", "gospel", "brazilian"]);
 register("add9", "add9", "Add 9", [0, 4, 7, 14], ["triad", "extension", "neo-soul"]);
-register("madd9", "madd9", "Minor add 9", [0, 3, 7, 14], ["triad", "extension", "brazilian", "neo-soul"]);
+register(
+  "madd9",
+  "madd9",
+  "Minor add 9",
+  [0, 3, 7, 14],
+  ["triad", "extension", "brazilian", "neo-soul"],
+);
 
 register("maj7", "maj7", "Major 7th", [0, 4, 7, 11], ["7th", "jazz", "brazilian", "neo-soul"]);
-register("min7", "m7", "Minor 7th", [0, 3, 7, 10], ["7th", "jazz", "brazilian", "neo-soul", "gospel"]);
+register(
+  "min7",
+  "m7",
+  "Minor 7th",
+  [0, 3, 7, 10],
+  ["7th", "jazz", "brazilian", "neo-soul", "gospel"],
+);
 register("dom7", "7", "Dominant 7th", [0, 4, 7, 10], ["7th", "jazz", "brazilian", "gospel"]);
 register("min7b5", "m7♭5", "Half-diminished", [0, 3, 6, 10], ["7th", "jazz", "brazilian"]);
 register("dim7", "dim7", "Diminished 7th", [0, 3, 6, 9], ["7th", "jazz", "gospel"]);
@@ -88,28 +117,112 @@ register("maj69", "6/9", "Major 6/9", [0, 4, 7, 9, 14], ["6th", "brazilian", "ne
 register("min69", "m6/9", "Minor 6/9", [0, 3, 7, 9, 14], ["6th", "brazilian", "neo-soul"]);
 
 register("maj9", "maj9", "Major 9th", [0, 4, 7, 11, 14], ["9th", "jazz", "brazilian", "neo-soul"]);
-register("min9", "m9", "Minor 9th", [0, 3, 7, 10, 14], ["9th", "jazz", "brazilian", "neo-soul", "gospel"]);
+register(
+  "min9",
+  "m9",
+  "Minor 9th",
+  [0, 3, 7, 10, 14],
+  ["9th", "jazz", "brazilian", "neo-soul", "gospel"],
+);
 register("dom9", "9", "Dominant 9th", [0, 4, 7, 10, 14], ["9th", "jazz", "brazilian", "gospel"]);
-register("7b9", "7♭9", "Dominant 7 ♭9", [0, 4, 7, 10, 13], ["9th", "altered", "jazz", "brazilian", "gospel"]);
-register("7sharp9", "7♯9", "Dominant 7 ♯9", [0, 4, 7, 10, 15], ["9th", "altered", "jazz", "neo-soul"]);
-register("mM9", "mM9", "Minor-major 9", [0, 3, 7, 11, 14], ["9th", "jazz", "brazilian", "neo-soul"]);
+register(
+  "7b9",
+  "7♭9",
+  "Dominant 7 ♭9",
+  [0, 4, 7, 10, 13],
+  ["9th", "altered", "jazz", "brazilian", "gospel"],
+);
+register(
+  "7sharp9",
+  "7♯9",
+  "Dominant 7 ♯9",
+  [0, 4, 7, 10, 15],
+  ["9th", "altered", "jazz", "neo-soul"],
+);
+register(
+  "mM9",
+  "mM9",
+  "Minor-major 9",
+  [0, 3, 7, 11, 14],
+  ["9th", "jazz", "brazilian", "neo-soul"],
+);
 
-register("min11", "m11", "Minor 11th", [0, 3, 7, 10, 14, 17], ["11th", "jazz", "brazilian", "neo-soul", "gospel"]);
+register(
+  "min11",
+  "m11",
+  "Minor 11th",
+  [0, 3, 7, 10, 14, 17],
+  ["11th", "jazz", "brazilian", "neo-soul", "gospel"],
+);
 register("dom11", "11", "Dominant 11th", [0, 4, 7, 10, 14, 17], ["11th", "jazz"]);
-register("maj7sharp11", "maj7♯11", "Lydian major 7", [0, 4, 7, 11, 18], ["11th", "jazz", "brazilian", "neo-soul"]);
-register("7sharp11", "7♯11", "Dominant 7 ♯11", [0, 4, 7, 10, 18], ["11th", "altered", "jazz", "brazilian"]);
+register(
+  "maj7sharp11",
+  "maj7♯11",
+  "Lydian major 7",
+  [0, 4, 7, 11, 18],
+  ["11th", "jazz", "brazilian", "neo-soul"],
+);
+register(
+  "7sharp11",
+  "7♯11",
+  "Dominant 7 ♯11",
+  [0, 4, 7, 10, 18],
+  ["11th", "altered", "jazz", "brazilian"],
+);
 
 register("maj13", "maj13", "Major 13th", [0, 4, 7, 11, 14, 21], ["13th", "jazz", "brazilian"]);
-register("min13", "m13", "Minor 13th", [0, 3, 7, 10, 14, 21], ["13th", "jazz", "neo-soul", "gospel"]);
-register("dom13", "13", "Dominant 13th", [0, 4, 7, 10, 14, 21], ["13th", "jazz", "brazilian", "gospel"]);
-register("maj13sharp11", "maj13♯11", "Major 13 ♯11", [0, 4, 7, 11, 14, 18, 21], ["13th", "jazz", "brazilian"]);
-register("alt", "alt", "Altered scale chord", [0, 4, 8, 10, 13, 15, 18, 20], ["altered", "jazz", "neo-soul"]);
+register(
+  "min13",
+  "m13",
+  "Minor 13th",
+  [0, 3, 7, 10, 14, 21],
+  ["13th", "jazz", "neo-soul", "gospel"],
+);
+register(
+  "dom13",
+  "13",
+  "Dominant 13th",
+  [0, 4, 7, 10, 14, 21],
+  ["13th", "jazz", "brazilian", "gospel"],
+);
+register(
+  "maj13sharp11",
+  "maj13♯11",
+  "Major 13 ♯11",
+  [0, 4, 7, 11, 14, 18, 21],
+  ["13th", "jazz", "brazilian"],
+);
+register(
+  "alt",
+  "alt",
+  "Altered scale chord",
+  [0, 4, 8, 10, 13, 15, 18, 20],
+  ["altered", "jazz", "neo-soul"],
+);
 
-register("quartal3", "quartal(3)", "Three-note quartal", [0, 5, 10], ["quartal", "neo-soul", "piano"]);
+register(
+  "quartal3",
+  "quartal(3)",
+  "Three-note quartal",
+  [0, 5, 10],
+  ["quartal", "neo-soul", "piano"],
+);
 register("quartal4", "quartal(4)", "Four-note quartal", [0, 5, 10, 15], ["quartal", "neo-soul"]);
-register("quartal5", "quartal(5)", "Five-note quartal", [0, 5, 10, 15, 20], ["quartal", "neo-soul"]);
+register(
+  "quartal5",
+  "quartal(5)",
+  "Five-note quartal",
+  [0, 5, 10, 15, 20],
+  ["quartal", "neo-soul"],
+);
 
-register("cluster_maj2", "cluster(maj2)", "Major 2nd cluster", [0, 2, 4], ["cluster", "gospel", "dense"]);
+register(
+  "cluster_maj2",
+  "cluster(maj2)",
+  "Major 2nd cluster",
+  [0, 2, 4],
+  ["cluster", "gospel", "dense"],
+);
 register("power5", "5", "Power (fifth)", [0, 7], ["basic", "rock"]);
 
 register("mu_major", "add2", "Mu major (add 2)", [0, 2, 4, 7], ["steely-dan", "studio", "add2"]);
@@ -125,50 +238,105 @@ register("min9sharp11", "m9♯11", "Minor 9 ♯11", [0, 3, 7, 10, 14, 18], ["neo
 
 register("tj_open4", "open4", "Open fourth dyad", [0, 5], ["tom-johnson", "minimal"]);
 register("tj_open5", "open5+", "Open fifth + add-2", [0, 2, 7], ["tom-johnson", "minimal"]);
-register("tj_trichord_014", "014", "Trichord 0-1-4", [0, 1, 4], ["tom-johnson", "minimal", "dense"]);
+register(
+  "tj_trichord_014",
+  "014",
+  "Trichord 0-1-4",
+  [0, 1, 4],
+  ["tom-johnson", "minimal", "dense"],
+);
 register("tj_trichord_015", "015", "Trichord 0-1-5", [0, 1, 5], ["tom-johnson", "minimal"]);
 
 const domBase = [0, 4, 7, 10];
 const altTones = [
-  { semi: 13, sym: "♭9" }, { semi: 14, sym: "9" }, { semi: 15, sym: "♯9" },
-  { semi: 17, sym: "11" }, { semi: 18, sym: "♯11" }, { semi: 20, sym: "♭13" }, { semi: 21, sym: "13" },
+  { semi: 13, sym: "♭9" },
+  { semi: 14, sym: "9" },
+  { semi: 15, sym: "♯9" },
+  { semi: 17, sym: "11" },
+  { semi: 18, sym: "♯11" },
+  { semi: 20, sym: "♭13" },
+  { semi: 21, sym: "13" },
 ];
 for (let mask = 1; mask < 128; mask++) {
   const parts: string[] = [];
   const semis: number[] = [];
   for (let b = 0; b < altTones.length; b++) {
-    if (mask & (1 << b)) { parts.push(altTones[b].sym.replace(/♭/g, "b").replace(/♯/g, "s")); semis.push(altTones[b].semi); }
+    if (mask & (1 << b)) {
+      parts.push(altTones[b].sym.replace(/♭/g, "b").replace(/♯/g, "s"));
+      semis.push(altTones[b].semi);
+    }
   }
   if (semis.length > 5) continue;
   let id = "dom7alt_" + parts.join("_");
   if (id.length > 48) id = "dom7alt_" + mask;
   const sym = "7(" + parts.join(",") + ")";
   const intervals = mergeIntervals(domBase, semis);
-  register(id, sym, "Dominant altered combination", intervals, ["generated", "dominant", "jazz", "neo-soul", "steely-dan", "studio"]);
+  register(id, sym, "Dominant altered combination", intervals, [
+    "generated",
+    "dominant",
+    "jazz",
+    "neo-soul",
+    "steely-dan",
+    "studio",
+  ]);
 }
 
 const maj7b = [0, 4, 7, 11];
-const majExt = [{ semi: 14, sym: "9" }, { semi: 18, sym: "♯11" }, { semi: 21, sym: "13" }];
+const majExt = [
+  { semi: 14, sym: "9" },
+  { semi: 18, sym: "♯11" },
+  { semi: 21, sym: "13" },
+];
 for (let m2 = 1; m2 < 8; m2++) {
-  const p2: string[] = []; const s2: number[] = [];
-  for (let b2 = 0; b2 < 3; b2++) { if (m2 & (1 << b2)) { p2.push(majExt[b2].sym.replace(/♯/g, "#")); s2.push(majExt[b2].semi); } }
+  const p2: string[] = [];
+  const s2: number[] = [];
+  for (let b2 = 0; b2 < 3; b2++) {
+    if (m2 & (1 << b2)) {
+      p2.push(majExt[b2].sym.replace(/♯/g, "#"));
+      s2.push(majExt[b2].semi);
+    }
+  }
   if (!s2.length) continue;
-  register("maj7ext_" + p2.join("_"), "maj7(" + p2.join(",") + ")", "Major 7 extended", mergeIntervals(maj7b, s2), ["maj7", "generated", "brazilian", "steely-dan", "studio"]);
+  register(
+    "maj7ext_" + p2.join("_"),
+    "maj7(" + p2.join(",") + ")",
+    "Major 7 extended",
+    mergeIntervals(maj7b, s2),
+    ["maj7", "generated", "brazilian", "steely-dan", "studio"],
+  );
 }
 
 const min7b = [0, 3, 7, 10];
-const minExt = [{ semi: 14, sym: "9" }, { semi: 17, sym: "11" }, { semi: 20, sym: "♭13" }];
+const minExt = [
+  { semi: 14, sym: "9" },
+  { semi: 17, sym: "11" },
+  { semi: 20, sym: "♭13" },
+];
 for (let m3 = 1; m3 < 8; m3++) {
-  const p3: string[] = []; const s3: number[] = [];
-  for (let b3 = 0; b3 < 3; b3++) { if (m3 & (1 << b3)) { p3.push(minExt[b3].sym.replace(/♭/g, "b").replace(/♯/g, "#")); s3.push(minExt[b3].semi); } }
-  register("min7ext_" + p3.join("_"), "m7(" + p3.join(",") + ")", "Minor 7 extended", mergeIntervals(min7b, s3), ["m7", "generated", "brazilian", "neo-soul", "studio"]);
+  const p3: string[] = [];
+  const s3: number[] = [];
+  for (let b3 = 0; b3 < 3; b3++) {
+    if (m3 & (1 << b3)) {
+      p3.push(minExt[b3].sym.replace(/♭/g, "b").replace(/♯/g, "#"));
+      s3.push(minExt[b3].semi);
+    }
+  }
+  register(
+    "min7ext_" + p3.join("_"),
+    "m7(" + p3.join(",") + ")",
+    "Minor 7 extended",
+    mergeIntervals(min7b, s3),
+    ["m7", "generated", "brazilian", "neo-soul", "studio"],
+  );
 }
 
-function invalidateListCache() { listCache = null; }
+function invalidateListCache() {
+  listCache = null;
+}
 
 function getAll(): ChordDef[] {
   if (!listCache) {
-    listCache = Object.keys(registry).map(k => registry[k]);
+    listCache = Object.keys(registry).map((k) => registry[k]);
     listCache.sort((a, b) => a.name.localeCompare(b.name));
   }
   return listCache.slice();
@@ -176,11 +344,16 @@ function getAll(): ChordDef[] {
 
 export function list(filters?: { tag?: string; q?: string }): ChordDef[] {
   const all = getAll();
-  return all.filter(c => {
+  return all.filter((c) => {
     if (filters?.tag && !c.tags.includes(filters.tag)) return false;
     if (filters?.q) {
       const q = filters.q.toLowerCase();
-      if (!c.id.toLowerCase().includes(q) && !c.name.toLowerCase().includes(q) && !c.symbol.toLowerCase().includes(q)) return false;
+      if (
+        !c.id.toLowerCase().includes(q) &&
+        !c.name.toLowerCase().includes(q) &&
+        !c.symbol.toLowerCase().includes(q)
+      )
+        return false;
     }
     return true;
   });
@@ -190,7 +363,11 @@ export function get(id: string): ChordDef | null {
   return registry[id] || null;
 }
 
-export function notes(root: string | number, chordId: string, options?: { preferFlats?: boolean }): { rootName: string; notes: string[]; midi: number[] } | null {
+export function notes(
+  root: string | number,
+  chordId: string,
+  options?: { preferFlats?: boolean },
+): { rootName: string; notes: string[]; midi: number[] } | null {
   const def = get(chordId);
   if (!def) return null;
   const pc = parseRoot(root);
@@ -200,7 +377,7 @@ export function notes(root: string | number, chordId: string, options?: { prefer
   const out: string[] = [];
   const midiArr: number[] = [];
   for (const s of semis) {
-    const p = ((pc + s) % 12 + 12) % 12;
+    const p = (((pc + s) % 12) + 12) % 12;
     out.push(names[p]);
     midiArr.push(60 + pc + s);
   }
@@ -212,7 +389,7 @@ export function midiVoicing(root: string | number, chordId: string, baseOctave =
   if (!def) return [];
   const rootPc = parseRoot(root);
   const rootMidi = 12 * (baseOctave + 1) + rootPc;
-  return intervalsToSemitonesFromRoot(def.intervals).map(s => rootMidi + s);
+  return intervalsToSemitonesFromRoot(def.intervals).map((s) => rootMidi + s);
 }
 
 function invertPitchClasses(pcs: number[], inversion: number): number[] {
@@ -225,13 +402,17 @@ function invertPitchClasses(pcs: number[], inversion: number): number[] {
   return out;
 }
 
-export function voicing(root: string | number, chordId: string, opts?: { inversion?: number; spread?: number; octave?: number; preferFlats?: boolean }): { midi: number[]; notes: string[]; chordId: string; inversion: number } | null {
+export function voicing(
+  root: string | number,
+  chordId: string,
+  opts?: { inversion?: number; spread?: number; octave?: number; preferFlats?: boolean },
+): { midi: number[]; notes: string[]; chordId: string; inversion: number } | null {
   const def = get(chordId);
   if (!def) return null;
   const pc = parseRoot(root);
   const inv = opts?.inversion || 0;
   const spread = opts?.spread || 0;
-  const pcs = def.intervals.map(x => (pc + x) % 12);
+  const pcs = def.intervals.map((x) => (pc + x) % 12);
   const order = invertPitchClasses(pcs, inv);
   const midi: number[] = [];
   const octave = opts?.octave ?? 3;
@@ -245,7 +426,7 @@ export function voicing(root: string | number, chordId: string, opts?: { inversi
     midi.push(m);
     last = m;
   }
-  const noteNames = midi.map(m => rootLabel(m % 12, opts?.preferFlats));
+  const noteNames = midi.map((m) => rootLabel(m % 12, opts?.preferFlats));
   return { midi, notes: noteNames, chordId, inversion: inv };
 }
 
@@ -261,19 +442,51 @@ export function randomChord(tag?: string): ChordDef | null {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export function registerCustom(id: string, symbol: string, name: string, intervals: number[], tags: string[]) {
+export function registerCustom(
+  id: string,
+  symbol: string,
+  name: string,
+  intervals: number[],
+  tags: string[],
+) {
   register(id, symbol, name, intervals, tags);
   invalidateListCache();
 }
 
 export const TAGS = [
-  "basic", "triad", "7th", "9th", "11th", "13th", "altered", "sus", "quartal", "cluster",
-  "brazilian", "neo-soul", "gospel", "jazz", "piano", "generated",
-  "steely-dan", "studio", "tom-johnson", "minimal", "dense", "add2", "rock",
-  "dominant", "m7", "maj7", "extension",
+  "basic",
+  "triad",
+  "7th",
+  "9th",
+  "11th",
+  "13th",
+  "altered",
+  "sus",
+  "quartal",
+  "cluster",
+  "brazilian",
+  "neo-soul",
+  "gospel",
+  "jazz",
+  "piano",
+  "generated",
+  "steely-dan",
+  "studio",
+  "tom-johnson",
+  "minimal",
+  "dense",
+  "add2",
+  "rock",
+  "dominant",
+  "m7",
+  "maj7",
+  "extension",
 ];
 
-export function chordsInKey(rootStr: string, mode: "major" | "minor"): { degree: number; roman: string; rootPc: number; chordId: string; symbol: string }[] {
+export function chordsInKey(
+  rootStr: string,
+  mode: "major" | "minor",
+): { degree: number; roman: string; rootPc: number; chordId: string; symbol: string }[] {
   const rootPc = parseRoot(rootStr);
   const majorSteps = [0, 2, 4, 5, 7, 9, 11];
   const minorSteps = [0, 2, 3, 5, 7, 8, 10];

@@ -17,8 +17,7 @@ export const runtimeSecretColdStart = {
   ),
   stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
   openai: !!(
-    process.env.AI_INTEGRATIONS_OPENAI_API_KEY?.trim() ||
-    process.env.OPENAI_API_KEY?.trim()
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim()
   ),
   openaiBase: !!process.env.AI_INTEGRATIONS_OPENAI_BASE_URL?.trim(),
   siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
@@ -42,7 +41,9 @@ export async function getPlatformRuntimeSecretsRow() {
   return row ?? null;
 }
 
-function syncProcessEnvFromRow(row: NonNullable<Awaited<ReturnType<typeof getPlatformRuntimeSecretsRow>>>) {
+function syncProcessEnvFromRow(
+  row: NonNullable<Awaited<ReturnType<typeof getPlatformRuntimeSecretsRow>>>,
+) {
   if (!runtimeSecretColdStart.stripeSecret) {
     const v = row.stripeSecretKey?.trim();
     if (v) process.env.STRIPE_SECRET_KEY = v;

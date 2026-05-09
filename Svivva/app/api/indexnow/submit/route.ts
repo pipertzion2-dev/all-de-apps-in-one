@@ -18,8 +18,14 @@ async function getAllUrls(): Promise<string[]> {
     `${BASE_URL}/pricing`,
     `${BASE_URL}/docs`,
   ];
-  const posts = await db.select({ slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.published, true));
-  const pages = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(eq(seoLandingPages.published, true));
+  const posts = await db
+    .select({ slug: blogPosts.slug })
+    .from(blogPosts)
+    .where(eq(blogPosts.published, true));
+  const pages = await db
+    .select({ slug: seoLandingPages.slug })
+    .from(seoLandingPages)
+    .where(eq(seoLandingPages.published, true));
   return [
     ...staticUrls,
     ...posts.map((p) => `${BASE_URL}/blog/${p.slug}`),
@@ -43,7 +49,11 @@ export async function POST(req: Request) {
     .limit(1);
 
   const key = credRow?.indexnowKey;
-  if (!key) return NextResponse.json({ error: "No IndexNow key configured. Run IndexNow Setup in Orbit first." }, { status: 400 });
+  if (!key)
+    return NextResponse.json(
+      { error: "No IndexNow key configured. Run IndexNow Setup in Orbit first." },
+      { status: 400 },
+    );
 
   const urls = await getAllUrls();
   const host = BASE_URL.replace(/^https?:\/\//, "");
@@ -79,9 +89,18 @@ export async function POST(req: Request) {
     await db.update(seedCredentials).set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
   }
 
-  if (status === 403) return NextResponse.json({ error: `Key verification failed (403) — key file must be at ${keyLocation}` }, { status: 400 });
-  if (status === 422) return NextResponse.json({ error: "Invalid URL format (422)" }, { status: 400 });
+  if (status === 403)
+    return NextResponse.json(
+      { error: `Key verification failed (403) — key file must be at ${keyLocation}` },
+      { status: 400 },
+    );
+  if (status === 422)
+    return NextResponse.json({ error: "Invalid URL format (422)" }, { status: 400 });
   if (!ok) return NextResponse.json({ error: `IndexNow returned HTTP ${status}` }, { status: 400 });
 
-  return NextResponse.json({ success: true, urlCount: urls.length, submittedTo: ["api.indexnow.org (Bing, Yandex, Yahoo)", "www.bing.com"] });
+  return NextResponse.json({
+    success: true,
+    urlCount: urls.length,
+    submittedTo: ["api.indexnow.org (Bing, Yandex, Yahoo)", "www.bing.com"],
+  });
 }

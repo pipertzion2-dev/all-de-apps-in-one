@@ -8,40 +8,142 @@ export type RothcoTheme = {
 
 export const ROTHCO_THEMES: RothcoTheme[] = [
   { name: "Olive Drab", primary: "#4B5320", accent: "#C4CB9C", surface: "#E8EBDD", ink: "#1A1C14" },
-  { name: "Coyote Brown", primary: "#6B4423", accent: "#D4B896", surface: "#F2E8DC", ink: "#24170C" },
-  { name: "Ranger Green", primary: "#3D4634", accent: "#A3B18A", surface: "#E6EBE0", ink: "#151A12" },
+  {
+    name: "Coyote Brown",
+    primary: "#6B4423",
+    accent: "#D4B896",
+    surface: "#F2E8DC",
+    ink: "#24170C",
+  },
+  {
+    name: "Ranger Green",
+    primary: "#3D4634",
+    accent: "#A3B18A",
+    surface: "#E6EBE0",
+    ink: "#151A12",
+  },
   { name: "Desert Tan", primary: "#8B7355", accent: "#F0DCC4", surface: "#FAF3EA", ink: "#2A2218" },
   { name: "Foliage", primary: "#3F4F3A", accent: "#B8C4A8", surface: "#EEF1E8", ink: "#161C14" },
   { name: "Field Gray", primary: "#4E4A40", accent: "#C9C2B4", surface: "#F0EDE6", ink: "#1C1A16" },
-  { name: "Woodland Brown", primary: "#5C4033", accent: "#D9B5A0", surface: "#F7EBE3", ink: "#231812" },
-  { name: "Gunmetal OD", primary: "#3B3C36", accent: "#A8A99E", surface: "#ECECE8", ink: "#121311" },
+  {
+    name: "Woodland Brown",
+    primary: "#5C4033",
+    accent: "#D9B5A0",
+    surface: "#F7EBE3",
+    ink: "#231812",
+  },
+  {
+    name: "Gunmetal OD",
+    primary: "#3B3C36",
+    accent: "#A8A99E",
+    surface: "#ECECE8",
+    ink: "#121311",
+  },
   { name: "Khaki Drab", primary: "#7D6E58", accent: "#E8DCC8", surface: "#F7F2E9", ink: "#28231C" },
   { name: "Moss", primary: "#5D6B4F", accent: "#C5D1B8", surface: "#EEF2E9", ink: "#1E2319" },
-  { name: "Earth Brown", primary: "#5A4D3F", accent: "#D8C4B0", surface: "#F5EDE4", ink: "#1F1A15" },
+  {
+    name: "Earth Brown",
+    primary: "#5A4D3F",
+    accent: "#D8C4B0",
+    surface: "#F5EDE4",
+    ink: "#1F1A15",
+  },
   { name: "Sage Gray", primary: "#5F6354", accent: "#C8CABF", surface: "#F0F1EC", ink: "#1C1E19" },
   { name: "Dark Stone", primary: "#4B4239", accent: "#C4B8A8", surface: "#EFEBE5", ink: "#1A1713" },
   { name: "Pine Drab", primary: "#4A5442", accent: "#B5C1A7", surface: "#EAF0E4", ink: "#181C14" },
   { name: "Sand Brown", primary: "#7C6F57", accent: "#EBE0CC", surface: "#F8F4EC", ink: "#28241C" },
-  { name: "Tactical Green", primary: "#4A5244", accent: "#B4BCAE", surface: "#ECEEE8", ink: "#171A16" },
+  {
+    name: "Tactical Green",
+    primary: "#4A5244",
+    accent: "#B4BCAE",
+    surface: "#ECEEE8",
+    ink: "#171A16",
+  },
   { name: "Walnut", primary: "#4E3B2E", accent: "#D4B8A4", surface: "#F5E9E1", ink: "#1C1510" },
-  { name: "Concrete Tan", primary: "#6B6560", accent: "#D8D4CF", surface: "#F3F2F0", ink: "#222120" },
-  { name: "Bronze Coyote", primary: "#6D5C4A", accent: "#E2D0BC", surface: "#F7EFE6", ink: "#241F18" },
-  { name: "Night Green", primary: "#2F3D32", accent: "#9EAE9A", surface: "#E4E9E2", ink: "#0F1410" },
+  {
+    name: "Concrete Tan",
+    primary: "#6B6560",
+    accent: "#D8D4CF",
+    surface: "#F3F2F0",
+    ink: "#222120",
+  },
+  {
+    name: "Bronze Coyote",
+    primary: "#6D5C4A",
+    accent: "#E2D0BC",
+    surface: "#F7EFE6",
+    ink: "#241F18",
+  },
+  {
+    name: "Night Green",
+    primary: "#2F3D32",
+    accent: "#9EAE9A",
+    surface: "#E4E9E2",
+    ink: "#0F1410",
+  },
   { name: "Dust Brown", primary: "#786858", accent: "#E5D9CA", surface: "#F6F1EB", ink: "#26211C" },
   { name: "Cedar", primary: "#6A5645", accent: "#DEC9B5", surface: "#F4EBE2", ink: "#231C16" },
   { name: "Urban Gray", primary: "#4A4F48", accent: "#B5BAB3", surface: "#ECEEEC", ink: "#161816" },
-  { name: "Golden Olive", primary: "#6B5C2E", accent: "#E0D59A", surface: "#F5F1DC", ink: "#221E0F" },
-  { name: "Shadow Green", primary: "#3E4538", accent: "#A5AD9A", surface: "#E6E9E2", ink: "#141712" },
+  {
+    name: "Golden Olive",
+    primary: "#6B5C2E",
+    accent: "#E0D59A",
+    surface: "#F5F1DC",
+    ink: "#221E0F",
+  },
+  {
+    name: "Shadow Green",
+    primary: "#3E4538",
+    accent: "#A5AD9A",
+    surface: "#E6E9E2",
+    ink: "#141712",
+  },
   { name: "Taupe Gray", primary: "#6E6259", accent: "#D9CEC5", surface: "#F3EFEB", ink: "#23201D" },
-  { name: "Leather Brown", primary: "#5C3D2E", accent: "#D9A882", surface: "#F8E8DD", ink: "#1F140F" },
-  { name: "Camo Gray-Green", primary: "#8F9779", accent: "#E2E6D6", surface: "#F4F6EF", ink: "#2A2D24" },
+  {
+    name: "Leather Brown",
+    primary: "#5C3D2E",
+    accent: "#D9A882",
+    surface: "#F8E8DD",
+    ink: "#1F140F",
+  },
+  {
+    name: "Camo Gray-Green",
+    primary: "#8F9779",
+    accent: "#E2E6D6",
+    surface: "#F4F6EF",
+    ink: "#2A2D24",
+  },
   { name: "Stone Gray", primary: "#5B5247", accent: "#CEC6BB", surface: "#F2EFEB", ink: "#1E1B18" },
-  { name: "Forest Drab", primary: "#354733", accent: "#A8B89E", surface: "#E8EDE4", ink: "#121812" },
-  { name: "Olive Brown", primary: "#6F4E37", accent: "#E8C9A8", surface: "#F9EEE4", ink: "#251A12" },
+  {
+    name: "Forest Drab",
+    primary: "#354733",
+    accent: "#A8B89E",
+    surface: "#E8EDE4",
+    ink: "#121812",
+  },
+  {
+    name: "Olive Brown",
+    primary: "#6F4E37",
+    accent: "#E8C9A8",
+    surface: "#F9EEE4",
+    ink: "#251A12",
+  },
   { name: "Deep Earth", primary: "#3C341F", accent: "#C4B896", surface: "#EDE8DC", ink: "#14120B" },
-  { name: "Slate Field", primary: "#2F4F4F", accent: "#A8C8C8", surface: "#E4F0F0", ink: "#0F1818" },
+  {
+    name: "Slate Field",
+    primary: "#2F4F4F",
+    accent: "#A8C8C8",
+    surface: "#E4F0F0",
+    ink: "#0F1818",
+  },
   { name: "Brown Belt", primary: "#6B5344", accent: "#DCC4B4", surface: "#F5EBE4", ink: "#231A15" },
-  { name: "Hunter Green", primary: "#2D3A2D", accent: "#9AAA9A", surface: "#E2E8E2", ink: "#0E1210" },
+  {
+    name: "Hunter Green",
+    primary: "#2D3A2D",
+    accent: "#9AAA9A",
+    surface: "#E2E8E2",
+    ink: "#0E1210",
+  },
   { name: "Tank Gray", primary: "#4D504B", accent: "#C5C7C2", surface: "#EFEFED", ink: "#1A1B19" },
   { name: "Marsh Drab", primary: "#556B2F", accent: "#D2E0A8", surface: "#F0F5E4", ink: "#1C2310" },
   { name: "Clay", primary: "#8D6E63", accent: "#EFD5CC", surface: "#FAF0EC", ink: "#2D221F" },
@@ -62,46 +164,377 @@ export type ToolDefinition = {
 };
 
 export const TOOLS: ToolDefinition[] = [
-  { id: 1, slug: "password-strength", title: "Free Password Strength Checker Online (No Sign-Up)", shortDescription: "Free online password strength test: entropy estimate, weak-pattern hints, and a secure random generator. Runs in your browser — no account.", keywords: "password strength checker, free password test online, password security checker, NIST password, strong password generator", theme: ROTHCO_THEMES[0] },
-  { id: 2, slug: "ssl-inspector", title: "Free SSL Certificate Checker Online | TLS & DNS Lookup", shortDescription: "Free SSL checker online: resolve host DNS (A records) and jump to SSL Labs for full TLS chain & expiry. Instant, no signup.", keywords: "SSL certificate checker, free SSL test, TLS checker online, certificate expiry check, SSL Labs", theme: ROTHCO_THEMES[1] },
-  { id: 3, slug: "security-headers-grader", title: "Free Security Headers Checker | HSTS, CSP, X-Frame Grade", shortDescription: "Free security headers test: grade HSTS, CSP, X-Frame-Options, nosniff, and more from pasted response headers. Website security checker.", keywords: "security headers checker, HTTP security headers test, HSTS checker, CSP checker free, website headers analyzer", theme: ROTHCO_THEMES[2] },
-  { id: 4, slug: "http-headers-analyzer", title: "Free HTTP Headers Analyzer & Email Header Checker", shortDescription: "Paste HTTP response headers or raw email source. Free online header analyzer for security review and phishing red flags.", keywords: "HTTP headers checker, email header analyzer, phishing header check, response headers online", theme: ROTHCO_THEMES[3] },
-  { id: 5, slug: "cors-checker", title: "Free CORS Checker Online | API Cross-Origin Policy Test", shortDescription: "Free CORS checker: paste Access-Control-* headers to spot wildcard + credentials risks. Online API security sanity check.", keywords: "CORS checker online, CORS policy checker, cross origin test, API CORS misconfiguration", theme: ROTHCO_THEMES[4] },
-  { id: 6, slug: "url-safety-scanner", title: "Free URL Safety Checker & Phishing Link Analyzer", shortDescription: "Free URL checker online: detect risky patterns, odd hosts, and credential-in-URL issues before you click. No signup.", keywords: "URL safety checker, check link safe, phishing URL scanner, malicious URL check free", theme: ROTHCO_THEMES[5] },
-  { id: 7, slug: "dns-record-viewer", title: "Free DNS Lookup Tool Online | A, MX, TXT, NS Records", shortDescription: "Free DNS lookup online via DNS-over-HTTPS: query A, AAAA, MX, TXT, NS, CNAME for any domain. DNS security check.", keywords: "DNS lookup free, DNS record checker, MX lookup online, TXT record lookup, DNS over HTTPS", theme: ROTHCO_THEMES[6] },
-  { id: 8, slug: "ip-reputation", title: "Free IP Lookup & IP Address Checker Online", shortDescription: "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.", keywords: "IP lookup free, IP address checker, IP geolocation online, who is this IP", theme: ROTHCO_THEMES[7] },
-  { id: 9, slug: "jwt-decoder", title: "Free JWT Decoder Online | JSON Web Token Parser", shortDescription: "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.", keywords: "JWT decoder online, decode JWT free, JWT parser, JSON web token inspector", theme: ROTHCO_THEMES[8] },
-  { id: 10, slug: "base64-hash-toolkit", title: "Free Base64 Encoder & SHA-256 Hash Generator Online", shortDescription: "Free Base64 encode/decode and SHA-256 hash generator in your browser. Hash tool for developers — no upload.", keywords: "Base64 encoder online, Base64 decode, SHA256 generator, hash calculator free", theme: ROTHCO_THEMES[9] },
-  { id: 11, slug: "subdomain-finder-lite", title: "Free Subdomain Finder Online (Quick DNS Probe)", shortDescription: "Free subdomain discovery lite: probe common hostnames with DNS-over-HTTPS. Not exhaustive — fast free subdomain check.", keywords: "subdomain finder free, find subdomains online, DNS subdomain check, subdomain enumeration lite", theme: ROTHCO_THEMES[10] },
-  { id: 12, slug: "open-port-checker", title: "Free Open Ports Reference | Top 20 Ports Security List", shortDescription: "Free open port reference: RDP, SSH, SMB, databases, and web ports teams audit first. Pair with a real scanner internally.", keywords: "open ports list, common ports security, port 3389 445 22, network security checklist", theme: ROTHCO_THEMES[11] },
-  { id: 13, slug: "robots-txt-analyzer", title: "Free robots.txt Checker & Security Analyzer Online", shortDescription: "Fetch or paste robots.txt. Free robots.txt analyzer highlights sensitive paths and sitemap lines — website security helper.", keywords: "robots.txt checker, robots.txt analyzer, crawl rules security, SEO robots test", theme: ROTHCO_THEMES[12] },
-  { id: 14, slug: "sitemap-parser", title: "Free Sitemap.xml Parser & URL Extractor Online", shortDescription: "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.", keywords: "sitemap parser online, extract URLs from sitemap, sitemap.xml tool free", theme: ROTHCO_THEMES[13] },
-  { id: 15, slug: "email-breach-checker", title: "Free Email Breach Check | MX Lookup + Have I Been Pwned", shortDescription: "Validate email format, lookup MX via DNS, open Have I Been Pwned in your tab. Free email security check — we don’t store email.", keywords: "email breach check, have i been pwned, email leak check free, MX record email security", theme: ROTHCO_THEMES[14] },
-  { id: 16, slug: "github-secret-scanner", title: "Free Secret Scanner | Find API Keys & Tokens in Text", shortDescription: "Paste logs or snippets — free secret scanner finds common AWS, GitHub, Slack, and key patterns. Rotate anything matched.", keywords: "secret scanner free, API key scanner, leaked token finder, GitHub secret detection", theme: ROTHCO_THEMES[15] },
-  { id: 17, slug: "cookie-analyzer", title: "Free Cookie Checker | Secure, HttpOnly, SameSite Analyzer", shortDescription: "Paste Set-Cookie lines — free cookie security checker grades Secure, HttpOnly, and SameSite per cookie.", keywords: "cookie checker, Set-Cookie analyzer, HttpOnly Secure SameSite test, session cookie security", theme: ROTHCO_THEMES[16] },
-  { id: 18, slug: "api-key-tester", title: "Free API Key Format Checker (Stripe, AWS, GitHub Shapes)", shortDescription: "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).", keywords: "API key checker, detect AWS key, Stripe key format, token type identifier", theme: ROTHCO_THEMES[17] },
-  { id: 19, slug: "tls-version-checker", title: "Free TLS Version Checker Guide | SSL/TLS Best Practices", shortDescription: "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.", keywords: "TLS version check, disable TLS 1.0, SSL TLS best practices, TLS 1.2 1.3", theme: ROTHCO_THEMES[18] },
-  { id: 20, slug: "cert-transparency", title: "Free Certificate Transparency Log Viewer (Paste crt.sh JSON)", shortDescription: "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.", keywords: "certificate transparency, crt.sh viewer, SSL cert history, CT log lookup", theme: ROTHCO_THEMES[19] },
-  { id: 21, slug: "cvss-calculator", title: "Free CVSS 3.1 Calculator Online | Base Score & Severity", shortDescription: "Paste a CVSS:3.1 vector string — instant base score and severity label. Free CVSS calculator for triage and tickets.", keywords: "CVSS calculator online, CVSS 3.1 base score, vulnerability severity calculator", theme: ROTHCO_THEMES[20] },
-  { id: 22, slug: "owasp-self-assessment", title: "Free OWASP Top 10 Checklist & Self-Assessment Online", shortDescription: "Answer ten OWASP-focused questions — get a simple risk band. Free OWASP Top 10 checklist for teams and builders.", keywords: "OWASP Top 10 checklist, OWASP self assessment, web app security checklist free", theme: ROTHCO_THEMES[21] },
-  { id: 23, slug: "sqli-payload-library", title: "SQL Injection Payload Reference (Authorized Testing Only)", shortDescription: "Browse small SQLi example payloads by DB family for authorized tests. Free reference — never use on systems without permission.", keywords: "SQL injection payloads, SQLi test reference, penetration testing SQLi education", theme: ROTHCO_THEMES[22] },
-  { id: 24, slug: "xss-payload-generator", title: "XSS Payload Generator for Authorized Security Testing", shortDescription: "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.", keywords: "XSS payload generator, cross site scripting test, XSS scanner helper", theme: ROTHCO_THEMES[23] },
-  { id: 25, slug: "open-redirect-tester", title: "Free Open Redirect Checker | URL Redirect Safety Test", shortDescription: "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).", keywords: "open redirect checker, redirect vulnerability test, URL redirect analyzer", theme: ROTHCO_THEMES[24] },
-  { id: 26, slug: "csp-evaluator", title: "Free CSP Checker | Content-Security-Policy Analyzer Online", shortDescription: "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.", keywords: "CSP checker, Content Security Policy analyzer, CSP evaluator online", theme: ROTHCO_THEMES[25] },
-  { id: 27, slug: "clickjacking-tester", title: "Free Clickjacking Test | X-Frame-Options & frame-ancestors", shortDescription: "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.", keywords: "clickjacking test, X-Frame-Options checker, frame-ancestors CSP test", theme: ROTHCO_THEMES[26] },
-  { id: 28, slug: "ssrf-payload-builder", title: "SSRF Payload Examples (Authorized Assessments Only)", shortDescription: "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.", keywords: "SSRF payload, SSRF testing reference, internal URL probe security test", theme: ROTHCO_THEMES[27] },
-  { id: 29, slug: "prototype-pollution-checker", title: "Free Prototype Pollution Pattern Scanner (JS/JSON)", shortDescription: "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.", keywords: "prototype pollution scanner, JavaScript merge risk, JSON pollution check", theme: ROTHCO_THEMES[28] },
-  { id: 30, slug: "dependency-vuln-lookup", title: "Free npm Package.json Scanner | Dependency & CVE Links", shortDescription: "Paste package.json — list dependencies with npm and advisory search links. Free npm dependency checker starting point.", keywords: "npm dependency checker, package.json scanner, CVE lookup npm, supply chain check", theme: ROTHCO_THEMES[29] },
-  { id: 31, slug: "nist-csf-scorecard", title: "Free NIST Cybersecurity Framework Scorecard (Quick)", shortDescription: "Slider-based NIST CSF gap snapshot plus themes to document. Free NIST cybersecurity framework checklist starter.", keywords: "NIST CSF scorecard, NIST cybersecurity framework checklist, free NIST audit tool", theme: ROTHCO_THEMES[30] },
-  { id: 32, slug: "zero-trust-checker", title: "Free Zero Trust Readiness Score | Identity & Network", shortDescription: "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.", keywords: "zero trust assessment, zero trust checklist free, ZTNA readiness score", theme: ROTHCO_THEMES[31] },
-  { id: 33, slug: "soc2-checklist", title: "Free SOC 2 Readiness Checklist Online (TSC Themes)", shortDescription: "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.", keywords: "SOC 2 checklist free, SOC2 readiness, trust services criteria checklist", theme: ROTHCO_THEMES[32] },
-  { id: 34, slug: "ransomware-risk", title: "Free Ransomware Risk Calculator | Backups, MFA, EDR", shortDescription: "Weighted score from backups, EDR, MFA, and segmentation. Free ransomware risk assessment for leadership conversations.", keywords: "ransomware risk calculator, ransomware checklist free, backup immaturity score", theme: ROTHCO_THEMES[33] },
-  { id: 35, slug: "ir-playbook-builder", title: "Free Incident Response Playbook Generator Outline", shortDescription: "Pick ransomware, data breach, or phishing — get a printable IR step outline. Free incident response plan helper.", keywords: "incident response playbook, IR plan generator free, cybersecurity playbook template", theme: ROTHCO_THEMES[34] },
-  { id: 36, slug: "attack-surface-calculator", title: "Free Attack Surface Estimator | Stack & Exposure Metaphor", shortDescription: "Turn SaaS, APIs, and workforce sliders into a simple exposure metaphor. Free attack surface calculator conversation starter.", keywords: "attack surface calculator, digital attack surface estimate, security exposure score", theme: ROTHCO_THEMES[35] },
-  { id: 37, slug: "bug-bounty-scope", title: "Free Bug Bounty Scope Parser | In-Scope vs Out-of-Scope", shortDescription: "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.", keywords: "bug bounty scope parser, HackerOne scope tool, bug bounty in scope checker", theme: ROTHCO_THEMES[36] },
-  { id: 38, slug: "security-awareness-quiz", title: "Free Security Awareness Quiz | Phishing & Passwords", shortDescription: "Short scored quiz on phishing and passwords. Free security awareness test for teams and lunch-and-learns.", keywords: "security awareness quiz free, phishing quiz employees, cybersecurity quiz online", theme: ROTHCO_THEMES[37] },
-  { id: 39, slug: "pentest-roadmap", title: "Free Penetration Testing Roadmap Generator Online", shortDescription: "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.", keywords: "penetration testing roadmap, pentest plan template free, security test scope", theme: ROTHCO_THEMES[38] },
-  { id: 40, slug: "vendor-risk-scorecard", title: "Free Third-Party Vendor Risk Scorecard Online", shortDescription: "Two-minute vendor security questionnaire with a simple risk tier. Free vendor risk assessment starting point.", keywords: "vendor risk assessment free, third party risk scorecard, supply chain security checklist", theme: ROTHCO_THEMES[39] },
+  {
+    id: 1,
+    slug: "password-strength",
+    title: "Free Password Strength Checker Online (No Sign-Up)",
+    shortDescription:
+      "Free online password strength test: entropy estimate, weak-pattern hints, and a secure random generator. Runs in your browser — no account.",
+    keywords:
+      "password strength checker, free password test online, password security checker, NIST password, strong password generator",
+    theme: ROTHCO_THEMES[0],
+  },
+  {
+    id: 2,
+    slug: "ssl-inspector",
+    title: "Free SSL Certificate Checker Online | TLS & DNS Lookup",
+    shortDescription:
+      "Free SSL checker online: resolve host DNS (A records) and jump to SSL Labs for full TLS chain & expiry. Instant, no signup.",
+    keywords:
+      "SSL certificate checker, free SSL test, TLS checker online, certificate expiry check, SSL Labs",
+    theme: ROTHCO_THEMES[1],
+  },
+  {
+    id: 3,
+    slug: "security-headers-grader",
+    title: "Free Security Headers Checker | HSTS, CSP, X-Frame Grade",
+    shortDescription:
+      "Free security headers test: grade HSTS, CSP, X-Frame-Options, nosniff, and more from pasted response headers. Website security checker.",
+    keywords:
+      "security headers checker, HTTP security headers test, HSTS checker, CSP checker free, website headers analyzer",
+    theme: ROTHCO_THEMES[2],
+  },
+  {
+    id: 4,
+    slug: "http-headers-analyzer",
+    title: "Free HTTP Headers Analyzer & Email Header Checker",
+    shortDescription:
+      "Paste HTTP response headers or raw email source. Free online header analyzer for security review and phishing red flags.",
+    keywords:
+      "HTTP headers checker, email header analyzer, phishing header check, response headers online",
+    theme: ROTHCO_THEMES[3],
+  },
+  {
+    id: 5,
+    slug: "cors-checker",
+    title: "Free CORS Checker Online | API Cross-Origin Policy Test",
+    shortDescription:
+      "Free CORS checker: paste Access-Control-* headers to spot wildcard + credentials risks. Online API security sanity check.",
+    keywords:
+      "CORS checker online, CORS policy checker, cross origin test, API CORS misconfiguration",
+    theme: ROTHCO_THEMES[4],
+  },
+  {
+    id: 6,
+    slug: "url-safety-scanner",
+    title: "Free URL Safety Checker & Phishing Link Analyzer",
+    shortDescription:
+      "Free URL checker online: detect risky patterns, odd hosts, and credential-in-URL issues before you click. No signup.",
+    keywords: "URL safety checker, check link safe, phishing URL scanner, malicious URL check free",
+    theme: ROTHCO_THEMES[5],
+  },
+  {
+    id: 7,
+    slug: "dns-record-viewer",
+    title: "Free DNS Lookup Tool Online | A, MX, TXT, NS Records",
+    shortDescription:
+      "Free DNS lookup online via DNS-over-HTTPS: query A, AAAA, MX, TXT, NS, CNAME for any domain. DNS security check.",
+    keywords:
+      "DNS lookup free, DNS record checker, MX lookup online, TXT record lookup, DNS over HTTPS",
+    theme: ROTHCO_THEMES[6],
+  },
+  {
+    id: 8,
+    slug: "ip-reputation",
+    title: "Free IP Lookup & IP Address Checker Online",
+    shortDescription:
+      "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.",
+    keywords: "IP lookup free, IP address checker, IP geolocation online, who is this IP",
+    theme: ROTHCO_THEMES[7],
+  },
+  {
+    id: 9,
+    slug: "jwt-decoder",
+    title: "Free JWT Decoder Online | JSON Web Token Parser",
+    shortDescription:
+      "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.",
+    keywords: "JWT decoder online, decode JWT free, JWT parser, JSON web token inspector",
+    theme: ROTHCO_THEMES[8],
+  },
+  {
+    id: 10,
+    slug: "base64-hash-toolkit",
+    title: "Free Base64 Encoder & SHA-256 Hash Generator Online",
+    shortDescription:
+      "Free Base64 encode/decode and SHA-256 hash generator in your browser. Hash tool for developers — no upload.",
+    keywords: "Base64 encoder online, Base64 decode, SHA256 generator, hash calculator free",
+    theme: ROTHCO_THEMES[9],
+  },
+  {
+    id: 11,
+    slug: "subdomain-finder-lite",
+    title: "Free Subdomain Finder Online (Quick DNS Probe)",
+    shortDescription:
+      "Free subdomain discovery lite: probe common hostnames with DNS-over-HTTPS. Not exhaustive — fast free subdomain check.",
+    keywords:
+      "subdomain finder free, find subdomains online, DNS subdomain check, subdomain enumeration lite",
+    theme: ROTHCO_THEMES[10],
+  },
+  {
+    id: 12,
+    slug: "open-port-checker",
+    title: "Free Open Ports Reference | Top 20 Ports Security List",
+    shortDescription:
+      "Free open port reference: RDP, SSH, SMB, databases, and web ports teams audit first. Pair with a real scanner internally.",
+    keywords:
+      "open ports list, common ports security, port 3389 445 22, network security checklist",
+    theme: ROTHCO_THEMES[11],
+  },
+  {
+    id: 13,
+    slug: "robots-txt-analyzer",
+    title: "Free robots.txt Checker & Security Analyzer Online",
+    shortDescription:
+      "Fetch or paste robots.txt. Free robots.txt analyzer highlights sensitive paths and sitemap lines — website security helper.",
+    keywords: "robots.txt checker, robots.txt analyzer, crawl rules security, SEO robots test",
+    theme: ROTHCO_THEMES[12],
+  },
+  {
+    id: 14,
+    slug: "sitemap-parser",
+    title: "Free Sitemap.xml Parser & URL Extractor Online",
+    shortDescription:
+      "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.",
+    keywords: "sitemap parser online, extract URLs from sitemap, sitemap.xml tool free",
+    theme: ROTHCO_THEMES[13],
+  },
+  {
+    id: 15,
+    slug: "email-breach-checker",
+    title: "Free Email Breach Check | MX Lookup + Have I Been Pwned",
+    shortDescription:
+      "Validate email format, lookup MX via DNS, open Have I Been Pwned in your tab. Free email security check — we don’t store email.",
+    keywords:
+      "email breach check, have i been pwned, email leak check free, MX record email security",
+    theme: ROTHCO_THEMES[14],
+  },
+  {
+    id: 16,
+    slug: "github-secret-scanner",
+    title: "Free Secret Scanner | Find API Keys & Tokens in Text",
+    shortDescription:
+      "Paste logs or snippets — free secret scanner finds common AWS, GitHub, Slack, and key patterns. Rotate anything matched.",
+    keywords: "secret scanner free, API key scanner, leaked token finder, GitHub secret detection",
+    theme: ROTHCO_THEMES[15],
+  },
+  {
+    id: 17,
+    slug: "cookie-analyzer",
+    title: "Free Cookie Checker | Secure, HttpOnly, SameSite Analyzer",
+    shortDescription:
+      "Paste Set-Cookie lines — free cookie security checker grades Secure, HttpOnly, and SameSite per cookie.",
+    keywords:
+      "cookie checker, Set-Cookie analyzer, HttpOnly Secure SameSite test, session cookie security",
+    theme: ROTHCO_THEMES[16],
+  },
+  {
+    id: 18,
+    slug: "api-key-tester",
+    title: "Free API Key Format Checker (Stripe, AWS, GitHub Shapes)",
+    shortDescription:
+      "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).",
+    keywords: "API key checker, detect AWS key, Stripe key format, token type identifier",
+    theme: ROTHCO_THEMES[17],
+  },
+  {
+    id: 19,
+    slug: "tls-version-checker",
+    title: "Free TLS Version Checker Guide | SSL/TLS Best Practices",
+    shortDescription:
+      "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.",
+    keywords: "TLS version check, disable TLS 1.0, SSL TLS best practices, TLS 1.2 1.3",
+    theme: ROTHCO_THEMES[18],
+  },
+  {
+    id: 20,
+    slug: "cert-transparency",
+    title: "Free Certificate Transparency Log Viewer (Paste crt.sh JSON)",
+    shortDescription:
+      "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.",
+    keywords: "certificate transparency, crt.sh viewer, SSL cert history, CT log lookup",
+    theme: ROTHCO_THEMES[19],
+  },
+  {
+    id: 21,
+    slug: "cvss-calculator",
+    title: "Free CVSS 3.1 Calculator Online | Base Score & Severity",
+    shortDescription:
+      "Paste a CVSS:3.1 vector string — instant base score and severity label. Free CVSS calculator for triage and tickets.",
+    keywords: "CVSS calculator online, CVSS 3.1 base score, vulnerability severity calculator",
+    theme: ROTHCO_THEMES[20],
+  },
+  {
+    id: 22,
+    slug: "owasp-self-assessment",
+    title: "Free OWASP Top 10 Checklist & Self-Assessment Online",
+    shortDescription:
+      "Answer ten OWASP-focused questions — get a simple risk band. Free OWASP Top 10 checklist for teams and builders.",
+    keywords: "OWASP Top 10 checklist, OWASP self assessment, web app security checklist free",
+    theme: ROTHCO_THEMES[21],
+  },
+  {
+    id: 23,
+    slug: "sqli-payload-library",
+    title: "SQL Injection Payload Reference (Authorized Testing Only)",
+    shortDescription:
+      "Browse small SQLi example payloads by DB family for authorized tests. Free reference — never use on systems without permission.",
+    keywords: "SQL injection payloads, SQLi test reference, penetration testing SQLi education",
+    theme: ROTHCO_THEMES[22],
+  },
+  {
+    id: 24,
+    slug: "xss-payload-generator",
+    title: "XSS Payload Generator for Authorized Security Testing",
+    shortDescription:
+      "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.",
+    keywords: "XSS payload generator, cross site scripting test, XSS scanner helper",
+    theme: ROTHCO_THEMES[23],
+  },
+  {
+    id: 25,
+    slug: "open-redirect-tester",
+    title: "Free Open Redirect Checker | URL Redirect Safety Test",
+    shortDescription:
+      "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).",
+    keywords: "open redirect checker, redirect vulnerability test, URL redirect analyzer",
+    theme: ROTHCO_THEMES[24],
+  },
+  {
+    id: 26,
+    slug: "csp-evaluator",
+    title: "Free CSP Checker | Content-Security-Policy Analyzer Online",
+    shortDescription:
+      "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.",
+    keywords: "CSP checker, Content Security Policy analyzer, CSP evaluator online",
+    theme: ROTHCO_THEMES[25],
+  },
+  {
+    id: 27,
+    slug: "clickjacking-tester",
+    title: "Free Clickjacking Test | X-Frame-Options & frame-ancestors",
+    shortDescription:
+      "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.",
+    keywords: "clickjacking test, X-Frame-Options checker, frame-ancestors CSP test",
+    theme: ROTHCO_THEMES[26],
+  },
+  {
+    id: 28,
+    slug: "ssrf-payload-builder",
+    title: "SSRF Payload Examples (Authorized Assessments Only)",
+    shortDescription:
+      "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.",
+    keywords: "SSRF payload, SSRF testing reference, internal URL probe security test",
+    theme: ROTHCO_THEMES[27],
+  },
+  {
+    id: 29,
+    slug: "prototype-pollution-checker",
+    title: "Free Prototype Pollution Pattern Scanner (JS/JSON)",
+    shortDescription:
+      "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.",
+    keywords: "prototype pollution scanner, JavaScript merge risk, JSON pollution check",
+    theme: ROTHCO_THEMES[28],
+  },
+  {
+    id: 30,
+    slug: "dependency-vuln-lookup",
+    title: "Free npm Package.json Scanner | Dependency & CVE Links",
+    shortDescription:
+      "Paste package.json — list dependencies with npm and advisory search links. Free npm dependency checker starting point.",
+    keywords: "npm dependency checker, package.json scanner, CVE lookup npm, supply chain check",
+    theme: ROTHCO_THEMES[29],
+  },
+  {
+    id: 31,
+    slug: "nist-csf-scorecard",
+    title: "Free NIST Cybersecurity Framework Scorecard (Quick)",
+    shortDescription:
+      "Slider-based NIST CSF gap snapshot plus themes to document. Free NIST cybersecurity framework checklist starter.",
+    keywords: "NIST CSF scorecard, NIST cybersecurity framework checklist, free NIST audit tool",
+    theme: ROTHCO_THEMES[30],
+  },
+  {
+    id: 32,
+    slug: "zero-trust-checker",
+    title: "Free Zero Trust Readiness Score | Identity & Network",
+    shortDescription:
+      "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.",
+    keywords: "zero trust assessment, zero trust checklist free, ZTNA readiness score",
+    theme: ROTHCO_THEMES[31],
+  },
+  {
+    id: 33,
+    slug: "soc2-checklist",
+    title: "Free SOC 2 Readiness Checklist Online (TSC Themes)",
+    shortDescription:
+      "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.",
+    keywords: "SOC 2 checklist free, SOC2 readiness, trust services criteria checklist",
+    theme: ROTHCO_THEMES[32],
+  },
+  {
+    id: 34,
+    slug: "ransomware-risk",
+    title: "Free Ransomware Risk Calculator | Backups, MFA, EDR",
+    shortDescription:
+      "Weighted score from backups, EDR, MFA, and segmentation. Free ransomware risk assessment for leadership conversations.",
+    keywords: "ransomware risk calculator, ransomware checklist free, backup immaturity score",
+    theme: ROTHCO_THEMES[33],
+  },
+  {
+    id: 35,
+    slug: "ir-playbook-builder",
+    title: "Free Incident Response Playbook Generator Outline",
+    shortDescription:
+      "Pick ransomware, data breach, or phishing — get a printable IR step outline. Free incident response plan helper.",
+    keywords: "incident response playbook, IR plan generator free, cybersecurity playbook template",
+    theme: ROTHCO_THEMES[34],
+  },
+  {
+    id: 36,
+    slug: "attack-surface-calculator",
+    title: "Free Attack Surface Estimator | Stack & Exposure Metaphor",
+    shortDescription:
+      "Turn SaaS, APIs, and workforce sliders into a simple exposure metaphor. Free attack surface calculator conversation starter.",
+    keywords: "attack surface calculator, digital attack surface estimate, security exposure score",
+    theme: ROTHCO_THEMES[35],
+  },
+  {
+    id: 37,
+    slug: "bug-bounty-scope",
+    title: "Free Bug Bounty Scope Parser | In-Scope vs Out-of-Scope",
+    shortDescription:
+      "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.",
+    keywords: "bug bounty scope parser, HackerOne scope tool, bug bounty in scope checker",
+    theme: ROTHCO_THEMES[36],
+  },
+  {
+    id: 38,
+    slug: "security-awareness-quiz",
+    title: "Free Security Awareness Quiz | Phishing & Passwords",
+    shortDescription:
+      "Short scored quiz on phishing and passwords. Free security awareness test for teams and lunch-and-learns.",
+    keywords: "security awareness quiz free, phishing quiz employees, cybersecurity quiz online",
+    theme: ROTHCO_THEMES[37],
+  },
+  {
+    id: 39,
+    slug: "pentest-roadmap",
+    title: "Free Penetration Testing Roadmap Generator Online",
+    shortDescription:
+      "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.",
+    keywords: "penetration testing roadmap, pentest plan template free, security test scope",
+    theme: ROTHCO_THEMES[38],
+  },
+  {
+    id: 40,
+    slug: "vendor-risk-scorecard",
+    title: "Free Third-Party Vendor Risk Scorecard Online",
+    shortDescription:
+      "Two-minute vendor security questionnaire with a simple risk tier. Free vendor risk assessment starting point.",
+    keywords:
+      "vendor risk assessment free, third party risk scorecard, supply chain security checklist",
+    theme: ROTHCO_THEMES[39],
+  },
 ];
 
 export type LandingDefinition = {
@@ -115,51 +548,804 @@ export type LandingDefinition = {
 };
 
 export const LANDINGS: LandingDefinition[] = [
-  { slug: "is-my-website-hackable", h1: "Is My Website Hackable? Free Online Security Check", metaDescription: "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for depth.", embedToolSlug: "url-safety-scanner", problems: ["Small misconfigurations become full breaches.", "Attackers automate discovery of weak endpoints.", "You cannot fix what you cannot see."], solutions: ["Start with a fast, free sanity check.", "Understand URL-level red flags in seconds.", "Funnel findings into a full-system AI scan."], steps: ["Enter your site URL.", "Review flagged patterns and host hints.", "Run a free full scan on Pyracrypt for depth."] },
-  { slug: "free-website-security-scan", h1: "Free Website Security Scan Online | No Sign-Up", metaDescription: "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt for full coverage.", embedToolSlug: "security-headers-grader", problems: ["Headers are the cheapest high-ROI hardening step.", "Missing CSP and HSTS are still everywhere.", "Scattered tools waste time."], solutions: ["Grade key headers locally.", "See what is missing before attackers do.", "One CTA to a unified AI scan."], steps: ["Paste response headers or probe a URL.", "Read your A–F grade and gaps.", "Launch Pyracrypt for auto-remediation."] },
-  { slug: "api-exposure-checker", h1: "Free API Exposure Checker | CORS & Cross-Origin Test", metaDescription: "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Pyracrypt.", embedToolSlug: "cors-checker", problems: ["Overly permissive ACAO is a data-exfil path.", "Credentials plus * origins are catastrophic.", "APIs are the new perimeter."], solutions: ["Reason about your CORS policy quickly.", "Spot credential and wildcard combos.", "Map the real API surface on Pyracrypt."], steps: ["Paste CORS-related headers.", "Review our risk callouts.", "Run a full surface map scan."] },
-  { slug: "ssl-certificate-checker", h1: "Free SSL Certificate Checker Online | TLS Test", metaDescription: "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.", embedToolSlug: "ssl-inspector", problems: ["Expired certs break trust and traffic.", "Weak chains enable downgrade attacks.", "TLS is easy to get almost right."], solutions: ["Validate host inputs and CT guidance.", "Understand issuer and expiry risk.", "Get remediation from Pyracrypt."], steps: ["Enter a hostname.", "Review TLS-related findings.", "Run a full TLS posture scan."] },
-  { slug: "security-headers-test", h1: "Free Security Headers Test Online | HSTS & CSP Grade", metaDescription: "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracrypt.", embedToolSlug: "security-headers-grader", problems: ["Headers fail silently until breach.", "CSP misconfiguration is subtle.", "Compliance expects explicit controls."], solutions: ["Instant A–F grading.", "Actionable missing-header list.", "Auto-fix path via Pyracrypt."], steps: ["Provide headers or fetch hints.", "Read grades per header family.", "Run a full scan for compliance scoring."] },
-  { slug: "password-strength-test", h1: "Free Password Strength Test Online | No Sign-Up", metaDescription: "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our servers.", embedToolSlug: "password-strength", problems: ["Password reuse powers credential stuffing.", "Short secrets fall to modern GPUs.", "Users need clarity, not jargon."], solutions: ["Entropy-focused feedback.", "Clear guidance without storing secrets.", "System-wide audit on Pyracrypt."], steps: ["Type a password (stays local).", "Review strength and hints.", "Scan the broader system posture."] },
-  { slug: "cors-checker", h1: "Free CORS Checker Online | API Policy Test", metaDescription: "Free CORS checker online: analyze Access-Control-Allow-Origin, credentials, and methods. Cross-origin misconfiguration test — full API discovery with Pyracrypt.", embedToolSlug: "cors-checker", problems: ["Misconfigured APIs leak session data.", "Wildcards plus credentials are toxic.", "Mobile and web stacks amplify risk."], solutions: ["Fast policy review.", "Origin vs ACAO visualization.", "Deep API discovery on Pyracrypt."], steps: ["Paste ACAO, ACAC, ACAM headers.", "Interpret risk badges.", "Run Pyracrypt surface mapping."] },
-  { slug: "dns-security-check", h1: "Free DNS Security Check Online | MX, TXT, SPF Lookup", metaDescription: "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.", embedToolSlug: "dns-record-viewer", problems: ["DNS is blind spot for many teams.", "Email auth records stop phishing.", "Subdomains expand attack surface."], solutions: ["DoH queries in-browser.", "TXT inspection for mail security.", "Complete mapping with Pyracrypt."], steps: ["Enter a domain.", "Query multiple record types.", "Run a deep infrastructure scan."] },
-  { slug: "email-breach-check", h1: "Free Email Breach Check Online | Have I Been Pwned", metaDescription: "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.", embedToolSlug: "email-breach-checker", problems: ["Breached passwords enable account takeover.", "Users need a safe workflow.", "Email is the reset channel."], solutions: ["Local validation plus MX lookup.", "Direct link to HIBP in your browser.", "Broader identity posture on Pyracrypt."], steps: ["Enter an email address.", "Review DNS and safety tips.", "Check HIBP and then scan your stack."] },
-  { slug: "jwt-decoder", h1: "Free JWT Decoder Online | JSON Web Token Parser", metaDescription: "Free JWT decoder online: parse header and payload, flag risky algorithms. JWT token decoder in-browser — full auth review with Pyracrypt.", embedToolSlug: "jwt-decoder", problems: ["Alg none and confusion bugs persist.", "Secrets in JWTs get logged.", "Expiry and audience checks are skipped."], solutions: ["Instant header/payload decode.", "Algorithm red-flag detection.", "Deep auth review with Pyracrypt."], steps: ["Paste a JWT.", "Inspect claims and warnings.", "Run a full application scan."] },
-  { slug: "attack-surface-calculator", h1: "What Is My Attack Surface? Free Calculator Online", metaDescription: "Free attack surface calculator: estimate exposure from SaaS, APIs, and workforce inputs. Visual metaphor for leadership — real asset discovery on Pyracrypt.", embedToolSlug: "attack-surface-calculator", problems: ["SaaS sprawl expands exposure.", "Shadow IT hides assets.", "Leadership wants a simple score."], solutions: ["Quantify inputs into a metaphorical score.", "Compare tiers of exposure.", "Replace guesswork with AI scanning."], steps: ["Answer stack questions.", "View your surface estimate.", "Run Pyracrypt for real discovery."] },
-  { slug: "owasp-top-10-checklist", h1: "Free OWASP Top 10 Checklist 2025 | Self-Assessment", metaDescription: "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.", embedToolSlug: "owasp-self-assessment", problems: ["OWASP items overlap with compliance.", "Teams need prioritization.", "Checklists without action fail."], solutions: ["10 focused questions.", "Risk rating plus actions.", "Continuous validation via Pyracrypt."], steps: ["Answer each prompt.", "Read your rating.", "Automate testing on Pyracrypt."] },
-  { slug: "sql-injection-prevention", h1: "SQL Injection Prevention | Free Payload Reference", metaDescription: "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.", embedToolSlug: "sqli-payload-library", problems: ["SQLi remains OWASP top tier.", "ORMs do not eliminate risk.", "Testing requires discipline."], solutions: ["Curated payload reference.", "DB-specific guidance.", "Safe, authorized deep tests."], steps: ["Select a database family.", "Review payloads.", "Run Pyracrypt attack simulation on your systems."] },
-  { slug: "xss-scanner", h1: "Free XSS Test Payload Generator | Authorized Use", metaDescription: "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracrypt.", embedToolSlug: "xss-payload-generator", problems: ["XSS is still ubiquitous.", "DOM XSS is easy to miss.", "CSP helps but is not magic."], solutions: ["Context-aware payload strings.", "Education-first workflow.", "AI-driven testing with Pyracrypt."], steps: ["Choose XSS mode.", "Copy vetted test strings.", "Run a full scan on Pyracrypt."] },
-  { slug: "cvss-calculator", h1: "Free CVSS Score Calculator Online | CVSS 3.1 Base", metaDescription: "Free CVSS calculator online: paste CVSS:3.1 vector for instant base score and severity. Vulnerability prioritization — tie to fixes on Pyracrypt.", embedToolSlug: "cvss-calculator", problems: ["Severity debates slow patching.", "Teams need a shared rubric.", "Executives want rollups."], solutions: ["Instant vector math in-browser.", "Explainable base scores.", "Remediation tied to Pyracrypt findings."], steps: ["Set metric values.", "Copy vector string.", "Prioritize fixes via Pyracrypt."] },
-  { slug: "ransomware-protection", h1: "Free Ransomware Protection Checklist & Risk Calculator", metaDescription: "Free ransomware risk calculator: backups, EDR, MFA, segmentation. Ransomware protection checklist online — incident plans with Pyracrypt.", embedToolSlug: "ransomware-risk", problems: ["Ransomware targets backups first.", "MFA gaps enable lateral movement.", "Leadership needs a simple score."], solutions: ["Weighted risk model.", "Clear control gaps.", "Incident readiness via Pyracrypt."], steps: ["Answer control questions.", "View exposure score.", "Generate playbooks and scans."] },
-  { slug: "soc2-readiness", h1: "Free SOC 2 Readiness Checklist Online | No Sign-Up", metaDescription: "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.", embedToolSlug: "soc2-checklist", problems: ["SOC 2 is evidence-heavy.", "Startups need structure.", "Auditors want consistency."], solutions: ["Checklist across TSC themes.", "Exportable progress.", "Technical evidence from Pyracrypt."], steps: ["Check controls you have.", "Spot gaps instantly.", "Attach scans and reports."] },
-  { slug: "nist-scorecard", h1: "Free NIST Cybersecurity Framework Scorecard Online", metaDescription: "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.", embedToolSlug: "nist-csf-scorecard", problems: ["NIST language is abstract.", "Teams need quick baselines.", "Mapping to tools is hard."], solutions: ["Fast yes/no scorecard.", "Plain-language gaps.", "Tooling via Pyracrypt engines."], steps: ["Complete twenty prompts.", "Read framework summary.", "Run technical validation."] },
-  { slug: "zero-trust-checklist", h1: "Free Zero Trust Security Checklist & Readiness Score", metaDescription: "Free zero trust checklist: score identity, device, network, and data pillars. Zero trust assessment online — enforce with Pyracrypt.", embedToolSlug: "zero-trust-checker", problems: ["Zero trust is misunderstood as VPN replacement.", "Identity is the control plane.", "Lateral movement is the goal of attackers."], solutions: ["Pillar scoring in minutes.", "Prioritized next steps.", "Continuous verification via Pyracrypt."], steps: ["Rate each pillar.", "View readiness score.", "Validate with live scanning."] },
-  { slug: "pentest-roadmap", h1: "Free Penetration Testing Roadmap Generator Online", metaDescription: "Free penetration testing roadmap: scope and maturity questions produce a methodology outline. Pentest planning tool — simulation on Pyracrypt.", embedToolSlug: "pentest-roadmap", problems: ["Pentests without scope fail.", "Teams need a repeatable plan.", "Remediation must follow."], solutions: ["Context-aware outline.", "PDF-friendly structure.", "Simulation-backed fixes."], steps: ["Answer five scoping questions.", "Review roadmap sections.", "Run attack simulation on Pyracrypt."] },
-  { slug: "subdomain-finder", h1: "Free Subdomain Finder Online | Quick DNS Discovery", metaDescription: "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.", embedToolSlug: "subdomain-finder-lite", problems: ["Subdomains hide legacy apps.", "Certs leak hostnames.", "Attackers automate discovery."], solutions: ["Fast common-prefix probes.", "DNS-over-HTTPS results.", "Deep enumeration on Pyracrypt."], steps: ["Enter apex domain.", "Run lite discovery.", "Upgrade to full Pyracrypt map."] },
-  { slug: "port-scanner", h1: "Open Port Scanner Online Free | Top Ports Reference", metaDescription: "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.", embedToolSlug: "open-port-checker", problems: ["Open admin ports are low-hanging fruit.", "Cloud SGs drift.", "You need continuous checks."], solutions: ["Understand critical ports.", "Self-assess exposure.", "Full port sweep on Pyracrypt."], steps: ["Review the port table.", "Check your environment.", "Run Pyracrypt surface scan."] },
-  { slug: "github-secrets-scanner", h1: "Free GitHub Secret Scanner | Find Leaked API Keys", metaDescription: "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.", embedToolSlug: "github-secret-scanner", problems: ["Keys in git are permanent.", "Forks propagate leaks.", "CI logs echo secrets."], solutions: ["Regex reference scanner.", "Immediate highlights.", "Deep secret hunting on Pyracrypt."], steps: ["Paste text.", "Review matches.", "Run full codebase analysis."] },
-  { slug: "robots-txt-analyzer", h1: "Free robots.txt Security Analyzer Online", metaDescription: "Free robots.txt checker: fetch or paste robots.txt and highlight sensitive paths. robots.txt security risks explained — full URL map on Pyracrypt.", embedToolSlug: "robots-txt-analyzer", problems: ["robots.txt advertises hidden routes.", "Disallow lists guide attackers.", "Staging paths leak."], solutions: ["Fetch or paste robots.txt.", "Highlight sensitive entries.", "Full URL discovery on Pyracrypt."], steps: ["Provide domain or text.", "Review flagged paths.", "Run complete surface mapping."] },
-  { slug: "cookie-security-checker", h1: "Free Cookie Security Checker | HttpOnly & SameSite", metaDescription: "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.", embedToolSlug: "cookie-analyzer", problems: ["Session cookies without flags are stolen via XSS.", "SameSite gaps enable CSRF.", "Third-party cookies are changing."], solutions: ["Parse multiple cookies.", "Flag weak combinations.", "Full session review on Pyracrypt."], steps: ["Paste Set-Cookie headers.", "Read per-cookie grades.", "Run a compliance scan."] },
-  { slug: "csp-checker", h1: "Free CSP Checker Online | Content Security Policy Test", metaDescription: "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.", embedToolSlug: "csp-evaluator", problems: ["unsafe-inline undermines CSP.", "wildcard sources are risky.", "JSONP endpoints bypass CSP."], solutions: ["Structured CSP parse.", "Risky directive detection.", "Auto remediation drafts."], steps: ["Paste your CSP.", "Review grade and notes.", "Apply fixes via Pyracrypt."] },
-  { slug: "clickjacking-test", h1: "Free Clickjacking Test Online | X-Frame-Options Check", metaDescription: "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.", embedToolSlug: "clickjacking-tester", problems: ["Missing XFO enables UI redress.", "CSP frame-ancestors is sharper.", "Single-page apps still need defense."], solutions: ["Header-based inference.", "Clear pass/fail guidance.", "Deep UI attack simulation."], steps: ["Paste security headers.", "See framing posture.", "Run Pyracrypt attack paths."] },
-  { slug: "ip-reputation-checker", h1: "Free IP Address Reputation Check | IP Lookup Online", metaDescription: "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.", embedToolSlug: "ip-reputation", problems: ["IPs signal botnets and VPNs.", "SOC teams need quick context.", "Geo-fencing depends on accuracy."], solutions: ["Client-side lookup where permitted.", "ASN and country context.", "Full infra graph on Pyracrypt."], steps: ["Enter an IPv4 address.", "Read network summary.", "Correlate with Pyracrypt scans."] },
-  { slug: "cert-transparency", h1: "Free Certificate Transparency Lookup | crt.sh Helper", metaDescription: "Free certificate transparency lookup: paste crt.sh JSON to browse issuers and hostnames. SSL cert history viewer — monitoring with Pyracrypt.", embedToolSlug: "cert-transparency", problems: ["Rogue certs happen.", "CT logs enable detection.", "Teams forget to monitor."], solutions: ["Parse issuance history snippets.", "Operational guidance.", "Continuous cert monitoring."], steps: ["Paste JSON or notes.", "Review issuers and SANs.", "Automate with Pyracrypt."] },
-  { slug: "ai-cybersecurity-tool", h1: "Free AI Cybersecurity Tool | TLS Check + Smart Tips", metaDescription: "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.", embedToolSlug: "tls-version-checker", problems: ["Legacy TLS enables downgrade.", "AI speeds attacker TTPs.", "You need AI defense parity."], solutions: ["TLS hygiene checklist.", "Paste findings from labs tools.", "AI remediation on Pyracrypt."], steps: ["Review TLS guidance.", "Paste SSLLabs-style notes.", "Run the Pyracrypt AI pipeline."] },
-  { slug: "bug-bounty-scope", h1: "Free Bug Bounty Scope Analyzer Online", metaDescription: "Free bug bounty scope analyzer: split in-scope vs out-of-scope lines from program text. HackerOne-style scope helper — safe testing with Pyracrypt.", embedToolSlug: "bug-bounty-scope", problems: ["OOS reports waste time.", "Ambiguous scope causes conflict.", "Programs evolve weekly."], solutions: ["Line-based bucketing.", "Visual counts.", "Scoped simulation on Pyracrypt."], steps: ["Paste scope text.", "Review buckets.", "Run in-scope testing only."] },
-  { slug: "phishing-email-checker", h1: "Free Phishing Email Checker | Header Analyzer Online", metaDescription: "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.", embedToolSlug: "http-headers-analyzer", problems: ["Phishing bypasses filters.", "Users need quick heuristics.", "Headers tell the story."], solutions: ["Analyze Received chains and anomalies.", "Combine with link hygiene tips.", "Full org phishing posture via Pyracrypt."], steps: ["Paste raw email source.", "Review flagged lines.", "Harden mail with Pyracrypt guidance."] },
-  { slug: "vendor-risk-scorecard", h1: "Free Third-Party Vendor Security Check Online", metaDescription: "Free vendor security check: two-minute third-party risk scorecard. Supply chain risk starter — continuous monitoring with Pyracrypt.", embedToolSlug: "vendor-risk-scorecard", problems: ["Supply chain risk is concentrated.", "Questionnaires lie without evidence.", "You need a repeatable score."], solutions: ["Weighted questionnaire.", "Instant scorecard.", "Evidence from Pyracrypt scans."], steps: ["Answer vendor prompts.", "View risk tier.", "Schedule deeper reviews."] },
-  { slug: "ir-plan-generator", h1: "Free Incident Response Plan Generator Online", metaDescription: "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.", embedToolSlug: "ir-playbook-builder", problems: ["IR plans go stale.", "On-call needs checklists.", "Regulators expect tabletop proof."], solutions: ["Type-driven playbooks.", "Printable outline.", "Simulated incidents on Pyracrypt."], steps: ["Select incident type.", "Generate steps.", "Exercise with Pyracrypt scenarios."] },
-  { slug: "security-awareness-quiz", h1: "Free Security Awareness Quiz for Employees Online", metaDescription: "Free security awareness quiz online: phishing and password questions with instant score. Employee cybersecurity quiz — program metrics via Pyracrypt.", embedToolSlug: "security-awareness-quiz", problems: ["Humans are the last line.", "Annual training is forgettable.", "You need quick checks."], solutions: ["Short, sharp quiz.", "Immediate scoring.", "Continuous culture metrics."], steps: ["Answer ten questions.", "See score and tips.", "Track improvements over time."] },
-  { slug: "2fa-comparison", h1: "Free Two-Factor Authentication Comparison | MFA Guide", metaDescription: "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.", embedToolSlug: "zero-trust-checker", problems: ["SMS OTP is phishable.", "Not all MFA is equal.", "Recovery flows matter."], solutions: ["Side-by-side decision matrix.", "Copy-ready policy text.", "Technical enforcement checks."], steps: ["Review factor strengths.", "Pick org defaults.", "Validate deployments with Pyracrypt."] },
-  { slug: "password-generator", h1: "Free Secure Password Generator Online | Strong & Random", metaDescription: "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.", embedToolSlug: "password-strength", problems: ["Humans pick patterns.", "Password managers need strong seeds.", "Rotation without entropy fails."], solutions: ["Browser crypto randomness.", "Length and charset controls.", "Enterprise rollout support."], steps: ["Choose length.", "Generate and copy.", "Store in a trusted vault."] },
-  { slug: "threat-actor-lookup", h1: "Free Threat Intel Self-Check | OWASP & Risk Baseline", metaDescription: "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.", embedToolSlug: "owasp-self-assessment", problems: ["Threat intel is noisy.", "Teams need quick context.", "MITRE mapping takes time."], solutions: ["Curated reference cards.", "Sector targeting hints.", "Automated TTP alignment on Pyracrypt."], steps: ["Browse actor summaries.", "Note TTP themes.", "Map detections via Pyracrypt."] },
-  { slug: "cve-lookup", h1: "Free CVE Lookup Tool | npm & Package Advisory Links", metaDescription: "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.", embedToolSlug: "dependency-vuln-lookup", problems: ["CVE volume is overwhelming.", "CVSS without context mis-prioritizes.", "Dependencies hide transitive risk."], solutions: ["Package and CVE linking.", "NVD deep links.", "Unified vuln graph on Pyracrypt."], steps: ["Paste package.json snippet.", "Review package list.", "Open NVD and Pyracrypt for depth."] },
-  { slug: "npm-audit-tool", h1: "Free npm Vulnerability Scanner Online | package.json", metaDescription: "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.", embedToolSlug: "dependency-vuln-lookup", problems: ["Transitive deps explode.", "Lockfiles drift.", "Supply chain attacks rise."], solutions: ["Parse dependencies locally.", "Highlight high-risk names.", "CI integration on Pyracrypt."], steps: ["Paste package.json.", "Scan dependency names.", "Run continuous Pyracrypt audits."] },
-  { slug: "open-redirect-tester", h1: "Free Open Redirect Vulnerability Checker Online", metaDescription: "Free open redirect checker: compare URLs and redirect parameters safely. OAuth redirect test — broader web testing on Pyracrypt.", embedToolSlug: "open-redirect-tester", problems: ["Open redirects power phishing.", "OAuth flows are sensitive.", "Encoded URLs hide intent."], solutions: ["Structure-aware comparison.", "Encoding warnings.", "Full web attack simulation."], steps: ["Paste base and redirect URLs.", "Review verdict.", "Authorize Pyracrypt testing."] },
-  { slug: "prototype-pollution", h1: "Free Prototype Pollution Scanner Online | JSON/JS", metaDescription: "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.", embedToolSlug: "prototype-pollution-checker", problems: ["Deep merge utilities are risky.", "Pollution enables RCE chains.", "Server-side JS is easy to neglect."], solutions: ["Pattern highlighting.", "Safe coding nudges.", "Full app review on Pyracrypt."], steps: ["Paste JSON or code.", "Review warnings.", "Run static and dynamic analysis."] },
-  { slug: "tls-version-checker", h1: "Free TLS Version Checker Online | SSL/TLS Hardening", metaDescription: "Free TLS version checker guide: disable legacy TLS, paste SSL Labs notes. SSL TLS test companion — remediation drafts on Pyracrypt.", embedToolSlug: "tls-version-checker", problems: ["TLS 1.0/1.1 still appear.", "Middleboxes complicate upgrades.", "Compliance mandates modern TLS."], solutions: ["Guidance and checklist.", "Paste lab outputs.", "Auto remediation drafts."], steps: ["Read TLS best practices.", "Paste findings.", "Generate fixes on Pyracrypt."] },
-  { slug: "attack-simulation", h1: "Free Attack Simulation Tool | URL Risk Story Online", metaDescription: "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.", embedToolSlug: "url-safety-scanner", problems: ["Point tools miss chains.", "Executives need narratives.", "Purple teams need speed."], solutions: ["Compose quick risk story.", "Link checks to scenarios.", "Full AI attack simulation."], steps: ["Run the surface sanity tool.", "Review narrative hints.", "Launch Pyracrypt attack simulation."] },
-  { slug: "threat-report-summarizer", h1: "Free Threat Report IOC Extractor + AI Tips Online", metaDescription: "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.", embedToolSlug: "github-secret-scanner", problems: ["Reports are long.", "IOCs hide in prose.", "Analyst time is scarce."], solutions: ["Regex IOC extraction.", "Structured highlights.", "Pyracrypt AI summarization."], steps: ["Paste report text.", "Review extracted tokens.", "Run full AI enrichment on Pyracrypt."] },
+  {
+    slug: "is-my-website-hackable",
+    h1: "Is My Website Hackable? Free Online Security Check",
+    metaDescription:
+      "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for depth.",
+    embedToolSlug: "url-safety-scanner",
+    problems: [
+      "Small misconfigurations become full breaches.",
+      "Attackers automate discovery of weak endpoints.",
+      "You cannot fix what you cannot see.",
+    ],
+    solutions: [
+      "Start with a fast, free sanity check.",
+      "Understand URL-level red flags in seconds.",
+      "Funnel findings into a full-system AI scan.",
+    ],
+    steps: [
+      "Enter your site URL.",
+      "Review flagged patterns and host hints.",
+      "Run a free full scan on Pyracrypt for depth.",
+    ],
+  },
+  {
+    slug: "free-website-security-scan",
+    h1: "Free Website Security Scan Online | No Sign-Up",
+    metaDescription:
+      "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt for full coverage.",
+    embedToolSlug: "security-headers-grader",
+    problems: [
+      "Headers are the cheapest high-ROI hardening step.",
+      "Missing CSP and HSTS are still everywhere.",
+      "Scattered tools waste time.",
+    ],
+    solutions: [
+      "Grade key headers locally.",
+      "See what is missing before attackers do.",
+      "One CTA to a unified AI scan.",
+    ],
+    steps: [
+      "Paste response headers or probe a URL.",
+      "Read your A–F grade and gaps.",
+      "Launch Pyracrypt for auto-remediation.",
+    ],
+  },
+  {
+    slug: "api-exposure-checker",
+    h1: "Free API Exposure Checker | CORS & Cross-Origin Test",
+    metaDescription:
+      "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Pyracrypt.",
+    embedToolSlug: "cors-checker",
+    problems: [
+      "Overly permissive ACAO is a data-exfil path.",
+      "Credentials plus * origins are catastrophic.",
+      "APIs are the new perimeter.",
+    ],
+    solutions: [
+      "Reason about your CORS policy quickly.",
+      "Spot credential and wildcard combos.",
+      "Map the real API surface on Pyracrypt.",
+    ],
+    steps: [
+      "Paste CORS-related headers.",
+      "Review our risk callouts.",
+      "Run a full surface map scan.",
+    ],
+  },
+  {
+    slug: "ssl-certificate-checker",
+    h1: "Free SSL Certificate Checker Online | TLS Test",
+    metaDescription:
+      "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.",
+    embedToolSlug: "ssl-inspector",
+    problems: [
+      "Expired certs break trust and traffic.",
+      "Weak chains enable downgrade attacks.",
+      "TLS is easy to get almost right.",
+    ],
+    solutions: [
+      "Validate host inputs and CT guidance.",
+      "Understand issuer and expiry risk.",
+      "Get remediation from Pyracrypt.",
+    ],
+    steps: ["Enter a hostname.", "Review TLS-related findings.", "Run a full TLS posture scan."],
+  },
+  {
+    slug: "security-headers-test",
+    h1: "Free Security Headers Test Online | HSTS & CSP Grade",
+    metaDescription:
+      "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracrypt.",
+    embedToolSlug: "security-headers-grader",
+    problems: [
+      "Headers fail silently until breach.",
+      "CSP misconfiguration is subtle.",
+      "Compliance expects explicit controls.",
+    ],
+    solutions: [
+      "Instant A–F grading.",
+      "Actionable missing-header list.",
+      "Auto-fix path via Pyracrypt.",
+    ],
+    steps: [
+      "Provide headers or fetch hints.",
+      "Read grades per header family.",
+      "Run a full scan for compliance scoring.",
+    ],
+  },
+  {
+    slug: "password-strength-test",
+    h1: "Free Password Strength Test Online | No Sign-Up",
+    metaDescription:
+      "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our servers.",
+    embedToolSlug: "password-strength",
+    problems: [
+      "Password reuse powers credential stuffing.",
+      "Short secrets fall to modern GPUs.",
+      "Users need clarity, not jargon.",
+    ],
+    solutions: [
+      "Entropy-focused feedback.",
+      "Clear guidance without storing secrets.",
+      "System-wide audit on Pyracrypt.",
+    ],
+    steps: [
+      "Type a password (stays local).",
+      "Review strength and hints.",
+      "Scan the broader system posture.",
+    ],
+  },
+  {
+    slug: "cors-checker",
+    h1: "Free CORS Checker Online | API Policy Test",
+    metaDescription:
+      "Free CORS checker online: analyze Access-Control-Allow-Origin, credentials, and methods. Cross-origin misconfiguration test — full API discovery with Pyracrypt.",
+    embedToolSlug: "cors-checker",
+    problems: [
+      "Misconfigured APIs leak session data.",
+      "Wildcards plus credentials are toxic.",
+      "Mobile and web stacks amplify risk.",
+    ],
+    solutions: [
+      "Fast policy review.",
+      "Origin vs ACAO visualization.",
+      "Deep API discovery on Pyracrypt.",
+    ],
+    steps: [
+      "Paste ACAO, ACAC, ACAM headers.",
+      "Interpret risk badges.",
+      "Run Pyracrypt surface mapping.",
+    ],
+  },
+  {
+    slug: "dns-security-check",
+    h1: "Free DNS Security Check Online | MX, TXT, SPF Lookup",
+    metaDescription:
+      "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.",
+    embedToolSlug: "dns-record-viewer",
+    problems: [
+      "DNS is blind spot for many teams.",
+      "Email auth records stop phishing.",
+      "Subdomains expand attack surface.",
+    ],
+    solutions: [
+      "DoH queries in-browser.",
+      "TXT inspection for mail security.",
+      "Complete mapping with Pyracrypt.",
+    ],
+    steps: ["Enter a domain.", "Query multiple record types.", "Run a deep infrastructure scan."],
+  },
+  {
+    slug: "email-breach-check",
+    h1: "Free Email Breach Check Online | Have I Been Pwned",
+    metaDescription:
+      "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.",
+    embedToolSlug: "email-breach-checker",
+    problems: [
+      "Breached passwords enable account takeover.",
+      "Users need a safe workflow.",
+      "Email is the reset channel.",
+    ],
+    solutions: [
+      "Local validation plus MX lookup.",
+      "Direct link to HIBP in your browser.",
+      "Broader identity posture on Pyracrypt.",
+    ],
+    steps: [
+      "Enter an email address.",
+      "Review DNS and safety tips.",
+      "Check HIBP and then scan your stack.",
+    ],
+  },
+  {
+    slug: "jwt-decoder",
+    h1: "Free JWT Decoder Online | JSON Web Token Parser",
+    metaDescription:
+      "Free JWT decoder online: parse header and payload, flag risky algorithms. JWT token decoder in-browser — full auth review with Pyracrypt.",
+    embedToolSlug: "jwt-decoder",
+    problems: [
+      "Alg none and confusion bugs persist.",
+      "Secrets in JWTs get logged.",
+      "Expiry and audience checks are skipped.",
+    ],
+    solutions: [
+      "Instant header/payload decode.",
+      "Algorithm red-flag detection.",
+      "Deep auth review with Pyracrypt.",
+    ],
+    steps: ["Paste a JWT.", "Inspect claims and warnings.", "Run a full application scan."],
+  },
+  {
+    slug: "attack-surface-calculator",
+    h1: "What Is My Attack Surface? Free Calculator Online",
+    metaDescription:
+      "Free attack surface calculator: estimate exposure from SaaS, APIs, and workforce inputs. Visual metaphor for leadership — real asset discovery on Pyracrypt.",
+    embedToolSlug: "attack-surface-calculator",
+    problems: [
+      "SaaS sprawl expands exposure.",
+      "Shadow IT hides assets.",
+      "Leadership wants a simple score.",
+    ],
+    solutions: [
+      "Quantify inputs into a metaphorical score.",
+      "Compare tiers of exposure.",
+      "Replace guesswork with AI scanning.",
+    ],
+    steps: [
+      "Answer stack questions.",
+      "View your surface estimate.",
+      "Run Pyracrypt for real discovery.",
+    ],
+  },
+  {
+    slug: "owasp-top-10-checklist",
+    h1: "Free OWASP Top 10 Checklist 2025 | Self-Assessment",
+    metaDescription:
+      "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.",
+    embedToolSlug: "owasp-self-assessment",
+    problems: [
+      "OWASP items overlap with compliance.",
+      "Teams need prioritization.",
+      "Checklists without action fail.",
+    ],
+    solutions: [
+      "10 focused questions.",
+      "Risk rating plus actions.",
+      "Continuous validation via Pyracrypt.",
+    ],
+    steps: ["Answer each prompt.", "Read your rating.", "Automate testing on Pyracrypt."],
+  },
+  {
+    slug: "sql-injection-prevention",
+    h1: "SQL Injection Prevention | Free Payload Reference",
+    metaDescription:
+      "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.",
+    embedToolSlug: "sqli-payload-library",
+    problems: [
+      "SQLi remains OWASP top tier.",
+      "ORMs do not eliminate risk.",
+      "Testing requires discipline.",
+    ],
+    solutions: [
+      "Curated payload reference.",
+      "DB-specific guidance.",
+      "Safe, authorized deep tests.",
+    ],
+    steps: [
+      "Select a database family.",
+      "Review payloads.",
+      "Run Pyracrypt attack simulation on your systems.",
+    ],
+  },
+  {
+    slug: "xss-scanner",
+    h1: "Free XSS Test Payload Generator | Authorized Use",
+    metaDescription:
+      "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracrypt.",
+    embedToolSlug: "xss-payload-generator",
+    problems: [
+      "XSS is still ubiquitous.",
+      "DOM XSS is easy to miss.",
+      "CSP helps but is not magic.",
+    ],
+    solutions: [
+      "Context-aware payload strings.",
+      "Education-first workflow.",
+      "AI-driven testing with Pyracrypt.",
+    ],
+    steps: ["Choose XSS mode.", "Copy vetted test strings.", "Run a full scan on Pyracrypt."],
+  },
+  {
+    slug: "cvss-calculator",
+    h1: "Free CVSS Score Calculator Online | CVSS 3.1 Base",
+    metaDescription:
+      "Free CVSS calculator online: paste CVSS:3.1 vector for instant base score and severity. Vulnerability prioritization — tie to fixes on Pyracrypt.",
+    embedToolSlug: "cvss-calculator",
+    problems: [
+      "Severity debates slow patching.",
+      "Teams need a shared rubric.",
+      "Executives want rollups.",
+    ],
+    solutions: [
+      "Instant vector math in-browser.",
+      "Explainable base scores.",
+      "Remediation tied to Pyracrypt findings.",
+    ],
+    steps: ["Set metric values.", "Copy vector string.", "Prioritize fixes via Pyracrypt."],
+  },
+  {
+    slug: "ransomware-protection",
+    h1: "Free Ransomware Protection Checklist & Risk Calculator",
+    metaDescription:
+      "Free ransomware risk calculator: backups, EDR, MFA, segmentation. Ransomware protection checklist online — incident plans with Pyracrypt.",
+    embedToolSlug: "ransomware-risk",
+    problems: [
+      "Ransomware targets backups first.",
+      "MFA gaps enable lateral movement.",
+      "Leadership needs a simple score.",
+    ],
+    solutions: ["Weighted risk model.", "Clear control gaps.", "Incident readiness via Pyracrypt."],
+    steps: ["Answer control questions.", "View exposure score.", "Generate playbooks and scans."],
+  },
+  {
+    slug: "soc2-readiness",
+    h1: "Free SOC 2 Readiness Checklist Online | No Sign-Up",
+    metaDescription:
+      "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.",
+    embedToolSlug: "soc2-checklist",
+    problems: [
+      "SOC 2 is evidence-heavy.",
+      "Startups need structure.",
+      "Auditors want consistency.",
+    ],
+    solutions: [
+      "Checklist across TSC themes.",
+      "Exportable progress.",
+      "Technical evidence from Pyracrypt.",
+    ],
+    steps: ["Check controls you have.", "Spot gaps instantly.", "Attach scans and reports."],
+  },
+  {
+    slug: "nist-scorecard",
+    h1: "Free NIST Cybersecurity Framework Scorecard Online",
+    metaDescription:
+      "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.",
+    embedToolSlug: "nist-csf-scorecard",
+    problems: [
+      "NIST language is abstract.",
+      "Teams need quick baselines.",
+      "Mapping to tools is hard.",
+    ],
+    solutions: ["Fast yes/no scorecard.", "Plain-language gaps.", "Tooling via Pyracrypt engines."],
+    steps: ["Complete twenty prompts.", "Read framework summary.", "Run technical validation."],
+  },
+  {
+    slug: "zero-trust-checklist",
+    h1: "Free Zero Trust Security Checklist & Readiness Score",
+    metaDescription:
+      "Free zero trust checklist: score identity, device, network, and data pillars. Zero trust assessment online — enforce with Pyracrypt.",
+    embedToolSlug: "zero-trust-checker",
+    problems: [
+      "Zero trust is misunderstood as VPN replacement.",
+      "Identity is the control plane.",
+      "Lateral movement is the goal of attackers.",
+    ],
+    solutions: [
+      "Pillar scoring in minutes.",
+      "Prioritized next steps.",
+      "Continuous verification via Pyracrypt.",
+    ],
+    steps: ["Rate each pillar.", "View readiness score.", "Validate with live scanning."],
+  },
+  {
+    slug: "pentest-roadmap",
+    h1: "Free Penetration Testing Roadmap Generator Online",
+    metaDescription:
+      "Free penetration testing roadmap: scope and maturity questions produce a methodology outline. Pentest planning tool — simulation on Pyracrypt.",
+    embedToolSlug: "pentest-roadmap",
+    problems: [
+      "Pentests without scope fail.",
+      "Teams need a repeatable plan.",
+      "Remediation must follow.",
+    ],
+    solutions: ["Context-aware outline.", "PDF-friendly structure.", "Simulation-backed fixes."],
+    steps: [
+      "Answer five scoping questions.",
+      "Review roadmap sections.",
+      "Run attack simulation on Pyracrypt.",
+    ],
+  },
+  {
+    slug: "subdomain-finder",
+    h1: "Free Subdomain Finder Online | Quick DNS Discovery",
+    metaDescription:
+      "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.",
+    embedToolSlug: "subdomain-finder-lite",
+    problems: [
+      "Subdomains hide legacy apps.",
+      "Certs leak hostnames.",
+      "Attackers automate discovery.",
+    ],
+    solutions: [
+      "Fast common-prefix probes.",
+      "DNS-over-HTTPS results.",
+      "Deep enumeration on Pyracrypt.",
+    ],
+    steps: ["Enter apex domain.", "Run lite discovery.", "Upgrade to full Pyracrypt map."],
+  },
+  {
+    slug: "port-scanner",
+    h1: "Open Port Scanner Online Free | Top Ports Reference",
+    metaDescription:
+      "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.",
+    embedToolSlug: "open-port-checker",
+    problems: [
+      "Open admin ports are low-hanging fruit.",
+      "Cloud SGs drift.",
+      "You need continuous checks.",
+    ],
+    solutions: [
+      "Understand critical ports.",
+      "Self-assess exposure.",
+      "Full port sweep on Pyracrypt.",
+    ],
+    steps: ["Review the port table.", "Check your environment.", "Run Pyracrypt surface scan."],
+  },
+  {
+    slug: "github-secrets-scanner",
+    h1: "Free GitHub Secret Scanner | Find Leaked API Keys",
+    metaDescription:
+      "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.",
+    embedToolSlug: "github-secret-scanner",
+    problems: ["Keys in git are permanent.", "Forks propagate leaks.", "CI logs echo secrets."],
+    solutions: [
+      "Regex reference scanner.",
+      "Immediate highlights.",
+      "Deep secret hunting on Pyracrypt.",
+    ],
+    steps: ["Paste text.", "Review matches.", "Run full codebase analysis."],
+  },
+  {
+    slug: "robots-txt-analyzer",
+    h1: "Free robots.txt Security Analyzer Online",
+    metaDescription:
+      "Free robots.txt checker: fetch or paste robots.txt and highlight sensitive paths. robots.txt security risks explained — full URL map on Pyracrypt.",
+    embedToolSlug: "robots-txt-analyzer",
+    problems: [
+      "robots.txt advertises hidden routes.",
+      "Disallow lists guide attackers.",
+      "Staging paths leak.",
+    ],
+    solutions: [
+      "Fetch or paste robots.txt.",
+      "Highlight sensitive entries.",
+      "Full URL discovery on Pyracrypt.",
+    ],
+    steps: ["Provide domain or text.", "Review flagged paths.", "Run complete surface mapping."],
+  },
+  {
+    slug: "cookie-security-checker",
+    h1: "Free Cookie Security Checker | HttpOnly & SameSite",
+    metaDescription:
+      "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.",
+    embedToolSlug: "cookie-analyzer",
+    problems: [
+      "Session cookies without flags are stolen via XSS.",
+      "SameSite gaps enable CSRF.",
+      "Third-party cookies are changing.",
+    ],
+    solutions: [
+      "Parse multiple cookies.",
+      "Flag weak combinations.",
+      "Full session review on Pyracrypt.",
+    ],
+    steps: ["Paste Set-Cookie headers.", "Read per-cookie grades.", "Run a compliance scan."],
+  },
+  {
+    slug: "csp-checker",
+    h1: "Free CSP Checker Online | Content Security Policy Test",
+    metaDescription:
+      "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.",
+    embedToolSlug: "csp-evaluator",
+    problems: [
+      "unsafe-inline undermines CSP.",
+      "wildcard sources are risky.",
+      "JSONP endpoints bypass CSP.",
+    ],
+    solutions: ["Structured CSP parse.", "Risky directive detection.", "Auto remediation drafts."],
+    steps: ["Paste your CSP.", "Review grade and notes.", "Apply fixes via Pyracrypt."],
+  },
+  {
+    slug: "clickjacking-test",
+    h1: "Free Clickjacking Test Online | X-Frame-Options Check",
+    metaDescription:
+      "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.",
+    embedToolSlug: "clickjacking-tester",
+    problems: [
+      "Missing XFO enables UI redress.",
+      "CSP frame-ancestors is sharper.",
+      "Single-page apps still need defense.",
+    ],
+    solutions: [
+      "Header-based inference.",
+      "Clear pass/fail guidance.",
+      "Deep UI attack simulation.",
+    ],
+    steps: ["Paste security headers.", "See framing posture.", "Run Pyracrypt attack paths."],
+  },
+  {
+    slug: "ip-reputation-checker",
+    h1: "Free IP Address Reputation Check | IP Lookup Online",
+    metaDescription:
+      "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.",
+    embedToolSlug: "ip-reputation",
+    problems: [
+      "IPs signal botnets and VPNs.",
+      "SOC teams need quick context.",
+      "Geo-fencing depends on accuracy.",
+    ],
+    solutions: [
+      "Client-side lookup where permitted.",
+      "ASN and country context.",
+      "Full infra graph on Pyracrypt.",
+    ],
+    steps: ["Enter an IPv4 address.", "Read network summary.", "Correlate with Pyracrypt scans."],
+  },
+  {
+    slug: "cert-transparency",
+    h1: "Free Certificate Transparency Lookup | crt.sh Helper",
+    metaDescription:
+      "Free certificate transparency lookup: paste crt.sh JSON to browse issuers and hostnames. SSL cert history viewer — monitoring with Pyracrypt.",
+    embedToolSlug: "cert-transparency",
+    problems: ["Rogue certs happen.", "CT logs enable detection.", "Teams forget to monitor."],
+    solutions: [
+      "Parse issuance history snippets.",
+      "Operational guidance.",
+      "Continuous cert monitoring.",
+    ],
+    steps: ["Paste JSON or notes.", "Review issuers and SANs.", "Automate with Pyracrypt."],
+  },
+  {
+    slug: "ai-cybersecurity-tool",
+    h1: "Free AI Cybersecurity Tool | TLS Check + Smart Tips",
+    metaDescription:
+      "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.",
+    embedToolSlug: "tls-version-checker",
+    problems: [
+      "Legacy TLS enables downgrade.",
+      "AI speeds attacker TTPs.",
+      "You need AI defense parity.",
+    ],
+    solutions: [
+      "TLS hygiene checklist.",
+      "Paste findings from labs tools.",
+      "AI remediation on Pyracrypt.",
+    ],
+    steps: ["Review TLS guidance.", "Paste SSLLabs-style notes.", "Run the Pyracrypt AI pipeline."],
+  },
+  {
+    slug: "bug-bounty-scope",
+    h1: "Free Bug Bounty Scope Analyzer Online",
+    metaDescription:
+      "Free bug bounty scope analyzer: split in-scope vs out-of-scope lines from program text. HackerOne-style scope helper — safe testing with Pyracrypt.",
+    embedToolSlug: "bug-bounty-scope",
+    problems: [
+      "OOS reports waste time.",
+      "Ambiguous scope causes conflict.",
+      "Programs evolve weekly.",
+    ],
+    solutions: ["Line-based bucketing.", "Visual counts.", "Scoped simulation on Pyracrypt."],
+    steps: ["Paste scope text.", "Review buckets.", "Run in-scope testing only."],
+  },
+  {
+    slug: "phishing-email-checker",
+    h1: "Free Phishing Email Checker | Header Analyzer Online",
+    metaDescription:
+      "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.",
+    embedToolSlug: "http-headers-analyzer",
+    problems: [
+      "Phishing bypasses filters.",
+      "Users need quick heuristics.",
+      "Headers tell the story.",
+    ],
+    solutions: [
+      "Analyze Received chains and anomalies.",
+      "Combine with link hygiene tips.",
+      "Full org phishing posture via Pyracrypt.",
+    ],
+    steps: [
+      "Paste raw email source.",
+      "Review flagged lines.",
+      "Harden mail with Pyracrypt guidance.",
+    ],
+  },
+  {
+    slug: "vendor-risk-scorecard",
+    h1: "Free Third-Party Vendor Security Check Online",
+    metaDescription:
+      "Free vendor security check: two-minute third-party risk scorecard. Supply chain risk starter — continuous monitoring with Pyracrypt.",
+    embedToolSlug: "vendor-risk-scorecard",
+    problems: [
+      "Supply chain risk is concentrated.",
+      "Questionnaires lie without evidence.",
+      "You need a repeatable score.",
+    ],
+    solutions: ["Weighted questionnaire.", "Instant scorecard.", "Evidence from Pyracrypt scans."],
+    steps: ["Answer vendor prompts.", "View risk tier.", "Schedule deeper reviews."],
+  },
+  {
+    slug: "ir-plan-generator",
+    h1: "Free Incident Response Plan Generator Online",
+    metaDescription:
+      "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.",
+    embedToolSlug: "ir-playbook-builder",
+    problems: [
+      "IR plans go stale.",
+      "On-call needs checklists.",
+      "Regulators expect tabletop proof.",
+    ],
+    solutions: [
+      "Type-driven playbooks.",
+      "Printable outline.",
+      "Simulated incidents on Pyracrypt.",
+    ],
+    steps: ["Select incident type.", "Generate steps.", "Exercise with Pyracrypt scenarios."],
+  },
+  {
+    slug: "security-awareness-quiz",
+    h1: "Free Security Awareness Quiz for Employees Online",
+    metaDescription:
+      "Free security awareness quiz online: phishing and password questions with instant score. Employee cybersecurity quiz — program metrics via Pyracrypt.",
+    embedToolSlug: "security-awareness-quiz",
+    problems: [
+      "Humans are the last line.",
+      "Annual training is forgettable.",
+      "You need quick checks.",
+    ],
+    solutions: ["Short, sharp quiz.", "Immediate scoring.", "Continuous culture metrics."],
+    steps: ["Answer ten questions.", "See score and tips.", "Track improvements over time."],
+  },
+  {
+    slug: "2fa-comparison",
+    h1: "Free Two-Factor Authentication Comparison | MFA Guide",
+    metaDescription:
+      "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.",
+    embedToolSlug: "zero-trust-checker",
+    problems: ["SMS OTP is phishable.", "Not all MFA is equal.", "Recovery flows matter."],
+    solutions: [
+      "Side-by-side decision matrix.",
+      "Copy-ready policy text.",
+      "Technical enforcement checks.",
+    ],
+    steps: [
+      "Review factor strengths.",
+      "Pick org defaults.",
+      "Validate deployments with Pyracrypt.",
+    ],
+  },
+  {
+    slug: "password-generator",
+    h1: "Free Secure Password Generator Online | Strong & Random",
+    metaDescription:
+      "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.",
+    embedToolSlug: "password-strength",
+    problems: [
+      "Humans pick patterns.",
+      "Password managers need strong seeds.",
+      "Rotation without entropy fails.",
+    ],
+    solutions: [
+      "Browser crypto randomness.",
+      "Length and charset controls.",
+      "Enterprise rollout support.",
+    ],
+    steps: ["Choose length.", "Generate and copy.", "Store in a trusted vault."],
+  },
+  {
+    slug: "threat-actor-lookup",
+    h1: "Free Threat Intel Self-Check | OWASP & Risk Baseline",
+    metaDescription:
+      "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.",
+    embedToolSlug: "owasp-self-assessment",
+    problems: ["Threat intel is noisy.", "Teams need quick context.", "MITRE mapping takes time."],
+    solutions: [
+      "Curated reference cards.",
+      "Sector targeting hints.",
+      "Automated TTP alignment on Pyracrypt.",
+    ],
+    steps: ["Browse actor summaries.", "Note TTP themes.", "Map detections via Pyracrypt."],
+  },
+  {
+    slug: "cve-lookup",
+    h1: "Free CVE Lookup Tool | npm & Package Advisory Links",
+    metaDescription:
+      "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.",
+    embedToolSlug: "dependency-vuln-lookup",
+    problems: [
+      "CVE volume is overwhelming.",
+      "CVSS without context mis-prioritizes.",
+      "Dependencies hide transitive risk.",
+    ],
+    solutions: ["Package and CVE linking.", "NVD deep links.", "Unified vuln graph on Pyracrypt."],
+    steps: [
+      "Paste package.json snippet.",
+      "Review package list.",
+      "Open NVD and Pyracrypt for depth.",
+    ],
+  },
+  {
+    slug: "npm-audit-tool",
+    h1: "Free npm Vulnerability Scanner Online | package.json",
+    metaDescription:
+      "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.",
+    embedToolSlug: "dependency-vuln-lookup",
+    problems: ["Transitive deps explode.", "Lockfiles drift.", "Supply chain attacks rise."],
+    solutions: [
+      "Parse dependencies locally.",
+      "Highlight high-risk names.",
+      "CI integration on Pyracrypt.",
+    ],
+    steps: ["Paste package.json.", "Scan dependency names.", "Run continuous Pyracrypt audits."],
+  },
+  {
+    slug: "open-redirect-tester",
+    h1: "Free Open Redirect Vulnerability Checker Online",
+    metaDescription:
+      "Free open redirect checker: compare URLs and redirect parameters safely. OAuth redirect test — broader web testing on Pyracrypt.",
+    embedToolSlug: "open-redirect-tester",
+    problems: [
+      "Open redirects power phishing.",
+      "OAuth flows are sensitive.",
+      "Encoded URLs hide intent.",
+    ],
+    solutions: ["Structure-aware comparison.", "Encoding warnings.", "Full web attack simulation."],
+    steps: ["Paste base and redirect URLs.", "Review verdict.", "Authorize Pyracrypt testing."],
+  },
+  {
+    slug: "prototype-pollution",
+    h1: "Free Prototype Pollution Scanner Online | JSON/JS",
+    metaDescription:
+      "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.",
+    embedToolSlug: "prototype-pollution-checker",
+    problems: [
+      "Deep merge utilities are risky.",
+      "Pollution enables RCE chains.",
+      "Server-side JS is easy to neglect.",
+    ],
+    solutions: ["Pattern highlighting.", "Safe coding nudges.", "Full app review on Pyracrypt."],
+    steps: ["Paste JSON or code.", "Review warnings.", "Run static and dynamic analysis."],
+  },
+  {
+    slug: "tls-version-checker",
+    h1: "Free TLS Version Checker Online | SSL/TLS Hardening",
+    metaDescription:
+      "Free TLS version checker guide: disable legacy TLS, paste SSL Labs notes. SSL TLS test companion — remediation drafts on Pyracrypt.",
+    embedToolSlug: "tls-version-checker",
+    problems: [
+      "TLS 1.0/1.1 still appear.",
+      "Middleboxes complicate upgrades.",
+      "Compliance mandates modern TLS.",
+    ],
+    solutions: ["Guidance and checklist.", "Paste lab outputs.", "Auto remediation drafts."],
+    steps: ["Read TLS best practices.", "Paste findings.", "Generate fixes on Pyracrypt."],
+  },
+  {
+    slug: "attack-simulation",
+    h1: "Free Attack Simulation Tool | URL Risk Story Online",
+    metaDescription:
+      "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.",
+    embedToolSlug: "url-safety-scanner",
+    problems: [
+      "Point tools miss chains.",
+      "Executives need narratives.",
+      "Purple teams need speed.",
+    ],
+    solutions: [
+      "Compose quick risk story.",
+      "Link checks to scenarios.",
+      "Full AI attack simulation.",
+    ],
+    steps: [
+      "Run the surface sanity tool.",
+      "Review narrative hints.",
+      "Launch Pyracrypt attack simulation.",
+    ],
+  },
+  {
+    slug: "threat-report-summarizer",
+    h1: "Free Threat Report IOC Extractor + AI Tips Online",
+    metaDescription:
+      "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.",
+    embedToolSlug: "github-secret-scanner",
+    problems: ["Reports are long.", "IOCs hide in prose.", "Analyst time is scarce."],
+    solutions: ["Regex IOC extraction.", "Structured highlights.", "Pyracrypt AI summarization."],
+    steps: [
+      "Paste report text.",
+      "Review extracted tokens.",
+      "Run full AI enrichment on Pyracrypt.",
+    ],
+  },
 ];
 
 const toolBySlug = new Map(TOOLS.map((t) => [t.slug, t]));

@@ -10,21 +10,21 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const url = new URL(request.url);
     const days = parseInt(url.searchParams.get("days") || "30");
-    
+
     const now = new Date();
     const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
+
     const userProjects = await db
       .select({ id: projects.id, name: projects.name })
       .from(projects)
       .where(eq(projects.ownerId, user.id));
-    
-    const projectIds = userProjects.map(p => p.id);
-    
+
+    const projectIds = userProjects.map((p) => p.id);
+
     if (projectIds.length === 0) {
       return NextResponse.json({
         stats: {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         recentRequests: [],
       });
     }
-    
+
     const [todayStats] = await db
       .select({
         count: count(),
@@ -45,12 +45,9 @@ export async function GET(request: NextRequest) {
       })
       .from(usageLogs)
       .where(
-        and(
-          sql`${usageLogs.projectId} = ANY(${projectIds})`,
-          gte(usageLogs.createdAt, yesterday)
-        )
+        and(sql`${usageLogs.projectId} = ANY(${projectIds})`, gte(usageLogs.createdAt, yesterday)),
       );
-    
+
     const [successStats] = await db
       .select({ count: count() })
       .from(usageLogs)
@@ -58,14 +55,14 @@ export async function GET(request: NextRequest) {
         and(
           sql`${usageLogs.projectId} = ANY(${projectIds})`,
           gte(usageLogs.createdAt, yesterday),
-          eq(usageLogs.status, "success")
-        )
+          eq(usageLogs.status, "success"),
+        ),
       );
-    
+
     const totalCalls = todayStats?.count || 0;
     const successCalls = successStats?.count || 0;
     const successRate = totalCalls > 0 ? Math.round((successCalls / totalCalls) * 100) : null;
-    
+
     const recentRequests = await db
       .select({
         id: usageLogs.id,
@@ -80,14 +77,14 @@ export async function GET(request: NextRequest) {
       .where(sql`${usageLogs.projectId} = ANY(${projectIds})`)
       .orderBy(desc(usageLogs.createdAt))
       .limit(20);
-    
-    const projectMap = Object.fromEntries(userProjects.map(p => [p.id, p.name]));
-    
-    const enrichedRequests = recentRequests.map(r => ({
+
+    const projectMap = Object.fromEntries(userProjects.map((p) => [p.id, p.name]));
+
+    const enrichedRequests = recentRequests.map((r) => ({
       ...r,
       projectName: projectMap[r.projectId] || "Unknown",
     }));
-    
+
     return NextResponse.json({
       stats: {
         apiCallsToday: todayStats?.count || 0,

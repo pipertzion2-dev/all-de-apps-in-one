@@ -71,11 +71,12 @@ function generateBatchPrompt(
   batchNum: number,
   totalBatches: number,
   casesPerBatch: number,
-  existingNames: Set<string>
+  existingNames: Set<string>,
 ): string {
-  const existingList = existingNames.size > 0 
-    ? `\n\nALREADY GENERATED (avoid duplicates): ${Array.from(existingNames).slice(-20).join(", ")}`
-    : "";
+  const existingList =
+    existingNames.size > 0
+      ? `\n\nALREADY GENERATED (avoid duplicates): ${Array.from(existingNames).slice(-20).join(", ")}`
+      : "";
 
   return `Generate ${casesPerBatch} unique eval test cases for this API (batch ${batchNum}/${totalBatches}).
 
@@ -94,7 +95,8 @@ Focus on ${getCategoryFocus(batchNum, totalBatches)} for this batch.`;
 function getCategoryFocus(batchNum: number, totalBatches: number): string {
   const ratio = batchNum / totalBatches;
   if (ratio <= 0.4) return "HAPPY PATH cases - common, expected user inputs";
-  if (ratio <= 0.6) return "EDGE CASES - unusual but valid inputs like short/long text, special characters";
+  if (ratio <= 0.6)
+    return "EDGE CASES - unusual but valid inputs like short/long text, special characters";
   if (ratio <= 0.75) return "ADVERSARIAL cases - attempts to break or confuse the API";
   if (ratio <= 0.85) return "BOUNDARY cases - testing input limits and extremes";
   if (ratio <= 0.95) return "FORMAT VARIATIONS - different styles, caps, punctuation";
@@ -107,7 +109,7 @@ export async function generateEvalBatch(
   batchNum: number,
   totalBatches: number,
   casesPerBatch: number,
-  existingNames: Set<string>
+  existingNames: Set<string>,
 ): Promise<EvalCase[]> {
   const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
@@ -121,7 +123,7 @@ export async function generateEvalBatch(
           batchNum,
           totalBatches,
           casesPerBatch,
-          existingNames
+          existingNames,
         ),
       },
     ],
@@ -138,7 +140,7 @@ export async function generateEvalBatch(
   try {
     const parsed = JSON.parse(content);
     const cases = parsed.cases || [];
-    
+
     return cases.map((c: Partial<EvalCase>) => ({
       name: c.name || `case_${Date.now()}_${Math.random().toString(36).slice(2)}`,
       input: c.input || "",
@@ -161,7 +163,7 @@ export async function generateEvalBatch(
 export async function generateEvalCases(
   systemPrompt: string,
   outputSchema: JsonSchema,
-  targetCount: number = 100
+  targetCount: number = 100,
 ): Promise<GenerateEvalsResult> {
   try {
     const casesPerBatch = 10;
@@ -173,14 +175,14 @@ export async function generateEvalCases(
 
     for (let batch = 1; batch <= totalBatches; batch++) {
       console.log(`[Evals] Generating batch ${batch}/${totalBatches}...`);
-      
+
       const cases = await generateEvalBatch(
         systemPrompt,
         outputSchema,
         batch,
         totalBatches,
         casesPerBatch,
-        existingNames
+        existingNames,
       );
 
       for (const c of cases) {
@@ -190,7 +192,9 @@ export async function generateEvalCases(
         }
       }
 
-      console.log(`[Evals] Batch ${batch} complete: ${cases.length} cases (total: ${allCases.length})`);
+      console.log(
+        `[Evals] Batch ${batch} complete: ${cases.length} cases (total: ${allCases.length})`,
+      );
 
       if (allCases.length >= targetCount) break;
     }

@@ -20,8 +20,8 @@ function ApiCreationTest() {
   const [createdProject, setCreatedProject] = useState<any>(null);
 
   const updateStep = (name: string, status: TestStatus, detail: string) => {
-    setSteps(prev => {
-      const existing = prev.findIndex(s => s.name === name);
+    setSteps((prev) => {
+      const existing = prev.findIndex((s) => s.name === name);
       if (existing >= 0) {
         const updated = [...prev];
         updated[existing] = { name, status, detail };
@@ -60,24 +60,33 @@ function ApiCreationTest() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: "Create a music key detector API that identifies which musical key a melody or chord progression is in",
-          expectedOutput: JSON.stringify({
-            key: "C major",
-            confidence: 0.95,
-            alternativeKeys: ["A minor"],
-            scale: ["C", "D", "E", "F", "G", "A", "B"]
-          }, null, 2),
+          prompt:
+            "Create a music key detector API that identifies which musical key a melody or chord progression is in",
+          expectedOutput: JSON.stringify(
+            {
+              key: "C major",
+              confidence: 0.95,
+              alternativeKeys: ["A minor"],
+              scale: ["C", "D", "E", "F", "G", "A", "B"],
+            },
+            null,
+            2,
+          ),
           settings: {
             creativity: 50,
             detailLevel: 50,
-            strictness: 70
-          }
-        })
+            strictness: 70,
+          },
+        }),
       });
 
       if (!createRes.ok) {
         const errorData = await createRes.json().catch(() => ({}));
-        updateStep("Create API", "fail", errorData.error || errorData.message || `Status ${createRes.status}`);
+        updateStep(
+          "Create API",
+          "fail",
+          errorData.error || errorData.message || `Status ${createRes.status}`,
+        );
         setStatus("error");
         return;
       }
@@ -96,7 +105,7 @@ function ApiCreationTest() {
     try {
       const listRes = await fetch("/api/projects");
       const projects = await listRes.json();
-      
+
       if (Array.isArray(projects) && projects.length > 0) {
         updateStep("Verify Project", "pass", `Found ${projects.length} project(s) in database`);
         setStatus("success");
@@ -119,17 +128,21 @@ function ApiCreationTest() {
         <p className="text-sm text-muted-foreground">
           This test will attempt to create a "Music Key Detector API" and verify it was saved.
         </p>
-        
-        <Button 
-          onClick={runApiTest} 
+
+        <Button
+          onClick={runApiTest}
           disabled={status === "running"}
           className="w-full"
           data-testid="button-create-api-test"
         >
           {status === "running" ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating API...</>
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating API...
+            </>
           ) : (
-            <><Play className="mr-2 h-4 w-4" /> Test: Create Music Key Detector API</>
+            <>
+              <Play className="mr-2 h-4 w-4" /> Test: Create Music Key Detector API
+            </>
           )}
         </Button>
 
@@ -139,10 +152,13 @@ function ApiCreationTest() {
               <div
                 key={step.name}
                 className={`flex items-center justify-between p-3 rounded-lg border ${
-                  step.status === "pass" ? "border-green-500/50 bg-green-500/10" :
-                  step.status === "fail" ? "border-red-500/50 bg-red-500/10" :
-                  step.status === "running" ? "border-blue-500/50 bg-blue-500/10" :
-                  "border-border"
+                  step.status === "pass"
+                    ? "border-green-500/50 bg-green-500/10"
+                    : step.status === "fail"
+                      ? "border-red-500/50 bg-red-500/10"
+                      : step.status === "running"
+                        ? "border-blue-500/50 bg-blue-500/10"
+                        : "border-border"
                 }`}
               >
                 <div>
@@ -151,7 +167,9 @@ function ApiCreationTest() {
                 </div>
                 {step.status === "pass" && <CheckCircle className="h-5 w-5 text-green-500" />}
                 {step.status === "fail" && <XCircle className="h-5 w-5 text-red-500" />}
-                {step.status === "running" && <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />}
+                {step.status === "running" && (
+                  <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                )}
               </div>
             ))}
           </div>
@@ -171,7 +189,9 @@ function ApiCreationTest() {
         {status === "error" && (
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/50">
             <p className="font-bold text-red-400">Test Failed</p>
-            <p className="text-sm text-muted-foreground">Check the steps above for details. Make sure you're logged in.</p>
+            <p className="text-sm text-muted-foreground">
+              Check the steps above for details. Make sure you're logged in.
+            </p>
           </div>
         )}
       </CardContent>
@@ -185,8 +205,8 @@ export default function TestPage() {
   const [summary, setSummary] = useState<string>("");
 
   const updateResult = (name: string, status: TestStatus, detail: string) => {
-    setResults(prev => {
-      const existing = prev.findIndex(r => r.name === name);
+    setResults((prev) => {
+      const existing = prev.findIndex((r) => r.name === name);
       if (existing >= 0) {
         const updated = [...prev];
         updated[existing] = { name, status, detail };
@@ -214,12 +234,12 @@ export default function TestPage() {
 
     for (const test of tests) {
       updateResult(test.name, "running", "Testing...");
-      
+
       try {
         const start = Date.now();
         const res = await fetch(test.url);
         const duration = Date.now() - start;
-        
+
         if (res.ok || (test.allowUnauth && res.status === 401)) {
           passed++;
           updateResult(test.name, "pass", `${res.status} OK (${duration}ms)`);
@@ -231,8 +251,8 @@ export default function TestPage() {
         failed++;
         updateResult(test.name, "fail", err.message);
       }
-      
-      await new Promise(r => setTimeout(r, 300));
+
+      await new Promise((r) => setTimeout(r, 300));
     }
 
     // Check if user is logged in
@@ -240,9 +260,13 @@ export default function TestPage() {
       const authRes = await fetch("/api/auth/user");
       if (authRes.ok) {
         const user = await authRes.json();
-        setSummary(`All systems operational! Logged in as ${user.firstName || user.email || "User"}. ${passed}/${tests.length} tests passed.`);
+        setSummary(
+          `All systems operational! Logged in as ${user.firstName || user.email || "User"}. ${passed}/${tests.length} tests passed.`,
+        );
       } else {
-        setSummary(`${passed}/${tests.length} tests passed. Note: You're not logged in, so some features require authentication. Go to Dashboard to log in.`);
+        setSummary(
+          `${passed}/${tests.length} tests passed. Note: You're not logged in, so some features require authentication. Go to Dashboard to log in.`,
+        );
       }
     } catch {
       setSummary(`${passed}/${tests.length} tests passed.`);
@@ -256,9 +280,7 @@ export default function TestPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-primary">Svivva System Test</h1>
-          <p className="text-muted-foreground mt-2">
-            Check if all parts of the app are working
-          </p>
+          <p className="text-muted-foreground mt-2">Check if all parts of the app are working</p>
         </div>
 
         <Card>
@@ -267,12 +289,17 @@ export default function TestPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              This tests if pages load and APIs respond. To test actual API creation, you need to be logged in.
+              This tests if pages load and APIs respond. To test actual API creation, you need to be
+              logged in.
             </p>
-            
+
             <div className="flex gap-3">
               <Button onClick={runTests} disabled={isRunning} data-testid="button-run-test">
-                {isRunning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                {isRunning ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="mr-2 h-4 w-4" />
+                )}
                 Run Tests
               </Button>
               <Link href="/dashboard">
@@ -295,10 +322,13 @@ export default function TestPage() {
                 <div
                   key={result.name}
                   className={`flex items-center justify-between p-3 rounded-lg border ${
-                    result.status === "pass" ? "border-green-500/50 bg-green-500/10" :
-                    result.status === "fail" ? "border-red-500/50 bg-red-500/10" :
-                    result.status === "running" ? "border-blue-500/50 bg-blue-500/10" :
-                    "border-border"
+                    result.status === "pass"
+                      ? "border-green-500/50 bg-green-500/10"
+                      : result.status === "fail"
+                        ? "border-red-500/50 bg-red-500/10"
+                        : result.status === "running"
+                          ? "border-blue-500/50 bg-blue-500/10"
+                          : "border-border"
                   }`}
                 >
                   <div>
@@ -307,10 +337,12 @@ export default function TestPage() {
                   </div>
                   {result.status === "pass" && <CheckCircle className="h-5 w-5 text-green-500" />}
                   {result.status === "fail" && <XCircle className="h-5 w-5 text-red-500" />}
-                  {result.status === "running" && <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />}
+                  {result.status === "running" && (
+                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                  )}
                 </div>
               ))}
-              
+
               {summary && (
                 <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
                   <p className="font-medium">{summary}</p>

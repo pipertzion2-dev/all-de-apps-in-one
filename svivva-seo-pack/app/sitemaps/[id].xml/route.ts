@@ -2,10 +2,7 @@ import { getSitemapChunks } from "@/lib/sitemap-data";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  _request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const index = Number(id) - 1;
 
@@ -22,7 +19,8 @@ export async function GET(
 
   const urls = chunk
     .map(
-      (entry) => `<url><loc>${entry.loc}</loc>${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ""}</url>`
+      (entry) =>
+        `<url><loc>${entry.loc}</loc>${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ""}</url>`,
     )
     .join("");
 

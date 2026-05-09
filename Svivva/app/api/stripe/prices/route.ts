@@ -55,7 +55,10 @@ export async function GET() {
       });
     }
   } catch (error: any) {
-    console.warn("[stripe/prices] stripe.* schema empty or missing — using Stripe API:", error?.message);
+    console.warn(
+      "[stripe/prices] stripe.* schema empty or missing — using Stripe API:",
+      error?.message,
+    );
   }
 
   try {

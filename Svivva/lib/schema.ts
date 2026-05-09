@@ -1,4 +1,14 @@
-import { pgTable, text, timestamp, integer, boolean, jsonb, unique, serial, varchar } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  integer,
+  boolean,
+  jsonb,
+  unique,
+  serial,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,7 +31,9 @@ export const users = pgTable("users", {
 // ============================================================================
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -32,42 +44,52 @@ export type Session = typeof sessions.$inferSelect;
 // ============================================================================
 // PROJECTS
 // ============================================================================
-export const projects = pgTable("projects", {
-  id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  slug: text("slug").notNull(),
-  description: text("description"),
-  systemPrompt: text("system_prompt").notNull(),
-  outputSchema: jsonb("output_schema").notNull().$type<Record<string, unknown>>().default({}),
-  status: text("status").notNull().default("draft"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.ownerId, t.slug),
-]);
+export const projects = pgTable(
+  "projects",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    description: text("description"),
+    systemPrompt: text("system_prompt").notNull(),
+    outputSchema: jsonb("output_schema").notNull().$type<Record<string, unknown>>().default({}),
+    status: text("status").notNull().default("draft"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.ownerId, t.slug)],
+);
 
 // ============================================================================
 // PROJECT VERSIONS
 // ============================================================================
-export const projectVersions = pgTable("project_versions", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  version: integer("version").notNull(),
-  systemPrompt: text("system_prompt").notNull(),
-  outputSchema: jsonb("output_schema").notNull().$type<Record<string, unknown>>().default({}),
-  changeSummary: text("change_summary"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.projectId, t.version),
-]);
+export const projectVersions = pgTable(
+  "project_versions",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    version: integer("version").notNull(),
+    systemPrompt: text("system_prompt").notNull(),
+    outputSchema: jsonb("output_schema").notNull().$type<Record<string, unknown>>().default({}),
+    changeSummary: text("change_summary"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.projectId, t.version)],
+);
 
 // ============================================================================
 // TRAINING EXAMPLES
 // ============================================================================
 export const trainingExamples = pgTable("training_examples", {
   id: text("id").primaryKey(),
-  versionId: text("version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
+  versionId: text("version_id")
+    .notNull()
+    .references(() => projectVersions.id, { onDelete: "cascade" }),
   input: text("input").notNull(),
   output: jsonb("output").notNull().$type<Record<string, unknown>>(),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -77,40 +99,52 @@ export const trainingExamples = pgTable("training_examples", {
 // ============================================================================
 // EVAL SUITES
 // ============================================================================
-export const evalSuites = pgTable("eval_suites", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  description: text("description"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.projectId, t.name),
-]);
+export const evalSuites = pgTable(
+  "eval_suites",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.projectId, t.name)],
+);
 
 // ============================================================================
 // EVAL CASES
 // ============================================================================
-export const evalCases = pgTable("eval_cases", {
-  id: text("id").primaryKey(),
-  suiteId: text("suite_id").notNull().references(() => evalSuites.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  input: text("input").notNull(),
-  expectedOutput: jsonb("expected_output").$type<Record<string, unknown>>(),
-  assertionType: text("assertion_type").notNull().default("exact"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.suiteId, t.name),
-]);
+export const evalCases = pgTable(
+  "eval_cases",
+  {
+    id: text("id").primaryKey(),
+    suiteId: text("suite_id")
+      .notNull()
+      .references(() => evalSuites.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    input: text("input").notNull(),
+    expectedOutput: jsonb("expected_output").$type<Record<string, unknown>>(),
+    assertionType: text("assertion_type").notNull().default("exact"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.suiteId, t.name)],
+);
 
 // ============================================================================
 // EVAL RUNS
 // ============================================================================
 export const evalRuns = pgTable("eval_runs", {
   id: text("id").primaryKey(),
-  suiteId: text("suite_id").notNull().references(() => evalSuites.id, { onDelete: "cascade" }),
-  versionId: text("version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
+  suiteId: text("suite_id")
+    .notNull()
+    .references(() => evalSuites.id, { onDelete: "cascade" }),
+  versionId: text("version_id")
+    .notNull()
+    .references(() => projectVersions.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("pending"),
   totalCases: integer("total_cases").notNull().default(0),
   passedCases: integer("passed_cases").notNull().default(0),
@@ -125,8 +159,12 @@ export const evalRuns = pgTable("eval_runs", {
 // ============================================================================
 export const evalRunResults = pgTable("eval_run_results", {
   id: text("id").primaryKey(),
-  runId: text("run_id").notNull().references(() => evalRuns.id, { onDelete: "cascade" }),
-  caseId: text("case_id").notNull().references(() => evalCases.id, { onDelete: "cascade" }),
+  runId: text("run_id")
+    .notNull()
+    .references(() => evalRuns.id, { onDelete: "cascade" }),
+  caseId: text("case_id")
+    .notNull()
+    .references(() => evalCases.id, { onDelete: "cascade" }),
   actualOutput: jsonb("actual_output").$type<Record<string, unknown>>(),
   passed: boolean("passed"),
   error: text("error"),
@@ -137,25 +175,33 @@ export const evalRunResults = pgTable("eval_run_results", {
 // ============================================================================
 // DEPLOYMENTS
 // ============================================================================
-export const deployments = pgTable("deployments", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  versionId: text("version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
-  environment: text("environment").notNull().default("production"),
-  deployedBy: text("deployed_by").references(() => users.id, { onDelete: "set null" }),
-  deployedAt: timestamp("deployed_at").notNull().defaultNow(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.projectId, t.environment),
-]);
+export const deployments = pgTable(
+  "deployments",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    versionId: text("version_id")
+      .notNull()
+      .references(() => projectVersions.id, { onDelete: "cascade" }),
+    environment: text("environment").notNull().default("production"),
+    deployedBy: text("deployed_by").references(() => users.id, { onDelete: "set null" }),
+    deployedAt: timestamp("deployed_at").notNull().defaultNow(),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.projectId, t.environment)],
+);
 
 // ============================================================================
 // API KEYS
 // ============================================================================
 export const apiKeys = pgTable("api_keys", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   keyHash: text("key_hash").notNull(),
   keyPrefix: text("key_prefix").notNull(),
@@ -170,16 +216,26 @@ export const apiKeys = pgTable("api_keys", {
 // ============================================================================
 export const projectBrands = pgTable("project_brands", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }).unique(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" })
+    .unique(),
   brandName: text("brand_name"),
   tagline: text("tagline"),
   icon: text("icon"),
-  colorPalette: jsonb("color_palette").$type<{ primary: string; secondary: string; accent: string }>(),
+  colorPalette: jsonb("color_palette").$type<{
+    primary: string;
+    secondary: string;
+    accent: string;
+  }>(),
   category: text("category"),
   personality: text("personality"),
   suggestedNames: jsonb("suggested_names").$type<string[]>(),
   suggestedIcons: jsonb("suggested_icons").$type<string[]>(),
-  suggestedPalettes: jsonb("suggested_palettes").$type<{ name: string; colors: { primary: string; secondary: string; accent: string } }[]>(),
+  suggestedPalettes:
+    jsonb("suggested_palettes").$type<
+      { name: string; colors: { primary: string; secondary: string; accent: string } }[]
+    >(),
   onboardingStep: text("onboarding_step").default("define"),
   onboardingAnswers: jsonb("onboarding_answers").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -191,7 +247,9 @@ export const projectBrands = pgTable("project_brands", {
 // ============================================================================
 export const usageLogs = pgTable("usage_logs", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   versionId: text("version_id").references(() => projectVersions.id, { onDelete: "set null" }),
   apiKeyId: text("api_key_id").references(() => apiKeys.id, { onDelete: "set null" }),
   input: text("input"),
@@ -210,27 +268,37 @@ export const teams = pgTable("teams", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   description: text("description"),
   avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const teamMembers = pgTable("team_members", {
-  id: text("id").primaryKey(),
-  teamId: text("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull().default("member"), // owner, admin, member, viewer
-  invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
-  joinedAt: timestamp("joined_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.teamId, t.userId),
-]);
+export const teamMembers = pgTable(
+  "team_members",
+  {
+    id: text("id").primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"), // owner, admin, member, viewer
+    invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
+    joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.teamId, t.userId)],
+);
 
 export const projectPermissions = pgTable("project_permissions", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   teamId: text("team_id").references(() => teams.id, { onDelete: "cascade" }),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
   role: text("role").notNull().default("viewer"), // owner, editor, viewer
@@ -242,9 +310,13 @@ export const projectPermissions = pgTable("project_permissions", {
 // ============================================================================
 export const promptComments = pgTable("prompt_comments", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   versionId: text("version_id").references(() => projectVersions.id, { onDelete: "cascade" }),
-  authorId: text("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  authorId: text("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   body: text("body").notNull(),
   lineStart: integer("line_start"),
   lineEnd: integer("line_end"),
@@ -259,8 +331,12 @@ export const promptComments = pgTable("prompt_comments", {
 // ============================================================================
 export const usageAlerts = pgTable("usage_alerts", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   thresholdType: text("threshold_type").notNull().default("percent"), // percent, absolute
   thresholdValue: integer("threshold_value").notNull().default(80),
   emailEnabled: boolean("email_enabled").notNull().default(true),
@@ -276,7 +352,9 @@ export const usageAlerts = pgTable("usage_alerts", {
 // ============================================================================
 export const webhooks = pgTable("webhooks", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   url: text("url").notNull(),
   secret: text("secret").notNull(),
   events: jsonb("events").notNull().$type<string[]>().default([]), // error, success, threshold
@@ -292,11 +370,15 @@ export const webhooks = pgTable("webhooks", {
 // ============================================================================
 export const promptExperiments = pgTable("prompt_experiments", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   status: text("status").notNull().default("draft"), // draft, running, paused, completed
-  winnerVersionId: text("winner_version_id").references(() => projectVersions.id, { onDelete: "set null" }),
+  winnerVersionId: text("winner_version_id").references(() => projectVersions.id, {
+    onDelete: "set null",
+  }),
   autoPromote: boolean("auto_promote").notNull().default(false),
   minSampleSize: integer("min_sample_size").notNull().default(100),
   startedAt: timestamp("started_at"),
@@ -305,28 +387,39 @@ export const promptExperiments = pgTable("prompt_experiments", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const experimentVariants = pgTable("experiment_variants", {
-  id: text("id").primaryKey(),
-  experimentId: text("experiment_id").notNull().references(() => promptExperiments.id, { onDelete: "cascade" }),
-  versionId: text("version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  trafficWeight: integer("traffic_weight").notNull().default(50), // percentage 0-100
-  impressions: integer("impressions").notNull().default(0),
-  conversions: integer("conversions").notNull().default(0),
-  avgLatencyMs: integer("avg_latency_ms"),
-  errorRate: integer("error_rate"), // stored as percentage * 100
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.experimentId, t.versionId),
-]);
+export const experimentVariants = pgTable(
+  "experiment_variants",
+  {
+    id: text("id").primaryKey(),
+    experimentId: text("experiment_id")
+      .notNull()
+      .references(() => promptExperiments.id, { onDelete: "cascade" }),
+    versionId: text("version_id")
+      .notNull()
+      .references(() => projectVersions.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    trafficWeight: integer("traffic_weight").notNull().default(50), // percentage 0-100
+    impressions: integer("impressions").notNull().default(0),
+    conversions: integer("conversions").notNull().default(0),
+    avgLatencyMs: integer("avg_latency_ms"),
+    errorRate: integer("error_rate"), // stored as percentage * 100
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.experimentId, t.versionId)],
+);
 
 // ============================================================================
 // MARKETPLACE
 // ============================================================================
 export const marketplaceListings = pgTable("marketplace_listings", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }).unique(),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" })
+    .unique(),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
   shortDescription: text("short_description"),
@@ -345,40 +438,56 @@ export const marketplaceListings = pgTable("marketplace_listings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const marketplacePurchases = pgTable("marketplace_purchases", {
-  id: text("id").primaryKey(),
-  listingId: text("listing_id").notNull().references(() => marketplaceListings.id, { onDelete: "cascade" }),
-  buyerId: text("buyer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  stripePaymentId: text("stripe_payment_id"),
-  amount: integer("amount").notNull(),
-  currency: text("currency").notNull().default("usd"),
-  status: text("status").notNull().default("pending"), // pending, completed, refunded
-  purchasedAt: timestamp("purchased_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.listingId, t.buyerId),
-]);
+export const marketplacePurchases = pgTable(
+  "marketplace_purchases",
+  {
+    id: text("id").primaryKey(),
+    listingId: text("listing_id")
+      .notNull()
+      .references(() => marketplaceListings.id, { onDelete: "cascade" }),
+    buyerId: text("buyer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    stripePaymentId: text("stripe_payment_id"),
+    amount: integer("amount").notNull(),
+    currency: text("currency").notNull().default("usd"),
+    status: text("status").notNull().default("pending"), // pending, completed, refunded
+    purchasedAt: timestamp("purchased_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.listingId, t.buyerId)],
+);
 
-export const marketplaceReviews = pgTable("marketplace_reviews", {
-  id: text("id").primaryKey(),
-  listingId: text("listing_id").notNull().references(() => marketplaceListings.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  rating: integer("rating").notNull(), // 1-5
-  title: text("title"),
-  body: text("body"),
-  isVerifiedPurchase: boolean("is_verified_purchase").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.listingId, t.userId),
-]);
+export const marketplaceReviews = pgTable(
+  "marketplace_reviews",
+  {
+    id: text("id").primaryKey(),
+    listingId: text("listing_id")
+      .notNull()
+      .references(() => marketplaceListings.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(), // 1-5
+    title: text("title"),
+    body: text("body"),
+    isVerifiedPurchase: boolean("is_verified_purchase").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.listingId, t.userId)],
+);
 
 // ============================================================================
 // FINE-TUNING
 // ============================================================================
 export const fineTuneJobs = pgTable("fine_tune_jobs", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   baseModel: text("base_model").notNull().default("gpt-4o-mini"),
   status: text("status").notNull().default("pending"), // pending, training, completed, failed
@@ -399,8 +508,12 @@ export const fineTuneJobs = pgTable("fine_tune_jobs", {
 
 export const fineTuneDeployments = pgTable("fine_tune_deployments", {
   id: text("id").primaryKey(),
-  jobId: text("job_id").notNull().references(() => fineTuneJobs.id, { onDelete: "cascade" }),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  jobId: text("job_id")
+    .notNull()
+    .references(() => fineTuneJobs.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   versionId: text("version_id").references(() => projectVersions.id, { onDelete: "set null" }),
   isActive: boolean("is_active").notNull().default(false),
   deployedAt: timestamp("deployed_at").notNull().defaultNow(),
@@ -411,7 +524,10 @@ export const fineTuneDeployments = pgTable("fine_tune_deployments", {
 // ============================================================================
 export const costPolicies = pgTable("cost_policies", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }).unique(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" })
+    .unique(),
   budgetLimit: integer("budget_limit"), // monthly budget in cents
   budgetAlertThreshold: integer("budget_alert_threshold").default(80), // percentage
   modelPreference: text("model_preference").default("balanced"), // cost, balanced, quality
@@ -427,7 +543,9 @@ export const costPolicies = pgTable("cost_policies", {
 // ============================================================================
 export const sdkExports = pgTable("sdk_exports", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   language: text("language").notNull(), // python, nodejs, typescript, go
   version: text("version").notNull(),
   downloadUrl: text("download_url"),
@@ -438,33 +556,41 @@ export const sdkExports = pgTable("sdk_exports", {
 // ============================================================================
 // ANALYTICS ROLLUPS
 // ============================================================================
-export const analyticsRollups = pgTable("analytics_rollups", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  interval: text("interval").notNull(), // hourly, daily, weekly, monthly
-  periodStart: timestamp("period_start").notNull(),
-  periodEnd: timestamp("period_end").notNull(),
-  totalCalls: integer("total_calls").notNull().default(0),
-  successfulCalls: integer("successful_calls").notNull().default(0),
-  failedCalls: integer("failed_calls").notNull().default(0),
-  avgLatencyMs: integer("avg_latency_ms"),
-  p50LatencyMs: integer("p50_latency_ms"),
-  p95LatencyMs: integer("p95_latency_ms"),
-  p99LatencyMs: integer("p99_latency_ms"),
-  totalTokens: integer("total_tokens").notNull().default(0),
-  totalCost: integer("total_cost").notNull().default(0), // in cents
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.projectId, t.interval, t.periodStart),
-]);
+export const analyticsRollups = pgTable(
+  "analytics_rollups",
+  {
+    id: text("id").primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    interval: text("interval").notNull(), // hourly, daily, weekly, monthly
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    totalCalls: integer("total_calls").notNull().default(0),
+    successfulCalls: integer("successful_calls").notNull().default(0),
+    failedCalls: integer("failed_calls").notNull().default(0),
+    avgLatencyMs: integer("avg_latency_ms"),
+    p50LatencyMs: integer("p50_latency_ms"),
+    p95LatencyMs: integer("p95_latency_ms"),
+    p99LatencyMs: integer("p99_latency_ms"),
+    totalTokens: integer("total_tokens").notNull().default(0),
+    totalCost: integer("total_cost").notNull().default(0), // in cents
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.projectId, t.interval, t.periodStart)],
+);
 
 // ============================================================================
 // PLAYGROUND SESSIONS
 // ============================================================================
 export const playgroundSessions = pgTable("playground_sessions", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   shareToken: text("share_token").unique(), // null = private, non-null = shareable
@@ -489,23 +615,31 @@ export const playgroundSessions = pgTable("playground_sessions", {
 // ============================================================================
 // PLAYGROUND COLLABORATORS
 // ============================================================================
-export const playgroundCollaborators = pgTable("playground_collaborators", {
-  id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => playgroundSessions.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull().default("viewer"), // viewer, editor
-  lastActiveAt: timestamp("last_active_at"),
-  joinedAt: timestamp("joined_at").notNull().defaultNow(),
-}, (t) => [
-  unique().on(t.sessionId, t.userId),
-]);
+export const playgroundCollaborators = pgTable(
+  "playground_collaborators",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => playgroundSessions.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("viewer"), // viewer, editor
+    lastActiveAt: timestamp("last_active_at"),
+    joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.sessionId, t.userId)],
+);
 
 // ============================================================================
 // PLAYGROUND REQUEST HISTORY
 // ============================================================================
 export const playgroundRequests = pgTable("playground_requests", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => playgroundSessions.id, { onDelete: "cascade" }),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => playgroundSessions.id, { onDelete: "cascade" }),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   request: jsonb("request").notNull().$type<{
     method: string;
@@ -526,22 +660,29 @@ export const playgroundRequests = pgTable("playground_requests", {
 // ============================================================================
 export const chaosRuns = pgTable("chaos_runs", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("pending"),
   totalInputs: integer("total_inputs").notNull().default(0),
   passedInputs: integer("passed_inputs").notNull().default(0),
   failedInputs: integer("failed_inputs").notNull().default(0),
   resilienceScore: integer("resilience_score"),
-  categories: jsonb("categories").$type<Record<string, { total: number; passed: number; failed: number }>>(),
-  results: jsonb("results").$type<{
-    input: string;
-    category: string;
-    passed: boolean;
-    output?: Record<string, unknown>;
-    error?: string;
-    latencyMs: number;
-  }[]>(),
+  categories:
+    jsonb("categories").$type<Record<string, { total: number; passed: number; failed: number }>>(),
+  results: jsonb("results").$type<
+    {
+      input: string;
+      category: string;
+      passed: boolean;
+      output?: Record<string, unknown>;
+      error?: string;
+      latencyMs: number;
+    }[]
+  >(),
   startedAt: timestamp("started_at"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -552,12 +693,22 @@ export const chaosRuns = pgTable("chaos_runs", {
 // ============================================================================
 export const promptBreeds = pgTable("prompt_breeds", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  parentAVersionId: text("parent_a_version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
-  parentBVersionId: text("parent_b_version_id").notNull().references(() => projectVersions.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  parentAVersionId: text("parent_a_version_id")
+    .notNull()
+    .references(() => projectVersions.id, { onDelete: "cascade" }),
+  parentBVersionId: text("parent_b_version_id")
+    .notNull()
+    .references(() => projectVersions.id, { onDelete: "cascade" }),
   offspringPrompt: text("offspring_prompt"),
-  offspringVersionId: text("offspring_version_id").references(() => projectVersions.id, { onDelete: "set null" }),
+  offspringVersionId: text("offspring_version_id").references(() => projectVersions.id, {
+    onDelete: "set null",
+  }),
   status: text("status").notNull().default("pending"),
   parentAScore: integer("parent_a_score"),
   parentBScore: integer("parent_b_score"),
@@ -576,8 +727,12 @@ export const promptBreeds = pgTable("prompt_breeds", {
 // ============================================================================
 export const apiAutopsies = pgTable("api_autopsies", {
   id: text("id").primaryKey(),
-  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   failedInput: text("failed_input").notNull(),
   failedOutput: jsonb("failed_output").$type<Record<string, unknown>>(),
   errorMessage: text("error_message"),
@@ -618,7 +773,9 @@ export const playSessions = pgTable("play_sessions", {
 // ============================================================================
 export const playAnalyses = pgTable("play_analyses", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => playSessions.id, { onDelete: "cascade" }),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => playSessions.id, { onDelete: "cascade" }),
   bpm: integer("bpm"),
   timeSignature: text("time_signature"),
   key: text("key"),
@@ -637,7 +794,9 @@ export const playAnalyses = pgTable("play_analyses", {
 // ============================================================================
 export const playGenerations = pgTable("play_generations", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => playSessions.id, { onDelete: "cascade" }),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => playSessions.id, { onDelete: "cascade" }),
   mode: text("mode").notNull(),
   status: text("status").notNull().default("pending"),
   plan: jsonb("plan").$type<Record<string, unknown>>(),
@@ -654,7 +813,9 @@ export const playGenerations = pgTable("play_generations", {
 // ============================================================================
 export const playStems = pgTable("play_stems", {
   id: text("id").primaryKey(),
-  generationId: text("generation_id").notNull().references(() => playGenerations.id, { onDelete: "cascade" }),
+  generationId: text("generation_id")
+    .notNull()
+    .references(() => playGenerations.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   role: text("role").notNull().default("melody"),
   instrumentHint: text("instrument_hint"),
@@ -673,12 +834,19 @@ export const playStems = pgTable("play_stems", {
 // ============================================================================
 export const playPatches = pgTable("play_patches", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => playSessions.id, { onDelete: "cascade" }),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => playSessions.id, { onDelete: "cascade" }),
   name: text("name").notNull().default("Untitled Patch"),
   synthFamily: text("synth_family").notNull().default("subtractive"),
   patchData: jsonb("patch_data").$type<Record<string, unknown>>(),
   instructions: text("instructions"),
-  macros: jsonb("macros").$type<{ brightness: number; movement: number; bite: number; space: number }>(),
+  macros: jsonb("macros").$type<{
+    brightness: number;
+    movement: number;
+    bite: number;
+    space: number;
+  }>(),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -686,52 +854,178 @@ export const playPatches = pgTable("play_patches", {
 // ============================================================================
 // INSERT SCHEMAS
 // ============================================================================
-export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertProjectSchema = createInsertSchema(projects).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertProjectVersionSchema = createInsertSchema(projectVersions).omit({ id: true, createdAt: true });
-export const insertTrainingExampleSchema = createInsertSchema(trainingExamples).omit({ id: true, createdAt: true });
-export const insertEvalSuiteSchema = createInsertSchema(evalSuites).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertEvalCaseSchema = createInsertSchema(evalCases).omit({ id: true, createdAt: true });
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertProjectVersionSchema = createInsertSchema(projectVersions).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertTrainingExampleSchema = createInsertSchema(trainingExamples).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertEvalSuiteSchema = createInsertSchema(evalSuites).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertEvalCaseSchema = createInsertSchema(evalCases).omit({
+  id: true,
+  createdAt: true,
+});
 export const insertEvalRunSchema = createInsertSchema(evalRuns).omit({ id: true, createdAt: true });
-export const insertEvalRunResultSchema = createInsertSchema(evalRunResults).omit({ id: true, createdAt: true });
-export const insertDeploymentSchema = createInsertSchema(deployments).omit({ id: true, createdAt: true });
+export const insertEvalRunResultSchema = createInsertSchema(evalRunResults).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertDeploymentSchema = createInsertSchema(deployments).omit({
+  id: true,
+  createdAt: true,
+});
 export const insertApiKeySchema = createInsertSchema(apiKeys).omit({ id: true, createdAt: true });
-export const insertUsageLogSchema = createInsertSchema(usageLogs).omit({ id: true, createdAt: true });
-export const insertProjectBrandSchema = createInsertSchema(projectBrands).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertTeamSchema = createInsertSchema(teams).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({ id: true, joinedAt: true });
-export const insertProjectPermissionSchema = createInsertSchema(projectPermissions).omit({ id: true, createdAt: true });
-export const insertPromptCommentSchema = createInsertSchema(promptComments).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertUsageAlertSchema = createInsertSchema(usageAlerts).omit({ id: true, createdAt: true });
-export const insertWebhookSchema = createInsertSchema(webhooks).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertPromptExperimentSchema = createInsertSchema(promptExperiments).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertExperimentVariantSchema = createInsertSchema(experimentVariants).omit({ id: true, createdAt: true });
-export const insertMarketplaceListingSchema = createInsertSchema(marketplaceListings).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertMarketplacePurchaseSchema = createInsertSchema(marketplacePurchases).omit({ id: true, purchasedAt: true });
-export const insertMarketplaceReviewSchema = createInsertSchema(marketplaceReviews).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertFineTuneJobSchema = createInsertSchema(fineTuneJobs).omit({ id: true, createdAt: true });
-export const insertFineTuneDeploymentSchema = createInsertSchema(fineTuneDeployments).omit({ id: true, deployedAt: true });
-export const insertCostPolicySchema = createInsertSchema(costPolicies).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertSdkExportSchema = createInsertSchema(sdkExports).omit({ id: true, generatedAt: true });
-export const insertAnalyticsRollupSchema = createInsertSchema(analyticsRollups).omit({ id: true, createdAt: true });
-export const insertPlaygroundSessionSchema = createInsertSchema(playgroundSessions).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertPlaygroundCollaboratorSchema = createInsertSchema(playgroundCollaborators).omit({ id: true, joinedAt: true });
-export const insertPlaygroundRequestSchema = createInsertSchema(playgroundRequests).omit({ id: true, createdAt: true });
-export const insertChaosRunSchema = createInsertSchema(chaosRuns).omit({ id: true, createdAt: true });
-export const insertPromptBreedSchema = createInsertSchema(promptBreeds).omit({ id: true, createdAt: true });
-export const insertApiAutopsySchema = createInsertSchema(apiAutopsies).omit({ id: true, createdAt: true });
-export const insertPlaySessionSchema = createInsertSchema(playSessions).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertPlayAnalysisSchema = createInsertSchema(playAnalyses).omit({ id: true, createdAt: true });
-export const insertPlayGenerationSchema = createInsertSchema(playGenerations).omit({ id: true, createdAt: true });
-export const insertPlayStemSchema = createInsertSchema(playStems).omit({ id: true, createdAt: true });
-export const insertPlayPatchSchema = createInsertSchema(playPatches).omit({ id: true, createdAt: true });
+export const insertUsageLogSchema = createInsertSchema(usageLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertProjectBrandSchema = createInsertSchema(projectBrands).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertTeamSchema = createInsertSchema(teams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
+  id: true,
+  joinedAt: true,
+});
+export const insertProjectPermissionSchema = createInsertSchema(projectPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPromptCommentSchema = createInsertSchema(promptComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertUsageAlertSchema = createInsertSchema(usageAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertWebhookSchema = createInsertSchema(webhooks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertPromptExperimentSchema = createInsertSchema(promptExperiments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertExperimentVariantSchema = createInsertSchema(experimentVariants).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertMarketplaceListingSchema = createInsertSchema(marketplaceListings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertMarketplacePurchaseSchema = createInsertSchema(marketplacePurchases).omit({
+  id: true,
+  purchasedAt: true,
+});
+export const insertMarketplaceReviewSchema = createInsertSchema(marketplaceReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertFineTuneJobSchema = createInsertSchema(fineTuneJobs).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertFineTuneDeploymentSchema = createInsertSchema(fineTuneDeployments).omit({
+  id: true,
+  deployedAt: true,
+});
+export const insertCostPolicySchema = createInsertSchema(costPolicies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertSdkExportSchema = createInsertSchema(sdkExports).omit({
+  id: true,
+  generatedAt: true,
+});
+export const insertAnalyticsRollupSchema = createInsertSchema(analyticsRollups).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPlaygroundSessionSchema = createInsertSchema(playgroundSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertPlaygroundCollaboratorSchema = createInsertSchema(playgroundCollaborators).omit({
+  id: true,
+  joinedAt: true,
+});
+export const insertPlaygroundRequestSchema = createInsertSchema(playgroundRequests).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertChaosRunSchema = createInsertSchema(chaosRuns).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPromptBreedSchema = createInsertSchema(promptBreeds).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertApiAutopsySchema = createInsertSchema(apiAutopsies).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPlaySessionSchema = createInsertSchema(playSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertPlayAnalysisSchema = createInsertSchema(playAnalyses).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPlayGenerationSchema = createInsertSchema(playGenerations).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPlayStemSchema = createInsertSchema(playStems).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertPlayPatchSchema = createInsertSchema(playPatches).omit({
+  id: true,
+  createdAt: true,
+});
 
 // ============================================================================
 // NEURAL AUDIO - DATASETS
 // ============================================================================
 export const audioDatasets = pgTable("audio_datasets", {
   id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   genre: text("genre"),
@@ -746,7 +1040,9 @@ export const audioDatasets = pgTable("audio_datasets", {
 
 export const audioDatasetItems = pgTable("audio_dataset_items", {
   id: text("id").primaryKey(),
-  datasetId: text("dataset_id").notNull().references(() => audioDatasets.id, { onDelete: "cascade" }),
+  datasetId: text("dataset_id")
+    .notNull()
+    .references(() => audioDatasets.id, { onDelete: "cascade" }),
   fileName: text("file_name").notNull(),
   fileUrl: text("file_url"),
   durationSec: integer("duration_sec"),
@@ -765,7 +1061,9 @@ export const audioDatasetItems = pgTable("audio_dataset_items", {
 // ============================================================================
 export const neuralModels = pgTable("neural_models", {
   id: text("id").primaryKey(),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   modelType: text("model_type").notNull().default("diffusion"),
   baseModel: text("base_model"),
@@ -778,9 +1076,15 @@ export const neuralModels = pgTable("neural_models", {
 
 export const neuralTrainingJobs = pgTable("neural_training_jobs", {
   id: text("id").primaryKey(),
-  modelId: text("model_id").notNull().references(() => neuralModels.id, { onDelete: "cascade" }),
-  datasetId: text("dataset_id").notNull().references(() => audioDatasets.id, { onDelete: "cascade" }),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  modelId: text("model_id")
+    .notNull()
+    .references(() => neuralModels.id, { onDelete: "cascade" }),
+  datasetId: text("dataset_id")
+    .notNull()
+    .references(() => audioDatasets.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("queued"),
   progress: integer("progress").notNull().default(0),
   epochs: integer("epochs").notNull().default(100),
@@ -794,10 +1098,24 @@ export const neuralTrainingJobs = pgTable("neural_training_jobs", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertAudioDatasetSchema = createInsertSchema(audioDatasets).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertAudioDatasetItemSchema = createInsertSchema(audioDatasetItems).omit({ id: true, createdAt: true });
-export const insertNeuralModelSchema = createInsertSchema(neuralModels).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertNeuralTrainingJobSchema = createInsertSchema(neuralTrainingJobs).omit({ id: true, createdAt: true });
+export const insertAudioDatasetSchema = createInsertSchema(audioDatasets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertAudioDatasetItemSchema = createInsertSchema(audioDatasetItems).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertNeuralModelSchema = createInsertSchema(neuralModels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertNeuralTrainingJobSchema = createInsertSchema(neuralTrainingJobs).omit({
+  id: true,
+  createdAt: true,
+});
 
 // ============================================================================
 // NEURAL API FEATURES - PROMPT OPTIMIZER, SCHEMA ENHANCER, QUALITY GATE, etc.
@@ -823,7 +1141,9 @@ export const neuralSchemaAnalyses = pgTable("neural_schema_analyses", {
   suggestedSchema: jsonb("suggested_schema").notNull(),
   rationale: text("rationale").notNull(),
   riskLevel: text("risk_level").notNull(),
-  improvements: jsonb("improvements").$type<{ field: string; change: string; reason: string }[]>().notNull(),
+  improvements: jsonb("improvements")
+    .$type<{ field: string; change: string; reason: string }[]>()
+    .notNull(),
   applied: boolean("applied").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -868,18 +1188,34 @@ export const neuralAnomalies = pgTable("neural_anomalies", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertNeuralPromptAnalysisSchema = createInsertSchema(neuralPromptAnalyses).omit({ id: true, createdAt: true });
-export const insertNeuralSchemaAnalysisSchema = createInsertSchema(neuralSchemaAnalyses).omit({ id: true, createdAt: true });
-export const insertNeuralQualityScoreSchema = createInsertSchema(neuralQualityScores).omit({ id: true });
-export const insertNeuralAugmentationJobSchema = createInsertSchema(neuralAugmentationJobs).omit({ id: true, createdAt: true });
-export const insertNeuralAnomalySchema = createInsertSchema(neuralAnomalies).omit({ id: true, createdAt: true });
+export const insertNeuralPromptAnalysisSchema = createInsertSchema(neuralPromptAnalyses).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertNeuralSchemaAnalysisSchema = createInsertSchema(neuralSchemaAnalyses).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertNeuralQualityScoreSchema = createInsertSchema(neuralQualityScores).omit({
+  id: true,
+});
+export const insertNeuralAugmentationJobSchema = createInsertSchema(neuralAugmentationJobs).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertNeuralAnomalySchema = createInsertSchema(neuralAnomalies).omit({
+  id: true,
+  createdAt: true,
+});
 
 // ============================================================================
 // IDEA ENGINE
 // ============================================================================
 export const ideaSessions = pgTable("idea_sessions", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   mode: text("mode").notNull().default("digital"),
   industry: text("industry"),
   context: text("context"),
@@ -904,7 +1240,10 @@ export interface IdeaResult {
   tags: string[];
 }
 
-export const insertIdeaSessionSchema = createInsertSchema(ideaSessions).omit({ id: true, createdAt: true });
+export const insertIdeaSessionSchema = createInsertSchema(ideaSessions).omit({
+  id: true,
+  createdAt: true,
+});
 
 // ============================================================================
 // SVIVVA SEEDS
@@ -942,7 +1281,9 @@ export interface SeedMarketingContent {
 
 export const seedSessions = pgTable("seed_sessions", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   fileName: text("file_name").notNull(),
   status: text("status").notNull().default("uploading"),
   seedCount: integer("seed_count").notNull().default(0),
@@ -951,7 +1292,9 @@ export const seedSessions = pgTable("seed_sessions", {
 
 export const seeds = pgTable("seeds", {
   id: text("id").primaryKey(),
-  sessionId: text("session_id").notNull().references(() => seedSessions.id, { onDelete: "cascade" }),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => seedSessions.id, { onDelete: "cascade" }),
   appName: text("app_name").notNull(),
   spec: jsonb("spec").$type<SeedAppSpec>().notNull(),
   status: text("status").notNull().default("parsed"),
@@ -963,7 +1306,10 @@ export const seeds = pgTable("seeds", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertSeedSessionSchema = createInsertSchema(seedSessions).omit({ id: true, createdAt: true });
+export const insertSeedSessionSchema = createInsertSchema(seedSessions).omit({
+  id: true,
+  createdAt: true,
+});
 export const insertSeedSchema = createInsertSchema(seeds).omit({ id: true, createdAt: true });
 
 // ============================================================================
@@ -1076,7 +1422,9 @@ export type InsertSeed = z.infer<typeof insertSeedSchema>;
 // BLOG POSTS
 // ============================================================================
 export const blogPosts = pgTable("blog_posts", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull(),
@@ -1093,7 +1441,11 @@ export const blogPosts = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 
@@ -1101,7 +1453,9 @@ export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 // SEO LANDING PAGES
 // ============================================================================
 export const seoLandingPages = pgTable("seo_landing_pages", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull().unique(),
   keyword: text("keyword").notNull(),
   title: text("title").notNull(),
@@ -1120,7 +1474,10 @@ export const seoLandingPages = pgTable("seo_landing_pages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertSeoLandingPageSchema = createInsertSchema(seoLandingPages).omit({ id: true, createdAt: true });
+export const insertSeoLandingPageSchema = createInsertSchema(seoLandingPages).omit({
+  id: true,
+  createdAt: true,
+});
 export type SeoLandingPage = typeof seoLandingPages.$inferSelect;
 export type InsertSeoLandingPage = z.infer<typeof insertSeoLandingPageSchema>;
 
@@ -1128,7 +1485,9 @@ export type InsertSeoLandingPage = z.infer<typeof insertSeoLandingPageSchema>;
 // PAGE CATEGORIES
 // ============================================================================
 export const pageCategories = pgTable("page_categories", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   description: text("description"),
@@ -1141,7 +1500,9 @@ export type PageCategory = typeof pageCategories.$inferSelect;
 export type InsertPageCategory = z.infer<typeof insertPageCategorySchema>;
 
 export const seoKeywords = pgTable("seo_keywords", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   keyword: text("keyword").notNull(),
   searchVolume: integer("search_volume").notNull().default(0),
   intent: text("intent").notNull().default("medium"),
@@ -1153,7 +1514,11 @@ export const seoKeywords = pgTable("seo_keywords", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertSeoKeywordSchema = createInsertSchema(seoKeywords).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSeoKeywordSchema = createInsertSchema(seoKeywords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type SeoKeyword = typeof seoKeywords.$inferSelect;
 export type InsertSeoKeyword = z.infer<typeof insertSeoKeywordSchema>;
 
@@ -1161,7 +1526,9 @@ export type InsertSeoKeyword = z.infer<typeof insertSeoKeywordSchema>;
 // SEED CREDENTIALS (per-user marketing funnel credentials)
 // ============================================================================
 export const seedCredentials = pgTable("seed_credentials", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").notNull().unique(),
   replitToken: text("replit_token"),
   replitUsername: text("replit_username"),
@@ -1189,7 +1556,9 @@ export type SeedCredentials = typeof seedCredentials.$inferSelect;
 // GROWTH MARKETING SYSTEM
 // ============================================================================
 export const growthSubmissions = pgTable("growth_submissions", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   directoryId: text("directory_id").notNull(),
   product: text("product").notNull(), // "svivva" | "pyracrypt" | "mini_apps"
   status: text("status").notNull().default("pending"), // "pending" | "submitted" | "live" | "rejected"
@@ -1200,7 +1569,9 @@ export const growthSubmissions = pgTable("growth_submissions", {
 });
 
 export const growthContent = pgTable("growth_content", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   product: text("product").notNull(),
   contentType: text("content_type").notNull(),
   title: text("title"),
@@ -1209,7 +1580,9 @@ export const growthContent = pgTable("growth_content", {
 });
 
 export const growthTasks = pgTable("growth_tasks", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   taskType: text("task_type").notNull(),
   product: text("product"),
   status: text("status").notNull().default("completed"),

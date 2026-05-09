@@ -252,7 +252,13 @@ function drawGeneric(ctx: CanvasRenderingContext2D, w: number, h: number, accent
   ctx.stroke();
 }
 
-export function ProductSketchViewer({ productName, productCategory, materials, requirements, className }: ProductSketchViewerProps) {
+export function ProductSketchViewer({
+  productName,
+  productCategory,
+  materials,
+  requirements,
+  className,
+}: ProductSketchViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -287,16 +293,33 @@ export function ProductSketchViewer({ productName, productCategory, materials, r
       ctx.stroke();
     }
 
-    const accent = materials.includes("Carbon fiber") || materials.includes("Titanium") ? "#5BA8A0" : "#A05068";
+    const accent =
+      materials.includes("Carbon fiber") || materials.includes("Titanium") ? "#5BA8A0" : "#A05068";
     const cat = productCategory.toLowerCase();
 
-    if (cat.includes("electron") || cat.includes("device") || cat.includes("phone") || cat.includes("tablet") || cat.includes("gadget")) {
+    if (
+      cat.includes("electron") ||
+      cat.includes("device") ||
+      cat.includes("phone") ||
+      cat.includes("tablet") ||
+      cat.includes("gadget")
+    ) {
       drawDevice(ctx, displayW, displayH, accent);
     } else if (cat.includes("home") || cat.includes("appliance") || cat.includes("kitchen")) {
       drawAppliance(ctx, displayW, displayH, accent);
-    } else if (cat.includes("wear") || cat.includes("watch") || cat.includes("fitness") || cat.includes("health")) {
+    } else if (
+      cat.includes("wear") ||
+      cat.includes("watch") ||
+      cat.includes("fitness") ||
+      cat.includes("health")
+    ) {
       drawWearable(ctx, displayW, displayH, accent);
-    } else if (cat.includes("industrial") || cat.includes("tool") || cat.includes("machine") || cat.includes("equipment")) {
+    } else if (
+      cat.includes("industrial") ||
+      cat.includes("tool") ||
+      cat.includes("machine") ||
+      cat.includes("equipment")
+    ) {
       drawIndustrial(ctx, displayW, displayH, accent);
     } else {
       drawGeneric(ctx, displayW, displayH, accent);

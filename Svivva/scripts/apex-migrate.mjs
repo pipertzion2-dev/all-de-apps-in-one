@@ -1,4 +1,4 @@
-import pg from 'pg';
+import pg from "pg";
 const { Pool } = pg;
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -18,7 +18,7 @@ async function run() {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
-  console.log('apex_call_logs OK');
+  console.log("apex_call_logs OK");
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS apex_cycles (
@@ -40,8 +40,11 @@ async function run() {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
-  console.log('apex_cycles OK');
+  console.log("apex_cycles OK");
   await pool.end();
 }
 
-run().catch(e => { console.error(e); process.exit(1); });
+run().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

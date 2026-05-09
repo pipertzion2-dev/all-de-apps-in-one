@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "keyword is required" }, { status: 400 });
     }
 
-    const keywordTag = keyword.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const keywordTag = keyword
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
 
     const completion = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
@@ -21,7 +24,8 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "You are an SEO content writer for Svivva, an AI-powered platform for building production-ready APIs from prompts. Write comprehensive, helpful blog articles that rank well on Google.",
+          content:
+            "You are an SEO content writer for Svivva, an AI-powered platform for building production-ready APIs from prompts. Write comprehensive, helpful blog articles that rank well on Google.",
         },
         {
           role: "user",
@@ -32,19 +36,22 @@ export async function POST(request: NextRequest) {
 
     const generated = JSON.parse(completion.choices[0].message.content || "{}");
 
-    const [post] = await db.insert(blogPosts).values({
-      slug: generated.slug,
-      title: generated.title,
-      excerpt: generated.excerpt,
-      content: generated.content,
-      author: "Svivva Team",
-      category: "guides",
-      tags: ["ai", keywordTag],
-      metaTitle: generated.metaTitle,
-      metaDescription: generated.metaDescription,
-      published: true,
-      publishedAt: new Date(),
-    }).returning();
+    const [post] = await db
+      .insert(blogPosts)
+      .values({
+        slug: generated.slug,
+        title: generated.title,
+        excerpt: generated.excerpt,
+        content: generated.content,
+        author: "Svivva Team",
+        category: "guides",
+        tags: ["ai", keywordTag],
+        metaTitle: generated.metaTitle,
+        metaDescription: generated.metaDescription,
+        published: true,
+        publishedAt: new Date(),
+      })
+      .returning();
 
     if (keywordId) {
       await db

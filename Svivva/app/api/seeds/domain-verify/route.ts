@@ -29,7 +29,11 @@ export async function POST(req: Request) {
     }
 
     if (action === "check") {
-      const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+      const [creds] = await db
+        .select()
+        .from(seedCredentials)
+        .where(eq(seedCredentials.userId, user.id))
+        .limit(1);
       if (!creds?.domainToken || !creds?.customDomain) {
         return badRequest("No verification token found. Generate one first.");
       }
@@ -38,10 +42,14 @@ export async function POST(req: Request) {
       try {
         const records = await dns.resolveTxt(creds.customDomain);
         verified = records.flat().some((r) => r.includes(creds.domainToken!));
-      } catch { /* domain not yet propagated */ }
+      } catch {
+        /* domain not yet propagated */
+      }
 
       if (verified) {
-        await db.execute(sql`UPDATE seed_credentials SET domain_verified = true WHERE user_id = ${user.id}`);
+        await db.execute(
+          sql`UPDATE seed_credentials SET domain_verified = true WHERE user_id = ${user.id}`,
+        );
       }
 
       return ok({ verified, domain: creds.customDomain, token: creds.domainToken });

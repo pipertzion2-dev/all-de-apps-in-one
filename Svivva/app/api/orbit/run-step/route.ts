@@ -13,19 +13,53 @@ export const maxDuration = 300;
 const BASE_URL = getSiteUrl();
 
 // ── Shared tool type ─────────────────────────────────────────────────────────
-interface DiscoveredTool { name: string; url: string; description: string }
+interface DiscoveredTool {
+  name: string;
+  url: string;
+  description: string;
+}
 
 const TOOL_ENDINGS = [
-  "-checker", "-scanner", "-tool", "-tester", "-generator", "-validator",
-  "-analyzer", "-decoder", "-encoder", "-lookup", "-viewer", "-inspector",
-  "-detector", "-parser", "-formatter", "-converter", "-calculator",
-  "-builder", "-maker", "-finder", "-tracker", "-monitor", "-audit",
-  "-mapper", "-simulator", "-sandbox", "-studio", "-creator",
-  "-explorer", "-extractor", "-debugger", "-comparator", "-optimizer",
+  "-checker",
+  "-scanner",
+  "-tool",
+  "-tester",
+  "-generator",
+  "-validator",
+  "-analyzer",
+  "-decoder",
+  "-encoder",
+  "-lookup",
+  "-viewer",
+  "-inspector",
+  "-detector",
+  "-parser",
+  "-formatter",
+  "-converter",
+  "-calculator",
+  "-builder",
+  "-maker",
+  "-finder",
+  "-tracker",
+  "-monitor",
+  "-audit",
+  "-mapper",
+  "-simulator",
+  "-sandbox",
+  "-studio",
+  "-creator",
+  "-explorer",
+  "-extractor",
+  "-debugger",
+  "-comparator",
+  "-optimizer",
 ];
 
 function slugToName(slug: string): string {
-  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).trim();
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
 }
 
 async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]> {
@@ -46,10 +80,14 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
             const name = slugToName(slug);
             tools.push({ name, url: loc, description: `${name} — free online security tool` });
           }
-        } catch { /* skip bad URLs */ }
+        } catch {
+          /* skip bad URLs */
+        }
       }
     }
-  } catch { /* sitemap unavailable */ }
+  } catch {
+    /* sitemap unavailable */
+  }
 
   if (tools.length > 0) return tools;
 
@@ -61,21 +99,38 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
       const hrefs = [...html.matchAll(/href=["']([^"']+)["']/gi)].map((m) => m[1]);
       for (const href of hrefs) {
         try {
-          const url = href.startsWith("http") ? href : `${base}${href.startsWith("/") ? "" : "/"}${href}`;
+          const url = href.startsWith("http")
+            ? href
+            : `${base}${href.startsWith("/") ? "" : "/"}${href}`;
           const slug = new URL(url).pathname.split("/").filter(Boolean).pop() || "";
-          if (slug.length > 4 && TOOL_ENDINGS.some((e) => slug.endsWith(e)) && !tools.find((t) => t.url === url)) {
-            tools.push({ name: slugToName(slug), url, description: `${slugToName(slug)} — free online security tool` });
+          if (
+            slug.length > 4 &&
+            TOOL_ENDINGS.some((e) => slug.endsWith(e)) &&
+            !tools.find((t) => t.url === url)
+          ) {
+            tools.push({
+              name: slugToName(slug),
+              url,
+              description: `${slugToName(slug)} — free online security tool`,
+            });
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
     }
-  } catch { /* page unavailable */ }
+  } catch {
+    /* page unavailable */
+  }
 
   if (tools.length > 0) return tools;
 
   // ── 3. AI fallback — generate a realistic list from the app's URL/name ───
   try {
-    const appLabel = base.replace(/https?:\/\//, "").split(".")[0].replace(/-/g, " ");
+    const appLabel = base
+      .replace(/https?:\/\//, "")
+      .split(".")[0]
+      .replace(/-/g, " ");
     const res = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       response_format: { type: "json_object" },
@@ -90,22 +145,37 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
     const data = JSON.parse(res.choices[0].message.content || "{}");
     for (const t of data.tools || []) {
       if (t.name && t.slug) {
-        tools.push({ name: t.name, url: `${base}/${t.slug}`, description: t.description || t.name });
+        tools.push({
+          name: t.name,
+          url: `${base}/${t.slug}`,
+          description: t.description || t.name,
+        });
       }
     }
-  } catch { /* AI unavailable */ }
+  } catch {
+    /* AI unavailable */
+  }
 
   return tools;
 }
 
 async function getAllSiteUrls(): Promise<string[]> {
   const staticUrls = [
-    BASE_URL, `${BASE_URL}/blog`, `${BASE_URL}/tools`,
-    `${BASE_URL}/about`, `${BASE_URL}/pricing`, `${BASE_URL}/docs`,
+    BASE_URL,
+    `${BASE_URL}/blog`,
+    `${BASE_URL}/tools`,
+    `${BASE_URL}/about`,
+    `${BASE_URL}/pricing`,
+    `${BASE_URL}/docs`,
   ];
-  const posts = await db.select({ slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.published, true));
-  const pages = await db.select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
-    .from(seoLandingPages).where(eq(seoLandingPages.published, true));
+  const posts = await db
+    .select({ slug: blogPosts.slug })
+    .from(blogPosts)
+    .where(eq(blogPosts.published, true));
+  const pages = await db
+    .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
+    .from(seoLandingPages)
+    .where(eq(seoLandingPages.published, true));
   return [
     ...staticUrls,
     ...posts.map((p) => `${BASE_URL}/blog/${p.slug}`),
@@ -114,7 +184,10 @@ async function getAllSiteUrls(): Promise<string[]> {
   ];
 }
 
-async function submitToIndexNow(userId: string, urls: string[]): Promise<{ ok: boolean; count: number; message: string }> {
+async function submitToIndexNow(
+  userId: string,
+  urls: string[],
+): Promise<{ ok: boolean; count: number; message: string }> {
   try {
     // Query without user_id filter — key is admin-only and there's only ever one entry
     const [credRow] = await db
@@ -124,7 +197,8 @@ async function submitToIndexNow(userId: string, urls: string[]): Promise<{ ok: b
       .orderBy(desc(seedCredentials.updatedAt))
       .limit(1);
     const key = credRow?.indexnowKey;
-    if (!key) return { ok: false, count: 0, message: "No IndexNow key — run IndexNow Setup first." };
+    if (!key)
+      return { ok: false, count: 0, message: "No IndexNow key — run IndexNow Setup first." };
     const host = BASE_URL.replace(/^https?:\/\//, "");
     // Standard IndexNow key location: /{key}.txt served via middleware rewrite
     const keyLocation = `${BASE_URL}/${key}.txt`;
@@ -135,32 +209,43 @@ async function submitToIndexNow(userId: string, urls: string[]): Promise<{ ok: b
       const chunk = urls.slice(i, i + CHUNK);
       const body = JSON.stringify({ host, key, keyLocation, urlList: chunk });
       const [r1] = await Promise.allSettled([
-        fetch("https://api.indexnow.org/indexnow", { method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body, signal: AbortSignal.timeout(30000) }),
+        fetch("https://api.indexnow.org/indexnow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body,
+          signal: AbortSignal.timeout(30000),
+        }),
       ]);
       // Fire-and-forget Bing in parallel without blocking
-      fetch("https://www.bing.com/indexnow", { method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body, signal: AbortSignal.timeout(30000) }).catch(() => {});
+      fetch("https://www.bing.com/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body,
+        signal: AbortSignal.timeout(30000),
+      }).catch(() => {});
       lastStatus = r1.status === "fulfilled" ? r1.value.status : 0;
       submitted += chunk.length;
     }
     const ok = lastStatus === 200 || lastStatus === 202;
     if (ok) {
-      await db.update(seedCredentials).set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
+      await db
+        .update(seedCredentials)
+        .set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() });
     }
-    const statusMsg = lastStatus === 403
-      ? `IndexNow: key verification failed (403) — key file must be accessible at ${keyLocation}`
-      : lastStatus === 422
-      ? `IndexNow: invalid URL format (422) — check URL list`
-      : lastStatus === 400
-      ? `IndexNow: bad request (400)`
-      : lastStatus === 0
-      ? `IndexNow: no response (timeout or network error)`
-      : `IndexNow returned HTTP ${lastStatus}`;
+    const statusMsg =
+      lastStatus === 403
+        ? `IndexNow: key verification failed (403) — key file must be accessible at ${keyLocation}`
+        : lastStatus === 422
+          ? `IndexNow: invalid URL format (422) — check URL list`
+          : lastStatus === 400
+            ? `IndexNow: bad request (400)`
+            : lastStatus === 0
+              ? `IndexNow: no response (timeout or network error)`
+              : `IndexNow returned HTTP ${lastStatus}`;
     return {
       ok,
       count: submitted,
-      message: ok
-        ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow`
-        : statusMsg,
+      message: ok ? `✓ ${submitted} URLs submitted to Bing, Yandex, Yahoo via IndexNow` : statusMsg,
     };
   } catch (e) {
     return { ok: false, count: 0, message: `IndexNow error: ${String(e).slice(0, 120)}` };
@@ -180,7 +265,9 @@ export async function POST(req: NextRequest) {
     }
 
     // For internal calls, fall back to admin user ID so IndexNow lookups still work
-    const userId: string = isInternalCall ? "51602957" : String((user as NonNullable<typeof user>).id);
+    const userId: string = isInternalCall
+      ? "51602957"
+      : String((user as NonNullable<typeof user>).id);
 
     const body = await req.json();
     const { stepId } = body;
@@ -206,17 +293,46 @@ export async function POST(req: NextRequest) {
     if (stepId === "svivva-seo-pages") {
       const SEO_KEYWORDS = [
         // original pages (already exist — will be skipped if slug taken)
-        "ai api builder", "prompt to api", "no-code api generator", "ai backend builder",
-        "build api with ai", "llm api platform", "api from natural language", "instant api creator",
-        "zero-code api development", "openai api wrapper", "ai powered rest api", "prompt engineering tool",
-        "ai app generator", "no-code backend", "natural language api", "api automation tool",
-        "ai workflow builder", "serverless ai api", "schema enforced ai output", "ai response validator",
+        "ai api builder",
+        "prompt to api",
+        "no-code api generator",
+        "ai backend builder",
+        "build api with ai",
+        "llm api platform",
+        "api from natural language",
+        "instant api creator",
+        "zero-code api development",
+        "openai api wrapper",
+        "ai powered rest api",
+        "prompt engineering tool",
+        "ai app generator",
+        "no-code backend",
+        "natural language api",
+        "api automation tool",
+        "ai workflow builder",
+        "serverless ai api",
+        "schema enforced ai output",
+        "ai response validator",
         // high-traffic additions — what developers actually search for
-        "chatgpt api integration", "openai api tutorial", "how to use openai api", "build app with chatgpt",
-        "gpt api builder", "llm api wrapper", "rest api builder free", "ai tools for developers",
-        "build chatbot api", "claude api builder", "gemini api builder", "best llm for production",
-        "reduce openai api costs", "openai api alternative", "ai api monitoring",
-        "build saas with ai", "ai app builder free", "llm application builder", "deploy ai api",
+        "chatgpt api integration",
+        "openai api tutorial",
+        "how to use openai api",
+        "build app with chatgpt",
+        "gpt api builder",
+        "llm api wrapper",
+        "rest api builder free",
+        "ai tools for developers",
+        "build chatbot api",
+        "claude api builder",
+        "gemini api builder",
+        "best llm for production",
+        "reduce openai api costs",
+        "openai api alternative",
+        "ai api monitoring",
+        "build saas with ai",
+        "ai app builder free",
+        "llm application builder",
+        "deploy ai api",
         "openai api vs anthropic api",
       ];
       const created: { title: string; url: string }[] = [];
@@ -224,29 +340,51 @@ export async function POST(req: NextRequest) {
 
       for (const keyword of SEO_KEYWORDS) {
         try {
-          const slug = keyword.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 60);
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
-          if (existing.length) { created.push({ title: `[existing] ${keyword}`, url: `${BASE_URL}/${slug}` }); continue; }
+          const slug = keyword
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "")
+            .slice(0, 60);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
+          if (existing.length) {
+            created.push({ title: `[existing] ${keyword}`, url: `${BASE_URL}/${slug}` });
+            continue;
+          }
 
           const gen = await openai.chat.completions.create({
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content." },
-              { role: "user", content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }` },
+              {
+                role: "system",
+                content:
+                  "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
+              },
+              {
+                role: "user",
+                content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }`,
+              },
             ],
           });
 
           const d = JSON.parse(gen.choices[0].message.content || "{}");
           await db.insert(seoLandingPages).values({
-            slug, title: d.title || keyword,
+            slug,
+            title: d.title || keyword,
             keyword,
             headline: d.headline || d.title || keyword,
             howItWorks: d.howItWorks || `AI-powered solution for ${keyword}`,
             whoItsFor: d.whoItsFor || "Teams and developers building with AI",
             content: d.content || `<p>${keyword}</p>`,
-            metaTitle: d.metaTitle || d.title || keyword, metaDescription: d.metaDescription || "",
-            category: "seo-landing", published: true, toolUrl: `${BASE_URL}/${slug}`,
+            metaTitle: d.metaTitle || d.title || keyword,
+            metaDescription: d.metaDescription || "",
+            category: "seo-landing",
+            published: true,
+            toolUrl: `${BASE_URL}/${slug}`,
           });
           created.push({ title: d.title || keyword, url: `${BASE_URL}/${slug}` });
         } catch (e) {
@@ -256,46 +394,98 @@ export async function POST(req: NextRequest) {
 
       const newUrls = created.filter((c) => !c.title.startsWith("[existing]")).map((c) => c.url);
       const indexResult = newUrls.length > 0 ? await submitToIndexNow(userId, newUrls) : null;
-      const lines = [`✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`, `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`, errors.length ? `⚠ ${errors.length} errors` : "", indexResult ? indexResult.message : ""].filter(Boolean);
-      const pageList = created.filter((c) => !c.title.startsWith("[existing]")).slice(0, 10).map((c) => `• ${c.title}`).join("\n");
-      return NextResponse.json({ summary: lines.join("\n") + (pageList ? "\n\nPages created:\n" + pageList : ""), details: { created: created.length, errors: errors.length } });
+      const lines = [
+        `✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`,
+        `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`,
+        errors.length ? `⚠ ${errors.length} errors` : "",
+        indexResult ? indexResult.message : "",
+      ].filter(Boolean);
+      const pageList = created
+        .filter((c) => !c.title.startsWith("[existing]"))
+        .slice(0, 10)
+        .map((c) => `• ${c.title}`)
+        .join("\n");
+      return NextResponse.json({
+        summary: lines.join("\n") + (pageList ? "\n\nPages created:\n" + pageList : ""),
+        details: { created: created.length, errors: errors.length },
+      });
     }
 
     // ── STEP: Comparison pages ────────────────────────────────────────────────
     if (stepId === "svivva-comparisons") {
       const COMPETITORS = [
         // original — pages already exist
-        "Bubble", "Webflow", "Retool", "Glide", "Adalo", "Zapier", "AppGyver", "AWS Lambda",
+        "Bubble",
+        "Webflow",
+        "Retool",
+        "Glide",
+        "Adalo",
+        "Zapier",
+        "AppGyver",
+        "AWS Lambda",
         // high-traffic AI/dev tool competitors people actually search
-        "n8n", "Dify", "LangChain", "Flowise", "Make", "Airtable", "Supabase", "Firebase",
-        "OpenAI Assistants API", "LlamaIndex", "Vercel AI SDK", "FastAPI",
+        "n8n",
+        "Dify",
+        "LangChain",
+        "Flowise",
+        "Make",
+        "Airtable",
+        "Supabase",
+        "Firebase",
+        "OpenAI Assistants API",
+        "LlamaIndex",
+        "Vercel AI SDK",
+        "FastAPI",
       ];
       const created: { title: string; url: string }[] = [];
 
       for (const comp of COMPETITORS) {
         try {
-          const slug = `svivva-vs-${comp.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`;
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
-          if (existing.length) { created.push({ title: `[existing] Svivva vs ${comp}`, url: `${BASE_URL}/${slug}` }); continue; }
+          const slug = `svivva-vs-${comp
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "")}`;
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
+          if (existing.length) {
+            created.push({ title: `[existing] Svivva vs ${comp}`, url: `${BASE_URL}/${slug}` });
+            continue;
+          }
 
           const gen = await openai.chat.completions.create({
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages." },
-              { role: "user", content: `Comparison page: "Svivva vs ${comp}". Target: people searching "${comp} alternative". Position Svivva as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }` },
+              {
+                role: "system",
+                content:
+                  "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
+              },
+              {
+                role: "user",
+                content: `Comparison page: "Svivva vs ${comp}". Target: people searching "${comp} alternative". Position Svivva as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
+              },
             ],
           });
 
           const d = JSON.parse(gen.choices[0].message.content || "{}");
           await db.insert(seoLandingPages).values({
-            slug, title: d.title || `Svivva vs ${comp}`, content: d.content || "",
+            slug,
+            title: d.title || `Svivva vs ${comp}`,
+            content: d.content || "",
             keyword: `svivva vs ${comp.toLowerCase()}`,
             headline: d.headline || `Svivva vs ${comp}: Which is Better?`,
             howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
-            whoItsFor: d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
-            metaTitle: d.metaTitle || `Svivva vs ${comp}`, metaDescription: d.metaDescription || "",
-            category: "seo-landing", published: true, toolUrl: `${BASE_URL}/${slug}`,
+            whoItsFor:
+              d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
+            metaTitle: d.metaTitle || `Svivva vs ${comp}`,
+            metaDescription: d.metaDescription || "",
+            category: "seo-landing",
+            published: true,
+            toolUrl: `${BASE_URL}/${slug}`,
           });
           created.push({ title: d.title || `Svivva vs ${comp}`, url: `${BASE_URL}/${slug}` });
         } catch (e) {
@@ -303,10 +493,15 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const newUrls = created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url).map((c) => c.url);
+      const newUrls = created
+        .filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url)
+        .map((c) => c.url);
       if (newUrls.length) await submitToIndexNow(userId, newUrls);
       const pageList = created.map((c) => `• ${c.title}`).join("\n");
-      return NextResponse.json({ summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ Targeting: "[Competitor] alternative" searches\n\n${pageList}`, details: { created: created.length } });
+      return NextResponse.json({
+        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ Targeting: "[Competitor] alternative" searches\n\n${pageList}`,
+        details: { created: created.length },
+      });
     }
 
     // ── STEP: 10 Blog posts ──────────────────────────────────────────────────
@@ -327,27 +522,51 @@ export async function POST(req: NextRequest) {
 
       for (const topic of BLOG_TOPICS) {
         try {
-          const baseSlug = topic.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, "-").slice(0, 70);
-          const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, baseSlug)).limit(1);
+          const baseSlug = topic
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, "")
+            .replace(/\s+/g, "-")
+            .slice(0, 70);
+          const existing = await db
+            .select({ id: blogPosts.id })
+            .from(blogPosts)
+            .where(eq(blogPosts.slug, baseSlug))
+            .limit(1);
           const slug = existing.length ? `${baseSlug}-${randomBytes(3).toString("hex")}` : baseSlug;
-          if (existing.length) { created.push({ title: `[existing] ${topic}`, url: `${BASE_URL}/blog/${baseSlug}` }); continue; }
+          if (existing.length) {
+            created.push({ title: `[existing] ${topic}`, url: `${BASE_URL}/blog/${baseSlug}` });
+            continue;
+          }
 
           const gen = await openai.chat.completions.create({
             model: DEFAULT_MODEL,
             response_format: { type: "json_object" },
             messages: [
-              { role: "system", content: "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers." },
-              { role: "user", content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for Svivva at end), metaTitle, metaDescription, tags (3-5 strings) }` },
+              {
+                role: "system",
+                content:
+                  "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
+              },
+              {
+                role: "user",
+                content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for Svivva at end), metaTitle, metaDescription, tags (3-5 strings) }`,
+              },
             ],
           });
 
           const d = JSON.parse(gen.choices[0].message.content || "{}");
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
-            id, slug, title: d.title || topic, excerpt: d.excerpt || "",
-            content: d.content || "", metaTitle: d.metaTitle || d.title || topic,
+            id,
+            slug,
+            title: d.title || topic,
+            excerpt: d.excerpt || "",
+            content: d.content || "",
+            metaTitle: d.metaTitle || d.title || topic,
             metaDescription: d.metaDescription || d.excerpt || "",
-            tags: Array.isArray(d.tags) ? d.tags : [baseSlug], published: true, publishedAt: new Date(),
+            tags: Array.isArray(d.tags) ? d.tags : [baseSlug],
+            published: true,
+            publishedAt: new Date(),
           } as any);
           created.push({ title: d.title || topic, url: `${BASE_URL}/blog/${slug}` });
         } catch (e) {
@@ -355,10 +574,17 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const newUrls = created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url).map((c) => c.url);
+      const newUrls = created
+        .filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]") && c.url)
+        .map((c) => c.url);
       if (newUrls.length) await submitToIndexNow(userId, newUrls);
-      const postList = created.map((c) => `• ${c.title.replace("[existing] ", "").replace("[error] ", "⚠ ")}`).join("\n");
-      return NextResponse.json({ summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} blog posts written & published\n✓ All submitted to IndexNow\n\n${postList}`, details: { created: created.length } });
+      const postList = created
+        .map((c) => `• ${c.title.replace("[existing] ", "").replace("[error] ", "⚠ ")}`)
+        .join("\n");
+      return NextResponse.json({
+        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} blog posts written & published\n✓ All submitted to IndexNow\n\n${postList}`,
+        details: { created: created.length },
+      });
     }
 
     // ── STEP: Social pack ────────────────────────────────────────────────────
@@ -367,7 +593,11 @@ export async function POST(req: NextRequest) {
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace." },
+          {
+            role: "system",
+            content:
+              "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
+          },
           {
             role: "user",
             content: `Create a complete social media launch pack. Return JSON: {
@@ -392,7 +622,9 @@ export async function POST(req: NextRequest) {
         `✓ Show HN post generated`,
         "",
         "── Twitter Thread Preview ──",
-        ...(social.twitter_thread?.slice(0, 3) || []).map((t: string, i: number) => `${i + 1}. ${t.slice(0, 100)}…`),
+        ...(social.twitter_thread?.slice(0, 3) || []).map(
+          (t: string, i: number) => `${i + 1}. ${t.slice(0, 100)}…`,
+        ),
         "",
         "── Product Hunt ──",
         `Tagline: ${social.producthunt?.tagline || ""}`,
@@ -408,7 +640,9 @@ export async function POST(req: NextRequest) {
       // (Cloud Run kills long-running requests; these network calls don't need to block the UI)
       submitToIndexNow(userId, urls).catch(() => {});
       const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
-      fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, { signal: AbortSignal.timeout(10000) }).catch(() => {});
+      fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
+        signal: AbortSignal.timeout(10000),
+      }).catch(() => {});
 
       return NextResponse.json({
         summary: [
@@ -426,8 +660,16 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Import apps — parallel batches, 4 SEO pages each ───────────────
     if (stepId === "mini-import") {
-      const { sourceUrl, tools: passedTools, chunkIndex = 0, chunkSize = 30 }: {
-        sourceUrl?: string; tools?: DiscoveredTool[]; chunkIndex?: number; chunkSize?: number
+      const {
+        sourceUrl,
+        tools: passedTools,
+        chunkIndex = 0,
+        chunkSize = 30,
+      }: {
+        sourceUrl?: string;
+        tools?: DiscoveredTool[];
+        chunkIndex?: number;
+        chunkSize?: number;
       } = body;
 
       // Auto-discover tools if none were passed from the UI
@@ -441,9 +683,12 @@ export async function POST(req: NextRequest) {
         allTools = await autoDiscoverTools(miniAppsUrl);
         autoDiscovered = true;
         if (!allTools.length) {
-          return NextResponse.json({
-            error: `Could not discover tools from ${miniAppsUrl}. The app may be offline — try again or use the Discover Tools button in the Launchpad.`,
-          }, { status: 400 });
+          return NextResponse.json(
+            {
+              error: `Could not discover tools from ${miniAppsUrl}. The app may be offline — try again or use the Discover Tools button in the Launchpad.`,
+            },
+            { status: 400 },
+          );
         }
       }
 
@@ -461,22 +706,35 @@ export async function POST(req: NextRequest) {
       }
 
       // --- Helper: generate + save 4 pages for one tool ---
-      interface AppResult { appTitle: string; pages: { title: string; url: string }[]; urls: string[] }
+      interface AppResult {
+        appTitle: string;
+        pages: { title: string; url: string }[];
+        urls: string[];
+      }
 
       async function processOneApp(repl: DiscoveredTool): Promise<AppResult> {
         const appName = repl.name;
         const appDesc = repl.description || `A free AI-powered tool called ${appName}`;
-        const appUrl  = repl.url;
-        const baseSlug = appName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 48);
+        const appUrl = repl.url;
+        const baseSlug = appName
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+          .slice(0, 48);
         const appPages: { title: string; url: string }[] = [];
         const appUrls: string[] = [];
 
         // Skip entirely if the main page already exists (idempotent re-runs)
         try {
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages)
-            .where(eq(seoLandingPages.slug, baseSlug)).limit(1);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, baseSlug))
+            .limit(1);
           if (existing.length) return { appTitle: appName, pages: [], urls: [] };
-        } catch { /* continue */ }
+        } catch {
+          /* continue */
+        }
 
         try {
           const gen = await openai.chat.completions.create({
@@ -485,7 +743,8 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: "system",
-                content: "Expert SEO copywriter for AI-powered web apps. Write keyword-rich HTML pages that rank and convert. Each page must have: rich H1/H2/H3 structure, feature list with <ul>, FAQ section with 5+ items, and a CTA button linking to the app. Return ONLY valid JSON.",
+                content:
+                  "Expert SEO copywriter for AI-powered web apps. Write keyword-rich HTML pages that rank and convert. Each page must have: rich H1/H2/H3 structure, feature list with <ul>, FAQ section with 5+ items, and a CTA button linking to the app. Return ONLY valid JSON.",
               },
               {
                 role: "user",
@@ -504,52 +763,71 @@ Return JSON with these 4 keys:
 
           const pages = JSON.parse(gen.choices[0].message.content || "{}");
           const variants = [
-            { key: "main",        slug: baseSlug,                   data: pages.main },
-            { key: "guide",       slug: `${baseSlug}-guide`,        data: pages.guide },
-            { key: "alternative", slug: `${baseSlug}-alternative`,  data: pages.alternative },
-            { key: "free",        slug: `free-${baseSlug}`,         data: pages.free },
+            { key: "main", slug: baseSlug, data: pages.main },
+            { key: "guide", slug: `${baseSlug}-guide`, data: pages.guide },
+            { key: "alternative", slug: `${baseSlug}-alternative`, data: pages.alternative },
+            { key: "free", slug: `free-${baseSlug}`, data: pages.free },
           ];
 
           for (const v of variants) {
             if (!v.data?.content) continue;
             try {
-              const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, v.slug)).limit(1);
+              const ex = await db
+                .select({ id: seoLandingPages.id })
+                .from(seoLandingPages)
+                .where(eq(seoLandingPages.slug, v.slug))
+                .limit(1);
               if (ex.length) continue;
               await db.insert(seoLandingPages).values({
                 slug: v.slug,
-                title: v.data.title || appName, content: v.data.content,
+                title: v.data.title || appName,
+                content: v.data.content,
                 keyword: appName,
                 headline: v.data.headline || v.data.title || appName,
                 howItWorks: v.data.howItWorks || `${appName} is a free AI-powered tool`,
                 whoItsFor: v.data.whoItsFor || "Anyone looking for free AI tools",
                 metaTitle: v.data.metaTitle || v.data.title || appName,
                 metaDescription: v.data.metaDescription || "",
-                category: "seed-marketing", published: true, toolUrl: appUrl,
+                category: "seed-marketing",
+                published: true,
+                toolUrl: appUrl,
               });
               const pageUrl = `${BASE_URL}/${v.slug}`;
               appUrls.push(pageUrl);
               appPages.push({ title: v.data.title || appName, url: pageUrl });
-            } catch { /* db error — skip variant */ }
+            } catch {
+              /* db error — skip variant */
+            }
           }
         } catch {
           // AI failed — create a minimal stub
           try {
-            const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, baseSlug)).limit(1);
+            const ex = await db
+              .select({ id: seoLandingPages.id })
+              .from(seoLandingPages)
+              .where(eq(seoLandingPages.slug, baseSlug))
+              .limit(1);
             if (!ex.length) {
               await db.insert(seoLandingPages).values({
-                slug: baseSlug, title: appName,
+                slug: baseSlug,
+                title: appName,
                 keyword: appName,
                 headline: appName,
                 howItWorks: appDesc || `${appName} is a free AI-powered tool`,
                 whoItsFor: "Anyone looking for free AI tools",
                 content: `<h1>${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Try ${appName} →</a></p>`,
-                metaTitle: `${appName} — Free AI Tool`, metaDescription: appDesc.slice(0, 155),
-                category: "seed-marketing", published: true, toolUrl: appUrl,
+                metaTitle: `${appName} — Free AI Tool`,
+                metaDescription: appDesc.slice(0, 155),
+                category: "seed-marketing",
+                published: true,
+                toolUrl: appUrl,
               });
               appUrls.push(`${BASE_URL}/${baseSlug}`);
               appPages.push({ title: appName, url: `${BASE_URL}/${baseSlug}` });
             }
-          } catch { /* fully skip */ }
+          } catch {
+            /* fully skip */
+          }
         }
 
         return { appTitle: appName, pages: appPages, urls: appUrls };
@@ -580,44 +858,74 @@ Return JSON with these 4 keys:
       const isDone = endIndex >= totalTools;
       const nextChunkIndex = chunkIndex + 1;
 
-      const appList = allCreated.filter((a) => a.pages.length > 0).slice(0, 20)
-        .map((a) => `• ${a.appTitle}: ${a.pages.length} pages`).join("\n");
+      const appList = allCreated
+        .filter((a) => a.pages.length > 0)
+        .slice(0, 20)
+        .map((a) => `• ${a.appTitle}: ${a.pages.length} pages`)
+        .join("\n");
 
       const sourceLine = sourceUrl ? `Source Repl: ${sourceUrl}` : "";
-      const chunkLine = totalTools > chunkSize
-        ? `Processing ${Math.min(endIndex, totalTools)} / ${totalTools} tools (batch ${chunkIndex + 1} of ${Math.ceil(totalTools / chunkSize)})`
-        : `✓ ${repls.length} tool${repls.length === 1 ? "" : "s"} from your Repl`;
+      const chunkLine =
+        totalTools > chunkSize
+          ? `Processing ${Math.min(endIndex, totalTools)} / ${totalTools} tools (batch ${chunkIndex + 1} of ${Math.ceil(totalTools / chunkSize)})`
+          : `✓ ${repls.length} tool${repls.length === 1 ? "" : "s"} from your Repl`;
 
       return NextResponse.json({
         summary: [
           sourceLine,
           chunkLine,
-          processedInChunk > 0 ? `✓ ${totalPages} new SEO pages live on svivva.com` : `✓ ${skippedInChunk} tools already had pages — skipped`,
-          processedInChunk > 0 ? `✓ Each page links directly to the real tool URL on your Repl` : "",
+          processedInChunk > 0
+            ? `✓ ${totalPages} new SEO pages live on svivva.com`
+            : `✓ ${skippedInChunk} tools already had pages — skipped`,
+          processedInChunk > 0
+            ? `✓ Each page links directly to the real tool URL on your Repl`
+            : "",
           newPageUrls.length > 0 ? `✓ ${newPageUrls.length} pages submitted to IndexNow` : "",
           "",
           appList ? "Tools promoted this batch:\n" + appList : "",
           "",
           isDone ? "✓ All tools processed. Run 'Build Hub & Categories' next." : "",
-        ].filter(Boolean).join("\n"),
-        details: { tools: repls.length, totalPages, urls: newPageUrls.length, done: isDone, nextChunkIndex, totalTools },
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        details: {
+          tools: repls.length,
+          totalPages,
+          urls: newPageUrls.length,
+          done: isDone,
+          nextChunkIndex,
+          totalTools,
+        },
       });
     }
 
     if (stepId === "mini-security") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
 
       if (!passedTools?.length) {
-        return NextResponse.json({
-          error: "No security tools provided. Discover the Pyracrypt mini apps first, then run this step.",
-        }, { status: 400 });
+        return NextResponse.json(
+          {
+            error:
+              "No security tools provided. Discover the Pyracrypt mini apps first, then run this step.",
+          },
+          { status: 400 },
+        );
       }
 
       const created: { title: string; url: string }[] = [];
 
       for (const tool of passedTools.slice(0, 25)) {
-        const slugBase = `pyracrypt-${tool.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 48)}`;
+        const slugBase = `pyracrypt-${tool.name
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+          .slice(0, 48)}`;
         const variants = [
           {
             slug: slugBase,
@@ -634,9 +942,16 @@ Return JSON with these 4 keys:
         ];
 
         for (const variant of variants) {
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, variant.slug)).limit(1);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, variant.slug))
+            .limit(1);
           if (existing.length) {
-            created.push({ title: `[existing] ${variant.title}`, url: `${BASE_URL}/${variant.slug}` });
+            created.push({
+              title: `[existing] ${variant.title}`,
+              url: `${BASE_URL}/${variant.slug}`,
+            });
             continue;
           }
 
@@ -673,18 +988,30 @@ Return JSON with these 4 keys:
     }
 
     if (stepId === "mini-app-build") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
 
       if (!passedTools?.length) {
-        return NextResponse.json({
-          error: "No Pyracrypt tools found. Discover the mini apps first, then run this step.",
-        }, { status: 400 });
+        return NextResponse.json(
+          {
+            error: "No Pyracrypt tools found. Discover the mini apps first, then run this step.",
+          },
+          { status: 400 },
+        );
       }
 
       const outputs: { title: string; url: string }[] = [];
       for (const tool of passedTools.slice(0, 20)) {
-        const baseSlug = `build-${tool.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 44)}`;
+        const baseSlug = `build-${tool.name
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+          .slice(0, 44)}`;
         const pages = [
           {
             slug: baseSlug,
@@ -713,7 +1040,11 @@ Return JSON with these 4 keys:
         ];
 
         for (const page of pages) {
-          const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, page.slug)).limit(1);
+          const existing = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, page.slug))
+            .limit(1);
           if (existing.length) {
             outputs.push({ title: `[existing] ${page.title}`, url: `${BASE_URL}/${page.slug}` });
             continue;
@@ -752,21 +1083,40 @@ Return JSON with these 4 keys:
     }
 
     if (stepId === "mini-api-security") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
 
       if (!passedTools?.length) {
-        return NextResponse.json({
-          error: "No tools found. Discover the Pyracrypt apps first, then run this step.",
-        }, { status: 400 });
+        return NextResponse.json(
+          {
+            error: "No tools found. Discover the Pyracrypt apps first, then run this step.",
+          },
+          { status: 400 },
+        );
       }
 
       const created: { title: string; url: string }[] = [];
       for (const tool of passedTools.slice(0, 20)) {
-        const slug = `api-security-${tool.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 44)}`;
-        const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+        const slug = `api-security-${tool.name
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "")
+          .slice(0, 44)}`;
+        const existing = await db
+          .select({ id: seoLandingPages.id })
+          .from(seoLandingPages)
+          .where(eq(seoLandingPages.slug, slug))
+          .limit(1);
         if (existing.length) {
-          created.push({ title: `[existing] ${tool.name} API Security`, url: `${BASE_URL}/${slug}` });
+          created.push({
+            title: `[existing] ${tool.name} API Security`,
+            url: `${BASE_URL}/${slug}`,
+          });
           continue;
         }
 
@@ -804,19 +1154,30 @@ Return JSON with these 4 keys:
     // ── STEP: Hub page + auto category pages ─────────────────────────────────
     if (stepId === "mini-hub") {
       // Fetch all app pages created so far
-      const appPages = await db.select({ slug: seoLandingPages.slug, title: seoLandingPages.title, toolUrl: seoLandingPages.toolUrl })
+      const appPages = await db
+        .select({
+          slug: seoLandingPages.slug,
+          title: seoLandingPages.title,
+          toolUrl: seoLandingPages.toolUrl,
+        })
         .from(seoLandingPages)
         .where(eq(seoLandingPages.category, "seed-marketing"));
 
       // Filter to main pages only (no -guide, -alternative, free- prefix)
-      const mainPages = appPages.filter((p) =>
-        !p.slug.endsWith("-guide") && !p.slug.endsWith("-alternative") && !p.slug.startsWith("free-")
+      const mainPages = appPages.filter(
+        (p) =>
+          !p.slug.endsWith("-guide") &&
+          !p.slug.endsWith("-alternative") &&
+          !p.slug.startsWith("free-"),
       );
 
       const appTitles = mainPages.map((p) => p.title || p.slug).slice(0, 60);
 
       if (!appTitles.length) {
-        return NextResponse.json({ error: "No app pages found. Run 'Promote Selected Apps' first to generate app pages." }, { status: 400 });
+        return NextResponse.json(
+          { error: "No app pages found. Run 'Promote Selected Apps' first to generate app pages." },
+          { status: 400 },
+        );
       }
 
       // 1. Categorize + generate master hub page + category pages via AI
@@ -826,7 +1187,8 @@ Return JSON with these 4 keys:
         messages: [
           {
             role: "system",
-            content: "SEO architect building a hub page strategy for a collection of AI tools. Create well-structured, high-traffic landing pages for tool collections.",
+            content:
+              "SEO architect building a hub page strategy for a collection of AI tools. Create well-structured, high-traffic landing pages for tool collections.",
           },
           {
             role: "user",
@@ -867,8 +1229,14 @@ Return JSON:
       // Save hub page
       if (hubData.hub?.content) {
         try {
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, hubData.hub.slug || "ai-tools-hub")).limit(1);
-          const slug = ex.length ? `ai-tools-hub-${randomBytes(3).toString("hex")}` : (hubData.hub.slug || "ai-tools-hub");
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, hubData.hub.slug || "ai-tools-hub"))
+            .limit(1);
+          const slug = ex.length
+            ? `ai-tools-hub-${randomBytes(3).toString("hex")}`
+            : hubData.hub.slug || "ai-tools-hub";
           await db.insert(seoLandingPages).values({
             slug,
             title: hubData.hub.title || "AI Tools Hub",
@@ -879,10 +1247,14 @@ Return JSON:
             content: hubData.hub.content,
             metaTitle: hubData.hub.metaTitle || hubData.hub.title,
             metaDescription: hubData.hub.metaDescription || "",
-            category: "seed-marketing", published: true, toolUrl: `${BASE_URL}/${slug}`,
+            category: "seed-marketing",
+            published: true,
+            toolUrl: `${BASE_URL}/${slug}`,
           });
           createdPages.push(`${BASE_URL}/${slug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       // Save category pages
@@ -890,21 +1262,30 @@ Return JSON:
       for (const cat of cats.slice(0, 8)) {
         if (!cat?.content || !cat?.slug) continue;
         try {
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, cat.slug)).limit(1);
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, cat.slug))
+            .limit(1);
           const finalSlug = ex.length ? `${cat.slug}-${randomBytes(3).toString("hex")}` : cat.slug;
           await db.insert(seoLandingPages).values({
             slug: finalSlug,
-            title: cat.name || cat.slug, content: cat.content,
+            title: cat.name || cat.slug,
+            content: cat.content,
             keyword: cat.name || cat.slug,
             headline: cat.name || cat.slug,
             howItWorks: "Browse free AI tools in this category — no sign up, instant access",
             whoItsFor: "Anyone searching for free AI tools in this category",
             metaTitle: cat.metaTitle || cat.name || cat.slug,
             metaDescription: cat.metaDescription || "",
-            category: "seed-marketing", published: true, toolUrl: `${BASE_URL}/${finalSlug}`,
+            category: "seed-marketing",
+            published: true,
+            toolUrl: `${BASE_URL}/${finalSlug}`,
           });
           createdPages.push(`${BASE_URL}/${finalSlug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (createdPages.length > 0) await submitToIndexNow(userId, createdPages);
@@ -927,10 +1308,18 @@ Return JSON:
 
     // ── STEP: mini-embed — Powered by Svivva widget ──────────────────────────
     if (stepId === "mini-embed") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const toolList = (passedTools || []).slice(0, 50);
-      const toolSample = toolList.slice(0, 8).map((t) => `• ${t.name}`).join("\n");
+      const toolSample = toolList
+        .slice(0, 8)
+        .map((t) => `• ${t.name}`)
+        .join("\n");
 
       const prompt = `You are a conversion copywriter for Svivva (${BASE_URL}), an AI API builder.
 
@@ -976,12 +1365,18 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
 
     // ── STEP: GoDaddy CNAME ──────────────────────────────────────────────────
     if (stepId === "mini-cname") {
-      const creds = await db.execute(sql`SELECT godaddy_api_key, godaddy_api_secret, godaddy_domain FROM seed_credentials WHERE user_id = ${userId} LIMIT 1`);
+      const creds = await db.execute(
+        sql`SELECT godaddy_api_key, godaddy_api_secret, godaddy_domain FROM seed_credentials WHERE user_id = ${userId} LIMIT 1`,
+      );
       const row = (creds as unknown as any[])[0];
       const domain = row?.godaddy_domain || new URL(BASE_URL).hostname;
 
       // Build subdomain map dynamically from connected Repls passed in body
-      interface ConnectedTool { name: string; url: string; description?: string }
+      interface ConnectedTool {
+        name: string;
+        url: string;
+        description?: string;
+      }
       const { tools: connectedTools }: { tools?: ConnectedTool[] } = body;
 
       // Dedupe by hostname so we get one subdomain per Repl (not per tool)
@@ -994,15 +1389,28 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
             seenHosts.add(host);
             uniqueRepls.push({ host, name: tool.name });
           }
-        } catch { /* skip malformed URL */ }
+        } catch {
+          /* skip malformed URL */
+        }
       }
 
       // Derive a clean subdomain slug from Repl name or hostname
       const toSub = (name: string, host: string): string => {
-        const fromName = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 20);
+        const fromName = name
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 20);
         if (fromName) return fromName;
         // fallback: first segment of hostname (e.g. "cyber-tools" from "cyber-tools-user.replit.app")
-        return host.split(".")[0].replace(/-[a-z0-9]+$/, "").slice(0, 20) || "tools";
+        return (
+          host
+            .split(".")[0]
+            .replace(/-[a-z0-9]+$/, "")
+            .slice(0, 20) || "tools"
+        );
       };
 
       // Fallback to known Pyracrypt defaults if no tools were passed
@@ -1010,14 +1418,27 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
         uniqueRepls.length > 0
           ? uniqueRepls.map((r) => ({ sub: toSub(r.name, r.host), target: r.host, label: r.name }))
           : [
-              { sub: "apps",      target: "cyber-security-mini-apps-zip.replit.app", label: "Pyracrypt mini-apps" },
-              { sub: "security",  target: "new-venture-pipertzion2.replit.app",       label: "Pyracrypt main" },
-              { sub: "pyracrypt", target: "new-venture-pipertzion2.replit.app",       label: "Pyracrypt alias"  },
+              {
+                sub: "apps",
+                target: "cyber-security-mini-apps-zip.replit.app",
+                label: "Pyracrypt mini-apps",
+              },
+              {
+                sub: "security",
+                target: "new-venture-pipertzion2.replit.app",
+                label: "Pyracrypt main",
+              },
+              {
+                sub: "pyracrypt",
+                target: "new-venture-pipertzion2.replit.app",
+                label: "Pyracrypt alias",
+              },
             ];
 
       if (!row?.godaddy_api_key || !row?.godaddy_domain) {
-        const manual = SUBDOMAIN_MAP.map((s) =>
-          `${s.sub}.${domain} → ${s.target}\n  GoDaddy DNS: Type=CNAME, Name=${s.sub}, Value=${s.target}, TTL=1hr`
+        const manual = SUBDOMAIN_MAP.map(
+          (s) =>
+            `${s.sub}.${domain} → ${s.target}\n  GoDaddy DNS: Type=CNAME, Name=${s.sub}, Value=${s.target}, TTL=1hr`,
         ).join("\n\n");
         return NextResponse.json({
           summary: [
@@ -1039,13 +1460,21 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
 
       for (const entry of SUBDOMAIN_MAP) {
         try {
-          const r = await fetch(`https://api.godaddy.com/v1/domains/${domain}/records/CNAME/${entry.sub}`, {
-            method: "PUT",
-            headers: { Authorization: authHeader, "Content-Type": "application/json" },
-            body: JSON.stringify([{ data: entry.target, ttl: 3600 }]),
-            signal: AbortSignal.timeout(15000),
+          const r = await fetch(
+            `https://api.godaddy.com/v1/domains/${domain}/records/CNAME/${entry.sub}`,
+            {
+              method: "PUT",
+              headers: { Authorization: authHeader, "Content-Type": "application/json" },
+              body: JSON.stringify([{ data: entry.target, ttl: 3600 }]),
+              signal: AbortSignal.timeout(15000),
+            },
+          );
+          results.push({
+            sub: entry.sub,
+            target: entry.target,
+            ok: r.status === 200 || r.status === 201 || r.status === 204,
+            label: entry.label,
           });
-          results.push({ sub: entry.sub, target: entry.target, ok: r.status === 200 || r.status === 201 || r.status === 204, label: entry.label });
         } catch {
           results.push({ sub: entry.sub, target: entry.target, ok: false, label: entry.label });
         }
@@ -1054,7 +1483,7 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
       const lines = results.map((r) =>
         r.ok
           ? `✓ ${r.sub}.${domain} → ${r.target}  (${r.label})`
-          : `✗ ${r.sub}.${domain} — failed (add manually in GoDaddy DNS)`
+          : `✗ ${r.sub}.${domain} — failed (add manually in GoDaddy DNS)`,
       );
       const anyOk = results.some((r) => r.ok);
       const okCount = results.filter((r) => r.ok).length;
@@ -1082,21 +1511,35 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
 
     // ── STEP: Full 50-app social launch pack ─────────────────────────────────
     if (stepId === "mini-social") {
-      const allMiniPages = await db.select({ slug: seoLandingPages.slug, title: seoLandingPages.title })
-        .from(seoLandingPages).where(eq(seoLandingPages.category, "seed-marketing"));
+      const allMiniPages = await db
+        .select({ slug: seoLandingPages.slug, title: seoLandingPages.title })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.category, "seed-marketing"));
 
       // Main pages only (not variants)
-      const mainApps = allMiniPages.filter((p) =>
-        !p.slug.endsWith("-guide") && !p.slug.endsWith("-alternative") && !p.slug.startsWith("free-") && !p.slug.startsWith("ai-") && p.slug !== "ai-tools-hub"
+      const mainApps = allMiniPages.filter(
+        (p) =>
+          !p.slug.endsWith("-guide") &&
+          !p.slug.endsWith("-alternative") &&
+          !p.slug.startsWith("free-") &&
+          !p.slug.startsWith("ai-") &&
+          p.slug !== "ai-tools-hub",
       );
       const appCount = mainApps.length;
-      const appNames = mainApps.map((p) => p.title || p.slug).slice(0, 20).join(", ");
+      const appNames = mainApps
+        .map((p) => p.title || p.slug)
+        .slice(0, 20)
+        .join(", ");
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Social media growth hacker launching a portfolio of 50 AI-powered tools on Svivva. Write viral, specific, benefit-first copy that drives clicks." },
+          {
+            role: "system",
+            content:
+              "Social media growth hacker launching a portfolio of 50 AI-powered tools on Svivva. Write viral, specific, benefit-first copy that drives clicks.",
+          },
           {
             role: "user",
             content: `Launch social pack for the Svivva AI Tools Hub: a collection of ${appCount} free AI tools including: ${appNames}. Hub URL: ${BASE_URL}/ai-tools-hub.
@@ -1135,7 +1578,9 @@ Return JSON:
           `✓ Instagram caption + 15 hashtags`,
           "",
           "── Twitter Thread (first 3) ──",
-          ...(social.twitter_thread?.slice(0, 3) || []).map((t: string, i: number) => `${i + 1}. ${t.slice(0, 120)}`),
+          ...(social.twitter_thread?.slice(0, 3) || []).map(
+            (t: string, i: number) => `${i + 1}. ${t.slice(0, 120)}`,
+          ),
           "",
           `── Product Hunt ──`,
           `Tagline: ${social.producthunt?.tagline || ""}`,
@@ -1150,8 +1595,10 @@ Return JSON:
       const allUrls = await getAllSiteUrls();
 
       // Also directly query seed-marketing pages to make sure we have them all
-      const seedPages = await db.select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
-        .from(seoLandingPages).where(eq(seoLandingPages.published, true));
+      const seedPages = await db
+        .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.published, true));
       const seedUrls = seedPages
         .filter((p) => p.category === "seed-marketing")
         .map((p) => `${BASE_URL}/${p.slug}`);
@@ -1166,7 +1613,9 @@ Return JSON:
       // Ping Bing sitemap (Google deprecated their ping endpoint in 2023)
       const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
       await Promise.allSettled([
-        fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, { signal: AbortSignal.timeout(10000) }),
+        fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
+          signal: AbortSignal.timeout(10000),
+        }),
       ]);
 
       return NextResponse.json({
@@ -1191,50 +1640,238 @@ Return JSON:
 
     // ── STEP: Mini — Directory Submissions ───────────────────────────────────
     if (stepId === "mini-directories") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
-      const toolNames = (passedTools || []).slice(0, 20).map((t) => t.name).join(", ");
+      const toolNames = (passedTools || [])
+        .slice(0, 20)
+        .map((t) => t.name)
+        .join(", ");
 
       const DIRECTORIES = [
-        { name: "Futurepedia",        url: "https://www.futurepedia.io/submit-tool",         cat: "AI Tools",  da: 72, traffic: "2M+/mo" },
-        { name: "There's An AI For That", url: "https://theresanaiforthat.com/submit",        cat: "AI Tools",  da: 68, traffic: "1.5M+/mo" },
-        { name: "FutureTools.io",     url: "https://www.futuretools.io/submit-a-tool",        cat: "AI Tools",  da: 58, traffic: "800K/mo" },
-        { name: "TopAI.tools",        url: "https://topai.tools/submit",                      cat: "AI Tools",  da: 52, traffic: "500K/mo" },
-        { name: "AiTopTools",         url: "https://aitoptools.com/submit-tool",              cat: "AI Tools",  da: 48, traffic: "300K/mo" },
-        { name: "Supertools",         url: "https://supertools.therundown.ai/submit",         cat: "AI Tools",  da: 62, traffic: "1M+/mo" },
-        { name: "EasyWithAI",         url: "https://easywithai.com/submit-tool",             cat: "AI Tools",  da: 42, traffic: "150K/mo" },
-        { name: "AITools.fyi",        url: "https://aitools.fyi/submit",                      cat: "AI Tools",  da: 44, traffic: "180K/mo" },
-        { name: "AI Tool Hunt",       url: "https://www.aitoolhunt.com/submit",              cat: "AI Tools",  da: 38, traffic: "100K/mo" },
-        { name: "Insidr.ai",          url: "https://www.insidr.ai/submit-tool",              cat: "AI Tools",  da: 40, traffic: "120K/mo" },
-        { name: "Product Hunt",       url: "https://www.producthunt.com/posts/new",          cat: "SaaS",      da: 91, traffic: "5M+/mo"  },
-        { name: "AlternativeTo",      url: "https://alternativeto.net/recommend-software",   cat: "SaaS",      da: 82, traffic: "4M+/mo"  },
-        { name: "SaaSHub",            url: "https://www.saashub.com/add-product",            cat: "SaaS",      da: 71, traffic: "2M+/mo"  },
-        { name: "G2",                 url: "https://www.g2.com/products/new",                cat: "SaaS",      da: 91, traffic: "5M+/mo"  },
-        { name: "Capterra",           url: "https://vendors.capterra.com",                   cat: "SaaS",      da: 89, traffic: "4M+/mo"  },
-        { name: "SourceForge",        url: "https://sourceforge.net/software/vendor",        cat: "SaaS",      da: 93, traffic: "7M+/mo"  },
-        { name: "DevHunt",            url: "https://devhunt.org/tool/new",                  cat: "Dev Tools", da: 49, traffic: "200K/mo" },
-        { name: "Hacker News",        url: "https://news.ycombinator.com/submit",           cat: "Dev Tools", da: 92, traffic: "9M+/mo"  },
-        { name: "BetaList",           url: "https://betalist.com/submit",                   cat: "Dev Tools", da: 62, traffic: "500K/mo" },
-        { name: "BetaPage",           url: "https://betapage.co/submit",                    cat: "Dev Tools", da: 52, traffic: "200K/mo" },
-        { name: "Uneed",              url: "https://www.uneed.best/submit",                 cat: "Dev Tools", da: 47, traffic: "150K/mo" },
-        { name: "Indie Hackers",      url: "https://www.indiehackers.com/products",         cat: "Dev Tools", da: 78, traffic: "2M+/mo"  },
-        { name: "Launched.io",        url: "https://launched.io/submit",                    cat: "Dev Tools", da: 44, traffic: "100K/mo" },
-        { name: "RapidAPI Hub",       url: "https://rapidapi.com/developer/dashboard",      cat: "API",       da: 84, traffic: "4M+/mo"  },
-        { name: "Public APIs GitHub", url: "https://github.com/public-apis/public-apis",   cat: "API",       da: 88, traffic: "3M+/mo"  },
-        { name: "AngelList",          url: "https://angel.co",                              cat: "Startup",   da: 90, traffic: "5M+/mo"  },
-        { name: "Crunchbase",         url: "https://www.crunchbase.com/organizations/new",  cat: "Startup",   da: 91, traffic: "5M+/mo"  },
-        { name: "Startup Stash",      url: "https://startupstash.com/add-resource",        cat: "Startup",   da: 58, traffic: "400K/mo" },
-        { name: "Slant",              url: "https://www.slant.co/improve/topics/add",       cat: "SaaS",      da: 63, traffic: "1M+/mo"  },
-        { name: "MakerPad",           url: "https://makerpad.zapier.com/posts",             cat: "No-Code",   da: 56, traffic: "300K/mo" },
+        {
+          name: "Futurepedia",
+          url: "https://www.futurepedia.io/submit-tool",
+          cat: "AI Tools",
+          da: 72,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "There's An AI For That",
+          url: "https://theresanaiforthat.com/submit",
+          cat: "AI Tools",
+          da: 68,
+          traffic: "1.5M+/mo",
+        },
+        {
+          name: "FutureTools.io",
+          url: "https://www.futuretools.io/submit-a-tool",
+          cat: "AI Tools",
+          da: 58,
+          traffic: "800K/mo",
+        },
+        {
+          name: "TopAI.tools",
+          url: "https://topai.tools/submit",
+          cat: "AI Tools",
+          da: 52,
+          traffic: "500K/mo",
+        },
+        {
+          name: "AiTopTools",
+          url: "https://aitoptools.com/submit-tool",
+          cat: "AI Tools",
+          da: 48,
+          traffic: "300K/mo",
+        },
+        {
+          name: "Supertools",
+          url: "https://supertools.therundown.ai/submit",
+          cat: "AI Tools",
+          da: 62,
+          traffic: "1M+/mo",
+        },
+        {
+          name: "EasyWithAI",
+          url: "https://easywithai.com/submit-tool",
+          cat: "AI Tools",
+          da: 42,
+          traffic: "150K/mo",
+        },
+        {
+          name: "AITools.fyi",
+          url: "https://aitools.fyi/submit",
+          cat: "AI Tools",
+          da: 44,
+          traffic: "180K/mo",
+        },
+        {
+          name: "AI Tool Hunt",
+          url: "https://www.aitoolhunt.com/submit",
+          cat: "AI Tools",
+          da: 38,
+          traffic: "100K/mo",
+        },
+        {
+          name: "Insidr.ai",
+          url: "https://www.insidr.ai/submit-tool",
+          cat: "AI Tools",
+          da: 40,
+          traffic: "120K/mo",
+        },
+        {
+          name: "Product Hunt",
+          url: "https://www.producthunt.com/posts/new",
+          cat: "SaaS",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "AlternativeTo",
+          url: "https://alternativeto.net/recommend-software",
+          cat: "SaaS",
+          da: 82,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "SaaSHub",
+          url: "https://www.saashub.com/add-product",
+          cat: "SaaS",
+          da: 71,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "G2",
+          url: "https://www.g2.com/products/new",
+          cat: "SaaS",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "Capterra",
+          url: "https://vendors.capterra.com",
+          cat: "SaaS",
+          da: 89,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "SourceForge",
+          url: "https://sourceforge.net/software/vendor",
+          cat: "SaaS",
+          da: 93,
+          traffic: "7M+/mo",
+        },
+        {
+          name: "DevHunt",
+          url: "https://devhunt.org/tool/new",
+          cat: "Dev Tools",
+          da: 49,
+          traffic: "200K/mo",
+        },
+        {
+          name: "Hacker News",
+          url: "https://news.ycombinator.com/submit",
+          cat: "Dev Tools",
+          da: 92,
+          traffic: "9M+/mo",
+        },
+        {
+          name: "BetaList",
+          url: "https://betalist.com/submit",
+          cat: "Dev Tools",
+          da: 62,
+          traffic: "500K/mo",
+        },
+        {
+          name: "BetaPage",
+          url: "https://betapage.co/submit",
+          cat: "Dev Tools",
+          da: 52,
+          traffic: "200K/mo",
+        },
+        {
+          name: "Uneed",
+          url: "https://www.uneed.best/submit",
+          cat: "Dev Tools",
+          da: 47,
+          traffic: "150K/mo",
+        },
+        {
+          name: "Indie Hackers",
+          url: "https://www.indiehackers.com/products",
+          cat: "Dev Tools",
+          da: 78,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "Launched.io",
+          url: "https://launched.io/submit",
+          cat: "Dev Tools",
+          da: 44,
+          traffic: "100K/mo",
+        },
+        {
+          name: "RapidAPI Hub",
+          url: "https://rapidapi.com/developer/dashboard",
+          cat: "API",
+          da: 84,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "Public APIs GitHub",
+          url: "https://github.com/public-apis/public-apis",
+          cat: "API",
+          da: 88,
+          traffic: "3M+/mo",
+        },
+        { name: "AngelList", url: "https://angel.co", cat: "Startup", da: 90, traffic: "5M+/mo" },
+        {
+          name: "Crunchbase",
+          url: "https://www.crunchbase.com/organizations/new",
+          cat: "Startup",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "Startup Stash",
+          url: "https://startupstash.com/add-resource",
+          cat: "Startup",
+          da: 58,
+          traffic: "400K/mo",
+        },
+        {
+          name: "Slant",
+          url: "https://www.slant.co/improve/topics/add",
+          cat: "SaaS",
+          da: 63,
+          traffic: "1M+/mo",
+        },
+        {
+          name: "MakerPad",
+          url: "https://makerpad.zapier.com/posts",
+          cat: "No-Code",
+          da: 56,
+          traffic: "300K/mo",
+        },
       ];
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "You write product listing content for SaaS and AI tool directories. Be specific, factual, and benefit-first. Use the real tool names." },
-          { role: "user", content: `Create directory listing content for a free AI tools hub at ${targetUrl}.
+          {
+            role: "system",
+            content:
+              "You write product listing content for SaaS and AI tool directories. Be specific, factual, and benefit-first. Use the real tool names.",
+          },
+          {
+            role: "user",
+            content: `Create directory listing content for a free AI tools hub at ${targetUrl}.
 The collection includes ${passedTools?.length || "50"}+ free tools. ${toolNames ? `Tool names include: ${toolNames}.` : ""}
 These are all free-to-use, no sign-up tools, built with Svivva.
 
@@ -1249,12 +1886,15 @@ Return JSON:
   "keywords": ["free ai tools","ai tools hub","free online tools","no signup ai tools"],
   "phHint": "Product Hunt first comment (founder story, 280 chars)",
   "hnHint": "Show HN title (max 80 chars, specific about what the tools do)"
-}` },
+}`,
+          },
         ],
       });
 
       const listing = JSON.parse(gen.choices[0].message.content || "{}");
-      const dirList = DIRECTORIES.map((d) => `• [DA ${d.da}] ${d.name} (${d.cat}, ${d.traffic}) — ${d.url}`).join("\n");
+      const dirList = DIRECTORIES.map(
+        (d) => `• [DA ${d.da}] ${d.name} (${d.cat}, ${d.traffic}) — ${d.url}`,
+      ).join("\n");
 
       return NextResponse.json({
         summary: [
@@ -1284,11 +1924,19 @@ Return JSON:
 
     // ── STEP: Mini — Parasite SEO Articles ───────────────────────────────────
     if (stepId === "mini-parasite") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
       const toolCount = passedTools?.length || 50;
-      const sampleTools = (passedTools || []).slice(0, 8).map((t) => t.name).join(", ");
+      const sampleTools = (passedTools || [])
+        .slice(0, 8)
+        .map((t) => t.name)
+        .join(", ");
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -1296,7 +1944,8 @@ Return JSON:
         messages: [
           {
             role: "system",
-            content: "Expert content marketer who writes platform-native articles that rank on Google AND get featured by editors. Write in each platform's authentic voice. Articles are genuinely useful — not promotional. Mention the tools collection naturally as the subject.",
+            content:
+              "Expert content marketer who writes platform-native articles that rank on Google AND get featured by editors. Write in each platform's authentic voice. Articles are genuinely useful — not promotional. Mention the tools collection naturally as the subject.",
           },
           {
             role: "user",
@@ -1343,7 +1992,8 @@ Return JSON:
           const slug = `mini-${key}-${randomBytes(4).toString("hex")}`;
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
-            id, slug,
+            id,
+            slug,
             title: article.title || `Mini apps on ${key}`,
             excerpt: `Parasite SEO article for ${key}: ${article.title}`,
             content: article.content,
@@ -1353,7 +2003,9 @@ Return JSON:
             published: false,
           });
           savedTitles.push(`${key}: "${article.title}"`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       return NextResponse.json({
@@ -1380,8 +2032,13 @@ Return JSON:
 
     // ── STEP: Mini — AEO (Answer Engine Optimization) ────────────────────────
     if (stepId === "mini-aeo") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
       const toolCount = passedTools?.length || 50;
       const toolSamples = (passedTools || []).slice(0, 10);
@@ -1400,10 +2057,19 @@ Return JSON:
         `how to scan github repository for leaked api keys`,
         `free website security audit tools online`,
       ];
-      const toolSpecificQueries = toolSamples.slice(0, 4).map((t) => `free ${t.name.toLowerCase()} online`);
+      const toolSpecificQueries = toolSamples
+        .slice(0, 4)
+        .map((t) => `free ${t.name.toLowerCase()} online`);
       const AEO_QUERIES = [...baseQueries, ...toolSpecificQueries].slice(0, 10);
 
-      let miniAeoPages: { query: string; slug: string; title: string; metaTitle: string; metaDescription: string; content: string }[] = [];
+      let miniAeoPages: {
+        query: string;
+        slug: string;
+        title: string;
+        metaTitle: string;
+        metaDescription: string;
+        content: string;
+      }[] = [];
       let miniAeoError: string | null = null;
       try {
         const gen = await openai.chat.completions.create({
@@ -1448,7 +2114,11 @@ Return JSON:
         if (!page.content || !page.slug) continue;
         try {
           const slug = `tools-${page.slug}`;
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
           const finalSlug = ex.length ? `${slug}-${randomBytes(3).toString("hex")}` : slug;
           await db.insert(seoLandingPages).values({
             slug: finalSlug,
@@ -1460,10 +2130,14 @@ Return JSON:
             content: page.content,
             metaTitle: page.metaTitle || page.title || page.query,
             metaDescription: page.metaDescription || "",
-            category: "aeo", published: true, toolUrl: targetUrl,
+            category: "aeo",
+            published: true,
+            toolUrl: targetUrl,
           });
           created.push(`${BASE_URL}/${finalSlug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (created.length) await submitToIndexNow(userId, created);
@@ -1473,7 +2147,9 @@ Return JSON:
           miniAeoError ? `⚠ AI generation error: ${miniAeoError}` : null,
           `✓ ${created.length} AEO pages created for ${targetUrl}`,
           created.length > 0 ? `✓ All pages submitted to IndexNow` : null,
-          created.length === 0 && miniAeoError ? "Retry the step — transient AI errors are common on large batch requests." : null,
+          created.length === 0 && miniAeoError
+            ? "Retry the step — transient AI errors are common on large batch requests."
+            : null,
           "",
           "These pages are written to be CITED by AI search engines.",
           "When someone asks Perplexity 'what are the best free AI tools',",
@@ -1484,18 +2160,28 @@ Return JSON:
           "",
           "Pages created:",
           ...created.slice(0, 8).map((u) => `• ${u}`),
-        ].filter(Boolean).join("\n"),
+        ]
+          .filter(Boolean)
+          .join("\n"),
         details: { created: created.length, targetUrl },
       });
     }
 
     // ── STEP: Mini — Community Strategy Pack ─────────────────────────────────
     if (stepId === "mini-communities") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
       const toolCount = passedTools?.length || 50;
-      const toolNames = (passedTools || []).slice(0, 12).map((t) => t.name).join(", ");
+      const toolNames = (passedTools || [])
+        .slice(0, 12)
+        .map((t) => t.name)
+        .join(", ");
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -1503,7 +2189,8 @@ Return JSON:
         messages: [
           {
             role: "system",
-            content: "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first. Each post provides real value and only mentions the tools naturally. Use the specific tool names provided.",
+            content:
+              "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first. Each post provides real value and only mentions the tools naturally. Use the specific tool names provided.",
           },
           {
             role: "user",
@@ -1546,7 +2233,10 @@ Return JSON:
       const community = JSON.parse(gen.choices[0].message.content || "{}");
       const redditPosts = community.reddit || {};
       const postSummary = Object.entries(redditPosts)
-        .map(([sub, post]: [string, unknown]) => `${sub}: "${(post as Record<string, string>).title || ""}"`)
+        .map(
+          ([sub, post]: [string, unknown]) =>
+            `${sub}: "${(post as Record<string, string>).title || ""}"`,
+        )
         .join("\n");
 
       return NextResponse.json({
@@ -1578,34 +2268,92 @@ Return JSON:
 
     // ── STEP: Mini — PR & Newsletter Pitches ─────────────────────────────────
     if (stepId === "mini-outreach") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
       const toolCount = passedTools?.length || 50;
-      const toolNames = (passedTools || []).slice(0, 8).map((t) => t.name).join(", ");
+      const toolNames = (passedTools || [])
+        .slice(0, 8)
+        .map((t) => t.name)
+        .join(", ");
 
       const NEWSLETTERS = [
-        { name: "TLDR AI",          subscribers: "1.25M", contact: "ai@tldr.tech",                niche: "AI tools and startups" },
-        { name: "The Rundown AI",   subscribers: "700K",  contact: "hello@therundown.ai",         niche: "daily AI news and tools" },
-        { name: "Ben's Bites",      subscribers: "100K",  contact: "ben@bensbites.co",            niche: "AI products" },
-        { name: "AI Tool Report",   subscribers: "300K",  contact: "hello@aitoolreport.com",      niche: "new AI tools" },
-        { name: "Superhuman AI",    subscribers: "400K",  contact: "zain@superhuman.ai",          niche: "AI for productivity" },
-        { name: "JavaScript Weekly", subscribers: "200K", contact: "submit@javascriptweekly.com", niche: "JS/Node dev tools" },
-        { name: "Bytes.dev",        subscribers: "300K",  contact: "tyler@bytes.dev",             niche: "developer news" },
-        { name: "Changelog Weekly", subscribers: "150K",  contact: "editors@changelog.com",      niche: "open source and dev tools" },
-        { name: "PH Newsletter",    subscribers: "1M",    contact: "hello@producthunt.com",       niche: "new products" },
-        { name: "Futurepedia",      subscribers: "500K",  contact: "submit@futurepedia.io",       niche: "AI tools newsletter" },
+        {
+          name: "TLDR AI",
+          subscribers: "1.25M",
+          contact: "ai@tldr.tech",
+          niche: "AI tools and startups",
+        },
+        {
+          name: "The Rundown AI",
+          subscribers: "700K",
+          contact: "hello@therundown.ai",
+          niche: "daily AI news and tools",
+        },
+        {
+          name: "Ben's Bites",
+          subscribers: "100K",
+          contact: "ben@bensbites.co",
+          niche: "AI products",
+        },
+        {
+          name: "AI Tool Report",
+          subscribers: "300K",
+          contact: "hello@aitoolreport.com",
+          niche: "new AI tools",
+        },
+        {
+          name: "Superhuman AI",
+          subscribers: "400K",
+          contact: "zain@superhuman.ai",
+          niche: "AI for productivity",
+        },
+        {
+          name: "JavaScript Weekly",
+          subscribers: "200K",
+          contact: "submit@javascriptweekly.com",
+          niche: "JS/Node dev tools",
+        },
+        {
+          name: "Bytes.dev",
+          subscribers: "300K",
+          contact: "tyler@bytes.dev",
+          niche: "developer news",
+        },
+        {
+          name: "Changelog Weekly",
+          subscribers: "150K",
+          contact: "editors@changelog.com",
+          niche: "open source and dev tools",
+        },
+        {
+          name: "PH Newsletter",
+          subscribers: "1M",
+          contact: "hello@producthunt.com",
+          niche: "new products",
+        },
+        {
+          name: "Futurepedia",
+          subscribers: "500K",
+          contact: "submit@futurepedia.io",
+          niche: "AI tools newsletter",
+        },
       ];
 
       const PODCASTS = [
-        { name: "Practical AI",         host: "Daniel & Chris",  url: "changelog.com/practicalai"   },
-        { name: "The Changelog",        host: "Adam & Jerod",    url: "changelog.com"                },
-        { name: "Indie Hackers Podcast", host: "Courtland Allen", url: "indiehackers.com/podcast"   },
-        { name: "My First Million",     host: "Sam & Shaan",     url: "mfmpod.com"                  },
-        { name: "Developer Tea",        host: "Jonathan Cutrell", url: "developertea.com"            },
-        { name: "TWIML AI Podcast",     host: "Sam Charrington", url: "twimlai.com"                 },
-        { name: "Software Eng Daily",   host: "Jeff Meyerson",   url: "softwareengineeringdaily.com" },
-        { name: "Lenny's Podcast",      host: "Lenny Rachitsky", url: "lennyspodcast.com"           },
+        { name: "Practical AI", host: "Daniel & Chris", url: "changelog.com/practicalai" },
+        { name: "The Changelog", host: "Adam & Jerod", url: "changelog.com" },
+        { name: "Indie Hackers Podcast", host: "Courtland Allen", url: "indiehackers.com/podcast" },
+        { name: "My First Million", host: "Sam & Shaan", url: "mfmpod.com" },
+        { name: "Developer Tea", host: "Jonathan Cutrell", url: "developertea.com" },
+        { name: "TWIML AI Podcast", host: "Sam Charrington", url: "twimlai.com" },
+        { name: "Software Eng Daily", host: "Jeff Meyerson", url: "softwareengineeringdaily.com" },
+        { name: "Lenny's Podcast", host: "Lenny Rachitsky", url: "lennyspodcast.com" },
       ];
 
       const gen = await openai.chat.completions.create({
@@ -1614,7 +2362,8 @@ Return JSON:
         messages: [
           {
             role: "system",
-            content: "PR professional who writes pitches editors actually respond to. Concise, specific, audience-relevant, with a clear hook. No generic templates. Use the specific tool names.",
+            content:
+              "PR professional who writes pitches editors actually respond to. Concise, specific, audience-relevant, with a clear hook. No generic templates. Use the specific tool names.",
           },
           {
             role: "user",
@@ -1659,18 +2408,24 @@ Return JSON:
         try {
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
-            id, slug: `mini-press-release-${randomBytes(4).toString("hex")}`,
+            id,
+            slug: `mini-press-release-${randomBytes(4).toString("hex")}`,
             title: `Press Release — ${toolCount} Free AI Tools at ${targetUrl}`,
             excerpt: "Official press release for media distribution",
             content: outreach.press_release,
             metaTitle: "Press Release — Free AI Tools Hub",
             metaDescription: `${toolCount} free AI tools now available at ${targetUrl}`,
-            category: "press", published: false,
+            category: "press",
+            published: false,
           });
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
-      const nlList = NEWSLETTERS.map((n) => `• ${n.name} (${n.subscribers}) — ${n.contact}`).join("\n");
+      const nlList = NEWSLETTERS.map((n) => `• ${n.name} (${n.subscribers}) — ${n.contact}`).join(
+        "\n",
+      );
       const podList = PODCASTS.map((p) => `• ${p.name} w/${p.host}`).join("\n");
 
       return NextResponse.json({
@@ -1692,24 +2447,42 @@ Return JSON:
           "Press release preview:",
           (outreach.press_release || "").slice(0, 300) + "…",
         ].join("\n"),
-        details: { newsletters: NEWSLETTERS.length, podcasts: PODCASTS.length, outreach, targetUrl },
+        details: {
+          newsletters: NEWSLETTERS.length,
+          podcasts: PODCASTS.length,
+          outreach,
+          targetUrl,
+        },
       });
     }
 
     // ── STEP: Mini — Schema.org + Backlink Bait ───────────────────────────────
     if (stepId === "mini-schema") {
-      interface DiscoveredTool { name: string; url: string; description: string }
-      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } = body;
+      interface DiscoveredTool {
+        name: string;
+        url: string;
+        description: string;
+      }
+      const { sourceUrl, tools: passedTools }: { sourceUrl?: string; tools?: DiscoveredTool[] } =
+        body;
       const targetUrl = sourceUrl || BASE_URL;
       const toolCount = passedTools?.length || 50;
-      const toolNames = (passedTools || []).slice(0, 8).map((t) => t.name).join(", ");
+      const toolNames = (passedTools || [])
+        .slice(0, 8)
+        .map((t) => t.name)
+        .join(", ");
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Technical SEO expert specializing in structured data and link acquisition." },
-          { role: "user", content: `Generate Schema.org and technical SEO assets for a free AI tools collection at ${targetUrl} with ${toolCount} tools. ${toolNames ? `Tools include: ${toolNames}.` : ""}
+          {
+            role: "system",
+            content: "Technical SEO expert specializing in structured data and link acquisition.",
+          },
+          {
+            role: "user",
+            content: `Generate Schema.org and technical SEO assets for a free AI tools collection at ${targetUrl} with ${toolCount} tools. ${toolNames ? `Tools include: ${toolNames}.` : ""}
 
 Return JSON:
 {
@@ -1744,7 +2517,8 @@ Return JSON:
     "slug": "tools-changelog",
     "content": "HTML changelog with 5 recent updates: 'Added [tool name]', 'Improved [feature]' etc. Shows Google active maintenance."
   }
-}` },
+}`,
+          },
         ],
       });
 
@@ -1753,12 +2527,18 @@ Return JSON:
 
       if (schemaData.backlinkMagnet?.content) {
         try {
-          const slug = schemaData.backlinkMagnet.slug || `best-free-ai-tools-${new Date().getFullYear()}`;
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+          const slug =
+            schemaData.backlinkMagnet.slug || `best-free-ai-tools-${new Date().getFullYear()}`;
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
           const finalSlug = ex.length ? `${slug}-${randomBytes(3).toString("hex")}` : slug;
           await db.insert(seoLandingPages).values({
             slug: finalSlug,
-            title: schemaData.backlinkMagnet.title || `Best Free AI Tools ${new Date().getFullYear()}`,
+            title:
+              schemaData.backlinkMagnet.title || `Best Free AI Tools ${new Date().getFullYear()}`,
             keyword: `best free ai tools ${new Date().getFullYear()}`,
             headline: schemaData.backlinkMagnet.title || "Best Free AI Tools",
             howItWorks: "Comprehensive roundup of the best free AI tools — updated regularly",
@@ -1766,16 +2546,24 @@ Return JSON:
             content: schemaData.backlinkMagnet.content,
             metaTitle: (schemaData.backlinkMagnet.title || "").slice(0, 60),
             metaDescription: `The best free AI tools available in ${new Date().getFullYear()} — no signup required, instant access.`,
-            category: "seo-landing", published: true, toolUrl: targetUrl,
+            category: "seo-landing",
+            published: true,
+            toolUrl: targetUrl,
           });
           pagesCreated.push(`${BASE_URL}/${finalSlug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (schemaData.changelog?.content) {
         try {
           const slug = schemaData.changelog.slug || "tools-changelog";
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
           if (!ex.length) {
             await db.insert(seoLandingPages).values({
               slug,
@@ -1787,11 +2575,15 @@ Return JSON:
               content: schemaData.changelog.content,
               metaTitle: "AI Tools Hub — Latest Updates & New Tools",
               metaDescription: "See the latest free AI tools added to the hub",
-              category: "seo-landing", published: true, toolUrl: targetUrl,
+              category: "seo-landing",
+              published: true,
+              toolUrl: targetUrl,
             });
             pagesCreated.push(`${BASE_URL}/${slug}`);
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (pagesCreated.length) await submitToIndexNow(userId, pagesCreated);
@@ -1819,7 +2611,8 @@ Return JSON:
         ].join("\n"),
         details: {
           schemas: { webApplication: schemaData.webApplication, faqSchema: schemaData.faqSchema },
-          pagesCreated, targetUrl,
+          pagesCreated,
+          targetUrl,
         },
       });
     }
@@ -1828,51 +2621,291 @@ Return JSON:
     if (stepId === "svivva-directories") {
       const DIRECTORIES = [
         // AI Tool Directories
-        { name: "Futurepedia",         url: "https://www.futurepedia.io/submit-tool",          cat: "AI Tools",   da: 72, traffic: "2M+/mo" },
-        { name: "There's An AI For That", url: "https://theresanaiforthat.com/submit",         cat: "AI Tools",   da: 68, traffic: "1.5M+/mo" },
-        { name: "FutureTools.io",      url: "https://www.futuretools.io/submit-a-tool",         cat: "AI Tools",   da: 58, traffic: "800K/mo" },
-        { name: "TopAI.tools",         url: "https://topai.tools/submit",                       cat: "AI Tools",   da: 52, traffic: "500K/mo" },
-        { name: "AiTopTools",          url: "https://aitoptools.com/submit-tool",               cat: "AI Tools",   da: 48, traffic: "300K/mo" },
-        { name: "ToolPilot.ai",        url: "https://www.toolpilot.ai/pages/submit-ai-tool",   cat: "AI Tools",   da: 45, traffic: "200K/mo" },
-        { name: "Supertools",          url: "https://supertools.therundown.ai/submit",          cat: "AI Tools",   da: 62, traffic: "1M+/mo" },
-        { name: "EasyWithAI",          url: "https://easywithai.com/submit-tool",              cat: "AI Tools",   da: 42, traffic: "150K/mo" },
-        { name: "AITools.fyi",         url: "https://aitools.fyi/submit",                       cat: "AI Tools",   da: 44, traffic: "180K/mo" },
-        { name: "Insidr.ai",           url: "https://www.insidr.ai/submit-tool",               cat: "AI Tools",   da: 40, traffic: "120K/mo" },
-        { name: "AI Tool Hunt",        url: "https://www.aitoolhunt.com/submit",               cat: "AI Tools",   da: 38, traffic: "100K/mo" },
-        { name: "AI For Work",         url: "https://www.aiforwork.co/submit",                 cat: "AI Tools",   da: 41, traffic: "130K/mo" },
-        { name: "GPTDemo.ai",          url: "https://www.gptdemo.ai/submit",                   cat: "AI Tools",   da: 36, traffic: "80K/mo" },
-        { name: "Phygital+",           url: "https://phygital.plus/submit",                    cat: "AI Tools",   da: 39, traffic: "90K/mo" },
+        {
+          name: "Futurepedia",
+          url: "https://www.futurepedia.io/submit-tool",
+          cat: "AI Tools",
+          da: 72,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "There's An AI For That",
+          url: "https://theresanaiforthat.com/submit",
+          cat: "AI Tools",
+          da: 68,
+          traffic: "1.5M+/mo",
+        },
+        {
+          name: "FutureTools.io",
+          url: "https://www.futuretools.io/submit-a-tool",
+          cat: "AI Tools",
+          da: 58,
+          traffic: "800K/mo",
+        },
+        {
+          name: "TopAI.tools",
+          url: "https://topai.tools/submit",
+          cat: "AI Tools",
+          da: 52,
+          traffic: "500K/mo",
+        },
+        {
+          name: "AiTopTools",
+          url: "https://aitoptools.com/submit-tool",
+          cat: "AI Tools",
+          da: 48,
+          traffic: "300K/mo",
+        },
+        {
+          name: "ToolPilot.ai",
+          url: "https://www.toolpilot.ai/pages/submit-ai-tool",
+          cat: "AI Tools",
+          da: 45,
+          traffic: "200K/mo",
+        },
+        {
+          name: "Supertools",
+          url: "https://supertools.therundown.ai/submit",
+          cat: "AI Tools",
+          da: 62,
+          traffic: "1M+/mo",
+        },
+        {
+          name: "EasyWithAI",
+          url: "https://easywithai.com/submit-tool",
+          cat: "AI Tools",
+          da: 42,
+          traffic: "150K/mo",
+        },
+        {
+          name: "AITools.fyi",
+          url: "https://aitools.fyi/submit",
+          cat: "AI Tools",
+          da: 44,
+          traffic: "180K/mo",
+        },
+        {
+          name: "Insidr.ai",
+          url: "https://www.insidr.ai/submit-tool",
+          cat: "AI Tools",
+          da: 40,
+          traffic: "120K/mo",
+        },
+        {
+          name: "AI Tool Hunt",
+          url: "https://www.aitoolhunt.com/submit",
+          cat: "AI Tools",
+          da: 38,
+          traffic: "100K/mo",
+        },
+        {
+          name: "AI For Work",
+          url: "https://www.aiforwork.co/submit",
+          cat: "AI Tools",
+          da: 41,
+          traffic: "130K/mo",
+        },
+        {
+          name: "GPTDemo.ai",
+          url: "https://www.gptdemo.ai/submit",
+          cat: "AI Tools",
+          da: 36,
+          traffic: "80K/mo",
+        },
+        {
+          name: "Phygital+",
+          url: "https://phygital.plus/submit",
+          cat: "AI Tools",
+          da: 39,
+          traffic: "90K/mo",
+        },
         // SaaS Directories
-        { name: "Product Hunt",        url: "https://www.producthunt.com/posts/new",           cat: "SaaS",       da: 91, traffic: "5M+/mo" },
-        { name: "AlternativeTo",       url: "https://alternativeto.net/recommend-software",    cat: "SaaS",       da: 82, traffic: "4M+/mo" },
-        { name: "SaaSHub",             url: "https://www.saashub.com/add-product",             cat: "SaaS",       da: 71, traffic: "2M+/mo" },
-        { name: "G2",                  url: "https://www.g2.com/products/new",                 cat: "SaaS",       da: 91, traffic: "5M+/mo" },
-        { name: "Capterra",            url: "https://vendors.capterra.com",                    cat: "SaaS",       da: 89, traffic: "4M+/mo" },
-        { name: "GetApp",              url: "https://www.getapp.com/all-software",             cat: "SaaS",       da: 81, traffic: "2M+/mo" },
-        { name: "Software Advice",     url: "https://www.softwareadvice.com",                  cat: "SaaS",       da: 79, traffic: "2M+/mo" },
-        { name: "SourceForge",         url: "https://sourceforge.net/software/vendor",         cat: "SaaS",       da: 93, traffic: "7M+/mo" },
-        { name: "Slant",               url: "https://www.slant.co/improve/topics/add",        cat: "SaaS",       da: 63, traffic: "1M+/mo" },
+        {
+          name: "Product Hunt",
+          url: "https://www.producthunt.com/posts/new",
+          cat: "SaaS",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "AlternativeTo",
+          url: "https://alternativeto.net/recommend-software",
+          cat: "SaaS",
+          da: 82,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "SaaSHub",
+          url: "https://www.saashub.com/add-product",
+          cat: "SaaS",
+          da: 71,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "G2",
+          url: "https://www.g2.com/products/new",
+          cat: "SaaS",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "Capterra",
+          url: "https://vendors.capterra.com",
+          cat: "SaaS",
+          da: 89,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "GetApp",
+          url: "https://www.getapp.com/all-software",
+          cat: "SaaS",
+          da: 81,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "Software Advice",
+          url: "https://www.softwareadvice.com",
+          cat: "SaaS",
+          da: 79,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "SourceForge",
+          url: "https://sourceforge.net/software/vendor",
+          cat: "SaaS",
+          da: 93,
+          traffic: "7M+/mo",
+        },
+        {
+          name: "Slant",
+          url: "https://www.slant.co/improve/topics/add",
+          cat: "SaaS",
+          da: 63,
+          traffic: "1M+/mo",
+        },
         // Developer Directories
-        { name: "DevHunt",             url: "https://devhunt.org/tool/new",                   cat: "Dev Tools",  da: 49, traffic: "200K/mo" },
-        { name: "Hacker News",         url: "https://news.ycombinator.com/submit",            cat: "Dev Tools",  da: 92, traffic: "9M+/mo" },
-        { name: "BetaList",            url: "https://betalist.com/submit",                    cat: "Dev Tools",  da: 62, traffic: "500K/mo" },
-        { name: "BetaPage",            url: "https://betapage.co/submit",                     cat: "Dev Tools",  da: 52, traffic: "200K/mo" },
-        { name: "Uneed",               url: "https://www.uneed.best/submit",                  cat: "Dev Tools",  da: 47, traffic: "150K/mo" },
-        { name: "Launched.io",         url: "https://launched.io/submit",                     cat: "Dev Tools",  da: 44, traffic: "100K/mo" },
-        { name: "Indie Hackers",       url: "https://www.indiehackers.com/products",          cat: "Dev Tools",  da: 78, traffic: "2M+/mo" },
-        { name: "MakerPad",            url: "https://makerpad.zapier.com/posts",              cat: "Dev Tools",  da: 56, traffic: "300K/mo" },
+        {
+          name: "DevHunt",
+          url: "https://devhunt.org/tool/new",
+          cat: "Dev Tools",
+          da: 49,
+          traffic: "200K/mo",
+        },
+        {
+          name: "Hacker News",
+          url: "https://news.ycombinator.com/submit",
+          cat: "Dev Tools",
+          da: 92,
+          traffic: "9M+/mo",
+        },
+        {
+          name: "BetaList",
+          url: "https://betalist.com/submit",
+          cat: "Dev Tools",
+          da: 62,
+          traffic: "500K/mo",
+        },
+        {
+          name: "BetaPage",
+          url: "https://betapage.co/submit",
+          cat: "Dev Tools",
+          da: 52,
+          traffic: "200K/mo",
+        },
+        {
+          name: "Uneed",
+          url: "https://www.uneed.best/submit",
+          cat: "Dev Tools",
+          da: 47,
+          traffic: "150K/mo",
+        },
+        {
+          name: "Launched.io",
+          url: "https://launched.io/submit",
+          cat: "Dev Tools",
+          da: 44,
+          traffic: "100K/mo",
+        },
+        {
+          name: "Indie Hackers",
+          url: "https://www.indiehackers.com/products",
+          cat: "Dev Tools",
+          da: 78,
+          traffic: "2M+/mo",
+        },
+        {
+          name: "MakerPad",
+          url: "https://makerpad.zapier.com/posts",
+          cat: "Dev Tools",
+          da: 56,
+          traffic: "300K/mo",
+        },
         // API Directories
-        { name: "RapidAPI Hub",        url: "https://rapidapi.com/developer/dashboard",       cat: "API",        da: 84, traffic: "4M+/mo" },
-        { name: "APIs.guru",           url: "https://github.com/APIs-guru/openapi-directory", cat: "API",        da: 71, traffic: "500K/mo" },
-        { name: "Public APIs",         url: "https://github.com/public-apis/public-apis",     cat: "API",        da: 88, traffic: "3M+/mo" },
-        { name: "API List",            url: "https://apilist.fun/add",                        cat: "API",        da: 54, traffic: "200K/mo" },
+        {
+          name: "RapidAPI Hub",
+          url: "https://rapidapi.com/developer/dashboard",
+          cat: "API",
+          da: 84,
+          traffic: "4M+/mo",
+        },
+        {
+          name: "APIs.guru",
+          url: "https://github.com/APIs-guru/openapi-directory",
+          cat: "API",
+          da: 71,
+          traffic: "500K/mo",
+        },
+        {
+          name: "Public APIs",
+          url: "https://github.com/public-apis/public-apis",
+          cat: "API",
+          da: 88,
+          traffic: "3M+/mo",
+        },
+        {
+          name: "API List",
+          url: "https://apilist.fun/add",
+          cat: "API",
+          da: 54,
+          traffic: "200K/mo",
+        },
         // Startup / Business
-        { name: "AngelList",           url: "https://angel.co",                               cat: "Startup",    da: 90, traffic: "5M+/mo" },
-        { name: "Crunchbase",          url: "https://www.crunchbase.com/organizations/new",   cat: "Startup",    da: 91, traffic: "5M+/mo" },
-        { name: "Clutch.co",           url: "https://clutch.co/directory",                    cat: "Startup",    da: 82, traffic: "1M+/mo" },
-        { name: "Startup Stash",       url: "https://startupstash.com/add-resource",         cat: "Startup",    da: 58, traffic: "400K/mo" },
-        { name: "Erlibird",            url: "https://erlibird.com/startup/register",          cat: "Startup",    da: 43, traffic: "80K/mo" },
-        { name: "Startup Buffer",      url: "https://startupbuffer.com/site/submit",          cat: "Startup",    da: 46, traffic: "100K/mo" },
+        { name: "AngelList", url: "https://angel.co", cat: "Startup", da: 90, traffic: "5M+/mo" },
+        {
+          name: "Crunchbase",
+          url: "https://www.crunchbase.com/organizations/new",
+          cat: "Startup",
+          da: 91,
+          traffic: "5M+/mo",
+        },
+        {
+          name: "Clutch.co",
+          url: "https://clutch.co/directory",
+          cat: "Startup",
+          da: 82,
+          traffic: "1M+/mo",
+        },
+        {
+          name: "Startup Stash",
+          url: "https://startupstash.com/add-resource",
+          cat: "Startup",
+          da: 58,
+          traffic: "400K/mo",
+        },
+        {
+          name: "Erlibird",
+          url: "https://erlibird.com/startup/register",
+          cat: "Startup",
+          da: 43,
+          traffic: "80K/mo",
+        },
+        {
+          name: "Startup Buffer",
+          url: "https://startupbuffer.com/site/submit",
+          cat: "Startup",
+          da: 46,
+          traffic: "100K/mo",
+        },
       ];
 
       // Generate universal listing content via AI
@@ -1880,8 +2913,14 @@ Return JSON:
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "You write product listing content for SaaS directories. Be specific, factual, and benefit-first. No jargon." },
-          { role: "user", content: `Create directory listing content for Svivva — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
+          {
+            role: "system",
+            content:
+              "You write product listing content for SaaS directories. Be specific, factual, and benefit-first. No jargon.",
+          },
+          {
+            role: "user",
+            content: `Create directory listing content for Svivva — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
 
 Return JSON:
 {
@@ -1897,7 +2936,8 @@ Return JSON:
   "alternatives": ["Retool", "Bubble", "Zapier", "AWS Lambda"],
   "rhHint": "For RapidAPI: what endpoint categories would you publish? List 3.",
   "phHint": "Product Hunt first comment (founder story, 280 chars)"
-}` },
+}`,
+          },
         ],
       });
 
@@ -1921,19 +2961,34 @@ Return JSON:
 <p>${listing.rhHint}</p>`;
 
       try {
-        const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+        const ex = await db
+          .select({ id: seoLandingPages.id })
+          .from(seoLandingPages)
+          .where(eq(seoLandingPages.slug, slug))
+          .limit(1);
         if (!ex.length) {
           await db.insert(seoLandingPages).values({
-            slug, title: "Svivva Directory Submission Kit", content: htmlContent,
-            keyword: "ai api builder directory", headline: listing.tagline || "Svivva — AI API Builder",
-            howItWorks: listing.shortDesc || "", whoItsFor: listing.targetAudience || "",
-            metaTitle: "Svivva Directory Listings", metaDescription: listing.description?.slice(0, 155) || "",
-            category: "seo-landing", published: false, toolUrl: BASE_URL,
+            slug,
+            title: "Svivva Directory Submission Kit",
+            content: htmlContent,
+            keyword: "ai api builder directory",
+            headline: listing.tagline || "Svivva — AI API Builder",
+            howItWorks: listing.shortDesc || "",
+            whoItsFor: listing.targetAudience || "",
+            metaTitle: "Svivva Directory Listings",
+            metaDescription: listing.description?.slice(0, 155) || "",
+            category: "seo-landing",
+            published: false,
+            toolUrl: BASE_URL,
           });
         }
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
 
-      const dirList = DIRECTORIES.map((d) => `• [DA ${d.da}] ${d.name} (${d.cat}, ${d.traffic}) → ${d.url}`).join("\n");
+      const dirList = DIRECTORIES.map(
+        (d) => `• [DA ${d.da}] ${d.name} (${d.cat}, ${d.traffic}) → ${d.url}`,
+      ).join("\n");
 
       return NextResponse.json({
         summary: [
@@ -1963,19 +3018,50 @@ Return JSON:
     // ── STEP: Parasite SEO — publish on high-DA platforms ────────────────────
     if (stepId === "svivva-parasite") {
       const PLATFORMS = [
-        { name: "Dev.to",     url: "https://dev.to/new",            audience: "developers",            tone: "technical, code examples, practical" },
-        { name: "Hashnode",   url: "https://hashnode.com",           audience: "developers",            tone: "technical, tutorial-style, real examples" },
-        { name: "Medium",     url: "https://medium.com/new-story",  audience: "tech founders/PMs",     tone: "story-driven, problem-first, accessible" },
-        { name: "HackerNoon", url: "https://hackernoon.com/submit", audience: "hackers/builders",      tone: "contrarian, opinionated, data-backed" },
-        { name: "Substack",   url: "https://substack.com/new",      audience: "startup founders",      tone: "personal, behind-the-scenes, honest" },
+        {
+          name: "Dev.to",
+          url: "https://dev.to/new",
+          audience: "developers",
+          tone: "technical, code examples, practical",
+        },
+        {
+          name: "Hashnode",
+          url: "https://hashnode.com",
+          audience: "developers",
+          tone: "technical, tutorial-style, real examples",
+        },
+        {
+          name: "Medium",
+          url: "https://medium.com/new-story",
+          audience: "tech founders/PMs",
+          tone: "story-driven, problem-first, accessible",
+        },
+        {
+          name: "HackerNoon",
+          url: "https://hackernoon.com/submit",
+          audience: "hackers/builders",
+          tone: "contrarian, opinionated, data-backed",
+        },
+        {
+          name: "Substack",
+          url: "https://substack.com/new",
+          audience: "startup founders",
+          tone: "personal, behind-the-scenes, honest",
+        },
       ];
 
       const gen = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Expert content marketer who writes platform-native articles that rank on Google AND get featured by each publication's editors. Write 600-800 word articles that are genuinely useful, not promotional." },
-          { role: "user", content: `Write 5 unique articles about Svivva (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
+          {
+            role: "system",
+            content:
+              "Expert content marketer who writes platform-native articles that rank on Google AND get featured by each publication's editors. Write 600-800 word articles that are genuinely useful, not promotional.",
+          },
+          {
+            role: "user",
+            content: `Write 5 unique articles about Svivva (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
 
 Return JSON:
 {
@@ -2002,7 +3088,8 @@ Return JSON:
     "title": "What I learned building 50 AI APIs in 2 months",
     "content": "Full markdown, 650 words, personal story, lessons learned, Svivva mention authentic"
   }
-}` },
+}`,
+          },
         ],
       });
 
@@ -2011,7 +3098,11 @@ Return JSON:
       // Save each as a blog post
       const savedTitles: string[] = [];
       const platformKeys: Record<string, keyof typeof articles> = {
-        devto: "devto", hashnode: "hashnode", medium: "medium", hackernoon: "hackernoon", substack: "substack",
+        devto: "devto",
+        hashnode: "hashnode",
+        medium: "medium",
+        hackernoon: "hackernoon",
+        substack: "substack",
       };
 
       for (const platform of PLATFORMS) {
@@ -2022,7 +3113,8 @@ Return JSON:
           const slug = `${platform.name.toLowerCase().replace(/\s+/g, "-")}-${randomBytes(4).toString("hex")}`;
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
-            id, slug,
+            id,
+            slug,
             title: article.title || `Svivva on ${platform.name}`,
             excerpt: `Published on ${platform.name}: ${article.title}`,
             content: article.content,
@@ -2032,7 +3124,9 @@ Return JSON:
             published: false, // These are for copy-pasting to external platforms
           });
           savedTitles.push(`${platform.name}: "${article.title}"`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       const platformDetails = PLATFORMS.map((p, i) => {
@@ -2080,7 +3174,14 @@ Return JSON:
         "how to validate and enforce structured output from ai apis",
       ];
 
-      let aeoPages: { query: string; slug: string; title: string; metaTitle: string; metaDescription: string; content: string }[] = [];
+      let aeoPages: {
+        query: string;
+        slug: string;
+        title: string;
+        metaTitle: string;
+        metaDescription: string;
+        content: string;
+      }[] = [];
       let aeoGenError: string | null = null;
       try {
         const gen = await openai.chat.completions.create({
@@ -2128,8 +3229,14 @@ Return JSON:
       for (const page of pages) {
         if (!page.content || !page.slug) continue;
         try {
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, page.slug)).limit(1);
-          const finalSlug = ex.length ? `${page.slug}-${randomBytes(3).toString("hex")}` : page.slug;
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, page.slug))
+            .limit(1);
+          const finalSlug = ex.length
+            ? `${page.slug}-${randomBytes(3).toString("hex")}`
+            : page.slug;
           await db.insert(seoLandingPages).values({
             slug: finalSlug,
             title: page.title || page.query,
@@ -2140,10 +3247,14 @@ Return JSON:
             content: page.content,
             metaTitle: page.metaTitle || page.title || page.query,
             metaDescription: page.metaDescription || "",
-            category: "aeo", published: true, toolUrl: BASE_URL,
+            category: "aeo",
+            published: true,
+            toolUrl: BASE_URL,
           });
           created.push(`${BASE_URL}/${finalSlug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (created.length) await submitToIndexNow(userId, created);
@@ -2152,7 +3263,9 @@ Return JSON:
         summary: [
           aeoGenError ? `⚠ AI generation error: ${aeoGenError}` : null,
           `✓ ${created.length} AEO pages created — optimized for Perplexity, ChatGPT, Gemini`,
-          created.length === 0 && aeoGenError ? "Retry the step — transient AI API errors are common on large requests." : null,
+          created.length === 0 && aeoGenError
+            ? "Retry the step — transient AI API errors are common on large requests."
+            : null,
           created.length > 0 ? `✓ All pages submitted to IndexNow for immediate crawling` : null,
           "",
           "WHY AEO MATTERS RIGHT NOW:",
@@ -2171,7 +3284,9 @@ Return JSON:
           ...created.slice(0, 10).map((u) => `• ${u}`),
           "",
           "NEXT: Check Perplexity.ai and search your target queries in 2-4 weeks to see if Svivva appears in answers.",
-        ].filter(Boolean).join("\n"),
+        ]
+          .filter(Boolean)
+          .join("\n"),
         details: { created: created.length, queries: AEO_QUERIES.length },
       });
     }
@@ -2179,14 +3294,30 @@ Return JSON:
     // ── STEP: Community Strategy Pack ─────────────────────────────────────────
     if (stepId === "svivva-communities") {
       const SUBREDDITS = [
-        { name: "r/SideProject",      subscribers: "1.7M", tone: "builder-to-builder, genuine, show what you built" },
-        { name: "r/webdev",           subscribers: "1.4M", tone: "technical, practical, code or demo" },
-        { name: "r/artificial",       subscribers: "1.8M", tone: "AI enthusiast, what makes this different" },
-        { name: "r/nocode",           subscribers: "60K",  tone: "no-code audience, no coding required angle" },
-        { name: "r/entrepreneur",     subscribers: "1.1M", tone: "founder story, lesson learned, ROI" },
-        { name: "r/ChatGPT",          subscribers: "5M",   tone: "what you can build with AI, practical use" },
-        { name: "r/MachineLearning",  subscribers: "3M",   tone: "technical, mention schema enforcement + evals" },
-        { name: "r/SaaS",             subscribers: "120K", tone: "SaaS founder, growth and pricing strategy" },
+        {
+          name: "r/SideProject",
+          subscribers: "1.7M",
+          tone: "builder-to-builder, genuine, show what you built",
+        },
+        { name: "r/webdev", subscribers: "1.4M", tone: "technical, practical, code or demo" },
+        {
+          name: "r/artificial",
+          subscribers: "1.8M",
+          tone: "AI enthusiast, what makes this different",
+        },
+        {
+          name: "r/nocode",
+          subscribers: "60K",
+          tone: "no-code audience, no coding required angle",
+        },
+        { name: "r/entrepreneur", subscribers: "1.1M", tone: "founder story, lesson learned, ROI" },
+        { name: "r/ChatGPT", subscribers: "5M", tone: "what you can build with AI, practical use" },
+        {
+          name: "r/MachineLearning",
+          subscribers: "3M",
+          tone: "technical, mention schema enforcement + evals",
+        },
+        { name: "r/SaaS", subscribers: "120K", tone: "SaaS founder, growth and pricing strategy" },
       ];
 
       const gen = await openai.chat.completions.create({
@@ -2195,7 +3326,8 @@ Return JSON:
         messages: [
           {
             role: "system",
-            content: "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first, never spammy. Each post provides real value and only mentions the product naturally at the end or in context.",
+            content:
+              "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first, never spammy. Each post provides real value and only mentions the product naturally at the end or in context.",
           },
           {
             role: "user",
@@ -2283,27 +3415,145 @@ Return JSON:
     // ── STEP: PR, Newsletter & Podcast Outreach ───────────────────────────────
     if (stepId === "svivva-outreach") {
       const NEWSLETTERS = [
-        { name: "TLDR AI",           subscribers: "1.25M", editor: "Dan", url: "tldr.tech/ai",      contact: "ai@tldr.tech",            niche: "AI tools and startups" },
-        { name: "The Rundown AI",    subscribers: "700K",  editor: "Team", url: "therundown.ai",    contact: "hello@therundown.ai",     niche: "daily AI news and tools" },
-        { name: "Ben's Bites",       subscribers: "100K",  editor: "Ben", url: "bensbites.co",      contact: "ben@bensbites.co",        niche: "AI products and research" },
-        { name: "AI Tool Report",    subscribers: "300K",  editor: "Team", url: "aitoolreport.com", contact: "hello@aitoolreport.com",  niche: "new AI tools" },
-        { name: "Superhuman AI",     subscribers: "400K",  editor: "Zain", url: "superhuman.ai",    contact: "zain@superhuman.ai",      niche: "AI for productivity" },
-        { name: "JavaScript Weekly", subscribers: "200K",  editor: "Peter",url: "javascriptweekly.com", contact: "submit@javascriptweekly.com", niche: "JS/Node developer tools" },
-        { name: "Node Weekly",       subscribers: "100K",  editor: "Peter",url: "nodeweekly.com",    contact: "submit@nodeweekly.com",  niche: "Node.js tools" },
-        { name: "Bytes.dev",         subscribers: "300K",  editor: "Tyler",url: "bytes.dev",         contact: "tyler@bytes.dev",        niche: "developer news and tools" },
-        { name: "Morning Brew Tech", subscribers: "500K",  editor: "Team", url: "morningbrew.com",  contact: "editorial@morningbrew.com", niche: "tech news for builders" },
-        { name: "Product Hunt Digest", subscribers: "1M", editor: "Team", url: "producthunt.com",  contact: "hello@producthunt.com",   niche: "new products" },
+        {
+          name: "TLDR AI",
+          subscribers: "1.25M",
+          editor: "Dan",
+          url: "tldr.tech/ai",
+          contact: "ai@tldr.tech",
+          niche: "AI tools and startups",
+        },
+        {
+          name: "The Rundown AI",
+          subscribers: "700K",
+          editor: "Team",
+          url: "therundown.ai",
+          contact: "hello@therundown.ai",
+          niche: "daily AI news and tools",
+        },
+        {
+          name: "Ben's Bites",
+          subscribers: "100K",
+          editor: "Ben",
+          url: "bensbites.co",
+          contact: "ben@bensbites.co",
+          niche: "AI products and research",
+        },
+        {
+          name: "AI Tool Report",
+          subscribers: "300K",
+          editor: "Team",
+          url: "aitoolreport.com",
+          contact: "hello@aitoolreport.com",
+          niche: "new AI tools",
+        },
+        {
+          name: "Superhuman AI",
+          subscribers: "400K",
+          editor: "Zain",
+          url: "superhuman.ai",
+          contact: "zain@superhuman.ai",
+          niche: "AI for productivity",
+        },
+        {
+          name: "JavaScript Weekly",
+          subscribers: "200K",
+          editor: "Peter",
+          url: "javascriptweekly.com",
+          contact: "submit@javascriptweekly.com",
+          niche: "JS/Node developer tools",
+        },
+        {
+          name: "Node Weekly",
+          subscribers: "100K",
+          editor: "Peter",
+          url: "nodeweekly.com",
+          contact: "submit@nodeweekly.com",
+          niche: "Node.js tools",
+        },
+        {
+          name: "Bytes.dev",
+          subscribers: "300K",
+          editor: "Tyler",
+          url: "bytes.dev",
+          contact: "tyler@bytes.dev",
+          niche: "developer news and tools",
+        },
+        {
+          name: "Morning Brew Tech",
+          subscribers: "500K",
+          editor: "Team",
+          url: "morningbrew.com",
+          contact: "editorial@morningbrew.com",
+          niche: "tech news for builders",
+        },
+        {
+          name: "Product Hunt Digest",
+          subscribers: "1M",
+          editor: "Team",
+          url: "producthunt.com",
+          contact: "hello@producthunt.com",
+          niche: "new products",
+        },
       ];
 
       const PODCASTS = [
-        { name: "TWIML AI Podcast",     host: "Sam Charrington", listeners: "100K/ep", url: "twimlai.com",           niche: "applied ML and AI engineering" },
-        { name: "Practical AI",         host: "Daniel & Chris",  listeners: "30K/ep",  url: "changelog.com/practicalai", niche: "practical AI for developers" },
-        { name: "The Changelog",        host: "Adam & Jerod",    listeners: "50K/ep",  url: "changelog.com",         niche: "open source and developer tools" },
-        { name: "Software Engineering Daily", host: "Jeff Meyerson", listeners: "80K/ep", url: "softwareengineeringdaily.com", niche: "engineering and tools" },
-        { name: "Indie Hackers Podcast", host: "Courtland Allen", listeners: "40K/ep", url: "indiehackers.com/podcast", niche: "founders and bootstrapped startups" },
-        { name: "My First Million",     host: "Sam & Shaan",     listeners: "500K/ep", url: "mfmpod.com",            niche: "business ideas and trends" },
-        { name: "Developer Tea",        host: "Jonathan Cutrell", listeners: "20K/ep", url: "developertea.com",      niche: "developer productivity tools" },
-        { name: "Lenny's Podcast",      host: "Lenny Rachitsky",  listeners: "200K/ep", url: "lennyspodcast.com",    niche: "product and growth" },
+        {
+          name: "TWIML AI Podcast",
+          host: "Sam Charrington",
+          listeners: "100K/ep",
+          url: "twimlai.com",
+          niche: "applied ML and AI engineering",
+        },
+        {
+          name: "Practical AI",
+          host: "Daniel & Chris",
+          listeners: "30K/ep",
+          url: "changelog.com/practicalai",
+          niche: "practical AI for developers",
+        },
+        {
+          name: "The Changelog",
+          host: "Adam & Jerod",
+          listeners: "50K/ep",
+          url: "changelog.com",
+          niche: "open source and developer tools",
+        },
+        {
+          name: "Software Engineering Daily",
+          host: "Jeff Meyerson",
+          listeners: "80K/ep",
+          url: "softwareengineeringdaily.com",
+          niche: "engineering and tools",
+        },
+        {
+          name: "Indie Hackers Podcast",
+          host: "Courtland Allen",
+          listeners: "40K/ep",
+          url: "indiehackers.com/podcast",
+          niche: "founders and bootstrapped startups",
+        },
+        {
+          name: "My First Million",
+          host: "Sam & Shaan",
+          listeners: "500K/ep",
+          url: "mfmpod.com",
+          niche: "business ideas and trends",
+        },
+        {
+          name: "Developer Tea",
+          host: "Jonathan Cutrell",
+          listeners: "20K/ep",
+          url: "developertea.com",
+          niche: "developer productivity tools",
+        },
+        {
+          name: "Lenny's Podcast",
+          host: "Lenny Rachitsky",
+          listeners: "200K/ep",
+          url: "lennyspodcast.com",
+          niche: "product and growth",
+        },
       ];
 
       const gen = await openai.chat.completions.create({
@@ -2312,7 +3562,8 @@ Return JSON:
         messages: [
           {
             role: "system",
-            content: "PR professional and content strategist. Write pitches that editors and hosts actually respond to. Concise, specific, relevant to their audience, with a clear hook. No generic templates.",
+            content:
+              "PR professional and content strategist. Write pitches that editors and hosts actually respond to. Concise, specific, relevant to their audience, with a clear hook. No generic templates.",
           },
           {
             role: "user",
@@ -2358,20 +3609,28 @@ Return JSON:
           const id = randomBytes(12).toString("hex");
           const slug = `svivva-press-release-${randomBytes(4).toString("hex")}`;
           await db.insert(blogPosts).values({
-            id, slug,
+            id,
+            slug,
             title: "Svivva Press Release",
             excerpt: "Official press release for media distribution",
             content: outreach.press_release,
             metaTitle: "Svivva Press Release",
-            metaDescription: "Svivva launches AI API builder that turns natural language into production APIs",
+            metaDescription:
+              "Svivva launches AI API builder that turns natural language into production APIs",
             category: "press",
             published: false,
           });
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
-      const newsletterList = NEWSLETTERS.map((n) => `• ${n.name} (${n.subscribers}, ${n.url}) — contact: ${n.contact}`).join("\n");
-      const podcastList = PODCASTS.map((p) => `• ${p.name} w/${p.host} (${p.listeners}, ${p.url})`).join("\n");
+      const newsletterList = NEWSLETTERS.map(
+        (n) => `• ${n.name} (${n.subscribers}, ${n.url}) — contact: ${n.contact}`,
+      ).join("\n");
+      const podcastList = PODCASTS.map(
+        (p) => `• ${p.name} w/${p.host} (${p.listeners}, ${p.url})`,
+      ).join("\n");
 
       return NextResponse.json({
         summary: [
@@ -2409,8 +3668,13 @@ Return JSON:
         model: DEFAULT_MODEL,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: "Technical SEO expert specializing in structured data and featured snippets." },
-          { role: "user", content: `Generate Schema.org structured data and technical SEO assets for Svivva (AI API builder, URL: ${BASE_URL}).
+          {
+            role: "system",
+            content: "Technical SEO expert specializing in structured data and featured snippets.",
+          },
+          {
+            role: "user",
+            content: `Generate Schema.org structured data and technical SEO assets for Svivva (AI API builder, URL: ${BASE_URL}).
 
 Return JSON:
 {
@@ -2457,7 +3721,8 @@ Return JSON:
     "Add Open Graph image to every page (1200x630px)",
     "Submit to Google Search Console manually after IndexNow"
   ]
-}` },
+}`,
+          },
         ],
       });
 
@@ -2468,28 +3733,41 @@ Return JSON:
       if (schemaData.backlinkMagnet?.content) {
         try {
           const slug = schemaData.backlinkMagnet.slug || "best-ai-api-tools-2025";
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, slug))
+            .limit(1);
           const finalSlug = ex.length ? `${slug}-${randomBytes(3).toString("hex")}` : slug;
           await db.insert(seoLandingPages).values({
             slug: finalSlug,
             title: schemaData.backlinkMagnet.title || "Best AI API Tools 2025",
             keyword: "best ai api tools 2025",
             headline: schemaData.backlinkMagnet.title || "Top 30 AI API Tools",
-            howItWorks: "Comprehensive comparison of the best AI API building tools — updated quarterly",
+            howItWorks:
+              "Comprehensive comparison of the best AI API building tools — updated quarterly",
             whoItsFor: "Developers evaluating AI API tools and platforms",
             content: schemaData.backlinkMagnet.content,
             metaTitle: (schemaData.backlinkMagnet.title || "Best AI API Tools 2025").slice(0, 60),
             metaDescription: schemaData.backlinkMagnet.description?.slice(0, 155) || "",
-            category: "seo-landing", published: true, toolUrl: `${BASE_URL}/${finalSlug}`,
+            category: "seo-landing",
+            published: true,
+            toolUrl: `${BASE_URL}/${finalSlug}`,
           });
           pagesCreated.push(`${BASE_URL}/${finalSlug}`);
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       // Save changelog
       if (schemaData.changelog?.content) {
         try {
-          const ex = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, "changelog")).limit(1);
+          const ex = await db
+            .select({ id: seoLandingPages.id })
+            .from(seoLandingPages)
+            .where(eq(seoLandingPages.slug, "changelog"))
+            .limit(1);
           if (!ex.length) {
             await db.insert(seoLandingPages).values({
               slug: "changelog",
@@ -2500,17 +3778,24 @@ Return JSON:
               whoItsFor: "Existing Svivva users and developers evaluating the platform",
               content: schemaData.changelog.content,
               metaTitle: "Svivva Changelog — Latest Updates",
-              metaDescription: "See what's new in Svivva — latest features, improvements, and fixes",
-              category: "seo-landing", published: true, toolUrl: `${BASE_URL}/changelog`,
+              metaDescription:
+                "See what's new in Svivva — latest features, improvements, and fixes",
+              category: "seo-landing",
+              published: true,
+              toolUrl: `${BASE_URL}/changelog`,
             });
             pagesCreated.push(`${BASE_URL}/changelog`);
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       if (pagesCreated.length) await submitToIndexNow(userId, pagesCreated);
 
-      const techChecklist = (schemaData.technicalChecklist || []).map((item: string) => `☐ ${item}`).join("\n");
+      const techChecklist = (schemaData.technicalChecklist || [])
+        .map((item: string) => `☐ ${item}`)
+        .join("\n");
 
       return NextResponse.json({
         summary: [
@@ -2535,7 +3820,10 @@ Return JSON:
           ...pagesCreated.map((u) => `• ${u}`),
         ].join("\n"),
         details: {
-          schemas: { softwareApplication: schemaData.softwareApplication, faqSchema: schemaData.faqSchema },
+          schemas: {
+            softwareApplication: schemaData.softwareApplication,
+            faqSchema: schemaData.faqSchema,
+          },
           pagesCreated,
           checklist: schemaData.technicalChecklist,
         },
@@ -2555,7 +3843,11 @@ Return JSON:
         { tool: "Airtable", slug: "svivva-airtable-integration", kw: "airtable AI automation API" },
         { tool: "Discord", slug: "svivva-discord-integration", kw: "discord AI bot API" },
         { tool: "Twilio", slug: "svivva-twilio-integration", kw: "twilio AI SMS API" },
-        { tool: "Google Sheets", slug: "svivva-google-sheets-integration", kw: "google sheets AI API" },
+        {
+          tool: "Google Sheets",
+          slug: "svivva-google-sheets-integration",
+          kw: "google sheets AI API",
+        },
         { tool: "Salesforce", slug: "svivva-salesforce-integration", kw: "salesforce AI API CRM" },
         { tool: "Webflow", slug: "svivva-webflow-integration", kw: "webflow AI API no-code" },
         { tool: "Bubble", slug: "svivva-bubble-integration", kw: "bubble no-code AI API" },
@@ -2568,9 +3860,17 @@ Return JSON:
         { tool: "Python", slug: "svivva-python-integration", kw: "python AI API builder" },
         { tool: "Node.js", slug: "svivva-nodejs-integration", kw: "nodejs AI API backend" },
         { tool: "FastAPI", slug: "svivva-fastapi-integration", kw: "fastapi AI wrapper backend" },
-        { tool: "AWS Lambda", slug: "svivva-aws-lambda-integration", kw: "aws lambda AI API serverless" },
+        {
+          tool: "AWS Lambda",
+          slug: "svivva-aws-lambda-integration",
+          kw: "aws lambda AI API serverless",
+        },
         { tool: "MongoDB", slug: "svivva-mongodb-integration", kw: "mongodb AI API database" },
-        { tool: "PostgreSQL", slug: "svivva-postgresql-integration", kw: "postgresql AI API database" },
+        {
+          tool: "PostgreSQL",
+          slug: "svivva-postgresql-integration",
+          kw: "postgresql AI API database",
+        },
         { tool: "SendGrid", slug: "svivva-sendgrid-integration", kw: "sendgrid AI email API" },
         { tool: "WordPress", slug: "svivva-wordpress-integration", kw: "wordpress AI API plugin" },
         { tool: "Retool", slug: "svivva-retool-integration", kw: "retool AI API internal tools" },
@@ -2578,34 +3878,52 @@ Return JSON:
       ];
 
       // ── Parallel: check existing in one query, generate all concurrently ──────
-      const allSlugs = INTEGRATIONS.map(i => i.slug);
-      const existingRows = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(inArray(seoLandingPages.slug, allSlugs));
-      const existingSlugs = new Set(existingRows.map(r => r.slug));
-      const toCreate = INTEGRATIONS.filter(i => !existingSlugs.has(i.slug));
-      const skipped  = INTEGRATIONS.filter(i =>  existingSlugs.has(i.slug));
+      const allSlugs = INTEGRATIONS.map((i) => i.slug);
+      const existingRows = await db
+        .select({ slug: seoLandingPages.slug })
+        .from(seoLandingPages)
+        .where(inArray(seoLandingPages.slug, allSlugs));
+      const existingSlugs = new Set(existingRows.map((r) => r.slug));
+      const toCreate = INTEGRATIONS.filter((i) => !existingSlugs.has(i.slug));
+      const skipped = INTEGRATIONS.filter((i) => existingSlugs.has(i.slug));
 
-      const results = await Promise.allSettled(toCreate.map(async (integ) => {
-        const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: "You are a technical content writer for Svivva — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers." },
-            { role: "user", content: `Write an integration guide page for "Svivva + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why Svivva + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for Svivva free trial) }` },
-          ],
-        });
-        const d = JSON.parse(gen.choices[0].message.content || "{}");
-        await db.insert(seoLandingPages).values({
-          id: randomBytes(12).toString("hex"), slug: integ.slug,
-          title: d.title || `Svivva + ${integ.tool}`,
-          metaTitle: d.metaTitle || `Svivva + ${integ.tool} Integration`,
-          metaDescription: d.metaDescription || `Build AI-powered ${integ.tool} integrations with Svivva.`,
-          content: d.content || "", category: "integration", publishedAt: new Date(),
-        } as any);
-        return { title: d.title || `Svivva + ${integ.tool}`, url: `${BASE_URL}/${integ.slug}` };
-      }));
+      const results = await Promise.allSettled(
+        toCreate.map(async (integ) => {
+          const gen = await openai.chat.completions.create({
+            model: DEFAULT_MODEL,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a technical content writer for Svivva — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
+              },
+              {
+                role: "user",
+                content: `Write an integration guide page for "Svivva + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why Svivva + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for Svivva free trial) }`,
+              },
+            ],
+          });
+          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          await db.insert(seoLandingPages).values({
+            id: randomBytes(12).toString("hex"),
+            slug: integ.slug,
+            title: d.title || `Svivva + ${integ.tool}`,
+            metaTitle: d.metaTitle || `Svivva + ${integ.tool} Integration`,
+            metaDescription:
+              d.metaDescription || `Build AI-powered ${integ.tool} integrations with Svivva.`,
+            content: d.content || "",
+            category: "integration",
+            publishedAt: new Date(),
+          } as any);
+          return { title: d.title || `Svivva + ${integ.tool}`, url: `${BASE_URL}/${integ.slug}` };
+        }),
+      );
 
-      const created = results.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<{title:string;url:string}>).value);
-      const newUrls = created.map(c => c.url);
+      const created = results
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
+      const newUrls = created.map((c) => c.url);
       if (newUrls.length) submitToIndexNow(userId, newUrls).catch(() => {});
       return NextResponse.json({
         summary: [
@@ -2614,8 +3932,10 @@ Return JSON:
           `✓ Targeting "svivva + [tool]" and "[tool] AI API" searches`,
           "",
           "PAGES CREATED:",
-          ...created.map(c => `• ${c.title}`),
-          skipped.length ? `\nALREADY EXISTED (skipped): ${skipped.map(i => i.tool).join(", ")}` : "",
+          ...created.map((c) => `• ${c.title}`),
+          skipped.length
+            ? `\nALREADY EXISTED (skipped): ${skipped.map((i) => i.tool).join(", ")}`
+            : "",
         ].join("\n"),
         details: { created: created.length, skipped: skipped.length },
       });
@@ -2627,13 +3947,29 @@ Return JSON:
         { name: "Healthcare", slug: "ai-api-for-healthcare", kw: "AI API healthcare applications" },
         { name: "Fintech", slug: "ai-api-for-fintech", kw: "AI API fintech applications" },
         { name: "E-commerce", slug: "ai-api-for-ecommerce", kw: "AI API ecommerce automation" },
-        { name: "Legal Tech", slug: "ai-api-for-legal-tech", kw: "AI API legal document automation" },
+        {
+          name: "Legal Tech",
+          slug: "ai-api-for-legal-tech",
+          kw: "AI API legal document automation",
+        },
         { name: "Education", slug: "ai-api-for-education", kw: "AI API edtech applications" },
-        { name: "Real Estate", slug: "ai-api-for-real-estate", kw: "AI API real estate applications" },
+        {
+          name: "Real Estate",
+          slug: "ai-api-for-real-estate",
+          kw: "AI API real estate applications",
+        },
         { name: "HR Tech", slug: "ai-api-for-hr-tech", kw: "AI API HR recruitment automation" },
         { name: "Marketing", slug: "ai-api-for-marketing", kw: "AI API marketing automation" },
-        { name: "Customer Support", slug: "ai-api-for-customer-support", kw: "AI API customer support chatbot" },
-        { name: "Cybersecurity", slug: "ai-api-for-cybersecurity", kw: "AI API security threat detection" },
+        {
+          name: "Customer Support",
+          slug: "ai-api-for-customer-support",
+          kw: "AI API customer support chatbot",
+        },
+        {
+          name: "Cybersecurity",
+          slug: "ai-api-for-cybersecurity",
+          kw: "AI API security threat detection",
+        },
         { name: "Media", slug: "ai-api-for-media", kw: "AI API content media automation" },
         { name: "Logistics", slug: "ai-api-for-logistics", kw: "AI API logistics supply chain" },
         { name: "Insurance", slug: "ai-api-for-insurance", kw: "AI API insurance underwriting" },
@@ -2643,37 +3979,63 @@ Return JSON:
         { name: "Gaming", slug: "ai-api-for-gaming", kw: "AI API game development NPC" },
         { name: "Travel", slug: "ai-api-for-travel", kw: "AI API travel hospitality" },
         { name: "Nonprofits", slug: "ai-api-for-nonprofits", kw: "AI API nonprofit automation" },
-        { name: "Government", slug: "ai-api-for-government", kw: "AI API government public services" },
+        {
+          name: "Government",
+          slug: "ai-api-for-government",
+          kw: "AI API government public services",
+        },
       ];
 
-      const indSlugs = INDUSTRIES.map(i => i.slug);
-      const indExisting = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(inArray(seoLandingPages.slug, indSlugs));
-      const indExistingSlugs = new Set(indExisting.map(r => r.slug));
-      const indToCreate = INDUSTRIES.filter(i => !indExistingSlugs.has(i.slug));
-      const indSkipped  = INDUSTRIES.filter(i =>  indExistingSlugs.has(i.slug));
+      const indSlugs = INDUSTRIES.map((i) => i.slug);
+      const indExisting = await db
+        .select({ slug: seoLandingPages.slug })
+        .from(seoLandingPages)
+        .where(inArray(seoLandingPages.slug, indSlugs));
+      const indExistingSlugs = new Set(indExisting.map((r) => r.slug));
+      const indToCreate = INDUSTRIES.filter((i) => !indExistingSlugs.has(i.slug));
+      const indSkipped = INDUSTRIES.filter((i) => indExistingSlugs.has(i.slug));
 
-      const indResults = await Promise.allSettled(indToCreate.map(async (ind) => {
-        const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: "You write industry-specific AI use case pages for Svivva — an AI API builder SaaS. Write for decision-makers in each industry, not just developers." },
-            { role: "user", content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with Svivva", CTA) }` },
-          ],
-        });
-        const d = JSON.parse(gen.choices[0].message.content || "{}");
-        await db.insert(seoLandingPages).values({
-          id: randomBytes(12).toString("hex"), slug: ind.slug,
-          title: d.title || `AI API for ${ind.name}`,
-          metaTitle: d.metaTitle || `AI API for ${ind.name} | Svivva`,
-          metaDescription: d.metaDescription || `Build AI-powered ${ind.name} applications with Svivva.`,
-          content: d.content || "", category: "usecase", publishedAt: new Date(),
-        } as any);
-        return { title: d.title || `AI API for ${ind.name}`, url: `${BASE_URL}/${ind.slug}` };
-      }));
+      const indResults = await Promise.allSettled(
+        indToCreate.map(async (ind) => {
+          const gen = await openai.chat.completions.create({
+            model: DEFAULT_MODEL,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You write industry-specific AI use case pages for Svivva — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
+              },
+              {
+                role: "user",
+                content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with Svivva", CTA) }`,
+              },
+            ],
+          });
+          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          await db.insert(seoLandingPages).values({
+            id: randomBytes(12).toString("hex"),
+            slug: ind.slug,
+            title: d.title || `AI API for ${ind.name}`,
+            metaTitle: d.metaTitle || `AI API for ${ind.name} | Svivva`,
+            metaDescription:
+              d.metaDescription || `Build AI-powered ${ind.name} applications with Svivva.`,
+            content: d.content || "",
+            category: "usecase",
+            publishedAt: new Date(),
+          } as any);
+          return { title: d.title || `AI API for ${ind.name}`, url: `${BASE_URL}/${ind.slug}` };
+        }),
+      );
 
-      const indCreated = indResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<{title:string;url:string}>).value);
-      if (indCreated.length) submitToIndexNow(userId, indCreated.map(c => c.url)).catch(() => {});
+      const indCreated = indResults
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
+      if (indCreated.length)
+        submitToIndexNow(
+          userId,
+          indCreated.map((c) => c.url),
+        ).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${indCreated.length} industry use case pages created (${indSkipped.length} already existed)`,
@@ -2681,7 +4043,9 @@ Return JSON:
           `✓ Targets industry decision-makers searching for AI solutions`,
           "",
           "INDUSTRIES COVERED:",
-          ...INDUSTRIES.map(i => `• ${i.name}${indExistingSlugs.has(i.slug) ? " (existing)" : ""}`),
+          ...INDUSTRIES.map(
+            (i) => `• ${i.name}${indExistingSlugs.has(i.slug) ? " (existing)" : ""}`,
+          ),
         ].join("\n"),
         details: { created: indCreated.length, skipped: indSkipped.length },
       });
@@ -2690,61 +4054,178 @@ Return JSON:
     // ── STEP: API Template Library ────────────────────────────────────────────
     if (stepId === "svivva-templates") {
       const TEMPLATES = [
-        { name: "Sentiment Analysis API", slug: "sentiment-analysis-api-template", kw: "sentiment analysis API tutorial" },
-        { name: "Text Summarizer API", slug: "text-summarizer-api-template", kw: "text summarization API builder" },
-        { name: "Email Classifier API", slug: "email-classifier-api-template", kw: "email classification AI API" },
+        {
+          name: "Sentiment Analysis API",
+          slug: "sentiment-analysis-api-template",
+          kw: "sentiment analysis API tutorial",
+        },
+        {
+          name: "Text Summarizer API",
+          slug: "text-summarizer-api-template",
+          kw: "text summarization API builder",
+        },
+        {
+          name: "Email Classifier API",
+          slug: "email-classifier-api-template",
+          kw: "email classification AI API",
+        },
         { name: "Lead Scoring API", slug: "lead-scoring-api-template", kw: "AI lead scoring API" },
-        { name: "Content Moderation API", slug: "content-moderation-api-template", kw: "content moderation AI API" },
-        { name: "Language Translator API", slug: "language-translator-api-template", kw: "language translation AI API" },
-        { name: "Question Answering API", slug: "question-answering-api-template", kw: "question answering AI API" },
-        { name: "Data Extractor API", slug: "data-extractor-api-template", kw: "AI data extraction API builder" },
-        { name: "Customer Support Bot API", slug: "customer-support-bot-api-template", kw: "customer support chatbot API" },
-        { name: "Invoice Parser API", slug: "invoice-parser-api-template", kw: "AI invoice parsing API" },
-        { name: "Resume Parser API", slug: "resume-parser-api-template", kw: "AI resume parser API" },
-        { name: "Product Description API", slug: "product-description-api-template", kw: "AI product description generator API" },
-        { name: "Meeting Notes API", slug: "meeting-notes-api-template", kw: "AI meeting notes summarizer API" },
-        { name: "Code Review API", slug: "code-review-api-template", kw: "AI code review API builder" },
-        { name: "FAQ Generator API", slug: "faq-generator-api-template", kw: "AI FAQ generator API" },
-        { name: "Review Summarizer API", slug: "review-summarizer-api-template", kw: "AI review summarizer API" },
-        { name: "Contract Analyzer API", slug: "contract-analyzer-api-template", kw: "AI contract analysis API" },
-        { name: "Job Description API", slug: "job-description-api-template", kw: "AI job description generator API" },
-        { name: "SEO Content API", slug: "seo-content-generator-api-template", kw: "AI SEO content generator API" },
-        { name: "Chatbot API", slug: "chatbot-api-template", kw: "AI chatbot API builder tutorial" },
-        { name: "SQL Generator API", slug: "sql-generator-api-template", kw: "AI SQL query generator API" },
-        { name: "Social Media Post API", slug: "social-media-post-api-template", kw: "AI social media generator API" },
-        { name: "News Classifier API", slug: "news-classifier-api-template", kw: "AI news article classifier API" },
-        { name: "Price Predictor API", slug: "price-predictor-api-template", kw: "AI price prediction API builder" },
-        { name: "Feedback Analyzer API", slug: "feedback-analyzer-api-template", kw: "customer feedback AI analysis API" },
+        {
+          name: "Content Moderation API",
+          slug: "content-moderation-api-template",
+          kw: "content moderation AI API",
+        },
+        {
+          name: "Language Translator API",
+          slug: "language-translator-api-template",
+          kw: "language translation AI API",
+        },
+        {
+          name: "Question Answering API",
+          slug: "question-answering-api-template",
+          kw: "question answering AI API",
+        },
+        {
+          name: "Data Extractor API",
+          slug: "data-extractor-api-template",
+          kw: "AI data extraction API builder",
+        },
+        {
+          name: "Customer Support Bot API",
+          slug: "customer-support-bot-api-template",
+          kw: "customer support chatbot API",
+        },
+        {
+          name: "Invoice Parser API",
+          slug: "invoice-parser-api-template",
+          kw: "AI invoice parsing API",
+        },
+        {
+          name: "Resume Parser API",
+          slug: "resume-parser-api-template",
+          kw: "AI resume parser API",
+        },
+        {
+          name: "Product Description API",
+          slug: "product-description-api-template",
+          kw: "AI product description generator API",
+        },
+        {
+          name: "Meeting Notes API",
+          slug: "meeting-notes-api-template",
+          kw: "AI meeting notes summarizer API",
+        },
+        {
+          name: "Code Review API",
+          slug: "code-review-api-template",
+          kw: "AI code review API builder",
+        },
+        {
+          name: "FAQ Generator API",
+          slug: "faq-generator-api-template",
+          kw: "AI FAQ generator API",
+        },
+        {
+          name: "Review Summarizer API",
+          slug: "review-summarizer-api-template",
+          kw: "AI review summarizer API",
+        },
+        {
+          name: "Contract Analyzer API",
+          slug: "contract-analyzer-api-template",
+          kw: "AI contract analysis API",
+        },
+        {
+          name: "Job Description API",
+          slug: "job-description-api-template",
+          kw: "AI job description generator API",
+        },
+        {
+          name: "SEO Content API",
+          slug: "seo-content-generator-api-template",
+          kw: "AI SEO content generator API",
+        },
+        {
+          name: "Chatbot API",
+          slug: "chatbot-api-template",
+          kw: "AI chatbot API builder tutorial",
+        },
+        {
+          name: "SQL Generator API",
+          slug: "sql-generator-api-template",
+          kw: "AI SQL query generator API",
+        },
+        {
+          name: "Social Media Post API",
+          slug: "social-media-post-api-template",
+          kw: "AI social media generator API",
+        },
+        {
+          name: "News Classifier API",
+          slug: "news-classifier-api-template",
+          kw: "AI news article classifier API",
+        },
+        {
+          name: "Price Predictor API",
+          slug: "price-predictor-api-template",
+          kw: "AI price prediction API builder",
+        },
+        {
+          name: "Feedback Analyzer API",
+          slug: "feedback-analyzer-api-template",
+          kw: "customer feedback AI analysis API",
+        },
       ];
 
-      const tmplSlugs = TEMPLATES.map(t => t.slug);
-      const tmplExisting = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(inArray(seoLandingPages.slug, tmplSlugs));
-      const tmplExistingSlugs = new Set(tmplExisting.map(r => r.slug));
-      const tmplToCreate = TEMPLATES.filter(t => !tmplExistingSlugs.has(t.slug));
-      const tmplSkipped  = TEMPLATES.filter(t =>  tmplExistingSlugs.has(t.slug));
+      const tmplSlugs = TEMPLATES.map((t) => t.slug);
+      const tmplExisting = await db
+        .select({ slug: seoLandingPages.slug })
+        .from(seoLandingPages)
+        .where(inArray(seoLandingPages.slug, tmplSlugs));
+      const tmplExistingSlugs = new Set(tmplExisting.map((r) => r.slug));
+      const tmplToCreate = TEMPLATES.filter((t) => !tmplExistingSlugs.has(t.slug));
+      const tmplSkipped = TEMPLATES.filter((t) => tmplExistingSlugs.has(t.slug));
 
-      const tmplResults = await Promise.allSettled(tmplToCreate.map(async (tmpl) => {
-        const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: "You write developer-focused API template guide pages for Svivva — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly." },
-            { role: "user", content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with Svivva", H2 "Common Customizations", CTA to try Svivva free) }` },
-          ],
-        });
-        const d = JSON.parse(gen.choices[0].message.content || "{}");
-        await db.insert(seoLandingPages).values({
-          id: randomBytes(12).toString("hex"), slug: tmpl.slug,
-          title: d.title || tmpl.name,
-          metaTitle: d.metaTitle || `${tmpl.name} | Svivva Templates`,
-          metaDescription: d.metaDescription || `Build a ${tmpl.name} with Svivva in minutes.`,
-          content: d.content || "", category: "template", publishedAt: new Date(),
-        } as any);
-        return { title: d.title || tmpl.name, url: `${BASE_URL}/${tmpl.slug}` };
-      }));
+      const tmplResults = await Promise.allSettled(
+        tmplToCreate.map(async (tmpl) => {
+          const gen = await openai.chat.completions.create({
+            model: DEFAULT_MODEL,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You write developer-focused API template guide pages for Svivva — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
+              },
+              {
+                role: "user",
+                content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with Svivva", H2 "Common Customizations", CTA to try Svivva free) }`,
+              },
+            ],
+          });
+          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          await db.insert(seoLandingPages).values({
+            id: randomBytes(12).toString("hex"),
+            slug: tmpl.slug,
+            title: d.title || tmpl.name,
+            metaTitle: d.metaTitle || `${tmpl.name} | Svivva Templates`,
+            metaDescription: d.metaDescription || `Build a ${tmpl.name} with Svivva in minutes.`,
+            content: d.content || "",
+            category: "template",
+            publishedAt: new Date(),
+          } as any);
+          return { title: d.title || tmpl.name, url: `${BASE_URL}/${tmpl.slug}` };
+        }),
+      );
 
-      const tmplCreated = tmplResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<{title:string;url:string}>).value);
-      if (tmplCreated.length) submitToIndexNow(userId, tmplCreated.map(c => c.url)).catch(() => {});
+      const tmplCreated = tmplResults
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
+      if (tmplCreated.length)
+        submitToIndexNow(
+          userId,
+          tmplCreated.map((c) => c.url),
+        ).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${tmplCreated.length} API template pages created (${tmplSkipped.length} already existed)`,
@@ -2753,7 +4234,9 @@ Return JSON:
           `✓ Includes working code examples — builds trust and drives signups`,
           "",
           "TEMPLATES CREATED:",
-          ...TEMPLATES.map(t => `• ${t.name}${tmplExistingSlugs.has(t.slug) ? " (existing)" : ""}`),
+          ...TEMPLATES.map(
+            (t) => `• ${t.name}${tmplExistingSlugs.has(t.slug) ? " (existing)" : ""}`,
+          ),
         ].join("\n"),
         details: { created: tmplCreated.length, skipped: tmplSkipped.length },
       });
@@ -2766,54 +4249,81 @@ Return JSON:
         { q: "How much does it cost to build an AI API?", slug: "how-much-does-ai-api-cost" },
         { q: "Can you build an AI API without coding?", slug: "build-ai-api-without-coding" },
         { q: "How do I add AI to my existing app?", slug: "how-to-add-ai-to-existing-app" },
-        { q: "What is the fastest way to build an AI product?", slug: "fastest-way-to-build-ai-product" },
+        {
+          q: "What is the fastest way to build an AI product?",
+          slug: "fastest-way-to-build-ai-product",
+        },
         { q: "How do I monetize an AI API?", slug: "how-to-monetize-ai-api" },
         { q: "How do I get consistent JSON output from AI?", slug: "get-consistent-json-from-ai" },
         { q: "What is schema enforcement in AI APIs?", slug: "what-is-schema-enforcement-ai-api" },
         { q: "How long does it take to build an AI API?", slug: "how-long-to-build-ai-api" },
         { q: "Is there a free AI API builder?", slug: "free-ai-api-builder" },
         { q: "How do I reduce OpenAI API costs in production?", slug: "reduce-openai-api-costs" },
-        { q: "What is the difference between GPT-4 and Claude for APIs?", slug: "gpt4-vs-claude-for-api" },
-        { q: "How do I secure an AI API from prompt injection?", slug: "secure-ai-api-prompt-injection" },
+        {
+          q: "What is the difference between GPT-4 and Claude for APIs?",
+          slug: "gpt4-vs-claude-for-api",
+        },
+        {
+          q: "How do I secure an AI API from prompt injection?",
+          slug: "secure-ai-api-prompt-injection",
+        },
         { q: "Can I build a SaaS app using an AI API?", slug: "build-saas-with-ai-api" },
         { q: "How do I test an AI API before deploying?", slug: "how-to-test-ai-api" },
       ];
 
-      const paaSlugs = PAA_QUESTIONS.map(p => p.slug);
-      const paaExisting = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(inArray(seoLandingPages.slug, paaSlugs));
-      const paaExistingSlugs = new Set(paaExisting.map(r => r.slug));
-      const paaToCreate = PAA_QUESTIONS.filter(p => !paaExistingSlugs.has(p.slug));
-      const paaSkipped  = PAA_QUESTIONS.filter(p =>  paaExistingSlugs.has(p.slug));
+      const paaSlugs = PAA_QUESTIONS.map((p) => p.slug);
+      const paaExisting = await db
+        .select({ slug: seoLandingPages.slug })
+        .from(seoLandingPages)
+        .where(inArray(seoLandingPages.slug, paaSlugs));
+      const paaExistingSlugs = new Set(paaExisting.map((r) => r.slug));
+      const paaToCreate = PAA_QUESTIONS.filter((p) => !paaExistingSlugs.has(p.slug));
+      const paaSkipped = PAA_QUESTIONS.filter((p) => paaExistingSlugs.has(p.slug));
 
-      const paaResults = await Promise.allSettled(paaToCreate.map(async (paa) => {
-        const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: `You write Answer Engine Optimized (AEO) content for Google's "People Also Ask" boxes AND AI search engines (Perplexity, ChatGPT, Gemini). Rules:
+      const paaResults = await Promise.allSettled(
+        paaToCreate.map(async (paa) => {
+          const gen = await openai.chat.completions.create({
+            model: DEFAULT_MODEL,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content: `You write Answer Engine Optimized (AEO) content for Google's "People Also Ask" boxes AND AI search engines (Perplexity, ChatGPT, Gemini). Rules:
 1. Start with a direct 2-3 sentence answer in the FIRST paragraph — this is what Google and Perplexity show
 2. Be factual, specific, and cite concrete numbers where possible
 3. Use H2/H3 subheadings for supporting sections
 4. Mention Svivva naturally in the answer as one solution
 5. No marketing fluff — write like an expert answering on Quora`,
-            },
-            { role: "user", content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | Svivva", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention Svivva as a tool that helps) }` },
-          ],
-        });
-        const d = JSON.parse(gen.choices[0].message.content || "{}");
-        await db.insert(seoLandingPages).values({
-          id: randomBytes(12).toString("hex"), slug: paa.slug,
-          title: d.title || paa.q, metaTitle: d.metaTitle || paa.q,
-          metaDescription: d.metaDescription || "", content: d.content || "",
-          category: "paa", publishedAt: new Date(),
-        } as any);
-        return { title: paa.q, url: `${BASE_URL}/${paa.slug}` };
-      }));
+              },
+              {
+                role: "user",
+                content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | Svivva", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention Svivva as a tool that helps) }`,
+              },
+            ],
+          });
+          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          await db.insert(seoLandingPages).values({
+            id: randomBytes(12).toString("hex"),
+            slug: paa.slug,
+            title: d.title || paa.q,
+            metaTitle: d.metaTitle || paa.q,
+            metaDescription: d.metaDescription || "",
+            content: d.content || "",
+            category: "paa",
+            publishedAt: new Date(),
+          } as any);
+          return { title: paa.q, url: `${BASE_URL}/${paa.slug}` };
+        }),
+      );
 
-      const paaCreated = paaResults.filter(r => r.status === "fulfilled").map(r => (r as PromiseFulfilledResult<{title:string;url:string}>).value);
-      if (paaCreated.length) submitToIndexNow(userId, paaCreated.map(c => c.url)).catch(() => {});
+      const paaCreated = paaResults
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
+      if (paaCreated.length)
+        submitToIndexNow(
+          userId,
+          paaCreated.map((c) => c.url),
+        ).catch(() => {});
       return NextResponse.json({
         summary: [
           `✓ ${paaCreated.length} PAA pages created (${paaSkipped.length} already existed)`,
@@ -2823,7 +4333,9 @@ Return JSON:
           `✓ Also optimized for Perplexity/ChatGPT/Gemini citations`,
           "",
           "QUESTIONS TARGETED:",
-          ...PAA_QUESTIONS.map(p => `• ${p.q}${paaExistingSlugs.has(p.slug) ? " (existing)" : ""}`),
+          ...PAA_QUESTIONS.map(
+            (p) => `• ${p.q}${paaExistingSlugs.has(p.slug) ? " (existing)" : ""}`,
+          ),
         ].join("\n"),
         details: { created: paaCreated.length, skipped: paaSkipped.length },
       });

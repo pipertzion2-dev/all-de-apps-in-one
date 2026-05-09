@@ -5,14 +5,17 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
 }
 
-type ScenePreset = 'hero' | 'features' | 'howItWorks' | 'evals' | 'pricing' | 'checkout';
+type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout";
 
 interface PresetConfig {
   flowerCount: number;
@@ -132,17 +135,17 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
 
 // Svivva brand colors from reference art
 const VIVVA_COLORS = {
-  teal: new THREE.Color(0x5B7FAA),      // Steel blue (from ref background)
-  tealLight: new THREE.Color(0x6B9B58), // Vivid leaf green
-  tealDark: new THREE.Color(0x3A5A30),  // Deep forest green
-  burgundy: new THREE.Color(0x8B1830),  // Rich crimson red
-  burgundyLight: new THREE.Color(0x8B5EA0), // Medium purple/violet
-  maroon: new THREE.Color(0x7A4530),    // Warm brown/umber
-  dustyPink: new THREE.Color(0xD8A0B8), // Dusty rose pink
-  paleRose: new THREE.Color(0xE8C0D0),  // Pale blush
-  mint: new THREE.Color(0x90B858),      // Yellow-green (from ref leaves)
-  lavender: new THREE.Color(0x9580C0),  // True lavender-purple
-  cream: new THREE.Color(0xC8B898),     // Warm sand/beige
+  teal: new THREE.Color(0x5b7faa), // Steel blue (from ref background)
+  tealLight: new THREE.Color(0x6b9b58), // Vivid leaf green
+  tealDark: new THREE.Color(0x3a5a30), // Deep forest green
+  burgundy: new THREE.Color(0x8b1830), // Rich crimson red
+  burgundyLight: new THREE.Color(0x8b5ea0), // Medium purple/violet
+  maroon: new THREE.Color(0x7a4530), // Warm brown/umber
+  dustyPink: new THREE.Color(0xd8a0b8), // Dusty rose pink
+  paleRose: new THREE.Color(0xe8c0d0), // Pale blush
+  mint: new THREE.Color(0x90b858), // Yellow-green (from ref leaves)
+  lavender: new THREE.Color(0x9580c0), // True lavender-purple
+  cream: new THREE.Color(0xc8b898), // Warm sand/beige
 };
 
 const WATER_VERTEX_SHADER = `
@@ -258,12 +261,12 @@ const CRT_FRAGMENT_SHADER = `
   }
 `;
 
-type FlowerType = 'tulip' | 'lily' | 'orchid' | 'rose' | 'lotus' | 'dahlia';
+type FlowerType = "tulip" | "lily" | "orchid" | "rose" | "lotus" | "dahlia";
 
 interface FlowerConfig {
   type: FlowerType;
   petalCount: number;
-  petalShape: 'pointed' | 'rounded' | 'curved' | 'layered' | 'star' | 'teardrop';
+  petalShape: "pointed" | "rounded" | "curved" | "layered" | "star" | "teardrop";
   colors: THREE.Color[];
   scale: number;
   petalWidth: number;
@@ -272,68 +275,251 @@ interface FlowerConfig {
 }
 
 const FLOWER_CONFIGS: FlowerConfig[] = [
-  { type: 'tulip', petalCount: 5, petalShape: 'pointed', colors: [VIVVA_COLORS.dustyPink, VIVVA_COLORS.paleRose, VIVVA_COLORS.lavender], scale: 1.4, petalWidth: 0.32, petalLength: 0.8, openAngle: 0.65 },
-  { type: 'lily', petalCount: 6, petalShape: 'curved', colors: [VIVVA_COLORS.mint, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream], scale: 1.5, petalWidth: 0.24, petalLength: 0.9, openAngle: 0.5 },
-  { type: 'orchid', petalCount: 5, petalShape: 'teardrop', colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.paleRose], scale: 1.3, petalWidth: 0.4, petalLength: 0.7, openAngle: 0.55 },
-  { type: 'rose', petalCount: 10, petalShape: 'layered', colors: [VIVVA_COLORS.paleRose, VIVVA_COLORS.dustyPink, VIVVA_COLORS.maroon], scale: 1.1, petalWidth: 0.28, petalLength: 0.45, openAngle: 0.4 },
-  { type: 'lotus', petalCount: 8, petalShape: 'rounded', colors: [VIVVA_COLORS.tealLight, VIVVA_COLORS.mint, VIVVA_COLORS.teal], scale: 1.4, petalWidth: 0.32, petalLength: 0.7, openAngle: 0.45 },
-  { type: 'dahlia', petalCount: 12, petalShape: 'star', colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.lavender], scale: 1.0, petalWidth: 0.15, petalLength: 0.55, openAngle: 0.35 },
+  {
+    type: "tulip",
+    petalCount: 5,
+    petalShape: "pointed",
+    colors: [VIVVA_COLORS.dustyPink, VIVVA_COLORS.paleRose, VIVVA_COLORS.lavender],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.8,
+    openAngle: 0.65,
+  },
+  {
+    type: "lily",
+    petalCount: 6,
+    petalShape: "curved",
+    colors: [VIVVA_COLORS.mint, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream],
+    scale: 1.5,
+    petalWidth: 0.24,
+    petalLength: 0.9,
+    openAngle: 0.5,
+  },
+  {
+    type: "orchid",
+    petalCount: 5,
+    petalShape: "teardrop",
+    colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.paleRose],
+    scale: 1.3,
+    petalWidth: 0.4,
+    petalLength: 0.7,
+    openAngle: 0.55,
+  },
+  {
+    type: "rose",
+    petalCount: 10,
+    petalShape: "layered",
+    colors: [VIVVA_COLORS.paleRose, VIVVA_COLORS.dustyPink, VIVVA_COLORS.maroon],
+    scale: 1.1,
+    petalWidth: 0.28,
+    petalLength: 0.45,
+    openAngle: 0.4,
+  },
+  {
+    type: "lotus",
+    petalCount: 8,
+    petalShape: "rounded",
+    colors: [VIVVA_COLORS.tealLight, VIVVA_COLORS.mint, VIVVA_COLORS.teal],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.7,
+    openAngle: 0.45,
+  },
+  {
+    type: "dahlia",
+    petalCount: 12,
+    petalShape: "star",
+    colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.lavender],
+    scale: 1.0,
+    petalWidth: 0.15,
+    petalLength: 0.55,
+    openAngle: 0.35,
+  },
 ];
 
 const INTRO_FLOWER_CONFIGS: FlowerConfig[] = [
-  { type: 'tulip', petalCount: 5, petalShape: 'pointed', colors: [VIVVA_COLORS.cream, VIVVA_COLORS.paleRose, VIVVA_COLORS.mint], scale: 1.4, petalWidth: 0.32, petalLength: 0.8, openAngle: 0.65 },
-  { type: 'lily', petalCount: 6, petalShape: 'curved', colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.maroon, VIVVA_COLORS.cream], scale: 1.5, petalWidth: 0.24, petalLength: 0.9, openAngle: 0.5 },
-  { type: 'orchid', petalCount: 5, petalShape: 'teardrop', colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.teal, VIVVA_COLORS.cream], scale: 1.3, petalWidth: 0.4, petalLength: 0.7, openAngle: 0.55 },
-  { type: 'rose', petalCount: 10, petalShape: 'layered', colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.maroon, VIVVA_COLORS.dustyPink], scale: 1.1, petalWidth: 0.28, petalLength: 0.45, openAngle: 0.4 },
-  { type: 'lotus', petalCount: 8, petalShape: 'rounded', colors: [VIVVA_COLORS.teal, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream], scale: 1.4, petalWidth: 0.32, petalLength: 0.7, openAngle: 0.45 },
-  { type: 'dahlia', petalCount: 12, petalShape: 'star', colors: [VIVVA_COLORS.maroon, VIVVA_COLORS.burgundy, VIVVA_COLORS.tealLight], scale: 1.0, petalWidth: 0.15, petalLength: 0.55, openAngle: 0.35 },
+  {
+    type: "tulip",
+    petalCount: 5,
+    petalShape: "pointed",
+    colors: [VIVVA_COLORS.cream, VIVVA_COLORS.paleRose, VIVVA_COLORS.mint],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.8,
+    openAngle: 0.65,
+  },
+  {
+    type: "lily",
+    petalCount: 6,
+    petalShape: "curved",
+    colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.maroon, VIVVA_COLORS.cream],
+    scale: 1.5,
+    petalWidth: 0.24,
+    petalLength: 0.9,
+    openAngle: 0.5,
+  },
+  {
+    type: "orchid",
+    petalCount: 5,
+    petalShape: "teardrop",
+    colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.teal, VIVVA_COLORS.cream],
+    scale: 1.3,
+    petalWidth: 0.4,
+    petalLength: 0.7,
+    openAngle: 0.55,
+  },
+  {
+    type: "rose",
+    petalCount: 10,
+    petalShape: "layered",
+    colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.maroon, VIVVA_COLORS.dustyPink],
+    scale: 1.1,
+    petalWidth: 0.28,
+    petalLength: 0.45,
+    openAngle: 0.4,
+  },
+  {
+    type: "lotus",
+    petalCount: 8,
+    petalShape: "rounded",
+    colors: [VIVVA_COLORS.teal, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.7,
+    openAngle: 0.45,
+  },
+  {
+    type: "dahlia",
+    petalCount: 12,
+    petalShape: "star",
+    colors: [VIVVA_COLORS.maroon, VIVVA_COLORS.burgundy, VIVVA_COLORS.tealLight],
+    scale: 1.0,
+    petalWidth: 0.15,
+    petalLength: 0.55,
+    openAngle: 0.35,
+  },
 ];
 
 const CHECKOUT_COLORS = {
-  blushPink: new THREE.Color(0xD8A0B0),
-  paleChartreuse: new THREE.Color(0xC8C870),
-  sageGreen: new THREE.Color(0x8BA868),
-  softLavender: new THREE.Color(0xB8A0C8),
-  warmCream: new THREE.Color(0xE0D8C0),
-  roseMauve: new THREE.Color(0xC8909A),
+  blushPink: new THREE.Color(0xd8a0b0),
+  paleChartreuse: new THREE.Color(0xc8c870),
+  sageGreen: new THREE.Color(0x8ba868),
+  softLavender: new THREE.Color(0xb8a0c8),
+  warmCream: new THREE.Color(0xe0d8c0),
+  roseMauve: new THREE.Color(0xc8909a),
 };
 
 const CHECKOUT_FLOWER_CONFIGS: FlowerConfig[] = [
-  { type: 'tulip', petalCount: 5, petalShape: 'pointed', colors: [CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.warmCream, CHECKOUT_COLORS.roseMauve], scale: 1.4, petalWidth: 0.32, petalLength: 0.8, openAngle: 0.65 },
-  { type: 'lily', petalCount: 6, petalShape: 'curved', colors: [CHECKOUT_COLORS.paleChartreuse, CHECKOUT_COLORS.warmCream, CHECKOUT_COLORS.sageGreen], scale: 1.5, petalWidth: 0.24, petalLength: 0.9, openAngle: 0.5 },
-  { type: 'orchid', petalCount: 5, petalShape: 'teardrop', colors: [CHECKOUT_COLORS.softLavender, CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.warmCream], scale: 1.3, petalWidth: 0.4, petalLength: 0.7, openAngle: 0.55 },
-  { type: 'rose', petalCount: 10, petalShape: 'layered', colors: [CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.roseMauve, CHECKOUT_COLORS.softLavender], scale: 1.1, petalWidth: 0.28, petalLength: 0.45, openAngle: 0.4 },
-  { type: 'lotus', petalCount: 8, petalShape: 'rounded', colors: [CHECKOUT_COLORS.sageGreen, CHECKOUT_COLORS.paleChartreuse, CHECKOUT_COLORS.warmCream], scale: 1.4, petalWidth: 0.32, petalLength: 0.7, openAngle: 0.45 },
-  { type: 'dahlia', petalCount: 12, petalShape: 'star', colors: [CHECKOUT_COLORS.softLavender, CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.paleChartreuse], scale: 1.0, petalWidth: 0.15, petalLength: 0.55, openAngle: 0.35 },
+  {
+    type: "tulip",
+    petalCount: 5,
+    petalShape: "pointed",
+    colors: [CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.warmCream, CHECKOUT_COLORS.roseMauve],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.8,
+    openAngle: 0.65,
+  },
+  {
+    type: "lily",
+    petalCount: 6,
+    petalShape: "curved",
+    colors: [CHECKOUT_COLORS.paleChartreuse, CHECKOUT_COLORS.warmCream, CHECKOUT_COLORS.sageGreen],
+    scale: 1.5,
+    petalWidth: 0.24,
+    petalLength: 0.9,
+    openAngle: 0.5,
+  },
+  {
+    type: "orchid",
+    petalCount: 5,
+    petalShape: "teardrop",
+    colors: [CHECKOUT_COLORS.softLavender, CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.warmCream],
+    scale: 1.3,
+    petalWidth: 0.4,
+    petalLength: 0.7,
+    openAngle: 0.55,
+  },
+  {
+    type: "rose",
+    petalCount: 10,
+    petalShape: "layered",
+    colors: [CHECKOUT_COLORS.blushPink, CHECKOUT_COLORS.roseMauve, CHECKOUT_COLORS.softLavender],
+    scale: 1.1,
+    petalWidth: 0.28,
+    petalLength: 0.45,
+    openAngle: 0.4,
+  },
+  {
+    type: "lotus",
+    petalCount: 8,
+    petalShape: "rounded",
+    colors: [CHECKOUT_COLORS.sageGreen, CHECKOUT_COLORS.paleChartreuse, CHECKOUT_COLORS.warmCream],
+    scale: 1.4,
+    petalWidth: 0.32,
+    petalLength: 0.7,
+    openAngle: 0.45,
+  },
+  {
+    type: "dahlia",
+    petalCount: 12,
+    petalShape: "star",
+    colors: [
+      CHECKOUT_COLORS.softLavender,
+      CHECKOUT_COLORS.blushPink,
+      CHECKOUT_COLORS.paleChartreuse,
+    ],
+    scale: 1.0,
+    petalWidth: 0.15,
+    petalLength: 0.55,
+    openAngle: 0.35,
+  },
 ];
 
 function createVivvaTextTexture(): THREE.CanvasTexture {
   const size = 512;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
   ctx.clearRect(0, 0, size, size);
 
-  const sColors = ['#5B9BD5', '#4ECDC4', '#6CB4EE', '#48D1CC', '#7EC8E3', '#3CB6CE'];
-  const vivvaColors = ['#E8607A', '#D64D78', '#CC5588', '#F06090', '#C84B80', '#DA5A90',
-    '#88CC66', '#70B858', '#A0D870', '#6BBA54', '#99DD77', '#82C462',
-    '#DD80DD', '#C870D0', '#B868C8', '#E088E8', '#D060C0', '#CC78D8'];
+  const sColors = ["#5B9BD5", "#4ECDC4", "#6CB4EE", "#48D1CC", "#7EC8E3", "#3CB6CE"];
+  const vivvaColors = [
+    "#E8607A",
+    "#D64D78",
+    "#CC5588",
+    "#F06090",
+    "#C84B80",
+    "#DA5A90",
+    "#88CC66",
+    "#70B858",
+    "#A0D870",
+    "#6BBA54",
+    "#99DD77",
+    "#82C462",
+    "#DD80DD",
+    "#C870D0",
+    "#B868C8",
+    "#E088E8",
+    "#D060C0",
+    "#CC78D8",
+  ];
 
   ctx.font = 'bold 180px "Arial", sans-serif';
-  ctx.textBaseline = 'middle';
-  ctx.textAlign = 'center';
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
 
   for (let pass = 0; pass < 3; pass++) {
     const offsetX = (Math.random() - 0.5) * 12;
     const offsetY = (Math.random() - 0.5) * 12;
     ctx.fillStyle = sColors[pass % sColors.length];
     ctx.globalAlpha = 0.5;
-    ctx.fillText('S', size / 2 + offsetX, size / 2 + offsetY);
+    ctx.fillText("S", size / 2 + offsetX, size / 2 + offsetY);
   }
 
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
   const vivvaSize = 30;
   ctx.font = `bold ${vivvaSize}px "Arial", sans-serif`;
 
@@ -345,7 +531,7 @@ function createVivvaTextTexture(): THREE.CanvasTexture {
       const cIdx = (row * 7 + col * 3) % vivvaColors.length;
       ctx.fillStyle = vivvaColors[cIdx];
       ctx.globalAlpha = 0.65;
-      ctx.fillText('VIVVA', x, y);
+      ctx.fillText("VIVVA", x, y);
       x += 88;
       col++;
     }
@@ -376,59 +562,59 @@ function createVivvaTextTexture(): THREE.CanvasTexture {
 }
 
 function createExoticFlower(
-  scene: THREE.Scene, 
-  position: THREE.Vector3, 
+  scene: THREE.Scene,
+  position: THREE.Vector3,
   flowerConfig: FlowerConfig,
   baseScale: number,
   disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[],
   noiseLevel: number = 0.12,
-  textTexture: THREE.CanvasTexture | null = null
+  textTexture: THREE.CanvasTexture | null = null,
 ) {
   const flowerGroup = new THREE.Group();
   flowerGroup.position.copy(position);
-  
+
   const scale = baseScale * flowerConfig.scale;
   const { petalCount, petalShape, colors, petalWidth, petalLength, openAngle } = flowerConfig;
-  
+
   // Create petals based on flower type
   for (let p = 0; p < petalCount; p++) {
     const angle = (p / petalCount) * Math.PI * 2;
     const layer = Math.floor(p / 4);
-    const layerOffset = petalShape === 'layered' ? layer * 0.06 : 0;
-    
+    const layerOffset = petalShape === "layered" ? layer * 0.06 : 0;
+
     // Different petal geometries based on shape - using varied THREE.js primitives
     let petalGeometry: THREE.BufferGeometry;
     const w = petalWidth * scale;
     const l = petalLength * scale;
     const h = 0.05 * scale;
-    
+
     switch (petalShape) {
-      case 'pointed':
+      case "pointed":
         // Sharp tulip-like petals using tapered box
         petalGeometry = new THREE.ConeGeometry(w * 0.6, l, 4, 1);
         petalGeometry.rotateX(Math.PI / 2);
         break;
-      case 'rounded':
+      case "rounded":
         // Soft lotus-like petals using elongated sphere segment
         petalGeometry = new THREE.SphereGeometry(w * 0.8, 6, 4, 0, Math.PI * 2, 0, Math.PI * 0.6);
         petalGeometry.scale(1, 0.3, l / (w * 0.8));
         break;
-      case 'curved':
+      case "curved":
         // Elegant lily petals - thin and long
         petalGeometry = new THREE.BoxGeometry(w * 0.7, h, l * 1.2);
         break;
-      case 'layered':
+      case "layered":
         // Rose petals in concentric layers
         const layerScale = 1 - layer * 0.2;
         petalGeometry = new THREE.CircleGeometry(w * layerScale, 6);
         petalGeometry.rotateX(-Math.PI / 2.5);
         break;
-      case 'star':
+      case "star":
         // Dahlia spiky petals
         petalGeometry = new THREE.ConeGeometry(w * 0.4, l * 0.9, 3, 1);
         petalGeometry.rotateX(Math.PI / 2);
         break;
-      case 'teardrop':
+      case "teardrop":
         // Orchid teardrop petals
         petalGeometry = new THREE.SphereGeometry(w * 0.5, 5, 4, 0, Math.PI * 2, 0, Math.PI * 0.7);
         petalGeometry.scale(1.2, 0.25, l / (w * 0.5));
@@ -436,11 +622,11 @@ function createExoticFlower(
       default:
         petalGeometry = new THREE.BoxGeometry(w, h, l);
     }
-    
+
     // Multi-color gradient material
     const colorIndex = p % colors.length;
     const nextColorIndex = (p + 1) % colors.length;
-    
+
     const petalUniforms: Record<string, { value: unknown }> = {
       uTime: { value: 0 },
       uBloom: { value: 0 },
@@ -483,7 +669,7 @@ function createExoticFlower(
         uniform float uHover;
         uniform float uNoiseLevel;
         uniform float uHasText;
-        ${textTexture ? 'uniform sampler2D uTextMap;' : ''}
+        ${textTexture ? "uniform sampler2D uTextMap;" : ""}
         varying vec3 vPosition;
         varying vec2 vUv;
 
@@ -527,7 +713,9 @@ function createExoticFlower(
           color = mix(color, color + (noiseTint - 0.5) * 2.0, uNoiseLevel);
           color += (fineGrain - uNoiseLevel * 0.15) * 0.8;
 
-          ${textTexture ? `
+          ${
+            textTexture
+              ? `
           if (uHasText > 0.5) {
             vec2 textUv = fract(vUv * 1.8);
             vec4 textSample = texture2D(uTextMap, textUv);
@@ -540,7 +728,9 @@ function createExoticFlower(
               color = mix(color, textColor * 1.2, blendAlpha);
             }
           }
-          ` : ''}
+          `
+              : ""
+          }
           
           gl_FragColor = vec4(color, 1.0);
         }
@@ -548,57 +738,62 @@ function createExoticFlower(
       transparent: true,
     });
     disposables.push({ geometry: petalGeometry, material: petalMaterial });
-    
+
     const petal = new THREE.Mesh(petalGeometry, petalMaterial);
-    const radius = 0.15 * scale * (petalShape === 'layered' ? (1 - layer * 0.15) : 1);
+    const radius = 0.15 * scale * (petalShape === "layered" ? 1 - layer * 0.15 : 1);
     petal.position.x = Math.cos(angle) * radius;
     petal.position.z = Math.sin(angle) * radius;
     petal.position.y = 0.25 * scale + layerOffset;
     petal.rotation.y = angle;
-    petal.rotation.z = openAngle + (petalShape === 'layered' ? layer * 0.15 : 0);
+    petal.rotation.z = openAngle + (petalShape === "layered" ? layer * 0.15 : 0);
     petal.userData = { material: petalMaterial, phase: p };
     flowerGroup.add(petal);
   }
-  
+
   // Flower center
   const centerGeometry = new THREE.BoxGeometry(0.14 * scale, 0.1 * scale, 0.14 * scale);
-  const centerColor = flowerConfig.type === 'tulip' || flowerConfig.type === 'rose' 
-    ? new THREE.Color(0xE8D060) 
-    : new THREE.Color(0xC4A058);
+  const centerColor =
+    flowerConfig.type === "tulip" || flowerConfig.type === "rose"
+      ? new THREE.Color(0xe8d060)
+      : new THREE.Color(0xc4a058);
   const centerMaterial = new THREE.MeshBasicMaterial({
     color: centerColor,
     transparent: true,
     opacity: 0.92,
   });
   disposables.push({ geometry: centerGeometry, material: centerMaterial });
-  
+
   const center = new THREE.Mesh(centerGeometry, centerMaterial);
   center.position.y = 0.28 * scale;
   flowerGroup.add(center);
-  
+
   // Stem with natural color
   const stemGeometry = new THREE.BoxGeometry(0.05 * scale, 1.0 * scale, 0.05 * scale);
   const stemMaterial = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0x2D5A32),
+    color: new THREE.Color(0x2d5a32),
     transparent: true,
     opacity: 0.88,
   });
   disposables.push({ geometry: stemGeometry, material: stemMaterial });
-  
+
   const stem = new THREE.Mesh(stemGeometry, stemMaterial);
   stem.position.y = -0.35 * scale;
   flowerGroup.add(stem);
-  
+
   // Optional leaf for some flower types
-  if (flowerConfig.type === 'lily' || flowerConfig.type === 'lotus' || flowerConfig.type === 'dahlia') {
+  if (
+    flowerConfig.type === "lily" ||
+    flowerConfig.type === "lotus" ||
+    flowerConfig.type === "dahlia"
+  ) {
     const leafGeometry = new THREE.BoxGeometry(0.08 * scale, 0.02 * scale, 0.35 * scale);
     const leafMaterial = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(0x3A6B40),
+      color: new THREE.Color(0x3a6b40),
       transparent: true,
       opacity: 0.85,
     });
     disposables.push({ geometry: leafGeometry, material: leafMaterial });
-    
+
     const leaf = new THREE.Mesh(leafGeometry, leafMaterial);
     leaf.position.y = -0.5 * scale;
     leaf.position.x = 0.15 * scale;
@@ -606,7 +801,7 @@ function createExoticFlower(
     leaf.rotation.y = Math.random() * Math.PI * 2;
     flowerGroup.add(leaf);
   }
-  
+
   scene.add(flowerGroup);
   return flowerGroup;
 }
@@ -616,23 +811,23 @@ interface ThreeCRTFlowersProps {
   isIntro?: boolean;
 }
 
-export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFlowersProps) {
+export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFlowersProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const [webGLAvailable, setWebGLAvailable] = useState(true);
-  const [dimensions, setDimensions] = useState<{width: number, height: number} | null>(null);
-  
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+
   // Track dimensions with multiple strategies for reliability
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const container = containerRef.current;
-    
+
     const updateDimensions = () => {
       const w = container.clientWidth || container.offsetWidth;
       const h = container.clientHeight || container.offsetHeight;
       if (w > 0 && h > 0) {
-        setDimensions(prev => {
+        setDimensions((prev) => {
           if (prev?.width === w && prev?.height === h) return prev;
           return { width: w, height: h };
         });
@@ -640,41 +835,42 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
       }
       return false;
     };
-    
+
     // Try immediately
     if (!updateDimensions()) {
       // Retry with delays for sections that load later
       const retries = [50, 100, 200, 500, 1000, 2000];
-      const timeouts = retries.map(delay => 
-        setTimeout(updateDimensions, delay)
-      );
-      
+      const timeouts = retries.map((delay) => setTimeout(updateDimensions, delay));
+
       // Also use IntersectionObserver
-      const intersectionObserver = new IntersectionObserver((entries) => {
-        if (entries[0]?.isIntersecting) {
-          updateDimensions();
-        }
-      }, { threshold: 0, rootMargin: '500px' });
+      const intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            updateDimensions();
+          }
+        },
+        { threshold: 0, rootMargin: "500px" },
+      );
       intersectionObserver.observe(container);
-      
+
       // ResizeObserver
       const resizeObserver = new ResizeObserver(updateDimensions);
       resizeObserver.observe(container);
-      
+
       return () => {
-        timeouts.forEach(t => clearTimeout(t));
+        timeouts.forEach((t) => clearTimeout(t));
         intersectionObserver.disconnect();
         resizeObserver.disconnect();
       };
     }
-    
+
     // ResizeObserver for ongoing changes
     const resizeObserver = new ResizeObserver(updateDimensions);
     resizeObserver.observe(container);
-    
+
     return () => resizeObserver.disconnect();
   }, [preset]);
-  
+
   useEffect(() => {
     if (!dimensions) return;
     if (!isWebGLAvailable()) {
@@ -682,64 +878,66 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
       return;
     }
     if (!containerRef.current) return;
-    
+
     const container = containerRef.current;
     const width = dimensions.width;
     const height = dimensions.height;
-    
+
     if (width === 0 || height === 0) return;
 
     // Detect mobile for performance optimization
     const isMobile = width < 768;
-    
+
     const baseConfig = PRESETS[preset];
     // Responsive scaling based on viewport width
     const scaleFactor = Math.min(1, width / 1200); // Scale down for smaller screens
     const isSmallMobile = width < 480;
     const isMediumMobile = width < 768;
-    
-    const isCheckoutPreset = preset === 'checkout';
 
-    const config = isMediumMobile ? {
-      ...baseConfig,
-      flowerCount: isCheckoutPreset
-        ? Math.floor(baseConfig.flowerCount * 0.8)
-        : isSmallMobile 
-          ? Math.max(60, Math.floor(baseConfig.flowerCount * 0.9))
-          : Math.max(80, Math.floor(baseConfig.flowerCount * 0.95)),
-      particleCount: Math.floor(baseConfig.particleCount * 0.3),
-      cameraZ: baseConfig.cameraZ * 0.95,
-      cameraY: baseConfig.cameraY * 0.9,
-      pixelSize: 1,
-      crtIntensity: isCheckoutPreset ? 0.06 : 0.2,
-      scanlineIntensity: isCheckoutPreset ? 0.003 : 0.012,
-      bloomSpeed: baseConfig.bloomSpeed * 1.2,
-      mobileScaleBoost: isSmallMobile ? 0.8 : 0.85,
-    } : { 
-      ...baseConfig, 
-      mobileScaleBoost: Math.max(0.85, scaleFactor),
-    };
+    const isCheckoutPreset = preset === "checkout";
+
+    const config = isMediumMobile
+      ? {
+          ...baseConfig,
+          flowerCount: isCheckoutPreset
+            ? Math.floor(baseConfig.flowerCount * 0.8)
+            : isSmallMobile
+              ? Math.max(60, Math.floor(baseConfig.flowerCount * 0.9))
+              : Math.max(80, Math.floor(baseConfig.flowerCount * 0.95)),
+          particleCount: Math.floor(baseConfig.particleCount * 0.3),
+          cameraZ: baseConfig.cameraZ * 0.95,
+          cameraY: baseConfig.cameraY * 0.9,
+          pixelSize: 1,
+          crtIntensity: isCheckoutPreset ? 0.06 : 0.2,
+          scanlineIntensity: isCheckoutPreset ? 0.003 : 0.012,
+          bloomSpeed: baseConfig.bloomSpeed * 1.2,
+          mobileScaleBoost: isSmallMobile ? 0.8 : 0.85,
+        }
+      : {
+          ...baseConfig,
+          mobileScaleBoost: Math.max(0.85, scaleFactor),
+        };
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
     camera.position.set(config.cameraX, config.cameraY, config.cameraZ);
     camera.lookAt(0, config.lookAtY, 0);
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: false,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
+
     // Style the canvas to fill container and stay positioned correctly
-    renderer.domElement.style.position = 'absolute';
-    renderer.domElement.style.top = '0';
-    renderer.domElement.style.left = '0';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = "0";
+    renderer.domElement.style.left = "0";
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -770,7 +968,10 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
     const crtQuad = new THREE.Mesh(crtGeometry, crtMaterial);
     crtScene.add(crtQuad);
 
-    const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[] = [];
+    const disposables: {
+      geometry?: THREE.BufferGeometry;
+      material?: THREE.Material | THREE.Material[];
+    }[] = [];
     disposables.push({ geometry: crtGeometry, material: crtMaterial });
 
     // Metallic water matching Vivva logo
@@ -799,34 +1000,48 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
 
     // Create many exotic flowers spread evenly across scene
     const flowers: THREE.Group[] = [];
-    
+
     // Calculate grid-based distribution for even coverage
     const gridCols = Math.ceil(Math.sqrt(config.flowerCount * 1.5));
     const gridRows = Math.ceil(config.flowerCount / gridCols);
-    
+
     // Spread flowers across entire scene - expanded for corners and edges
     const spreadX = config.waterSize * config.spreadX * 1.5;
     const spreadZ = config.waterSize * config.spreadZ * 2.0;
-    
-    const isCheckout = preset === 'checkout';
+
+    const isCheckout = preset === "checkout";
     const vivvaTextTex = isCheckout ? createVivvaTextTexture() : null;
 
     const addFlower = (pos: THREE.Vector3, scaleMultiplier: number = 1, flowerIndex: number) => {
-      const activeConfigs = isCheckout ? CHECKOUT_FLOWER_CONFIGS : isIntro ? INTRO_FLOWER_CONFIGS : FLOWER_CONFIGS;
+      const activeConfigs = isCheckout
+        ? CHECKOUT_FLOWER_CONFIGS
+        : isIntro
+          ? INTRO_FLOWER_CONFIGS
+          : FLOWER_CONFIGS;
       const typeIndex = Math.floor(Math.random() * activeConfigs.length);
       const flowerConfig = activeConfigs[typeIndex];
-      
+
       const sizeVariation = Math.random();
       const sectionBoost = isIntro ? 1 : 1.4;
-      const baseScale = sizeVariation < 0.2 ? (0.9 + Math.random() * 0.5) : (0.6 + Math.random() * 0.4);
+      const baseScale = sizeVariation < 0.2 ? 0.9 + Math.random() * 0.5 : 0.6 + Math.random() * 0.4;
       const mobileBoost = (config as any).mobileScaleBoost || 1;
       const scale = baseScale * Math.max(mobileBoost, 0.6) * scaleMultiplier * sectionBoost;
-      
+
       const flowerNoise = isCheckout ? 0.18 : isIntro ? 0.25 : 0.12;
-      const flower = createExoticFlower(scene, pos, flowerConfig, scale, disposables, flowerNoise, vivvaTextTex);
+      const flower = createExoticFlower(
+        scene,
+        pos,
+        flowerConfig,
+        scale,
+        disposables,
+        flowerNoise,
+        vivvaTextTex,
+      );
       const initialGrowth = isIntro
-        ? (Math.random() < 0.3 ? (0.3 + Math.random() * 0.3) : (0.6 + Math.random() * 0.4))
-        : (0.5 + Math.random() * 0.5);
+        ? Math.random() < 0.3
+          ? 0.3 + Math.random() * 0.3
+          : 0.6 + Math.random() * 0.4
+        : 0.5 + Math.random() * 0.5;
       flower.userData = {
         baseY: pos.y,
         growthProgress: initialGrowth,
@@ -839,39 +1054,45 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
       flower.rotation.y = Math.random() * Math.PI * 2;
       flowers.push(flower);
     };
-    
+
     // Main grid flowers
     for (let i = 0; i < config.flowerCount; i++) {
       const gridX = (i % gridCols) / gridCols;
       const gridZ = Math.floor(i / gridCols) / gridRows;
-      
+
       const jitterX = (Math.random() - 0.5) * (spreadX / gridCols) * 0.8;
       const jitterZ = (Math.random() - 0.5) * (spreadZ / gridRows) * 0.8;
-      
+
       const pos = new THREE.Vector3(
         (gridX - 0.5) * spreadX + jitterX,
         (Math.random() - 0.5) * 0.5,
-        (gridZ - 0.5) * spreadZ + jitterZ
+        (gridZ - 0.5) * spreadZ + jitterZ,
       );
-      
+
       addFlower(pos, 1, i);
     }
-    
+
     // Add extra corner flowers (smaller, growing)
     const cornerCount = Math.floor(config.flowerCount * 0.3);
     const corners = [
-      { x: -1, z: -1 }, { x: 1, z: -1 }, { x: -1, z: 1 }, { x: 1, z: 1 },
-      { x: -1, z: 0 }, { x: 1, z: 0 }, { x: 0, z: -1 }, { x: 0, z: 1 }
+      { x: -1, z: -1 },
+      { x: 1, z: -1 },
+      { x: -1, z: 1 },
+      { x: 1, z: 1 },
+      { x: -1, z: 0 },
+      { x: 1, z: 0 },
+      { x: 0, z: -1 },
+      { x: 0, z: 1 },
     ];
-    
+
     for (let i = 0; i < cornerCount; i++) {
       const corner = corners[i % corners.length];
       const pos = new THREE.Vector3(
         corner.x * spreadX * 0.45 + (Math.random() - 0.5) * spreadX * 0.25,
         (Math.random() - 0.5) * 0.4,
-        corner.z * spreadZ * 0.45 + (Math.random() - 0.5) * spreadZ * 0.25
+        corner.z * spreadZ * 0.45 + (Math.random() - 0.5) * spreadZ * 0.25,
       );
-      
+
       addFlower(pos, 0.6 + Math.random() * 0.3, config.flowerCount + i);
     }
 
@@ -880,13 +1101,19 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
     if (config.particleCount > 0) {
       const particlePositions = new Float32Array(config.particleCount * 3);
       const particleColors = new Float32Array(config.particleCount * 3);
-      const colorOptions = [VIVVA_COLORS.teal, VIVVA_COLORS.dustyPink, VIVVA_COLORS.mint, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.lavender];
-      
+      const colorOptions = [
+        VIVVA_COLORS.teal,
+        VIVVA_COLORS.dustyPink,
+        VIVVA_COLORS.mint,
+        VIVVA_COLORS.burgundyLight,
+        VIVVA_COLORS.lavender,
+      ];
+
       for (let i = 0; i < config.particleCount; i++) {
         particlePositions[i * 3] = (Math.random() - 0.5) * config.waterSize;
         particlePositions[i * 3 + 1] = Math.random() * 6 - 1.5;
         particlePositions[i * 3 + 2] = (Math.random() - 0.5) * config.waterSize * 0.5;
-        
+
         const color = colorOptions[Math.floor(Math.random() * colorOptions.length)];
         particleColors[i * 3] = color.r;
         particleColors[i * 3 + 1] = color.g;
@@ -894,17 +1121,17 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
       }
 
       particleGeoRef = new THREE.BufferGeometry();
-      particleGeoRef.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-      particleGeoRef.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+      particleGeoRef.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+      particleGeoRef.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
 
-      const dotCanvas = document.createElement('canvas');
+      const dotCanvas = document.createElement("canvas");
       dotCanvas.width = 16;
       dotCanvas.height = 16;
-      const dotCtx = dotCanvas.getContext('2d');
+      const dotCtx = dotCanvas.getContext("2d");
       if (dotCtx) {
         dotCtx.beginPath();
         dotCtx.arc(8, 8, 7, 0, Math.PI * 2);
-        dotCtx.fillStyle = '#ffffff';
+        dotCtx.fillStyle = "#ffffff";
         dotCtx.fill();
       }
       const dotTexture = new THREE.CanvasTexture(dotCanvas);
@@ -929,13 +1156,13 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
     let mouseY = 0;
     let targetMouseX = 0;
     let targetMouseY = 0;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
       targetMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       targetMouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     };
-    
+
     const handleClick = () => {
       flowers.forEach((flower) => {
         if (flower.userData.growthProgress < 0.5) {
@@ -943,23 +1170,26 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
         }
       });
     };
-    
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('click', handleClick);
+
+    container.addEventListener("mousemove", handleMouseMove);
+    container.addEventListener("click", handleClick);
 
     let animationId: number;
     let isVisible = true;
     const clock = new THREE.Clock();
 
-    const observer = new IntersectionObserver((entries) => {
-      isVisible = entries[0]?.isIntersecting ?? true;
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0.1 },
+    );
     observer.observe(container);
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       if (!isVisible) return;
-      
+
       const elapsed = clock.getElapsedTime();
 
       mouseX += (targetMouseX - mouseX) * 0.04;
@@ -971,16 +1201,16 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
 
       flowers.forEach((flower) => {
         const { phase, baseY, bloomSpeed, rotationOffset } = flower.userData;
-        
+
         if (flower.userData.growthProgress < flower.userData.targetGrowth) {
           flower.userData.growthProgress += bloomSpeed;
         }
-        
+
         const growth = Math.min(flower.userData.growthProgress, 1);
         flower.scale.setScalar(growth);
         flower.position.y = baseY + Math.sin(elapsed * 0.7 + phase) * 0.06 * growth;
         flower.rotation.y = rotationOffset + Math.sin(elapsed * 0.3 + phase) * 0.06;
-        
+
         flower.children.forEach((child) => {
           if (child.userData.material) {
             child.userData.material.uniforms.uTime.value = elapsed;
@@ -1021,28 +1251,28 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
       renderTarget.setSize(newWidth, newHeight);
       crtMaterial.uniforms.uResolution.value.set(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('click', handleClick);
+      window.removeEventListener("resize", handleResize);
+      container.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("click", handleClick);
       observer.disconnect();
       cancelAnimationFrame(animationId);
-      
+
       disposables.forEach(({ geometry, material }) => {
         geometry?.dispose();
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach((m) => m.dispose());
         } else {
           material?.dispose();
         }
       });
-      
+
       if (vivvaTextTex) {
         vivvaTextTex.dispose();
       }
-      
+
       renderTarget.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
@@ -1056,13 +1286,13 @@ export function ThreeCRTFlowers({ preset = 'hero', isIntro = false }: ThreeCRTFl
   }
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="absolute inset-0 w-full h-full"
-      style={{ 
-        pointerEvents: 'auto',
-        minHeight: '100%',
-        minWidth: '100%',
+      style={{
+        pointerEvents: "auto",
+        minHeight: "100%",
+        minWidth: "100%",
       }}
     />
   );

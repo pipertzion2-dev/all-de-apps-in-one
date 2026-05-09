@@ -50,7 +50,10 @@ export async function parsePdfToSeeds(pdfText: string): Promise<ParsedSeeds> {
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: PARSE_PDF_PROMPT },
-        { role: "user", content: `Parse the following document into separate application seeds:\n\n${pdfText}` },
+        {
+          role: "user",
+          content: `Parse the following document into separate application seeds:\n\n${pdfText}`,
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 1,
@@ -106,7 +109,7 @@ Return JSON:
 
 export async function applyPromptToSeed(
   spec: SeedAppSpec,
-  prompt: string
+  prompt: string,
 ): Promise<{ success: boolean; spec: SeedAppSpec | null; error?: string }> {
   try {
     const response = await openai.chat.completions.create({
@@ -134,8 +137,12 @@ export async function applyPromptToSeed(
       features: Array.isArray(parsed.features) ? parsed.features.map(String) : spec.features,
       userFlows: Array.isArray(parsed.userFlows) ? parsed.userFlows.map(String) : spec.userFlows,
       databaseSchema: String(parsed.databaseSchema || spec.databaseSchema),
-      apiEndpoints: Array.isArray(parsed.apiEndpoints) ? parsed.apiEndpoints.map(String) : spec.apiEndpoints,
-      uiComponents: Array.isArray(parsed.uiComponents) ? parsed.uiComponents.map(String) : spec.uiComponents,
+      apiEndpoints: Array.isArray(parsed.apiEndpoints)
+        ? parsed.apiEndpoints.map(String)
+        : spec.apiEndpoints,
+      uiComponents: Array.isArray(parsed.uiComponents)
+        ? parsed.uiComponents.map(String)
+        : spec.uiComponents,
       businessModel: String(parsed.businessModel || spec.businessModel),
       deploymentPreferences: String(parsed.deploymentPreferences || spec.deploymentPreferences),
     };
@@ -184,7 +191,7 @@ export interface SeedMarketingPageData {
 
 export async function generateSeedMarketingPages(
   spec: SeedAppSpec,
-  seedId: string
+  seedId: string,
 ): Promise<{ success: boolean; pages: SeedMarketingPageData[]; error?: string }> {
   try {
     const response = await openai.chat.completions.create({
@@ -205,9 +212,14 @@ export async function generateSeedMarketingPages(
     if (!content) return { success: false, pages: [], error: "No response from AI" };
 
     const g = JSON.parse(content);
-    const baseSlug = spec.appName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 40);
+    const baseSlug = spec.appName
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .slice(0, 40);
     const ts = Date.now().toString(36);
-    const faqJson = g.faq && Array.isArray(g.faq) ? `\n\n[FAQ_JSON]${JSON.stringify(g.faq)}[/FAQ_JSON]` : "";
+    const faqJson =
+      g.faq && Array.isArray(g.faq) ? `\n\n[FAQ_JSON]${JSON.stringify(g.faq)}[/FAQ_JSON]` : "";
     const fullContent = (g.content || "") + faqJson;
 
     const variants = [
@@ -249,13 +261,18 @@ Return JSON:
   "cicdPipeline": "CI/CD pipeline explanation with stages"
 }`;
 
-export async function generateEngineeringDocs(spec: SeedAppSpec): Promise<{ success: boolean; docs: SeedEngineeringDocs | null; error?: string }> {
+export async function generateEngineeringDocs(
+  spec: SeedAppSpec,
+): Promise<{ success: boolean; docs: SeedEngineeringDocs | null; error?: string }> {
   try {
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: ENGINEERING_DOCS_PROMPT },
-        { role: "user", content: `Generate engineering documentation for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nTarget Users: ${spec.targetUsers}\nFeatures: ${spec.features.join(", ")}\nAPI Endpoints: ${spec.apiEndpoints.join(", ")}\nDatabase: ${spec.databaseSchema}\nUI Components: ${spec.uiComponents.join(", ")}` },
+        {
+          role: "user",
+          content: `Generate engineering documentation for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nTarget Users: ${spec.targetUsers}\nFeatures: ${spec.features.join(", ")}\nAPI Endpoints: ${spec.apiEndpoints.join(", ")}\nDatabase: ${spec.databaseSchema}\nUI Components: ${spec.uiComponents.join(", ")}`,
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 1,
@@ -294,13 +311,18 @@ Return JSON:
   "launchEmailSequence": "3-email launch sequence with subject lines and body copy"
 }`;
 
-export async function generateMarketingContent(spec: SeedAppSpec): Promise<{ success: boolean; content: SeedMarketingContent | null; error?: string }> {
+export async function generateMarketingContent(
+  spec: SeedAppSpec,
+): Promise<{ success: boolean; content: SeedMarketingContent | null; error?: string }> {
   try {
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: MARKETING_PROMPT },
-        { role: "user", content: `Generate marketing content for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nTarget Users: ${spec.targetUsers}\nFeatures: ${spec.features.join(", ")}\nBusiness Model: ${spec.businessModel}\nUnique Value: ${spec.deploymentPreferences}` },
+        {
+          role: "user",
+          content: `Generate marketing content for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nTarget Users: ${spec.targetUsers}\nFeatures: ${spec.features.join(", ")}\nBusiness Model: ${spec.businessModel}\nUnique Value: ${spec.deploymentPreferences}`,
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 1,
@@ -343,13 +365,18 @@ Return JSON with file paths as keys and file content as values:
 
 Generate clean, modular, production-ready code. Use React/Next.js for frontend, Node/Express for backend, PostgreSQL for database. Include authentication scaffolding and environment configuration.`;
 
-export async function generateCodeScaffold(spec: SeedAppSpec): Promise<{ success: boolean; code: Record<string, string> | null; error?: string }> {
+export async function generateCodeScaffold(
+  spec: SeedAppSpec,
+): Promise<{ success: boolean; code: Record<string, string> | null; error?: string }> {
   try {
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: CODE_GEN_PROMPT },
-        { role: "user", content: `Generate a production-ready code scaffold for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nFeatures: ${spec.features.join(", ")}\nAPI Endpoints: ${spec.apiEndpoints.join(", ")}\nDatabase Schema: ${spec.databaseSchema}\nUI Components: ${spec.uiComponents.join(", ")}\nDeployment: ${spec.deploymentPreferences}` },
+        {
+          role: "user",
+          content: `Generate a production-ready code scaffold for:\n\nApp: ${spec.appName}\nProblem: ${spec.problemStatement}\nFeatures: ${spec.features.join(", ")}\nAPI Endpoints: ${spec.apiEndpoints.join(", ")}\nDatabase Schema: ${spec.databaseSchema}\nUI Components: ${spec.uiComponents.join(", ")}\nDeployment: ${spec.deploymentPreferences}`,
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 1,

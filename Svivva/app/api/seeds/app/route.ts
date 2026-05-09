@@ -16,7 +16,10 @@ export async function POST(req: Request) {
     const { name, url, description, platform, hostingProvider, domain, subApps } = await req.json();
     if (!name || !url) return badRequest("name and url are required");
 
-    const appKey = `app:${user.id}:${name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`;
+    const appKey = `app:${user.id}:${name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")}`;
 
     const existing = await db
       .select({ id: seoLandingPages.id })
@@ -47,27 +50,33 @@ export async function POST(req: Request) {
       const result = await generateSeedMarketingPages(spec, appKey);
       if (result.success) {
         for (const page of result.pages) {
-          const [row] = await db.insert(seoLandingPages).values({
-            slug: page.slug,
-            keyword: page.keyword,
-            title: page.title,
-            headline: page.headline,
-            subheadline: page.subheadline,
-            content: page.content,
-            benefits: page.benefits,
-            howItWorks: page.howItWorks,
-            whoItsFor: page.whoItsFor,
-            metaTitle: page.metaTitle,
-            metaDescription: page.metaDescription,
-            published: true,
-            category: "seed-marketing",
-            toolUrl: appKey,
-          }).returning({ slug: seoLandingPages.slug });
+          const [row] = await db
+            .insert(seoLandingPages)
+            .values({
+              slug: page.slug,
+              keyword: page.keyword,
+              title: page.title,
+              headline: page.headline,
+              subheadline: page.subheadline,
+              content: page.content,
+              benefits: page.benefits,
+              howItWorks: page.howItWorks,
+              whoItsFor: page.whoItsFor,
+              metaTitle: page.metaTitle,
+              metaDescription: page.metaDescription,
+              published: true,
+              category: "seed-marketing",
+              toolUrl: appKey,
+            })
+            .returning({ slug: seoLandingPages.slug });
           if (row) slugs.push(row.slug);
         }
       }
     } else {
-      const existingPages = await db.select({ slug: seoLandingPages.slug }).from(seoLandingPages).where(eq(seoLandingPages.toolUrl, appKey));
+      const existingPages = await db
+        .select({ slug: seoLandingPages.slug })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.toolUrl, appKey));
       slugs.push(...existingPages.map((p) => p.slug));
     }
 

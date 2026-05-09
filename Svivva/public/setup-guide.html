@@ -1,498 +1,579 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vivva - Setup & Launch Guide</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 30px 20px;
-      background: #fafafa;
-      color: #333;
-      line-height: 1.7;
-    }
-    @media print {
-      body { background: white; }
-      .no-print { display: none; }
-    }
-    h1 {
-      color: #5BA8A0;
-      border-bottom: 3px solid #5BA8A0;
-      padding-bottom: 15px;
-      margin-bottom: 30px;
-    }
-    h2 {
-      color: #6B2C4A;
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #ddd;
-    }
-    .phase {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin: 20px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .phase-header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .phase-number {
-      background: #5BA8A0;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .phase-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #333;
-    }
-    .checklist {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .checklist li {
-      padding: 12px 15px;
-      margin: 8px 0;
-      background: #f8f9fa;
-      border-radius: 8px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      border-left: 4px solid #ddd;
-    }
-    .checklist li:hover {
-      background: #f0f4f3;
-    }
-    .checkbox {
-      width: 22px;
-      height: 22px;
-      border: 2px solid #5BA8A0;
-      border-radius: 4px;
-      flex-shrink: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2px;
-    }
-    .checkbox.checked {
-      background: #5BA8A0;
-      color: white;
-    }
-    .checkbox.checked::after {
-      content: "✓";
-      font-weight: bold;
-    }
-    .item-content {
-      flex: 1;
-    }
-    .item-title {
-      font-weight: 600;
-      color: #333;
-    }
-    .item-details {
-      font-size: 14px;
-      color: #666;
-      margin-top: 4px;
-    }
-    .item-details code {
-      background: #e9ecef;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-    .tag.required { background: #fee2e2; color: #b91c1c; }
-    .tag.optional { background: #dbeafe; color: #1d4ed8; }
-    .tag.done { background: #d1fae5; color: #047857; }
-    .note {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .note-title {
-      font-weight: 600;
-      color: #92400e;
-      margin-bottom: 5px;
-    }
-    .success-box {
-      background: #d1fae5;
-      border: 2px solid #10b981;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      margin-top: 30px;
-    }
-    .success-box h3 {
-      color: #047857;
-      margin: 0 0 10px 0;
-    }
-    .btn {
-      display: inline-block;
-      background: #5BA8A0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin: 10px 5px;
-    }
-    .btn:hover { background: #4a9690; }
-    .progress-bar {
-      background: #e5e7eb;
-      height: 8px;
-      border-radius: 4px;
-      margin: 20px 0;
-      overflow: hidden;
-    }
-    .progress-fill {
-      background: linear-gradient(90deg, #5BA8A0, #6B2C4A);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s;
-    }
-    .progress-text {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <h1>Vivva Setup & Launch Guide</h1>
-  
-  <div class="no-print">
-    <p>Complete each step to get Vivva fully functional and ready to ship. Click checkboxes to track your progress.</p>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-text"><span id="progressCount">0</span> of <span id="totalCount">0</span> steps completed</div>
-  </div>
-
-  <!-- PHASE 1: Environment Setup -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">1</div>
-      <div class="phase-title">Environment Setup</div>
-    </div>
-    <ul class="checklist" data-phase="1">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Verify app is running <span class="tag done">Done</span></div>
-          <div class="item-details">Check that "Start application" workflow shows green/running status</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Database is connected <span class="tag done">Done</span></div>
-          <div class="item-details">PostgreSQL database is already configured via <code>DATABASE_URL</code></div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Run database migrations</div>
-          <div class="item-details">In Shell, run: <code>npm run db:push</code> to sync schema with database</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- PHASE 2: Stripe Setup -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">2</div>
-      <div class="phase-title">Stripe Payment Integration</div>
-    </div>
-    <ul class="checklist" data-phase="2">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Create Stripe account <span class="tag required">Required</span></div>
-          <div class="item-details">Go to <code>stripe.com</code> and create a free account if you don't have one</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Get Stripe API keys</div>
-          <div class="item-details">In Stripe Dashboard → Developers → API keys. Copy the <strong>Secret key</strong> (starts with <code>sk_</code>)</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Add STRIPE_SECRET_KEY to Secrets</div>
-          <div class="item-details">In Replit: Click "Secrets" tab (lock icon) → Add <code>STRIPE_SECRET_KEY</code> with your secret key</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Create pricing plans in Stripe</div>
-          <div class="item-details">Stripe Dashboard → Products → Create products for your subscription tiers (e.g., Free, Pro, Enterprise)</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Set up Stripe webhook (for production)</div>
-          <div class="item-details">Stripe Dashboard → Webhooks → Add endpoint pointing to your published app URL + <code>/api/stripe/webhook</code></div>
-        </div>
-      </li>
-    </ul>
-    <div class="note">
-      <div class="note-title">Tip: Test Mode</div>
-      Use Stripe's test mode keys (starting with <code>sk_test_</code>) while developing. Switch to live keys only when ready to accept real payments.
-    </div>
-  </div>
-
-  <!-- PHASE 3: OpenAI Setup -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">3</div>
-      <div class="phase-title">OpenAI API Setup</div>
-    </div>
-    <ul class="checklist" data-phase="3">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Verify OpenAI integration <span class="tag done">Done</span></div>
-          <div class="item-details">OpenAI integration is already installed via Replit AI Integrations</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Check API credits</div>
-          <div class="item-details">Ensure you have sufficient OpenAI credits or Replit AI credits for API calls</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test API generation</div>
-          <div class="item-details">Create a test API to verify OpenAI calls work correctly</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- PHASE 4: Authentication -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">4</div>
-      <div class="phase-title">Authentication</div>
-    </div>
-    <ul class="checklist" data-phase="4">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Replit Auth is configured <span class="tag done">Done</span></div>
-          <div class="item-details">Login with Replit integration is already installed</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test login flow</div>
-          <div class="item-details">Click "Sign In" on homepage and verify you can log in with Replit account</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test protected routes</div>
-          <div class="item-details">Verify dashboard redirects to login when not authenticated</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- PHASE 5: Core Features -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">5</div>
-      <div class="phase-title">Test Core Features</div>
-    </div>
-    <ul class="checklist" data-phase="5">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Create an API (full flow)</div>
-          <div class="item-details">Complete all 3 phases: DEFINE → CONFIGURE → FINISH. Verify API saves to database.</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">View created APIs in dashboard</div>
-          <div class="item-details">Check that your created API appears in the project list</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test API execution</div>
-          <div class="item-details">Send a request to your created API and verify it returns valid JSON response</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test dark mode toggle</div>
-          <div class="item-details">Switch between light/dark mode on all pages</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- PHASE 6: Pre-Launch -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">6</div>
-      <div class="phase-title">Pre-Launch Checklist</div>
-    </div>
-    <ul class="checklist" data-phase="6">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Remove test data</div>
-          <div class="item-details">Delete any test projects/APIs created during development</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Switch Stripe to live mode <span class="tag required">Required</span></div>
-          <div class="item-details">Replace test API keys with live keys in Secrets</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Set up production webhook</div>
-          <div class="item-details">Create Stripe webhook pointing to your published URL</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test on mobile browser</div>
-          <div class="item-details">Open your app URL on a phone to check responsive design</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- PHASE 7: Launch -->
-  <div class="phase">
-    <div class="phase-header">
-      <div class="phase-number">7</div>
-      <div class="phase-title">Launch</div>
-    </div>
-    <ul class="checklist" data-phase="7">
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Publish the app</div>
-          <div class="item-details">Click the "Publish" button in Replit to deploy your app live</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Test published URL</div>
-          <div class="item-details">Visit your <code>.replit.app</code> URL and verify everything works</div>
-        </div>
-      </li>
-      <li>
-        <div class="checkbox" onclick="toggleCheck(this)"></div>
-        <div class="item-content">
-          <div class="item-title">Set up custom domain <span class="tag optional">Optional</span></div>
-          <div class="item-details">In Replit deployment settings, add your custom domain (e.g., vivva.com)</div>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <div class="success-box" id="successBox" style="display: none;">
-    <h3>Ready to Launch!</h3>
-    <p>All steps completed. Your app is ready to go live!</p>
-    <a href="/" class="btn">Go to App</a>
-  </div>
-
-  <div class="no-print" style="margin-top: 30px; text-align: center;">
-    <button onclick="window.print()" style="background: #6B2C4A; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
-      Print / Save as PDF
-    </button>
-  </div>
-
-  <script>
-    function toggleCheck(el) {
-      el.classList.toggle('checked');
-      updateProgress();
-      saveProgress();
-    }
-
-    function updateProgress() {
-      const total = document.querySelectorAll('.checkbox').length;
-      const checked = document.querySelectorAll('.checkbox.checked').length;
-      document.getElementById('progressCount').textContent = checked;
-      document.getElementById('totalCount').textContent = total;
-      document.getElementById('progressFill').style.width = ((checked / total) * 100) + '%';
-      
-      if (checked === total) {
-        document.getElementById('successBox').style.display = 'block';
-      } else {
-        document.getElementById('successBox').style.display = 'none';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vivva - Setup & Launch Guide</title>
+    <style>
+      * {
+        box-sizing: border-box;
       }
-    }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        background: #fafafa;
+        color: #333;
+        line-height: 1.7;
+      }
+      @media print {
+        body {
+          background: white;
+        }
+        .no-print {
+          display: none;
+        }
+      }
+      h1 {
+        color: #5ba8a0;
+        border-bottom: 3px solid #5ba8a0;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+      }
+      h2 {
+        color: #6b2c4a;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+      .phase {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .phase-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .phase-number {
+        background: #5ba8a0;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      .phase-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+      }
+      .checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .checklist li {
+        padding: 12px 15px;
+        margin: 8px 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border-left: 4px solid #ddd;
+      }
+      .checklist li:hover {
+        background: #f0f4f3;
+      }
+      .checkbox {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #5ba8a0;
+        border-radius: 4px;
+        flex-shrink: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+      }
+      .checkbox.checked {
+        background: #5ba8a0;
+        color: white;
+      }
+      .checkbox.checked::after {
+        content: "✓";
+        font-weight: bold;
+      }
+      .item-content {
+        flex: 1;
+      }
+      .item-title {
+        font-weight: 600;
+        color: #333;
+      }
+      .item-details {
+        font-size: 14px;
+        color: #666;
+        margin-top: 4px;
+      }
+      .item-details code {
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+      }
+      .tag.required {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+      .tag.optional {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .tag.done {
+        background: #d1fae5;
+        color: #047857;
+      }
+      .note {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .note-title {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 5px;
+      }
+      .success-box {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 30px;
+      }
+      .success-box h3 {
+        color: #047857;
+        margin: 0 0 10px 0;
+      }
+      .btn {
+        display: inline-block;
+        background: #5ba8a0;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        margin: 10px 5px;
+      }
+      .btn:hover {
+        background: #4a9690;
+      }
+      .progress-bar {
+        background: #e5e7eb;
+        height: 8px;
+        border-radius: 4px;
+        margin: 20px 0;
+        overflow: hidden;
+      }
+      .progress-fill {
+        background: linear-gradient(90deg, #5ba8a0, #6b2c4a);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .progress-text {
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Vivva Setup & Launch Guide</h1>
 
-    function saveProgress() {
-      const checked = [];
-      document.querySelectorAll('.checkbox').forEach((el, i) => {
-        if (el.classList.contains('checked')) checked.push(i);
-      });
-      localStorage.setItem('vivva-setup-progress', JSON.stringify(checked));
-    }
+    <div class="no-print">
+      <p>
+        Complete each step to get Vivva fully functional and ready to ship. Click checkboxes to
+        track your progress.
+      </p>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text">
+        <span id="progressCount">0</span> of <span id="totalCount">0</span> steps completed
+      </div>
+    </div>
 
-    function loadProgress() {
-      const saved = localStorage.getItem('vivva-setup-progress');
-      if (saved) {
-        const checked = JSON.parse(saved);
-        document.querySelectorAll('.checkbox').forEach((el, i) => {
-          if (checked.includes(i)) el.classList.add('checked');
+    <!-- PHASE 1: Environment Setup -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">1</div>
+        <div class="phase-title">Environment Setup</div>
+      </div>
+      <ul class="checklist" data-phase="1">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Verify app is running <span class="tag done">Done</span></div>
+            <div class="item-details">
+              Check that "Start application" workflow shows green/running status
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Database is connected <span class="tag done">Done</span></div>
+            <div class="item-details">
+              PostgreSQL database is already configured via <code>DATABASE_URL</code>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Run database migrations</div>
+            <div class="item-details">
+              In Shell, run: <code>npm run db:push</code> to sync schema with database
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 2: Stripe Setup -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">2</div>
+        <div class="phase-title">Stripe Payment Integration</div>
+      </div>
+      <ul class="checklist" data-phase="2">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">
+              Create Stripe account <span class="tag required">Required</span>
+            </div>
+            <div class="item-details">
+              Go to <code>stripe.com</code> and create a free account if you don't have one
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Get Stripe API keys</div>
+            <div class="item-details">
+              In Stripe Dashboard → Developers → API keys. Copy the
+              <strong>Secret key</strong> (starts with <code>sk_</code>)
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Add STRIPE_SECRET_KEY to Secrets</div>
+            <div class="item-details">
+              In Replit: Click "Secrets" tab (lock icon) → Add <code>STRIPE_SECRET_KEY</code> with
+              your secret key
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Create pricing plans in Stripe</div>
+            <div class="item-details">
+              Stripe Dashboard → Products → Create products for your subscription tiers (e.g., Free,
+              Pro, Enterprise)
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Set up Stripe webhook (for production)</div>
+            <div class="item-details">
+              Stripe Dashboard → Webhooks → Add endpoint pointing to your published app URL +
+              <code>/api/stripe/webhook</code>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="note">
+        <div class="note-title">Tip: Test Mode</div>
+        Use Stripe's test mode keys (starting with <code>sk_test_</code>) while developing. Switch
+        to live keys only when ready to accept real payments.
+      </div>
+    </div>
+
+    <!-- PHASE 3: OpenAI Setup -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">3</div>
+        <div class="phase-title">OpenAI API Setup</div>
+      </div>
+      <ul class="checklist" data-phase="3">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">
+              Verify OpenAI integration <span class="tag done">Done</span>
+            </div>
+            <div class="item-details">
+              OpenAI integration is already installed via Replit AI Integrations
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Check API credits</div>
+            <div class="item-details">
+              Ensure you have sufficient OpenAI credits or Replit AI credits for API calls
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test API generation</div>
+            <div class="item-details">Create a test API to verify OpenAI calls work correctly</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 4: Authentication -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">4</div>
+        <div class="phase-title">Authentication</div>
+      </div>
+      <ul class="checklist" data-phase="4">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">
+              Replit Auth is configured <span class="tag done">Done</span>
+            </div>
+            <div class="item-details">Login with Replit integration is already installed</div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test login flow</div>
+            <div class="item-details">
+              Click "Sign In" on homepage and verify you can log in with Replit account
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test protected routes</div>
+            <div class="item-details">
+              Verify dashboard redirects to login when not authenticated
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 5: Core Features -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">5</div>
+        <div class="phase-title">Test Core Features</div>
+      </div>
+      <ul class="checklist" data-phase="5">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Create an API (full flow)</div>
+            <div class="item-details">
+              Complete all 3 phases: DEFINE → CONFIGURE → FINISH. Verify API saves to database.
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">View created APIs in dashboard</div>
+            <div class="item-details">Check that your created API appears in the project list</div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test API execution</div>
+            <div class="item-details">
+              Send a request to your created API and verify it returns valid JSON response
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test dark mode toggle</div>
+            <div class="item-details">Switch between light/dark mode on all pages</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 6: Pre-Launch -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">6</div>
+        <div class="phase-title">Pre-Launch Checklist</div>
+      </div>
+      <ul class="checklist" data-phase="6">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Remove test data</div>
+            <div class="item-details">Delete any test projects/APIs created during development</div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">
+              Switch Stripe to live mode <span class="tag required">Required</span>
+            </div>
+            <div class="item-details">Replace test API keys with live keys in Secrets</div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Set up production webhook</div>
+            <div class="item-details">Create Stripe webhook pointing to your published URL</div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test on mobile browser</div>
+            <div class="item-details">Open your app URL on a phone to check responsive design</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- PHASE 7: Launch -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-number">7</div>
+        <div class="phase-title">Launch</div>
+      </div>
+      <ul class="checklist" data-phase="7">
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Publish the app</div>
+            <div class="item-details">
+              Click the "Publish" button in Replit to deploy your app live
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">Test published URL</div>
+            <div class="item-details">
+              Visit your <code>.replit.app</code> URL and verify everything works
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="checkbox" onclick="toggleCheck(this)"></div>
+          <div class="item-content">
+            <div class="item-title">
+              Set up custom domain <span class="tag optional">Optional</span>
+            </div>
+            <div class="item-details">
+              In Replit deployment settings, add your custom domain (e.g., vivva.com)
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="success-box" id="successBox" style="display: none">
+      <h3>Ready to Launch!</h3>
+      <p>All steps completed. Your app is ready to go live!</p>
+      <a href="/" class="btn">Go to App</a>
+    </div>
+
+    <div class="no-print" style="margin-top: 30px; text-align: center">
+      <button
+        onclick="window.print()"
+        style="
+          background: #6b2c4a;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 6px;
+          cursor: pointer;
+        "
+      >
+        Print / Save as PDF
+      </button>
+    </div>
+
+    <script>
+      function toggleCheck(el) {
+        el.classList.toggle("checked");
+        updateProgress();
+        saveProgress();
+      }
+
+      function updateProgress() {
+        const total = document.querySelectorAll(".checkbox").length;
+        const checked = document.querySelectorAll(".checkbox.checked").length;
+        document.getElementById("progressCount").textContent = checked;
+        document.getElementById("totalCount").textContent = total;
+        document.getElementById("progressFill").style.width = (checked / total) * 100 + "%";
+
+        if (checked === total) {
+          document.getElementById("successBox").style.display = "block";
+        } else {
+          document.getElementById("successBox").style.display = "none";
+        }
+      }
+
+      function saveProgress() {
+        const checked = [];
+        document.querySelectorAll(".checkbox").forEach((el, i) => {
+          if (el.classList.contains("checked")) checked.push(i);
         });
+        localStorage.setItem("vivva-setup-progress", JSON.stringify(checked));
       }
-      updateProgress();
-    }
 
-    loadProgress();
-  </script>
-</body>
+      function loadProgress() {
+        const saved = localStorage.getItem("vivva-setup-progress");
+        if (saved) {
+          const checked = JSON.parse(saved);
+          document.querySelectorAll(".checkbox").forEach((el, i) => {
+            if (checked.includes(i)) el.classList.add("checked");
+          });
+        }
+        updateProgress();
+      }
+
+      loadProgress();
+    </script>
+  </body>
 </html>

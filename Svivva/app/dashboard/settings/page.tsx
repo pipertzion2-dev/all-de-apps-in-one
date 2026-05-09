@@ -96,7 +96,8 @@ export default function SettingsPage() {
               Runtime credentials
             </CardTitle>
             <CardDescription>
-              Save OpenAI, Stripe, and site URL in the database when you prefer not to use host env vars.
+              Save OpenAI, Stripe, and site URL in the database when you prefer not to use host env
+              vars.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -119,9 +120,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium">Two-Factor Authentication</h4>
-              <p className="text-sm text-muted-foreground">
-                Managed through your Replit account
-              </p>
+              <p className="text-sm text-muted-foreground">Managed through your Replit account</p>
             </div>
             <Button variant="outline" disabled data-testid="button-2fa">
               Manage

@@ -17,15 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { 
-  Plus, 
-  Key,
-  Copy,
-  Trash2,
-  Eye,
-  EyeOff,
-  CheckCircle2
-} from "lucide-react";
+import { Plus, Key, Copy, Trash2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 interface ApiKey {
   id: string;
@@ -54,11 +46,11 @@ export default function ApiKeysPage() {
         body: JSON.stringify({ name }),
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to create API key");
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -81,11 +73,11 @@ export default function ApiKeysPage() {
         method: "DELETE",
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to delete API key");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -148,7 +140,10 @@ export default function ApiKeysPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" data-testid="button-create-key">
+            <Button
+              className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+              data-testid="button-create-key"
+            >
               <Plus className="w-4 h-4" />
               Create Key
             </Button>
@@ -160,7 +155,7 @@ export default function ApiKeysPage() {
                 Create a new API key to authenticate your requests
               </DialogDescription>
             </DialogHeader>
-            
+
             {newKey ? (
               <div className="space-y-4">
                 <div className="p-4 bg-muted rounded-lg">
@@ -248,7 +243,8 @@ export default function ApiKeysPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Created {new Date(key.createdAt).toLocaleDateString()}
-                      {key.lastUsedAt && ` • Last used ${new Date(key.lastUsedAt).toLocaleDateString()}`}
+                      {key.lastUsedAt &&
+                        ` • Last used ${new Date(key.lastUsedAt).toLocaleDateString()}`}
                     </p>
                   </div>
                   <Button

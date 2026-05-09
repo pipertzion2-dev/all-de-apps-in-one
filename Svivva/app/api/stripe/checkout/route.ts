@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       if (!v.ok) {
         return NextResponse.json(
           { error: v.reason === "Price not found" ? "Invalid or inactive price" : v.reason },
-          { status: 400 }
+          { status: 400 },
         );
       }
       tier = v.tier;

@@ -8,22 +8,26 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Users, 
-  Plus, 
-  Crown,
-  Shield,
-  Eye,
-  User,
-  UserPlus,
-  Trash2,
-  Settings
-} from "lucide-react";
+import { Users, Plus, Crown, Shield, Eye, User, UserPlus, Trash2, Settings } from "lucide-react";
 
 interface Team {
   id: string;
@@ -179,7 +183,9 @@ export default function TeamsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-teams-title">Teams</h1>
+          <h1 className="text-3xl font-bold" data-testid="text-teams-title">
+            Teams
+          </h1>
           <p className="text-muted-foreground">Collaborate with your team members</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -317,7 +323,9 @@ export default function TeamsPage() {
                     </Avatar>
                     <div>
                       <CardTitle>{teamDetails.name}</CardTitle>
-                      <CardDescription>{teamDetails.description || "No description"}</CardDescription>
+                      <CardDescription>
+                        {teamDetails.description || "No description"}
+                      </CardDescription>
                     </div>
                   </div>
                   {teamDetails.userRole === "owner" && (
@@ -338,7 +346,9 @@ export default function TeamsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="font-medium">{teamDetails.owner.username || teamDetails.owner.email}</p>
+                      <p className="font-medium">
+                        {teamDetails.owner.username || teamDetails.owner.email}
+                      </p>
                       <p className="text-sm text-muted-foreground">{teamDetails.owner.email}</p>
                     </div>
                     <Badge>
@@ -352,7 +362,7 @@ export default function TeamsPage() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">Members ({teamDetails.members.length})</h3>
                   </div>
-                  
+
                   {(teamDetails.userRole === "owner" || teamDetails.userRole === "admin") && (
                     <div className="flex gap-2 mb-4">
                       <Input

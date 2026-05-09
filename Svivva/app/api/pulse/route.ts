@@ -70,7 +70,13 @@ export async function GET() {
       const [succ] = await db
         .select({ c: count() })
         .from(usageLogs)
-        .where(and(inArray(usageLogs.projectId, projectIds), gte(usageLogs.createdAt, day7), eq(usageLogs.status, "success")));
+        .where(
+          and(
+            inArray(usageLogs.projectId, projectIds),
+            gte(usageLogs.createdAt, day7),
+            eq(usageLogs.status, "success"),
+          ),
+        );
       successRate = calls7d > 0 ? Math.round(((succ?.c || 0) / calls7d) * 100) : null;
 
       const perProjRows = await db
@@ -130,7 +136,10 @@ export async function GET() {
       totals: { calls24h, calls7d, calls30d, avgLatency, tokens30d, successRate, evalPassRate },
     };
 
-    let insights: { headline: string; items: { type: string; icon: string; title: string; body: string; action: string }[] } = {
+    let insights: {
+      headline: string;
+      items: { type: string; icon: string; title: string; body: string; action: string }[];
+    } = {
       headline: "",
       items: [],
     };

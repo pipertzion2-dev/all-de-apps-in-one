@@ -6,22 +6,27 @@ import Link from "next/link";
 import { Lock, ArrowRight, Shield } from "lucide-react";
 
 const TEAL_N = 0x5ba8a0;
-const BURG_N  = 0x9b3a5e; // brightened burgundy so barbs pop
-const TEAL    = "#5BA8A0";
-const BG_N    = 0x04060f;
+const BURG_N = 0x9b3a5e; // brightened burgundy so barbs pop
+const TEAL = "#5BA8A0";
+const BG_N = 0x04060f;
 
 // corridor geometry constants
-const CW       = 18;  // corridor width  (±9 in X)
-const CH       = 12;  // corridor height (±6 in Y)
-const TILE_LEN = 28;  // one tile's Z depth
-const TILES_N  = 8;   // number of repeating tiles
-const SPEED    = 0.07; // units per frame fly-through speed
+const CW = 18; // corridor width  (±9 in X)
+const CH = 12; // corridor height (±6 in Y)
+const TILE_LEN = 28; // one tile's Z depth
+const TILES_N = 8; // number of repeating tiles
+const SPEED = 0.07; // units per frame fly-through speed
 
 function isWebGLAvailable() {
   try {
     const c = document.createElement("canvas");
-    return !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl")));
-  } catch { return false; }
+    return !!(
+      window.WebGLRenderingContext &&
+      (c.getContext("webgl") || c.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -37,8 +42,12 @@ function floatGeo(pts: number[]) {
 function gridPanel(
   fixedAxis: "x" | "y",
   fixedVal: number,
-  yFrom: number, yTo: number, ySteps: number,
-  zFrom: number, zTo: number, zSteps: number,
+  yFrom: number,
+  yTo: number,
+  ySteps: number,
+  zFrom: number,
+  zTo: number,
+  zSteps: number,
   mat: THREE.LineBasicMaterial,
 ): THREE.LineSegments {
   const pts: number[] = [];
@@ -63,7 +72,12 @@ function gridPanel(
 }
 
 /** Barbed wire strand + barbs running along X at fixed (y, z) */
-function barbedWireX(y: number, z: number, mat: THREE.LineBasicMaterial, barbMat: THREE.LineBasicMaterial): THREE.Group {
+function barbedWireX(
+  y: number,
+  z: number,
+  mat: THREE.LineBasicMaterial,
+  barbMat: THREE.LineBasicMaterial,
+): THREE.Group {
   const g = new THREE.Group();
   const hw = CW / 2;
   const BARB_SP = 1.3;
@@ -78,15 +92,20 @@ function barbedWireX(y: number, z: number, mat: THREE.LineBasicMaterial, barbMat
   for (let b = 0; b <= count; b++) {
     const x = -hw + b * BARB_SP;
     // X-cross in the XY plane (barb perpendicular to wire)
-    barbPts.push(x - BS, y + BS, z,  x + BS, y - BS, z);
-    barbPts.push(x - BS, y - BS, z,  x + BS, y + BS, z);
+    barbPts.push(x - BS, y + BS, z, x + BS, y - BS, z);
+    barbPts.push(x - BS, y - BS, z, x + BS, y + BS, z);
   }
   g.add(new THREE.LineSegments(floatGeo(barbPts), barbMat));
   return g;
 }
 
 /** Barbed wire strand + barbs running along Y at fixed (x, z) */
-function barbedWireY(x: number, z: number, mat: THREE.LineBasicMaterial, barbMat: THREE.LineBasicMaterial): THREE.Group {
+function barbedWireY(
+  x: number,
+  z: number,
+  mat: THREE.LineBasicMaterial,
+  barbMat: THREE.LineBasicMaterial,
+): THREE.Group {
   const g = new THREE.Group();
   const hh = CH / 2;
   const BARB_SP = 1.1;
@@ -99,8 +118,8 @@ function barbedWireY(x: number, z: number, mat: THREE.LineBasicMaterial, barbMat
   for (let b = 0; b <= count; b++) {
     const y = -hh + b * BARB_SP;
     // X-cross in the YZ plane
-    barbPts.push(x, y - BS, z + BS,  x, y + BS, z - BS);
-    barbPts.push(x, y - BS, z - BS,  x, y + BS, z + BS);
+    barbPts.push(x, y - BS, z + BS, x, y + BS, z - BS);
+    barbPts.push(x, y - BS, z - BS, x, y + BS, z + BS);
   }
   g.add(new THREE.LineSegments(floatGeo(barbPts), barbMat));
   return g;
@@ -109,29 +128,30 @@ function barbedWireY(x: number, z: number, mat: THREE.LineBasicMaterial, barbMat
 // ── one repeating corridor tile ──────────────────────────────────────────────
 function createTile(): THREE.Group {
   const g = new THREE.Group();
-  const hw = CW / 2, hh = CH / 2;
+  const hw = CW / 2,
+    hh = CH / 2;
 
-  const matWall  = new THREE.LineBasicMaterial({ color: TEAL_N, transparent: true, opacity: 0.55 });
+  const matWall = new THREE.LineBasicMaterial({ color: TEAL_N, transparent: true, opacity: 0.55 });
   const matFloor = new THREE.LineBasicMaterial({ color: TEAL_N, transparent: true, opacity: 0.35 });
-  const matCeil  = new THREE.LineBasicMaterial({ color: TEAL_N, transparent: true, opacity: 0.22 });
-  const matWire  = new THREE.LineBasicMaterial({ color: TEAL_N });
-  const matBarb  = new THREE.LineBasicMaterial({ color: BURG_N });
+  const matCeil = new THREE.LineBasicMaterial({ color: TEAL_N, transparent: true, opacity: 0.22 });
+  const matWire = new THREE.LineBasicMaterial({ color: TEAL_N });
+  const matBarb = new THREE.LineBasicMaterial({ color: BURG_N });
 
   // ── walls ──
   // Dense horizontal wires (every ~1 unit in Y) + vertical structs every ~5 units in Z
-  g.add(gridPanel("x", -hw,  -hh, hh, 11,  0, -TILE_LEN, 6, matWall));
-  g.add(gridPanel("x",  hw,  -hh, hh, 11,  0, -TILE_LEN, 6, matWall));
+  g.add(gridPanel("x", -hw, -hh, hh, 11, 0, -TILE_LEN, 6, matWall));
+  g.add(gridPanel("x", hw, -hh, hh, 11, 0, -TILE_LEN, 6, matWall));
 
   // ── floor ──
-  g.add(gridPanel("y", -hh, -hw, hw, 9,  0, -TILE_LEN, 14, matFloor));
+  g.add(gridPanel("y", -hh, -hw, hw, 9, 0, -TILE_LEN, 14, matFloor));
 
   // ── ceiling ──
-  g.add(gridPanel("y",  hh, -hw, hw, 9,  0, -TILE_LEN, 7, matCeil));
+  g.add(gridPanel("y", hh, -hw, hw, 9, 0, -TILE_LEN, 7, matCeil));
 
   // ── horizontal barbed wire strands crossing the corridor ──
   // Two rows at different heights, spaced through the tile depth
-  const zSlots = [-5, -12, -19];   // Z positions within tile
-  const yLevels = [-1.8, 1.8];     // two height levels
+  const zSlots = [-5, -12, -19]; // Z positions within tile
+  const yLevels = [-1.8, 1.8]; // two height levels
 
   for (const z of zSlots) {
     for (const y of yLevels) {
@@ -166,7 +186,11 @@ function buildScene(el: HTMLDivElement) {
   camera.position.set(0, 1.5, 14);
   camera.lookAt(0, 0, -60);
 
-  const renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({
+    alpha: false,
+    antialias: true,
+    powerPreference: "high-performance",
+  });
   renderer.setSize(W, H);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(BG_N, 1);
@@ -246,8 +270,20 @@ export function PyracryptBobwireSection() {
       <div ref={mountRef} className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }} />
 
       {/* top/bottom page-blend gradients */}
-      <div className="absolute inset-x-0 top-0 h-24 pointer-events-none" style={{ background: "linear-gradient(to bottom, hsl(var(--background)) 0%, #04060f 100%)", zIndex: 1 }} />
-      <div className="absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "linear-gradient(to top, hsl(var(--background)) 0%, #04060f 100%)", zIndex: 1 }} />
+      <div
+        className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, hsl(var(--background)) 0%, #04060f 100%)",
+          zIndex: 1,
+        }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+        style={{
+          background: "linear-gradient(to top, hsl(var(--background)) 0%, #04060f 100%)",
+          zIndex: 1,
+        }}
+      />
 
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[640px] px-4 py-24 text-center">
@@ -262,7 +298,8 @@ export function PyracryptBobwireSection() {
           <span style={{ color: TEAL }}>Pyracrypt</span>
         </h2>
         <p className="text-lg sm:text-xl text-white/60 max-w-xl mx-auto mb-4 leading-relaxed">
-          Lock your files so only you can open them. AES-256 encryption that runs entirely in your browser — nothing ever leaves your device.
+          Lock your files so only you can open them. AES-256 encryption that runs entirely in your
+          browser — nothing ever leaves your device.
         </p>
         <p className="text-sm text-white/35 max-w-md mx-auto mb-10">
           Free forever · Pro plans from $19/mo · Zero upload · No sign-up needed
@@ -286,15 +323,17 @@ export function PyracryptBobwireSection() {
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center mt-8">
-          {["AES-256", "Zero Upload", "No Account", "Free Forever", "Pro from $19/mo"].map((tag) => (
-            <span
-              key={tag}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}28`, color: TEAL }}
-            >
-              {tag}
-            </span>
-          ))}
+          {["AES-256", "Zero Upload", "No Account", "Free Forever", "Pro from $19/mo"].map(
+            (tag) => (
+              <span
+                key={tag}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}28`, color: TEAL }}
+              >
+                {tag}
+              </span>
+            ),
+          )}
         </div>
       </div>
     </section>

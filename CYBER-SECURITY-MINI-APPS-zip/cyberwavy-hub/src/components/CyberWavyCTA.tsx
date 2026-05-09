@@ -12,7 +12,8 @@ export function CyberWavyCTA({ headline = "Want the full picture?" }: Props) {
         <p>
           <strong>{headline}</strong>
           <br />
-          Pyracrypt runs advanced AI-powered security engines across your entire system in one unified scan.
+          Pyracrypt runs advanced AI-powered security engines across your entire system in one
+          unified scan.
         </p>
         <a className="btn-cta-large" href={PYRACRYPT_URL} target="_blank" rel="noreferrer">
           Try Pyracrypt Free →

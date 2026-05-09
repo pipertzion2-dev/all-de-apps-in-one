@@ -70,7 +70,12 @@ async function getRobots(robotsUrl: string) {
   return robotsParser(robotsUrl, body);
 }
 
-function pushIssue(issues: UrlAuditIssue[], code: string, message: string, priority: IssuePriority) {
+function pushIssue(
+  issues: UrlAuditIssue[],
+  code: string,
+  message: string,
+  priority: IssuePriority,
+) {
   issues.push({ code, message, priority });
 }
 
@@ -82,16 +87,24 @@ function countByPriority(results: UrlAuditResult[]): Record<IssuePriority, numbe
       });
       return acc;
     },
-    { high: 0, medium: 0, low: 0 }
+    { high: 0, medium: 0, low: 0 },
   );
 }
 
-async function auditUrl(url: string, robots: ReturnType<typeof robotsParser>): Promise<UrlAuditResult> {
+async function auditUrl(
+  url: string,
+  robots: ReturnType<typeof robotsParser>,
+): Promise<UrlAuditResult> {
   const issues: UrlAuditIssue[] = [];
   const { status, body } = await fetchText(url);
 
   if (!robots.isAllowed(url, "*")) {
-    pushIssue(issues, "BLOCKED_BY_ROBOTS", "URL is blocked by robots.txt but present in sitemap.", "high");
+    pushIssue(
+      issues,
+      "BLOCKED_BY_ROBOTS",
+      "URL is blocked by robots.txt but present in sitemap.",
+      "high",
+    );
   }
 
   if (status !== 200) {
@@ -113,7 +126,12 @@ async function auditUrl(url: string, robots: ReturnType<typeof robotsParser>): P
     const canonicalIsAbsolute = /^https?:\/\//i.test(canonical);
     const canonicalFinal = canonicalIsAbsolute ? canonical : new URL(canonical, url).toString();
     if (normalizeUrl(canonicalFinal) !== normalizeUrl(url)) {
-      pushIssue(issues, "CANONICAL_MISMATCH", `Canonical points to ${canonicalFinal}, expected ${url}.`, "high");
+      pushIssue(
+        issues,
+        "CANONICAL_MISMATCH",
+        `Canonical points to ${canonicalFinal}, expected ${url}.`,
+        "high",
+      );
     }
   }
 

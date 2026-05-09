@@ -1,0 +1,25 @@
+**/.git
+**/node_modules
+**/.next
+**/dist
+**/build
+**/out
+**/coverage
+**/.turbo
+**/.cache
+**/.local
+**/attached_assets
+
+# Vendor / bulk drops (keep formatting scoped to maintained source)
+Ai-Tools-Hub/_uploaded_tools
+Ai-Tools-Hub/artifacts
+SVIVVA ADD ONS
+PYRACRYPT EXTRA FEATURES ADD ON
+
+# Lockfiles (noisy, machine-generated)
+**/package-lock.json
+**/pnpm-lock.yaml
+**/yarn.lock
+
+**/*.min.js
+**/*.min.css

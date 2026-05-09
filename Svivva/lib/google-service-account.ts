@@ -9,22 +9,14 @@ export interface GoogleServiceAccount {
 
 function base64Url(input: string | Buffer): string {
   const buffer = typeof input === "string" ? Buffer.from(input) : input;
-  return buffer
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
+  return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-export function parseGoogleServiceAccount(
-  rawJson: string
-): GoogleServiceAccount {
+export function parseGoogleServiceAccount(rawJson: string): GoogleServiceAccount {
   const parsed = JSON.parse(rawJson) as GoogleServiceAccount;
 
   if (!parsed.private_key || !parsed.client_email || !parsed.token_uri) {
-    throw new Error(
-      "Service account JSON missing private_key, client_email, or token_uri"
-    );
+    throw new Error("Service account JSON missing private_key, client_email, or token_uri");
   }
 
   return parsed;
@@ -32,7 +24,7 @@ export function parseGoogleServiceAccount(
 
 export async function getGoogleServiceAccountAccessToken(
   serviceAccount: GoogleServiceAccount,
-  scope: string
+  scope: string,
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
@@ -43,7 +35,7 @@ export async function getGoogleServiceAccountAccessToken(
       aud: serviceAccount.token_uri,
       exp: now + 3600,
       iat: now,
-    })
+    }),
   );
   const sigInput = `${header}.${payload}`;
   const signer = createSign("RSA-SHA256");

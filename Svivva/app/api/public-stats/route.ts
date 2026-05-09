@@ -7,17 +7,11 @@ export const revalidate = 300;
 
 export async function GET() {
   try {
-    const [projectCount] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(projects);
+    const [projectCount] = await db.select({ count: sql<number>`count(*)::int` }).from(projects);
 
-    const [userCount] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(users);
+    const [userCount] = await db.select({ count: sql<number>`count(*)::int` }).from(users);
 
-    const [apiCallCount] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(usageLogs);
+    const [apiCallCount] = await db.select({ count: sql<number>`count(*)::int` }).from(usageLogs);
 
     return NextResponse.json({
       projects: projectCount.count ?? 0,

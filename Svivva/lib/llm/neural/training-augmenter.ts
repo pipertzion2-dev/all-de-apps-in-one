@@ -18,11 +18,16 @@ export interface AugmentationResult {
 }
 
 const AUGMENTATION_STRATEGIES = {
-  paraphrase: "Generate semantically equivalent inputs with different wording, style, and structure. Vary formality, sentence length, and vocabulary while preserving meaning.",
-  adversarial: "Generate challenging inputs designed to test edge cases: ambiguous requests, borderline valid inputs, unusual formatting, mixed languages, and potential prompt injection attempts.",
-  interpolation: "Generate inputs that fill gaps between existing examples. Find intermediate complexity levels, combine aspects of different examples, and explore unexplored input patterns.",
-  diversity: "Generate inputs from underrepresented categories. Include different domains, user personas, input lengths, cultural contexts, and unusual but valid use cases.",
-  stress: "Generate extreme inputs: very long text, minimal text, special characters, numbers, URLs, code snippets, and other unusual input types that the API should handle gracefully.",
+  paraphrase:
+    "Generate semantically equivalent inputs with different wording, style, and structure. Vary formality, sentence length, and vocabulary while preserving meaning.",
+  adversarial:
+    "Generate challenging inputs designed to test edge cases: ambiguous requests, borderline valid inputs, unusual formatting, mixed languages, and potential prompt injection attempts.",
+  interpolation:
+    "Generate inputs that fill gaps between existing examples. Find intermediate complexity levels, combine aspects of different examples, and explore unexplored input patterns.",
+  diversity:
+    "Generate inputs from underrepresented categories. Include different domains, user personas, input lengths, cultural contexts, and unusual but valid use cases.",
+  stress:
+    "Generate extreme inputs: very long text, minimal text, special characters, numbers, URLs, code snippets, and other unusual input types that the API should handle gracefully.",
 };
 
 const AUGMENTER_PROMPT = `You are a neural training data augmentation engine. Generate high-quality synthetic training examples for AI APIs using advanced augmentation strategies.
@@ -40,14 +45,19 @@ export async function augmentTrainingData(
   outputSchema: JsonSchema,
   strategy: keyof typeof AUGMENTATION_STRATEGIES,
   count: number = 10,
-  existingExamples?: { input: string; output: Record<string, unknown> }[]
+  existingExamples?: { input: string; output: Record<string, unknown> }[],
 ): Promise<AugmentationResult> {
   try {
-    const strategyDescription = AUGMENTATION_STRATEGIES[strategy] || AUGMENTATION_STRATEGIES.diversity;
-    
-    const existingContext = existingExamples && existingExamples.length > 0
-      ? `\n\nExisting examples (generate DIFFERENT ones):\n${existingExamples.slice(0, 5).map((e, i) => `${i + 1}. Input: "${e.input.substring(0, 100)}"`).join("\n")}`
-      : "";
+    const strategyDescription =
+      AUGMENTATION_STRATEGIES[strategy] || AUGMENTATION_STRATEGIES.diversity;
+
+    const existingContext =
+      existingExamples && existingExamples.length > 0
+        ? `\n\nExisting examples (generate DIFFERENT ones):\n${existingExamples
+            .slice(0, 5)
+            .map((e, i) => `${i + 1}. Input: "${e.input.substring(0, 100)}"`)
+            .join("\n")}`
+        : "";
 
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
@@ -79,15 +89,17 @@ Return JSON with "examples" array of ${count} items. Each: { input (string), out
     }
 
     const parsed = JSON.parse(content);
-    const examples: AugmentedExample[] = (parsed.examples || []).map((e: Partial<AugmentedExample>) => ({
-      input: e.input || "",
-      output: e.output || {},
-      strategy: e.strategy || strategy,
-      qualityScore: e.qualityScore ?? 0,
-      approved: (e.qualityScore ?? 0) >= 75,
-    }));
+    const examples: AugmentedExample[] = (parsed.examples || []).map(
+      (e: Partial<AugmentedExample>) => ({
+        input: e.input || "",
+        output: e.output || {},
+        strategy: e.strategy || strategy,
+        qualityScore: e.qualityScore ?? 0,
+        approved: (e.qualityScore ?? 0) >= 75,
+      }),
+    );
 
-    const approved = examples.filter(e => e.approved);
+    const approved = examples.filter((e) => e.approved);
 
     return {
       success: true,
@@ -103,4 +115,6 @@ Return JSON with "examples" array of ${count} items. Each: { input (string), out
   }
 }
 
-export const STRATEGIES = Object.keys(AUGMENTATION_STRATEGIES) as (keyof typeof AUGMENTATION_STRATEGIES)[];
+export const STRATEGIES = Object.keys(
+  AUGMENTATION_STRATEGIES,
+) as (keyof typeof AUGMENTATION_STRATEGIES)[];

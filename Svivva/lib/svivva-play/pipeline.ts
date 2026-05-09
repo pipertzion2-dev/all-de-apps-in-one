@@ -76,13 +76,24 @@ async function callLLM(systemPrompt: string, userInput: Record<string, unknown>)
 }
 
 export async function runAnalysis(
-  audioMeta: { name: string; size: number; type: string; durationEstimate?: number; audioBase64?: string },
+  audioMeta: {
+    name: string;
+    size: number;
+    type: string;
+    durationEstimate?: number;
+    audioBase64?: string;
+  },
   userHint?: string,
-  realAnalysis?: { bpm: number; key: string; keyConfidence: number }
+  realAnalysis?: { bpm: number; key: string; keyConfidence: number },
 ): Promise<PipelineStageResult<Analysis>> {
   try {
     const input: Record<string, unknown> = {
-      audio_meta: { name: audioMeta.name, size: audioMeta.size, type: audioMeta.type, durationEstimate: audioMeta.durationEstimate },
+      audio_meta: {
+        name: audioMeta.name,
+        size: audioMeta.size,
+        type: audioMeta.type,
+        durationEstimate: audioMeta.durationEstimate,
+      },
       user_hint: userHint || "",
     };
 
@@ -128,7 +139,9 @@ export async function runAnalysis(
       chords: Array.isArray(parsed.chords) ? parsed.chords : [],
       sections: Array.isArray(parsed.sections) ? parsed.sections : [],
       downbeats: Array.isArray(parsed.downbeats) ? parsed.downbeats : [],
-      style_compatibility: Array.isArray(parsed.style_compatibility) ? parsed.style_compatibility : [],
+      style_compatibility: Array.isArray(parsed.style_compatibility)
+        ? parsed.style_compatibility
+        : [],
       timbre_descriptors: parsed.timbre_descriptors || {},
     };
 
@@ -149,7 +162,7 @@ export async function runPlan(
   analysis: Analysis,
   mode: PlayMode,
   stylePreset: string,
-  settings: PipelineSettings
+  settings: PipelineSettings,
 ): Promise<PipelineStageResult<Plan>> {
   try {
     const modeAddon = MODE_PROMPT_ADDONS[mode] || "";
@@ -168,15 +181,17 @@ export async function runPlan(
     const parsed = JSON.parse(raw);
 
     const normalized = {
-      stems: Array.isArray(parsed.stems) ? parsed.stems.map((s: any) => ({
-        name: String(s.name || "Untitled"),
-        role: s.role || "melody",
-        register: s.register || "mid",
-        instrument_hint: String(s.instrument_hint || s.instrumentHint || "Piano"),
-        density_curve: Array.isArray(s.density_curve) ? s.density_curve : [],
-        pan: s.pan ?? 0,
-        articulations: Array.isArray(s.articulations) ? s.articulations : [],
-      })) : [],
+      stems: Array.isArray(parsed.stems)
+        ? parsed.stems.map((s: any) => ({
+            name: String(s.name || "Untitled"),
+            role: s.role || "melody",
+            register: s.register || "mid",
+            instrument_hint: String(s.instrument_hint || s.instrumentHint || "Piano"),
+            density_curve: Array.isArray(s.density_curve) ? s.density_curve : [],
+            pan: s.pan ?? 0,
+            articulations: Array.isArray(s.articulations) ? s.articulations : [],
+          }))
+        : [],
       motif_rules: parsed.motif_rules || [],
       harmony_rules: parsed.harmony_rules || { mode: settings.harmonyMode || "match" },
       dynamics: parsed.dynamics || [],
@@ -200,7 +215,7 @@ export async function runMidiGeneration(
   analysis: Analysis,
   plan: Plan,
   range: { startBar: number; endBar: number },
-  settings: PipelineSettings
+  settings: PipelineSettings,
 ): Promise<PipelineStageResult<MidiOutput>> {
   try {
     const input = {
@@ -221,27 +236,37 @@ export async function runMidiGeneration(
     const parsed = JSON.parse(raw);
 
     const normalized = {
-      stems: Array.isArray(parsed.stems) ? parsed.stems.map((s: any) => ({
-        name: String(s.name || "Untitled"),
-        midi_events: Array.isArray(s.midi_events)
-          ? s.midi_events.filter((e: any) =>
-              typeof e.note === "number" && typeof e.startBeat === "number" && typeof e.duration === "number"
-            ).map((e: any) => ({
-              note: Math.max(0, Math.min(127, e.note)),
-              velocity: Math.max(1, Math.min(127, e.velocity || 80)),
-              startBeat: Math.max(0, e.startBeat),
-              duration: Math.max(0.01, e.duration),
-              channel: Math.max(0, Math.min(15, e.channel || 0)),
-            }))
-          : [],
-        expression: {
-          cc: Array.isArray(s.expression?.cc) ? s.expression.cc : [],
-          pitchbend: Array.isArray(s.expression?.pitchbend) ? s.expression.pitchbend : [],
-        },
-      })) : [],
+      stems: Array.isArray(parsed.stems)
+        ? parsed.stems.map((s: any) => ({
+            name: String(s.name || "Untitled"),
+            midi_events: Array.isArray(s.midi_events)
+              ? s.midi_events
+                  .filter(
+                    (e: any) =>
+                      typeof e.note === "number" &&
+                      typeof e.startBeat === "number" &&
+                      typeof e.duration === "number",
+                  )
+                  .map((e: any) => ({
+                    note: Math.max(0, Math.min(127, e.note)),
+                    velocity: Math.max(1, Math.min(127, e.velocity || 80)),
+                    startBeat: Math.max(0, e.startBeat),
+                    duration: Math.max(0.01, e.duration),
+                    channel: Math.max(0, Math.min(15, e.channel || 0)),
+                  }))
+              : [],
+            expression: {
+              cc: Array.isArray(s.expression?.cc) ? s.expression.cc : [],
+              pitchbend: Array.isArray(s.expression?.pitchbend) ? s.expression.pitchbend : [],
+            },
+          }))
+        : [],
     };
 
-    if (normalized.stems.length === 0 || normalized.stems.every((s: { midi_events: unknown[] }) => s.midi_events.length === 0)) {
+    if (
+      normalized.stems.length === 0 ||
+      normalized.stems.every((s: { midi_events: unknown[] }) => s.midi_events.length === 0)
+    ) {
       return { success: false, error: "MIDI generation produced no valid events" };
     }
 
@@ -254,7 +279,7 @@ export async function runMidiGeneration(
 
 export async function runPatchDesign(
   analysis: Analysis,
-  settings: PipelineSettings
+  settings: PipelineSettings,
 ): Promise<PipelineStageResult<Patch>> {
   try {
     const modeAddon = MODE_PROMPT_ADDONS.patch;

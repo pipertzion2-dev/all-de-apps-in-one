@@ -11,12 +11,7 @@ import {
   GoogleServiceAccount,
   parseGoogleServiceAccount,
 } from "@/lib/google-service-account";
-import {
-  badRequest,
-  forbidden,
-  ok,
-  serverError,
-} from "@/lib/http-response";
+import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
 
@@ -37,23 +32,44 @@ export async function POST(req: NextRequest) {
       // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
       const adminUserId = process.env.ADMIN_USER_ID || "";
       const [creds] = adminUserId
-        ? await db.select({ sa: seedCredentials.googleServiceAccountJson, site: seedCredentials.googleSiteUrl })
+        ? await db
+            .select({
+              sa: seedCredentials.googleServiceAccountJson,
+              site: seedCredentials.googleSiteUrl,
+            })
             .from(seedCredentials)
             .where(eq(seedCredentials.userId, adminUserId))
             .limit(1)
-        : await db.select({ sa: seedCredentials.googleServiceAccountJson, site: seedCredentials.googleSiteUrl })
+        : await db
+            .select({
+              sa: seedCredentials.googleServiceAccountJson,
+              site: seedCredentials.googleSiteUrl,
+            })
             .from(seedCredentials)
-            .where(and(eq(seedCredentials.googleIndexingEnabled, true), isNotNull(seedCredentials.googleServiceAccountJson), isNotNull(seedCredentials.googleSiteUrl)))
+            .where(
+              and(
+                eq(seedCredentials.googleIndexingEnabled, true),
+                isNotNull(seedCredentials.googleServiceAccountJson),
+                isNotNull(seedCredentials.googleSiteUrl),
+              ),
+            )
             .orderBy(desc(seedCredentials.updatedAt))
             .limit(1);
 
-      const googlePromise = creds?.sa && creds?.site
-        ? submitSitemapToGSC(creds.sa, creds.site, sitemapUrl)
-        : Promise.resolve({ ok: false as const, error: "No service account configured (paste JSON at /dashboard/gsc-connect)" });
+      const googlePromise =
+        creds?.sa && creds?.site
+          ? submitSitemapToGSC(creds.sa, creds.site, sitemapUrl)
+          : Promise.resolve({
+              ok: false as const,
+              error: "No service account configured (paste JSON at /dashboard/gsc-connect)",
+            });
 
-      const bingPromise = fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`, {
-        signal: AbortSignal.timeout(10000),
-      })
+      const bingPromise = fetch(
+        `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+        {
+          signal: AbortSignal.timeout(10000),
+        },
+      )
         .then((r) => ({ ok: r.ok, status: r.status }))
         .catch((e) => ({ ok: false, status: 0, error: String(e) }));
 
@@ -70,7 +86,11 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user || !isAdmin(user)) return forbidden();
 
-  const [existing] = await db.select({ id: seedCredentials.id }).from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+  const [existing] = await db
+    .select({ id: seedCredentials.id })
+    .from(seedCredentials)
+    .where(eq(seedCredentials.userId, user.id))
+    .limit(1);
   if (!existing) {
     await db.insert(seedCredentials).values({ userId: user.id, updatedAt: new Date() });
   }
@@ -79,7 +99,10 @@ export async function POST(req: NextRequest) {
   if (action === "fix_url") {
     const { siteUrl } = body;
     if (!siteUrl || typeof siteUrl !== "string") return badRequest("siteUrl required");
-    await db.update(seedCredentials).set({ googleSiteUrl: siteUrl, updatedAt: new Date() }).where(eq(seedCredentials.userId, user.id));
+    await db
+      .update(seedCredentials)
+      .set({ googleSiteUrl: siteUrl, updatedAt: new Date() })
+      .where(eq(seedCredentials.userId, user.id));
     return ok({ success: true, siteUrl });
   }
 
@@ -96,13 +119,14 @@ export async function POST(req: NextRequest) {
     try {
       await getGoogleServiceAccountAccessToken(
         sa,
-        "https://www.googleapis.com/auth/webmasters.readonly"
+        "https://www.googleapis.com/auth/webmasters.readonly",
       );
     } catch (e: any) {
       return badRequest(`Service account auth failed: ${e.message}`);
     }
     try {
-      const result = await db.update(seedCredentials)
+      const result = await db
+        .update(seedCredentials)
         .set({ googleServiceAccountJson: json, googleIndexingEnabled: true, updatedAt: new Date() })
         .where(eq(seedCredentials.userId, user.id));
       console.log("[gsc/save] UPDATE result:", JSON.stringify(result));

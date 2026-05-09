@@ -25,18 +25,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found", projectId },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
     }
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {
-      return NextResponse.json(
-        { error: "No version found for project" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No version found for project" }, { status: 404 });
     }
 
     let body: z.infer<typeof GenerateEvalsInputSchema>;
@@ -53,13 +47,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const result = await generateEvalCases(
       latestVersion.systemPrompt,
       latestVersion.outputSchema as JsonSchema,
-      count
+      count,
     );
 
     if (!result.success || !result.cases) {
       return NextResponse.json(
         { error: "Failed to generate eval cases", details: result.error },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -67,7 +61,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .select()
       .from(evalSuites)
       .where(eq(evalSuites.projectId, projectId));
-    
+
     let suite = existingSuites.find((s) => s.name === finalSuiteName);
 
     if (suite && replace) {
@@ -97,9 +91,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
           result[key] = sanitizeObject(value as Record<string, unknown>);
         } else if (Array.isArray(value)) {
-          result[key] = value.map((v) => 
-            typeof v === "string" ? sanitizeString(v) : 
-            typeof v === "object" && v !== null ? sanitizeObject(v as Record<string, unknown>) : v
+          result[key] = value.map((v) =>
+            typeof v === "string"
+              ? sanitizeString(v)
+              : typeof v === "object" && v !== null
+                ? sanitizeObject(v as Record<string, unknown>)
+                : v,
           );
         } else {
           result[key] = value;
@@ -152,8 +149,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Generate evals error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown" },
-      { status: 500 }
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown",
+      },
+      { status: 500 },
     );
   }
 }
@@ -164,27 +164,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const suites = await db
-      .select()
-      .from(evalSuites)
-      .where(eq(evalSuites.projectId, projectId));
+    const suites = await db.select().from(evalSuites).where(eq(evalSuites.projectId, projectId));
 
     const suitesWithCounts = await Promise.all(
       suites.map(async (suite) => {
-        const cases = await db
-          .select()
-          .from(evalCases)
-          .where(eq(evalCases.suiteId, suite.id));
+        const cases = await db.select().from(evalCases).where(eq(evalCases.suiteId, suite.id));
 
         const categoryCounts: Record<string, number> = {};
         for (const c of cases) {
-          const meta = (c.expectedOutput as Record<string, unknown>)?._meta as Record<string, unknown> | undefined;
+          const meta = (c.expectedOutput as Record<string, unknown>)?._meta as
+            | Record<string, unknown>
+            | undefined;
           const category = (meta?.category as string) || "unknown";
           categoryCounts[category] = (categoryCounts[category] || 0) + 1;
         }
@@ -198,7 +191,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           categoryCounts,
           createdAt: suite.createdAt,
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -209,9 +202,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Get evals error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

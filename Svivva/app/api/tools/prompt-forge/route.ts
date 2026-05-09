@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/llm/openai";
 
 const ALLOWED_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-11-20", "gpt-4-turbo"] as const;
-type AllowedModel = typeof ALLOWED_MODELS[number];
+type AllowedModel = (typeof ALLOWED_MODELS)[number];
 
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
 
@@ -23,7 +23,10 @@ function checkRateLimit(ip: string): boolean {
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (!checkRateLimit(ip)) {
-    return NextResponse.json({ error: "Rate limit reached — 12 requests/minute. Upgrade to Svivva for unlimited." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Rate limit reached — 12 requests/minute. Upgrade to Svivva for unlimited." },
+      { status: 429 },
+    );
   }
 
   let body: { systemPrompt?: string; userMessage?: string; model?: string; temperature?: number };
@@ -42,7 +45,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid model" }, { status: 400 });
   }
   if (userMessage.length > 8000 || systemPrompt.length > 4000) {
-    return NextResponse.json({ error: "Prompt too long — max 8000 chars for user message, 4000 for system prompt" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Prompt too long — max 8000 chars for user message, 4000 for system prompt" },
+      { status: 400 },
+    );
   }
 
   const messages: { role: "system" | "user"; content: string }[] = [];
@@ -63,21 +69,21 @@ export async function POST(req: NextRequest) {
     const usage = completion.usage;
 
     const MODEL_PRICES: Record<string, { input: number; output: number }> = {
-      "gpt-4o-mini":         { input: 0.15,  output: 0.60  },
-      "gpt-4o":              { input: 2.50,  output: 10.00 },
-      "gpt-4o-2024-11-20":   { input: 2.50,  output: 10.00 },
-      "gpt-4-turbo":         { input: 10.00, output: 30.00 },
+      "gpt-4o-mini": { input: 0.15, output: 0.6 },
+      "gpt-4o": { input: 2.5, output: 10.0 },
+      "gpt-4o-2024-11-20": { input: 2.5, output: 10.0 },
+      "gpt-4-turbo": { input: 10.0, output: 30.0 },
     };
     const prices = MODEL_PRICES[model] || MODEL_PRICES["gpt-4o-mini"];
-    const inputTokens  = usage?.prompt_tokens    || 0;
+    const inputTokens = usage?.prompt_tokens || 0;
     const outputTokens = usage?.completion_tokens || 0;
-    const costUsd = ((inputTokens * prices.input) + (outputTokens * prices.output)) / 1_000_000;
+    const costUsd = (inputTokens * prices.input + outputTokens * prices.output) / 1_000_000;
 
     return NextResponse.json({
-      content:      choice.message.content || "",
+      content: choice.message.content || "",
       inputTokens,
       outputTokens,
-      totalTokens:  usage?.total_tokens || 0,
+      totalTokens: usage?.total_tokens || 0,
       model,
       latencyMs,
       costUsd,

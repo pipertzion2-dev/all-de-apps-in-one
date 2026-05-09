@@ -58,26 +58,32 @@ artifacts-monorepo/
 ## Tool Categories (29 tools total)
 
 ### Built-in AI Tools (10 — powered by OpenAI via Replit)
+
 AI Chat, Summarizer, Translator, Code Explainer, Grammar Checker,
 Sentiment Analyzer, Keyword Extractor, Tone Rewriter, Image Generator, Quiz Generator
 
 ### AI Prompt Tools (8 — uploaded static apps)
+
 Prompt Coverage Checker, AI Prompt Linter, AI Test Case Generator,
 Prompt Drift Detector, Prompt Security Scanner, Prompt Consistency Checker,
 Prompt Confidence Heatmap, Prompt Compression Tool
 
 ### Developer Tools (4 — uploaded static apps)
+
 JSON Schema Analyzer, API Latency Calculator, JSON Repair Tool, JSON Schema Linter, Evaluation Rule Builder
 
 ### AI Model Tools (4 — uploaded static apps)
+
 AI Model Comparison, Synthetic Dataset Generator, AI Output Diff Visualizer, Evaluation Rule Builder
 
 ### Hardware & BOM (3 — uploaded static apps)
+
 Hardware BOM Tools, AI BOM Generator, BOM Material Sourcing
 
 ## SEO Architecture
 
 Each uploaded tool has:
+
 - **Landing page** at `/:slug` — React page with hero, features, steps, FAQ, marketing funnel, related tools
 - **Live tool** at `/tools/:slug/` — Static HTML app served via Vite public folder
 - **Structured data** JSON-LD injected per page via useEffect
@@ -88,6 +94,7 @@ Each uploaded tool has:
 ## API Routes
 
 ### Built-in AI Tools
+
 - `GET/POST /api/openai/conversations` - Manage conversations
 - `POST /api/openai/generate-image` - Image generation
 - `POST /api/tools/summarize` - Text summarization (SSE)
@@ -100,6 +107,7 @@ Each uploaded tool has:
 - `POST /api/tools/quiz` - Quiz generation (JSON)
 
 ### Mini Tool Routes (pure JS analysis — no AI credits needed)
+
 - `POST /api/tools/ai-model-comparison/analyze`
 - `POST /api/tools/prompt-consistency-checker/analyze`
 - `POST /api/tools/synthetic-dataset-generator/analyze`

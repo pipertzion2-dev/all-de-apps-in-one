@@ -8,23 +8,44 @@ export async function POST(req: NextRequest) {
     const { json, schema } = await req.json();
 
     if (!json || !schema) {
-      return NextResponse.json({ error: "Both 'json' and 'schema' are required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Both 'json' and 'schema' are required." },
+        { status: 400 },
+      );
     }
 
     let parsedJson: unknown;
     let parsedSchema: unknown;
 
-    try { parsedJson = JSON.parse(json); }
-    catch (e) { return NextResponse.json({ valid: false, errors: [{ message: `Invalid JSON: ${(e as Error).message}`, path: "" }], parseError: "json" }); }
+    try {
+      parsedJson = JSON.parse(json);
+    } catch (e) {
+      return NextResponse.json({
+        valid: false,
+        errors: [{ message: `Invalid JSON: ${(e as Error).message}`, path: "" }],
+        parseError: "json",
+      });
+    }
 
-    try { parsedSchema = JSON.parse(schema); }
-    catch (e) { return NextResponse.json({ valid: false, errors: [{ message: `Invalid JSON Schema: ${(e as Error).message}`, path: "" }], parseError: "schema" }); }
+    try {
+      parsedSchema = JSON.parse(schema);
+    } catch (e) {
+      return NextResponse.json({
+        valid: false,
+        errors: [{ message: `Invalid JSON Schema: ${(e as Error).message}`, path: "" }],
+        parseError: "schema",
+      });
+    }
 
     const validate = ajv.compile(parsedSchema as object);
     const valid = validate(parsedJson);
 
     if (valid) {
-      return NextResponse.json({ valid: true, errors: [], message: "✓ Valid — JSON matches the schema perfectly." });
+      return NextResponse.json({
+        valid: true,
+        errors: [],
+        message: "✓ Valid — JSON matches the schema perfectly.",
+      });
     }
 
     const errors = (validate.errors || []).map((e) => ({
@@ -35,7 +56,11 @@ export async function POST(req: NextRequest) {
       schemaPath: e.schemaPath,
     }));
 
-    return NextResponse.json({ valid: false, errors, message: `${errors.length} validation error${errors.length === 1 ? "" : "s"} found.` });
+    return NextResponse.json({
+      valid: false,
+      errors,
+      message: `${errors.length} validation error${errors.length === 1 ? "" : "s"} found.`,
+    });
   } catch (e) {
     return NextResponse.json({ error: `Server error: ${String(e)}` }, { status: 500 });
   }

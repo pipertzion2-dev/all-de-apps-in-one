@@ -13,7 +13,10 @@ export async function POST() {
 
     const username = process.env.REPL_OWNER || null;
     if (!username) {
-      return NextResponse.json({ error: "REPL_OWNER not available in this environment" }, { status: 400 });
+      return NextResponse.json(
+        { error: "REPL_OWNER not available in this environment" },
+        { status: 400 },
+      );
     }
 
     const [existing] = await db

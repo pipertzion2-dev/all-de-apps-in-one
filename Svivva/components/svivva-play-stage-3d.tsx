@@ -94,7 +94,7 @@ export function SvivvaPlayStage3D({
       undefined,
       () => {
         if (!cancelled) setErr("Model loading failed");
-      }
+      },
     );
 
     let raf = 0;
@@ -131,7 +131,9 @@ export function SvivvaPlayStage3D({
         </div>
       )}
       {!ready && !err && (
-        <div className="absolute inset-0 flex items-center justify-center text-[10px] text-gray-500">Loading 3D…</div>
+        <div className="absolute inset-0 flex items-center justify-center text-[10px] text-gray-500">
+          Loading 3D…
+        </div>
       )}
     </div>
   );

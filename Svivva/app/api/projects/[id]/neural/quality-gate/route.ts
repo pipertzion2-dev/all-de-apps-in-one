@@ -8,10 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { type JsonSchema } from "@/lib/spec";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -59,10 +56,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -91,22 +85,28 @@ export async function POST(
 
     const result = await scoreOutputQuality(input, output, outputSchema, systemPrompt);
     if (!result.success) {
-      return NextResponse.json({ error: result.error || "Quality scoring failed" }, { status: 422 });
+      return NextResponse.json(
+        { error: result.error || "Quality scoring failed" },
+        { status: 422 },
+      );
     }
 
     const scoreId = uuidv4();
-    const [score] = await db.insert(neuralQualityScores).values({
-      id: scoreId,
-      projectId: id,
-      versionId: latestVersion?.id || null,
-      input,
-      output,
-      confidenceScore: result.confidenceScore || 0,
-      coherenceScore: result.coherenceScore || 0,
-      completenessScore: result.completenessScore || 0,
-      flags: result.flags || [],
-      explanation: result.explanation || "",
-    }).returning();
+    const [score] = await db
+      .insert(neuralQualityScores)
+      .values({
+        id: scoreId,
+        projectId: id,
+        versionId: latestVersion?.id || null,
+        input,
+        output,
+        confidenceScore: result.confidenceScore || 0,
+        coherenceScore: result.coherenceScore || 0,
+        completenessScore: result.completenessScore || 0,
+        flags: result.flags || [],
+        explanation: result.explanation || "",
+      })
+      .returning();
 
     return NextResponse.json(score, { status: 201 });
   } catch (error) {

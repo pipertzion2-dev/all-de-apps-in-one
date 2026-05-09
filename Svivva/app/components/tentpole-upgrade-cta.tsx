@@ -42,10 +42,16 @@ export function TentpoleStickyBar({
     >
       <div
         className="flex items-center justify-between gap-3 px-4 py-3 md:px-8"
-        style={{ background: `linear-gradient(135deg, hsl(240 10% 6%), hsl(240 10% 8%))`, borderTop: `1px solid ${TEAL}30` }}
+        style={{
+          background: `linear-gradient(135deg, hsl(240 10% 6%), hsl(240 10% 8%))`,
+          borderTop: `1px solid ${TEAL}30`,
+        }}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}>
+          <div
+            className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center"
+            style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}
+          >
             <Zap className="w-4 h-4" style={{ color: TEAL }} />
           </div>
           <div className="min-w-0">
@@ -96,15 +102,30 @@ export function TentpoleBanner({
   context,
 }: TentpoleBannerProps) {
   return (
-    <div className="rounded-2xl overflow-hidden relative" style={{ background: `linear-gradient(135deg, ${TEAL}18, ${BURG}18)`, border: `1px solid ${TEAL}30` }}>
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, ${TEAL}, ${BURG})` }} />
+    <div
+      className="rounded-2xl overflow-hidden relative"
+      style={{
+        background: `linear-gradient(135deg, ${TEAL}18, ${BURG}18)`,
+        border: `1px solid ${TEAL}30`,
+      }}
+    >
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: `linear-gradient(to right, ${TEAL}, ${BURG})` }}
+      />
       <div className="p-6 md:flex md:items-center md:gap-6">
-        <div className="w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center mb-4 md:mb-0" style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}>
+        <div
+          className="w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center mb-4 md:mb-0"
+          style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}
+        >
           <Sparkles className="w-6 h-6" style={{ color: TEAL }} />
         </div>
         <div className="flex-1 min-w-0">
           {context && (
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: TEAL }}>
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-1"
+              style={{ color: TEAL }}
+            >
               Step 1 complete · Next →
             </p>
           )}
@@ -132,18 +153,28 @@ interface TentpoleStepIndicatorProps {
   nextLabel: string;
 }
 
-export function TentpoleStepIndicator({ step, total, currentLabel, nextLabel }: TentpoleStepIndicatorProps) {
+export function TentpoleStepIndicator({
+  step,
+  total,
+  currentLabel,
+  nextLabel,
+}: TentpoleStepIndicatorProps) {
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className="flex items-center gap-2">
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium"
-            style={i < step
-              ? { background: `${TEAL}15`, color: TEAL, border: `1px solid ${TEAL}40` }
-              : i === step
-              ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-              : { opacity: 0.4, color: "hsl(var(--muted-foreground))" }
+            style={
+              i < step
+                ? { background: `${TEAL}15`, color: TEAL, border: `1px solid ${TEAL}40` }
+                : i === step
+                  ? {
+                      background: "hsl(var(--muted))",
+                      color: "hsl(var(--muted-foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    }
+                  : { opacity: 0.4, color: "hsl(var(--muted-foreground))" }
             }
           >
             <span>{i + 1}</span>

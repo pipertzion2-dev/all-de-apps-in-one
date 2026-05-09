@@ -49,9 +49,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
   const filteredPosts =
     activeCategory === "All"
       ? posts
-      : posts.filter(
-          (p) => p.category.toLowerCase() === activeCategory.toLowerCase()
-        );
+      : posts.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase());
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -90,8 +88,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
       <section
         className="relative py-20 px-6 text-center"
         style={{
-          background:
-            "linear-gradient(135deg, #5BA8A0 0%, #3d8a82 50%, #6B2C4A 100%)",
+          background: "linear-gradient(135deg, #5BA8A0 0%, #3d8a82 50%, #6B2C4A 100%)",
         }}
         data-testid="section-hero"
       >
@@ -103,21 +100,15 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
           >
             Svivva Blog
           </h1>
-          <p
-            className="text-lg text-white/80 max-w-xl mx-auto"
-            data-testid="text-blog-description"
-          >
-            Guides, tutorials, and insights on building AI-powered APIs.
-            Learn to ship faster with Svivva.
+          <p className="text-lg text-white/80 max-w-xl mx-auto" data-testid="text-blog-description">
+            Guides, tutorials, and insights on building AI-powered APIs. Learn to ship faster with
+            Svivva.
           </p>
         </div>
       </section>
 
       <main className="max-w-6xl mx-auto px-6 py-12">
-        <div
-          className="flex items-center gap-2 mb-8 flex-wrap"
-          data-testid="filter-categories"
-        >
+        <div className="flex items-center gap-2 mb-8 flex-wrap" data-testid="filter-categories">
           {CATEGORIES.map((cat) => (
             <Button
               key={cat}
@@ -125,11 +116,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
               size="sm"
               onClick={() => setActiveCategory(cat)}
               data-testid={`button-category-${cat.toLowerCase()}`}
-              className={
-                activeCategory === cat
-                  ? "text-white"
-                  : ""
-              }
+              className={activeCategory === cat ? "text-white" : ""}
               style={
                 activeCategory === cat
                   ? { backgroundColor: "#5BA8A0", borderColor: "#5BA8A0" }
@@ -191,7 +178,10 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
                       {estimateReadTime(post.content)} min read
                     </span>
                   </div>
-                  <div className="mt-3 flex items-center gap-1 text-sm font-medium" style={{ color: "#5BA8A0" }}>
+                  <div
+                    className="mt-3 flex items-center gap-1 text-sm font-medium"
+                    style={{ color: "#5BA8A0" }}
+                  >
                     Read more <ArrowRight className="h-3 w-3" />
                   </div>
                 </Card>

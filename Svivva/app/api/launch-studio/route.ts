@@ -26,7 +26,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = requestSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
     }
 
     const { action, appName, appDescription, targetAudience } = parsed.data;
@@ -38,7 +41,8 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: "You are an expert app marketing strategist. Generate actionable marketing plans for indie developers and small teams launching apps. Be specific, creative, and practical.",
+            content:
+              "You are an expert app marketing strategist. Generate actionable marketing plans for indie developers and small teams launching apps. Be specific, creative, and practical.",
           },
           {
             role: "user",
@@ -78,7 +82,8 @@ Return JSON: {
         messages: [
           {
             role: "system",
-            content: "You are a landing page copywriter. Generate complete, conversion-optimized landing page content. Write real copy, not placeholder text.",
+            content:
+              "You are a landing page copywriter. Generate complete, conversion-optimized landing page content. Write real copy, not placeholder text.",
           },
           {
             role: "user",
@@ -122,7 +127,8 @@ Return JSON: {
         messages: [
           {
             role: "system",
-            content: "You are a social media expert. Generate engaging, platform-specific posts that drive awareness and signups. Write in an authentic, non-corporate voice.",
+            content:
+              "You are a social media expert. Generate engaging, platform-specific posts that drive awareness and signups. Write in an authentic, non-corporate voice.",
           },
           {
             role: "user",
@@ -152,6 +158,9 @@ Return JSON: {
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (e) {
     console.error("launch-studio error:", e);
-    return NextResponse.json({ error: "An internal error occurred. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { error: "An internal error occurred. Please try again." },
+      { status: 500 },
+    );
   }
 }

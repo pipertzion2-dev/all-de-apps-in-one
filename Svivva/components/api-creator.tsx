@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Zap, Target, Sparkles, Rocket, Brain, Cpu, ChevronRight, Check } from "lucide-react";
+import {
+  Loader2,
+  Zap,
+  Target,
+  Sparkles,
+  Rocket,
+  Brain,
+  Cpu,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 
 interface ApiCreatorProps {
   onComplete: (data: {
@@ -47,26 +57,49 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
   const [suggestions, setSuggestions] = useState<BrandSuggestion | null>(null);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const [selectedPalette, setSelectedPalette] = useState<{ name: string; colors: { primary: string; secondary: string; accent: string } } | null>(null);
+  const [selectedPalette, setSelectedPalette] = useState<{
+    name: string;
+    colors: { primary: string; secondary: string; accent: string };
+  } | null>(null);
 
   const generateTailoredQuestions = useCallback(async (userPrompt: string) => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 600));
-    
+    await new Promise((r) => setTimeout(r, 600));
+
     const words = userPrompt.toLowerCase();
     const questions: TailoredQuestion[] = [];
-    
+
     if (words.includes("analyz") || words.includes("review") || words.includes("sentiment")) {
-      questions.push({ id: "depth", question: "How deep should the analysis go?", options: ["Quick scan", "Standard", "Deep dive", "Exhaustive"] });
+      questions.push({
+        id: "depth",
+        question: "How deep should the analysis go?",
+        options: ["Quick scan", "Standard", "Deep dive", "Exhaustive"],
+      });
     } else if (words.includes("generat") || words.includes("creat") || words.includes("write")) {
-      questions.push({ id: "creativity", question: "How creative should the output be?", options: ["Conservative", "Balanced", "Creative", "Experimental"] });
+      questions.push({
+        id: "creativity",
+        question: "How creative should the output be?",
+        options: ["Conservative", "Balanced", "Creative", "Experimental"],
+      });
     } else {
-      questions.push({ id: "style", question: "How should it process requests?", options: ["Fast", "Balanced", "Thorough", "Maximum"] });
+      questions.push({
+        id: "style",
+        question: "How should it process requests?",
+        options: ["Fast", "Balanced", "Thorough", "Maximum"],
+      });
     }
-    
-    questions.push({ id: "output", question: "How detailed should responses be?", options: ["Brief", "Standard", "Detailed", "Comprehensive"] });
-    questions.push({ id: "tone", question: "What tone should it use?", options: ["Professional", "Friendly", "Technical", "Casual"] });
-    
+
+    questions.push({
+      id: "output",
+      question: "How detailed should responses be?",
+      options: ["Brief", "Standard", "Detailed", "Comprehensive"],
+    });
+    questions.push({
+      id: "tone",
+      question: "What tone should it use?",
+      options: ["Professional", "Friendly", "Technical", "Casual"],
+    });
+
     setTailoredQuestions(questions);
     setPhase("questions");
     setIsGenerating(false);
@@ -74,12 +107,12 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
 
   const generateBrandSuggestions = useCallback(async () => {
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 500));
-    
+    await new Promise((r) => setTimeout(r, 500));
+
     const words = prompt.split(" ");
-    const keyword = words.find(w => w.length > 3) || "API";
+    const keyword = words.find((w) => w.length > 3) || "API";
     const cap = keyword.charAt(0).toUpperCase() + keyword.slice(1, 6).toLowerCase();
-    
+
     const mock: BrandSuggestion = {
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
       icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
@@ -90,7 +123,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
         { name: "Ember", colors: { primary: "#f97316", secondary: "#ea580c", accent: "#fbbf24" } },
       ],
     };
-    
+
     setSuggestions(mock);
     setSelectedName(mock.names[0]);
     setSelectedIcon(mock.icons[0]);
@@ -99,35 +132,49 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
     setIsGenerating(false);
   }, [prompt]);
 
-  const handleOptionSelect = useCallback((questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    setTimeout(() => {
-      if (currentQuestionIndex < tailoredQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        generateBrandSuggestions();
-      }
-    }, 200);
-  }, [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions]);
+  const handleOptionSelect = useCallback(
+    (questionId: string, value: string) => {
+      setAnswers((prev) => ({ ...prev, [questionId]: value }));
+      setTimeout(() => {
+        if (currentQuestionIndex < tailoredQuestions.length - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+        } else {
+          generateBrandSuggestions();
+        }
+      }, 200);
+    },
+    [currentQuestionIndex, tailoredQuestions.length, generateBrandSuggestions],
+  );
 
   const handleCreate = () => {
     if (selectedName && selectedIcon && selectedPalette) {
-      onComplete({ prompt, name: selectedName, icon: selectedIcon, palette: selectedPalette.colors });
+      onComplete({
+        prompt,
+        name: selectedName,
+        icon: selectedIcon,
+        palette: selectedPalette.colors,
+      });
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "prompt" ? "bg-[#5BA8A0] text-white" : "bg-[#5BA8A0]/20 text-[#5BA8A0]"}`}>
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "prompt" ? "bg-[#5BA8A0] text-white" : "bg-[#5BA8A0]/20 text-[#5BA8A0]"}`}
+        >
           {phase !== "prompt" ? <Check className="w-4 h-4" /> : "1"}
         </div>
         <div className={`h-0.5 flex-1 ${phase !== "prompt" ? "bg-[#5BA8A0]" : "bg-border"}`} />
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "questions" ? "bg-[#5BA8A0] text-white" : phase === "brand" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}>
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "questions" ? "bg-[#5BA8A0] text-white" : phase === "brand" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
+        >
           {phase === "brand" ? <Check className="w-4 h-4" /> : "2"}
         </div>
         <div className={`h-0.5 flex-1 ${phase === "brand" ? "bg-[#5BA8A0]" : "bg-border"}`} />
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "brand" ? "bg-[#5BA8A0] text-white" : "bg-muted text-muted-foreground"}`}>
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "brand" ? "bg-[#5BA8A0] text-white" : "bg-muted text-muted-foreground"}`}
+        >
           3
         </div>
       </div>
@@ -136,9 +183,11 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
         <div className="space-y-4">
           <div>
             <h2 className="text-xl font-semibold mb-1">Define your API</h2>
-            <p className="text-muted-foreground text-sm">Describe what you want your AI API to do</p>
+            <p className="text-muted-foreground text-sm">
+              Describe what you want your AI API to do
+            </p>
           </div>
-          
+
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -146,12 +195,12 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
             className="min-h-[120px] text-base"
             data-testid="input-prompt"
           />
-          
+
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
               {prompt.length} characters {prompt.length < 10 && "(min 10)"}
             </span>
-            <Button 
+            <Button
               onClick={() => generateTailoredQuestions(prompt)}
               disabled={prompt.length < 10 || isGenerating}
               className="bg-[#5BA8A0] hover:bg-[#4a9890]"
@@ -168,7 +217,9 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
       {phase === "questions" && tailoredQuestions[currentQuestionIndex] && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-1">{tailoredQuestions[currentQuestionIndex].question}</h2>
+            <h2 className="text-xl font-semibold mb-1">
+              {tailoredQuestions[currentQuestionIndex].question}
+            </h2>
             <p className="text-muted-foreground text-sm">
               Question {currentQuestionIndex + 1} of {tailoredQuestions.length}
             </p>
@@ -180,10 +231,12 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
               return (
                 <button
                   key={opt}
-                  onClick={() => handleOptionSelect(tailoredQuestions[currentQuestionIndex].id, opt)}
+                  onClick={() =>
+                    handleOptionSelect(tailoredQuestions[currentQuestionIndex].id, opt)
+                  }
                   className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    isSelected 
-                      ? "border-[#5BA8A0] bg-[#5BA8A0]/10" 
+                    isSelected
+                      ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
                       : "border-border hover:border-[#5BA8A0]/50 hover:bg-muted/50"
                   }`}
                   data-testid={`button-option-${opt.toLowerCase().replace(/\s/g, "-")}`}
@@ -199,7 +252,11 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full ${
-                  i < currentQuestionIndex ? "bg-[#5BA8A0]" : i === currentQuestionIndex ? "bg-[#5BA8A0]/50" : "bg-muted"
+                  i < currentQuestionIndex
+                    ? "bg-[#5BA8A0]"
+                    : i === currentQuestionIndex
+                      ? "bg-[#5BA8A0]/50"
+                      : "bg-muted"
                 }`}
               />
             ))}
@@ -240,8 +297,8 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                     key={icon}
                     onClick={() => setSelectedIcon(icon)}
                     className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all ${
-                      selectedIcon === icon 
-                        ? "border-[#5BA8A0] bg-[#5BA8A0]/10 text-[#5BA8A0]" 
+                      selectedIcon === icon
+                        ? "border-[#5BA8A0] bg-[#5BA8A0]/10 text-[#5BA8A0]"
                         : "border-border hover:border-[#5BA8A0]/50"
                     }`}
                     data-testid={`button-icon-${icon.toLowerCase()}`}
@@ -260,15 +317,21 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                     key={palette.name}
                     onClick={() => setSelectedPalette(palette)}
                     className={`p-3 rounded-lg border-2 transition-all ${
-                      selectedPalette?.name === palette.name 
-                        ? "border-[#5BA8A0] bg-[#5BA8A0]/5" 
+                      selectedPalette?.name === palette.name
+                        ? "border-[#5BA8A0] bg-[#5BA8A0]/5"
                         : "border-border hover:border-[#5BA8A0]/50"
                     }`}
                     data-testid={`button-palette-${palette.name.toLowerCase()}`}
                   >
                     <div className="flex gap-1 mb-2">
-                      <div className="w-6 h-6 rounded" style={{ backgroundColor: palette.colors.primary }} />
-                      <div className="w-6 h-6 rounded" style={{ backgroundColor: palette.colors.accent }} />
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{ backgroundColor: palette.colors.primary }}
+                      />
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{ backgroundColor: palette.colors.accent }}
+                      />
                     </div>
                     <span className="text-xs font-medium">{palette.name}</span>
                   </button>
@@ -277,7 +340,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
             </div>
           </div>
 
-          <Button 
+          <Button
             onClick={handleCreate}
             disabled={!selectedName || !selectedIcon || !selectedPalette}
             className="w-full bg-[#5BA8A0] hover:bg-[#4a9890]"

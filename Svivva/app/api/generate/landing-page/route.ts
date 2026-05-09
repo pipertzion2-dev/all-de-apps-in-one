@@ -13,9 +13,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "keyword is required" }, { status: 400 });
     }
 
-    let slug = providedSlug || keyword.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    let slug =
+      providedSlug ||
+      keyword
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
 
-    const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+    const existing = await db
+      .select({ id: seoLandingPages.id })
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.slug, slug))
+      .limit(1);
     if (existing.length > 0) {
       slug = `${slug}-${Date.now().toString(36)}`;
     }
@@ -26,7 +35,8 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "You are an SEO expert writing landing pages for Svivva, an AI-powered platform that lets users build production-ready AI APIs from natural language prompts. Generate compelling, SEO-optimized landing page content.",
+          content:
+            "You are an SEO expert writing landing pages for Svivva, an AI-powered platform that lets users build production-ready AI APIs from natural language prompts. Generate compelling, SEO-optimized landing page content.",
         },
         {
           role: "user",
@@ -42,21 +52,24 @@ export async function POST(request: NextRequest) {
       contentWithFaq += `\n\n[FAQ_JSON]${JSON.stringify(generated.faq)}[/FAQ_JSON]`;
     }
 
-    const [page] = await db.insert(seoLandingPages).values({
-      slug,
-      keyword,
-      title: generated.title,
-      headline: generated.headline,
-      subheadline: generated.subheadline,
-      content: contentWithFaq,
-      benefits: generated.benefits || [],
-      howItWorks: generated.howItWorks,
-      whoItsFor: generated.whoItsFor,
-      metaTitle: generated.metaTitle,
-      metaDescription: generated.metaDescription,
-      published: true,
-      category: "seo-landing",
-    }).returning();
+    const [page] = await db
+      .insert(seoLandingPages)
+      .values({
+        slug,
+        keyword,
+        title: generated.title,
+        headline: generated.headline,
+        subheadline: generated.subheadline,
+        content: contentWithFaq,
+        benefits: generated.benefits || [],
+        howItWorks: generated.howItWorks,
+        whoItsFor: generated.whoItsFor,
+        metaTitle: generated.metaTitle,
+        metaDescription: generated.metaDescription,
+        published: true,
+        category: "seo-landing",
+      })
+      .returning();
 
     if (keywordId) {
       await db

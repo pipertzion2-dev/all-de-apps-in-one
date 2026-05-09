@@ -123,8 +123,7 @@ export interface KeywordsResult {
   keywords: KeywordsResultKeywordsItem[];
 }
 
-export type RewriteToneBodyTone =
-  (typeof RewriteToneBodyTone)[keyof typeof RewriteToneBodyTone];
+export type RewriteToneBodyTone = (typeof RewriteToneBodyTone)[keyof typeof RewriteToneBodyTone];
 
 export const RewriteToneBodyTone = {
   professional: "professional",

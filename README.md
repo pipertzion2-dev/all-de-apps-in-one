@@ -2,6 +2,30 @@
 
 Monorepo of multiple apps. The production-ready **Next.js** product lives in **`Svivva/`**.
 
+## Monorepo layout
+
+| Folder                                           | What it is                                       | Run locally                                                        |
+| ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------------------ |
+| **`Svivva/`**                                    | Main product (Next.js, deploy target for Vercel) | `npm run dev:svivva` from repo root, or `cd Svivva && npm run dev` |
+| **`Ai-Tools-Hub/`**                              | pnpm workspace (AI tools hub + libs)             | `npm run dev:ai-tools-hub` (needs `pnpm install` in that folder)   |
+| **`Pyracrypt/`**                                 | Crypto / cybersec app artifacts                  | `npm run dev:pyracrypt-web` / `dev:pyracrypt-api`                  |
+| **`CYBER-SECURITY-MINI-APPS-zip/cyberwavy-hub`** | Vite hub for mini-apps                           | `npm run dev:mini-apps`                                            |
+| **`docker-compose.yml`** (root)                  | Local Postgres for Svivva                        | `npm run db:up`                                                    |
+
+Bulk vendor drops (`Ai-Tools-Hub/_uploaded_tools`, `Ai-Tools-Hub/artifacts`) are excluded from repo-wide Prettier; see **`.prettierignore`**.
+
+## Repo-wide formatting
+
+From the **repository root**:
+
+```bash
+npm install          # once — installs Prettier
+npm run format       # write formatting (respects .prettierignore)
+npm run format:check # CI-style check
+```
+
+**`Svivva`** also has its own `format` / `format:check`; `npm run verify` there includes Prettier + Vitest + the owner-note scan.
+
 ## Deploy Svivva on Vercel (pick one path)
 
 Do **not** wire both **Path A** and **Path B** at the same time, or every code push can trigger **two** production deploys.
@@ -27,7 +51,7 @@ Use this if you want deploys driven only by Actions (no Vercel↔Git integration
    - **`VERCEL_TOKEN`**
    - **`VERCEL_ORG_ID`** — Vercel → Project → **Settings → General**
    - **`VERCEL_PROJECT_ID`** — same  
-   Or run `cd Svivva && npx vercel link` locally once and read `.vercel/project.json` (gitignored).
+     Or run `cd Svivva && npx vercel link` locally once and read `.vercel/project.json` (gitignored).
 4. **Variables** tab: **`VERCEL_CI_DEPLOY`** = **`true`**  
    (Until this is set, pushes skip the deploy job so CI stays green while you configure secrets.)
 5. Push to **`main`** (or **Actions → Deploy Svivva → Run workflow**).

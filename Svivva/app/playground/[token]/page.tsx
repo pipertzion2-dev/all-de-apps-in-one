@@ -11,7 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Loader2, Clock, CheckCircle, XCircle, Copy, Code, Eye, Users, ArrowLeft } from "lucide-react";
+import {
+  Play,
+  Loader2,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Copy,
+  Code,
+  Eye,
+  Users,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 
 interface PlaygroundData {
@@ -85,16 +96,16 @@ export default function SharedPlaygroundPage() {
   const executeMutation = useMutation({
     mutationFn: async ({ shareToken, input }: { shareToken: string; input: string }) => {
       const startTime = Date.now();
-      
+
       const res = await fetch("/api/playground/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ shareToken, input }),
       });
-      
+
       const resData = await res.json();
       const latency = Date.now() - startTime;
-      
+
       return {
         ...resData,
         latency,
@@ -123,7 +134,7 @@ export default function SharedPlaygroundPage() {
       });
       return;
     }
-    
+
     executeMutation.mutate({ shareToken: token, input: inputText });
   };
 
@@ -147,7 +158,9 @@ export default function SharedPlaygroundPage() {
           <CardContent className="pt-6 text-center space-y-4">
             <XCircle className="w-12 h-12 mx-auto text-destructive" />
             <h2 className="text-xl font-semibold">Playground Not Found</h2>
-            <p className="text-muted-foreground">This playground may be private or no longer exists.</p>
+            <p className="text-muted-foreground">
+              This playground may be private or no longer exists.
+            </p>
             <Button asChild variant="outline">
               <Link href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -173,8 +186,12 @@ export default function SharedPlaygroundPage() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-semibold" data-testid="text-playground-name">{session.name}</h1>
-              <p className="text-sm text-muted-foreground" data-testid="text-project-name">{session.project.name}</p>
+              <h1 className="text-xl font-semibold" data-testid="text-playground-name">
+                {session.name}
+              </h1>
+              <p className="text-sm text-muted-foreground" data-testid="text-project-name">
+                {session.project.name}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -187,7 +204,9 @@ export default function SharedPlaygroundPage() {
                 <AvatarImage src={session.owner.avatarUrl || undefined} />
                 <AvatarFallback>{session.owner.name?.charAt(0) || "?"}</AvatarFallback>
               </Avatar>
-              <span className="text-sm" data-testid="text-owner-name">{session.owner.name}</span>
+              <span className="text-sm" data-testid="text-owner-name">
+                {session.owner.name}
+              </span>
             </div>
           </div>
         </div>
@@ -195,7 +214,9 @@ export default function SharedPlaygroundPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {session.description && (
-          <p className="text-muted-foreground" data-testid="text-description">{session.description}</p>
+          <p className="text-muted-foreground" data-testid="text-description">
+            {session.description}
+          </p>
         )}
 
         {collaborators.length > 0 && (
@@ -205,12 +226,16 @@ export default function SharedPlaygroundPage() {
               {collaborators.slice(0, 5).map((collab) => (
                 <Avatar key={collab.id} className="w-6 h-6 border-2 border-background">
                   <AvatarImage src={collab.user.avatarUrl || undefined} />
-                  <AvatarFallback className="text-xs">{collab.user.name?.charAt(0) || "?"}</AvatarFallback>
+                  <AvatarFallback className="text-xs">
+                    {collab.user.name?.charAt(0) || "?"}
+                  </AvatarFallback>
                 </Avatar>
               ))}
             </div>
             {collaborators.length > 5 && (
-              <span className="text-sm text-muted-foreground">+{collaborators.length - 5} more</span>
+              <span className="text-sm text-muted-foreground">
+                +{collaborators.length - 5} more
+              </span>
             )}
           </div>
         )}
@@ -264,12 +289,18 @@ export default function SharedPlaygroundPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between" data-testid="text-response-title">
+              <CardTitle
+                className="flex items-center justify-between"
+                data-testid="text-response-title"
+              >
                 Response
                 {response && (
                   <div className="flex items-center gap-2">
                     {response.success ? (
-                      <Badge className="bg-green-500/10 text-green-500 border-green-500/20" data-testid="badge-response-success">
+                      <Badge
+                        className="bg-green-500/10 text-green-500 border-green-500/20"
+                        data-testid="badge-response-success"
+                      >
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Success
                       </Badge>
@@ -290,7 +321,10 @@ export default function SharedPlaygroundPage() {
             </CardHeader>
             <CardContent>
               {!response ? (
-                <div className="h-64 flex items-center justify-center text-muted-foreground" data-testid="text-response-placeholder">
+                <div
+                  className="h-64 flex items-center justify-center text-muted-foreground"
+                  data-testid="text-response-placeholder"
+                >
                   <p>{canEdit ? "Run a request to see the response" : "No saved response"}</p>
                 </div>
               ) : (
@@ -300,19 +334,24 @@ export default function SharedPlaygroundPage() {
                       variant="ghost"
                       size="icon"
                       className="absolute top-2 right-2"
-                      onClick={() => copyToClipboard(JSON.stringify(response.output || response.error, null, 2))}
+                      onClick={() =>
+                        copyToClipboard(JSON.stringify(response.output || response.error, null, 2))
+                      }
                       data-testid="button-copy-response"
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
-                    <pre className="p-4 bg-muted rounded-lg overflow-auto max-h-64 text-sm font-mono" data-testid="text-response-output">
-                      {response.success 
-                        ? JSON.stringify(response.output, null, 2)
-                        : response.error
-                      }
+                    <pre
+                      className="p-4 bg-muted rounded-lg overflow-auto max-h-64 text-sm font-mono"
+                      data-testid="text-response-output"
+                    >
+                      {response.success ? JSON.stringify(response.output, null, 2) : response.error}
                     </pre>
                   </div>
-                  <p className="text-xs text-muted-foreground" data-testid="text-response-timestamp">
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="text-response-timestamp"
+                  >
                     {new Date(response.timestamp).toLocaleString()}
                   </p>
                 </div>
@@ -333,17 +372,29 @@ export default function SharedPlaygroundPage() {
             <CardContent>
               <div className="space-y-3">
                 {history.slice(0, 10).map((req) => (
-                  <div key={req.id} className="p-3 bg-muted rounded-lg flex items-center justify-between gap-4">
+                  <div
+                    key={req.id}
+                    className="p-3 bg-muted rounded-lg flex items-center justify-between gap-4"
+                  >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-mono truncate">{req.request.body.substring(0, 100)}...</p>
+                      <p className="text-sm font-mono truncate">
+                        {req.request.body.substring(0, 100)}...
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(req.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {req.response ? (
-                        <Badge variant={req.response.status === 200 ? "secondary" : "destructive"} className="gap-1">
-                          {req.response.status === 200 ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        <Badge
+                          variant={req.response.status === 200 ? "secondary" : "destructive"}
+                          className="gap-1"
+                        >
+                          {req.response.status === 200 ? (
+                            <CheckCircle className="w-3 h-3" />
+                          ) : (
+                            <XCircle className="w-3 h-3" />
+                          )}
                           {req.response.latencyMs}ms
                         </Badge>
                       ) : req.error ? (

@@ -9,7 +9,7 @@ export async function GET() {
   const sitemapLinks = chunks
     .map(
       (_chunk, index) =>
-        `<sitemap><loc>${siteUrl}/sitemaps/${index + 1}.xml</loc><lastmod>${new Date().toISOString()}</lastmod></sitemap>`
+        `<sitemap><loc>${siteUrl}/sitemaps/${index + 1}.xml</loc><lastmod>${new Date().toISOString()}</lastmod></sitemap>`,
     )
     .join("");
 

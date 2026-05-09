@@ -13,7 +13,11 @@ type SeoPage = typeof seoLandingPages.$inferSelect;
 
 async function fetchTool(slug: string): Promise<SeoPage | null> {
   try {
-    const [page] = await db.select().from(seoLandingPages).where(eq(seoLandingPages.slug, slug)).limit(1);
+    const [page] = await db
+      .select()
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.slug, slug))
+      .limit(1);
     return page || null;
   } catch {
     return null;
@@ -23,7 +27,10 @@ async function fetchTool(slug: string): Promise<SeoPage | null> {
 async function fetchRelatedTools(slugs: string[]): Promise<SeoPage[]> {
   if (!slugs.length) return [];
   try {
-    return await db.select().from(seoLandingPages).where(inArray(seoLandingPages.slug, slugs.slice(0, 3)));
+    return await db
+      .select()
+      .from(seoLandingPages)
+      .where(inArray(seoLandingPages.slug, slugs.slice(0, 3)));
   } catch {
     return [];
   }
@@ -50,11 +57,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ToolPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tool = await fetchTool(slug);
 
@@ -79,9 +82,7 @@ export default async function ToolPage({
   const howItWorksSteps = tool.howItWorks
     ? tool.howItWorks.split("\n").filter((s) => s.trim())
     : [];
-  const whoItsForItems = tool.whoItsFor
-    ? tool.whoItsFor.split("\n").filter((s) => s.trim())
-    : [];
+  const whoItsForItems = tool.whoItsFor ? tool.whoItsFor.split("\n").filter((s) => s.trim()) : [];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -108,13 +109,7 @@ export default async function ToolPage({
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image
-              src={svivvaLogo}
-              alt="Svivva"
-              width={120}
-              height={36}
-              priority
-            />
+            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
           </Link>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -149,10 +144,7 @@ export default async function ToolPage({
         >
           {tool.keyword}
         </h1>
-        <p
-          className="mt-6 text-lg text-white/60 leading-relaxed"
-          data-testid="text-tool-content"
-        >
+        <p className="mt-6 text-lg text-white/60 leading-relaxed" data-testid="text-tool-content">
           {tool.content}
         </p>
       </article>
@@ -185,17 +177,10 @@ export default async function ToolPage({
               </div>
             </div>
           ) : (
-            <div
-              className="text-center py-12"
-              data-testid="text-coming-soon"
-            >
+            <div className="text-center py-12" data-testid="text-coming-soon">
               <Clock className="w-10 h-10 text-white/20 mx-auto mb-4" />
-              <p className="text-xl font-semibold text-white/40">
-                Coming Soon
-              </p>
-              <p className="text-sm text-white/30 mt-1">
-                Tool launching soon
-              </p>
+              <p className="text-xl font-semibold text-white/40">Coming Soon</p>
+              <p className="text-sm text-white/30 mt-1">Tool launching soon</p>
             </div>
           )}
         </div>
@@ -203,23 +188,14 @@ export default async function ToolPage({
 
       {tool.benefits && tool.benefits.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 pb-12">
-          <h2
-            className="text-2xl font-bold mb-6"
-            data-testid="text-benefits-heading"
-          >
+          <h2 className="text-2xl font-bold mb-6" data-testid="text-benefits-heading">
             Benefits
           </h2>
           <ul className="space-y-4">
             {tool.benefits.slice(0, 3).map((benefit, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3"
-                data-testid={`text-benefit-${i}`}
-              >
+              <li key={i} className="flex items-start gap-3" data-testid={`text-benefit-${i}`}>
                 <CheckCircle2 className="w-5 h-5 text-[#5BA8A0] shrink-0 mt-0.5" />
-                <span className="text-white/70 leading-relaxed">
-                  {benefit}
-                </span>
+                <span className="text-white/70 leading-relaxed">{benefit}</span>
               </li>
             ))}
           </ul>
@@ -228,25 +204,16 @@ export default async function ToolPage({
 
       {howItWorksSteps.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 pb-12">
-          <h2
-            className="text-2xl font-bold mb-6"
-            data-testid="text-how-it-works-heading"
-          >
+          <h2 className="text-2xl font-bold mb-6" data-testid="text-how-it-works-heading">
             How It Works
           </h2>
           <ol className="space-y-4">
             {howItWorksSteps.map((step, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-4"
-                data-testid={`text-step-${i}`}
-              >
+              <li key={i} className="flex items-start gap-4" data-testid={`text-step-${i}`}>
                 <span className="w-8 h-8 rounded-md bg-[#5BA8A0]/20 text-[#5BA8A0] font-bold text-sm flex items-center justify-center shrink-0">
                   {i + 1}
                 </span>
-                <span className="text-white/70 leading-relaxed pt-1">
-                  {step}
-                </span>
+                <span className="text-white/70 leading-relaxed pt-1">{step}</span>
               </li>
             ))}
           </ol>
@@ -255,19 +222,12 @@ export default async function ToolPage({
 
       {whoItsForItems.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 pb-12">
-          <h2
-            className="text-2xl font-bold mb-6"
-            data-testid="text-who-its-for-heading"
-          >
+          <h2 className="text-2xl font-bold mb-6" data-testid="text-who-its-for-heading">
             Who It&apos;s For
           </h2>
           <ul className="space-y-3">
             {whoItsForItems.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3"
-                data-testid={`text-audience-${i}`}
-              >
+              <li key={i} className="flex items-start gap-3" data-testid={`text-audience-${i}`}>
                 <Users className="w-4 h-4 text-[#5BA8A0] shrink-0 mt-1" />
                 <span className="text-white/70 leading-relaxed">{item}</span>
               </li>
@@ -278,10 +238,7 @@ export default async function ToolPage({
 
       {relatedTools.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 pb-12">
-          <h2
-            className="text-2xl font-bold mb-6"
-            data-testid="text-related-heading"
-          >
+          <h2 className="text-2xl font-bold mb-6" data-testid="text-related-heading">
             Related Tools
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -292,12 +249,8 @@ export default async function ToolPage({
                 data-testid={`link-related-${related.slug}`}
                 className="rounded-md border border-white/10 bg-white/5 p-4 hover-elevate transition-colors"
               >
-                <h3 className="font-semibold text-sm mb-1">
-                  {related.title}
-                </h3>
-                <p className="text-xs text-white/50">
-                  {related.content.slice(0, 80)}...
-                </p>
+                <h3 className="font-semibold text-sm mb-1">{related.title}</h3>
+                <p className="text-xs text-white/50">{related.content.slice(0, 80)}...</p>
               </Link>
             ))}
           </div>
@@ -305,17 +258,35 @@ export default async function ToolPage({
       )}
 
       <section className="max-w-3xl mx-auto px-6 pb-16" data-testid="section-cta">
-        <div className="rounded-2xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(91,168,160,0.12), rgba(107,44,74,0.12))", border: "1px solid rgba(91,168,160,0.25)" }}>
-          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, #5BA8A0, #6B2C4A)" }} />
+        <div
+          className="rounded-2xl overflow-hidden relative"
+          style={{
+            background: "linear-gradient(135deg, rgba(91,168,160,0.12), rgba(107,44,74,0.12))",
+            border: "1px solid rgba(91,168,160,0.25)",
+          }}
+        >
+          <div
+            className="absolute top-0 left-0 right-0 h-px"
+            style={{ background: "linear-gradient(to right, #5BA8A0, #6B2C4A)" }}
+          />
           <div className="p-8 md:flex md:items-center md:gap-6">
-            <div className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center mb-5 md:mb-0" style={{ background: "rgba(91,168,160,0.15)", border: "1px solid rgba(91,168,160,0.3)" }}>
+            <div
+              className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center mb-5 md:mb-0"
+              style={{
+                background: "rgba(91,168,160,0.15)",
+                border: "1px solid rgba(91,168,160,0.3)",
+              }}
+            >
               <Sparkles className="w-7 h-7 text-[#5BA8A0]" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#5BA8A0] mb-1">Step 1 complete · Next →</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#5BA8A0] mb-1">
+                Step 1 complete · Next →
+              </p>
               <h3 className="text-xl font-black text-white">Deploy this as a live API in Svivva</h3>
               <p className="text-white/60 text-sm mt-1">
-                You just explored what this tool does. Svivva lets you build, deploy, and monitor AI APIs like this one — in minutes, no backend required.
+                You just explored what this tool does. Svivva lets you build, deploy, and monitor AI
+                APIs like this one — in minutes, no backend required.
               </p>
             </div>
             <Link

@@ -7,6 +7,7 @@ pnpm workspace monorepo with a **Cybersecurity Wavy** app: React + Three.js fron
 ## Artifacts
 
 ### cybersec-app (previewPath `/`, port via $PORT)
+
 - React 19 + Vite 7 frontend
 - Three.js 3D scene via `@react-three/fiber@9.5.0` + `@react-three/drei@10.7.7`
 - Zustand state management
@@ -19,6 +20,7 @@ pnpm workspace monorepo with a **Cybersecurity Wavy** app: React + Three.js fron
 - Vite proxy: all `/hypothesis`, `/combine`, `/mutate`, `/simulate`, `/remedy`, `/pipeline`, `/suite`, `/features` → FastAPI on port 8000
 
 ### Python Backend (port 8000)
+
 - FastAPI + uvicorn
 - Source: `backend/`
   - `main.py` — app entry, CORS, route mounting

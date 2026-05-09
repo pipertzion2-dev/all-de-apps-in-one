@@ -18,23 +18,22 @@ const UpdateTrainingExampleSchema = z.object({
 async function validateExampleOwnership(projectId: string, exampleId: string) {
   const project = await projectRepository.findById(projectId);
   if (!project) return { error: "Project not found", status: 404 };
-  
+
   const latestVersion = await versionRepository.findLatestByProjectId(projectId);
   if (!latestVersion) return { error: "No version found", status: 404 };
-  
+
   const example = await db
     .select()
     .from(trainingExamples)
-    .where(and(
-      eq(trainingExamples.id, exampleId),
-      eq(trainingExamples.versionId, latestVersion.id)
-    ))
+    .where(
+      and(eq(trainingExamples.id, exampleId), eq(trainingExamples.versionId, latestVersion.id)),
+    )
     .limit(1);
-    
+
   if (example.length === 0) {
     return { error: "Example not found or does not belong to this project", status: 404 };
   }
-  
+
   return { example: example[0], versionId: latestVersion.id };
 }
 
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ('error' in result) {
+    if ("error" in result) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
@@ -59,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ('error' in result) {
+    if ("error" in result) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
@@ -71,10 +70,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (parsed.output !== undefined) updateData.output = parsed.output;
     if (parsed.sortOrder !== undefined) updateData.sortOrder = parsed.sortOrder;
 
-    await db
-      .update(trainingExamples)
-      .set(updateData)
-      .where(eq(trainingExamples.id, exampleId));
+    await db.update(trainingExamples).set(updateData).where(eq(trainingExamples.id, exampleId));
 
     const updated = await db
       .select()
@@ -88,7 +84,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: "Validation error", details: error.errors },
+        { status: 400 },
+      );
     }
     console.error("Update training example error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -100,7 +99,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ('error' in result) {
+    if ("error" in result) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 

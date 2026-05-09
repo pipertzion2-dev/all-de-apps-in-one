@@ -60,7 +60,10 @@ export async function getAllSitemapEntries(): Promise<SitemapEntry[]> {
 
   let seoPages: SitemapEntry[] = [];
   try {
-    const pages = await db.select().from(seoLandingPages).where(eq(seoLandingPages.published, true));
+    const pages = await db
+      .select()
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.published, true));
     seoPages = pages.map((page) => ({
       loc: absoluteUrl(`/${page.slug}`),
       lastmod: (page.createdAt || new Date()).toISOString(),

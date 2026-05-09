@@ -12,7 +12,15 @@ export function ToolPage() {
   const tool = slug ? getToolBySlug(slug) : undefined;
   if (!tool) {
     return (
-      <ThemedShell theme={{ name: "", primary: "#4b5320", accent: "#c4cb9c", surface: "#2a2d20", ink: "#e8ebdd" }}>
+      <ThemedShell
+        theme={{
+          name: "",
+          primary: "#4b5320",
+          accent: "#c4cb9c",
+          surface: "#2a2d20",
+          ink: "#e8ebdd",
+        }}
+      >
         <NavBar />
         <p>Tool not found.</p>
         <Link to="/">Back to hub</Link>
@@ -44,14 +52,21 @@ export function ToolPage() {
         <p className="breadcrumb">
           <Link to="/">Hub</Link> / tool / {tool.slug}
         </p>
-        <h1 className="app-title" style={{ fontSize: "1.5rem", margin: "0 0 0.75rem", color: "var(--army-light)" }}>
+        <h1
+          className="app-title"
+          style={{ fontSize: "1.5rem", margin: "0 0 0.75rem", color: "var(--army-light)" }}
+        >
           {tool.title}
         </h1>
         <p className="muted">{tool.shortDescription}</p>
         <div style={{ marginTop: "1.25rem" }}>
           <ToolBody slug={tool.slug} />
         </div>
-        <AiInsightPanel toolSlug={tool.slug} toolTitle={tool.title} toolSummary={tool.shortDescription} />
+        <AiInsightPanel
+          toolSlug={tool.slug}
+          toolTitle={tool.title}
+          toolSummary={tool.shortDescription}
+        />
       </div>
       <CyberWavyCTA />
     </ThemedShell>

@@ -41,38 +41,47 @@ export default function UsagePage() {
 
   const statsData = data?.stats;
   const stats = [
-    { 
-      label: "API Calls Today", 
-      value: isLoading ? null : String(statsData?.apiCallsToday || 0), 
-      icon: Zap 
+    {
+      label: "API Calls Today",
+      value: isLoading ? null : String(statsData?.apiCallsToday || 0),
+      icon: Zap,
     },
-    { 
-      label: "Avg Response Time", 
-      value: isLoading ? null : (statsData?.avgResponseTime ? `${statsData.avgResponseTime}ms` : "—"), 
-      icon: Clock 
+    {
+      label: "Avg Response Time",
+      value: isLoading ? null : statsData?.avgResponseTime ? `${statsData.avgResponseTime}ms` : "—",
+      icon: Clock,
     },
-    { 
-      label: "Success Rate", 
-      value: isLoading ? null : (statsData?.successRate !== null && statsData?.successRate !== undefined ? `${statsData.successRate}%` : "—"), 
-      icon: TrendingUp 
+    {
+      label: "Success Rate",
+      value: isLoading
+        ? null
+        : statsData?.successRate !== null && statsData?.successRate !== undefined
+          ? `${statsData.successRate}%`
+          : "—",
+      icon: TrendingUp,
     },
-    { 
-      label: "Tokens Used", 
-      value: isLoading ? null : String(statsData?.tokensUsed || 0), 
-      icon: BarChart3 
+    {
+      label: "Tokens Used",
+      value: isLoading ? null : String(statsData?.tokensUsed || 0),
+      icon: BarChart3,
     },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="text-usage-title">Usage</h1>
+        <h1 className="text-3xl font-bold" data-testid="text-usage-title">
+          Usage
+        </h1>
         <p className="text-muted-foreground">Monitor your API usage and performance</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label} data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}>
+          <Card
+            key={stat.label}
+            data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
+          >
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.label}
@@ -83,7 +92,10 @@ export default function UsagePage() {
               {stat.value === null ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold" data-testid={`text-stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                <div
+                  className="text-2xl font-bold"
+                  data-testid={`text-stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
+                >
                   {stat.value}
                 </div>
               )}
@@ -124,7 +136,10 @@ export default function UsagePage() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium truncate">{request.projectName}</span>
                       {request.status === "success" ? (
-                        <Badge className="bg-green-500/10 text-green-500 border-green-500/20" data-testid={`badge-status-${request.id}`}>
+                        <Badge
+                          className="bg-green-500/10 text-green-500 border-green-500/20"
+                          data-testid={`badge-status-${request.id}`}
+                        >
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Success
                         </Badge>

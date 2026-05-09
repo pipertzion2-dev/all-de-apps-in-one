@@ -5,12 +5,14 @@ This is a cross-engine strategy designed for how Svivva already works: combining
 ## Strategic Core
 
 Svivva already has the right primitives:
+
 - real utility tools (84+)
 - tentpole platform pages
 - Orbit-generated SEO pages
 - cross-product funnels (Svivva -> tools -> Pyracrypt -> Svivva)
 
 The new hybrid layer is **Intent Fusion Loops**:
+
 1. Detect adjacent intents with shared users but different keyword clusters.
 2. Fuse two utility surfaces into one new "bridge page" and one new mini-tool.
 3. Route traffic bi-directionally through intent-matched CTAs.
@@ -21,17 +23,20 @@ This is not standard content marketing; it is product-combinatorial growth.
 ## Novel Strategy: Intent Fusion Matrix (IFM)
 
 For each week, generate 10 pairings from unrelated tool families:
+
 - Cybersecurity x Hardware
 - Prompt Engineering x Compliance
 - Music/Audio x AI Model Evaluation
 - Research x API Cost Controls
 
 For each pairing, ship:
+
 1. One fusion landing page (indexable, structured, with FAQ schema).
 2. One micro-tool block (real interactive utility, no gate).
 3. One conversion bridge CTA to Svivva core and one to Pyracrypt where relevant.
 
 Example fusion pairs:
+
 - `CVSS Calculator` + `Hardware Compliance Checker` -> "Embedded Device Risk Scorer"
 - `Prompt Security Scanner` + `JSON Schema Linter` -> "LLM Contract Hardening Tool"
 - `Cross-Domain Idea Hybridizer` + `BOM Generator` -> "Hybrid Hardware Concept-to-BOM"
@@ -39,6 +44,7 @@ Example fusion pairs:
 ## Cross-Engine Indexing Reliability (No-Error Ops Layer)
 
 ### Google Search Console
+
 - Verify domain property via DNS TXT.
 - Submit `https://svivva.com/sitemap.xml` (index sitemap).
 - Monitor:
@@ -48,11 +54,13 @@ Example fusion pairs:
   - Alternate page with proper canonical
 
 ### Bing Webmaster Tools
+
 - Submit same sitemap index.
 - Enable URL submission API if desired.
 - Keep IndexNow enabled through Svivva Orbit flow.
 
 ### IndexNow
+
 - Ensure submitted URLs are final canonical URLs only.
 - Exclude:
   - blocked paths
@@ -84,10 +92,12 @@ Example fusion pairs:
 ## 90-Day Hybrid Execution Plan
 
 ### Days 1-14
+
 - Stabilize technical SEO (canonicals, robots, sitemap index/chunks).
 - Run full `seo-audit.ts` and clear all high-priority issues.
 
 ### Days 15-45
+
 - Launch first 12 fusion pages (4 per month cadence).
 - For each fusion page, create:
   - one operational use-case
@@ -95,6 +105,7 @@ Example fusion pairs:
   - one "related tools" cluster
 
 ### Days 46-90
+
 - Keep top 30% fusion pages; prune or merge low performers.
 - Expand with "X vs Y + workflow recommendation" pages.
 - Introduce weekly "fusion release notes" to recrawl fresh surfaces.

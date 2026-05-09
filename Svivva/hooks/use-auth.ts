@@ -20,7 +20,9 @@ if (typeof window !== "undefined") {
   if (_t) {
     localStorage.setItem(SESSION_TOKEN_KEY, _t);
     _p.delete("session_token");
-    const _newUrl = _p.toString() ? `${window.location.pathname}?${_p.toString()}` : window.location.pathname;
+    const _newUrl = _p.toString()
+      ? `${window.location.pathname}?${_p.toString()}`
+      : window.location.pathname;
     window.history.replaceState({}, "", _newUrl);
     // Also bridge into cookie (fire-and-forget)
     fetch("/api/auth/set-session", {
@@ -70,7 +72,9 @@ function captureSessionToken(): void {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ token }),
-    }).catch(() => {/* non-critical */});
+    }).catch(() => {
+      /* non-critical */
+    });
   }
 }
 
@@ -84,7 +88,9 @@ async function ensureSessionCookie(): Promise<void> {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ token }),
-  }).catch(() => {/* non-critical */});
+  }).catch(() => {
+    /* non-critical */
+  });
 }
 
 async function fetchUser(): Promise<AuthUser | null> {
@@ -92,13 +98,13 @@ async function fetchUser(): Promise<AuthUser | null> {
   captureSessionToken();
   // Bridge existing localStorage token into a server-side cookie (silent)
   await ensureSessionCookie();
-  
+
   const headers: HeadersInit = {};
   const token = getSessionToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  
+
   const response = await fetch("/api/auth/user", {
     credentials: "include",
     headers,
@@ -127,7 +133,7 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  
+
   return fetch(url, {
     ...options,
     headers,
@@ -137,7 +143,7 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  
+
   const { data: user, isLoading } = useQuery<AuthUser | null>({
     queryKey: ["/api/auth/user"],
     queryFn: fetchUser,
@@ -166,6 +172,7 @@ export function isUnauthorizedError(error: Error): boolean {
 }
 
 export function redirectToLogin(returnTo?: string) {
-  const dest = returnTo || (typeof window !== "undefined" ? window.location.pathname : "/dashboard");
+  const dest =
+    returnTo || (typeof window !== "undefined" ? window.location.pathname : "/dashboard");
   window.location.href = `/api/auth/login?redirect=${encodeURIComponent(dest)}`;
 }

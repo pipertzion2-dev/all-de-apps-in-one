@@ -6,10 +6,7 @@ import type { QueryOptions } from "./base";
 
 export class VersionRepository {
   async findById(id: string): Promise<ProjectVersion | undefined> {
-    const [result] = await db
-      .select()
-      .from(projectVersions)
-      .where(eq(projectVersions.id, id));
+    const [result] = await db.select().from(projectVersions).where(eq(projectVersions.id, id));
     return result;
   }
 
@@ -30,16 +27,14 @@ export class VersionRepository {
     return query;
   }
 
-  async findByVersionNumber(projectId: string, version: number): Promise<ProjectVersion | undefined> {
+  async findByVersionNumber(
+    projectId: string,
+    version: number,
+  ): Promise<ProjectVersion | undefined> {
     const [result] = await db
       .select()
       .from(projectVersions)
-      .where(
-        and(
-          eq(projectVersions.projectId, projectId),
-          eq(projectVersions.version, version)
-        )
-      );
+      .where(and(eq(projectVersions.projectId, projectId), eq(projectVersions.version, version)));
     return result;
   }
 
@@ -64,7 +59,7 @@ export class VersionRepository {
 
   async create(data: InsertProjectVersion): Promise<ProjectVersion> {
     const nextVersion = await this.getNextVersionNumber(data.projectId);
-    
+
     const [result] = await db
       .insert(projectVersions)
       .values({
@@ -80,10 +75,10 @@ export class VersionRepository {
     projectId: string,
     systemPrompt: string,
     outputSchema: Record<string, unknown>,
-    changeSummary?: string
+    changeSummary?: string,
   ): Promise<ProjectVersion> {
     const nextVersion = await this.getNextVersionNumber(projectId);
-    
+
     const [result] = await db
       .insert(projectVersions)
       .values({
@@ -99,10 +94,7 @@ export class VersionRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await db
-      .delete(projectVersions)
-      .where(eq(projectVersions.id, id))
-      .returning();
+    const result = await db.delete(projectVersions).where(eq(projectVersions.id, id)).returning();
     return result.length > 0;
   }
 

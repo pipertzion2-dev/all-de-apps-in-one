@@ -38,7 +38,7 @@ export interface EvalRunResult {
 function compareOutputs(
   actual: Record<string, unknown>,
   expected: Record<string, unknown>,
-  assertionType: string
+  assertionType: string,
 ): { passed: boolean; matchedFields: string[]; mismatchedFields: string[] } {
   const matchedFields: string[] = [];
   const mismatchedFields: string[] = [];
@@ -115,7 +115,7 @@ function compareOutputs(
 
 export async function runEvalCase(
   evalCase: EvalCaseInput,
-  config: RuntimeConfig
+  config: RuntimeConfig,
 ): Promise<EvalCaseResult> {
   const startTime = Date.now();
 
@@ -136,7 +136,7 @@ export async function runEvalCase(
     const comparison = compareOutputs(
       result.output,
       evalCase.expectedOutput,
-      evalCase.assertionType
+      evalCase.assertionType,
     );
 
     const totalFields = comparison.matchedFields.length + comparison.mismatchedFields.length;
@@ -169,7 +169,7 @@ export async function runEvalCase(
 export async function runEvalSuite(
   cases: EvalCaseInput[],
   config: RuntimeConfig,
-  concurrency: number = 2
+  concurrency: number = 2,
 ): Promise<EvalRunResult> {
   const results: EvalCaseResult[] = [];
   let totalLatency = 0;
@@ -178,16 +178,16 @@ export async function runEvalSuite(
 
   for (let i = 0; i < cases.length; i += concurrency) {
     const batch = cases.slice(i, i + concurrency);
-    const batchResults = await Promise.all(
-      batch.map((c) => runEvalCase(c, config))
-    );
+    const batchResults = await Promise.all(batch.map((c) => runEvalCase(c, config)));
     results.push(...batchResults);
 
     for (const r of batchResults) {
       totalLatency += r.latencyMs;
     }
 
-    console.log(`[EvalRunner] Completed ${Math.min(i + concurrency, cases.length)}/${cases.length} cases`);
+    console.log(
+      `[EvalRunner] Completed ${Math.min(i + concurrency, cases.length)}/${cases.length} cases`,
+    );
   }
 
   const passedCases = results.filter((r) => r.passed).length;

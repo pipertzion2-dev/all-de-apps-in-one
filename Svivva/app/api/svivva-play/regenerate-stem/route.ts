@@ -13,7 +13,11 @@ import type { Analysis, Plan } from "@/lib/svivva-play/schemas";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { generationId, stemName, settings = {} } = body as {
+    const {
+      generationId,
+      stemName,
+      settings = {},
+    } = body as {
       generationId: string;
       stemName: string;
       settings: PipelineSettings;
@@ -23,7 +27,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "generationId and stemName required" }, { status: 400 });
     }
 
-    const generations = await db.select().from(playGenerations).where(eq(playGenerations.id, generationId));
+    const generations = await db
+      .select()
+      .from(playGenerations)
+      .where(eq(playGenerations.id, generationId));
     if (generations.length === 0) {
       return NextResponse.json({ error: "Generation not found" }, { status: 404 });
     }
@@ -41,7 +48,10 @@ export async function POST(request: NextRequest) {
 
     let analysisData: Analysis | null = null;
     if (session.analysisId) {
-      const analyses = await db.select().from(playAnalyses).where(eq(playAnalyses.id, session.analysisId));
+      const analyses = await db
+        .select()
+        .from(playAnalyses)
+        .where(eq(playAnalyses.id, session.analysisId));
       if (analyses[0]) {
         const a = analyses[0];
         analysisData = {
@@ -62,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No analysis found" }, { status: 400 });
     }
 
-    const targetStemPlan = plan.stems.find(s => s.name === stemName);
+    const targetStemPlan = plan.stems.find((s) => s.name === stemName);
     if (!targetStemPlan) {
       return NextResponse.json({ error: `Stem "${stemName}" not found in plan` }, { status: 400 });
     }
@@ -75,13 +85,21 @@ export async function POST(request: NextRequest) {
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
     const barCount = 16;
 
-    const midiResult = await runMidiGeneration(analysisData, singleStemPlan, {
-      startBar: 0,
-      endBar: barCount,
-    }, { ...settings, seed });
+    const midiResult = await runMidiGeneration(
+      analysisData,
+      singleStemPlan,
+      {
+        startBar: 0,
+        endBar: barCount,
+      },
+      { ...settings, seed },
+    );
 
     if (!midiResult.success || !midiResult.data) {
-      return NextResponse.json({ error: midiResult.error || "Stem regeneration failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: midiResult.error || "Stem regeneration failed" },
+        { status: 500 },
+      );
     }
 
     const newMidiStem = midiResult.data.stems[0];
@@ -89,8 +107,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No MIDI events generated for stem" }, { status: 500 });
     }
 
-    const existingStems = await db.select().from(playStems).where(eq(playStems.generationId, generationId));
-    const oldStem = existingStems.find(s => s.name === stemName);
+    const existingStems = await db
+      .select()
+      .from(playStems)
+      .where(eq(playStems.generationId, generationId));
+    const oldStem = existingStems.find((s) => s.name === stemName);
 
     const stemId = uuidv4();
     await db.insert(playStems).values({

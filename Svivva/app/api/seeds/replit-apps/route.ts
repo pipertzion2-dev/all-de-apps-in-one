@@ -31,10 +31,16 @@ export async function POST() {
     const { user, error } = await requireAdminUser();
     if (error || !user) return error!;
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
     const replitUsername = creds?.replitUsername || null;
     if (!replitUsername) {
-      return badRequest("Replit not connected. Enter your Replit username in Connected Services first.");
+      return badRequest(
+        "Replit not connected. Enter your Replit username in Connected Services first.",
+      );
     }
 
     const gqlRes = await fetch(REPLIT_GQL, {
@@ -42,10 +48,13 @@ export async function POST() {
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://replit.com",
+        Referer: "https://replit.com",
         "User-Agent": "Mozilla/5.0 Svivva/1.0",
       },
-      body: JSON.stringify({ query: REPLS_QUERY, variables: { username: replitUsername, count: 100 } }),
+      body: JSON.stringify({
+        query: REPLS_QUERY,
+        variables: { username: replitUsername, count: 100 },
+      }),
       signal: AbortSignal.timeout(15000),
     });
 
@@ -93,7 +102,11 @@ export async function POST() {
         appName: app.title,
         problemStatement: app.description || `${app.title} - a web application`,
         targetUsers: "Developers and end users",
-        features: ["Web application", "Built on Replit", app.hasDeployment ? "Live deployment" : "Development mode"],
+        features: [
+          "Web application",
+          "Built on Replit",
+          app.hasDeployment ? "Live deployment" : "Development mode",
+        ],
         userFlows: ["Visit the app", "Use core features", "Share with others"],
         databaseSchema: "Application-specific database",
         apiEndpoints: ["/api", app.url],
@@ -107,22 +120,25 @@ export async function POST() {
 
       if (result.success) {
         for (const page of result.pages) {
-          const [row] = await db.insert(seoLandingPages).values({
-            slug: page.slug,
-            keyword: page.keyword,
-            title: page.title,
-            headline: page.headline,
-            subheadline: page.subheadline,
-            content: page.content,
-            benefits: page.benefits,
-            howItWorks: page.howItWorks,
-            whoItsFor: page.whoItsFor,
-            metaTitle: page.metaTitle,
-            metaDescription: page.metaDescription,
-            published: true,
-            category: "seed-marketing",
-            toolUrl: `replit:${app.id}`,
-          }).returning({ slug: seoLandingPages.slug });
+          const [row] = await db
+            .insert(seoLandingPages)
+            .values({
+              slug: page.slug,
+              keyword: page.keyword,
+              title: page.title,
+              headline: page.headline,
+              subheadline: page.subheadline,
+              content: page.content,
+              benefits: page.benefits,
+              howItWorks: page.howItWorks,
+              whoItsFor: page.whoItsFor,
+              metaTitle: page.metaTitle,
+              metaDescription: page.metaDescription,
+              published: true,
+              category: "seed-marketing",
+              toolUrl: `replit:${app.id}`,
+            })
+            .returning({ slug: seoLandingPages.slug });
           if (row) slugs.push(row.slug);
         }
       }

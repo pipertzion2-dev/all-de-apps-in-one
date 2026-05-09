@@ -10,11 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useState } from "react";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Plus,
   Upload,
   FileText,
@@ -26,7 +34,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Copy
+  Copy,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -130,9 +138,9 @@ export default function TrainingDataPage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "training-data"] });
-      toast({ 
-        title: "Import successful", 
-        description: `${data.imported} examples imported${data.aiEnhanced ? `, ${data.aiEnhanced} AI-enhanced` : ''}` 
+      toast({
+        title: "Import successful",
+        description: `${data.imported} examples imported${data.aiEnhanced ? `, ${data.aiEnhanced} AI-enhanced` : ""}`,
       });
       setImportDialogOpen(false);
       setImportData("");
@@ -203,8 +211,8 @@ export default function TrainingDataPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => generateGuideMutation.mutate()}
             disabled={generateGuideMutation.isPending}
             data-testid="button-generate-guide"
@@ -232,7 +240,7 @@ export default function TrainingDataPage() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex gap-2">
-                  <Button 
+                  <Button
                     variant={importFormat === "json" ? "default" : "outline"}
                     onClick={() => setImportFormat("json")}
                     size="sm"
@@ -240,7 +248,7 @@ export default function TrainingDataPage() {
                   >
                     JSON
                   </Button>
-                  <Button 
+                  <Button
                     variant={importFormat === "csv" ? "default" : "outline"}
                     onClick={() => setImportFormat("csv")}
                     size="sm"
@@ -252,9 +260,10 @@ export default function TrainingDataPage() {
                 <div className="space-y-2">
                   <Label>Data</Label>
                   <Textarea
-                    placeholder={importFormat === "json" 
-                      ? '[{"input": "example input", "output": {"field": "value"}}]'
-                      : 'input,output\n"example input","{""field"": ""value""}"'
+                    placeholder={
+                      importFormat === "json"
+                        ? '[{"input": "example input", "output": {"field": "value"}}]'
+                        : 'input,output\n"example input","{""field"": ""value""}"'
                     }
                     value={importData}
                     onChange={(e) => setImportData(e.target.value)}
@@ -281,8 +290,8 @@ export default function TrainingDataPage() {
                 <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleImport} 
+                <Button
+                  onClick={handleImport}
                   disabled={importMutation.isPending || !importData.trim()}
                   data-testid="button-confirm-import"
                 >
@@ -302,9 +311,7 @@ export default function TrainingDataPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add Training Example</DialogTitle>
-                <DialogDescription>
-                  Add a new input/output pair for training
-                </DialogDescription>
+                <DialogDescription>Add a new input/output pair for training</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -327,7 +334,12 @@ export default function TrainingDataPage() {
                   />
                   {trainingData?.outputSchema && (
                     <p className="text-xs text-muted-foreground">
-                      Expected schema: {JSON.stringify(Object.keys(trainingData.outputSchema.properties || trainingData.outputSchema))}
+                      Expected schema:{" "}
+                      {JSON.stringify(
+                        Object.keys(
+                          trainingData.outputSchema.properties || trainingData.outputSchema,
+                        ),
+                      )}
                     </p>
                   )}
                 </div>
@@ -336,12 +348,14 @@ export default function TrainingDataPage() {
                 <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleAddExample} 
+                <Button
+                  onClick={handleAddExample}
                   disabled={addExampleMutation.isPending || !newInput.trim()}
                   data-testid="button-confirm-add"
                 >
-                  {addExampleMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {addExampleMutation.isPending && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   Add Example
                 </Button>
               </DialogFooter>
@@ -363,7 +377,11 @@ export default function TrainingDataPage() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Example
               </Button>
-              <Button variant="outline" onClick={() => setImportDialogOpen(true)} data-testid="button-import-first">
+              <Button
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+                data-testid="button-import-first"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Import Data
               </Button>
@@ -376,20 +394,26 @@ export default function TrainingDataPage() {
             <Card key={example.id} data-testid={`card-example-${example.id}`}>
               <CardHeader className="flex flex-row items-start justify-between gap-4 pb-2">
                 <div className="flex-1 min-w-0">
-                  <Badge variant="secondary" className="mb-2">Example {index + 1}</Badge>
+                  <Badge variant="secondary" className="mb-2">
+                    Example {index + 1}
+                  </Badge>
                   <p className="font-medium break-words">{example.input}</p>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
-                    onClick={() => copyToClipboard(JSON.stringify({ input: example.input, output: example.output }, null, 2))}
+                    onClick={() =>
+                      copyToClipboard(
+                        JSON.stringify({ input: example.input, output: example.output }, null, 2),
+                      )
+                    }
                     data-testid={`button-copy-${example.id}`}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => deleteExampleMutation.mutate(example.id)}
                     disabled={deleteExampleMutation.isPending}
@@ -419,7 +443,15 @@ export default function TrainingDataPage() {
           </DialogHeader>
           {guide && (
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: guide.replace(/\n/g, '<br />').replace(/#{1,6}\s+(.+)/g, '<h3>$1</h3>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`(.+?)`/g, '<code>$1</code>') }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: guide
+                    .replace(/\n/g, "<br />")
+                    .replace(/#{1,6}\s+(.+)/g, "<h3>$1</h3>")
+                    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                    .replace(/`(.+?)`/g, "<code>$1</code>"),
+                }}
+              />
             </div>
           )}
           <DialogFooter>

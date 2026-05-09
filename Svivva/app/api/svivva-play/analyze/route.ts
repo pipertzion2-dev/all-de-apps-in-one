@@ -12,17 +12,24 @@ import { constants } from "fs";
 
 function convertMp3ToWav(inputPath: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    execFile("ffmpeg", ["-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", outputPath], { timeout: 60000 }, (error) => {
-      if (error) {
-        reject(new Error(`FFmpeg conversion failed: ${error.message}`));
-      } else {
-        resolve();
-      }
-    });
+    execFile(
+      "ffmpeg",
+      ["-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", outputPath],
+      { timeout: 60000 },
+      (error) => {
+        if (error) {
+          reject(new Error(`FFmpeg conversion failed: ${error.message}`));
+        } else {
+          resolve();
+        }
+      },
+    );
   });
 }
 
-function runPythonAnalysis(filePath: string): Promise<{ bpm: number; key: string; keyConfidence: number }> {
+function runPythonAnalysis(
+  filePath: string,
+): Promise<{ bpm: number; key: string; keyConfidence: number }> {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(process.cwd(), "scripts", "analyze_audio.py");
     execFile("python", [scriptPath, filePath], { timeout: 120000 }, (error, stdout, stderr) => {
@@ -90,7 +97,7 @@ export async function POST(request: NextRequest) {
     try {
       const debugCopy = path.join(tmpDir, `last_play_upload${ext}`);
       await copyFile(tempFilePath, debugCopy).catch(() => {});
-      
+
       let analysisPath = tempFilePath;
       // Convert MP3 to WAV if needed
       if (ext.toLowerCase() === ".mp3" || audioFile.type === "audio/mpeg") {
@@ -105,14 +112,20 @@ export async function POST(request: NextRequest) {
           // Try with raw MP3 anyway
         }
       }
-      
+
       console.log("Starting Python analysis for file:", audioFile.name, "size:", audioFile.size);
       realAnalysis = await runPythonAnalysis(analysisPath);
       console.log("✅ Python DSP analysis succeeded:", realAnalysis);
-
     } catch (err) {
       console.warn("⚠️ Python analysis failed, falling back to LLM:", err);
-      console.log("File info - name:", audioFile.name, "type:", audioFile.type, "size:", audioFile.size);
+      console.log(
+        "File info - name:",
+        audioFile.name,
+        "type:",
+        audioFile.type,
+        "size:",
+        audioFile.size,
+      );
     }
 
     const result = await runAnalysis(
@@ -122,7 +135,7 @@ export async function POST(request: NextRequest) {
         type: audioFile.type,
       },
       userHint,
-      realAnalysis
+      realAnalysis,
     );
 
     if (!result.success || !result.data) {
@@ -147,9 +160,10 @@ export async function POST(request: NextRequest) {
       status: "complete",
     });
 
-    await db.update(playSessions).set({ status: "analyzed", analysisId }).where(
-      eq(playSessions.id, sessionId)
-    );
+    await db
+      .update(playSessions)
+      .set({ status: "analyzed", analysisId })
+      .where(eq(playSessions.id, sessionId));
 
     return NextResponse.json({
       sessionId,
@@ -171,7 +185,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
   } finally {
     if (tempFilePath) {
-      try { await unlink(tempFilePath); } catch {}
+      try {
+        await unlink(tempFilePath);
+      } catch {}
     }
   }
 }

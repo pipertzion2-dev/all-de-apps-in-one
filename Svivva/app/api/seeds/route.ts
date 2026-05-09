@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedSessions, seeds, seoLandingPages } from "@/lib/schema";
-import { parsePdfToSeeds, generateEngineeringDocs, generateMarketingContent, generateCodeScaffold, applyPromptToSeed, generateSeedMarketingPages } from "@/lib/llm/seeds";
+import {
+  parsePdfToSeeds,
+  generateEngineeringDocs,
+  generateMarketingContent,
+  generateCodeScaffold,
+  applyPromptToSeed,
+  generateSeedMarketingPages,
+} from "@/lib/llm/seeds";
 import { eq, desc, inArray } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { requireUser } from "@/lib/auth/require-user";
@@ -94,14 +101,20 @@ export async function POST(request: NextRequest) {
       }
 
       if (!pdfText.trim()) {
-        await db.update(seedSessions).set({ status: "error" }).where(eq(seedSessions.id, sessionId));
+        await db
+          .update(seedSessions)
+          .set({ status: "error" })
+          .where(eq(seedSessions.id, sessionId));
         return badRequest("Could not extract text from PDF");
       }
 
       const result = await parsePdfToSeeds(pdfText);
 
       if (!result.success || result.seeds.length === 0) {
-        await db.update(seedSessions).set({ status: "error" }).where(eq(seedSessions.id, sessionId));
+        await db
+          .update(seedSessions)
+          .set({ status: "error" })
+          .where(eq(seedSessions.id, sessionId));
         return badRequest(result.error || "No application specs found in PDF");
       }
 
@@ -118,10 +131,13 @@ export async function POST(request: NextRequest) {
         await db.insert(seeds).values(record);
       }
 
-      await db.update(seedSessions).set({
-        status: "parsed",
-        seedCount: seedRecords.length,
-      }).where(eq(seedSessions.id, sessionId));
+      await db
+        .update(seedSessions)
+        .set({
+          status: "parsed",
+          seedCount: seedRecords.length,
+        })
+        .where(eq(seedSessions.id, sessionId));
 
       return ok({
         sessionId,
@@ -139,12 +155,18 @@ export async function POST(request: NextRequest) {
         return notFound("Seed not found");
       }
 
-      const [ownerSession] = await db.select().from(seedSessions).where(eq(seedSessions.id, seed.sessionId));
+      const [ownerSession] = await db
+        .select()
+        .from(seedSessions)
+        .where(eq(seedSessions.id, seed.sessionId));
       if (!ownerSession || ownerSession.userId !== user.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
       }
 
-      await db.update(seeds).set({ status: "building", buildProgress: 10 }).where(eq(seeds.id, seedId));
+      await db
+        .update(seeds)
+        .set({ status: "building", buildProgress: 10 })
+        .where(eq(seeds.id, seedId));
 
       const [docsResult, marketingResult, codeResult] = await Promise.all([
         generateEngineeringDocs(seed.spec).then(async (r) => {
@@ -162,20 +184,21 @@ export async function POST(request: NextRequest) {
       ]);
 
       const hasError = !docsResult.success || !marketingResult.success || !codeResult.success;
-      const errorMessages = [
-        docsResult.error,
-        marketingResult.error,
-        codeResult.error,
-      ].filter(Boolean).join("; ");
+      const errorMessages = [docsResult.error, marketingResult.error, codeResult.error]
+        .filter(Boolean)
+        .join("; ");
 
-      await db.update(seeds).set({
-        status: hasError ? "partial" : "complete",
-        buildProgress: 100,
-        engineeringDocs: docsResult.docs,
-        marketingContent: marketingResult.content,
-        generatedCode: codeResult.code,
-        error: errorMessages || null,
-      }).where(eq(seeds.id, seedId));
+      await db
+        .update(seeds)
+        .set({
+          status: hasError ? "partial" : "complete",
+          buildProgress: 100,
+          engineeringDocs: docsResult.docs,
+          marketingContent: marketingResult.content,
+          generatedCode: codeResult.code,
+          error: errorMessages || null,
+        })
+        .where(eq(seeds.id, seedId));
 
       return ok({
         success: true,
@@ -185,7 +208,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "build-all" && body.sessionId) {
-      const [ownerSession] = await db.select().from(seedSessions).where(eq(seedSessions.id, body.sessionId));
+      const [ownerSession] = await db
+        .select()
+        .from(seedSessions)
+        .where(eq(seedSessions.id, body.sessionId));
       if (!ownerSession || ownerSession.userId !== user.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
       }
@@ -201,7 +227,10 @@ export async function POST(request: NextRequest) {
       const buildPromises = sessionSeeds
         .filter((s) => s.status === "parsed" || s.status === "queued")
         .map(async (seed) => {
-          await db.update(seeds).set({ status: "building", buildProgress: 10 }).where(eq(seeds.id, seed.id));
+          await db
+            .update(seeds)
+            .set({ status: "building", buildProgress: 10 })
+            .where(eq(seeds.id, seed.id));
 
           try {
             const [docsResult, marketingResult, codeResult] = await Promise.all([
@@ -212,19 +241,28 @@ export async function POST(request: NextRequest) {
 
             const hasError = !docsResult.success || !marketingResult.success || !codeResult.success;
 
-            await db.update(seeds).set({
-              status: hasError ? "partial" : "complete",
-              buildProgress: 100,
-              engineeringDocs: docsResult.docs,
-              marketingContent: marketingResult.content,
-              generatedCode: codeResult.code,
-              error: [docsResult.error, marketingResult.error, codeResult.error].filter(Boolean).join("; ") || null,
-            }).where(eq(seeds.id, seed.id));
+            await db
+              .update(seeds)
+              .set({
+                status: hasError ? "partial" : "complete",
+                buildProgress: 100,
+                engineeringDocs: docsResult.docs,
+                marketingContent: marketingResult.content,
+                generatedCode: codeResult.code,
+                error:
+                  [docsResult.error, marketingResult.error, codeResult.error]
+                    .filter(Boolean)
+                    .join("; ") || null,
+              })
+              .where(eq(seeds.id, seed.id));
           } catch (err) {
-            await db.update(seeds).set({
-              status: "error",
-              error: String(err),
-            }).where(eq(seeds.id, seed.id));
+            await db
+              .update(seeds)
+              .set({
+                status: "error",
+                error: String(err),
+              })
+              .where(eq(seeds.id, seed.id));
           }
         });
 
@@ -234,7 +272,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "generate-pages") {
-      const targetSeedIds: string[] = body.seedIds || (body.sessionId ? (await db.select({ id: seeds.id }).from(seeds).where(eq(seeds.sessionId, body.sessionId))).map((r) => r.id) : []);
+      const targetSeedIds: string[] =
+        body.seedIds ||
+        (body.sessionId
+          ? (
+              await db
+                .select({ id: seeds.id })
+                .from(seeds)
+                .where(eq(seeds.sessionId, body.sessionId))
+            ).map((r) => r.id)
+          : []);
 
       if (targetSeedIds.length === 0) {
         return badRequest("No seeds specified");
@@ -244,7 +291,10 @@ export async function POST(request: NextRequest) {
       for (const sid of targetSeedIds) {
         const [seed] = await db.select().from(seeds).where(eq(seeds.id, sid));
         if (!seed) continue;
-        const [ownerSession] = await db.select().from(seedSessions).where(eq(seedSessions.id, seed.sessionId));
+        const [ownerSession] = await db
+          .select()
+          .from(seedSessions)
+          .where(eq(seedSessions.id, seed.sessionId));
         if (ownerSession && ownerSession.userId === user.id) validSeeds.push(seed);
       }
 
@@ -262,24 +312,31 @@ export async function POST(request: NextRequest) {
 
             const inserted = [];
             for (const page of result.pages) {
-              const existing = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.slug, page.slug)).limit(1);
+              const existing = await db
+                .select({ id: seoLandingPages.id })
+                .from(seoLandingPages)
+                .where(eq(seoLandingPages.slug, page.slug))
+                .limit(1);
               if (existing.length > 0) continue;
-              const [row] = await db.insert(seoLandingPages).values({
-                slug: page.slug,
-                keyword: page.keyword,
-                title: page.title,
-                headline: page.headline,
-                subheadline: page.subheadline,
-                content: page.content,
-                benefits: page.benefits,
-                howItWorks: page.howItWorks,
-                whoItsFor: page.whoItsFor,
-                metaTitle: page.metaTitle,
-                metaDescription: page.metaDescription,
-                published: true,
-                category: "seed-marketing",
-                toolUrl: seed.id,
-              }).returning({ slug: seoLandingPages.slug });
+              const [row] = await db
+                .insert(seoLandingPages)
+                .values({
+                  slug: page.slug,
+                  keyword: page.keyword,
+                  title: page.title,
+                  headline: page.headline,
+                  subheadline: page.subheadline,
+                  content: page.content,
+                  benefits: page.benefits,
+                  howItWorks: page.howItWorks,
+                  whoItsFor: page.whoItsFor,
+                  metaTitle: page.metaTitle,
+                  metaDescription: page.metaDescription,
+                  published: true,
+                  category: "seed-marketing",
+                  toolUrl: seed.id,
+                })
+                .returning({ slug: seoLandingPages.slug });
               if (row) inserted.push(row.slug);
             }
 
@@ -287,7 +344,7 @@ export async function POST(request: NextRequest) {
           } catch (err) {
             return { seedId: seed.id, success: false, slugs: [], error: String(err) };
           }
-        })
+        }),
       );
 
       // Note: per-page Google sitemap ping removed (?ping= retired June 2023).
@@ -304,7 +361,12 @@ export async function POST(request: NextRequest) {
       const seedIds: string[] = body.seedIds;
       const prompt: string = body.prompt;
 
-      if (!Array.isArray(seedIds) || seedIds.length === 0 || typeof prompt !== "string" || !prompt.trim()) {
+      if (
+        !Array.isArray(seedIds) ||
+        seedIds.length === 0 ||
+        typeof prompt !== "string" ||
+        !prompt.trim()
+      ) {
         return badRequest("seedIds (array) and prompt (string) are required");
       }
 
@@ -316,7 +378,10 @@ export async function POST(request: NextRequest) {
       for (const sid of seedIds) {
         const [seed] = await db.select().from(seeds).where(eq(seeds.id, sid));
         if (!seed) continue;
-        const [ownerSession] = await db.select().from(seedSessions).where(eq(seedSessions.id, seed.sessionId));
+        const [ownerSession] = await db
+          .select()
+          .from(seedSessions)
+          .where(eq(seedSessions.id, seed.sessionId));
         if (ownerSession && ownerSession.userId === user.id) {
           targetSeeds.push(seed);
         }
@@ -327,7 +392,10 @@ export async function POST(request: NextRequest) {
       }
 
       for (const seed of targetSeeds) {
-        await db.update(seeds).set({ status: "building", buildProgress: 10 }).where(eq(seeds.id, seed.id));
+        await db
+          .update(seeds)
+          .set({ status: "building", buildProgress: 10 })
+          .where(eq(seeds.id, seed.id));
       }
 
       const results = await Promise.all(
@@ -336,34 +404,43 @@ export async function POST(request: NextRequest) {
             await db.update(seeds).set({ buildProgress: 30 }).where(eq(seeds.id, seed.id));
             const result = await applyPromptToSeed(seed.spec, prompt);
             if (result.success && result.spec) {
-              await db.update(seeds).set({
-                spec: result.spec,
-                appName: result.spec.appName,
-                status: "parsed",
-                buildProgress: 0,
-                engineeringDocs: null,
-                marketingContent: null,
-                generatedCode: null,
-                error: null,
-              }).where(eq(seeds.id, seed.id));
+              await db
+                .update(seeds)
+                .set({
+                  spec: result.spec,
+                  appName: result.spec.appName,
+                  status: "parsed",
+                  buildProgress: 0,
+                  engineeringDocs: null,
+                  marketingContent: null,
+                  generatedCode: null,
+                  error: null,
+                })
+                .where(eq(seeds.id, seed.id));
               return { seedId: seed.id, success: true };
             } else {
-              await db.update(seeds).set({
-                status: "error",
-                buildProgress: 0,
-                error: result.error || "Failed to apply prompt",
-              }).where(eq(seeds.id, seed.id));
+              await db
+                .update(seeds)
+                .set({
+                  status: "error",
+                  buildProgress: 0,
+                  error: result.error || "Failed to apply prompt",
+                })
+                .where(eq(seeds.id, seed.id));
               return { seedId: seed.id, success: false, error: result.error };
             }
           } catch (err) {
-            await db.update(seeds).set({
-              status: "error",
-              buildProgress: 0,
-              error: String(err),
-            }).where(eq(seeds.id, seed.id));
+            await db
+              .update(seeds)
+              .set({
+                status: "error",
+                buildProgress: 0,
+                error: String(err),
+              })
+              .where(eq(seeds.id, seed.id));
             return { seedId: seed.id, success: false, error: String(err) };
           }
-        })
+        }),
       );
 
       return ok({

@@ -25,22 +25,26 @@ export async function GET() {
       {
         id: "diffusion",
         name: "Diffusion Model",
-        description: "Generates audio by iteratively denoising a random signal. Best for high-fidelity, diverse outputs.",
+        description:
+          "Generates audio by iteratively denoising a random signal. Best for high-fidelity, diverse outputs.",
       },
       {
         id: "gan",
         name: "Generative Adversarial Network",
-        description: "Uses a generator and discriminator pair to produce realistic audio. Fast inference but can be harder to train.",
+        description:
+          "Uses a generator and discriminator pair to produce realistic audio. Fast inference but can be harder to train.",
       },
       {
         id: "vae",
         name: "Variational Autoencoder",
-        description: "Learns a compressed latent space of audio. Good for interpolation and style transfer between sounds.",
+        description:
+          "Learns a compressed latent space of audio. Good for interpolation and style transfer between sounds.",
       },
       {
         id: "transformer",
         name: "Transformer",
-        description: "Sequence-based model that excels at capturing long-range dependencies in audio. Great for structured compositions.",
+        description:
+          "Sequence-based model that excels at capturing long-range dependencies in audio. Great for structured compositions.",
       },
     ],
     qualityChecklist: [

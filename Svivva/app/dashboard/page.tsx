@@ -29,7 +29,14 @@ interface Project {
   createdAt: string;
 }
 
-function FloatingShape({ shape, color, size, delay, duration, className }: {
+function FloatingShape({
+  shape,
+  color,
+  size,
+  delay,
+  duration,
+  className,
+}: {
   shape: "cube" | "sphere" | "ring" | "pyramid";
   color: string;
   size: number;
@@ -46,11 +53,55 @@ function FloatingShape({ shape, color, size, delay, duration, className }: {
 
   if (shape === "cube") {
     return (
-      <div className={`absolute ${className}`} style={{ ...baseStyle, animation: `floatY ${duration}s ease-in-out infinite`, animationDelay: `${delay}s` }}>
-        <div className="w-full h-full relative" style={{ transformStyle: "preserve-3d", animation: `spin3d ${duration}s linear infinite`, animationDelay: `${delay}s` }}>
-          <div className="absolute inset-0 rounded-md border" style={{ background: `${color}15`, borderColor: `${color}40`, transform: "translateZ(calc(var(--s)/2))", "--s": `${size}px` } as React.CSSProperties} />
-          <div className="absolute inset-0 rounded-md border" style={{ background: `${color}10`, borderColor: `${color}30`, transform: "rotateY(90deg) translateZ(calc(var(--s)/2))", "--s": `${size}px` } as React.CSSProperties} />
-          <div className="absolute inset-0 rounded-md border" style={{ background: `${color}08`, borderColor: `${color}20`, transform: "rotateX(90deg) translateZ(calc(var(--s)/2))", "--s": `${size}px` } as React.CSSProperties} />
+      <div
+        className={`absolute ${className}`}
+        style={{
+          ...baseStyle,
+          animation: `floatY ${duration}s ease-in-out infinite`,
+          animationDelay: `${delay}s`,
+        }}
+      >
+        <div
+          className="w-full h-full relative"
+          style={{
+            transformStyle: "preserve-3d",
+            animation: `spin3d ${duration}s linear infinite`,
+            animationDelay: `${delay}s`,
+          }}
+        >
+          <div
+            className="absolute inset-0 rounded-md border"
+            style={
+              {
+                background: `${color}15`,
+                borderColor: `${color}40`,
+                transform: "translateZ(calc(var(--s)/2))",
+                "--s": `${size}px`,
+              } as React.CSSProperties
+            }
+          />
+          <div
+            className="absolute inset-0 rounded-md border"
+            style={
+              {
+                background: `${color}10`,
+                borderColor: `${color}30`,
+                transform: "rotateY(90deg) translateZ(calc(var(--s)/2))",
+                "--s": `${size}px`,
+              } as React.CSSProperties
+            }
+          />
+          <div
+            className="absolute inset-0 rounded-md border"
+            style={
+              {
+                background: `${color}08`,
+                borderColor: `${color}20`,
+                transform: "rotateX(90deg) translateZ(calc(var(--s)/2))",
+                "--s": `${size}px`,
+              } as React.CSSProperties
+            }
+          />
         </div>
       </div>
     );
@@ -58,54 +109,116 @@ function FloatingShape({ shape, color, size, delay, duration, className }: {
 
   if (shape === "sphere") {
     return (
-      <div className={`absolute rounded-full border ${className}`}
-        style={{ ...baseStyle, background: `radial-gradient(circle at 30% 30%, ${color}30, ${color}08)`, borderColor: `${color}30`, animation: `floatY ${duration}s ease-in-out infinite`, animationDelay: `${delay}s` }}
+      <div
+        className={`absolute rounded-full border ${className}`}
+        style={{
+          ...baseStyle,
+          background: `radial-gradient(circle at 30% 30%, ${color}30, ${color}08)`,
+          borderColor: `${color}30`,
+          animation: `floatY ${duration}s ease-in-out infinite`,
+          animationDelay: `${delay}s`,
+        }}
       />
     );
   }
 
   if (shape === "ring") {
     return (
-      <div className={`absolute rounded-full border-2 ${className}`}
-        style={{ ...baseStyle, borderColor: `${color}35`, background: "transparent", animation: `spin2d ${duration}s linear infinite`, animationDelay: `${delay}s` }}
+      <div
+        className={`absolute rounded-full border-2 ${className}`}
+        style={{
+          ...baseStyle,
+          borderColor: `${color}35`,
+          background: "transparent",
+          animation: `spin2d ${duration}s linear infinite`,
+          animationDelay: `${delay}s`,
+        }}
       />
     );
   }
 
   return (
-    <div className={`absolute ${className}`}
-      style={{ ...baseStyle, animation: `floatY ${duration}s ease-in-out infinite`, animationDelay: `${delay}s` }}>
-      <div style={{ width: 0, height: 0, borderLeft: `${size / 2}px solid transparent`, borderRight: `${size / 2}px solid transparent`, borderBottom: `${size}px solid ${color}20` }} />
+    <div
+      className={`absolute ${className}`}
+      style={{
+        ...baseStyle,
+        animation: `floatY ${duration}s ease-in-out infinite`,
+        animationDelay: `${delay}s`,
+      }}
+    >
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: `${size / 2}px solid transparent`,
+          borderRight: `${size / 2}px solid transparent`,
+          borderBottom: `${size}px solid ${color}20`,
+        }}
+      />
     </div>
   );
 }
 
-function VisualCard({ href, title, subtitle, icon: Icon, color, shapes, testId }: {
+function VisualCard({
+  href,
+  title,
+  subtitle,
+  icon: Icon,
+  color,
+  shapes,
+  testId,
+}: {
   href: string;
   title: string;
   subtitle: string;
   icon: typeof Package;
   color: string;
-  shapes: { shape: "cube" | "sphere" | "ring" | "pyramid"; size: number; x: string; y: string; delay: number; duration: number }[];
+  shapes: {
+    shape: "cube" | "sphere" | "ring" | "pyramid";
+    size: number;
+    x: string;
+    y: string;
+    delay: number;
+    duration: number;
+  }[];
   testId: string;
 }) {
   return (
     <Link href={href}>
-      <Card className="group h-full cursor-pointer border-border/40 hover:border-foreground/15 transition-all duration-300 overflow-hidden relative" data-testid={testId}>
+      <Card
+        className="group h-full cursor-pointer border-border/40 hover:border-foreground/15 transition-all duration-300 overflow-hidden relative"
+        data-testid={testId}
+      >
         <CardContent className="p-0">
-          <div className="relative h-24 sm:h-32 overflow-hidden" style={{ background: `linear-gradient(135deg, ${color}08, ${color}03)` }}>
+          <div
+            className="relative h-24 sm:h-32 overflow-hidden"
+            style={{ background: `linear-gradient(135deg, ${color}08, ${color}03)` }}
+          >
             {shapes.map((s, i) => (
-              <FloatingShape key={i} shape={s.shape} color={color} size={s.size} delay={s.delay} duration={s.duration} className={`${s.x} ${s.y}`} />
+              <FloatingShape
+                key={i}
+                shape={s.shape}
+                color={color}
+                size={s.size}
+                delay={s.delay}
+                duration={s.duration}
+                className={`${s.x} ${s.y}`}
+              />
             ))}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm transition-transform duration-300 group-hover:scale-110" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
+              <div
+                className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm transition-transform duration-300 group-hover:scale-110"
+                style={{ background: `${color}15`, border: `1px solid ${color}25` }}
+              >
                 <Icon className="w-5 h-5 sm:w-7 sm:h-7" style={{ color }} />
               </div>
             </div>
           </div>
           <div className="px-3 py-3 sm:px-5 sm:py-4">
             <h3 className="font-semibold text-xs sm:text-sm">{title}</h3>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 line-clamp-2">{subtitle}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 line-clamp-2">
+              {subtitle}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -118,7 +231,10 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
     <div className="flex items-center justify-center min-h-[60vh] sm:min-h-[70vh]">
       <div className="max-w-2xl w-full text-center space-y-8 sm:space-y-10 px-4">
         <div className="space-y-3">
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight" data-testid="text-welcome-title">
+          <h1
+            className="text-2xl sm:text-4xl font-bold tracking-tight"
+            data-testid="text-welcome-title"
+          >
             What have you been sitting on?
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg max-w-md mx-auto">
@@ -128,12 +244,39 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
 
         <div className="grid gap-6 sm:grid-cols-2 max-w-lg mx-auto">
           <Link href="/dashboard/api-builder" onClick={() => onModeSet("digital")}>
-            <Card className="h-full cursor-pointer border-border/40 hover:border-[#5BA8A0]/40 transition-all duration-300 group overflow-hidden" data-testid="card-choose-software">
+            <Card
+              className="h-full cursor-pointer border-border/40 hover:border-[#5BA8A0]/40 transition-all duration-300 group overflow-hidden"
+              data-testid="card-choose-software"
+            >
               <CardContent className="p-0">
-                <div className="relative h-28 overflow-hidden" style={{ background: "linear-gradient(135deg, #5BA8A008, #5BA8A003)" }}>
-                  <FloatingShape shape="cube" color="#5BA8A0" size={28} delay={0} duration={8} className="top-4 left-6" />
-                  <FloatingShape shape="sphere" color="#5BA8A0" size={18} delay={1} duration={5} className="bottom-6 right-8" />
-                  <FloatingShape shape="ring" color="#5BA8A0" size={22} delay={0.5} duration={6} className="top-8 right-12" />
+                <div
+                  className="relative h-28 overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #5BA8A008, #5BA8A003)" }}
+                >
+                  <FloatingShape
+                    shape="cube"
+                    color="#5BA8A0"
+                    size={28}
+                    delay={0}
+                    duration={8}
+                    className="top-4 left-6"
+                  />
+                  <FloatingShape
+                    shape="sphere"
+                    color="#5BA8A0"
+                    size={18}
+                    delay={1}
+                    duration={5}
+                    className="bottom-6 right-8"
+                  />
+                  <FloatingShape
+                    shape="ring"
+                    color="#5BA8A0"
+                    size={22}
+                    delay={0.5}
+                    duration={6}
+                    className="top-8 right-12"
+                  />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-12 h-12 rounded-xl bg-[#5BA8A0]/10 border border-[#5BA8A0]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Package className="w-6 h-6 text-[#5BA8A0]" />
@@ -149,12 +292,39 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
           </Link>
 
           <Link href="/dashboard/hardware-builder" onClick={() => onModeSet("physical")}>
-            <Card className="h-full cursor-pointer border-border/40 hover:border-[#6B2C4A]/40 transition-all duration-300 group overflow-hidden" data-testid="card-choose-hardware">
+            <Card
+              className="h-full cursor-pointer border-border/40 hover:border-[#6B2C4A]/40 transition-all duration-300 group overflow-hidden"
+              data-testid="card-choose-hardware"
+            >
               <CardContent className="p-0">
-                <div className="relative h-28 overflow-hidden" style={{ background: "linear-gradient(135deg, #6B2C4A08, #6B2C4A03)" }}>
-                  <FloatingShape shape="pyramid" color="#6B2C4A" size={24} delay={0.3} duration={7} className="top-6 left-8" />
-                  <FloatingShape shape="cube" color="#6B2C4A" size={20} delay={0} duration={9} className="bottom-4 right-6" />
-                  <FloatingShape shape="sphere" color="#6B2C4A" size={16} delay={1.5} duration={5} className="top-3 right-10" />
+                <div
+                  className="relative h-28 overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #6B2C4A08, #6B2C4A03)" }}
+                >
+                  <FloatingShape
+                    shape="pyramid"
+                    color="#6B2C4A"
+                    size={24}
+                    delay={0.3}
+                    duration={7}
+                    className="top-6 left-8"
+                  />
+                  <FloatingShape
+                    shape="cube"
+                    color="#6B2C4A"
+                    size={20}
+                    delay={0}
+                    duration={9}
+                    className="bottom-4 right-6"
+                  />
+                  <FloatingShape
+                    shape="sphere"
+                    color="#6B2C4A"
+                    size={16}
+                    delay={1.5}
+                    duration={5}
+                    className="top-3 right-10"
+                  />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-12 h-12 rounded-xl bg-[#6B2C4A]/10 border border-[#6B2C4A]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Box className="w-6 h-6 text-[#6B2C4A]" />
@@ -172,7 +342,11 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
 
         <div className="pt-2">
           <Link href="/dashboard/idea-engine">
-            <Button variant="ghost" className="text-muted-foreground gap-2 text-sm" data-testid="button-explore-ideas">
+            <Button
+              variant="ghost"
+              className="text-muted-foreground gap-2 text-sm"
+              data-testid="button-explore-ideas"
+            >
               <Lightbulb className="w-4 h-4" />
               Browse around first
             </Button>
@@ -183,7 +357,13 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
   );
 }
 
-function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
+function ReturningUserDashboard({
+  user,
+  mode,
+  projects,
+  isLoading,
+  isAdmin,
+}: {
   user: { firstName?: string | null } | null;
   mode: string;
   projects: Project[];
@@ -216,7 +396,14 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
       shapes: [
         { shape: "sphere" as const, size: 20, x: "left-6", y: "top-4", delay: 0.3, duration: 6 },
         { shape: "cube" as const, size: 16, x: "right-8", y: "top-8", delay: 0, duration: 9 },
-        { shape: "pyramid" as const, size: 18, x: "left-16", y: "bottom-3", delay: 1.2, duration: 7 },
+        {
+          shape: "pyramid" as const,
+          size: 18,
+          x: "left-16",
+          y: "bottom-3",
+          delay: 1.2,
+          duration: 7,
+        },
       ],
     },
     {
@@ -239,7 +426,14 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
       color: "#EC4899",
       shapes: [
         { shape: "ring" as const, size: 20, x: "left-6", y: "top-5", delay: 0, duration: 6 },
-        { shape: "sphere" as const, size: 12, x: "right-10", y: "bottom-6", delay: 0.5, duration: 5 },
+        {
+          shape: "sphere" as const,
+          size: 12,
+          x: "right-10",
+          y: "bottom-6",
+          delay: 0.5,
+          duration: 5,
+        },
         { shape: "cube" as const, size: 14, x: "right-4", y: "top-4", delay: 1, duration: 8 },
       ],
     },
@@ -278,7 +472,14 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
       color: "#6B2C4A",
       shapes: [
         { shape: "cube" as const, size: 26, x: "left-4", y: "top-3", delay: 0, duration: 9 },
-        { shape: "pyramid" as const, size: 16, x: "right-8", y: "bottom-5", delay: 0.5, duration: 7 },
+        {
+          shape: "pyramid" as const,
+          size: 16,
+          x: "right-8",
+          y: "bottom-5",
+          delay: 0.5,
+          duration: 7,
+        },
         { shape: "sphere" as const, size: 14, x: "right-4", y: "top-6", delay: 1, duration: 5 },
       ],
     },
@@ -329,12 +530,14 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
           <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-dashboard-title">
             {user?.firstName ? `Welcome back, ${user.firstName}` : "Welcome back"}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            What are you working on today?
-          </p>
+          <p className="text-muted-foreground mt-1 text-sm">What are you working on today?</p>
         </div>
         <Link href={builderHref} className="w-full sm:w-auto">
-          <Button className="gap-2 shrink-0 w-full sm:w-auto" style={{ background: primaryColor }} data-testid="button-new-project">
+          <Button
+            className="gap-2 shrink-0 w-full sm:w-auto"
+            style={{ background: primaryColor }}
+            data-testid="button-new-project"
+          >
             <Plus className="w-4 h-4" />
             {builderLabel}
           </Button>
@@ -342,19 +545,31 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
       </div>
 
       <div>
-        <h2 className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest mb-4">Tools</h2>
+        <h2 className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest mb-4">
+          Tools
+        </h2>
         <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
-            <VisualCard key={c.href} {...c} testId={`card-tool-${c.title.toLowerCase().replace(/\s+/g, "-")}`} />
+            <VisualCard
+              key={c.href}
+              {...c}
+              testId={`card-tool-${c.title.toLowerCase().replace(/\s+/g, "-")}`}
+            />
           ))}
         </div>
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">Recent Projects</h2>
+          <h2 className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">
+            Recent Projects
+          </h2>
           {projects.length > 0 && (
-            <Link href="/dashboard/projects" className="text-xs text-muted-foreground hover:text-foreground transition-colors" data-testid="link-view-all-projects">
+            <Link
+              href="/dashboard/projects"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-view-all-projects"
+            >
               View all
             </Link>
           )}
@@ -362,8 +577,13 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
 
         {isLoading ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map(i => (
-              <Card key={i}><CardContent className="pt-5 pb-5"><Skeleton className="h-5 w-32 mb-2" /><Skeleton className="h-4 w-full" /></CardContent></Card>
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="pt-5 pb-5">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-full" />
+                </CardContent>
+              </Card>
             ))}
           </div>
         ) : projects.length === 0 ? (
@@ -371,17 +591,24 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
             <CardContent className="py-10 text-center">
               <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">No projects yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Use the tools above to create your first one</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                Use the tools above to create your first one
+              </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
               <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
-                <Card className="h-full cursor-pointer border-border/30 hover:border-foreground/15 transition-colors" data-testid={`card-project-${project.id}`}>
+                <Card
+                  className="h-full cursor-pointer border-border/30 hover:border-foreground/15 transition-colors"
+                  data-testid={`card-project-${project.id}`}
+                >
                   <CardContent className="pt-4 pb-4 px-5">
                     <h3 className="font-medium text-sm truncate">{project.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{project.description || "No description"}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {project.description || "No description"}
+                    </p>
                   </CardContent>
                 </Card>
               </Link>
@@ -393,7 +620,11 @@ function ReturningUserDashboard({ user, mode, projects, isLoading, isAdmin }: {
       {isAdmin && (
         <div className="pt-2 border-t border-border/20">
           <Link href="/dashboard/traffic">
-            <Button variant="outline" className="gap-2 w-full sm:w-auto" data-testid="button-traffic-analytics">
+            <Button
+              variant="outline"
+              className="gap-2 w-full sm:w-auto"
+              data-testid="button-traffic-analytics"
+            >
               <BarChart2 className="h-4 w-4 text-teal-500" />
               View Traffic & Analytics
             </Button>
@@ -415,7 +646,11 @@ export default function DashboardPage() {
   });
   const userIsAdmin = meData?.isAdmin ?? false;
 
-  const { data: projectsData, isLoading: projectsLoading, isError } = useQuery({
+  const {
+    data: projectsData,
+    isLoading: projectsLoading,
+    isError,
+  } = useQuery({
     queryKey: ["/api/projects"],
     queryFn: async () => {
       const res = await authFetch("/api/projects");
@@ -424,7 +659,9 @@ export default function DashboardPage() {
     },
   });
 
-  const allProjects: Project[] = Array.isArray(projectsData) ? projectsData : projectsData?.projects || [];
+  const allProjects: Project[] = Array.isArray(projectsData)
+    ? projectsData
+    : projectsData?.projects || [];
   const recentProjects = allProjects.slice(0, 6);
   const isNewUser = !projectsLoading && !isError && allProjects.length === 0;
 

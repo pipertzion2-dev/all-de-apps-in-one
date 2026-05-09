@@ -3,7 +3,18 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Database, Cpu, Play, BookOpen, ChevronDown, ChevronRight, Trash2, Music } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Database,
+  Cpu,
+  Play,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  Music,
+} from "lucide-react";
 
 interface Dataset {
   id: string;
@@ -108,18 +119,40 @@ export default function NeuralAudioPage() {
   const [showAddItem, setShowAddItem] = useState<string | null>(null);
 
   const [datasetForm, setDatasetForm] = useState({ name: "", description: "", genre: "" });
-  const [modelForm, setModelForm] = useState({ name: "", modelType: "diffusion", baseModel: "", description: "" });
-  const [jobForm, setJobForm] = useState({ modelId: "", datasetId: "", epochs: "100", learningRate: "0.0001", batchSize: "8" });
-  const [itemForm, setItemForm] = useState({ fileName: "", durationSec: "", bpm: "", key: "", genre: "", instrument: "", mood: "" });
+  const [modelForm, setModelForm] = useState({
+    name: "",
+    modelType: "diffusion",
+    baseModel: "",
+    description: "",
+  });
+  const [jobForm, setJobForm] = useState({
+    modelId: "",
+    datasetId: "",
+    epochs: "100",
+    learningRate: "0.0001",
+    batchSize: "8",
+  });
+  const [itemForm, setItemForm] = useState({
+    fileName: "",
+    durationSec: "",
+    bpm: "",
+    key: "",
+    genre: "",
+    instrument: "",
+    mood: "",
+  });
 
-  const setLoadingKey = (key: string, val: boolean) => setLoading((prev) => ({ ...prev, [key]: val }));
+  const setLoadingKey = (key: string, val: boolean) =>
+    setLoading((prev) => ({ ...prev, [key]: val }));
 
   const fetchDatasets = useCallback(async () => {
     setLoadingKey("datasets", true);
     try {
       const res = await fetch("/api/neural-audio/datasets");
       if (res.ok) setDatasets(await res.json());
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("datasets", false);
   }, []);
 
@@ -128,7 +161,9 @@ export default function NeuralAudioPage() {
     try {
       const res = await fetch("/api/neural-audio/models");
       if (res.ok) setModels(await res.json());
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("models", false);
   }, []);
 
@@ -137,7 +172,9 @@ export default function NeuralAudioPage() {
     try {
       const res = await fetch("/api/neural-audio/jobs");
       if (res.ok) setJobs(await res.json());
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("jobs", false);
   }, []);
 
@@ -146,7 +183,9 @@ export default function NeuralAudioPage() {
     try {
       const res = await fetch("/api/neural-audio/guide");
       if (res.ok) setGuide(await res.json());
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("guide", false);
   }, []);
 
@@ -158,7 +197,9 @@ export default function NeuralAudioPage() {
         const items = await res.json();
         setDatasetItems((prev) => ({ ...prev, [datasetId]: items }));
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey(`items-${datasetId}`, false);
   };
 
@@ -186,7 +227,9 @@ export default function NeuralAudioPage() {
         setShowCreateDataset(false);
         await fetchDatasets();
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("createDataset", false);
   };
 
@@ -204,7 +247,9 @@ export default function NeuralAudioPage() {
         setShowCreateModel(false);
         await fetchModels();
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("createModel", false);
   };
 
@@ -225,11 +270,19 @@ export default function NeuralAudioPage() {
         }),
       });
       if (res.ok) {
-        setJobForm({ modelId: "", datasetId: "", epochs: "100", learningRate: "0.0001", batchSize: "8" });
+        setJobForm({
+          modelId: "",
+          datasetId: "",
+          epochs: "100",
+          learningRate: "0.0001",
+          batchSize: "8",
+        });
         setShowStartTraining(false);
         await fetchJobs();
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("startTraining", false);
   };
 
@@ -251,12 +304,22 @@ export default function NeuralAudioPage() {
         }),
       });
       if (res.ok) {
-        setItemForm({ fileName: "", durationSec: "", bpm: "", key: "", genre: "", instrument: "", mood: "" });
+        setItemForm({
+          fileName: "",
+          durationSec: "",
+          bpm: "",
+          key: "",
+          genre: "",
+          instrument: "",
+          mood: "",
+        });
         setShowAddItem(null);
         await fetchItems(datasetId);
         await fetchDatasets();
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setLoadingKey("addItem", false);
   };
 
@@ -269,14 +332,20 @@ export default function NeuralAudioPage() {
     }
   };
 
-  const getModelName = (modelId: string) => models.find((m) => m.id === modelId)?.name || modelId.slice(0, 8);
-  const getDatasetName = (datasetId: string) => datasets.find((d) => d.id === datasetId)?.name || datasetId.slice(0, 8);
+  const getModelName = (modelId: string) =>
+    models.find((m) => m.id === modelId)?.name || modelId.slice(0, 8);
+  const getDatasetName = (datasetId: string) =>
+    datasets.find((d) => d.id === datasetId)?.name || datasetId.slice(0, 8);
 
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="text-neural-audio-title">Neural Audio</h1>
-        <p className="text-muted-foreground mt-1">Train and manage neural audio models with your own datasets</p>
+        <h1 className="text-3xl font-bold" data-testid="text-neural-audio-title">
+          Neural Audio
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Train and manage neural audio models with your own datasets
+        </p>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -302,7 +371,9 @@ export default function NeuralAudioPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-xl font-semibold">Training Data Management</h2>
-              <p className="text-sm text-muted-foreground">Organize and manage your audio datasets for model training</p>
+              <p className="text-sm text-muted-foreground">
+                Organize and manage your audio datasets for model training
+              </p>
             </div>
             <Button
               onClick={() => setShowCreateDataset(!showCreateDataset)}
@@ -348,7 +419,9 @@ export default function NeuralAudioPage() {
                       className="w-full border rounded-md px-3 py-2 text-sm bg-background"
                       placeholder="A collection of..."
                       value={datasetForm.description}
-                      onChange={(e) => setDatasetForm({ ...datasetForm, description: e.target.value })}
+                      onChange={(e) =>
+                        setDatasetForm({ ...datasetForm, description: e.target.value })
+                      }
                       data-testid="input-dataset-description"
                     />
                   </div>
@@ -356,14 +429,23 @@ export default function NeuralAudioPage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleCreateDataset}
-                    disabled={loading.createDataset || !datasetForm.name || !datasetForm.description || !datasetForm.genre}
+                    disabled={
+                      loading.createDataset ||
+                      !datasetForm.name ||
+                      !datasetForm.description ||
+                      !datasetForm.genre
+                    }
                     className="bg-[#5BA8A0] text-white"
                     data-testid="button-submit-dataset"
                   >
                     {loading.createDataset && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                     Create
                   </Button>
-                  <Button variant="outline" onClick={() => setShowCreateDataset(false)} data-testid="button-cancel-dataset">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCreateDataset(false)}
+                    data-testid="button-cancel-dataset"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -380,8 +462,14 @@ export default function NeuralAudioPage() {
               <CardContent className="py-12 text-center">
                 <Music className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No datasets yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first dataset to start building your neural audio training pipeline.</p>
-                <Button onClick={() => setShowCreateDataset(true)} className="gap-2 bg-[#5BA8A0] text-white" data-testid="button-create-first-dataset">
+                <p className="text-muted-foreground mb-4">
+                  Create your first dataset to start building your neural audio training pipeline.
+                </p>
+                <Button
+                  onClick={() => setShowCreateDataset(true)}
+                  className="gap-2 bg-[#5BA8A0] text-white"
+                  data-testid="button-create-first-dataset"
+                >
                   <Plus className="w-4 h-4" />
                   Create Your First Dataset
                 </Button>
@@ -412,8 +500,12 @@ export default function NeuralAudioPage() {
                         <Badge variant="outline">{ds.genre}</Badge>
                         <StatusBadge status={ds.status} />
                         <span className="text-sm text-muted-foreground">{ds.totalItems} items</span>
-                        <span className="text-sm text-muted-foreground">{formatDuration(ds.totalDurationSec)}</span>
-                        <span className="text-xs text-muted-foreground">{new Date(ds.createdAt).toLocaleDateString()}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDuration(ds.totalDurationSec)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(ds.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </CardHeader>
@@ -424,7 +516,10 @@ export default function NeuralAudioPage() {
                         <h4 className="text-sm font-medium">Dataset Items</h4>
                         <Button
                           size="sm"
-                          onClick={(e) => { e.stopPropagation(); setShowAddItem(showAddItem === ds.id ? null : ds.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAddItem(showAddItem === ds.id ? null : ds.id);
+                          }}
                           className="gap-1 bg-[#5BA8A0] text-white"
                           data-testid={`button-add-item-${ds.id}`}
                         >
@@ -441,7 +536,9 @@ export default function NeuralAudioPage() {
                               className="border rounded-md px-3 py-2 text-sm bg-background"
                               placeholder="File name"
                               value={itemForm.fileName}
-                              onChange={(e) => setItemForm({ ...itemForm, fileName: e.target.value })}
+                              onChange={(e) =>
+                                setItemForm({ ...itemForm, fileName: e.target.value })
+                              }
                               data-testid="input-item-filename"
                             />
                             <input
@@ -449,7 +546,9 @@ export default function NeuralAudioPage() {
                               placeholder="Duration (sec)"
                               type="number"
                               value={itemForm.durationSec}
-                              onChange={(e) => setItemForm({ ...itemForm, durationSec: e.target.value })}
+                              onChange={(e) =>
+                                setItemForm({ ...itemForm, durationSec: e.target.value })
+                              }
                               data-testid="input-item-duration"
                             />
                             <input
@@ -480,7 +579,9 @@ export default function NeuralAudioPage() {
                               className="border rounded-md px-3 py-2 text-sm bg-background"
                               placeholder="Instrument"
                               value={itemForm.instrument}
-                              onChange={(e) => setItemForm({ ...itemForm, instrument: e.target.value })}
+                              onChange={(e) =>
+                                setItemForm({ ...itemForm, instrument: e.target.value })
+                              }
                               data-testid="input-item-instrument"
                             />
                             <input
@@ -502,7 +603,12 @@ export default function NeuralAudioPage() {
                               {loading.addItem && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
                               Add
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => setShowAddItem(null)} data-testid="button-cancel-item">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowAddItem(null)}
+                              data-testid="button-cancel-item"
+                            >
                               Cancel
                             </Button>
                           </div>
@@ -522,20 +628,36 @@ export default function NeuralAudioPage() {
                           <table className="w-full text-sm" data-testid={`table-items-${ds.id}`}>
                             <thead>
                               <tr className="border-b text-left">
-                                <th className="py-2 pr-4 font-medium text-muted-foreground">File Name</th>
-                                <th className="py-2 pr-4 font-medium text-muted-foreground">Duration</th>
+                                <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                  File Name
+                                </th>
+                                <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                  Duration
+                                </th>
                                 <th className="py-2 pr-4 font-medium text-muted-foreground">BPM</th>
                                 <th className="py-2 pr-4 font-medium text-muted-foreground">Key</th>
-                                <th className="py-2 pr-4 font-medium text-muted-foreground">Genre</th>
-                                <th className="py-2 pr-4 font-medium text-muted-foreground">Instrument</th>
+                                <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                  Genre
+                                </th>
+                                <th className="py-2 pr-4 font-medium text-muted-foreground">
+                                  Instrument
+                                </th>
                                 <th className="py-2 font-medium text-muted-foreground">Mood</th>
                               </tr>
                             </thead>
                             <tbody>
                               {(datasetItems[ds.id] || []).map((item) => (
-                                <tr key={item.id} className="border-b last:border-0" data-testid={`row-item-${item.id}`}>
+                                <tr
+                                  key={item.id}
+                                  className="border-b last:border-0"
+                                  data-testid={`row-item-${item.id}`}
+                                >
                                   <td className="py-2 pr-4 font-mono">{item.fileName}</td>
-                                  <td className="py-2 pr-4">{item.durationSec != null ? formatDuration(item.durationSec) : "-"}</td>
+                                  <td className="py-2 pr-4">
+                                    {item.durationSec != null
+                                      ? formatDuration(item.durationSec)
+                                      : "-"}
+                                  </td>
                                   <td className="py-2 pr-4">{item.bpm ?? "-"}</td>
                                   <td className="py-2 pr-4">{item.key ?? "-"}</td>
                                   <td className="py-2 pr-4">{item.genre ?? "-"}</td>
@@ -561,7 +683,9 @@ export default function NeuralAudioPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-xl font-semibold">Neural Models</h2>
-              <p className="text-sm text-muted-foreground">Create and manage your audio generation models</p>
+              <p className="text-sm text-muted-foreground">
+                Create and manage your audio generation models
+              </p>
             </div>
             <Button
               onClick={() => setShowCreateModel(!showCreateModel)}
@@ -636,7 +760,11 @@ export default function NeuralAudioPage() {
                     {loading.createModel && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                     Create
                   </Button>
-                  <Button variant="outline" onClick={() => setShowCreateModel(false)} data-testid="button-cancel-model">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCreateModel(false)}
+                    data-testid="button-cancel-model"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -653,8 +781,14 @@ export default function NeuralAudioPage() {
               <CardContent className="py-12 text-center">
                 <Cpu className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No models yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first neural model to start generating audio.</p>
-                <Button onClick={() => setShowCreateModel(true)} className="gap-2 bg-[#5BA8A0] text-white" data-testid="button-create-first-model">
+                <p className="text-muted-foreground mb-4">
+                  Create your first neural model to start generating audio.
+                </p>
+                <Button
+                  onClick={() => setShowCreateModel(true)}
+                  className="gap-2 bg-[#5BA8A0] text-white"
+                  data-testid="button-create-first-model"
+                >
                   <Plus className="w-4 h-4" />
                   Create Your First Model
                 </Button>
@@ -668,7 +802,9 @@ export default function NeuralAudioPage() {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <CardTitle className="text-base">{model.name}</CardTitle>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="uppercase text-xs">{model.modelType}</Badge>
+                        <Badge variant="outline" className="uppercase text-xs">
+                          {model.modelType}
+                        </Badge>
                         <StatusBadge status={model.status} />
                       </div>
                     </div>
@@ -694,7 +830,9 @@ export default function NeuralAudioPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-xl font-semibold">Training Jobs</h2>
-              <p className="text-sm text-muted-foreground">Monitor and launch model training sessions</p>
+              <p className="text-sm text-muted-foreground">
+                Monitor and launch model training sessions
+              </p>
             </div>
             <Button
               onClick={() => setShowStartTraining(!showStartTraining)}
@@ -724,7 +862,9 @@ export default function NeuralAudioPage() {
                     >
                       <option value="">Select a model...</option>
                       {models.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -738,7 +878,9 @@ export default function NeuralAudioPage() {
                     >
                       <option value="">Select a dataset...</option>
                       {datasets.map((d) => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -782,7 +924,11 @@ export default function NeuralAudioPage() {
                     {loading.startTraining && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                     Start Training
                   </Button>
-                  <Button variant="outline" onClick={() => setShowStartTraining(false)} data-testid="button-cancel-training">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowStartTraining(false)}
+                    data-testid="button-cancel-training"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -799,8 +945,14 @@ export default function NeuralAudioPage() {
               <CardContent className="py-12 text-center">
                 <Play className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No training jobs yet</h3>
-                <p className="text-muted-foreground mb-4">Start a training job to begin fine-tuning your neural audio model.</p>
-                <Button onClick={() => setShowStartTraining(true)} className="gap-2 bg-[#5BA8A0] text-white" data-testid="button-start-first-training">
+                <p className="text-muted-foreground mb-4">
+                  Start a training job to begin fine-tuning your neural audio model.
+                </p>
+                <Button
+                  onClick={() => setShowStartTraining(true)}
+                  className="gap-2 bg-[#5BA8A0] text-white"
+                  data-testid="button-start-first-training"
+                >
                   <Play className="w-4 h-4" />
                   Start Your First Training
                 </Button>
@@ -814,7 +966,9 @@ export default function NeuralAudioPage() {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <CardTitle className="text-base">{getModelName(job.modelId)}</CardTitle>
-                        <CardDescription className="mt-1">Dataset: {getDatasetName(job.datasetId)}</CardDescription>
+                        <CardDescription className="mt-1">
+                          Dataset: {getDatasetName(job.datasetId)}
+                        </CardDescription>
                       </div>
                       <StatusBadge status={job.status} />
                     </div>
@@ -846,7 +1000,9 @@ export default function NeuralAudioPage() {
         <div className="space-y-4">
           <div>
             <h2 className="text-xl font-semibold">Training Guide</h2>
-            <p className="text-sm text-muted-foreground">Best practices and requirements for neural audio training</p>
+            <p className="text-sm text-muted-foreground">
+              Best practices and requirements for neural audio training
+            </p>
           </div>
 
           {loading.guide ? (
@@ -869,17 +1025,23 @@ export default function NeuralAudioPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Recommended items</span>
-                    <span className="font-medium">{guide.datasetRequirements.recommendedItems}+</span>
+                    <span className="font-medium">
+                      {guide.datasetRequirements.recommendedItems}+
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Max duration per item</span>
-                    <span className="font-medium">{guide.datasetRequirements.maxDurationPerItem}s</span>
+                    <span className="font-medium">
+                      {guide.datasetRequirements.maxDurationPerItem}s
+                    </span>
                   </div>
                   <div className="space-y-1">
                     <span className="text-sm text-muted-foreground">Supported formats</span>
                     <div className="flex gap-1 flex-wrap">
                       {guide.datasetRequirements.supportedFormats.map((f) => (
-                        <Badge key={f} variant="secondary" className="uppercase text-xs">{f}</Badge>
+                        <Badge key={f} variant="secondary" className="uppercase text-xs">
+                          {f}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -887,7 +1049,9 @@ export default function NeuralAudioPage() {
                     <span className="text-sm text-muted-foreground">Required metadata</span>
                     <div className="flex gap-1 flex-wrap">
                       {guide.datasetRequirements.requiredMetadata.map((m) => (
-                        <Badge key={m} variant="outline" className="text-xs">{m}</Badge>
+                        <Badge key={m} variant="outline" className="text-xs">
+                          {m}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -925,7 +1089,9 @@ export default function NeuralAudioPage() {
                     <div key={mt.id} className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{mt.name}</span>
-                        <Badge variant="outline" className="uppercase text-xs">{mt.id}</Badge>
+                        <Badge variant="outline" className="uppercase text-xs">
+                          {mt.id}
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{mt.description}</p>
                     </div>
@@ -944,7 +1110,9 @@ export default function NeuralAudioPage() {
                   <ul className="space-y-2">
                     {guide.qualityChecklist.map((item, i) => (
                       <li key={i} className="text-sm flex gap-2 items-start">
-                        <span className="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-xs text-muted-foreground">{i + 1}</span>
+                        <span className="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-xs text-muted-foreground">
+                          {i + 1}
+                        </span>
                         <span>{item}</span>
                       </li>
                     ))}

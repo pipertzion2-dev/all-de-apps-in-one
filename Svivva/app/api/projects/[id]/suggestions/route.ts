@@ -13,19 +13,45 @@ interface RouteParams {
 
 const SuggestionRequestSchema = z.object({
   type: z.enum(["names", "icons", "palettes", "questions", "complete"]),
-  context: z.object({
-    prompt: z.string().optional(),
-    category: z.string().optional(),
-    personality: z.string().optional(),
-    existingAnswers: z.record(z.unknown()).optional(),
-  }).optional(),
+  context: z
+    .object({
+      prompt: z.string().optional(),
+      category: z.string().optional(),
+      personality: z.string().optional(),
+      existingAnswers: z.record(z.unknown()).optional(),
+    })
+    .optional(),
 });
 
 const ICON_OPTIONS = [
-  "Zap", "Brain", "Sparkles", "Target", "Rocket", "Shield", "Globe", "Code",
-  "MessageSquare", "Image", "FileText", "BarChart", "Database", "Lock",
-  "Cpu", "Layers", "Bot", "Wand2", "Flame", "Heart", "Star", "Gem",
-  "Crown", "Trophy", "Lightbulb", "Compass", "Anchor", "Feather"
+  "Zap",
+  "Brain",
+  "Sparkles",
+  "Target",
+  "Rocket",
+  "Shield",
+  "Globe",
+  "Code",
+  "MessageSquare",
+  "Image",
+  "FileText",
+  "BarChart",
+  "Database",
+  "Lock",
+  "Cpu",
+  "Layers",
+  "Bot",
+  "Wand2",
+  "Flame",
+  "Heart",
+  "Star",
+  "Gem",
+  "Crown",
+  "Trophy",
+  "Lightbulb",
+  "Compass",
+  "Anchor",
+  "Feather",
 ];
 
 const PALETTE_PRESETS = [
@@ -44,11 +70,31 @@ const ONBOARDING_QUESTIONS = [
     id: "purpose",
     question: "What will your API do?",
     options: [
-      { value: "analyze", label: "Analyze & Extract", icon: "Brain", description: "Process text, images, or data to extract insights" },
-      { value: "generate", label: "Generate & Create", icon: "Sparkles", description: "Create content, text, images, or code" },
-      { value: "classify", label: "Classify & Categorize", icon: "Target", description: "Sort and label data into categories" },
-      { value: "transform", label: "Transform & Convert", icon: "Wand2", description: "Convert between formats or restructure data" },
-    ]
+      {
+        value: "analyze",
+        label: "Analyze & Extract",
+        icon: "Brain",
+        description: "Process text, images, or data to extract insights",
+      },
+      {
+        value: "generate",
+        label: "Generate & Create",
+        icon: "Sparkles",
+        description: "Create content, text, images, or code",
+      },
+      {
+        value: "classify",
+        label: "Classify & Categorize",
+        icon: "Target",
+        description: "Sort and label data into categories",
+      },
+      {
+        value: "transform",
+        label: "Transform & Convert",
+        icon: "Wand2",
+        description: "Convert between formats or restructure data",
+      },
+    ],
   },
   {
     id: "domain",
@@ -60,17 +106,37 @@ const ONBOARDING_QUESTIONS = [
       { value: "data", label: "Data & Analytics", icon: "BarChart" },
       { value: "communication", label: "Communication", icon: "MessageSquare" },
       { value: "health", label: "Health & Wellness", icon: "Heart" },
-    ]
+    ],
   },
   {
     id: "personality",
     question: "What personality should your API have?",
     options: [
-      { value: "professional", label: "Professional", icon: "Briefcase", description: "Formal, precise, business-focused" },
-      { value: "friendly", label: "Friendly", icon: "Smile", description: "Warm, approachable, conversational" },
-      { value: "technical", label: "Technical", icon: "Cpu", description: "Detailed, accurate, developer-oriented" },
-      { value: "creative", label: "Creative", icon: "Palette", description: "Imaginative, expressive, artistic" },
-    ]
+      {
+        value: "professional",
+        label: "Professional",
+        icon: "Briefcase",
+        description: "Formal, precise, business-focused",
+      },
+      {
+        value: "friendly",
+        label: "Friendly",
+        icon: "Smile",
+        description: "Warm, approachable, conversational",
+      },
+      {
+        value: "technical",
+        label: "Technical",
+        icon: "Cpu",
+        description: "Detailed, accurate, developer-oriented",
+      },
+      {
+        value: "creative",
+        label: "Creative",
+        icon: "Palette",
+        description: "Imaginative, expressive, artistic",
+      },
+    ],
   },
 ];
 
@@ -115,14 +181,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const answers = context?.existingAnswers || {};
         const prompt = context?.prompt || project.systemPrompt;
         const branding = await generateCompleteBranding(prompt, answers);
-        
-        const existingBrand = await db.select()
+
+        const existingBrand = await db
+          .select()
           .from(projectBrands)
           .where(eq(projectBrands.projectId, projectId))
           .limit(1);
 
         if (existingBrand.length > 0) {
-          await db.update(projectBrands)
+          await db
+            .update(projectBrands)
             .set({
               suggestedNames: branding.names,
               suggestedIcons: branding.icons,
@@ -155,8 +223,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Suggestion error:", error);
     return NextResponse.json(
-      { error: "Failed to generate suggestions", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to generate suggestions",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }
@@ -165,7 +236,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const brand = await db.select()
+    const brand = await db
+      .select()
       .from(projectBrands)
       .where(eq(projectBrands.projectId, projectId))
       .limit(1);
@@ -202,12 +274,12 @@ async function generateNameSuggestions(prompt: string, category?: string): Promi
 - Easy to pronounce
 - Professional yet memorable
 - Relevant to the API's purpose
-Return ONLY a JSON array of 6 name strings, no explanation.`
+Return ONLY a JSON array of 6 name strings, no explanation.`,
       },
       {
         role: "user",
-        content: `API Purpose: ${prompt}\n${category ? `Category: ${category}` : ""}`
-      }
+        content: `API Purpose: ${prompt}\n${category ? `Category: ${category}` : ""}`,
+      },
     ],
     response_format: { type: "json_object" },
   });
@@ -215,7 +287,9 @@ Return ONLY a JSON array of 6 name strings, no explanation.`
   try {
     const content = response.choices[0].message.content || "{}";
     const parsed = JSON.parse(content);
-    return parsed.names || ["API Pro", "DataFlow", "SmartAPI", "IntelliCore", "NexusAI", "PulseAPI"];
+    return (
+      parsed.names || ["API Pro", "DataFlow", "SmartAPI", "IntelliCore", "NexusAI", "PulseAPI"]
+    );
   } catch {
     return ["API Pro", "DataFlow", "SmartAPI", "IntelliCore", "NexusAI", "PulseAPI"];
   }
@@ -228,12 +302,12 @@ async function generateIconSuggestions(prompt: string, category?: string): Promi
       {
         role: "system",
         content: `You are an icon selection expert. Based on the API purpose and category, select the 6 most relevant icons from this list: ${ICON_OPTIONS.join(", ")}.
-Return ONLY a JSON object with an "icons" array of 6 icon names from the list.`
+Return ONLY a JSON object with an "icons" array of 6 icon names from the list.`,
       },
       {
         role: "user",
-        content: `API Purpose: ${prompt}\n${category ? `Category: ${category}` : ""}`
-      }
+        content: `API Purpose: ${prompt}\n${category ? `Category: ${category}` : ""}`,
+      },
     ],
     response_format: { type: "json_object" },
   });
@@ -268,7 +342,9 @@ function generatePaletteSuggestions(personality: string): typeof PALETTE_PRESETS
   return sorted;
 }
 
-function getNextQuestion(answers: Record<string, unknown>): typeof ONBOARDING_QUESTIONS[0] | null {
+function getNextQuestion(
+  answers: Record<string, unknown>,
+): (typeof ONBOARDING_QUESTIONS)[0] | null {
   for (const question of ONBOARDING_QUESTIONS) {
     if (!(question.id in answers)) {
       return question;
@@ -283,7 +359,7 @@ async function generateCompleteBranding(prompt: string, answers: Record<string, 
     generateIconSuggestions(prompt, answers.domain as string),
   ]);
 
-  const palettes = generatePaletteSuggestions(answers.personality as string || "professional");
+  const palettes = generatePaletteSuggestions((answers.personality as string) || "professional");
 
   return {
     names,

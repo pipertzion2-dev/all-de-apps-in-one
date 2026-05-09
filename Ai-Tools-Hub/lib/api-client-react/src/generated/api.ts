@@ -56,9 +56,7 @@ export const getHealthCheckUrl = () => {
   return `/api/healthz`;
 };
 
-export const healthCheck = async (
-  options?: RequestInit,
-): Promise<HealthStatus> => {
+export const healthCheck = async (options?: RequestInit): Promise<HealthStatus> => {
   return customFetch<HealthStatus>(getHealthCheckUrl(), {
     ...options,
     method: "GET",
@@ -73,20 +71,15 @@ export const getHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof healthCheck>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getHealthCheckQueryKey();
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({
-    signal,
-  }) => healthCheck({ signal, ...requestOptions });
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) =>
+    healthCheck({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof healthCheck>>,
@@ -95,9 +88,7 @@ export const getHealthCheckQueryOptions = <
   > & { queryKey: QueryKey };
 };
 
-export type HealthCheckQueryResult = NonNullable<
-  Awaited<ReturnType<typeof healthCheck>>
->;
+export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>;
 export type HealthCheckQueryError = ErrorType<unknown>;
 
 /**
@@ -108,11 +99,7 @@ export function useHealthCheck<
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof healthCheck>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
@@ -148,21 +135,16 @@ export const getListOpenaiConversationsQueryOptions = <
   TData = Awaited<ReturnType<typeof listOpenaiConversations>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof listOpenaiConversations>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listOpenaiConversations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getListOpenaiConversationsQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getListOpenaiConversationsQueryKey();
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof listOpenaiConversations>>
-  > = ({ signal }) => listOpenaiConversations({ signal, ...requestOptions });
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listOpenaiConversations>>> = ({
+    signal,
+  }) => listOpenaiConversations({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof listOpenaiConversations>>,
@@ -184,11 +166,7 @@ export function useListOpenaiConversations<
   TData = Awaited<ReturnType<typeof listOpenaiConversations>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof listOpenaiConversations>>,
-    TError,
-    TData
-  >;
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listOpenaiConversations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListOpenaiConversationsQueryOptions(options);
@@ -238,9 +216,7 @@ export const getCreateOpenaiConversationMutationOptions = <
 > => {
   const mutationKey = ["createOpenaiConversation"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -260,8 +236,7 @@ export const getCreateOpenaiConversationMutationOptions = <
 export type CreateOpenaiConversationMutationResult = NonNullable<
   Awaited<ReturnType<typeof createOpenaiConversation>>
 >;
-export type CreateOpenaiConversationMutationBody =
-  BodyType<CreateOpenaiConversationBody>;
+export type CreateOpenaiConversationMutationBody = BodyType<CreateOpenaiConversationBody>;
 export type CreateOpenaiConversationMutationError = ErrorType<unknown>;
 
 /**
@@ -298,13 +273,10 @@ export const getOpenaiConversation = async (
   id: number,
   options?: RequestInit,
 ): Promise<OpenaiConversationWithMessages> => {
-  return customFetch<OpenaiConversationWithMessages>(
-    getGetOpenaiConversationUrl(id),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
+  return customFetch<OpenaiConversationWithMessages>(getGetOpenaiConversationUrl(id), {
+    ...options,
+    method: "GET",
+  });
 };
 
 export const getGetOpenaiConversationQueryKey = (id: number) => {
@@ -317,33 +289,25 @@ export const getGetOpenaiConversationQueryOptions = <
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getOpenaiConversation>>,
-      TError,
-      TData
-    >;
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getOpenaiConversation>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetOpenaiConversationQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetOpenaiConversationQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getOpenaiConversation>>
-  > = ({ signal }) => getOpenaiConversation(id, { signal, ...requestOptions });
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getOpenaiConversation>>> = ({ signal }) =>
+    getOpenaiConversation(id, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
     enabled: !!id,
     ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getOpenaiConversation>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
+  } as UseQueryOptions<Awaited<ReturnType<typeof getOpenaiConversation>>, TError, TData> & {
+    queryKey: QueryKey;
+  };
 };
 
 export type GetOpenaiConversationQueryResult = NonNullable<
@@ -361,11 +325,7 @@ export function useGetOpenaiConversation<
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof getOpenaiConversation>>,
-      TError,
-      TData
-    >;
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getOpenaiConversation>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -414,9 +374,7 @@ export const getDeleteOpenaiConversationMutationOptions = <
 > => {
   const mutationKey = ["deleteOpenaiConversation"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -489,11 +447,7 @@ export const getListOpenaiMessagesQueryOptions = <
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof listOpenaiMessages>>,
-      TError,
-      TData
-    >;
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listOpenaiMessages>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -501,20 +455,17 @@ export const getListOpenaiMessagesQueryOptions = <
 
   const queryKey = queryOptions?.queryKey ?? getListOpenaiMessagesQueryKey(id);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof listOpenaiMessages>>
-  > = ({ signal }) => listOpenaiMessages(id, { signal, ...requestOptions });
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listOpenaiMessages>>> = ({ signal }) =>
+    listOpenaiMessages(id, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
     enabled: !!id,
     ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof listOpenaiMessages>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
+  } as UseQueryOptions<Awaited<ReturnType<typeof listOpenaiMessages>>, TError, TData> & {
+    queryKey: QueryKey;
+  };
 };
 
 export type ListOpenaiMessagesQueryResult = NonNullable<
@@ -532,11 +483,7 @@ export function useListOpenaiMessages<
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof listOpenaiMessages>>,
-      TError,
-      TData
-    >;
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listOpenaiMessages>>, TError, TData>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -588,9 +535,7 @@ export const getSendOpenaiMessageMutationOptions = <
 > => {
   const mutationKey = ["sendOpenaiMessage"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -616,10 +561,7 @@ export type SendOpenaiMessageMutationError = ErrorType<unknown>;
 /**
  * @summary Send a text message and receive a streaming text response
  */
-export const useSendOpenaiMessage = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useSendOpenaiMessage = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof sendOpenaiMessage>>,
     TError,
@@ -674,9 +616,7 @@ export const getGenerateOpenaiImageMutationOptions = <
 > => {
   const mutationKey = ["generateOpenaiImage"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -702,10 +642,7 @@ export type GenerateOpenaiImageMutationError = ErrorType<unknown>;
 /**
  * @summary Generate an image from a text prompt
  */
-export const useGenerateOpenaiImage = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useGenerateOpenaiImage = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof generateOpenaiImage>>,
     TError,
@@ -760,9 +697,7 @@ export const getSummarizeTextMutationOptions = <
 > => {
   const mutationKey = ["summarizeText"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -779,19 +714,14 @@ export const getSummarizeTextMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type SummarizeTextMutationResult = NonNullable<
-  Awaited<ReturnType<typeof summarizeText>>
->;
+export type SummarizeTextMutationResult = NonNullable<Awaited<ReturnType<typeof summarizeText>>>;
 export type SummarizeTextMutationBody = BodyType<SummarizeTextBody>;
 export type SummarizeTextMutationError = ErrorType<unknown>;
 
 /**
  * @summary Summarize text content
  */
-export const useSummarizeText = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useSummarizeText = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof summarizeText>>,
     TError,
@@ -846,9 +776,7 @@ export const getTranslateTextMutationOptions = <
 > => {
   const mutationKey = ["translateText"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -865,19 +793,14 @@ export const getTranslateTextMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type TranslateTextMutationResult = NonNullable<
-  Awaited<ReturnType<typeof translateText>>
->;
+export type TranslateTextMutationResult = NonNullable<Awaited<ReturnType<typeof translateText>>>;
 export type TranslateTextMutationBody = BodyType<TranslateTextBody>;
 export type TranslateTextMutationError = ErrorType<unknown>;
 
 /**
  * @summary Translate text to another language
  */
-export const useTranslateText = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useTranslateText = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof translateText>>,
     TError,
@@ -932,9 +855,7 @@ export const getExplainCodeMutationOptions = <
 > => {
   const mutationKey = ["explainCode"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -951,19 +872,14 @@ export const getExplainCodeMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type ExplainCodeMutationResult = NonNullable<
-  Awaited<ReturnType<typeof explainCode>>
->;
+export type ExplainCodeMutationResult = NonNullable<Awaited<ReturnType<typeof explainCode>>>;
 export type ExplainCodeMutationBody = BodyType<ExplainCodeBody>;
 export type ExplainCodeMutationError = ErrorType<unknown>;
 
 /**
  * @summary Explain a piece of code
  */
-export const useExplainCode = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useExplainCode = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof explainCode>>,
     TError,
@@ -1018,9 +934,7 @@ export const getCheckGrammarMutationOptions = <
 > => {
   const mutationKey = ["checkGrammar"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -1037,19 +951,14 @@ export const getCheckGrammarMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type CheckGrammarMutationResult = NonNullable<
-  Awaited<ReturnType<typeof checkGrammar>>
->;
+export type CheckGrammarMutationResult = NonNullable<Awaited<ReturnType<typeof checkGrammar>>>;
 export type CheckGrammarMutationBody = BodyType<CheckGrammarBody>;
 export type CheckGrammarMutationError = ErrorType<unknown>;
 
 /**
  * @summary Check and fix grammar
  */
-export const useCheckGrammar = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useCheckGrammar = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof checkGrammar>>,
     TError,
@@ -1104,9 +1013,7 @@ export const getAnalyzeSentimentMutationOptions = <
 > => {
   const mutationKey = ["analyzeSentiment"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -1132,10 +1039,7 @@ export type AnalyzeSentimentMutationError = ErrorType<unknown>;
 /**
  * @summary Analyze sentiment of text
  */
-export const useAnalyzeSentiment = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useAnalyzeSentiment = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof analyzeSentiment>>,
     TError,
@@ -1190,9 +1094,7 @@ export const getExtractKeywordsMutationOptions = <
 > => {
   const mutationKey = ["extractKeywords"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -1218,10 +1120,7 @@ export type ExtractKeywordsMutationError = ErrorType<unknown>;
 /**
  * @summary Extract keywords from text
  */
-export const useExtractKeywords = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useExtractKeywords = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof extractKeywords>>,
     TError,
@@ -1276,9 +1175,7 @@ export const getRewriteToneMutationOptions = <
 > => {
   const mutationKey = ["rewriteTone"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -1295,19 +1192,14 @@ export const getRewriteToneMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type RewriteToneMutationResult = NonNullable<
-  Awaited<ReturnType<typeof rewriteTone>>
->;
+export type RewriteToneMutationResult = NonNullable<Awaited<ReturnType<typeof rewriteTone>>>;
 export type RewriteToneMutationBody = BodyType<RewriteToneBody>;
 export type RewriteToneMutationError = ErrorType<unknown>;
 
 /**
  * @summary Rewrite text in a different tone
  */
-export const useRewriteTone = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useRewriteTone = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof rewriteTone>>,
     TError,
@@ -1362,9 +1254,7 @@ export const getGenerateQuizMutationOptions = <
 > => {
   const mutationKey = ["generateQuiz"];
   const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
     : { mutation: { mutationKey }, request: undefined };
@@ -1381,19 +1271,14 @@ export const getGenerateQuizMutationOptions = <
   return { mutationFn, ...mutationOptions };
 };
 
-export type GenerateQuizMutationResult = NonNullable<
-  Awaited<ReturnType<typeof generateQuiz>>
->;
+export type GenerateQuizMutationResult = NonNullable<Awaited<ReturnType<typeof generateQuiz>>>;
 export type GenerateQuizMutationBody = BodyType<GenerateQuizBody>;
 export type GenerateQuizMutationError = ErrorType<unknown>;
 
 /**
  * @summary Generate quiz questions from text
  */
-export const useGenerateQuiz = <
-  TError = ErrorType<unknown>,
-  TContext = unknown,
->(options?: {
+export const useGenerateQuiz = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof generateQuiz>>,
     TError,

@@ -5,8 +5,11 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
@@ -23,7 +26,7 @@ export function ThreeAPITraffic() {
     }
     if (!containerRef.current) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     const container = containerRef.current;
@@ -34,22 +37,25 @@ export function ThreeAPITraffic() {
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
     camera.position.z = 20;
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
     const colors = {
-      primary: new THREE.Color(0x7BA3AC),
-      secondary: new THREE.Color(0xD782B2),
-      tertiary: new THREE.Color(0x63B3A6),
+      primary: new THREE.Color(0x7ba3ac),
+      secondary: new THREE.Color(0xd782b2),
+      tertiary: new THREE.Color(0x63b3a6),
     };
 
-    const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[] = [];
+    const disposables: {
+      geometry?: THREE.BufferGeometry;
+      material?: THREE.Material | THREE.Material[];
+    }[] = [];
 
     const torusGeometry = new THREE.TorusGeometry(8, 0.1, 16, 100);
     const torusMaterial = new THREE.MeshBasicMaterial({
@@ -64,7 +70,7 @@ export function ThreeAPITraffic() {
       const material = torusMaterial.clone();
       disposables.push({ material });
       const torus = new THREE.Mesh(torusGeometry, material);
-      torus.rotation.x = Math.PI / 2 + (i * Math.PI / 6);
+      torus.rotation.x = Math.PI / 2 + (i * Math.PI) / 6;
       torus.userData = { rotationSpeed: 0.2 + i * 0.1 };
       scene.add(torus);
       torusMeshes.push(torus);
@@ -143,8 +149,8 @@ export function ThreeAPITraffic() {
     }
 
     const orbitGeometry = new THREE.BufferGeometry();
-    orbitGeometry.setAttribute('position', new THREE.BufferAttribute(orbitPositions, 3));
-    orbitGeometry.setAttribute('aColor', new THREE.BufferAttribute(orbitColors, 3));
+    orbitGeometry.setAttribute("position", new THREE.BufferAttribute(orbitPositions, 3));
+    orbitGeometry.setAttribute("aColor", new THREE.BufferAttribute(orbitColors, 3));
 
     const orbitMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -199,8 +205,8 @@ export function ThreeAPITraffic() {
       trailColors[i * 3 + 2] = color.b;
     }
 
-    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-    trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3));
+    trailGeometry.setAttribute("position", new THREE.BufferAttribute(trailPositions, 3));
+    trailGeometry.setAttribute("color", new THREE.BufferAttribute(trailColors, 3));
 
     const trailMaterial = new THREE.PointsMaterial({
       size: 4,
@@ -222,21 +228,24 @@ export function ThreeAPITraffic() {
       mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     };
-    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener("mousemove", handleMouseMove);
 
     let animationId: number;
     let isVisible = true;
     const clock = new THREE.Clock();
 
-    const observer = new IntersectionObserver((entries) => {
-      isVisible = entries[0]?.isIntersecting ?? true;
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0.1 },
+    );
     observer.observe(container);
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       if (!isVisible) return;
-      
+
       const elapsed = clock.getElapsedTime();
 
       torusMeshes.forEach((torus) => {
@@ -255,10 +264,10 @@ export function ThreeAPITraffic() {
         const phase = orbitPhases[i];
         const radius = orbitRadii[i];
         const speed = orbitSpeeds[i];
-        
+
         const theta = elapsed * speed + phase;
         const phi = elapsed * speed * 0.5 + phase * 2;
-        
+
         orbitPos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
         orbitPos[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
         orbitPos[i * 3 + 2] = radius * Math.cos(phi);
@@ -292,23 +301,23 @@ export function ThreeAPITraffic() {
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      container.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("resize", handleResize);
+      container.removeEventListener("mousemove", handleMouseMove);
       observer.disconnect();
       cancelAnimationFrame(animationId);
-      
+
       disposables.forEach(({ geometry, material }) => {
         geometry?.dispose();
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach((m) => m.dispose());
         } else {
           material?.dispose();
         }
       });
-      
+
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -320,11 +329,5 @@ export function ThreeAPITraffic() {
     return null;
   }
 
-  return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0"
-      style={{ pointerEvents: 'none' }}
-    />
-  );
+  return <div ref={containerRef} className="absolute inset-0" style={{ pointerEvents: "none" }} />;
 }

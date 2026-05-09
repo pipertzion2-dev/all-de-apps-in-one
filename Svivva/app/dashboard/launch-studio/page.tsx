@@ -8,7 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Sparkles,
   Rocket,
@@ -109,7 +114,10 @@ export default function LaunchStudioPage() {
         });
         setActiveTab("landing");
       }
-      if (action === "social-posts") { setSocialPosts(Array.isArray(data.posts) ? data.posts : []); setActiveTab("social"); }
+      if (action === "social-posts") {
+        setSocialPosts(Array.isArray(data.posts) ? data.posts : []);
+        setActiveTab("social");
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -129,7 +137,11 @@ export default function LaunchStudioPage() {
       className="p-1.5 rounded-md hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
       data-testid={`button-copy-${id}`}
     >
-      {copiedIndex === id ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+      {copiedIndex === id ? (
+        <Check className="w-3.5 h-3.5 text-green-500" />
+      ) : (
+        <Copy className="w-3.5 h-3.5" />
+      )}
     </button>
   );
 
@@ -166,7 +178,9 @@ export default function LaunchStudioPage() {
             <Target className="w-5 h-5 text-primary" />
             Tell us about your app
           </CardTitle>
-          <CardDescription>The more detail you provide, the better your marketing materials will be</CardDescription>
+          <CardDescription>
+            The more detail you provide, the better your marketing materials will be
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -206,7 +220,11 @@ export default function LaunchStudioPage() {
               className="gap-2"
               data-testid="button-generate-plan"
             >
-              {loading === "marketing-plan" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+              {loading === "marketing-plan" ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Rocket className="w-4 h-4" />
+              )}
               Generate Marketing Plan
             </Button>
             <Button
@@ -216,7 +234,11 @@ export default function LaunchStudioPage() {
               className="gap-2"
               data-testid="button-generate-landing"
             >
-              {loading === "landing-page" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Layout className="w-4 h-4" />}
+              {loading === "landing-page" ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Layout className="w-4 h-4" />
+              )}
               Generate Landing Page
             </Button>
             <Button
@@ -226,7 +248,11 @@ export default function LaunchStudioPage() {
               className="gap-2"
               data-testid="button-generate-social"
             >
-              {loading === "social-posts" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+              {loading === "social-posts" ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
               Generate Social Posts
             </Button>
           </div>
@@ -236,9 +262,24 @@ export default function LaunchStudioPage() {
       {(plan || landingPage || socialPosts.length > 0) && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-muted/50">
-            {plan && <TabsTrigger value="plan" data-testid="tab-plan" className="gap-2"><Rocket className="w-4 h-4" />Plan</TabsTrigger>}
-            {landingPage && <TabsTrigger value="landing" data-testid="tab-landing" className="gap-2"><Layout className="w-4 h-4" />Landing Page</TabsTrigger>}
-            {socialPosts.length > 0 && <TabsTrigger value="social" data-testid="tab-social" className="gap-2"><Share2 className="w-4 h-4" />Social</TabsTrigger>}
+            {plan && (
+              <TabsTrigger value="plan" data-testid="tab-plan" className="gap-2">
+                <Rocket className="w-4 h-4" />
+                Plan
+              </TabsTrigger>
+            )}
+            {landingPage && (
+              <TabsTrigger value="landing" data-testid="tab-landing" className="gap-2">
+                <Layout className="w-4 h-4" />
+                Landing Page
+              </TabsTrigger>
+            )}
+            {socialPosts.length > 0 && (
+              <TabsTrigger value="social" data-testid="tab-social" className="gap-2">
+                <Share2 className="w-4 h-4" />
+                Social
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {plan && (
@@ -247,7 +288,9 @@ export default function LaunchStudioPage() {
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Tagline</p>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                        Tagline
+                      </p>
                       <p className="text-xl font-semibold">{plan.tagline}</p>
                     </div>
                     <CopyBtn text={plan.tagline} id="tagline" />
@@ -326,7 +369,9 @@ export default function LaunchStudioPage() {
                       {plan.contentIdeas.map((idea, i) => (
                         <div key={i} className="p-3 rounded-lg bg-muted/30">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary" className="text-[10px]">{idea.type}</Badge>
+                            <Badge variant="secondary" className="text-[10px]">
+                              {idea.type}
+                            </Badge>
                             <span className="text-sm font-medium">{idea.title}</span>
                           </div>
                           <p className="text-xs text-muted-foreground">{idea.description}</p>
@@ -342,7 +387,9 @@ export default function LaunchStudioPage() {
                       <Lightbulb className="w-4 h-4 text-primary" />
                       Mini App Ideas
                     </CardTitle>
-                    <CardDescription className="text-xs">Small tools to drive traffic to your main app</CardDescription>
+                    <CardDescription className="text-xs">
+                      Small tools to drive traffic to your main app
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
@@ -368,7 +415,9 @@ export default function LaunchStudioPage() {
               <Card className="overflow-hidden border-primary/20">
                 <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 text-center space-y-4">
                   <h2 className="text-3xl font-bold tracking-tight">{landingPage.heroHeadline}</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{landingPage.heroSubheadline}</p>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    {landingPage.heroSubheadline}
+                  </p>
                   <Button size="lg" className="gap-2" data-testid="button-landing-cta">
                     {landingPage.ctaText}
                     <ArrowRight className="w-4 h-4" />
@@ -382,15 +431,19 @@ export default function LaunchStudioPage() {
                       onClick={() => {
                         const html = `<html><head><title>${appName}</title></head><body>
 <section style="text-align:center;padding:4rem 2rem"><h1>${landingPage.heroHeadline}</h1><p>${landingPage.heroSubheadline}</p><button>${landingPage.ctaText}</button></section>
-<section style="padding:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem">${landingPage.features.map(f => `<div><h3>${f.icon} ${f.title}</h3><p>${f.description}</p></div>`).join("")}</section>
-<section style="padding:2rem;text-align:center"><h2>${landingPage.socialProofHeadline}</h2>${landingPage.testimonials.map(t => `<blockquote><p>"${t.quote}"</p><cite>— ${t.author}, ${t.role}</cite></blockquote>`).join("")}</section>
+<section style="padding:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem">${landingPage.features.map((f) => `<div><h3>${f.icon} ${f.title}</h3><p>${f.description}</p></div>`).join("")}</section>
+<section style="padding:2rem;text-align:center"><h2>${landingPage.socialProofHeadline}</h2>${landingPage.testimonials.map((t) => `<blockquote><p>"${t.quote}"</p><cite>— ${t.author}, ${t.role}</cite></blockquote>`).join("")}</section>
 </body></html>`;
                         copyText(html, "landing-html");
                       }}
                       className="gap-2"
                       data-testid="button-copy-landing-html"
                     >
-                      {copiedIndex === "landing-html" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedIndex === "landing-html" ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
                       Copy as HTML
                     </Button>
                   </div>
@@ -409,9 +462,14 @@ export default function LaunchStudioPage() {
                     <h3 className="font-semibold text-center">{landingPage.socialProofHeadline}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {landingPage.testimonials.map((t, i) => (
-                        <div key={i} className="p-4 rounded-xl bg-muted/20 border border-border/30 italic">
+                        <div
+                          key={i}
+                          className="p-4 rounded-xl bg-muted/20 border border-border/30 italic"
+                        >
                           <p className="text-sm mb-3">"{t.quote}"</p>
-                          <p className="text-xs text-muted-foreground not-italic">— {t.author}, {t.role}</p>
+                          <p className="text-xs text-muted-foreground not-italic">
+                            — {t.author}, {t.role}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -421,7 +479,9 @@ export default function LaunchStudioPage() {
                     {landingPage.faqItems.map((faq, i) => (
                       <AccordionItem key={i} value={`faq-${i}`}>
                         <AccordionTrigger className="text-sm">{faq.question}</AccordionTrigger>
-                        <AccordionContent className="text-sm text-muted-foreground">{faq.answer}</AccordionContent>
+                        <AccordionContent className="text-sm text-muted-foreground">
+                          {faq.answer}
+                        </AccordionContent>
                       </AccordionItem>
                     ))}
                   </Accordion>
@@ -446,18 +506,24 @@ export default function LaunchStudioPage() {
                         </span>
                         <div>
                           <p className="text-sm font-medium capitalize">{post.platform}</p>
-                          {post.subreddit && <p className="text-xs text-muted-foreground">r/{post.subreddit}</p>}
+                          {post.subreddit && (
+                            <p className="text-xs text-muted-foreground">r/{post.subreddit}</p>
+                          )}
                         </div>
                       </div>
                       <CopyBtn text={post.content || post.tagline || ""} id={`social-${i}`} />
                     </div>
                     {post.title && <p className="font-semibold text-sm mb-2">{post.title}</p>}
-                    {post.tagline && <p className="text-sm italic text-primary mb-2">{post.tagline}</p>}
+                    {post.tagline && (
+                      <p className="text-sm italic text-primary mb-2">{post.tagline}</p>
+                    )}
                     <p className="text-sm whitespace-pre-wrap">{post.content}</p>
                     {post.hashtags && post.hashtags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {post.hashtags.map((tag, j) => (
-                          <Badge key={j} variant="secondary" className="text-xs">#{tag}</Badge>
+                          <Badge key={j} variant="secondary" className="text-xs">
+                            #{tag}
+                          </Badge>
                         ))}
                       </div>
                     )}
@@ -476,7 +542,8 @@ export default function LaunchStudioPage() {
           </div>
           <h2 className="text-lg font-semibold">Ready to launch?</h2>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            Enter your app details above and let AI create a complete marketing strategy, landing page copy, and social media posts for you.
+            Enter your app details above and let AI create a complete marketing strategy, landing
+            page copy, and social media posts for you.
           </p>
         </div>
       )}

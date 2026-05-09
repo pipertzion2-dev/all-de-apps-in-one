@@ -132,7 +132,9 @@ export default function RuntimeKeysPage() {
       setClearStripePublishable(false);
       setClearStripeWebhook(false);
       setClearSiteUrl(false);
-      setSaveMessage("Saved. New server instances pick this up immediately; some hosts may need a moment to refresh.");
+      setSaveMessage(
+        "Saved. New server instances pick this up immediately; some hosts may need a moment to refresh.",
+      );
       await load();
     } catch (e) {
       setSaveMessage(e instanceof Error ? e.message : String(e));
@@ -168,10 +170,10 @@ export default function RuntimeKeysPage() {
       <div>
         <h1 className="text-3xl font-bold">Runtime credentials</h1>
         <p className="text-muted-foreground">
-          Store OpenAI, Stripe, and site URL in the database when you do not want to paste keys into your host’s
-          environment panel.{" "}
-          <strong className="text-foreground font-medium">Host env vars still win</strong> if they are set at deploy
-          time.
+          Store OpenAI, Stripe, and site URL in the database when you do not want to paste keys into
+          your host’s environment panel.{" "}
+          <strong className="text-foreground font-medium">Host env vars still win</strong> if they
+          are set at deploy time.
         </p>
       </div>
 
@@ -184,13 +186,14 @@ export default function RuntimeKeysPage() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-2">
           <p>
-            On server startup, keys from this page are loaded into the process only for slots that are{" "}
-            <em>empty</em> in your deployment environment. Set <code className="text-xs">DATABASE_URL</code> on the
-            host as usual; this feature cannot bootstrap the database connection itself.
+            On server startup, keys from this page are loaded into the process only for slots that
+            are <em>empty</em> in your deployment environment. Set{" "}
+            <code className="text-xs">DATABASE_URL</code> on the host as usual; this feature cannot
+            bootstrap the database connection itself.
           </p>
           <p>
-            After saving, this instance reloads secrets immediately. Other serverless instances refresh on their next
-            cold start (or when they load this page’s API again).
+            After saving, this instance reloads secrets immediately. Other serverless instances
+            refresh on their next cold start (or when they load this page’s API again).
           </p>
         </CardContent>
       </Card>
@@ -202,17 +205,15 @@ export default function RuntimeKeysPage() {
         </div>
       )}
 
-      {loadError && (
-        <p className="text-sm text-destructive">{loadError}</p>
-      )}
+      {loadError && <p className="text-sm text-destructive">{loadError}</p>}
 
       {status && (
         <Card>
           <CardHeader>
             <CardTitle>Status</CardTitle>
             <CardDescription>
-              Stored = saved in Postgres. Effective = what the server is using after env + DB merge. Updated{" "}
-              {status.updatedAt ? new Date(status.updatedAt).toLocaleString() : "never"}.
+              Stored = saved in Postgres. Effective = what the server is using after env + DB merge.
+              Updated {status.updatedAt ? new Date(status.updatedAt).toLocaleString() : "never"}.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
@@ -248,8 +249,8 @@ export default function RuntimeKeysPage() {
           <CardHeader>
             <CardTitle>Update secrets</CardTitle>
             <CardDescription>
-              Leave inputs blank to leave saved values unchanged. Check “clear” to remove a value from app storage (only
-              affects slots your host did not set at deploy).
+              Leave inputs blank to leave saved values unchanged. Check “clear” to remove a value
+              from app storage (only affects slots your host did not set at deploy).
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -258,13 +259,17 @@ export default function RuntimeKeysPage() {
               <Input
                 type="password"
                 autoComplete="off"
-                placeholder={status.stored.openai ? "•••••••• (saved — enter new to replace)" : "sk-…"}
+                placeholder={
+                  status.stored.openai ? "•••••••• (saved — enter new to replace)" : "sk-…"
+                }
                 value={openaiApiKey}
                 onChange={(e) => setOpenaiApiKey(e.target.value)}
                 disabled={clearOpenai || !!status.deploymentOverrides.openai}
               />
               {status.deploymentOverrides.openai && (
-                <p className="text-xs text-muted-foreground">Overridden by host environment — database value is ignored.</p>
+                <p className="text-xs text-muted-foreground">
+                  Overridden by host environment — database value is ignored.
+                </p>
               )}
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -332,7 +337,9 @@ export default function RuntimeKeysPage() {
               <Input
                 type="password"
                 autoComplete="off"
-                placeholder={status.stored.stripePublishable ? "••••••••" : "pk_live_… or pk_test_…"}
+                placeholder={
+                  status.stored.stripePublishable ? "••••••••" : "pk_live_… or pk_test_…"
+                }
                 value={stripePublishableKey}
                 onChange={(e) => setStripePublishableKey(e.target.value)}
                 disabled={clearStripePublishable || !!status.deploymentOverrides.stripePublishable}
@@ -402,8 +409,12 @@ export default function RuntimeKeysPage() {
             </div>
 
             {saveMessage && (
-              <p className={`text-sm flex items-start gap-2 ${saveMessage.startsWith("Saved") ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
-                {saveMessage.startsWith("Saved") ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : null}
+              <p
+                className={`text-sm flex items-start gap-2 ${saveMessage.startsWith("Saved") ? "text-green-600 dark:text-green-400" : "text-destructive"}`}
+              >
+                {saveMessage.startsWith("Saved") ? (
+                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                ) : null}
                 {saveMessage}
               </p>
             )}

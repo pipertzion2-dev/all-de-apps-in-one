@@ -9,9 +9,26 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Rocket, Copy, Check, ExternalLink, RefreshCw, Zap, Globe,
-  Target, BookOpen, Radio, Github, Mail, TrendingUp, Shield,
-  BarChart2, Newspaper, Brain, ChevronDown, ChevronUp, Play
+  Rocket,
+  Copy,
+  Check,
+  ExternalLink,
+  RefreshCw,
+  Zap,
+  Globe,
+  Target,
+  BookOpen,
+  Radio,
+  Github,
+  Mail,
+  TrendingUp,
+  Shield,
+  BarChart2,
+  Newspaper,
+  Brain,
+  ChevronDown,
+  ChevronUp,
+  Play,
 } from "lucide-react";
 
 type Product = "svivva" | "pyracrypt" | "mini_apps";
@@ -62,7 +79,8 @@ const NOVEL_TACTICS = [
     badge: "🔥 New",
     desc: "Structure your content so AI search engines (Perplexity, ChatGPT, Gemini) cite Svivva when users ask about AI API builders. Most competitors don't do this yet.",
     action: "aeo_content",
-    howTo: "Generate AEO content → add it to your website as a dedicated FAQ page → AI engines will cite it within weeks.",
+    howTo:
+      "Generate AEO content → add it to your website as a dedicated FAQ page → AI engines will cite it within weeks.",
   },
   {
     id: "competitor",
@@ -71,7 +89,8 @@ const NOVEL_TACTICS = [
     badge: "High Impact",
     desc: 'When someone searches "Zapier alternative" or "Make vs Bubble", your comparison pages rank instead. Captures ready-to-buy traffic.',
     action: "competitor_comparison",
-    howTo: 'Generate comparison content → publish as /vs/zapier, /vs/make pages → target "competitor alternative" searches.',
+    howTo:
+      'Generate comparison content → publish as /vs/zapier, /vs/make pages → target "competitor alternative" searches.',
   },
   {
     id: "github",
@@ -80,7 +99,8 @@ const NOVEL_TACTICS = [
     badge: "Passive",
     desc: "Publish useful code snippets/gists that solve real problems and naturally reference Svivva. GitHub results rank high on Google for developer queries.",
     action: "github_seo",
-    howTo: "Generate GitHub content → post as Gists → add to relevant GitHub awesome-lists → get passive developer traffic.",
+    howTo:
+      "Generate GitHub content → post as Gists → add to relevant GitHub awesome-lists → get passive developer traffic.",
   },
   {
     id: "pr_mill",
@@ -89,7 +109,8 @@ const NOVEL_TACTICS = [
     badge: "Backlinks",
     desc: "Submit press releases to 6 free PR sites weekly. Each one is indexed by Google within 24h and creates high-authority backlinks. Most founders never do this.",
     action: "press_release",
-    howTo: "Generate press release → paste into PRLog, OpenPR, PR.com → submit → repeat weekly with new angle.",
+    howTo:
+      "Generate press release → paste into PRLog, OpenPR, PR.com → submit → repeat weekly with new angle.",
   },
   {
     id: "podcast",
@@ -98,7 +119,8 @@ const NOVEL_TACTICS = [
     badge: "Brand",
     desc: "There are 3M+ podcasts. AI/tech/founder shows are always looking for guests. Being on 1 podcast = hours of evergreen content + backlink + email subscribers.",
     action: "podcast_pitch",
-    howTo: "Generate 3 pitches → send to target podcasts → 1 in 10 typically responds → each appearance drives traffic for years.",
+    howTo:
+      "Generate 3 pitches → send to target podcasts → 1 in 10 typically responds → each appearance drives traffic for years.",
   },
   {
     id: "newsletter",
@@ -107,7 +129,8 @@ const NOVEL_TACTICS = [
     badge: "Compound",
     desc: "A weekly newsletter builds your email list AND gets picked up by newsletter aggregators (e.g., Substack Discovery), creating additional discovery channels.",
     action: "email_newsletter",
-    howTo: "Generate weekly draft → publish on Substack or Beehiiv (free) → optimize for discovery → compounds over time.",
+    howTo:
+      "Generate weekly draft → publish on Substack or Beehiiv (free) → optimize for discovery → compounds over time.",
   },
   {
     id: "velocity",
@@ -116,7 +139,8 @@ const NOVEL_TACTICS = [
     badge: "SEO",
     desc: "Google rewards consistent publishing. Generate 10 unique landing pages per week targeting long-tail keywords. Each page is a new entry point from search.",
     action: "blog_outline",
-    howTo: "Generate blog outline → create page → publish to /blog/[slug] → repeat weekly. Volume beats perfection in SEO.",
+    howTo:
+      "Generate blog outline → create page → publish to /blog/[slug] → repeat weekly. Volume beats perfection in SEO.",
   },
   {
     id: "embedded",
@@ -125,14 +149,18 @@ const NOVEL_TACTICS = [
     badge: "Viral Loop",
     desc: 'Every mini app gets a "Powered by Svivva" footer link. As mini apps grow their own traffic, each one sends link equity and visitors back to Svivva automatically.',
     action: null,
-    howTo: "Add 'Powered by Svivva' badge to all mini app pages with a dofollow link. Deploy more mini apps to expand the network.",
+    howTo:
+      "Add 'Powered by Svivva' badge to all mini app pages with a dofollow link. Deploy more mini apps to expand the network.",
   },
 ];
 
 function useCopyToClipboard() {
   const [copied, setCopied] = useState(false);
   const copy = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
   return { copied, copy };
 }
@@ -141,11 +169,18 @@ export default function GrowthPage() {
   const [product, setProduct] = useState<Product>("svivva");
   const [catFilter, setCatFilter] = useState<DirCategory | "all">("all");
   const [contentType, setContentType] = useState("tweet_thread");
-  const [generatedContent, setGeneratedContent] = useState<{ title: string; content: string } | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<{
+    title: string;
+    content: string;
+  } | null>(null);
   const [expandedTactic, setExpandedTactic] = useState<string | null>(null);
   const { copied, copy } = useCopyToClipboard();
 
-  const { data: dirData, isLoading: dirLoading, refetch: refetchDirs } = useQuery({
+  const {
+    data: dirData,
+    isLoading: dirLoading,
+    refetch: refetchDirs,
+  } = useQuery({
     queryKey: ["/api/growth/directories", product],
     queryFn: async () => {
       const r = await authFetch(`/api/growth/directories?product=${product}`);
@@ -174,7 +209,11 @@ export default function GrowthPage() {
 
   const submitDirMutation = useMutation({
     mutationFn: async ({ directoryId, status }: { directoryId: string; status: DirStatus }) => {
-      const r = await authFetch("/api/growth/directories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ directoryId, product, status }) });
+      const r = await authFetch("/api/growth/directories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ directoryId, product, status }),
+      });
       return r.json();
     },
     onSuccess: () => refetchDirs(),
@@ -182,23 +221,38 @@ export default function GrowthPage() {
 
   const generateMutation = useMutation({
     mutationFn: async ({ type }: { type: string }) => {
-      const r = await authFetch("/api/growth/content", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product, contentType: type }) });
-      if (!r.ok) { const d = await r.json(); throw new Error(d.error || "Failed"); }
+      const r = await authFetch("/api/growth/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product, contentType: type }),
+      });
+      if (!r.ok) {
+        const d = await r.json();
+        throw new Error(d.error || "Failed");
+      }
       return r.json();
     },
-    onSuccess: (data) => { setGeneratedContent(data); refetchContent(); },
+    onSuccess: (data) => {
+      setGeneratedContent(data);
+      refetchContent();
+    },
   });
 
   const runTasksMutation = useMutation({
     mutationFn: async () => {
-      const r = await authFetch("/api/growth/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const r = await authFetch("/api/growth/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
       return r.json();
     },
   });
 
   const dirs = dirData?.directories ?? [];
   const stats = dirData?.stats ?? { total: 0, submitted: 0, live: 0 };
-  const filteredDirs = catFilter === "all" ? dirs : dirs.filter((d: any) => d.category === catFilter);
+  const filteredDirs =
+    catFilter === "all" ? dirs : dirs.filter((d: any) => d.category === catFilter);
   const tasks = tasksData?.tasks ?? [];
 
   return (
@@ -209,9 +263,17 @@ export default function GrowthPage() {
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-6 h-6 text-[#5BA8A0]" />
             <h1 className="text-2xl font-bold tracking-tight">Growth Engine</h1>
-            <Badge variant="outline" className="text-xs bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30">AI-Powered</Badge>
+            <Badge
+              variant="outline"
+              className="text-xs bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30"
+            >
+              AI-Powered
+            </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">Svivva's AI marketing team — directories, content, and novel tactics that run on autopilot.</p>
+          <p className="text-sm text-muted-foreground">
+            Svivva's AI marketing team — directories, content, and novel tactics that run on
+            autopilot.
+          </p>
         </div>
         <Button
           size="sm"
@@ -242,14 +304,21 @@ export default function GrowthPage() {
       {/* Stats row */}
       {runTasksMutation.isSuccess && (
         <div className="px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-700 dark:text-emerald-400">
-          Weekly tasks complete: {(runTasksMutation.data as any)?.results?.map((r: any) => `${r.task} (${r.status})`).join(" · ")}
+          Weekly tasks complete:{" "}
+          {(runTasksMutation.data as any)?.results
+            ?.map((r: any) => `${r.task} (${r.status})`)
+            .join(" · ")}
         </div>
       )}
 
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Directories targeted", value: stats.total, sub: `for ${product}` },
-          { label: "Submitted", value: stats.submitted, sub: `${stats.total > 0 ? Math.round(stats.submitted / stats.total * 100) : 0}% coverage` },
+          {
+            label: "Submitted",
+            value: stats.submitted,
+            sub: `${stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0}% coverage`,
+          },
           { label: "Live listings", value: stats.live, sub: "confirmed backlinks" },
         ].map((s) => (
           <Card key={s.label} className="border-border/50">
@@ -264,83 +333,112 @@ export default function GrowthPage() {
 
       <Tabs defaultValue="directories">
         <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="directories" data-testid="tab-directories">Directory Blitz</TabsTrigger>
-          <TabsTrigger value="content" data-testid="tab-content">AI Copy Engine</TabsTrigger>
-          <TabsTrigger value="tactics" data-testid="tab-tactics">Novel Tactics</TabsTrigger>
-          <TabsTrigger value="log" data-testid="tab-log">Automation Log</TabsTrigger>
+          <TabsTrigger value="directories" data-testid="tab-directories">
+            Directory Blitz
+          </TabsTrigger>
+          <TabsTrigger value="content" data-testid="tab-content">
+            AI Copy Engine
+          </TabsTrigger>
+          <TabsTrigger value="tactics" data-testid="tab-tactics">
+            Novel Tactics
+          </TabsTrigger>
+          <TabsTrigger value="log" data-testid="tab-log">
+            Automation Log
+          </TabsTrigger>
         </TabsList>
 
         {/* ── DIRECTORY BLITZ ── */}
         <TabsContent value="directories" className="space-y-4 mt-4">
           <div className="flex gap-2 flex-wrap">
-            {(["all", "ai_tools", "saas", "developer", "pr", "social", "security"] as const).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCatFilter(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${catFilter === cat ? "bg-[#5BA8A0] text-white border-[#5BA8A0]" : "border-border/60 hover:bg-muted/40"}`}
-              >
-                {cat === "all" ? "All" : CATEGORY_LABELS[cat]}
-              </button>
-            ))}
-            <span className="ml-auto text-xs text-muted-foreground self-center">{filteredDirs.length} directories</span>
+            {(["all", "ai_tools", "saas", "developer", "pr", "social", "security"] as const).map(
+              (cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCatFilter(cat)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${catFilter === cat ? "bg-[#5BA8A0] text-white border-[#5BA8A0]" : "border-border/60 hover:bg-muted/40"}`}
+                >
+                  {cat === "all" ? "All" : CATEGORY_LABELS[cat]}
+                </button>
+              ),
+            )}
+            <span className="ml-auto text-xs text-muted-foreground self-center">
+              {filteredDirs.length} directories
+            </span>
           </div>
 
-          {dirLoading
-            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)
-            : (
-              <div className="grid gap-2">
-                {filteredDirs.map((d: any) => (
-                  <Card key={d.id} className="border-border/50">
-                    <CardContent className="py-3 px-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-sm">{d.name}</span>
-                            <Badge variant="outline" className={`text-[10px] ${STATUS_STYLES[d.status as DirStatus]}`}>
-                              {d.status}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px] border-border/50 text-muted-foreground">
-                              {CATEGORY_LABELS[d.category as DirCategory]}
-                            </Badge>
-                            <span className="text-[10px] text-muted-foreground">{(d.estimatedVisitors / 1000).toFixed(0)}K/mo</span>
-                          </div>
-                          {d.tip && <p className="text-[11px] text-[#5BA8A0] mt-0.5">💡 {d.tip}</p>}
+          {dirLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            ))
+          ) : (
+            <div className="grid gap-2">
+              {filteredDirs.map((d: any) => (
+                <Card key={d.id} className="border-border/50">
+                  <CardContent className="py-3 px-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm">{d.name}</span>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${STATUS_STYLES[d.status as DirStatus]}`}
+                          >
+                            {d.status}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] border-border/50 text-muted-foreground"
+                          >
+                            {CATEGORY_LABELS[d.category as DirCategory]}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground">
+                            {(d.estimatedVisitors / 1000).toFixed(0)}K/mo
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {d.status === "pending" && (
-                            <>
-                              <a href={d.submitUrl} target="_blank" rel="noopener noreferrer">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-xs gap-1 border-[#5BA8A0]/40 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
-                                  onClick={() => submitDirMutation.mutate({ directoryId: d.id, status: "submitted" })}
-                                  data-testid={`btn-submit-${d.id}`}
-                                >
-                                  Submit <ExternalLink className="w-3 h-3" />
-                                </Button>
-                              </a>
-                            </>
-                          )}
-                          {d.status === "submitted" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 text-xs border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
-                              onClick={() => submitDirMutation.mutate({ directoryId: d.id, status: "live" })}
-                              data-testid={`btn-mark-live-${d.id}`}
-                            >
-                              Mark Live
-                            </Button>
-                          )}
-                          {d.status === "live" && <Check className="w-4 h-4 text-emerald-500" />}
-                        </div>
+                        {d.tip && <p className="text-[11px] text-[#5BA8A0] mt-0.5">💡 {d.tip}</p>}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {d.status === "pending" && (
+                          <>
+                            <a href={d.submitUrl} target="_blank" rel="noopener noreferrer">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs gap-1 border-[#5BA8A0]/40 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
+                                onClick={() =>
+                                  submitDirMutation.mutate({
+                                    directoryId: d.id,
+                                    status: "submitted",
+                                  })
+                                }
+                                data-testid={`btn-submit-${d.id}`}
+                              >
+                                Submit <ExternalLink className="w-3 h-3" />
+                              </Button>
+                            </a>
+                          </>
+                        )}
+                        {d.status === "submitted" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                            onClick={() =>
+                              submitDirMutation.mutate({ directoryId: d.id, status: "live" })
+                            }
+                            data-testid={`btn-mark-live-${d.id}`}
+                          >
+                            Mark Live
+                          </Button>
+                        )}
+                        {d.status === "live" && <Check className="w-4 h-4 text-emerald-500" />}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* ── AI COPY ENGINE ── */}
@@ -367,7 +465,9 @@ export default function GrowthPage() {
             data-testid="btn-generate-content"
           >
             <Zap className="w-4 h-4" />
-            {generateMutation.isPending ? "Generating…" : `Generate ${CONTENT_TYPES.find(c => c.id === contentType)?.label} for ${PRODUCTS.find(p => p.id === product)?.label}`}
+            {generateMutation.isPending
+              ? "Generating…"
+              : `Generate ${CONTENT_TYPES.find((c) => c.id === contentType)?.label} for ${PRODUCTS.find((p) => p.id === product)?.label}`}
           </Button>
 
           {generateMutation.isError && (
@@ -402,16 +502,27 @@ export default function GrowthPage() {
           {/* Content history */}
           {(contentHistory?.items?.length ?? 0) > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Recent generations</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Recent generations
+              </p>
               <div className="space-y-2">
                 {contentHistory.items.slice(0, 5).map((item: any) => (
                   <Card key={item.id} className="border-border/50">
                     <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
                       <div>
                         <span className="text-xs font-semibold">{item.title}</span>
-                        <span className="text-[10px] text-muted-foreground ml-2">{new Date(item.createdAt).toLocaleDateString()}</span>
+                        <span className="text-[10px] text-muted-foreground ml-2">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setGeneratedContent({ title: item.title, content: item.content })}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2"
+                        onClick={() =>
+                          setGeneratedContent({ title: item.title, content: item.content })
+                        }
+                      >
                         View
                       </Button>
                     </CardContent>
@@ -424,7 +535,9 @@ export default function GrowthPage() {
 
         {/* ── NOVEL TACTICS ── */}
         <TabsContent value="tactics" className="space-y-3 mt-4">
-          <p className="text-sm text-muted-foreground">Unconventional traffic strategies most competitors haven't thought of yet.</p>
+          <p className="text-sm text-muted-foreground">
+            Unconventional traffic strategies most competitors haven't thought of yet.
+          </p>
           {NOVEL_TACTICS.map((tactic) => {
             const Icon = tactic.icon;
             const isExpanded = expandedTactic === tactic.id;
@@ -438,13 +551,20 @@ export default function GrowthPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-semibold text-sm">{tactic.title}</span>
-                        <Badge variant="outline" className="text-[10px] bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30">{tactic.badge}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30"
+                        >
+                          {tactic.badge}
+                        </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">{tactic.desc}</p>
                       {isExpanded && (
                         <div className="mt-3 p-3 bg-muted/30 rounded-lg">
                           <p className="text-xs font-semibold mb-1">How to execute:</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{tactic.howTo}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {tactic.howTo}
+                          </p>
                         </div>
                       )}
                       <div className="flex gap-2 mt-3">
@@ -454,14 +574,23 @@ export default function GrowthPage() {
                           className="h-7 text-xs px-2 gap-1"
                           onClick={() => setExpandedTactic(isExpanded ? null : tactic.id)}
                         >
-                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          {isExpanded ? (
+                            <ChevronUp className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )}
                           {isExpanded ? "Less" : "How to"}
                         </Button>
                         {tactic.action && (
                           <Button
                             size="sm"
                             className="h-7 text-xs bg-[#5BA8A0] hover:bg-[#5BA8A0]/90 text-white gap-1"
-                            onClick={() => { setContentType(tactic.action!); document.querySelector('[data-testid="tab-content"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true })); }}
+                            onClick={() => {
+                              setContentType(tactic.action!);
+                              document
+                                .querySelector('[data-testid="tab-content"]')
+                                ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+                            }}
                             data-testid={`btn-tactic-generate-${tactic.id}`}
                           >
                             <Zap className="w-3 h-3" /> Generate content
@@ -479,35 +608,45 @@ export default function GrowthPage() {
         {/* ── AUTOMATION LOG ── */}
         <TabsContent value="log" className="space-y-4 mt-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Automated tasks run weekly. Logs last 100 runs.</p>
+            <p className="text-sm text-muted-foreground">
+              Automated tasks run weekly. Logs last 100 runs.
+            </p>
           </div>
 
-          {tasksLoading
-            ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)
-            : tasks.length === 0
-            ? (
-              <Card className="border-dashed border-border/50">
-                <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                  No tasks run yet. Click <strong>Run Weekly Tasks</strong> to start.
-                </CardContent>
-              </Card>
-            )
-            : (
-              <div className="space-y-2">
-                {tasks.map((t: any) => (
-                  <Card key={t.id} className="border-border/50">
-                    <CardContent className="py-3 px-4 flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full shrink-0 ${t.status === "completed" ? "bg-emerald-500" : t.status === "failed" ? "bg-red-500" : "bg-amber-500"}`} />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-semibold">{t.taskType.replace(/_/g, " ")}</span>
-                        {t.product && <span className="text-[10px] text-muted-foreground ml-2">· {t.product}</span>}
-                      </div>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{new Date(t.runAt).toLocaleString()}</span>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+          {tasksLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-xl" />
+            ))
+          ) : tasks.length === 0 ? (
+            <Card className="border-dashed border-border/50">
+              <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                No tasks run yet. Click <strong>Run Weekly Tasks</strong> to start.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {tasks.map((t: any) => (
+                <Card key={t.id} className="border-border/50">
+                  <CardContent className="py-3 px-4 flex items-center gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full shrink-0 ${t.status === "completed" ? "bg-emerald-500" : t.status === "failed" ? "bg-red-500" : "bg-amber-500"}`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-semibold">{t.taskType.replace(/_/g, " ")}</span>
+                      {t.product && (
+                        <span className="text-[10px] text-muted-foreground ml-2">
+                          · {t.product}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">
+                      {new Date(t.runAt).toLocaleString()}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

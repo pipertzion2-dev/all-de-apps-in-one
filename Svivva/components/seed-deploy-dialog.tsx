@@ -4,12 +4,7 @@ import { useState } from "react";
 import { authFetch } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Download,
   Rocket,
@@ -100,7 +95,7 @@ export function SeedDeployDialog({
       color: "#F26207",
       steps: [
         "Open your cloud platform dashboard → New Project",
-        "Choose \"Import from ZIP\"",
+        'Choose "Import from ZIP"',
         "Upload the downloaded ZIP",
         "Click Run — your app is live",
       ],
@@ -111,10 +106,7 @@ export function SeedDeployDialog({
       name: "Vercel",
       icon: Zap,
       color: "#000000",
-      steps: [
-        "Install Vercel CLI",
-        "Unzip and run deploy command",
-      ],
+      steps: ["Install Vercel CLI", "Unzip and run deploy command"],
       command: `cd ${appSlug} && npx vercel`,
       url: "https://vercel.com/new",
     },
@@ -122,10 +114,7 @@ export function SeedDeployDialog({
       name: "Railway",
       icon: Terminal,
       color: "#0B0D0E",
-      steps: [
-        "Install Railway CLI",
-        "Unzip and deploy",
-      ],
+      steps: ["Install Railway CLI", "Unzip and deploy"],
       command: `cd ${appSlug} && npx @railway/cli up`,
       url: "https://railway.app/new",
     },
@@ -157,9 +146,7 @@ export function SeedDeployDialog({
             <Button
               className="w-full gap-2 h-12 text-base"
               style={{
-                background: hasCode
-                  ? "linear-gradient(135deg, #5BA8A0, #4A9890)"
-                  : undefined,
+                background: hasCode ? "linear-gradient(135deg, #5BA8A0, #4A9890)" : undefined,
               }}
               disabled={!hasCode || downloading}
               onClick={handleDownloadZip}
@@ -210,14 +197,9 @@ export function SeedDeployDialog({
                         className="w-8 h-8 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: `${target.color}15` }}
                       >
-                        <target.icon
-                          className="w-4 h-4"
-                          style={{ color: target.color }}
-                        />
+                        <target.icon className="w-4 h-4" style={{ color: target.color }} />
                       </div>
-                      <span className="font-semibold text-sm">
-                        {target.name}
-                      </span>
+                      <span className="font-semibold text-sm">{target.name}</span>
                     </div>
                     <a
                       href={target.url}
@@ -238,9 +220,7 @@ export function SeedDeployDialog({
                   <ol className="text-xs text-muted-foreground space-y-1 pl-1">
                     {target.steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-[#5BA8A0] font-bold flex-shrink-0">
-                          {i + 1}.
-                        </span>
+                        <span className="text-[#5BA8A0] font-bold flex-shrink-0">{i + 1}.</span>
                         {step}
                       </li>
                     ))}
@@ -248,9 +228,7 @@ export function SeedDeployDialog({
 
                   {target.command && (
                     <button
-                      onClick={() =>
-                        copyCommand(target.command!, target.name)
-                      }
+                      onClick={() => copyCommand(target.command!, target.name)}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left group"
                       data-testid={`button-copy-deploy-${target.name.toLowerCase()}`}
                     >
@@ -272,15 +250,17 @@ export function SeedDeployDialog({
 
           <div className="h-px bg-border" />
 
-          <div className="rounded-xl p-4 space-y-2" style={{ background: "linear-gradient(135deg, #6B2C4A08, #5BA8A008)" }}>
+          <div
+            className="rounded-xl p-4 space-y-2"
+            style={{ background: "linear-gradient(135deg, #6B2C4A08, #5BA8A008)" }}
+          >
             <div className="flex items-center gap-2 text-sm font-medium">
               <Rocket className="w-4 h-4 text-[#6B2C4A]" />
               Step 3: Connect to marketing
             </div>
             <p className="text-xs text-muted-foreground">
-              Once deployed, use the Seeds Marketing Funnel to auto-generate SEO
-              landing pages, comparison articles, and social content for your
-              live app.
+              Once deployed, use the Seeds Marketing Funnel to auto-generate SEO landing pages,
+              comparison articles, and social content for your live app.
             </p>
             <Button
               variant="outline"

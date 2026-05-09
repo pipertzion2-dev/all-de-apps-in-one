@@ -11,15 +11,15 @@ interface HeroBloomAnimationProps {
 }
 
 const VIVVA_COLORS = {
-  teal: new THREE.Color(0x5BA8A0),
-  tealLight: new THREE.Color(0x8FCFC7),
-  burgundy: new THREE.Color(0x6B2C4A),
-  burgundyLight: new THREE.Color(0x8B4C6A),
-  dustyPink: new THREE.Color(0xD4A5A5),
-  mint: new THREE.Color(0x98D4BB),
-  lavender: new THREE.Color(0xB8A9C9),
-  accent: new THREE.Color(0x7BA3AC),
-  cream: new THREE.Color(0xF5E6D3),
+  teal: new THREE.Color(0x5ba8a0),
+  tealLight: new THREE.Color(0x8fcfc7),
+  burgundy: new THREE.Color(0x6b2c4a),
+  burgundyLight: new THREE.Color(0x8b4c6a),
+  dustyPink: new THREE.Color(0xd4a5a5),
+  mint: new THREE.Color(0x98d4bb),
+  lavender: new THREE.Color(0xb8a9c9),
+  accent: new THREE.Color(0x7ba3ac),
+  cream: new THREE.Color(0xf5e6d3),
 };
 
 const CRT_FRAGMENT_SHADER = `
@@ -284,7 +284,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     waterMaterial: THREE.ShaderMaterial;
     sparkleMaterial: THREE.ShaderMaterial;
   } | null>(null);
-  const [phase, setPhase] = useState<string>('watering');
+  const [phase, setPhase] = useState<string>("watering");
   const completedRef = useRef(false);
 
   useEffect(() => {
@@ -308,7 +308,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
 
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    
+
     const crtPass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
@@ -378,7 +378,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
       metalness: 0.1,
       roughness: 0.2,
     });
-    
+
     for (let i = 0; i < 25; i++) {
       const dropGeo = new THREE.SphereGeometry(0.035 + Math.random() * 0.02, 8, 8);
       dropGeo.scale(1, 1.5, 1);
@@ -394,12 +394,25 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     }
 
     const seeds: THREE.Mesh[] = [];
-    const seedColors = [VIVVA_COLORS.burgundy, VIVVA_COLORS.teal, VIVVA_COLORS.dustyPink, VIVVA_COLORS.lavender, VIVVA_COLORS.mint, VIVVA_COLORS.tealLight];
-    const seedPositions = [
-      [-1.2, -0.95, 0.15], [-0.55, -0.95, 0.35], [0.1, -0.95, 0.25], [0.65, -0.95, 0.35], [1.2, -0.95, 0.15],
-      [-0.85, -0.95, -0.1], [0.35, -0.95, -0.05], [0.9, -0.95, -0.12]
+    const seedColors = [
+      VIVVA_COLORS.burgundy,
+      VIVVA_COLORS.teal,
+      VIVVA_COLORS.dustyPink,
+      VIVVA_COLORS.lavender,
+      VIVVA_COLORS.mint,
+      VIVVA_COLORS.tealLight,
     ];
-    
+    const seedPositions = [
+      [-1.2, -0.95, 0.15],
+      [-0.55, -0.95, 0.35],
+      [0.1, -0.95, 0.25],
+      [0.65, -0.95, 0.35],
+      [1.2, -0.95, 0.15],
+      [-0.85, -0.95, -0.1],
+      [0.35, -0.95, -0.05],
+      [0.9, -0.95, -0.12],
+    ];
+
     seedPositions.forEach((pos, i) => {
       const seedGeo = new THREE.SphereGeometry(0.08, 10, 10);
       seedGeo.scale(1.1, 0.5, 0.7);
@@ -426,9 +439,9 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     const sparkleSizes = new Float32Array(sparkleCount);
     const sparkleColors = new Float32Array(sparkleCount * 3);
     const sparkleDelays = new Float32Array(sparkleCount);
-    
+
     const colorOptions = [VIVVA_COLORS.cream, VIVVA_COLORS.tealLight, VIVVA_COLORS.mint];
-    
+
     for (let i = 0; i < sparkleCount; i++) {
       const seedIdx = Math.floor(Math.random() * seedPositions.length);
       const seedPos = seedPositions[seedIdx];
@@ -437,21 +450,21 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
       sparklePositions[i * 3 + 2] = seedPos[2] + (Math.random() - 0.5) * 0.3;
       sparkleSizes[i] = Math.random() * 2.5 + 1.5;
       sparkleDelays[i] = Math.random() * 0.8;
-      
+
       const color = colorOptions[Math.floor(Math.random() * colorOptions.length)];
       sparkleColors[i * 3] = color.r;
       sparkleColors[i * 3 + 1] = color.g;
       sparkleColors[i * 3 + 2] = color.b;
     }
-    
+
     const sparkleGeo = new THREE.BufferGeometry();
-    sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
-    sparkleGeo.setAttribute('size', new THREE.BufferAttribute(sparkleSizes, 1));
-    sparkleGeo.setAttribute('sparkleColor', new THREE.BufferAttribute(sparkleColors, 3));
-    sparkleGeo.setAttribute('delay', new THREE.BufferAttribute(sparkleDelays, 1));
-    
+    sparkleGeo.setAttribute("position", new THREE.BufferAttribute(sparklePositions, 3));
+    sparkleGeo.setAttribute("size", new THREE.BufferAttribute(sparkleSizes, 1));
+    sparkleGeo.setAttribute("sparkleColor", new THREE.BufferAttribute(sparkleColors, 3));
+    sparkleGeo.setAttribute("delay", new THREE.BufferAttribute(sparkleDelays, 1));
+
     const sparkleMaterial = new THREE.ShaderMaterial({
-      uniforms: { 
+      uniforms: {
         uTime: { value: 0 },
         uWaterStart: { value: 1.0 },
       },
@@ -466,16 +479,25 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
 
     const flowers: THREE.Group[] = [];
     const flowerConfigs = [
-      { colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.tealLight, VIVVA_COLORS.dustyPink], petals: 5 },
+      {
+        colors: [VIVVA_COLORS.burgundy, VIVVA_COLORS.tealLight, VIVVA_COLORS.dustyPink],
+        petals: 5,
+      },
       { colors: [VIVVA_COLORS.teal, VIVVA_COLORS.mint, VIVVA_COLORS.lavender], petals: 6 },
-      { colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.cream], petals: 5 },
+      {
+        colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.cream],
+        petals: 5,
+      },
       { colors: [VIVVA_COLORS.dustyPink, VIVVA_COLORS.teal, VIVVA_COLORS.mint], petals: 7 },
       { colors: [VIVVA_COLORS.mint, VIVVA_COLORS.lavender, VIVVA_COLORS.tealLight], petals: 6 },
-      { colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.cream], petals: 8 },
+      {
+        colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.cream],
+        petals: 8,
+      },
       { colors: [VIVVA_COLORS.tealLight, VIVVA_COLORS.burgundy, VIVVA_COLORS.lavender], petals: 5 },
       { colors: [VIVVA_COLORS.cream, VIVVA_COLORS.mint, VIVVA_COLORS.dustyPink], petals: 6 },
     ];
-    
+
     seedPositions.forEach((pos, i) => {
       const flower = createFlower(flowerConfigs[i % flowerConfigs.length]);
       flower.position.set(pos[0], pos[1], pos[2]);
@@ -486,20 +508,32 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     });
 
     const startTime = Date.now();
-    
+
     sceneRef.current = {
-      scene, camera, renderer, composer, pitcher,
-      waterDrops, waterSurface, waterMaterial, seeds, flowers, sparkles, sparkleMaterial, crtPass,
-      animationId: 0, startTime
+      scene,
+      camera,
+      renderer,
+      composer,
+      pitcher,
+      waterDrops,
+      waterSurface,
+      waterMaterial,
+      seeds,
+      flowers,
+      sparkles,
+      sparkleMaterial,
+      crtPass,
+      animationId: 0,
+      startTime,
     };
 
     const animate = () => {
       const s = sceneRef.current;
       if (!s) return;
-      
+
       s.animationId = requestAnimationFrame(animate);
       const elapsed = (Date.now() - s.startTime) / 1000;
-      
+
       s.crtPass.uniforms.uTime.value = elapsed;
       s.waterMaterial.uniforms.uTime.value = elapsed;
       s.sparkleMaterial.uniforms.uTime.value = elapsed;
@@ -507,7 +541,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
       const pitcherStartY = 2.0;
       const pitcherEndY = 0.9;
       const pitcherMoveTime = 0.8;
-      
+
       if (elapsed < pitcherMoveTime) {
         const t = elapsed / pitcherMoveTime;
         const eased = 1 - Math.pow(1 - t, 3);
@@ -530,21 +564,21 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
             drop.visible = true;
             const cycleTime = 0.45;
             const progress = ((waterElapsed - delay) % cycleTime) / cycleTime;
-            
+
             const spoutX = 0.5;
             const spoutY = 1.1;
             drop.position.x = spoutX + drop.userData.offsetX - progress * 0.5;
             drop.position.y = spoutY - progress * 2.3;
             drop.position.z = drop.userData.offsetZ;
-            
+
             const scale = 1 - progress * 0.4;
             drop.scale.setScalar(Math.max(0.25, scale));
           }
         });
-        
-        if (elapsed > 1.2) setPhase('growing');
+
+        if (elapsed > 1.2) setPhase("growing");
       } else if (elapsed >= waterEnd) {
-        s.waterDrops.forEach(drop => drop.visible = false);
+        s.waterDrops.forEach((drop) => (drop.visible = false));
       }
 
       if (elapsed > 1.3) {
@@ -556,7 +590,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
         const mat = seed.userData.material as THREE.ShaderMaterial;
         if (mat?.uniforms) {
           mat.uniforms.uTime.value = elapsed;
-          
+
           if (elapsed > 2.0) {
             const fadeStart = 2.0 + seed.userData.index * 0.08;
             const fadeProgress = Math.min((elapsed - fadeStart) / 0.5, 1);
@@ -577,12 +611,12 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
         if (elapsed > delayedStart) {
           const growProgress = Math.min((elapsed - delayedStart) / 0.85, 1);
           const eased = 1 - Math.pow(1 - growProgress, 3);
-          
+
           flower.scale.setScalar(eased * 0.4);
           flower.position.y = -0.95 + eased * 0.95;
-          
+
           flower.rotation.y = Math.sin(elapsed * 0.5 + i) * 0.05;
-          
+
           flower.children.forEach((child) => {
             const mesh = child as THREE.Mesh;
             const mat = mesh.userData?.material as THREE.ShaderMaterial;
@@ -594,7 +628,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
         }
       });
 
-      if (elapsed > 2.4) setPhase('blooming');
+      if (elapsed > 2.4) setPhase("blooming");
 
       if (elapsed > 4.5 && !completedRef.current) {
         completedRef.current = true;
@@ -622,7 +656,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
 
   function createRealisticPitcher(): THREE.Group {
     const group = new THREE.Group();
-    
+
     const mirrorMat = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -640,7 +674,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       const y = t * 1.0;
-      
+
       let x: number;
       if (t < 0.2) {
         x = 0.06 + Math.pow(t / 0.2, 0.7) * 0.22;
@@ -686,12 +720,12 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     return group;
   }
 
-  function createFlower(config: { colors: THREE.Color[], petals: number }): THREE.Group {
+  function createFlower(config: { colors: THREE.Color[]; petals: number }): THREE.Group {
     const group = new THREE.Group();
     const { colors, petals } = config;
 
     const stemGeo = new THREE.CylinderGeometry(0.02, 0.028, 0.8, 8);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2D5A32 });
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2d5a32 });
     const stem = new THREE.Mesh(stemGeo, stemMat);
     stem.position.y = 0.4;
     group.add(stem);
@@ -699,10 +733,10 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     for (let p = 0; p < petals; p++) {
       const angle = (p / petals) * Math.PI * 2;
       const colorIdx = p % colors.length;
-      
+
       const petalGeo = new THREE.ConeGeometry(0.08, 0.25, 5, 1);
       petalGeo.rotateX(Math.PI / 2);
-      
+
       const petalMat = new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
@@ -737,7 +771,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
           }
         `,
       });
-      
+
       const petal = new THREE.Mesh(petalGeo, petalMat);
       petal.position.set(Math.cos(angle) * 0.05, 0.85, Math.sin(angle) * 0.05);
       petal.rotation.y = angle;
@@ -747,7 +781,11 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
     }
 
     const centerGeo = new THREE.SphereGeometry(0.05, 10, 10);
-    const centerMat = new THREE.MeshStandardMaterial({ color: 0xE8D060, emissive: 0x443308, emissiveIntensity: 0.2 });
+    const centerMat = new THREE.MeshStandardMaterial({
+      color: 0xe8d060,
+      emissive: 0x443308,
+      emissiveIntensity: 0.2,
+    });
     const center = new THREE.Mesh(centerGeo, centerMat);
     center.position.y = 0.85;
     group.add(center);
@@ -756,9 +794,9 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
   }
 
   const phaseLabels: Record<string, string> = {
-    watering: 'Initializing...',
-    growing: 'Configuring...',
-    blooming: 'Ready...',
+    watering: "Initializing...",
+    growing: "Configuring...",
+    blooming: "Ready...",
   };
 
   return (
@@ -766,17 +804,18 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
       <div ref={containerRef} className="w-full h-full" />
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center z-10">
         <p className="text-white/80 text-xs font-medium tracking-wide">
-          {phaseLabels[phase] || ''}
+          {phaseLabels[phase] || ""}
         </p>
         <div className="mt-2 flex justify-center gap-1">
-          {['watering', 'growing', 'blooming'].map((p, i) => (
+          {["watering", "growing", "blooming"].map((p, i) => (
             <div
               key={p}
               className="w-1.5 h-1.5 rounded-full transition-all duration-300"
               style={{
-                backgroundColor: ['watering', 'growing', 'blooming'].indexOf(phase) >= i 
-                  ? '#7BA3AC' 
-                  : 'rgba(255,255,255,0.15)',
+                backgroundColor:
+                  ["watering", "growing", "blooming"].indexOf(phase) >= i
+                    ? "#7BA3AC"
+                    : "rgba(255,255,255,0.15)",
               }}
             />
           ))}

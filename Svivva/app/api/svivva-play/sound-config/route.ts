@@ -7,15 +7,17 @@ export async function POST(req: NextRequest) {
     const { instrumentHint, role, register, batch } = body;
 
     if (batch && Array.isArray(batch)) {
-      const configs = batch.map((item: { instrumentHint: string; role?: string; register?: string }) => {
-        const preset = resolveInstrumentPreset(item.instrumentHint, item.role);
-        return {
-          instrumentHint: item.instrumentHint,
-          role: item.role,
-          register: item.register,
-          preset,
-        };
-      });
+      const configs = batch.map(
+        (item: { instrumentHint: string; role?: string; register?: string }) => {
+          const preset = resolveInstrumentPreset(item.instrumentHint, item.role);
+          return {
+            instrumentHint: item.instrumentHint,
+            role: item.role,
+            register: item.register,
+            preset,
+          };
+        },
+      );
       return NextResponse.json({ configs });
     }
 

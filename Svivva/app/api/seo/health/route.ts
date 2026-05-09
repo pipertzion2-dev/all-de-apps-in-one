@@ -18,7 +18,10 @@ type Check = {
   link?: { label: string; href: string };
 };
 
-async function fetchText(url: string, timeoutMs = 8000): Promise<{ ok: boolean; status: number; text: string }> {
+async function fetchText(
+  url: string,
+  timeoutMs = 8000,
+): Promise<{ ok: boolean; status: number; text: string }> {
   try {
     const r = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
@@ -51,9 +54,11 @@ export async function GET() {
     });
   } else {
     const title = home.text.match(/<title>([^<]+)<\/title>/i)?.[1]?.trim() || "";
-    const desc = home.text.match(/<meta\s+name="description"\s+content="([^"]+)"/i)?.[1]?.trim() || "";
+    const desc =
+      home.text.match(/<meta\s+name="description"\s+content="([^"]+)"/i)?.[1]?.trim() || "";
     const og = /<meta\s+property="og:image"/i.test(home.text);
-    const canonical = home.text.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1]?.trim() || "";
+    const canonical =
+      home.text.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1]?.trim() || "";
 
     checks.push({
       id: "home",
@@ -80,7 +85,9 @@ export async function GET() {
       id: "og",
       label: "OpenGraph image",
       status: og ? "ok" : "warn",
-      detail: og ? "Configured — social previews will look good." : "Missing — social shares will look bare.",
+      detail: og
+        ? "Configured — social previews will look good."
+        : "Missing — social shares will look bare.",
     });
     checks.push({
       id: "canonical",
@@ -175,10 +182,19 @@ export async function GET() {
   let blogCount = 0;
   let seoCount = 0;
   try {
-    const [b] = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.published, true));
-    const all = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.published, true));
+    const [b] = await db
+      .select({ id: blogPosts.id })
+      .from(blogPosts)
+      .where(eq(blogPosts.published, true));
+    const all = await db
+      .select({ id: blogPosts.id })
+      .from(blogPosts)
+      .where(eq(blogPosts.published, true));
     blogCount = all.length;
-    const seo = await db.select({ id: seoLandingPages.id }).from(seoLandingPages).where(eq(seoLandingPages.published, true));
+    const seo = await db
+      .select({ id: seoLandingPages.id })
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.published, true));
     seoCount = seo.length;
   } catch {}
 

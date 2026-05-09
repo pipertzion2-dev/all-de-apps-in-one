@@ -12,7 +12,9 @@ const costPolicySchema = z.object({
   budgetAlertThreshold: z.number().min(1).max(100).default(80),
   modelPreference: z.enum(["quality", "balanced", "economy"]).default("balanced"),
   autoSwitch: z.boolean().default(false),
-  fallbackModel: z.enum(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]).default("gpt-4o-mini"),
+  fallbackModel: z
+    .enum(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"])
+    .default("gpt-4o-mini"),
   complexityThreshold: z.number().min(0).max(100).default(50),
 });
 
@@ -45,10 +47,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const [policy] = await db
-      .select()
-      .from(costPolicies)
-      .where(eq(costPolicies.projectId, id));
+    const [policy] = await db.select().from(costPolicies).where(eq(costPolicies.projectId, id));
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -60,22 +59,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         totalTokens: sql<number>`coalesce(sum(${usageLogs.tokensUsed}), 0)::int`,
       })
       .from(usageLogs)
-      .where(
-        and(
-          eq(usageLogs.projectId, id),
-          gte(usageLogs.createdAt, monthStart)
-        )
-      );
+      .where(and(eq(usageLogs.projectId, id), gte(usageLogs.createdAt, monthStart)));
 
     const budgetLimit = policy?.budgetLimit || 10000;
-    const budgetUsedPercent = budgetLimit > 0 
-      ? Math.round((monthlyUsage?.totalCost || 0) / budgetLimit * 100)
-      : 0;
+    const budgetUsedPercent =
+      budgetLimit > 0 ? Math.round(((monthlyUsage?.totalCost || 0) / budgetLimit) * 100) : 0;
 
     const recommendation = getCostRecommendation(
       monthlyUsage?.totalCost || 0,
       monthlyUsage?.totalCalls || 0,
-      policy?.modelPreference || "balanced"
+      policy?.modelPreference || "balanced",
     );
 
     return NextResponse.json({
@@ -122,17 +115,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = costPolicySchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { budgetLimit, budgetAlertThreshold, modelPreference, autoSwitch, fallbackModel, complexityThreshold } = parsed.data;
+    const {
+      budgetLimit,
+      budgetAlertThreshold,
+      modelPreference,
+      autoSwitch,
+      fallbackModel,
+      complexityThreshold,
+    } = parsed.data;
 
-    const [existing] = await db
-      .select()
-      .from(costPolicies)
-      .where(eq(costPolicies.projectId, id));
+    const [existing] = await db.select().from(costPolicies).where(eq(costPolicies.projectId, id));
 
     if (existing) {
       const [updated] = await db
@@ -176,7 +173,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 function getCostRecommendation(
   totalCost: number,
   totalCalls: number,
-  currentPreference: string
+  currentPreference: string,
 ): { model: string; reason: string; potentialSavings: number } | null {
   if (totalCalls < 100) {
     return null;
@@ -187,7 +184,8 @@ function getCostRecommendation(
   if (avgCostPerCall > 50 && currentPreference !== "economy") {
     return {
       model: "gpt-4o-mini",
-      reason: "Your average cost per call is high. Switching to gpt-4o-mini could reduce costs significantly.",
+      reason:
+        "Your average cost per call is high. Switching to gpt-4o-mini could reduce costs significantly.",
       potentialSavings: Math.round(totalCost * 0.6),
     };
   }
@@ -195,7 +193,8 @@ function getCostRecommendation(
   if (avgCostPerCall < 5 && currentPreference !== "quality") {
     return {
       model: "gpt-4o",
-      reason: "Your usage is low-cost. Consider upgrading to gpt-4o for better quality without major cost impact.",
+      reason:
+        "Your usage is low-cost. Consider upgrading to gpt-4o for better quality without major cost impact.",
       potentialSavings: 0,
     };
   }

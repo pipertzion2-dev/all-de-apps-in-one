@@ -33,7 +33,9 @@ export function Hub() {
           <div className="hub-hero-badge app-title">⬡ 40+ Free Tools · No Sign-Up Required</div>
           <h1 className="app-title">Free Cybersecurity Tools Online</h1>
           <p className="hub-hero-tagline">
-            SSL checker, DNS lookup, security headers test, JWT decoder, CORS checker, password strength, CVSS calculator — all free, all in your browser. Bring findings into Pyracrypt for full AI-powered scanning.
+            SSL checker, DNS lookup, security headers test, JWT decoder, CORS checker, password
+            strength, CVSS calculator — all free, all in your browser. Bring findings into Pyracrypt
+            for full AI-powered scanning.
           </p>
         </div>
       </div>

@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
         .where(eq(seoLandingPages.category, category))
         .orderBy(desc(seoLandingPages.createdAt));
     } else {
-      pages = await db
-        .select()
-        .from(seoLandingPages)
-        .orderBy(desc(seoLandingPages.createdAt));
+      pages = await db.select().from(seoLandingPages).orderBy(desc(seoLandingPages.createdAt));
     }
 
     return NextResponse.json(pages);

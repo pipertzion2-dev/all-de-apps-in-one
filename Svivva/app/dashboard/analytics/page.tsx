@@ -6,18 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  BarChart3, 
-  Clock, 
-  TrendingUp, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BarChart3,
+  Clock,
+  TrendingUp,
   TrendingDown,
   Zap,
   DollarSign,
   AlertTriangle,
   CheckCircle,
   Activity,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 interface Project {
@@ -79,7 +85,7 @@ function formatNumber(num: number): string {
 function SimpleBarChart({ data, height = 100 }: { data: number[]; height?: number }) {
   const max = Math.max(...data, 1);
   const barWidth = 100 / data.length;
-  
+
   return (
     <div className="flex items-end gap-1 h-24" style={{ height }}>
       {data.map((value, i) => (
@@ -98,7 +104,17 @@ function SimpleBarChart({ data, height = 100 }: { data: number[]; height?: numbe
   );
 }
 
-function LatencyChart({ p50, p95, p99, avg }: { p50: number; p95: number; p99: number; avg: number }) {
+function LatencyChart({
+  p50,
+  p95,
+  p99,
+  avg,
+}: {
+  p50: number;
+  p95: number;
+  p99: number;
+  avg: number;
+}) {
   const max = Math.max(p50, p95, p99, avg, 1);
   const bars = [
     { label: "P50", value: p50, color: "bg-green-500" },
@@ -106,7 +122,7 @@ function LatencyChart({ p50, p95, p99, avg }: { p50: number; p95: number; p99: n
     { label: "P95", value: p95, color: "bg-yellow-500" },
     { label: "P99", value: p99, color: "bg-red-500" },
   ];
-  
+
   return (
     <div className="space-y-3">
       {bars.map((bar) => (
@@ -140,11 +156,15 @@ export default function AnalyticsPage() {
 
   const projectId = selectedProject || projects?.[0]?.id;
 
-  const { data: analytics, isLoading: analyticsLoading, refetch } = useQuery<AnalyticsData>({
+  const {
+    data: analytics,
+    isLoading: analyticsLoading,
+    refetch,
+  } = useQuery<AnalyticsData>({
     queryKey: ["/api/projects", projectId, "analytics", range],
     queryFn: async () => {
-      const res = await fetch(`/api/projects/${projectId}/analytics?range=${range}`, { 
-        credentials: "include" 
+      const res = await fetch(`/api/projects/${projectId}/analytics?range=${range}`, {
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return res.json();
@@ -158,15 +178,17 @@ export default function AnalyticsPage() {
   const latency = analytics?.latencyPercentiles;
   const timeSeries = analytics?.timeSeriesData || [];
 
-  const callsData = timeSeries.map(t => t.calls);
-  const latencyData = timeSeries.map(t => t.avgLatency);
-  const errorsData = timeSeries.map(t => t.errors);
+  const callsData = timeSeries.map((t) => t.calls);
+  const latencyData = timeSeries.map((t) => t.avgLatency);
+  const errorsData = timeSeries.map((t) => t.errors);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold" data-testid="text-analytics-title">Analytics</h1>
+          <h1 className="text-3xl font-bold" data-testid="text-analytics-title">
+            Analytics
+          </h1>
           <p className="text-muted-foreground">Real-time metrics and performance insights</p>
         </div>
         <div className="flex items-center gap-3">
@@ -176,7 +198,9 @@ export default function AnalyticsPage() {
             </SelectTrigger>
             <SelectContent>
               {projects?.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -191,7 +215,12 @@ export default function AnalyticsPage() {
               <SelectItem value="90d">Last 90 days</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={() => refetch()} data-testid="button-refresh">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            data-testid="button-refresh"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
@@ -212,7 +241,9 @@ export default function AnalyticsPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card data-testid="card-total-calls">
               <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Calls</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Calls
+                </CardTitle>
                 <Zap className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -226,7 +257,9 @@ export default function AnalyticsPage() {
 
             <Card data-testid="card-success-rate">
               <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Success Rate</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Success Rate
+                </CardTitle>
                 {summary && summary.successRate >= 99 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 ) : (
@@ -251,7 +284,9 @@ export default function AnalyticsPage() {
 
             <Card data-testid="card-avg-latency">
               <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Avg Latency</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Avg Latency
+                </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -265,7 +300,9 @@ export default function AnalyticsPage() {
 
             <Card data-testid="card-total-cost">
               <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Cost</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Cost
+                </CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -273,8 +310,12 @@ export default function AnalyticsPage() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold">{formatCost(summary?.totalCost || 0)}</span>
-                    <span className="text-xs text-muted-foreground">{formatNumber(summary?.totalTokens || 0)} tokens</span>
+                    <span className="text-2xl font-bold">
+                      {formatCost(summary?.totalCost || 0)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatNumber(summary?.totalTokens || 0)} tokens
+                    </span>
                   </div>
                 )}
               </CardContent>

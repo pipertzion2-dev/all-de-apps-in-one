@@ -9,7 +9,9 @@ import { z } from "zod";
 
 const createFineTuneSchema = z.object({
   name: z.string().min(1, "Job name is required"),
-  baseModel: z.enum(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]).default("gpt-4o-mini"),
+  baseModel: z
+    .enum(["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"])
+    .default("gpt-4o-mini"),
   epochs: z.number().min(1).max(10).default(3),
 });
 
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           .from(fineTuneDeployments)
           .where(eq(fineTuneDeployments.jobId, job.id));
         return { ...job, deployments };
-      })
+      }),
     );
 
     const trainingCount = await db
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = createFineTuneSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -105,12 +107,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .from(trainingExamples)
       .innerJoin(projectVersions, eq(trainingExamples.versionId, projectVersions.id))
       .where(eq(projectVersions.projectId, id));
-    const examples = examplesResult.map(r => r.trainingExamples);
+    const examples = examplesResult.map((r) => r.trainingExamples);
 
     if (examples.length < 10) {
       return NextResponse.json(
         { error: `Need at least 10 training examples. You have ${examples.length}.` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -161,7 +163,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = updateFineTuneSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -171,12 +173,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [job] = await db
       .select()
       .from(fineTuneJobs)
-      .where(
-        and(
-          eq(fineTuneJobs.id, jobId),
-          eq(fineTuneJobs.projectId, id)
-        )
-      );
+      .where(and(eq(fineTuneJobs.id, jobId), eq(fineTuneJobs.projectId, id)));
 
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -184,15 +181,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (action === "cancel") {
       if (!["pending", "running"].includes(job.status)) {
-        return NextResponse.json({ error: "Can only cancel pending or running jobs" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Can only cancel pending or running jobs" },
+          { status: 400 },
+        );
       }
-      
+
       const [updated] = await db
         .update(fineTuneJobs)
         .set({ status: "cancelled" })
         .where(eq(fineTuneJobs.id, jobId))
         .returning();
-      
+
       return NextResponse.json(updated);
     }
 
@@ -223,12 +223,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       await db
         .update(fineTuneDeployments)
         .set({ isActive: false })
-        .where(
-          and(
-            eq(fineTuneDeployments.jobId, jobId),
-            eq(fineTuneDeployments.projectId, id)
-          )
-        );
+        .where(and(eq(fineTuneDeployments.jobId, jobId), eq(fineTuneDeployments.projectId, id)));
 
       return NextResponse.json({ success: true });
     }
@@ -265,12 +260,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Job ID required" }, { status: 400 });
     }
 
-    await db.delete(fineTuneJobs).where(
-      and(
-        eq(fineTuneJobs.id, jobId),
-        eq(fineTuneJobs.projectId, id)
-      )
-    );
+    await db
+      .delete(fineTuneJobs)
+      .where(and(eq(fineTuneJobs.id, jobId), eq(fineTuneJobs.projectId, id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

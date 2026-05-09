@@ -26,63 +26,140 @@ const tutorials: Record<string, TutorialConfig> = {
     id: "dashboard",
     pageName: "Dashboard",
     steps: [
-      { title: "Welcome to your Dashboard", description: "This is your home base. From here you can see your recent projects and access all of Svivva's tools." },
-      { title: "Tool Cards", description: "Each card represents a tool you can use. Click any card to jump straight into that feature." },
-      { title: "Your Projects", description: "Your recent projects appear below the tools. Click any project to open it." },
+      {
+        title: "Welcome to your Dashboard",
+        description:
+          "This is your home base. From here you can see your recent projects and access all of Svivva's tools.",
+      },
+      {
+        title: "Tool Cards",
+        description:
+          "Each card represents a tool you can use. Click any card to jump straight into that feature.",
+      },
+      {
+        title: "Your Projects",
+        description: "Your recent projects appear below the tools. Click any project to open it.",
+      },
     ],
   },
   "/dashboard/api-builder": {
     id: "api-builder",
     pageName: "API Builder",
     steps: [
-      { title: "Describe Your API", description: "Type what you want your API to do in plain English. The AI will handle the rest." },
-      { title: "AI Generation", description: "Once you submit, AI generates the endpoint, schema, and documentation automatically." },
-      { title: "Test & Deploy", description: "Preview your API response, test it live, then deploy with one click." },
+      {
+        title: "Describe Your API",
+        description:
+          "Type what you want your API to do in plain English. The AI will handle the rest.",
+      },
+      {
+        title: "AI Generation",
+        description:
+          "Once you submit, AI generates the endpoint, schema, and documentation automatically.",
+      },
+      {
+        title: "Test & Deploy",
+        description: "Preview your API response, test it live, then deploy with one click.",
+      },
     ],
   },
   "/dashboard/hardware-builder": {
     id: "hardware-builder",
     pageName: "Hardware Builder",
     steps: [
-      { title: "The BUILD System", description: "Follow 5 simple steps: Bring your vision → define Users → select materials (Into) → generate designs (Logical) → Delivery." },
-      { title: "AI Sketches & Schematics", description: "In the design step, AI generates reference sketches and technical schematics for your product." },
-      { title: "Manufacturer Research", description: "On the final step, AI finds real manufacturers, suppliers, and generates a professional PDF blueprint." },
+      {
+        title: "The BUILD System",
+        description:
+          "Follow 5 simple steps: Bring your vision → define Users → select materials (Into) → generate designs (Logical) → Delivery.",
+      },
+      {
+        title: "AI Sketches & Schematics",
+        description:
+          "In the design step, AI generates reference sketches and technical schematics for your product.",
+      },
+      {
+        title: "Manufacturer Research",
+        description:
+          "On the final step, AI finds real manufacturers, suppliers, and generates a professional PDF blueprint.",
+      },
     ],
   },
   "/dashboard/hypothesis": {
     id: "hypothesis-lab",
     pageName: "Hypothesis Lab",
     steps: [
-      { title: "Register Your APIs", description: "Start by adding API endpoints you want to test. Include the URL, input schema, and a sample response." },
-      { title: "Generate Hypotheses", description: "Select APIs and ask a question. AI runs a 5-stage pipeline to discover relationships." },
-      { title: "Insight Memory", description: "Confirmed insights are saved and used to make future discoveries smarter." },
+      {
+        title: "Register Your APIs",
+        description:
+          "Start by adding API endpoints you want to test. Include the URL, input schema, and a sample response.",
+      },
+      {
+        title: "Generate Hypotheses",
+        description:
+          "Select APIs and ask a question. AI runs a 5-stage pipeline to discover relationships.",
+      },
+      {
+        title: "Insight Memory",
+        description: "Confirmed insights are saved and used to make future discoveries smarter.",
+      },
     ],
   },
   "/dashboard/idea-engine": {
     id: "idea-engine",
     pageName: "Idea Engine",
     steps: [
-      { title: "Pick an Industry", description: "Select an industry or describe your own niche to focus the AI's research." },
-      { title: "AI Discovery Pipeline", description: "The engine scans markets, identifies gaps, and generates 6 novel ideas ranked by potential." },
-      { title: "Act on Ideas", description: "Send any idea directly to the API Builder or Hardware Builder to start building immediately." },
+      {
+        title: "Pick an Industry",
+        description: "Select an industry or describe your own niche to focus the AI's research.",
+      },
+      {
+        title: "AI Discovery Pipeline",
+        description:
+          "The engine scans markets, identifies gaps, and generates 6 novel ideas ranked by potential.",
+      },
+      {
+        title: "Act on Ideas",
+        description:
+          "Send any idea directly to the API Builder or Hardware Builder to start building immediately.",
+      },
     ],
   },
   "/dashboard/launch-studio": {
     id: "launch-studio",
     pageName: "Launch Studio",
     steps: [
-      { title: "Describe Your App", description: "Tell the AI about your app or product. It generates a complete marketing toolkit." },
-      { title: "Marketing Plan", description: "Get a tagline, value propositions, channel strategies, and a launch checklist." },
-      { title: "Landing Page & Social", description: "Generate landing page copy and platform-specific social media posts ready to publish." },
+      {
+        title: "Describe Your App",
+        description:
+          "Tell the AI about your app or product. It generates a complete marketing toolkit.",
+      },
+      {
+        title: "Marketing Plan",
+        description:
+          "Get a tagline, value propositions, channel strategies, and a launch checklist.",
+      },
+      {
+        title: "Landing Page & Social",
+        description:
+          "Generate landing page copy and platform-specific social media posts ready to publish.",
+      },
     ],
   },
   "/dashboard/collaborate": {
     id: "collaborate",
     pageName: "Collaboration",
     steps: [
-      { title: "Invite Your Team", description: "Add team members by email. They'll get access to your shared workspace." },
-      { title: "Real-Time Activity", description: "See who's online and what they're working on in real time." },
-      { title: "Comments & Threads", description: "Leave feedback on any project, API, or design. Tag teammates to notify them." },
+      {
+        title: "Invite Your Team",
+        description: "Add team members by email. They'll get access to your shared workspace.",
+      },
+      {
+        title: "Real-Time Activity",
+        description: "See who's online and what they're working on in real time.",
+      },
+      {
+        title: "Comments & Threads",
+        description: "Leave feedback on any project, API, or design. Tag teammates to notify them.",
+      },
     ],
   },
 };
@@ -99,7 +176,11 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
     const disabled = localStorage.getItem(TUTORIAL_KEY) === "true";
     const asked = localStorage.getItem(TUTORIAL_ASKED_KEY) === "true";
     let seen: string[] = [];
-    try { seen = JSON.parse(localStorage.getItem(TUTORIAL_SEEN_KEY) || "[]"); } catch { seen = []; }
+    try {
+      seen = JSON.parse(localStorage.getItem(TUTORIAL_SEEN_KEY) || "[]");
+    } catch {
+      seen = [];
+    }
     setIsDisabled(disabled);
     setHasBeenAsked(asked);
     setSeenPages(new Set(seen));
@@ -183,13 +264,27 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
               <div className="flex-1 space-y-3">
                 <div>
                   <p className="font-medium text-sm">Want a quick tour?</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Short tips on each page to help you get started. You can turn them off anytime.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Short tips on each page to help you get started. You can turn them off anytime.
+                  </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleAcceptTutorials} className="text-xs h-7 px-3" style={{ background: "#5BA8A0" }} data-testid="button-accept-tutorials">
+                  <Button
+                    size="sm"
+                    onClick={handleAcceptTutorials}
+                    className="text-xs h-7 px-3"
+                    style={{ background: "#5BA8A0" }}
+                    data-testid="button-accept-tutorials"
+                  >
                     Yes, show me
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={handleDeclineTutorials} className="text-xs h-7 px-3" data-testid="button-decline-tutorials">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleDeclineTutorials}
+                    className="text-xs h-7 px-3"
+                    data-testid="button-decline-tutorials"
+                  >
                     No thanks
                   </Button>
                 </div>
@@ -210,15 +305,24 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
     <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
       <Card className="w-80 border-[#5BA8A0]/30 shadow-lg overflow-hidden">
         <div className="h-1 bg-muted">
-          <div className="h-full bg-[#5BA8A0] transition-all duration-300" style={{ width: `${((currentStep + 1) / tutorial.steps.length) * 100}%` }} />
+          <div
+            className="h-full bg-[#5BA8A0] transition-all duration-300"
+            style={{ width: `${((currentStep + 1) / tutorial.steps.length) * 100}%` }}
+          />
         </div>
         <CardContent className="pt-3 pb-3 px-4">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-[#5BA8A0]" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{tutorial.pageName} · {currentStep + 1}/{tutorial.steps.length}</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                {tutorial.pageName} · {currentStep + 1}/{tutorial.steps.length}
+              </span>
             </div>
-            <button onClick={handleDismiss} className="text-muted-foreground hover:text-foreground transition-colors" data-testid="button-dismiss-tutorial">
+            <button
+              onClick={handleDismiss}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="button-dismiss-tutorial"
+            >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -227,17 +331,40 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
           <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
 
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30">
-            <button onClick={handleDisablePermanently} className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors" data-testid="button-disable-tutorials-permanently">
+            <button
+              onClick={handleDisablePermanently}
+              className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+              data-testid="button-disable-tutorials-permanently"
+            >
               Turn off tutorials
             </button>
             <div className="flex gap-1.5">
               {currentStep > 0 && (
-                <Button size="sm" variant="ghost" onClick={handleBack} className="h-7 w-7 p-0" data-testid="button-tutorial-back">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleBack}
+                  className="h-7 w-7 p-0"
+                  data-testid="button-tutorial-back"
+                >
                   <ChevronLeft className="w-3.5 h-3.5" />
                 </Button>
               )}
-              <Button size="sm" onClick={handleNext} className="h-7 text-xs px-3" style={{ background: "#5BA8A0" }} data-testid="button-tutorial-next">
-                {isLast ? "Got it" : <><span>Next</span><ChevronRight className="w-3 h-3 ml-1" /></>}
+              <Button
+                size="sm"
+                onClick={handleNext}
+                className="h-7 text-xs px-3"
+                style={{ background: "#5BA8A0" }}
+                data-testid="button-tutorial-next"
+              >
+                {isLast ? (
+                  "Got it"
+                ) : (
+                  <>
+                    <span>Next</span>
+                    <ChevronRight className="w-3 h-3 ml-1" />
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -265,7 +392,11 @@ export function TutorialToggle() {
   };
 
   return (
-    <button onClick={toggle} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="button-toggle-tutorials">
+    <button
+      onClick={toggle}
+      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      data-testid="button-toggle-tutorials"
+    >
       <GraduationCap className="w-4 h-4" />
       <span>{isDisabled ? "Enable tutorials" : "Disable tutorials"}</span>
     </button>

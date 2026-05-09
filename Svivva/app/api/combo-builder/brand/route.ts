@@ -12,10 +12,7 @@ export async function POST(request: NextRequest) {
     const { companyDescription, selectedAPIs, goals } = await request.json();
 
     if (!companyDescription) {
-      return NextResponse.json(
-        { error: "Company description is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Company description is required" }, { status: 400 });
     }
 
     const systemPrompt = `You are a brand identity specialist. Generate creative and professional brand identity suggestions for an API product suite.
@@ -57,7 +54,7 @@ Create unique, professional brand identity options that would resonate with the 
       model: DEFAULT_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { role: "user", content: userPrompt },
       ],
       response_format: { type: "json_object" },
       temperature: 0.9,
@@ -77,9 +74,6 @@ Create unique, professional brand identity options that would resonate with the 
     return NextResponse.json(result);
   } catch (error) {
     console.error("Brand generation error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate brand suggestions" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate brand suggestions" }, { status: 500 });
   }
 }

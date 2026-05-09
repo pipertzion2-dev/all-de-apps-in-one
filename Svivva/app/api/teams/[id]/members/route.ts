@@ -18,10 +18,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
@@ -35,12 +32,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         and(
           eq(teamMembers.teamId, id),
           eq(teamMembers.userId, user.id),
-          eq(teamMembers.role, "admin")
-        )
+          eq(teamMembers.role, "admin"),
+        ),
       );
 
     if (!isOwner && adminMembership.length === 0) {
-      return NextResponse.json({ error: "Only owners and admins can add members" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only owners and admins can add members" },
+        { status: 403 },
+      );
     }
 
     const body = await request.json();
@@ -54,13 +54,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    const [targetUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
+    const [targetUser] = await db.select().from(users).where(eq(users.email, email));
 
     if (!targetUser) {
-      return NextResponse.json({ error: "User not found. They must sign up first." }, { status: 404 });
+      return NextResponse.json(
+        { error: "User not found. They must sign up first." },
+        { status: 404 },
+      );
     }
 
     if (targetUser.id === team.ownerId) {
@@ -70,12 +70,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const existingMember = await db
       .select()
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, id),
-          eq(teamMembers.userId, targetUser.id)
-        )
-      );
+      .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, targetUser.id)));
 
     if (existingMember.length > 0) {
       return NextResponse.json({ error: "User is already a member" }, { status: 400 });
@@ -116,10 +111,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
@@ -143,12 +135,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const [updated] = await db
       .update(teamMembers)
       .set({ role })
-      .where(
-        and(
-          eq(teamMembers.id, memberId),
-          eq(teamMembers.teamId, id)
-        )
-      )
+      .where(and(eq(teamMembers.id, memberId), eq(teamMembers.teamId, id)))
       .returning();
 
     if (!updated) {
@@ -171,10 +158,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [team] = await db
-      .select()
-      .from(teams)
-      .where(eq(teams.id, id));
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
 
     if (!team) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
@@ -190,12 +174,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const [member] = await db
       .select()
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.id, memberId),
-          eq(teamMembers.teamId, id)
-        )
-      );
+      .where(and(eq(teamMembers.id, memberId), eq(teamMembers.teamId, id)));
 
     if (!member) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
@@ -205,7 +184,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const isOwner = team.ownerId === user.id;
 
     if (!isSelf && !isOwner) {
-      return NextResponse.json({ error: "Only the owner or the member themselves can remove" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only the owner or the member themselves can remove" },
+        { status: 403 },
+      );
     }
 
     await db.delete(teamMembers).where(eq(teamMembers.id, memberId));

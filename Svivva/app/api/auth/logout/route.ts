@@ -4,7 +4,9 @@ import { clearSession, getLogoutUrl } from "@/lib/auth/session";
 function getHostname(request: NextRequest): string {
   if (process.env.REPLIT_DEV_DOMAIN) return process.env.REPLIT_DEV_DOMAIN;
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    try { return new URL(process.env.NEXT_PUBLIC_SITE_URL).host; } catch {}
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).host;
+    } catch {}
   }
   return (
     request.headers.get("x-forwarded-host") ||
@@ -22,7 +24,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(logoutUrl);
   } catch (error) {
     console.error("Logout error:", error);
-    try { await clearSession(); } catch {}
+    try {
+      await clearSession();
+    } catch {}
     return NextResponse.redirect(new URL("/", base));
   }
 }

@@ -1,21 +1,22 @@
 /* eslint-disable */
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const OUT = path.resolve(__dirname, '../exports/svivva-tools-pitch.html');
+const OUT = path.resolve(__dirname, "../exports/svivva-tools-pitch.html");
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
 const src = fs.readFileSync(
-  path.resolve(__dirname, '../artifacts/ai-tools-hub/src/data/tools.ts'),
-  'utf8'
+  path.resolve(__dirname, "../artifacts/ai-tools-hub/src/data/tools.ts"),
+  "utf8",
 );
 
-const objRe = /\{\s*id:\s*\d+,[\s\S]*?isBuiltIn:\s*(?:true|false),?(?:\s*iframeSrc:\s*'[^']+',?)?\s*\}/g;
+const objRe =
+  /\{\s*id:\s*\d+,[\s\S]*?isBuiltIn:\s*(?:true|false),?(?:\s*iframeSrc:\s*'[^']+',?)?\s*\}/g;
 const objs = [...src.matchAll(objRe)].map((m) => m[0]);
 
 function pick(s, key) {
   const m = s.match(new RegExp(`${key}:\\s*'((?:[^'\\\\]|\\\\.)*)'`));
-  return m ? m[1].replace(/\\'/g, "'") : '';
+  return m ? m[1].replace(/\\'/g, "'") : "";
 }
 function pickArr(s, key) {
   const m = s.match(new RegExp(`${key}:\\s*\\[([\\s\\S]*?)\\]`));
@@ -24,12 +25,12 @@ function pickArr(s, key) {
 }
 
 const tools = objs.map((s) => ({
-  slug: pick(s, 'slug'),
-  name: pick(s, 'name'),
-  category: pick(s, 'category'),
-  tagline: pick(s, 'tagline'),
-  description: pick(s, 'description'),
-  features: pickArr(s, 'features'),
+  slug: pick(s, "slug"),
+  name: pick(s, "name"),
+  category: pick(s, "category"),
+  tagline: pick(s, "tagline"),
+  description: pick(s, "description"),
+  features: pickArr(s, "features"),
 }));
 
 const byCategory = {};
@@ -38,72 +39,93 @@ tools.forEach((t) => {
 });
 
 const CATEGORY_COLORS = {
-  'AI Prompt Tools': '#8b5cf6',
-  'Developer Tools': '#ea580c',
-  'AI Model Tools': '#0891b2',
-  'Hardware & BOM': '#d97706',
-  'Content & Writing': '#a855f7',
-  'Code Tools': '#16a34a',
-  'Language Tools': '#2563eb',
-  'Data Tools': '#db2777',
-  'Music & Audio': '#e11d48',
-  'Research & Analysis': '#0d9488',
+  "AI Prompt Tools": "#8b5cf6",
+  "Developer Tools": "#ea580c",
+  "AI Model Tools": "#0891b2",
+  "Hardware & BOM": "#d97706",
+  "Content & Writing": "#a855f7",
+  "Code Tools": "#16a34a",
+  "Language Tools": "#2563eb",
+  "Data Tools": "#db2777",
+  "Music & Audio": "#e11d48",
+  "Research & Analysis": "#0d9488",
 };
 
 const CATEGORY_BLURB = {
-  'Research & Analysis': 'Twenty fast structured-thinking tools for researchers, founders, and analysts. From cognitive bias detection to causal chain mapping — every one is an SEO long-tail for someone who already needs structured help.',
-  'Developer Tools': 'Fourteen utilities developers Google for: linters, schema generators, regex helpers, doc tools. Pure utility, zero signup, every tool a keyword surface.',
-  'AI Prompt Tools': 'Thirteen prompt engineering aids — coverage analyzers, drift detectors, test case generators. Tools the prompt-eng audience wishes existed.',
-  'Hardware & BOM': 'Ten hardware engineering tools: BOM builders, component selectors, datasheet helpers. An unusually under-served SEO niche with high commercial intent.',
-  'Music & Audio': 'Ten music & audio tools — chord generators, scale browsers, generative composers. Creative-coding audience that overlaps with builders Svivva targets.',
-  'AI Model Tools': 'Six tools for working with AI models — comparison, evaluation, regression testing. Catches the technical side of the AI buyer journey.',
-  'Content & Writing': 'Seven content tools: AI chat, summarization, grammar, sentiment, tone — the broad demand layer that introduces casual users to the brand.',
-  'Data Tools': 'Two data tools: keyword extraction and Hypothesis Labs (the parent app for the 20 research tools above).',
-  'Code Tools': 'One core code tool: code explanation. A high-volume search term that converts curious learners into Svivva-aware visitors.',
-  'Language Tools': 'One translator tool. Universal demand; introduces Svivva to international audiences.',
+  "Research & Analysis":
+    "Twenty fast structured-thinking tools for researchers, founders, and analysts. From cognitive bias detection to causal chain mapping — every one is an SEO long-tail for someone who already needs structured help.",
+  "Developer Tools":
+    "Fourteen utilities developers Google for: linters, schema generators, regex helpers, doc tools. Pure utility, zero signup, every tool a keyword surface.",
+  "AI Prompt Tools":
+    "Thirteen prompt engineering aids — coverage analyzers, drift detectors, test case generators. Tools the prompt-eng audience wishes existed.",
+  "Hardware & BOM":
+    "Ten hardware engineering tools: BOM builders, component selectors, datasheet helpers. An unusually under-served SEO niche with high commercial intent.",
+  "Music & Audio":
+    "Ten music & audio tools — chord generators, scale browsers, generative composers. Creative-coding audience that overlaps with builders Svivva targets.",
+  "AI Model Tools":
+    "Six tools for working with AI models — comparison, evaluation, regression testing. Catches the technical side of the AI buyer journey.",
+  "Content & Writing":
+    "Seven content tools: AI chat, summarization, grammar, sentiment, tone — the broad demand layer that introduces casual users to the brand.",
+  "Data Tools":
+    "Two data tools: keyword extraction and Hypothesis Labs (the parent app for the 20 research tools above).",
+  "Code Tools":
+    "One core code tool: code explanation. A high-volume search term that converts curious learners into Svivva-aware visitors.",
+  "Language Tools":
+    "One translator tool. Universal demand; introduces Svivva to international audiences.",
 };
 
 const orderedCats = [
-  'Research & Analysis',
-  'Developer Tools',
-  'AI Prompt Tools',
-  'Hardware & BOM',
-  'Music & Audio',
-  'AI Model Tools',
-  'Content & Writing',
-  'Data Tools',
-  'Code Tools',
-  'Language Tools',
+  "Research & Analysis",
+  "Developer Tools",
+  "AI Prompt Tools",
+  "Hardware & BOM",
+  "Music & Audio",
+  "AI Model Tools",
+  "Content & Writing",
+  "Data Tools",
+  "Code Tools",
+  "Language Tools",
 ];
 
-const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const esc = (s) =>
+  String(s || "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+  );
 
 const categoryHtml = orderedCats
   .filter((c) => byCategory[c])
   .map((cat) => {
     const list = byCategory[cat];
-    const color = CATEGORY_COLORS[cat] || '#7c3aed';
+    const color = CATEGORY_COLORS[cat] || "#7c3aed";
     const cards = list
       .map(
         (t) => `
       <article class="card" style="--c:${color}">
         <header><h3>${esc(t.name)}</h3><span class="slug">/${esc(t.slug)}</span></header>
         <p class="tag">${esc(t.tagline)}</p>
-        ${t.features && t.features.length ? `<ul class="feat">${t.features.slice(0, 3).map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
-      </article>`
+        ${
+          t.features && t.features.length
+            ? `<ul class="feat">${t.features
+                .slice(0, 3)
+                .map((f) => `<li>${esc(f)}</li>`)
+                .join("")}</ul>`
+            : ""
+        }
+      </article>`,
       )
-      .join('');
+      .join("");
     return `
     <section class="cat">
       <div class="cat-head" style="--c:${color}">
         <h2>${esc(cat)}</h2>
         <span class="count">${list.length} tools</span>
       </div>
-      <p class="cat-blurb">${esc(CATEGORY_BLURB[cat] || '')}</p>
+      <p class="cat-blurb">${esc(CATEGORY_BLURB[cat] || "")}</p>
       <div class="grid">${cards}</div>
     </section>`;
   })
-  .join('');
+  .join("");
 
 const html = `<!doctype html>
 <html lang="en">
@@ -366,7 +388,7 @@ const html = `<!doctype html>
 </html>`;
 
 fs.writeFileSync(OUT, html);
-const PUB = path.resolve(__dirname, '../artifacts/ai-tools-hub/public/pitch.html');
+const PUB = path.resolve(__dirname, "../artifacts/ai-tools-hub/public/pitch.html");
 fs.writeFileSync(PUB, html);
-console.log('Wrote', OUT, '(' + (html.length / 1024).toFixed(1) + ' KB)');
-console.log('Also wrote', PUB);
+console.log("Wrote", OUT, "(" + (html.length / 1024).toFixed(1) + " KB)");
+console.log("Also wrote", PUB);

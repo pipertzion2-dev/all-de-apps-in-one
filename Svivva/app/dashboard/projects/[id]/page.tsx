@@ -9,10 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { 
-  ArrowLeft, 
-  Play, 
-  GitBranch, 
+import {
+  ArrowLeft,
+  Play,
+  GitBranch,
   Sparkles,
   Code2,
   Copy,
@@ -31,12 +31,18 @@ import {
   ShieldCheck,
   ShieldAlert,
   Skull,
-  BrainCircuit
+  BrainCircuit,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ApiInstrument } from "@/components/api-instrument";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Project {
   id: string;
@@ -96,7 +102,11 @@ export default function ProjectDetailPage() {
     },
   });
 
-  const { data: trainingData, isLoading: trainingLoading, isError: trainingError } = useQuery<{ examples: TrainingExample[]; count: number }>({
+  const {
+    data: trainingData,
+    isLoading: trainingLoading,
+    isError: trainingError,
+  } = useQuery<{ examples: TrainingExample[]; count: number }>({
     queryKey: ["/api/projects", projectId, "training"],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${projectId}/generate-training`, {
@@ -108,7 +118,11 @@ export default function ProjectDetailPage() {
     enabled: !!projectId,
   });
 
-  const { data: evalsData, isLoading: evalsLoading, isError: evalsError } = useQuery<{ suites: EvalSuite[]; totalSuites: number }>({
+  const {
+    data: evalsData,
+    isLoading: evalsLoading,
+    isError: evalsError,
+  } = useQuery<{ suites: EvalSuite[]; totalSuites: number }>({
     queryKey: ["/api/projects", projectId, "evals"],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${projectId}/generate-evals`, {
@@ -172,10 +186,14 @@ export default function ProjectDetailPage() {
     },
   });
 
-  const { data: versionsData } = useQuery<{ id: string; version: number; systemPrompt: string; changeSummary: string | null }[]>({
+  const { data: versionsData } = useQuery<
+    { id: string; version: number; systemPrompt: string; changeSummary: string | null }[]
+  >({
     queryKey: ["/api/projects", projectId, "versions"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/versions`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/versions`, {
+        credentials: "include",
+      });
       if (!response.ok) return [];
       const data = await response.json();
       return data.versions || [];
@@ -206,7 +224,9 @@ export default function ProjectDetailPage() {
   const { data: autopsyData, isLoading: autopsyLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "autopsy"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/autopsy`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/autopsy`, {
+        credentials: "include",
+      });
       if (!response.ok) return { autopsies: [] };
       return response.json();
     },
@@ -216,7 +236,9 @@ export default function ProjectDetailPage() {
   const { data: neuralPromptData, isLoading: neuralPromptLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "neural", "prompt-optimizer"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/neural/prompt-optimizer`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/neural/prompt-optimizer`, {
+        credentials: "include",
+      });
       if (!response.ok) return { analyses: [] };
       return response.json();
     },
@@ -226,7 +248,9 @@ export default function ProjectDetailPage() {
   const { data: neuralSchemaData, isLoading: neuralSchemaLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "neural", "schema-enhancer"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/neural/schema-enhancer`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/neural/schema-enhancer`, {
+        credentials: "include",
+      });
       if (!response.ok) return { analyses: [] };
       return response.json();
     },
@@ -236,7 +260,9 @@ export default function ProjectDetailPage() {
   const { data: neuralQualityData, isLoading: neuralQualityLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "neural", "quality-gate"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/neural/quality-gate`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/neural/quality-gate`, {
+        credentials: "include",
+      });
       if (!response.ok) return { scores: [], averages: {} };
       return response.json();
     },
@@ -246,7 +272,9 @@ export default function ProjectDetailPage() {
   const { data: neuralAugmentData, isLoading: neuralAugmentLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "neural", "training-augment"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/neural/training-augment`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/neural/training-augment`, {
+        credentials: "include",
+      });
       if (!response.ok) return { jobs: [], strategies: [] };
       return response.json();
     },
@@ -256,7 +284,9 @@ export default function ProjectDetailPage() {
   const { data: neuralAnomalyData, isLoading: neuralAnomalyLoading } = useQuery({
     queryKey: ["/api/projects", projectId, "neural", "anomalies"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/neural/anomalies`, { credentials: "include" });
+      const response = await fetch(`/api/projects/${projectId}/neural/anomalies`, {
+        credentials: "include",
+      });
       if (!response.ok) return { anomalies: [] };
       return response.json();
     },
@@ -340,10 +370,17 @@ export default function ProjectDetailPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "neural", "prompt-optimizer"] });
-      toast({ title: "Instructions improved", description: `${data.improvementScore}% better than before` });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/projects", projectId, "neural", "prompt-optimizer"],
+      });
+      toast({
+        title: "Instructions improved",
+        description: `${data.improvementScore}% better than before`,
+      });
     },
-    onError: () => { toast({ title: "Instruction improvement failed", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Instruction improvement failed", variant: "destructive" });
+    },
   });
 
   const applyPromptMutation = useMutation({
@@ -361,7 +398,9 @@ export default function ProjectDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
       toast({ title: "Improved instructions applied", description: "New version created" });
     },
-    onError: () => { toast({ title: "Failed to apply improvements", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Failed to apply improvements", variant: "destructive" });
+    },
   });
 
   const neuralSchemaMutation = useMutation({
@@ -374,10 +413,14 @@ export default function ProjectDetailPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "neural", "schema-enhancer"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/projects", projectId, "neural", "schema-enhancer"],
+      });
       toast({ title: "Response format improved", description: `Change risk: ${data.riskLevel}` });
     },
-    onError: () => { toast({ title: "Format improvement failed", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Format improvement failed", variant: "destructive" });
+    },
   });
 
   const applySchemaMutation = useMutation({
@@ -395,7 +438,9 @@ export default function ProjectDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
       toast({ title: "Improved format applied", description: "New version created" });
     },
-    onError: () => { toast({ title: "Failed to apply enhancement", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Failed to apply enhancement", variant: "destructive" });
+    },
   });
 
   const neuralAugmentMutation = useMutation({
@@ -410,11 +455,18 @@ export default function ProjectDetailPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "neural", "training-augment"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/projects", projectId, "neural", "training-augment"],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "training"] });
-      toast({ title: "New training examples created", description: `${data.approved} good examples kept out of ${data.generated} generated` });
+      toast({
+        title: "New training examples created",
+        description: `${data.approved} good examples kept out of ${data.generated} generated`,
+      });
     },
-    onError: () => { toast({ title: "Training example creation failed", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Training example creation failed", variant: "destructive" });
+    },
   });
 
   const neuralAnomalyMutation = useMutation({
@@ -429,10 +481,17 @@ export default function ProjectDetailPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "neural", "anomalies"] });
-      toast({ title: "Issue scan complete", description: data.summary || `Found ${data.anomalies?.length || 0} recurring issues` });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/projects", projectId, "neural", "anomalies"],
+      });
+      toast({
+        title: "Issue scan complete",
+        description: data.summary || `Found ${data.anomalies?.length || 0} recurring issues`,
+      });
     },
-    onError: () => { toast({ title: "Issue scan failed", variant: "destructive" }); },
+    onError: () => {
+      toast({ title: "Issue scan failed", variant: "destructive" });
+    },
   });
 
   const copyEndpoint = () => {
@@ -451,7 +510,7 @@ export default function ProjectDetailPage() {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to download spec");
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -461,7 +520,7 @@ export default function ProjectDetailPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast({
         title: "Downloaded",
         description: "API blueprint downloaded successfully",
@@ -492,7 +551,9 @@ export default function ProjectDetailPage() {
       <div className="text-center py-12" data-testid="text-project-not-found">
         <h2 className="text-xl font-semibold mb-2">Project not found</h2>
         <Link href="/dashboard/projects">
-          <Button variant="outline" data-testid="button-back-to-projects">Back to Projects</Button>
+          <Button variant="outline" data-testid="button-back-to-projects">
+            Back to Projects
+          </Button>
         </Link>
       </div>
     );
@@ -511,8 +572,13 @@ export default function ProjectDetailPage() {
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold truncate" data-testid="text-project-name">{project.name}</h1>
-            <Badge variant={project.status === "deployed" ? "default" : "secondary"} data-testid="badge-project-status">
+            <h1 className="text-3xl font-bold truncate" data-testid="text-project-name">
+              {project.name}
+            </h1>
+            <Badge
+              variant={project.status === "deployed" ? "default" : "secondary"}
+              data-testid="badge-project-status"
+            >
               {project.status === "deployed" ? (
                 <CheckCircle2 className="w-3 h-3 mr-1" />
               ) : (
@@ -521,11 +587,23 @@ export default function ProjectDetailPage() {
               {project.status}
             </Badge>
           </div>
-          <p className="text-muted-foreground truncate" data-testid="text-project-description">{project.description || "No description"}</p>
+          <p className="text-muted-foreground truncate" data-testid="text-project-description">
+            {project.description || "No description"}
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" className="gap-2" onClick={downloadOpenApiSpec} disabled={isExporting} data-testid="button-export-openapi">
-            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={downloadOpenApiSpec}
+            disabled={isExporting}
+            data-testid="button-export-openapi"
+          >
+            {isExporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
             {isExporting ? "Exporting..." : "Export API Blueprint"}
           </Button>
           <Button variant="outline" className="gap-2" data-testid="button-run-evals">
@@ -552,7 +630,12 @@ export default function ProjectDetailPage() {
             <code className="flex-1 text-sm break-all" data-testid="text-api-endpoint">
               POST {apiOrigin}/api/runtime/{projectId}/main
             </code>
-            <Button variant="ghost" size="icon" onClick={copyEndpoint} data-testid="button-copy-endpoint">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={copyEndpoint}
+              data-testid="button-copy-endpoint"
+            >
               <Copy className="w-4 h-4" />
             </Button>
           </div>
@@ -565,15 +648,31 @@ export default function ProjectDetailPage() {
             <Sliders className="w-4 h-4 mr-1" />
             Instrument
           </TabsTrigger>
-          <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-          <TabsTrigger value="schema" data-testid="tab-schema">Schema</TabsTrigger>
+          <TabsTrigger value="overview" data-testid="tab-overview">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="schema" data-testid="tab-schema">
+            Schema
+          </TabsTrigger>
           <TabsTrigger value="training" data-testid="tab-training">
-            Training Data {hasTrainingData && <Badge variant="secondary" className="ml-1">{trainingData.count}</Badge>}
+            Training Data{" "}
+            {hasTrainingData && (
+              <Badge variant="secondary" className="ml-1">
+                {trainingData.count}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="evals" data-testid="tab-evals">
-            Evaluations {hasEvals && <Badge variant="secondary" className="ml-1">{evalsData.totalSuites}</Badge>}
+            Evaluations{" "}
+            {hasEvals && (
+              <Badge variant="secondary" className="ml-1">
+                {evalsData.totalSuites}
+              </Badge>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="versions" data-testid="tab-versions">Versions</TabsTrigger>
+          <TabsTrigger value="versions" data-testid="tab-versions">
+            Versions
+          </TabsTrigger>
           <TabsTrigger value="chaos" data-testid="tab-chaos" className="gap-1">
             <Zap className="w-4 h-4" />
             Chaos
@@ -593,8 +692,8 @@ export default function ProjectDetailPage() {
         </TabsList>
 
         <TabsContent value="instrument">
-          <ApiInstrument 
-            projectId={projectId} 
+          <ApiInstrument
+            projectId={projectId}
             initialPrompt={project.systemPrompt}
             onComplete={(data) => {
               toast({
@@ -609,26 +708,38 @@ export default function ProjectDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">API Calls (24h)</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  API Calls (24h)
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-api-calls-24h">0</div>
+                <div className="text-2xl font-bold" data-testid="text-api-calls-24h">
+                  0
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Test Pass Rate</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Test Pass Rate
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-eval-pass-rate">—</div>
+                <div className="text-2xl font-bold" data-testid="text-eval-pass-rate">
+                  —
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Current Version</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Current Version
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold" data-testid="text-current-version">v1</div>
+                <div className="text-2xl font-bold" data-testid="text-current-version">
+                  v1
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -638,7 +749,10 @@ export default function ProjectDetailPage() {
               <CardTitle>System Prompt</CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="p-4 bg-muted rounded-lg overflow-auto text-sm whitespace-pre-wrap" data-testid="text-system-prompt">
+              <pre
+                className="p-4 bg-muted rounded-lg overflow-auto text-sm whitespace-pre-wrap"
+                data-testid="text-system-prompt"
+              >
                 {project.systemPrompt}
               </pre>
             </CardContent>
@@ -649,10 +763,16 @@ export default function ProjectDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Output Schema</CardTitle>
-              <CardDescription>This defines the exact format your API's responses will follow -- it ensures every answer comes back organized the same way</CardDescription>
+              <CardDescription>
+                This defines the exact format your API's responses will follow -- it ensures every
+                answer comes back organized the same way
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <pre className="p-4 bg-muted rounded-lg overflow-auto text-sm" data-testid="text-output-schema">
+              <pre
+                className="p-4 bg-muted rounded-lg overflow-auto text-sm"
+                data-testid="text-output-schema"
+              >
                 {JSON.stringify(project.outputSchema, null, 2)}
               </pre>
             </CardContent>
@@ -668,17 +788,25 @@ export default function ProjectDetailPage() {
                     <Sparkles className="w-5 h-5" />
                     Training Data
                   </CardTitle>
-                  <CardDescription>These are example conversations that teach your API how to respond -- like showing someone how to do a job before they start</CardDescription>
+                  <CardDescription>
+                    These are example conversations that teach your API how to respond -- like
+                    showing someone how to do a job before they start
+                  </CardDescription>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <Link href={`/dashboard/projects/${projectId}/training`}>
-                    <Button variant="default" size="sm" className="bg-[#7BA3AC] hover:bg-[#6B939C]" data-testid="button-manage-training">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="bg-[#7BA3AC] hover:bg-[#6B939C]"
+                      data-testid="button-manage-training"
+                    >
                       Manage Training Data
                     </Button>
                   </Link>
                   {hasTrainingData && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => generateTrainingMutation.mutate()}
                       disabled={generateTrainingMutation.isPending}
@@ -702,20 +830,35 @@ export default function ProjectDetailPage() {
                   <Skeleton className="h-24 w-full" />
                 </div>
               ) : trainingError ? (
-                <div className="text-center py-8 text-destructive" data-testid="text-training-error">
+                <div
+                  className="text-center py-8 text-destructive"
+                  data-testid="text-training-error"
+                >
                   Failed to load training data. Please try again.
                 </div>
               ) : hasTrainingData ? (
                 <div className="space-y-4" data-testid="container-training-examples">
                   {trainingData.examples.map((example) => (
-                    <div key={example.id} className="p-4 border rounded-lg space-y-2" data-testid={`card-training-example-${example.id}`}>
+                    <div
+                      key={example.id}
+                      className="p-4 border rounded-lg space-y-2"
+                      data-testid={`card-training-example-${example.id}`}
+                    >
                       <div>
                         <span className="text-sm font-medium text-muted-foreground">Input:</span>
-                        <p className="text-sm mt-1" data-testid={`text-training-input-${example.id}`}>{example.input}</p>
+                        <p
+                          className="text-sm mt-1"
+                          data-testid={`text-training-input-${example.id}`}
+                        >
+                          {example.input}
+                        </p>
                       </div>
                       <div>
                         <span className="text-sm font-medium text-muted-foreground">Output:</span>
-                        <pre className="text-sm mt-1 p-2 bg-muted rounded overflow-auto" data-testid={`text-training-output-${example.id}`}>
+                        <pre
+                          className="text-sm mt-1 p-2 bg-muted rounded overflow-auto"
+                          data-testid={`text-training-output-${example.id}`}
+                        >
                           {JSON.stringify(example.output, null, 2)}
                         </pre>
                       </div>
@@ -727,10 +870,11 @@ export default function ProjectDetailPage() {
                   <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No training data yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    Add some example conversations so your API knows exactly how to respond. We can generate them for you automatically.
+                    Add some example conversations so your API knows exactly how to respond. We can
+                    generate them for you automatically.
                   </p>
-                  <Button 
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" 
+                  <Button
+                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                     onClick={() => generateTrainingMutation.mutate()}
                     disabled={generateTrainingMutation.isPending}
                     data-testid="button-generate-training"
@@ -740,7 +884,9 @@ export default function ProjectDetailPage() {
                     ) : (
                       <Sparkles className="w-4 h-4" />
                     )}
-                    {generateTrainingMutation.isPending ? "Generating..." : "Generate Training Data"}
+                    {generateTrainingMutation.isPending
+                      ? "Generating..."
+                      : "Generate Training Data"}
                   </Button>
                 </div>
               )}
@@ -757,11 +903,14 @@ export default function ProjectDetailPage() {
                     <BarChart3 className="w-5 h-5" />
                     Evaluations
                   </CardTitle>
-                  <CardDescription>Automatic tests that check if your API gives the right answers -- we create tricky questions so you can catch problems early</CardDescription>
+                  <CardDescription>
+                    Automatic tests that check if your API gives the right answers -- we create
+                    tricky questions so you can catch problems early
+                  </CardDescription>
                 </div>
                 {hasEvals && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => generateEvalsMutation.mutate()}
                     disabled={generateEvalsMutation.isPending}
@@ -790,17 +939,30 @@ export default function ProjectDetailPage() {
               ) : hasEvals ? (
                 <div className="space-y-4" data-testid="container-eval-suites">
                   {evalsData.suites.map((suite) => (
-                    <div key={suite.id} className="p-4 border rounded-lg space-y-3" data-testid={`card-eval-suite-${suite.id}`}>
+                    <div
+                      key={suite.id}
+                      className="p-4 border rounded-lg space-y-3"
+                      data-testid={`card-eval-suite-${suite.id}`}
+                    >
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div>
-                          <h4 className="font-medium" data-testid={`text-suite-name-${suite.id}`}>{suite.name}</h4>
+                          <h4 className="font-medium" data-testid={`text-suite-name-${suite.id}`}>
+                            {suite.name}
+                          </h4>
                           <p className="text-sm text-muted-foreground">{suite.description}</p>
                         </div>
-                        <Badge variant="outline" data-testid={`badge-suite-cases-${suite.id}`}>{suite.totalCases} cases</Badge>
+                        <Badge variant="outline" data-testid={`badge-suite-cases-${suite.id}`}>
+                          {suite.totalCases} cases
+                        </Badge>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {Object.entries(suite.categoryCounts).map(([category, count]) => (
-                          <Badge key={category} variant="secondary" className="text-xs" data-testid={`badge-category-${suite.id}-${category}`}>
+                          <Badge
+                            key={category}
+                            variant="secondary"
+                            className="text-xs"
+                            data-testid={`badge-category-${suite.id}-${category}`}
+                          >
                             {category}: {count}
                           </Badge>
                         ))}
@@ -813,10 +975,11 @@ export default function ProjectDetailPage() {
                   <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No evaluations yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    We'll create tricky test questions to make sure your API handles unexpected inputs before real people use it
+                    We'll create tricky test questions to make sure your API handles unexpected
+                    inputs before real people use it
                   </p>
-                  <Button 
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" 
+                  <Button
+                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                     onClick={() => generateEvalsMutation.mutate()}
                     disabled={generateEvalsMutation.isPending}
                     data-testid="button-generate-evals"
@@ -841,34 +1004,55 @@ export default function ProjectDetailPage() {
                 <GitBranch className="w-5 h-5" />
                 Version History
               </CardTitle>
-              <CardDescription>Every change you make is saved as a version -- you can always go back to an earlier one if something isn't working</CardDescription>
+              <CardDescription>
+                Every change you make is saved as a version -- you can always go back to an earlier
+                one if something isn't working
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4" data-testid="container-versions">
                 {versionsData && versionsData.length > 0 ? (
                   versionsData.map((v, i) => (
-                    <div key={v.id} className="flex items-center justify-between gap-2 p-4 border rounded-lg flex-wrap" data-testid={`card-version-${v.version}`}>
+                    <div
+                      key={v.id}
+                      className="flex items-center justify-between gap-2 p-4 border rounded-lg flex-wrap"
+                      data-testid={`card-version-${v.version}`}
+                    >
                       <div className="flex items-center gap-3">
-                        <Badge data-testid={`badge-version-number-${v.version}`}>v{v.version}</Badge>
+                        <Badge data-testid={`badge-version-number-${v.version}`}>
+                          v{v.version}
+                        </Badge>
                         <div>
-                          <p className="font-medium" data-testid={`text-version-name-${v.version}`}>{v.changeSummary || "Initial version"}</p>
+                          <p className="font-medium" data-testid={`text-version-name-${v.version}`}>
+                            {v.changeSummary || "Initial version"}
+                          </p>
                         </div>
                       </div>
                       {i === 0 && <Badge variant="secondary">Current</Badge>}
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center justify-between gap-2 p-4 border rounded-lg flex-wrap" data-testid="card-version-1">
+                  <div
+                    className="flex items-center justify-between gap-2 p-4 border rounded-lg flex-wrap"
+                    data-testid="card-version-1"
+                  >
                     <div className="flex items-center gap-3">
                       <Badge data-testid="badge-version-number-1">v1</Badge>
                       <div>
-                        <p className="font-medium" data-testid="text-version-name-1">Initial version</p>
-                        <p className="text-sm text-muted-foreground" data-testid="text-version-date-1">
+                        <p className="font-medium" data-testid="text-version-name-1">
+                          Initial version
+                        </p>
+                        <p
+                          className="text-sm text-muted-foreground"
+                          data-testid="text-version-date-1"
+                        >
                           Created {new Date(project.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <Badge variant="secondary" data-testid="badge-version-status-1">Current</Badge>
+                    <Badge variant="secondary" data-testid="badge-version-status-1">
+                      Current
+                    </Badge>
                   </div>
                 )}
               </div>
@@ -885,7 +1069,11 @@ export default function ProjectDetailPage() {
                     <Zap className="w-5 h-5" />
                     Chaos Mode
                   </CardTitle>
-                  <CardDescription>Think of this as a stress test -- we throw the most confusing, unusual, and tricky inputs at your API to see if it breaks, so you can fix weak spots before real users find them</CardDescription>
+                  <CardDescription>
+                    Think of this as a stress test -- we throw the most confusing, unusual, and
+                    tricky inputs at your API to see if it breaks, so you can fix weak spots before
+                    real users find them
+                  </CardDescription>
                 </div>
                 <Button
                   className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
@@ -906,7 +1094,9 @@ export default function ProjectDetailPage() {
               {chaosMutation.isPending && (
                 <div className="text-center py-8 space-y-4" data-testid="container-chaos-running">
                   <Loader2 className="w-12 h-12 mx-auto animate-spin text-muted-foreground" />
-                  <p className="text-muted-foreground">Creating and running 20 tough test inputs...</p>
+                  <p className="text-muted-foreground">
+                    Creating and running 20 tough test inputs...
+                  </p>
                   <p className="text-sm text-muted-foreground">This may take a minute</p>
                 </div>
               )}
@@ -914,66 +1104,128 @@ export default function ProjectDetailPage() {
                 <Skeleton className="h-32 w-full" />
               ) : chaosData?.runs?.length > 0 ? (
                 <div className="space-y-6" data-testid="container-chaos-results">
-                  {chaosData.runs.map((run: { id: string; resilienceScore: number | null; totalInputs: number; passedInputs: number; failedInputs: number; status: string; categories: Record<string, { total: number; passed: number; failed: number }> | null; results: { input: string; category: string; passed: boolean; error?: string; latencyMs: number }[] | null; createdAt: string }) => (
-                    <div key={run.id} className="space-y-4" data-testid={`card-chaos-run-${run.id}`}>
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-3">
-                          {run.resilienceScore !== null && run.resilienceScore >= 80 ? (
-                            <ShieldCheck className="w-8 h-8 text-green-500" />
-                          ) : run.resilienceScore !== null && run.resilienceScore >= 50 ? (
-                            <Shield className="w-8 h-8 text-yellow-500" />
-                          ) : (
-                            <ShieldAlert className="w-8 h-8 text-red-500" />
-                          )}
-                          <div>
-                            <p className="text-2xl font-bold" data-testid={`text-resilience-score-${run.id}`}>
-                              {run.resilienceScore ?? 0}% Toughness
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {run.passedInputs}/{run.totalInputs} tough inputs handled
-                            </p>
+                  {chaosData.runs.map(
+                    (run: {
+                      id: string;
+                      resilienceScore: number | null;
+                      totalInputs: number;
+                      passedInputs: number;
+                      failedInputs: number;
+                      status: string;
+                      categories: Record<
+                        string,
+                        { total: number; passed: number; failed: number }
+                      > | null;
+                      results:
+                        | {
+                            input: string;
+                            category: string;
+                            passed: boolean;
+                            error?: string;
+                            latencyMs: number;
+                          }[]
+                        | null;
+                      createdAt: string;
+                    }) => (
+                      <div
+                        key={run.id}
+                        className="space-y-4"
+                        data-testid={`card-chaos-run-${run.id}`}
+                      >
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            {run.resilienceScore !== null && run.resilienceScore >= 80 ? (
+                              <ShieldCheck className="w-8 h-8 text-green-500" />
+                            ) : run.resilienceScore !== null && run.resilienceScore >= 50 ? (
+                              <Shield className="w-8 h-8 text-yellow-500" />
+                            ) : (
+                              <ShieldAlert className="w-8 h-8 text-red-500" />
+                            )}
+                            <div>
+                              <p
+                                className="text-2xl font-bold"
+                                data-testid={`text-resilience-score-${run.id}`}
+                              >
+                                {run.resilienceScore ?? 0}% Toughness
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {run.passedInputs}/{run.totalInputs} tough inputs handled
+                              </p>
+                            </div>
                           </div>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(run.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(run.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      {run.categories && (
-                        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                          {Object.entries(run.categories).map(([cat, stats]) => (
-                            <div key={cat} className="flex items-center justify-between gap-2 p-3 border rounded-lg">
-                              <span className="text-sm font-medium capitalize">{cat.replace(/_/g, " ")}</span>
-                              <Badge variant={stats.failed === 0 ? "default" : "destructive"}>
-                                {stats.passed}/{stats.total}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {run.results && run.results.filter((r: { passed: boolean }) => !r.passed).length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium text-destructive">Failed Inputs:</p>
-                          {run.results.filter((r: { passed: boolean }) => !r.passed).slice(0, 5).map((r: { input: string; category: string; error?: string; latencyMs: number }, i: number) => (
-                            <div key={i} className="p-3 border border-destructive/20 rounded-lg space-y-1">
-                              <div className="flex items-center justify-between gap-2 flex-wrap">
-                                <Badge variant="secondary" className="text-xs">{r.category.replace(/_/g, " ")}</Badge>
-                                <span className="text-xs text-muted-foreground">{r.latencyMs}ms</span>
+                        {run.categories && (
+                          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                            {Object.entries(run.categories).map(([cat, stats]) => (
+                              <div
+                                key={cat}
+                                className="flex items-center justify-between gap-2 p-3 border rounded-lg"
+                              >
+                                <span className="text-sm font-medium capitalize">
+                                  {cat.replace(/_/g, " ")}
+                                </span>
+                                <Badge variant={stats.failed === 0 ? "default" : "destructive"}>
+                                  {stats.passed}/{stats.total}
+                                </Badge>
                               </div>
-                              <p className="text-sm font-mono break-all">{r.input.substring(0, 200)}{r.input.length > 200 ? "..." : ""}</p>
-                              {r.error && <p className="text-xs text-destructive">{r.error}</p>}
+                            ))}
+                          </div>
+                        )}
+                        {run.results &&
+                          run.results.filter((r: { passed: boolean }) => !r.passed).length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-destructive">Failed Inputs:</p>
+                              {run.results
+                                .filter((r: { passed: boolean }) => !r.passed)
+                                .slice(0, 5)
+                                .map(
+                                  (
+                                    r: {
+                                      input: string;
+                                      category: string;
+                                      error?: string;
+                                      latencyMs: number;
+                                    },
+                                    i: number,
+                                  ) => (
+                                    <div
+                                      key={i}
+                                      className="p-3 border border-destructive/20 rounded-lg space-y-1"
+                                    >
+                                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                                        <Badge variant="secondary" className="text-xs">
+                                          {r.category.replace(/_/g, " ")}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          {r.latencyMs}ms
+                                        </span>
+                                      </div>
+                                      <p className="text-sm font-mono break-all">
+                                        {r.input.substring(0, 200)}
+                                        {r.input.length > 200 ? "..." : ""}
+                                      </p>
+                                      {r.error && (
+                                        <p className="text-xs text-destructive">{r.error}</p>
+                                      )}
+                                    </div>
+                                  ),
+                                )}
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                          )}
+                      </div>
+                    ),
+                  )}
                 </div>
               ) : !chaosMutation.isPending ? (
                 <div className="text-center py-8" data-testid="text-chaos-empty">
                   <Zap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No chaos tests yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    Hit the button above to throw tough, unusual inputs at your API and see how well it holds up
+                    Hit the button above to throw tough, unusual inputs at your API and see how well
+                    it holds up
                   </p>
                 </div>
               ) : null}
@@ -988,7 +1240,11 @@ export default function ProjectDetailPage() {
                 <Dna className="w-5 h-5" />
                 Prompt Breeding
               </CardTitle>
-              <CardDescription>Pick two versions of your API instructions and mix them together -- the AI keeps the best parts of each and creates an improved version, like combining two winning recipes</CardDescription>
+              <CardDescription>
+                Pick two versions of your API instructions and mix them together -- the AI keeps the
+                best parts of each and creates an improved version, like combining two winning
+                recipes
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2">
@@ -1000,7 +1256,9 @@ export default function ProjectDetailPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {versionsData?.map((v) => (
-                        <SelectItem key={v.id} value={v.id}>v{v.version} - {v.changeSummary || "Initial"}</SelectItem>
+                        <SelectItem key={v.id} value={v.id}>
+                          v{v.version} - {v.changeSummary || "Initial"}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1013,7 +1271,9 @@ export default function ProjectDetailPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {versionsData?.map((v) => (
-                        <SelectItem key={v.id} value={v.id}>v{v.version} - {v.changeSummary || "Initial"}</SelectItem>
+                        <SelectItem key={v.id} value={v.id}>
+                          v{v.version} - {v.changeSummary || "Initial"}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1022,7 +1282,12 @@ export default function ProjectDetailPage() {
               <Button
                 className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                 onClick={() => breedMutation.mutate()}
-                disabled={breedMutation.isPending || !breedVersionA || !breedVersionB || breedVersionA === breedVersionB}
+                disabled={
+                  breedMutation.isPending ||
+                  !breedVersionA ||
+                  !breedVersionB ||
+                  breedVersionA === breedVersionB
+                }
                 data-testid="button-breed"
               >
                 {breedMutation.isPending ? (
@@ -1036,7 +1301,9 @@ export default function ProjectDetailPage() {
               {breedMutation.isPending && (
                 <div className="text-center py-6 space-y-3">
                   <Loader2 className="w-10 h-10 mx-auto animate-spin text-muted-foreground" />
-                  <p className="text-muted-foreground">Analyzing parent prompts, breeding offspring, running evals...</p>
+                  <p className="text-muted-foreground">
+                    Analyzing parent prompts, breeding offspring, running evals...
+                  </p>
                 </div>
               )}
 
@@ -1044,36 +1311,64 @@ export default function ProjectDetailPage() {
                 <Skeleton className="h-32 w-full" />
               ) : breedData?.breeds?.length > 0 ? (
                 <div className="space-y-4" data-testid="container-breed-results">
-                  {breedData.breeds.map((breed: { id: string; parentAScore: number | null; parentBScore: number | null; offspringScore: number | null; reasoning: string | null; offspringPrompt: string | null; status: string; createdAt: string }) => (
-                    <div key={breed.id} className="p-4 border rounded-lg space-y-4" data-testid={`card-breed-${breed.id}`}>
-                      <div className="grid gap-3 md:grid-cols-3">
-                        <div className="text-center p-3 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground mb-1">Parent A</p>
-                          <p className="text-xl font-bold">{breed.parentAScore ?? 0}%</p>
+                  {breedData.breeds.map(
+                    (breed: {
+                      id: string;
+                      parentAScore: number | null;
+                      parentBScore: number | null;
+                      offspringScore: number | null;
+                      reasoning: string | null;
+                      offspringPrompt: string | null;
+                      status: string;
+                      createdAt: string;
+                    }) => (
+                      <div
+                        key={breed.id}
+                        className="p-4 border rounded-lg space-y-4"
+                        data-testid={`card-breed-${breed.id}`}
+                      >
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <div className="text-center p-3 bg-muted rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">Parent A</p>
+                            <p className="text-xl font-bold">{breed.parentAScore ?? 0}%</p>
+                          </div>
+                          <div className="text-center p-3 bg-muted rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">Parent B</p>
+                            <p className="text-xl font-bold">{breed.parentBScore ?? 0}%</p>
+                          </div>
+                          <div
+                            className="text-center p-3 rounded-lg"
+                            style={{
+                              backgroundColor:
+                                (breed.offspringScore ?? 0) >
+                                Math.max(breed.parentAScore ?? 0, breed.parentBScore ?? 0)
+                                  ? "rgba(34, 197, 94, 0.1)"
+                                  : "rgba(239, 68, 68, 0.1)",
+                            }}
+                          >
+                            <p className="text-sm text-muted-foreground mb-1">Offspring</p>
+                            <p className="text-xl font-bold">{breed.offspringScore ?? 0}%</p>
+                          </div>
                         </div>
-                        <div className="text-center p-3 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground mb-1">Parent B</p>
-                          <p className="text-xl font-bold">{breed.parentBScore ?? 0}%</p>
-                        </div>
-                        <div className="text-center p-3 rounded-lg" style={{ backgroundColor: (breed.offspringScore ?? 0) > Math.max(breed.parentAScore ?? 0, breed.parentBScore ?? 0) ? "rgba(34, 197, 94, 0.1)" : "rgba(239, 68, 68, 0.1)" }}>
-                          <p className="text-sm text-muted-foreground mb-1">Offspring</p>
-                          <p className="text-xl font-bold">{breed.offspringScore ?? 0}%</p>
-                        </div>
+                        {breed.reasoning && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Breeding Reasoning</p>
+                            <p className="text-sm text-muted-foreground">{breed.reasoning}</p>
+                          </div>
+                        )}
+                        {breed.offspringPrompt && (
+                          <details className="text-sm">
+                            <summary className="cursor-pointer font-medium hover:underline">
+                              View offspring prompt
+                            </summary>
+                            <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">
+                              {breed.offspringPrompt}
+                            </pre>
+                          </details>
+                        )}
                       </div>
-                      {breed.reasoning && (
-                        <div>
-                          <p className="text-sm font-medium mb-1">Breeding Reasoning</p>
-                          <p className="text-sm text-muted-foreground">{breed.reasoning}</p>
-                        </div>
-                      )}
-                      {breed.offspringPrompt && (
-                        <details className="text-sm">
-                          <summary className="cursor-pointer font-medium hover:underline">View offspring prompt</summary>
-                          <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">{breed.offspringPrompt}</pre>
-                        </details>
-                      )}
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               ) : !breedMutation.isPending ? (
                 <div className="text-center py-6" data-testid="text-breed-empty">
@@ -1097,7 +1392,10 @@ export default function ProjectDetailPage() {
                 <Skull className="w-5 h-5" />
                 API Autopsy
               </CardTitle>
-              <CardDescription>Something went wrong with your API? Paste what you sent and the error you got -- we'll investigate exactly what happened and tell you how to fix it</CardDescription>
+              <CardDescription>
+                Something went wrong with your API? Paste what you sent and the error you got --
+                we'll investigate exactly what happened and tell you how to fix it
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -1147,80 +1445,122 @@ export default function ProjectDetailPage() {
                 <Skeleton className="h-32 w-full" />
               ) : autopsyData?.autopsies?.length > 0 ? (
                 <div className="space-y-4" data-testid="container-autopsy-results">
-                  {autopsyData.autopsies.map((a: { id: string; failedInput: string; rootCause: string | null; causeChain: string[] | null; contributingFactors: string[] | null; suggestedFix: string | null; fixedPrompt: string | null; severity: string; similarFailures: number; createdAt: string }) => (
-                    <div key={a.id} className="p-4 border rounded-lg space-y-4" data-testid={`card-autopsy-${a.id}`}>
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={a.severity === "critical" ? "destructive" : a.severity === "high" ? "destructive" : "secondary"}>
-                            {a.severity === "critical" && <AlertTriangle className="w-3 h-3 mr-1" />}
-                            {a.severity}
-                          </Badge>
-                          {a.similarFailures > 0 && (
-                            <span className="text-xs text-muted-foreground">{a.similarFailures} similar failures found</span>
-                          )}
-                        </div>
-                        <span className="text-xs text-muted-foreground">{new Date(a.createdAt).toLocaleDateString()}</span>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-medium mb-1">Failed Input</p>
-                        <p className="text-sm font-mono p-2 bg-muted rounded-lg break-all">{a.failedInput.substring(0, 300)}</p>
-                      </div>
-
-                      {a.rootCause && (
-                        <div>
-                          <p className="text-sm font-medium mb-1">Root Cause</p>
-                          <p className="text-sm text-muted-foreground">{a.rootCause}</p>
-                        </div>
-                      )}
-
-                      {a.causeChain && a.causeChain.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium mb-2">Cause Chain</p>
-                          <div className="space-y-1">
-                            {a.causeChain.map((step: string, i: number) => (
-                              <div key={i} className="flex items-start gap-2">
-                                <span className="text-xs font-mono text-muted-foreground mt-0.5">{i + 1}.</span>
-                                <p className="text-sm">{step}</p>
-                              </div>
-                            ))}
+                  {autopsyData.autopsies.map(
+                    (a: {
+                      id: string;
+                      failedInput: string;
+                      rootCause: string | null;
+                      causeChain: string[] | null;
+                      contributingFactors: string[] | null;
+                      suggestedFix: string | null;
+                      fixedPrompt: string | null;
+                      severity: string;
+                      similarFailures: number;
+                      createdAt: string;
+                    }) => (
+                      <div
+                        key={a.id}
+                        className="p-4 border rounded-lg space-y-4"
+                        data-testid={`card-autopsy-${a.id}`}
+                      >
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={
+                                a.severity === "critical"
+                                  ? "destructive"
+                                  : a.severity === "high"
+                                    ? "destructive"
+                                    : "secondary"
+                              }
+                            >
+                              {a.severity === "critical" && (
+                                <AlertTriangle className="w-3 h-3 mr-1" />
+                              )}
+                              {a.severity}
+                            </Badge>
+                            {a.similarFailures > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                {a.similarFailures} similar failures found
+                              </span>
+                            )}
                           </div>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(a.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
-                      )}
 
-                      {a.contributingFactors && a.contributingFactors.length > 0 && (
                         <div>
-                          <p className="text-sm font-medium mb-1">Contributing Factors</p>
-                          <div className="flex flex-wrap gap-2">
-                            {a.contributingFactors.map((f: string, i: number) => (
-                              <Badge key={i} variant="outline">{f}</Badge>
-                            ))}
+                          <p className="text-sm font-medium mb-1">Failed Input</p>
+                          <p className="text-sm font-mono p-2 bg-muted rounded-lg break-all">
+                            {a.failedInput.substring(0, 300)}
+                          </p>
+                        </div>
+
+                        {a.rootCause && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Root Cause</p>
+                            <p className="text-sm text-muted-foreground">{a.rootCause}</p>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {a.suggestedFix && (
-                        <div>
-                          <p className="text-sm font-medium mb-1">Suggested Fix</p>
-                          <p className="text-sm text-muted-foreground">{a.suggestedFix}</p>
-                        </div>
-                      )}
+                        {a.causeChain && a.causeChain.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-2">Cause Chain</p>
+                            <div className="space-y-1">
+                              {a.causeChain.map((step: string, i: number) => (
+                                <div key={i} className="flex items-start gap-2">
+                                  <span className="text-xs font-mono text-muted-foreground mt-0.5">
+                                    {i + 1}.
+                                  </span>
+                                  <p className="text-sm">{step}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                      {a.fixedPrompt && (
-                        <details className="text-sm">
-                          <summary className="cursor-pointer font-medium hover:underline">View corrected prompt</summary>
-                          <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">{a.fixedPrompt}</pre>
-                        </details>
-                      )}
-                    </div>
-                  ))}
+                        {a.contributingFactors && a.contributingFactors.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Contributing Factors</p>
+                            <div className="flex flex-wrap gap-2">
+                              {a.contributingFactors.map((f: string, i: number) => (
+                                <Badge key={i} variant="outline">
+                                  {f}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {a.suggestedFix && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Suggested Fix</p>
+                            <p className="text-sm text-muted-foreground">{a.suggestedFix}</p>
+                          </div>
+                        )}
+
+                        {a.fixedPrompt && (
+                          <details className="text-sm">
+                            <summary className="cursor-pointer font-medium hover:underline">
+                              View corrected prompt
+                            </summary>
+                            <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">
+                              {a.fixedPrompt}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    ),
+                  )}
                 </div>
               ) : !autopsyMutation.isPending ? (
                 <div className="text-center py-6" data-testid="text-autopsy-empty">
                   <Skull className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No autopsies yet</h3>
                   <p className="text-muted-foreground">
-                    Paste something that caused an error above and we'll figure out exactly what went wrong
+                    Paste something that caused an error above and we'll figure out exactly what
+                    went wrong
                   </p>
                 </div>
               ) : null}
@@ -1238,7 +1578,10 @@ export default function ProjectDetailPage() {
                       <BrainCircuit className="w-5 h-5" />
                       Neural Prompt Optimizer
                     </CardTitle>
-                    <CardDescription>Our AI reads your instructions and suggests ways to make them clearer and more effective -- like having an editor review your writing</CardDescription>
+                    <CardDescription>
+                      Our AI reads your instructions and suggests ways to make them clearer and more
+                      effective -- like having an editor review your writing
+                    </CardDescription>
                   </div>
                   <Button
                     className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
@@ -1246,7 +1589,11 @@ export default function ProjectDetailPage() {
                     disabled={neuralPromptMutation.isPending}
                     data-testid="button-optimize-prompt"
                   >
-                    {neuralPromptMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {neuralPromptMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
                     {neuralPromptMutation.isPending ? "Optimizing..." : "Optimize Prompt"}
                   </Button>
                 </div>
@@ -1256,59 +1603,93 @@ export default function ProjectDetailPage() {
                   <Skeleton className="h-32 w-full" />
                 ) : neuralPromptData?.analyses?.length > 0 ? (
                   <div className="space-y-4" data-testid="container-prompt-analyses">
-                    {neuralPromptData.analyses.map((a: { id: string; improvementScore: number; rationale: string; weaknesses: string[]; strengths: string[]; optimizedPrompt: string; applied: boolean; createdAt: string }) => (
-                      <div key={a.id} className="p-4 border rounded-lg space-y-3" data-testid={`card-prompt-analysis-${a.id}`}>
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <Badge>{a.improvementScore}% improvement</Badge>
-                            {a.applied && <Badge variant="secondary">Applied</Badge>}
+                    {neuralPromptData.analyses.map(
+                      (a: {
+                        id: string;
+                        improvementScore: number;
+                        rationale: string;
+                        weaknesses: string[];
+                        strengths: string[];
+                        optimizedPrompt: string;
+                        applied: boolean;
+                        createdAt: string;
+                      }) => (
+                        <div
+                          key={a.id}
+                          className="p-4 border rounded-lg space-y-3"
+                          data-testid={`card-prompt-analysis-${a.id}`}
+                        >
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <Badge>{a.improvementScore}% improvement</Badge>
+                              {a.applied && <Badge variant="secondary">Applied</Badge>}
+                            </div>
+                            {!a.applied && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => applyPromptMutation.mutate(a.id)}
+                                disabled={applyPromptMutation.isPending}
+                                data-testid={`button-apply-prompt-${a.id}`}
+                              >
+                                {applyPromptMutation.isPending ? (
+                                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                ) : (
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                )}
+                                Apply to Project
+                              </Button>
+                            )}
                           </div>
-                          {!a.applied && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => applyPromptMutation.mutate(a.id)}
-                              disabled={applyPromptMutation.isPending}
-                              data-testid={`button-apply-prompt-${a.id}`}
-                            >
-                              {applyPromptMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
-                              Apply to Project
-                            </Button>
+                          <p className="text-sm text-muted-foreground">{a.rationale}</p>
+                          {a.weaknesses.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">
+                                Weaknesses Found
+                              </p>
+                              <div className="flex flex-wrap gap-1">
+                                {a.weaknesses.map((w: string, i: number) => (
+                                  <Badge key={i} variant="destructive" className="text-xs">
+                                    {w}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
                           )}
+                          {a.strengths.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">
+                                Strengths
+                              </p>
+                              <div className="flex flex-wrap gap-1">
+                                {a.strengths.map((s: string, i: number) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">
+                                    {s}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <details className="text-sm">
+                            <summary className="cursor-pointer font-medium hover:underline">
+                              View optimized prompt
+                            </summary>
+                            <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">
+                              {a.optimizedPrompt}
+                            </pre>
+                          </details>
                         </div>
-                        <p className="text-sm text-muted-foreground">{a.rationale}</p>
-                        {a.weaknesses.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Weaknesses Found</p>
-                            <div className="flex flex-wrap gap-1">
-                              {a.weaknesses.map((w: string, i: number) => (
-                                <Badge key={i} variant="destructive" className="text-xs">{w}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {a.strengths.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Strengths</p>
-                            <div className="flex flex-wrap gap-1">
-                              {a.strengths.map((s: string, i: number) => (
-                                <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <details className="text-sm">
-                          <summary className="cursor-pointer font-medium hover:underline">View optimized prompt</summary>
-                          <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto whitespace-pre-wrap text-xs">{a.optimizedPrompt}</pre>
-                        </details>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8" data-testid="text-prompt-optimizer-empty">
                     <BrainCircuit className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No prompt optimizations yet</h3>
-                    <p className="text-muted-foreground">Click &quot;Optimize Prompt&quot; and our AI will review your instructions and suggest ways to make them work better</p>
+                    <p className="text-muted-foreground">
+                      Click &quot;Optimize Prompt&quot; and our AI will review your instructions and
+                      suggest ways to make them work better
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -1322,7 +1703,10 @@ export default function ProjectDetailPage() {
                       <Code2 className="w-5 h-5" />
                       Neural Schema Enhancer
                     </CardTitle>
-                    <CardDescription>We analyze the structure of your API's responses and suggest improvements -- making sure the data that comes back is organized and complete</CardDescription>
+                    <CardDescription>
+                      We analyze the structure of your API's responses and suggest improvements --
+                      making sure the data that comes back is organized and complete
+                    </CardDescription>
                   </div>
                   <Button
                     className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
@@ -1330,7 +1714,11 @@ export default function ProjectDetailPage() {
                     disabled={neuralSchemaMutation.isPending}
                     data-testid="button-enhance-schema"
                   >
-                    {neuralSchemaMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {neuralSchemaMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
                     {neuralSchemaMutation.isPending ? "Analyzing..." : "Enhance Schema"}
                   </Button>
                 </div>
@@ -1340,55 +1728,97 @@ export default function ProjectDetailPage() {
                   <Skeleton className="h-32 w-full" />
                 ) : neuralSchemaData?.analyses?.length > 0 ? (
                   <div className="space-y-4" data-testid="container-schema-analyses">
-                    {neuralSchemaData.analyses.map((a: { id: string; riskLevel: string; rationale: string; improvements: { field: string; change: string; reason: string }[]; applied: boolean; suggestedSchema: Record<string, unknown>; createdAt: string }) => (
-                      <div key={a.id} className="p-4 border rounded-lg space-y-3" data-testid={`card-schema-analysis-${a.id}`}>
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={a.riskLevel === "low" ? "secondary" : a.riskLevel === "high" ? "destructive" : "default"}>
-                              {a.riskLevel} risk
-                            </Badge>
-                            <Badge variant="secondary">{a.improvements.length} improvements</Badge>
-                            {a.applied && <Badge variant="secondary">Applied</Badge>}
+                    {neuralSchemaData.analyses.map(
+                      (a: {
+                        id: string;
+                        riskLevel: string;
+                        rationale: string;
+                        improvements: { field: string; change: string; reason: string }[];
+                        applied: boolean;
+                        suggestedSchema: Record<string, unknown>;
+                        createdAt: string;
+                      }) => (
+                        <div
+                          key={a.id}
+                          className="p-4 border rounded-lg space-y-3"
+                          data-testid={`card-schema-analysis-${a.id}`}
+                        >
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant={
+                                  a.riskLevel === "low"
+                                    ? "secondary"
+                                    : a.riskLevel === "high"
+                                      ? "destructive"
+                                      : "default"
+                                }
+                              >
+                                {a.riskLevel} risk
+                              </Badge>
+                              <Badge variant="secondary">
+                                {a.improvements.length} improvements
+                              </Badge>
+                              {a.applied && <Badge variant="secondary">Applied</Badge>}
+                            </div>
+                            {!a.applied && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => applySchemaMutation.mutate(a.id)}
+                                disabled={applySchemaMutation.isPending}
+                                data-testid={`button-apply-schema-${a.id}`}
+                              >
+                                {applySchemaMutation.isPending ? (
+                                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                ) : (
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                )}
+                                Apply to Project
+                              </Button>
+                            )}
                           </div>
-                          {!a.applied && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => applySchemaMutation.mutate(a.id)}
-                              disabled={applySchemaMutation.isPending}
-                              data-testid={`button-apply-schema-${a.id}`}
-                            >
-                              {applySchemaMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
-                              Apply to Project
-                            </Button>
+                          <p className="text-sm text-muted-foreground">{a.rationale}</p>
+                          {a.improvements.length > 0 && (
+                            <div className="space-y-2">
+                              {a.improvements.map(
+                                (
+                                  imp: { field: string; change: string; reason: string },
+                                  i: number,
+                                ) => (
+                                  <div key={i} className="p-2 bg-muted rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <code className="text-xs font-mono">{imp.field}</code>
+                                      <span className="text-xs text-muted-foreground">
+                                        {imp.change}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">{imp.reason}</p>
+                                  </div>
+                                ),
+                              )}
+                            </div>
                           )}
+                          <details className="text-sm">
+                            <summary className="cursor-pointer font-medium hover:underline">
+                              View enhanced schema
+                            </summary>
+                            <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto text-xs">
+                              {JSON.stringify(a.suggestedSchema, null, 2)}
+                            </pre>
+                          </details>
                         </div>
-                        <p className="text-sm text-muted-foreground">{a.rationale}</p>
-                        {a.improvements.length > 0 && (
-                          <div className="space-y-2">
-                            {a.improvements.map((imp: { field: string; change: string; reason: string }, i: number) => (
-                              <div key={i} className="p-2 bg-muted rounded-lg">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <code className="text-xs font-mono">{imp.field}</code>
-                                  <span className="text-xs text-muted-foreground">{imp.change}</span>
-                                </div>
-                                <p className="text-xs text-muted-foreground">{imp.reason}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <details className="text-sm">
-                          <summary className="cursor-pointer font-medium hover:underline">View enhanced schema</summary>
-                          <pre className="mt-2 p-3 bg-muted rounded-lg overflow-auto text-xs">{JSON.stringify(a.suggestedSchema, null, 2)}</pre>
-                        </details>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8" data-testid="text-schema-enhancer-empty">
                     <Code2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No schema enhancements yet</h3>
-                    <p className="text-muted-foreground">Click &quot;Enhance Schema&quot; and we'll suggest ways to better organize the data your API sends back</p>
+                    <p className="text-muted-foreground">
+                      Click &quot;Enhance Schema&quot; and we'll suggest ways to better organize the
+                      data your API sends back
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -1400,7 +1830,10 @@ export default function ProjectDetailPage() {
                   <BarChart3 className="w-5 h-5" />
                   Neural Quality Gate
                 </CardTitle>
-                <CardDescription>Every time your API responds, we give it a quality score -- so you can see at a glance whether it's performing well or starting to slip</CardDescription>
+                <CardDescription>
+                  Every time your API responds, we give it a quality score -- so you can see at a
+                  glance whether it's performing well or starting to slip
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {neuralQualityLoading ? (
@@ -1410,44 +1843,83 @@ export default function ProjectDetailPage() {
                     <div className="grid gap-4 md:grid-cols-4">
                       <div className="text-center p-3 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground mb-1">Confidence</p>
-                        <p className="text-2xl font-bold">{neuralQualityData.averages.confidence}%</p>
+                        <p className="text-2xl font-bold">
+                          {neuralQualityData.averages.confidence}%
+                        </p>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground mb-1">Coherence</p>
-                        <p className="text-2xl font-bold">{neuralQualityData.averages.coherence}%</p>
+                        <p className="text-2xl font-bold">
+                          {neuralQualityData.averages.coherence}%
+                        </p>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground mb-1">Completeness</p>
-                        <p className="text-2xl font-bold">{neuralQualityData.averages.completeness}%</p>
+                        <p className="text-2xl font-bold">
+                          {neuralQualityData.averages.completeness}%
+                        </p>
                       </div>
                       <div className="text-center p-3 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground mb-1">Total Scored</p>
-                        <p className="text-2xl font-bold">{neuralQualityData.averages.totalScored}</p>
+                        <p className="text-2xl font-bold">
+                          {neuralQualityData.averages.totalScored}
+                        </p>
                       </div>
                     </div>
                     {neuralQualityData.scores?.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-sm font-medium">Recent Scores</p>
-                        {neuralQualityData.scores.slice(0, 5).map((s: { id: string; input: string; confidenceScore: number; coherenceScore: number; completenessScore: number; flags: string[]; explanation: string; createdAt: string }) => (
-                          <div key={s.id} className="p-3 border rounded-lg" data-testid={`card-quality-score-${s.id}`}>
-                            <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-                              <p className="text-sm font-mono truncate max-w-[300px]">{s.input.substring(0, 80)}</p>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={s.confidenceScore >= 80 ? "default" : s.confidenceScore >= 50 ? "secondary" : "destructive"}>
-                                  {s.confidenceScore}%
-                                </Badge>
+                        {neuralQualityData.scores
+                          .slice(0, 5)
+                          .map(
+                            (s: {
+                              id: string;
+                              input: string;
+                              confidenceScore: number;
+                              coherenceScore: number;
+                              completenessScore: number;
+                              flags: string[];
+                              explanation: string;
+                              createdAt: string;
+                            }) => (
+                              <div
+                                key={s.id}
+                                className="p-3 border rounded-lg"
+                                data-testid={`card-quality-score-${s.id}`}
+                              >
+                                <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                                  <p className="text-sm font-mono truncate max-w-[300px]">
+                                    {s.input.substring(0, 80)}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      variant={
+                                        s.confidenceScore >= 80
+                                          ? "default"
+                                          : s.confidenceScore >= 50
+                                            ? "secondary"
+                                            : "destructive"
+                                      }
+                                    >
+                                      {s.confidenceScore}%
+                                    </Badge>
+                                  </div>
+                                </div>
+                                {s.flags && s.flags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mb-1">
+                                    {s.flags.map((f: string, i: number) => (
+                                      <Badge key={i} variant="destructive" className="text-xs">
+                                        {f.replace(/_/g, " ")}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                                {s.explanation && (
+                                  <p className="text-xs text-muted-foreground">{s.explanation}</p>
+                                )}
                               </div>
-                            </div>
-                            {s.flags && s.flags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mb-1">
-                                {s.flags.map((f: string, i: number) => (
-                                  <Badge key={i} variant="destructive" className="text-xs">{f.replace(/_/g, " ")}</Badge>
-                                ))}
-                              </div>
-                            )}
-                            {s.explanation && <p className="text-xs text-muted-foreground">{s.explanation}</p>}
-                          </div>
-                        ))}
+                            ),
+                          )}
                       </div>
                     )}
                   </div>
@@ -1455,7 +1927,10 @@ export default function ProjectDetailPage() {
                   <div className="text-center py-8" data-testid="text-quality-gate-empty">
                     <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No quality scores yet</h3>
-                    <p className="text-muted-foreground">Once your API starts handling requests, we'll automatically score each response so you can track how well it's doing</p>
+                    <p className="text-muted-foreground">
+                      Once your API starts handling requests, we'll automatically score each
+                      response so you can track how well it's doing
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -1469,7 +1944,10 @@ export default function ProjectDetailPage() {
                       <Sparkles className="w-5 h-5" />
                       Neural Training Augmentation
                     </CardTitle>
-                    <CardDescription>Automatically create more training examples from your existing ones -- like making practice worksheets with variations of the same questions</CardDescription>
+                    <CardDescription>
+                      Automatically create more training examples from your existing ones -- like
+                      making practice worksheets with variations of the same questions
+                    </CardDescription>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Select value={augmentStrategy} onValueChange={setAugmentStrategy}>
@@ -1490,7 +1968,11 @@ export default function ProjectDetailPage() {
                       disabled={neuralAugmentMutation.isPending}
                       data-testid="button-augment-training"
                     >
-                      {neuralAugmentMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {neuralAugmentMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4" />
+                      )}
                       {neuralAugmentMutation.isPending ? "Augmenting..." : "Augment Data"}
                     </Button>
                   </div>
@@ -1501,28 +1983,57 @@ export default function ProjectDetailPage() {
                   <Skeleton className="h-32 w-full" />
                 ) : neuralAugmentData?.jobs?.length > 0 ? (
                   <div className="space-y-3" data-testid="container-augment-jobs">
-                    {neuralAugmentData.jobs.map((job: { id: string; strategy: string; requestedCount: number; generatedCount: number; approvedCount: number; status: string; createdAt: string }) => (
-                      <div key={job.id} className="flex items-center justify-between gap-2 p-3 border rounded-lg flex-wrap" data-testid={`card-augment-job-${job.id}`}>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="capitalize">{job.strategy}</Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {job.approvedCount}/{job.generatedCount} approved
-                          </span>
+                    {neuralAugmentData.jobs.map(
+                      (job: {
+                        id: string;
+                        strategy: string;
+                        requestedCount: number;
+                        generatedCount: number;
+                        approvedCount: number;
+                        status: string;
+                        createdAt: string;
+                      }) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between gap-2 p-3 border rounded-lg flex-wrap"
+                          data-testid={`card-augment-job-${job.id}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="capitalize">
+                              {job.strategy}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {job.approvedCount}/{job.generatedCount} approved
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={
+                                job.status === "completed"
+                                  ? "default"
+                                  : job.status === "failed"
+                                    ? "destructive"
+                                    : "secondary"
+                              }
+                            >
+                              {job.status}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(job.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={job.status === "completed" ? "default" : job.status === "failed" ? "destructive" : "secondary"}>
-                            {job.status}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{new Date(job.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8" data-testid="text-augment-empty">
                     <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No augmentation jobs yet</h3>
-                    <p className="text-muted-foreground">Pick a strategy from the dropdown and click &quot;Augment Data&quot; to automatically create more training examples from the ones you already have</p>
+                    <p className="text-muted-foreground">
+                      Pick a strategy from the dropdown and click &quot;Augment Data&quot; to
+                      automatically create more training examples from the ones you already have
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -1536,7 +2047,10 @@ export default function ProjectDetailPage() {
                       <AlertTriangle className="w-5 h-5" />
                       Neural Anomaly Detector
                     </CardTitle>
-                    <CardDescription>We scan your API's history for repeating problems -- if the same type of error keeps happening, we'll spot the pattern and tell you what's going on</CardDescription>
+                    <CardDescription>
+                      We scan your API's history for repeating problems -- if the same type of error
+                      keeps happening, we'll spot the pattern and tell you what's going on
+                    </CardDescription>
                   </div>
                   <Button
                     className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
@@ -1544,7 +2058,11 @@ export default function ProjectDetailPage() {
                     disabled={neuralAnomalyMutation.isPending}
                     data-testid="button-detect-anomalies"
                   >
-                    {neuralAnomalyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    {neuralAnomalyMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
                     {neuralAnomalyMutation.isPending ? "Scanning..." : "Scan for Anomalies"}
                   </Button>
                 </div>
@@ -1554,41 +2072,71 @@ export default function ProjectDetailPage() {
                   <Skeleton className="h-32 w-full" />
                 ) : neuralAnomalyData?.anomalies?.length > 0 ? (
                   <div className="space-y-3" data-testid="container-anomalies">
-                    {neuralAnomalyData.anomalies.map((a: { id: string; signalType: string; severity: string; title: string; description: string; recommendations: string[]; resolved: boolean; createdAt: string }) => (
-                      <div key={a.id} className="p-4 border rounded-lg space-y-2" data-testid={`card-anomaly-${a.id}`}>
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={a.severity === "critical" || a.severity === "high" ? "destructive" : "secondary"}>
-                              {a.severity}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">{a.signalType.replace(/_/g, " ")}</Badge>
-                            {a.resolved && <Badge variant="secondary">Resolved</Badge>}
+                    {neuralAnomalyData.anomalies.map(
+                      (a: {
+                        id: string;
+                        signalType: string;
+                        severity: string;
+                        title: string;
+                        description: string;
+                        recommendations: string[];
+                        resolved: boolean;
+                        createdAt: string;
+                      }) => (
+                        <div
+                          key={a.id}
+                          className="p-4 border rounded-lg space-y-2"
+                          data-testid={`card-anomaly-${a.id}`}
+                        >
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant={
+                                  a.severity === "critical" || a.severity === "high"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
+                              >
+                                {a.severity}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {a.signalType.replace(/_/g, " ")}
+                              </Badge>
+                              {a.resolved && <Badge variant="secondary">Resolved</Badge>}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(a.createdAt).toLocaleDateString()}
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{new Date(a.createdAt).toLocaleDateString()}</span>
+                          <p className="text-sm font-medium">{a.title}</p>
+                          <p className="text-sm text-muted-foreground">{a.description}</p>
+                          {a.recommendations && a.recommendations.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">
+                                Recommendations
+                              </p>
+                              <ul className="text-xs text-muted-foreground space-y-1">
+                                {a.recommendations.map((r: string, i: number) => (
+                                  <li key={i} className="flex items-start gap-1">
+                                    <span className="text-muted-foreground mt-0.5">•</span>
+                                    {r}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm font-medium">{a.title}</p>
-                        <p className="text-sm text-muted-foreground">{a.description}</p>
-                        {a.recommendations && a.recommendations.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Recommendations</p>
-                            <ul className="text-xs text-muted-foreground space-y-1">
-                              {a.recommendations.map((r: string, i: number) => (
-                                <li key={i} className="flex items-start gap-1">
-                                  <span className="text-muted-foreground mt-0.5">•</span>
-                                  {r}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8" data-testid="text-anomalies-empty">
                     <AlertTriangle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No anomalies detected</h3>
-                    <p className="text-muted-foreground">Click &quot;Scan for Anomalies&quot; and we'll look through your API's recent activity for any recurring issues or warning signs</p>
+                    <p className="text-muted-foreground">
+                      Click &quot;Scan for Anomalies&quot; and we'll look through your API's recent
+                      activity for any recurring issues or warning signs
+                    </p>
                   </div>
                 )}
               </CardContent>

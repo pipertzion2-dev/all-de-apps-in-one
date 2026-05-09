@@ -21,8 +21,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const headerSecret = req.headers.get("x-internal-secret");
   const isInternal =
-    !!process.env.ORBIT_INTERNAL_SECRET &&
-    headerSecret === process.env.ORBIT_INTERNAL_SECRET;
+    !!process.env.ORBIT_INTERNAL_SECRET && headerSecret === process.env.ORBIT_INTERNAL_SECRET;
 
   if (!isInternal) {
     const user = await getCurrentUser();
@@ -40,8 +39,15 @@ export async function POST(req: NextRequest) {
   //    The real GSC submission happens via the scheduler's submit_sitemap action,
   //    which calls the Webmasters v3 API with a stored service-account.)
   try {
-    const b = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(mainSitemap)}`, { signal: AbortSignal.timeout(8000) });
-    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "svivva", status: "completed", details: { bing: b.status } });
+    const b = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(mainSitemap)}`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    await db.insert(growthTasks).values({
+      taskType: "sitemap_ping",
+      product: "svivva",
+      status: "completed",
+      details: { bing: b.status },
+    });
     results.push({ task: "Svivva sitemap ping", status: "ok", detail: `Bing ${b.status}` });
   } catch (e: any) {
     results.push({ task: "Svivva sitemap ping", status: "error", detail: e.message });
@@ -49,8 +55,16 @@ export async function POST(req: NextRequest) {
 
   // 2. Ping Pyracrypt sitemap (Bing only)
   try {
-    const b = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`, { signal: AbortSignal.timeout(8000) });
-    await db.insert(growthTasks).values({ taskType: "sitemap_ping", product: "pyracrypt", status: "completed", details: { bing: b.status } });
+    const b = await fetch(
+      `https://www.bing.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    await db.insert(growthTasks).values({
+      taskType: "sitemap_ping",
+      product: "pyracrypt",
+      status: "completed",
+      details: { bing: b.status },
+    });
     results.push({ task: "Pyracrypt sitemap ping", status: "ok", detail: `Bing ${b.status}` });
   } catch (e: any) {
     results.push({ task: "Pyracrypt sitemap ping", status: "error", detail: e.message });
@@ -60,12 +74,24 @@ export async function POST(req: NextRequest) {
   try {
     const r = await fetch(`${appOrigin}/api/indexnow/submit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(internalSecret ? { "x-internal-secret": internalSecret } : {}) },
+      headers: {
+        "Content-Type": "application/json",
+        ...(internalSecret ? { "x-internal-secret": internalSecret } : {}),
+      },
       signal: AbortSignal.timeout(30000),
     });
     const d = await r.json().catch(() => ({}));
-    await db.insert(growthTasks).values({ taskType: "indexnow_submit", product: "svivva", status: r.ok ? "completed" : "failed", details: d });
-    results.push({ task: "IndexNow submission", status: r.ok ? "ok" : "warn", detail: d.error || `${d.urlCount ?? 0} URLs submitted` });
+    await db.insert(growthTasks).values({
+      taskType: "indexnow_submit",
+      product: "svivva",
+      status: r.ok ? "completed" : "failed",
+      details: d,
+    });
+    results.push({
+      task: "IndexNow submission",
+      status: r.ok ? "ok" : "warn",
+      detail: d.error || `${d.urlCount ?? 0} URLs submitted`,
+    });
   } catch (e: any) {
     results.push({ task: "IndexNow submission", status: "error", detail: e.message });
   }
@@ -74,7 +100,11 @@ export async function POST(req: NextRequest) {
   await db.insert(growthTasks).values({
     taskType: "weekly_run",
     status: "completed",
-    details: { results, triggeredBy: isInternal ? "internal_scheduler" : "manual", timestamp: new Date().toISOString() },
+    details: {
+      results,
+      triggeredBy: isInternal ? "internal_scheduler" : "manual",
+      timestamp: new Date().toISOString(),
+    },
   });
 
   return ok({ success: true, results });

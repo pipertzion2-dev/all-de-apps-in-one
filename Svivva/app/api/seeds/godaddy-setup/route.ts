@@ -13,9 +13,16 @@ export async function POST() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
     if (!creds?.godaddyApiKey || !creds?.godaddyApiSecret) {
-      return NextResponse.json({ error: "GoDaddy API credentials not configured." }, { status: 400 });
+      return NextResponse.json(
+        { error: "GoDaddy API credentials not configured." },
+        { status: 400 },
+      );
     }
     if (!creds.godaddyDomain) {
       return NextResponse.json({ error: "GoDaddy domain not configured." }, { status: 400 });
@@ -30,7 +37,10 @@ export async function POST() {
 
     if (!domainRes.ok) {
       const err = await domainRes.json().catch(() => ({}));
-      return NextResponse.json({ error: `GoDaddy API error: ${err.message || domainRes.status}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `GoDaddy API error: ${err.message || domainRes.status}` },
+        { status: 400 },
+      );
     }
 
     const domainData = await domainRes.json();

@@ -18,39 +18,32 @@ export interface OutputValidationResult {
 
 export function validateProjectSpec(input: unknown): ValidationResult {
   const result = ProjectSpecSchema.safeParse(input);
-  
+
   if (!result.success) {
     return {
       valid: false,
-      errors: result.error.errors.map(
-        (e) => `${e.path.join(".")}: ${e.message}`
-      ),
+      errors: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
     };
   }
-  
+
   return {
     valid: true,
     data: result.data,
   };
 }
 
-export function validateOutput(
-  output: unknown,
-  schema: JsonSchema
-): OutputValidationResult {
+export function validateOutput(output: unknown, schema: JsonSchema): OutputValidationResult {
   try {
     const validate = ajv.compile(schema);
     const valid = validate(output);
-    
+
     if (!valid) {
       return {
         valid: false,
-        errors: validate.errors?.map(
-          (e) => `${e.instancePath || "root"}: ${e.message}`
-        ),
+        errors: validate.errors?.map((e) => `${e.instancePath || "root"}: ${e.message}`),
       };
     }
-    
+
     return {
       valid: true,
       data: output as Record<string, unknown>,
@@ -63,16 +56,13 @@ export function validateOutput(
   }
 }
 
-export function validateOutputStrict(
-  output: unknown,
-  schema: JsonSchema
-): Record<string, unknown> {
+export function validateOutputStrict(output: unknown, schema: JsonSchema): Record<string, unknown> {
   const result = validateOutput(output, schema);
-  
+
   if (!result.valid) {
     throw new Error(`Output validation failed: ${result.errors?.join(", ")}`);
   }
-  
+
   return result.data!;
 }
 

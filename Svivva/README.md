@@ -21,10 +21,11 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 ## Core Scripts
 
 - `npm run dev` - run local development server.
-- `npm run build` - full self-hosted build (`next build` + `dist/` launcher). **Vercel** ignores this and runs `next build` only (see `vercel.json`).
+- `npm run build` - full self-hosted build (runs `verify`, optional DB push, then `next build` + `dist/` launcher). **Vercel** uses `npm run build:vercel` (`verify` + `next build`) via `vercel.json`.
 - `npm run start` - run production build output.
 - `npm run check` - run TypeScript checks.
-- `npm run verify` - owner-note gate: `check` + `lint` + dummy-copy scan (see `scripts/owner-note-verify.mjs`). Runs automatically before `next build` via `npm run build:vercel` and `npm run build`.
+- `npm run verify` - owner-note gate: `check` + `lint` + `format:check` + `test` (Vitest) + dummy-copy scan (see `scripts/owner-note-verify.mjs`). Runs automatically before `next build` via `npm run build:vercel` and `npm run build`.
+- `npm run test` / `npm run test:watch` - unit tests (`vitest`; start with `lib/*.test.ts`).
 - `npm run lint` - run ESLint checks.
 - `npm run format:check` - check Prettier formatting.
 - `npm run format` - write Prettier formatting.
@@ -48,7 +49,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 1. Push this repo to GitHub.
 2. Vercel → **Add New… → Project** → **Import** your repo.
 3. **Root Directory:** set to **`Svivva`** (required — do not leave blank).
-4. Framework should detect **Next.js**. Build uses `vercel.json`: `npm ci` then `next build`.
+4. Framework should detect **Next.js**. Build uses `vercel.json`: `npm ci` then **`npm run build:vercel`** (`verify` + `next build`).
 5. **Environment variables** (Production — copy names from `.env.example`):
    - **`DATABASE_URL`** — hosted Postgres (e.g. Neon/Vercel Postgres).
    - **`NEXTAUTH_SECRET`** — long random string.

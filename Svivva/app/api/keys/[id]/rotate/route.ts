@@ -16,10 +16,7 @@ function generateApiKey(): { key: string; prefix: string; hash: string } {
   return { key, prefix, hash };
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -42,9 +39,7 @@ export async function POST(
     const [existingKey] = await db
       .select()
       .from(apiKeys)
-      .where(
-        and(eq(apiKeys.id, id), inArray(apiKeys.projectId, projectIds))
-      );
+      .where(and(eq(apiKeys.id, id), inArray(apiKeys.projectId, projectIds)));
 
     if (!existingKey) {
       return NextResponse.json({ error: "Key not found" }, { status: 404 });

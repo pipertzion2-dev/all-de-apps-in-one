@@ -8,7 +8,14 @@ import { nanoid } from "nanoid";
 import { randomBytes } from "crypto";
 import { z } from "zod";
 
-const validEvents = ["api.call", "api.error", "api.threshold", "eval.completed", "version.created", "version.rollback"] as const;
+const validEvents = [
+  "api.call",
+  "api.error",
+  "api.threshold",
+  "eval.completed",
+  "version.created",
+  "version.rollback",
+] as const;
 
 const createWebhookSchema = z.object({
   url: z.string().url("Invalid URL format"),
@@ -88,7 +95,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = createWebhookSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -141,7 +148,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = updateWebhookSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -203,9 +210,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Webhook ID required" }, { status: 400 });
     }
 
-    await db
-      .delete(webhooks)
-      .where(and(eq(webhooks.id, webhookId), eq(webhooks.projectId, id)));
+    await db.delete(webhooks).where(and(eq(webhooks.id, webhookId), eq(webhooks.projectId, id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

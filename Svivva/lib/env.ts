@@ -3,10 +3,10 @@ import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  
+
   OPENAI_API_KEY: z.string().optional(),
   AI_INTEGRATIONS_OPENAI_API_KEY: z.string().optional(),
-  
+
   STRIPE_SECRET_KEY: z.string().optional(),
 });
 

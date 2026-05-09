@@ -34,7 +34,7 @@ async function detectWithOfflineContext(buffer: AudioBuffer): Promise<number | n
   const data = filtered.getChannelData(0);
 
   const windowMs = 10;
-  const windowSamples = Math.round(sampleRate * windowMs / 1000);
+  const windowSamples = Math.round((sampleRate * windowMs) / 1000);
   const envLength = Math.floor(data.length / windowSamples);
   const envelope = new Float32Array(envLength);
   for (let i = 0; i < envLength; i++) {
@@ -55,7 +55,7 @@ async function detectWithOfflineContext(buffer: AudioBuffer): Promise<number | n
   if (maxEnv === 0) return null;
 
   const threshold = maxEnv * 0.3;
-  const minDist = Math.round(envRate * 60 / 200);
+  const minDist = Math.round((envRate * 60) / 200);
 
   const peaks: number[] = [];
   for (let i = 2; i < envelope.length - 2; i++) {
@@ -72,11 +72,14 @@ async function detectWithOfflineContext(buffer: AudioBuffer): Promise<number | n
     }
   }
 
-  console.log(`BPM detect: ${peaks.length} peaks found, duration=${duration.toFixed(1)}s, threshold=${threshold.toFixed(4)}`);
+  console.log(
+    `BPM detect: ${peaks.length} peaks found, duration=${duration.toFixed(1)}s, threshold=${threshold.toFixed(4)}`,
+  );
 
   if (peaks.length < 4) return null;
 
-  const minBPM = 60, maxBPM = 180;
+  const minBPM = 60,
+    maxBPM = 180;
   const step = 0.5;
   const nBins = Math.round((maxBPM - minBPM) / step) + 1;
   const histogram = new Float64Array(nBins);

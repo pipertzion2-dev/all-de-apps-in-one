@@ -11,8 +11,7 @@ function normalizeSiteUrl(raw: string): string {
 }
 
 export function getPublicSiteUrl(): string {
-  const env =
-    typeof process !== "undefined" ? process.env.NEXT_PUBLIC_SITE_URL?.trim() : "";
+  const env = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_SITE_URL?.trim() : "";
   if (!env) return DEFAULT_SITE;
   return normalizeSiteUrl(env);
 }

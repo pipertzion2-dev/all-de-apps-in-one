@@ -62,7 +62,8 @@ export async function POST(req: Request) {
       const spec: SeedAppSpec = {
         appName: `${replTitle} — ${subApp.name}`,
         problemStatement:
-          subApp.description || `${subApp.name} module inside ${replTitle} — a focused mini-application`,
+          subApp.description ||
+          `${subApp.name} module inside ${replTitle} — a focused mini-application`,
         targetUsers: "Developers and end users looking for " + subApp.name + " functionality",
         features: [
           `${subApp.name} core functionality`,
@@ -77,7 +78,11 @@ export async function POST(req: Request) {
         ],
         databaseSchema: "Shared database with parent application",
         apiEndpoints: [subApp.url || "/api", ...(subApp.path ? [subApp.path] : [])],
-        uiComponents: ["Mini app interface", "Navigation back to main app", "Core feature components"],
+        uiComponents: [
+          "Mini app interface",
+          "Navigation back to main app",
+          "Core feature components",
+        ],
         businessModel: `Part of ${replTitle} — ${subApp.description ? subApp.description : "free to use"}`,
         deploymentPreferences: `Sub-application of ${replTitle}, accessible at ${subApp.url || subApp.path || "the main app URL"}`,
       };

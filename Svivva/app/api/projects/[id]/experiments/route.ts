@@ -67,7 +67,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           .where(eq(experimentVariants.experimentId, exp.id));
 
         return { ...exp, variants };
-      })
+      }),
     );
 
     return NextResponse.json(experimentsWithVariants);
@@ -97,12 +97,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = createExperimentSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { name, description, versionIds, trafficWeights, autoPromote, minSampleSize } = parsed.data;
+    const { name, description, versionIds, trafficWeights, autoPromote, minSampleSize } =
+      parsed.data;
 
     const versions = await db
       .select()
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           })
           .returning();
         return variant;
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -183,7 +184,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = updateExperimentSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -193,12 +194,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [experiment] = await db
       .select()
       .from(promptExperiments)
-      .where(
-        and(
-          eq(promptExperiments.id, experimentId),
-          eq(promptExperiments.projectId, id)
-        )
-      );
+      .where(and(eq(promptExperiments.id, experimentId), eq(promptExperiments.projectId, id)));
 
     if (!experiment) {
       return NextResponse.json({ error: "Experiment not found" }, { status: 404 });
@@ -264,12 +260,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Experiment ID required" }, { status: 400 });
     }
 
-    await db.delete(promptExperiments).where(
-      and(
-        eq(promptExperiments.id, experimentId),
-        eq(promptExperiments.projectId, id)
-      )
-    );
+    await db
+      .delete(promptExperiments)
+      .where(and(eq(promptExperiments.id, experimentId), eq(promptExperiments.projectId, id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

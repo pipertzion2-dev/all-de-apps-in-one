@@ -115,7 +115,11 @@ const STORAGE_KEY = "svivva_hypothesis_memory";
 const EXT_API_KEY = "svivva_hypothesis_external_apis";
 
 function loadSaved(): SavedDiscovery[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function saveToDisk(items: SavedDiscovery[]) {
@@ -123,26 +127,49 @@ function saveToDisk(items: SavedDiscovery[]) {
 }
 
 function loadExternalApis(): ExternalApi[] {
-  try { return JSON.parse(localStorage.getItem(EXT_API_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(EXT_API_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function saveExternalApis(items: ExternalApi[]) {
   localStorage.setItem(EXT_API_KEY, JSON.stringify(items));
 }
 
-function isDuplicate(question: string, apiIds: string[], saved: SavedDiscovery[]): SavedDiscovery | null {
+function isDuplicate(
+  question: string,
+  apiIds: string[],
+  saved: SavedDiscovery[],
+): SavedDiscovery | null {
   const normalQ = question.toLowerCase().trim();
-  return saved.find((d) => {
-    const sameQ = d.question.toLowerCase().trim() === normalQ;
-    const sameApis = d.apisUsed?.length === apiIds.length && d.apisUsed.every((a) => apiIds.includes(a));
-    return sameQ && sameApis;
-  }) || null;
+  return (
+    saved.find((d) => {
+      const sameQ = d.question.toLowerCase().trim() === normalQ;
+      const sameApis =
+        d.apisUsed?.length === apiIds.length && d.apisUsed.every((a) => apiIds.includes(a));
+      return sameQ && sameApis;
+    }) || null
+  );
 }
 
 const resultConfig: Record<string, { label: string; color: string; Icon: typeof CheckCircle2 }> = {
-  confirmed: { label: "Confirmed", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", Icon: CheckCircle2 },
-  rejected: { label: "Rejected", color: "bg-red-500/15 text-red-400 border-red-500/30", Icon: XCircle },
-  unclear: { label: "Unclear", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", Icon: HelpCircle },
+  confirmed: {
+    label: "Confirmed",
+    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    Icon: CheckCircle2,
+  },
+  rejected: {
+    label: "Rejected",
+    color: "bg-red-500/15 text-red-400 border-red-500/30",
+    Icon: XCircle,
+  },
+  unclear: {
+    label: "Unclear",
+    color: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    Icon: HelpCircle,
+  },
 };
 
 const categoryColors: Record<string, string> = {
@@ -199,14 +226,16 @@ export default function HypothesisPage() {
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 4 ? [...prev, id] : prev
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 4 ? [...prev, id] : prev,
     );
   }
 
   function startSelect() {
     if (!question.trim()) return;
     if (apiProjects.length === 0 && externalApis.length === 0) {
-      setError("You need at least one API to run discovery. Create a project or register an external API.");
+      setError(
+        "You need at least one API to run discovery. Create a project or register an external API.",
+      );
       return;
     }
     setError(null);
@@ -377,8 +406,22 @@ export default function HypothesisPage() {
     : false;
 
   const allSelectable = [
-    ...apiProjects.map((p) => ({ id: p.id, name: p.name, desc: p.description || `/${p.slug} endpoint`, status: p.status, type: "svivva" as const })),
-    ...externalApis.map((a) => ({ id: a.id, name: a.name, desc: a.description || a.url, status: "external", type: "external" as const, hasSchema: !!a.inputSchema, hasSample: !!a.sampleResponse })),
+    ...apiProjects.map((p) => ({
+      id: p.id,
+      name: p.name,
+      desc: p.description || `/${p.slug} endpoint`,
+      status: p.status,
+      type: "svivva" as const,
+    })),
+    ...externalApis.map((a) => ({
+      id: a.id,
+      name: a.name,
+      desc: a.description || a.url,
+      status: "external",
+      type: "external" as const,
+      hasSchema: !!a.inputSchema,
+      hasSample: !!a.sampleResponse,
+    })),
   ];
 
   return (
@@ -390,11 +433,19 @@ export default function HypothesisPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Hypothesis Lab</h1>
-            <p className="text-muted-foreground text-sm">Discover hidden relationships across your APIs</p>
+            <p className="text-muted-foreground text-sm">
+              Discover hidden relationships across your APIs
+            </p>
           </div>
         </div>
         {step !== "ask" && activeTab === "discover" && (
-          <Button variant="outline" size="sm" className="gap-2" onClick={reset} data-testid="button-reset-hypothesis">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={reset}
+            data-testid="button-reset-hypothesis"
+          >
             <RotateCcw className="w-4 h-4" />
             Start Over
           </Button>
@@ -420,14 +471,18 @@ export default function HypothesisPage() {
             <Globe className="w-4 h-4" />
             API Registry
             {externalApis.length > 0 && (
-              <Badge variant="secondary" className="text-[10px] ml-1">{externalApis.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1">
+                {externalApis.length}
+              </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="feed" className="gap-2" data-testid="tab-feed">
             <Bookmark className="w-4 h-4" />
             Insight Feed
             {savedDiscoveries.length > 0 && (
-              <Badge variant="secondary" className="text-[10px] ml-1">{savedDiscoveries.length}</Badge>
+              <Badge variant="secondary" className="text-[10px] ml-1">
+                {savedDiscoveries.length}
+              </Badge>
             )}
           </TabsTrigger>
         </TabsList>
@@ -441,7 +496,8 @@ export default function HypothesisPage() {
                     <BrainCircuit className="w-10 h-10 text-primary mx-auto" />
                     <h2 className="text-lg font-semibold">What do you want to discover?</h2>
                     <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                      Ask a question and the system will generate hypotheses, run experiments, and find patterns across your APIs.
+                      Ask a question and the system will generate hypotheses, run experiments, and
+                      find patterns across your APIs.
                     </p>
                   </div>
                   <div className="flex gap-3 max-w-xl mx-auto">
@@ -453,7 +509,12 @@ export default function HypothesisPage() {
                       className="flex-1"
                       data-testid="input-hypothesis-question"
                     />
-                    <Button onClick={startSelect} disabled={!question.trim()} className="gap-2 shrink-0" data-testid="button-discover">
+                    <Button
+                      onClick={startSelect}
+                      disabled={!question.trim()}
+                      className="gap-2 shrink-0"
+                      data-testid="button-discover"
+                    >
                       <Search className="w-4 h-4" />
                       Discover
                     </Button>
@@ -475,11 +536,31 @@ export default function HypothesisPage() {
 
               <div className="grid gap-4 sm:grid-cols-5 pt-2">
                 {[
-                  { icon: FlaskConical, title: "Generate", desc: "Create hypotheses about API relationships" },
-                  { icon: Beaker, title: "Experiment", desc: "Design input scenarios to test each theory" },
-                  { icon: Microscope, title: "Execute", desc: "Simulate API calls with varied inputs" },
-                  { icon: ShieldCheck, title: "Validate", desc: "Detect patterns, contradictions, and anomalies" },
-                  { icon: BrainCircuit, title: "Synthesize", desc: "Produce actionable insights with confidence" },
+                  {
+                    icon: FlaskConical,
+                    title: "Generate",
+                    desc: "Create hypotheses about API relationships",
+                  },
+                  {
+                    icon: Beaker,
+                    title: "Experiment",
+                    desc: "Design input scenarios to test each theory",
+                  },
+                  {
+                    icon: Microscope,
+                    title: "Execute",
+                    desc: "Simulate API calls with varied inputs",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Validate",
+                    desc: "Detect patterns, contradictions, and anomalies",
+                  },
+                  {
+                    icon: BrainCircuit,
+                    title: "Synthesize",
+                    desc: "Produce actionable insights with confidence",
+                  },
                 ].map((s) => (
                   <Card key={s.title} className="bg-card/30 border-border/30">
                     <CardContent className="pt-5 pb-4 px-4 text-center space-y-2">
@@ -527,14 +608,26 @@ export default function HypothesisPage() {
                       <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium">Duplicate detected</p>
-                        <p className="text-xs text-muted-foreground">You already ran this exact question with these APIs on {new Date(duplicateWarning.savedAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground">
+                          You already ran this exact question with these APIs on{" "}
+                          {new Date(duplicateWarning.savedAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      <Button size="sm" variant="outline" onClick={() => loadDiscovery(duplicateWarning)} data-testid="button-view-existing">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => loadDiscovery(duplicateWarning)}
+                        data-testid="button-view-existing"
+                      >
                         View Existing
                       </Button>
-                      <Button size="sm" onClick={() => runDiscovery(true)} data-testid="button-run-anyway">
+                      <Button
+                        size="sm"
+                        onClick={() => runDiscovery(true)}
+                        data-testid="button-run-anyway"
+                      >
                         Run Anyway
                       </Button>
                     </div>
@@ -546,20 +639,34 @@ export default function HypothesisPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-base font-semibold">Select APIs to analyze</h2>
-                    <p className="text-xs text-muted-foreground">Choose 1-4 APIs. The system will find relationships between them.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Choose 1-4 APIs. The system will find relationships between them.
+                    </p>
                   </div>
-                  <Badge variant="outline" className="text-xs">{selectedIds.length}/4 selected</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {selectedIds.length}/4 selected
+                  </Badge>
                 </div>
 
                 {projectsLoading ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-28 rounded-xl" />
+                    ))}
                   </div>
                 ) : allSelectable.length === 0 ? (
                   <Card className="bg-muted/20">
                     <CardContent className="py-8 text-center space-y-2">
-                      <p className="text-sm text-muted-foreground">No APIs available. Create a project or register an external API first.</p>
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("registry")} className="gap-2 mt-2" data-testid="button-goto-registry">
+                      <p className="text-sm text-muted-foreground">
+                        No APIs available. Create a project or register an external API first.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("registry")}
+                        className="gap-2 mt-2"
+                        data-testid="button-goto-registry"
+                      >
                         <Globe className="w-4 h-4" />
                         Add External API
                       </Button>
@@ -583,22 +690,38 @@ export default function HypothesisPage() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               <p className="font-medium text-sm truncate">{item.name}</p>
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.desc}</p>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {item.desc}
+                              </p>
                             </div>
-                            <div className={`p-1 rounded-md shrink-0 ${selected ? "bg-primary text-primary-foreground" : "bg-muted/50"}`}>
-                              {selected ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                            <div
+                              className={`p-1 rounded-md shrink-0 ${selected ? "bg-primary text-primary-foreground" : "bg-muted/50"}`}
+                            >
+                              {selected ? (
+                                <Minus className="w-3.5 h-3.5" />
+                              ) : (
+                                <Plus className="w-3.5 h-3.5" />
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="text-[10px]">{item.status}</Badge>
+                            <Badge variant="outline" className="text-[10px]">
+                              {item.status}
+                            </Badge>
                             {item.type === "external" && (
-                              <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/30">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/30"
+                              >
                                 <Globe className="w-2.5 h-2.5 mr-1" />
                                 external
                               </Badge>
                             )}
                             {"hasSchema" in item && item.hasSchema && (
-                              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              >
                                 <FileJson className="w-2.5 h-2.5 mr-1" />
                                 schema
                               </Badge>
@@ -612,7 +735,12 @@ export default function HypothesisPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => runDiscovery()} disabled={selectedIds.length === 0} className="gap-2" data-testid="button-run-discovery">
+                <Button
+                  onClick={() => runDiscovery()}
+                  disabled={selectedIds.length === 0}
+                  className="gap-2"
+                  data-testid="button-run-discovery"
+                >
                   <Microscope className="w-4 h-4" />
                   Run Discovery
                 </Button>
@@ -631,7 +759,9 @@ export default function HypothesisPage() {
                 </div>
                 <div className="space-y-2">
                   <p className="font-semibold">{progress}</p>
-                  <p className="text-xs text-muted-foreground">Running all 5 stages: Generate → Experiment → Execute → Validate → Synthesize</p>
+                  <p className="text-xs text-muted-foreground">
+                    Running all 5 stages: Generate → Experiment → Execute → Validate → Synthesize
+                  </p>
                 </div>
                 <Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" />
               </CardContent>
@@ -648,8 +778,12 @@ export default function HypothesisPage() {
                         <BrainCircuit className="w-5 h-5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Discovery Summary</p>
-                        <p className="text-sm font-medium" data-testid="text-discovery-summary">{results.summary}</p>
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                          Discovery Summary
+                        </p>
+                        <p className="text-sm font-medium" data-testid="text-discovery-summary">
+                          {results.summary}
+                        </p>
                       </div>
                     </div>
                     <Button
@@ -669,9 +803,16 @@ export default function HypothesisPage() {
 
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold text-muted-foreground">
-                  {results.hypotheses.length} Hypothes{results.hypotheses.length === 1 ? "is" : "es"} Tested
+                  {results.hypotheses.length} Hypothes
+                  {results.hypotheses.length === 1 ? "is" : "es"} Tested
                 </h2>
-                <Button variant="outline" size="sm" onClick={remix} className="gap-2" data-testid="button-remix">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={remix}
+                  className="gap-2"
+                  data-testid="button-remix"
+                >
                   <RotateCcw className="w-4 h-4" />
                   Remix
                 </Button>
@@ -680,13 +821,17 @@ export default function HypothesisPage() {
               {results.hypotheses.map((h, i) => {
                 const rc = resultConfig[h.result] || resultConfig.unclear;
                 const ResultIcon = rc.Icon;
-                const catColor = categoryColors[h.category] || "bg-muted text-muted-foreground border-border";
+                const catColor =
+                  categoryColors[h.category] || "bg-muted text-muted-foreground border-border";
                 const isExpanded = expandedHypothesis === h.id;
                 const exp = typeof h.experiment === "object" ? h.experiment : null;
                 const val = h.validation;
 
                 return (
-                  <Card key={h.id || i} className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 transition-colors">
+                  <Card
+                    key={h.id || i}
+                    className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 transition-colors"
+                  >
                     <CardContent className="py-6 px-6 space-y-4">
                       <div className="flex items-start gap-4">
                         <div className="flex-1 min-w-0 space-y-3">
@@ -701,12 +846,16 @@ export default function HypothesisPage() {
                           </div>
 
                           <div>
-                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Hypothesis</p>
+                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                              Hypothesis
+                            </p>
                             <p className="text-sm font-semibold">{h.hypothesis}</p>
                           </div>
 
                           <div>
-                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Insight</p>
+                            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                              Insight
+                            </p>
                             <p className="text-sm leading-relaxed">{h.insight}</p>
                           </div>
 
@@ -715,16 +864,24 @@ export default function HypothesisPage() {
                               <div className="h-1.5 w-24 rounded-full bg-muted/50 overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all ${
-                                    h.confidence >= 70 ? "bg-emerald-500" : h.confidence >= 40 ? "bg-amber-500" : "bg-red-500"
+                                    h.confidence >= 70
+                                      ? "bg-emerald-500"
+                                      : h.confidence >= 40
+                                        ? "bg-amber-500"
+                                        : "bg-red-500"
                                   }`}
                                   style={{ width: `${h.confidence}%` }}
                                 />
                               </div>
-                              <span className="text-xs font-medium tabular-nums">{h.confidence}%</span>
+                              <span className="text-xs font-medium tabular-nums">
+                                {h.confidence}%
+                              </span>
                             </div>
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {h.apisUsed?.map((api, j) => (
-                                <Badge key={j} variant="secondary" className="text-[10px]">{api}</Badge>
+                                <Badge key={j} variant="secondary" className="text-[10px]">
+                                  {api}
+                                </Badge>
                               ))}
                             </div>
                           </div>
@@ -734,7 +891,11 @@ export default function HypothesisPage() {
                             className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors pt-1"
                             data-testid={`button-expand-${i}`}
                           >
-                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            )}
                             {isExpanded ? "Hide" : "Show"} experiment details
                           </button>
 
@@ -744,24 +905,37 @@ export default function HypothesisPage() {
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-2">
                                     <Beaker className="w-4 h-4 text-primary" />
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Experiment Design</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                      Experiment Design
+                                    </p>
                                   </div>
                                   <p className="text-sm text-muted-foreground">{exp.description}</p>
 
                                   {exp.scenarios && exp.scenarios.length > 0 && (
                                     <div className="space-y-2">
-                                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Input Scenarios</p>
+                                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                                        Input Scenarios
+                                      </p>
                                       <div className="grid gap-2">
                                         {exp.scenarios.map((sc, si) => (
-                                          <div key={si} className="p-3 rounded-lg bg-muted/20 border border-border/30">
+                                          <div
+                                            key={si}
+                                            className="p-3 rounded-lg bg-muted/20 border border-border/30"
+                                          >
                                             <p className="text-xs font-medium mb-1">{sc.label}</p>
                                             <div className="flex flex-col sm:flex-row gap-2">
                                               <div className="flex-1">
-                                                <p className="text-[10px] text-muted-foreground mb-0.5">Inputs</p>
-                                                <pre className="text-[10px] font-mono bg-black/20 rounded p-1.5 overflow-x-auto">{JSON.stringify(sc.inputs, null, 1)}</pre>
+                                                <p className="text-[10px] text-muted-foreground mb-0.5">
+                                                  Inputs
+                                                </p>
+                                                <pre className="text-[10px] font-mono bg-black/20 rounded p-1.5 overflow-x-auto">
+                                                  {JSON.stringify(sc.inputs, null, 1)}
+                                                </pre>
                                               </div>
                                               <div className="flex-1">
-                                                <p className="text-[10px] text-muted-foreground mb-0.5">Expected</p>
+                                                <p className="text-[10px] text-muted-foreground mb-0.5">
+                                                  Expected
+                                                </p>
                                                 <p className="text-[11px]">{sc.expectedBehavior}</p>
                                               </div>
                                             </div>
@@ -773,11 +947,17 @@ export default function HypothesisPage() {
 
                                   {exp.apisCalledInOrder && (
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <p className="text-[10px] text-muted-foreground">Call order:</p>
+                                      <p className="text-[10px] text-muted-foreground">
+                                        Call order:
+                                      </p>
                                       {exp.apisCalledInOrder.map((a, ai) => (
                                         <span key={ai} className="flex items-center gap-1">
-                                          {ai > 0 && <ArrowRight className="w-3 h-3 text-muted-foreground" />}
-                                          <Badge variant="outline" className="text-[10px]">{a}</Badge>
+                                          {ai > 0 && (
+                                            <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                                          )}
+                                          <Badge variant="outline" className="text-[10px]">
+                                            {a}
+                                          </Badge>
                                         </span>
                                       ))}
                                     </div>
@@ -789,15 +969,28 @@ export default function HypothesisPage() {
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-2">
                                     <Microscope className="w-4 h-4 text-primary" />
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Simulated Execution</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                      Simulated Execution
+                                    </p>
                                   </div>
                                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                                     {h.execution.map((ex, ei) => (
-                                      <div key={ei} className="flex items-start gap-3 text-[11px] p-2 rounded bg-muted/10 border border-border/20">
-                                        <Badge variant="outline" className="text-[9px] shrink-0">{ex.scenario}</Badge>
-                                        <span className="text-muted-foreground shrink-0">{ex.apiName}</span>
-                                        <pre className="font-mono text-[10px] bg-black/20 rounded px-1.5 py-0.5 overflow-x-auto flex-1">{JSON.stringify(ex.output)}</pre>
-                                        <span className="text-[9px] text-muted-foreground/50 shrink-0 tabular-nums">{new Date(ex.timestamp).toLocaleTimeString()}</span>
+                                      <div
+                                        key={ei}
+                                        className="flex items-start gap-3 text-[11px] p-2 rounded bg-muted/10 border border-border/20"
+                                      >
+                                        <Badge variant="outline" className="text-[9px] shrink-0">
+                                          {ex.scenario}
+                                        </Badge>
+                                        <span className="text-muted-foreground shrink-0">
+                                          {ex.apiName}
+                                        </span>
+                                        <pre className="font-mono text-[10px] bg-black/20 rounded px-1.5 py-0.5 overflow-x-auto flex-1">
+                                          {JSON.stringify(ex.output)}
+                                        </pre>
+                                        <span className="text-[9px] text-muted-foreground/50 shrink-0 tabular-nums">
+                                          {new Date(ex.timestamp).toLocaleTimeString()}
+                                        </span>
                                       </div>
                                     ))}
                                   </div>
@@ -808,15 +1001,22 @@ export default function HypothesisPage() {
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-2">
                                     <ShieldCheck className="w-4 h-4 text-primary" />
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Validation</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                      Validation
+                                    </p>
                                   </div>
 
                                   {val.patternsFound && val.patternsFound.length > 0 && (
                                     <div>
-                                      <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">Patterns Found</p>
+                                      <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">
+                                        Patterns Found
+                                      </p>
                                       <div className="space-y-1">
                                         {val.patternsFound.map((p, pi) => (
-                                          <div key={pi} className="flex items-start gap-2 text-[11px]">
+                                          <div
+                                            key={pi}
+                                            className="flex items-start gap-2 text-[11px]"
+                                          >
                                             <TrendingUp className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" />
                                             <span>{p}</span>
                                           </div>
@@ -825,19 +1025,26 @@ export default function HypothesisPage() {
                                     </div>
                                   )}
 
-                                  {val.contradictions && val.contradictions.length > 0 && val.contradictions[0] !== "" && (
-                                    <div>
-                                      <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">Contradictions</p>
-                                      <div className="space-y-1">
-                                        {val.contradictions.filter(Boolean).map((c, ci) => (
-                                          <div key={ci} className="flex items-start gap-2 text-[11px]">
-                                            <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
-                                            <span>{c}</span>
-                                          </div>
-                                        ))}
+                                  {val.contradictions &&
+                                    val.contradictions.length > 0 &&
+                                    val.contradictions[0] !== "" && (
+                                      <div>
+                                        <p className="text-[10px] uppercase text-muted-foreground font-medium mb-1">
+                                          Contradictions
+                                        </p>
+                                        <div className="space-y-1">
+                                          {val.contradictions.filter(Boolean).map((c, ci) => (
+                                            <div
+                                              key={ci}
+                                              className="flex items-start gap-2 text-[11px]"
+                                            >
+                                              <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
+                                              <span>{c}</span>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
 
                                   {val.statisticalNote && (
                                     <div className="flex items-start gap-2 text-[11px] p-2 rounded bg-blue-500/5 border border-blue-500/20">
@@ -851,11 +1058,23 @@ export default function HypothesisPage() {
                           )}
 
                           <div className="flex items-center gap-2 pt-2 border-t border-border/30">
-                            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8" onClick={() => turnIntoApi(h)} data-testid={`button-turn-api-${i}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1.5 text-xs h-8"
+                              onClick={() => turnIntoApi(h)}
+                              data-testid={`button-turn-api-${i}`}
+                            >
                               <Package className="w-3.5 h-3.5" />
                               Turn into API
                             </Button>
-                            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-8" onClick={remix} data-testid={`button-remix-${i}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1.5 text-xs h-8"
+                              onClick={remix}
+                              data-testid={`button-remix-${i}`}
+                            >
                               <RotateCcw className="w-3.5 h-3.5" />
                               Remix
                             </Button>
@@ -877,7 +1096,10 @@ export default function HypothesisPage() {
                 <Globe className="w-5 h-5 text-primary" />
                 External API Registry
               </CardTitle>
-              <CardDescription>Register third-party APIs with their schemas and sample responses for richer hypothesis testing.</CardDescription>
+              <CardDescription>
+                Register third-party APIs with their schemas and sample responses for richer
+                hypothesis testing.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
@@ -946,7 +1168,9 @@ export default function HypothesisPage() {
 
           {externalApis.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">Registered APIs ({externalApis.length})</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Registered APIs ({externalApis.length})
+              </h3>
               {externalApis.map((api) => (
                 <Card key={api.id} className="bg-card/50">
                   <CardContent className="py-4 px-5">
@@ -956,19 +1180,29 @@ export default function HypothesisPage() {
                           <Globe className="w-4 h-4 text-blue-400 shrink-0" />
                           <p className="font-medium text-sm">{api.name}</p>
                           {api.inputSchema && (
-                            <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            >
                               <FileJson className="w-2.5 h-2.5 mr-0.5" />
                               schema
                             </Badge>
                           )}
                           {api.sampleResponse && (
-                            <Badge variant="outline" className="text-[9px] bg-blue-500/10 text-blue-400 border-blue-500/30">
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] bg-blue-500/10 text-blue-400 border-blue-500/30"
+                            >
                               sample
                             </Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1 truncate">{api.url}</p>
-                        {api.description && <p className="text-xs text-muted-foreground/70 mt-0.5">{api.description}</p>}
+                        {api.description && (
+                          <p className="text-xs text-muted-foreground/70 mt-0.5">
+                            {api.description}
+                          </p>
+                        )}
                       </div>
                       <Button
                         variant="ghost"
@@ -990,7 +1224,9 @@ export default function HypothesisPage() {
             <div className="text-center py-12 space-y-3">
               <Globe className="w-10 h-10 text-muted-foreground/30 mx-auto" />
               <p className="text-sm text-muted-foreground">No external APIs registered yet</p>
-              <p className="text-xs text-muted-foreground/60">Add external API endpoints to discover relationships with your Svivva projects</p>
+              <p className="text-xs text-muted-foreground/60">
+                Add external API endpoints to discover relationships with your Svivva projects
+              </p>
             </div>
           )}
         </TabsContent>
@@ -998,7 +1234,9 @@ export default function HypothesisPage() {
         <TabsContent value="feed" className="space-y-6 mt-6">
           {savedDiscoveries.length > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground">Saved Discoveries ({savedDiscoveries.length})</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Saved Discoveries ({savedDiscoveries.length})
+              </h3>
               {savedDiscoveries.map((d) => (
                 <Card
                   key={d.id}
@@ -1010,7 +1248,9 @@ export default function HypothesisPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold truncate">{d.question}</p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{d.summary}</p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {d.summary}
+                        </p>
                         <div className="flex items-center gap-3 mt-2">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground/60">
                             <Clock className="w-3 h-3" />
@@ -1020,13 +1260,19 @@ export default function HypothesisPage() {
                             {d.hypotheses.slice(0, 3).map((h, i) => {
                               const rc = resultConfig[h.result] || resultConfig.unclear;
                               return (
-                                <Badge key={i} variant="outline" className={`text-[9px] ${rc.color}`}>
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className={`text-[9px] ${rc.color}`}
+                                >
                                   {rc.label}
                                 </Badge>
                               );
                             })}
                             {d.hypotheses.length > 3 && (
-                              <span className="text-[10px] text-muted-foreground">+{d.hypotheses.length - 3}</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                +{d.hypotheses.length - 3}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -1036,7 +1282,10 @@ export default function HypothesisPage() {
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-foreground"
-                          onClick={(e) => { e.stopPropagation(); loadDiscovery(d); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            loadDiscovery(d);
+                          }}
                           data-testid={`button-load-${d.id}`}
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -1045,7 +1294,14 @@ export default function HypothesisPage() {
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-primary"
-                          onClick={(e) => { e.stopPropagation(); setQuestion(d.question); setSelectedIds(d.apisUsed || []); setIsEditing(true); setStep("select"); setActiveTab("discover"); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuestion(d.question);
+                            setSelectedIds(d.apisUsed || []);
+                            setIsEditing(true);
+                            setStep("select");
+                            setActiveTab("discover");
+                          }}
                           data-testid={`button-remix-feed-${d.id}`}
                         >
                           <RotateCcw className="w-4 h-4" />
@@ -1054,7 +1310,10 @@ export default function HypothesisPage() {
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-red-400"
-                          onClick={(e) => { e.stopPropagation(); deleteDiscovery(d.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDiscovery(d.id);
+                          }}
                           data-testid={`button-delete-${d.id}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1069,7 +1328,9 @@ export default function HypothesisPage() {
             <div className="text-center py-12 space-y-3">
               <Bookmark className="w-10 h-10 text-muted-foreground/30 mx-auto" />
               <p className="text-sm text-muted-foreground">No saved discoveries yet</p>
-              <p className="text-xs text-muted-foreground/60">Run a discovery and save the results to build your insight memory</p>
+              <p className="text-xs text-muted-foreground/60">
+                Run a discovery and save the results to build your insight memory
+              </p>
             </div>
           )}
         </TabsContent>

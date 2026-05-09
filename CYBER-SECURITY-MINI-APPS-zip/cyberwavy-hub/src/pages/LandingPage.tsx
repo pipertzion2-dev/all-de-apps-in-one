@@ -11,7 +11,13 @@ export function LandingPage() {
   const { slug } = useParams();
   const landing = slug ? getLandingBySlug(slug) : undefined;
   const embed = landing ? getToolForLanding(landing) : undefined;
-  const theme = embed?.theme ?? { name: "Default", primary: "#4b5320", accent: "#c4cb9c", surface: "#2a2d20", ink: "#e8ebdd" };
+  const theme = embed?.theme ?? {
+    name: "Default",
+    primary: "#4b5320",
+    accent: "#c4cb9c",
+    surface: "#2a2d20",
+    ink: "#e8ebdd",
+  };
 
   if (!landing) {
     return (
@@ -38,7 +44,14 @@ export function LandingPage() {
           <p className="breadcrumb">
             <Link to="/">Hub</Link> / lp / {landing.slug}
           </p>
-          <h1 className="app-title" style={{ fontSize: "clamp(1.35rem, 3.5vw, 2rem)", margin: "0 0 0.5rem", color: "var(--army-light)" }}>
+          <h1
+            className="app-title"
+            style={{
+              fontSize: "clamp(1.35rem, 3.5vw, 2rem)",
+              margin: "0 0 0.5rem",
+              color: "var(--army-light)",
+            }}
+          >
             {landing.h1}
           </h1>
           <p className="muted">{landing.metaDescription}</p>
@@ -68,14 +81,26 @@ export function LandingPage() {
         </section>
 
         <section className="card" style={{ marginTop: "1rem" }}>
-          <h2 className="app-title" style={{ fontSize: "1.1rem", marginTop: 0, color: "var(--army-khaki)", letterSpacing: "0.05em" }}>
+          <h2
+            className="app-title"
+            style={{
+              fontSize: "1.1rem",
+              marginTop: 0,
+              color: "var(--army-khaki)",
+              letterSpacing: "0.05em",
+            }}
+          >
             Free interactive check
           </h2>
           {embed ? (
             <>
               <p className="muted">Embedded tool: {embed.title}</p>
               <ToolBody slug={embed.slug} />
-              <AiInsightPanel toolSlug={embed.slug} toolTitle={embed.title} toolSummary={embed.shortDescription} />
+              <AiInsightPanel
+                toolSlug={embed.slug}
+                toolTitle={embed.title}
+                toolSummary={embed.shortDescription}
+              />
             </>
           ) : (
             <p>Tool unavailable.</p>

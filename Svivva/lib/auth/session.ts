@@ -19,10 +19,10 @@ const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      getOidcClientId()
+      getOidcClientId(),
     );
   },
-  { maxAge: 3600 * 1000 }
+  { maxAge: 3600 * 1000 },
 );
 
 export interface SessionUser {
@@ -70,10 +70,7 @@ async function getUserFromToken(token: string): Promise<SessionUser | null> {
 
     if (!session) return null;
 
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, session.userId));
+    const [user] = await db.select().from(users).where(eq(users.id, session.userId));
 
     if (!user) return null;
 
@@ -168,18 +165,22 @@ export async function getLoginUrl(hostname: string, redirectAfter?: string): Pro
   // callbackBase is the OAuth hostname (Replit domain) — needed to reconstruct redirect_uri in callback
   try {
     const cookieStore = await cookies();
-    cookieStore.set("oauth_state", JSON.stringify({
-      state,
-      codeVerifier,
-      redirectAfter: redirectAfter || null,
-      callbackBase: `https://${hostname}`,
-    }), {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 600,
-    });
+    cookieStore.set(
+      "oauth_state",
+      JSON.stringify({
+        state,
+        codeVerifier,
+        redirectAfter: redirectAfter || null,
+        callbackBase: `https://${hostname}`,
+      }),
+      {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 600,
+      },
+    );
   } catch {
     console.log("Could not set OAuth cookie");
   }
@@ -199,7 +200,7 @@ export async function getLoginUrl(hostname: string, redirectAfter?: string): Pro
 
 export async function handleCallback(
   currentUrl: string,
-  state: string
+  state: string,
 ): Promise<{ user: SessionUser; token: string; replitAccessToken: string | null }> {
   await ensureOauthStatesTable();
 
@@ -209,7 +210,7 @@ export async function handleCallback(
   // Try DB first
   try {
     const rows = await db.execute(
-      sql`SELECT code_verifier FROM oauth_states WHERE state = ${state} AND expires_at > NOW() LIMIT 1`
+      sql`SELECT code_verifier FROM oauth_states WHERE state = ${state} AND expires_at > NOW() LIMIT 1`,
     );
     const row = rows.rows?.[0] ?? (Array.isArray(rows) ? rows[0] : null);
     if (row?.code_verifier) {
@@ -243,14 +244,10 @@ export async function handleCallback(
     throw new Error("OAuth state not found — please try signing in again");
   }
 
-  const tokens = await client.authorizationCodeGrant(
-    config,
-    new URL(currentUrl),
-    {
-      pkceCodeVerifier: codeVerifier,
-      expectedState: state,
-    }
-  );
+  const tokens = await client.authorizationCodeGrant(config, new URL(currentUrl), {
+    pkceCodeVerifier: codeVerifier,
+    expectedState: state,
+  });
 
   const claims = tokens.claims();
 

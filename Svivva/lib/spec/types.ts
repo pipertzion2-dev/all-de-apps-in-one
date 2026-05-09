@@ -30,7 +30,7 @@ export const JsonSchemaPropertySchema: z.ZodType<JsonSchemaProperty> = z.lazy(()
     format: z.string().optional(),
     default: z.unknown().optional(),
     examples: z.array(z.unknown()).optional(),
-  })
+  }),
 );
 
 export const JsonSchemaSchema = z.object({
@@ -98,21 +98,23 @@ export const ProjectSpecSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
   description: z.string().max(1000).optional(),
-  
+
   systemPrompt: z.string().min(10).max(10000),
-  
+
   endpoints: z.array(EndpointSpecSchema).min(1),
-  
+
   examples: z.array(TrainingExampleSchema).optional(),
-  
+
   constraints: ConstraintsSchema.optional(),
-  
-  metadata: z.object({
-    author: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    category: z.string().optional(),
-    isPublic: z.boolean().optional().default(false),
-  }).optional(),
+
+  metadata: z
+    .object({
+      author: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      category: z.string().optional(),
+      isPublic: z.boolean().optional().default(false),
+    })
+    .optional(),
 });
 
 // ============================================================================

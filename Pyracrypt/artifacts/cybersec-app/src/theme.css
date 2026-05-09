@@ -1,46 +1,55 @@
 @font-face {
-  font-family: 'Decima Mono Pro';
-  src: url('/fonts/DecimaMonoPro-Regular.ttf') format('truetype');
+  font-family: "Decima Mono Pro";
+  src: url("/fonts/DecimaMonoPro-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 :root {
-  --bg:       #EDF1F7;
-  --bg2:      #E4EAF2;
-  --bg3:      #F4F7FC;
-  --text:     #1e2228;
-  --text2:    #404650;
-  --muted:    #606870;
-  --green:    #DCE5CA;
-  --green-d:  #6a9e48;
-  --pink:     #DFB2A9;
-  --pink-d:   #b87060;
-  --purple:   #AC81AF;
+  --bg: #edf1f7;
+  --bg2: #e4eaf2;
+  --bg3: #f4f7fc;
+  --text: #1e2228;
+  --text2: #404650;
+  --muted: #606870;
+  --green: #dce5ca;
+  --green-d: #6a9e48;
+  --pink: #dfb2a9;
+  --pink-d: #b87060;
+  --purple: #ac81af;
   --purple-d: #865a8a;
-  --blue:     #6D91B3;
-  --blue-d:   #3e6a9a;
-  --glass:    rgba(255,255,255,0.26);
-  --glass-h:  rgba(255,255,255,0.42);
-  --glass-b:  rgba(255,255,255,0.55);
-  --stroke:   rgba(0,0,0,0.09);
-  --stroke2:  rgba(0,0,0,0.05);
+  --blue: #6d91b3;
+  --blue-d: #3e6a9a;
+  --glass: rgba(255, 255, 255, 0.26);
+  --glass-h: rgba(255, 255, 255, 0.42);
+  --glass-b: rgba(255, 255, 255, 0.55);
+  --stroke: rgba(0, 0, 0, 0.09);
+  --stroke2: rgba(0, 0, 0, 0.05);
   --wire-metal: #8a8870;
-  --wire-shadow:#505048;
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.14);
-  --shadow-md: 0 4px 18px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.22);
+  --wire-shadow: #505048;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.14);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.18), 0 1px 4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.22);
 }
 
 /* Noise data URI used inline on colored elements */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+}
 
 body {
-  font-family: 'Decima Mono Pro', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
+  font-family:
+    "Decima Mono Pro", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -49,7 +58,7 @@ body {
 
 /* ── Subtle global film grain (lighter on light bg) ── */
 body::after {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   z-index: 9000;
@@ -61,19 +70,36 @@ body::after {
 }
 
 @keyframes grain-shift {
-  0%   { background-position: 0 0; }
-  33%  { background-position: 7px -5px; }
-  66%  { background-position: -5px 9px; }
-  100% { background-position: 4px -3px; }
+  0% {
+    background-position: 0 0;
+  }
+  33% {
+    background-position: 7px -5px;
+  }
+  66% {
+    background-position: -5px 9px;
+  }
+  100% {
+    background-position: 4px -3px;
+  }
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 9999px; }
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 9999px;
+}
 
 /* ── Section padding ── */
-.section-pad { padding: 96px 80px; }
+.section-pad {
+  padding: 96px 80px;
+}
 
 /* ── Hero ── */
 .hero-full {
@@ -93,18 +119,38 @@ body::after {
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .hero-full { padding: 100px 24px 56px; }
-  .features-grid { grid-template-columns: 1fr; }
-  .section-pad { padding: 60px 20px !important; }
-  .nav-desktop { display: none !important; }
-  .hide-mobile { display: none !important; }
+  .hero-full {
+    padding: 100px 24px 56px;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .section-pad {
+    padding: 60px 20px !important;
+  }
+  .nav-desktop {
+    display: none !important;
+  }
+  .hide-mobile {
+    display: none !important;
+  }
 }
 
 @media (max-width: 600px) {
-  .hero-full { padding: 88px 16px 44px; }
-  .section-pad { padding: 44px 16px !important; }
-  .cta-row { flex-direction: column !important; align-items: stretch !important; }
-  .cta-row button { width: 100% !important; justify-content: center !important; }
+  .hero-full {
+    padding: 88px 16px 44px;
+  }
+  .section-pad {
+    padding: 44px 16px !important;
+  }
+  .cta-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .cta-row button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
 }
 
 /* ── LED buttons ── */
@@ -125,7 +171,9 @@ body::after {
   -ms-overflow-style: none;
   padding-bottom: 1px;
 }
-.led-rail-inner::-webkit-scrollbar { display: none; }
+.led-rail-inner::-webkit-scrollbar {
+  display: none;
+}
 
 /* ── Mobile: equal-width buttons filling the full rail ── */
 @media (max-width: 700px) {
@@ -151,15 +199,29 @@ body::after {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 18px;
 }
-.dash-col-full { grid-column: 1 / 4; }
-.dash-col-main { grid-column: 1 / 3; }
-.dash-col-side { grid-column: 3; }
+.dash-col-full {
+  grid-column: 1 / 4;
+}
+.dash-col-main {
+  grid-column: 1 / 3;
+}
+.dash-col-side {
+  grid-column: 3;
+}
 
 @media (max-width: 900px) {
-  .dash-grid { grid-template-columns: 1fr; }
-  .dash-col-full { grid-column: 1; }
-  .dash-col-main { grid-column: 1; }
-  .dash-col-side { grid-column: 1; }
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-col-full {
+    grid-column: 1;
+  }
+  .dash-col-main {
+    grid-column: 1;
+  }
+  .dash-col-side {
+    grid-column: 1;
+  }
 }
 
 /* ── Dashboard header ── */
@@ -185,10 +247,34 @@ body::after {
   flex-wrap: wrap;
 }
 @media (max-width: 600px) {
-  .metrics-row { gap: 16px; justify-content: center; }
-  .metrics-system-info { display: none; }
+  .metrics-row {
+    gap: 16px;
+    justify-content: center;
+  }
+  .metrics-system-info {
+    display: none;
+  }
 }
 
 /* ── Animations ── */
-@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.8)} }
-@keyframes slide-in  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

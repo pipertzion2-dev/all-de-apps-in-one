@@ -3,7 +3,16 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
-import { CheckCircle2, Circle, AlertCircle, ExternalLink, TrendingUp, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  AlertCircle,
+  ExternalLink,
+  TrendingUp,
+  Zap,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import Link from "next/link";
 import {
   getPublicSiteUrl,
@@ -52,8 +61,10 @@ interface Props {
 }
 
 function statusIcon(s: TaskStatus) {
-  if (s === "done") return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />;
-  if (s === "warn") return <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />;
+  if (s === "done")
+    return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />;
+  if (s === "warn")
+    return <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />;
   if (s === "auto") return <Zap className="w-3.5 h-3.5 text-[#5BA8A0] flex-shrink-0 mt-0.5" />;
   return <Circle className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />;
 }
@@ -77,13 +88,19 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
     try {
       const saved = JSON.parse(localStorage.getItem(MANUAL_STORAGE_KEY) || "{}");
       setManualDone(saved);
-    } catch { /**/ }
+    } catch {
+      /**/
+    }
   }, []);
 
   const toggleManual = (id: string) => {
     setManualDone((prev) => {
       const next = { ...prev, [id]: !prev[id] };
-      try { localStorage.setItem(MANUAL_STORAGE_KEY, JSON.stringify(next)); } catch { /**/ }
+      try {
+        localStorage.setItem(MANUAL_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        /**/
+      }
       return next;
     });
   };
@@ -120,14 +137,18 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-indexnow-key",
           label: "IndexNow key set up",
-          detail: orbitStatus?.indexNowKey ? "Key exists in DB — search engines will accept URL submissions" : `Run 'Set Up IndexNow' in the ${ORBIT_HOST} tab`,
+          detail: orbitStatus?.indexNowKey
+            ? "Key exists in DB — search engines will accept URL submissions"
+            : `Run 'Set Up IndexNow' in the ${ORBIT_HOST} tab`,
           status: orbitStatus?.indexNowKey ? "done" : "missing",
           priority: "high",
         },
         {
           id: "tech-indexnow-submitted",
           label: "URLs submitted via IndexNow",
-          detail: orbitStatus?.indexNowSubmitted ? "Bing/Yandex/Yahoo notified — automated weekly" : "Run IndexNow step or click 'Run Weekly Tasks' in Growth Engine",
+          detail: orbitStatus?.indexNowSubmitted
+            ? "Bing/Yandex/Yahoo notified — automated weekly"
+            : "Run IndexNow step or click 'Run Weekly Tasks' in Growth Engine",
           status: orbitStatus?.indexNowSubmitted ? "auto" : "missing",
           priority: "high",
         },
@@ -142,7 +163,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-gsc-sitemap",
           label: "Sitemap submitted in Google Search Console",
-          detail: manualDone["tech-gsc-sitemap"] ? "Done ✓" : `GSC → Sitemaps → paste ${ORBIT_SITEMAP} → Submit. Without this, Google will not crawl your site.`,
+          detail: manualDone["tech-gsc-sitemap"]
+            ? "Done ✓"
+            : `GSC → Sitemaps → paste ${ORBIT_SITEMAP} → Submit. Without this, Google will not crawl your site.`,
           status: manualDone["tech-gsc-sitemap"] ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "Open GSC →",
@@ -151,15 +174,27 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-schema-jsonld",
           label: "Schema.org JSON-LD added to homepage",
-          detail: manualDone["tech-schema-jsonld"] ? "Done ✓" : "Orbit generated this (svivva-schema step results). Copy the JSON-LD → paste into your homepage <head>. Enables rich results.",
-          status: orbitStepDone("svivva-schema") ? (manualDone["tech-schema-jsonld"] ? "done" : "warn") : "missing",
+          detail: manualDone["tech-schema-jsonld"]
+            ? "Done ✓"
+            : "Orbit generated this (svivva-schema step results). Copy the JSON-LD → paste into your homepage <head>. Enables rich results.",
+          status: orbitStepDone("svivva-schema")
+            ? manualDone["tech-schema-jsonld"]
+              ? "done"
+              : "warn"
+            : "missing",
           priority: "medium",
         },
         {
           id: "tech-rich-results",
           label: "Rich results test passed",
-          detail: manualDone["tech-rich-results"] ? "Done ✓" : `After adding JSON-LD: test at search.google.com/test/rich-results → paste ${ORBIT_HOST}`,
-          status: manualDone["tech-rich-results"] ? "done" : (manualDone["tech-schema-jsonld"] ? "warn" : "missing"),
+          detail: manualDone["tech-rich-results"]
+            ? "Done ✓"
+            : `After adding JSON-LD: test at search.google.com/test/rich-results → paste ${ORBIT_HOST}`,
+          status: manualDone["tech-rich-results"]
+            ? "done"
+            : manualDone["tech-schema-jsonld"]
+              ? "warn"
+              : "missing",
           link: "https://search.google.com/test/rich-results",
           linkLabel: "Test now →",
           priority: "low",
@@ -173,79 +208,151 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "content-seo-pages",
           label: `SEO landing pages (${orbitStatus?.seoPages ?? 0}/40 created)`,
-          detail: (orbitStatus?.seoPages ?? 0) >= 40 ? "All 40 pages created and live — automated weekly" : `${orbitStatus?.seoPages ?? 0} pages exist. Run 'SEO Landing Pages' in the ${ORBIT_HOST} tab to create more.`,
-          status: (orbitStatus?.seoPages ?? 0) >= 40 ? "auto" : orbitStepDone("svivva-seo-pages") ? "done" : "missing",
+          detail:
+            (orbitStatus?.seoPages ?? 0) >= 40
+              ? "All 40 pages created and live — automated weekly"
+              : `${orbitStatus?.seoPages ?? 0} pages exist. Run 'SEO Landing Pages' in the ${ORBIT_HOST} tab to create more.`,
+          status:
+            (orbitStatus?.seoPages ?? 0) >= 40
+              ? "auto"
+              : orbitStepDone("svivva-seo-pages")
+                ? "done"
+                : "missing",
         },
         {
           id: "content-comparisons",
           label: `Competitor comparison pages (${orbitStatus?.comparisons ?? 0}/20)`,
-          detail: (orbitStatus?.comparisons ?? 0) >= 20 ? "All 20 comparison pages live" : `Run 'Competitor Comparisons' step in Orbit`,
-          status: (orbitStatus?.comparisons ?? 0) >= 20 ? "done" : orbitStepDone("svivva-comparisons") ? "done" : "missing",
+          detail:
+            (orbitStatus?.comparisons ?? 0) >= 20
+              ? "All 20 comparison pages live"
+              : `Run 'Competitor Comparisons' step in Orbit`,
+          status:
+            (orbitStatus?.comparisons ?? 0) >= 20
+              ? "done"
+              : orbitStepDone("svivva-comparisons")
+                ? "done"
+                : "missing",
           priority: "high",
         },
         {
           id: "content-blog",
           label: `Blog posts (${orbitStatus?.blogPosts ?? 0}/10 published)`,
-          detail: (orbitStatus?.blogPosts ?? 0) >= 10 ? "10 blog posts live" : "Run 'SEO Blog Articles' step in Orbit",
-          status: (orbitStatus?.blogPosts ?? 0) >= 10 ? "done" : orbitStepDone("svivva-blog") ? "done" : "missing",
+          detail:
+            (orbitStatus?.blogPosts ?? 0) >= 10
+              ? "10 blog posts live"
+              : "Run 'SEO Blog Articles' step in Orbit",
+          status:
+            (orbitStatus?.blogPosts ?? 0) >= 10
+              ? "done"
+              : orbitStepDone("svivva-blog")
+                ? "done"
+                : "missing",
         },
         {
           id: "content-aeo",
           label: `AEO pages for AI search (${orbitStatus?.aeoPages ?? 0}/15)`,
-          detail: (orbitStatus?.aeoPages ?? 0) >= 15 ? "15 AEO pages live — Perplexity/ChatGPT will cite these" : "Run 'AI Search Optimization' step in Orbit",
-          status: (orbitStatus?.aeoPages ?? 0) >= 15 ? "done" : orbitStepDone("svivva-aeo") ? "done" : "missing",
+          detail:
+            (orbitStatus?.aeoPages ?? 0) >= 15
+              ? "15 AEO pages live — Perplexity/ChatGPT will cite these"
+              : "Run 'AI Search Optimization' step in Orbit",
+          status:
+            (orbitStatus?.aeoPages ?? 0) >= 15
+              ? "done"
+              : orbitStepDone("svivva-aeo")
+                ? "done"
+                : "missing",
           priority: "high",
         },
         {
           id: "content-integrations",
           label: `Integration pages — Svivva + [Tool] (${orbitStatus?.integrationPages ?? 0}/30)`,
-          detail: (orbitStatus?.integrationPages ?? 0) >= 20 ? "Integration pages live — targeting 'tool + AI API' searches" : "Run '30 Integration Pages' step in Orbit",
-          status: (orbitStatus?.integrationPages ?? 0) >= 20 ? "done" : orbitStepDone("svivva-integrations") ? "done" : "missing",
+          detail:
+            (orbitStatus?.integrationPages ?? 0) >= 20
+              ? "Integration pages live — targeting 'tool + AI API' searches"
+              : "Run '30 Integration Pages' step in Orbit",
+          status:
+            (orbitStatus?.integrationPages ?? 0) >= 20
+              ? "done"
+              : orbitStepDone("svivva-integrations")
+                ? "done"
+                : "missing",
           priority: "high",
         },
         {
           id: "content-usecases",
           label: `Industry use case pages (${orbitStatus?.usecasePages ?? 0}/20)`,
-          detail: (orbitStatus?.usecasePages ?? 0) >= 15 ? "Industry use case pages live — targeting decision-maker searches" : "Run '20 Industry Use Case Pages' step in Orbit",
-          status: (orbitStatus?.usecasePages ?? 0) >= 15 ? "done" : orbitStepDone("svivva-usecases") ? "done" : "missing",
+          detail:
+            (orbitStatus?.usecasePages ?? 0) >= 15
+              ? "Industry use case pages live — targeting decision-maker searches"
+              : "Run '20 Industry Use Case Pages' step in Orbit",
+          status:
+            (orbitStatus?.usecasePages ?? 0) >= 15
+              ? "done"
+              : orbitStepDone("svivva-usecases")
+                ? "done"
+                : "missing",
           priority: "high",
         },
         {
           id: "content-templates",
           label: `API template library (${orbitStatus?.templatePages ?? 0}/25)`,
-          detail: (orbitStatus?.templatePages ?? 0) >= 20 ? "Template pages live — targeting 'build X API' developer searches" : "Run '25 API Template Pages' step in Orbit",
-          status: (orbitStatus?.templatePages ?? 0) >= 20 ? "done" : orbitStepDone("svivva-templates") ? "done" : "missing",
+          detail:
+            (orbitStatus?.templatePages ?? 0) >= 20
+              ? "Template pages live — targeting 'build X API' developer searches"
+              : "Run '25 API Template Pages' step in Orbit",
+          status:
+            (orbitStatus?.templatePages ?? 0) >= 20
+              ? "done"
+              : orbitStepDone("svivva-templates")
+                ? "done"
+                : "missing",
         },
         {
           id: "content-paa",
           label: `People Also Ask domination (${orbitStatus?.paaPages ?? 0}/15)`,
-          detail: (orbitStatus?.paaPages ?? 0) >= 10 ? "PAA pages live — appearing in Google PAA boxes + Perplexity citations" : "Run 'People Also Ask Domination' step in Orbit",
-          status: (orbitStatus?.paaPages ?? 0) >= 10 ? "done" : orbitStepDone("svivva-paa") ? "done" : "missing",
+          detail:
+            (orbitStatus?.paaPages ?? 0) >= 10
+              ? "PAA pages live — appearing in Google PAA boxes + Perplexity citations"
+              : "Run 'People Also Ask Domination' step in Orbit",
+          status:
+            (orbitStatus?.paaPages ?? 0) >= 10
+              ? "done"
+              : orbitStepDone("svivva-paa")
+                ? "done"
+                : "missing",
           priority: "high",
         },
         {
           id: "content-parasite",
           label: "Parasite SEO articles drafted",
-          detail: orbitStepDone("svivva-parasite") ? "Articles generated — need to be published on platforms (see below)" : "Run 'Parasite SEO Articles' step in Orbit",
+          detail: orbitStepDone("svivva-parasite")
+            ? "Articles generated — need to be published on platforms (see below)"
+            : "Run 'Parasite SEO Articles' step in Orbit",
           status: orbitStepDone("svivva-parasite") ? "warn" : "missing",
           priority: "high",
         },
         {
           id: "content-social-pack",
           label: "Social launch pack drafted",
-          detail: orbitStepDone("svivva-social") ? "Twitter thread, LinkedIn, Product Hunt copy generated" : "Run 'Full Social Launch Pack' step",
+          detail: orbitStepDone("svivva-social")
+            ? "Twitter thread, LinkedIn, Product Hunt copy generated"
+            : "Run 'Full Social Launch Pack' step",
           status: orbitStepDone("svivva-social") ? "warn" : "missing",
         },
         {
           id: "content-community",
           label: "Community post drafts ready",
-          detail: orbitStepDone("svivva-communities") ? "Reddit, Show HN, IH posts drafted — need manual posting" : "Run 'Community Strategy Pack' step",
+          detail: orbitStepDone("svivva-communities")
+            ? "Reddit, Show HN, IH posts drafted — need manual posting"
+            : "Run 'Community Strategy Pack' step",
           status: orbitStepDone("svivva-communities") ? "warn" : "missing",
         },
         {
           id: "content-outreach",
           label: "PR / newsletter / podcast pitches drafted",
-          detail: orbitStepDone("svivva-outreach") ? "Press release + 10 newsletter pitches + 8 podcast pitches generated" : "Run 'PR & Newsletter Pitches' step",
+          detail: orbitStepDone("svivva-outreach")
+            ? "Press release + 10 newsletter pitches + 8 podcast pitches generated"
+            : "Run 'PR & Newsletter Pitches' step",
           status: orbitStepDone("svivva-outreach") ? "warn" : "missing",
         },
       ],
@@ -257,7 +364,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-devto",
           label: "Dev.to parasite article published",
-          detail: manualDone["manual-devto"] ? "Done ✓" : "Copy article from Orbit parasite results → dev.to/new → publish. DA 94 — ranks within days.",
+          detail: manualDone["manual-devto"]
+            ? "Done ✓"
+            : "Copy article from Orbit parasite results → dev.to/new → publish. DA 94 — ranks within days.",
           status: manualDone["manual-devto"] ? "done" : "missing",
           link: "https://dev.to/new",
           linkLabel: "dev.to →",
@@ -266,7 +375,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-medium",
           label: "Medium article published",
-          detail: manualDone["manual-medium"] ? "Done ✓" : "Copy from Orbit results → medium.com/new-story → publish. DA 96.",
+          detail: manualDone["manual-medium"]
+            ? "Done ✓"
+            : "Copy from Orbit results → medium.com/new-story → publish. DA 96.",
           status: manualDone["manual-medium"] ? "done" : "missing",
           link: "https://medium.com/new-story",
           linkLabel: "Medium →",
@@ -275,7 +386,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-hashnode",
           label: "Hashnode article published",
-          detail: manualDone["manual-hashnode"] ? "Done ✓" : "Copy from Orbit results → hashnode.com → publish",
+          detail: manualDone["manual-hashnode"]
+            ? "Done ✓"
+            : "Copy from Orbit results → hashnode.com → publish",
           status: manualDone["manual-hashnode"] ? "done" : "missing",
           link: "https://hashnode.com",
           linkLabel: "Hashnode →",
@@ -283,7 +396,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-reddit-sideproject",
           label: "Reddit r/SideProject post submitted",
-          detail: manualDone["manual-reddit-sideproject"] ? "Done ✓" : "Copy post from Orbit community pack → post. Don't cross-post to multiple subs at once — start with r/SideProject.",
+          detail: manualDone["manual-reddit-sideproject"]
+            ? "Done ✓"
+            : "Copy post from Orbit community pack → post. Don't cross-post to multiple subs at once — start with r/SideProject.",
           status: manualDone["manual-reddit-sideproject"] ? "done" : "missing",
           link: "https://reddit.com/r/SideProject/submit",
           linkLabel: "r/SideProject →",
@@ -292,7 +407,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-showhn",
           label: "Show HN submitted on Hacker News",
-          detail: manualDone["manual-showhn"] ? "Done ✓" : "Submit at news.ycombinator.com/submit — title must start with 'Show HN:'. Best time: 9am–12pm EST weekdays.",
+          detail: manualDone["manual-showhn"]
+            ? "Done ✓"
+            : "Submit at news.ycombinator.com/submit — title must start with 'Show HN:'. Best time: 9am–12pm EST weekdays.",
           status: manualDone["manual-showhn"] ? "done" : "missing",
           link: "https://news.ycombinator.com/submit",
           linkLabel: "HN →",
@@ -301,7 +418,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-producthunt",
           label: "Product Hunt launch submitted",
-          detail: manualDone["manual-producthunt"] ? "Done ✓" : "Biggest single-day traffic spike possible. Copy copy from Orbit social pack → submit at 12:01am PST for full day of votes.",
+          detail: manualDone["manual-producthunt"]
+            ? "Done ✓"
+            : "Biggest single-day traffic spike possible. Copy copy from Orbit social pack → submit at 12:01am PST for full day of votes.",
           status: manualDone["manual-producthunt"] ? "done" : "missing",
           link: "https://www.producthunt.com/posts/new",
           linkLabel: "Product Hunt →",
@@ -310,7 +429,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-twitter-thread",
           label: "Twitter/X launch thread posted",
-          detail: manualDone["manual-twitter-thread"] ? "Done ✓" : "Post the thread from Orbit social pack. Hook tweet first, then reply with each numbered tweet.",
+          detail: manualDone["manual-twitter-thread"]
+            ? "Done ✓"
+            : "Post the thread from Orbit social pack. Hook tweet first, then reply with each numbered tweet.",
           status: manualDone["manual-twitter-thread"] ? "done" : "missing",
           link: "https://twitter.com/compose/tweet",
           linkLabel: "Twitter →",
@@ -318,7 +439,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-linkedin",
           label: "LinkedIn post published",
-          detail: manualDone["manual-linkedin"] ? "Done ✓" : "Post LinkedIn copy from Orbit social pack. Best time: Tuesday 8–10am.",
+          detail: manualDone["manual-linkedin"]
+            ? "Done ✓"
+            : "Post LinkedIn copy from Orbit social pack. Best time: Tuesday 8–10am.",
           status: manualDone["manual-linkedin"] ? "done" : "missing",
           link: "https://www.linkedin.com/feed/",
           linkLabel: "LinkedIn →",
@@ -326,7 +449,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-indiehackers",
           label: "Indie Hackers product listed",
-          detail: manualDone["manual-indiehackers"] ? "Done ✓" : "Add Svivva to indiehackers.com/products — write a milestone post. Great for early traction.",
+          detail: manualDone["manual-indiehackers"]
+            ? "Done ✓"
+            : "Add Svivva to indiehackers.com/products — write a milestone post. Great for early traction.",
           status: manualDone["manual-indiehackers"] ? "done" : "missing",
           link: "https://www.indiehackers.com/products",
           linkLabel: "IH →",
@@ -334,14 +459,18 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-newsletters",
           label: "Newsletter pitches sent (TLDR AI, Ben's Bites, etc.)",
-          detail: manualDone["manual-newsletters"] ? "Done ✓" : "Copy pitch emails from Orbit outreach results → send from your inbox. Reach: 4M+ readers combined.",
+          detail: manualDone["manual-newsletters"]
+            ? "Done ✓"
+            : "Copy pitch emails from Orbit outreach results → send from your inbox. Reach: 4M+ readers combined.",
           status: manualDone["manual-newsletters"] ? "done" : "missing",
           priority: "medium",
         },
         {
           id: "manual-podcasts",
           label: "Podcast pitches sent",
-          detail: manualDone["manual-podcasts"] ? "Done ✓" : "Copy pitch emails from Orbit outreach results → send. AI/tech shows always need guests.",
+          detail: manualDone["manual-podcasts"]
+            ? "Done ✓"
+            : "Copy pitch emails from Orbit outreach results → send. AI/tech shows always need guests.",
           status: manualDone["manual-podcasts"] ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Generate more →",
@@ -349,7 +478,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-gsc-indexing",
           label: "Key pages requested for Google indexing",
-          detail: manualDone["manual-gsc-indexing"] ? "Done ✓" : "GSC → URL Inspection → paste each URL → Request Indexing. Do: /, /pyracrypt, /blog, /tools, and 5-10 SEO pages.",
+          detail: manualDone["manual-gsc-indexing"]
+            ? "Done ✓"
+            : "GSC → URL Inspection → paste each URL → Request Indexing. Do: /, /pyracrypt, /blog, /tools, and 5-10 SEO pages.",
           status: manualDone["manual-gsc-indexing"] ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "GSC →",
@@ -364,7 +495,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-producthunt",
           label: "Product Hunt listing",
-          detail: manualDone["dir-producthunt"] ? "Done ✓" : "Submit Svivva to Product Hunt (separate from the launch — this is just getting listed)",
+          detail: manualDone["dir-producthunt"]
+            ? "Done ✓"
+            : "Submit Svivva to Product Hunt (separate from the launch — this is just getting listed)",
           status: manualDone["dir-producthunt"] ? "done" : "missing",
           link: "https://www.producthunt.com/posts/new",
           linkLabel: "Submit →",
@@ -373,7 +506,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-futurepedia",
           label: "Futurepedia submitted (500K/mo visitors)",
-          detail: manualDone["dir-futurepedia"] ? "Done ✓" : "Use Growth Engine to track and open the submit link",
+          detail: manualDone["dir-futurepedia"]
+            ? "Done ✓"
+            : "Use Growth Engine to track and open the submit link",
           status: manualDone["dir-futurepedia"] ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Growth Engine →",
@@ -382,7 +517,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-taaft",
           label: "There's An AI For That (2M/mo visitors)",
-          detail: manualDone["dir-taaft"] ? "Done ✓" : "Highest-traffic AI directory. Open via Growth Engine.",
+          detail: manualDone["dir-taaft"]
+            ? "Done ✓"
+            : "Highest-traffic AI directory. Open via Growth Engine.",
           status: manualDone["dir-taaft"] ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Growth Engine →",
@@ -391,7 +528,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-g2",
           label: "G2 listing created (8M/mo visitors)",
-          detail: manualDone["dir-g2"] ? "Done ✓" : "Biggest SaaS review site. Requires a few reviews to rank but huge traffic.",
+          detail: manualDone["dir-g2"]
+            ? "Done ✓"
+            : "Biggest SaaS review site. Requires a few reviews to rank but huge traffic.",
           status: manualDone["dir-g2"] ? "done" : "missing",
           link: "https://sell.g2.com",
           linkLabel: "G2 →",
@@ -400,7 +539,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-alternativeto",
           label: "AlternativeTo listed as Zapier alternative",
-          detail: manualDone["dir-alternativeto"] ? "Done ✓" : "List Svivva AND mark it as alternative to Zapier, Make, n8n. Captures high-intent searches.",
+          detail: manualDone["dir-alternativeto"]
+            ? "Done ✓"
+            : "List Svivva AND mark it as alternative to Zapier, Make, n8n. Captures high-intent searches.",
           status: manualDone["dir-alternativeto"] ? "done" : "missing",
           link: "https://alternativeto.net/add-app/",
           linkLabel: "AlternativeTo →",
@@ -409,7 +550,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-crunchbase",
           label: "Crunchbase company page created",
-          detail: manualDone["dir-crunchbase"] ? "Done ✓" : "Essential for startup credibility. High-DA backlink. Free to create.",
+          detail: manualDone["dir-crunchbase"]
+            ? "Done ✓"
+            : "Essential for startup credibility. High-DA backlink. Free to create.",
           status: manualDone["dir-crunchbase"] ? "done" : "missing",
           link: "https://www.crunchbase.com/add-new",
           linkLabel: "Crunchbase →",
@@ -418,7 +561,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-growth-engine-overall",
           label: `Growth Engine: ${dirStats.submitted}/${dirStats.total} directories submitted`,
-          detail: dirStats.submitted === 0 ? "Open Growth Engine to start tracking directory submissions" : `${dirStats.live} live listings confirmed. ${dirStats.total - dirStats.submitted} directories remaining.`,
+          detail:
+            dirStats.submitted === 0
+              ? "Open Growth Engine to start tracking directory submissions"
+              : `${dirStats.live} live listings confirmed. ${dirStats.total - dirStats.submitted} directories remaining.`,
           status: dirStats.submitted === 0 ? "missing" : dirStats.live > 10 ? "done" : "warn",
           link: "/dashboard/growth",
           linkLabel: "Open Growth Engine →",
@@ -433,7 +579,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-email-list",
           label: "Email list set up (Substack or Beehiiv)",
-          detail: manualDone["acc-email-list"] ? "Done ✓" : "Critical long-term asset. Create a free Beehiiv or Substack newsletter → link from your homepage. Even 100 subscribers compounds over months.",
+          detail: manualDone["acc-email-list"]
+            ? "Done ✓"
+            : "Critical long-term asset. Create a free Beehiiv or Substack newsletter → link from your homepage. Even 100 subscribers compounds over months.",
           status: manualDone["acc-email-list"] ? "done" : "missing",
           link: "https://www.beehiiv.com",
           linkLabel: "Beehiiv →",
@@ -442,14 +590,18 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-twitter",
           label: "Twitter/X account active",
-          detail: manualDone["acc-twitter"] ? "Done ✓" : "Consistent presence matters more than follower count. Post once/day using Growth Engine content.",
+          detail: manualDone["acc-twitter"]
+            ? "Done ✓"
+            : "Consistent presence matters more than follower count. Post once/day using Growth Engine content.",
           status: manualDone["acc-twitter"] ? "done" : "missing",
           priority: "medium",
         },
         {
           id: "acc-linkedin",
           label: "LinkedIn company page created",
-          detail: manualDone["acc-linkedin"] ? "Done ✓" : `Create company page → link from ${ORBIT_SITE} → adds credibility and a dofollow backlink.`,
+          detail: manualDone["acc-linkedin"]
+            ? "Done ✓"
+            : `Create company page → link from ${ORBIT_SITE} → adds credibility and a dofollow backlink.`,
           status: manualDone["acc-linkedin"] ? "done" : "missing",
           link: "https://www.linkedin.com/company/setup/new/",
           linkLabel: "LinkedIn →",
@@ -457,8 +609,14 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-powered-by",
           label: "'Powered by Svivva' widgets added to mini apps",
-          detail: manualDone["acc-powered-by"] ? "Done ✓" : "Run 'Powered by Svivva Widget' step in Tools Repl tab → copy HTML to each mini app. Each mini app becomes a traffic referral channel.",
-          status: orbitStepDone("mini-embed") ? (manualDone["acc-powered-by"] ? "done" : "warn") : "missing",
+          detail: manualDone["acc-powered-by"]
+            ? "Done ✓"
+            : "Run 'Powered by Svivva Widget' step in Tools Repl tab → copy HTML to each mini app. Each mini app becomes a traffic referral channel.",
+          status: orbitStepDone("mini-embed")
+            ? manualDone["acc-powered-by"]
+              ? "done"
+              : "warn"
+            : "missing",
           link: "/dashboard/launchpad",
           linkLabel: "Run in Orbit →",
           priority: "high",
@@ -466,7 +624,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-badge",
           label: "Developer 'Built with Svivva' badge deployed",
-          detail: manualDone["acc-badge"] ? "Done ✓" : `Share ${ORBIT_SITE}/badge with users — each embed = a backlink + brand impression. Add the badge to your own GitHub repos too.`,
+          detail: manualDone["acc-badge"]
+            ? "Done ✓"
+            : `Share ${ORBIT_SITE}/badge with users — each embed = a backlink + brand impression. Add the badge to your own GitHub repos too.`,
           status: manualDone["acc-badge"] ? "done" : "missing",
           link: "/badge",
           linkLabel: "Badge page →",
@@ -475,7 +635,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-free-pr",
           label: "Press release submitted to PR sites",
-          detail: manualDone["acc-free-pr"] ? "Done ✓" : "Use Growth Engine → AI Copy Engine → 'Press Release' → submit to PRLog, OpenPR, PR.com. All free, all indexed by Google within 24h.",
+          detail: manualDone["acc-free-pr"]
+            ? "Done ✓"
+            : "Use Growth Engine → AI Copy Engine → 'Press Release' → submit to PRLog, OpenPR, PR.com. All free, all indexed by Google within 24h.",
           status: manualDone["acc-free-pr"] ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Generate PR →",
@@ -496,7 +658,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "auto-growth-tasks",
           label: `Weekly growth tasks (last run: ${lastGrowthRun ? new Date(lastGrowthRun).toLocaleDateString() : "never"})`,
-          detail: lastGrowthRun ? "Automated — sitemap pings + IndexNow every 7 days" : "Click 'Run Weekly Tasks' in Growth Engine to start",
+          detail: lastGrowthRun
+            ? "Automated — sitemap pings + IndexNow every 7 days"
+            : "Click 'Run Weekly Tasks' in Growth Engine to start",
           status: lastGrowthRun ? "auto" : "warn",
           link: "/dashboard/growth",
           linkLabel: "Growth Engine →",
@@ -504,7 +668,9 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "auto-content-velocity",
           label: "Publishing new SEO content weekly",
-          detail: manualDone["auto-content-velocity"] ? "Done ✓" : "Use Growth Engine → AI Copy Engine to generate a new blog outline or AEO piece weekly. Google rewards publishing frequency.",
+          detail: manualDone["auto-content-velocity"]
+            ? "Done ✓"
+            : "Use Growth Engine → AI Copy Engine to generate a new blog outline or AEO piece weekly. Google rewards publishing frequency.",
           status: manualDone["auto-content-velocity"] ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Generate content →",
@@ -519,16 +685,24 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
   const doneTasks = allTasks.filter((t) => {
     if (t.status === "auto") return true;
     if (t.status === "done") return true;
-    if (t.id.startsWith("manual-") || t.id.startsWith("acc-") || t.id.startsWith("dir-") || t.id === "auto-content-velocity") return manualDone[t.id];
+    if (
+      t.id.startsWith("manual-") ||
+      t.id.startsWith("acc-") ||
+      t.id.startsWith("dir-") ||
+      t.id === "auto-content-velocity"
+    )
+      return manualDone[t.id];
     return false;
   }).length;
 
-  const highPriorityPending = allTasks.filter((t) => {
-    if (t.priority !== "high") return false;
-    if (t.status === "auto" || t.status === "done") return false;
-    if (manualDone[t.id]) return false;
-    return true;
-  }).slice(0, 3);
+  const highPriorityPending = allTasks
+    .filter((t) => {
+      if (t.priority !== "high") return false;
+      if (t.status === "auto" || t.status === "done") return false;
+      if (manualDone[t.id]) return false;
+      return true;
+    })
+    .slice(0, 3);
 
   return (
     <div className="space-y-4">
@@ -540,44 +714,70 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               <TrendingUp className="w-3.5 h-3.5" style={{ color: TEAL }} />
               Marketing Completion
             </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{doneTasks}/{allTasks.length} tasks complete</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {doneTasks}/{allTasks.length} tasks complete
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-black tabular-nums" style={{ color: TEAL }}>{Math.round(doneTasks / allTasks.length * 100)}%</p>
+            <p className="text-2xl font-black tabular-nums" style={{ color: TEAL }}>
+              {Math.round((doneTasks / allTasks.length) * 100)}%
+            </p>
           </div>
         </div>
         <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.round(doneTasks / allTasks.length * 100)}%`, background: TEAL }} />
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${Math.round((doneTasks / allTasks.length) * 100)}%`,
+              background: TEAL,
+            }}
+          />
         </div>
 
         {/* Legend */}
         <div className="flex flex-wrap gap-3 text-[10px]">
-          <span className="flex items-center gap-1 text-emerald-500"><CheckCircle2 className="w-3 h-3" /> Done</span>
-          <span className="flex items-center gap-1 text-[#5BA8A0]"><Zap className="w-3 h-3" /> Automated</span>
-          <span className="flex items-center gap-1 text-amber-500"><AlertCircle className="w-3 h-3" /> Generated — needs posting</span>
-          <span className="flex items-center gap-1 text-muted-foreground/60"><Circle className="w-3 h-3" /> Not done yet</span>
+          <span className="flex items-center gap-1 text-emerald-500">
+            <CheckCircle2 className="w-3 h-3" /> Done
+          </span>
+          <span className="flex items-center gap-1 text-[#5BA8A0]">
+            <Zap className="w-3 h-3" /> Automated
+          </span>
+          <span className="flex items-center gap-1 text-amber-500">
+            <AlertCircle className="w-3 h-3" /> Generated — needs posting
+          </span>
+          <span className="flex items-center gap-1 text-muted-foreground/60">
+            <Circle className="w-3 h-3" /> Not done yet
+          </span>
         </div>
       </div>
 
       {/* Next actions */}
       {highPriorityPending.length > 0 && (
         <div className="rounded-2xl border-2 border-amber-500/25 bg-amber-500/5 p-4 space-y-2">
-          <p className="text-xs font-black text-amber-600 uppercase tracking-wide">⚡ Do these next — highest impact</p>
+          <p className="text-xs font-black text-amber-600 uppercase tracking-wide">
+            ⚡ Do these next — highest impact
+          </p>
           {highPriorityPending.map((t) => (
             <div key={t.id} className="flex items-start gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
               <div>
                 <p className="text-xs font-semibold text-foreground">{t.label}</p>
                 <p className="text-[11px] text-muted-foreground leading-tight">{t.detail}</p>
-                {t.link && (
-                  t.link.startsWith("http") ? (
-                    <a href={t.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5">
+                {t.link &&
+                  (t.link.startsWith("http") ? (
+                    <a
+                      href={t.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5"
+                    >
                       {t.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
                     </a>
                   ) : (
-                    <Link href={t.link} className="text-[10px] text-[#5BA8A0] hover:underline">{t.linkLabel}</Link>
-                  )
-                )}
+                    <Link href={t.link} className="text-[10px] text-[#5BA8A0] hover:underline">
+                      {t.linkLabel}
+                    </Link>
+                  ))}
               </div>
             </div>
           ))}
@@ -593,7 +793,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         }).length;
 
         return (
-          <div key={group.title} className="rounded-2xl border-2 border-border bg-card overflow-hidden">
+          <div
+            key={group.title}
+            className="rounded-2xl border-2 border-border bg-card overflow-hidden"
+          >
             <button
               onClick={() => setExpanded(isOpen ? null : group.title)}
               className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/20 transition-colors"
@@ -601,51 +804,94 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-base">{group.emoji}</span>
                 <span className="text-xs font-bold text-foreground">{group.title}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: groupDone === group.tasks.length ? "rgba(74,222,128,0.15)" : "rgba(91,168,160,0.1)", color: groupDone === group.tasks.length ? "#4ade80" : TEAL }}>
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full font-bold"
+                  style={{
+                    background:
+                      groupDone === group.tasks.length
+                        ? "rgba(74,222,128,0.15)"
+                        : "rgba(91,168,160,0.1)",
+                    color: groupDone === group.tasks.length ? "#4ade80" : TEAL,
+                  }}
+                >
                   {groupDone}/{group.tasks.length}
                 </span>
               </div>
-              {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+              {isOpen ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              )}
             </button>
 
             {isOpen && (
               <div className="px-4 pb-4 space-y-2 border-t border-border/50 pt-3">
                 {group.tasks.map((task) => {
-                  const isManualCheckable = task.id.startsWith("manual-") || task.id.startsWith("acc-") || task.id.startsWith("dir-") || task.id === "auto-content-velocity" || ["tech-gsc-sitemap", "tech-schema-jsonld", "tech-rich-results"].includes(task.id);
-                  const effectiveStatus: TaskStatus = isManualCheckable && manualDone[task.id] ? "done" : task.status;
+                  const isManualCheckable =
+                    task.id.startsWith("manual-") ||
+                    task.id.startsWith("acc-") ||
+                    task.id.startsWith("dir-") ||
+                    task.id === "auto-content-velocity" ||
+                    ["tech-gsc-sitemap", "tech-schema-jsonld", "tech-rich-results"].includes(
+                      task.id,
+                    );
+                  const effectiveStatus: TaskStatus =
+                    isManualCheckable && manualDone[task.id] ? "done" : task.status;
 
                   return (
-                    <div key={task.id} className={`rounded-xl border px-3 py-2.5 flex items-start gap-2.5 ${statusBg(effectiveStatus)}`}>
+                    <div
+                      key={task.id}
+                      className={`rounded-xl border px-3 py-2.5 flex items-start gap-2.5 ${statusBg(effectiveStatus)}`}
+                    >
                       {isManualCheckable ? (
                         <button
                           onClick={() => toggleManual(task.id)}
                           className="mt-0.5 flex-shrink-0 focus:outline-none"
                           data-testid={`checkbox-${task.id}`}
                         >
-                          {manualDone[task.id]
-                            ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                            : <Circle className="w-3.5 h-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
-                          }
+                          {manualDone[task.id] ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <Circle className="w-3.5 h-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
+                          )}
                         </button>
                       ) : (
                         statusIcon(effectiveStatus)
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-xs font-semibold text-foreground leading-tight">{task.label}</p>
-                          {task.priority === "high" && effectiveStatus !== "done" && effectiveStatus !== "auto" && (
-                            <span className="text-[9px] bg-red-500/15 text-red-500 px-1 py-0.5 rounded font-bold flex-shrink-0">HIGH</span>
-                          )}
+                          <p className="text-xs font-semibold text-foreground leading-tight">
+                            {task.label}
+                          </p>
+                          {task.priority === "high" &&
+                            effectiveStatus !== "done" &&
+                            effectiveStatus !== "auto" && (
+                              <span className="text-[9px] bg-red-500/15 text-red-500 px-1 py-0.5 rounded font-bold flex-shrink-0">
+                                HIGH
+                              </span>
+                            )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{task.detail}</p>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+                          {task.detail}
+                        </p>
                         {task.link && effectiveStatus !== "done" && (
                           <div className="mt-1">
                             {task.link.startsWith("http") ? (
-                              <a href={task.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5">
+                              <a
+                                href={task.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5"
+                              >
                                 {task.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
                               </a>
                             ) : (
-                              <Link href={task.link} className="text-[10px] text-[#5BA8A0] hover:underline">{task.linkLabel}</Link>
+                              <Link
+                                href={task.link}
+                                className="text-[10px] text-[#5BA8A0] hover:underline"
+                              >
+                                {task.linkLabel}
+                              </Link>
                             )}
                           </div>
                         )}
@@ -668,7 +914,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               Growth Engine — Continuous Marketing
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {dirStats.submitted}/{dirStats.total} directories submitted · {dirStats.live} live · AI content generator · 8 novel tactics · weekly automation
+              {dirStats.submitted}/{dirStats.total} directories submitted · {dirStats.live} live ·
+              AI content generator · 8 novel tactics · weekly automation
             </p>
           </div>
           <Link

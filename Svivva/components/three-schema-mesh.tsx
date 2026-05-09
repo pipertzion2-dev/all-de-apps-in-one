@@ -5,8 +5,11 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
@@ -23,7 +26,7 @@ export function ThreeSchemaMesh() {
     }
     if (!containerRef.current) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     const container = containerRef.current;
@@ -36,24 +39,27 @@ export function ThreeSchemaMesh() {
     camera.position.y = 8;
     camera.position.x = 10;
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
     const colors = [
-      new THREE.Color(0x7BA3AC),
-      new THREE.Color(0xD782B2),
-      new THREE.Color(0x63B3A6),
-      new THREE.Color(0x96A9AB),
-      new THREE.Color(0xF3AFC4),
+      new THREE.Color(0x7ba3ac),
+      new THREE.Color(0xd782b2),
+      new THREE.Color(0x63b3a6),
+      new THREE.Color(0x96a9ab),
+      new THREE.Color(0xf3afc4),
     ];
 
-    const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[] = [];
+    const disposables: {
+      geometry?: THREE.BufferGeometry;
+      material?: THREE.Material | THREE.Material[];
+    }[] = [];
 
     const cubes: THREE.Mesh[] = [];
     const cubeCount = 40;
@@ -69,14 +75,10 @@ export function ThreeSchemaMesh() {
       });
       disposables.push({ geometry, material });
       const cube = new THREE.Mesh(geometry, material);
-      
+
       const gridX = (i % 8) - 4;
       const gridZ = Math.floor(i / 8) - 2.5;
-      cube.position.set(
-        gridX * 2 + (Math.random() - 0.5),
-        0,
-        gridZ * 2 + (Math.random() - 0.5)
-      );
+      cube.position.set(gridX * 2 + (Math.random() - 0.5), 0, gridZ * 2 + (Math.random() - 0.5));
       cube.userData = {
         baseY: 0,
         targetHeight: 0.5 + Math.random() * 3,
@@ -87,7 +89,7 @@ export function ThreeSchemaMesh() {
       cubes.push(cube);
     }
 
-    const gridHelper = new THREE.GridHelper(20, 20, 0x7BA3AC, 0x333333);
+    const gridHelper = new THREE.GridHelper(20, 20, 0x7ba3ac, 0x333333);
     const gridMaterial = gridHelper.material as THREE.Material;
     gridMaterial.transparent = true;
     gridMaterial.opacity = 0.1;
@@ -96,7 +98,7 @@ export function ThreeSchemaMesh() {
     scene.add(gridHelper);
 
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x7BA3AC,
+      color: 0x7ba3ac,
       transparent: true,
       opacity: 0.2,
     });
@@ -112,7 +114,7 @@ export function ThreeSchemaMesh() {
           new THREE.Vector3(
             (startCube.position.x + endCube.position.x) / 2,
             3 + Math.random() * 2,
-            (startCube.position.z + endCube.position.z) / 2
+            (startCube.position.z + endCube.position.z) / 2,
           ),
           endCube.position.clone(),
         ];
@@ -132,15 +134,17 @@ export function ThreeSchemaMesh() {
       particlePositions[i * 3] = (Math.random() - 0.5) * 16;
       particlePositions[i * 3 + 1] = Math.random() * 8;
       particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-      particleVelocities.push(new THREE.Vector3(
-        (Math.random() - 0.5) * 0.02,
-        (Math.random() - 0.5) * 0.02,
-        (Math.random() - 0.5) * 0.02
-      ));
+      particleVelocities.push(
+        new THREE.Vector3(
+          (Math.random() - 0.5) * 0.02,
+          (Math.random() - 0.5) * 0.02,
+          (Math.random() - 0.5) * 0.02,
+        ),
+      );
     }
 
     const particleGeometry = new THREE.BufferGeometry();
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -175,15 +179,18 @@ export function ThreeSchemaMesh() {
     let isVisible = true;
     const clock = new THREE.Clock();
 
-    const observer = new IntersectionObserver((entries) => {
-      isVisible = entries[0]?.isIntersecting ?? true;
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0.1 },
+    );
     observer.observe(container);
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       if (!isVisible) return;
-      
+
       const elapsed = clock.getElapsedTime();
 
       cubes.forEach((cube) => {
@@ -222,22 +229,22 @@ export function ThreeSchemaMesh() {
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       observer.disconnect();
       cancelAnimationFrame(animationId);
-      
+
       disposables.forEach(({ geometry, material }) => {
         geometry?.dispose();
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach((m) => m.dispose());
         } else {
           material?.dispose();
         }
       });
-      
+
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -249,11 +256,5 @@ export function ThreeSchemaMesh() {
     return null;
   }
 
-  return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0"
-      style={{ pointerEvents: 'none' }}
-    />
-  );
+  return <div ref={containerRef} className="absolute inset-0" style={{ pointerEvents: "none" }} />;
 }

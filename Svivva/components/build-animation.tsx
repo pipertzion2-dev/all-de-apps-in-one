@@ -17,7 +17,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
 
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    
+
     if (!gl) {
       setWebglSupported(false);
       setIsLoading(false);
@@ -45,10 +45,10 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         camera.position.z = 15;
         camera.position.y = 2;
 
-        renderer = new THREE.WebGLRenderer({ 
-          antialias: true, 
+        renderer = new THREE.WebGLRenderer({
+          antialias: true,
           alpha: true,
-          failIfMajorPerformanceCaveat: false
+          failIfMajorPerformanceCaveat: false,
         });
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -62,11 +62,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        const pointLight = new THREE.PointLight(
-          mode === "digital" ? 0x5BA8A0 : 0x6B2C4A, 
-          1, 
-          50
-        );
+        const pointLight = new THREE.PointLight(mode === "digital" ? 0x5ba8a0 : 0x6b2c4a, 1, 50);
         pointLight.position.set(-5, 5, 5);
         scene.add(pointLight);
 
@@ -78,8 +74,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
           { text: "Delivery", x: 6, y: -4, z: -2 },
         ];
 
-        const digitalColors = [0x2D5A56, 0x5BA8A0, 0x7BBDB7, 0xA8D5D0, 0xE8F4F3];
-        const physicalColors = [0x4A1C32, 0x6B2C4A, 0x8B4A6B, 0xD4A5C9, 0xF5E8EE];
+        const digitalColors = [0x2d5a56, 0x5ba8a0, 0x7bbdb7, 0xa8d5d0, 0xe8f4f3];
+        const physicalColors = [0x4a1c32, 0x6b2c4a, 0x8b4a6b, 0xd4a5c9, 0xf5e8ee];
         const colors = mode === "digital" ? digitalColors : physicalColors;
 
         const loader = new FontLoader();
@@ -117,7 +113,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
                 phase: index * 0.5,
                 rotationSpeed: 0.001 + index * 0.0005,
               };
-              
+
               scene.add(mesh);
               textMeshes.push(mesh);
             });
@@ -127,7 +123,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
           () => {
             setWebglSupported(false);
             setIsLoading(false);
-          }
+          },
         );
 
         const clock = new THREE.Clock();
@@ -193,7 +189,10 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
 
   if (!webglSupported) {
     return (
-      <div className="w-full h-full min-h-[400px] flex items-center justify-center" data-testid="build-animation-fallback">
+      <div
+        className="w-full h-full min-h-[400px] flex items-center justify-center"
+        data-testid="build-animation-fallback"
+      >
         <div className="relative w-full h-full">
           {["Bring", "Users", "Into", "Logical", "Delivery"].map((word, index) => (
             <div
@@ -222,11 +221,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-current" />
         </div>
       )}
-      <div 
-        ref={containerRef} 
-        className="w-full h-full"
-        data-testid="build-animation"
-      />
+      <div ref={containerRef} className="w-full h-full" data-testid="build-animation" />
     </div>
   );
 }

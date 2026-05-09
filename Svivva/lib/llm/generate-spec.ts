@@ -91,7 +91,7 @@ export interface GenerateSpecResult {
 
 export async function generateProjectSpec(
   prompt: string,
-  name?: string
+  name?: string,
 ): Promise<GenerateSpecResult> {
   try {
     const userMessage = name
@@ -99,7 +99,7 @@ export async function generateProjectSpec(
       : `Create an AI API that does the following:\n\n${prompt}`;
 
     console.log("[LLM] Calling OpenAI with prompt:", userMessage.substring(0, 100));
-    
+
     const response = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       messages: [
@@ -110,7 +110,10 @@ export async function generateProjectSpec(
       max_completion_tokens: 16384,
     });
 
-    console.log("[LLM] Response received:", JSON.stringify(response.choices?.[0], null, 2).substring(0, 500));
+    console.log(
+      "[LLM] Response received:",
+      JSON.stringify(response.choices?.[0], null, 2).substring(0, 500),
+    );
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
@@ -136,7 +139,7 @@ export async function generateProjectSpec(
     if (!validation.success) {
       return {
         success: false,
-        error: `Validation failed: ${validation.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
+        error: `Validation failed: ${validation.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
         rawResponse: content,
       };
     }

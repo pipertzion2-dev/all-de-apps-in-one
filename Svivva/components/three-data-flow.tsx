@@ -5,8 +5,11 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
@@ -23,7 +26,7 @@ export function ThreeDataFlow() {
     }
     if (!containerRef.current) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     const container = containerRef.current;
@@ -35,23 +38,26 @@ export function ThreeDataFlow() {
     camera.position.z = 30;
     camera.position.y = 5;
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
     const colors = {
-      prompt: new THREE.Color(0x7BA3AC),
-      schema: new THREE.Color(0xD782B2),
-      api: new THREE.Color(0x63B3A6),
-      particle: new THREE.Color(0x96A9AB),
+      prompt: new THREE.Color(0x7ba3ac),
+      schema: new THREE.Color(0xd782b2),
+      api: new THREE.Color(0x63b3a6),
+      particle: new THREE.Color(0x96a9ab),
     };
 
-    const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] }[] = [];
+    const disposables: {
+      geometry?: THREE.BufferGeometry;
+      material?: THREE.Material | THREE.Material[];
+    }[] = [];
 
     const nodes: THREE.Mesh[] = [];
     const nodePositions = [
@@ -160,7 +166,7 @@ export function ThreeDataFlow() {
       particleConnections[i] = Math.floor(Math.random() * connections.length);
     }
 
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -205,9 +211,9 @@ export function ThreeDataFlow() {
     }
 
     const orbitGeometry = new THREE.BufferGeometry();
-    orbitGeometry.setAttribute('position', new THREE.BufferAttribute(orbitPositions, 3));
-    orbitGeometry.setAttribute('aColor', new THREE.BufferAttribute(orbitColors, 3));
-    orbitGeometry.setAttribute('aPhase', new THREE.BufferAttribute(orbitPhases, 1));
+    orbitGeometry.setAttribute("position", new THREE.BufferAttribute(orbitPositions, 3));
+    orbitGeometry.setAttribute("aColor", new THREE.BufferAttribute(orbitColors, 3));
+    orbitGeometry.setAttribute("aPhase", new THREE.BufferAttribute(orbitPhases, 1));
 
     const orbitMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -259,21 +265,24 @@ export function ThreeDataFlow() {
       mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     };
-    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener("mousemove", handleMouseMove);
 
     let animationId: number;
     let isVisible = true;
     const clock = new THREE.Clock();
 
-    const observer = new IntersectionObserver((entries) => {
-      isVisible = entries[0]?.isIntersecting ?? true;
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0.1 },
+    );
     observer.observe(container);
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
       if (!isVisible) return;
-      
+
       const elapsed = clock.getElapsedTime();
 
       nodes.forEach((node) => {
@@ -307,7 +316,7 @@ export function ThreeDataFlow() {
         const phase = orbitPhases[i];
         const radius = 4 + (i % 5) * 0.5;
         const speed = 0.5 + (i % 3) * 0.2;
-        
+
         orbitPos[i * 3] = basePos.x + Math.cos(elapsed * speed + phase) * radius;
         orbitPos[i * 3 + 1] = basePos.y + Math.sin(elapsed * speed * 1.5 + phase) * radius * 0.5;
         orbitPos[i * 3 + 2] = basePos.z + Math.sin(elapsed * speed + phase) * radius * 0.3;
@@ -332,23 +341,23 @@ export function ThreeDataFlow() {
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      container.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("resize", handleResize);
+      container.removeEventListener("mousemove", handleMouseMove);
       observer.disconnect();
       cancelAnimationFrame(animationId);
-      
+
       disposables.forEach(({ geometry, material }) => {
         geometry?.dispose();
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach((m) => m.dispose());
         } else {
           material?.dispose();
         }
       });
-      
+
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -360,10 +369,5 @@ export function ThreeDataFlow() {
     return null;
   }
 
-  return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0 pointer-events-none"
-    />
-  );
+  return <div ref={containerRef} className="absolute inset-0 pointer-events-none" />;
 }

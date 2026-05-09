@@ -21,16 +21,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found", projectId },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
     }
 
     if (project.status !== "active" && project.status !== "draft") {
       return NextResponse.json(
         { error: "Project is not active", status: project.status },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -38,7 +35,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!latestVersion) {
       return NextResponse.json(
         { error: "No version found for project", projectId },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -46,21 +43,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const userInput = typeof body.input === "string" 
-      ? body.input 
-      : JSON.stringify(body);
+    const userInput = typeof body.input === "string" ? body.input : JSON.stringify(body);
 
     if (!userInput || userInput.length === 0) {
-      return NextResponse.json(
-        { error: "Input is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Input is required" }, { status: 400 });
     }
 
     const result = await executeRuntime(userInput, {
@@ -83,7 +72,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             latencyMs,
           },
         },
-        { status: 422 }
+        { status: 422 },
       );
     }
 
@@ -128,7 +117,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -139,10 +128,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found", projectId },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
     }
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
@@ -163,9 +149,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Runtime info error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
-import {
-  hasStripeConfigured,
-  hasStripeWebhookConfigured,
-} from "@/lib/env";
+import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
 
 export async function GET() {
@@ -74,6 +71,6 @@ export async function GET() {
         envKeysComplete: hasCompleteStripeEnvKeys(),
       },
     },
-    { status: statusCode }
+    { status: statusCode },
   );
 }

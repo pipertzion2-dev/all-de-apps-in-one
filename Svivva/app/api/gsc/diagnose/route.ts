@@ -24,7 +24,11 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user || !isAdmin(user)) return forbidden();
 
-  const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+  const [creds] = await db
+    .select()
+    .from(seedCredentials)
+    .where(eq(seedCredentials.userId, user.id))
+    .limit(1);
 
   const steps: DiagStep[] = [];
   const canonicalSite = getSiteUrl();
@@ -33,7 +37,10 @@ export async function GET() {
   // Step 1 — site URL format
   const rawUrl = creds?.googleSiteUrl || "";
   const siteUrl = rawUrl.trim();
-  const urlOk = siteUrl.startsWith("https://") || siteUrl.startsWith("http://") || siteUrl.startsWith("sc-domain:");
+  const urlOk =
+    siteUrl.startsWith("https://") ||
+    siteUrl.startsWith("http://") ||
+    siteUrl.startsWith("sc-domain:");
   steps.push({
     id: "site_url",
     label: "Site URL format",
@@ -41,8 +48,8 @@ export async function GET() {
     detail: !siteUrl
       ? "No site URL saved."
       : urlOk
-      ? `Saved as: ${siteUrl}`
-      : `Saved as "${siteUrl}" — GSC requires a full URL with protocol (e.g. ${canonicalSite}). Click Fix to auto-correct.`,
+        ? `Saved as: ${siteUrl}`
+        : `Saved as "${siteUrl}" — GSC requires a full URL with protocol (e.g. ${canonicalSite}). Click Fix to auto-correct.`,
     fix: !urlOk && siteUrl ? "https://" + siteUrl.replace(/^\/+/, "").toLowerCase() : undefined,
   });
 
@@ -51,7 +58,10 @@ export async function GET() {
   // which would cause spurious "fail" status here.
   let sitemapOk = false;
   try {
-    const smRes = await fetch(canonicalSitemap, { signal: AbortSignal.timeout(8000), method: "GET" });
+    const smRes = await fetch(canonicalSitemap, {
+      signal: AbortSignal.timeout(8000),
+      method: "GET",
+    });
     sitemapOk = smRes.ok;
     steps.push({
       id: "sitemap_accessible",
@@ -62,14 +72,22 @@ export async function GET() {
         : `Sitemap returned HTTP ${smRes.status}. Google cannot crawl it.`,
     });
   } catch {
-    steps.push({ id: "sitemap_accessible", label: "Sitemap accessible", status: "fail", detail: `Could not reach ${canonicalSitemap}.` });
+    steps.push({
+      id: "sitemap_accessible",
+      label: "Sitemap accessible",
+      status: "fail",
+      detail: `Could not reach ${canonicalSitemap}.`,
+    });
   }
 
   // Step 3 — IndexNow key file
   const indexnowKey = creds?.indexnowKey || "";
   if (indexnowKey) {
     try {
-      const keyRes = await fetch(`${canonicalSite}/${indexnowKey}.txt`, { signal: AbortSignal.timeout(8000), method: "HEAD" });
+      const keyRes = await fetch(`${canonicalSite}/${indexnowKey}.txt`, {
+        signal: AbortSignal.timeout(8000),
+        method: "HEAD",
+      });
       steps.push({
         id: "indexnow_key",
         label: "IndexNow key file",
@@ -79,10 +97,20 @@ export async function GET() {
           : `Key file not found (HTTP ${keyRes.status}). Bing/IndexNow submissions will fail.`,
       });
     } catch {
-      steps.push({ id: "indexnow_key", label: "IndexNow key file", status: "fail", detail: "Could not reach IndexNow key file." });
+      steps.push({
+        id: "indexnow_key",
+        label: "IndexNow key file",
+        status: "fail",
+        detail: "Could not reach IndexNow key file.",
+      });
     }
   } else {
-    steps.push({ id: "indexnow_key", label: "IndexNow key file", status: "skip", detail: "No IndexNow key configured." });
+    steps.push({
+      id: "indexnow_key",
+      label: "IndexNow key file",
+      status: "skip",
+      detail: "No IndexNow key configured.",
+    });
   }
 
   // Step 4 — service account (optional enhancement)
@@ -90,13 +118,15 @@ export async function GET() {
   try {
     const saJson = creds?.googleServiceAccountJson || null;
     if (saJson) sa = JSON.parse(saJson) as GoogleServiceAccount;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   if (sa) {
     try {
       await getGoogleServiceAccountAccessToken(
         sa,
-        "https://www.googleapis.com/auth/webmasters.readonly"
+        "https://www.googleapis.com/auth/webmasters.readonly",
       );
       steps.push({
         id: "service_account",

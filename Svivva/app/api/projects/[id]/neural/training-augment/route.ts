@@ -8,10 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { type JsonSchema } from "@/lib/spec";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -40,10 +37,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -55,9 +49,12 @@ export async function POST(
     const { strategy = "diversity", count = 10 } = body;
 
     if (!STRATEGIES.includes(strategy)) {
-      return NextResponse.json({
-        error: `Invalid strategy. Choose from: ${STRATEGIES.join(", ")}`,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Invalid strategy. Choose from: ${STRATEGIES.join(", ")}`,
+        },
+        { status: 400 },
+      );
     }
 
     const project = await projectRepository.findById(id);
@@ -79,7 +76,7 @@ export async function POST(
       .where(eq(projectVersions.projectId, id))
       .limit(10);
 
-    const existingForAugment = existing.map(e => ({
+    const existingForAugment = existing.map((e) => ({
       input: e.input,
       output: e.output as Record<string, unknown>,
     }));
@@ -98,22 +95,26 @@ export async function POST(
       outputSchema,
       strategy,
       Math.min(count, 20),
-      existingForAugment
+      existingForAugment,
     );
 
     if (!result.success || !result.examples) {
-      await db.update(neuralAugmentationJobs)
+      await db
+        .update(neuralAugmentationJobs)
         .set({ status: "failed", completedAt: new Date() })
         .where(eq(neuralAugmentationJobs.id, jobId));
       return NextResponse.json({ error: result.error || "Augmentation failed" }, { status: 422 });
     }
 
-    const approved = result.examples.filter(e => e.approved);
+    const approved = result.examples.filter((e) => e.approved);
     const maxSort = existing.length;
 
     const targetVersionId = latestVersion?.id;
     if (!targetVersionId) {
-      return NextResponse.json({ error: "No project version found to attach examples to" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No project version found to attach examples to" },
+        { status: 400 },
+      );
     }
 
     for (let i = 0; i < approved.length; i++) {
@@ -126,7 +127,8 @@ export async function POST(
       });
     }
 
-    await db.update(neuralAugmentationJobs)
+    await db
+      .update(neuralAugmentationJobs)
       .set({
         status: "completed",
         generatedCount: result.generatedCount || 0,
@@ -136,13 +138,16 @@ export async function POST(
       })
       .where(eq(neuralAugmentationJobs.id, jobId));
 
-    return NextResponse.json({
-      jobId,
-      generated: result.generatedCount,
-      approved: result.approvedCount,
-      strategy,
-      examples: result.examples,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        jobId,
+        generated: result.generatedCount,
+        approved: result.approvedCount,
+        strategy,
+        examples: result.examples,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error running augmentation:", error);
     return NextResponse.json({ error: "Failed to run augmentation" }, { status: 500 });

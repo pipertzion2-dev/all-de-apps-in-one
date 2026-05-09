@@ -46,8 +46,7 @@ export default function ToolsIndexContent({
         !searchQuery ||
         tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tool.keyword.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        activeCategory === "all" || tool.category === activeCategory;
+      const matchesCategory = activeCategory === "all" || tool.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
   }, [tools, searchQuery, activeCategory]);
@@ -57,13 +56,7 @@ export default function ToolsIndexContent({
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image
-              src={svivvaLogo}
-              alt="Svivva"
-              width={120}
-              height={36}
-              priority
-            />
+            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
           </Link>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -95,18 +88,15 @@ export default function ToolsIndexContent({
         <div className="w-14 h-14 rounded-md bg-[#5BA8A0]/20 flex items-center justify-center mx-auto mb-6">
           <Wrench className="w-7 h-7 text-[#5BA8A0]" />
         </div>
-        <h1
-          className="text-4xl sm:text-5xl font-bold tracking-tight"
-          data-testid="text-hero-title"
-        >
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight" data-testid="text-hero-title">
           Free AI &amp; Developer Tools
         </h1>
         <p
           className="mt-4 text-lg text-white/60 max-w-2xl mx-auto leading-relaxed"
           data-testid="text-hero-description"
         >
-          Explore our collection of free AI-powered tools designed for
-          developers, creators, and teams. No signup required.
+          Explore our collection of free AI-powered tools designed for developers, creators, and
+          teams. No signup required.
         </p>
       </section>
 
@@ -185,9 +175,7 @@ export default function ToolsIndexContent({
                   {tool.keyword}
                 </p>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  {tool.content.length > 120
-                    ? tool.content.slice(0, 120) + "..."
-                    : tool.content}
+                  {tool.content.length > 120 ? tool.content.slice(0, 120) + "..." : tool.content}
                 </p>
               </Link>
             ))}

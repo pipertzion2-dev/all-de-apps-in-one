@@ -113,4 +113,6 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-console.log("✓ No blocked placeholder patterns under app/, components/, lib/, hooks/, shared/, server/, script/\n");
+console.log(
+  "✓ No blocked placeholder patterns under app/, components/, lib/, hooks/, shared/, server/, script/\n",
+);

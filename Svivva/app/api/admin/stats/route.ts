@@ -22,9 +22,13 @@ export async function GET() {
 
   // New signups last 7 days and 30 days
   const [[newUsers7d], [newUsers30d]] = await Promise.all([
-    db.select({ count: sql<number>`count(*)::int` }).from(users)
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
       .where(sql`created_at >= now() - interval '7 days'`),
-    db.select({ count: sql<number>`count(*)::int` }).from(users)
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
       .where(sql`created_at >= now() - interval '30 days'`),
   ]);
 
@@ -37,7 +41,12 @@ export async function GET() {
 
   // Recent projects
   const recentProjects = await db
-    .select({ id: projects.id, name: projects.name, status: projects.status, createdAt: projects.createdAt })
+    .select({
+      id: projects.id,
+      name: projects.name,
+      status: projects.status,
+      createdAt: projects.createdAt,
+    })
     .from(projects)
     .orderBy(desc(projects.createdAt))
     .limit(10);
@@ -49,8 +58,11 @@ export async function GET() {
 
   // ── Stripe metrics (via Replit Stripe sync schema) ─────────────────────────
   let stripeData = {
-    mrr: 0, arr: 0, totalRevenue: 0,
-    activeSubscriptions: 0, trialingSubscriptions: 0,
+    mrr: 0,
+    arr: 0,
+    totalRevenue: 0,
+    activeSubscriptions: 0,
+    trialingSubscriptions: 0,
     recentCharges: [] as any[],
     recentSubscriptions: [] as any[],
     topPlans: [] as any[],
@@ -58,7 +70,9 @@ export async function GET() {
 
   try {
     const [subStats, recentCharges, recentSubs, planStats] = await Promise.all([
-      db.execute(sql`
+      db
+        .execute(
+          sql`
         SELECT
           status,
           count(*)::int as count,
@@ -74,18 +88,26 @@ export async function GET() {
           FROM stripe.subscriptions WHERE id = s.id
         ) si ON true
         GROUP BY status
-      `).catch(() => ({ rows: [] })),
+      `,
+        )
+        .catch(() => ({ rows: [] })),
 
-      db.execute(sql`
+      db
+        .execute(
+          sql`
         SELECT id, amount, currency, status, description, created,
                customer, metadata
         FROM stripe.charges
         WHERE status = 'succeeded'
         ORDER BY created DESC
         LIMIT 15
-      `).catch(() => ({ rows: [] })),
+      `,
+        )
+        .catch(() => ({ rows: [] })),
 
-      db.execute(sql`
+      db
+        .execute(
+          sql`
         SELECT s.id, s.status, s.current_period_end, s.created,
                s.customer, s.cancel_at_period_end,
                (s.items->0->'plan'->>'amount')::int as amount,
@@ -95,16 +117,22 @@ export async function GET() {
         LEFT JOIN stripe.products p ON s.items->0->'plan'->>'product' = p.id
         ORDER BY s.created DESC
         LIMIT 15
-      `).catch(() => ({ rows: [] })),
+      `,
+        )
+        .catch(() => ({ rows: [] })),
 
-      db.execute(sql`
+      db
+        .execute(
+          sql`
         SELECT p.name, count(s.id)::int as count,
                coalesce(sum((s.items->0->'plan'->>'amount')::int), 0)::int as monthly_revenue
         FROM stripe.subscriptions s
         LEFT JOIN stripe.products p ON s.items->0->'plan'->>'product' = p.id
         WHERE s.status = 'active'
         GROUP BY p.name ORDER BY monthly_revenue DESC
-      `).catch(() => ({ rows: [] })),
+      `,
+        )
+        .catch(() => ({ rows: [] })),
     ]);
 
     // Compute MRR from active subscriptions
@@ -120,7 +148,8 @@ export async function GET() {
     }
 
     const totalRevenue = (recentCharges.rows as any[]).reduce(
-      (sum: number, c: any) => sum + (c.amount || 0) / 100, 0
+      (sum: number, c: any) => sum + (c.amount || 0) / 100,
+      0,
     );
 
     stripeData = {

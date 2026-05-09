@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = ideaRequestSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
     const { mode, industry, context } = parsed.data;
 
@@ -88,10 +91,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      await db
-        .update(ideaSessions)
-        .set({ stage: "error" })
-        .where(eq(ideaSessions.id, sessionId));
+      await db.update(ideaSessions).set({ stage: "error" }).where(eq(ideaSessions.id, sessionId));
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
@@ -100,11 +100,15 @@ export async function POST(request: NextRequest) {
       return validated.success ? validated.data : ideaResultSchema.parse({});
     });
 
-    const avgScore = validatedIdeas.length > 0
-      ? Math.round(
-          validatedIdeas.reduce((sum, i) => sum + (i.novelty + i.lucrativePotential + i.feasibility) / 3, 0) / validatedIdeas.length
-        )
-      : 0;
+    const avgScore =
+      validatedIdeas.length > 0
+        ? Math.round(
+            validatedIdeas.reduce(
+              (sum, i) => sum + (i.novelty + i.lucrativePotential + i.feasibility) / 3,
+              0,
+            ) / validatedIdeas.length,
+          )
+        : 0;
 
     await db
       .update(ideaSessions)

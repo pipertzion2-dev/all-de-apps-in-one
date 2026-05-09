@@ -3,6 +3,8 @@
   "private": true,
   "description": "Meta-scripts to run sibling projects locally (each app keeps its own package.json).",
   "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev:svivva": "cd \"Svivva\" && npm run dev",
     "dev:pyracrypt-web": "cd \"Pyracrypt/artifacts/cybersec-app\" && pnpm dev",
     "dev:pyracrypt-api": "cd \"Pyracrypt/artifacts/api-server\" && pnpm dev",
@@ -10,5 +12,8 @@
     "dev:ai-tools-hub": "cd \"Ai-Tools-Hub\" && pnpm --filter \"@workspace/ai-tools-hub\" dev",
     "db:up": "docker compose up -d postgres",
     "secrets:svivva": "node Svivva/scripts/gen-deploy-secrets.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }

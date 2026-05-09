@@ -12,7 +12,11 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
 
     if (!creds) {
       return NextResponse.json({
@@ -28,9 +32,13 @@ export async function GET() {
     // Also check indexnow_key via raw SQL since it may not be in the ORM model
     let indexnowKey: string | null = null;
     try {
-      const rows = await db.execute(sql`SELECT indexnow_key FROM seed_credentials WHERE user_id = ${user.id} LIMIT 1`);
+      const rows = await db.execute(
+        sql`SELECT indexnow_key FROM seed_credentials WHERE user_id = ${user.id} LIMIT 1`,
+      );
       indexnowKey = (rows as unknown as any[])[0]?.indexnow_key || null;
-    } catch { /* column may not exist yet */ }
+    } catch {
+      /* column may not exist yet */
+    }
 
     return NextResponse.json({
       hasReplit: !!(creds.replitUsername || creds.replitToken),
@@ -59,21 +67,26 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const updates: Partial<typeof seedCredentials.$inferInsert> = {};
     if (typeof body.replitToken === "string") updates.replitToken = body.replitToken;
-    if (typeof body.replitUsername === "string") updates.replitUsername = body.replitUsername || null;
+    if (typeof body.replitUsername === "string")
+      updates.replitUsername = body.replitUsername || null;
     if (typeof body.godaddyApiKey === "string") updates.godaddyApiKey = body.godaddyApiKey;
     if (typeof body.godaddyApiSecret === "string") updates.godaddyApiSecret = body.godaddyApiSecret;
     if (typeof body.godaddyDomain === "string") {
       const normalized = normalizeGodaddyDomain(body.godaddyDomain);
       if (body.godaddyDomain.trim() && !normalized) {
         return NextResponse.json(
-          { error: "Invalid domain. Use your apex domain only, e.g. example.com (no https:// or www)." },
-          { status: 400 }
+          {
+            error:
+              "Invalid domain. Use your apex domain only, e.g. example.com (no https:// or www).",
+          },
+          { status: 400 },
         );
       }
       updates.godaddyDomain = normalized ?? null;
     }
     if (typeof body.googleSiteUrl === "string") updates.googleSiteUrl = body.googleSiteUrl;
-    if (typeof body.googleVerificationToken === "string") updates.googleVerificationToken = body.googleVerificationToken;
+    if (typeof body.googleVerificationToken === "string")
+      updates.googleVerificationToken = body.googleVerificationToken;
 
     const hasMiniAppsUrl = typeof body.miniAppsUrl === "string";
     const hasMiniAppsSubdomain = typeof body.miniAppsSubdomain === "string";
@@ -82,25 +95,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No valid fields provided" }, { status: 400 });
     }
 
-    const [existing] = await db.select({ id: seedCredentials.id }).from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [existing] = await db
+      .select({ id: seedCredentials.id })
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
 
     if (existing) {
       if (Object.keys(updates).length > 0) {
-        await db.update(seedCredentials).set({ ...updates, updatedAt: new Date() }).where(eq(seedCredentials.userId, user.id));
+        await db
+          .update(seedCredentials)
+          .set({ ...updates, updatedAt: new Date() })
+          .where(eq(seedCredentials.userId, user.id));
       }
       if (hasMiniAppsUrl) {
-        await db.execute(sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl}, updated_at = NOW() WHERE user_id = ${user.id}`);
+        await db.execute(
+          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl}, updated_at = NOW() WHERE user_id = ${user.id}`,
+        );
       }
       if (hasMiniAppsSubdomain) {
-        await db.execute(sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain}, updated_at = NOW() WHERE user_id = ${user.id}`);
+        await db.execute(
+          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain}, updated_at = NOW() WHERE user_id = ${user.id}`,
+        );
       }
     } else {
       await db.insert(seedCredentials).values({ userId: user.id, ...updates });
       if (hasMiniAppsUrl) {
-        await db.execute(sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl} WHERE user_id = ${user.id}`);
+        await db.execute(
+          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl} WHERE user_id = ${user.id}`,
+        );
       }
       if (hasMiniAppsSubdomain) {
-        await db.execute(sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain} WHERE user_id = ${user.id}`);
+        await db.execute(
+          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain} WHERE user_id = ${user.id}`,
+        );
       }
     }
 

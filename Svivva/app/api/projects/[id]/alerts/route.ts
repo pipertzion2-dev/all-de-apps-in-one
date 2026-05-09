@@ -46,10 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const alerts = await db
-      .select()
-      .from(usageAlerts)
-      .where(eq(usageAlerts.projectId, id));
+    const alerts = await db.select().from(usageAlerts).where(eq(usageAlerts.projectId, id));
 
     return NextResponse.json(alerts);
   } catch (error) {
@@ -78,7 +75,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = createAlertSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
@@ -126,12 +123,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const parsed = updateAlertSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { alertId, thresholdValue, emailEnabled, slackEnabled, slackWebhook, isActive } = parsed.data;
+    const { alertId, thresholdValue, emailEnabled, slackEnabled, slackWebhook, isActive } =
+      parsed.data;
 
     const updateData: Record<string, unknown> = {};
     if (thresholdValue !== undefined) updateData.thresholdValue = thresholdValue;
@@ -143,12 +141,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [updated] = await db
       .update(usageAlerts)
       .set(updateData)
-      .where(
-        and(
-          eq(usageAlerts.id, alertId),
-          eq(usageAlerts.projectId, id)
-        )
-      )
+      .where(and(eq(usageAlerts.id, alertId), eq(usageAlerts.projectId, id)))
       .returning();
 
     if (!updated) {
@@ -189,12 +182,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     await db
       .delete(usageAlerts)
-      .where(
-        and(
-          eq(usageAlerts.id, alertId),
-          eq(usageAlerts.projectId, id)
-        )
-      );
+      .where(and(eq(usageAlerts.id, alertId), eq(usageAlerts.projectId, id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -11,7 +11,19 @@ const createListingSchema = z.object({
   title: z.string().min(1, "Title is required").max(100),
   description: z.string().max(5000).optional(),
   shortDescription: z.string().max(200).optional(),
-  category: z.enum(["general", "ai-ml", "data", "automation", "content", "commerce", "analytics", "social", "developer-tools"]).default("general"),
+  category: z
+    .enum([
+      "general",
+      "ai-ml",
+      "data",
+      "automation",
+      "content",
+      "commerce",
+      "analytics",
+      "social",
+      "developer-tools",
+    ])
+    .default("general"),
   tags: z.array(z.string()).max(10).default([]),
   priceType: z.enum(["free", "one-time", "subscription"]).default("free"),
   priceAmount: z.number().min(0).max(100000).optional(),
@@ -61,8 +73,8 @@ export async function GET(request: NextRequest) {
       query = query.where(
         or(
           ilike(marketplaceListings.title, `%${search}%`),
-          ilike(marketplaceListings.shortDescription, `%${search}%`)
-        )
+          ilike(marketplaceListings.shortDescription, `%${search}%`),
+        ),
       );
     }
 
@@ -101,17 +113,23 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const parsed = createListingSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { projectId, title, description, shortDescription, category, tags, priceType, priceAmount } = parsed.data;
+    const {
+      projectId,
+      title,
+      description,
+      shortDescription,
+      category,
+      tags,
+      priceType,
+      priceAmount,
+    } = parsed.data;
 
-    const [project] = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, projectId));
+    const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });

@@ -26,13 +26,27 @@ export interface ChordStem {
 // ─── Note utilities ────────────────────────────────────────────────────────
 
 const NOTE_NAMES: Record<string, number> = {
-  C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3,
-  E: 4, F: 5, "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8,
-  A: 9, "A#": 10, Bb: 10, B: 11,
+  C: 0,
+  "C#": 1,
+  Db: 1,
+  D: 2,
+  "D#": 3,
+  Eb: 3,
+  E: 4,
+  F: 5,
+  "F#": 6,
+  Gb: 6,
+  G: 7,
+  "G#": 8,
+  Ab: 8,
+  A: 9,
+  "A#": 10,
+  Bb: 10,
+  B: 11,
 };
 
 function midi(pitchClass: number, octave: number): number {
-  return (octave + 1) * 12 + ((pitchClass % 12 + 12) % 12);
+  return (octave + 1) * 12 + (((pitchClass % 12) + 12) % 12);
 }
 
 function parseKey(keyStr: string): { root: number; isMinor: boolean } {
@@ -52,7 +66,7 @@ const NATURAL_MINOR_STEPS = [0, 2, 3, 5, 7, 8, 10];
 function buildScale(root: number, isMinor: boolean): number[] {
   // Use Dorian for minor (Glasper's preferred minor mode — has raised 6th)
   const steps = isMinor ? DORIAN_STEPS : MAJOR_STEPS;
-  return steps.map(s => (root + s) % 12);
+  return steps.map((s) => (root + s) % 12);
 }
 
 // ─── Chord voicing builder ──────────────────────────────────────────────────
@@ -73,7 +87,7 @@ function buildVoicing(
 
   // Upper voicing: place chord tones starting from octave 4, ascending
   // Skip root and 5th in upper voicing for a more open, jazz feel
-  const upperTones = chordTones.filter(t => t !== root % 12);
+  const upperTones = chordTones.filter((t) => t !== root % 12);
   let currentMidi = midi(upperTones[0], 4);
 
   for (const tone of upperTones) {
@@ -134,9 +148,10 @@ function buildDiatonicChords(root: number, isMinor: boolean): DiatonicChord[] {
       label = labels[degree];
     }
 
-    const noteName = Object.keys(NOTE_NAMES).find(
-      k => NOTE_NAMES[k] === chordRoot && !k.includes("b") && k.length <= 2
-    ) || String(chordRoot);
+    const noteName =
+      Object.keys(NOTE_NAMES).find(
+        (k) => NOTE_NAMES[k] === chordRoot && !k.includes("b") && k.length <= 2,
+      ) || String(chordRoot);
 
     chords.push({
       label: `${noteName}${label}`,
@@ -156,18 +171,18 @@ type Progression = number[]; // degree indices (0-based)
  */
 function selectProgression(isMinor: boolean, seed = 0): Progression {
   const majorProgressions: Progression[] = [
-    [0, 5, 3, 4],   // Imaj9 → vim9 → IVmaj9 → V13sus4  ("Float" — Glasper)
-    [1, 4, 0, 5],   // iim11 → V13sus4 → Imaj9 → vim9   ("Black Radio")
-    [5, 3, 0, 4],   // vim9 → IVmaj9 → Imaj9 → V13sus4  (neo-soul staple)
-    [0, 5, 1, 4],   // Imaj9 → vim9 → iim11 → V13sus4   (Lins ii-Vsus)
-    [3, 0, 5, 4],   // IVmaj9 → Imaj9 → vim9 → V13sus4
+    [0, 5, 3, 4], // Imaj9 → vim9 → IVmaj9 → V13sus4  ("Float" — Glasper)
+    [1, 4, 0, 5], // iim11 → V13sus4 → Imaj9 → vim9   ("Black Radio")
+    [5, 3, 0, 4], // vim9 → IVmaj9 → Imaj9 → V13sus4  (neo-soul staple)
+    [0, 5, 1, 4], // Imaj9 → vim9 → iim11 → V13sus4   (Lins ii-Vsus)
+    [3, 0, 5, 4], // IVmaj9 → Imaj9 → vim9 → V13sus4
   ];
 
   const minorProgressions: Progression[] = [
-    [0, 6, 5, 4],   // im11 → bVII → bVI → vm9   ("North Portland" — Glasper)
-    [0, 5, 3, 1],   // im11 → bVImaj9 → IVm11 → iim9
-    [0, 3, 6, 5],   // im11 → IVm11 → bVII → bVI  (D'Angelo / Erykah vibe)
-    [0, 6, 5, 6],   // im11 → bVII → bVI → bVII   (two-chord Glasper float)
+    [0, 6, 5, 4], // im11 → bVII → bVI → vm9   ("North Portland" — Glasper)
+    [0, 5, 3, 1], // im11 → bVImaj9 → IVm11 → iim9
+    [0, 3, 6, 5], // im11 → IVm11 → bVII → bVI  (D'Angelo / Erykah vibe)
+    [0, 6, 5, 6], // im11 → bVII → bVI → bVII   (two-chord Glasper float)
   ];
 
   const pool = isMinor ? minorProgressions : majorProgressions;
@@ -202,7 +217,7 @@ function generateCompEvents(
       });
     }
     // Add gentle upper note re-attack halfway through for movement (Glasper comping)
-    const upperNotes = voicing.filter(n => n >= 60);
+    const upperNotes = voicing.filter((n) => n >= 60);
     if (upperNotes.length >= 2 && barsPerChord >= 2) {
       const midpoint = startBeat + totalBeats / 2;
       for (const note of upperNotes.slice(-2)) {
@@ -236,7 +251,13 @@ function generateCompEvents(
     const upperOnly = voicing.slice(1); // skip bass for arpeggiation
     let beat = startBeat;
     // Bass hits on beat 1
-    events.push({ note: voicing[0], velocity: 75, startBeat, duration: totalBeats - 0.1, channel: 0 });
+    events.push({
+      note: voicing[0],
+      velocity: 75,
+      startBeat,
+      duration: totalBeats - 0.1,
+      channel: 0,
+    });
     while (beat < startBeat + totalBeats - step) {
       const idx = Math.round((beat - startBeat) / step) % upperOnly.length;
       events.push({
@@ -258,11 +279,11 @@ function generateCompEvents(
 export interface ChordEngineOptions {
   key: string;
   bpm: number;
-  barsPerChord?: number;       // default 2
-  totalBars?: number;          // default 8
-  pattern?: CompPattern;       // default sustained_pads
-  progressionSeed?: number;    // pick which Glasper progression template
-  includeBass?: boolean;       // separate bass stem
+  barsPerChord?: number; // default 2
+  totalBars?: number; // default 8
+  pattern?: CompPattern; // default sustained_pads
+  progressionSeed?: number; // pick which Glasper progression template
+  includeBass?: boolean; // separate bass stem
 }
 
 export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
@@ -299,9 +320,7 @@ export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
       const upperVoicing = chord.voicing.slice(1);
 
       // Generate comping events for upper voices
-      const upperEvents = generateCompEvents(
-        upperVoicing, startBeat, barsPerChord, bpm, pattern
-      );
+      const upperEvents = generateCompEvents(upperVoicing, startBeat, barsPerChord, bpm, pattern);
       chordEvents.push(...upperEvents);
 
       // Separate bass line (simpler rhythmic pattern)
@@ -374,5 +393,5 @@ export function getProgressionLabels(key: string, progressionSeed = 0): string[]
   const { root, isMinor } = parseKey(key);
   const diatonicChords = buildDiatonicChords(root, isMinor);
   const progression = selectProgression(isMinor, progressionSeed);
-  return progression.map(i => diatonicChords[i].label);
+  return progression.map((i) => diatonicChords[i].label);
 }

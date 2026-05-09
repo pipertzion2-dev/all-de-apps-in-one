@@ -9,17 +9,13 @@ import { sql } from "drizzle-orm";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   const startTime = Date.now();
   const { slug } = await params;
 
   try {
-    const projectRows = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.slug, slug))
-      .limit(1);
+    const projectRows = await db.select().from(projects).where(eq(projects.slug, slug)).limit(1);
 
     if (!projectRows[0]) {
       return NextResponse.json({ error: "API not found", slug }, { status: 404 });
@@ -30,7 +26,7 @@ export async function POST(
     if (!["deployed", "active", "draft"].includes(project.status)) {
       return NextResponse.json(
         { error: "API is not deployed", status: project.status },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -54,8 +50,7 @@ export async function POST(
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const userInput =
-      typeof body.input === "string" ? body.input : JSON.stringify(body);
+    const userInput = typeof body.input === "string" ? body.input : JSON.stringify(body);
 
     if (!userInput) {
       return NextResponse.json({ error: "input field is required" }, { status: 400 });
@@ -69,7 +64,8 @@ export async function POST(
     const latencyMs = Date.now() - startTime;
 
     // ── APEX: log call via raw SQL (table may not exist in all environments) ──
-    db.execute(sql`
+    db.execute(
+      sql`
       INSERT INTO apex_call_logs (id, project_id, version_id, input, output, latency_ms, schema_valid, repaired, error_type)
       VALUES (
         ${nanoid()}, ${project.id}, ${version.id}, ${userInput},
@@ -77,7 +73,8 @@ export async function POST(
         ${latencyMs}, ${result.success && !result.repaired}, ${result.repaired ?? false},
         ${result.success ? null : "execution_error"}
       )
-    `).catch(() => {});
+    `,
+    ).catch(() => {});
     // ─────────────────────────────────────────────────────────────────────────
 
     if (!result.success) {
@@ -104,7 +101,7 @@ export async function POST(
           "Access-Control-Allow-Methods": "POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Run error:", error);

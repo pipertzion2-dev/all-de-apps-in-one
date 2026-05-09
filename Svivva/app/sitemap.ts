@@ -10,11 +10,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/tools`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/pyracrypt`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    {
+      url: `${baseUrl}/pyracrypt`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
     { url: `${baseUrl}/docs`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
-    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
     { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
@@ -34,13 +54,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const PRIORITY_CATEGORIES: Record<string, number> = {
     "seo-landing": 0.85,
     "seed-marketing": 0.8,
-    "aeo": 0.8,
+    aeo: 0.8,
     "parasite-seo": 0.75,
   };
 
   let seoPages: MetadataRoute.Sitemap = [];
   try {
-    const pages = await db.select().from(seoLandingPages).where(eq(seoLandingPages.published, true));
+    const pages = await db
+      .select()
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.published, true));
     seoPages = pages.map((page) => ({
       url: `${baseUrl}/${page.slug}`,
       lastModified: page.createdAt,
@@ -61,9 +84,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {}
 
   const lpPages: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/lp/ai-api-builder`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${baseUrl}/lp/prompt-to-api`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${baseUrl}/lp/ai-app-generator`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    {
+      url: `${baseUrl}/lp/ai-api-builder`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/lp/prompt-to-api`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/lp/ai-app-generator`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
   ];
 
   return [...staticPages, ...blogPages, ...seoPages, ...categoryPages, ...lpPages];

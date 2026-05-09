@@ -30,7 +30,11 @@ async function runSeoTasks() {
 
   // IndexNow submission
   try {
-    const r = await fetch(`${SEO_BASE}/api/indexnow/submit`, { method: "POST", headers, signal: AbortSignal.timeout(40_000) });
+    const r = await fetch(`${SEO_BASE}/api/indexnow/submit`, {
+      method: "POST",
+      headers,
+      signal: AbortSignal.timeout(40_000),
+    });
     const d = await r.json().catch(() => ({}));
     if (r.ok) log(`[auto-seo] IndexNow: submitted ${d.urlCount ?? "?"} URLs`, "seo");
     else log(`[auto-seo] IndexNow failed: ${d.error ?? r.status}`, "seo");
@@ -40,7 +44,12 @@ async function runSeoTasks() {
 
   // GSC sitemap submission
   try {
-    const r = await fetch(`${SEO_BASE}/api/gsc/save`, { method: "POST", headers, body: JSON.stringify({ action: "submit_sitemap" }), signal: AbortSignal.timeout(30_000) });
+    const r = await fetch(`${SEO_BASE}/api/gsc/save`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ action: "submit_sitemap" }),
+      signal: AbortSignal.timeout(30_000),
+    });
     const d = await r.json().catch(() => ({}));
     if (r.ok) log("[auto-seo] GSC sitemap: submitted", "seo");
     else log(`[auto-seo] GSC sitemap skipped: ${d.error ?? r.status}`, "seo");
@@ -50,7 +59,10 @@ async function runSeoTasks() {
 }
 
 function startSeoScheduler(readyDelayMs = 90_000) {
-  log(`[auto-seo] Scheduler armed — first run in ${readyDelayMs / 60_000} min, then every ${SEO_INTERVAL_MS / 3_600_000}h`, "seo");
+  log(
+    `[auto-seo] Scheduler armed — first run in ${readyDelayMs / 60_000} min, then every ${SEO_INTERVAL_MS / 3_600_000}h`,
+    "seo",
+  );
   setTimeout(async () => {
     log("[auto-seo] Running initial SEO tasks…", "seo");
     await runSeoTasks();
@@ -71,11 +83,18 @@ async function runGrowthTasks() {
     ...(INTERNAL_SECRET ? { "x-internal-secret": INTERNAL_SECRET } : {}),
   };
   try {
-    const r = await fetch(`${SEO_BASE}/api/growth/tasks`, { method: "POST", headers, signal: AbortSignal.timeout(60_000) });
+    const r = await fetch(`${SEO_BASE}/api/growth/tasks`, {
+      method: "POST",
+      headers,
+      signal: AbortSignal.timeout(60_000),
+    });
     const d = await r.json().catch(() => ({}));
     if (r.ok) {
       const results: { task: string; status: string }[] = (d as any).results ?? [];
-      log(`[auto-growth] Weekly run complete — ${results.length} tasks: ${results.map((x) => `${x.task}(${x.status})`).join(", ")}`, "growth");
+      log(
+        `[auto-growth] Weekly run complete — ${results.length} tasks: ${results.map((x) => `${x.task}(${x.status})`).join(", ")}`,
+        "growth",
+      );
     } else {
       log(`[auto-growth] Weekly run failed: ${JSON.stringify(d)}`, "growth");
     }
@@ -85,7 +104,10 @@ async function runGrowthTasks() {
 }
 
 function startGrowthScheduler() {
-  log(`[auto-growth] Growth scheduler armed — first run in ${GROWTH_INITIAL_DELAY_MS / 60_000} min, then weekly`, "growth");
+  log(
+    `[auto-growth] Growth scheduler armed — first run in ${GROWTH_INITIAL_DELAY_MS / 60_000} min, then weekly`,
+    "growth",
+  );
   setTimeout(async () => {
     log("[auto-growth] Running weekly growth tasks…", "growth");
     await runGrowthTasks();

@@ -56,7 +56,7 @@ Return JSON with "anomalies" array and "summary" string.`;
 export async function detectAnomalies(
   failures: FailureRecord[],
   systemPrompt: string,
-  projectName: string
+  projectName: string,
 ): Promise<AnomalyDetectionResult> {
   try {
     if (failures.length === 0) {
@@ -101,14 +101,16 @@ Identify patterns, recurring issues, and anomalies. Return JSON with "anomalies"
     }
 
     const parsed = JSON.parse(content);
-    const anomalies: DetectedAnomaly[] = (parsed.anomalies || []).map((a: Partial<DetectedAnomaly>) => ({
-      signalType: a.signalType || a.signalType || "recurring_failure",
-      severity: a.severity || "medium",
-      title: a.title || "Unknown anomaly",
-      description: a.description || "",
-      pattern: a.pattern || {},
-      recommendations: a.recommendations || [],
-    }));
+    const anomalies: DetectedAnomaly[] = (parsed.anomalies || []).map(
+      (a: Partial<DetectedAnomaly>) => ({
+        signalType: a.signalType || a.signalType || "recurring_failure",
+        severity: a.severity || "medium",
+        title: a.title || "Unknown anomaly",
+        description: a.description || "",
+        pattern: a.pattern || {},
+        recommendations: a.recommendations || [],
+      }),
+    );
 
     return {
       success: true,

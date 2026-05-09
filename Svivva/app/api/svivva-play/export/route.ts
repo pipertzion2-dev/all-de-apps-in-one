@@ -11,25 +11,29 @@ function buildMidiFile(stems: any[], bpm: number): Buffer {
   for (const stem of stems) {
     const track = new Midi.Track();
     file.addTrack(track);
-    
+
     // Set track name
-    track.addEvent(new Midi.MetaEvent({ 
-      type: Midi.MetaEvent.TRACK_NAME, 
-      data: stem.name || "Untitled" 
-    }));
-    
+    track.addEvent(
+      new Midi.MetaEvent({
+        type: Midi.MetaEvent.TRACK_NAME,
+        data: stem.name || "Untitled",
+      }),
+    );
+
     // Set MIDI program for better DAW recognition
     const channel = 0;
-    track.addEvent(new Midi.ControllerEvent({
-      type: Midi.ControllerEvent.PROGRAM_CHANGE,
-      channel: channel,
-      param1: 0,
-      param2: 0
-    }));
+    track.addEvent(
+      new Midi.ControllerEvent({
+        type: Midi.ControllerEvent.PROGRAM_CHANGE,
+        channel: channel,
+        param1: 0,
+        param2: 0,
+      }),
+    );
 
     const events = Array.isArray(stem.midiEvents) ? stem.midiEvents : [];
     if (events.length === 0) continue;
-    
+
     const sorted = [...events].sort((a: any, b: any) => (a.startBeat || 0) - (b.startBeat || 0));
     const ticksPerBeat = 480; // Standard MIDI resolution for better compatibility
 
@@ -37,9 +41,12 @@ function buildMidiFile(stems: any[], bpm: number): Buffer {
     for (const evt of sorted) {
       try {
         const startTick = Math.round((evt.startBeat || 0) * ticksPerBeat);
-        const durationTick = Math.max(ticksPerBeat / 4, Math.round((evt.duration || 0.25) * ticksPerBeat));
+        const durationTick = Math.max(
+          ticksPerBeat / 4,
+          Math.round((evt.duration || 0.25) * ticksPerBeat),
+        );
         const delay = Math.max(0, startTick - currentTick);
-        
+
         const note = Math.max(0, Math.min(127, Math.round(evt.note || 60)));
         const velocity = Math.max(1, Math.min(127, Math.round(evt.velocity || 80)));
 
@@ -76,7 +83,10 @@ export async function GET(request: NextRequest) {
     const analysis = analyses[0] || null;
     const bpm = analysis?.bpm || 120;
 
-    const generations = await db.select().from(playGenerations).where(eq(playGenerations.sessionId, sessionId));
+    const generations = await db
+      .select()
+      .from(playGenerations)
+      .where(eq(playGenerations.sessionId, sessionId));
     const latestGen = generations[generations.length - 1];
 
     let stems: any[] = [];
@@ -98,7 +108,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (format === "patch" && patches.length > 0) {
-      const patchExport = patches.map(p => ({
+      const patchExport = patches.map((p) => ({
         name: p.name,
         synth_family: p.synthFamily,
         ...(p.patchData as Record<string, unknown>),
@@ -121,17 +131,19 @@ export async function GET(request: NextRequest) {
         name: session.sourceAudioName || "Unknown",
         duration_s: session.sourceAudioDuration || null,
       },
-      analysis: analysis ? {
-        bpm: analysis.bpm,
-        time_signature: analysis.timeSignature,
-        key: analysis.key,
-        key_confidence: analysis.keyConfidence,
-        chords: analysis.chords,
-        sections: analysis.sections,
-        downbeats: analysis.downbeats,
-        style_compatibility: analysis.styleCompatibility,
-        timbre_descriptors: analysis.timbreDescriptors,
-      } : null,
+      analysis: analysis
+        ? {
+            bpm: analysis.bpm,
+            time_signature: analysis.timeSignature,
+            key: analysis.key,
+            key_confidence: analysis.keyConfidence,
+            chords: analysis.chords,
+            sections: analysis.sections,
+            downbeats: analysis.downbeats,
+            style_compatibility: analysis.styleCompatibility,
+            timbre_descriptors: analysis.timbreDescriptors,
+          }
+        : null,
       mode: session.mode,
       style: {
         preset: latestGen?.mode || session.mode,
@@ -151,7 +163,7 @@ export async function GET(request: NextRequest) {
         },
         midi_events: s.midiEvents,
       })),
-      patches: patches.map(p => ({
+      patches: patches.map((p) => ({
         name: p.name,
         synth_family: p.synthFamily,
         patch_data: p.patchData,
@@ -159,7 +171,8 @@ export async function GET(request: NextRequest) {
         macros: p.macros,
       })),
       quality_tier: "professional",
-      quality_note: "MIDI output is professional quality. Audio rendering is available as BETA preview only.",
+      quality_note:
+        "MIDI output is professional quality. Audio rendering is available as BETA preview only.",
     };
 
     return new NextResponse(JSON.stringify(sessionExport, null, 2), {

@@ -12,22 +12,22 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const [dbUser] = await db.select().from(users).where(eq(users.id, user.id));
-    
+
     if (!dbUser?.stripeCustomerId) {
       return NextResponse.json({ error: "No billing account found" }, { status: 400 });
     }
-    
+
     const stripe = await getUncachableStripeClient();
-    
+
     const origin = getBillingOriginFromRequest(request);
 
     const session = await stripe.billingPortal.sessions.create({
       customer: dbUser.stripeCustomerId,
       return_url: `${origin}/dashboard/billing`,
     });
-    
+
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error("Portal error:", error);

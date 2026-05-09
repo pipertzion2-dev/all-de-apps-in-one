@@ -53,10 +53,18 @@ function detectSubAppsFromDescription(description: string): {
   const suggested: { name: string; description: string; path: string }[] = [];
 
   if (/frontend.*backend|backend.*frontend/i.test(description)) {
-    suggested.push({ name: "frontend", description: "User-facing web application", path: "/frontend" });
+    suggested.push({
+      name: "frontend",
+      description: "User-facing web application",
+      path: "/frontend",
+    });
     suggested.push({ name: "backend", description: "API server and data layer", path: "/backend" });
   } else if (/dashboard.*api|api.*dashboard/i.test(description)) {
-    suggested.push({ name: "dashboard", description: "Admin/user dashboard interface", path: "/dashboard" });
+    suggested.push({
+      name: "dashboard",
+      description: "Admin/user dashboard interface",
+      path: "/dashboard",
+    });
     suggested.push({ name: "api", description: "REST API service", path: "/api" });
   } else if (/admin.*portal|portal.*admin/i.test(description)) {
     suggested.push({ name: "admin", description: "Admin control panel", path: "/admin" });
@@ -65,7 +73,10 @@ function detectSubAppsFromDescription(description: string): {
     const match = description.match(/(\w+)\s+app/gi);
     if (match) {
       match.slice(0, 4).forEach((m, i) => {
-        const name = m.replace(/\s+app$/i, "").toLowerCase().replace(/\s+/g, "-");
+        const name = m
+          .replace(/\s+app$/i, "")
+          .toLowerCase()
+          .replace(/\s+/g, "-");
         suggested.push({ name, description: `${m} module`, path: `/apps/${name}` });
       });
     }
@@ -83,7 +94,11 @@ export async function POST(req: Request) {
     const { replId, replTitle, replDescription } = await req.json();
     if (!replId) return NextResponse.json({ error: "replId required" }, { status: 400 });
 
-    const [creds] = await db.select().from(seedCredentials).where(eq(seedCredentials.userId, user.id)).limit(1);
+    const [creds] = await db
+      .select()
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, user.id))
+      .limit(1);
 
     let description = replDescription || "";
     let title = replTitle || replId;
@@ -94,9 +109,9 @@ export async function POST(req: Request) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${creds.replitToken}`,
+            Authorization: `Bearer ${creds.replitToken}`,
             "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://replit.com",
+            Referer: "https://replit.com",
           },
           body: JSON.stringify({ query: FILES_QUERY, variables: { id: replId } }),
           signal: AbortSignal.timeout(8000),
@@ -109,7 +124,9 @@ export async function POST(req: Request) {
             title = repl.title || title;
           }
         }
-      } catch { /* best-effort */ }
+      } catch {
+        /* best-effort */
+      }
     }
 
     const analysis = detectSubAppsFromDescription(description);

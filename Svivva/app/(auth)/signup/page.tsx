@@ -11,7 +11,10 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-[#0a0f14] flex flex-col items-center justify-center gap-6 p-4">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-8 h-8 rounded-lg" style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }} />
+        <div
+          className="w-8 h-8 rounded-lg"
+          style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
+        />
         <span className="font-bold text-xl text-white tracking-tight">Svivva</span>
       </div>
 

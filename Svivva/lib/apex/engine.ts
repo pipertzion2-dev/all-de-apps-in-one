@@ -8,12 +8,7 @@
  */
 
 import { db } from "@/lib/db";
-import {
-  projects,
-  projectVersions,
-  evalSuites,
-  evalCases,
-} from "@/lib/schema";
+import { projects, projectVersions, evalSuites, evalCases } from "@/lib/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { executeRuntime } from "@/lib/llm/runtime";
@@ -60,19 +55,35 @@ export async function runApexCycle(projectId: string): Promise<{
       LIMIT 100
     `);
     const recentLogs = logsResult.rows as Array<{
-      id: string; input: string; output: unknown; schema_valid: boolean;
-      repaired: boolean; error_type: string | null; created_at: Date;
+      id: string;
+      input: string;
+      output: unknown;
+      schema_valid: boolean;
+      repaired: boolean;
+      error_type: string | null;
+      created_at: Date;
     }>;
 
     if (recentLogs.length < MIN_CALLS_REQUIRED) {
-      return await finishCycle(cycleId, "skipped", currentPrompt, null, null, null, 0,
-        `Only ${recentLogs.length} calls logged — need at least ${MIN_CALLS_REQUIRED} to run APEX`);
+      return await finishCycle(
+        cycleId,
+        "skipped",
+        currentPrompt,
+        null,
+        null,
+        null,
+        0,
+        `Only ${recentLogs.length} calls logged — need at least ${MIN_CALLS_REQUIRED} to run APEX`,
+      );
     }
 
-    const failures = recentLogs.filter(l => !l.schema_valid || l.error_type || l.repaired);
+    const failures = recentLogs.filter((l) => !l.schema_valid || l.error_type || l.repaired);
     const failureRate = Math.round((failures.length / recentLogs.length) * 100);
-    const sampleFailures = failures.slice(0, 5).map(l => l.input);
-    const sampleSuccesses = recentLogs.filter(l => l.schema_valid && !l.error_type).slice(0, 3).map(l => l.input);
+    const sampleFailures = failures.slice(0, 5).map((l) => l.input);
+    const sampleSuccesses = recentLogs
+      .filter((l) => l.schema_valid && !l.error_type)
+      .slice(0, 3)
+      .map((l) => l.input);
 
     const diagnosisResp = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
@@ -95,15 +106,28 @@ export async function runApexCycle(projectId: string): Promise<{
       improvedPrompt?: string;
     };
 
-    const failurePattern = diagnosis.failurePattern ?? `${failureRate}% of calls failing schema validation`;
+    const failurePattern =
+      diagnosis.failurePattern ?? `${failureRate}% of calls failing schema validation`;
     const improvedPrompt = diagnosis.improvedPrompt;
 
     if (!improvedPrompt || improvedPrompt.trim() === currentPrompt.trim()) {
-      return await finishCycle(cycleId, "skipped", currentPrompt, improvedPrompt ?? null,
-        null, null, 0, "No meaningful prompt improvement found");
+      return await finishCycle(
+        cycleId,
+        "skipped",
+        currentPrompt,
+        improvedPrompt ?? null,
+        null,
+        null,
+        0,
+        "No meaningful prompt improvement found",
+      );
     }
 
-    const suites = await db.select().from(evalSuites).where(eq(evalSuites.projectId, projectId)).limit(1);
+    const suites = await db
+      .select()
+      .from(evalSuites)
+      .where(eq(evalSuites.projectId, projectId))
+      .limit(1);
     let scoreBefore = 0;
     let scoreAfter = 0;
     let casesRun = 0;
@@ -127,14 +151,20 @@ export async function runApexCycle(projectId: string): Promise<{
       }
     }
 
-    const shouldPromote = casesRun === 0
-      ? failureRate > 20
-      : scoreAfter - scoreBefore >= MIN_IMPROVEMENT_DELTA;
+    const shouldPromote =
+      casesRun === 0 ? failureRate > 20 : scoreAfter - scoreBefore >= MIN_IMPROVEMENT_DELTA;
 
     if (!shouldPromote) {
-      return await finishCycle(cycleId, "skipped", currentPrompt, improvedPrompt,
-        scoreBefore, scoreAfter, casesRun,
-        `Score delta insufficient (${scoreBefore}→${scoreAfter})`);
+      return await finishCycle(
+        cycleId,
+        "skipped",
+        currentPrompt,
+        improvedPrompt,
+        scoreBefore,
+        scoreAfter,
+        casesRun,
+        `Score delta insufficient (${scoreBefore}→${scoreAfter})`,
+      );
     }
 
     const nextVersionNum = (version?.version ?? 0) + 1;
@@ -158,9 +188,18 @@ export async function runApexCycle(projectId: string): Promise<{
       UPDATE apex_cycles SET sample_inputs = ${JSON.stringify(sampleFailures)}::jsonb WHERE id = ${cycleId}
     `);
 
-    return await finishCycle(cycleId, "promoted", currentPrompt, improvedPrompt,
-      scoreBefore, scoreAfter, casesRun, undefined, true, failurePattern);
-
+    return await finishCycle(
+      cycleId,
+      "promoted",
+      currentPrompt,
+      improvedPrompt,
+      scoreBefore,
+      scoreAfter,
+      casesRun,
+      undefined,
+      true,
+      failurePattern,
+    );
   } catch (err) {
     console.error("[APEX] cycle error:", err);
     await db.execute(sql`
@@ -177,16 +216,25 @@ export async function rollbackApexCycle(cycleId: string) {
   const result = await db.execute(sql`
     SELECT * FROM apex_cycles WHERE id = ${cycleId} LIMIT 1
   `);
-  const cycle = result.rows[0] as {
-    id: string; project_id: string; prompt_before: string;
-    promoted: boolean; rolled_back: boolean;
-  } | undefined;
+  const cycle = result.rows[0] as
+    | {
+        id: string;
+        project_id: string;
+        prompt_before: string;
+        promoted: boolean;
+        rolled_back: boolean;
+      }
+    | undefined;
 
   if (!cycle) throw new Error("Cycle not found");
   if (!cycle.promoted) throw new Error("Cycle was not promoted — nothing to rollback");
   if (cycle.rolled_back) throw new Error("Already rolled back");
 
-  const [project] = await db.select().from(projects).where(eq(projects.id, cycle.project_id)).limit(1);
+  const [project] = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.id, cycle.project_id))
+    .limit(1);
   if (!project) throw new Error("Project not found");
 
   await db
@@ -214,7 +262,7 @@ async function scorePrompt(
     cases.map(async (c) => {
       const res = await executeRuntime(c.input, { systemPrompt: prompt, outputSchema: schema });
       if (res.success) passed++;
-    })
+    }),
   );
   return passed;
 }

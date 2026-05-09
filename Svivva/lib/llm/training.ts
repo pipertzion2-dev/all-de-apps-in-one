@@ -50,7 +50,7 @@ Be strict - only approve high-quality examples.`;
 export async function generateTrainingExamples(
   systemPrompt: string,
   outputSchema: JsonSchema,
-  count: number = 5
+  count: number = 5,
 ): Promise<TrainingExample[]> {
   const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
@@ -86,7 +86,7 @@ Each example must have: input (string), output (object matching schema), descrip
 export async function gradeTrainingExample(
   example: TrainingExample,
   systemPrompt: string,
-  outputSchema: JsonSchema
+  outputSchema: JsonSchema,
 ): Promise<GradedExample> {
   const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
@@ -138,21 +138,23 @@ export async function generateAndGradeTraining(
   systemPrompt: string,
   outputSchema: JsonSchema,
   count: number = 5,
-  minApproved: number = 3
+  minApproved: number = 3,
 ): Promise<GenerateTrainingResult> {
   try {
     const requestCount = Math.max(count, minApproved + 2);
-    
+
     console.log(`[Training] Generating ${requestCount} training examples...`);
     const examples = await generateTrainingExamples(systemPrompt, outputSchema, requestCount);
-    
+
     console.log(`[Training] Generated ${examples.length} examples, grading...`);
-    
+
     const graded: GradedExample[] = [];
     for (const example of examples) {
       const gradedExample = await gradeTrainingExample(example, systemPrompt, outputSchema);
       graded.push(gradedExample);
-      console.log(`[Training] Example graded: score=${gradedExample.score}, approved=${gradedExample.approved}`);
+      console.log(
+        `[Training] Example graded: score=${gradedExample.score}, approved=${gradedExample.approved}`,
+      );
     }
 
     const approved = graded.filter((e) => e.approved).sort((a, b) => b.score - a.score);

@@ -8,10 +8,12 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Free AI & Developer Tools | Svivva",
-  description: "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
+  description:
+    "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
   openGraph: {
     title: "Free AI & Developer Tools | Svivva",
-    description: "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
+    description:
+      "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
     type: "website",
   },
 };

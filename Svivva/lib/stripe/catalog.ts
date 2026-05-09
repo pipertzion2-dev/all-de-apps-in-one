@@ -6,7 +6,7 @@ export type BillingTier = "pro" | "enterprise";
 /** Validate a price for hosted checkout: active price + product with tier metadata. */
 export async function validateCheckoutPrice(
   stripe: Stripe,
-  priceId: string
+  priceId: string,
 ): Promise<{ ok: true; tier: BillingTier } | { ok: false; reason: string }> {
   let price: Stripe.Price;
   try {
@@ -73,7 +73,7 @@ export async function listProductsFromStripeApi(stripe: Stripe) {
 
 export async function getSubscriptionPlanFromStripe(
   stripe: Stripe,
-  subscriptionId: string
+  subscriptionId: string,
 ): Promise<{
   subscription: {
     id: string;
@@ -96,7 +96,7 @@ export async function getSubscriptionPlanFromStripe(
   const price = item?.price;
   const periodEnd =
     "current_period_end" in sub
-      ? (sub as Stripe.Subscription & { current_period_end?: number }).current_period_end ?? null
+      ? ((sub as Stripe.Subscription & { current_period_end?: number }).current_period_end ?? null)
       : null;
 
   if (!price) {

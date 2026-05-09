@@ -5,8 +5,11 @@ import * as THREE from "three";
 
 function isWebGLAvailable() {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
@@ -32,10 +35,10 @@ export function ThreeBackground() {
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.z = 50;
 
-    const renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
       antialias: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -44,14 +47,14 @@ export function ThreeBackground() {
 
     // Flower-matched color palette
     const colors = [
-      new THREE.Color(0x3F2A2C), // espresso brown
-      new THREE.Color(0x7A4F3A), // copper
-      new THREE.Color(0x6B3A67), // plum purple
+      new THREE.Color(0x3f2a2c), // espresso brown
+      new THREE.Color(0x7a4f3a), // copper
+      new THREE.Color(0x6b3a67), // plum purple
       new THREE.Color(0x425884), // indigo blue
-      new THREE.Color(0xD782B2), // orchid pink
-      new THREE.Color(0xF3AFC4), // blush pink
-      new THREE.Color(0x63B3A6), // mint green
-      new THREE.Color(0x96A9AB), // sage
+      new THREE.Color(0xd782b2), // orchid pink
+      new THREE.Color(0xf3afc4), // blush pink
+      new THREE.Color(0x63b3a6), // mint green
+      new THREE.Color(0x96a9ab), // sage
     ];
 
     // Central breathing glow
@@ -59,8 +62,8 @@ export function ThreeBackground() {
     const glowMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uColor1: { value: new THREE.Color(0x96A9AB) },
-        uColor2: { value: new THREE.Color(0xD782B2) },
+        uColor1: { value: new THREE.Color(0x96a9ab) },
+        uColor2: { value: new THREE.Color(0xd782b2) },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -102,25 +105,25 @@ export function ThreeBackground() {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       const radius = 15 + Math.random() * 55;
-      
+
       positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i3 + 2] = (Math.random() - 0.5) * 70 - 15;
-      
+
       const color = colors[Math.floor(Math.random() * colors.length)];
       colorAttrib[i3] = color.r;
       colorAttrib[i3 + 1] = color.g;
       colorAttrib[i3 + 2] = color.b;
-      
+
       sizes[i] = 0.5 + Math.random() * 2.5;
       phases[i] = Math.random() * Math.PI * 2;
     }
 
     const particleGeometry = new THREE.BufferGeometry();
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particleGeometry.setAttribute('aColor', new THREE.BufferAttribute(colorAttrib, 3));
-    particleGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-    particleGeometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    particleGeometry.setAttribute("aColor", new THREE.BufferAttribute(colorAttrib, 3));
+    particleGeometry.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    particleGeometry.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
 
     const particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -263,19 +266,21 @@ export function ThreeBackground() {
       const segments = 60;
       const baseRadius = 20 + r * 7;
       const phase = (r / 6) * Math.PI * 2;
-      
+
       for (let i = 0; i <= segments; i++) {
         const t = (i / segments) * Math.PI * 2;
-        points.push(new THREE.Vector3(
-          Math.cos(t + phase) * baseRadius + Math.sin(t * 3) * 3,
-          Math.sin(t + phase) * baseRadius * 0.5 + Math.cos(t * 2) * 4,
-          Math.sin(t * 2 + phase) * 8 - 18
-        ));
+        points.push(
+          new THREE.Vector3(
+            Math.cos(t + phase) * baseRadius + Math.sin(t * 3) * 3,
+            Math.sin(t + phase) * baseRadius * 0.5 + Math.cos(t * 2) * 4,
+            Math.sin(t * 2 + phase) * 8 - 18,
+          ),
+        );
       }
 
       const curve = new THREE.CatmullRomCurve3(points, true);
       const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.15 + r * 0.04, 6, true);
-      
+
       const ribbonMaterial = new THREE.MeshBasicMaterial({
         color: colors[r % colors.length],
         transparent: true,
@@ -307,9 +312,9 @@ export function ThreeBackground() {
     }
 
     const bokehGeometry = new THREE.BufferGeometry();
-    bokehGeometry.setAttribute('position', new THREE.BufferAttribute(bokehPositions, 3));
-    bokehGeometry.setAttribute('aSize', new THREE.BufferAttribute(bokehSizes, 1));
-    bokehGeometry.setAttribute('aColor', new THREE.BufferAttribute(bokehColors, 3));
+    bokehGeometry.setAttribute("position", new THREE.BufferAttribute(bokehPositions, 3));
+    bokehGeometry.setAttribute("aSize", new THREE.BufferAttribute(bokehSizes, 1));
+    bokehGeometry.setAttribute("aColor", new THREE.BufferAttribute(bokehColors, 3));
 
     const bokehMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -373,7 +378,7 @@ export function ThreeBackground() {
       targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
       targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
 
     // Animation
     let animationId: number;
@@ -416,11 +421,11 @@ export function ThreeBackground() {
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationId);
       renderer.dispose();
       container.removeChild(renderer.domElement);
@@ -432,10 +437,6 @@ export function ThreeBackground() {
   }
 
   return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0 -z-10"
-      style={{ pointerEvents: 'none' }}
-    />
+    <div ref={containerRef} className="absolute inset-0 -z-10" style={{ pointerEvents: "none" }} />
   );
 }

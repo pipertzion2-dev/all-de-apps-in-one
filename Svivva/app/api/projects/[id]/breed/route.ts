@@ -11,7 +11,11 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-async function breedPrompts(promptA: string, promptB: string, outputSchema: Record<string, unknown>): Promise<{ prompt: string; reasoning: string }> {
+async function breedPrompts(
+  promptA: string,
+  promptB: string,
+  outputSchema: Record<string, unknown>,
+): Promise<{ prompt: string; reasoning: string }> {
   const response = await openai.chat.completions.create({
     model: DEFAULT_MODEL,
     messages: [
@@ -58,14 +62,24 @@ Return JSON with "prompt" (the offspring system prompt) and "reasoning" (explain
   }
 }
 
-async function quickEval(systemPrompt: string, outputSchema: Record<string, unknown>, projectId: string): Promise<{ passed: number; total: number }> {
-  const suites = await db.select().from(evalSuites)
-    .where(eq(evalSuites.projectId, projectId)).limit(1);
+async function quickEval(
+  systemPrompt: string,
+  outputSchema: Record<string, unknown>,
+  projectId: string,
+): Promise<{ passed: number; total: number }> {
+  const suites = await db
+    .select()
+    .from(evalSuites)
+    .where(eq(evalSuites.projectId, projectId))
+    .limit(1);
 
   let testInputs: string[] = [];
   if (suites.length > 0) {
-    const cases = await db.select().from(evalCases)
-      .where(eq(evalCases.suiteId, suites[0].id)).limit(10);
+    const cases = await db
+      .select()
+      .from(evalCases)
+      .where(eq(evalCases.suiteId, suites[0].id))
+      .limit(10);
     testInputs = cases.map((c) => c.input);
   }
 
@@ -114,15 +128,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const [versionA] = await db.select().from(projectVersions)
+    const [versionA] = await db
+      .select()
+      .from(projectVersions)
       .where(and(eq(projectVersions.id, versionIdA), eq(projectVersions.projectId, projectId)))
       .limit(1);
-    const [versionB] = await db.select().from(projectVersions)
+    const [versionB] = await db
+      .select()
+      .from(projectVersions)
       .where(and(eq(projectVersions.id, versionIdB), eq(projectVersions.projectId, projectId)))
       .limit(1);
 
     if (!versionA || !versionB) {
-      return NextResponse.json({ error: "One or both versions not found for this project" }, { status: 404 });
+      return NextResponse.json(
+        { error: "One or both versions not found for this project" },
+        { status: 404 },
+      );
     }
 
     const outputSchema = (versionA.outputSchema || project.outputSchema) as Record<string, unknown>;
@@ -140,7 +161,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { prompt: offspringPrompt, reasoning } = await breedPrompts(
       versionA.systemPrompt,
       versionB.systemPrompt,
-      outputSchema
+      outputSchema,
     );
 
     const [evalA, evalB, evalOffspring] = await Promise.all([
@@ -150,7 +171,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     ]);
 
     const newVersionId = uuidv4();
-    const latestVersion = await db.select().from(projectVersions)
+    const latestVersion = await db
+      .select()
+      .from(projectVersions)
       .where(eq(projectVersions.projectId, projectId))
       .orderBy(desc(projectVersions.version))
       .limit(1);
@@ -168,18 +191,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const parentAScore = evalA.total > 0 ? Math.round((evalA.passed / evalA.total) * 100) : 0;
     const parentBScore = evalB.total > 0 ? Math.round((evalB.passed / evalB.total) * 100) : 0;
-    const offspringScore = evalOffspring.total > 0 ? Math.round((evalOffspring.passed / evalOffspring.total) * 100) : 0;
+    const offspringScore =
+      evalOffspring.total > 0 ? Math.round((evalOffspring.passed / evalOffspring.total) * 100) : 0;
 
-    await db.update(promptBreeds).set({
-      status: "completed",
-      offspringPrompt,
-      offspringVersionId: newVersionId,
-      parentAScore,
-      parentBScore,
-      offspringScore,
-      evalResults: { parentA: evalA, parentB: evalB, offspring: evalOffspring },
-      reasoning,
-    }).where(eq(promptBreeds.id, breedId));
+    await db
+      .update(promptBreeds)
+      .set({
+        status: "completed",
+        offspringPrompt,
+        offspringVersionId: newVersionId,
+        parentAScore,
+        parentBScore,
+        offspringScore,
+        evalResults: { parentA: evalA, parentB: evalB, offspring: evalOffspring },
+        reasoning,
+      })
+      .where(eq(promptBreeds.id, breedId));
 
     return NextResponse.json({
       id: breedId,
@@ -196,11 +223,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error("Breed error:", error);
     try {
-      const pendingBreeds = await db.select().from(promptBreeds)
+      const pendingBreeds = await db
+        .select()
+        .from(promptBreeds)
         .where(eq(promptBreeds.projectId, projectId));
       for (const breed of pendingBreeds) {
         if (breed.status === "breeding") {
-          await db.update(promptBreeds).set({ status: "failed" }).where(eq(promptBreeds.id, breed.id));
+          await db
+            .update(promptBreeds)
+            .set({ status: "failed" })
+            .where(eq(promptBreeds.id, breed.id));
         }
       }
     } catch {}
@@ -212,7 +244,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const breeds = await db.select().from(promptBreeds)
+    const breeds = await db
+      .select()
+      .from(promptBreeds)
       .where(eq(promptBreeds.projectId, projectId))
       .orderBy(desc(promptBreeds.createdAt))
       .limit(10);

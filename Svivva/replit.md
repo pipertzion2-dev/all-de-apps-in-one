@@ -1,15 +1,18 @@
 # Svivva - AI API Builder SaaS
 
 ## Overview
+
 Svivva is a SaaS platform designed to transform user prompts into production-ready AI APIs. It provides a comprehensive suite of features including schema-enforced JSON responses, automated evaluations, version control with instant rollback, and robust team collaboration tools. The platform also offers an API marketplace, A/B testing capabilities, and cost optimization features, aiming to streamline the development and deployment of AI-powered applications.
 
 ## User Preferences
+
 - Clean, minimal design with Three.js flower background (35-40% opacity)
 - Svivva branding throughout (teal #5BA8A0, burgundy #6B2C4A)
 - Dark mode support
 - Apple-like user-friendly UI: simple, guided, no clutter
 
 ## Dashboard Onboarding
+
 - **New users** (no projects): Centered "What have you been sitting on?" welcome with two paths (Software/Hardware) featuring CSS 3D animated visual cards, plus "Browse around first" fallback.
 - **Returning users** (have projects): Large visual tool cards with CSS 3D floating shapes (cubes, spheres, rings, pyramids) for each feature — makes it obvious what each section does. Projects below.
 - **Sidebar**: Apple-minimal — 4 groups (Home/Projects, Build, Grow, Settings). ~6-7 items total. Pulse/Collaborate removed from sidebar but remain accessible via dashboard cards + command palette search. Orbit admin-only.
@@ -19,75 +22,77 @@ Svivva is a SaaS platform designed to transform user prompts into production-rea
 - Stats cards and the 6-card quick actions grid were removed — they overwhelmed new users with zeros and jargon.
 
 ## System Architecture
+
 The platform is built on a modern full-stack architecture using **Next.js 16 App Router** with **TypeScript** for the frontend, styled with **Tailwind CSS** and **shadcn/ui components**. The backend leverages **Next.js API Routes**. Data persistence is managed by **PostgreSQL** with **Drizzle ORM**.
 
 Key architectural decisions and features include:
+
 - **Prompt-to-API Generation**: Users define AI APIs directly from natural language prompts.
 - **Schema Enforcement**: Strict JSON Schema validation with AI-powered auto-repair mechanisms.
 - **Automated AI Workflows**:
-    - AI-driven generation and grading of training examples.
-    - Automatic generation of 50-200 diverse evaluation cases per endpoint, including edge and adversarial scenarios.
-    - Automated evaluation runner with instant rollback capabilities if pass rates fall below thresholds.
+  - AI-driven generation and grading of training examples.
+  - Automatic generation of 50-200 diverse evaluation cases per endpoint, including edge and adversarial scenarios.
+  - Automated evaluation runner with instant rollback capabilities if pass rates fall below thresholds.
 - **Version Control & Rollback**: Every modification creates a new version, enabling instant rollbacks to previous states.
 - **API Management**:
-    - **OpenAPI Export**: Generation of OpenAPI 3.0 specifications for seamless integration.
-    - **SDK Generation**: Auto-generation of client SDKs for Python and Node.js.
-    - **API Key Management**: Secure API key rotation.
-    - **Usage Monitoring**: Real-time analytics for latency, cost, and error rates, alongside configurable usage alerts via email/Slack and webhooks for API events.
+  - **OpenAPI Export**: Generation of OpenAPI 3.0 specifications for seamless integration.
+  - **SDK Generation**: Auto-generation of client SDKs for Python and Node.js.
+  - **API Key Management**: Secure API key rotation.
+  - **Usage Monitoring**: Real-time analytics for latency, cost, and error rates, alongside configurable usage alerts via email/Slack and webhooks for API events.
 - **Collaboration & Marketplace**:
-    - **Team Management**: Role-based access control (owner, admin, member, viewer).
-    - **API Marketplace**: A platform for publishing, discovering, and monetizing AI APIs.
+  - **Team Management**: Role-based access control (owner, admin, member, viewer).
+  - **API Marketplace**: A platform for publishing, discovering, and monetizing AI APIs.
 - **Advanced AI Optimization & Analysis**:
-    - **A/B Testing**: Facilitates traffic splitting between different prompt versions for performance comparison.
-    - **Fine-tuning Pipeline**: Supports training custom AI models.
-    - **Cost Optimizer**: Provides model suggestions and budget capping for cost management.
-    - **Neural AI Pipeline**: A suite of AI-powered tools for:
-        - **Prompt Optimization**: AI analysis and improvement of system prompts.
-        - **Schema Enhancement**: AI suggestions for refining output schemas.
-        - **Quality Gate**: Automatic confidence scoring for every API output.
-        - **Training Augmentation**: Synthetic data generation using five distinct strategies.
-        - **Anomaly Detection**: AI-driven identification of failure patterns in logs.
-    - **Chaos Mode**: Adversarial stress testing with resilience scoring.
-    - **Prompt Breeding**: Genetic evolution of prompts by combining versions.
-    - **API Autopsy**: Forensic analysis of API failures to identify root causes.
+  - **A/B Testing**: Facilitates traffic splitting between different prompt versions for performance comparison.
+  - **Fine-tuning Pipeline**: Supports training custom AI models.
+  - **Cost Optimizer**: Provides model suggestions and budget capping for cost management.
+  - **Neural AI Pipeline**: A suite of AI-powered tools for:
+    - **Prompt Optimization**: AI analysis and improvement of system prompts.
+    - **Schema Enhancement**: AI suggestions for refining output schemas.
+    - **Quality Gate**: Automatic confidence scoring for every API output.
+    - **Training Augmentation**: Synthetic data generation using five distinct strategies.
+    - **Anomaly Detection**: AI-driven identification of failure patterns in logs.
+  - **Chaos Mode**: Adversarial stress testing with resilience scoring.
+  - **Prompt Breeding**: Genetic evolution of prompts by combining versions.
+  - **API Autopsy**: Forensic analysis of API failures to identify root causes.
 - **Svivva Seeds**: Multi-application generation engine that builds multiple production-ready apps from a single structured PDF.
-    - PDF ingestion and parsing into separate application build units
-    - Parallel build orchestration for concurrent app generation
-    - Generates frontend, backend, database, auth, and deployment config per app
-    - Engineering documentation extraction (API docs, architecture, deployment guides)
-    - Marketing content extraction (landing pages, pitch decks, app store descriptions)
-    - **Multi-App Prompt Editing**: Select multiple seeds and apply a single AI prompt to edit all their specs simultaneously in parallel. Edits invalidate stale artifacts and reset status to "parsed" so users can rebuild.
-    - **Auto App Marketing Engine**: "Launch Marketing" button per session generates 3 programmatic SEO landing pages per seed app (main, generator, online variants) stored in seoLandingPages table with category="seed-marketing". Pages auto-published at root-level slugs, sitemap pinged to Google on generation. Links shown live on each SeedCard.
-    - **Marketing Funnel Setup**: Collapsible "Auto Marketing Funnel Setup" panel in Seeds page. Replit account linked **automatically at login** via OIDC access_token (stored to `seed_credentials.replitToken` in auth callback — no manual PAT needed). GoDaddy (API key+secret+domain → verify domain + add DNS record), and Google Search Console (site URL → submit sitemap). Credentials stored per-user in `seed_credentials` DB table. API routes: `/api/seeds/credentials` (GET/POST), `/api/seeds/replit-apps` (POST), `/api/seeds/godaddy-setup` (POST).
-    - **Launch Campaign Strategy**: Seeds supports rapid launch campaigns inspired by proven SaaS playbooks:
-        - **Pre-launch phase (3-4 weeks):** Story-driven email sequences building curiosity about multi-app generation, no pricing revealed
-        - **Warm-up content:** Blog posts, social posts, demo videos explaining the vision without revealing product details
-        - **Launch announcement:** Limited-time early access program (not infinite free tier), creating urgency to sign up
-        - **Early adopter community:** Target 500+ power users for feedback and word-of-mouth marketing
-        - **Momentum strategy:** Time-bound access ensures committed users who become evangelists and provide product feedback
-    - Available on Pro and Enterprise tiers only
+  - PDF ingestion and parsing into separate application build units
+  - Parallel build orchestration for concurrent app generation
+  - Generates frontend, backend, database, auth, and deployment config per app
+  - Engineering documentation extraction (API docs, architecture, deployment guides)
+  - Marketing content extraction (landing pages, pitch decks, app store descriptions)
+  - **Multi-App Prompt Editing**: Select multiple seeds and apply a single AI prompt to edit all their specs simultaneously in parallel. Edits invalidate stale artifacts and reset status to "parsed" so users can rebuild.
+  - **Auto App Marketing Engine**: "Launch Marketing" button per session generates 3 programmatic SEO landing pages per seed app (main, generator, online variants) stored in seoLandingPages table with category="seed-marketing". Pages auto-published at root-level slugs, sitemap pinged to Google on generation. Links shown live on each SeedCard.
+  - **Marketing Funnel Setup**: Collapsible "Auto Marketing Funnel Setup" panel in Seeds page. Replit account linked **automatically at login** via OIDC access_token (stored to `seed_credentials.replitToken` in auth callback — no manual PAT needed). GoDaddy (API key+secret+domain → verify domain + add DNS record), and Google Search Console (site URL → submit sitemap). Credentials stored per-user in `seed_credentials` DB table. API routes: `/api/seeds/credentials` (GET/POST), `/api/seeds/replit-apps` (POST), `/api/seeds/godaddy-setup` (POST).
+  - **Launch Campaign Strategy**: Seeds supports rapid launch campaigns inspired by proven SaaS playbooks:
+    - **Pre-launch phase (3-4 weeks):** Story-driven email sequences building curiosity about multi-app generation, no pricing revealed
+    - **Warm-up content:** Blog posts, social posts, demo videos explaining the vision without revealing product details
+    - **Launch announcement:** Limited-time early access program (not infinite free tier), creating urgency to sign up
+    - **Early adopter community:** Target 500+ power users for feedback and word-of-mouth marketing
+    - **Momentum strategy:** Time-bound access ensures committed users who become evangelists and provide product feedback
+  - Available on Pro and Enterprise tiers only
 - **Hypothesis Lab** (`/dashboard/hypothesis`): AI-powered hypothesis-as-a-service discovery engine implementing all 5 core features:
-    1. **API Registry**: Users register external APIs with endpoint URL, input schema (JSON), sample response — shown alongside Svivva projects as selectable cards with schema/sample badges
-    2. **Hypothesis Generation Engine**: LLM generates 4-6 hypotheses per session covering correlations, inverse relationships, anomalies, conditional behaviors, and dependencies
-    3. **Experiment Engine**: Each hypothesis includes a designed experiment with 3 input scenarios, API call order, and expected behaviors — all visible in expandable detail view
-    4. **Insight Validation Engine**: Per-hypothesis validation shows patterns found, contradictions detected, statistical notes, and confidence scores (0-100 with heuristic scale)
-    5. **Insight Memory**: localStorage-based storage (`svivva_hypothesis_memory`, max 50). Duplicate detection warns on same question+APIs combo. Incremental learning sends up to 20 previous confirmed insights as context for new discoveries
-    - Additional: Remix (edit question + reselect APIs), Insight Feed (clickable, remixable, deletable), Turn into API (prefills API Builder). No DB tables needed.
+  1. **API Registry**: Users register external APIs with endpoint URL, input schema (JSON), sample response — shown alongside Svivva projects as selectable cards with schema/sample badges
+  2. **Hypothesis Generation Engine**: LLM generates 4-6 hypotheses per session covering correlations, inverse relationships, anomalies, conditional behaviors, and dependencies
+  3. **Experiment Engine**: Each hypothesis includes a designed experiment with 3 input scenarios, API call order, and expected behaviors — all visible in expandable detail view
+  4. **Insight Validation Engine**: Per-hypothesis validation shows patterns found, contradictions detected, statistical notes, and confidence scores (0-100 with heuristic scale)
+  5. **Insight Memory**: localStorage-based storage (`svivva_hypothesis_memory`, max 50). Duplicate detection warns on same question+APIs combo. Incremental learning sends up to 20 previous confirmed insights as context for new discoveries
+  - Additional: Remix (edit question + reselect APIs), Insight Feed (clickable, remixable, deletable), Turn into API (prefills API Builder). No DB tables needed.
 - **Hypothesis Lab — Hardware Edition** (`/dashboard/hypothesis-hardware`): Physical-side innovation engine that connects hardware components, digital APIs, Seeds apps, and external data to discover cross-ecosystem innovations for manufacturers. Same 5-core-feature architecture as digital version but with:
-    - Hardware context step (product type, materials, industry, constraints)
-    - Source Registry supports 3 types: Hardware Components (sensors, boards, materials), External APIs, and Seeds Apps — plus auto-connects all user's digital Svivva APIs
-    - Categories: material_innovation, process_optimization, iot_integration, cross_domain, supply_chain, hybrid_product
-    - Innovation score per hypothesis + cost impact analysis in validation
-    - Actions: Build Hardware (routes to Hardware Builder), Turn into API (routes to API Builder), Remix
-    - Separate localStorage keys: `svivva_hypothesis_hardware_memory`, `svivva_hypothesis_hardware_components`
-    - Available on physical side sidebar under Discover
+  - Hardware context step (product type, materials, industry, constraints)
+  - Source Registry supports 3 types: Hardware Components (sensors, boards, materials), External APIs, and Seeds Apps — plus auto-connects all user's digital Svivva APIs
+  - Categories: material_innovation, process_optimization, iot_integration, cross_domain, supply_chain, hybrid_product
+  - Innovation score per hypothesis + cost impact analysis in validation
+  - Actions: Build Hardware (routes to Hardware Builder), Turn into API (routes to API Builder), Remix
+  - Separate localStorage keys: `svivva_hypothesis_hardware_memory`, `svivva_hypothesis_hardware_components`
+  - Available on physical side sidebar under Discover
 - **Pulse**: Automated intelligence dashboard that analyzes user account data (projects, API calls, eval scores, latency, tokens) and generates AI-powered insights, growth opportunities, risk alerts, and actionable recommendations. Cached per-user (3 min TTL) to manage costs. Located at `/dashboard/pulse` with API at `/api/pulse`. Does not send project descriptions to AI — only names and numeric data.
 - **Idea Engine**: AI-powered discovery of untapped opportunities available on both digital and physical sides.
-    - Multi-stage pipeline: Market Scan → Gap Analysis → Idea Generation → Scoring → Complete
-    - Generates 6 novel ideas per session with novelty/revenue/feasibility scores
-    - Identifies market gaps and competitive insights
-    - Supports industry filtering and custom context
-    - Stores session history for revisiting past discoveries
+  - Multi-stage pipeline: Market Scan → Gap Analysis → Idea Generation → Scoring → Complete
+  - Generates 6 novel ideas per session with novelty/revenue/feasibility scores
+  - Identifies market gaps and competitive insights
+  - Supports industry filtering and custom context
+  - Stores session history for revisiting past discoveries
 - **Growth Engine** (`/dashboard/growth`): Admin-only AI marketing hub for auto-marketing Svivva, Pyracrypt, and Mini Apps.
   - **Directory Blitz**: 60+ pre-loaded directories (AI tools, SaaS, developer, PR, social, security) filterable by category. Click to submit and track status (pending/submitted/live) per product. Shows estimated monthly visitors per directory.
   - **AI Copy Engine**: One-click AI content generation across 11 content types: Twitter/X thread, Reddit post, LinkedIn post, ProductHunt launch kit, blog post outline, press release, AEO content (Answer Engine Optimization for Perplexity/ChatGPT), competitor comparison pages, podcast pitches, GitHub SEO content, email newsletter.
@@ -114,20 +119,23 @@ Key architectural decisions and features include:
   12. `svivva-submit` — Bing sitemap ping + IndexNow re-submit
 
   **Mini Apps tab — 5 steps:** mini-import, mini-hub, mini-cname, mini-social, mini-index
+
 - **Build System**: Unified build interface styled like Svivva Play hardware sampler UI
-    - Dark hardware aesthetic (dark backgrounds, holographic gradients, 3D tactile buttons)
-    - 4 build modes: API Build, Hardware Build, Seed Build, Quick Deploy
-    - Each mode has its own multi-step wizard inside the hardware-style interface
-    - Holographic text animations and gradient accents matching Svivva Play design language
-    - Located at `/dashboard/build`
+  - Dark hardware aesthetic (dark backgrounds, holographic gradients, 3D tactile buttons)
+  - 4 build modes: API Build, Hardware Build, Seed Build, Quick Deploy
+  - Each mode has its own multi-step wizard inside the hardware-style interface
+  - Holographic text animations and gradient accents matching Svivva Play design language
+  - Located at `/dashboard/build`
 
 ## Dashboard Navigation
+
 Apple-minimal sidebar (4 groups, ~8 items):
 
 **Digital Mode**: Home, Projects | API Builder, Hypothesis Lab | Idea Engine, Launch Studio, Pulse, Collaborate | Settings, Orbit (admin-only)
 **Physical Mode**: Home, Projects | Hardware Builder, Hypothesis Lab | Idea Engine, Collaborate | Settings
 
 ## Interactive Tutorial System
+
 - Non-intrusive tooltip-based tutorials on every major page (Dashboard, API Builder, Hardware Builder, Hypothesis Lab, Idea Engine, Launch Studio, Collaborate)
 - First visit: asks "Want a quick tour?" — user can accept or decline
 - If accepted: shows 3 contextual tips per page in a small bottom-right card with progress bar
@@ -136,6 +144,7 @@ Apple-minimal sidebar (4 groups, ~8 items):
 - Component: `components/tutorial-system.tsx` (TutorialProvider + TutorialToggle)
 
 ## Real-Time Collaboration (`/dashboard/collaborate`)
+
 - 3-tab layout: Team, Activity, Comments
 - **Team tab**: Invite members by email, see pending invites, view team members with online status indicators
 - **Activity tab**: Shared projects list, recent team activity feed
@@ -144,6 +153,7 @@ Apple-minimal sidebar (4 groups, ~8 items):
 - Local state (comments, invites) in localStorage for instant interaction
 
 ## Hardware Builder Features
+
 - **BUILD System** (5 steps): Bring → Users → Into → Logical → Delivery
 - **Step 5 (Delivery)** includes:
   - Manufacturing Checklist (6 items)
@@ -155,13 +165,16 @@ Apple-minimal sidebar (4 groups, ~8 items):
 The project structure is organized into `app/` (API routes, dashboard, runtime), `lib/` (database schema, Drizzle DB, repositories, ProjectSpec system, LLM helpers), `components/` (UI components), and `design_guidelines.md`. The database schema includes 48 tables covering core project data, evaluations, API management, teams, marketplace, A/B testing, fine-tuning, cost management, neural AI pipeline components, idea engine, blog posts, SEO landing pages, and page categories.
 
 ## Launch Studio (`/dashboard/launch-studio`)
+
 User-facing AI marketing toolkit in the Discover section. Authenticated users describe their app and generate:
+
 - **Marketing Plan**: Tagline, value props, channel strategies with priorities, launch checklist, content ideas, and mini app concepts
 - **Landing Page**: Hero copy, features, testimonials, FAQ, and CTA — with "Copy as HTML" export
 - **Social Posts**: Platform-specific posts for Twitter/X, LinkedIn, Reddit, and Product Hunt with hashtags
 - API route: `POST /api/launch-studio` (authenticated, Zod-validated input, safe JSON parsing)
 
 ## SEO & Marketing Infrastructure
+
 - **Blog**: Server-rendered at `/blog` and `/blog/[slug]` with generateMetadata, JSON-LD structured data, category filters, related posts, CTA sections
 - **Programmatic SEO Tools**: Server-rendered at `/tools`, `/tools/[slug]`, `/tools/category/[slug]` using direct Drizzle ORM queries
 - **Conversion Landing Pages**: Static ad-optimized pages at `/lp/[slug]` (ai-api-builder, prompt-to-api, ai-app-generator)
@@ -175,6 +188,7 @@ User-facing AI marketing toolkit in the Discover section. Authenticated users de
 - All SEO pages are public (middleware exempts /blog, /tools, /lp, and single-segment root paths from site gate)
 
 ## APEX — Autonomous Prompt Evolution eXecutor
+
 - **Feature**: Self-improving APIs — after deploy, APEX continuously monitors real traffic, detects failure patterns, generates improved prompts via GPT, evaluates them against the existing test suite, and auto-promotes if quality improves (≥5pt score delta). Fully reversible per-cycle.
 - **Loop**: Observe (apex_call_logs) → Analyze (failure pattern via GPT) → Hypothesize (improved prompt) → Evaluate (score both on eval cases) → Promote (new projectVersion + update project) → Learn (cycle record)
 - **Tables**: `apex_call_logs` (every live /api/run call), `apex_cycles` (each cycle: pattern, score before/after, promoted, rolledBack)
@@ -185,6 +199,7 @@ User-facing AI marketing toolkit in the Discover section. Authenticated users de
 - **Projects page**: Purple "APEX" badge link on every project card
 
 ## SEO Growth Dashboard
+
 - **Keyword Planner**: Dashboard at `/dashboard/keywords` for managing SEO keywords with search volume, intent, status tracking
 - **AI Landing Page Generator**: POST `/api/generate/landing-page` uses OpenAI to generate full SEO landing pages from keywords, saves to seoLandingPages with FAQ embedded
 - **AI Article Generator**: POST `/api/generate/article` uses OpenAI to generate blog articles from keywords, saves to blogPosts
@@ -192,7 +207,9 @@ User-facing AI marketing toolkit in the Discover section. Authenticated users de
 - **Database**: `seo_keywords` table tracks keywords with searchVolume, intent, assignedPage, assignedArticle, status
 
 ## Svivva Play (`/play`)
+
 Music composition and chord exploration tool with hardware-sampler UI aesthetic.
+
 - **Active Modes**:
   - **Chord Player**: Browse 500+ chord voicings (neo-soul, jazz, Brazilian, gospel, quartal, etc.) with diatonic analysis, inversions, and MIDI output. Powered by `lib/svivva-play/chordkit.ts` (ported from ChordKit JS).
   - **Composition**: Counterpoint (3-voice interlocking canons) and Hocketing (6-voice alternating texture) generator. Three styles: Electric Counterpoint, Shaw Interlace, Phase Canon. 25+ world/jazz/Indian scales. Powered by `lib/svivva-play/reich-engine.ts` (ported from Python Reich composer).
@@ -203,12 +220,16 @@ Music composition and chord exploration tool with hardware-sampler UI aesthetic.
 - **API Routes**: `/api/svivva-play/analyze`, `/api/svivva-play/generate`, `/api/svivva-play/export`
 
 ## Hardware Builder — Sketch & 3D Model Maker
+
 Step 4 (Logical) of the BUILD wizard now has two active tools (replacing the former "Coming Soon" placeholders):
+
 - **3D Model Viewer**: Paste any Spline scene URL to load an interactive 3D model preview via iframe embed. Links to Spline editor for scene creation.
 - **AI Sketch Generator**: Text-to-image via DALL-E 3. Prompt is auto-prefixed with product context (name, category, materials). Generates reference sketches with download support. API route: `POST /api/hardware/sketch` (uses existing OpenAI integration from `lib/llm/openai.ts`).
 
 ## Custom Checkout (`/dashboard/checkout`)
+
 Embedded Stripe Elements checkout page replacing Stripe's hosted checkout:
+
 - Plan summary sidebar with features, pricing, test card reference
 - Stripe PaymentElement with dark theme matching Svivva branding
 - Three.js blooming flowers decorative banner at top (checkout preset): reference-matching colors (blush pink, chartreuse, sage green, lavender) with holographic "S VIVVA" text on petals via canvas texture + shader overlay
@@ -218,6 +239,7 @@ Embedded Stripe Elements checkout page replacing Stripe's hosted checkout:
 - Uses `@stripe/stripe-js` and `@stripe/react-stripe-js` for embedded Elements
 
 ## External Dependencies
+
 - **AI**: OpenAI GPT-5 (via Replit AI Integrations)
 - **Authentication**: Replit Auth
 - **Payments**: Stripe

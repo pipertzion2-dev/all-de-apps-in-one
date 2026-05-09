@@ -5,7 +5,7 @@ export const sentimentAnalysisSpec: ProjectSpec = {
   name: "Sentiment Analysis API",
   slug: "sentiment-analysis",
   description: "Analyzes text and returns sentiment classification with confidence scores",
-  
+
   systemPrompt: `You are a sentiment analysis expert. Analyze the given text and determine its emotional tone.
 Classify the sentiment as positive, negative, or neutral.
 Provide a confidence score between 0 and 1.
@@ -170,7 +170,8 @@ Return null for fields that cannot be determined.`,
 
   examples: [
     {
-      input: "Apple MacBook Pro 16-inch, M3 Max chip, 36GB RAM, 1TB SSD. Price: $3,499. Space Black finish.",
+      input:
+        "Apple MacBook Pro 16-inch, M3 Max chip, 36GB RAM, 1TB SSD. Price: $3,499. Space Black finish.",
       output: {
         name: "Apple MacBook Pro 16-inch",
         price: { amount: 3499, currency: "USD" },
@@ -282,14 +283,16 @@ Rate the overall code quality from 1-10.`,
 }`,
       output: {
         score: 3,
-        summary: "Critical SQL injection vulnerability detected. Code lacks error handling and type safety.",
+        summary:
+          "Critical SQL injection vulnerability detected. Code lacks error handling and type safety.",
         issues: [
           {
             severity: "critical",
             type: "security",
             line: 2,
             message: "SQL injection vulnerability: user input is concatenated directly into query",
-            suggestion: "Use parameterized queries: db.query('SELECT * FROM users WHERE id = ?', [id])",
+            suggestion:
+              "Use parameterized queries: db.query('SELECT * FROM users WHERE id = ?', [id])",
           },
           {
             severity: "major",

@@ -6,10 +6,7 @@ import type { QueryOptions } from "./base";
 
 export class ProjectRepository {
   async findById(id: string): Promise<Project | undefined> {
-    const [result] = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, id));
+    const [result] = await db.select().from(projects).where(eq(projects.id, id));
     return result;
   }
 
@@ -53,10 +50,7 @@ export class ProjectRepository {
   }
 
   async findAll(options?: QueryOptions): Promise<Project[]> {
-    let query = db
-      .select()
-      .from(projects)
-      .orderBy(desc(projects.updatedAt));
+    let query = db.select().from(projects).orderBy(desc(projects.updatedAt));
 
     if (options?.limit) {
       query = query.limit(options.limit) as typeof query;
@@ -96,10 +90,7 @@ export class ProjectRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await db
-      .delete(projects)
-      .where(eq(projects.id, id))
-      .returning();
+    const result = await db.delete(projects).where(eq(projects.id, id)).returning();
     return result.length > 0;
   }
 
@@ -109,10 +100,7 @@ export class ProjectRepository {
   }
 
   async countByOwner(ownerId: string): Promise<number> {
-    const result = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.ownerId, ownerId));
+    const result = await db.select().from(projects).where(eq(projects.ownerId, ownerId));
     return result.length;
   }
 

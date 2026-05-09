@@ -24,10 +24,10 @@ function getMaterialColor(materials: string[]): number {
 }
 
 function getAccentColor(materials: string[]): number {
-  if (materials.includes("Carbon fiber")) return 0x5BA8A0;
-  if (materials.includes("Titanium")) return 0x6B2C4A;
-  if (materials.includes("Glass")) return 0x5BA8A0;
-  return 0xA05068;
+  if (materials.includes("Carbon fiber")) return 0x5ba8a0;
+  if (materials.includes("Titanium")) return 0x6b2c4a;
+  if (materials.includes("Glass")) return 0x5ba8a0;
+  return 0xa05068;
 }
 
 function buildProductGeometry(
@@ -35,7 +35,7 @@ function buildProductGeometry(
   requirements: string[],
   scene: THREE.Scene,
   matColor: number,
-  accentColor: number
+  accentColor: number,
 ): THREE.Group {
   const group = new THREE.Group();
   const mainMat = new THREE.MeshPhysicalMaterial({
@@ -62,7 +62,13 @@ function buildProductGeometry(
   const isModular = requirements.includes("Modular design");
   const scale = isCompact ? 0.7 : 1.0;
 
-  if (cat.includes("electron") || cat.includes("device") || cat.includes("gadget") || cat.includes("phone") || cat.includes("tablet")) {
+  if (
+    cat.includes("electron") ||
+    cat.includes("device") ||
+    cat.includes("gadget") ||
+    cat.includes("phone") ||
+    cat.includes("tablet")
+  ) {
     const bodyW = 1.2 * scale;
     const bodyH = 0.15 * scale;
     const bodyD = 2.0 * scale;
@@ -72,7 +78,12 @@ function buildProductGeometry(
 
     const screen = new THREE.Mesh(
       new THREE.PlaneGeometry(bodyW * 0.85, bodyD * 0.88),
-      new THREE.MeshPhysicalMaterial({ color: 0x111111, metalness: 0.1, roughness: 0.05, clearcoat: 1.0 })
+      new THREE.MeshPhysicalMaterial({
+        color: 0x111111,
+        metalness: 0.1,
+        roughness: 0.05,
+        clearcoat: 1.0,
+      }),
     );
     screen.position.set(0, bodyH / 2 + 0.001, -bodyD * 0.02);
     screen.rotation.x = -Math.PI / 2;
@@ -89,7 +100,10 @@ function buildProductGeometry(
 
     if (isModular) {
       for (let i = -1; i <= 1; i += 2) {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.04, bodyH * 1.1, bodyD * 0.3), accentMat);
+        const rail = new THREE.Mesh(
+          new THREE.BoxGeometry(0.04, bodyH * 1.1, bodyD * 0.3),
+          accentMat,
+        );
         rail.position.set(i * (bodyW / 2 + 0.025), 0, -bodyD * 0.25);
         group.add(rail);
       }
@@ -97,10 +111,16 @@ function buildProductGeometry(
   } else if (cat.includes("home") || cat.includes("appliance") || cat.includes("kitchen")) {
     const baseR = 0.6 * scale;
     const baseH = 1.4 * scale;
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(baseR, baseR * 1.05, baseH, 32), mainMat);
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(baseR, baseR * 1.05, baseH, 32),
+      mainMat,
+    );
     group.add(base);
 
-    const lid = new THREE.Mesh(new THREE.CylinderGeometry(baseR * 0.3, baseR, 0.3 * scale, 32), mainMat);
+    const lid = new THREE.Mesh(
+      new THREE.CylinderGeometry(baseR * 0.3, baseR, 0.3 * scale, 32),
+      mainMat,
+    );
     lid.position.y = baseH / 2 + 0.15 * scale;
     group.add(lid);
 
@@ -111,22 +131,36 @@ function buildProductGeometry(
     const panel = new THREE.Mesh(new THREE.BoxGeometry(baseR * 0.6, baseH * 0.2, 0.02), darkMat);
     panel.position.set(0, -baseH * 0.1, baseR + 0.01);
     group.add(panel);
-  } else if (cat.includes("industrial") || cat.includes("tool") || cat.includes("machine") || cat.includes("equipment")) {
+  } else if (
+    cat.includes("industrial") ||
+    cat.includes("tool") ||
+    cat.includes("machine") ||
+    cat.includes("equipment")
+  ) {
     const baseW = 1.8 * scale;
     const baseH = 0.3 * scale;
     const baseD = 1.2 * scale;
     const base = new THREE.Mesh(new THREE.BoxGeometry(baseW, baseH, baseD), mainMat);
     group.add(base);
 
-    const col = new THREE.Mesh(new THREE.BoxGeometry(0.25 * scale, 1.5 * scale, 0.25 * scale), mainMat);
+    const col = new THREE.Mesh(
+      new THREE.BoxGeometry(0.25 * scale, 1.5 * scale, 0.25 * scale),
+      mainMat,
+    );
     col.position.set(-baseW * 0.35, 0.9 * scale, 0);
     group.add(col);
 
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(1.0 * scale, 0.15 * scale, 0.2 * scale), accentMat);
+    const arm = new THREE.Mesh(
+      new THREE.BoxGeometry(1.0 * scale, 0.15 * scale, 0.2 * scale),
+      accentMat,
+    );
     arm.position.set(0, 1.65 * scale, 0);
     group.add(arm);
 
-    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.12 * scale, 0.08 * scale, 0.4 * scale, 16), darkMat);
+    const head = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12 * scale, 0.08 * scale, 0.4 * scale, 16),
+      darkMat,
+    );
     head.position.set(0.35 * scale, 1.4 * scale, 0);
     group.add(head);
 
@@ -135,7 +169,12 @@ function buildProductGeometry(
       foot.position.set(i * baseW * 0.4, -baseH / 2 - 0.04, 0);
       group.add(foot);
     }
-  } else if (cat.includes("wear") || cat.includes("watch") || cat.includes("fitness") || cat.includes("health")) {
+  } else if (
+    cat.includes("wear") ||
+    cat.includes("watch") ||
+    cat.includes("fitness") ||
+    cat.includes("health")
+  ) {
     const bandW = 0.4 * scale;
     const faceR = 0.35 * scale;
 
@@ -145,7 +184,12 @@ function buildProductGeometry(
 
     const screen2 = new THREE.Mesh(
       new THREE.CircleGeometry(faceR * 0.85, 32),
-      new THREE.MeshPhysicalMaterial({ color: 0x111122, metalness: 0.1, roughness: 0.05, clearcoat: 1.0 })
+      new THREE.MeshPhysicalMaterial({
+        color: 0x111122,
+        metalness: 0.1,
+        roughness: 0.05,
+        clearcoat: 1.0,
+      }),
     );
     screen2.position.z = 0.041;
     group.add(screen2);
@@ -167,11 +211,17 @@ function buildProductGeometry(
     band2.rotation.z = Math.PI;
     group.add(band2);
   } else {
-    const body2 = new THREE.Mesh(new THREE.BoxGeometry(1.5 * scale, 0.8 * scale, 1.0 * scale), mainMat);
+    const body2 = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5 * scale, 0.8 * scale, 1.0 * scale),
+      mainMat,
+    );
     body2.geometry = roundEdges(body2.geometry, 0.08);
     group.add(body2);
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(1.3 * scale, 0.1 * scale, 0.8 * scale), accentMat);
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(1.3 * scale, 0.1 * scale, 0.8 * scale),
+      accentMat,
+    );
     top.position.y = 0.45 * scale;
     group.add(top);
 
@@ -186,7 +236,10 @@ function buildProductGeometry(
 
     if (isModular) {
       for (let i = 0; i < 3; i++) {
-        const slot = new THREE.Mesh(new THREE.BoxGeometry(0.35 * scale, 0.02, 0.8 * scale), accentMat);
+        const slot = new THREE.Mesh(
+          new THREE.BoxGeometry(0.35 * scale, 0.02, 0.8 * scale),
+          accentMat,
+        );
         slot.position.set(-0.45 * scale + i * 0.45 * scale, -0.41 * scale, 0);
         group.add(slot);
       }
@@ -200,7 +253,13 @@ function roundEdges(geometry: THREE.BoxGeometry, _radius: number): THREE.BoxGeom
   return geometry;
 }
 
-export function CadModelViewer({ productName, productCategory, materials, requirements, className }: CadModelViewerProps) {
+export function CadModelViewer({
+  productName,
+  productCategory,
+  materials,
+  requirements,
+  className,
+}: CadModelViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -220,7 +279,12 @@ export function CadModelViewer({ productName, productCategory, materials, requir
     scene.background = new THREE.Color(0x1a1a1a);
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(
+      40,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      100,
+    );
     camera.position.set(3, 2.5, 3);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
@@ -248,7 +312,7 @@ export function CadModelViewer({ productName, productCategory, materials, requir
     fillLight.position.set(-3, 4, -2);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xA05068, 0.3);
+    const rimLight = new THREE.DirectionalLight(0xa05068, 0.3);
     rimLight.position.set(0, 2, -5);
     scene.add(rimLight);
 
@@ -270,7 +334,11 @@ export function CadModelViewer({ productName, productCategory, materials, requir
     model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const wireGeo = new THREE.EdgesGeometry(child.geometry, 15);
-        const wireMat = new THREE.LineBasicMaterial({ color: 0x5BA8A0, transparent: true, opacity: 0.15 });
+        const wireMat = new THREE.LineBasicMaterial({
+          color: 0x5ba8a0,
+          transparent: true,
+          opacity: 0.15,
+        });
         const wireframe = new THREE.LineSegments(wireGeo, wireMat);
         wireframe.position.copy(child.position);
         wireframe.rotation.copy(child.rotation);
@@ -295,7 +363,9 @@ export function CadModelViewer({ productName, productCategory, materials, requir
       rotation.current.x = Math.max(-1.2, Math.min(1.2, rotation.current.x));
       prevMouse.current = { x: e.clientX, y: e.clientY };
     };
-    const onMouseUp = () => { isDragging.current = false; };
+    const onMouseUp = () => {
+      isDragging.current = false;
+    };
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
@@ -312,7 +382,9 @@ export function CadModelViewer({ productName, productCategory, materials, requir
       rotation.current.x = Math.max(-1.2, Math.min(1.2, rotation.current.x));
       prevMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     };
-    const onTouchEnd = () => { isDragging.current = false; };
+    const onTouchEnd = () => {
+      isDragging.current = false;
+    };
 
     renderer.domElement.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
@@ -362,7 +434,11 @@ export function CadModelViewer({ productName, productCategory, materials, requir
 
   return (
     <div className={`relative ${className || ""}`}>
-      <div ref={containerRef} className="w-full aspect-square rounded-lg overflow-hidden" style={{ minHeight: 200 }} />
+      <div
+        ref={containerRef}
+        className="w-full aspect-square rounded-lg overflow-hidden"
+        style={{ minHeight: 200 }}
+      />
       {isInitialized && (
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
           <span className="text-[9px] font-mono text-gray-500 bg-black/60 px-1.5 py-0.5 rounded">

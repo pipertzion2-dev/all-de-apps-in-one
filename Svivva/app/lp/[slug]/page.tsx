@@ -77,8 +77,7 @@ const pages: Record<string, LandingPageData> = {
   },
   "prompt-to-api": {
     title: "Prompt to API",
-    metaTitle:
-      "Prompt to API - Turn Any AI Prompt Into a Scalable Endpoint | Svivva",
+    metaTitle: "Prompt to API - Turn Any AI Prompt Into a Scalable Endpoint | Svivva",
     metaDescription:
       "Transform your AI prompts into production-ready API endpoints instantly. Version control, A/B testing, and analytics included. Try free.",
     heroHeadline: "Turn Any AI Prompt Into a Live API Endpoint",
@@ -125,8 +124,7 @@ const pages: Record<string, LandingPageData> = {
   },
   "ai-app-generator": {
     title: "AI App Generator",
-    metaTitle:
-      "AI App Generator - Full-Stack AI Applications From a Description | Svivva",
+    metaTitle: "AI App Generator - Full-Stack AI Applications From a Description | Svivva",
     metaDescription:
       "Generate complete AI-powered applications with APIs, databases, and frontends from a single description. Ship your MVP in hours, not weeks.",
     heroHeadline: "Ship Your AI-Powered App Before Lunch",
@@ -206,11 +204,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function LandingPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const page = pages[slug];
 
@@ -227,13 +221,7 @@ export default async function LandingPage({
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image
-              src={svivvaLogo}
-              alt="Svivva"
-              width={120}
-              height={36}
-              priority
-            />
+            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
           </Link>
           <Link
             href="/dashboard"
@@ -273,21 +261,15 @@ export default async function LandingPage({
       <section className="max-w-4xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div data-testid="stat-apis-created">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">
-              10K+
-            </p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">10K+</p>
             <p className="mt-1 text-sm text-white/60">APIs Created</p>
           </div>
           <div data-testid="stat-uptime">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">
-              99.9%
-            </p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">99.9%</p>
             <p className="mt-1 text-sm text-white/60">Uptime SLA</p>
           </div>
           <div data-testid="stat-latency">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">
-              50ms
-            </p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">50ms</p>
             <p className="mt-1 text-sm text-white/60">Avg Latency</p>
           </div>
         </div>
@@ -310,9 +292,7 @@ export default async function LandingPage({
                   <IconComp className="w-5 h-5 text-[#5BA8A0]" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">
-                  {benefit.description}
-                </p>
+                <p className="text-sm text-white/60 leading-relaxed">{benefit.description}</p>
               </div>
             );
           })}
@@ -320,9 +300,7 @@ export default async function LandingPage({
       </section>
 
       <section className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-          Ready to get started?
-        </h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4">Ready to get started?</h2>
         <p className="text-white/60 mb-8">
           No credit card required. Build your first API in under 5 minutes.
         </p>
@@ -351,9 +329,7 @@ export default async function LandingPage({
                 {faq.question}
                 <ChevronDown className="w-4 h-4 text-white/40 shrink-0 transition-transform group-open:rotate-180" />
               </summary>
-              <div className="px-6 pb-4 text-sm text-white/60 leading-relaxed">
-                {faq.answer}
-              </div>
+              <div className="px-6 pb-4 text-sm text-white/60 leading-relaxed">{faq.answer}</div>
             </details>
           ))}
         </div>

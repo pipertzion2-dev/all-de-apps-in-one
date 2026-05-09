@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
         .where(eq(neuralModels.ownerId, ownerId))
         .orderBy(desc(neuralModels.createdAt));
     } else {
-      models = await db
-        .select()
-        .from(neuralModels)
-        .orderBy(desc(neuralModels.createdAt));
+      models = await db.select().from(neuralModels).orderBy(desc(neuralModels.createdAt));
     }
 
     return NextResponse.json(models);
@@ -36,27 +33,27 @@ export async function POST(request: NextRequest) {
     const { name, modelType, baseModel, description, params, ownerId } = body;
 
     if (!name || !modelType) {
-      return NextResponse.json(
-        { error: "name and modelType are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "name and modelType are required" }, { status: 400 });
     }
 
     const id = uuidv4();
     const now = new Date();
 
-    const [model] = await db.insert(neuralModels).values({
-      id,
-      ownerId: ownerId || "anonymous",
-      name,
-      modelType,
-      baseModel: baseModel || null,
-      description: description || null,
-      params: params || null,
-      status: "draft",
-      createdAt: now,
-      updatedAt: now,
-    }).returning();
+    const [model] = await db
+      .insert(neuralModels)
+      .values({
+        id,
+        ownerId: ownerId || "anonymous",
+        name,
+        modelType,
+        baseModel: baseModel || null,
+        description: description || null,
+        params: params || null,
+        status: "draft",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
 
     return NextResponse.json(model, { status: 201 });
   } catch (error) {
