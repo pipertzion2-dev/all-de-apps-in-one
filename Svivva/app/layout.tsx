@@ -35,9 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "Svivva — From seed to symphony.";
+  const title = "From seed to symphony";
   const description =
-    "Svivva is the AI-native API builder. Turn a plain-language prompt into a production endpoint with schema validation, model routing, cost policy, retries, billing, and docs — in the time it takes to refill your coffee. Free tier, no credit card.";
+    "From seed to symphony — one workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
 
   return {
     title: {
@@ -46,17 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: [
-      "AI API builder",
-      "build AI API",
-      "prompt to API",
-      "OpenAI API wrapper",
-      "Claude API builder",
-      "AI endpoint generator",
-      "no-code AI API",
-      "ship AI features fast",
-      "Svivva",
-    ],
+    keywords: ["Svivva", "From seed to symphony"],
     openGraph: {
       type: "website",
       siteName: "Svivva",
@@ -68,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/svivva-logo.png",
           width: 1200,
           height: 630,
-          alt: "Svivva — From seed to symphony",
+          alt: "From seed to symphony",
         },
       ],
     },
@@ -121,7 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 url: siteUrl,
                 logo: `${siteUrl}/logo.png`,
                 description:
-                  "Svivva — build AI-powered APIs, generate full app suites, compose music, launch hardware products, and automate marketing from one workspace.",
+                  "From seed to symphony — Svivva is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],
               },
               {
@@ -141,12 +131,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "SoftwareApplication",
-                name: "Svivva AI API Builder",
+                name: "Svivva",
                 operatingSystem: "Web",
                 applicationCategory: "DeveloperApplication",
                 offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
                 description:
-                  "Build, test, and deploy AI-powered APIs with schema-enforced JSON responses, auto-generated evaluations, versioning, and instant rollback.",
+                  "From seed to symphony — ship with schema validation, automated checks, versioning, and rollback from one workspace.",
                 url: siteUrl,
               },
               {
@@ -158,7 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     name: "What is Svivva?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Svivva is an AI-native API builder that turns a plain-language prompt into a production endpoint with schema validation, model routing, auto-evaluations, versioning, cost controls, billing, and auto-generated docs — in minutes.",
+                      text: "From seed to symphony: Svivva turns plain-language intent into shipped product — with validation, evaluations, versioning, and rollback so quality does not drift.",
                     },
                   },
                   {
@@ -206,7 +196,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "HowTo",
-                name: "How to build an AI API with Svivva",
+                name: "How to ship with Svivva",
                 description:
                   "Build a production-ready endpoint from a plain-language prompt with Svivva — schema validation, evaluations, and rollback included.",
                 step: [

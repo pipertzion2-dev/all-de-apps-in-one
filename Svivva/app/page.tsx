@@ -389,9 +389,6 @@ export default function LandingPage() {
                   </nav>
                   <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-background to-[#5BA8A0]/10">
                     <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto px-4 sm:px-6">
-                      <Badge variant="secondary" className="px-4 py-1.5">
-                        The AI platform that tests its own work
-                      </Badge>
                       <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                         From seed{" "}
                         <span
@@ -549,10 +546,6 @@ export default function LandingPage() {
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-              <Badge variant="secondary" className="px-4 py-1.5">
-                Growing with our community
-              </Badge>
-
               {mode === "digital" ? (
                 <>
                   <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
