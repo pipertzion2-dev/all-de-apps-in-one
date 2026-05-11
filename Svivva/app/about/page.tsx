@@ -4,14 +4,14 @@ import Image from "next/image";
 import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
 
 export const metadata: Metadata = {
-  title: "About Svivva — The AI API Builder Platform",
+  title: "About",
   description:
-    "Svivva transforms plain-language prompts into production-ready AI APIs with schema validation, auto-evaluations, versioning, and instant rollback. Built for lean teams who ship fast.",
+    "From seed to symphony — Svivva helps teams turn plain-language intent into shipped product, with validation, evaluations, versioning, and rollback.",
   alternates: { canonical: "https://svivva.com/about" },
   openGraph: {
-    title: "About Svivva — The AI API Builder Platform",
+    title: "About Svivva",
     description:
-      "Svivva transforms plain-language prompts into production-ready AI APIs with schema validation, auto-evaluations, versioning, and instant rollback.",
+      "From seed to symphony — learn how Svivva helps teams ship with guardrails instead of babysitting infrastructure.",
     url: "https://svivva.com/about",
   },
 };

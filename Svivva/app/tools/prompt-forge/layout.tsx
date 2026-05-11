@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "PromptForge — Free AI Prompt Testing Tool | Svivva",
+  title: "PromptForge",
   description:
-    "Test and refine AI prompts instantly with GPT-4o, GPT-4o mini, and GPT-4 Turbo. Free prompt playground — no signup, no API key. See tokens, latency, and cost per run.",
+    "Test and refine prompts with GPT-4o, GPT-4o mini, and GPT-4 Turbo. Free playground — no signup, no API key. See tokens, latency, and cost per run.",
   openGraph: {
-    title: "PromptForge — Free AI Prompt Testing Tool",
-    description:
-      "Test AI prompts with GPT-4o, see token counts and costs, then deploy to production with Svivva.",
+    title: "PromptForge",
+    description: "Test prompts with GPT-4o, see token counts and costs, then ship with Svivva.",
     type: "website",
   },
   keywords: [

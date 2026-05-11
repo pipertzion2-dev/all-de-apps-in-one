@@ -52,9 +52,9 @@ export default function BadgePage() {
       desc: "For apps and tools that use Svivva as their AI backend",
     },
     {
-      label: "AI API by Svivva",
-      params: "label=AI+API+by&message=Svivva&color=6B2C4A",
-      desc: "Burgundy variant — highlights the AI API aspect",
+      label: "Ships with Svivva",
+      params: "label=Ships+with&message=Svivva&color=6B2C4A",
+      desc: "Burgundy variant — highlights a product powered on Svivva",
     },
     {
       label: "Svivva Certified",
@@ -77,8 +77,8 @@ export default function BadgePage() {
           <h1 className="text-2xl font-bold">Svivva Badge</h1>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Add a "Built with Svivva" badge to your README, website, or app. Shows the world you're
-          using the fastest AI API builder — and gives Svivva a small backlink in return.
+          Add a &ldquo;Built with Svivva&rdquo; badge to your README, website, or app. Shows you
+          ship with Svivva — and gives a small backlink in return.
         </p>
         <div className="flex items-center gap-2">
           <Badge
@@ -159,10 +159,10 @@ export default function BadgePage() {
         className="rounded-2xl p-6 text-center space-y-3"
         style={{ background: `${TEAL}15`, border: `1px solid ${TEAL}30` }}
       >
-        <p className="text-sm font-semibold">Build your own AI API in 11 minutes</p>
+        <p className="text-sm font-semibold">From seed to symphony</p>
         <p className="text-xs text-muted-foreground">
-          Svivva turns natural language prompts into production-ready APIs with schema enforcement,
-          versioning, and a built-in marketplace.
+          Svivva turns plain-language intent into production backends with schema checks, tests,
+          versioning, and rollback — from one workspace.
         </p>
         <Link
           href="/"

@@ -4,9 +4,9 @@ import Image from "next/image";
 import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
 
 export const metadata: Metadata = {
-  title: "Contact Svivva — AI API Builder Support",
+  title: "Contact",
   description:
-    "Get in touch with the Svivva team for platform questions, enterprise plans, or partnership inquiries. Email us at hello@svivva.com.",
+    "Contact the Svivva team for platform questions, enterprise plans, or partnerships. Email hello@svivva.com.",
   alternates: { canonical: "https://svivva.com/contact" },
   openGraph: {
     title: "Contact Svivva",

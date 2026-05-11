@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
       default: title,
-      template: "%s | Svivva",
+      template: "%s · From seed to symphony",
     },
     description,
     metadataBase: new URL(siteUrl),
@@ -185,7 +185,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   },
                   {
                     "@type": "Question",
-                    name: "What happens if my AI API returns bad data?",
+                    name: "What happens if my endpoint returns bad data?",
                     acceptedAnswer: {
                       "@type": "Answer",
                       text: "Svivva validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",

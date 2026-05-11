@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pyracrypt — Free Browser-Based File Encryption | Svivva Tools",
+  title: "Pyracrypt",
   description:
     "Encrypt any file with AES-256 directly in your browser. Zero uploads, zero sign-up, zero cost. Pyracrypt keeps your data private — nothing ever leaves your device.",
   keywords: [

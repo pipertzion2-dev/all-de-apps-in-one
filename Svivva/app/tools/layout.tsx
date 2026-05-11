@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free AI & Developer Tools | Svivva",
+  title: "Tools",
   description:
-    "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
+    "Free tools for developers and creators — calculators, validators, and playgrounds. Most need no signup.",
   openGraph: {
-    title: "Free AI & Developer Tools | Svivva",
+    title: "Svivva tools",
     description:
-      "Explore our collection of free AI-powered tools designed for developers, creators, and teams. No signup required.",
+      "Free tools for developers and creators — explore calculators, validators, and playgrounds on Svivva.",
     type: "website",
   },
 };

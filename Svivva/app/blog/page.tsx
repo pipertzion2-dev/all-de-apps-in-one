@@ -7,12 +7,12 @@ import BlogIndexContent from "./blog-index-content";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Svivva Blog | AI API Development Guides & Tutorials",
+  title: "Blog",
   description:
-    "Guides, tutorials, and insights on building AI-powered APIs. Learn prompt engineering, schema validation, API versioning, and more.",
+    "Guides and stories from Svivva — shipping with guardrails: prompts, schemas, evaluations, versioning, and what we learn along the way.",
   openGraph: {
-    title: "Svivva Blog | AI API Development Guides & Tutorials",
-    description: "Guides, tutorials, and insights on building AI-powered APIs.",
+    title: "Svivva blog",
+    description: "Guides and stories on shipping with Svivva — from seed to symphony.",
     type: "website",
   },
 };
