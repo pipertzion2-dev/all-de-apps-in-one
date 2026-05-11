@@ -378,7 +378,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               className="text-2xl md:text-3xl font-bold text-white mb-4"
               data-testid="text-cta-title"
             >
-              {miniApp ? `Try ${page.headline.split(":")[0]} Free` : "Ready to Build Your AI API?"}
+              {miniApp ? `Try ${page.headline.split(":")[0]} Free` : "Ready to ship with Svivva?"}
             </h2>
             <p className="text-white/80 mb-8 text-lg">
               {miniApp

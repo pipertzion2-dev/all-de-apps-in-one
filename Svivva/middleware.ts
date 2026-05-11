@@ -33,7 +33,12 @@ export function middleware(request: NextRequest) {
     url.searchParams.set("key", keyMatch[1].toLowerCase());
     return NextResponse.rewrite(url);
   }
-  return NextResponse.next();
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {

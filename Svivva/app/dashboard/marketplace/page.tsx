@@ -124,7 +124,7 @@ export default function MarketplacePage() {
         <h1 className="text-3xl font-bold" data-testid="text-marketplace-title">
           Marketplace
         </h1>
-        <p className="text-muted-foreground">Discover and purchase pre-built AI APIs</p>
+        <p className="text-muted-foreground">Discover and purchase pre-built endpoints</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">

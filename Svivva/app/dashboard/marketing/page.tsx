@@ -1057,7 +1057,7 @@ function GscSetupCard({ siteUrl }: { siteUrl: string }) {
             { url: `${domain}/pyracrypt`, label: "Pyracrypt" },
             { url: `${domain}/blog`, label: "Blog" },
             { url: `${domain}/tools`, label: "Tools Hub" },
-            { url: `${domain}/lp/ai-api-builder`, label: "LP: AI API Builder" },
+            { url: `${domain}/lp/ai-api-builder`, label: "LP: Builder" },
             { url: `${domain}/lp/prompt-to-api`, label: "LP: Prompt to API" },
             { url: `${domain}/lp/ai-app-generator`, label: "LP: AI App Generator" },
           ].map(({ url, label }) => (

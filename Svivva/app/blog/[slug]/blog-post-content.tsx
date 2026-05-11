@@ -253,7 +253,7 @@ export default function BlogPostContent({
             className="text-2xl md:text-3xl font-bold text-white mb-3"
             data-testid="text-cta-title"
           >
-            Build AI APIs faster with Svivva
+            From seed to symphony — ship faster with Svivva
           </h2>
           <p className="text-white/80 mb-6">
             Turn prompts into production-ready APIs with schema enforcement, evaluations, and

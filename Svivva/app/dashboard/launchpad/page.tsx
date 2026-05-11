@@ -126,7 +126,7 @@ const SVIVVA_STEPS: Step[] = [
     icon: FileText,
     estimate: "~3 min",
     description:
-      "Full-length technical posts on AI APIs, schema enforcement, prompt engineering — ranks for long-tail developer searches",
+      "Full-length technical posts on LLM endpoints, schema enforcement, prompt engineering — ranks for long-tail developer searches",
     auto: [
       `10 blog posts written, published, and live at ${ORBIT_SITE}/blog`,
       "Each post has meta title, description, and full HTML content",
@@ -224,7 +224,7 @@ const SVIVVA_STEPS: Step[] = [
     auto: [
       "FAQ schema JSON-LD generated",
       "SoftwareApplication schema generated",
-      "'Top 30 AI APIs' roundup page created",
+      "'Top developer AI tools' roundup page created",
     ],
     manual: [
       "Add the JSON-LD from Results to your homepage <head> in the site code",
@@ -270,7 +270,7 @@ const SVIVVA_STEPS: Step[] = [
     icon: Link2,
     estimate: "~6 min",
     description:
-      "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI API' searches",
+      "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
     auto: [
       `30 integration guide pages created at ${ORBIT_HOST}/{slug}`,
       "Each covers: how to connect the tool, step-by-step guide, use cases, getting started CTA",
@@ -287,7 +287,7 @@ const SVIVVA_STEPS: Step[] = [
     icon: Target,
     estimate: "~4 min",
     description:
-      "AI-written pages for Healthcare, Fintech, E-commerce, Legal Tech + 16 more industries — targets 'AI API for [industry]' searches from decision-makers",
+      "AI-written pages for Healthcare, Fintech, E-commerce, Legal Tech + 16 more industries — targets 'AI backend for [industry]' searches from decision-makers",
     auto: [
       "20 industry-specific use case pages created",
       "Each explains the problem → AI solution → 5 specific use cases → CTA",
@@ -323,7 +323,7 @@ const SVIVVA_STEPS: Step[] = [
     description:
       "15 pages each answering an exact 'People Also Ask' question — gets featured in Google PAA boxes AND cited by Perplexity/ChatGPT/Gemini",
     auto: [
-      "15 question-answer pages created (e.g. 'What is the best AI API builder?')",
+      "15 question-answer pages created (e.g. 'What is the best way to ship AI features fast?')",
       "First paragraph is the direct answer — what Google shows in PAA boxes",
       "Also optimized for AI search engine citations",
       "All submitted to IndexNow",

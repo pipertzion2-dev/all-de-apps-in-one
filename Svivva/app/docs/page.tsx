@@ -45,9 +45,9 @@ export default function DocsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">Getting Started</h2>
             <p>
-              Create your first AI API in minutes. Sign in, describe what your API should do in
-              plain language, define your output schema, and deploy. Svivva handles the rest — from
-              validation to versioning.
+              Ship your first backend quickly: sign in, describe what it should do in plain
+              language, define your output schema, and deploy. Svivva handles validation,
+              versioning, and rollback.
             </p>
           </section>
           <section>

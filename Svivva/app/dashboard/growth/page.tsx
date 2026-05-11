@@ -77,7 +77,7 @@ const NOVEL_TACTICS = [
     icon: Brain,
     title: "Answer Engine Optimization",
     badge: "🔥 New",
-    desc: "Structure your content so AI search engines (Perplexity, ChatGPT, Gemini) cite Svivva when users ask about AI API builders. Most competitors don't do this yet.",
+    desc: "Structure your content so AI search engines (Perplexity, ChatGPT, Gemini) cite Svivva when users ask how to ship AI products fast. Most competitors don't do this yet.",
     action: "aeo_content",
     howTo:
       "Generate AEO content → add it to your website as a dedicated FAQ page → AI engines will cite it within weeks.",

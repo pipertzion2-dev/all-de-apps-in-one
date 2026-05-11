@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!data) return { title: "API not found" };
   return {
     title: `${data.project.name} — Svivva API`,
-    description: data.project.description || `A live AI API built with Svivva`,
+    description: data.project.description || `A live endpoint built with Svivva`,
   };
 }
 
@@ -375,7 +375,7 @@ export default async function ApiCardPage({ params }: PageProps) {
               textDecoration: "none",
             }}
           >
-            Build your own AI API →
+            Build your own →
           </Link>
         </div>
       </main>

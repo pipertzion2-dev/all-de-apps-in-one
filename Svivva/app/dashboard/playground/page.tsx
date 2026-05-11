@@ -305,7 +305,7 @@ export default function PlaygroundPage() {
             API Playground
           </h1>
           <p className="text-muted-foreground" data-testid="text-playground-description">
-            Test and share your AI APIs with collaborators
+            Test and share your endpoints with collaborators
           </p>
         </div>
         <Dialog open={showNewSessionDialog} onOpenChange={setShowNewSessionDialog}>

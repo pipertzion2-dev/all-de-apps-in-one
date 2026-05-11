@@ -162,7 +162,7 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Projects</h1>
-          <p className="text-muted-foreground">Manage your AI API projects</p>
+          <p className="text-muted-foreground">Manage your projects</p>
         </div>
         <Link href="/dashboard/projects/new">
           <Button
@@ -180,7 +180,7 @@ export default function ProjectsPage() {
           <CardContent className="py-12 text-center">
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No projects yet</h3>
-            <p className="text-muted-foreground mb-4">Create your first AI API to get started</p>
+            <p className="text-muted-foreground mb-4">Create your first project to get started</p>
             <Link href="/dashboard/projects/new">
               <Button
                 className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"

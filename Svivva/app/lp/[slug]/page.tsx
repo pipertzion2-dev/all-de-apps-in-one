@@ -29,14 +29,14 @@ interface LandingPageData {
 
 const pages: Record<string, LandingPageData> = {
   "ai-api-builder": {
-    title: "AI API Builder",
-    metaTitle: "AI API Builder - Create Production APIs in Minutes | Svivva",
+    title: "Ship production backends",
+    metaTitle: "Ship production backends from plain English | Svivva",
     metaDescription:
-      "Build, deploy, and scale AI-powered APIs without infrastructure headaches. Go from idea to production endpoint in under 5 minutes. Start free today.",
-    heroHeadline: "Build Production AI APIs in Minutes, Not Months",
+      "From seed to symphony — describe what you need, deploy a guarded endpoint with schema validation and rollback, and grow without babysitting infrastructure. Start free.",
+    heroHeadline: "From seed to symphony — ship what you describe",
     heroSubheadline:
-      "Describe what you need in plain English. Svivva generates a fully functional, scalable API endpoint — complete with authentication, rate limiting, and monitoring. No DevOps required.",
-    ctaText: "Start Building Free",
+      "Plain English in, a production-ready endpoint out — with validation, monitoring, and rollback so quality does not drift. No DevOps assembly line required.",
+    ctaText: "Start free",
     benefits: [
       {
         icon: "code",
@@ -130,7 +130,7 @@ const pages: Record<string, LandingPageData> = {
     heroHeadline: "Ship Your AI-Powered App Before Lunch",
     heroSubheadline:
       "Describe your application idea. Svivva generates the complete stack — API endpoints, database schemas, authentication flows, and SDK packages — ready to integrate into any frontend or mobile app.",
-    ctaText: "Build Your First AI API",
+    ctaText: "Start building",
     benefits: [
       {
         icon: "bot",

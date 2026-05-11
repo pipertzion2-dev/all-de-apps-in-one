@@ -6,6 +6,7 @@ const config = [
     ignores: [
       "node_modules/**",
       ".next/**",
+      ".vercel/**",
       "dist/**",
       "coverage/**",
       // Bundled skill/artifact templates — not application source

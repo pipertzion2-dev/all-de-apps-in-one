@@ -405,7 +405,7 @@ export default function PromptForgePage() {
               href="/tools/ai-api-cost-calculator"
               className="text-sm px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors"
             >
-              AI API Cost Calculator
+              LLM cost calculator
             </Link>
             <Link
               href="/tools/json-schema-validator"

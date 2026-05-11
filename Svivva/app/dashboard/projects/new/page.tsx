@@ -46,7 +46,7 @@ export default function NewProjectPage() {
       trackAppCreation(data.name);
       toast({
         title: "Project created",
-        description: "Your AI API is ready to use",
+        description: "Your endpoint is ready to use",
       });
       router.push(`/dashboard/projects/${data.id}`);
     },

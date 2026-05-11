@@ -85,7 +85,7 @@ export async function GET() {
       { label: "Pyracrypt", url: `${BASE}/pyracrypt` },
       { label: "Blog", url: `${BASE}/blog` },
       { label: "Tools Hub", url: `${BASE}/tools` },
-      { label: "LP: AI API Builder", url: `${BASE}/lp/ai-api-builder` },
+      { label: "LP: Builder", url: `${BASE}/lp/ai-api-builder` },
       { label: "LP: Prompt to API", url: `${BASE}/lp/prompt-to-api` },
       { label: "LP: AI App Generator", url: `${BASE}/lp/ai-app-generator` },
     ].map(({ label, url }) => ({ label, url, gscLink: gscBase + encodeURIComponent(url) }));

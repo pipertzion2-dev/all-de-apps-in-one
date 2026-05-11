@@ -33,7 +33,7 @@ function getProducts(): Record<ProductKey, ProductInfo> {
       audience: "developers, entrepreneurs, SaaS builders, non-technical founders",
       competitors: ["Zapier", "Make (Integromat)", "Bubble", "n8n", "Retool", "Langchain"],
       keywords: [
-        "AI API builder",
+        "AI backend builder",
         "no-code AI",
         "GPT API wrapper",
         "AI automation",
@@ -185,7 +185,7 @@ Competitors: ${p.competitors.join(", ")}
 
 Create comparison content for the TOP 3 competitors:
 For each competitor, write a complete comparison page outline:
-1. PAGE TITLE (e.g., "Svivva vs Zapier: Which is Better for AI APIs in 2025?")
+1. PAGE TITLE (e.g., "Svivva vs Zapier: Which is Better for Shipping AI Features in 2026?")
 2. SUMMARY (2-3 sentence verdict)
 3. COMPARISON TABLE (5-7 features, who wins each)
 4. WHEN TO CHOOSE ${p.name.toUpperCase()} (3-4 specific use cases)

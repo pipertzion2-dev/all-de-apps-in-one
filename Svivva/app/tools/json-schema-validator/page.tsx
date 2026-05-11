@@ -293,7 +293,7 @@ export default function JsonSchemaValidatorPage() {
               a: "All standard formats from ajv-formats: email, date, date-time, uri, ipv4, ipv6, uuid, hostname, byte, binary, password, regex, and more.",
             },
             {
-              q: "How do I validate AI API responses automatically?",
+              q: "How do I validate model responses automatically?",
               a: "Svivva lets you define a JSON Schema for your AI endpoint — every response is automatically validated, and if it fails, the AI auto-repairs the output before returning it to your users.",
             },
             {
@@ -315,7 +315,7 @@ export default function JsonSchemaValidatorPage() {
               href="/tools/ai-api-cost-calculator"
               className="text-sm px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors text-foreground"
             >
-              AI API Cost Calculator
+              LLM cost calculator
             </Link>
             <Link
               href="/tools/prompt-forge"
