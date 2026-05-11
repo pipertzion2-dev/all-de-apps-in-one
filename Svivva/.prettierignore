@@ -6,3 +6,4 @@ package-lock.json
 .local
 .config
 public
+vercel.json
