@@ -570,8 +570,8 @@ export default function LandingPage() {
                     </span>
                   </h1>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Build and ship an AI API, hardware prototype, or full app suite from a
-                    plain-English description. Svivva writes the test cases, deploys the endpoint,
+                    Build and ship production backends, hardware prototypes, or full app suites from
+                    a plain-English description. Svivva writes the test cases, deploys the endpoint,
                     validates every response, and auto-rolls back if anything breaks. No DevOps, no
                     backend code, no babysitting.
                   </p>
@@ -608,7 +608,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Live in under 11 minutes</span>
+                      <span>Ship with confidence</span>
                     </div>
                   </div>
                 </>
@@ -966,7 +966,7 @@ export default function LandingPage() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
                 {mode === "digital" ? (
                   <>
-                    Everything you need to ship{" "}
+                    Everything you need for{" "}
                     <span
                       style={{
                         backgroundImage:
@@ -976,7 +976,7 @@ export default function LandingPage() {
                         backgroundClip: "text",
                       }}
                     >
-                      AI APIs
+                      production
                     </span>
                   </>
                 ) : (
@@ -1821,7 +1821,7 @@ export default function LandingPage() {
                         backgroundClip: "text",
                       }}
                     >
-                      production AI APIs
+                      your next release
                     </span>
                     ?
                   </>

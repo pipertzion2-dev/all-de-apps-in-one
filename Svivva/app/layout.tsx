@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "Svivva — From seed to symphony. AI APIs in 11 minutes.";
+  const title = "Svivva — From seed to symphony.";
   const description =
     "Svivva is the AI-native API builder. Turn a plain-language prompt into a production endpoint with schema validation, model routing, cost policy, retries, billing, and docs — in the time it takes to refill your coffee. Free tier, no credit card.";
 
@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: siteUrl,
       images: [
-        { url: "/svivva-logo.png", width: 1200, height: 630, alt: "Svivva — AI API builder" },
+        { url: "/svivva-logo.png", width: 1200, height: 630, alt: "Svivva — From seed to symphony" },
       ],
     },
     twitter: {
@@ -158,10 +158,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   },
                   {
                     "@type": "Question",
-                    name: "How long does it take to build an AI API with Svivva?",
+                    name: "How long does it take to ship with Svivva?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Most users have a working, tested API endpoint live in under 11 minutes. Write the prompt, define the output schema, click deploy — Svivva handles the rest.",
+                      text: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — Svivva handles validation, rollback, and ops.",
                     },
                   },
                   {
@@ -203,7 +203,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 "@type": "HowTo",
                 name: "How to build an AI API with Svivva",
                 description:
-                  "Build a production-ready AI API from a plain-language prompt in under 11 minutes using Svivva.",
+                  "Build a production-ready endpoint from a plain-language prompt with Svivva — schema validation, evaluations, and rollback included.",
                 step: [
                   {
                     "@type": "HowToStep",

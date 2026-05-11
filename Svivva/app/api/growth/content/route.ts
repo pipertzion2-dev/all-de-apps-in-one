@@ -26,10 +26,10 @@ function getProducts(): Record<ProductKey, ProductInfo> {
   return {
     svivva: {
       name: "Svivva",
-      tagline: "AI API Builder SaaS — build production AI APIs in 11 minutes",
+      tagline: "From seed to symphony — ship production backends from plain English",
       url: base,
       description:
-        "Svivva lets developers and entrepreneurs build, deploy, and monetize AI-powered APIs without deep ML expertise. From seed to symphony in 11 minutes.",
+        "Svivva lets developers and entrepreneurs build, deploy, and monetize AI-powered endpoints without deep ML expertise. From seed to symphony.",
       audience: "developers, entrepreneurs, SaaS builders, non-technical founders",
       competitors: ["Zapier", "Make (Integromat)", "Bubble", "n8n", "Retool", "Langchain"],
       keywords: [
