@@ -4,6 +4,7 @@
  * Bulk Replit drops were removed from git — do not re-commit without updating imports + .vercelignore.
  */
 import { execSync } from "child_process";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 
@@ -21,11 +22,26 @@ const ALLOW = new Set([
   "Svivva/attached_assets/Svivva_print_2_1769474625495.png",
 ]);
 
-const out = execSync("git ls-files -z Svivva/attached_assets/", {
-  cwd: repoRoot,
-  encoding: "utf8",
-});
-const tracked = out.split("\0").filter(Boolean);
+const assetsDir = path.join(repoRoot, "Svivva", "attached_assets");
+
+function getAssetPaths() {
+  try {
+    const out = execSync("git ls-files -z Svivva/attached_assets/", {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return out.split("\0").filter(Boolean);
+  } catch {
+    // Vercel remote builds don't include a .git checkout. Fall back to filesystem files.
+    const files = fs.readdirSync(assetsDir, { withFileTypes: true });
+    return files
+      .filter((entry) => entry.isFile())
+      .map((entry) => `Svivva/attached_assets/${entry.name}`);
+  }
+}
+
+const tracked = getAssetPaths();
 
 const extra = tracked.filter((p) => !ALLOW.has(p));
 const missing = [...ALLOW].filter((p) => !tracked.includes(p));
