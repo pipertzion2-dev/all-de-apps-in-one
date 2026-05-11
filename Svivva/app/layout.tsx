@@ -64,7 +64,12 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: siteUrl,
       images: [
-        { url: "/svivva-logo.png", width: 1200, height: 630, alt: "Svivva — From seed to symphony" },
+        {
+          url: "/svivva-logo.png",
+          width: 1200,
+          height: 630,
+          alt: "Svivva — From seed to symphony",
+        },
       ],
     },
     twitter: {
