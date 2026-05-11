@@ -9,35 +9,36 @@ import { fileURLToPath } from "url";
 import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..", "..");
+const projectRoot = path.resolve(__dirname, "..");
 
 const ALLOW = new Set([
-  "Svivva/attached_assets/5C21F641-65DD-4255-A832-F60282E2CBF0_1771895543298.png",
-  "Svivva/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png",
-  "Svivva/attached_assets/IMG_1493_1770509047497.png",
-  "Svivva/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png",
-  "Svivva/attached_assets/Svivva_Crate_1770908797554.png",
-  "Svivva/attached_assets/Svivva_Seeds_6_1771888740460.png",
-  "Svivva/attached_assets/Svivva_official_3_1769474625495.png",
-  "Svivva/attached_assets/Svivva_print_2_1769474625495.png",
+  "5C21F641-65DD-4255-A832-F60282E2CBF0_1771895543298.png",
+  "CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png",
+  "IMG_1493_1770509047497.png",
+  "SVIVVA_OFFICIAL_LOGO_1769201341308.png",
+  "Svivva_Crate_1770908797554.png",
+  "Svivva_Seeds_6_1771888740460.png",
+  "Svivva_official_3_1769474625495.png",
+  "Svivva_print_2_1769474625495.png",
 ]);
 
-const assetsDir = path.join(repoRoot, "Svivva", "attached_assets");
+const assetsDir = path.join(projectRoot, "attached_assets");
 
 function getAssetPaths() {
   try {
-    const out = execSync("git ls-files -z Svivva/attached_assets/", {
-      cwd: repoRoot,
+    const out = execSync("git ls-files -z attached_assets/", {
+      cwd: projectRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
-    return out.split("\0").filter(Boolean);
+    return out
+      .split("\0")
+      .filter(Boolean)
+      .map((p) => path.basename(p));
   } catch {
     // Vercel remote builds don't include a .git checkout. Fall back to filesystem files.
     const files = fs.readdirSync(assetsDir, { withFileTypes: true });
-    return files
-      .filter((entry) => entry.isFile())
-      .map((entry) => `Svivva/attached_assets/${entry.name}`);
+    return files.filter((entry) => entry.isFile()).map((entry) => entry.name);
   }
 }
 
