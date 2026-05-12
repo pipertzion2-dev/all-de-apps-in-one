@@ -30,6 +30,9 @@ PYRACRYPT EXTRA FEATURES ADD ON
 **/*.min.js
 **/*.min.css
 
+# Vercel CLI local output (not committed; avoids hundreds of format warnings after `vercel build`)
+**/.vercel
+
 # Vercel / Docker text configs (no stable Prettier parser)
 **/.vercelignore
 **/Dockerfile*

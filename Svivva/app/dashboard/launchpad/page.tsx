@@ -68,370 +68,370 @@ type OrbitUrlPack = { site: string; host: string; sitemap: string };
 function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
   const { site, host, sitemap } = orbit;
   return [
-  {
-    id: "svivva-indexnow",
-    title: "Set Up IndexNow",
-    icon: Zap,
-    estimate: "~5s",
-    description:
-      "Generate key + submit all URLs to Bing, Yandex & Yahoo instantly — skips waiting for Googlebot by weeks",
-    auto: [
-      "IndexNow key generated & saved to database",
-      "All site URLs submitted to Bing, Yandex, Yahoo, DuckDuckGo",
-    ],
-    manual: [
-      `Open Google Search Console → Sitemaps → paste: ${sitemap} → click Submit`,
-      "Google does NOT use IndexNow — GSC sitemap submission is the only way to guarantee Google crawls you",
-    ],
-  },
-  {
-    id: "svivva-seo-pages",
-    title: "40 SEO Landing Pages",
-    icon: Globe,
-    estimate: "~4 min",
-    description:
-      "AI-written pages for 40 high-traffic keywords — 'chatgpt api integration', 'openai api tutorial', 'build app with chatgpt' + 37 more",
-    auto: [
-      `Up to 40 keyword pages created at ${host}/{slug} (skips any already created)`,
-      "Each page has title, meta description, and content",
-      "Pages auto-submitted to Bing/Yahoo/Yandex via IndexNow",
-    ],
-    manual: [
-      "In Google Search Console → URL Inspection → paste each page URL → click Request Indexing",
-      "Pages are live but Google won't know until you request indexing",
-    ],
-  },
-  {
-    id: "svivva-comparisons",
-    title: "20 Competitor Comparisons",
-    icon: Activity,
-    estimate: "~3 min",
-    description:
-      "Svivva vs n8n, LangChain, Dify, Supabase, Firebase + 15 more — captures high-converting 'X alternative' searches",
-    auto: [
-      "Up to 20 comparison pages created (svivva-vs-langchain, svivva-vs-n8n, etc.)",
-      "Pages submitted to Bing/Yahoo/Yandex via IndexNow",
-    ],
-    manual: [
-      "Request indexing in Google Search Console for each comparison page",
-      "Share on Reddit (r/nocode, r/webdev) for extra backlinks — drafts are in the results below",
-    ],
-  },
-  {
-    id: "svivva-blog",
-    title: "10 SEO Blog Articles",
-    icon: FileText,
-    estimate: "~3 min",
-    description:
-      "Full-length technical posts on LLM endpoints, schema enforcement, prompt engineering — ranks for long-tail developer searches",
-    auto: [
-      `10 blog posts written, published, and live at ${site}/blog`,
-      "Each post has meta title, description, and full HTML content",
-    ],
-    manual: [
-      "Request indexing in Google Search Console for each post",
-      "Share top 2-3 posts on LinkedIn and Twitter/X — copy the content from Results below",
-    ],
-  },
-  {
-    id: "svivva-directories",
-    title: "40 Directory Submissions",
-    icon: ListChecks,
-    estimate: "~30s",
-    description:
-      "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI + 33 more",
-    auto: [
-      "40 directory listing texts generated (name, tagline, description, categories, screenshots list)",
-    ],
-    manual: [
-      "Copy each listing from Results and paste it into the actual directory website",
-      "Priority order: Product Hunt → G2 → Futurepedia → AlternativeTo → SaaSHub → the rest",
-      "These cannot be auto-submitted — each site requires a manual account sign-up",
-    ],
-  },
-  {
-    id: "svivva-parasite",
-    title: "Parasite SEO Articles",
-    icon: FileText,
-    estimate: "~2 min",
-    description:
-      "5 platform-native articles for Dev.to (DA 94), Medium (DA 96), Hashnode, HackerNoon, Substack",
-    auto: ["5 full articles written with correct formatting for each platform"],
-    manual: [
-      "Copy each article from Results and publish it on the target platform",
-      "Dev.to: dev.to/new → paste → publish",
-      "Medium: medium.com/new-story → paste → publish",
-      "These cannot be auto-posted — platforms require a logged-in account",
-    ],
-  },
-  {
-    id: "svivva-aeo",
-    title: "AI Search Optimization",
-    icon: Search,
-    estimate: "~2 min",
-    description:
-      "15 answer-format pages targeting Perplexity, ChatGPT Search, Gemini — AI engines cite your pages",
-    auto: [
-      `15 AEO pages created at ${host}/{slug} with direct-answer format`,
-      "Submitted to Bing/Yahoo/Yandex via IndexNow",
-    ],
-    manual: [
-      "Request indexing in Google Search Console for each AEO page",
-      "Perplexity and ChatGPT pick these up automatically once Google indexes them — no extra action needed",
-    ],
-  },
-  {
-    id: "svivva-communities",
-    title: "Community Strategy Pack",
-    icon: MessageSquare,
-    estimate: "~30s",
-    description:
-      "8 Reddit posts + Show HN + IH milestone post + Discord templates — written, formatted, ready to paste",
-    auto: ["All post drafts generated with platform-specific formatting"],
-    manual: [
-      "Copy each post from Results and submit it to the platform",
-      "Reddit: post to r/SideProject first (most traffic) — do NOT post to multiple subreddits at once or you'll be shadowbanned",
-      "Show HN: submit to news.ycombinator.com/submit — best time is 9am–12pm EST on weekdays",
-    ],
-  },
-  {
-    id: "svivva-outreach",
-    title: "PR & Newsletter Pitches",
-    icon: Sparkles,
-    estimate: "~45s",
-    description: "Press release + pitches for 10 AI/dev newsletters + 8 podcast pitches",
-    auto: [
-      "Press release written",
-      "10 newsletter pitch emails written",
-      "8 podcast pitch emails written",
-    ],
-    manual: [
-      "Send each email manually from your own inbox",
-      "Copy the email from Results → paste into Gmail/Outlook → send",
-      "Best time to send: Tuesday or Wednesday, 8–10am recipient's time zone",
-    ],
-  },
-  {
-    id: "svivva-schema",
-    title: "Schema.org + Backlink Bait",
-    icon: Link2,
-    estimate: "~30s",
-    description:
-      "FAQ + SoftwareApplication JSON-LD for rich results · Roundup page attracts natural links",
-    auto: [
-      "FAQ schema JSON-LD generated",
-      "SoftwareApplication schema generated",
-      "'Top developer AI tools' roundup page created",
-    ],
-    manual: [
-      "Add the JSON-LD from Results to your homepage <head> in the site code",
-      "Test at: search.google.com/test/rich-results → paste your URL → check for errors",
-    ],
-  },
-  {
-    id: "svivva-social",
-    title: "Full Social Launch Pack",
-    icon: Rocket,
-    estimate: "~20s",
-    description:
-      "Twitter/X thread · LinkedIn article · Reddit posts · Product Hunt · Show HN — all written, ready to post",
-    auto: [
-      "Twitter/X thread written (hook tweet + 8 replies)",
-      "LinkedIn article written",
-      "Product Hunt listing text written",
-    ],
-    manual: [
-      "Copy and post the Twitter thread from Results — post the hook tweet first, then reply with each numbered tweet",
-      "Schedule LinkedIn post for Tuesday 8–10am for best reach",
-      "Submit Product Hunt listing at 12:01am PST for maximum upvote time",
-    ],
-  },
-  {
-    id: "svivva-submit",
-    title: "Submit Everywhere",
-    icon: Activity,
-    estimate: "~10s",
-    description: "Ping Bing sitemap · Re-submit all URLs via IndexNow · Verify sitemap coverage",
-    auto: [
-      "All URLs re-submitted to Bing, Yandex, Yahoo via IndexNow",
-      "Bing sitemap pinged directly",
-    ],
-    manual: [
-      `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
-      "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /pyracrypt, /blog, /tools, and each LP)",
-    ],
-  },
-  {
-    id: "svivva-integrations",
-    title: "30 Integration Pages",
-    icon: Link2,
-    estimate: "~6 min",
-    description:
-      "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
-    auto: [
-      `30 integration guide pages created at ${host}/{slug}`,
-      "Each covers: how to connect the tool, step-by-step guide, use cases, getting started CTA",
-      "All submitted to Bing/Yandex/Yahoo via IndexNow",
-    ],
-    manual: [
-      "Request indexing in GSC for each integration page",
-      "Share the most relevant ones in communities for those tools (e.g. Notion subreddit, Shopify forums)",
-    ],
-  },
-  {
-    id: "svivva-usecases",
-    title: "20 Industry Use Case Pages",
-    icon: Target,
-    estimate: "~4 min",
-    description:
-      "AI-written pages for Healthcare, Fintech, E-commerce, Legal Tech + 16 more industries — targets 'AI backend for [industry]' searches from decision-makers",
-    auto: [
-      "20 industry-specific use case pages created",
-      "Each explains the problem → AI solution → 5 specific use cases → CTA",
-      "All submitted to IndexNow",
-    ],
-    manual: [
-      "Request indexing in GSC for each use case page",
-      "Share in industry-specific LinkedIn groups and newsletters for extra reach",
-    ],
-  },
-  {
-    id: "svivva-templates",
-    title: "25 API Template Pages",
-    icon: FileText,
-    estimate: "~5 min",
-    description:
-      "Developer-focused template pages for Sentiment Analysis, Chatbot, Invoice Parser, Resume Parser + 21 more — each with code examples, targets 'build X API' searches",
-    auto: [
-      "25 API template pages created with working JSON examples",
-      "Targets developers searching for specific use-case implementations",
-      "All submitted to IndexNow",
-    ],
-    manual: [
-      "Request indexing in GSC",
-      "Share on developer communities: Reddit r/webdev, Dev.to, Hacker News",
-    ],
-  },
-  {
-    id: "svivva-paa",
-    title: "People Also Ask Domination",
-    icon: Search,
-    estimate: "~3 min",
-    description:
-      "15 pages each answering an exact 'People Also Ask' question — gets featured in Google PAA boxes AND cited by Perplexity/ChatGPT/Gemini",
-    auto: [
-      "15 question-answer pages created (e.g. 'What is the best way to ship AI features fast?')",
-      "First paragraph is the direct answer — what Google shows in PAA boxes",
-      "Also optimized for AI search engine citations",
-      "All submitted to IndexNow",
-    ],
-    manual: [
-      "Request indexing in GSC for each question page",
-      "These pages work on autopilot — Google and AI engines surface them for matching queries",
-    ],
-  },
-];
+    {
+      id: "svivva-indexnow",
+      title: "Set Up IndexNow",
+      icon: Zap,
+      estimate: "~5s",
+      description:
+        "Generate key + submit all URLs to Bing, Yandex & Yahoo instantly — skips waiting for Googlebot by weeks",
+      auto: [
+        "IndexNow key generated & saved to database",
+        "All site URLs submitted to Bing, Yandex, Yahoo, DuckDuckGo",
+      ],
+      manual: [
+        `Open Google Search Console → Sitemaps → paste: ${sitemap} → click Submit`,
+        "Google does NOT use IndexNow — GSC sitemap submission is the only way to guarantee Google crawls you",
+      ],
+    },
+    {
+      id: "svivva-seo-pages",
+      title: "40 SEO Landing Pages",
+      icon: Globe,
+      estimate: "~4 min",
+      description:
+        "AI-written pages for 40 high-traffic keywords — 'chatgpt api integration', 'openai api tutorial', 'build app with chatgpt' + 37 more",
+      auto: [
+        `Up to 40 keyword pages created at ${host}/{slug} (skips any already created)`,
+        "Each page has title, meta description, and content",
+        "Pages auto-submitted to Bing/Yahoo/Yandex via IndexNow",
+      ],
+      manual: [
+        "In Google Search Console → URL Inspection → paste each page URL → click Request Indexing",
+        "Pages are live but Google won't know until you request indexing",
+      ],
+    },
+    {
+      id: "svivva-comparisons",
+      title: "20 Competitor Comparisons",
+      icon: Activity,
+      estimate: "~3 min",
+      description:
+        "Svivva vs n8n, LangChain, Dify, Supabase, Firebase + 15 more — captures high-converting 'X alternative' searches",
+      auto: [
+        "Up to 20 comparison pages created (svivva-vs-langchain, svivva-vs-n8n, etc.)",
+        "Pages submitted to Bing/Yahoo/Yandex via IndexNow",
+      ],
+      manual: [
+        "Request indexing in Google Search Console for each comparison page",
+        "Share on Reddit (r/nocode, r/webdev) for extra backlinks — drafts are in the results below",
+      ],
+    },
+    {
+      id: "svivva-blog",
+      title: "10 SEO Blog Articles",
+      icon: FileText,
+      estimate: "~3 min",
+      description:
+        "Full-length technical posts on LLM endpoints, schema enforcement, prompt engineering — ranks for long-tail developer searches",
+      auto: [
+        `10 blog posts written, published, and live at ${site}/blog`,
+        "Each post has meta title, description, and full HTML content",
+      ],
+      manual: [
+        "Request indexing in Google Search Console for each post",
+        "Share top 2-3 posts on LinkedIn and Twitter/X — copy the content from Results below",
+      ],
+    },
+    {
+      id: "svivva-directories",
+      title: "40 Directory Submissions",
+      icon: ListChecks,
+      estimate: "~30s",
+      description:
+        "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI + 33 more",
+      auto: [
+        "40 directory listing texts generated (name, tagline, description, categories, screenshots list)",
+      ],
+      manual: [
+        "Copy each listing from Results and paste it into the actual directory website",
+        "Priority order: Product Hunt → G2 → Futurepedia → AlternativeTo → SaaSHub → the rest",
+        "These cannot be auto-submitted — each site requires a manual account sign-up",
+      ],
+    },
+    {
+      id: "svivva-parasite",
+      title: "Parasite SEO Articles",
+      icon: FileText,
+      estimate: "~2 min",
+      description:
+        "5 platform-native articles for Dev.to (DA 94), Medium (DA 96), Hashnode, HackerNoon, Substack",
+      auto: ["5 full articles written with correct formatting for each platform"],
+      manual: [
+        "Copy each article from Results and publish it on the target platform",
+        "Dev.to: dev.to/new → paste → publish",
+        "Medium: medium.com/new-story → paste → publish",
+        "These cannot be auto-posted — platforms require a logged-in account",
+      ],
+    },
+    {
+      id: "svivva-aeo",
+      title: "AI Search Optimization",
+      icon: Search,
+      estimate: "~2 min",
+      description:
+        "15 answer-format pages targeting Perplexity, ChatGPT Search, Gemini — AI engines cite your pages",
+      auto: [
+        `15 AEO pages created at ${host}/{slug} with direct-answer format`,
+        "Submitted to Bing/Yahoo/Yandex via IndexNow",
+      ],
+      manual: [
+        "Request indexing in Google Search Console for each AEO page",
+        "Perplexity and ChatGPT pick these up automatically once Google indexes them — no extra action needed",
+      ],
+    },
+    {
+      id: "svivva-communities",
+      title: "Community Strategy Pack",
+      icon: MessageSquare,
+      estimate: "~30s",
+      description:
+        "8 Reddit posts + Show HN + IH milestone post + Discord templates — written, formatted, ready to paste",
+      auto: ["All post drafts generated with platform-specific formatting"],
+      manual: [
+        "Copy each post from Results and submit it to the platform",
+        "Reddit: post to r/SideProject first (most traffic) — do NOT post to multiple subreddits at once or you'll be shadowbanned",
+        "Show HN: submit to news.ycombinator.com/submit — best time is 9am–12pm EST on weekdays",
+      ],
+    },
+    {
+      id: "svivva-outreach",
+      title: "PR & Newsletter Pitches",
+      icon: Sparkles,
+      estimate: "~45s",
+      description: "Press release + pitches for 10 AI/dev newsletters + 8 podcast pitches",
+      auto: [
+        "Press release written",
+        "10 newsletter pitch emails written",
+        "8 podcast pitch emails written",
+      ],
+      manual: [
+        "Send each email manually from your own inbox",
+        "Copy the email from Results → paste into Gmail/Outlook → send",
+        "Best time to send: Tuesday or Wednesday, 8–10am recipient's time zone",
+      ],
+    },
+    {
+      id: "svivva-schema",
+      title: "Schema.org + Backlink Bait",
+      icon: Link2,
+      estimate: "~30s",
+      description:
+        "FAQ + SoftwareApplication JSON-LD for rich results · Roundup page attracts natural links",
+      auto: [
+        "FAQ schema JSON-LD generated",
+        "SoftwareApplication schema generated",
+        "'Top developer AI tools' roundup page created",
+      ],
+      manual: [
+        "Add the JSON-LD from Results to your homepage <head> in the site code",
+        "Test at: search.google.com/test/rich-results → paste your URL → check for errors",
+      ],
+    },
+    {
+      id: "svivva-social",
+      title: "Full Social Launch Pack",
+      icon: Rocket,
+      estimate: "~20s",
+      description:
+        "Twitter/X thread · LinkedIn article · Reddit posts · Product Hunt · Show HN — all written, ready to post",
+      auto: [
+        "Twitter/X thread written (hook tweet + 8 replies)",
+        "LinkedIn article written",
+        "Product Hunt listing text written",
+      ],
+      manual: [
+        "Copy and post the Twitter thread from Results — post the hook tweet first, then reply with each numbered tweet",
+        "Schedule LinkedIn post for Tuesday 8–10am for best reach",
+        "Submit Product Hunt listing at 12:01am PST for maximum upvote time",
+      ],
+    },
+    {
+      id: "svivva-submit",
+      title: "Submit Everywhere",
+      icon: Activity,
+      estimate: "~10s",
+      description: "Ping Bing sitemap · Re-submit all URLs via IndexNow · Verify sitemap coverage",
+      auto: [
+        "All URLs re-submitted to Bing, Yandex, Yahoo via IndexNow",
+        "Bing sitemap pinged directly",
+      ],
+      manual: [
+        `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
+        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /pyracrypt, /blog, /tools, and each LP)",
+      ],
+    },
+    {
+      id: "svivva-integrations",
+      title: "30 Integration Pages",
+      icon: Link2,
+      estimate: "~6 min",
+      description:
+        "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
+      auto: [
+        `30 integration guide pages created at ${host}/{slug}`,
+        "Each covers: how to connect the tool, step-by-step guide, use cases, getting started CTA",
+        "All submitted to Bing/Yandex/Yahoo via IndexNow",
+      ],
+      manual: [
+        "Request indexing in GSC for each integration page",
+        "Share the most relevant ones in communities for those tools (e.g. Notion subreddit, Shopify forums)",
+      ],
+    },
+    {
+      id: "svivva-usecases",
+      title: "20 Industry Use Case Pages",
+      icon: Target,
+      estimate: "~4 min",
+      description:
+        "AI-written pages for Healthcare, Fintech, E-commerce, Legal Tech + 16 more industries — targets 'AI backend for [industry]' searches from decision-makers",
+      auto: [
+        "20 industry-specific use case pages created",
+        "Each explains the problem → AI solution → 5 specific use cases → CTA",
+        "All submitted to IndexNow",
+      ],
+      manual: [
+        "Request indexing in GSC for each use case page",
+        "Share in industry-specific LinkedIn groups and newsletters for extra reach",
+      ],
+    },
+    {
+      id: "svivva-templates",
+      title: "25 API Template Pages",
+      icon: FileText,
+      estimate: "~5 min",
+      description:
+        "Developer-focused template pages for Sentiment Analysis, Chatbot, Invoice Parser, Resume Parser + 21 more — each with code examples, targets 'build X API' searches",
+      auto: [
+        "25 API template pages created with working JSON examples",
+        "Targets developers searching for specific use-case implementations",
+        "All submitted to IndexNow",
+      ],
+      manual: [
+        "Request indexing in GSC",
+        "Share on developer communities: Reddit r/webdev, Dev.to, Hacker News",
+      ],
+    },
+    {
+      id: "svivva-paa",
+      title: "People Also Ask Domination",
+      icon: Search,
+      estimate: "~3 min",
+      description:
+        "15 pages each answering an exact 'People Also Ask' question — gets featured in Google PAA boxes AND cited by Perplexity/ChatGPT/Gemini",
+      auto: [
+        "15 question-answer pages created (e.g. 'What is the best way to ship AI features fast?')",
+        "First paragraph is the direct answer — what Google shows in PAA boxes",
+        "Also optimized for AI search engine citations",
+        "All submitted to IndexNow",
+      ],
+      manual: [
+        "Request indexing in GSC for each question page",
+        "These pages work on autopilot — Google and AI engines surface them for matching queries",
+      ],
+    },
+  ];
 }
 
 function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
   const { site, host } = orbit;
   return [
-  {
-    id: "mini-import",
-    title: `Build SEO Pages on ${host}`,
-    icon: Globe,
-    estimate: "~30s/5 tools",
-    description: `Auto-discovers all tools from your connected app, then creates 4 keyword pages per tool on ${host}`,
-    auto: [
-      "Fetches tool list from your app URL automatically",
-      `Creates 4 SEO pages per tool at ${host}/{slug}`,
-      "Pages published and submitted to Bing/Yandex/Yahoo via IndexNow",
-    ],
-    manual: [
-      "Request indexing in Google Search Console for each tool page",
-      "After GSC indexing is requested, Google typically indexes within 1–7 days",
-    ],
-  },
-  {
-    id: "mini-hub",
-    title: "Build Hub & Category Pages",
-    icon: Package,
-    estimate: "~20s",
-    description: `Master hub page + 6 category pages on ${host} — gives Google site structure so tool pages rank faster`,
-    auto: [
-      `Hub page created at ${site}/tools`,
-      "6 category pages created (encryption, password, network, web, file, system)",
-    ],
-    manual: [
-      `Request indexing in GSC for ${site}/tools and each category page`,
-      "Hub page is the anchor — Google uses it to find and rank all tool pages faster",
-    ],
-  },
-  {
-    id: "mini-embed",
-    title: "Generate 'Powered by Svivva' Widget",
-    icon: Link2,
-    estimate: "~20s",
-    needsTools: true,
-    description: "Creates a ready-to-paste banner + footer + post-use CTA for EACH mini app",
-    auto: [
-      "Widget HTML + CSS generated for each tool",
-      "Banner, footer, and post-use CTA all written",
-    ],
-    manual: [
-      "Copy each widget from Results and paste it into the corresponding app's HTML",
-      "Add the banner to the top of the page and the footer CTA at the bottom",
-      "Redeploy your app after adding the widgets for them to go live",
-    ],
-  },
-  {
-    id: "mini-social",
-    title: "Social Launch Pack",
-    icon: Sparkles,
-    estimate: "~20s",
-    description:
-      "Twitter/X thread · LinkedIn · Reddit posts · Show HN — all written using your specific tool names",
-    auto: [
-      "Twitter/X launch thread written for your tool set",
-      "LinkedIn post written",
-      "Reddit posts drafted for relevant subreddits",
-    ],
-    manual: [
-      "Post the Twitter thread — send the hook first, reply with each numbered tweet",
-      "Post to Reddit: r/netsec, r/cybersecurity, r/privacy (one at a time, not all at once)",
-      "Best time: Tuesday–Thursday, 9–11am EST",
-    ],
-  },
-  {
-    id: "mini-cname",
-    title: "Set Up All 3 Subdomains",
-    icon: Activity,
-    estimate: "~5s",
-    description:
-      "Auto-creates apps.svivva.com, security.svivva.com, pyracrypt.svivva.com via GoDaddy API",
-    auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
-    manual: [
-      "Wait 24–48 hours for DNS propagation before the subdomains resolve",
-      "Test after 24h: open apps.svivva.com in a browser — if it loads your hosted app you're done",
-      "If GoDaddy API failed: go to GoDaddy DNS Manager → add CNAME records manually (details in Results below)",
-    ],
-  },
-  {
-    id: "mini-index",
-    title: "Index Everything",
-    icon: Zap,
-    estimate: "~5s",
-    description: "Submit all SEO pages, hub and category pages to Bing/Yandex/Yahoo via IndexNow",
-    auto: [
-      "All tool pages, hub page, and category pages submitted to Bing/Yandex/Yahoo/DuckDuckGo via IndexNow",
-    ],
-    manual: [
-      `Google Search Console → URL Inspection → paste ${site}/tools → Request Indexing`,
-      "Then request indexing for 5–10 of your most important tool pages",
-      "Google does NOT accept IndexNow submissions — GSC is required for Google",
-    ],
-  },
-];
+    {
+      id: "mini-import",
+      title: `Build SEO Pages on ${host}`,
+      icon: Globe,
+      estimate: "~30s/5 tools",
+      description: `Auto-discovers all tools from your connected app, then creates 4 keyword pages per tool on ${host}`,
+      auto: [
+        "Fetches tool list from your app URL automatically",
+        `Creates 4 SEO pages per tool at ${host}/{slug}`,
+        "Pages published and submitted to Bing/Yandex/Yahoo via IndexNow",
+      ],
+      manual: [
+        "Request indexing in Google Search Console for each tool page",
+        "After GSC indexing is requested, Google typically indexes within 1–7 days",
+      ],
+    },
+    {
+      id: "mini-hub",
+      title: "Build Hub & Category Pages",
+      icon: Package,
+      estimate: "~20s",
+      description: `Master hub page + 6 category pages on ${host} — gives Google site structure so tool pages rank faster`,
+      auto: [
+        `Hub page created at ${site}/tools`,
+        "6 category pages created (encryption, password, network, web, file, system)",
+      ],
+      manual: [
+        `Request indexing in GSC for ${site}/tools and each category page`,
+        "Hub page is the anchor — Google uses it to find and rank all tool pages faster",
+      ],
+    },
+    {
+      id: "mini-embed",
+      title: "Generate 'Powered by Svivva' Widget",
+      icon: Link2,
+      estimate: "~20s",
+      needsTools: true,
+      description: "Creates a ready-to-paste banner + footer + post-use CTA for EACH mini app",
+      auto: [
+        "Widget HTML + CSS generated for each tool",
+        "Banner, footer, and post-use CTA all written",
+      ],
+      manual: [
+        "Copy each widget from Results and paste it into the corresponding app's HTML",
+        "Add the banner to the top of the page and the footer CTA at the bottom",
+        "Redeploy your app after adding the widgets for them to go live",
+      ],
+    },
+    {
+      id: "mini-social",
+      title: "Social Launch Pack",
+      icon: Sparkles,
+      estimate: "~20s",
+      description:
+        "Twitter/X thread · LinkedIn · Reddit posts · Show HN — all written using your specific tool names",
+      auto: [
+        "Twitter/X launch thread written for your tool set",
+        "LinkedIn post written",
+        "Reddit posts drafted for relevant subreddits",
+      ],
+      manual: [
+        "Post the Twitter thread — send the hook first, reply with each numbered tweet",
+        "Post to Reddit: r/netsec, r/cybersecurity, r/privacy (one at a time, not all at once)",
+        "Best time: Tuesday–Thursday, 9–11am EST",
+      ],
+    },
+    {
+      id: "mini-cname",
+      title: "Set Up All 3 Subdomains",
+      icon: Activity,
+      estimate: "~5s",
+      description:
+        "Auto-creates apps.svivva.com, security.svivva.com, pyracrypt.svivva.com via GoDaddy API",
+      auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
+      manual: [
+        "Wait 24–48 hours for DNS propagation before the subdomains resolve",
+        "Test after 24h: open apps.svivva.com in a browser — if it loads your hosted app you're done",
+        "If GoDaddy API failed: go to GoDaddy DNS Manager → add CNAME records manually (details in Results below)",
+      ],
+    },
+    {
+      id: "mini-index",
+      title: "Index Everything",
+      icon: Zap,
+      estimate: "~5s",
+      description: "Submit all SEO pages, hub and category pages to Bing/Yandex/Yahoo via IndexNow",
+      auto: [
+        "All tool pages, hub page, and category pages submitted to Bing/Yandex/Yahoo/DuckDuckGo via IndexNow",
+      ],
+      manual: [
+        `Google Search Console → URL Inspection → paste ${site}/tools → Request Indexing`,
+        "Then request indexing for 5–10 of your most important tool pages",
+        "Google does NOT accept IndexNow submissions — GSC is required for Google",
+      ],
+    },
+  ];
 }
 
 const PYRACRYPT_PRESET = getPyracryptOrbitPreset();
@@ -890,7 +890,7 @@ function MiniSourceConfig({
           }}
           data-testid="button-scan-connect-repls"
         >
-            {scanning ? (
+          {scanning ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" /> Scanning apps…
             </>
@@ -1776,14 +1776,8 @@ export default function LaunchpadPage() {
   const router = useRouter();
   const { toast } = useToast();
   const orbitUrls = usePublicOrbitUrls();
-  const SVIVVA_STEPS = useMemo(
-    () => makeSvivvaSteps(orbitUrls),
-    [orbitUrls],
-  );
-  const miniSteps = useMemo(
-    () => makeMiniSteps(orbitUrls),
-    [orbitUrls],
-  );
+  const SVIVVA_STEPS = useMemo(() => makeSvivvaSteps(orbitUrls), [orbitUrls]);
+  const miniSteps = useMemo(() => makeMiniSteps(orbitUrls), [orbitUrls]);
   const [devLanUrl, setDevLanUrl] = useState<string | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;

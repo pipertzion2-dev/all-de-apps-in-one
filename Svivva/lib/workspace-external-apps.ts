@@ -36,12 +36,17 @@ export function getPyracryptOrbitPreset() {
     name: "Pyracrypt",
     sourceUrl: getPyracryptMainAppUrl(),
     miniAppsUrl: getPyracryptMiniAppsBaseUrl(),
-    description: "Defaults use svivva.com; override with NEXT_PUBLIC_PYRACRYPT_* in .env if your apps live elsewhere.",
+    description:
+      "Defaults use svivva.com; override with NEXT_PUBLIC_PYRACRYPT_* in .env if your apps live elsewhere.",
   };
 }
 
 /** GoDaddy CNAME targets when the user has not connected tool URLs in Orbit. */
-export function getDefaultSubdomainCnameTargets(): { sub: string; target: string; label: string }[] {
+export function getDefaultSubdomainCnameTargets(): {
+  sub: string;
+  target: string;
+  label: string;
+}[] {
   const miniHost = hostnameFromHttpUrl(getPyracryptMiniAppsBaseUrl());
   const mainHost = hostnameFromHttpUrl(getPyracryptMainAppUrl());
   if (miniHost && mainHost) {
@@ -52,8 +57,16 @@ export function getDefaultSubdomainCnameTargets(): { sub: string; target: string
     ];
   }
   return [
-    { sub: "apps", target: "svivva.com", label: "Mini apps (set NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL)" },
-    { sub: "security", target: "svivva.com", label: "Main app (set NEXT_PUBLIC_PYRACRYPT_MAIN_URL)" },
+    {
+      sub: "apps",
+      target: "svivva.com",
+      label: "Mini apps (set NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL)",
+    },
+    {
+      sub: "security",
+      target: "svivva.com",
+      label: "Main app (set NEXT_PUBLIC_PYRACRYPT_MAIN_URL)",
+    },
     { sub: "pyracrypt", target: "svivva.com", label: "Alias" },
   ];
 }
