@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
@@ -37,11 +37,8 @@ import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { ReplitUsernameConnector } from "@/components/replit-username-connector";
 import { MarketingChecklist } from "@/components/marketing-checklist";
-import {
-  getPublicSiteUrl,
-  getPublicSitemapUrl,
-  getPublicSiteHostname,
-} from "@/lib/site-url-public";
+import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
+import { getPyracryptOrbitPreset } from "@/lib/workspace-external-apps";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
@@ -66,11 +63,11 @@ interface Step {
   manual?: string[]; // what you must do yourself after
 }
 
-const ORBIT_SITE = getPublicSiteUrl();
-const ORBIT_SITEMAP = getPublicSitemapUrl();
-const ORBIT_HOST = getPublicSiteHostname();
+type OrbitUrlPack = { site: string; host: string; sitemap: string };
 
-const SVIVVA_STEPS: Step[] = [
+function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
+  const { site, host, sitemap } = orbit;
+  return [
   {
     id: "svivva-indexnow",
     title: "Set Up IndexNow",
@@ -83,7 +80,7 @@ const SVIVVA_STEPS: Step[] = [
       "All site URLs submitted to Bing, Yandex, Yahoo, DuckDuckGo",
     ],
     manual: [
-      `Open Google Search Console → Sitemaps → paste: ${ORBIT_SITEMAP} → click Submit`,
+      `Open Google Search Console → Sitemaps → paste: ${sitemap} → click Submit`,
       "Google does NOT use IndexNow — GSC sitemap submission is the only way to guarantee Google crawls you",
     ],
   },
@@ -95,7 +92,7 @@ const SVIVVA_STEPS: Step[] = [
     description:
       "AI-written pages for 40 high-traffic keywords — 'chatgpt api integration', 'openai api tutorial', 'build app with chatgpt' + 37 more",
     auto: [
-      `Up to 40 keyword pages created at ${ORBIT_HOST}/{slug} (skips any already created)`,
+      `Up to 40 keyword pages created at ${host}/{slug} (skips any already created)`,
       "Each page has title, meta description, and content",
       "Pages auto-submitted to Bing/Yahoo/Yandex via IndexNow",
     ],
@@ -128,7 +125,7 @@ const SVIVVA_STEPS: Step[] = [
     description:
       "Full-length technical posts on LLM endpoints, schema enforcement, prompt engineering — ranks for long-tail developer searches",
     auto: [
-      `10 blog posts written, published, and live at ${ORBIT_SITE}/blog`,
+      `10 blog posts written, published, and live at ${site}/blog`,
       "Each post has meta title, description, and full HTML content",
     ],
     manual: [
@@ -175,7 +172,7 @@ const SVIVVA_STEPS: Step[] = [
     description:
       "15 answer-format pages targeting Perplexity, ChatGPT Search, Gemini — AI engines cite your pages",
     auto: [
-      `15 AEO pages created at ${ORBIT_HOST}/{slug} with direct-answer format`,
+      `15 AEO pages created at ${host}/{slug} with direct-answer format`,
       "Submitted to Bing/Yahoo/Yandex via IndexNow",
     ],
     manual: [
@@ -260,7 +257,7 @@ const SVIVVA_STEPS: Step[] = [
       "Bing sitemap pinged directly",
     ],
     manual: [
-      `Google Search Console → Sitemaps → paste ${ORBIT_SITEMAP} → Submit (one-time setup)`,
+      `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
       "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /pyracrypt, /blog, /tools, and each LP)",
     ],
   },
@@ -272,7 +269,7 @@ const SVIVVA_STEPS: Step[] = [
     description:
       "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
     auto: [
-      `30 integration guide pages created at ${ORBIT_HOST}/{slug}`,
+      `30 integration guide pages created at ${host}/{slug}`,
       "Each covers: how to connect the tool, step-by-step guide, use cases, getting started CTA",
       "All submitted to Bing/Yandex/Yahoo via IndexNow",
     ],
@@ -334,17 +331,20 @@ const SVIVVA_STEPS: Step[] = [
     ],
   },
 ];
+}
 
-const MINI_STEPS: Step[] = [
+function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
+  const { site, host } = orbit;
+  return [
   {
     id: "mini-import",
-    title: `Build SEO Pages on ${ORBIT_HOST}`,
+    title: `Build SEO Pages on ${host}`,
     icon: Globe,
     estimate: "~30s/5 tools",
-    description: `Auto-discovers all tools from your connected Repl, then creates 4 keyword pages per tool on ${ORBIT_HOST}`,
+    description: `Auto-discovers all tools from your connected app, then creates 4 keyword pages per tool on ${host}`,
     auto: [
-      "Fetches tool list from your Repl URL automatically",
-      `Creates 4 SEO pages per tool at ${ORBIT_HOST}/{slug}`,
+      "Fetches tool list from your app URL automatically",
+      `Creates 4 SEO pages per tool at ${host}/{slug}`,
       "Pages published and submitted to Bing/Yandex/Yahoo via IndexNow",
     ],
     manual: [
@@ -357,13 +357,13 @@ const MINI_STEPS: Step[] = [
     title: "Build Hub & Category Pages",
     icon: Package,
     estimate: "~20s",
-    description: `Master hub page + 6 category pages on ${ORBIT_HOST} — gives Google site structure so tool pages rank faster`,
+    description: `Master hub page + 6 category pages on ${host} — gives Google site structure so tool pages rank faster`,
     auto: [
-      `Hub page created at ${ORBIT_SITE}/tools`,
+      `Hub page created at ${site}/tools`,
       "6 category pages created (encryption, password, network, web, file, system)",
     ],
     manual: [
-      `Request indexing in GSC for ${ORBIT_SITE}/tools and each category page`,
+      `Request indexing in GSC for ${site}/tools and each category page`,
       "Hub page is the anchor — Google uses it to find and rank all tool pages faster",
     ],
   },
@@ -379,9 +379,9 @@ const MINI_STEPS: Step[] = [
       "Banner, footer, and post-use CTA all written",
     ],
     manual: [
-      "Copy each widget from Results and paste it into the corresponding Repl app's HTML",
+      "Copy each widget from Results and paste it into the corresponding app's HTML",
       "Add the banner to the top of the page and the footer CTA at the bottom",
-      "Redeploy your Repl after adding the widgets for them to go live",
+      "Redeploy your app after adding the widgets for them to go live",
     ],
   },
   {
@@ -412,7 +412,7 @@ const MINI_STEPS: Step[] = [
     auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
     manual: [
       "Wait 24–48 hours for DNS propagation before the subdomains resolve",
-      "Test after 24h: open apps.svivva.com in a browser — if it loads your Repl you're done",
+      "Test after 24h: open apps.svivva.com in a browser — if it loads your hosted app you're done",
       "If GoDaddy API failed: go to GoDaddy DNS Manager → add CNAME records manually (details in Results below)",
     ],
   },
@@ -426,22 +426,15 @@ const MINI_STEPS: Step[] = [
       "All tool pages, hub page, and category pages submitted to Bing/Yandex/Yahoo/DuckDuckGo via IndexNow",
     ],
     manual: [
-      `Google Search Console → URL Inspection → paste ${ORBIT_SITE}/tools → Request Indexing`,
+      `Google Search Console → URL Inspection → paste ${site}/tools → Request Indexing`,
       "Then request indexing for 5–10 of your most important tool pages",
       "Google does NOT accept IndexNow submissions — GSC is required for Google",
     ],
   },
 ];
+}
 
-const PYRACRYPT_PRESET = {
-  name: "Pyracrypt",
-  sourceUrl:
-    process.env.NEXT_PUBLIC_PYRACRYPT_MAIN_URL || "https://new-venture-pipertzion2.replit.app",
-  miniAppsUrl:
-    process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL ||
-    "https://cyber-security-mini-apps-zip.replit.app",
-  description: "Separate workspace with a second set of mini apps.",
-};
+const PYRACRYPT_PRESET = getPyracryptOrbitPreset();
 
 const STORAGE_KEY = "orbit_v3";
 
@@ -706,7 +699,7 @@ function MiniSourceConfig({
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-foreground leading-none">
               {discoveredTools.length} tool{discoveredTools.length === 1 ? "" : "s"} from{" "}
-              {uniqueHosts.length} Repl{uniqueHosts.length === 1 ? "" : "s"} connected
+              {uniqueHosts.length} site{uniqueHosts.length === 1 ? "" : "s"} connected
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               All funnelled through the Orbit steps below
@@ -897,21 +890,21 @@ function MiniSourceConfig({
           }}
           data-testid="button-scan-connect-repls"
         >
-          {scanning ? (
+            {scanning ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Scanning Repls…
+              <Loader2 className="w-4 h-4 animate-spin" /> Scanning apps…
             </>
           ) : validCount === 0 ? (
             "Enter at least one URL"
           ) : (
             <>
               <Search className="w-4 h-4" /> Scan & Connect{" "}
-              {validCount > 1 ? `all ${validCount} Repls` : "Repl"}
+              {validCount > 1 ? `all ${validCount} apps` : "app"}
             </>
           )}
         </button>
         <p className="text-[10px] text-muted-foreground text-center">
-          Orbit auto-discovers all tools in each Repl via sitemap + AI analysis
+          Orbit auto-discovers tools from each URL via sitemap + page analysis
         </p>
       </div>
     </div>
@@ -936,6 +929,7 @@ function LaunchStation({
   coreUrls,
   toolUrls,
   totalSteps,
+  sitemapUrl,
 }: {
   launchActive: boolean;
   launchDone: boolean;
@@ -947,9 +941,9 @@ function LaunchStation({
   coreUrls: GscUrlItem[];
   toolUrls: GscUrlItem[];
   totalSteps: number;
+  sitemapUrl: string;
 }) {
   const allUrls = [...coreUrls, ...toolUrls].map((u) => u.url).join("\n");
-  const sitemapUrl = ORBIT_SITEMAP;
   const [copiedAll, setCopiedAll] = useState(false);
   const [copiedSitemap, setCopiedSitemap] = useState(false);
 
@@ -1153,13 +1147,14 @@ function LaunchStation({
 function GoogleIndexPanel({
   coreUrls,
   toolUrls,
+  sitemapUrl,
 }: {
   coreUrls: GscUrlItem[];
   toolUrls: GscUrlItem[];
+  sitemapUrl: string;
 }) {
   const total = coreUrls.length + toolUrls.length;
   const allUrls = [...coreUrls, ...toolUrls].map((u) => u.url).join("\n");
-  const sitemapUrl = ORBIT_SITEMAP;
 
   const [copiedSitemap, setCopiedSitemap] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
@@ -1545,7 +1540,7 @@ function CopyInline({ text }: { text: string }) {
   );
 }
 
-function DeployGuide() {
+function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSite: string }) {
   const [openSection, setOpenSection] = useState<string | null>("deploy");
   const toggle = (id: string) => setOpenSection((p) => (p === id ? null : id));
 
@@ -1592,7 +1587,7 @@ function DeployGuide() {
     <div className="space-y-3">
       <div className="px-1">
         <p className="text-sm font-bold text-foreground">
-          Deploy Svivva + connect all 3 apps to {ORBIT_HOST}
+          Deploy Svivva + connect all 3 apps to {publicHost}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           Follow in order — takes about 15 minutes total.
@@ -1606,7 +1601,7 @@ function DeployGuide() {
           <ul className="space-y-1.5 list-none">
             {[
               "Out-of-memory: The free hosting tier has 512MB RAM. If you have large AI calls, use streaming responses.",
-              `Missing env vars: In Secrets, make sure DATABASE_URL, OPENAI_API_KEY, NEXTAUTH_SECRET, and NEXT_PUBLIC_SITE_URL=${ORBIT_SITE} are all set.`,
+              `Missing env vars: In Secrets, make sure DATABASE_URL, OPENAI_API_KEY, NEXTAUTH_SECRET, and NEXT_PUBLIC_SITE_URL=${publicSite} are all set.`,
               "Cold start timeout: Use the Always On feature (Deployments → Autoscale) to keep it warm.",
               "Build errors: Run 'npm run build' in the shell first — fix any TypeScript errors before deploying.",
             ].map((tip, i) => (
@@ -1621,11 +1616,11 @@ function DeployGuide() {
           <div className="rounded-xl border border-border bg-card px-3 py-2 space-y-1.5">
             <p className="font-semibold text-foreground">Deploy steps:</p>
             {[
-              "Click the blue Deploy button (top right of the editor)",
-              "Choose Autoscale deployment",
-              "Set machine power to 1 vCPU / 2GB RAM (avoids crashes)",
-              "Add Custom Domain: svivva.com",
-              "Click Deploy — TLS is provisioned automatically",
+              "Push this repo to GitHub and import it in Vercel (or your host)",
+              "Add env vars in the host dashboard: DATABASE_URL, OPENAI_API_KEY, NEXTAUTH_SECRET, NEXT_PUBLIC_SITE_URL",
+              "Deploy — wait for the production build to finish",
+              "In the host → Domains, add svivva.com and www as instructed (DNS at GoDaddy)",
+              "TLS is provisioned automatically by the host",
             ].map((s, i) => (
               <div key={i} className="flex items-start gap-2">
                 <span className="text-[#5BA8A0] font-bold flex-shrink-0">{i + 1}.</span>
@@ -1738,9 +1733,9 @@ function DeployGuide() {
             },
             {
               label: "Always On",
-              desc: "For each of the 3 apps: Deploy → enable Always On so they don't sleep between users. A sleeping app loses traffic.",
-              href: "https://docs.replit.com/hosting/deployments/reserved-vm",
-              cta: "Docs →",
+              desc: "Serverless hosts scale from zero; first request after idle can be slower. For heavy cron-style work, use your host's background jobs or an external scheduler hitting your API with ORBIT_INTERNAL_SECRET.",
+              href: "https://vercel.com/docs/cron-jobs",
+              cta: "Vercel Cron →",
             },
             {
               label: "Analytics",
@@ -1780,6 +1775,31 @@ function DeployGuide() {
 export default function LaunchpadPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const orbitUrls = usePublicOrbitUrls();
+  const SVIVVA_STEPS = useMemo(
+    () => makeSvivvaSteps(orbitUrls),
+    [orbitUrls],
+  );
+  const miniSteps = useMemo(
+    () => makeMiniSteps(orbitUrls),
+    [orbitUrls],
+  );
+  const [devLanUrl, setDevLanUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const h = window.location.hostname;
+    if (h !== "localhost" && h !== "127.0.0.1") return;
+    let cancelled = false;
+    fetch("/api/dev/lan-url")
+      .then((r) => r.json())
+      .then((d: { lanUrl?: string | null }) => {
+        if (!cancelled && d?.lanUrl) setDevLanUrl(d.lanUrl);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [tab, setTab] = useState<"svivva" | "mini" | "deploy" | "checklist">("svivva");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
@@ -1940,7 +1960,7 @@ export default function LaunchpadPage() {
 
           const finalSummary = [
             `✓ All ${effectiveTools.length} tools processed across ${totalChunks} batch${totalChunks === 1 ? "" : "es"}`,
-            `✓ ${totalPages} SEO pages live on ${ORBIT_HOST}`,
+            `✓ ${totalPages} SEO pages live on ${orbitUrls.host}`,
             "",
             ...summaries.slice(-1),
           ]
@@ -1984,11 +2004,11 @@ export default function LaunchpadPage() {
         return false;
       }
     },
-    [setStep],
+    [setStep, orbitUrls.host],
   );
 
   const runAll = async () => {
-    const steps = tab === "svivva" ? SVIVVA_STEPS : MINI_STEPS;
+    const steps = tab === "svivva" ? SVIVVA_STEPS : miniSteps;
     const pending = steps.filter((s) => (statusesRef.current[s.id] || "pending") !== "done");
 
     if (!pending.length) {
@@ -2006,9 +2026,9 @@ export default function LaunchpadPage() {
 
     if (!runnable.length) {
       toast({
-        title: "Scan your tools Repl first",
+        title: "Scan your tools URL first",
         description:
-          "Paste your deployed Repl URL and click 'Scan & Connect' — then Run All will work.",
+          "Paste your deployed app URL and click 'Scan & Connect' — then Run All will work.",
         duration: 5000,
       });
       return;
@@ -2017,7 +2037,7 @@ export default function LaunchpadPage() {
     if (needingTools.length > 0) {
       toast({
         title: `Running ${runnable.length} of ${pending.length} steps`,
-        description: `${needingTools.map((s) => s.title).join(", ")} need tools — scan your Repl URL first to unlock them.`,
+        description: `${needingTools.map((s) => s.title).join(", ")} need tools — scan an app URL first to unlock them.`,
         duration: 6000,
       });
     } else {
@@ -2082,7 +2102,7 @@ export default function LaunchpadPage() {
       sourceUrlRef.current = miniSrc;
     }
 
-    const allSteps = [...SVIVVA_STEPS, ...MINI_STEPS];
+    const allSteps = [...SVIVVA_STEPS, ...miniSteps];
     const total = allSteps.length;
     let idx = 0;
 
@@ -2143,11 +2163,11 @@ export default function LaunchpadPage() {
     );
   if (!me?.isAdmin) return null;
 
-  const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "mini" ? MINI_STEPS : [];
+  const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "mini" ? miniSteps : [];
   const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
-  const miniDone = MINI_STEPS.filter((s) => statuses[s.id] === "done").length;
+  const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
   const totalDone = svivvaDone + miniDone;
-  const totalSteps = SVIVVA_STEPS.length + MINI_STEPS.length;
+  const totalSteps = SVIVVA_STEPS.length + miniSteps.length;
   const tabDone = tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : 0;
   const allTabDone = steps.length > 0 && tabDone === steps.length;
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
@@ -2155,6 +2175,30 @@ export default function LaunchpadPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {devLanUrl && (
+        <div className="max-w-2xl mx-auto px-4 pt-4">
+          <div className="rounded-xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-950 dark:text-amber-100 space-y-1.5">
+            <p className="font-bold">Testing on your phone?</p>
+            <p className="text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
+              <code className="rounded bg-black/10 dark:bg-white/10 px-1">127.0.0.1</code> on an
+              iPhone means the phone itself — not your Mac. On the same Wi‑Fi, open this URL
+              instead:
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="text-[11px] break-all rounded-lg bg-white/80 dark:bg-black/40 px-2 py-1 border border-amber-200/60 dark:border-amber-800/50">
+                {devLanUrl}
+              </code>
+              <button
+                type="button"
+                className="text-[11px] font-bold px-2 py-1 rounded-lg bg-amber-600 text-white hover:bg-amber-700"
+                onClick={() => navigator.clipboard.writeText(devLanUrl)}
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── Header ── */}
       <div
         className="relative overflow-hidden"
@@ -2181,7 +2225,7 @@ export default function LaunchpadPage() {
                   </span>
                 </div>
                 <p className="text-white/50 text-xs">
-                  svivva.com + your Repl tools — maximum real traffic
+                  Svivva + your deployed apps — maximum real traffic
                 </p>
               </div>
             </div>
@@ -2212,7 +2256,7 @@ export default function LaunchpadPage() {
                 {overallPct}% complete
               </span>
               <span>
-                tools: {miniDone}/{MINI_STEPS.length}
+                tools: {miniDone}/{miniSteps.length}
               </span>
             </div>
           </div>
@@ -2438,8 +2482,8 @@ export default function LaunchpadPage() {
                 1
               </div>
               <div>
-                <strong className="text-foreground">Connect your tools Repl</strong> — Orbit scans
-                your 50 mini apps and learns their names, descriptions and URLs.
+                <strong className="text-foreground">Connect your deployed tools app</strong> — Orbit
+                scans your mini apps and learns their names, descriptions and URLs.
               </div>
             </div>
             <div className="flex items-start gap-2.5">
@@ -2534,16 +2578,16 @@ export default function LaunchpadPage() {
                   className="text-xs font-bold truncate"
                   style={{ color: tab === "mini" ? TEAL : undefined }}
                 >
-                  Tools Repl
+                  Your tools
                 </span>
                 <span
                   className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "mini" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
                 >
-                  {miniDone}/{MINI_STEPS.length}
+                  {miniDone}/{miniSteps.length}
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-tight">
-                Connect Repls → SEO pages
+                Connect apps → SEO pages
               </p>
             </button>
             <button
@@ -2593,14 +2637,17 @@ export default function LaunchpadPage() {
             />
             {creds?.hasReplit && (
               <p className="text-xs text-muted-foreground px-1">
-                Paste your deployed Repl URL below to discover tools and generate SEO pages.
+                Optional: Replit catalog below. Paste any deployed app URL to discover tools and
+                generate SEO pages.
               </p>
             )}
           </>
         )}
 
         {/* Deploy tab — full guide */}
-        {tab === "deploy" && <DeployGuide />}
+        {tab === "deploy" && (
+          <DeployGuide publicHost={orbitUrls.host} publicSite={orbitUrls.site} />
+        )}
 
         {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
         {tab !== "deploy" && tab !== "checklist" && (
@@ -2614,7 +2661,8 @@ export default function LaunchpadPage() {
             onLaunch={launchEverything}
             coreUrls={orbitStatus?.coreUrls ?? []}
             toolUrls={orbitStatus?.toolUrls ?? []}
-            totalSteps={SVIVVA_STEPS.length + MINI_STEPS.length}
+            totalSteps={SVIVVA_STEPS.length + miniSteps.length}
+            sitemapUrl={orbitUrls.sitemap}
           />
         )}
 
@@ -2708,8 +2756,8 @@ export default function LaunchpadPage() {
             </p>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
               {tab === "svivva"
-                ? "Switch to Your Tools Repl to promote your existing apps."
-                : "Both Repls are connected — Google traffic will flow to your real tools."}
+                ? "Switch to the Your Tools tab to promote your deployed mini apps."
+                : "Your app URLs are connected — Google traffic can flow to your live tools."}
             </p>
             {tab === "svivva" && (
               <button
@@ -2717,7 +2765,7 @@ export default function LaunchpadPage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
                 style={{ background: TEAL }}
               >
-                Connect Your Tools Repl <ArrowRight className="w-3.5 h-3.5" />
+                Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -2728,6 +2776,7 @@ export default function LaunchpadPage() {
           <GoogleIndexPanel
             coreUrls={orbitStatus?.coreUrls ?? []}
             toolUrls={orbitStatus?.toolUrls ?? []}
+            sitemapUrl={orbitUrls.sitemap}
           />
         )}
 

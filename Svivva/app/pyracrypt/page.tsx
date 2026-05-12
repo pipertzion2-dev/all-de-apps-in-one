@@ -15,9 +15,11 @@ import {
   Star,
 } from "lucide-react";
 
+import { getPyracryptMainAppUrl } from "@/lib/workspace-external-apps";
+
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
-const PYRACRYPT_URL = "https://new-venture-pipertzion2.replit.app";
+const PYRACRYPT_URL = getPyracryptMainAppUrl();
 
 const features = [
   {

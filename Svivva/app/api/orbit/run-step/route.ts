@@ -10,6 +10,10 @@ import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import {
+  getDefaultSubdomainCnameTargets,
+  getPyracryptMiniAppsBaseUrl,
+} from "@/lib/workspace-external-apps";
 
 export const maxDuration = 300;
 
@@ -596,10 +600,7 @@ export async function POST(req: NextRequest) {
       let allTools: DiscoveredTool[] = passedTools || [];
       let autoDiscovered = false;
       if (!allTools.length) {
-        const miniAppsUrl =
-          sourceUrl ||
-          process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL ||
-          "https://cyber-security-mini-apps-zip.replit.app";
+        const miniAppsUrl = sourceUrl || getPyracryptMiniAppsBaseUrl();
         allTools = await autoDiscoverTools(miniAppsUrl);
         autoDiscovered = true;
         if (!allTools.length) {
@@ -1324,7 +1325,7 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
           .replace(/^-|-$/g, "")
           .slice(0, 20);
         if (fromName) return fromName;
-        // fallback: first segment of hostname (e.g. "cyber-tools" from "cyber-tools-user.replit.app")
+        // fallback: first segment of hostname (e.g. "cyber-tools" from "cyber-tools.example.com")
         return (
           host
             .split(".")[0]
@@ -1337,23 +1338,7 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
       const SUBDOMAIN_MAP: { sub: string; target: string; label: string }[] =
         uniqueRepls.length > 0
           ? uniqueRepls.map((r) => ({ sub: toSub(r.name, r.host), target: r.host, label: r.name }))
-          : [
-              {
-                sub: "apps",
-                target: "cyber-security-mini-apps-zip.replit.app",
-                label: "Pyracrypt mini-apps",
-              },
-              {
-                sub: "security",
-                target: "new-venture-pipertzion2.replit.app",
-                label: "Pyracrypt main",
-              },
-              {
-                sub: "pyracrypt",
-                target: "new-venture-pipertzion2.replit.app",
-                label: "Pyracrypt alias",
-              },
-            ];
+          : getDefaultSubdomainCnameTargets();
 
       if (!row?.godaddy_api_key || !row?.godaddy_domain) {
         const manual = SUBDOMAIN_MAP.map(
@@ -1368,8 +1353,8 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
             "",
             manual,
             "",
-            "Once DNS propagates (5–30 min) each subdomain serves the live Replit app.",
-            "Then in each Replit deployment → Settings → Custom Domain, add the subdomain.",
+            "Once DNS propagates (5–30 min) each subdomain should point at your deployed app host.",
+            "In your host (Vercel, Netlify, Cloudflare, etc.) add each subdomain as a custom domain.",
           ].join("\n"),
           details: { skipped: true, subdomains: SUBDOMAIN_MAP },
         });
@@ -1417,13 +1402,13 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
           ...lines,
           "",
           "DNS propagation: 5–30 minutes.",
-          "After propagation, in each Replit deployment → Settings → Custom Domain, add the subdomain.",
+          "After propagation, add each subdomain in your hosting provider as a custom domain (TLS is provisioned there).",
           "",
           "Deploy Svivva itself:",
-          "1. Click the ▶ Deploy button in Replit (top right)",
-          "2. In deployment settings, add svivva.com as Custom Domain",
-          "3. GoDaddy: add CNAME www → your-svivva-app.replit.app",
-          "4. Replit will auto-provision TLS — no extra config needed",
+          "1. Deploy this repo to Vercel (or your host) from Git",
+          "2. In the host project → Domains, add svivva.com / www as directed",
+          "3. GoDaddy: point www (CNAME) at the hostname your provider gives you",
+          "4. The host provisions TLS automatically",
         ].join("\n"),
         details: { domain, results, subdomains: SUBDOMAIN_MAP.length },
       });
@@ -2515,8 +2500,8 @@ Return JSON:
           `✓ Changelog page created — tells Google you're actively maintained`,
           `✓ ${pagesCreated.length} pages submitted to IndexNow`,
           "",
-          "ADD JSON-LD TO YOUR REPL (add to <head>):",
-          "Copy the 'webApplication' and 'faqSchema' from step results into your Repl's HTML <head>:",
+          "ADD JSON-LD TO YOUR SITE (add to <head>):",
+          "Copy the 'webApplication' and 'faqSchema' from step results into your app's HTML <head>:",
           '<script type="application/ld+json">{ ...webApplication }</script>',
           '<script type="application/ld+json">{ ...faqSchema }</script>',
           "",

@@ -14,11 +14,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  getPublicSiteUrl,
-  getPublicSitemapUrl,
-  getPublicSiteHostname,
-} from "@/lib/site-url-public";
+import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
@@ -77,9 +73,10 @@ function statusBg(s: TaskStatus) {
 }
 
 export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
-  const ORBIT_SITE = getPublicSiteUrl();
-  const ORBIT_SITEMAP = getPublicSitemapUrl();
-  const ORBIT_HOST = getPublicSiteHostname();
+  const orbitUrls = usePublicOrbitUrls();
+  const ORBIT_SITE = orbitUrls.site;
+  const ORBIT_SITEMAP = orbitUrls.sitemap;
+  const ORBIT_HOST = orbitUrls.host;
 
   const [manualDone, setManualDone] = useState<Record<string, boolean>>({});
   const [expanded, setExpanded] = useState<string | null>("next");

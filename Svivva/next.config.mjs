@@ -9,6 +9,10 @@ const nextConfig = {
     "*.vercel.app",
     "127.0.0.1",
     "localhost",
+    // Same-Wi‑Fi device testing (Orbit / Next dev on LAN)
+    "192.168.*",
+    "10.*",
+    "172.*",
   ],
 };
 

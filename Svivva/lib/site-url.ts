@@ -38,9 +38,18 @@ export function getGoogleSearchConsoleInspectBase(): string {
 }
 
 /** Stripe Checkout / Billing Portal return URLs — prefers NEXT_PUBLIC_SITE_URL when set. */
+function isLikelyLocalDevHost(host: string): boolean {
+  const h = host.split(":")[0]?.toLowerCase() || "";
+  if (h === "localhost" || h === "127.0.0.1" || h === "[::1]") return true;
+  if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  return false;
+}
+
 export function getBillingOriginFromRequest(request: NextRequest): string {
   const host = request.headers.get("host") || "localhost:5000";
-  const protocol = host.includes("localhost") ? "http" : "https";
+  const protocol = isLikelyLocalDevHost(host) ? "http" : "https";
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (configured) {
     try {

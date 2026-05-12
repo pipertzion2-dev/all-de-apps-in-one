@@ -49,7 +49,8 @@ export async function GET() {
 
     if (!username) {
       return NextResponse.json({
-        error: "Replit not connected. Enter your Replit username in Connected Services.",
+        error:
+          "Optional Replit catalog: add your Replit username under Connected Services to list public Repls. Or paste any deployed app URL directly in Orbit — Replit is not required.",
         repls: [],
       });
     }
