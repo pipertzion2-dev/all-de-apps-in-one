@@ -8,19 +8,20 @@ import { sessions, users } from "@/lib/schema";
 import { randomBytes } from "crypto";
 
 function getOidcClientId(): string {
-  const id = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
+  const id = process.env.OIDC_CLIENT_ID;
   if (!id) {
-    throw new Error("Set OIDC_CLIENT_ID (or REPL_ID on Replit) for OpenID login.");
+    throw new Error("Set OIDC_CLIENT_ID for OpenID login.");
   }
   return id;
 }
 
 const getOidcConfig = memoize(
   async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      getOidcClientId(),
-    );
+    const issuerUrl = process.env.ISSUER_URL;
+    if (!issuerUrl) {
+      throw new Error("Set ISSUER_URL for OpenID login.");
+    }
+    return await client.discovery(new URL(issuerUrl), getOidcClientId());
   },
   { maxAge: 3600 * 1000 },
 );
@@ -201,7 +202,7 @@ export async function getLoginUrl(hostname: string, redirectAfter?: string): Pro
 export async function handleCallback(
   currentUrl: string,
   state: string,
-): Promise<{ user: SessionUser; token: string; replitAccessToken: string | null }> {
+): Promise<{ user: SessionUser; token: string; accessToken: string | null }> {
   await ensureOauthStatesTable();
 
   const config = await getOidcConfig();
@@ -272,9 +273,9 @@ export async function handleCallback(
 
   const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
   const token = await setSession(user, expiresAt);
-  const replitAccessToken = (tokens.access_token as string | undefined) || null;
+  const accessToken = (tokens.access_token as string | undefined) || null;
 
-  return { user, token, replitAccessToken };
+  return { user, token, accessToken };
 }
 
 export async function getLogoutUrl(hostname: string): Promise<string> {

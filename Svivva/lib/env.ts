@@ -34,19 +34,8 @@ export function getOpenAIBaseUrl(): string | undefined {
   return process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
 }
 
-/**
- * Stripe ready for API + Elements: **both** publishable + secret env vars, or Replit connector.
- * Secret alone is not enough (publishable-key route would fail).
- */
 export function hasStripeConfigured(): boolean {
-  if (hasCompleteStripeEnvKeys()) return true;
-  if (
-    process.env.REPLIT_CONNECTORS_HOSTNAME &&
-    (process.env.REPL_IDENTITY || process.env.WEB_REPL_RENEWAL)
-  ) {
-    return true;
-  }
-  return false;
+  return hasCompleteStripeEnvKeys();
 }
 
 export function hasStripeWebhookConfigured(): boolean {

@@ -1808,6 +1808,8 @@ export default function LaunchpadPage() {
   const [launchProgress, setLaunchProgress] = useState("");
   const [launchCopied, setLaunchCopied] = useState<string | null>(null);
   const [showAllTools, setShowAllTools] = useState(false);
+  const [autopilotActive, setAutopilotActive] = useState(false);
+  const [autopilotResult, setAutopilotResult] = useState<string | null>(null);
 
   // Mini apps source state
   const [sourceUrl, setSourceUrl] = useState("");
@@ -2088,6 +2090,35 @@ export default function LaunchpadPage() {
     setQueuedSteps(new Set());
   };
 
+  const runWorkspaceAutopilot = async () => {
+    if (autopilotActive) return;
+    setAutopilotActive(true);
+    setAutopilotResult(null);
+    try {
+      const res = await authFetch("/api/orbit/workspace-autopilot", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setAutopilotResult(data.summary || "Orbit autopilot completed.");
+      refetchStatus();
+      toast({
+        title: "Orbit autopilot finished",
+        description: "Connections, Stripe readiness, and indexable tool health were checked.",
+        duration: 7000,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setAutopilotResult(msg);
+      toast({
+        title: "Autopilot needs attention",
+        description: msg,
+        variant: "destructive",
+        duration: 7000,
+      });
+    } finally {
+      setAutopilotActive(false);
+    }
+  };
+
   const launchEverything = async () => {
     if (launchActive) return;
     setLaunchActive(true);
@@ -2325,6 +2356,54 @@ export default function LaunchpadPage() {
 
       {/* ── Content ── */}
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-10 space-y-4">
+        <div className="rounded-2xl border-2 border-amber-400/40 bg-card p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center flex-shrink-0">
+              <Zap className="w-5 h-5 text-amber-500" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-black text-foreground">Admin Traffic Autopilot</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                One click checks svivva.com, connected apps, sitemap/robots, Stripe readiness, and
+                removes broken or risky AI tool pages from indexing.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              onClick={runWorkspaceAutopilot}
+              disabled={autopilotActive}
+              className="flex-1 font-bold"
+              data-testid="button-orbit-admin-autopilot"
+            >
+              {autopilotActive ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Checking everything…
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 mr-2" /> Connect + Check Everything
+                </>
+              )}
+            </Button>
+            <Button type="button" variant="outline" asChild>
+              <a
+                href="https://dashboard.stripe.com/apikeys"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Stripe keys <ExternalLink className="w-3 h-3 ml-1" />
+              </a>
+            </Button>
+          </div>
+          {autopilotResult && (
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+              {autopilotResult}
+            </pre>
+          )}
+        </div>
+
         {/* Connections Hub */}
         <div className="rounded-2xl border-2 border-border bg-card p-4">
           <ConnectionsHub />
