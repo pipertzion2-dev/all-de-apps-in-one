@@ -40,7 +40,7 @@ export default function LoginPage() {
             <div className="text-2xl mb-2">⚠️</div>
             <h1 className="text-lg font-bold text-white mb-1">Sign-in failed</h1>
             <p className="text-sm text-white/50 mb-1">
-              Replit couldn&apos;t complete the connection.
+              Your identity provider could not finish sign-in.
             </p>
             {detail && <p className="text-xs text-red-400 mt-2 break-words">{detail}</p>}
           </div>
@@ -50,7 +50,7 @@ export default function LoginPage() {
             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
           >
-            Try again with Replit
+            Try again
           </button>
 
           <Link href="/" className="text-xs text-white/30 hover:text-white/60 transition-colors">
@@ -74,7 +74,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 flex flex-col items-center gap-5 text-center">
         <div>
           <h1 className="text-xl font-bold text-white mb-1">Welcome back</h1>
-          <p className="text-sm text-white/50">Signing you in with Replit…</p>
+          <p className="text-sm text-white/50">Signing you in…</p>
         </div>
         <div className="w-8 h-8 border-2 border-[#5BA8A0] border-t-transparent rounded-full animate-spin" />
         <p className="text-xs text-white/30">

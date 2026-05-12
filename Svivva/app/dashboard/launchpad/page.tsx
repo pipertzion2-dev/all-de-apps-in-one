@@ -1816,7 +1816,11 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  const { data: me, isLoading: meLoading } = useQuery<{ isAdmin: boolean }>({
+  const { data: me, isLoading: meLoading } = useQuery<{
+    isAdmin: boolean;
+    vercelCommit?: string | null;
+    nextPublicSiteUrl?: string | null;
+  }>({
     queryKey: ["/api/auth/me"],
     queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
   });
@@ -2221,6 +2225,40 @@ export default function LaunchpadPage() {
                 <p className="text-white/50 text-xs">
                   Svivva + your deployed apps — maximum real traffic
                 </p>
+                {orbitUrls.host.endsWith("svivva.com") && (
+                  <div className="mt-2 rounded-lg border border-white/15 bg-black/20 px-2.5 py-2 text-[10px] text-white/70 leading-snug space-y-1.5 max-w-md">
+                    <p>
+                      <span className="font-semibold text-white/85">Live site</span> updates only
+                      after <span className="text-white/90">Vercel</span> finishes a production
+                      deploy from GitHub — pushing code alone does not change svivva.com until that
+                      build runs.
+                    </p>
+                    {me?.vercelCommit ? (
+                      <p className="font-mono text-white/55">
+                        Running build{" "}
+                        <span className="text-white/80">{me.vercelCommit.slice(0, 7)}</span>
+                        {me.nextPublicSiteUrl ? (
+                          <>
+                            {" "}
+                            · <span className="text-white/80">NEXT_PUBLIC_SITE_URL</span>{" "}
+                            {me.nextPublicSiteUrl}
+                          </>
+                        ) : null}
+                      </p>
+                    ) : (
+                      <p className="text-amber-200/90">
+                        No Vercel commit id on this server — if Orbit still feels old, open Vercel →
+                        Deployments → Redeploy, and confirm this GitHub repo is linked to that
+                        project.
+                      </p>
+                    )}
+                    <p className="text-white/55">
+                      Sign-in still redirects through{" "}
+                      <span className="text-white/75">Replit OpenID</span> — that is expected until
+                      a different auth provider is configured.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="text-right flex-shrink-0">

@@ -482,7 +482,7 @@ export default function MiniAppsGuide() {
                   <input
                     value={appUrl}
                     onChange={(e) => setAppUrl(e.target.value)}
-                    placeholder="https://yourapp.replit.app"
+                    placeholder="https://your-app.vercel.app or https://tools.yourdomain.com"
                     data-testid="input-app-url"
                     className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none font-mono bg-background"
                   />

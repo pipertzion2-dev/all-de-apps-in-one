@@ -7,7 +7,7 @@ import { isAdmin } from "@/lib/auth/admin";
 
 const GODADDY_API = "https://api.godaddy.com/v1";
 
-function extractReplitDomain(url: string): string | null {
+function extractTargetHostname(url: string): string | null {
   try {
     const u = new URL(url.startsWith("http") ? url : `https://${url}`);
     return u.hostname;
@@ -39,10 +39,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GoDaddy domain not configured." }, { status: 400 });
     }
 
-    const targetDomain = targetUrl ? extractReplitDomain(targetUrl) : null;
+    const targetDomain = targetUrl ? extractTargetHostname(targetUrl) : null;
     if (!targetDomain) {
       return NextResponse.json(
-        { error: "Invalid target URL — enter a full URL like https://your-app.replit.app" },
+        {
+          error:
+            "Invalid target URL — enter a full URL (e.g. https://your-project.vercel.app or https://mini-apps.example.com)",
+        },
         { status: 400 },
       );
     }

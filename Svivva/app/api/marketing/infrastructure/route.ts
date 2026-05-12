@@ -97,7 +97,8 @@ export async function POST(req: Request) {
     const { user, error } = await requireAdminUser();
     if (error || !user) return error!;
 
-    const { action, replitDomain, googleSiteUrl } = await req.json();
+    const { action, replitDomain, hostingTarget, googleSiteUrl } = await req.json();
+    const cnameTargetHost = (hostingTarget ?? replitDomain) as string | undefined;
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
     if (action === "submit-sitemap") {
@@ -147,12 +148,16 @@ export async function POST(req: Request) {
       if (!creds?.godaddyApiKey || !creds?.godaddyApiSecret || !creds?.godaddyDomain) {
         return badRequest("GoDaddy credentials and domain required");
       }
-      if (!replitDomain) {
-        return badRequest("Replit deployment domain required (e.g. yourapp.replit.app)");
+      if (!cnameTargetHost?.trim()) {
+        return badRequest(
+          "Hosting CNAME target required — hostname your DNS should point at (e.g. cname.vercel-dns.com, your-project.vercel.app, or any deployed app host).",
+        );
       }
 
       const authHeader = `sso-key ${creds.godaddyApiKey}:${creds.godaddyApiSecret}`;
-      const cleanReplitDomain = replitDomain.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      const cleanReplitDomain = String(cnameTargetHost)
+        .replace(/^https?:\/\//, "")
+        .replace(/\/$/, "");
 
       const records = [
         { type: "CNAME", name: "www", data: cleanReplitDomain, ttl: 600 },

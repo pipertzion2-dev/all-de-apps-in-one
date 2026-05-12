@@ -90,25 +90,29 @@ export function SeedDeployDialog({
 
   const deployTargets = [
     {
-      name: "Cloud Platform",
+      name: "Vercel (recommended)",
+      icon: Zap,
+      color: "#000000",
+      steps: [
+        "Push your code to GitHub",
+        "Open vercel.com/new → Import Git Repository",
+        "Root directory: set to your app folder if this monorepo is not the Next root",
+        "Add env vars from your old host, then Deploy",
+      ],
+      command: `cd ${appSlug} && npx vercel`,
+      url: "https://vercel.com/new",
+    },
+    {
+      name: "Replit (legacy)",
       icon: Cloud,
       color: "#F26207",
       steps: [
-        "Open your cloud platform dashboard → New Project",
-        'Choose "Import from ZIP"',
+        "Open Replit → New Repl → Import from ZIP",
         "Upload the downloaded ZIP",
-        "Click Run — your app is live",
+        "Click Run — your app is live on a .replit.app URL",
       ],
       command: null,
       url: "https://replit.com/new",
-    },
-    {
-      name: "Vercel",
-      icon: Zap,
-      color: "#000000",
-      steps: ["Install Vercel CLI", "Unzip and run deploy command"],
-      command: `cd ${appSlug} && npx vercel`,
-      url: "https://vercel.com/new",
     },
     {
       name: "Railway",
