@@ -19,6 +19,8 @@ export default function robots(): MetadataRoute.Robots {
           "/docs",
           "/privacy",
           "/terms",
+          "/marketing-hub",
+          "/marketing-hub/*",
         ],
         disallow: [
           "/dashboard",

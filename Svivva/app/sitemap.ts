@@ -124,5 +124,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticPages, ...blogPages, ...seoPages, ...categoryPages, ...lpPages];
+  const marketingHubPages: MetadataRoute.Sitemap = [
+    "/marketing-hub",
+    "/marketing-hub/campaigns",
+    "/marketing-hub/leads",
+    "/marketing-hub/referrals",
+    "/marketing-hub/utm",
+    "/marketing-hub/amplify",
+    "/marketing-hub/ab-tests",
+  ].map((path) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...blogPages, ...seoPages, ...categoryPages, ...lpPages, ...marketingHubPages];
 }

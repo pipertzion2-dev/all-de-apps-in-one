@@ -1706,3 +1706,5 @@ export const referralCampaigns = pgTable("referral_campaigns", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export * from "./marketing/schema";

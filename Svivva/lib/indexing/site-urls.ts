@@ -58,6 +58,16 @@ export async function getAllSiteUrlsForIndexing(): Promise<string[]> {
     `${baseUrl}/lp/ai-app-generator`,
   ];
 
-  const merged = [...staticUrls, ...blogUrls, ...seoUrls, ...categoryUrls, ...lpUrls];
+  const marketingHubUrls = [
+    `${baseUrl}/marketing-hub`,
+    `${baseUrl}/marketing-hub/campaigns`,
+    `${baseUrl}/marketing-hub/leads`,
+    `${baseUrl}/marketing-hub/referrals`,
+    `${baseUrl}/marketing-hub/utm`,
+    `${baseUrl}/marketing-hub/amplify`,
+    `${baseUrl}/marketing-hub/ab-tests`,
+  ];
+
+  const merged = [...staticUrls, ...blogUrls, ...seoUrls, ...categoryUrls, ...lpUrls, ...marketingHubUrls];
   return [...new Set(merged)].sort();
 }
