@@ -1941,6 +1941,8 @@ export default function LaunchpadPage() {
   };
   const meLoading = false;
 
+  // Force deployment refresh
+
   const { data: creds } = useQuery<{
     hasReplit: boolean;
     replitUsername?: string | null;
