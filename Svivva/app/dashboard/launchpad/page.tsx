@@ -964,7 +964,8 @@ function LaunchStation({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden border-2"
+      id="orbit-full-marketing-strategy"
+      className="rounded-2xl overflow-hidden border-2 scroll-mt-6"
       style={{
         borderColor,
         background: launchDone ? "rgba(22,163,74,0.04)" : "rgba(234,179,8,0.05)",
