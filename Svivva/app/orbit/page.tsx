@@ -35,19 +35,19 @@ const steps = [
   },
   {
     id: "seo-pages",
-    title: "40 SEO Landing Pages",
+    title: "SEO Landing Pages",
     icon: Globe,
     estimate: "~4 min",
     description:
-      "AI-written pages for 40 high-traffic keywords — 'chatgpt api integration', 'openai api tutorial', 'build app with chatgpt' + 37 more",
+      "AI-written pages for high-traffic keywords — 'chatgpt api integration', 'openai api tutorial', 'build app with chatgpt' + more. Generates pages for all your connected apps.",
   },
   {
     id: "comparisons",
-    title: "20 Competitor Comparisons",
+    title: "Competitor Comparisons",
     icon: Activity,
     estimate: "~3 min",
     description:
-      "Svivva vs n8n, LangChain, Dify, Supabase, Firebase + 15 more — captures high-converting 'X alternative' searches",
+      "Svivva vs n8n, LangChain, Dify, Supabase, Firebase and more — captures high-converting 'X alternative' searches for your apps.",
   },
   {
     id: "blog",
@@ -59,11 +59,11 @@ const steps = [
   },
   {
     id: "directories",
-    title: "40 Directory Submissions",
+    title: "Directory Submissions",
     icon: ListChecks,
     estimate: "~30s",
     description:
-      "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI + 33 more",
+      "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI and more directories.",
   },
 ];
 
