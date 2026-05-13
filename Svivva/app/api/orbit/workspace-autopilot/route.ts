@@ -4,7 +4,7 @@ import { seoLandingPages } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
-import { getPyracryptMainAppUrl, getPyracryptMiniAppsBaseUrl } from "@/lib/workspace-external-apps";
+import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { and, eq, isNotNull } from "drizzle-orm";
 
@@ -92,14 +92,17 @@ export async function POST() {
         : `Create Stripe webhook at ${siteUrl}/api/stripe/webhook and save whsec_*`,
     });
 
-    const appChecks = await Promise.all([
-      probeUrl("Svivva", siteUrl),
-      probeUrl("Pyracrypt", getPyracryptMainAppUrl()),
-      probeUrl("AI tools / mini apps hub", getPyracryptMiniAppsBaseUrl()),
+    const allProjects = getAllWorkspaceProjects();
+    const projectChecks = await Promise.all(
+      allProjects.map((project) => probeUrl(project.name, project.url)),
+    );
+    checks.push(...projectChecks);
+
+    const infraChecks = await Promise.all([
       probeUrl("Sitemap", `${siteUrl}/sitemap.xml`),
       probeUrl("Robots", `${siteUrl}/robots.txt`),
     ]);
-    checks.push(...appChecks);
+    checks.push(...infraChecks);
 
     const toolPages = await db
       .select({

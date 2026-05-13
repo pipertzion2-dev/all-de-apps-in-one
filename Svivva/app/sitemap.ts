@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
-/** Public URL paths must stay aligned with `lib/indexing/site-urls.ts` (IndexNow / Orbit). */
 import { db } from "@/server/db";
 import { blogPosts, seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+  const allProjects = getAllWorkspaceProjects();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
@@ -22,6 +23,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/cyber-security-mini-apps`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/seo-pack`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/about`,
