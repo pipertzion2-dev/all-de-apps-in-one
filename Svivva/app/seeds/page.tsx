@@ -814,7 +814,7 @@ export default function SeedsPage() {
             </div>
 
             {/* Orbit CTA banner */}
-            <Link href="/dashboard/launchpad">
+            <Link href="/orbit">
               <div
                 className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
                 style={{

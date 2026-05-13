@@ -144,7 +144,7 @@ export default function MarketingPage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
-              href="/dashboard/launchpad"
+              href="/orbit"
               className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold"
               style={{ background: TEAL }}
             >
