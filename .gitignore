@@ -36,3 +36,5 @@ Thumbs.db
 
 # Local source drop folder for reference assets/zips
 SVIVVA ADD ONS/
+.vercel
+.env*.local
