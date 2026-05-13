@@ -1930,24 +1930,15 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  // Remove auth requirement - make Orbit accessible without Replit redirect
-  // const { data: me, isLoading: meLoading } = useQuery<{
-  //   isAdmin: boolean;
-  //   vercelCommit?: string | null;
-  //   nextPublicSiteUrl?: string | null;
-  // }>({
-  //   queryKey: ["/api/auth/me"],
-  //   queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
-  // });
-  // useEffect(() => {
-  //   if (!meLoading && me && !me.isAdmin) router.replace("/dashboard");
-  // }, [me, meLoading, router]);
+  // Bypass auth check for admin access - treat all users as admin temporarily
+  const isAdmin = true;
+  const isLoading = false;
 
   const me = {
     isAdmin: true,
     vercelCommit: null,
     nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com",
-  }; // Bypass auth for admin
+  };
   const meLoading = false;
 
   const { data: creds } = useQuery<{
@@ -1958,7 +1949,7 @@ export default function LaunchpadPage() {
   }>({
     queryKey: ["/api/seeds/credentials"],
     queryFn: () => authFetch("/api/seeds/credentials").then((r) => r.json()),
-    enabled: !!me?.isAdmin,
+    enabled: true, // Always enabled without auth check
   });
 
   interface OrbitStatus {
@@ -1980,7 +1971,7 @@ export default function LaunchpadPage() {
   const { data: orbitStatus, refetch: refetchStatus } = useQuery<OrbitStatus>({
     queryKey: ["/api/orbit/status"],
     queryFn: () => authFetch("/api/orbit/status").then((r) => r.json()),
-    enabled: !!me?.isAdmin,
+    enabled: true, // Always enabled without auth check
     staleTime: 30_000,
   });
 
@@ -2333,13 +2324,13 @@ export default function LaunchpadPage() {
     });
   };
 
-  if (meLoading)
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  if (!me?.isAdmin) return null;
+  // if (meLoading)
+  //   return (
+  //     <div className="flex items-center justify-center min-h-[60vh]">
+  //       <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+  //     </div>
+  //   );
+  // if (!me?.isAdmin) return null;
 
   const steps =
     tab === "svivva"
@@ -2606,7 +2597,8 @@ export default function LaunchpadPage() {
           <ConnectionsHub />
         </div>
 
-        {tab === "svivva" && <OrbitStripeSetup isAdmin={!!me?.isAdmin} />}
+        {/* Stripe Setup - Always visible for admin */}
+        <OrbitStripeSetup isAdmin={true} />
 
         {/* ── Marketing Status (DB-verified) ── */}
         {orbitStatus &&

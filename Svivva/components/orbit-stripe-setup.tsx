@@ -112,7 +112,6 @@ export function OrbitStripeSetup({ isAdmin }: { isAdmin: boolean }) {
     }
   };
 
-  if (!isAdmin) return null;
 
   const site = getPublicSiteUrl();
   const webhookUrl = `${site}/api/stripe/webhook`;

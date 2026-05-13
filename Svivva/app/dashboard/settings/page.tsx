@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { User, Shield, Trash2, KeyRound } from "lucide-react";
+import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -89,15 +90,16 @@ export default function SettingsPage() {
       </Card>
 
       {me?.isAdmin && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <KeyRound className="w-5 h-5" />
-              Runtime credentials
-            </CardTitle>
-            <CardDescription>
-              Save OpenAI, Stripe, and site URL in the database when you prefer not to use host env
-              vars.
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5" />
+                Runtime credentials
+              </CardTitle>
+              <CardDescription>
+                Save OpenAI, Stripe, and site URL in the database when you prefer not to use host env
+                vars.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -106,6 +108,9 @@ export default function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
+        <OrbitStripeSetup isAdmin={true} />
+      </>
       )}
 
       <Card>
