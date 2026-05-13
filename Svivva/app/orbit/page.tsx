@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -105,25 +106,22 @@ export default function OrbitPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="text-xl font-black" style={{ color: TEAL }}>
-            Orbit
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <a href="/marketing">Marketing</a>
-            </Button>
-            <Button size="sm" asChild>
-              <a href="/dashboard/launchpad">Admin Orbit</a>
-            </Button>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      {/* Admin Access Link */}
+      <div className="fixed top-4 right-4 z-50">
+        <Link href="/dashboard/launchpad">
+          <Button
+            variant="outline"
+            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white hover:bg-slate-700"
+            size="sm"
+          >
+            <Rocket className="w-4 h-4 mr-2" />
+            Admin Orbit
+          </Button>
+        </Link>
+      </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Hero */}
         <div className="text-center mb-12">
           <div
