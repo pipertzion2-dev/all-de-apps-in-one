@@ -1647,3 +1647,62 @@ export const oauthStates = pgTable("oauth_states", {
   redirectAfter: text("redirect_after"),
   callbackBase: text("callback_base"),
 });
+
+// ============================================================================
+// REFERRALS (Multi-level referral system)
+// ============================================================================
+export const referrals = pgTable("referrals", {
+  id: text("id").primaryKey(),
+  referrerId: text("referrer_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  referredId: text("referred_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  level: integer("level").notNull().default(1), // Level in hierarchy (1 = direct, 2 = indirect, etc.)
+  commissionRate: integer("commission_rate").notNull().default(10), // Percentage commission
+  totalEarnings: integer("total_earnings").notNull().default(0), // Total earnings in cents
+  status: text("status").notNull().default("active"), // active, paused, completed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ============================================================================
+// REFERRAL REWARDS (Individual reward transactions)
+// ============================================================================
+export const referralRewards = pgTable("referral_rewards", {
+  id: text("id").primaryKey(),
+  referralId: text("referral_id")
+    .notNull()
+    .references(() => referrals.id, { onDelete: "cascade" }),
+  referrerId: text("referrer_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(), // Amount in cents
+  source: text("source").notNull(), // subscription, upgrade, etc.
+  sourceId: text("source_id"), // Related subscription/payment ID
+  level: integer("level").notNull(), // Level at which reward was earned
+  status: text("status").notNull().default("pending"), // pending, paid, failed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  paidAt: timestamp("paid_at"),
+});
+
+// ============================================================================
+// REFERRAL CAMPAIGNS (Promotional campaigns for referrals)
+// ============================================================================
+export const referralCampaigns = pgTable("referral_campaigns", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  commissionRate: integer("commission_rate").notNull().default(10), // Base commission rate
+  level2Rate: integer("level_2_rate").notNull().default(5), // Second level commission
+  level3Rate: integer("level_3_rate").notNull().default(2), // Third level commission
+  maxLevels: integer("max_levels").notNull().default(3), // Maximum referral depth
+  bonusPerSignup: integer("bonus_per_signup").notNull().default(0), // Bonus in cents per signup
+  bonusPerUpgrade: integer("bonus_per_upgrade").notNull().default(500), // Bonus in cents per upgrade
+  active: boolean("active").notNull().default(true),
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});

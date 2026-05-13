@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
+import { ReferralWidget } from "@/components/referral-widget";
 import {
   Upload,
   FileText,
@@ -861,6 +862,9 @@ export default function SeedsPage() {
             <div className="rounded-2xl border-2 border-border bg-card p-4" id="seeds-marketing">
               <ConnectionsHub />
             </div>
+
+            {/* Referral Widget */}
+            <ReferralWidget />
 
             <SeedsFunnelSetup />
           </div>

@@ -8,8 +8,10 @@ import {
   CheckCircle,
   Shield,
   Search,
+  Gift,
 } from "lucide-react";
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
+import { ReferralWidget } from "@/components/referral-widget";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
@@ -160,6 +162,20 @@ export default function MarketingPage() {
           </p>
         </div>
 
+        {/* Referral CTA */}
+        <div
+          className="rounded-3xl border-2 p-8 text-center"
+          style={{ borderColor: `${TEAL}30`, background: `${TEAL}05` }}
+        >
+          <Gift className="w-12 h-12 mx-auto mb-4" style={{ color: TEAL }} />
+          <h2 className="text-2xl font-black mb-3">Earn Money Referring Users</h2>
+          <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+            Join our multi-level referral program and earn up to 10% commission on subscriptions
+            from your network.
+          </p>
+          <ReferralWidget variant="prominent" />
+        </div>
+
         <div className="mt-16">
           <h2 className="text-2xl font-black text-center mb-8">All Your Projects</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -190,6 +206,7 @@ export default function MarketingPage() {
                   </div>
                   <h3 className="font-bold text-foreground mb-2">{project.name}</h3>
                   <p className="text-xs text-muted-foreground capitalize">{project.category}</p>
+                  <ReferralWidget userId={project.name} compact variant="minimal" />
                 </a>
               );
             })}
