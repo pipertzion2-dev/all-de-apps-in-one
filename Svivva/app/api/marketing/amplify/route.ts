@@ -4,16 +4,25 @@ import { marketingAmplifyJobs } from "@/lib/marketing/schema";
 import { desc } from "drizzle-orm";
 
 const CHANNEL_PROMPTS: Record<string, string> = {
-  twitter: "Rewrite the following content as a punchy Twitter/X thread (5-7 tweets). Start with a hook. Use short sentences. End with a CTA. No hashtag spam.",
-  linkedin: "Rewrite the following content as a professional LinkedIn post. Lead with an insight. Use short paragraphs. Include a thoughtful CTA.",
-  email: "Rewrite the following content as a marketing email. Include: Subject line, preview text, body (2-3 paragraphs), and a clear CTA button label.",
-  instagram: "Rewrite the following content as an Instagram caption. Conversational, visual-first, 150-200 words. End with 5-10 relevant hashtags.",
-  facebook: "Rewrite the following content as a Facebook post. Conversational, community-focused. Include a question to drive engagement.",
+  twitter:
+    "Rewrite the following content as a punchy Twitter/X thread (5-7 tweets). Start with a hook. Use short sentences. End with a CTA. No hashtag spam.",
+  linkedin:
+    "Rewrite the following content as a professional LinkedIn post. Lead with an insight. Use short paragraphs. Include a thoughtful CTA.",
+  email:
+    "Rewrite the following content as a marketing email. Include: Subject line, preview text, body (2-3 paragraphs), and a clear CTA button label.",
+  instagram:
+    "Rewrite the following content as an Instagram caption. Conversational, visual-first, 150-200 words. End with 5-10 relevant hashtags.",
+  facebook:
+    "Rewrite the following content as a Facebook post. Conversational, community-focused. Include a question to drive engagement.",
 };
 
 export async function GET() {
   try {
-    const jobs = await db.select().from(marketingAmplifyJobs).orderBy(desc(marketingAmplifyJobs.createdAt)).limit(50);
+    const jobs = await db
+      .select()
+      .from(marketingAmplifyJobs)
+      .orderBy(desc(marketingAmplifyJobs.createdAt))
+      .limit(50);
     return NextResponse.json(jobs);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch jobs" }, { status: 500 });
@@ -23,7 +32,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sourceContent, channels = ["twitter", "linkedin", "email"], sourceType = "custom", sourceId } = body;
+    const {
+      sourceContent,
+      channels = ["twitter", "linkedin", "email"],
+      sourceType = "custom",
+      sourceId,
+    } = body;
     if (!sourceContent || !sourceContent.trim()) {
       return NextResponse.json({ error: "sourceContent is required" }, { status: 400 });
     }

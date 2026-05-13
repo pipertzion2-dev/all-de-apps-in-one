@@ -5,7 +5,10 @@ import { eq, desc } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const tests = await db.select().from(marketingAbTests).orderBy(desc(marketingAbTests.createdAt));
+    const tests = await db
+      .select()
+      .from(marketingAbTests)
+      .orderBy(desc(marketingAbTests.createdAt));
     return NextResponse.json(tests);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch A/B tests" }, { status: 500 });
@@ -17,7 +20,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, hypothesis, variants, targetMetric } = body;
     if (!name || !variants || variants.length < 2) {
-      return NextResponse.json({ error: "name and at least 2 variants are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "name and at least 2 variants are required" },
+        { status: 400 },
+      );
     }
     const normalizedVariants = variants.map((v: any) => ({
       ...v,
@@ -28,7 +34,13 @@ export async function POST(request: NextRequest) {
     }));
     const [test] = await db
       .insert(marketingAbTests)
-      .values({ name, description, hypothesis, variants: normalizedVariants, targetMetric: targetMetric ?? "conversion_rate" })
+      .values({
+        name,
+        description,
+        hypothesis,
+        variants: normalizedVariants,
+        targetMetric: targetMetric ?? "conversion_rate",
+      })
       .returning();
     return NextResponse.json(test, { status: 201 });
   } catch (error) {

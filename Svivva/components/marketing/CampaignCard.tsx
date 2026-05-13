@@ -42,10 +42,14 @@ export function CampaignCard({ campaign, onStatusChange }: CampaignCardProps) {
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-foreground text-sm leading-snug">{campaign.name}</h3>
         <div className="flex gap-1.5 shrink-0">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CHANNEL_COLORS[campaign.channel] ?? "bg-muted text-muted-foreground"}`}>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium ${CHANNEL_COLORS[campaign.channel] ?? "bg-muted text-muted-foreground"}`}
+          >
             {campaign.channel}
           </span>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[campaign.status] ?? "bg-muted text-muted-foreground"}`}>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[campaign.status] ?? "bg-muted text-muted-foreground"}`}
+          >
             {campaign.status}
           </span>
         </div>
@@ -58,7 +62,10 @@ export function CampaignCard({ campaign, onStatusChange }: CampaignCardProps) {
             <span>${spent.toLocaleString()} spent</span>
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-foreground rounded-full transition-all" style={{ width: `${spentPct}%` }} />
+            <div
+              className="h-full bg-foreground rounded-full transition-all"
+              style={{ width: `${spentPct}%` }}
+            />
           </div>
         </div>
       )}
@@ -79,21 +86,33 @@ export function CampaignCard({ campaign, onStatusChange }: CampaignCardProps) {
       {onStatusChange && campaign.status !== "completed" && (
         <div className="flex gap-2 pt-1">
           {campaign.status === "draft" && (
-            <button onClick={() => onStatusChange(campaign.id, "active")} className="text-xs px-3 py-1 rounded-md bg-foreground text-background hover:opacity-80 transition-opacity font-medium">
+            <button
+              onClick={() => onStatusChange(campaign.id, "active")}
+              className="text-xs px-3 py-1 rounded-md bg-foreground text-background hover:opacity-80 transition-opacity font-medium"
+            >
               Activate
             </button>
           )}
           {campaign.status === "active" && (
-            <button onClick={() => onStatusChange(campaign.id, "paused")} className="text-xs px-3 py-1 rounded-md bg-muted text-foreground hover:bg-muted/70 transition-colors font-medium">
+            <button
+              onClick={() => onStatusChange(campaign.id, "paused")}
+              className="text-xs px-3 py-1 rounded-md bg-muted text-foreground hover:bg-muted/70 transition-colors font-medium"
+            >
               Pause
             </button>
           )}
           {campaign.status === "paused" && (
-            <button onClick={() => onStatusChange(campaign.id, "active")} className="text-xs px-3 py-1 rounded-md bg-foreground text-background hover:opacity-80 transition-opacity font-medium">
+            <button
+              onClick={() => onStatusChange(campaign.id, "active")}
+              className="text-xs px-3 py-1 rounded-md bg-foreground text-background hover:opacity-80 transition-opacity font-medium"
+            >
               Resume
             </button>
           )}
-          <button onClick={() => onStatusChange(campaign.id, "completed")} className="text-xs px-3 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground transition-colors font-medium">
+          <button
+            onClick={() => onStatusChange(campaign.id, "completed")}
+            className="text-xs px-3 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground transition-colors font-medium"
+          >
             Mark Done
           </button>
         </div>

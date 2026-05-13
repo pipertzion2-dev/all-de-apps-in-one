@@ -7,7 +7,10 @@ export async function getCampaigns() {
 }
 
 export async function getCampaignById(id: string) {
-  const [campaign] = await db.select().from(marketingCampaigns).where(eq(marketingCampaigns.id, id));
+  const [campaign] = await db
+    .select()
+    .from(marketingCampaigns)
+    .where(eq(marketingCampaigns.id, id));
   return campaign ?? null;
 }
 
@@ -22,11 +25,14 @@ export async function createCampaign(data: {
   goals?: { clicks?: number; conversions?: number; leads?: number; revenue?: number };
   tags?: string[];
 }) {
-  const [campaign] = await db.insert(marketingCampaigns).values({
-    ...data,
-    startDate: data.startDate ? new Date(data.startDate) : undefined,
-    endDate: data.endDate ? new Date(data.endDate) : undefined,
-  }).returning();
+  const [campaign] = await db
+    .insert(marketingCampaigns)
+    .values({
+      ...data,
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : undefined,
+    })
+    .returning();
   return campaign;
 }
 
@@ -41,7 +47,13 @@ export async function updateCampaignStatus(id: string, status: string) {
 
 export async function updateCampaignMetrics(
   id: string,
-  metrics: { clicks?: number; impressions?: number; conversions?: number; leads?: number; revenue?: number }
+  metrics: {
+    clicks?: number;
+    impressions?: number;
+    conversions?: number;
+    leads?: number;
+    revenue?: number;
+  },
 ) {
   const [campaign] = await db
     .update(marketingCampaigns)
@@ -64,7 +76,7 @@ export async function getCampaignSummary() {
       ["email", "social", "seo", "paid", "referral", "content"].map((ch) => [
         ch,
         all.filter((c) => c.channel === ch).length,
-      ])
+      ]),
     ),
   };
 }

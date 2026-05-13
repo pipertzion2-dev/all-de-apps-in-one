@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReferralByCode, trackReferralEvent } from "@/lib/marketing/referrals";
 
-export async function POST(request: NextRequest, { params }: { params: { code: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ code: string }> },
+) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const body = await request.json();
     const { eventType, referredEmail } = body;
     const referral = await getReferralByCode(code);
@@ -17,9 +20,10 @@ export async function POST(request: NextRequest, { params }: { params: { code: s
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { code: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   try {
-    const referral = await getReferralByCode(params.code);
+    const { code } = await params;
+    const referral = await getReferralByCode(code);
     if (!referral) return NextResponse.json({ error: "Not found" }, { status: 404 });
     await trackReferralEvent(referral.id, "click", {
       ip: request.headers.get("x-forwarded-for") ?? undefined,

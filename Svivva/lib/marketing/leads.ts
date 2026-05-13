@@ -22,7 +22,13 @@ export async function getLeads(search?: string) {
     return db
       .select()
       .from(marketingLeads)
-      .where(or(ilike(marketingLeads.email, `%${search}%`), ilike(marketingLeads.firstName ?? "", `%${search}%`), ilike(marketingLeads.company ?? "", `%${search}%`)))
+      .where(
+        or(
+          ilike(marketingLeads.email, `%${search}%`),
+          ilike(marketingLeads.firstName ?? "", `%${search}%`),
+          ilike(marketingLeads.company ?? "", `%${search}%`),
+        ),
+      )
       .orderBy(desc(marketingLeads.createdAt));
   }
   return db.select().from(marketingLeads).orderBy(desc(marketingLeads.createdAt));
@@ -86,7 +92,7 @@ export async function getLeadStats() {
       ["organic", "referral", "paid", "social", "email", "direct"].map((src) => [
         src,
         all.filter((l) => l.source === src).length,
-      ])
+      ]),
     ),
   };
 }

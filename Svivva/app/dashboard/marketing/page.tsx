@@ -203,9 +203,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
     domain: creds?.godaddyDomain || gdDomain,
   };
   const cnamePreview =
-    cnameParts.domain && appDomain
-      ? `${cnameParts.sub}.${cnameParts.domain} → ${appDomain}`
-      : null;
+    cnameParts.domain && appDomain ? `${cnameParts.sub}.${cnameParts.domain} → ${appDomain}` : null;
   const sitemapPreview =
     googleUrl || creds?.googleSiteUrl
       ? (googleUrl || creds?.googleSiteUrl || "").replace(/\/$/, "") + "/sitemap.xml"

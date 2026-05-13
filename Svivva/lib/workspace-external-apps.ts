@@ -49,19 +49,49 @@ export function getMarketingHubUrl(): string {
 }
 
 /** Get all workspace projects for Orbit autopilot and marketing. */
-export function getAllWorkspaceProjects(): Array<{ name: string; url: string; category: string; description: string }> {
+export function getAllWorkspaceProjects(): Array<{
+  name: string;
+  url: string;
+  category: string;
+  description: string;
+}> {
   return [
-    { name: "Svivva", url: DEFAULT_SITE, category: "main", description: "AI-powered app builder — the core platform" },
-    { name: "Pyracrypt", url: getPyracryptMainAppUrl(), category: "security", description: "End-to-end encryption & security tools" },
-    { name: "AI Tools Hub", url: getAiToolsHubUrl(), category: "ai-tools", description: "Collection of AI generators and utilities" },
+    {
+      name: "Svivva",
+      url: DEFAULT_SITE,
+      category: "main",
+      description: "AI-powered app builder — the core platform",
+    },
+    {
+      name: "Pyracrypt",
+      url: getPyracryptMainAppUrl(),
+      category: "security",
+      description: "End-to-end encryption & security tools",
+    },
+    {
+      name: "AI Tools Hub",
+      url: getAiToolsHubUrl(),
+      category: "ai-tools",
+      description: "Collection of AI generators and utilities",
+    },
     {
       name: "Cyber Security Mini Apps",
       url: getCyberSecurityMiniAppsUrl(),
       category: "security-tools",
       description: "Security scanners, analyzers & hardening tools",
     },
-    { name: "Svivva SEO Pack", url: getSvivvaSeoPackUrl(), category: "seo-tools", description: "SEO auditing, keyword research & optimization" },
-    { name: "Marketing Hub", url: getMarketingHubUrl(), category: "marketing", description: "Campaigns, leads, referrals, UTM tracking & A/B tests" },
+    {
+      name: "Svivva SEO Pack",
+      url: getSvivvaSeoPackUrl(),
+      category: "seo-tools",
+      description: "SEO auditing, keyword research & optimization",
+    },
+    {
+      name: "Marketing Hub",
+      url: getMarketingHubUrl(),
+      category: "marketing",
+      description: "Campaigns, leads, referrals, UTM tracking & A/B tests",
+    },
   ];
 }
 

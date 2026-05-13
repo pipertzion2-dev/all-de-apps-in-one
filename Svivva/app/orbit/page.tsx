@@ -87,32 +87,38 @@ const TRAFFIC_FUNNEL = [
   {
     icon: Globe,
     title: "SEO Pages & Blog",
-    description: "AI-generated landing pages, comparison posts, and blog content rank on Google and drive organic traffic to all projects.",
+    description:
+      "AI-generated landing pages, comparison posts, and blog content rank on Google and drive organic traffic to all projects.",
   },
   {
     icon: Zap,
     title: "IndexNow + Google Indexing",
-    description: "Instant submission to Bing, Yandex, Yahoo via IndexNow. Google Indexing API + Search Console for maximum coverage.",
+    description:
+      "Instant submission to Bing, Yandex, Yahoo via IndexNow. Google Indexing API + Search Console for maximum coverage.",
   },
   {
     icon: Activity,
     title: "Cross-Product Funnels",
-    description: "Every app links to every other app. Tool pages on svivva.com drive users to Pyracrypt, AI Tools Hub, and back.",
+    description:
+      "Every app links to every other app. Tool pages on svivva.com drive users to Pyracrypt, AI Tools Hub, and back.",
   },
   {
     icon: Users,
     title: "Referral System",
-    description: "Multi-level referral program rewards users for bringing new traffic. Tracks clicks, signups, and conversions.",
+    description:
+      "Multi-level referral program rewards users for bringing new traffic. Tracks clicks, signups, and conversions.",
   },
   {
     icon: BarChart3,
     title: "Marketing Hub Analytics",
-    description: "Campaigns, leads, UTM tracking, and A/B tests measure what's working and optimize for maximum conversions.",
+    description:
+      "Campaigns, leads, UTM tracking, and A/B tests measure what's working and optimize for maximum conversions.",
   },
   {
     icon: FileText,
     title: "Content Amplification",
-    description: "AI rewrites your content for Twitter, LinkedIn, email, Instagram — one input generates posts for every channel.",
+    description:
+      "AI rewrites your content for Twitter, LinkedIn, email, Instagram — one input generates posts for every channel.",
   },
 ];
 
@@ -160,8 +166,9 @@ export default function OrbitPage() {
             <span className="text-white"> Project Hub</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            All your apps, tools, and marketing systems connected in one ecosystem.
-            Every project drives traffic to every other project — automatically indexed and funneled for maximum reach.
+            All your apps, tools, and marketing systems connected in one ecosystem. Every project
+            drives traffic to every other project — automatically indexed and funneled for maximum
+            reach.
           </p>
         </div>
 
@@ -180,7 +187,10 @@ export default function OrbitPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${project.color}20`, border: `1px solid ${project.color}40` }}
+                    style={{
+                      background: `${project.color}20`,
+                      border: `1px solid ${project.color}40`,
+                    }}
                   >
                     <project.icon className="w-5 h-5" style={{ color: project.color }} />
                   </div>
@@ -197,7 +207,11 @@ export default function OrbitPage() {
                     <span
                       key={f}
                       className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                      style={{ background: `${project.color}15`, color: `${project.color}cc`, border: `1px solid ${project.color}25` }}
+                      style={{
+                        background: `${project.color}15`,
+                        color: `${project.color}cc`,
+                        border: `1px solid ${project.color}25`,
+                      }}
                     >
                       {f}
                     </span>
@@ -236,9 +250,7 @@ export default function OrbitPage() {
 
         {/* Funnel Visualization */}
         <div className="mb-16 rounded-2xl border-2 border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <h2 className="text-center font-black text-lg mb-6 text-white">
-            The Orbit Traffic Loop
-          </h2>
+          <h2 className="text-center font-black text-lg mb-6 text-white">The Orbit Traffic Loop</h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2 text-center flex-wrap">
             {[
               { label: "Google / Bing", sub: "SEO pages rank", color: "#4285f4" },
@@ -302,8 +314,8 @@ export default function OrbitPage() {
             <div>
               <h2 className="font-bold text-white mb-1">Referral Program</h2>
               <p className="text-xs text-white/50">
-                Earn up to 10% commission with multi-level referral rewards.
-                Share your link — track clicks, signups, and conversions in the Marketing Hub.
+                Earn up to 10% commission with multi-level referral rewards. Share your link — track
+                clicks, signups, and conversions in the Marketing Hub.
               </p>
             </div>
           </div>
@@ -330,7 +342,11 @@ export default function OrbitPage() {
                 {copied ? "Copied!" : "Copy Referral Link"}
               </Button>
               <Link href="/marketing-hub/referrals">
-                <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
                   Manage
                 </Button>
               </Link>
@@ -340,7 +356,9 @@ export default function OrbitPage() {
 
         {/* Quick Links Footer */}
         <div className="text-center space-y-3">
-          <p className="text-[11px] uppercase tracking-wider text-white/25 font-bold">Quick Links</p>
+          <p className="text-[11px] uppercase tracking-wider text-white/25 font-bold">
+            Quick Links
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
               { label: "Blog", href: "/blog" },

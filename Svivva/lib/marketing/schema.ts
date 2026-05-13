@@ -1,7 +1,9 @@
 import { pgTable, text, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
 
 export const marketingCampaigns = pgTable("marketing_campaigns", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
   channel: text("channel").notNull(), // email | social | seo | paid | referral | content
@@ -11,15 +13,30 @@ export const marketingCampaigns = pgTable("marketing_campaigns", {
   targetAudience: text("target_audience"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
-  goals: jsonb("goals").$type<{ clicks?: number; conversions?: number; leads?: number; revenue?: number }>(),
-  metrics: jsonb("metrics").$type<{ clicks: number; impressions: number; conversions: number; leads: number; revenue: number }>().default({ clicks: 0, impressions: 0, conversions: 0, leads: 0, revenue: 0 }),
+  goals: jsonb("goals").$type<{
+    clicks?: number;
+    conversions?: number;
+    leads?: number;
+    revenue?: number;
+  }>(),
+  metrics: jsonb("metrics")
+    .$type<{
+      clicks: number;
+      impressions: number;
+      conversions: number;
+      leads: number;
+      revenue: number;
+    }>()
+    .default({ clicks: 0, impressions: 0, conversions: 0, leads: 0, revenue: 0 }),
   tags: text("tags").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const marketingLeads = pgTable("marketing_leads", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   firstName: text("first_name"),
   lastName: text("last_name"),
@@ -40,7 +57,9 @@ export const marketingLeads = pgTable("marketing_leads", {
 });
 
 export const marketingReferrals = pgTable("marketing_referrals", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   referrerId: text("referrer_id").notNull(),
   referrerEmail: text("referrer_email").notNull(),
   referralCode: text("referral_code").notNull().unique(),
@@ -57,7 +76,9 @@ export const marketingReferrals = pgTable("marketing_referrals", {
 });
 
 export const marketingReferralEvents = pgTable("marketing_referral_events", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   referralId: text("referral_id").notNull(),
   eventType: text("event_type").notNull(), // click | signup | conversion
   referredEmail: text("referred_email"),
@@ -67,7 +88,9 @@ export const marketingReferralEvents = pgTable("marketing_referral_events", {
 });
 
 export const marketingUtmLinks = pgTable("marketing_utm_links", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   destinationUrl: text("destination_url").notNull(),
   utmSource: text("utm_source").notNull(),
@@ -82,14 +105,27 @@ export const marketingUtmLinks = pgTable("marketing_utm_links", {
 });
 
 export const marketingAbTests = pgTable("marketing_ab_tests", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
   hypothesis: text("hypothesis"),
   status: text("status").default("draft"), // draft | running | paused | concluded
   winnerVariant: text("winner_variant"),
   targetMetric: text("target_metric").notNull().default("conversion_rate"),
-  variants: jsonb("variants").$type<Array<{ id: string; name: string; description: string; traffic: number; conversions: number; impressions: number }>>().default([]),
+  variants: jsonb("variants")
+    .$type<
+      Array<{
+        id: string;
+        name: string;
+        description: string;
+        traffic: number;
+        conversions: number;
+        impressions: number;
+      }>
+    >()
+    .default([]),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -97,11 +133,15 @@ export const marketingAbTests = pgTable("marketing_ab_tests", {
 });
 
 export const marketingAmplifyJobs = pgTable("marketing_amplify_jobs", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   sourceType: text("source_type").notNull(), // blog | seo-page | custom
   sourceId: text("source_id"),
   sourceContent: text("source_content"),
-  outputs: jsonb("outputs").$type<Array<{ channel: string; content: string; status: string }>>().default([]),
+  outputs: jsonb("outputs")
+    .$type<Array<{ channel: string; content: string; status: string }>>()
+    .default([]),
   channels: text("channels").array().default([]), // twitter | linkedin | email | instagram | facebook
   status: text("status").default("pending"), // pending | processing | done | failed
   createdAt: timestamp("created_at").defaultNow(),

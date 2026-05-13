@@ -915,9 +915,7 @@ function MiniSourceConfig({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-[11px] font-semibold text-muted-foreground">
-                      App {idx + 1}
-                    </p>
+                    <p className="text-[11px] font-semibold text-muted-foreground">App {idx + 1}</p>
                     {st === "scanning" && (
                       <Loader2 className="w-3 h-3 animate-spin text-[#5BA8A0]" />
                     )}

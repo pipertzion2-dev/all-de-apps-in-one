@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUtmLinkById, incrementUtmClicks, buildUtmUrl } from "@/lib/marketing/utm";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const link = await getUtmLinkById(params.id);
+    const { id } = await params;
+    const link = await getUtmLinkById(id);
     if (!link) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    await incrementUtmClicks(params.id);
+    await incrementUtmClicks(id);
     const fullUrl = buildUtmUrl({
       destinationUrl: link.destinationUrl,
       utmSource: link.utmSource,
