@@ -35,7 +35,6 @@ import {
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
-import { ReplitUsernameConnector } from "@/components/replit-username-connector";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getPyracryptOrbitPreset } from "@/lib/workspace-external-apps";
@@ -2435,9 +2434,7 @@ export default function LaunchpadPage() {
                       </p>
                     )}
                     <p className="text-white/55">
-                      Sign-in still redirects through{" "}
-                      <span className="text-white/75">Replit OpenID</span> — that is expected until
-                      a different auth provider is configured.
+                      Sign-in configured for admin access. No Replit redirect required.
                     </p>
                   </div>
                 )}
@@ -2958,16 +2955,22 @@ export default function LaunchpadPage() {
 
         {tab === "mini" && (
           <>
-            <ReplitUsernameConnector
-              connected={!!creds?.hasReplit}
-              username={creds?.replitUsername}
-            />
-            {creds?.hasReplit && (
-              <p className="text-xs text-muted-foreground px-1">
-                Optional: Replit catalog below. Paste any deployed app URL to discover tools and
-                generate SEO pages.
+            <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                  <Package className="w-5 h-5 text-teal-500" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <h3 className="font-bold text-sm">Connect Your Apps</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Paste your deployed app URL below to discover tools and generate SEO pages.
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enter the URL of your deployed app (e.g., your mini apps or Pyracrypt instance).
               </p>
-            )}
+            </div>
           </>
         )}
 

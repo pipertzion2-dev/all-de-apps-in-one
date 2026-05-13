@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +17,7 @@ import {
   Gift,
   Share2,
   Copy,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,6 +68,7 @@ const steps = [
 ];
 
 export default function OrbitPage() {
+  const router = useRouter();
   const [launchActive, setLaunchActive] = useState(false);
   const [launchProgress, setLaunchProgress] = useState("");
   const [launchDone, setLaunchDone] = useState(false);
@@ -74,27 +77,8 @@ export default function OrbitPage() {
   const { toast } = useToast();
 
   const launchOrbit = async () => {
-    setLaunchActive(true);
-    setLaunchProgress("Initializing Orbit marketing system...");
-
-    // Simulate the launch process
-    for (let i = 0; i < steps.length; i++) {
-      setLaunchProgress(`Running: ${steps[i].title}...`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
-
-    setLaunchProgress("Submitting to all search engines...");
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setLaunchProgress("");
-    setLaunchDone(true);
-    setLaunchActive(false);
-
-    toast({
-      title: "Orbit Launch Complete!",
-      description: "All marketing steps have been executed successfully.",
-      duration: 5000,
-    });
+    // Redirect to admin Orbit for actual functionality
+    router.push("/dashboard/launchpad");
   };
 
   const copyReferralLink = () => {
@@ -151,27 +135,19 @@ export default function OrbitPage() {
           >
             {launchActive ? (
               <>
-                <Rocket className="w-5 h-5 mr-2 animate-spin" /> {launchProgress}
-              </>
-            ) : launchDone ? (
-              <>
-                <CheckCircle className="w-5 h-5 mr-2" /> Orbit Launched Successfully
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Launching...
               </>
             ) : (
               <>
-                <Rocket className="w-5 h-5 mr-2" /> Launch Orbit Marketing
+                <Rocket className="w-5 h-5 mr-2" />
+                Launch Orbit Marketing System
               </>
             )}
           </Button>
-          {launchDone && (
-            <div className="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-              <p className="text-sm text-green-600">✓ IndexNow key generated and submitted</p>
-              <p className="text-sm text-green-600">✓ 40 SEO landing pages created</p>
-              <p className="text-sm text-green-600">✓ 20 competitor comparisons generated</p>
-              <p className="text-sm text-green-600">✓ 10 blog articles published</p>
-              <p className="text-sm text-green-600">✓ 40 directory listings prepared</p>
-            </div>
-          )}
+          <p className="text-center text-xs text-white/60 mt-3">
+            Access admin dashboard for full control over all marketing features
+          </p>
         </div>
 
         {/* Steps */}
