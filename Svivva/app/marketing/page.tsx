@@ -137,10 +137,10 @@ export default function MarketingPage() {
           style={{ borderColor: `${TEAL}30`, background: `${TEAL}05` }}
         >
           <Rocket className="w-12 h-12 mx-auto mb-4" style={{ color: TEAL }} />
-          <h2 className="text-2xl font-black mb-3">Ready to Launch Your Marketing?</h2>
+          <h2 className="text-2xl font-black mb-3">Access Orbit Marketing System</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Access the full Orbit marketing funnel with autopilot, IndexNow integration, and social
-            media automation.
+            Full marketing automation with IndexNow integration, SEO page generation, and social
+            media tools for all your projects.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
@@ -151,10 +151,10 @@ export default function MarketingPage() {
               Open Orbit Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/dashboard/finish-setup"
+              href="/referrals"
               className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold border border-border"
             >
-              Setup Guide
+              Referral Program
             </Link>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
@@ -162,7 +162,6 @@ export default function MarketingPage() {
           </p>
         </div>
 
-        {/* Referral CTA */}
         <div
           className="rounded-3xl border-2 p-8 text-center"
           style={{ borderColor: `${TEAL}30`, background: `${TEAL}05` }}
@@ -206,10 +205,38 @@ export default function MarketingPage() {
                   </div>
                   <h3 className="font-bold text-foreground mb-2">{project.name}</h3>
                   <p className="text-xs text-muted-foreground capitalize">{project.category}</p>
-                  <ReferralWidget userId={project.name} compact variant="minimal" />
                 </a>
               );
             })}
+          </div>
+        </div>
+
+        <div className="mt-12 rounded-2xl border-2 border-[#6B2C4A]/40 bg-gradient-to-br from-[#6B2C4A]/5 to-transparent p-6">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#6B2C4A" }} />
+            <div>
+              <h3 className="font-bold text-foreground mb-2">Pyracrypt Security Suite</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Your flagship encryption and security product. Orbit marketing includes:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>
+                  • <strong>Custom SEO pages</strong> for encryption keywords
+                </li>
+                <li>
+                  • <strong>Competitor comparisons</strong> vs other security tools
+                </li>
+                <li>
+                  • <strong>Directory listings</strong> on security-focused platforms
+                </li>
+                <li>
+                  • <strong>Subdomain setup</strong> (pyracrypt.svivva.com, security.svivva.com)
+                </li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-2">
+                Access Orbit Dashboard to run Pyracrypt-specific marketing campaigns.
+              </p>
+            </div>
           </div>
         </div>
 
