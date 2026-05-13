@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   CheckCircle2,
   Circle,
@@ -263,6 +264,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
   const [godaddySecret, setGodaddySecret] = useState("");
   const [godaddyDomain, setGodaddyDomain] = useState("");
   const [googleSiteUrl, setGoogleSiteUrl] = useState("");
+  const { toast } = useToast();
 
   useAuth(); // kept for side effects only
 
@@ -276,23 +278,37 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
     retry: 2,
   });
 
+  // Pre-fill form fields from server data
   useEffect(() => {
     if (creds?.godaddyDomain) setGodaddyDomain(creds.godaddyDomain);
-  }, [creds?.godaddyDomain]);
+    if (creds?.googleSiteUrl) setGoogleSiteUrl(creds.googleSiteUrl);
+  }, [creds?.godaddyDomain, creds?.googleSiteUrl]);
 
   const isLoading = credsLoading;
 
   const saveMut = useMutation({
-    mutationFn: (payload: Record<string, string>) =>
-      fetch("/api/seeds/credentials", {
+    mutationFn: async (payload: Record<string, string>) => {
+      const res = await fetch("/api/seeds/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then((r) => {
-        if (!r.ok) throw new Error(`Save failed: ${r.status}`);
-        return r.json();
-      }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/seeds/credentials"] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Save failed: ${res.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seeds/credentials"] });
+      toast({ title: "Saved!", description: "Connection saved successfully.", duration: 3000 });
+    },
+    onError: (err) => {
+      toast({
+        title: "Save failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+        duration: 5000,
+      });
+    },
   });
 
   const BASE_URL =
@@ -395,7 +411,23 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
               }
               return links;
             })()}
-            onSave={() => saveMut.mutate({ googleSiteUrl })}
+            onSave={() => {
+              // Normalize URL: add https:// if missing
+              let url = (googleSiteUrl || "").trim();
+              if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+                url = `https://${url}`;
+              }
+              if (!url) {
+                toast({
+                  title: "Enter a URL",
+                  description: "Please enter your site URL first.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              setGoogleSiteUrl(url);
+              saveMut.mutate({ googleSiteUrl: url });
+            }}
             saving={saveMut.isPending}
             expandedContent={
               <div className="space-y-3">
@@ -418,10 +450,19 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
                 <PlainInput
                   label="Your Site URL"
                   placeholder="https://svivva.com"
-                  value={googleSiteUrl || creds?.googleSiteUrl || ""}
+                  value={googleSiteUrl}
                   onChange={setGoogleSiteUrl}
-                  helpText="The URL you verified in Google Search Console"
+                  helpText="The URL you verified in Google Search Console (e.g. https://svivva.com)"
                 />
+                {!googleSiteUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setGoogleSiteUrl(BASE_URL)}
+                    className="w-full py-2 rounded-xl text-xs font-semibold border border-blue-400/40 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                  >
+                    Use {BASE_URL}
+                  </button>
+                )}
               </div>
             }
           />
