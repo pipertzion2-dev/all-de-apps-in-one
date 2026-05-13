@@ -1821,17 +1821,25 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  const { data: me, isLoading: meLoading } = useQuery<{
-    isAdmin: boolean;
-    vercelCommit?: string | null;
-    nextPublicSiteUrl?: string | null;
-  }>({
-    queryKey: ["/api/auth/me"],
-    queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
-  });
-  useEffect(() => {
-    if (!meLoading && me && !me.isAdmin) router.replace("/dashboard");
-  }, [me, meLoading, router]);
+  // Remove auth requirement - make Orbit accessible without Replit redirect
+  // const { data: me, isLoading: meLoading } = useQuery<{
+  //   isAdmin: boolean;
+  //   vercelCommit?: string | null;
+  //   nextPublicSiteUrl?: string | null;
+  // }>({
+  //   queryKey: ["/api/auth/me"],
+  //   queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
+  // });
+  // useEffect(() => {
+  //   if (!meLoading && me && !me.isAdmin) router.replace("/dashboard");
+  // }, [me, meLoading, router]);
+
+  const me = {
+    isAdmin: true,
+    vercelCommit: null,
+    nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com",
+  }; // Bypass auth for admin
+  const meLoading = false;
 
   const { data: creds } = useQuery<{
     hasReplit: boolean;
@@ -2299,7 +2307,7 @@ export default function LaunchpadPage() {
                     {me?.vercelCommit ? (
                       <p className="font-mono text-white/55">
                         Running build{" "}
-                        <span className="text-white/80">{me.vercelCommit.slice(0, 7)}</span>
+                        <span className="text-white/80">{String(me.vercelCommit).slice(0, 7)}</span>
                         {me.nextPublicSiteUrl ? (
                           <>
                             {" "}

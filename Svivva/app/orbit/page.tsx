@@ -117,7 +117,7 @@ export default function OrbitPage() {
               <a href="/marketing">Marketing</a>
             </Button>
             <Button size="sm" asChild>
-              <a href="/dashboard">Dashboard</a>
+              <a href="/dashboard/launchpad">Admin Orbit</a>
             </Button>
           </div>
         </div>
