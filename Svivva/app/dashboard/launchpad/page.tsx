@@ -333,6 +333,101 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
   ];
 }
 
+function makeFusionSteps(): Step[] {
+  return [
+    {
+      id: "fusion-discover",
+      title: "Discover Fusion Pairs",
+      icon: Zap,
+      estimate: "~2 min",
+      description:
+        "AI analyzes 84+ utility tools and generates 10 high-intent fusion pairs per week (Cybersecurity x Hardware, Prompt Engineering x Compliance, etc.)",
+      auto: [
+        "Tool inventory scanned and categorized",
+        "Intent overlap analysis completed",
+        "10 fusion pair candidates generated",
+      ],
+      manual: [
+        "Review fusion pair suggestions in Results",
+        "Select top 3 pairs to implement this week",
+        "Approve or reject each pair",
+      ],
+    },
+    {
+      id: "fusion-pages",
+      title: "Generate Fusion Landing Pages",
+      icon: Globe,
+      estimate: "~3 min",
+      description:
+        "For each approved pair, create one fusion landing page with FAQ schema, structured content, and SEO metadata",
+      auto: [
+        "Fusion landing pages created with proper SEO structure",
+        "Each page includes H1, meta description, canonical tags",
+        "FAQ schema added for rich snippets",
+      ],
+      manual: [
+        "Review generated fusion pages",
+        "Edit content to match brand voice",
+        "Add custom images or videos if needed",
+      ],
+    },
+    {
+      id: "fusion-tools",
+      title: "Build Micro-Tools",
+      icon: Activity,
+      estimate: "~5 min",
+      description:
+        "For each fusion pair, create one interactive micro-tool block (real utility, no gate) embedded in the fusion page",
+      auto: [
+        "Micro-tool components generated and integrated",
+        "Interactive functionality tested",
+        "Performance optimized for fast loading",
+      ],
+      manual: [
+        "Test micro-tool functionality",
+        "Adjust tool parameters or logic",
+        "Add additional features if needed",
+      ],
+    },
+    {
+      id: "fusion-ctas",
+      title: "Add Conversion Bridges",
+      icon: ArrowRight,
+      estimate: "~1 min",
+      description:
+        "Route traffic bi-directionally through intent-matched CTAs to Svivva core and Pyracrypt where relevant",
+      auto: [
+        "CTA buttons added to fusion pages",
+        "Cross-product funnels configured",
+        "Conversion tracking enabled",
+      ],
+      manual: [
+        "Review CTA placement and messaging",
+        "Adjust funnel destinations if needed",
+        "A/B test different CTA variations",
+      ],
+    },
+    {
+      id: "fusion-index",
+      title: "Submit to Search Engines",
+      icon: ListChecks,
+      estimate: "~30s",
+      description:
+        "Submit all fusion pages to Google, Bing, Yandex via IndexNow and sitemap submission",
+      auto: [
+        "Fusion pages added to sitemap",
+        "IndexNow submission completed",
+        "Search Console URLs submitted",
+      ],
+      manual: [
+        "Monitor indexing status in Google Search Console",
+        "Request indexing for any pages not indexed within 48h",
+        "Track organic traffic growth",
+      ],
+    },
+  ];
+}
+
 function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
   const { site, host } = orbit;
   return [
@@ -344,9 +439,22 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       description: `Auto-discovers all tools from your connected app, then creates 4 keyword pages per tool on ${host}`,
       auto: [
         "Fetches tool list from your app URL automatically",
-        `Creates 4 SEO pages per tool at ${host}/{slug}`,
-        "Pages published and submitted to Bing/Yandex/Yahoo via IndexNow",
+        "Creates 4 SEO pages per tool (feature, use-case, integration, how-to)",
+        "Each page has H1, meta description, canonical, and FAQ schema",
       ],
+      manual: [
+        "Review generated pages and edit content to match your brand",
+        "Add custom images or screenshots to tool pages",
+        "Adjust keyword targeting if needed",
+      ],
+    },
+    {
+      id: "mini-pages",
+      title: "Generate Tool SEO Pages",
+      icon: Globe,
+      estimate: "~2 min",
+      description: `Creates 4 SEO pages per tool at ${host}/{slug}`,
+      auto: ["Pages published and submitted to Bing/Yandex/Yahoo via IndexNow"],
       manual: [
         "Request indexing in Google Search Console for each tool page",
         "After GSC indexing is requested, Google typically indexes within 1–7 days",
@@ -1779,6 +1887,7 @@ export default function LaunchpadPage() {
   const orbitUrls = usePublicOrbitUrls();
   const SVIVVA_STEPS = useMemo(() => makeSvivvaSteps(orbitUrls), [orbitUrls]);
   const miniSteps = useMemo(() => makeMiniSteps(orbitUrls), [orbitUrls]);
+  const fusionSteps = useMemo(() => makeFusionSteps(), []);
   const [devLanUrl, setDevLanUrl] = useState<string | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1795,7 +1904,7 @@ export default function LaunchpadPage() {
       cancelled = true;
     };
   }, []);
-  const [tab, setTab] = useState<"svivva" | "mini" | "deploy" | "checklist">("svivva");
+  const [tab, setTab] = useState<"svivva" | "mini" | "fusion" | "deploy" | "checklist">("svivva");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -2232,12 +2341,21 @@ export default function LaunchpadPage() {
     );
   if (!me?.isAdmin) return null;
 
-  const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "mini" ? miniSteps : [];
+  const steps =
+    tab === "svivva"
+      ? SVIVVA_STEPS
+      : tab === "mini"
+        ? miniSteps
+        : tab === "fusion"
+          ? fusionSteps
+          : [];
   const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
   const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
-  const totalDone = svivvaDone + miniDone;
-  const totalSteps = SVIVVA_STEPS.length + miniSteps.length;
-  const tabDone = tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : 0;
+  const fusionDone = fusionSteps.filter((s) => statuses[s.id] === "done").length;
+  const totalDone = svivvaDone + miniDone + fusionDone;
+  const totalSteps = SVIVVA_STEPS.length + miniSteps.length + fusionSteps.length;
+  const tabDone =
+    tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : tab === "fusion" ? fusionDone : 0;
   const allTabDone = steps.length > 0 && tabDone === steps.length;
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
   const overallPct = Math.round((totalDone / totalSteps) * 100);
@@ -2781,6 +2899,31 @@ export default function LaunchpadPage() {
               </p>
             </button>
             <button
+              onClick={() => setTab("fusion")}
+              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "fusion" ? "border-[#6B2C4A] bg-[#6B2C4A]/10" : "border-border bg-card hover:bg-muted/30"}`}
+            >
+              <div className="flex items-center gap-1.5 w-full">
+                <Zap
+                  className="w-3.5 h-3.5 flex-shrink-0"
+                  style={{ color: tab === "fusion" ? BURG : undefined }}
+                />
+                <span
+                  className="text-xs font-bold truncate"
+                  style={{ color: tab === "fusion" ? BURG : undefined }}
+                >
+                  Fusion Growth
+                </span>
+                <span
+                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "fusion" ? "bg-[#6B2C4A]/20 text-[#6B2C4A]" : "bg-muted text-muted-foreground"}`}
+                >
+                  {fusionDone}/{fusionSteps.length}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                Intent Fusion Matrix
+              </p>
+            </button>
+            <button
               onClick={() => setTab("deploy")}
               className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "deploy" ? "border-green-500 bg-green-500/10" : "border-border bg-card hover:bg-muted/30"}`}
             >
@@ -2832,6 +2975,18 @@ export default function LaunchpadPage() {
               </p>
             )}
           </>
+        )}
+
+        {tab === "fusion" && (
+          <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
+            <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: BURG }} />
+            <span>
+              <strong>Intent Fusion Matrix</strong> — pairs unrelated tool families to create high-intent fusion pages
+              and micro-tools (e.g., Cybersecurity x Hardware → Embedded Device Risk Scorer). Generates 10 fusion pairs per week.
+              <br /><br />
+              <strong>Cross-Product Funnel:</strong> Svivva → Tools → Pyracrypt → Svivva (bi-directional conversion loops)
+            </span>
+          </div>
         )}
 
         {/* Deploy tab — full guide */}
@@ -2942,12 +3097,22 @@ export default function LaunchpadPage() {
           >
             <p className="text-3xl">🚀</p>
             <p className="font-black text-lg">
-              {tab === "svivva" ? "svivva.com is in orbit!" : "Your tools are live on Google!"}
+              {tab === "svivva"
+                ? "svivva.com is in orbit!"
+                : tab === "mini"
+                  ? "Your tools are live on Google!"
+                  : tab === "fusion"
+                    ? "Fusion growth activated!"
+                    : "Deployment configured"}
             </p>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
               {tab === "svivva"
                 ? "Switch to the Your Tools tab to promote your deployed mini apps."
-                : "Your app URLs are connected — Google traffic can flow to your live tools."}
+                : tab === "mini"
+                  ? "Your app URLs are connected — Google traffic can flow to your live tools."
+                  : tab === "fusion"
+                    ? "Intent Fusion Matrix is generating high-intent fusion pages."
+                    : "Deployment is ready — your marketing will go live on deploy."}
             </p>
             {tab === "svivva" && (
               <button
@@ -2956,6 +3121,15 @@ export default function LaunchpadPage() {
                 style={{ background: TEAL }}
               >
                 Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {tab === "mini" && (
+              <button
+                onClick={() => setTab("fusion")}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
+                style={{ background: BURG }}
+              >
+                Enable Fusion Growth <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
