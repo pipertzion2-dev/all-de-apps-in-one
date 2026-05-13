@@ -33,7 +33,6 @@ import {
   Play,
 } from "lucide-react";
 
-import { ReplitUsernameConnector } from "@/components/replit-username-connector";
 import { getSuggestedGoDaddyDomain } from "@/lib/site-url-public";
 
 const PINK = "#E91E8C";
@@ -60,7 +59,6 @@ interface GSearch {
   totalUrls: number;
 }
 interface Creds {
-  hasReplit: boolean;
   hasGodaddy: boolean;
   hasGoogle: boolean;
   godaddyDomain: string | null;
@@ -386,9 +384,6 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
                     "Save Mini Apps URL"
                   )}
                 </button>
-
-                {/* Replit connection — PAT based, no OAuth redirect needed */}
-                <ReplitUsernameConnector connected={!!creds?.hasReplit} compact />
               </div>
             </div>
 
@@ -1301,7 +1296,6 @@ export default function MarketingDashboard() {
           message: text.trim(),
           history,
           context: {
-            hasReplit: creds?.hasReplit,
             hasGodaddy: creds?.hasGodaddy,
             hasGoogle: creds?.hasGoogle,
             godaddyDomain: creds?.godaddyDomain,
