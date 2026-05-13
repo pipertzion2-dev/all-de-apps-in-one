@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build:vercel"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_PUBLIC_SITE_URL = "https://svivva.com"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

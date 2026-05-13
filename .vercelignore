@@ -1,0 +1,18 @@
+# Exclude sibling projects — Vercel only needs Svivva + root config
+Ai-Tools-Hub/
+CYBER-SECURITY-MINI-APPS-zip/
+Pyracrypt/
+PYRACRYPT EXTRA FEATURES ADD ON/
+SVIVVA ADD ONS/
+marketing-hub/
+svivva-seo-pack/
+contrib/
+.cursor/
+.vscode/
+.github/
+
+# Build artifacts
+Svivva/.next/
+Svivva/node_modules/
+node_modules/
+.git/

@@ -1937,8 +1937,12 @@ export default function LaunchpadPage() {
     miniAppsUrl?: string | null;
   }>({
     queryKey: ["/api/seeds/credentials"],
-    queryFn: () => authFetch("/api/seeds/credentials").then((r) => r.json()),
-    enabled: true, // Always enabled without auth check
+    queryFn: async () => {
+      const r = await authFetch("/api/seeds/credentials");
+      if (!r.ok) return null;
+      return r.json();
+    },
+    enabled: true,
   });
 
   interface OrbitStatus {
@@ -1957,10 +1961,14 @@ export default function LaunchpadPage() {
     coreUrls: GscUrlItem[];
     toolUrls: GscUrlItem[];
   }
-  const { data: orbitStatus, refetch: refetchStatus } = useQuery<OrbitStatus>({
+  const { data: orbitStatus, refetch: refetchStatus } = useQuery<OrbitStatus | null>({
     queryKey: ["/api/orbit/status"],
-    queryFn: () => authFetch("/api/orbit/status").then((r) => r.json()),
-    enabled: true, // Always enabled without auth check
+    queryFn: async () => {
+      const r = await authFetch("/api/orbit/status");
+      if (!r.ok) return null;
+      return r.json();
+    },
+    enabled: true,
     staleTime: 30_000,
   });
 
@@ -2614,7 +2622,7 @@ export default function LaunchpadPage() {
               {
                 label: "Tools SEO Pages",
                 ok: orbitStatus.seedMarketing >= 100,
-                detail: `${orbitStatus.seedMarketing.toLocaleString()} pages`,
+                detail: `${(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages`,
               },
               {
                 label: "Integration Pages",
@@ -2732,7 +2740,7 @@ export default function LaunchpadPage() {
                     <span className="font-bold text-red-400">⚠ IndexNow not submitted</span>
                     <span className="text-muted-foreground">
                       {" "}
-                      — {orbitStatus.seedMarketing.toLocaleString()} pages are live but search
+                      — {(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages are live but search
                       engines haven't been notified. Click <strong>Complete Now</strong> to fix
                       this.
                     </span>
