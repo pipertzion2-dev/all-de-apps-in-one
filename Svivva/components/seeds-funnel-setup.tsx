@@ -42,7 +42,6 @@ import {
 } from "lucide-react";
 
 interface FunnelStatus {
-  hasReplit: boolean;
   hasGodaddy: boolean;
   hasGoogle: boolean;
   googleSiteUrl: string | null;
@@ -172,45 +171,6 @@ function SocialCard({
         <CopyButton text={content} />
       </div>
       <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">{content}</p>
-    </div>
-  );
-}
-
-// ── Replit Connect ─────────────────────────────────────────────────────────────
-function ReplitConnectBlock({ connected }: { connected: boolean }) {
-  if (connected) {
-    return (
-      <div
-        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-        style={{
-          background: `${REPLIT_ORANGE}15`,
-          border: `1px solid ${REPLIT_ORANGE}30`,
-          color: REPLIT_ORANGE,
-        }}
-      >
-        <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-        <span>App platform connected — your apps are ready to import</span>
-      </div>
-    );
-  }
-  return (
-    <div className="rounded-xl border border-[#F26207]/20 bg-[#F26207]/5 p-3 space-y-2">
-      <p className="text-xs font-semibold text-foreground">
-        Connect your app platform to bulk-import your apps
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Your account is linked automatically when you log in. Log out and log back in to connect.
-      </p>
-      <a
-        href="/api/auth/logout"
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-xs font-semibold hover:opacity-90 transition-all"
-        style={{ background: REPLIT_ORANGE }}
-      >
-        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current">
-          <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z" />
-        </svg>
-        Log out → Log back in to connect
-      </a>
     </div>
   );
 }
@@ -1273,7 +1233,6 @@ export function SeedsFunnelSetup() {
           {/* Apps tab */}
           {activeTab === "apps" && !showAddApp && (
             <div className="space-y-3">
-              <ReplitConnectBlock connected={!!status?.hasReplit} />
               {appsLoading ? (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground p-2">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading...
