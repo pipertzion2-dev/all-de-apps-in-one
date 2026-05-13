@@ -2740,9 +2740,9 @@ export default function LaunchpadPage() {
                     <span className="font-bold text-red-400">⚠ IndexNow not submitted</span>
                     <span className="text-muted-foreground">
                       {" "}
-                      — {(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages are live but search
-                      engines haven't been notified. Click <strong>Complete Now</strong> to fix
-                      this.
+                      — {(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages are live but
+                      search engines haven't been notified. Click <strong>Complete Now</strong> to
+                      fix this.
                     </span>
                   </div>
                 )}

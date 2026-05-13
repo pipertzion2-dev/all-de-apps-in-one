@@ -160,11 +160,27 @@ export default function OrbitPage() {
           <h2 className="font-black text-lg mb-6 text-white text-center">What You Get — Free</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: Globe, title: "50+ AI Tools", desc: "Security, SEO, text, code — all free, no signup" },
-              { icon: Zap, title: "AI API Builder", desc: "Turn prompts into production APIs instantly" },
-              { icon: Shield, title: "Security Suite", desc: "Encryption, scanning, and audit tools" },
+              {
+                icon: Globe,
+                title: "50+ AI Tools",
+                desc: "Security, SEO, text, code — all free, no signup",
+              },
+              {
+                icon: Zap,
+                title: "AI API Builder",
+                desc: "Turn prompts into production APIs instantly",
+              },
+              {
+                icon: Shield,
+                title: "Security Suite",
+                desc: "Encryption, scanning, and audit tools",
+              },
               { icon: Search, title: "SEO Tools", desc: "Keyword research, audits, rank tracking" },
-              { icon: Megaphone, title: "Marketing Tools", desc: "Campaigns, UTM, A/B tests, leads" },
+              {
+                icon: Megaphone,
+                title: "Marketing Tools",
+                desc: "Campaigns, UTM, A/B tests, leads",
+              },
               { icon: Gift, title: "Referral Rewards", desc: "Earn commission sharing Svivva" },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
