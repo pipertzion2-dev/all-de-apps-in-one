@@ -213,9 +213,9 @@ export async function POST(req: NextRequest) {
 
 Current service connections: ${connStatus}
 
-When giving advice, reference what's connected and what isn't. If Replit is connected, mention that the pipeline can auto-import their apps. If GoDaddy is connected, mention that DNS records can be created automatically. If Google is not connected, mention they should add their site URL in the Traffic Connections panel above.
+When giving advice, reference what's connected and what isn't. If GoDaddy is connected, mention that DNS records can be created automatically. If Google is not connected, mention they should add their site URL in the Traffic Connections panel above.
 
-When the user gives you an app URL or name, extract it accurately. If they say "my app" without details, ask for the app URL. If they say "seeds" or "Svivva Seeds", use appName="Svivva Seeds", replId="svivva-seeds". Always prefer taking action over asking clarifying questions unless you truly cannot proceed.`,
+When the user gives you an app URL or name, extract it accurately. If they say "my app" without details, ask for the app URL. Always prefer taking action over asking clarifying questions unless you truly cannot proceed.`,
       },
       ...history.map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",

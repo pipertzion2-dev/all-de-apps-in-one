@@ -570,8 +570,8 @@ interface ReplItem {
   imageUrl?: string;
 }
 
-// ── Multi-Repl connector ───────────────────────────────────────────────────
-interface ReplEntry {
+// ── Multi-App connector ────────────────────────────────────────────────────
+interface AppEntry {
   id: string;
   name: string;
   url: string;
@@ -583,19 +583,17 @@ function MiniSourceConfig({
   setSourceUrl,
   discoveredTools,
   setDiscoveredTools,
-  replitUsername,
   savedUrl,
 }: {
   sourceUrl: string;
   setSourceUrl: (u: string) => void;
   discoveredTools: DiscoveredTool[];
   setDiscoveredTools: (t: DiscoveredTool[]) => void;
-  replitUsername?: string | null;
   savedUrl?: string | null;
 }) {
   const isConnected = discoveredTools.length > 0;
 
-  const [entries, setEntries] = useState<ReplEntry[]>([
+  const [entries, setEntries] = useState<AppEntry[]>([
     { id: crypto.randomUUID(), name: "", url: "" },
   ]);
   const [scanStatuses, setScanStatuses] = useState<Record<string, ScanStatus>>({});
@@ -628,7 +626,7 @@ function MiniSourceConfig({
   }, [savedUrl]);
 
   // Auto-save entries (name + url) to DB 800ms after any change
-  const persistEntries = (updated: ReplEntry[]) => {
+  const persistEntries = (updated: AppEntry[]) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
       const filled = updated.filter((e) => e.url.trim());
@@ -651,7 +649,7 @@ function MiniSourceConfig({
   };
 
   const addEntry = () => {
-    const updated = [...entries, { id: crypto.randomUUID(), name: "", url: "" }];
+    const updated: AppEntry[] = [...entries, { id: crypto.randomUUID(), name: "", url: "" }];
     setEntries(updated);
   };
 
@@ -667,7 +665,7 @@ function MiniSourceConfig({
     persistEntries(updated);
   };
 
-  // Scan each Repl URL via discover-tools API, then merge all tools
+  // Scan each app URL via discover-tools API, then merge all tools
   const scanAndConnect = async () => {
     const valid = entries.filter((e) => e.url.trim());
     if (!valid.length) return;
@@ -732,7 +730,7 @@ function MiniSourceConfig({
     setDiscoveredTools(allTools);
     setScanning(false);
 
-    // Persist ALL entered URLs (comma-separated) so every field pre-fills on next visit
+    // Persist ALL entered app URLs so every field pre-fills on next visit
     const allEnteredUrls = valid.map((e) => e.url.trim().replace(/\/$/, "")).join(",");
     try {
       await authFetch("/api/seeds/credentials", {
@@ -754,7 +752,7 @@ function MiniSourceConfig({
 
   // ── Connected state ──────────────────────────────────────────────────────
   if (isConnected) {
-    // Group tools by source Repl hostname
+    // Group tools by source app hostname
     const uniqueHosts = [
       ...new Set(
         discoveredTools.map((t) => {
@@ -767,7 +765,7 @@ function MiniSourceConfig({
       ),
     ];
 
-    // Return to entry form keeping all existing Repl URLs pre-filled + one blank row to add more
+    // Return to entry form keeping all existing app URLs pre-filled + one blank row to add more
     const goToAddMore = () => {
       const existingOrigins = [
         ...new Set(
@@ -780,7 +778,7 @@ function MiniSourceConfig({
           }),
         ),
       ];
-      const prefilled = existingOrigins.map((origin) => ({
+      const prefilled: AppEntry[] = existingOrigins.map((origin) => ({
         id: crypto.randomUUID(),
         name: "",
         url: origin,
@@ -814,7 +812,7 @@ function MiniSourceConfig({
           </div>
         </div>
 
-        {/* Per-Repl summary rows */}
+        {/* Per-app summary rows */}
         <div className="bg-card px-4 py-2 space-y-1.5">
           {uniqueHosts.map((host) => {
             const hostTools = discoveredTools.filter((t) => {
@@ -866,15 +864,15 @@ function MiniSourceConfig({
           })}
         </div>
 
-        {/* Add more Repls */}
+        {/* Add more apps */}
         <div className="px-4 pb-3 pt-1.5">
           <button
             onClick={goToAddMore}
-            data-testid="btn-add-more-repls"
+            data-testid="btn-add-more-apps"
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed font-bold text-xs transition-all hover:bg-muted/20"
             style={{ borderColor: `${TEAL}50`, color: TEAL }}
           >
-            <span className="text-base leading-none">+</span> Add more Repls
+            <span className="text-base leading-none">+</span> Add more apps
           </button>
         </div>
       </div>
@@ -894,7 +892,7 @@ function MiniSourceConfig({
           <Package className="w-3.5 h-3.5" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-foreground">Connect your Repls</p>
+          <p className="text-sm font-bold text-foreground">Connect Your Apps</p>
           <p className="text-[11px] text-muted-foreground">
             Paste deployed URLs — Orbit scans each one for tools automatically
           </p>
@@ -918,7 +916,7 @@ function MiniSourceConfig({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <p className="text-[11px] font-semibold text-muted-foreground">
-                      Repl {idx + 1}
+                      App {idx + 1}
                     </p>
                     {st === "scanning" && (
                       <Loader2 className="w-3 h-3 animate-spin text-[#5BA8A0]" />
@@ -956,16 +954,16 @@ function MiniSourceConfig({
                   placeholder="Name (e.g. Pyracrypt, Cyber Tools)"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 disabled:opacity-50"
                   disabled={scanning}
-                  data-testid={`input-repl-name-${idx}`}
+                  data-testid={`input-app-name-${idx}`}
                 />
                 <input
                   type="url"
                   value={entry.url}
                   onChange={(e) => updateEntry(entry.id, "url", e.target.value)}
-                  placeholder="https://your-app.svivva.com"
+                  placeholder="https://your-app.example.com"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 disabled:opacity-50"
                   disabled={scanning}
-                  data-testid={`input-repl-url-${idx}`}
+                  data-testid={`input-app-url-${idx}`}
                 />
               </div>
             );
@@ -976,16 +974,10 @@ function MiniSourceConfig({
           onClick={addEntry}
           disabled={scanning}
           className="w-full py-2 rounded-xl border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/60 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40"
-          data-testid="button-add-repl"
+          data-testid="button-add-app"
         >
           <span className="text-base leading-none">+</span> Add another App
         </button>
-
-        {false && (
-          <p className="text-[11px] text-muted-foreground text-center">
-            Connected as <span className="font-semibold text-foreground">@{replitUsername}</span>
-          </p>
-        )}
 
         <button
           onClick={scanAndConnect}
@@ -995,7 +987,7 @@ function MiniSourceConfig({
             background:
               validCount > 0 && !scanning ? `linear-gradient(135deg, ${BURG}, ${TEAL})` : undefined,
           }}
-          data-testid="button-scan-connect-repls"
+          data-testid="button-scan-connect-apps"
         >
           {scanning ? (
             <>
@@ -1943,8 +1935,6 @@ export default function LaunchpadPage() {
   // Force deployment refresh
 
   const { data: creds } = useQuery<{
-    hasReplit: boolean;
-    replitUsername?: string | null;
     godaddyDomain: string | null;
     miniAppsUrl?: string | null;
   }>({
@@ -2085,7 +2075,7 @@ export default function LaunchpadPage() {
 
         const body: Record<string, unknown> = { stepId };
 
-        // Pass sourceUrl + tools for all mini-* steps that need context about the other Repl
+        // Pass sourceUrl + tools for all mini-* steps that need context about the connected app
         if (stepId.startsWith("mini-")) {
           body.sourceUrl = effectiveSourceUrl;
           if (effectiveTools.length) body.tools = effectiveTools;
@@ -3064,7 +3054,6 @@ export default function LaunchpadPage() {
             setSourceUrl={setSourceUrl}
             discoveredTools={discoveredTools}
             setDiscoveredTools={setDiscoveredTools}
-            replitUsername={creds?.replitUsername}
             savedUrl={creds?.miniAppsUrl}
           />
         )}

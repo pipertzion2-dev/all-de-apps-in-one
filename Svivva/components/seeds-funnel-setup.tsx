@@ -59,7 +59,7 @@ interface ManualApp {
   subApps: { name: string; description: string; url: string }[];
   source: "manual";
 }
-interface ReplitAppRow {
+interface ImportedAppRow {
   replId: string;
   title: string;
   pages: { slug: string; title: string }[];
@@ -67,7 +67,7 @@ interface ReplitAppRow {
 }
 interface AppsListData {
   manualApps: ManualApp[];
-  replitApps: ReplitAppRow[];
+  replitApps: ImportedAppRow[];
 }
 
 const PLATFORMS = [
@@ -86,7 +86,6 @@ const PLATFORMS = [
   "Hosted Platform",
   "Other",
 ];
-const REPLIT_ORANGE = "#F26207";
 const TEAL = "#5BA8A0";
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
@@ -753,7 +752,7 @@ function DomainPanel() {
 }
 
 // ── Traffic Panel ──────────────────────────────────────────────────────────────
-function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: ReplitAppRow[] }) {
+function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: ImportedAppRow[] }) {
   const allApps = [
     ...apps.map((a) => ({ name: a.name, url: a.url, description: a.description })),
     ...replitApps.map((r) => ({
@@ -983,13 +982,13 @@ function AppsList({
   apps,
   replitApps,
   onAddApp,
-  onImportReplit,
+  onImportApps,
   importPending,
 }: {
   apps: ManualApp[];
-  replitApps: ReplitAppRow[];
+  replitApps: ImportedAppRow[];
   onAddApp: () => void;
-  onImportReplit: () => void;
+  onImportApps: () => void;
   importPending: boolean;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -1007,10 +1006,10 @@ function AppsList({
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 border-[#F26207]/30 text-[#F26207] hover:bg-[#F26207]/10"
+          className="gap-1.5 border-[#5BA8A0]/30 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
           disabled={importPending}
-          onClick={onImportReplit}
-          data-testid="button-import-replit"
+          onClick={onImportApps}
+          data-testid="button-import-apps"
         >
           {importPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1032,7 +1031,7 @@ function AppsList({
           <Button
             size="sm"
             className="bg-[#6B2C4A] gap-1.5"
-            onClick={onImportReplit}
+            onClick={onImportApps}
             disabled={importPending}
             data-testid="button-import-pyracrypt"
           >
@@ -1242,7 +1241,7 @@ export function SeedsFunnelSetup() {
                   apps={manualApps}
                   replitApps={replitApps}
                   onAddApp={() => setShowAddApp(true)}
-                  onImportReplit={() => importMutation.mutate()}
+                  onImportApps={() => importMutation.mutate()}
                   importPending={importMutation.isPending}
                 />
               )}

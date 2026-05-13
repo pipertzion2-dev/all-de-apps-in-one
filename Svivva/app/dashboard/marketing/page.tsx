@@ -188,7 +188,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
   };
 
   // Derived preview values
-  const replitDomain = miniAppsUrl
+  const appDomain = miniAppsUrl
     ? (() => {
         try {
           return new URL(miniAppsUrl.startsWith("http") ? miniAppsUrl : `https://${miniAppsUrl}`)
@@ -203,8 +203,8 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
     domain: creds?.godaddyDomain || gdDomain,
   };
   const cnamePreview =
-    cnameParts.domain && replitDomain
-      ? `${cnameParts.sub}.${cnameParts.domain} → ${replitDomain}`
+    cnameParts.domain && appDomain
+      ? `${cnameParts.sub}.${cnameParts.domain} → ${appDomain}`
       : null;
   const sitemapPreview =
     googleUrl || creds?.googleSiteUrl
@@ -311,7 +311,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* ── Step 1: Mini Apps (Replit) ── */}
+            {/* ── Step 1: Mini Apps ── */}
             <div
               className={`rounded-xl p-3 border-2 text-xs space-y-2 ${creds?.miniAppsUrl ? "border-orange-300 bg-orange-50/60" : "border-dashed border-border bg-muted/20"}`}
             >
@@ -363,9 +363,9 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
                   data-testid="input-mini-apps-subdomain"
                 />
 
-                {replitDomain && cnameParts.domain && (
+                {appDomain && cnameParts.domain && (
                   <div className="bg-green-50 border border-green-200 rounded-lg px-2 py-1.5 text-green-700 font-mono text-xs">
-                    DNS preview: {cnameParts.sub}.{cnameParts.domain} → {replitDomain}
+                    DNS preview: {cnameParts.sub}.{cnameParts.domain} → {appDomain}
                   </div>
                 )}
 
@@ -1638,7 +1638,7 @@ export default function MarketingDashboard() {
                     "Submit directory listings (Product Hunt, G2, Futurepedia) — requires your account on each site",
                     "Publish parasite SEO articles on Dev.to / Medium / Hashnode — AI writes them, you post",
                     "Send PR / newsletter pitches — AI writes the emails, you send from your inbox",
-                    "Add 'Powered by Svivva' widgets to your Repl apps and redeploy",
+                    "Add 'Powered by Svivva' widgets to your deployed apps and redeploy",
                     "Wait 24–48h after CNAME setup before testing subdomains (DNS propagation)",
                   ].map((item) => (
                     <p key={item} className="text-amber-900 dark:text-amber-200 leading-snug pl-1">
