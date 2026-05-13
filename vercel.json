@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "cd Svivva && npm ci",
-  "buildCommand": "cd Svivva && npm run build:vercel",
+  "installCommand": "npm install && cd Svivva && npm ci",
+  "buildCommand": "npm run vercel-build",
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",
