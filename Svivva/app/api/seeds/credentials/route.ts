@@ -2,20 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { normalizeGodaddyDomain } from "@/lib/godaddy-domain";
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
     const [creds] = await db
       .select()
       .from(seedCredentials)
-      .where(eq(seedCredentials.userId, user.id))
+      .where(eq(seedCredentials.userId, userId))
       .limit(1);
 
     if (!creds) {
@@ -33,7 +34,7 @@ export async function GET() {
     let indexnowKey: string | null = null;
     try {
       const rows = await db.execute(
-        sql`SELECT indexnow_key FROM seed_credentials WHERE user_id = ${user.id} LIMIT 1`,
+        sql`SELECT indexnow_key FROM seed_credentials WHERE user_id = ${userId} LIMIT 1`,
       );
       indexnowKey = (rows as unknown as any[])[0]?.indexnow_key || null;
     } catch {
@@ -60,9 +61,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
     const body = await request.json();
     const updates: Partial<typeof seedCredentials.$inferInsert> = {};
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
     const [existing] = await db
       .select({ id: seedCredentials.id })
       .from(seedCredentials)
-      .where(eq(seedCredentials.userId, user.id))
+      .where(eq(seedCredentials.userId, userId))
       .limit(1);
 
     if (existing) {
@@ -106,28 +108,28 @@ export async function POST(request: NextRequest) {
         await db
           .update(seedCredentials)
           .set({ ...updates, updatedAt: new Date() })
-          .where(eq(seedCredentials.userId, user.id));
+          .where(eq(seedCredentials.userId, userId));
       }
       if (hasMiniAppsUrl) {
         await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl}, updated_at = NOW() WHERE user_id = ${user.id}`,
+          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl}, updated_at = NOW() WHERE user_id = ${userId}`,
         );
       }
       if (hasMiniAppsSubdomain) {
         await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain}, updated_at = NOW() WHERE user_id = ${user.id}`,
+          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain}, updated_at = NOW() WHERE user_id = ${userId}`,
         );
       }
     } else {
-      await db.insert(seedCredentials).values({ userId: user.id, ...updates });
+      await db.insert(seedCredentials).values({ userId, ...updates });
       if (hasMiniAppsUrl) {
         await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl} WHERE user_id = ${user.id}`,
+          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl} WHERE user_id = ${userId}`,
         );
       }
       if (hasMiniAppsSubdomain) {
         await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain} WHERE user_id = ${user.id}`,
+          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain} WHERE user_id = ${userId}`,
         );
       }
     }

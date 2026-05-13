@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, inArray } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
@@ -168,31 +167,10 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
 
 export async function POST(req: NextRequest) {
   try {
-    const internalSecret = req.headers.get("x-internal-secret");
-    const isInternalCall = internalSecret && internalSecret === process.env.ORBIT_INTERNAL_SECRET;
-    let user: Awaited<ReturnType<typeof getCurrentUser>> = null;
-    if (!isInternalCall) {
-      user = await getCurrentUser();
-      if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    if (!(await isOrbitAdminAllowed(req)))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    let userId: string;
-    if (isInternalCall) {
-      const internalId = await resolveOrbitInternalUserId();
-      if (!internalId) {
-        return NextResponse.json(
-          {
-            error:
-              "Orbit internal user not configured: set ORBIT_INTERNAL_USER_ID or create seed_credentials.",
-          },
-          { status: 503 },
-        );
-      }
-      userId = internalId;
-    } else {
-      userId = String((user as NonNullable<typeof user>).id);
-    }
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
     const body = await req.json();
     const { stepId } = body;

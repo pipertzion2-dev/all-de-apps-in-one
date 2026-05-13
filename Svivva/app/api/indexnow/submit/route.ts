@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const internalSecret = req.headers.get("x-internal-secret");
-  const isInternal = internalSecret && internalSecret === process.env.ORBIT_INTERNAL_SECRET;
-  if (!isInternal) {
-    const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!(await isOrbitAdminAllowed()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const urls = await getAllSiteUrlsForIndexing();
   const result = await submitIndexNowBatched(urls);

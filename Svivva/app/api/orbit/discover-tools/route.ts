@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 
 export const maxDuration = 90;
@@ -314,9 +313,8 @@ async function collectLocsFromSitemap(
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed(req)))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
     const replUrl: string = (body.replUrl || "").trim().replace(/\/$/, "");

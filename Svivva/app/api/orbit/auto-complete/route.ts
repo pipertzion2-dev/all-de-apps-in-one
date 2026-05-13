@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
@@ -111,15 +111,16 @@ Return JSON:
 
 export async function POST() {
   try {
-    const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
     const steps: string[] = [];
     let totalUrls = 0;
 
     // 1 — Generate missing AEO pages first
     steps.push("Generating missing AEO pages…");
-    const aeo = await generateMissingAEO(user.id);
+    const aeo = await generateMissingAEO(userId);
     if (aeo.created > 0) {
       steps.push(`✓ ${aeo.created} AEO pages created (AI search engine optimization)`);
     } else {

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
@@ -74,9 +73,8 @@ async function autoConnectAllApps(siteUrl: string) {
 
 export async function POST(request: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await request.json().catch(() => ({}));
     const siteUrl = body.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";

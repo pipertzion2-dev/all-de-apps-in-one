@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
@@ -60,8 +59,8 @@ function isRiskyIndexedTool(title: string, slug: string): boolean {
 
 export async function POST() {
   try {
-    const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const siteUrl = getSiteUrl();
     const checks: CheckResult[] = [];

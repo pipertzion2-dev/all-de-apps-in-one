@@ -2,14 +2,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, isNotNull, desc } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl, getGoogleSearchConsoleInspectBase } from "@/lib/site-url";
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await isOrbitAdminAllowed()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const [
       seoRows,
