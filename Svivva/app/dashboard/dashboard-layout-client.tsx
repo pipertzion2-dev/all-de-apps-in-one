@@ -108,7 +108,6 @@ const digitalMenuGroups: MenuGroup[] = [
         desc: "Marketing",
         href: "/dashboard/launch-studio",
         icon: Sparkles,
-        proOnly: true,
       },
       {
         title: "Growth Engine",

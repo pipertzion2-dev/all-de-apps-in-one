@@ -1811,6 +1811,8 @@ export default function LaunchpadPage() {
   const [showAllTools, setShowAllTools] = useState(false);
   const [autopilotActive, setAutopilotActive] = useState(false);
   const [autopilotResult, setAutopilotResult] = useState<string | null>(null);
+  const [autoConnectActive, setAutoConnectActive] = useState(false);
+  const [autoConnectResult, setAutoConnectResult] = useState<string | null>(null);
 
   // Mini apps source state
   const [sourceUrl, setSourceUrl] = useState("");
@@ -2108,15 +2110,44 @@ export default function LaunchpadPage() {
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setAutopilotResult(msg);
+      setAutopilotResult(`Error: ${msg}`);
       toast({
-        title: "Autopilot needs attention",
+        title: "Orbit autopilot failed",
         description: msg,
         variant: "destructive",
         duration: 7000,
       });
     } finally {
       setAutopilotActive(false);
+    }
+  };
+
+  const runAutoConnectAll = async () => {
+    if (autoConnectActive) return;
+    setAutoConnectActive(true);
+    setAutoConnectResult(null);
+    try {
+      const res = await authFetch("/api/admin/auto-connect-all", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setAutoConnectResult(JSON.stringify(data, null, 2));
+      refetchStatus();
+      toast({
+        title: "Auto-connect completed",
+        description: "All apps connected, 404 links fixed, and submitted to all search engines.",
+        duration: 7000,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setAutoConnectResult(`Error: ${msg}`);
+      toast({
+        title: "Auto-connect failed",
+        description: msg,
+        variant: "destructive",
+        duration: 7000,
+      });
+    } finally {
+      setAutoConnectActive(false);
     }
   };
 
@@ -2401,6 +2432,45 @@ export default function LaunchpadPage() {
           {autopilotResult && (
             <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
               {autopilotResult}
+            </pre>
+          )}
+        </div>
+
+        {/* Auto-Connect All */}
+        <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-card p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
+              <Rocket className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                One click connects all monorepo apps (Svivva, Pyracrypt, AI Tools Hub, Cyber
+                Security, SEO Pack), fixes 404 links, and submits to Bing, Yandex, Yahoo,
+                DuckDuckGo.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            onClick={runAutoConnectAll}
+            disabled={autoConnectActive}
+            className="font-bold"
+            style={{ background: "#5BA8A0" }}
+          >
+            {autoConnectActive ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Connecting all apps…
+              </>
+            ) : (
+              <>
+                <Rocket className="w-4 h-4 mr-2" /> Auto-Connect All + Submit to Search Engines
+              </>
+            )}
+          </Button>
+          {autoConnectResult && (
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+              {autoConnectResult}
             </pre>
           )}
         </div>
