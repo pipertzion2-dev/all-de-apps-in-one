@@ -48,6 +48,7 @@ import {
   BarChart2,
   Lock,
   Search,
+  Smartphone,
   TrendingUp,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -128,6 +129,14 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/traffic",
         icon: BarChart2,
         adminOnly: true,
+      },
+      {
+        title: "Finish Setup",
+        desc: "iPhone admin",
+        href: "/dashboard/finish-setup",
+        icon: Smartphone,
+        adminOnly: true,
+        highlight: true,
       },
       {
         title: "Google Search",
