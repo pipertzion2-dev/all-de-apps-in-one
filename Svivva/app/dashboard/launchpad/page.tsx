@@ -3140,8 +3140,15 @@ export default function LaunchpadPage() {
           </p>
           <div className="grid grid-cols-2 gap-2">
             {[
+              { label: "Marketing Hub", href: "/marketing-hub" },
               { label: "Marketing AI", href: "/dashboard/marketing" },
+              { label: "Pyracrypt", href: "/pyracrypt" },
+              { label: "AI Tools Hub", href: "/ai-tools-hub" },
+              { label: "Cyber Security", href: "/cyber-security-mini-apps" },
+              { label: "SEO Pack", href: "/seo-pack" },
               { label: "Seeds Funnel", href: "/seeds#seeds-marketing" },
+              { label: "Referrals", href: "/referrals" },
+              { label: "Orbit (Public)", href: "/orbit" },
               { label: "Keywords", href: "/dashboard/keywords" },
               { label: "Blog Content", href: "/dashboard/content" },
               { label: "View Sitemap", href: "/sitemap.xml", external: true },
