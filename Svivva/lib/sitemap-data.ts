@@ -35,14 +35,17 @@ export async function getSitemapChunk(id: number): Promise<string> {
   const chunks = await getSitemapChunks();
   const chunk = chunks.find((c) => c.id === id);
 
-  if (!chunk) return '';
+  if (!chunk) return "";
 
-  return chunk.urls.map((url) =>
-    `  <url>
+  return chunk.urls
+    .map(
+      (url) =>
+        `  <url>
     <loc>${url}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`
-  ).join('\n');
+  </url>`,
+    )
+    .join("\n");
 }

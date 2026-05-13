@@ -2981,10 +2981,13 @@ export default function LaunchpadPage() {
           <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
             <Zap className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: BURG }} />
             <span>
-              <strong>Intent Fusion Matrix</strong> — pairs unrelated tool families to create high-intent fusion pages
-              and micro-tools (e.g., Cybersecurity x Hardware → Embedded Device Risk Scorer). Generates 10 fusion pairs per week.
-              <br /><br />
-              <strong>Cross-Product Funnel:</strong> Svivva → Tools → Pyracrypt → Svivva (bi-directional conversion loops)
+              <strong>Intent Fusion Matrix</strong> — pairs unrelated tool families to create
+              high-intent fusion pages and micro-tools (e.g., Cybersecurity x Hardware → Embedded
+              Device Risk Scorer). Generates 10 fusion pairs per week.
+              <br />
+              <br />
+              <strong>Cross-Product Funnel:</strong> Svivva → Tools → Pyracrypt → Svivva
+              (bi-directional conversion loops)
             </span>
           </div>
         )}
