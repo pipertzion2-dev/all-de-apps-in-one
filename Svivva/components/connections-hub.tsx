@@ -21,14 +21,11 @@ import {
   Link2,
   RefreshCw,
 } from "lucide-react";
-import { ReplitUsernameConnector } from "@/components/replit-username-connector";
 import { getSuggestedGoDaddyDomain } from "@/lib/site-url-public";
 
 const TEAL = "#5BA8A0";
 
 interface CredsData {
-  hasReplit: boolean;
-  replitUsername?: string | null;
   hasGodaddy: boolean;
   hasGoogle: boolean;
   godaddyDomain: string | null;
@@ -300,7 +297,6 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
     typeof window !== "undefined" ? `https://${window.location.hostname}` : "https://svivva.com";
 
   const connectedCount = [
-    creds?.hasReplit,
     true, // IndexNow = always auto
     creds?.hasGodaddy,
     creds?.hasGoogle,
@@ -329,13 +325,13 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
           </div>
           <div className="text-left">
             <p className="text-sm font-bold text-foreground">Connected Services</p>
-            <p className="text-xs text-muted-foreground">{connectedCount}/4 services ready</p>
+            <p className="text-xs text-muted-foreground">{connectedCount}/3 services ready</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {/* Progress dots */}
           <div className="flex gap-1">
-            {[creds?.hasReplit, true, creds?.hasGodaddy, creds?.hasGoogle].map((ok, i) => (
+            {[true, creds?.hasGodaddy, creds?.hasGoogle].map((ok, i) => (
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full ${ok ? "bg-green-500" : "bg-muted-foreground/25"}`}
@@ -352,33 +348,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
 
       {!collapsed && (
         <div className="space-y-2.5">
-          {/* ── 1. App Platform ───────────────────────────────────────────────── */}
-          <ServiceCard
-            icon={() => (
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z" />
-              </svg>
-            )}
-            name="App Platform"
-            description={
-              creds?.hasReplit
-                ? "Your apps are accessible — the Orbit picker fetches them automatically."
-                : "Enter your username to link your public apps — no token or login needed."
-            }
-            status={creds?.hasReplit ? "connected" : "setup"}
-            statusLabel={creds?.hasReplit ? "Connected" : "Setup Required"}
-            statusColor={creds?.hasReplit ? "#16a34a" : "#d97706"}
-            accentColor="#F26207"
-            expandedContent={
-              <ReplitUsernameConnector
-                connected={!!creds?.hasReplit}
-                username={creds?.replitUsername}
-                credQueryKey="/api/seeds/credentials"
-              />
-            }
-          />
-
-          {/* ── 2. IndexNow (auto) ────────────────────────────────────────────── */}
+          {/* ── 1. IndexNow (auto) ────────────────────────────────────────────── */}
           <ServiceCard
             icon={Zap}
             name="IndexNow"
@@ -393,7 +363,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
             ]}
           />
 
-          {/* ── 3. Google Search Console ─────────────────────────────────────── */}
+          {/* ── 2. Google Search Console ─────────────────────────────────────── */}
           <ServiceCard
             icon={Search}
             name="Google Search Console"
@@ -454,7 +424,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
             }
           />
 
-          {/* ── 4. GoDaddy ────────────────────────────────────────────────────── */}
+          {/* ── 3. GoDaddy ────────────────────────────────────────────────────── */}
           <ServiceCard
             icon={Globe}
             name="GoDaddy"
