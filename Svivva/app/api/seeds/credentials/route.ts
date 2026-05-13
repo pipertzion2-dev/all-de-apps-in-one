@@ -65,78 +65,59 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
-
     const body = await request.json();
-    const updates: Partial<typeof seedCredentials.$inferInsert> = {};
-    if (typeof body.replitToken === "string") updates.replitToken = body.replitToken;
-    if (typeof body.replitUsername === "string")
-      updates.replitUsername = body.replitUsername || null;
-    if (typeof body.godaddyApiKey === "string") updates.godaddyApiKey = body.godaddyApiKey;
-    if (typeof body.godaddyApiSecret === "string") updates.godaddyApiSecret = body.godaddyApiSecret;
-    if (typeof body.godaddyDomain === "string") {
+
+    // Validate GoDaddy domain if provided
+    if (typeof body.godaddyDomain === "string" && body.godaddyDomain.trim()) {
       const normalized = normalizeGodaddyDomain(body.godaddyDomain);
-      if (body.godaddyDomain.trim() && !normalized) {
+      if (!normalized) {
         return NextResponse.json(
-          {
-            error:
-              "Invalid domain. Use your apex domain only, e.g. example.com (no https:// or www).",
-          },
+          { error: "Invalid domain. Use apex domain only, e.g. example.com" },
           { status: 400 },
         );
       }
-      updates.godaddyDomain = normalized ?? null;
+      body.godaddyDomain = normalized;
     }
-    if (typeof body.googleSiteUrl === "string") updates.googleSiteUrl = body.googleSiteUrl;
+
+    // Collect updates
+    const updates: Record<string, string | null> = {};
+    if (typeof body.replitToken === "string") updates.replitToken = body.replitToken || null;
+    if (typeof body.replitUsername === "string")
+      updates.replitUsername = body.replitUsername || null;
+    if (typeof body.godaddyApiKey === "string") updates.godaddyApiKey = body.godaddyApiKey || null;
+    if (typeof body.godaddyApiSecret === "string")
+      updates.godaddyApiSecret = body.godaddyApiSecret || null;
+    if (typeof body.godaddyDomain === "string") updates.godaddyDomain = body.godaddyDomain || null;
+    if (typeof body.googleSiteUrl === "string") updates.googleSiteUrl = body.googleSiteUrl || null;
     if (typeof body.googleVerificationToken === "string")
-      updates.googleVerificationToken = body.googleVerificationToken;
+      updates.googleVerificationToken = body.googleVerificationToken || null;
+    if (typeof body.miniAppsUrl === "string") updates.miniAppsUrl = body.miniAppsUrl || null;
+    if (typeof body.miniAppsSubdomain === "string")
+      updates.miniAppsSubdomain = body.miniAppsSubdomain || null;
 
-    const hasMiniAppsUrl = typeof body.miniAppsUrl === "string";
-    const hasMiniAppsSubdomain = typeof body.miniAppsSubdomain === "string";
-
-    if (Object.keys(updates).length === 0 && !hasMiniAppsUrl && !hasMiniAppsSubdomain) {
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No valid fields provided" }, { status: 400 });
     }
 
-    const [existing] = await db
-      .select({ id: seedCredentials.id })
-      .from(seedCredentials)
-      .where(eq(seedCredentials.userId, userId))
-      .limit(1);
+    // Step 1: Ensure a row exists for this userId (idempotent)
+    await db.execute(
+      sql`INSERT INTO seed_credentials (id, user_id, updated_at)
+          VALUES (${crypto.randomUUID()}, ${userId}, NOW())
+          ON CONFLICT (user_id) DO NOTHING`,
+    );
 
-    if (existing) {
-      if (Object.keys(updates).length > 0) {
-        await db
-          .update(seedCredentials)
-          .set({ ...updates, updatedAt: new Date() })
-          .where(eq(seedCredentials.userId, userId));
-      }
-      if (hasMiniAppsUrl) {
-        await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl}, updated_at = NOW() WHERE user_id = ${userId}`,
-        );
-      }
-      if (hasMiniAppsSubdomain) {
-        await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain}, updated_at = NOW() WHERE user_id = ${userId}`,
-        );
-      }
-    } else {
-      await db.insert(seedCredentials).values({ userId, ...updates });
-      if (hasMiniAppsUrl) {
-        await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_url = ${body.miniAppsUrl} WHERE user_id = ${userId}`,
-        );
-      }
-      if (hasMiniAppsSubdomain) {
-        await db.execute(
-          sql`UPDATE seed_credentials SET mini_apps_subdomain = ${body.miniAppsSubdomain} WHERE user_id = ${userId}`,
-        );
-      }
+    // Step 2: Update individual fields via raw SQL (reliable across all column sets)
+    for (const [key, value] of Object.entries(updates)) {
+      const col = key.replace(/([A-Z])/g, "_$1").toLowerCase(); // camelCase → snake_case
+      await db.execute(
+        sql`UPDATE seed_credentials SET ${sql.raw(col)} = ${value}, updated_at = NOW() WHERE user_id = ${userId}`,
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error("Credentials POST error:", e);
-    return NextResponse.json({ error: "Failed to save credentials" }, { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Credentials POST error:", msg, e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
