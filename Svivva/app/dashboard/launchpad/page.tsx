@@ -545,7 +545,12 @@ const PYRACRYPT_PRESET = getPyracryptOrbitPreset();
 
 const STORAGE_KEY = "orbit_v3";
 
-function loadState(): { statuses: Record<string, StepStatus>; results: Record<string, string> } {
+type OrbitState = {
+  statuses: Record<string, StepStatus>;
+  results: Record<string, string>;
+};
+
+function loadStateLocal(): OrbitState {
   if (typeof window === "undefined") return { statuses: {}, results: {} };
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || { statuses: {}, results: {} };
@@ -553,12 +558,32 @@ function loadState(): { statuses: Record<string, StepStatus>; results: Record<st
     return { statuses: {}, results: {} };
   }
 }
-function saveState(s: Record<string, StepStatus>, r: Record<string, string>) {
+
+async function loadStateFromServer(): Promise<OrbitState | null> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ statuses: s, results: r }));
+    const r = await fetch("/api/orbit/admin-state");
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (data.statuses && Object.keys(data.statuses).length > 0) return data as OrbitState;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function saveState(s: Record<string, StepStatus>, r: Record<string, string>) {
+  const payload = { statuses: s, results: r };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch {
     /**/
   }
+  // Sync to backend (fire-and-forget) so state persists across devices
+  fetch("/api/orbit/admin-state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
 }
 
 interface ReplItem {
@@ -905,6 +930,85 @@ function MiniSourceConfig({
       </div>
 
       <div className="bg-card p-4 space-y-3">
+        {/* Quick-add presets — known Svivva ecosystem apps */}
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            Quick Add (one-click)
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
+              { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
+              { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
+              { name: "Pyracrypt", url: "https://svivva.com/pyracrypt" },
+              { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
+            ]
+              .filter(
+                (preset) => !entries.some((e) => e.url.trim().replace(/\/$/, "") === preset.url),
+              )
+              .map((preset) => (
+                <button
+                  key={preset.url}
+                  disabled={scanning}
+                  onClick={() => {
+                    // Add to first empty slot or append new row
+                    const emptyIdx = entries.findIndex((e) => !e.url.trim());
+                    if (emptyIdx >= 0) {
+                      const updated = entries.map((e, i) =>
+                        i === emptyIdx ? { ...e, name: preset.name, url: preset.url } : e,
+                      );
+                      setEntries(updated);
+                      persistEntries(updated);
+                    } else {
+                      const updated = [
+                        ...entries,
+                        { id: crypto.randomUUID(), name: preset.name, url: preset.url },
+                      ];
+                      setEntries(updated);
+                      persistEntries(updated);
+                    }
+                  }}
+                  className="text-[10px] px-2.5 py-1.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/60 font-semibold transition-colors disabled:opacity-40"
+                >
+                  + {preset.name}
+                </button>
+              ))}
+            <button
+              disabled={scanning}
+              onClick={() => {
+                const allPresets = [
+                  {
+                    name: "Cyber Security Tools",
+                    url: "https://svivva.com/cyber-security-mini-apps",
+                  },
+                  { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
+                  { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
+                  { name: "Pyracrypt", url: "https://svivva.com/pyracrypt" },
+                  { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
+                ];
+                const existing = entries.filter((e) => e.url.trim());
+                const existingUrls = new Set(existing.map((e) => e.url.trim().replace(/\/$/, "")));
+                const newOnes = allPresets.filter((p) => !existingUrls.has(p.url));
+                if (!newOnes.length) return;
+                const merged = [
+                  ...existing.map((e) => ({ ...e })),
+                  ...newOnes.map((p) => ({ id: crypto.randomUUID(), name: p.name, url: p.url })),
+                ];
+                if (!existing.length)
+                  setEntries(
+                    merged.length ? merged : [{ id: crypto.randomUUID(), name: "", url: "" }],
+                  );
+                else setEntries(merged);
+                persistEntries(merged);
+              }}
+              className="text-[10px] px-2.5 py-1.5 rounded-lg border-2 border-dashed font-bold transition-colors disabled:opacity-40"
+              style={{ borderColor: `${TEAL}60`, color: TEAL }}
+            >
+              ⚡ Add All Svivva Apps
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-2">
           {entries.map((entry, idx) => {
             const st = scanStatuses[entry.id] ?? "idle";
@@ -1991,13 +2095,28 @@ export default function LaunchpadPage() {
     }
   };
 
-  // Load persisted state
+  // Load persisted state — localStorage first (instant), then server (cross-device)
   useEffect(() => {
-    const saved = loadState();
-    const s = saved.statuses || {};
+    const local = loadStateLocal();
+    const s = local.statuses || {};
     statusesRef.current = s;
     setStatuses(s);
-    setResults(saved.results || {});
+    setResults(local.results || {});
+
+    // Async merge from server — server state wins if it has more completed steps
+    loadStateFromServer().then((server) => {
+      if (!server) return;
+      const localDone = Object.values(s).filter((v) => v === "done").length;
+      const serverDone = Object.values(server.statuses).filter((v) => v === "done").length;
+      if (serverDone >= localDone) {
+        statusesRef.current = server.statuses;
+        setStatuses(server.statuses);
+        setResults(server.results || {});
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(server));
+        } catch {}
+      }
+    });
   }, []);
 
   const setStep = useCallback((id: string, status: StepStatus, result?: string) => {
@@ -2585,6 +2704,80 @@ export default function LaunchpadPage() {
               {autoConnectResult}
             </pre>
           )}
+        </div>
+
+        {/* ── Quick External Links — one-click access ── */}
+        <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+            <p className="text-xs font-bold text-foreground uppercase tracking-wider">
+              Quick Links (open in new tab)
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              {
+                label: "Google Search Console",
+                href: "https://search.google.com/search-console",
+                color: "#4285f4",
+              },
+              {
+                label: "Bing Webmaster Tools",
+                href: "https://www.bing.com/webmasters",
+                color: "#008373",
+              },
+              {
+                label: "Vercel Dashboard",
+                href: "https://vercel.com/svivva",
+                color: "#000",
+              },
+              {
+                label: "Stripe Dashboard",
+                href: "https://dashboard.stripe.com",
+                color: "#635bff",
+              },
+              {
+                label: "GitHub Repo",
+                href: "https://github.com/pipertzion2-dev/all-de-apps-in-one",
+                color: "#24292f",
+              },
+              {
+                label: "svivva.com Sitemap",
+                href: "https://svivva.com/sitemap.xml",
+                color: TEAL,
+              },
+              {
+                label: "svivva.com/orbit",
+                href: "https://svivva.com/orbit",
+                color: BURG,
+              },
+              {
+                label: "IndexNow Status",
+                href: "https://www.indexnow.org",
+                color: "#ff6b35",
+              },
+              {
+                label: "Google PageSpeed",
+                href: "https://pagespeed.web.dev/analysis?url=https://svivva.com",
+                color: "#34a853",
+              },
+            ].map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-colors text-foreground min-h-[40px]"
+              >
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: link.color }}
+                />
+                <span className="text-[11px] font-medium leading-tight">{link.label}</span>
+                <ExternalLink className="w-2.5 h-2.5 opacity-40 ml-auto flex-shrink-0" />
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* Connections Hub */}
