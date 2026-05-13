@@ -237,7 +237,10 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  if (isLoading) {
+  // Allow Orbit admin (launchpad) to bypass auth — it has its own internal auth
+  const isOrbitAdmin = pathname === "/dashboard/launchpad";
+
+  if (isLoading && !isOrbitAdmin) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="space-y-4 text-center">
@@ -249,7 +252,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isOrbitAdmin) {
     // Capture current path so after login we return here (e.g. /dashboard/launchpad)
     const returnTo = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
     const loginHref = `/api/auth/login?redirect=${encodeURIComponent(returnTo)}`;
@@ -299,6 +302,11 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
         </Card>
       </div>
     );
+  }
+
+  // Orbit admin renders without the sidebar/dashboard chrome
+  if (isOrbitAdmin && !isAuthenticated) {
+    return <div className="min-h-screen bg-background">{children}</div>;
   }
 
   const style = {
