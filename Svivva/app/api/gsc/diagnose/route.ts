@@ -1,5 +1,5 @@
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -21,13 +21,14 @@ export type DiagStep = {
 };
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return forbidden();
+  if (!(await isOrbitAdminAllowed())) return forbidden();
+
+  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
   const [creds] = await db
     .select()
     .from(seedCredentials)
-    .where(eq(seedCredentials.userId, user.id))
+    .where(eq(seedCredentials.userId, userId))
     .limit(1);
 
   const steps: DiagStep[] = [];

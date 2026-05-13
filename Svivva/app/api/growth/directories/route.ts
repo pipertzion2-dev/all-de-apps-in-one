@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { db } from "@/lib/db";
 import { growthSubmissions } from "@/lib/schema";
 import { and, eq } from "drizzle-orm";
@@ -634,8 +633,8 @@ export const ALL_DIRECTORIES: Directory[] = [
 ];
 
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!(await isOrbitAdminAllowed(req)))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const product = req.nextUrl.searchParams.get("product") as
     | "svivva"
@@ -674,8 +673,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!(await isOrbitAdminAllowed(req)))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { directoryId, product, status, liveUrl, notes } = await req.json();
 

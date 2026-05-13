@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { authFetch, useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
 import {
   CheckCircle2,
@@ -264,16 +264,15 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
   const [godaddyDomain, setGodaddyDomain] = useState("");
   const [googleSiteUrl, setGoogleSiteUrl] = useState("");
 
-  const { user, isLoading: authLoading } = useAuth();
+  useAuth(); // kept for side effects only
 
   const { data: creds, isLoading: credsLoading } = useQuery<CredsData>({
     queryKey: ["/api/seeds/credentials"],
     queryFn: async () => {
-      const r = await authFetch("/api/seeds/credentials");
+      const r = await fetch("/api/seeds/credentials");
       if (!r.ok) return null as unknown as CredsData;
       return r.json();
     },
-    enabled: !!user,
     retry: 2,
   });
 
@@ -281,15 +280,18 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
     if (creds?.godaddyDomain) setGodaddyDomain(creds.godaddyDomain);
   }, [creds?.godaddyDomain]);
 
-  const isLoading = authLoading || credsLoading;
+  const isLoading = credsLoading;
 
   const saveMut = useMutation({
     mutationFn: (payload: Record<string, string>) =>
-      authFetch("/api/seeds/credentials", {
+      fetch("/api/seeds/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then((r) => r.json()),
+      }).then((r) => {
+        if (!r.ok) throw new Error(`Save failed: ${r.status}`);
+        return r.json();
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/seeds/credentials"] }),
   });
 

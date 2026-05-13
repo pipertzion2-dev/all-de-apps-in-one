@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { db } from "@/lib/db";
 import { growthTasks } from "@/lib/schema";
 import { desc } from "drizzle-orm";
@@ -11,22 +10,18 @@ import { forbidden, ok } from "@/lib/http-response";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return forbidden();
+  if (!(await isOrbitAdminAllowed())) return forbidden();
 
   const tasks = await db.select().from(growthTasks).orderBy(desc(growthTasks.runAt)).limit(100);
   return ok({ tasks });
 }
 
 export async function POST(req: NextRequest) {
-  const headerSecret = req.headers.get("x-internal-secret");
-  const isInternal =
-    !!process.env.ORBIT_INTERNAL_SECRET && headerSecret === process.env.ORBIT_INTERNAL_SECRET;
+  if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
-  if (!isInternal) {
-    const user = await getCurrentUser();
-    if (!user || !isAdmin(user)) return forbidden();
-  }
+  const isInternal =
+    !!process.env.ORBIT_INTERNAL_SECRET &&
+    req.headers.get("x-internal-secret") === process.env.ORBIT_INTERNAL_SECRET;
 
   const internalSecret = process.env.ORBIT_INTERNAL_SECRET || "";
   const results: { task: string; status: string; detail?: string }[] = [];

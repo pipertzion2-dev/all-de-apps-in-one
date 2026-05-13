@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { getPrimaryAdminUserId, isAdmin } from "@/lib/auth/admin";
+import { getPrimaryAdminUserId } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
@@ -80,19 +81,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Remaining actions require authenticated user (not available for internal scheduler)
-  if (isInternal) return badRequest("Action not available for internal calls");
+  // Remaining actions require admin access
+  if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return forbidden();
+  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
   const [existing] = await db
     .select({ id: seedCredentials.id })
     .from(seedCredentials)
-    .where(eq(seedCredentials.userId, user.id))
+    .where(eq(seedCredentials.userId, userId))
     .limit(1);
   if (!existing) {
-    await db.insert(seedCredentials).values({ userId: user.id, updatedAt: new Date() });
+    await db.insert(seedCredentials).values({ userId, updatedAt: new Date() });
   }
 
   // Fix site URL
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     await db
       .update(seedCredentials)
       .set({ googleSiteUrl: siteUrl, updatedAt: new Date() })
-      .where(eq(seedCredentials.userId, user.id));
+      .where(eq(seedCredentials.userId, userId));
     return ok({ success: true, siteUrl });
   }
 
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       await db
         .update(seedCredentials)
         .set({ googleServiceAccountJson: json, googleIndexingEnabled: true, updatedAt: new Date() })
-        .where(eq(seedCredentials.userId, user.id));
+        .where(eq(seedCredentials.userId, userId));
     } catch (e: any) {
       console.error("[gsc/save] UPDATE failed:", e?.message);
       return serverError(`DB save failed: ${e.message}`);

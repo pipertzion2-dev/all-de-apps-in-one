@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { db } from "@/lib/db";
 import { seedCredentials, blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq, isNotNull } from "drizzle-orm";
@@ -36,8 +35,7 @@ async function fetchText(
 }
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) {
+  if (!(await isOrbitAdminAllowed())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
