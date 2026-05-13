@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,72 +12,101 @@ import {
   ArrowRight,
   Gift,
   Copy,
-  Shield,
-  Brain,
+  FileText,
+  BarChart3,
   Search,
   Megaphone,
+  Users,
+  Loader2,
+  ExternalLink,
+  ListChecks,
+  Share2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
 
-const PRODUCTS = [
+const FUNNEL_STEPS = [
   {
-    name: "Svivva",
-    href: "/",
-    icon: Rocket,
-    color: BURG,
-    description: "AI-powered app builder — turn prompts into production APIs",
-    features: ["App generation", "API builder", "AI endpoints"],
+    num: "1",
+    icon: Globe,
+    title: "Connect Your Project",
+    description:
+      "Paste your live app or website URL. Orbit scans it and discovers all your pages, tools, and features automatically.",
   },
   {
-    name: "Pyracrypt",
-    href: "/pyracrypt",
-    icon: Shield,
-    color: "#e11d48",
-    description: "End-to-end encryption & security tools for developers",
-    features: ["File encryption", "Password tools", "Security audit"],
+    num: "2",
+    icon: FileText,
+    title: "AI Generates SEO Content",
+    description:
+      "Orbit creates optimized landing pages, comparison posts, and blog articles targeting high-traffic keywords for your project.",
   },
   {
-    name: "AI Tools Hub",
-    href: "/ai-tools-hub",
-    icon: Brain,
-    color: "#8b5cf6",
-    description: "50+ free AI-powered generators, analyzers, and utilities",
-    features: ["Text generators", "Code assistants", "Data analyzers"],
-  },
-  {
-    name: "Cyber Security Tools",
-    href: "/cyber-security-mini-apps",
-    icon: Shield,
-    color: "#059669",
-    description: "Free security scanners, analyzers & hardening tools",
-    features: ["Port scanning", "Vulnerability check", "SSL analysis"],
-  },
-  {
-    name: "SEO Pack",
-    href: "/seo-pack",
+    num: "3",
     icon: Search,
-    color: "#0891b2",
-    description: "SEO auditing, keyword research & optimization tools",
-    features: ["Keyword research", "Site audit", "Rank tracking"],
+    title: "Instant Search Engine Submission",
+    description:
+      "All generated pages are submitted to Google, Bing, Yandex, and Yahoo via IndexNow and sitemap pings — indexing starts within hours.",
   },
   {
-    name: "Marketing Hub",
-    href: "/marketing-hub",
+    num: "4",
     icon: Megaphone,
-    color: "#d97706",
-    description: "Campaign management, lead tracking & referrals",
-    features: ["Campaigns", "Lead capture", "Referrals"],
+    title: "Social & Launch Pack",
+    description:
+      "AI generates a complete launch kit — Twitter thread, LinkedIn post, Reddit posts, Product Hunt copy, and Show HN — ready to paste.",
+  },
+  {
+    num: "5",
+    icon: BarChart3,
+    title: "Track & Grow",
+    description:
+      "Monitor which pages rank, track referral traffic, and run A/B tests. Orbit keeps optimizing your funnel automatically.",
   },
 ];
 
 export default function OrbitPage() {
-  const router = useRouter();
+  const [projectUrl, setProjectUrl] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [step, setStep] = useState<"input" | "preview" | "launched">("input");
+  const [launching, setLaunching] = useState(false);
   const [referralCode, setReferralCode] = useState("");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const handleScan = () => {
+    if (!projectUrl.trim()) {
+      toast({ title: "Enter your project URL first", duration: 2000 });
+      return;
+    }
+    const name =
+      projectName.trim() ||
+      projectUrl
+        .replace(/https?:\/\//, "")
+        .split(".")[0]
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    setProjectName(name);
+    setStep("preview");
+    toast({
+      title: `Scanned: ${name}`,
+      description: "Review your marketing plan below.",
+      duration: 3000,
+    });
+  };
+
+  const handleLaunch = async () => {
+    setLaunching(true);
+    // Simulate launch — in production this calls the orbit API
+    await new Promise((r) => setTimeout(r, 2500));
+    setLaunching(false);
+    setStep("launched");
+    toast({
+      title: "Orbit launched!",
+      description: "Your marketing funnel is being built.",
+      duration: 5000,
+    });
+  };
 
   const copyReferralLink = () => {
     const link = `https://svivva.com?ref=${referralCode}`;
@@ -90,98 +118,244 @@ export default function OrbitPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+      {/* Admin nav — discrete */}
+      <div className="fixed top-4 right-4 z-50">
+        <Link href="/dashboard/launchpad">
+          <Button
+            variant="outline"
+            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white hover:bg-slate-700"
+            size="sm"
+          >
+            <Rocket className="w-4 h-4 mr-2" />
+            Admin
+          </Button>
+        </Link>
+      </div>
+
+      <div className="container mx-auto px-4 py-12 max-w-3xl">
         {/* Hero */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <div
             className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full mb-6 border"
             style={{ borderColor: `${TEAL}50`, color: TEAL, background: `${TEAL}10` }}
           >
-            <Rocket className="w-4 h-4" /> Svivva Ecosystem
+            <Rocket className="w-4 h-4" /> Marketing Autopilot
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
             <span style={{ color: TEAL }}>Orbit</span>
-            <span className="text-white"> — All Products</span>
+            <span className="text-white"> — Launch Your Project</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Everything built on Svivva — AI tools, security, SEO, and marketing — all free to use.
+            Connect any app or website. Orbit builds your entire marketing funnel — SEO pages, blog
+            content, social launch pack, and search engine submission — automatically.
           </p>
         </div>
 
-        {/* Products Grid */}
-        <div className="mb-16">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {PRODUCTS.map((product) => (
-              <Link
-                key={product.name}
-                href={product.href}
-                className="group rounded-2xl border-2 border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-white/25 hover:bg-white/8 transition-all"
+        {/* ── Connect Project ── */}
+        <div className="rounded-2xl border-2 border-white/15 bg-white/5 backdrop-blur-sm p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}
+            >
+              <Globe className="w-5 h-5" style={{ color: TEAL }} />
+            </div>
+            <div>
+              <h2 className="font-bold text-white text-lg">Connect Your Project</h2>
+              <p className="text-xs text-white/50">
+                Paste your live URL — Orbit handles everything else.
+              </p>
+            </div>
+          </div>
+
+          {step === "input" && (
+            <div className="space-y-3">
+              <Input
+                placeholder="https://your-app.com"
+                value={projectUrl}
+                onChange={(e) => setProjectUrl(e.target.value)}
+                className="text-sm bg-white/10 border-white/20 text-white placeholder:text-white/30 h-12"
+              />
+              <Input
+                placeholder="Project name (optional — we'll detect it)"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                className="text-sm bg-white/10 border-white/20 text-white placeholder:text-white/30"
+              />
+              <Button
+                onClick={handleScan}
+                className="w-full font-bold h-12"
+                style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: `${product.color}20`,
-                      border: `1px solid ${product.color}40`,
-                    }}
-                  >
-                    <product.icon className="w-5 h-5" style={{ color: product.color }} />
+                <Search className="w-4 h-4 mr-2" />
+                Scan & Build Marketing Plan
+              </Button>
+            </div>
+          )}
+
+          {step === "preview" && (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-sm font-bold text-white mb-1">{projectName}</p>
+                <p className="text-xs text-white/40 font-mono">{projectUrl}</p>
+              </div>
+
+              <p className="text-xs font-bold text-white/60 uppercase tracking-wider">
+                Orbit will generate:
+              </p>
+              <div className="grid gap-2">
+                {[
+                  {
+                    icon: FileText,
+                    label: "20+ SEO landing pages targeting high-traffic keywords",
+                  },
+                  { icon: Users, label: '8 competitor comparison pages ("Your App vs X")' },
+                  { icon: FileText, label: "10 blog posts with conversion CTAs" },
+                  {
+                    icon: Megaphone,
+                    label: "Social launch pack (Twitter, LinkedIn, Reddit, Product Hunt)",
+                  },
+                  { icon: Search, label: "Sitemap + IndexNow submission to all search engines" },
+                  { icon: Share2, label: "Referral-ready links with tracking" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2.5">
+                    <item.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: TEAL }} />
+                    <span className="text-xs text-white/70">{item.label}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-white group-hover:text-white/90 truncate">
-                      {product.name}
-                    </h3>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-white/50 transition-colors flex-shrink-0" />
+                ))}
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleLaunch}
+                  disabled={launching}
+                  className="flex-1 font-bold h-12"
+                  style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
+                >
+                  {launching ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building funnel…
+                    </>
+                  ) : (
+                    <>
+                      <Rocket className="w-4 h-4 mr-2" /> Launch Orbit
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep("input")}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Back
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === "launched" && (
+            <div className="text-center space-y-4 py-4">
+              <div className="text-4xl">🚀</div>
+              <h3 className="text-xl font-black text-white">Orbit is Live!</h3>
+              <p className="text-sm text-white/50 max-w-sm mx-auto">
+                Your marketing funnel for <strong className="text-white">{projectName}</strong> is
+                being built. SEO pages, blog posts, and social content are generating now.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
+                <Link href="/marketing-hub">
+                  <Button className="font-bold" style={{ background: TEAL }}>
+                    <BarChart3 className="w-4 h-4 mr-2" /> View Marketing Hub
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStep("input");
+                    setProjectUrl("");
+                    setProjectName("");
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  <Zap className="w-4 h-4 mr-2" /> Add Another Project
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── How It Works ── */}
+        <div className="mb-10">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-white/40 mb-4 px-1">
+            How Orbit Works
+          </h2>
+          <div className="space-y-3">
+            {FUNNEL_STEPS.map((s) => (
+              <div
+                key={s.num}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex items-start gap-4"
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
+                >
+                  {s.num}
                 </div>
-                <p className="text-xs text-white/50 mb-3 leading-relaxed">{product.description}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {product.features.map((f) => (
-                    <span
-                      key={f}
-                      className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                      style={{
-                        background: `${product.color}15`,
-                        color: `${product.color}cc`,
-                        border: `1px solid ${product.color}25`,
-                      }}
-                    >
-                      {f}
-                    </span>
-                  ))}
+                <div>
+                  <h3 className="font-bold text-sm text-white mb-1">{s.title}</h3>
+                  <p className="text-xs text-white/50 leading-relaxed">{s.description}</p>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* What you get */}
-        <div className="mb-16 rounded-2xl border-2 border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <h2 className="font-black text-lg mb-6 text-white text-center">What You Get — Free</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ── What You Get ── */}
+        <div className="mb-10 rounded-2xl border-2 border-white/10 bg-white/[0.03] p-6">
+          <h2 className="font-black text-lg mb-5 text-white text-center">
+            Everything Orbit Builds for You
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-4">
             {[
               {
-                icon: Globe,
-                title: "50+ AI Tools",
-                desc: "Security, SEO, text, code — all free, no signup",
+                icon: FileText,
+                title: "SEO Landing Pages",
+                desc: "AI-written, keyword-targeted pages that rank on Google",
               },
               {
-                icon: Zap,
-                title: "AI API Builder",
-                desc: "Turn prompts into production APIs instantly",
+                icon: Users,
+                title: "Competitor Comparisons",
+                desc: '"Your App vs X" pages targeting alternative searches',
               },
               {
-                icon: Shield,
-                title: "Security Suite",
-                desc: "Encryption, scanning, and audit tools",
+                icon: FileText,
+                title: "Blog Content",
+                desc: "10 expert articles with CTAs driving signups",
               },
-              { icon: Search, title: "SEO Tools", desc: "Keyword research, audits, rank tracking" },
               {
                 icon: Megaphone,
-                title: "Marketing Tools",
-                desc: "Campaigns, UTM, A/B tests, leads",
+                title: "Social Launch Pack",
+                desc: "Twitter, LinkedIn, Reddit, Product Hunt — ready to paste",
               },
-              { icon: Gift, title: "Referral Rewards", desc: "Earn commission sharing Svivva" },
+              {
+                icon: Search,
+                title: "Search Indexing",
+                desc: "Instant submission to Google, Bing, Yandex, Yahoo",
+              },
+              {
+                icon: Gift,
+                title: "Referral System",
+                desc: "Shareable links with click and conversion tracking",
+              },
+              {
+                icon: BarChart3,
+                title: "Analytics Dashboard",
+                desc: "Track rankings, traffic, and conversions",
+              },
+              {
+                icon: ListChecks,
+                title: "Marketing Checklist",
+                desc: "Step-by-step guide to maximize your launch",
+              },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
                 <div
@@ -199,8 +373,8 @@ export default function OrbitPage() {
           </div>
         </div>
 
-        {/* Referral Section */}
-        <div className="max-w-md mx-auto rounded-2xl border-2 border-[#5BA8A0]/40 bg-gradient-to-br from-[#5BA8A0]/5 to-transparent p-6 mb-12">
+        {/* ── Referral ── */}
+        <div className="max-w-md mx-auto rounded-2xl border-2 border-[#5BA8A0]/40 bg-gradient-to-br from-[#5BA8A0]/5 to-transparent p-6 mb-10">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
               <Gift className="w-5 h-5" style={{ color: "#5BA8A0" }} />
@@ -208,7 +382,7 @@ export default function OrbitPage() {
             <div>
               <h2 className="font-bold text-white mb-1">Referral Program</h2>
               <p className="text-xs text-white/50">
-                Earn up to 10% commission by sharing Svivva. Track clicks, signups, and conversions.
+                Earn up to 10% commission. Share your link — track clicks, signups, and conversions.
               </p>
             </div>
           </div>
@@ -247,31 +421,15 @@ export default function OrbitPage() {
           </div>
         </div>
 
-        {/* Get Started */}
-        <div className="max-w-lg mx-auto mb-12 text-center">
-          <Button
-            size="lg"
-            onClick={() => router.push("/")}
-            className="w-full font-bold text-sm"
-            style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
-          >
-            <Rocket className="w-4 h-4 mr-2" />
-            Get Started with Svivva
-          </Button>
-        </div>
-
-        {/* Quick Links Footer */}
+        {/* Footer Links */}
         <div className="text-center space-y-3">
-          <p className="text-[11px] uppercase tracking-wider text-white/25 font-bold">
-            Quick Links
-          </p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
+              { label: "Marketing Hub", href: "/marketing-hub" },
               { label: "Blog", href: "/blog" },
               { label: "Tools", href: "/tools" },
               { label: "Docs", href: "/docs" },
               { label: "Seeds", href: "/seeds" },
-              { label: "Sitemap", href: "/sitemap.xml" },
             ].map((l) => (
               <Link
                 key={l.label}
