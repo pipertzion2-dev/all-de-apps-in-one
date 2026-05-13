@@ -2,7 +2,7 @@ import { z } from "zod";
 import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  DATABASE_URL: z.string().optional(),
 
   OPENAI_API_KEY: z.string().optional(),
   AI_INTEGRATIONS_OPENAI_API_KEY: z.string().optional(),
