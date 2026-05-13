@@ -98,19 +98,19 @@ export default function SettingsPage() {
                 Runtime credentials
               </CardTitle>
               <CardDescription>
-                Save OpenAI, Stripe, and site URL in the database when you prefer not to use host env
-                vars.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" asChild>
-              <Link href="/dashboard/settings/runtime-keys">Manage API keys in app</Link>
-            </Button>
-          </CardContent>
-        </Card>
+                Save OpenAI, Stripe, and site URL in the database when you prefer not to use host
+                env vars.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" asChild>
+                <Link href="/dashboard/settings/runtime-keys">Manage API keys in app</Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-        <OrbitStripeSetup isAdmin={true} />
-      </>
+          <OrbitStripeSetup isAdmin={true} />
+        </>
       )}
 
       <Card>
