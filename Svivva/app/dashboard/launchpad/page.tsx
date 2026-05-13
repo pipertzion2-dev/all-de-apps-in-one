@@ -981,7 +981,7 @@ function MiniSourceConfig({
           <span className="text-base leading-none">+</span> Add another App
         </button>
 
-        {replitUsername && (
+        {false && (
           <p className="text-[11px] text-muted-foreground text-center">
             Connected as <span className="font-semibold text-foreground">@{replitUsername}</span>
           </p>

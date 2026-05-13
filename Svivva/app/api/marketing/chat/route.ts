@@ -197,7 +197,6 @@ export async function POST(req: NextRequest) {
     if (!message?.trim()) return NextResponse.json({ error: "Message required" }, { status: 400 });
 
     const connStatus = [
-      context.hasReplit ? "✓ Replit connected" : "✗ Replit not connected",
       context.hasGodaddy
         ? `✓ GoDaddy connected (${context.godaddyDomain || "domain set"})`
         : "✗ GoDaddy not connected",
