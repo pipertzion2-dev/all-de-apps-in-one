@@ -1,59 +1,71 @@
 import OpenAI from "openai";
-import { getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl } from "@/lib/env";
+import { getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl, getGeminiApiKey } from "@/lib/env";
 
 let _client: OpenAI | null = null;
 let _lastSig = "";
 let _isOllama = false;
+let _isGemini = false;
 
 export function resetOpenAIClientCache() {
   _client = null;
   _lastSig = "";
   _isOllama = false;
+  _isGemini = false;
 }
 
-function buildClient(): { client: OpenAI; isOllama: boolean } {
+function buildClient(): { client: OpenAI; isOllama: boolean; isGemini: boolean } {
+  const geminiKey = getGeminiApiKey() ?? "";
   const ollamaUrl = getOllamaUrl();
   const openaiKey = getOpenAIApiKey() ?? "";
   const customBase = getOpenAIBaseUrl() ?? "";
 
-  // Priority: 1) Ollama (free, local, no key)  2) Custom base + key  3) OpenAI key
+  // Priority: 1) Gemini (free, cloud, works on Vercel)  2) Ollama (free, local)  3) OpenAI (paid)
+  if (geminiKey && geminiKey.length > 10) {
+    const client = new OpenAI({
+      apiKey: geminiKey,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+    return { client, isOllama: false, isGemini: true };
+  }
+
   if (ollamaUrl) {
     const client = new OpenAI({
       apiKey: "ollama",
       baseURL: `${ollamaUrl.replace(/\/$/, "")}/v1`,
     });
-    return { client, isOllama: true };
+    return { client, isOllama: true, isGemini: false };
   }
 
   if (customBase && openaiKey) {
     const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
-    return { client, isOllama: false };
+    return { client, isOllama: false, isGemini: false };
   }
 
   if (openaiKey && openaiKey.startsWith("sk-")) {
     const client = new OpenAI({ apiKey: openaiKey });
-    return { client, isOllama: false };
+    return { client, isOllama: false, isGemini: false };
   }
 
-  // No OpenAI key configured — default to local Ollama (zero-config fallback)
-  // If Ollama isn't running, the API call will show a clear connection error
+  // Nothing configured — default to local Ollama (zero-config fallback)
   const defaultOllama = "http://127.0.0.1:11434";
   const client = new OpenAI({
     apiKey: "ollama",
     baseURL: `${defaultOllama}/v1`,
   });
-  return { client, isOllama: true };
+  return { client, isOllama: true, isGemini: false };
 }
 
 function getClientSync(): OpenAI {
+  const geminiKey = getGeminiApiKey() ?? "";
   const ollamaUrl = getOllamaUrl();
   const openaiKey = getOpenAIApiKey() ?? "";
   const customBase = getOpenAIBaseUrl() ?? "";
-  const sig = `${openaiKey}\0${customBase}\0${ollamaUrl ?? ""}`;
+  const sig = `${openaiKey}\0${customBase}\0${ollamaUrl ?? ""}\0${geminiKey}`;
   if (!_client || sig !== _lastSig) {
-    const { client, isOllama } = buildClient();
+    const { client, isOllama, isGemini } = buildClient();
     _client = client;
     _isOllama = isOllama;
+    _isGemini = isGemini;
     _lastSig = sig;
   }
   return _client;
@@ -61,8 +73,14 @@ function getClientSync(): OpenAI {
 
 /** True when the active client points to a local Ollama instance. */
 export function isUsingOllama(): boolean {
-  getClientSync(); // ensure _isOllama is current
+  getClientSync();
   return _isOllama;
+}
+
+/** True when the active client points to Google Gemini. */
+export function isUsingGemini(): boolean {
+  getClientSync();
+  return _isGemini;
 }
 
 /** Lazily built so DB-hydrated keys apply after instrumentation. */
@@ -75,13 +93,15 @@ export const openai = new Proxy({} as OpenAI, {
   },
 });
 
-/** Preferred model — Ollama-compatible if Ollama is active. */
-export const DEFAULT_MODEL = "gpt-4o";
+/** Preferred model — Gemini/Ollama-compatible. */
+export const DEFAULT_MODEL = "gemini-2.0-flash";
 
-/** Runtime model selection — picks Ollama model when no OpenAI key (auto-detects Ollama). */
+/** Runtime model selection — Gemini first, then Ollama, then OpenAI. */
 export function getDefaultModel(): string {
-  const hasOpenAI = !!getOpenAIApiKey();
+  const hasGemini = !!getGeminiApiKey();
   const hasOllamaEnv = !!getOllamaUrl();
-  // Ollama mode if: explicit OLLAMA_URL env, or no OpenAI key configured (zero-config fallback)
-  return hasOllamaEnv || !hasOpenAI ? "llama3.2" : "gpt-4o";
+  const hasOpenAI = !!getOpenAIApiKey();
+  if (hasGemini) return "gemini-2.0-flash";
+  if (hasOllamaEnv || !hasOpenAI) return "llama3.2";
+  return "gpt-4o";
 }
