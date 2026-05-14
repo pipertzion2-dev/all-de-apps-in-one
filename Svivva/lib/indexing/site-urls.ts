@@ -50,6 +50,18 @@ export async function getAllSiteUrlsForIndexing(): Promise<string[]> {
     /* db unavailable */
   }
 
+  // Add all mini-app/seed-marketing pages explicitly
+  let miniAppUrls: string[] = [];
+  try {
+    const miniPages = await db
+      .select({ slug: seoLandingPages.slug })
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.category, "seed-marketing"));
+    miniAppUrls = miniPages.map((p) => `${baseUrl}/${p.slug}`);
+  } catch {
+    /* db unavailable */
+  }
+
   let categoryUrls: string[] = [];
   try {
     const categories = await db.select({ slug: pageCategories.slug }).from(pageCategories);
@@ -78,6 +90,7 @@ export async function getAllSiteUrlsForIndexing(): Promise<string[]> {
     ...staticUrls,
     ...blogUrls,
     ...seoUrls,
+    ...miniAppUrls,
     ...categoryUrls,
     ...lpUrls,
     ...marketingHubUrls,

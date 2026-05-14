@@ -386,7 +386,6 @@ export async function POST(req: NextRequest) {
     // ── STEP: Comparison pages ────────────────────────────────────────────────
     if (stepId === "svivva-comparisons") {
       const COMPETITORS = [
-        // original — pages already exist
         "Bubble",
         "Webflow",
         "Retool",
@@ -395,7 +394,6 @@ export async function POST(req: NextRequest) {
         "Zapier",
         "AppGyver",
         "AWS Lambda",
-        // high-traffic AI/dev tool competitors people actually search
         "n8n",
         "Dify",
         "LangChain",
@@ -410,6 +408,7 @@ export async function POST(req: NextRequest) {
         "FastAPI",
       ];
       const created: { title: string; url: string }[] = [];
+      const useAI = isAIConfigured();
 
       for (const comp of COMPETITORS) {
         try {
@@ -427,39 +426,55 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
-              },
-              {
-                role: "user",
-                content: `Comparison page: "Svivva vs ${comp}". Target: people searching "${comp} alternative". Position Svivva as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
-              },
-            ],
-          });
+          let pageData;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content: "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
+                },
+                {
+                  role: "user",
+                  content: `Comparison page: "Svivva vs ${comp}". Target: people searching "${comp} alternative". Position Svivva as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
+                },
+              ],
+            });
+            const d = JSON.parse(gen.choices[0].message.content || "{}");
+            pageData = {
+              title: d.title || `Svivva vs ${comp}`,
+              metaTitle: d.metaTitle || `Svivva vs ${comp}`,
+              metaDescription: d.metaDescription || "",
+              headline: d.headline || `Svivva vs ${comp}: Which is Better?`,
+              howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
+              whoItsFor:
+                d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
+              content: d.content || "",
+            };
+          } else {
+            pageData = batchComparisonPages(1)[0];
+            pageData.title = `Svivva vs ${comp}`;
+            pageData.slug = slug;
+            pageData.keyword = `svivva vs ${comp.toLowerCase()}`;
+          }
 
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
           await db.insert(seoLandingPages).values({
             slug,
-            title: d.title || `Svivva vs ${comp}`,
-            content: d.content || "",
-            keyword: `svivva vs ${comp.toLowerCase()}`,
-            headline: d.headline || `Svivva vs ${comp}: Which is Better?`,
-            howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
-            whoItsFor:
-              d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
-            metaTitle: d.metaTitle || `Svivva vs ${comp}`,
-            metaDescription: d.metaDescription || "",
+            title: pageData.title || `Svivva vs ${comp}`,
+            content: pageData.content || `<p>Svivva vs ${comp}</p>`,
+            keyword: pageData.keyword || `svivva vs ${comp.toLowerCase()}`,
+            headline: pageData.headline || `Svivva vs ${comp}`,
+            howItWorks: (pageData as any).howItWorks || "Compare features, pricing and use-cases side by side",
+            whoItsFor: (pageData as any).whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
+            metaTitle: pageData.metaTitle || `Svivva vs ${comp}`,
+            metaDescription: pageData.metaDescription || `Compare Svivva vs ${comp}`,
             category: "seo-landing",
             published: true,
             toolUrl: `${BASE_URL}/${slug}`,
           });
-          created.push({ title: d.title || `Svivva vs ${comp}`, url: `${BASE_URL}/${slug}` });
+          created.push({ title: pageData.title, url: `${BASE_URL}/${slug}` });
         } catch (e) {
           created.push({ title: `[error] Svivva vs ${comp}`, url: "" });
         }
@@ -471,12 +486,12 @@ export async function POST(req: NextRequest) {
       if (newUrls.length) await submitIndexNowBatched(newUrls);
       const pageList = created.map((c) => `• ${c.title}`).join("\n");
       return NextResponse.json({
-        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ Targeting: "[Competitor] alternative" searches\n\n${pageList}`,
+        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed\n✓ Using ${useAI ? "AI" : "templates"} (zero API key required)\n\n${pageList}`,
         details: { created: created.length },
       });
     }
 
-    // ── STEP: 10 Blog posts ──────────────────────────────────────────────────
+    // ── STEP: Blog posts ──────────────────────────────────────────────────────
     if (stepId === "svivva-blog") {
       const BLOG_TOPICS = [
         "How to Build an API Without Writing Code in 2025",
