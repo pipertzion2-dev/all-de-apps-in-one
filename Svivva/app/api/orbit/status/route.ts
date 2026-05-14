@@ -94,9 +94,14 @@ export async function GET() {
     );
 
     const warnings: string[] = [];
-    if (!cred?.indexnowKey) warnings.push("IndexNow key not set yet — run “Set Up IndexNow” before expecting Bing/Yandex indexing.");
+    if (!cred?.indexnowKey)
+      warnings.push(
+        "IndexNow key not set yet — run “Set Up IndexNow” before expecting Bing/Yandex indexing.",
+      );
     if (!cred?.lastIndexnowSubmit)
-      warnings.push("IndexNow has not been submitted yet — search engines may not have your latest URLs.");
+      warnings.push(
+        "IndexNow has not been submitted yet — search engines may not have your latest URLs.",
+      );
     if (!orbitFreeAi)
       warnings.push(
         "Orbit AI prose is in template mode. Add GEMINI_API_KEY (Google AI Studio, free tier) or OLLAMA_URL for AI-generated copy — paid OpenAI is not used in Orbit.",

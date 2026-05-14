@@ -318,7 +318,9 @@ export function OrbitStripeSetup() {
             type="password"
             autoComplete="off"
             placeholder={
-              status?.stored.pyracryptStripeSecret ? "•••••••• (saved — enter to replace)" : "sk_live_…"
+              status?.stored.pyracryptStripeSecret
+                ? "•••••••• (saved — enter to replace)"
+                : "sk_live_…"
             }
             value={pyStripeSecretKey}
             onChange={(e) => setPyStripeSecretKey(e.target.value)}
@@ -332,7 +334,10 @@ export function OrbitStripeSetup() {
               onCheckedChange={(v) => setClearPyStripeSecret(!!v)}
               disabled={!!status?.deploymentOverrides.pyracryptStripeSecret}
             />
-            <Label htmlFor="orbit-py-stripe-clear-sec" className="text-xs font-normal text-muted-foreground">
+            <Label
+              htmlFor="orbit-py-stripe-clear-sec"
+              className="text-xs font-normal text-muted-foreground"
+            >
               Clear saved Pyracrypt secret
             </Label>
           </div>
@@ -358,7 +363,10 @@ export function OrbitStripeSetup() {
               onCheckedChange={(v) => setClearPyStripePublishable(!!v)}
               disabled={!!status?.deploymentOverrides.pyracryptStripePublishable}
             />
-            <Label htmlFor="orbit-py-stripe-clear-pub" className="text-xs font-normal text-muted-foreground">
+            <Label
+              htmlFor="orbit-py-stripe-clear-pub"
+              className="text-xs font-normal text-muted-foreground"
+            >
               Clear saved Pyracrypt publishable
             </Label>
           </div>
@@ -382,7 +390,10 @@ export function OrbitStripeSetup() {
               onCheckedChange={(v) => setClearPyStripeWebhook(!!v)}
               disabled={!!status?.deploymentOverrides.pyracryptStripeWebhook}
             />
-            <Label htmlFor="orbit-py-stripe-clear-wh" className="text-xs font-normal text-muted-foreground">
+            <Label
+              htmlFor="orbit-py-stripe-clear-wh"
+              className="text-xs font-normal text-muted-foreground"
+            >
               Clear saved Pyracrypt webhook secret
             </Label>
           </div>

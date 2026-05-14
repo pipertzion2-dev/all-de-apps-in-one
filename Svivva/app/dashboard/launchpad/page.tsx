@@ -2102,7 +2102,8 @@ export default function LaunchpadPage() {
 
             if (data.details?.done) break;
             chunkIndex = data.details?.nextChunkIndex ?? chunkIndex + 1;
-            if (chunkIndex > 500) throw new Error("Too many mini-import batches — aborting safety stop");
+            if (chunkIndex > 500)
+              throw new Error("Too many mini-import batches — aborting safety stop");
           }
 
           const finalSummary = [
@@ -2781,8 +2782,8 @@ export default function LaunchpadPage() {
                   Index &amp; AI preflight
                 </p>
                 <p className="text-[11px] text-foreground">
-                  Health score:{" "}
-                  <strong>{orbitStatus.preflight.indexHealthScore}</strong>/100 · Free AI ready:{" "}
+                  Health score: <strong>{orbitStatus.preflight.indexHealthScore}</strong>/100 · Free
+                  AI ready:{" "}
                   <strong>{orbitStatus.preflight.orbitFreeAi ? "yes" : "no (templates)"}</strong>
                 </p>
                 {orbitStatus.preflight.warnings?.length ? (
