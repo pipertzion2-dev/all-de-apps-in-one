@@ -7,6 +7,7 @@
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "build:vercel": "npm run verify && next build",
+    "vercel-build": "npm run verify && next build",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "verify": "npm run check && npm run lint && npm run format:check && npm run test && node scripts/verify-attached-assets.mjs && node scripts/owner-note-verify.mjs",
