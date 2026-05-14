@@ -16,6 +16,12 @@ export const runtimeSecretColdStart = {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim()
   ),
   stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
+  pyracryptStripeSecret: !!process.env.PYRACRYPT_STRIPE_SECRET_KEY?.trim(),
+  pyracryptStripePublishable: !!(
+    process.env.PYRACRYPT_STRIPE_PUBLISHABLE_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_PYRACRYPT_STRIPE_PUBLISHABLE_KEY?.trim()
+  ),
+  pyracryptStripeWebhook: !!process.env.PYRACRYPT_STRIPE_WEBHOOK_SECRET?.trim(),
   openai: !!(
     process.env.AI_INTEGRATIONS_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim()
   ),
@@ -29,6 +35,9 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   stripeSecretKey: string | null;
   stripePublishableKey: string | null;
   stripeWebhookSecret: string | null;
+  pyracryptStripeSecretKey: string | null;
+  pyracryptStripePublishableKey: string | null;
+  pyracryptStripeWebhookSecret: string | null;
   nextPublicSiteUrl: string | null;
 }>;
 
@@ -106,6 +115,9 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     stripeSecretKey: existing?.stripeSecretKey ?? null,
     stripePublishableKey: existing?.stripePublishableKey ?? null,
     stripeWebhookSecret: existing?.stripeWebhookSecret ?? null,
+    pyracryptStripeSecretKey: existing?.pyracryptStripeSecretKey ?? null,
+    pyracryptStripePublishableKey: existing?.pyracryptStripePublishableKey ?? null,
+    pyracryptStripeWebhookSecret: existing?.pyracryptStripeWebhookSecret ?? null,
     nextPublicSiteUrl: existing?.nextPublicSiteUrl ?? null,
     updatedAt: new Date(),
   };
@@ -123,6 +135,9 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         stripeSecretKey: merged.stripeSecretKey,
         stripePublishableKey: merged.stripePublishableKey,
         stripeWebhookSecret: merged.stripeWebhookSecret,
+        pyracryptStripeSecretKey: merged.pyracryptStripeSecretKey,
+        pyracryptStripePublishableKey: merged.pyracryptStripePublishableKey,
+        pyracryptStripeWebhookSecret: merged.pyracryptStripeWebhookSecret,
         nextPublicSiteUrl: merged.nextPublicSiteUrl,
         updatedAt: merged.updatedAt,
       },

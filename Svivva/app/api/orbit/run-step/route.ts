@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray, desc, isNotNull } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { openai, getDefaultModel, isUsingGemini, isUsingOllama } from "@/lib/llm/openai";
-import { getGeminiApiKey, getOpenAIApiKey, getOllamaUrl } from "@/lib/env";
+import {
+  openai,
+  getDefaultModel,
+  isUsingGemini,
+  isUsingOllama,
+  isOrbitFreeAIConfigured,
+} from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
+import { submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import {
   getDefaultSubdomainCnameTargets,
@@ -47,21 +53,13 @@ export const maxDuration = 300;
 
 const BASE_URL = getSiteUrl();
 
-// ── AI availability check ───────────────────────────────────────────────────
-function isAIConfigured(): boolean {
-  const hasGemini = !!getGeminiApiKey();
-  const hasOllama = !!getOllamaUrl();
-  const hasOpenAI = !!getOpenAIApiKey();
-  return hasGemini || hasOllama || hasOpenAI;
-}
-
-// ── AI with template fallback ──────────────────────────────────────────────────
+// ── AI with template fallback (Gemini / Ollama only — never paid OpenAI) ───
 async function generateWithAIOrFallback<T>(
   aiCall: () => Promise<T>,
   fallback: () => T,
   stepName: string,
 ): Promise<T> {
-  if (isAIConfigured()) {
+  if (isOrbitFreeAIConfigured()) {
     try {
       return await aiCall();
     } catch (e) {
@@ -186,34 +184,36 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
   if (tools.length > 0) return tools;
 
   // ── 3. AI fallback — generate a realistic list from the app's URL/name ───
-  try {
-    const appLabel = base
-      .replace(/https?:\/\//, "")
-      .split(".")[0]
-      .replace(/-/g, " ");
-    const res = await openai.chat.completions.create({
-      model: getDefaultModel(),
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: "Return valid JSON only. No markdown." },
-        {
-          role: "user",
-          content: `The app at ${base} is called "${appLabel}" and contains free cybersecurity mini tools. Generate a realistic list of 80 tools it likely contains. Return: {"tools":[{"name":"Password Strength Checker","slug":"password-strength-checker","description":"Check how strong your password is"},...]}`,
-        },
-      ],
-    });
-    const data = JSON.parse(res.choices[0].message.content || "{}");
-    for (const t of data.tools || []) {
-      if (t.name && t.slug) {
-        tools.push({
-          name: t.name,
-          url: `${base}/${t.slug}`,
-          description: t.description || t.name,
-        });
+  if (isOrbitFreeAIConfigured()) {
+    try {
+      const appLabel = base
+        .replace(/https?:\/\//, "")
+        .split(".")[0]
+        .replace(/-/g, " ");
+      const res = await openai.chat.completions.create({
+        model: getDefaultModel(),
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: "Return valid JSON only. No markdown." },
+          {
+            role: "user",
+            content: `The app at ${base} is called "${appLabel}" and contains free cybersecurity mini tools. Generate a realistic list of 80 tools it likely contains. Return: {"tools":[{"name":"Password Strength Checker","slug":"password-strength-checker","description":"Check how strong your password is"},...]}`,
+          },
+        ],
+      });
+      const data = JSON.parse(res.choices[0].message.content || "{}");
+      for (const t of data.tools || []) {
+        if (t.name && t.slug) {
+          tools.push({
+            name: t.name,
+            url: `${base}/${t.slug}`,
+            description: t.description || t.name,
+          });
+        }
       }
+    } catch {
+      /* AI unavailable */
     }
-  } catch {
-    /* AI unavailable */
   }
 
   return tools;
@@ -291,7 +291,7 @@ export async function POST(req: NextRequest) {
       ];
       const created: { title: string; url: string }[] = [];
       const errors: string[] = [];
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
 
       for (let i = 0; i < SEO_KEYWORDS.length; i++) {
         const keyword = SEO_KEYWORDS[i];
@@ -368,7 +368,7 @@ export async function POST(req: NextRequest) {
       const lines = [
         `✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`,
         `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`,
-        `✓ Using ${useAI ? "AI" : "templates"} (zero API key required)`,
+        `✓ Using ${useAI ? "free-tier AI (Gemini/Ollama)" : "built-in templates — set GEMINI_API_KEY or OLLAMA_URL for AI prose"}`,
         errors.length ? `⚠ ${errors.length} errors` : "",
         indexResult ? indexResult.message : "",
       ].filter(Boolean);
@@ -408,7 +408,7 @@ export async function POST(req: NextRequest) {
         "FastAPI",
       ];
       const created: { title: string; url: string }[] = [];
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
 
       for (const comp of COMPETITORS) {
         try {
@@ -491,7 +491,7 @@ export async function POST(req: NextRequest) {
       if (newUrls.length) await submitIndexNowBatched(newUrls);
       const pageList = created.map((c) => `• ${c.title}`).join("\n");
       return NextResponse.json({
-        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed\n✓ Using ${useAI ? "AI" : "templates"} (zero API key required)\n\n${pageList}`,
+        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed\n✓ Using ${useAI ? "free-tier AI (Gemini/Ollama)" : "built-in templates"}\n\n${pageList}`,
         details: { created: created.length },
       });
     }
@@ -511,7 +511,7 @@ export async function POST(req: NextRequest) {
         "From Prompt to Product: Building a Complete AI App in One Day",
       ];
       const created: { title: string; url: string }[] = [];
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
 
       for (let i = 0; i < BLOG_TOPICS.length; i++) {
         const topic = BLOG_TOPICS[i];
@@ -598,7 +598,7 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Social pack ────────────────────────────────────────────────────
     if (stepId === "svivva-social") {
-      const social = isAIConfigured()
+      const social = isOrbitFreeAIConfigured()
         ? await generateWithAIOrFallback(
             async () => {
               const gen = await openai.chat.completions.create({
@@ -691,11 +691,9 @@ export async function POST(req: NextRequest) {
 
       // Auto-discover tools if none were passed from the UI
       let allTools: DiscoveredTool[] = passedTools || [];
-      let autoDiscovered = false;
       if (!allTools.length) {
         const miniAppsUrl = sourceUrl || getPyracryptMiniAppsBaseUrl();
         allTools = await autoDiscoverTools(miniAppsUrl);
-        autoDiscovered = true;
         if (!allTools.length) {
           return NextResponse.json(
             {
@@ -707,8 +705,9 @@ export async function POST(req: NextRequest) {
       }
 
       const totalTools = allTools.length;
-      // When auto-discovered, process all in one go (no chunking from client)
-      const effectiveChunkSize = autoDiscovered ? totalTools : chunkSize;
+      const requestedChunk = Math.max(1, Math.min(chunkSize || 30, 40));
+      const effectiveChunkSize = requestedChunk;
+
       const start = chunkIndex * effectiveChunkSize;
       const repls = allTools.slice(start, start + effectiveChunkSize);
 
@@ -750,7 +749,7 @@ export async function POST(req: NextRequest) {
           /* continue */
         }
 
-        const useAI = isAIConfigured();
+        const useAI = isOrbitFreeAIConfigured();
         try {
           let variants;
           if (useAI) {
@@ -832,8 +831,8 @@ Return JSON with these 4 keys:
         return { appTitle: appName, pages: appPages, urls: appUrls };
       }
 
-      // --- Parallel batch processing: 5 apps at a time ---
-      const BATCH = 5;
+      // --- Parallel batch processing: smaller batches = faster responses under serverless limits ---
+      const BATCH = 2;
       const allCreated: AppResult[] = [];
       const newPageUrls: string[] = [];
 
@@ -865,8 +864,8 @@ Return JSON with these 4 keys:
 
       const sourceLine = sourceUrl ? `Source Repl: ${sourceUrl}` : "";
       const chunkLine =
-        totalTools > chunkSize
-          ? `Processing ${Math.min(endIndex, totalTools)} / ${totalTools} tools (batch ${chunkIndex + 1} of ${Math.ceil(totalTools / chunkSize)})`
+        totalTools > effectiveChunkSize
+          ? `Processing ${Math.min(endIndex, totalTools)} / ${totalTools} tools (batch ${chunkIndex + 1} of ${Math.ceil(totalTools / effectiveChunkSize)})`
           : `✓ ${repls.length} tool${repls.length === 1 ? "" : "s"} from your Repl`;
 
       return NextResponse.json({
@@ -1577,7 +1576,6 @@ Return JSON:
     if (stepId === "mini-index") {
       const allUrls = await getAllSiteUrlsForIndexing();
 
-      // Also directly query seed-marketing pages to make sure we have them all
       const seedPages = await db
         .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
         .from(seoLandingPages)
@@ -1586,14 +1584,12 @@ Return JSON:
         .filter((p) => p.category === "seed-marketing")
         .map((p) => `${BASE_URL}/${p.slug}`);
 
-      // Merge + dedupe
       const allSet = new Set([...allUrls, ...seedUrls]);
       const finalUrls = Array.from(allSet);
 
       const seoPageCount = seedUrls.length;
       const allResult = await submitIndexNowBatched(finalUrls);
 
-      // Ping Bing sitemap (Google deprecated their ping endpoint in 2023)
       const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
       await Promise.allSettled([
         fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
@@ -1601,18 +1597,53 @@ Return JSON:
         }),
       ]);
 
+      const [credsRow] = await db
+        .select({ json: seedCredentials.googleServiceAccountJson })
+        .from(seedCredentials)
+        .where(isNotNull(seedCredentials.googleServiceAccountJson))
+        .orderBy(desc(seedCredentials.updatedAt))
+        .limit(1);
+
+      let googleSubmitted = 0;
+      let googleDetail = "";
+      if (credsRow?.json) {
+        const GOOGLE_BATCH = 50;
+        for (let i = 0; i < finalUrls.length; i += GOOGLE_BATCH) {
+          const batch = finalUrls.slice(i, i + GOOGLE_BATCH);
+          const r = await submitUrlsToGoogleIndexingApi(credsRow.json, batch);
+          googleSubmitted += r.submitted;
+        }
+        googleDetail = `✓ Google Indexing API: ${googleSubmitted} URL notification(s) sent in ${Math.ceil(finalUrls.length / GOOGLE_BATCH)} batch(es) (requires Search Console service account).`;
+        try {
+          await db.execute(
+            sql`UPDATE seed_credentials SET last_google_indexing = NOW(), updated_at = NOW() WHERE google_service_account_json IS NOT NULL`,
+          );
+        } catch {
+          /* non-fatal */
+        }
+      } else {
+        googleDetail =
+          "○ Google Indexing API skipped — save a Search Console service account under Marketing → Google Search.";
+      }
+
       return NextResponse.json({
         summary: [
-          `✓ ${seoPageCount} app SEO pages found (main + guide + alternative + free + hub + categories)`,
-          `✓ ${finalUrls.length} total URLs submitted`,
+          `✓ ${seoPageCount} seed-marketing (mini-app) SEO URLs included`,
+          `✓ ${finalUrls.length} total unique URLs submitted to IndexNow`,
           allResult.message,
+          googleDetail,
           "✓ Bing sitemap pinged",
           "",
-          "All pages are now being crawled by Bing, Yandex, and Yahoo via IndexNow.",
-          "For Google: go to Google Search Console → Sitemaps → paste your sitemap URL.",
+          "Bing, Yandex, and Yahoo receive IndexNow pings for every URL on this host.",
+          "For Google: ensure sitemap is submitted in Search Console; Indexing API runs automatically when credentials exist.",
           `Sitemap: ${BASE_URL}/sitemap.xml`,
         ].join("\n"),
-        details: { totalUrls: finalUrls.length, seedPages: seoPageCount, submitted: allResult.ok },
+        details: {
+          totalUrls: finalUrls.length,
+          seedPages: seoPageCount,
+          submitted: allResult.ok,
+          googleIndexingApi: googleSubmitted,
+        },
       });
     }
 
@@ -1921,18 +1952,20 @@ Return JSON:
         .map((t) => t.name)
         .join(", ");
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Expert content marketer who writes platform-native articles that rank on Google AND get featured by editors. Write in each platform's authentic voice. Articles are genuinely useful — not promotional. Mention the tools collection naturally as the subject.",
-          },
-          {
-            role: "user",
-            content: `Write 5 platform-native articles about a collection of ${toolCount} free AI tools at ${targetUrl}. ${sampleTools ? `Tools include: ${sampleTools}.` : ""} Each article should be platform-native in tone.
+      const articles = await generateWithAIOrFallback(
+        async () => {
+          const gen = await openai.chat.completions.create({
+            model: getDefaultModel(),
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Expert content marketer who writes platform-native articles that rank on Google AND get featured by editors. Write in each platform's authentic voice. Articles are genuinely useful — not promotional. Mention the tools collection naturally as the subject.",
+              },
+              {
+                role: "user",
+                content: `Write 5 platform-native articles about a collection of ${toolCount} free AI tools at ${targetUrl}. ${sampleTools ? `Tools include: ${sampleTools}.` : ""} Each article should be platform-native in tone.
 
 Return JSON:
 {
@@ -1960,12 +1993,47 @@ Return JSON:
     "content": "Full markdown, 650 words, curated newsletter style, specific tool descriptions, link to ${targetUrl}"
   }
 }`,
-          },
-        ],
-      });
-
-      const articles = JSON.parse(gen.choices[0].message.content || "{}");
+              },
+            ],
+          });
+          return JSON.parse(gen.choices[0].message.content || "{}");
+        },
+        () => {
+          const tpl = generateMiniParasite();
+          const pick = (needle: string) =>
+            tpl.find((x) => x.platform.toLowerCase().includes(needle));
+          const dev = pick("dev");
+          const hn = pick("linkedin") || pick("medium");
+          return {
+            devto: {
+              title: dev?.title || "Building a free AI tools hub",
+              tags: ["ai", "tools", "javascript"],
+              content: `${dev?.content || ""}\n\nTool hub: ${targetUrl}`,
+            },
+            hashnode: {
+              title: pick("hashnode")?.title || "Ship AI tools faster",
+              tags: ["ai", "tools"],
+              content: `${pick("hashnode")?.content || ""}\n\n${targetUrl}`,
+            },
+            medium: {
+              title: pick("medium")?.title || "What we learned shipping free tools",
+              subtitle: "Practical founder notes",
+              content: `${pick("medium")?.content || ""}\n\n${targetUrl}`,
+            },
+            hackernoon: {
+              title: hn?.title || "Why free mini-apps beat bloated suites",
+              content: `${hn?.content || pick("medium")?.content || ""}\n\n${targetUrl}`,
+            },
+            substack: {
+              title: pick("substack")?.title || "Free tools worth bookmarking",
+              content: `${pick("substack")?.content || ""}\n\n${targetUrl}`,
+            },
+          };
+        },
+        "mini-parasite",
+      );
       const savedTitles: string[] = [];
+      const parasiteMiniUrls: string[] = [];
       const platformKeys = ["devto", "hashnode", "medium", "hackernoon", "substack"];
 
       for (const key of platformKeys) {
@@ -1986,9 +2054,14 @@ Return JSON:
             published: false,
           });
           savedTitles.push(`${key}: "${article.title}"`);
+          parasiteMiniUrls.push(`${BASE_URL}/blog/${slug}`);
         } catch {
           /* skip */
         }
+      }
+
+      if (parasiteMiniUrls.length > 0) {
+        await submitIndexNowBatched(parasiteMiniUrls).catch(() => {});
       }
 
       return NextResponse.json({
@@ -2008,6 +2081,9 @@ Return JSON:
           "",
           "PRO TIP: On Medium, set the 'canonical URL' to a page on your domain.",
           "This means Medium passes its DA to YOU while you still get their audience.",
+          parasiteMiniUrls.length > 0
+            ? `✓ ${parasiteMiniUrls.length} on-site blog draft URL(s) pinged via IndexNow.`
+            : "",
         ].join("\n"),
         details: { articles: savedTitles.length, targetUrl },
       });
@@ -3416,7 +3492,7 @@ Return JSON:
         },
       ];
 
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
       const parasite = useAI
         ? await generateWithAIOrFallback(
             async () => {
@@ -3466,13 +3542,23 @@ Return JSON:
             },
             () => {
               const parasitePages = generateMiniParasite();
-              const articles: any = {};
+              const articles: Record<string, { title: string; content: string; tags?: string[] }> =
+                {};
               parasitePages.forEach((p) => {
-                const key = p.platform.toLowerCase().replace(/\s+/g, "");
-                articles[key] = {
-                  title: p.title,
-                  content: p.content,
-                };
+                const raw = p.platform.toLowerCase().replace(/[^a-z]/g, "");
+                const key =
+                  raw === "linkedin"
+                    ? "hackernoon"
+                    : raw === "medium"
+                      ? "medium"
+                      : raw === "devto"
+                        ? "devto"
+                        : raw === "hashnode"
+                          ? "hashnode"
+                          : raw === "substack"
+                            ? "substack"
+                            : raw;
+                articles[key] = { title: p.title, content: p.content };
               });
               return articles;
             },
@@ -3480,13 +3566,23 @@ Return JSON:
           )
         : (() => {
             const parasitePages = generateMiniParasite();
-            const articles: any = {};
+            const articles: Record<string, { title: string; content: string; tags?: string[] }> =
+              {};
             parasitePages.forEach((p) => {
-              const key = p.platform.toLowerCase().replace(/\s+/g, "");
-              articles[key] = {
-                title: p.title,
-                content: p.content,
-              };
+              const raw = p.platform.toLowerCase().replace(/[^a-z]/g, "");
+              const key =
+                raw === "linkedin"
+                  ? "hackernoon"
+                  : raw === "medium"
+                    ? "medium"
+                    : raw === "devto"
+                      ? "devto"
+                      : raw === "hashnode"
+                        ? "hashnode"
+                        : raw === "substack"
+                          ? "substack"
+                          : raw;
+              articles[key] = { title: p.title, content: p.content };
             });
             return articles;
           })();
@@ -3495,6 +3591,7 @@ Return JSON:
 
       // Save each as a blog post
       const savedTitles: string[] = [];
+      const parasiteBlogUrls: string[] = [];
       const platformKeys: Record<string, keyof typeof articles> = {
         devto: "devto",
         hashnode: "hashnode",
@@ -3522,9 +3619,14 @@ Return JSON:
             published: false, // These are for copy-pasting to external platforms
           });
           savedTitles.push(`${platform.name}: "${article.title}"`);
+          parasiteBlogUrls.push(`${BASE_URL}/blog/${slug}`);
         } catch {
           /* skip */
         }
+      }
+
+      if (parasiteBlogUrls.length > 0) {
+        await submitIndexNowBatched(parasiteBlogUrls).catch(() => {});
       }
 
       const platformDetails = PLATFORMS.map((p, i) => {
@@ -3549,6 +3651,9 @@ Return JSON:
           platformDetails,
           "",
           "PRO TIP: Wait 2-3 weeks between posts on each platform. Add 'Originally published at svivva.com' to boost your domain's authority too.",
+          parasiteBlogUrls.length > 0
+            ? `✓ ${parasiteBlogUrls.length} on-site blog draft URL(s) pinged via IndexNow (Bing/Yandex partners) so copies are discoverable while you publish off-site.`
+            : "",
         ].join("\n"),
         details: { articles: savedTitles.length, platforms: PLATFORMS.map((p) => p.name) },
       });
@@ -3581,7 +3686,7 @@ Return JSON:
         content: string;
       }[] = [];
       let aeoGenError: string | null = null;
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
       try {
         if (useAI) {
           const gen = await openai.chat.completions.create({
@@ -3742,7 +3847,7 @@ Return JSON:
         { name: "r/SaaS", subscribers: "120K", tone: "SaaS founder, growth and pricing strategy" },
       ];
 
-      const community = isAIConfigured()
+      const community = isOrbitFreeAIConfigured()
         ? await generateWithAIOrFallback(
             async () => {
               const gen = await openai.chat.completions.create({
@@ -3985,7 +4090,7 @@ Return JSON:
         },
       ];
 
-      const outreach = isAIConfigured()
+      const outreach = isOrbitFreeAIConfigured()
         ? await generateWithAIOrFallback(
             async () => {
               const gen = await openai.chat.completions.create({
@@ -4099,7 +4204,7 @@ Return JSON:
 
     // ── STEP: Schema.org + Technical SEO Boosts ──────────────────────────────
     if (stepId === "svivva-schema") {
-      const schema = isAIConfigured()
+      const schema = isOrbitFreeAIConfigured()
         ? await generateWithAIOrFallback(
             async () => {
               const gen = await openai.chat.completions.create({
@@ -4247,7 +4352,7 @@ Return JSON:
           `✓ FAQ Schema generated (5 questions — enables FAQ rich results in Google)`,
           `✓ Backlink magnet page created: ${pagesCreated[0] || ""}`,
           `✓ Changelog page created (shows Google you're actively maintained)`,
-          `✓ Using ${isAIConfigured() ? "AI" : "templates"} (zero API key required)`,
+          `✓ Using ${isOrbitFreeAIConfigured() ? "free-tier AI (Gemini/Ollama)" : "built-in templates — Orbit does not use paid OpenAI"}`,
           "",
           "ADD THIS JSON-LD TO app/layout.tsx <head> (copy the 'jsonLd' field from step results):",
           "Add both softwareApplication + faqSchema in separate <script type='application/ld+json'> tags",
@@ -4332,7 +4437,7 @@ Return JSON:
       const toCreate = INTEGRATIONS.filter((i) => !existingSlugs.has(i.slug));
       const skipped = INTEGRATIONS.filter((i) => existingSlugs.has(i.slug));
 
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
       const results = await Promise.allSettled(
         toCreate.map(async (integ) => {
           let d;
@@ -4376,6 +4481,7 @@ Return JSON:
               d.metaDescription || `Build AI-powered ${integ.tool} integrations with Svivva.`,
             content: d.content || "",
             category: "integration",
+            published: true,
             publishedAt: new Date(),
           } as any);
           return { title: d.title || `Svivva + ${integ.tool}`, url: `${BASE_URL}/${integ.slug}` };
@@ -4457,7 +4563,7 @@ Return JSON:
       const indToCreate = INDUSTRIES.filter((i) => !indExistingSlugs.has(i.slug));
       const indSkipped = INDUSTRIES.filter((i) => indExistingSlugs.has(i.slug));
 
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
       const indResults = await Promise.allSettled(
         indToCreate.map(async (ind) => {
           let d;
@@ -4501,6 +4607,7 @@ Return JSON:
               d.metaDescription || `Build AI-powered ${ind.name} applications with Svivva.`,
             content: d.content || "",
             category: "usecase",
+            published: true,
             publishedAt: new Date(),
           } as any);
           return { title: d.title || `AI API for ${ind.name}`, url: `${BASE_URL}/${ind.slug}` };
@@ -4661,7 +4768,7 @@ Return JSON:
       const tmplToCreate = TEMPLATES.filter((t) => !tmplExistingSlugs.has(t.slug));
       const tmplSkipped = TEMPLATES.filter((t) => tmplExistingSlugs.has(t.slug));
 
-      const useAI = isAIConfigured();
+      const useAI = isOrbitFreeAIConfigured();
       const tmplResults = await Promise.allSettled(
         tmplToCreate.map(async (tmpl) => {
           let d;
@@ -4701,6 +4808,7 @@ Return JSON:
             metaDescription: d.metaDescription || `Build a ${tmpl.name} with Svivva in minutes.`,
             content: d.content || "",
             category: "template",
+            published: true,
             publishedAt: new Date(),
           } as any);
           return { title: d.title || tmpl.name, url: `${BASE_URL}/${tmpl.slug}` };
@@ -4795,6 +4903,7 @@ Return JSON:
             metaDescription: d.metaDescription || "",
             content: d.content || "",
             category: "paa",
+            published: true,
             publishedAt: new Date(),
           } as any);
           return { title: paa.q, url: `${BASE_URL}/${paa.slug}` };

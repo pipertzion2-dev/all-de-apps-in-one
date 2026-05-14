@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
+import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { randomBytes } from "crypto";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
@@ -23,27 +24,6 @@ async function getCredentials() {
     };
   } catch {
     return { indexnowKey: null, serviceAccountJson: null };
-  }
-}
-
-async function indexnowSubmit(urls: string[], indexnowKey: string) {
-  if (!indexnowKey || !urls.length) return { submitted: false, count: 0 };
-  try {
-    const host = BASE_URL.replace(/^https?:\/\//, "");
-    const res = await fetch("https://api.indexnow.org/indexnow", {
-      method: "POST",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        host,
-        key: indexnowKey,
-        keyLocation: `${BASE_URL}/.well-known/indexnow`,
-        urlList: urls,
-      }),
-      signal: AbortSignal.timeout(20000),
-    });
-    return { submitted: res.status === 200 || res.status === 202, count: urls.length };
-  } catch {
-    return { submitted: false, count: 0 };
   }
 }
 
@@ -255,8 +235,11 @@ Return JSON with these exact keys:
 
       // Submit to IndexNow + Google Indexing API in parallel
       const [indexnow, googleIndexing] = await Promise.all([
-        indexnowKey
-          ? indexnowSubmit(newUrls, indexnowKey)
+        indexnowKey && newUrls.length
+          ? submitIndexNowBatched(newUrls, {
+              indexnowKey,
+              updateMatchingCredentialRows: false,
+            }).then((r) => ({ submitted: r.ok, count: r.submittedCount }))
           : Promise.resolve({ submitted: false, count: 0 }),
         googleIndexingSubmit(newUrls, serviceAccountJson),
       ]);
@@ -368,8 +351,11 @@ Return JSON: {
       }
 
       const [indexnow, googleIndexing] = await Promise.all([
-        indexnowKey
-          ? indexnowSubmit(newUrls, indexnowKey)
+        indexnowKey && newUrls.length
+          ? submitIndexNowBatched(newUrls, {
+              indexnowKey,
+              updateMatchingCredentialRows: false,
+            }).then((r) => ({ submitted: r.ok, count: r.submittedCount }))
           : Promise.resolve({ submitted: false, count: 0 }),
         googleIndexingSubmit(newUrls, serviceAccountJson),
       ]);

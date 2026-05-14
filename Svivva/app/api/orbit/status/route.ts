@@ -4,6 +4,7 @@ import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, isNotNull, desc } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl, getGoogleSearchConsoleInspectBase } from "@/lib/site-url";
+import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
 
 export async function GET() {
   try {
@@ -76,6 +77,31 @@ export async function GET() {
 
     const cred = credRows[0];
 
+    const orbitFreeAi = !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim());
+    const hasPaidOpenAiKey = !!(
+      getOpenAIApiKey()?.trim() && getOpenAIApiKey()!.trim().startsWith("sk-")
+    );
+
+    const indexHealthScore = Math.round(
+      Math.min(
+        100,
+        (cred?.indexnowKey ? 25 : 0) +
+          (cred?.lastIndexnowSubmit ? 35 : 0) +
+          (hubPage.length > 0 ? 15 : 0) +
+          Math.min((seoRows.length / 25) * 12.5, 12.5) +
+          Math.min((blogRows.length / 8) * 12.5, 12.5),
+      ),
+    );
+
+    const warnings: string[] = [];
+    if (!cred?.indexnowKey) warnings.push("IndexNow key not set yet — run “Set Up IndexNow” before expecting Bing/Yandex indexing.");
+    if (!cred?.lastIndexnowSubmit)
+      warnings.push("IndexNow has not been submitted yet — search engines may not have your latest URLs.");
+    if (!orbitFreeAi)
+      warnings.push(
+        "Orbit AI prose is in template mode. Add GEMINI_API_KEY (Google AI Studio, free tier) or OLLAMA_URL for AI-generated copy — paid OpenAI is not used in Orbit.",
+      );
+
     const BASE = getSiteUrl();
     const gscBase = getGoogleSearchConsoleInspectBase();
 
@@ -122,6 +148,12 @@ export async function GET() {
       paaPages: Number((paaRows[0] as any)?.count ?? 0),
       coreUrls,
       toolUrls,
+      preflight: {
+        orbitFreeAi,
+        hasPaidOpenAiKey,
+        indexHealthScore,
+        warnings,
+      },
     });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

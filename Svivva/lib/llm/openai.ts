@@ -105,3 +105,14 @@ export function getDefaultModel(): string {
   if (hasOllamaEnv || !hasOpenAI) return "llama3.2";
   return "gpt-4o";
 }
+
+/**
+ * Orbit / Launchpad marketing steps: use only “free-tier friendly” providers.
+ * - Google Gemini (`GEMINI_API_KEY` from AI Studio — generous free quota)
+ * - Self-hosted Ollama (`OLLAMA_URL`)
+ *
+ * Paid OpenAI is intentionally excluded so Orbit never consumes `sk-*` keys here.
+ */
+export function isOrbitFreeAIConfigured(): boolean {
+  return !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim());
+}
