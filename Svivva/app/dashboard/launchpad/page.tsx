@@ -134,13 +134,13 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
     },
     {
       id: "svivva-directories",
-      title: "41 Directory Submissions",
+      title: "100+ Directory Submissions",
       icon: ListChecks,
       estimate: "~30s",
       description:
-        "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI + 34 more",
+        "Listing content for Futurepedia, TAAFT, Product Hunt, G2, AlternativeTo, SaaSHub, RapidAPI + 90+ more",
       auto: [
-        "41 directory listing texts generated (name, tagline, description, categories, screenshots list)",
+        "100+ directory listing texts generated (name, tagline, description, categories, screenshots list)",
       ],
       manual: [
         "Copy each listing from Results and paste it into the actual directory website",
