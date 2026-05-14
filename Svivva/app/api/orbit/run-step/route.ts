@@ -3464,10 +3464,32 @@ Return JSON:
               });
               return JSON.parse(gen.choices[0].message.content || "{}");
             },
-            () => batchParasiteSEO(),
-            "parasite",
+            () => {
+              const parasitePages = generateMiniParasite();
+              const articles: any = {};
+              parasitePages.forEach((p) => {
+                const key = p.platform.toLowerCase().replace(/\s+/g, "");
+                articles[key] = {
+                  title: p.title,
+                  content: p.content,
+                };
+              });
+              return articles;
+            },
+            "parasite"
           )
-        : batchParasiteSEO();
+        : (() => {
+            const parasitePages = generateMiniParasite();
+            const articles: any = {};
+            parasitePages.forEach((p) => {
+              const key = p.platform.toLowerCase().replace(/\s+/g, "");
+              articles[key] = {
+                title: p.title,
+                content: p.content,
+              };
+            });
+            return articles;
+          })();
 
       const articles = parasite;
 
