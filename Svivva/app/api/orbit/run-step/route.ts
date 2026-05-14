@@ -3416,18 +3416,22 @@ Return JSON:
         },
       ];
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Expert content marketer who writes platform-native articles that rank on Google AND get featured by each publication's editors. Write 600-800 word articles that are genuinely useful, not promotional.",
-          },
-          {
-            role: "user",
-            content: `Write 5 unique articles about Svivva (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
+      const useAI = isAIConfigured();
+      const parasite = useAI
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Expert content marketer who writes platform-native articles that rank on Google AND get featured by each publication's editors. Write 600-800 word articles that are genuinely useful, not promotional.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write 5 unique articles about Svivva (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
 
 Return JSON:
 {
@@ -3455,11 +3459,17 @@ Return JSON:
     "content": "Full markdown, 650 words, personal story, lessons learned, Svivva mention authentic"
   }
 }`,
-          },
-        ],
-      });
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => batchParasiteSEO(),
+            "parasite",
+          )
+        : batchParasiteSEO();
 
-      const articles = JSON.parse(gen.choices[0].message.content || "{}");
+      const articles = parasite;
 
       // Save each as a blog post
       const savedTitles: string[] = [];
