@@ -3476,7 +3476,7 @@ Return JSON:
               });
               return articles;
             },
-            "parasite"
+            "parasite",
           )
         : (() => {
             const parasitePages = generateMiniParasite();
