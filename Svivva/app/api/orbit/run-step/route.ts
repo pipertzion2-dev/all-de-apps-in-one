@@ -750,19 +750,22 @@ export async function POST(req: NextRequest) {
           /* continue */
         }
 
+        const useAI = isAIConfigured();
         try {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Expert SEO copywriter for AI-powered web apps. Write keyword-rich HTML pages that rank and convert. Each page must have: rich H1/H2/H3 structure, feature list with <ul>, FAQ section with 5+ items, and a CTA button linking to the app. Return ONLY valid JSON.",
-              },
-              {
-                role: "user",
-                content: `Generate 4 SEO landing pages for the app "${appName}" — ${appDesc}. App URL: ${appUrl}. Part of the Svivva AI Tools Hub (50 free AI tools).
+          let variants;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "Expert SEO copywriter for AI-powered web apps. Write keyword-rich HTML pages that rank and convert. Each page must have: rich H1/H2/H3 structure, feature list with <ul>, FAQ section with 5+ items, and a CTA button linking to the app. Return ONLY valid JSON.",
+                },
+                {
+                  role: "user",
+                  content: `Generate 4 SEO landing pages for the app "${appName}" — ${appDesc}. App URL: ${appUrl}. Part of the Svivva AI Tools Hub (50 free AI tools).
 
 Return JSON with these 4 keys:
 {
@@ -771,17 +774,26 @@ Return JSON with these 4 keys:
   "alternative": { "title": "Best Free ${appName} Alternative in 2025", "metaTitle": "≤60 chars", "metaDescription": "≤155 chars", "content": "HTML: H1 'Why ${appName} is the Best Free Option', feature comparison table, strengths vs paid tools, CTA" },
   "free": { "title": "Free ${appName} — No Sign Up Required", "metaTitle": "≤60 chars", "metaDescription": "≤155 chars", "content": "HTML: targets 'free ${appName}' searches — emphasize free access, instant use, no credit card, CTA to ${appUrl}" }
 }`,
-              },
-            ],
-          });
+                },
+              ],
+            });
 
-          const pages = JSON.parse(gen.choices[0].message.content || "{}");
-          const variants = [
-            { key: "main", slug: baseSlug, data: pages.main },
-            { key: "guide", slug: `${baseSlug}-guide`, data: pages.guide },
-            { key: "alternative", slug: `${baseSlug}-alternative`, data: pages.alternative },
-            { key: "free", slug: `free-${baseSlug}`, data: pages.free },
-          ];
+            const pages = JSON.parse(gen.choices[0].message.content || "{}");
+            variants = [
+              { key: "main", slug: baseSlug, data: pages.main },
+              { key: "guide", slug: `${baseSlug}-guide`, data: pages.guide },
+              { key: "alternative", slug: `${baseSlug}-alternative`, data: pages.alternative },
+              { key: "free", slug: `free-${baseSlug}`, data: pages.free },
+            ];
+          } else {
+            // Use templates - generate 4 pages
+            const templatePages = generateMiniSEOPages(appName, appDesc, appUrl);
+            variants = templatePages.map((p, i) => ({
+              key: i === 0 ? "main" : i === 1 ? "guide" : i === 2 ? "alternative" : "free",
+              slug: p.slug,
+              data: p,
+            }));
+          }
 
           for (const v of variants) {
             if (!v.data?.content) continue;
@@ -798,8 +810,8 @@ Return JSON with these 4 keys:
                 content: v.data.content,
                 keyword: appName,
                 headline: v.data.headline || v.data.title || appName,
-                howItWorks: v.data.howItWorks || `${appName} is a free AI-powered tool`,
-                whoItsFor: v.data.whoItsFor || "Anyone looking for free AI tools",
+                howItWorks: (v.data as any).howItWorks || `${appName} is a free AI-powered tool`,
+                whoItsFor: (v.data as any).whoItsFor || "Anyone looking for free AI tools",
                 metaTitle: v.data.metaTitle || v.data.title || appName,
                 metaDescription: v.data.metaDescription || "",
                 category: "seed-marketing",
@@ -813,35 +825,8 @@ Return JSON with these 4 keys:
               /* db error — skip variant */
             }
           }
-        } catch {
-          // AI failed — create a minimal stub
-          try {
-            const ex = await db
-              .select({ id: seoLandingPages.id })
-              .from(seoLandingPages)
-              .where(eq(seoLandingPages.slug, baseSlug))
-              .limit(1);
-            if (!ex.length) {
-              await db.insert(seoLandingPages).values({
-                slug: baseSlug,
-                title: appName,
-                keyword: appName,
-                headline: appName,
-                howItWorks: appDesc || `${appName} is a free AI-powered tool`,
-                whoItsFor: "Anyone looking for free AI tools",
-                content: `<h1>${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Try ${appName} →</a></p>`,
-                metaTitle: `${appName} — Free AI Tool`,
-                metaDescription: appDesc.slice(0, 155),
-                category: "seed-marketing",
-                published: true,
-                toolUrl: appUrl,
-              });
-              appUrls.push(`${BASE_URL}/${baseSlug}`);
-              appPages.push({ title: appName, url: `${BASE_URL}/${baseSlug}` });
-            }
-          } catch {
-            /* fully skip */
-          }
+        } catch (e) {
+          console.warn(`[Orbit] Failed to process ${appName}:`, String(e).slice(0, 100));
         }
 
         return { appTitle: appName, pages: appPages, urls: appUrls };
