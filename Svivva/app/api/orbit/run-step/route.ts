@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, inArray } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { openai, getDefaultModel } from "@/lib/llm/openai";
+import { openai, getDefaultModel, isUsingGemini, isUsingOllama } from "@/lib/llm/openai";
+import { getGeminiApiKey, getOpenAIApiKey, getOllamaUrl } from "@/lib/env";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
@@ -13,10 +14,63 @@ import {
   getDefaultSubdomainCnameTargets,
   getPyracryptMiniAppsBaseUrl,
 } from "@/lib/workspace-external-apps";
+import {
+  batchSEOPages,
+  batchComparisonPages,
+  batchBlogPosts,
+  batchIntegrationPages,
+  batchIndustryPages,
+  batchAPITemplatePages,
+  batchPAAPages,
+  generateSocialPack,
+  generateOutreach,
+  generateSchemaOrg,
+  generateWidget,
+  generateMiniHub,
+  generateMiniCategories,
+  generateMiniSocial,
+  generateMiniSEOPages,
+  generateMiniIndexNowUrls,
+  generateMiniDirectories,
+  generateMiniParasite,
+  generateMiniAEO,
+  generateMiniCommunities,
+  generateMiniOutreachAll,
+  generateMiniSecurity,
+  generateMiniAppBuild,
+  generateMiniAPISecurity,
+  generateMiniCNAMETargets,
+  generateMiniImportTools,
+} from "@/lib/orbit/content-templates";
 
 export const maxDuration = 300;
 
 const BASE_URL = getSiteUrl();
+
+// ── AI availability check ───────────────────────────────────────────────────
+function isAIConfigured(): boolean {
+  const hasGemini = !!getGeminiApiKey();
+  const hasOllama = !!getOllamaUrl();
+  const hasOpenAI = !!getOpenAIApiKey();
+  return hasGemini || hasOllama || hasOpenAI;
+}
+
+// ── AI with template fallback ──────────────────────────────────────────────────
+async function generateWithAIOrFallback<T>(
+  aiCall: () => Promise<T>,
+  fallback: () => T,
+  stepName: string
+): Promise<T> {
+  if (isAIConfigured()) {
+    try {
+      return await aiCall();
+    } catch (e) {
+      console.warn(`[Orbit] AI failed for ${stepName}, using templates:`, String(e).slice(0, 100));
+      return fallback();
+    }
+  }
+  return fallback();
+}
 
 // ── Shared tool type ─────────────────────────────────────────────────────────
 interface DiscoveredTool {
@@ -194,7 +248,6 @@ export async function POST(req: NextRequest) {
     // ── STEP: 50 SEO pages ───────────────────────────────────────────────────
     if (stepId === "svivva-seo-pages") {
       const SEO_KEYWORDS = [
-        // original pages (already exist — will be skipped if slug taken)
         "ai api builder",
         "prompt to api",
         "no-code api generator",
@@ -215,7 +268,6 @@ export async function POST(req: NextRequest) {
         "serverless ai api",
         "schema enforced ai output",
         "ai response validator",
-        // high-traffic additions — what developers actually search for
         "chatgpt api integration",
         "openai api tutorial",
         "how to use openai api",
@@ -239,8 +291,10 @@ export async function POST(req: NextRequest) {
       ];
       const created: { title: string; url: string }[] = [];
       const errors: string[] = [];
+      const useAI = isAIConfigured();
 
-      for (const keyword of SEO_KEYWORDS) {
+      for (let i = 0; i < SEO_KEYWORDS.length; i++) {
+        const keyword = SEO_KEYWORDS[i];
         try {
           const slug = keyword
             .toLowerCase()
@@ -257,38 +311,52 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
-              },
-              {
-                role: "user",
-                content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }`,
-              },
-            ],
-          });
+          let pageData;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content: "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
+                },
+                {
+                  role: "user",
+                  content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }`,
+                },
+              ],
+            });
+            const d = JSON.parse(gen.choices[0].message.content || "{}");
+            pageData = {
+              title: d.title || keyword,
+              metaTitle: d.metaTitle || d.title || keyword,
+              metaDescription: d.metaDescription || "",
+              headline: d.headline || d.title || keyword,
+              content: d.content || `<p>${keyword}</p>`,
+            };
+          } else {
+            pageData = batchSEOPages(1)[0];
+            pageData.title = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} — Svivva`;
+            pageData.slug = `${slug}-${i}`;
+            pageData.keyword = keyword;
+          }
 
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
           await db.insert(seoLandingPages).values({
             slug,
-            title: d.title || keyword,
+            title: pageData.title,
             keyword,
-            headline: d.headline || d.title || keyword,
-            howItWorks: d.howItWorks || `AI-powered solution for ${keyword}`,
-            whoItsFor: d.whoItsFor || "Teams and developers building with AI",
-            content: d.content || `<p>${keyword}</p>`,
-            metaTitle: d.metaTitle || d.title || keyword,
-            metaDescription: d.metaDescription || "",
+            headline: pageData.headline,
+            howItWorks: `AI-powered solution for ${keyword}`,
+            whoItsFor: "Teams and developers building with AI",
+            content: pageData.content,
+            metaTitle: pageData.metaTitle,
+            metaDescription: pageData.metaDescription,
             category: "seo-landing",
             published: true,
             toolUrl: `${BASE_URL}/${slug}`,
           });
-          created.push({ title: d.title || keyword, url: `${BASE_URL}/${slug}` });
+          created.push({ title: pageData.title, url: `${BASE_URL}/${slug}` });
         } catch (e) {
           errors.push(`${keyword}: ${String(e).slice(0, 60)}`);
         }
@@ -299,6 +367,7 @@ export async function POST(req: NextRequest) {
       const lines = [
         `✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`,
         `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`,
+        `✓ Using ${useAI ? "AI" : "templates"} (zero API key required)`,
         errors.length ? `⚠ ${errors.length} errors` : "",
         indexResult ? indexResult.message : "",
       ].filter(Boolean);
@@ -421,8 +490,10 @@ export async function POST(req: NextRequest) {
         "From Prompt to Product: Building a Complete AI App in One Day",
       ];
       const created: { title: string; url: string }[] = [];
+      const useAI = isAIConfigured();
 
-      for (const topic of BLOG_TOPICS) {
+      for (let i = 0; i < BLOG_TOPICS.length; i++) {
+        const topic = BLOG_TOPICS[i];
         try {
           const baseSlug = topic
             .toLowerCase()
@@ -440,37 +511,51 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
-              },
-              {
-                role: "user",
-                content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for Svivva at end), metaTitle, metaDescription, tags (3-5 strings) }`,
-              },
-            ],
-          });
+          let blogData;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content: "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
+                },
+                {
+                  role: "user",
+                  content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for Svivva at end), metaTitle, metaDescription, tags (3-5 strings) }`,
+                },
+              ],
+            });
+            const d = JSON.parse(gen.choices[0].message.content || "{}");
+            blogData = {
+              title: d.title || topic,
+              excerpt: d.excerpt || "",
+              content: d.content || `## ${topic}\n\nDetailed guide coming soon.`,
+              metaTitle: d.metaTitle || topic,
+              metaDescription: d.metaDescription || "",
+              tags: d.tags || ["AI API"],
+            };
+          } else {
+            blogData = batchBlogPosts(1)[0];
+            blogData.title = topic;
+            blogData.excerpt = topic;
+          }
 
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
             id,
             slug,
-            title: d.title || topic,
-            excerpt: d.excerpt || "",
-            content: d.content || "",
-            metaTitle: d.metaTitle || d.title || topic,
-            metaDescription: d.metaDescription || d.excerpt || "",
-            tags: Array.isArray(d.tags) ? d.tags : [baseSlug],
+            title: blogData.title,
+            excerpt: blogData.excerpt,
+            content: blogData.content,
+            metaTitle: blogData.metaTitle,
+            metaDescription: blogData.metaDescription,
+            tags: blogData.tags,
             published: true,
             publishedAt: new Date(),
           } as any);
-          created.push({ title: d.title || topic, url: `${BASE_URL}/blog/${slug}` });
+          created.push({ title: blogData.title, url: `${BASE_URL}/blog/${slug}` });
         } catch (e) {
           created.push({ title: `[error] ${topic}`, url: "" });
         }
@@ -491,18 +576,20 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Social pack ────────────────────────────────────────────────────
     if (stepId === "svivva-social") {
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
-          },
-          {
-            role: "user",
-            content: `Create a complete social media launch pack. Return JSON: {
+      const social = isAIConfigured()
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content: "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
+                  },
+                  {
+                    role: "user",
+                    content: `Create a complete social media launch pack. Return JSON: {
   twitter_thread: [8 tweets as strings, first tweet is the hook],
   linkedin: { headline, body (3-4 paragraphs), cta },
   reddit_webdev: { title, body },
@@ -511,11 +598,16 @@ export async function POST(req: NextRequest) {
   producthunt: { tagline (≤60 chars), description (260 chars), first_comment },
   show_hn: { title, body }
 }`,
-          },
-        ],
-      });
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => generateSocialPack(),
+            "social"
+          )
+        : generateSocialPack();
 
-      const social = JSON.parse(gen.choices[0].message.content || "{}");
       const lines = [
         `✓ Twitter/X thread: ${social.twitter_thread?.length || 0} tweets`,
         `✓ LinkedIn post generated`,
@@ -3546,18 +3638,20 @@ Return JSON:
 
     // ── STEP: Schema.org + Technical SEO Boosts ──────────────────────────────
     if (stepId === "svivva-schema") {
-      // Generate JSON-LD structured data, FAQ schema, and backlink magnet content
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content: "Technical SEO expert specializing in structured data and featured snippets.",
-          },
-          {
-            role: "user",
-            content: `Generate Schema.org structured data and technical SEO assets for Svivva (AI API builder, URL: ${BASE_URL}).
+      const schema = isAIConfigured()
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content: "Technical SEO expert specializing in structured data and featured snippets.",
+                  },
+                  {
+                    role: "user",
+                    content: `Generate Schema.org structured data and technical SEO assets for Svivva (AI API builder, URL: ${BASE_URL}).
 
 Return JSON:
 {
@@ -3587,13 +3681,13 @@ Return JSON:
   "backlinkMagnet": {
     "title": "Top 30 AI API Tools for Developers in 2025 (Ranked & Compared)",
     "slug": "best-ai-api-tools-2025",
-    "description": "A genuinely useful roundup page that includes Svivva + 29 real competitors — this gets linked to by bloggers, shared in communities, and cited by researchers",
-    "content": "Full HTML: intro, comparison table with 10 tools (Svivva highlighted as #1 or #2), criteria section, FAQ, conclusion — 1200 words minimum"
+    "description": "A genuinely useful roundup page that includes Svivva + 29 real competitors",
+    "content": "Full HTML: intro, comparison table with 10 tools, criteria section, FAQ, conclusion"
   },
   "changelog": {
     "title": "Svivva Changelog — What's New",
     "slug": "changelog",
-    "content": "HTML changelog with 5 recent fake updates in format: version number, date, bullet points of changes — shows Google you're actively maintained"
+    "content": "HTML changelog with 5 recent updates"
   },
   "technicalChecklist": [
     "Verify canonical tags on all pages",
@@ -3605,11 +3699,17 @@ Return JSON:
     "Submit to Google Search Console manually after IndexNow"
   ]
 }`,
-          },
-        ],
-      });
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => generateSchemaOrg(),
+            "schema"
+          )
+        : generateSchemaOrg();
 
-      const schemaData = JSON.parse(gen.choices[0].message.content || "{}");
+      const schemaData = schema;
       const pagesCreated: string[] = [];
 
       // Save backlink magnet page
@@ -3627,8 +3727,7 @@ Return JSON:
             title: schemaData.backlinkMagnet.title || "Best AI API Tools 2025",
             keyword: "best ai api tools 2025",
             headline: schemaData.backlinkMagnet.title || "Top 30 AI API Tools",
-            howItWorks:
-              "Comprehensive comparison of the best AI API building tools — updated quarterly",
+            howItWorks: "Comprehensive comparison of the best AI API building tools",
             whoItsFor: "Developers evaluating AI API tools and platforms",
             content: schemaData.backlinkMagnet.content,
             metaTitle: (schemaData.backlinkMagnet.title || "Best AI API Tools 2025").slice(0, 60),
@@ -3661,8 +3760,7 @@ Return JSON:
               whoItsFor: "Existing Svivva users and developers evaluating the platform",
               content: schemaData.changelog.content,
               metaTitle: "Svivva Changelog — Latest Updates",
-              metaDescription:
-                "See what's new in Svivva — latest features, improvements, and fixes",
+              metaDescription: "See what's new in Svivva — latest features, improvements, and fixes",
               category: "seo-landing",
               published: true,
               toolUrl: `${BASE_URL}/changelog`,
@@ -3686,6 +3784,7 @@ Return JSON:
           `✓ FAQ Schema generated (5 questions — enables FAQ rich results in Google)`,
           `✓ Backlink magnet page created: ${pagesCreated[0] || ""}`,
           `✓ Changelog page created (shows Google you're actively maintained)`,
+          `✓ Using ${isAIConfigured() ? "AI" : "templates"} (zero API key required)`,
           "",
           "ADD THIS JSON-LD TO app/layout.tsx <head> (copy the 'jsonLd' field from step results):",
           "Add both softwareApplication + faqSchema in separate <script type='application/ld+json'> tags",
