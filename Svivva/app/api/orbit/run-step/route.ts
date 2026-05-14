@@ -434,7 +434,8 @@ export async function POST(req: NextRequest) {
               messages: [
                 {
                   role: "system",
-                  content: "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
+                  content:
+                    "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
                 },
                 {
                   role: "user",
@@ -466,8 +467,12 @@ export async function POST(req: NextRequest) {
             content: pageData.content || `<p>Svivva vs ${comp}</p>`,
             keyword: pageData.keyword || `svivva vs ${comp.toLowerCase()}`,
             headline: pageData.headline || `Svivva vs ${comp}`,
-            howItWorks: (pageData as any).howItWorks || "Compare features, pricing and use-cases side by side",
-            whoItsFor: (pageData as any).whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
+            howItWorks:
+              (pageData as any).howItWorks ||
+              "Compare features, pricing and use-cases side by side",
+            whoItsFor:
+              (pageData as any).whoItsFor ||
+              `${comp} users looking for a more powerful AI-native alternative`,
             metaTitle: pageData.metaTitle || `Svivva vs ${comp}`,
             metaDescription: pageData.metaDescription || `Compare Svivva vs ${comp}`,
             category: "seo-landing",
