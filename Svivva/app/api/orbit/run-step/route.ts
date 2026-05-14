@@ -59,7 +59,7 @@ function isAIConfigured(): boolean {
 async function generateWithAIOrFallback<T>(
   aiCall: () => Promise<T>,
   fallback: () => T,
-  stepName: string
+  stepName: string,
 ): Promise<T> {
   if (isAIConfigured()) {
     try {
@@ -319,7 +319,8 @@ export async function POST(req: NextRequest) {
               messages: [
                 {
                   role: "system",
-                  content: "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
+                  content:
+                    "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
                 },
                 {
                   role: "user",
@@ -519,7 +520,8 @@ export async function POST(req: NextRequest) {
               messages: [
                 {
                   role: "system",
-                  content: "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
+                  content:
+                    "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
                 },
                 {
                   role: "user",
@@ -585,7 +587,8 @@ export async function POST(req: NextRequest) {
                 messages: [
                   {
                     role: "system",
-                    content: "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
+                    content:
+                      "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
                   },
                   {
                     role: "user",
@@ -604,7 +607,7 @@ export async function POST(req: NextRequest) {
               return JSON.parse(gen.choices[0].message.content || "{}");
             },
             () => generateSocialPack(),
-            "social"
+            "social",
           )
         : generateSocialPack();
 
@@ -3647,7 +3650,8 @@ Return JSON:
                 messages: [
                   {
                     role: "system",
-                    content: "Technical SEO expert specializing in structured data and featured snippets.",
+                    content:
+                      "Technical SEO expert specializing in structured data and featured snippets.",
                   },
                   {
                     role: "user",
@@ -3705,7 +3709,7 @@ Return JSON:
               return JSON.parse(gen.choices[0].message.content || "{}");
             },
             () => generateSchemaOrg(),
-            "schema"
+            "schema",
           )
         : generateSchemaOrg();
 
@@ -3760,7 +3764,8 @@ Return JSON:
               whoItsFor: "Existing Svivva users and developers evaluating the platform",
               content: schemaData.changelog.content,
               metaTitle: "Svivva Changelog — Latest Updates",
-              metaDescription: "See what's new in Svivva — latest features, improvements, and fixes",
+              metaDescription:
+                "See what's new in Svivva — latest features, improvements, and fixes",
               category: "seo-landing",
               published: true,
               toolUrl: `${BASE_URL}/changelog`,
