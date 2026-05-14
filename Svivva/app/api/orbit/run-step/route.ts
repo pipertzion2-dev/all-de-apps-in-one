@@ -3166,22 +3166,24 @@ Return JSON:
         content: string;
       }[] = [];
       let aeoGenError: string | null = null;
+      const useAI = isAIConfigured();
       try {
-        const gen = await openai.chat.completions.create({
-          model: getDefaultModel(),
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: `You write Answer Engine Optimized (AEO) content. These pages get cited by Perplexity, ChatGPT Search, Gemini, and other AI search engines because they directly answer specific questions. Rules:
+        if (useAI) {
+          const gen = await openai.chat.completions.create({
+            model: getDefaultModel(),
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content: `You write Answer Engine Optimized (AEO) content. These pages get cited by Perplexity, ChatGPT Search, Gemini, and other AI search engines because they directly answer specific questions. Rules:
 1. First 150 words = direct, factual answer (no marketing speak, no "great question")
 2. Then provide 3-4 supporting paragraphs with specific data, comparisons, or steps
 3. End with a brief mention of Svivva as a practical tool
 4. No fluff, no corporate language — write like a knowledgeable engineer explaining to a peer`,
-            },
-            {
-              role: "user",
-              content: `Generate AEO pages for these 10 queries that developers and builders search on Perplexity/ChatGPT. Each page targets Svivva's use case (AI API builder).
+              },
+              {
+                role: "user",
+                content: `Generate AEO pages for these 10 queries that developers and builders search on Perplexity/ChatGPT. Each page targets Svivva's use case (AI API builder).
 
 Queries: ${AEO_QUERIES.join(" | ")}
 
@@ -3198,13 +3200,35 @@ Return JSON:
     }
   ]
 }`,
-            },
-          ],
-        });
-        const aeoData = JSON.parse(gen.choices[0].message.content || "{}");
-        aeoPages = Array.isArray(aeoData.pages) ? aeoData.pages : [];
+              },
+            ],
+          });
+          const aeoData = JSON.parse(gen.choices[0].message.content || "{}");
+          aeoPages = Array.isArray(aeoData.pages) ? aeoData.pages : [];
+        } else {
+          const templateAEO = generateMiniAEO();
+          aeoPages = templateAEO.map((t) => ({
+            query: t.query,
+            slug: t.slug,
+            title: t.query.charAt(0).toUpperCase() + t.query.slice(1),
+            metaTitle: t.query.slice(0, 60),
+            metaDescription: t.content.slice(0, 155),
+            content: t.content,
+          }));
+        }
       } catch (e) {
         aeoGenError = String(e).slice(0, 300);
+        if (!useAI) {
+          const templateAEO = generateMiniAEO();
+          aeoPages = templateAEO.map((t) => ({
+            query: t.query,
+            slug: t.slug,
+            title: t.query.charAt(0).toUpperCase() + t.query.slice(1),
+            metaTitle: t.query.slice(0, 60),
+            metaDescription: t.content.slice(0, 155),
+            content: t.content,
+          }));
+        }
       }
       const pages = aeoPages;
       const created: string[] = [];
@@ -3303,18 +3327,21 @@ Return JSON:
         { name: "r/SaaS", subscribers: "120K", tone: "SaaS founder, growth and pricing strategy" },
       ];
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first, never spammy. Each post provides real value and only mentions the product naturally at the end or in context.",
-          },
-          {
-            role: "user",
-            content: `Write community launch posts for Svivva (AI API builder) across 8 platforms. Each post must feel native to the platform — not promotional.
+      const community = isAIConfigured()
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Reddit marketing expert who writes posts that get upvoted, not removed. Posts are genuine, community-first, never spammy. Each post provides real value and only mentions the product naturally at the end or in context.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write community launch posts for Svivva (AI API builder) across 8 platforms. Each post must feel native to the platform — not promotional.
 
 Subreddits and their tones: ${SUBREDDITS.map((s) => `${s.name} (${s.tone})`).join("; ")}
 
@@ -3348,11 +3375,15 @@ Return JSON:
     "hn_best_time": "Weekday 9am–10am EST (when US east coast starts work)"
   }
 }`,
-          },
-        ],
-      });
-
-      const community = JSON.parse(gen.choices[0].message.content || "{}");
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => generateMiniCommunities(),
+            "communities"
+          )
+        : generateMiniCommunities();
 
       // Save as a blog post for reference
       const redditPosts = community.reddit || {};
@@ -3539,18 +3570,21 @@ Return JSON:
         },
       ];
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "PR professional and content strategist. Write pitches that editors and hosts actually respond to. Concise, specific, relevant to their audience, with a clear hook. No generic templates.",
-          },
-          {
-            role: "user",
-            content: `Write outreach content for Svivva (AI API builder — turns natural language prompts into production APIs with schema enforcement, version control, automated evaluations, marketplace).
+      const outreach = isAIConfigured()
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "PR professional and content strategist. Write pitches that editors and hosts actually respond to. Concise, specific, relevant to their audience, with a clear hook. No generic templates.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write outreach content for Svivva (AI API builder — turns natural language prompts into production APIs with schema enforcement, version control, automated evaluations, marketplace).
 
 Return JSON:
 {
@@ -3580,11 +3614,15 @@ Return JSON:
   "email_subject_lines": ["5 different subject lines for newsletter pitches"],
   "follow_up_template": "1 short follow-up email if no response after 1 week"
 }`,
-          },
-        ],
-      });
-
-      const outreach = JSON.parse(gen.choices[0].message.content || "{}");
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => generateMiniOutreachAll(),
+            "outreach"
+          )
+        : generateMiniOutreachAll();
 
       // Save press release as blog post
       if (outreach.press_release) {
@@ -3879,24 +3917,37 @@ Return JSON:
       const toCreate = INTEGRATIONS.filter((i) => !existingSlugs.has(i.slug));
       const skipped = INTEGRATIONS.filter((i) => existingSlugs.has(i.slug));
 
+      const useAI = isAIConfigured();
       const results = await Promise.allSettled(
         toCreate.map(async (integ) => {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a technical content writer for Svivva — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
-              },
-              {
-                role: "user",
-                content: `Write an integration guide page for "Svivva + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why Svivva + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for Svivva free trial) }`,
-              },
-            ],
-          });
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          let d;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are a technical content writer for Svivva — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
+                },
+                {
+                  role: "user",
+                  content: `Write an integration guide page for "Svivva + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why Svivva + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for Svivva free trial) }`,
+                },
+              ],
+            });
+            d = JSON.parse(gen.choices[0].message.content || "{}");
+          } else {
+            const templatePages = batchIntegrationPages();
+            const template = templatePages[0];
+            d = {
+              title: `Svivva + ${integ.tool} Integration`,
+              metaTitle: `Svivva + ${integ.tool} - AI API Builder`.slice(0, 60),
+              metaDescription: `Build AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.`.slice(0, 155),
+              content: `# Svivva + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.\n\n## Why Svivva + ${integ.tool}?\n\nSvivva's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for Svivva\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry Svivva free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://svivva.com)`,
+            };
+          }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: integ.slug,
@@ -3987,24 +4038,37 @@ Return JSON:
       const indToCreate = INDUSTRIES.filter((i) => !indExistingSlugs.has(i.slug));
       const indSkipped = INDUSTRIES.filter((i) => indExistingSlugs.has(i.slug));
 
+      const useAI = isAIConfigured();
       const indResults = await Promise.allSettled(
         indToCreate.map(async (ind) => {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You write industry-specific AI use case pages for Svivva — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
-              },
-              {
-                role: "user",
-                content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with Svivva", CTA) }`,
-              },
-            ],
-          });
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          let d;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You write industry-specific AI use case pages for Svivva — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
+                },
+                {
+                  role: "user",
+                  content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with Svivva", CTA) }`,
+                },
+              ],
+            });
+            d = JSON.parse(gen.choices[0].message.content || "{}");
+          } else {
+            const templatePages = batchIndustryPages();
+            const template = templatePages[0];
+            d = {
+              title: `AI API for ${ind.name} - Transform Your Business`,
+              metaTitle: `AI API for ${ind.name} | Svivva`.slice(0, 60),
+              metaDescription: `Build AI-powered ${ind.name} applications with Svivva. Automate workflows and scale without coding.`.slice(0, 155),
+              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from Svivva.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with Svivva\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://svivva.com)`,
+            };
+          }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: ind.slug,
@@ -4174,24 +4238,37 @@ Return JSON:
       const tmplToCreate = TEMPLATES.filter((t) => !tmplExistingSlugs.has(t.slug));
       const tmplSkipped = TEMPLATES.filter((t) => tmplExistingSlugs.has(t.slug));
 
+      const useAI = isAIConfigured();
       const tmplResults = await Promise.allSettled(
         tmplToCreate.map(async (tmpl) => {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You write developer-focused API template guide pages for Svivva — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
-              },
-              {
-                role: "user",
-                content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with Svivva", H2 "Common Customizations", CTA to try Svivva free) }`,
-              },
-            ],
-          });
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
+          let d;
+          if (useAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You write developer-focused API template guide pages for Svivva — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
+                },
+                {
+                  role: "user",
+                  content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with Svivva", H2 "Common Customizations", CTA to try Svivva free) }`,
+                },
+              ],
+            });
+            d = JSON.parse(gen.choices[0].message.content || "{}");
+          } else {
+            const templatePages = batchAPITemplatePages();
+            const template = templatePages[0];
+            d = {
+              title: `${tmpl.name} - Build in Minutes`,
+              metaTitle: `${tmpl.name} | Svivva Templates`.slice(0, 60),
+              metaDescription: `Build a ${tmpl.name} with Svivva in minutes. No coding required.`.slice(0, 155),
+              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with Svivva in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with Svivva\n\n1. Sign up for Svivva\n2. Describe your API in plain English\n3. Svivva generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://svivva.com)`,
+            };
+          }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: tmpl.slug,
