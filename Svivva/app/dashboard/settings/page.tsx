@@ -109,7 +109,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <OrbitStripeSetup isAdmin={true} />
+          <OrbitStripeSetup />
         </>
       )}
 

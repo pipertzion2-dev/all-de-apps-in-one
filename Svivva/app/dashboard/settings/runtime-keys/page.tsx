@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { authFetch } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,11 +40,6 @@ function Dot({ ok }: { ok: boolean }) {
 }
 
 export default function RuntimeKeysPage() {
-  const { data: me } = useQuery<{ isAdmin: boolean }>({
-    queryKey: ["/api/auth/me"],
-    queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
-  });
-
   const [status, setStatus] = useState<StatusPayload | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -69,7 +62,7 @@ export default function RuntimeKeysPage() {
   const load = async () => {
     setLoadError(null);
     try {
-      const res = await authFetch("/api/admin/platform-secrets");
+      const res = await fetch("/api/admin/platform-secrets");
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || res.statusText);
@@ -81,8 +74,8 @@ export default function RuntimeKeysPage() {
   };
 
   useEffect(() => {
-    if (me?.isAdmin) void load();
-  }, [me?.isAdmin]);
+    void load();
+  }, []);
 
   const submit = async () => {
     setSaveMessage(null);
@@ -112,7 +105,7 @@ export default function RuntimeKeysPage() {
         return;
       }
 
-      const res = await authFetch("/api/admin/platform-secrets", {
+      const res = await fetch("/api/admin/platform-secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -142,20 +135,6 @@ export default function RuntimeKeysPage() {
       setSaving(false);
     }
   };
-
-  if (me && !me.isAdmin) {
-    return (
-      <div className="max-w-2xl space-y-4">
-        <p className="text-muted-foreground">You do not have access to this page.</p>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/settings">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to settings
-          </Link>
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl space-y-6">

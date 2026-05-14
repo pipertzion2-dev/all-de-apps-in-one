@@ -237,8 +237,10 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  // Allow Orbit admin (launchpad) to bypass auth — it has its own internal auth
-  const isOrbitAdmin = pathname === "/dashboard/launchpad";
+  // Allow Orbit admin (launchpad) and settings pages to bypass auth
+  // — these have their own internal auth via isOrbitAdminAllowed() on API routes
+  const isOrbitAdmin =
+    pathname === "/dashboard/launchpad" || pathname.startsWith("/dashboard/settings");
 
   if (isLoading && !isOrbitAdmin) {
     return (

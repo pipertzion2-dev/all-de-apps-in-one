@@ -3151,7 +3151,7 @@ export default function LaunchpadPage() {
         </div>
 
         {/* Stripe Setup - Always visible for admin */}
-        <OrbitStripeSetup isAdmin={true} />
+        <OrbitStripeSetup />
 
         {/* ── Marketing Status (DB-verified) ── */}
         {orbitStatus &&

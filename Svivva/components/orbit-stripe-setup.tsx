@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { authFetch } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +36,7 @@ function Dot({ ok }: { ok: boolean }) {
   );
 }
 
-export function OrbitStripeSetup({ isAdmin }: { isAdmin: boolean }) {
+export function OrbitStripeSetup() {
   const [status, setStatus] = useState<StatusPayload | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -54,7 +53,7 @@ export function OrbitStripeSetup({ isAdmin }: { isAdmin: boolean }) {
   const load = useCallback(async () => {
     setLoadError(null);
     try {
-      const res = await authFetch("/api/admin/platform-secrets");
+      const res = await fetch("/api/admin/platform-secrets");
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || res.statusText);
@@ -66,8 +65,8 @@ export function OrbitStripeSetup({ isAdmin }: { isAdmin: boolean }) {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) void load();
-  }, [isAdmin, load]);
+    void load();
+  }, [load]);
 
   const submit = async () => {
     setSaveMessage(null);
@@ -89,7 +88,7 @@ export function OrbitStripeSetup({ isAdmin }: { isAdmin: boolean }) {
         return;
       }
 
-      const res = await authFetch("/api/admin/platform-secrets", {
+      const res = await fetch("/api/admin/platform-secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
