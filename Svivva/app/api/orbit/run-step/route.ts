@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, inArray } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { openai, getDefaultModel } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
@@ -138,7 +138,7 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
       .split(".")[0]
       .replace(/-/g, " ");
     const res = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
+      model: getDefaultModel(),
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: "Return valid JSON only. No markdown." },
@@ -258,7 +258,7 @@ export async function POST(req: NextRequest) {
           }
 
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -358,7 +358,7 @@ export async function POST(req: NextRequest) {
           }
 
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -441,7 +441,7 @@ export async function POST(req: NextRequest) {
           }
 
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -492,7 +492,7 @@ export async function POST(req: NextRequest) {
     // ── STEP: Social pack ────────────────────────────────────────────────────
     if (stepId === "svivva-social") {
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -637,7 +637,7 @@ export async function POST(req: NextRequest) {
 
         try {
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -1081,7 +1081,7 @@ Return JSON with these 4 keys:
 
       // 1. Categorize + generate master hub page + category pages via AI
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1240,7 +1240,7 @@ Generate a complete "Powered by Svivva" traffic package that these tool pages sh
 Use concise, compelling copy. Every link must use UTM params. Make the widget beautiful but unobtrusive.`;
 
       const response = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         messages: [{ role: "user", content: prompt }],
         max_tokens: 3000,
       });
@@ -1415,7 +1415,7 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
         .join(", ");
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1744,7 +1744,7 @@ Return JSON:
       ];
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1822,7 +1822,7 @@ Return JSON:
         .join(", ");
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1956,7 +1956,7 @@ Return JSON:
       let miniAeoError: string | null = null;
       try {
         const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
+          model: getDefaultModel(),
           response_format: { type: "json_object" },
           messages: [
             {
@@ -2067,7 +2067,7 @@ Return JSON:
         .join(", ");
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2240,7 +2240,7 @@ Return JSON:
       ];
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2356,7 +2356,7 @@ Return JSON:
         .join(", ");
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2793,7 +2793,7 @@ Return JSON:
 
       // Generate universal listing content via AI
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2934,7 +2934,7 @@ Return JSON:
       ];
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -3068,7 +3068,7 @@ Return JSON:
       let aeoGenError: string | null = null;
       try {
         const gen = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
+          model: getDefaultModel(),
           response_format: { type: "json_object" },
           messages: [
             {
@@ -3204,7 +3204,7 @@ Return JSON:
       ];
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -3440,7 +3440,7 @@ Return JSON:
       ];
 
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -3548,7 +3548,7 @@ Return JSON:
     if (stepId === "svivva-schema") {
       // Generate JSON-LD structured data, FAQ schema, and backlink magnet content
       const gen = await openai.chat.completions.create({
-        model: DEFAULT_MODEL,
+        model: getDefaultModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -3773,7 +3773,7 @@ Return JSON:
       const results = await Promise.allSettled(
         toCreate.map(async (integ) => {
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -3881,7 +3881,7 @@ Return JSON:
       const indResults = await Promise.allSettled(
         indToCreate.map(async (ind) => {
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -4068,7 +4068,7 @@ Return JSON:
       const tmplResults = await Promise.allSettled(
         tmplToCreate.map(async (tmpl) => {
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -4158,7 +4158,7 @@ Return JSON:
       const paaResults = await Promise.allSettled(
         paaToCreate.map(async (paa) => {
           const gen = await openai.chat.completions.create({
-            model: DEFAULT_MODEL,
+            model: getDefaultModel(),
             response_format: { type: "json_object" },
             messages: [
               {

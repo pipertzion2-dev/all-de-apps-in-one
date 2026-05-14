@@ -6,6 +6,7 @@ const envSchema = z.object({
 
   OPENAI_API_KEY: z.string().optional(),
   AI_INTEGRATIONS_OPENAI_API_KEY: z.string().optional(),
+  OLLAMA_URL: z.string().optional(),
 
   STRIPE_SECRET_KEY: z.string().optional(),
 });
@@ -32,6 +33,10 @@ export function getOpenAIApiKey(): string | undefined {
 
 export function getOpenAIBaseUrl(): string | undefined {
   return process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+}
+
+export function getOllamaUrl(): string | undefined {
+  return process.env.OLLAMA_URL?.trim() || undefined;
 }
 
 export function hasStripeConfigured(): boolean {
