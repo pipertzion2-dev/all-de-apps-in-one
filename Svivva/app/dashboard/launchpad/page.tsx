@@ -2442,18 +2442,12 @@ export default function LaunchpadPage() {
   //   );
   // if (!me?.isAdmin) return null;
 
-  const steps =
-    tab === "svivva"
-      ? SVIVVA_STEPS
-      : tab === "mini"
-        ? miniSteps
-        : [];
+  const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "mini" ? miniSteps : [];
   const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
   const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
   const totalDone = svivvaDone + miniDone;
   const totalSteps = SVIVVA_STEPS.length + miniSteps.length;
-  const tabDone =
-    tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : 0;
+  const tabDone = tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : 0;
   const allTabDone = steps.length > 0 && tabDone === steps.length;
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
   const overallPct = Math.round((totalDone / totalSteps) * 100);
