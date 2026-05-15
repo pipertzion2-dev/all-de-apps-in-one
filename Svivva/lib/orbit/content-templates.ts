@@ -756,35 +756,195 @@ export function generateMiniCNAMETargets(): { subdomain: string; target: string 
   ];
 }
 
+/** 75 tools × 4 SEO pages each = 300 tool landing pages on svivva.com */
+const EXPANDED_MINI_TOOL_SLUGS = [
+  "password-strength-checker",
+  "ssl-certificate-checker",
+  "hash-generator",
+  "text-encoder",
+  "url-shortener",
+  "json-formatter",
+  "base64-converter",
+  "markdown-renderer",
+  "csv-to-json",
+  "regex-tester",
+  "color-converter",
+  "ip-address-lookup",
+  "dns-lookup-tool",
+  "whois-lookup-tool",
+  "port-scanner",
+  "subdomain-finder",
+  "email-header-analyzer",
+  "phishing-url-checker",
+  "malware-hash-lookup",
+  "jwt-decoder",
+  "uuid-generator",
+  "qr-code-generator",
+  "html-encoder",
+  "sql-injection-tester",
+  "xss-payload-generator",
+  "csrf-token-generator",
+  "http-header-analyzer",
+  "tls-cipher-checker",
+  "certificate-decoder",
+  "pgp-key-generator",
+  "entropy-calculator",
+  "password-generator",
+  "bcrypt-hash-generator",
+  "argon2-hash-generator",
+  "file-hash-checker",
+  "metadata-extractor",
+  "robots-txt-generator",
+  "sitemap-generator",
+  "open-graph-preview",
+  "meta-tag-generator",
+  "keyword-density-analyzer",
+  "readability-scorer",
+  "word-counter-tool",
+  "lorem-ipsum-generator",
+  "slug-generator",
+  "utm-link-builder",
+  "cron-expression-generator",
+  "timestamp-converter",
+  "timezone-converter",
+  "unit-converter-tool",
+  "image-compressor",
+  "favicon-generator",
+  "css-minifier",
+  "js-minifier",
+  "html-validator",
+  "api-response-formatter",
+  "yaml-to-json-converter",
+  "xml-formatter",
+  "diff-checker",
+  "text-case-converter",
+  "markdown-to-html-converter",
+  "ai-text-summarizer",
+  "ai-paraphraser-tool",
+  "ai-headline-generator",
+  "ai-meta-description-generator",
+  "ai-blog-outline-generator",
+  "ai-email-subject-generator",
+  "ai-product-description-generator",
+  "ai-social-post-generator",
+  "ai-hashtag-generator",
+  "ai-keyword-cluster-tool",
+  "ai-title-tag-optimizer",
+  "ai-faq-generator",
+  "ai-schema-markup-generator",
+  "ai-landing-page-copy-tool",
+  "ai-ad-copy-generator",
+  "ai-prompt-to-api-tool",
+  "ai-schema-enforcement-demo",
+  "ai-api-builder-demo",
+  "ai-rag-demo-tool",
+  "ai-agent-workflow-tool",
+  "ai-embeddings-playground",
+  "ai-vector-search-demo",
+  "ai-document-qa-tool",
+  "ai-pdf-summarizer-tool",
+  "ai-sentiment-analyzer",
+  "ai-keyword-extractor",
+  "ai-text-classifier",
+  "ai-spam-detector",
+  "ai-grammar-suggestion-tool",
+  "ai-seo-audit-tool",
+  "ai-indexnow-helper-tool",
+  "ai-chatbot-intent-tool",
+  "ai-help-center-generator",
+  "ai-guardrail-checker",
+  "ai-cost-estimator-tool",
+  "ai-latency-benchmark-tool",
+  "ai-model-router-tool",
+  "ai-fraud-detection-demo",
+  "ai-lead-scoring-tool",
+  "ai-email-classifier-tool",
+  "ai-support-ticket-tagger",
+  "ai-churn-predictor-tool",
+  "ai-recommendation-engine-demo",
+  "ai-landing-page-optimizer",
+  "ai-growth-dashboard-tool",
+  "ai-product-hunt-launch-tool",
+  "ai-directory-listing-tool",
+];
+
+export const MINI_TOOL_CATALOG_SIZE = 75;
+export const PAGES_PER_MINI_TOOL = 4;
+export const TARGET_MINI_TOOL_SEO_PAGES = MINI_TOOL_CATALOG_SIZE * PAGES_PER_MINI_TOOL;
+
 export function generateMiniImportTools(): { name: string; slug: string; description: string }[] {
-  return [
+  return EXPANDED_MINI_TOOL_SLUGS.slice(0, MINI_TOOL_CATALOG_SIZE).map((slug) => ({
+    name: slugToDisplayName(slug),
+    slug,
+    description: `${slugToDisplayName(slug)} — free online tool powered by Svivva`,
+  }));
+}
+
+function slugToDisplayName(slug: string): string {
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+/** All SEO page variants per tool (standard + import-style slugs). */
+export function generateAllToolSeoVariants(
+  appName: string,
+  appDesc: string,
+  appUrl: string,
+): SEOPageData[] {
+  const base = appName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 48);
+  const importStyle: SEOPageData[] = [
     {
-      name: "Password Strength Checker",
-      slug: "password-strength-checker",
-      description: "Check password strength",
+      title: `${appName} — Svivva Tool`,
+      metaTitle: `${appName} | Free Tool`.slice(0, 60),
+      metaDescription: `${appDesc}. Try free on Svivva — traffic to svivva.com.`.slice(0, 155),
+      headline: appName,
+      subheadline: appDesc,
+      content: `<h1>${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Open tool</a> · <a href="${SITE}">Build on Svivva</a></p>`,
+      slug: base,
+      keyword: appName,
     },
-    { name: "Text Encoder", slug: "text-encoder", description: "Encode text to various formats" },
-    { name: "Hash Generator", slug: "hash-generator", description: "Generate secure hashes" },
-    { name: "URL Shortener", slug: "url-shortener", description: "Create short links" },
-    { name: "JSON Formatter", slug: "json-formatter", description: "Format and validate JSON" },
     {
-      name: "Base64 Converter",
-      slug: "base64-converter",
-      description: "Convert to and from Base64",
+      title: `How to Use ${appName}`,
+      metaTitle: `How to Use ${appName}`.slice(0, 60),
+      metaDescription: `Guide for ${appName}. ${appDesc}.`.slice(0, 155),
+      headline: `How to Use ${appName}`,
+      subheadline: "Step-by-step",
+      content: `<h1>How to Use ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Try now</a></p>`,
+      slug: `${base}-guide`,
+      keyword: `how to use ${appName}`,
     },
     {
-      name: "Markdown Renderer",
-      slug: "markdown-renderer",
-      description: "Render Markdown to HTML",
+      title: `Best ${appName} Alternative`,
+      metaTitle: `Best ${appName} Alternative`.slice(0, 60),
+      metaDescription: `Best free ${appName}. ${appDesc}.`.slice(0, 155),
+      headline: `Best ${appName}`,
+      subheadline: "Free alternative",
+      content: `<h1>Best ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Use free</a></p>`,
+      slug: `${base}-alternative`,
+      keyword: `best ${appName}`,
     },
-    { name: "CSV to JSON", slug: "csv-to-json", description: "Convert CSV to JSON" },
-    { name: "Regex Tester", slug: "regex-tester", description: "Test regular expressions" },
     {
-      name: "Color Converter",
-      slug: "color-converter",
-      description: "Convert between color formats",
+      title: `Free ${appName}`,
+      metaTitle: `Free ${appName}`.slice(0, 60),
+      metaDescription: `Free ${appName} — no signup. ${appDesc}.`.slice(0, 155),
+      headline: `Free ${appName}`,
+      subheadline: "No signup",
+      content: `<h1>Free ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Start free</a></p>`,
+      slug: `free-${base}`,
+      keyword: `free ${appName}`,
     },
   ];
+
+  const bySlug = new Map<string, SEOPageData>();
+  for (const p of [...generateMiniSEOPages(appName, appDesc, appUrl), ...importStyle]) {
+    if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
+  }
+  return [...bySlug.values()];
 }
 
 // ── Batch generators used by run-step route ───────────────────────────────

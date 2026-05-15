@@ -6,6 +6,15 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl, getGoogleSearchConsoleInspectBase } from "@/lib/site-url";
 import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
 import { stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
+import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
+import {
+  TARGET_TOTAL_MARKETING_PAGES,
+  TARGET_TOOL_SEO_PAGES,
+  sumMarketingPages,
+  computePagesPercent,
+  computeIndexedPercent,
+  computeIndexHealthScore,
+} from "@/lib/orbit/marketing-targets";
 
 export async function GET() {
   try {
@@ -83,16 +92,41 @@ export async function GET() {
       getOpenAIApiKey()?.trim() && getOpenAIApiKey()!.trim().startsWith("sk-")
     );
 
-    const indexHealthScore = Math.round(
-      Math.min(
-        100,
-        (cred?.indexnowKey ? 25 : 0) +
-          (cred?.lastIndexnowSubmit ? 35 : 0) +
-          (hubPage.length > 0 ? 15 : 0) +
-          Math.min((seoRows.length / 25) * 12.5, 12.5) +
-          Math.min((blogRows.length / 8) * 12.5, 12.5),
-      ),
-    );
+    const counts = {
+      seoPages: seoRows.length,
+      comparisons: comparisons.length,
+      blogPosts: blogRows.length,
+      aeoPages: aeoRows.length,
+      seedMarketing: Number((seedRows[0] as { count?: number })?.count ?? 0),
+      hubExists: hubPage.length > 0,
+      indexNowKey: !!cred?.indexnowKey,
+      indexNowSubmitted: !!cred?.lastIndexnowSubmit,
+      integrationPages: Number((integRows[0] as { count?: number })?.count ?? 0),
+      usecasePages: Number((usecaseRows[0] as { count?: number })?.count ?? 0),
+      templatePages: Number((templateRows[0] as { count?: number })?.count ?? 0),
+      paaPages: Number((paaRows[0] as { count?: number })?.count ?? 0),
+    };
+
+    const totalPages = sumMarketingPages(counts);
+    const pagesPercent = computePagesPercent(totalPages);
+    let indexableUrlCount = 0;
+    if (cred?.indexnowKey) {
+      try {
+        indexableUrlCount = (await getAllSiteUrlsForIndexing()).length;
+      } catch {
+        indexableUrlCount = totalPages;
+      }
+    }
+    const indexedPercent = computeIndexedPercent({
+      indexNowSubmitted: counts.indexNowSubmitted,
+      indexNowOk: counts.indexNowSubmitted,
+      submittedCount: counts.indexNowSubmitted ? indexableUrlCount : 0,
+      totalUrls: indexableUrlCount || totalPages,
+    });
+    const indexHealthScore = computeIndexHealthScore(counts, {
+      totalPages,
+      indexedPercent,
+    });
 
     const warnings: string[] = [];
     if (!cred?.indexnowKey)
@@ -139,23 +173,14 @@ export async function GET() {
       })),
     ];
 
-    const counts = {
-      seoPages: seoRows.length,
-      comparisons: comparisons.length,
-      blogPosts: blogRows.length,
-      aeoPages: aeoRows.length,
-      seedMarketing: Number((seedRows[0] as any)?.count ?? 0),
-      hubExists: hubPage.length > 0,
-      indexNowKey: !!cred?.indexnowKey,
-      indexNowSubmitted: !!cred?.lastIndexnowSubmit,
-      integrationPages: Number((integRows[0] as any)?.count ?? 0),
-      usecasePages: Number((usecaseRows[0] as any)?.count ?? 0),
-      templatePages: Number((templateRows[0] as any)?.count ?? 0),
-      paaPages: Number((paaRows[0] as any)?.count ?? 0),
-    };
-
     return NextResponse.json({
       ...counts,
+      totalPages,
+      targetPages: TARGET_TOTAL_MARKETING_PAGES,
+      targetToolSeoPages: TARGET_TOOL_SEO_PAGES,
+      pagesPercent,
+      indexedPercent,
+      indexableUrlCount,
       stepCompletion: stepCompletionFromCounts(counts),
       coreUrls,
       toolUrls,

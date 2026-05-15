@@ -28,6 +28,7 @@ import {
   generateMiniImportTools,
   type SEOPageData,
 } from "@/lib/orbit/content-templates";
+import { TARGET_TOTAL_MARKETING_PAGES, TARGET_TOOL_SEO_PAGES } from "@/lib/orbit/marketing-targets";
 
 const BASE = getSiteUrl();
 
@@ -36,12 +37,31 @@ const THRESHOLDS = {
   comparisons: 8,
   blogPosts: 10,
   aeoPages: 10,
-  seedMarketing: 100,
+  seedMarketing: TARGET_TOOL_SEO_PAGES,
   integrationPages: 20,
   usecasePages: 15,
   templatePages: 20,
   paaPages: 10,
 } as const;
+
+const SKIP_HUB_SLUGS = new Set([
+  "blog",
+  "tools",
+  "about",
+  "contact",
+  "pricing",
+  "login",
+  "signup",
+  "privacy",
+  "terms",
+  "sitemap",
+  "robots",
+  "index",
+  "home",
+  "ai-tools-hub",
+  "cyber-security-mini-apps",
+  "seo-pack",
+]);
 
 const EXTRA_INTEGRATIONS = [
   "Stripe",
@@ -159,7 +179,12 @@ async function discoverToolsFromHub(
         try {
           const loc = m[1].trim();
           const slug = new URL(loc).pathname.split("/").filter(Boolean).pop() || "";
-          if (slug.length > 4 && TOOL_ENDINGS.some((e) => slug.endsWith(e))) {
+          if (
+            slug.length > 4 &&
+            !SKIP_HUB_SLUGS.has(slug) &&
+            !slug.startsWith("svivva-vs-") &&
+            (TOOL_ENDINGS.some((e) => slug.endsWith(e)) || slug.includes("-"))
+          ) {
             const name = slugToName(slug);
             tools.push({ name, url: loc, description: `${name} — free online tool on Svivva` });
           }
@@ -188,23 +213,56 @@ async function discoverAllMiniTools(): Promise<
     const found = await discoverToolsFromHub(hub);
     for (const t of found) byUrl.set(t.url, t);
   }
-  if (byUrl.size < 25) {
-    for (const t of generateMiniImportTools()) {
-      const url = `${getAiToolsHubUrl()}/${t.slug}`;
-      if (!byUrl.has(url)) {
-        byUrl.set(url, { name: t.name, url, description: t.description });
-      }
-    }
-    let i = 0;
-    while (byUrl.size < 30) {
-      const slug = `svivva-ai-tool-${i}-generator`;
-      const name = `Svivva AI Tool ${i + 1}`;
-      const url = `${BASE}/${slug}`;
-      byUrl.set(url, { name, url, description: `${name} — free AI tool powered by Svivva` });
-      i++;
+  for (const t of generateMiniImportTools()) {
+    const url = `${getAiToolsHubUrl()}/${t.slug}`;
+    if (!byUrl.has(url)) {
+      byUrl.set(url, { name: t.name, url, description: t.description });
     }
   }
   return [...byUrl.values()];
+}
+
+async function getTotalMarketingPageCount(): Promise<number> {
+  const [seo, blog, aeo, seed, integ, use, tmpl, paa] = await Promise.all([
+    countByCategory("seo-landing"),
+    db
+      .select({ id: blogPosts.id })
+      .from(blogPosts)
+      .where(eq(blogPosts.published, true))
+      .then((r) => r.length),
+    countByCategory("aeo"),
+    countByCategory("seed-marketing"),
+    countByCategory("integration"),
+    countByCategory("usecase"),
+    countByCategory("template"),
+    countByCategory("paa"),
+  ]);
+  const comparisons = await countComparisons();
+  return seo + comparisons + blog + aeo + seed + integ + use + tmpl + paa;
+}
+
+/** Create up to 4 SEO pages per tool until seed-marketing reaches TARGET (300). */
+async function ensureAllToolSeoPages(
+  newUrls: string[],
+): Promise<{ added: number; toolCount: number }> {
+  const tools = await discoverAllMiniTools();
+  let seedCount = await countByCategory("seed-marketing");
+  let added = 0;
+
+  for (const tool of tools) {
+    if (seedCount >= TARGET_TOOL_SEO_PAGES) break;
+    const pages = generateMiniSEOPages(tool.name, tool.description, tool.url);
+    for (const p of pages) {
+      if (seedCount >= TARGET_TOOL_SEO_PAGES) break;
+      if (await insertSeoPage(p, "seed-marketing", tool.url)) {
+        seedCount++;
+        added++;
+        newUrls.push(`${BASE}/${p.slug}`);
+      }
+    }
+  }
+
+  return { added, toolCount: tools.length };
 }
 
 async function countByCategory(category: string): Promise<number> {
@@ -524,23 +582,34 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
     steps.push(`✓ PAA pages: +${added}`);
   }
 
-  // Mini-app SEO (seed-marketing) — discover every hub + synthetic tools
-  let seedCount = await countByCategory("seed-marketing");
-  if (seedCount < THRESHOLDS.seedMarketing) {
-    const tools = await discoverAllMiniTools();
-    let added = 0;
-    for (const tool of tools) {
-      if (seedCount + added >= THRESHOLDS.seedMarketing) break;
-      const pages = generateMiniSEOPages(tool.name, tool.description, tool.url);
-      for (const p of pages) {
-        if (seedCount + added >= THRESHOLDS.seedMarketing) break;
-        if (await insertSeoPage(p, "seed-marketing", tool.url)) {
-          added++;
-          newUrls.push(`${BASE}/${p.slug}`);
-        }
+  // Mini-app SEO — 75 tools × 4 pages = 300 tool landing pages (all link to svivva.com)
+  const beforeSeed = await countByCategory("seed-marketing");
+  if (beforeSeed < TARGET_TOOL_SEO_PAGES) {
+    const { added, toolCount } = await ensureAllToolSeoPages(newUrls);
+    const afterSeed = await countByCategory("seed-marketing");
+    steps.push(
+      `✓ Tools SEO: +${added} pages from ${toolCount} mini apps (${afterSeed}/${TARGET_TOOL_SEO_PAGES} target)`,
+    );
+  } else {
+    steps.push(`✓ Tools SEO: ${beforeSeed}/${TARGET_TOOL_SEO_PAGES} already complete`);
+  }
+
+  let totalPages = await getTotalMarketingPageCount();
+  if (totalPages < TARGET_TOTAL_MARKETING_PAGES) {
+    const need = TARGET_TOTAL_MARKETING_PAGES - totalPages;
+    const filler = batchSEOPages(need + 5);
+    let extra = 0;
+    for (const p of filler) {
+      if (extra >= need) break;
+      if (await insertSeoPage(p, "seo-landing")) {
+        extra++;
+        newUrls.push(`${BASE}/${p.slug}`);
       }
     }
-    steps.push(`✓ Tools SEO pages: +${added} from ${tools.length} mini apps`);
+    steps.push(
+      `✓ Extra SEO pages: +${extra} (total marketing pages toward ${TARGET_TOTAL_MARKETING_PAGES})`,
+    );
+    totalPages = await getTotalMarketingPageCount();
   }
 
   // Hub page
@@ -653,7 +722,7 @@ export function stepCompletionFromCounts(counts: {
     "svivva-usecases": counts.usecasePages >= THRESHOLDS.usecasePages,
     "svivva-templates": counts.templatePages >= THRESHOLDS.templatePages,
     "svivva-paa": counts.paaPages >= THRESHOLDS.paaPages,
-    "mini-import": counts.seedMarketing >= THRESHOLDS.seedMarketing,
+    "mini-import": counts.seedMarketing >= TARGET_TOOL_SEO_PAGES,
     "mini-hub": counts.hubExists,
     "mini-embed": counts.seedMarketing >= 20,
     "mini-social": counts.seedMarketing >= 20,

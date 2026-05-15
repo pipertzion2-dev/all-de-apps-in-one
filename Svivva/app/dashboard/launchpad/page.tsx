@@ -1974,6 +1974,12 @@ export default function LaunchpadPage() {
     usecasePages: number;
     templatePages: number;
     paaPages: number;
+    totalPages?: number;
+    targetPages?: number;
+    targetToolSeoPages?: number;
+    pagesPercent?: number;
+    indexedPercent?: number;
+    indexableUrlCount?: number;
     stepCompletion?: Record<string, boolean>;
     coreUrls: GscUrlItem[];
     toolUrls: GscUrlItem[];
@@ -2948,30 +2954,29 @@ export default function LaunchpadPage() {
             </div>
 
             {/* Main gauges row */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {(() => {
                 const totalPages =
+                  orbitStatus.totalPages ??
                   (orbitStatus.seoPages ?? 0) +
-                  (orbitStatus.comparisons ?? 0) +
-                  (orbitStatus.blogPosts ?? 0) +
-                  (orbitStatus.aeoPages ?? 0) +
-                  (orbitStatus.seedMarketing ?? 0) +
-                  (orbitStatus.integrationPages ?? 0) +
-                  (orbitStatus.usecasePages ?? 0) +
-                  (orbitStatus.templatePages ?? 0) +
-                  (orbitStatus.paaPages ?? 0);
-                const targetPages = 300;
-                const pct = Math.min(Math.round((totalPages / targetPages) * 100), 100);
-                const healthScore = Math.round(
-                  ((orbitStatus.indexNowKey ? 20 : 0) +
-                    (orbitStatus.indexNowSubmitted ? 30 : 0) +
-                    (orbitStatus.hubExists ? 10 : 0) +
-                    Math.min((orbitStatus.seoPages / 20) * 15, 15) +
-                    Math.min((orbitStatus.blogPosts / 10) * 15, 15) +
-                    Math.min(((orbitStatus.seedMarketing ?? 0) / 100) * 10, 10)) *
-                    1,
-                );
-                const indexedPct = orbitStatus.indexNowSubmitted ? 85 : 0;
+                    (orbitStatus.comparisons ?? 0) +
+                    (orbitStatus.blogPosts ?? 0) +
+                    (orbitStatus.aeoPages ?? 0) +
+                    (orbitStatus.seedMarketing ?? 0) +
+                    (orbitStatus.integrationPages ?? 0) +
+                    (orbitStatus.usecasePages ?? 0) +
+                    (orbitStatus.templatePages ?? 0) +
+                    (orbitStatus.paaPages ?? 0);
+                const targetPages = orbitStatus.targetPages ?? 300;
+                const pct =
+                  orbitStatus.pagesPercent ??
+                  Math.min(Math.round((totalPages / targetPages) * 100), 100);
+                const healthScore =
+                  orbitStatus.preflight?.indexHealthScore ??
+                  Math.min(100, Math.round(pct * 0.5 + (orbitStatus.indexedPercent ?? 0) * 0.5));
+                const indexedPct = orbitStatus.indexedPercent ?? 0;
+                const toolSeo = orbitStatus.seedMarketing ?? 0;
+                const toolTarget = orbitStatus.targetToolSeoPages ?? 300;
 
                 const gauges = [
                   {
@@ -2979,8 +2984,21 @@ export default function LaunchpadPage() {
                     value: totalPages,
                     target: targetPages,
                     pct,
-                    color: pct >= 80 ? "#4ade80" : pct >= 40 ? "#eab308" : "#ef4444",
+                    color: pct >= 100 ? "#4ade80" : pct >= 80 ? "#eab308" : "#ef4444",
                     unit: `/${targetPages}`,
+                  },
+                  {
+                    label: "Tools SEO",
+                    value: toolSeo,
+                    target: toolTarget,
+                    pct: Math.min(100, Math.round((toolSeo / toolTarget) * 100)),
+                    color:
+                      toolSeo >= toolTarget
+                        ? "#4ade80"
+                        : toolSeo >= toolTarget * 0.85
+                          ? "#eab308"
+                          : "#ef4444",
+                    unit: `/${toolTarget}`,
                   },
                   {
                     label: "Health Score",
@@ -2988,7 +3006,7 @@ export default function LaunchpadPage() {
                     target: 100,
                     pct: healthScore,
                     color:
-                      healthScore >= 80 ? "#4ade80" : healthScore >= 50 ? "#eab308" : "#ef4444",
+                      healthScore >= 90 ? "#4ade80" : healthScore >= 60 ? "#eab308" : "#ef4444",
                     unit: "%",
                   },
                   {
@@ -2996,7 +3014,7 @@ export default function LaunchpadPage() {
                     value: indexedPct,
                     target: 100,
                     pct: indexedPct,
-                    color: indexedPct >= 70 ? "#4ade80" : indexedPct >= 30 ? "#eab308" : "#ef4444",
+                    color: indexedPct >= 100 ? "#4ade80" : indexedPct >= 50 ? "#eab308" : "#ef4444",
                     unit: "%",
                   },
                 ];
@@ -3324,8 +3342,8 @@ export default function LaunchpadPage() {
               },
               {
                 label: "Tools SEO Pages",
-                ok: orbitStatus.seedMarketing >= 100,
-                detail: `${(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages`,
+                ok: orbitStatus.seedMarketing >= (orbitStatus.targetToolSeoPages ?? 300),
+                detail: `${(orbitStatus.seedMarketing ?? 0).toLocaleString()}/${orbitStatus.targetToolSeoPages ?? 300} pages`,
               },
               {
                 label: "Integration Pages",
