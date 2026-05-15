@@ -3811,16 +3811,8 @@ Return JSON:
       for (const page of pages) {
         if (!page.content || !page.slug) continue;
         try {
-          const ex = await db
-            .select({ id: seoLandingPages.id })
-            .from(seoLandingPages)
-            .where(eq(seoLandingPages.slug, page.slug))
-            .limit(1);
-          const finalSlug = ex.length
-            ? `${page.slug}-${randomBytes(3).toString("hex")}`
-            : page.slug;
           await db.insert(seoLandingPages).values({
-            slug: finalSlug,
+            slug: page.slug,
             title: page.title || page.query,
             keyword: page.query,
             headline: page.title || page.query,
@@ -3833,9 +3825,9 @@ Return JSON:
             published: true,
             toolUrl: BASE_URL,
           });
-          created.push(`${BASE_URL}/${finalSlug}`);
+          created.push(`${BASE_URL}/${page.slug}`);
         } catch {
-          /* skip */
+          /* skip if duplicate */
         }
       }
 
@@ -4494,7 +4486,7 @@ Return JSON:
 
       const useAI = isOrbitFreeAIConfigured();
       const results = await Promise.allSettled(
-        toCreate.map(async (integ) => {
+        INTEGRATIONS.map(async (integ) => {
           let d;
           if (useAI) {
             const gen = await openai.chat.completions.create({
@@ -4620,7 +4612,7 @@ Return JSON:
 
       const useAI = isOrbitFreeAIConfigured();
       const indResults = await Promise.allSettled(
-        indToCreate.map(async (ind) => {
+        INDUSTRIES.map(async (ind) => {
           let d;
           if (useAI) {
             const gen = await openai.chat.completions.create({
@@ -4825,7 +4817,7 @@ Return JSON:
 
       const useAI = isOrbitFreeAIConfigured();
       const tmplResults = await Promise.allSettled(
-        tmplToCreate.map(async (tmpl) => {
+        TEMPLATES.map(async (tmpl) => {
           let d;
           if (useAI) {
             const gen = await openai.chat.completions.create({
@@ -4929,7 +4921,7 @@ Return JSON:
       const paaSkipped = PAA_QUESTIONS.filter((p) => paaExistingSlugs.has(p.slug));
 
       const paaResults = await Promise.allSettled(
-        paaToCreate.map(async (paa) => {
+        PAA_QUESTIONS.map(async (paa) => {
           const gen = await openai.chat.completions.create({
             model: getDefaultModel(),
             response_format: { type: "json_object" },
