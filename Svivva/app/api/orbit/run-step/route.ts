@@ -3390,8 +3390,10 @@ Return JSON:
             () => ({
               tagline: "Turn prompts into production APIs",
               shortDesc: "AI-powered API builder with schema enforcement",
-              description: "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
-              longDesc: "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+              description:
+                "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+              longDesc:
+                "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
               features: [
                 "Natural language to API",
                 "JSON schema enforcement",
@@ -3402,19 +3404,23 @@ Return JSON:
               ],
               categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
               keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
-              targetAudience: "Developers, no-code builders, startups, enterprises building AI-powered features",
+              targetAudience:
+                "Developers, no-code builders, startups, enterprises building AI-powered features",
               pricing: "Free tier available, paid plans from $29/month",
               alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
               rhHint: "AI APIs, Developer Tools, No-Code, Automation",
-              phHint: "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+              phHint:
+                "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
             }),
-            "directory"
+            "directory",
           )
         : {
             tagline: "Turn prompts into production APIs",
             shortDesc: "AI-powered API builder with schema enforcement",
-            description: "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
-            longDesc: "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+            description:
+              "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+            longDesc:
+              "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
             features: [
               "Natural language to API",
               "JSON schema enforcement",
@@ -3425,11 +3431,13 @@ Return JSON:
             ],
             categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
             keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
-            targetAudience: "Developers, no-code builders, startups, enterprises building AI-powered features",
+            targetAudience:
+              "Developers, no-code builders, startups, enterprises building AI-powered features",
             pricing: "Free tier available, paid plans from $29/month",
             alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
             rhHint: "AI APIs, Developer Tools, No-Code, Automation",
-            phHint: "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+            phHint:
+              "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
           };
 
       // Save as a reference page in the DB for easy access
