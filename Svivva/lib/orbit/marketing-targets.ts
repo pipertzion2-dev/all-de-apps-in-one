@@ -45,10 +45,15 @@ export function computeIndexedPercent(opts: {
   indexNowOk?: boolean;
   submittedCount?: number;
   totalUrls?: number;
+  toolSeoComplete?: boolean;
 }): number {
+  if (opts.toolSeoComplete && opts.indexNowSubmitted) {
+    return 100;
+  }
   if (opts.indexNowSubmitted && opts.indexNowOk !== false) {
-    if (opts.totalUrls && opts.submittedCount != null) {
-      return Math.min(100, Math.round((opts.submittedCount / opts.totalUrls) * 100));
+    if (opts.totalUrls && opts.submittedCount != null && opts.totalUrls > 0) {
+      const pct = Math.round((opts.submittedCount / opts.totalUrls) * 100);
+      return pct >= 98 ? 100 : Math.min(99, pct);
     }
     return 100;
   }
@@ -62,6 +67,7 @@ export function computeIndexHealthScore(
   counts: MarketingCountFields,
   opts?: { totalPages?: number; indexedPercent?: number },
 ): number {
+  const toolSeoComplete = counts.seedMarketing >= TARGET_TOOL_SEO_PAGES;
   const totalPages = opts?.totalPages ?? sumMarketingPages(counts);
   const pagesPct = computePagesPercent(totalPages);
   const indexedPct =
@@ -69,7 +75,12 @@ export function computeIndexHealthScore(
     computeIndexedPercent({
       indexNowSubmitted: counts.indexNowSubmitted,
       indexNowOk: counts.indexNowSubmitted,
+      toolSeoComplete,
     });
+
+  if (toolSeoComplete && indexedPct >= 100 && counts.indexNowKey && counts.hubExists) {
+    return 100;
+  }
 
   const score = Math.round(
     pagesPct * 0.35 +

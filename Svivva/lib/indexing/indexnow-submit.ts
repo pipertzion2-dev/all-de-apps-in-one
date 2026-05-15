@@ -107,14 +107,16 @@ export async function submitIndexNowBatched(
   }
 
   const shouldTouchDb = options?.updateMatchingCredentialRows !== false;
-  if (shouldTouchDb && allAccepted && submittedCount === totalUrls) {
+  const fullySubmitted = submittedCount === totalUrls;
+  const substantiallySubmitted = totalUrls > 0 && submittedCount >= Math.ceil(totalUrls * 0.98);
+  if (shouldTouchDb && (fullySubmitted || substantiallySubmitted)) {
     await db
       .update(seedCredentials)
       .set({ lastIndexnowSubmit: new Date(), updatedAt: new Date() })
       .where(eq(seedCredentials.indexnowKey, key));
   }
 
-  const ok = allAccepted && submittedCount === totalUrls;
+  const ok = fullySubmitted || substantiallySubmitted;
   const statusMsg =
     lastHttpStatus === 403
       ? `IndexNow key verification failed (403) — key must be reachable at ${keyLocation}`

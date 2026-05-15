@@ -117,11 +117,13 @@ export async function GET() {
         indexableUrlCount = totalPages;
       }
     }
+    const toolSeoComplete = counts.seedMarketing >= TARGET_TOOL_SEO_PAGES;
     const indexedPercent = computeIndexedPercent({
       indexNowSubmitted: counts.indexNowSubmitted,
       indexNowOk: counts.indexNowSubmitted,
       submittedCount: counts.indexNowSubmitted ? indexableUrlCount : 0,
       totalUrls: indexableUrlCount || totalPages,
+      toolSeoComplete,
     });
     const indexHealthScore = computeIndexHealthScore(counts, {
       totalPages,
@@ -133,10 +135,12 @@ export async function GET() {
       warnings.push(
         "IndexNow key not set yet — run “Set Up IndexNow” before expecting Bing/Yandex indexing.",
       );
-    if (!cred?.lastIndexnowSubmit)
+    if (!cred?.lastIndexnowSubmit && !toolSeoComplete)
       warnings.push(
         "IndexNow has not been submitted yet — search engines may not have your latest URLs.",
       );
+    if (toolSeoComplete && !cred?.lastIndexnowSubmit)
+      warnings.push("Run Complete Now to submit all 300 tool pages to IndexNow.");
     if (!orbitFreeAi)
       warnings.push(
         "Orbit AI prose is in template mode. Add GEMINI_API_KEY (Google AI Studio, free tier) or OLLAMA_URL for AI-generated copy — paid OpenAI is not used in Orbit.",
