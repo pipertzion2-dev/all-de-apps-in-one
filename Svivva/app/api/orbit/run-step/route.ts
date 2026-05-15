@@ -3350,19 +3350,22 @@ Return JSON:
         },
       ];
 
-      // Generate universal listing content via AI
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "You write product listing content for SaaS directories. Be specific, factual, and benefit-first. No jargon.",
-          },
-          {
-            role: "user",
-            content: `Create directory listing content for Svivva — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
+      // Generate universal listing content via AI or template fallback
+      const listing = isOrbitFreeAIConfigured()
+        ? await generateWithAIOrFallback(
+            async () => {
+              const gen = await openai.chat.completions.create({
+                model: getDefaultModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You write product listing content for SaaS directories. Be specific, factual, and benefit-first. No jargon.",
+                  },
+                  {
+                    role: "user",
+                    content: `Create directory listing content for Svivva — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
 
 Return JSON:
 {
@@ -3379,11 +3382,55 @@ Return JSON:
   "rhHint": "For RapidAPI: what endpoint categories would you publish? List 3.",
   "phHint": "Product Hunt first comment (founder story, 280 chars)"
 }`,
-          },
-        ],
-      });
-
-      const listing = JSON.parse(gen.choices[0].message.content || "{}");
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => ({
+              tagline: "Turn prompts into production APIs",
+              shortDesc: "AI-powered API builder with schema enforcement",
+              description: "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+              longDesc: "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+              features: [
+                "Natural language to API",
+                "JSON schema enforcement",
+                "Version control & rollback",
+                "Automated evaluations",
+                "API marketplace",
+                "A/B testing",
+              ],
+              categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
+              keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
+              targetAudience: "Developers, no-code builders, startups, enterprises building AI-powered features",
+              pricing: "Free tier available, paid plans from $29/month",
+              alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
+              rhHint: "AI APIs, Developer Tools, No-Code, Automation",
+              phHint: "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+            }),
+            "directory"
+          )
+        : {
+            tagline: "Turn prompts into production APIs",
+            shortDesc: "AI-powered API builder with schema enforcement",
+            description: "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+            longDesc: "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+            features: [
+              "Natural language to API",
+              "JSON schema enforcement",
+              "Version control & rollback",
+              "Automated evaluations",
+              "API marketplace",
+              "A/B testing",
+            ],
+            categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
+            keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
+            targetAudience: "Developers, no-code builders, startups, enterprises building AI-powered features",
+            pricing: "Free tier available, paid plans from $29/month",
+            alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
+            rhHint: "AI APIs, Developer Tools, No-Code, Automation",
+            phHint: "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+          };
 
       // Save as a reference page in the DB for easy access
       const slug = "svivva-directory-listings";
