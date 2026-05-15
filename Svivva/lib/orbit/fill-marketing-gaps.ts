@@ -146,9 +146,9 @@ function slugToName(slug: string): string {
     .trim();
 }
 
-async function discoverToolsFromHub(hubUrl: string): Promise<
-  { name: string; url: string; description: string }[]
-> {
+async function discoverToolsFromHub(
+  hubUrl: string,
+): Promise<{ name: string; url: string; description: string }[]> {
   const base = hubUrl.replace(/\/$/, "");
   const tools: { name: string; url: string; description: string }[] = [];
   try {
@@ -174,7 +174,9 @@ async function discoverToolsFromHub(hubUrl: string): Promise<
   return tools;
 }
 
-async function discoverAllMiniTools(): Promise<{ name: string; url: string; description: string }[]> {
+async function discoverAllMiniTools(): Promise<
+  { name: string; url: string; description: string }[]
+> {
   const hubs = [
     getPyracryptMiniAppsBaseUrl(),
     getAiToolsHubUrl(),
@@ -276,10 +278,8 @@ function industryPage(name: string): SEOPageData {
   return {
     title: `AI API for ${name}`,
     metaTitle: `AI API for ${name} | Svivva`.slice(0, 60),
-    metaDescription: `Build AI APIs for ${name.toLowerCase()} with Svivva — traffic to svivva.com.`.slice(
-      0,
-      155,
-    ),
+    metaDescription:
+      `Build AI APIs for ${name.toLowerCase()} with Svivva — traffic to svivva.com.`.slice(0, 155),
     headline: `AI API for ${name}`,
     subheadline: `Built in minutes for ${name}.`,
     content: `<h1>AI API for ${name}</h1><p>Deploy AI on Svivva — <a href="${BASE}">svivva.com</a>.</p>`,
@@ -604,13 +604,14 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
     usecasePages: await countByCategory("usecase"),
     templatePages: await countByCategory("template"),
     paaPages: await countByCategory("paa"),
-    hubExists: (
-      await db
-        .select({ id: seoLandingPages.id })
-        .from(seoLandingPages)
-        .where(eq(seoLandingPages.slug, "ai-tools-hub"))
-        .limit(1)
-    ).length > 0,
+    hubExists:
+      (
+        await db
+          .select({ id: seoLandingPages.id })
+          .from(seoLandingPages)
+          .where(eq(seoLandingPages.slug, "ai-tools-hub"))
+          .limit(1)
+      ).length > 0,
   };
 
   return {

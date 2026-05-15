@@ -1995,29 +1995,26 @@ export default function LaunchpadPage() {
     staleTime: 30_000,
   });
 
-  const applyDbStepCompletion = useCallback(
-    (completion: Record<string, boolean> | undefined) => {
-      if (!completion) return;
-      setStatuses((prev) => {
-        const next = { ...prev };
-        let changed = false;
-        for (const [id, ok] of Object.entries(completion)) {
-          if (ok && next[id] !== "done") {
-            next[id] = "done";
-            changed = true;
-          }
+  const applyDbStepCompletion = useCallback((completion: Record<string, boolean> | undefined) => {
+    if (!completion) return;
+    setStatuses((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const [id, ok] of Object.entries(completion)) {
+        if (ok && next[id] !== "done") {
+          next[id] = "done";
+          changed = true;
         }
-        if (!changed) return prev;
-        statusesRef.current = next;
-        setResults((prevR) => {
-          saveState(next, prevR);
-          return prevR;
-        });
-        return next;
+      }
+      if (!changed) return prev;
+      statusesRef.current = next;
+      setResults((prevR) => {
+        saveState(next, prevR);
+        return prevR;
       });
-    },
-    [],
-  );
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (orbitStatus?.stepCompletion) applyDbStepCompletion(orbitStatus.stepCompletion);
@@ -2474,9 +2471,7 @@ export default function LaunchpadPage() {
       setFullAutopilotStep("Discovering every mini app across all hubs…");
       const discovered = await discoverAllHubTools();
       toast({
-        title: discovered.length
-          ? `${discovered.length} tools discovered`
-          : "Hub scan complete",
+        title: discovered.length ? `${discovered.length} tools discovered` : "Hub scan complete",
         description: discovered.length
           ? "Orbit will index each tool on svivva.com for traffic."
           : "Continuing with server-side discovery during mini-import.",
@@ -2578,7 +2573,10 @@ export default function LaunchpadPage() {
       for (let phase = startPhase; phase < GOLD_PHASES; phase++) {
         await runPhaseUnits(phase);
         try {
-          localStorage.setItem(GOLD_PHASE_KEY, phase + 1 >= GOLD_PHASES ? "done" : String(phase + 1));
+          localStorage.setItem(
+            GOLD_PHASE_KEY,
+            phase + 1 >= GOLD_PHASES ? "done" : String(phase + 1),
+          );
         } catch {
           /* ignore */
         }
@@ -2841,9 +2839,9 @@ export default function LaunchpadPage() {
                 <h2 className="text-sm font-black text-foreground">Run Everything (8 phases)</h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   One press runs <strong>all 8 phases</strong> automatically: discovers every mini
-                  app hub, auto-connects workspace apps, runs all 22 marketing steps in
-                  server-safe batches, fills DB gaps, and submits every URL to IndexNow — all traffic
-                  funnels to <strong>svivva.com</strong>.
+                  app hub, auto-connects workspace apps, runs all 22 marketing steps in server-safe
+                  batches, fills DB gaps, and submits every URL to IndexNow — all traffic funnels to{" "}
+                  <strong>svivva.com</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
                   Orbit uses <strong>free-tier AI only</strong> (set{" "}
