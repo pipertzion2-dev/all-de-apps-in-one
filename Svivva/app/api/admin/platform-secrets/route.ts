@@ -21,7 +21,9 @@ const patchSchema = z
 function toPatchValue(raw: string | undefined): string | null | undefined {
   if (raw === undefined) return undefined;
   const t = raw.trim();
-  return t.length ? t : null;
+  // Only return null if explicitly empty string (user wants to clear)
+  // Otherwise return undefined to skip updating this field
+  return t.length === 0 ? null : t;
 }
 
 export async function GET() {
