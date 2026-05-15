@@ -1196,19 +1196,22 @@ Return JSON with these 4 keys:
         );
       }
 
-      // 1. Categorize + generate master hub page + category pages via AI
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "SEO architect building a hub page strategy for a collection of AI tools. Create well-structured, high-traffic landing pages for tool collections.",
-          },
-          {
-            role: "user",
-            content: `I have ${appTitles.length} AI-powered mini apps in the Svivva AI Tools Hub. App names: ${appTitles.join(", ")}.
+      let hubData: { hub?: Record<string, string>; categories?: Record<string, string>[] } = {};
+      const useHubAI = isOrbitFreeAIConfigured();
+      if (useHubAI) {
+        try {
+          const gen = await openai.chat.completions.create({
+            model: getDefaultModel(),
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "SEO architect building a hub page strategy for a collection of AI tools. Create well-structured, high-traffic landing pages for tool collections.",
+              },
+              {
+                role: "user",
+                content: `I have ${appTitles.length} AI-powered mini apps in the Svivva AI Tools Hub. App names: ${appTitles.join(", ")}.
 
 Generate:
 1. A master hub page listing ALL apps
@@ -1221,7 +1224,7 @@ Return JSON:
     "title": "Svivva AI Tools Hub — ${appTitles.length} Free AI Tools",
     "metaTitle": "≤60 chars",
     "metaDescription": "≤155 chars",
-    "content": "Full HTML: hero H1, subtitle, grid of all apps as <ul> with links to /${appTitles[0]?.toLowerCase().replace(/\\s+/g, "-")}, benefits section, CTA. Include all ${appTitles.length} app names."
+    "content": "Full HTML: hero H1, subtitle, grid of all apps as <ul>, benefits section, CTA to ${BASE_URL}"
   },
   "categories": [
     {
@@ -1229,17 +1232,37 @@ Return JSON:
       "slug": "ai-writing-tools",
       "metaTitle": "≤60 chars",
       "metaDescription": "≤155 chars",
-      "apps": ["app name 1", "app name 2"],
-      "content": "HTML: H1, category intro, app list <ul> with descriptions, who this is for, CTA"
+      "content": "HTML: H1, category intro, app list, CTA to ${BASE_URL}"
     }
-    // ... 5 more categories relevant to these specific apps
   ]
 }`,
+              },
+            ],
+          });
+          hubData = JSON.parse(gen.choices[0].message.content || "{}");
+        } catch {
+          /* fall through to templates */
+        }
+      }
+      if (!hubData.hub?.content) {
+        const tplHub = generateMiniHub(appTitles);
+        hubData = {
+          hub: {
+            slug: tplHub.slug,
+            title: tplHub.title,
+            metaTitle: tplHub.metaTitle,
+            metaDescription: tplHub.metaDescription,
+            content: tplHub.content,
           },
-        ],
-      });
-
-      const hubData = JSON.parse(gen.choices[0].message.content || "{}");
+          categories: generateMiniCategories(appTitles).map((c) => ({
+            name: c.name,
+            slug: c.slug,
+            metaTitle: c.metaTitle,
+            metaDescription: c.metaDescription,
+            content: c.content,
+          })),
+        };
+      }
       const createdPages: string[] = [];
 
       // Save hub page
@@ -4504,7 +4527,7 @@ Return JSON:
 
       const useAI = isOrbitFreeAIConfigured();
       const results = await Promise.allSettled(
-        INTEGRATIONS.map(async (integ) => {
+        toCreate.map(async (integ) => {
           let d;
           if (useAI) {
             const gen = await openai.chat.completions.create({
@@ -4630,7 +4653,7 @@ Return JSON:
 
       const useAI = isOrbitFreeAIConfigured();
       const indResults = await Promise.allSettled(
-        INDUSTRIES.map(async (ind) => {
+        indToCreate.map(async (ind) => {
           let d;
           if (useAI) {
             const gen = await openai.chat.completions.create({
@@ -4938,28 +4961,45 @@ Return JSON:
       const paaToCreate = PAA_QUESTIONS.filter((p) => !paaExistingSlugs.has(p.slug));
       const paaSkipped = PAA_QUESTIONS.filter((p) => paaExistingSlugs.has(p.slug));
 
+      const usePaaAI = isOrbitFreeAIConfigured();
       const paaResults = await Promise.allSettled(
-        PAA_QUESTIONS.map(async (paa) => {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content: `You write Answer Engine Optimized (AEO) content for Google's "People Also Ask" boxes AND AI search engines (Perplexity, ChatGPT, Gemini). Rules:
+        paaToCreate.map(async (paa) => {
+          let d: {
+            title?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            content?: string;
+          };
+          if (usePaaAI) {
+            const gen = await openai.chat.completions.create({
+              model: getDefaultModel(),
+              response_format: { type: "json_object" },
+              messages: [
+                {
+                  role: "system",
+                  content: `You write Answer Engine Optimized (AEO) content for Google's "People Also Ask" boxes AND AI search engines (Perplexity, ChatGPT, Gemini). Rules:
 1. Start with a direct 2-3 sentence answer in the FIRST paragraph — this is what Google and Perplexity show
 2. Be factual, specific, and cite concrete numbers where possible
 3. Use H2/H3 subheadings for supporting sections
 4. Mention Svivva naturally in the answer as one solution
 5. No marketing fluff — write like an expert answering on Quora`,
-              },
-              {
-                role: "user",
-                content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | Svivva", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention Svivva as a tool that helps) }`,
-              },
-            ],
-          });
-          const d = JSON.parse(gen.choices[0].message.content || "{}");
+                },
+                {
+                  role: "user",
+                  content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | Svivva", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention Svivva as a tool that helps) }`,
+                },
+              ],
+            });
+            d = JSON.parse(gen.choices[0].message.content || "{}");
+          } else {
+            const tpl = batchPAAPages(1)[0];
+            d = {
+              title: paa.q,
+              metaTitle: tpl.metaTitle,
+              metaDescription: tpl.metaDescription,
+              content: tpl.content,
+            };
+          }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: paa.slug,

@@ -442,8 +442,17 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
 
 const PYRACRYPT_PRESET = getPyracryptOrbitPreset();
 
+/** Every mini-app hub Orbit scans to build svivva.com SEO pages */
+const ORBIT_HUB_URLS = [
+  PYRACRYPT_PRESET.miniAppsUrl,
+  "https://svivva.com/ai-tools-hub",
+  "https://svivva.com/cyber-security-mini-apps",
+  "https://svivva.com/seo-pack",
+  PYRACRYPT_PRESET.sourceUrl,
+];
+
 const STORAGE_KEY = "orbit_v3";
-/** Gold “Run Everything” is split into 8 presses so each run stays under serverless limits. */
+/** Gold “Run Everything” runs all 8 phases in one session (serverless-safe batches). */
 const GOLD_PHASE_KEY = "orbit_gold_phase_v2";
 const GOLD_PHASES = 8;
 
@@ -1965,6 +1974,7 @@ export default function LaunchpadPage() {
     usecasePages: number;
     templatePages: number;
     paaPages: number;
+    stepCompletion?: Record<string, boolean>;
     coreUrls: GscUrlItem[];
     toolUrls: GscUrlItem[];
     preflight?: {
@@ -1985,6 +1995,34 @@ export default function LaunchpadPage() {
     staleTime: 30_000,
   });
 
+  const applyDbStepCompletion = useCallback(
+    (completion: Record<string, boolean> | undefined) => {
+      if (!completion) return;
+      setStatuses((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [id, ok] of Object.entries(completion)) {
+          if (ok && next[id] !== "done") {
+            next[id] = "done";
+            changed = true;
+          }
+        }
+        if (!changed) return prev;
+        statusesRef.current = next;
+        setResults((prevR) => {
+          saveState(next, prevR);
+          return prevR;
+        });
+        return next;
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (orbitStatus?.stepCompletion) applyDbStepCompletion(orbitStatus.stepCompletion);
+  }, [orbitStatus?.stepCompletion, applyDbStepCompletion]);
+
   const handleAutoComplete = async () => {
     setCompleting(true);
     setCompleteResult(null);
@@ -1992,10 +2030,11 @@ export default function LaunchpadPage() {
       const res = await authFetch("/api/orbit/auto-complete", { method: "POST" });
       const data = await res.json();
       setCompleteResult(data.summary || data.error || "Done");
-      refetchStatus();
+      const statusRes = await refetchStatus();
+      if (statusRes.data?.stepCompletion) applyDbStepCompletion(statusRes.data.stepCompletion);
       toast({
         title: "Marketing completed!",
-        description: `${data.details?.totalUrls ?? 0} URLs submitted to IndexNow.`,
+        description: `${data.details?.totalUrls ?? 0} URLs indexed · DB checks updated.`,
       });
     } catch (e) {
       setCompleteResult(`Error: ${String(e)}`);
@@ -2157,6 +2196,36 @@ export default function LaunchpadPage() {
     [setStep, orbitUrls.host],
   );
 
+  const discoverAllHubTools = async (): Promise<DiscoveredTool[]> => {
+    const byUrl = new Map<string, DiscoveredTool>();
+    for (const hubUrl of ORBIT_HUB_URLS) {
+      const clean = hubUrl.trim().replace(/\/$/, "");
+      if (!clean) continue;
+      try {
+        const res = await authFetch("/api/orbit/discover-tools", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ replUrl: clean }),
+        });
+        const data = await res.json();
+        for (const t of data.tools || []) {
+          if (t?.url) byUrl.set(t.url, t);
+        }
+      } catch {
+        /* try next hub */
+      }
+    }
+    const merged = [...byUrl.values()];
+    if (merged.length) {
+      discoveredRef.current = merged;
+      setDiscoveredTools(merged);
+      const first = merged[0].url.replace(/\/$/, "");
+      sourceUrlRef.current = first;
+      setSourceUrl(first);
+    }
+    return merged;
+  };
+
   const runAll = async () => {
     const steps = tab === "svivva" ? SVIVVA_STEPS : miniSteps;
     const pending = steps.filter((s) => (statusesRef.current[s.id] || "pending") !== "done");
@@ -2303,6 +2372,8 @@ export default function LaunchpadPage() {
     setLaunchActive(true);
     setLaunchDone(false);
 
+    await discoverAllHubTools();
+
     // Always ensure mini steps have a sourceUrl — fall back to the Pyracrypt preset
     const miniSrc = sourceUrlRef.current.trim() || PYRACRYPT_PRESET.miniAppsUrl;
     if (!sourceUrlRef.current.trim()) {
@@ -2342,7 +2413,8 @@ export default function LaunchpadPage() {
     setLaunchProgress("");
     setLaunchActive(false);
     setLaunchDone(true);
-    refetchStatus();
+    const statusRes = await refetchStatus();
+    if (statusRes.data?.stepCompletion) applyDbStepCompletion(statusRes.data.stepCompletion);
     toast({
       title: "🚀 Orbit complete!",
       description: "Copy your URLs below and paste them into Google Search Console.",
@@ -2398,20 +2470,28 @@ export default function LaunchpadPage() {
     setLaunchActive(true);
     setLaunchDone(false);
 
-    const phase = goldPhaseDisplay;
-
     try {
-      if (phase === 0) {
-        const pr = await authFetch("/api/orbit/status");
-        const st = await pr.json();
-        await queryClient.invalidateQueries({ queryKey: ["/api/orbit/status"] });
-        if (Array.isArray(st?.preflight?.warnings) && st.preflight.warnings.length > 0) {
-          toast({
-            title: "Preflight (index health & AI)",
-            description: `${st.preflight.warnings.slice(0, 2).join(" ")}${st.preflight.warnings.length > 2 ? " …" : ""}`,
-            duration: 12000,
-          });
-        }
+      setFullAutopilotStep("Discovering every mini app across all hubs…");
+      const discovered = await discoverAllHubTools();
+      toast({
+        title: discovered.length
+          ? `${discovered.length} tools discovered`
+          : "Hub scan complete",
+        description: discovered.length
+          ? "Orbit will index each tool on svivva.com for traffic."
+          : "Continuing with server-side discovery during mini-import.",
+        duration: 6000,
+      });
+
+      const pr = await authFetch("/api/orbit/status");
+      const st = await pr.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/orbit/status"] });
+      if (Array.isArray(st?.preflight?.warnings) && st.preflight.warnings.length > 0) {
+        toast({
+          title: "Preflight (index health & AI)",
+          description: `${st.preflight.warnings.slice(0, 2).join(" ")}${st.preflight.warnings.length > 2 ? " …" : ""}`,
+          duration: 12000,
+        });
       }
 
       const miniSrc = sourceUrlRef.current.trim() || PYRACRYPT_PRESET.miniAppsUrl;
@@ -2434,96 +2514,106 @@ export default function LaunchpadPage() {
         { t: "finish" },
       ];
       const L = units.length;
-      const start = Math.floor((phase * L) / GOLD_PHASES);
-      const end = Math.floor(((phase + 1) * L) / GOLD_PHASES);
 
-      for (let i = start; i < end; i++) {
-        const u = units[i];
-        if (u.t === "connect") {
-          setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect all apps…`);
-          setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect…`);
-          try {
-            const res = await authFetch("/api/admin/auto-connect-all", { method: "POST" });
-            if (res.ok) {
-              const data = await res.json();
-              setAutoConnectResult(JSON.stringify(data, null, 2));
+      const runPhaseUnits = async (phase: number) => {
+        const start = Math.floor((phase * L) / GOLD_PHASES);
+        const end = Math.floor(((phase + 1) * L) / GOLD_PHASES);
+
+        for (let i = start; i < end; i++) {
+          const u = units[i];
+          if (u.t === "connect") {
+            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect all apps…`);
+            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect…`);
+            try {
+              const res = await authFetch("/api/admin/auto-connect-all", { method: "POST" });
+              if (res.ok) {
+                const data = await res.json();
+                setAutoConnectResult(JSON.stringify(data, null, 2));
+              }
+            } catch {
+              /* non-fatal */
             }
-          } catch {
-            /* non-fatal */
+            continue;
           }
-          continue;
-        }
-        if (u.t === "autopilot") {
-          setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Workspace health checks…`);
-          setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Health checks…`);
-          try {
-            const res = await authFetch("/api/orbit/workspace-autopilot", { method: "POST" });
-            if (res.ok) {
-              const data = await res.json();
-              setAutopilotResult(data.summary || "Health checks passed.");
+          if (u.t === "autopilot") {
+            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Workspace health checks…`);
+            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Health checks…`);
+            try {
+              const res = await authFetch("/api/orbit/workspace-autopilot", { method: "POST" });
+              if (res.ok) {
+                const data = await res.json();
+                setAutopilotResult(data.summary || "Health checks passed.");
+              }
+            } catch {
+              /* non-fatal */
             }
-          } catch {
-            /* non-fatal */
+            continue;
           }
-          continue;
-        }
-        if (u.t === "finish") {
-          setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Submit to search engines…`);
-          setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: IndexNow + Bing…`);
-          try {
-            await authFetch("/api/orbit/auto-complete", { method: "POST" });
-          } catch {
-            /* non-fatal */
+          if (u.t === "finish") {
+            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Fill gaps + IndexNow…`);
+            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: IndexNow + Bing…`);
+            try {
+              await authFetch("/api/orbit/auto-complete", { method: "POST" });
+            } catch {
+              /* non-fatal */
+            }
+            continue;
           }
-          continue;
-        }
-        if (u.t === "step") {
-          const step = u.step;
-          // Always run every step — don't skip even if previously marked done
-          const label = `Phase ${phase + 1}/${GOLD_PHASES}: ${step.title}`;
-          setFullAutopilotStep(label);
-          setLaunchProgress(label);
-          const overrideUrl = step.id.startsWith("mini-") ? miniSrc : undefined;
-          let ok = await executeStep(step.id, overrideUrl);
-          if (!ok) {
-            await new Promise((r) => setTimeout(r, 2000));
-            ok = await executeStep(step.id, overrideUrl);
+          if (u.t === "step") {
+            const step = u.step;
+            const label = `Phase ${phase + 1}/${GOLD_PHASES}: ${step.title}`;
+            setFullAutopilotStep(label);
+            setLaunchProgress(label);
+            const overrideUrl = step.id.startsWith("mini-") ? miniSrc : undefined;
+            let ok = await executeStep(step.id, overrideUrl);
+            if (!ok) {
+              await new Promise((r) => setTimeout(r, 2000));
+              ok = await executeStep(step.id, overrideUrl);
+            }
           }
         }
+      };
+
+      const startPhase = goldPhaseDisplay;
+      for (let phase = startPhase; phase < GOLD_PHASES; phase++) {
+        await runPhaseUnits(phase);
+        try {
+          localStorage.setItem(GOLD_PHASE_KEY, phase + 1 >= GOLD_PHASES ? "done" : String(phase + 1));
+        } catch {
+          /* ignore */
+        }
+        setGoldPhaseDisplay(phase + 1);
+      }
+
+      setFullAutopilotStep("Final pass: marketing DB gaps + full IndexNow…");
+      try {
+        const acRes = await authFetch("/api/orbit/auto-complete", { method: "POST" });
+        const acData = await acRes.json();
+        if (acData.summary) setCompleteResult(acData.summary);
+      } catch {
+        /* non-fatal */
       }
 
       setLaunchProgress("");
       setLaunchDone(true);
       setFullAutopilotStep("");
-      refetchStatus();
 
-      const nextPhase = phase + 1;
-      if (nextPhase >= GOLD_PHASES) {
-        try {
-          localStorage.setItem(GOLD_PHASE_KEY, "done");
-        } catch {
-          /* ignore */
-        }
-        setGoldPhaseDisplay(GOLD_PHASES);
-        toast({
-          title: "All 8 gold phases complete",
-          description:
-            "Orbit marketing sequence finished (in 8 server-safe batches). Verify Index Health above, then use Google Search Console for Google-specific indexing.",
-          duration: 12000,
-        });
-      } else {
-        try {
-          localStorage.setItem(GOLD_PHASE_KEY, String(nextPhase));
-        } catch {
-          /* ignore */
-        }
-        setGoldPhaseDisplay(nextPhase);
-        toast({
-          title: `Phase ${phase + 1} of ${GOLD_PHASES} done`,
-          description: `Press “Run Everything in Orbit” again to run phase ${nextPhase + 1} of ${GOLD_PHASES}.`,
-          duration: 8000,
-        });
+      try {
+        localStorage.setItem(GOLD_PHASE_KEY, "done");
+      } catch {
+        /* ignore */
       }
+      setGoldPhaseDisplay(GOLD_PHASES);
+
+      const statusRes = await refetchStatus();
+      if (statusRes.data?.stepCompletion) applyDbStepCompletion(statusRes.data.stepCompletion);
+
+      toast({
+        title: "All 8 phases complete",
+        description:
+          "Every Orbit step ran across all phases. Marketing DB checks and IndexNow updated — verify green checks below.",
+        duration: 12000,
+      });
     } catch (e) {
       setFullAutopilotStep(`Error: ${e instanceof Error ? e.message : String(e)}`);
       toast({
@@ -2750,12 +2840,10 @@ export default function LaunchpadPage() {
               <div className="min-w-0 flex-1">
                 <h2 className="text-sm font-black text-foreground">Run Everything (8 phases)</h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Each press runs <strong>one eighth</strong> of the full Orbit marketing pipeline
-                  (auto-connect, health checks, every SEO step, then IndexNow). Press up to{" "}
-                  <strong>8 times</strong> to finish everything — safer on Vercel than one giant
-                  request. GoDaddy, IndexNow keys, and other Marketing credentials stay in the
-                  database; only Orbit step progress is synced to{" "}
-                  <code className="text-[10px]">orbit_admin_state</code>.
+                  One press runs <strong>all 8 phases</strong> automatically: discovers every mini
+                  app hub, auto-connects workspace apps, runs all 22 marketing steps in
+                  server-safe batches, fills DB gaps, and submits every URL to IndexNow — all traffic
+                  funnels to <strong>svivva.com</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
                   Orbit uses <strong>free-tier AI only</strong> (set{" "}
@@ -2820,7 +2908,9 @@ export default function LaunchpadPage() {
                   <span className="text-lg">🚀</span>{" "}
                   {goldPhaseDisplay >= GOLD_PHASES
                     ? "All phases done — reset to run again"
-                    : `Run Everything — phase ${goldPhaseDisplay + 1}/${GOLD_PHASES}`}
+                    : goldPhaseDisplay > 0
+                      ? `Continue all 8 phases (from ${goldPhaseDisplay + 1}/${GOLD_PHASES})`
+                      : "Run Everything — all 8 phases"}
                 </>
               )}
             </button>
@@ -2841,7 +2931,7 @@ export default function LaunchpadPage() {
             <p className="text-[10px] text-center text-muted-foreground">
               {goldPhaseDisplay >= GOLD_PHASES
                 ? "All 8 phases complete. Reset below to start over."
-                : `Next run: phase ${goldPhaseDisplay + 1} of ${GOLD_PHASES} · Orbit saves step checkmarks only — never overwrites GoDaddy or domain secrets.`}
+                : `Runs phases ${goldPhaseDisplay + 1}–${GOLD_PHASES} in one session · Step checkmarks sync when DB verifies each metric.`}
             </p>
           </div>
         </div>

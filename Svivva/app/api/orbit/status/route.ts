@@ -5,6 +5,7 @@ import { eq, sql, isNotNull, desc } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl, getGoogleSearchConsoleInspectBase } from "@/lib/site-url";
 import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
+import { stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
 
 export async function GET() {
   try {
@@ -138,7 +139,7 @@ export async function GET() {
       })),
     ];
 
-    return NextResponse.json({
+    const counts = {
       seoPages: seoRows.length,
       comparisons: comparisons.length,
       blogPosts: blogRows.length,
@@ -151,6 +152,11 @@ export async function GET() {
       usecasePages: Number((usecaseRows[0] as any)?.count ?? 0),
       templatePages: Number((templateRows[0] as any)?.count ?? 0),
       paaPages: Number((paaRows[0] as any)?.count ?? 0),
+    };
+
+    return NextResponse.json({
+      ...counts,
+      stepCompletion: stepCompletionFromCounts(counts),
       coreUrls,
       toolUrls,
       preflight: {
