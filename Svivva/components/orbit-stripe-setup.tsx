@@ -103,7 +103,8 @@ export function OrbitStripeSetup() {
       setClearStripePublishable(false);
       setClearStripeWebhook(false);
       setSaveMessage("Saved. Billing and checkout can use Stripe on the next server load.");
-      await load();
+      // Don't reload immediately to avoid clearing the form while user might want to verify
+      // setTimeout(() => load(), 2000);
     } catch (e) {
       setSaveMessage(e instanceof Error ? e.message : String(e));
     } finally {
