@@ -2053,7 +2053,7 @@ export default function LaunchpadPage() {
 
   const executeStep = useCallback(
     async (stepId: string, overrideSourceUrl?: string): Promise<boolean> => {
-      if (statusesRef.current[stepId] === "done") return true;
+      // Always run the step — don't skip even if previously marked done
       setStep(stepId, "running");
 
       const effectiveSourceUrl = overrideSourceUrl ?? sourceUrlRef.current;
