@@ -4914,26 +4914,85 @@ Return JSON:
         .filter((r) => r.status === "fulfilled")
         .map((r) => (r as PromiseFulfilledResult<{ title: string; url: string }>).value);
       if (paaCreated.length) submitIndexNowBatched(paaCreated.map((c) => c.url)).catch(() => {});
+
       return NextResponse.json({
         summary: [
-          `✓ ${paaCreated.length} PAA pages created (${paaSkipped.length} already existed)`,
-          `✓ Generated in parallel — all ${paaToCreate.length} pages created concurrently`,
-          `✓ Each page targets a Google "People Also Ask" question`,
-          `✓ First paragraph is a direct answer — gets featured in PAA boxes`,
-          `✓ Also optimized for Perplexity/ChatGPT/Gemini citations`,
+          `✓ ${paaCreated.length} PAA pages created`,
+          `✓ ${paaSkipped.length} already exist (skipped)`,
           "",
-          "QUESTIONS TARGETED:",
-          ...PAA_QUESTIONS.map(
-            (p) => `• ${p.q}${paaExistingSlugs.has(p.slug) ? " (existing)" : ""}`,
-          ),
+          "PAA STRATEGY:",
+          "Each page directly answers a 'People Also Ask' question",
+          "Google shows these in PAA boxes at the top of search results",
+          "Perplexity, ChatGPT, Gemini also cite these pages for matching queries",
+          "",
+          "PAGES CREATED:",
+          ...paaCreated.map((c) => `• ${c.title}`),
         ].join("\n"),
         details: { created: paaCreated.length, skipped: paaSkipped.length },
       });
     }
 
-    return NextResponse.json({ error: `Unknown stepId: ${stepId}` }, { status: 400 });
+    // ── STEP: RUN ALL SVIVVA STEPS ────────────────────────────────────────────
+    if (stepId === "run-all-svivva") {
+      const svivvaSteps = [
+        "svivva-indexnow",
+        "svivva-seo-pages",
+        "svivva-comparisons",
+        "svivva-blog",
+        "svivva-directories",
+        "svivva-parasite",
+        "svivva-aeo",
+        "svivva-communities",
+        "svivva-outreach",
+        "svivva-schema",
+        "svivva-social",
+        "svivva-submit",
+        "svivva-integrations",
+        "svivva-usecases",
+        "svivva-templates",
+        "svivva-paa",
+      ];
+
+      const results: string[] = [];
+      const errors: string[] = [];
+
+      for (const step of svivvaSteps) {
+        try {
+          const body: Record<string, unknown> = { stepId: step };
+          const res = await fetch(`${BASE_URL}/api/orbit/run-step`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            errors.push(`${step}: ${data.error || `HTTP ${res.status}`}`);
+          } else {
+            results.push(`✓ ${step}: ${data.summary?.split("\n")[0] || "completed"}`);
+          }
+        } catch (e) {
+          errors.push(`${step}: ${String(e).slice(0, 60)}`);
+        }
+      }
+
+      return NextResponse.json({
+        summary: [
+          "🏆 ALL SVIVVA STEPS COMPLETED",
+          "",
+          ...results,
+          ...(errors.length ? ["", "ERRORS:", ...errors] : []),
+          "",
+          "NEXT STEPS:",
+          "1. Request indexing in Google Search Console for all new pages",
+          "2. Share content on social platforms as needed",
+          "3. Monitor traffic and rankings",
+        ].join("\n"),
+        details: { completed: results.length, errors: errors.length },
+      });
+    }
+
+    return NextResponse.json({ error: "Unknown stepId" }, { status: 400 });
   } catch (e) {
-    console.error("orbit run-step error:", e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
