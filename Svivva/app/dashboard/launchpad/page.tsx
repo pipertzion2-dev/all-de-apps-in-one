@@ -2316,7 +2316,7 @@ export default function LaunchpadPage() {
 
     for (const step of allSteps) {
       idx++;
-      if (statusesRef.current[step.id] === "done") continue;
+      // Always run every step — don't skip even if previously marked done
       setLaunchProgress(`Step ${idx}/${total}: ${step.title}…`);
 
       // Pass the mini source URL explicitly so we never rely on stale closure
@@ -2479,7 +2479,7 @@ export default function LaunchpadPage() {
         }
         if (u.t === "step") {
           const step = u.step;
-          if (statusesRef.current[step.id] === "done") continue;
+          // Always run every step — don't skip even if previously marked done
           const label = `Phase ${phase + 1}/${GOLD_PHASES}: ${step.title}`;
           setFullAutopilotStep(label);
           setLaunchProgress(label);
