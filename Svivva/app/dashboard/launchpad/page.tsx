@@ -329,24 +329,6 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
         "These pages work on autopilot — Google and AI engines surface them for matching queries",
       ],
     },
-    {
-      id: "run-all-svivva",
-      title: "🏆 RUN ALL SVIVVA STEPS",
-      icon: Rocket,
-      estimate: "~20 min",
-      description:
-        "Execute all Svivva marketing steps in one shot — SEO pages, comparisons, blog, directories, AEO, integrations, use cases, templates, PAA, schema, social, outreach",
-      auto: [
-        "All 12 Svivva steps executed sequentially",
-        "All pages created and indexed automatically",
-        "All content generated with templates (no AI keys required)",
-      ],
-      manual: [
-        "Review generated content in Results section",
-        "Request indexing in GSC for all new pages",
-        "Share content on social platforms as needed",
-      ],
-    },
   ];
 }
 
