@@ -8,32 +8,22 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CreditCard, ExternalLink } from "lucide-react";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
-import { getPyracryptMainAppUrl } from "@/lib/workspace-external-apps";
 
 type StatusPayload = {
   stored: {
     stripeSecret: boolean;
     stripePublishable: boolean;
     stripeWebhook: boolean;
-    pyracryptStripeSecret: boolean;
-    pyracryptStripePublishable: boolean;
-    pyracryptStripeWebhook: boolean;
   };
   deploymentOverrides: {
     stripeSecret: boolean;
     stripePublishable: boolean;
     stripeWebhook: boolean;
-    pyracryptStripeSecret: boolean;
-    pyracryptStripePublishable: boolean;
-    pyracryptStripeWebhook: boolean;
   };
   effective: {
     stripeSecret: boolean;
     stripePublishable: boolean;
     stripeWebhook: boolean;
-    pyracryptStripeSecret: boolean;
-    pyracryptStripePublishable: boolean;
-    pyracryptStripeWebhook: boolean;
   };
 };
 
@@ -56,17 +46,9 @@ export function OrbitStripeSetup() {
   const [stripePublishableKey, setStripePublishableKey] = useState("");
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
 
-  const [pyStripeSecretKey, setPyStripeSecretKey] = useState("");
-  const [pyStripePublishableKey, setPyStripePublishableKey] = useState("");
-  const [pyStripeWebhookSecret, setPyStripeWebhookSecret] = useState("");
-
   const [clearStripeSecret, setClearStripeSecret] = useState(false);
   const [clearStripePublishable, setClearStripePublishable] = useState(false);
   const [clearStripeWebhook, setClearStripeWebhook] = useState(false);
-
-  const [clearPyStripeSecret, setClearPyStripeSecret] = useState(false);
-  const [clearPyStripePublishable, setClearPyStripePublishable] = useState(false);
-  const [clearPyStripeWebhook, setClearPyStripeWebhook] = useState(false);
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -100,19 +82,8 @@ export function OrbitStripeSetup() {
       if (clearStripeWebhook) body.stripeWebhookSecret = "";
       else if (stripeWebhookSecret.trim()) body.stripeWebhookSecret = stripeWebhookSecret.trim();
 
-      if (clearPyStripeSecret) body.pyracryptStripeSecretKey = "";
-      else if (pyStripeSecretKey.trim()) body.pyracryptStripeSecretKey = pyStripeSecretKey.trim();
-
-      if (clearPyStripePublishable) body.pyracryptStripePublishableKey = "";
-      else if (pyStripePublishableKey.trim())
-        body.pyracryptStripePublishableKey = pyStripePublishableKey.trim();
-
-      if (clearPyStripeWebhook) body.pyracryptStripeWebhookSecret = "";
-      else if (pyStripeWebhookSecret.trim())
-        body.pyracryptStripeWebhookSecret = pyStripeWebhookSecret.trim();
-
       if (Object.keys(body).length === 0) {
-        setSaveMessage("Enter a key or check a “clear” box, then save.");
+        setSaveMessage('Enter a key or check a "clear" box, then save.');
         setSaving(false);
         return;
       }
@@ -131,12 +102,6 @@ export function OrbitStripeSetup() {
       setClearStripeSecret(false);
       setClearStripePublishable(false);
       setClearStripeWebhook(false);
-      setPyStripeSecretKey("");
-      setPyStripePublishableKey("");
-      setPyStripeWebhookSecret("");
-      setClearPyStripeSecret(false);
-      setClearPyStripePublishable(false);
-      setClearPyStripeWebhook(false);
       setSaveMessage("Saved. Billing and checkout can use Stripe on the next server load.");
       await load();
     } catch (e) {
@@ -148,8 +113,6 @@ export function OrbitStripeSetup() {
 
   const site = getPublicSiteUrl();
   const webhookUrl = `${site}/api/stripe/webhook`;
-  const pyracryptBase = getPyracryptMainAppUrl().replace(/\/$/, "");
-  const pyracryptWebhookUrl = `${pyracryptBase}/api/stripe/webhook`;
 
   return (
     <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-4">
@@ -187,15 +150,6 @@ export function OrbitStripeSetup() {
           <span className="inline-flex items-center gap-1.5">
             <Dot ok={status.effective.stripePublishable} /> Publishable
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Dot ok={status.effective.pyracryptStripeSecret} /> Pyracrypt secret
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Dot ok={status.effective.pyracryptStripePublishable} /> Pyracrypt publishable
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Dot ok={status.effective.pyracryptStripeWebhook} /> Pyracrypt webhook
-          </span>
         </div>
       )}
 
@@ -208,18 +162,6 @@ export function OrbitStripeSetup() {
           Events: <code className="text-[10px]">checkout.session.completed</code>,{" "}
           <code className="text-[10px]">customer.subscription.deleted</code>
         </p>
-      </div>
-
-      <div className="rounded-lg bg-muted/30 border border-border px-2.5 py-2 space-y-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Pyracrypt webhook URL (separate Stripe account)
-        </p>
-        <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Use the URL below in the Pyracrypt Stripe dashboard. Keys are stored in this vault for
-          safekeeping — copy them into the Pyracrypt deployment env; they are never mixed into
-          Svivva&apos;s <code className="text-[10px]">STRIPE_*</code>.
-        </p>
-        <code className="text-[10px] break-all block text-foreground">{pyracryptWebhookUrl}</code>
       </div>
 
       <div className="space-y-3">
@@ -305,96 +247,6 @@ export function OrbitStripeSetup() {
               className="text-xs font-normal text-muted-foreground"
             >
               Clear saved webhook secret
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3 border-t border-border pt-4">
-        <p className="text-xs font-semibold text-foreground">Pyracrypt Stripe keys (optional)</p>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Pyracrypt secret key</Label>
-          <Input
-            type="password"
-            autoComplete="off"
-            placeholder={
-              status?.stored.pyracryptStripeSecret
-                ? "•••••••• (saved — enter to replace)"
-                : "sk_live_…"
-            }
-            value={pyStripeSecretKey}
-            onChange={(e) => setPyStripeSecretKey(e.target.value)}
-            disabled={clearPyStripeSecret || !!status?.deploymentOverrides.pyracryptStripeSecret}
-            className="text-sm"
-          />
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="orbit-py-stripe-clear-sec"
-              checked={clearPyStripeSecret}
-              onCheckedChange={(v) => setClearPyStripeSecret(!!v)}
-              disabled={!!status?.deploymentOverrides.pyracryptStripeSecret}
-            />
-            <Label
-              htmlFor="orbit-py-stripe-clear-sec"
-              className="text-xs font-normal text-muted-foreground"
-            >
-              Clear saved Pyracrypt secret
-            </Label>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs">Pyracrypt publishable key</Label>
-          <Input
-            type="password"
-            autoComplete="off"
-            placeholder={status?.stored.pyracryptStripePublishable ? "••••••••" : "pk_live_…"}
-            value={pyStripePublishableKey}
-            onChange={(e) => setPyStripePublishableKey(e.target.value)}
-            disabled={
-              clearPyStripePublishable || !!status?.deploymentOverrides.pyracryptStripePublishable
-            }
-            className="text-sm"
-          />
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="orbit-py-stripe-clear-pub"
-              checked={clearPyStripePublishable}
-              onCheckedChange={(v) => setClearPyStripePublishable(!!v)}
-              disabled={!!status?.deploymentOverrides.pyracryptStripePublishable}
-            />
-            <Label
-              htmlFor="orbit-py-stripe-clear-pub"
-              className="text-xs font-normal text-muted-foreground"
-            >
-              Clear saved Pyracrypt publishable
-            </Label>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs">Pyracrypt webhook signing secret</Label>
-          <Input
-            type="password"
-            autoComplete="off"
-            placeholder={status?.stored.pyracryptStripeWebhook ? "••••••••" : "whsec_…"}
-            value={pyStripeWebhookSecret}
-            onChange={(e) => setPyStripeWebhookSecret(e.target.value)}
-            disabled={clearPyStripeWebhook || !!status?.deploymentOverrides.pyracryptStripeWebhook}
-            className="text-sm"
-          />
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="orbit-py-stripe-clear-wh"
-              checked={clearPyStripeWebhook}
-              onCheckedChange={(v) => setClearPyStripeWebhook(!!v)}
-              disabled={!!status?.deploymentOverrides.pyracryptStripeWebhook}
-            />
-            <Label
-              htmlFor="orbit-py-stripe-clear-wh"
-              className="text-xs font-normal text-muted-foreground"
-            >
-              Clear saved Pyracrypt webhook secret
             </Label>
           </div>
         </div>
