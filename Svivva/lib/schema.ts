@@ -1633,10 +1633,6 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   stripeSecretKey: text("stripe_secret_key"),
   stripePublishableKey: text("stripe_publishable_key"),
   stripeWebhookSecret: text("stripe_webhook_secret"),
-  /** Separate Stripe account for the Pyracrypt deployment (never mixed into Svivva `STRIPE_*`). */
-  pyracryptStripeSecretKey: text("pyracrypt_stripe_secret_key"),
-  pyracryptStripePublishableKey: text("pyracrypt_stripe_publishable_key"),
-  pyracryptStripeWebhookSecret: text("pyracrypt_stripe_webhook_secret"),
   nextPublicSiteUrl: text("next_public_site_url"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

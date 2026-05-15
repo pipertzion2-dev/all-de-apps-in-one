@@ -14,9 +14,6 @@ const patchSchema = z
     stripeSecretKey: z.string().optional(),
     stripePublishableKey: z.string().optional(),
     stripeWebhookSecret: z.string().optional(),
-    pyracryptStripeSecretKey: z.string().optional(),
-    pyracryptStripePublishableKey: z.string().optional(),
-    pyracryptStripeWebhookSecret: z.string().optional(),
     nextPublicSiteUrl: z.string().optional(),
   })
   .strict();
@@ -41,9 +38,6 @@ export async function GET() {
         stripeSecret: !!row?.stripeSecretKey?.trim(),
         stripePublishable: !!row?.stripePublishableKey?.trim(),
         stripeWebhook: !!row?.stripeWebhookSecret?.trim(),
-        pyracryptStripeSecret: !!row?.pyracryptStripeSecretKey?.trim(),
-        pyracryptStripePublishable: !!row?.pyracryptStripePublishableKey?.trim(),
-        pyracryptStripeWebhook: !!row?.pyracryptStripeWebhookSecret?.trim(),
         siteUrl: !!row?.nextPublicSiteUrl?.trim(),
       },
       deploymentOverrides: runtimeSecretColdStart,
@@ -56,12 +50,6 @@ export async function GET() {
           process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim()
         ),
         stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
-        pyracryptStripeSecret: !!process.env.PYRACRYPT_STRIPE_SECRET_KEY?.trim(),
-        pyracryptStripePublishable: !!(
-          process.env.PYRACRYPT_STRIPE_PUBLISHABLE_KEY?.trim() ||
-          process.env.NEXT_PUBLIC_PYRACRYPT_STRIPE_PUBLISHABLE_KEY?.trim()
-        ),
-        pyracryptStripeWebhook: !!process.env.PYRACRYPT_STRIPE_WEBHOOK_SECRET?.trim(),
         siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
       },
       updatedAt: row?.updatedAt?.toISOString() ?? null,
@@ -95,12 +83,6 @@ export async function POST(request: Request) {
       patch.stripePublishableKey = toPatchValue(body.stripePublishableKey);
     if ("stripeWebhookSecret" in body)
       patch.stripeWebhookSecret = toPatchValue(body.stripeWebhookSecret);
-    if ("pyracryptStripeSecretKey" in body)
-      patch.pyracryptStripeSecretKey = toPatchValue(body.pyracryptStripeSecretKey);
-    if ("pyracryptStripePublishableKey" in body)
-      patch.pyracryptStripePublishableKey = toPatchValue(body.pyracryptStripePublishableKey);
-    if ("pyracryptStripeWebhookSecret" in body)
-      patch.pyracryptStripeWebhookSecret = toPatchValue(body.pyracryptStripeWebhookSecret);
     if ("nextPublicSiteUrl" in body) patch.nextPublicSiteUrl = toPatchValue(body.nextPublicSiteUrl);
 
     if (Object.keys(patch).length === 0) {
