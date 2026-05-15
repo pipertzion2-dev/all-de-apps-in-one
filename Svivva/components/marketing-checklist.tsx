@@ -264,11 +264,11 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           id: "content-integrations",
           label: `Integration pages — Svivva + [Tool] (${orbitStatus?.integrationPages ?? 0}/30)`,
           detail:
-            (orbitStatus?.integrationPages ?? 0) >= 20
-              ? "Integration pages live — targeting 'tool + AI API' searches"
-              : "Run '30 Integration Pages' step in Orbit",
+            (orbitStatus?.integrationPages ?? 0) >= 30
+              ? "All 30 integration pages live — targeting 'tool + AI API' searches"
+              : `Run '30 Integration Pages' step in Orbit (${orbitStatus?.integrationPages ?? 0}/30 created)`,
           status:
-            (orbitStatus?.integrationPages ?? 0) >= 20
+            (orbitStatus?.integrationPages ?? 0) >= 30
               ? "done"
               : orbitStepDone("svivva-integrations")
                 ? "done"
@@ -279,11 +279,11 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           id: "content-usecases",
           label: `Industry use case pages (${orbitStatus?.usecasePages ?? 0}/20)`,
           detail:
-            (orbitStatus?.usecasePages ?? 0) >= 15
-              ? "Industry use case pages live — targeting decision-maker searches"
-              : "Run '20 Industry Use Case Pages' step in Orbit",
+            (orbitStatus?.usecasePages ?? 0) >= 20
+              ? "All 20 industry use case pages live — targeting decision-maker searches"
+              : `Run '20 Industry Use Case Pages' step in Orbit (${orbitStatus?.usecasePages ?? 0}/20 created)`,
           status:
-            (orbitStatus?.usecasePages ?? 0) >= 15
+            (orbitStatus?.usecasePages ?? 0) >= 20
               ? "done"
               : orbitStepDone("svivva-usecases")
                 ? "done"
@@ -294,11 +294,11 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           id: "content-templates",
           label: `API template library (${orbitStatus?.templatePages ?? 0}/25)`,
           detail:
-            (orbitStatus?.templatePages ?? 0) >= 20
-              ? "Template pages live — targeting 'build X API' developer searches"
-              : "Run '25 API Template Pages' step in Orbit",
+            (orbitStatus?.templatePages ?? 0) >= 25
+              ? "All 25 template pages live — targeting 'build X API' developer searches"
+              : `Run '25 API Template Pages' step in Orbit (${orbitStatus?.templatePages ?? 0}/25 created)`,
           status:
-            (orbitStatus?.templatePages ?? 0) >= 20
+            (orbitStatus?.templatePages ?? 0) >= 25
               ? "done"
               : orbitStepDone("svivva-templates")
                 ? "done"
@@ -308,11 +308,11 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           id: "content-paa",
           label: `People Also Ask domination (${orbitStatus?.paaPages ?? 0}/15)`,
           detail:
-            (orbitStatus?.paaPages ?? 0) >= 10
-              ? "PAA pages live — appearing in Google PAA boxes + Perplexity citations"
-              : "Run 'People Also Ask Domination' step in Orbit",
+            (orbitStatus?.paaPages ?? 0) >= 15
+              ? "All 15 PAA pages live — appearing in Google PAA boxes + Perplexity citations"
+              : `Run 'People Also Ask Domination' step in Orbit (${orbitStatus?.paaPages ?? 0}/15 created)`,
           status:
-            (orbitStatus?.paaPages ?? 0) >= 10
+            (orbitStatus?.paaPages ?? 0) >= 15
               ? "done"
               : orbitStepDone("svivva-paa")
                 ? "done"
