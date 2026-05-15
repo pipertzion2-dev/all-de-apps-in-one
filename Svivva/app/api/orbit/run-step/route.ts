@@ -693,11 +693,29 @@ export async function POST(req: NextRequest) {
       let allTools: DiscoveredTool[] = passedTools || [];
       if (!allTools.length) {
         const miniAppsUrl = sourceUrl || getPyracryptMiniAppsBaseUrl();
-        allTools = await autoDiscoverTools(miniAppsUrl);
+        // Discover from all mini app hubs
+        const hubs = [
+          miniAppsUrl,
+          "https://svivva.com/ai-tools-hub",
+          "https://svivva.com/cyber-security-mini-apps",
+          "https://svivva.com/seo-pack",
+        ];
+        const uniqueTools = new Map<string, DiscoveredTool>();
+        for (const hub of hubs) {
+          try {
+            const tools = await autoDiscoverTools(hub);
+            for (const tool of tools) {
+              uniqueTools.set(tool.url, tool);
+            }
+          } catch {
+            /* skip failed hubs */
+          }
+        }
+        allTools = Array.from(uniqueTools.values());
         if (!allTools.length) {
           return NextResponse.json(
             {
-              error: `Could not discover tools from ${miniAppsUrl}. The app may be offline — try again or use the Discover Tools button in the Launchpad.`,
+              error: `Could not discover tools from any hub. The apps may be offline — try again or use the Discover Tools button in the Launchpad.`,
             },
             { status: 400 },
           );
@@ -4998,6 +5016,12 @@ Return JSON:
         "svivva-usecases",
         "svivva-templates",
         "svivva-paa",
+        "mini-import",
+        "mini-hub",
+        "mini-embed",
+        "mini-social",
+        "mini-cname",
+        "mini-index",
       ];
 
       const results: string[] = [];
