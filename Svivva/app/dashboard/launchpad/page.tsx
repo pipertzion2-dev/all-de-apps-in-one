@@ -32,6 +32,7 @@ import {
   Eye,
   Copy,
   Target,
+  Wand2,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
@@ -452,6 +453,8 @@ const ORBIT_HUB_URLS = [
 ];
 
 const STORAGE_KEY = "orbit_v3";
+/** Checked-off items in the pink “Your turn” manual checklist (local only). */
+const MANUAL_DONE_KEY = "orbit_manual_check_v1";
 /** Gold “Run Everything” runs all 8 phases in one session (serverless-safe batches). */
 const GOLD_PHASE_KEY = "orbit_gold_phase_v2";
 const GOLD_PHASES = 8;
@@ -1583,6 +1586,10 @@ function StepCard({
               <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                 ⚠ You need to do this
               </p>
+              <p className="text-[9px] text-pink-700 dark:text-pink-400 font-medium pb-0.5">
+                Also listed in the pink <strong>Your turn</strong> checklist (scroll up) — tick
+                items there when done.
+              </p>
               {step.manual.map((item, i) => (
                 <p key={i} className="text-xs text-amber-900 dark:text-amber-200 leading-snug pl-1">
                   • {item}
@@ -1880,6 +1887,258 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
           ))}
         </div>
       </Section>
+    </div>
+  );
+}
+
+const PINK_COACH = "#ec4899";
+const PINK_COACH_BORDER = "rgba(236,72,153,0.55)";
+
+function renderManualLineWithUrls(text: string) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/gi);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//i.test(part) ? (
+          <a
+            key={i}
+            href={part.replace(/\)+$/, "")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-pink-700 dark:text-pink-300 font-medium underline underline-offset-2 break-all"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+function PinkManualCoach({
+  manualTasks,
+  checkedManual,
+  onToggleCheck,
+  onResetChecks,
+  orbitFreeAi,
+  totalDone,
+  totalSteps,
+}: {
+  manualTasks: { key: string; stepTitle: string; text: string }[];
+  checkedManual: Record<string, boolean>;
+  onToggleCheck: (key: string) => void;
+  onResetChecks: () => void;
+  orbitFreeAi: boolean;
+  totalDone: number;
+  totalSteps: number;
+}) {
+  const [open, setOpen] = useState(true);
+  const [aiGuide, setAiGuide] = useState<string | null>(null);
+  const [aiHint, setAiHint] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const doneN = manualTasks.filter((t) => checkedManual[t.key]).length;
+  const allN = manualTasks.length;
+  const allChecked = allN > 0 && doneN === allN;
+
+  const runSimplify = async () => {
+    if (!manualTasks.length) return;
+    setAiLoading(true);
+    setAiHint(null);
+    try {
+      const res = await authFetch("/api/orbit/simplify-manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: manualTasks.map((t) => t.text) }),
+      });
+      const data = await res.json();
+      if (data.guide) setAiGuide(data.guide);
+      if (data.hint) setAiHint(data.hint);
+      if (data.error && !data.guide) setAiGuide(`Could not reach AI. ${data.error}`);
+    } catch (e) {
+      setAiGuide(`Network error: ${String(e)}`);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  if (totalDone === 0) {
+    return (
+      <div
+        className="rounded-2xl border-2 px-4 py-3 space-y-1"
+        style={{
+          borderColor: PINK_COACH_BORDER,
+          background: "linear-gradient(135deg, rgba(236,72,153,0.12), rgba(244,114,182,0.06))",
+        }}
+      >
+        <p className="text-sm font-black text-pink-950 dark:text-pink-100 flex items-center gap-2">
+          <Sparkles className="w-4 h-4" style={{ color: PINK_COACH }} />
+          Your turn (easy mode)
+        </p>
+        <p className="text-xs text-pink-900/80 dark:text-pink-100/75 leading-relaxed">
+          Run <strong>Run Everything</strong> or individual steps first. When steps turn green,
+          every <strong>You need to do this</strong> line is copied here in one pink checklist —
+          optional <strong>Condense with AI</strong> uses the same free stack as Orbit (Gemini cloud
+          or your Ollama URL).
+        </p>
+      </div>
+    );
+  }
+
+  if (manualTasks.length === 0) {
+    return (
+      <div
+        className="rounded-2xl border-2 px-4 py-3 space-y-1"
+        style={{
+          borderColor: PINK_COACH_BORDER,
+          background: "linear-gradient(135deg, rgba(236,72,153,0.12), rgba(244,114,182,0.06))",
+        }}
+      >
+        <p className="text-sm font-black text-pink-950 dark:text-pink-100 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          Your turn — nothing queued
+        </p>
+        <p className="text-xs text-pink-900/80 dark:text-pink-100/75">
+          {totalDone}/{totalSteps} steps are done. There are no separate manual follow-ups on those
+          steps yet, or run more steps to add tasks here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-2xl border-2 overflow-hidden shadow-lg shadow-pink-500/15 dark:shadow-pink-900/25 bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50 dark:from-pink-950/45 dark:via-rose-950/25 dark:to-fuchsia-950/20"
+      style={{ borderColor: PINK_COACH_BORDER }}
+    >
+      <button
+        type="button"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left"
+        onClick={() => setOpen(!open)}
+      >
+        <div
+          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+          style={{ background: `linear-gradient(135deg, ${PINK_COACH}, #db2777)` }}
+        >
+          <ListChecks className="w-5 h-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-black text-pink-950 dark:text-pink-50">
+            Your turn — super easy checklist
+          </p>
+          <p className="text-[11px] text-pink-800/85 dark:text-pink-200/80">
+            Every <strong>You need to do this</strong> item in one place · {doneN}/{allN} checked
+            {allChecked ? " · All set!" : ""}
+          </p>
+        </div>
+        {open ? (
+          <ChevronUp className="w-4 h-4 text-pink-800 dark:text-pink-200 flex-shrink-0" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-pink-800 dark:text-pink-200 flex-shrink-0" />
+        )}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3 border-t border-pink-200/60 dark:border-pink-800/40">
+          <div className="flex flex-wrap gap-2 pt-3">
+            <button
+              type="button"
+              disabled={aiLoading}
+              onClick={runSimplify}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-60"
+              style={{ background: `linear-gradient(135deg, ${PINK_COACH}, #a21caf)` }}
+            >
+              {aiLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Wand2 className="w-3.5 h-3.5" />
+              )}
+              Condense with AI {orbitFreeAi ? "" : "(set GEMINI_API_KEY or OLLAMA_URL)"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const lines = manualTasks.map((t, i) => `${i + 1}. [${t.stepTitle}] ${t.text}`);
+                navigator.clipboard.writeText(lines.join("\n"));
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-pink-300 dark:border-pink-700 bg-white/70 dark:bg-pink-950/40 text-pink-950 dark:text-pink-50"
+            >
+              <Copy className="w-3.5 h-3.5" /> Copy all
+            </button>
+            <button
+              type="button"
+              onClick={onResetChecks}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-pink-300/60 text-pink-900 dark:text-pink-100"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Reset ticks
+            </button>
+          </div>
+
+          {aiHint && (
+            <p className="text-[10px] text-pink-900 dark:text-pink-100 bg-pink-100/55 dark:bg-pink-900/35 rounded-lg px-2 py-1.5">
+              {aiHint}
+            </p>
+          )}
+
+          {aiGuide && (
+            <div className="rounded-xl border border-pink-200 dark:border-pink-800 bg-white/85 dark:bg-pink-950/35 px-3 py-2.5 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-pink-800 dark:text-pink-300">
+                AI playbook
+              </p>
+              <div className="text-xs text-pink-950 dark:text-pink-50 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                {aiGuide}
+              </div>
+              <button
+                type="button"
+                className="text-[10px] font-bold text-pink-700 dark:text-pink-300 underline"
+                onClick={() => navigator.clipboard.writeText(aiGuide)}
+              >
+                Copy playbook
+              </button>
+            </div>
+          )}
+
+          <ul className="space-y-2">
+            {manualTasks.map((t) => (
+              <li
+                key={t.key}
+                className="flex gap-2.5 items-start rounded-xl border border-pink-200/70 dark:border-pink-800/55 bg-white/65 dark:bg-pink-950/25 px-3 py-2.5"
+              >
+                <button
+                  type="button"
+                  aria-pressed={!!checkedManual[t.key]}
+                  onClick={() => onToggleCheck(t.key)}
+                  className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                    checkedManual[t.key]
+                      ? "bg-pink-500 border-pink-500 text-white"
+                      : "border-pink-300 dark:border-pink-600 bg-white dark:bg-pink-950"
+                  }`}
+                >
+                  {checkedManual[t.key] ? <CheckCircle2 className="w-4 h-4" /> : null}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-wide">
+                    {t.stepTitle}
+                  </p>
+                  <p className="text-xs text-pink-950 dark:text-pink-50 leading-snug">
+                    {renderManualLineWithUrls(t.text)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="flex-shrink-0 p-1.5 rounded-lg border border-pink-200 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-900/40"
+                  onClick={() => navigator.clipboard.writeText(t.text)}
+                  title="Copy"
+                >
+                  <Copy className="w-3.5 h-3.5 text-pink-700 dark:text-pink-300" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -2663,6 +2922,53 @@ export default function LaunchpadPage() {
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
   const overallPct = Math.round((totalDone / totalSteps) * 100);
 
+  const [checkedManual, setCheckedManual] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      setCheckedManual(JSON.parse(localStorage.getItem(MANUAL_DONE_KEY) || "{}"));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const manualTasks = useMemo(() => {
+    const map = new Map<string, { stepTitle: string; text: string }>();
+    for (const s of [...SVIVVA_STEPS, ...miniSteps]) {
+      if (statuses[s.id] !== "done" || !s.manual?.length) continue;
+      for (const text of s.manual) {
+        const norm = text.trim().replace(/\s+/g, " ");
+        if (!norm || map.has(norm)) continue;
+        map.set(norm, { stepTitle: s.title, text });
+      }
+    }
+    return [...map.entries()].map(([norm, v], idx) => ({
+      ...v,
+      key: `manual:${idx}:${norm.slice(0, 48)}`,
+    }));
+  }, [SVIVVA_STEPS, miniSteps, statuses]);
+
+  const toggleManualCheck = useCallback((key: string) => {
+    setCheckedManual((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      try {
+        localStorage.setItem(MANUAL_DONE_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
+
+  const resetManualChecks = useCallback(() => {
+    setCheckedManual({});
+    try {
+      localStorage.removeItem(MANUAL_DONE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {devLanUrl && (
@@ -2939,6 +3245,16 @@ export default function LaunchpadPage() {
             </p>
           </div>
         </div>
+
+        <PinkManualCoach
+          manualTasks={manualTasks}
+          checkedManual={checkedManual}
+          onToggleCheck={toggleManualCheck}
+          onResetChecks={resetManualChecks}
+          orbitFreeAi={!!orbitStatus?.preflight?.orbitFreeAi}
+          totalDone={totalDone}
+          totalSteps={totalSteps}
+        />
 
         {/* ── INDEX HEALTH DASHBOARD — Car instrument cluster style ── */}
         {orbitStatus && (
