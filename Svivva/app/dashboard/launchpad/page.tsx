@@ -2433,6 +2433,8 @@ export default function LaunchpadPage() {
     stepCompletion?: Record<string, boolean>;
     coreUrls: GscUrlItem[];
     toolUrls: GscUrlItem[];
+    /** Present on Vercel production — proves which Git revision is running. */
+    deploymentCommit?: string | null;
     preflight?: {
       orbitFreeAi: boolean;
       hasPaidOpenAiKey: boolean;
@@ -2440,7 +2442,11 @@ export default function LaunchpadPage() {
       warnings: string[];
     };
   }
-  const { data: orbitStatus, refetch: refetchStatus } = useQuery<OrbitStatus | null>({
+  const {
+    data: orbitStatus,
+    isPending: orbitStatusPending,
+    refetch: refetchStatus,
+  } = useQuery<OrbitStatus | null>({
     queryKey: ["/api/orbit/status"],
     queryFn: async () => {
       const r = await authFetch("/api/orbit/status");
@@ -3223,10 +3229,16 @@ export default function LaunchpadPage() {
                       deploy from GitHub — pushing code alone does not change svivva.com until that
                       build runs.
                     </p>
-                    {me?.vercelCommit ? (
+                    {orbitStatusPending ? (
+                      <p className="font-mono text-white/45 text-[10px]">
+                        Checking production build…
+                      </p>
+                    ) : orbitStatus?.deploymentCommit ? (
                       <p className="font-mono text-white/55">
                         Running build{" "}
-                        <span className="text-white/80">{String(me.vercelCommit).slice(0, 7)}</span>
+                        <span className="text-white/80">
+                          {orbitStatus.deploymentCommit.slice(0, 7)}
+                        </span>
                         {me.nextPublicSiteUrl ? (
                           <>
                             {" "}
@@ -3237,9 +3249,9 @@ export default function LaunchpadPage() {
                       </p>
                     ) : (
                       <p className="text-amber-200/90">
-                        No Vercel commit id on this server — if Orbit still feels old, open Vercel →
-                        Deployments → Redeploy, and confirm this GitHub repo is linked to that
-                        project.
+                        No deploy revision reported (localhost preview, or Vercel env missing{" "}
+                        <span className="font-mono">VERCEL_GIT_COMMIT_SHA</span>). Open Vercel →
+                        Deployments to confirm production.
                       </p>
                     )}
                     <p className="text-white/55">

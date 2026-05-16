@@ -188,6 +188,7 @@ export async function GET() {
       stepCompletion: stepCompletionFromCounts(counts),
       coreUrls,
       toolUrls,
+      deploymentCommit: process.env.VERCEL_GIT_COMMIT_SHA?.trim() || null,
       preflight: {
         orbitFreeAi,
         hasPaidOpenAiKey,
