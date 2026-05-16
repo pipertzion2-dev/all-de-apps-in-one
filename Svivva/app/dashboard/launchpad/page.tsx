@@ -2860,10 +2860,17 @@ export default function LaunchpadPage() {
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setAutopilotResult(data.summary || "Orbit autopilot completed.");
       refetchStatus();
+      const failed = (data.checks as { label: string; ok: boolean }[] | undefined)?.filter(
+        (c) => !c.ok,
+      );
       toast({
-        title: "Orbit autopilot finished",
-        description: "Connections, Stripe readiness, and indexable tool health were checked.",
-        duration: 7000,
+        title: data.allPassed ? "11/11 checks passed" : "Orbit autopilot finished",
+        description: data.allPassed
+          ? "All workspace URLs, Stripe, and infra checks passed."
+          : failed?.length
+            ? `Still failing: ${failed.map((c) => c.label).join(", ")}`
+            : "See log below for details.",
+        duration: 9000,
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

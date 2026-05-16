@@ -23,7 +23,6 @@ import {
   batchIndustryPages,
   batchAPITemplatePages,
   batchPAAPages,
-  generateMiniHub,
   generateMiniSEOPages,
   generateMiniImportTools,
   generateAllToolSeoVariants,
@@ -31,6 +30,7 @@ import {
   type SEOPageData,
 } from "@/lib/orbit/content-templates";
 import { TARGET_TOTAL_MARKETING_PAGES, TARGET_TOOL_SEO_PAGES } from "@/lib/orbit/marketing-targets";
+import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 
 const BASE = getSiteUrl();
 
@@ -703,32 +703,10 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
     totalPages = await getTotalMarketingPageCount();
   }
 
-  // Hub page
-  const hub = await db
-    .select({ id: seoLandingPages.id })
-    .from(seoLandingPages)
-    .where(eq(seoLandingPages.slug, "ai-tools-hub"))
-    .limit(1);
-  if (!hub.length) {
-    const mainPages = await db
-      .select({ title: seoLandingPages.title })
-      .from(seoLandingPages)
-      .where(eq(seoLandingPages.category, "seed-marketing"))
-      .limit(60);
-    const names = mainPages.map((p) => p.title).filter(Boolean) as string[];
-    const hubPage = generateMiniHub(names.length ? names : ["Free AI Tools"]);
-    await insertSeoPage(
-      {
-        ...hubPage,
-        headline: hubPage.title,
-        subheadline: "All tools link to svivva.com",
-        keyword: "ai tools hub",
-      },
-      "seed-marketing",
-      `${BASE}/ai-tools-hub`,
-    );
-    newUrls.push(`${BASE}/ai-tools-hub`);
-    steps.push("✓ Hub page ai-tools-hub created");
+  const hubSteps = await ensureOrbitHubPages();
+  steps.push(...hubSteps);
+  for (const slug of ["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"]) {
+    newUrls.push(`${BASE}/${slug}`);
   }
 
   if (newUrls.length) {

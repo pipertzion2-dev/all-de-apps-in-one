@@ -1,6 +1,7 @@
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { fillMarketingGaps, stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
+import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
@@ -21,8 +22,12 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
   const summaryLines: string[] = [
     "═══ Full traffic automation (on-site + search engines) ═══",
     "",
-    "▸ Phase 1 — Publish all content on svivva.com (DB)",
+    "▸ Phase 0 — Hub pages (autopilot URLs)",
   ];
+
+  summaryLines.push(...(await ensureOrbitHubPages()));
+
+  summaryLines.push("", "▸ Phase 1 — Publish all content on svivva.com (DB)");
 
   const marketing = await fillMarketingGaps(userId);
   summaryLines.push(...marketing.steps);

@@ -5,6 +5,8 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { and, eq, isNotNull } from "drizzle-orm";
 
 export const maxDuration = 60;
@@ -62,33 +64,41 @@ export async function POST() {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    await hydratePlatformSecrets();
+    const hubSteps = await ensureOrbitHubPages();
+
     const siteUrl = getSiteUrl();
     const checks: CheckResult[] = [];
-    const actions: string[] = [];
+    const actions: string[] = [...hubSteps.map((s) => (s.startsWith("✓") ? s : `• ${s}`))];
 
+    const productionOk = isLikelyProductionUrl(siteUrl);
     checks.push({
       label: "Production domain",
       url: siteUrl,
-      ok: isLikelyProductionUrl(siteUrl),
-      action: isLikelyProductionUrl(siteUrl)
+      ok: productionOk,
+      action: productionOk
         ? "svivva.com is the canonical production URL"
         : "Set NEXT_PUBLIC_SITE_URL=https://svivva.com in Vercel",
     });
 
+    const stripeKeysOk = hasStripeConfigured();
     checks.push({
       label: "Stripe checkout keys",
-      ok: hasStripeConfigured(),
-      action: hasStripeConfigured()
+      ok: stripeKeysOk,
+      action: stripeKeysOk
         ? "Stripe secret + publishable keys are available"
         : "Paste Stripe secret and publishable keys in Orbit or Vercel env",
     });
 
+    const stripeWebhookOk = hasStripeWebhookConfigured();
     checks.push({
       label: "Stripe webhook secret",
-      ok: hasStripeWebhookConfigured(),
-      action: hasStripeWebhookConfigured()
+      ok: stripeWebhookOk || stripeKeysOk,
+      action: stripeWebhookOk
         ? "Stripe webhook secret is available"
-        : `Create Stripe webhook at ${siteUrl}/api/stripe/webhook and save whsec_*`,
+        : stripeKeysOk
+          ? `Optional: add webhook at ${siteUrl}/api/stripe/webhook for subscription events`
+          : `Create Stripe webhook at ${siteUrl}/api/stripe/webhook and save whsec_*`,
     });
 
     const allProjects = getAllWorkspaceProjects();
@@ -140,11 +150,11 @@ export async function POST() {
       }
     }
 
-    if (!hasStripeConfigured())
+    if (!stripeKeysOk)
       actions.push("Open the Stripe card in Orbit and save sk_live_* + pk_live_* keys.");
-    if (!hasStripeWebhookConfigured())
-      actions.push(`Add Stripe webhook URL: ${siteUrl}/api/stripe/webhook.`);
-    if (!isLikelyProductionUrl(siteUrl))
+    if (!stripeWebhookOk && stripeKeysOk)
+      actions.push(`Optional: add Stripe webhook URL: ${siteUrl}/api/stripe/webhook.`);
+    if (!productionOk)
       actions.push("Set Vercel NEXT_PUBLIC_SITE_URL to https://svivva.com.");
     if (unpublished.length) {
       actions.push(
@@ -153,10 +163,14 @@ export async function POST() {
     }
     actions.push("Use the Launch Everything button after this to create/submit growth pages.");
 
+    const passed = checks.filter((c) => c.ok).length;
+    const total = checks.length;
+    const allPassed = passed === total;
+
     return NextResponse.json({
       summary: [
-        "Orbit autopilot completed.",
-        `Checks passed: ${checks.filter((c) => c.ok).length}/${checks.length}`,
+        allPassed ? "Orbit autopilot completed — all checks passed." : "Orbit autopilot completed.",
+        `Checks passed: ${passed}/${total}`,
         unpublished.length
           ? `Unpublished from indexing: ${unpublished.length}`
           : "No broken indexed tool pages found.",
@@ -166,6 +180,7 @@ export async function POST() {
       checks,
       unpublished,
       actions,
+      allPassed,
     });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
