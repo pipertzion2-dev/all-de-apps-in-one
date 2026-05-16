@@ -40,6 +40,7 @@ import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getPyracryptOrbitPreset } from "@/lib/workspace-external-apps";
+import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
@@ -1936,9 +1937,9 @@ function computeManualSmart(
 
   let needsOutsideApp = mentionsGscAction || mentionsPasteOrAccount;
   let outsideHint: string | undefined;
-  if (mentionsGscAction) {
+  if (mentionsGscAction && !likelyAutoDone) {
     outsideHint =
-      "Orbit cannot see your Google account — check this off after you do it in Search Console.";
+      "Use “Start traffic now” with a GSC service account, or check this off after Search Console.";
   } else if (mentionsPasteOrAccount && !likelyAutoDone) {
     outsideHint =
       "Needs your login on that site — Orbit generated the text but cannot post as you.";
@@ -1975,62 +1976,124 @@ function renderManualLineWithUrls(text: string) {
   );
 }
 
-/** Real server-side indexing (not the LLM): IndexNow, Bing ping, GSC sitemap, Google Indexing API. */
-function OrbitServerAutomateButton({ onDone }: { onDone?: () => void }) {
+/** Full traffic automation + optional indexing-only pass. */
+function OrbitTrafficAutomation({
+  manualTasks,
+  onDone,
+  onSyncSteps,
+  onAutoCheckKeys,
+}: {
+  manualTasks: Array<{
+    key: string;
+    stepId: string;
+    text: string;
+    smart: { likelyAutoDone: boolean; needsOutsideApp: boolean };
+  }>;
+  onDone?: () => void;
+  onSyncSteps?: (stepCompletion: Record<string, boolean>) => void;
+  onAutoCheckKeys?: (keys: string[]) => void;
+}) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [fullLoading, setFullLoading] = useState(false);
+  const [indexLoading, setIndexLoading] = useState(false);
   const [lastLog, setLastLog] = useState<string | null>(null);
 
-  const run = async () => {
-    setLoading(true);
+  const runFullTraffic = async () => {
+    setFullLoading(true);
+    setLastLog(null);
+    try {
+      const res = await authFetch("/api/orbit/full-traffic-automation", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setLastLog(typeof data.summary === "string" ? data.summary : "");
+      if (data.stepCompletion) onSyncSteps?.(data.stepCompletion);
+      if (data.automationContext) {
+        onAutoCheckKeys?.(getAutoCompletableManualKeys(manualTasks, data.automationContext));
+      }
+      onDone?.();
+      toast({
+        title: "Traffic automation complete",
+        description: "On-site content published + search engines notified. Checklist auto-updated.",
+        duration: 12000,
+      });
+    } catch (e) {
+      setLastLog(String(e));
+      toast({ title: "Automation failed", description: String(e), variant: "destructive" });
+    } finally {
+      setFullLoading(false);
+    }
+  };
+
+  const runIndexingOnly = async () => {
+    setIndexLoading(true);
     setLastLog(null);
     try {
       const res = await authFetch("/api/orbit/automate-manual", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      const summary = typeof data.summary === "string" ? data.summary : "";
-      setLastLog(summary);
+      setLastLog(typeof data.summary === "string" ? data.summary : "");
+      onAutoCheckKeys?.(
+        getAutoCompletableManualKeys(manualTasks, {
+          indexNowOk: !!data.indexNow?.ok,
+          googleSitemapOk: !!data.googleSitemap?.ok,
+          googleIndexingSubmitted: data.googleIndexing?.submitted ?? 0,
+        }),
+      );
       onDone?.();
-      toast({
-        title: "Server actions finished",
-        description: "IndexNow / Bing / Google (if configured). See log below.",
-        duration: 8000,
-      });
+      toast({ title: "Indexing pass done", duration: 8000 });
     } catch (e) {
-      const msg = String(e);
-      setLastLog(msg);
-      toast({ title: "Automation failed", description: msg, variant: "destructive" });
+      setLastLog(String(e));
+      toast({ title: "Indexing failed", description: String(e), variant: "destructive" });
     } finally {
-      setLoading(false);
+      setIndexLoading(false);
     }
   };
+
+  const busy = fullLoading || indexLoading;
 
   return (
     <div className="space-y-2">
       <button
         type="button"
-        disabled={loading}
-        onClick={run}
-        className="w-full inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-black text-white disabled:opacity-60 border-2 border-teal-700/20"
+        disabled={busy}
+        onClick={runFullTraffic}
+        className="w-full inline-flex items-center justify-center gap-2 px-3 py-3.5 rounded-xl text-sm font-black text-white disabled:opacity-60 border-2 border-pink-400/40 shadow-md"
+        style={{ background: `linear-gradient(135deg, ${PINK_COACH}, #a21caf, ${PINK_COACH})` }}
+      >
+        {fullLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Rocket className="w-4 h-4" />
+        )}
+        Start traffic now — automate everything possible
+      </button>
+      <p className="text-[10px] text-pink-950/90 dark:text-pink-50/90 leading-snug font-medium">
+        Publishes <strong>blog posts, SEO pages, comparisons, 300 tool pages</strong> on{" "}
+        <strong>svivva.com</strong>, then IndexNow + Bing + Google API. Auto-checks this list.
+      </p>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={runIndexingOnly}
+        className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-60"
         style={{ background: `linear-gradient(135deg, ${TEAL}, #0d9488)` }}
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-        Run all automatable server actions
+        {indexLoading ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Zap className="w-3.5 h-3.5" />
+        )}
+        Indexing only (skip creating new pages)
       </button>
       <p className="text-[10px] text-pink-900/85 dark:text-pink-100/80 leading-snug">
-        Does <strong>real HTTP calls</strong> from this server: full <strong>IndexNow</strong>{" "}
-        submit, <strong>Bing</strong> sitemap ping, <strong>Google Search Console</strong> sitemap
-        (API), and <strong>Google Indexing API</strong> for up to 200 URLs — requires{" "}
-        <Link
-          href="/dashboard/gsc-connect"
-          className="font-bold text-pink-700 dark:text-pink-300 underline underline-offset-2"
-        >
+        Cannot auto-post to Reddit, Medium, Product Hunt, or directories (your login required).{" "}
+        <Link href="/dashboard/gsc-connect" className="font-bold underline">
           GSC service account
-        </Link>
-        . Still cannot post to Reddit, Medium, email, etc.
+        </Link>{" "}
+        unlocks Google sitemap + up to 1000 URL indexing requests.
       </p>
       {lastLog && (
-        <pre className="text-[10px] leading-relaxed whitespace-pre-wrap font-mono max-h-40 overflow-y-auto rounded-lg border border-pink-200/60 dark:border-pink-800/50 bg-white/70 dark:bg-black/20 px-2 py-1.5 text-pink-950 dark:text-pink-50">
+        <pre className="text-[10px] leading-relaxed whitespace-pre-wrap font-mono max-h-48 overflow-y-auto rounded-lg border border-pink-200/60 dark:border-pink-800/50 bg-white/70 dark:bg-black/20 px-2 py-1.5 text-pink-950 dark:text-pink-50">
           {lastLog}
         </pre>
       )}
@@ -2047,6 +2110,8 @@ function PinkManualCoach({
   totalDone,
   totalSteps,
   onRefetchOrbit,
+  onSyncSteps,
+  onAutoCheckKeys,
 }: {
   manualTasks: Array<{
     key: string;
@@ -2062,6 +2127,8 @@ function PinkManualCoach({
   totalDone: number;
   totalSteps: number;
   onRefetchOrbit?: () => void;
+  onSyncSteps?: (stepCompletion: Record<string, boolean>) => void;
+  onAutoCheckKeys?: (keys: string[]) => void;
 }) {
   const [open, setOpen] = useState(true);
   const [aiGuide, setAiGuide] = useState<string | null>(null);
@@ -2117,7 +2184,12 @@ function PinkManualCoach({
           rewrites the text shorter — it does not log into Google or post for you.
         </p>
         <div className="pt-2 border-t border-pink-200/50 dark:border-pink-800/40 mt-2">
-          <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+          <OrbitTrafficAutomation
+            manualTasks={manualTasks}
+            onDone={onRefetchOrbit}
+            onSyncSteps={onSyncSteps}
+            onAutoCheckKeys={onAutoCheckKeys}
+          />
         </div>
       </div>
     );
@@ -2141,7 +2213,12 @@ function PinkManualCoach({
           steps yet, or run more steps to add tasks here.
         </p>
         <div className="pt-2 border-t border-pink-200/50 dark:border-pink-800/40 mt-2">
-          <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+          <OrbitTrafficAutomation
+            manualTasks={manualTasks}
+            onDone={onRefetchOrbit}
+            onSyncSteps={onSyncSteps}
+            onAutoCheckKeys={onAutoCheckKeys}
+          />
         </div>
       </div>
     );
@@ -2183,7 +2260,12 @@ function PinkManualCoach({
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-pink-200/60 dark:border-pink-800/40">
           <div className="pt-3">
-            <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+            <OrbitTrafficAutomation
+              manualTasks={manualTasks}
+              onDone={onRefetchOrbit}
+              onSyncSteps={onSyncSteps}
+              onAutoCheckKeys={onAutoCheckKeys}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
@@ -3129,10 +3211,49 @@ export default function LaunchpadPage() {
     }
   }, []);
 
+  const syncStepCompletionFromAutomation = useCallback(
+    (completion: Record<string, boolean>) => {
+      applyDbStepCompletion(completion);
+      setStatuses((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [id, ok] of Object.entries(completion)) {
+          if (ok && next[id] !== "done") {
+            next[id] = "done";
+            changed = true;
+          }
+        }
+        if (!changed) return prev;
+        statusesRef.current = next;
+        setResults((prevR) => {
+          saveState(next, prevR);
+          return prevR;
+        });
+        return next;
+      });
+    },
+    [applyDbStepCompletion],
+  );
+
+  const applyAutoCheckKeys = useCallback((keys: string[]) => {
+    if (!keys.length) return;
+    setCheckedManual((prev) => {
+      const next = { ...prev };
+      for (const k of keys) next[k] = true;
+      try {
+        localStorage.setItem(MANUAL_DONE_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
+
   const manualTasks = useMemo(() => {
     const map = new Map<string, { stepTitle: string; text: string; stepId: string }>();
     for (const s of [...SVIVVA_STEPS, ...miniSteps]) {
-      if (statuses[s.id] !== "done" || !s.manual?.length) continue;
+      const stepDone = statuses[s.id] === "done" || !!orbitStatus?.stepCompletion?.[s.id];
+      if (!stepDone || !s.manual?.length) continue;
       for (const text of s.manual) {
         const norm = text.trim().replace(/\s+/g, " ");
         if (!norm || map.has(norm)) continue;
@@ -3461,6 +3582,8 @@ export default function LaunchpadPage() {
           onRefetchOrbit={() => {
             void refetchStatus();
           }}
+          onSyncSteps={syncStepCompletionFromAutomation}
+          onAutoCheckKeys={applyAutoCheckKeys}
         />
 
         {/* ── INDEX HEALTH DASHBOARD — Car instrument cluster style ── */}

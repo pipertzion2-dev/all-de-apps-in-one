@@ -9,6 +9,8 @@ import { getSitemapUrl } from "@/lib/site-url";
 
 /** Google Indexing API daily quota is limited; stay aligned with /api/marketing/google-search. */
 const GOOGLE_INDEXING_BATCH = 200;
+const DEFAULT_GOOGLE_BATCHES = 1;
+const MAX_GOOGLE_BATCHES = 5;
 
 export type AutomateManualResult = {
   summaryLines: string[];
@@ -71,7 +73,10 @@ async function getGscCreds(): Promise<{
  * IndexNow (all URLs), Bing sitemap ping, GSC sitemap PUT, Google Indexing API (first N URLs).
  * Does not post to Reddit/Medium/etc. — those still require your accounts.
  */
-export async function runAutomatableManualActions(): Promise<AutomateManualResult> {
+export async function runAutomatableManualActions(opts?: {
+  /** Up to 5 × 200 URLs per run when GSC service account is configured. */
+  googleMaxBatches?: number;
+}): Promise<AutomateManualResult> {
   const summaryLines: string[] = [];
   const urls = await getAllSiteUrlsForIndexing();
   const sitemapUrl = getSitemapUrl();
@@ -118,11 +123,30 @@ export async function runAutomatableManualActions(): Promise<AutomateManualResul
     );
 
     googleIndexing.attempted = true;
-    const batch = urls.slice(0, GOOGLE_INDEXING_BATCH);
-    const gi = await submitUrlsToGoogleIndexingApi(gsc.sa, batch);
-    googleIndexing.submitted = gi.submitted;
-    googleIndexing.batched = batch.length;
-    googleIndexing.errorsSample = gi.errors.slice(0, 8);
+    const batchCount = Math.min(
+      MAX_GOOGLE_BATCHES,
+      Math.max(DEFAULT_GOOGLE_BATCHES, opts?.googleMaxBatches ?? DEFAULT_GOOGLE_BATCHES),
+    );
+    let totalGiSubmitted = 0;
+    let totalGiAttempted = 0;
+    const allGiErrors: string[] = [];
+
+    for (let b = 0; b < batchCount; b++) {
+      const batch = urls.slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH);
+      if (!batch.length) break;
+      const gi = await submitUrlsToGoogleIndexingApi(gsc.sa, batch);
+      totalGiSubmitted += gi.submitted;
+      totalGiAttempted += batch.length;
+      allGiErrors.push(...gi.errors);
+      if (batch.length < GOOGLE_INDEXING_BATCH) break;
+      if (b < batchCount - 1) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    }
+
+    googleIndexing.submitted = totalGiSubmitted;
+    googleIndexing.batched = totalGiAttempted;
+    googleIndexing.errorsSample = allGiErrors.slice(0, 8);
 
     try {
       await db.execute(
@@ -133,10 +157,10 @@ export async function runAutomatableManualActions(): Promise<AutomateManualResul
     }
 
     summaryLines.push(
-      `✓ Google Indexing API: ${gi.submitted}/${batch.length} URL notifications sent (${urls.length} on site; quota limits batch size)`,
+      `✓ Google Indexing API: ${totalGiSubmitted}/${totalGiAttempted} URL notifications (${urls.length} on site; up to ${batchCount}×${GOOGLE_INDEXING_BATCH} per run)`,
     );
-    if (gi.errors.length) {
-      summaryLines.push(`  · Sample errors: ${gi.errors.slice(0, 3).join(" | ")}`);
+    if (allGiErrors.length) {
+      summaryLines.push(`  · Sample errors: ${allGiErrors.slice(0, 3).join(" | ")}`);
     }
   } else {
     summaryLines.push(
