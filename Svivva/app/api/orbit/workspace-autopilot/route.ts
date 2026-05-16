@@ -154,8 +154,7 @@ export async function POST() {
       actions.push("Open the Stripe card in Orbit and save sk_live_* + pk_live_* keys.");
     if (!stripeWebhookOk && stripeKeysOk)
       actions.push(`Optional: add Stripe webhook URL: ${siteUrl}/api/stripe/webhook.`);
-    if (!productionOk)
-      actions.push("Set Vercel NEXT_PUBLIC_SITE_URL to https://svivva.com.");
+    if (!productionOk) actions.push("Set Vercel NEXT_PUBLIC_SITE_URL to https://svivva.com.");
     if (unpublished.length) {
       actions.push(
         `${unpublished.length} broken/risky indexed tool pages were unpublished so Google stops seeing them.`,
