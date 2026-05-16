@@ -33,6 +33,7 @@ import {
   Copy,
   Target,
   Wand2,
+  Info,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
@@ -1894,6 +1895,63 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
 const PINK_COACH = "#ec4899";
 const PINK_COACH_BORDER = "rgba(236,72,153,0.55)";
 
+/** What Orbit can infer from the database (IndexNow, step thresholds) vs. what only you can do (GSC login, paste posts). */
+function computeManualSmart(
+  stepId: string,
+  text: string,
+  orbit:
+    | {
+        stepCompletion?: Record<string, boolean>;
+        indexNowSubmitted?: boolean;
+        hubExists?: boolean;
+      }
+    | null
+    | undefined,
+): {
+  dbStepOk: boolean;
+  likelyAutoDone: boolean;
+  likelyReason?: string;
+  needsOutsideApp: boolean;
+  outsideHint?: string;
+} {
+  const lower = text.toLowerCase();
+  const mentionsBingSide = /bing|yandex|yahoo|duckduckgo|indexnow/.test(lower);
+  const mentionsGscAction = /google search console|\bgsc\b|url inspection|request indexing/i.test(
+    text,
+  );
+  const mentionsPasteOrAccount =
+    /copy each|copy the|paste into|paste it|publish it|logged-?in|sign-?up|your inbox|from your own|directory website|go to godaddy|add cname/i.test(
+      lower,
+    );
+
+  let likelyAutoDone = false;
+  let likelyReason: string | undefined;
+  if (orbit?.indexNowSubmitted && mentionsBingSide && !mentionsGscAction) {
+    likelyAutoDone = true;
+    likelyReason =
+      "IndexNow on the server already pushed these URLs to Bing, Yandex, Yahoo, and DuckDuckGo — nothing else is required here for those engines.";
+  }
+
+  const dbStepOk = !!(orbit?.stepCompletion && orbit.stepCompletion[stepId]);
+
+  let needsOutsideApp = mentionsGscAction || mentionsPasteOrAccount;
+  let outsideHint: string | undefined;
+  if (mentionsGscAction) {
+    outsideHint =
+      "Orbit cannot see your Google account — check this off after you do it in Search Console.";
+  } else if (mentionsPasteOrAccount && !likelyAutoDone) {
+    outsideHint =
+      "Needs your login on that site — Orbit generated the text but cannot post as you.";
+  }
+
+  if (stepId === "mini-hub" && orbit?.hubExists && mentionsGscAction) {
+    outsideHint =
+      "The /tools hub page is live on svivva.com; GSC indexing is still something only you can confirm in Google.";
+  }
+
+  return { dbStepOk, likelyAutoDone, likelyReason, needsOutsideApp, outsideHint };
+}
+
 function renderManualLineWithUrls(text: string) {
   const parts = text.split(/(https?:\/\/[^\s]+)/gi);
   return (
@@ -1917,6 +1975,69 @@ function renderManualLineWithUrls(text: string) {
   );
 }
 
+/** Real server-side indexing (not the LLM): IndexNow, Bing ping, GSC sitemap, Google Indexing API. */
+function OrbitServerAutomateButton({ onDone }: { onDone?: () => void }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [lastLog, setLastLog] = useState<string | null>(null);
+
+  const run = async () => {
+    setLoading(true);
+    setLastLog(null);
+    try {
+      const res = await authFetch("/api/orbit/automate-manual", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      const summary = typeof data.summary === "string" ? data.summary : "";
+      setLastLog(summary);
+      onDone?.();
+      toast({
+        title: "Server actions finished",
+        description: "IndexNow / Bing / Google (if configured). See log below.",
+        duration: 8000,
+      });
+    } catch (e) {
+      const msg = String(e);
+      setLastLog(msg);
+      toast({ title: "Automation failed", description: msg, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        disabled={loading}
+        onClick={run}
+        className="w-full inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-black text-white disabled:opacity-60 border-2 border-teal-700/20"
+        style={{ background: `linear-gradient(135deg, ${TEAL}, #0d9488)` }}
+      >
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+        Run all automatable server actions
+      </button>
+      <p className="text-[10px] text-pink-900/85 dark:text-pink-100/80 leading-snug">
+        Does <strong>real HTTP calls</strong> from this server: full <strong>IndexNow</strong>{" "}
+        submit, <strong>Bing</strong> sitemap ping, <strong>Google Search Console</strong> sitemap
+        (API), and <strong>Google Indexing API</strong> for up to 200 URLs — requires{" "}
+        <Link
+          href="/dashboard/gsc-connect"
+          className="font-bold text-pink-700 dark:text-pink-300 underline underline-offset-2"
+        >
+          GSC service account
+        </Link>
+        . Still cannot post to Reddit, Medium, email, etc.
+      </p>
+      {lastLog && (
+        <pre className="text-[10px] leading-relaxed whitespace-pre-wrap font-mono max-h-40 overflow-y-auto rounded-lg border border-pink-200/60 dark:border-pink-800/50 bg-white/70 dark:bg-black/20 px-2 py-1.5 text-pink-950 dark:text-pink-50">
+          {lastLog}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 function PinkManualCoach({
   manualTasks,
   checkedManual,
@@ -1925,14 +2046,22 @@ function PinkManualCoach({
   orbitFreeAi,
   totalDone,
   totalSteps,
+  onRefetchOrbit,
 }: {
-  manualTasks: { key: string; stepTitle: string; text: string }[];
+  manualTasks: Array<{
+    key: string;
+    stepId: string;
+    stepTitle: string;
+    text: string;
+    smart: ReturnType<typeof computeManualSmart>;
+  }>;
   checkedManual: Record<string, boolean>;
   onToggleCheck: (key: string) => void;
   onResetChecks: () => void;
   orbitFreeAi: boolean;
   totalDone: number;
   totalSteps: number;
+  onRefetchOrbit?: () => void;
 }) {
   const [open, setOpen] = useState(true);
   const [aiGuide, setAiGuide] = useState<string | null>(null);
@@ -1941,7 +2070,10 @@ function PinkManualCoach({
 
   const doneN = manualTasks.filter((t) => checkedManual[t.key]).length;
   const allN = manualTasks.length;
-  const allChecked = allN > 0 && doneN === allN;
+  const orbitHandledN = manualTasks.filter((t) => t.smart.likelyAutoDone).length;
+  const needYouN = manualTasks.filter(
+    (t) => !t.smart.likelyAutoDone && t.smart.needsOutsideApp,
+  ).length;
 
   const runSimplify = async () => {
     if (!manualTasks.length) return;
@@ -1979,10 +2111,14 @@ function PinkManualCoach({
         </p>
         <p className="text-xs text-pink-900/80 dark:text-pink-100/75 leading-relaxed">
           Run <strong>Run Everything</strong> or individual steps first. When steps turn green,
-          every <strong>You need to do this</strong> line is copied here in one pink checklist —
-          optional <strong>Condense with AI</strong> uses the same free stack as Orbit (Gemini cloud
-          or your Ollama URL).
+          every <strong>You need to do this</strong> line is copied here. The list updates from your
+          live Orbit database (IndexNow, page counts) so lines that only referred to Bing/Yandex can
+          show as <strong>already handled</strong>. Optional <strong>Condense with AI</strong> just
+          rewrites the text shorter — it does not log into Google or post for you.
         </p>
+        <div className="pt-2 border-t border-pink-200/50 dark:border-pink-800/40 mt-2">
+          <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+        </div>
       </div>
     );
   }
@@ -2004,6 +2140,9 @@ function PinkManualCoach({
           {totalDone}/{totalSteps} steps are done. There are no separate manual follow-ups on those
           steps yet, or run more steps to add tasks here.
         </p>
+        <div className="pt-2 border-t border-pink-200/50 dark:border-pink-800/40 mt-2">
+          <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+        </div>
       </div>
     );
   }
@@ -2026,11 +2165,12 @@ function PinkManualCoach({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-black text-pink-950 dark:text-pink-50">
-            Your turn — super easy checklist
+            Your turn — smart checklist
           </p>
-          <p className="text-[11px] text-pink-800/85 dark:text-pink-200/80">
-            Every <strong>You need to do this</strong> item in one place · {doneN}/{allN} checked
-            {allChecked ? " · All set!" : ""}
+          <p className="text-[11px] text-pink-800/85 dark:text-pink-200/80 leading-snug">
+            <strong>{doneN}</strong> you ticked · <strong>{orbitHandledN}</strong> Orbit marks done
+            (Bing/IndexNow side) · <strong>~{needYouN}</strong> usually need Google/social login ·{" "}
+            <strong>{allN}</strong> lines total
           </p>
         </div>
         {open ? (
@@ -2042,11 +2182,16 @@ function PinkManualCoach({
 
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-pink-200/60 dark:border-pink-800/40">
-          <div className="flex flex-wrap gap-2 pt-3">
+          <div className="pt-3">
+            <OrbitServerAutomateButton onDone={onRefetchOrbit} />
+          </div>
+
+          <div className="flex flex-wrap gap-2 items-center">
             <button
               type="button"
               disabled={aiLoading}
               onClick={runSimplify}
+              title="Rewrites this checklist into one short playbook (does not perform any action for you)."
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-60"
               style={{ background: `linear-gradient(135deg, ${PINK_COACH}, #a21caf)` }}
             >
@@ -2076,6 +2221,16 @@ function PinkManualCoach({
             </button>
           </div>
 
+          <p className="flex gap-1.5 text-[10px] text-pink-900/90 dark:text-pink-100/85 leading-snug bg-pink-100/40 dark:bg-pink-900/25 rounded-lg px-2.5 py-2 border border-pink-200/50 dark:border-pink-800/40">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-pink-600 dark:text-pink-400" />
+            <span>
+              <strong>Condense with AI</strong> only <em>summarizes</em> this list (Gemini/Ollama)
+              into a shorter playbook — it does not open Search Console or post anywhere.{" "}
+              <strong>Run all automatable server actions</strong> (above) performs real indexing
+              calls.
+            </span>
+          </p>
+
           {aiHint && (
             <p className="text-[10px] text-pink-900 dark:text-pink-100 bg-pink-100/55 dark:bg-pink-900/35 rounded-lg px-2 py-1.5">
               {aiHint}
@@ -2101,41 +2256,77 @@ function PinkManualCoach({
           )}
 
           <ul className="space-y-2">
-            {manualTasks.map((t) => (
-              <li
-                key={t.key}
-                className="flex gap-2.5 items-start rounded-xl border border-pink-200/70 dark:border-pink-800/55 bg-white/65 dark:bg-pink-950/25 px-3 py-2.5"
-              >
-                <button
-                  type="button"
-                  aria-pressed={!!checkedManual[t.key]}
-                  onClick={() => onToggleCheck(t.key)}
-                  className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                    checkedManual[t.key]
-                      ? "bg-pink-500 border-pink-500 text-white"
-                      : "border-pink-300 dark:border-pink-600 bg-white dark:bg-pink-950"
-                  }`}
+            {manualTasks.map((t) => {
+              const rowStyle = t.smart.likelyAutoDone
+                ? "border-emerald-300/70 dark:border-emerald-700/50 bg-emerald-50/40 dark:bg-emerald-950/20"
+                : "border-pink-200/70 dark:border-pink-800/55 bg-white/65 dark:bg-pink-950/25";
+              return (
+                <li
+                  key={t.key}
+                  className={`flex gap-2.5 items-start rounded-xl border px-3 py-2.5 ${rowStyle}`}
                 >
-                  {checkedManual[t.key] ? <CheckCircle2 className="w-4 h-4" /> : null}
-                </button>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-wide">
-                    {t.stepTitle}
-                  </p>
-                  <p className="text-xs text-pink-950 dark:text-pink-50 leading-snug">
-                    {renderManualLineWithUrls(t.text)}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="flex-shrink-0 p-1.5 rounded-lg border border-pink-200 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-900/40"
-                  onClick={() => navigator.clipboard.writeText(t.text)}
-                  title="Copy"
-                >
-                  <Copy className="w-3.5 h-3.5 text-pink-700 dark:text-pink-300" />
-                </button>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    aria-pressed={!!checkedManual[t.key]}
+                    onClick={() => onToggleCheck(t.key)}
+                    className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                      checkedManual[t.key]
+                        ? "bg-pink-500 border-pink-500 text-white"
+                        : "border-pink-300 dark:border-pink-600 bg-white dark:bg-pink-950"
+                    }`}
+                  >
+                    {checkedManual[t.key] ? <CheckCircle2 className="w-4 h-4" /> : null}
+                  </button>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-[10px] font-bold text-pink-700 dark:text-pink-400 uppercase tracking-wide">
+                      {t.stepTitle}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {t.smart.likelyAutoDone ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-emerald-200/80 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200">
+                          Orbit: already handled
+                        </span>
+                      ) : null}
+                      {t.smart.dbStepOk ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-sky-200/80 dark:bg-sky-900/50 text-sky-900 dark:text-sky-100">
+                          DB: step verified
+                        </span>
+                      ) : null}
+                      {t.smart.needsOutsideApp && !t.smart.likelyAutoDone ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-amber-200/80 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100">
+                          Needs you (browser)
+                        </span>
+                      ) : null}
+                    </div>
+                    {(t.smart.likelyReason || t.smart.outsideHint) && (
+                      <p className="text-[10px] text-pink-800/90 dark:text-pink-200/80 leading-snug">
+                        {t.smart.likelyReason && (
+                          <span className="block text-emerald-800 dark:text-emerald-200/90">
+                            {t.smart.likelyReason}
+                          </span>
+                        )}
+                        {t.smart.outsideHint && (
+                          <span className="block text-amber-900/85 dark:text-amber-100/85">
+                            {t.smart.outsideHint}
+                          </span>
+                        )}
+                      </p>
+                    )}
+                    <p className="text-xs text-pink-950 dark:text-pink-50 leading-snug">
+                      {renderManualLineWithUrls(t.text)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="flex-shrink-0 p-1.5 rounded-lg border border-pink-200 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-900/40"
+                    onClick={() => navigator.clipboard.writeText(t.text)}
+                    title="Copy"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-pink-700 dark:text-pink-300" />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -2933,20 +3124,21 @@ export default function LaunchpadPage() {
   }, []);
 
   const manualTasks = useMemo(() => {
-    const map = new Map<string, { stepTitle: string; text: string }>();
+    const map = new Map<string, { stepTitle: string; text: string; stepId: string }>();
     for (const s of [...SVIVVA_STEPS, ...miniSteps]) {
       if (statuses[s.id] !== "done" || !s.manual?.length) continue;
       for (const text of s.manual) {
         const norm = text.trim().replace(/\s+/g, " ");
         if (!norm || map.has(norm)) continue;
-        map.set(norm, { stepTitle: s.title, text });
+        map.set(norm, { stepTitle: s.title, text, stepId: s.id });
       }
     }
     return [...map.entries()].map(([norm, v], idx) => ({
       ...v,
       key: `manual:${idx}:${norm.slice(0, 48)}`,
+      smart: computeManualSmart(v.stepId, v.text, orbitStatus ?? undefined),
     }));
-  }, [SVIVVA_STEPS, miniSteps, statuses]);
+  }, [SVIVVA_STEPS, miniSteps, statuses, orbitStatus]);
 
   const toggleManualCheck = useCallback((key: string) => {
     setCheckedManual((prev) => {
@@ -3254,6 +3446,9 @@ export default function LaunchpadPage() {
           orbitFreeAi={!!orbitStatus?.preflight?.orbitFreeAi}
           totalDone={totalDone}
           totalSteps={totalSteps}
+          onRefetchOrbit={() => {
+            void refetchStatus();
+          }}
         />
 
         {/* ── INDEX HEALTH DASHBOARD — Car instrument cluster style ── */}
