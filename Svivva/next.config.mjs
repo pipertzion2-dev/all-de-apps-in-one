@@ -9,14 +9,6 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     minimumCacheTTL: 60 * 60 * 24 * 7,
   },
-  async rewrites() {
-    return {
-      beforeFiles: [
-        { source: "/sitemap.xml", destination: "/api/seo/sitemap" },
-        { source: "/pyracrypt-sitemap.xml", destination: "/api/seo/pyracrypt-sitemap" },
-      ],
-    };
-  },
   async headers() {
     return [
       {
