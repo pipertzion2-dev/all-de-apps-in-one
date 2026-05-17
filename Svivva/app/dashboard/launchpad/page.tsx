@@ -2447,9 +2447,7 @@ export default function LaunchpadPage() {
       cancelled = true;
     };
   }, []);
-  const [tab, setTab] = useState<"svivva" | "mini" | "index22" | "deploy" | "checklist">(
-    "index22",
-  );
+  const [tab, setTab] = useState<"svivva" | "mini" | "index22" | "deploy" | "checklist">("index22");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -2776,8 +2774,7 @@ export default function LaunchpadPage() {
   };
 
   const runAll = async () => {
-    const steps =
-      tab === "svivva" ? SVIVVA_STEPS : tab === "index22" ? INDEX22_STEPS : miniSteps;
+    const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "index22" ? INDEX22_STEPS : miniSteps;
     const pending = steps.filter((s) => (statusesRef.current[s.id] || "pending") !== "done");
 
     if (!pending.length) {
@@ -3237,13 +3234,7 @@ export default function LaunchpadPage() {
   const totalDone = svivvaDone + miniDone + index22Done;
   const totalSteps = SVIVVA_STEPS.length + miniSteps.length + INDEX22_STEPS.length;
   const tabDone =
-    tab === "svivva"
-      ? svivvaDone
-      : tab === "mini"
-        ? miniDone
-        : tab === "index22"
-          ? index22Done
-          : 0;
+    tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : tab === "index22" ? index22Done : 0;
   const allTabDone = steps.length > 0 && tabDone === steps.length;
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
   const overallPct = Math.round((totalDone / totalSteps) * 100);
