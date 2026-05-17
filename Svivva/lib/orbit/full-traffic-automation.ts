@@ -3,6 +3,7 @@ import { fillMarketingGaps, stepCompletionFromCounts } from "@/lib/orbit/fill-ma
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
+import { runSeoIndexStep, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
@@ -21,10 +22,18 @@ export type FullTrafficAutomationResult = {
 export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationResult> {
   const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
   const summaryLines: string[] = [
-    "═══ Full traffic automation (on-site + search engines) ═══",
+    "═══ Full traffic automation (Index 22 + on-site + search engines) ═══",
     "",
-    "▸ Phase 0 — Hub pages (autopilot URLs)",
+    "▸ Index 22 — Search infrastructure (9 phases)",
   ];
+
+  for (const phase of SEO_INDEX_PHASES) {
+    const r = await runSeoIndexStep(phase.id);
+    summaryLines.push(r.summary.split("\n")[0] ?? phase.title);
+    if (!r.ok) summaryLines.push(`  ⚠ ${phase.title} reported issues — see ${phase.id}`);
+  }
+
+  summaryLines.push("", "▸ Phase 0 — Hub pages (autopilot URLs)");
 
   summaryLines.push(...(await ensureOrbitHubPages()));
 

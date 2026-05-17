@@ -34,8 +34,11 @@ import {
   Target,
   Wand2,
   Info,
+  Radar,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
+import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
+import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
@@ -459,7 +462,10 @@ const STORAGE_KEY = "orbit_v3";
 const MANUAL_DONE_KEY = "orbit_manual_check_v1";
 /** Gold “Run Everything” runs all 8 phases in one session (serverless-safe batches). */
 const GOLD_PHASE_KEY = "orbit_gold_phase_v2";
-const GOLD_PHASES = 8;
+const GOLD_MARKETING_PHASES = 8;
+const INDEX22_STEPS = buildIndex22OrbitSteps();
+/** Index 22 (9) + marketing autopilot (8) */
+const GOLD_PHASES = INDEX22_PHASE_COUNT + GOLD_MARKETING_PHASES;
 
 type OrbitState = {
   statuses: Record<string, StepStatus>;
@@ -2441,7 +2447,9 @@ export default function LaunchpadPage() {
       cancelled = true;
     };
   }, []);
-  const [tab, setTab] = useState<"svivva" | "mini" | "deploy" | "checklist">("svivva");
+  const [tab, setTab] = useState<"svivva" | "mini" | "index22" | "deploy" | "checklist">(
+    "index22",
+  );
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -2768,7 +2776,8 @@ export default function LaunchpadPage() {
   };
 
   const runAll = async () => {
-    const steps = tab === "svivva" ? SVIVVA_STEPS : miniSteps;
+    const steps =
+      tab === "svivva" ? SVIVVA_STEPS : tab === "index22" ? INDEX22_STEPS : miniSteps;
     const pending = steps.filter((s) => (statusesRef.current[s.id] || "pending") !== "done");
 
     if (!pending.length) {
@@ -2998,7 +3007,7 @@ export default function LaunchpadPage() {
     setGoldPhaseDisplay(0);
     toast({
       title: "Gold phases reset",
-      description: "Press “Run Everything” to start again from phase 1 of 8.",
+      description: "Press “Run Everything” to start again from Index 22 phase 1 of 9.",
       duration: 5000,
     });
   }, [toast]);
@@ -3062,14 +3071,16 @@ export default function LaunchpadPage() {
       const L = units.length;
 
       const runPhaseUnits = async (phase: number) => {
-        const start = Math.floor((phase * L) / GOLD_PHASES);
-        const end = Math.floor(((phase + 1) * L) / GOLD_PHASES);
+        const start = Math.floor((phase * L) / GOLD_MARKETING_PHASES);
+        const end = Math.floor(((phase + 1) * L) / GOLD_MARKETING_PHASES);
 
         for (let i = start; i < end; i++) {
           const u = units[i];
           if (u.t === "connect") {
-            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect all apps…`);
-            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Auto-connect…`);
+            setFullAutopilotStep(
+              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Auto-connect all apps…`,
+            );
+            setLaunchProgress(`Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Auto-connect…`);
             try {
               const res = await authFetch("/api/admin/auto-connect-all", { method: "POST" });
               if (res.ok) {
@@ -3082,8 +3093,10 @@ export default function LaunchpadPage() {
             continue;
           }
           if (u.t === "autopilot") {
-            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Workspace health checks…`);
-            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: Health checks…`);
+            setFullAutopilotStep(
+              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Workspace health checks…`,
+            );
+            setLaunchProgress(`Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Health checks…`);
             try {
               const res = await authFetch("/api/orbit/workspace-autopilot", { method: "POST" });
               if (res.ok) {
@@ -3096,8 +3109,10 @@ export default function LaunchpadPage() {
             continue;
           }
           if (u.t === "finish") {
-            setFullAutopilotStep(`Phase ${phase + 1}/${GOLD_PHASES}: Fill gaps + IndexNow…`);
-            setLaunchProgress(`Phase ${phase + 1}/${GOLD_PHASES}: IndexNow + Bing…`);
+            setFullAutopilotStep(
+              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Fill gaps + IndexNow…`,
+            );
+            setLaunchProgress(`Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: IndexNow + Bing…`);
             try {
               await authFetch("/api/orbit/auto-complete", { method: "POST" });
             } catch {
@@ -3107,7 +3122,7 @@ export default function LaunchpadPage() {
           }
           if (u.t === "step") {
             const step = u.step;
-            const label = `Phase ${phase + 1}/${GOLD_PHASES}: ${step.title}`;
+            const label = `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: ${step.title}`;
             setFullAutopilotStep(label);
             setLaunchProgress(label);
             const overrideUrl = step.id.startsWith("mini-") ? miniSrc : undefined;
@@ -3121,17 +3136,27 @@ export default function LaunchpadPage() {
       };
 
       const startPhase = goldPhaseDisplay;
-      for (let phase = startPhase; phase < GOLD_PHASES; phase++) {
-        await runPhaseUnits(phase);
+      for (let g = startPhase; g < GOLD_PHASES; g++) {
+        if (g < INDEX22_PHASE_COUNT) {
+          const seoStep = SEO_INDEX_PHASES[g];
+          const label = `Index 22 · Phase ${g + 1}/${INDEX22_PHASE_COUNT}: ${seoStep.title}`;
+          setFullAutopilotStep(label);
+          setLaunchProgress(label);
+          let ok = await executeStep(seoStep.id);
+          if (!ok) {
+            await new Promise((r) => setTimeout(r, 2000));
+            ok = await executeStep(seoStep.id);
+          }
+        } else {
+          const marketingPhase = g - INDEX22_PHASE_COUNT;
+          await runPhaseUnits(marketingPhase);
+        }
         try {
-          localStorage.setItem(
-            GOLD_PHASE_KEY,
-            phase + 1 >= GOLD_PHASES ? "done" : String(phase + 1),
-          );
+          localStorage.setItem(GOLD_PHASE_KEY, g + 1 >= GOLD_PHASES ? "done" : String(g + 1));
         } catch {
           /* ignore */
         }
-        setGoldPhaseDisplay(phase + 1);
+        setGoldPhaseDisplay(g + 1);
       }
 
       setFullAutopilotStep("Final pass: marketing DB gaps + full IndexNow…");
@@ -3158,9 +3183,9 @@ export default function LaunchpadPage() {
       if (statusRes.data?.stepCompletion) applyDbStepCompletion(statusRes.data.stepCompletion);
 
       toast({
-        title: "All 8 phases complete",
+        title: "Index 22 + marketing complete",
         description:
-          "Every Orbit step ran across all phases. Marketing DB checks and IndexNow updated — verify green checks below.",
+          "All 9 search-infrastructure phases and 8 marketing batches finished. Verify Index 22 tab and green marketing checks below.",
         duration: 12000,
       });
     } catch (e) {
@@ -3198,12 +3223,27 @@ export default function LaunchpadPage() {
   //   );
   // if (!me?.isAdmin) return null;
 
-  const steps = tab === "svivva" ? SVIVVA_STEPS : tab === "mini" ? miniSteps : [];
+  const steps =
+    tab === "svivva"
+      ? SVIVVA_STEPS
+      : tab === "mini"
+        ? miniSteps
+        : tab === "index22"
+          ? INDEX22_STEPS
+          : [];
   const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
   const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
-  const totalDone = svivvaDone + miniDone;
-  const totalSteps = SVIVVA_STEPS.length + miniSteps.length;
-  const tabDone = tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : 0;
+  const index22Done = INDEX22_STEPS.filter((s) => statuses[s.id] === "done").length;
+  const totalDone = svivvaDone + miniDone + index22Done;
+  const totalSteps = SVIVVA_STEPS.length + miniSteps.length + INDEX22_STEPS.length;
+  const tabDone =
+    tab === "svivva"
+      ? svivvaDone
+      : tab === "mini"
+        ? miniDone
+        : tab === "index22"
+          ? index22Done
+          : 0;
   const allTabDone = steps.length > 0 && tabDone === steps.length;
   const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
   const overallPct = Math.round((totalDone / totalSteps) * 100);
@@ -3394,7 +3434,9 @@ export default function LaunchpadPage() {
                 {totalDone}
                 <span className="text-white/30 text-sm font-normal">/{totalSteps}</span>
               </p>
-              <p className="text-[11px] text-white/40">steps done</p>
+              <p className="text-[11px] text-white/40">
+                steps · Index 22 {index22Done}/{INDEX22_STEPS.length}
+              </p>
             </div>
           </div>
 
@@ -3480,12 +3522,14 @@ export default function LaunchpadPage() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-black text-foreground">Run Everything (8 phases)</h2>
+                <h2 className="text-sm font-black text-foreground">
+                  Run Everything (Index 22 + marketing)
+                </h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  One press runs <strong>all 8 phases</strong> automatically: discovers every mini
-                  app hub, auto-connects workspace apps, runs all 22 marketing steps in server-safe
-                  batches, fills DB gaps, and submits every URL to IndexNow — all traffic funnels to{" "}
-                  <strong>svivva.com</strong>.
+                  One press runs <strong>9 Index 22 phases</strong> (audit, sitemaps, internal
+                  links, quality, performance, conversion, analytics, monitoring) then{" "}
+                  <strong>8 marketing batches</strong> (mini hubs, 22 content steps, IndexNow) — all
+                  traffic funnels to <strong>svivva.com</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
                   Orbit uses <strong>free-tier AI only</strong> (set{" "}
@@ -3551,8 +3595,8 @@ export default function LaunchpadPage() {
                   {goldPhaseDisplay >= GOLD_PHASES
                     ? "All phases done — reset to run again"
                     : goldPhaseDisplay > 0
-                      ? `Continue all 8 phases (from ${goldPhaseDisplay + 1}/${GOLD_PHASES})`
-                      : "Run Everything — all 8 phases"}
+                      ? `Continue (${goldPhaseDisplay + 1}/${GOLD_PHASES})`
+                      : "Run Everything — Index 22 + marketing"}
                 </>
               )}
             </button>
@@ -3566,14 +3610,16 @@ export default function LaunchpadPage() {
                 onClick={resetGoldPhases}
                 disabled={fullAutopilotActive || launchActive}
               >
-                Reset gold phases (1–8)
+                Reset all phases (Index 22 + marketing)
               </Button>
             </div>
 
             <p className="text-[10px] text-center text-muted-foreground">
               {goldPhaseDisplay >= GOLD_PHASES
-                ? "All 8 phases complete. Reset below to start over."
-                : `Runs phases ${goldPhaseDisplay + 1}–${GOLD_PHASES} in one session · Step checkmarks sync when DB verifies each metric.`}
+                ? "Index 22 (9) + marketing (8) complete. Reset below to start over."
+                : goldPhaseDisplay < INDEX22_PHASE_COUNT
+                  ? `Next: Index 22 phase ${goldPhaseDisplay + 1}/${INDEX22_PHASE_COUNT}, then marketing batches.`
+                  : `Marketing batch ${goldPhaseDisplay - INDEX22_PHASE_COUNT + 1}/${GOLD_MARKETING_PHASES} · checkmarks sync when each step finishes.`}
             </p>
           </div>
         </div>
@@ -4189,7 +4235,7 @@ export default function LaunchpadPage() {
           <p className="text-[11px] text-muted-foreground px-1 font-medium uppercase tracking-wide">
             What to do:
           </p>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <button
               onClick={() => setTab("checklist")}
               className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
@@ -4208,6 +4254,32 @@ export default function LaunchpadPage() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-tight">All tasks status</p>
+            </button>
+            <button
+              onClick={() => setTab("index22")}
+              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "index22" ? "border-sky-500 bg-sky-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+              data-testid="tab-index22"
+            >
+              <div className="flex items-center gap-1.5 w-full">
+                <Radar
+                  className="w-3.5 h-3.5 flex-shrink-0"
+                  style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
+                />
+                <span
+                  className="text-xs font-bold truncate"
+                  style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
+                >
+                  Index 22
+                </span>
+                <span
+                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "index22" ? "bg-sky-500/20 text-sky-600" : "bg-muted text-muted-foreground"}`}
+                >
+                  {index22Done}/{INDEX22_STEPS.length}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                9-phase search infra
+              </p>
             </button>
             <button
               onClick={() => setTab("svivva")}
@@ -4287,6 +4359,25 @@ export default function LaunchpadPage() {
           <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
         )}
 
+        {tab === "index22" && (
+          <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-muted-foreground space-y-2">
+            <div className="flex items-start gap-2">
+              <Radar className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-sky-500" />
+              <span>
+                <strong className="text-foreground">Index 22</strong> — production search
+                infrastructure (audit, sitemaps, internal links, quality gate, performance,
+                conversion, analytics, monitoring). No doorway pages; thin content is rejected.
+              </span>
+            </div>
+            <Link
+              href="/dashboard/seo-health"
+              className="inline-flex items-center gap-1 text-sky-600 font-semibold hover:underline"
+            >
+              Open SEO Health dashboard <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+        )}
+
         {/* Tab info banner */}
         {tab === "svivva" && (
           <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
@@ -4325,7 +4416,7 @@ export default function LaunchpadPage() {
         )}
 
         {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
-        {tab !== "deploy" && tab !== "checklist" && (
+        {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && (
           <LaunchStation
             launchActive={launchActive}
             launchDone={launchDone}
@@ -4430,14 +4521,18 @@ export default function LaunchpadPage() {
                 ? "svivva.com is in orbit!"
                 : tab === "mini"
                   ? "Your tools are live on Google!"
-                  : "Deployment configured"}
+                  : tab === "index22"
+                    ? "Index 22 infrastructure complete!"
+                    : "Deployment configured"}
             </p>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
               {tab === "svivva"
                 ? "Switch to the Your Tools tab to promote your deployed mini apps."
                 : tab === "mini"
                   ? "Your app URLs are connected — Google traffic can flow to your live tools."
-                  : "Deployment is ready — your marketing will go live on deploy."}
+                  : tab === "index22"
+                    ? "Run marketing steps on svivva.com and Your tools tabs, or use Run Everything above."
+                    : "Deployment is ready — your marketing will go live on deploy."}
             </p>
             {tab === "svivva" && (
               <button

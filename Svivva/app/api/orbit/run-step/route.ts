@@ -48,6 +48,7 @@ import {
   generateMiniCNAMETargets,
   generateMiniImportTools,
 } from "@/lib/orbit/content-templates";
+import { isSeoIndexStepId, runSeoIndexStep } from "@/lib/orbit/seo-index-phases";
 
 export const maxDuration = 300;
 
@@ -5038,6 +5039,15 @@ Return JSON:
     }
 
     // ── STEP: RUN ALL SVIVVA STEPS ────────────────────────────────────────────
+    if (isSeoIndexStepId(stepId)) {
+      const result = await runSeoIndexStep(stepId);
+      return NextResponse.json({
+        summary: result.summary,
+        ok: result.ok,
+        details: result.details,
+      });
+    }
+
     if (stepId === "run-all-svivva") {
       const svivvaSteps = [
         "svivva-indexnow",
