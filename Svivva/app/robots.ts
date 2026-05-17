@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl, getPyracryptSitemapUrl, getSitemapUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+  const baseUrl = getSiteUrl().replace(/\/$/, "");
 
   return {
     rules: [
@@ -12,15 +13,13 @@ export default function robots(): MetadataRoute.Robots {
           "/blog",
           "/blog/*",
           "/tools",
-          "/tools/*",
+          "/tools/category/*",
           "/lp/*",
           "/about",
           "/contact",
           "/docs",
           "/privacy",
           "/terms",
-          "/marketing-hub",
-          "/marketing-hub/*",
           "/orbit",
           "/seeds",
           "/referrals",
@@ -29,9 +28,28 @@ export default function robots(): MetadataRoute.Robots {
           "/cyber-security-mini-apps",
           "/seo-pack",
         ],
-        disallow: ["/dashboard", "/dashboard/*", "/api", "/api/*", "/_next", "/gate", "/play"],
+        disallow: [
+          "/dashboard",
+          "/dashboard/*",
+          "/api",
+          "/api/*",
+          "/_next",
+          "/_next/*",
+          "/gate",
+          "/gate/*",
+          "/play",
+          "/play/*",
+          "/playground",
+          "/playground/*",
+          "/test",
+          "/badge",
+          "/api-card",
+          "/api-card/*",
+          "/*?*",
+        ],
       },
     ],
-    sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/pyracrypt/sitemap.xml`],
+    sitemap: [getSitemapUrl(), getPyracryptSitemapUrl()],
+    host: baseUrl,
   };
 }

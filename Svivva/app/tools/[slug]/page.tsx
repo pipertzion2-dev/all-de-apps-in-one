@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { CheckCircle2, ArrowRight, Clock, Users, Wrench, Sparkles } from "lucide-react";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
 import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
@@ -46,20 +48,20 @@ export async function generateMetadata({
   if (!tool) {
     return { title: "Tool Not Found | Svivva" };
   }
-  return {
+  return buildSeoMetadata({
     title: tool.metaTitle || `${tool.title} | Svivva`,
     description: tool.metaDescription || tool.content.slice(0, 160),
-    openGraph: {
-      title: tool.metaTitle || `${tool.title} | Svivva`,
-      description: tool.metaDescription || tool.content.slice(0, 160),
-      type: "website",
-    },
-  };
+    path: `/${slug}`,
+  });
 }
 
 export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tool = await fetchTool(slug);
+
+  if (tool?.published) {
+    redirect(`/${slug}`);
+  }
 
   if (!tool) {
     return (

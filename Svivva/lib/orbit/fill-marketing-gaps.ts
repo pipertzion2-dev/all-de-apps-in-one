@@ -370,6 +370,16 @@ async function insertSeoPage(
   toolUrl?: string,
 ): Promise<boolean> {
   try {
+    const { scorePageContent } = await import("@/lib/seo/content-quality/score");
+    const quality = scorePageContent({
+      title: page.title,
+      content: page.content,
+      howItWorks: page.subheadline || page.headline,
+      whoItsFor: "Developers and teams building with AI on Svivva",
+      hasFaq: /\[FAQ_JSON\]/i.test(page.content),
+    });
+    if (!quality.passed) return false;
+
     const ex = await db
       .select({ id: seoLandingPages.id })
       .from(seoLandingPages)

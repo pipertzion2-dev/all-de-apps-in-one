@@ -10,8 +10,12 @@ import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 import FaqSection from "./faq-section";
 
 import { TrackedCta } from "@/components/tracked-cta";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
+import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
+import { ConversionFunnel } from "@/components/seo/conversion-funnel";
+import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 type LandingPage = typeof seoLandingPages.$inferSelect;
 
@@ -67,6 +71,13 @@ function isMiniApp(page: LandingPage): boolean {
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
 
+function hubLabel(hubPath: string): string {
+  if (hubPath === "/ai-tools-hub") return "AI Tools Hub";
+  if (hubPath === "/seo-pack") return "SEO Pack";
+  if (hubPath === "/cyber-security-mini-apps") return "Security Mini Apps";
+  return "Tools";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -77,20 +88,11 @@ export async function generateMetadata({
   if (!page) return { title: "Page Not Found | Svivva" };
 
   const description = page.metaDescription || getContentWithoutFaq(page.content).slice(0, 160);
-  return {
+  return buildSeoMetadata({
     title: page.metaTitle || `${page.title} | Svivva`,
     description,
-    alternates: { canonical: `${BASE_URL}/${slug}` },
-    openGraph: {
-      title: page.metaTitle || page.title,
-      description,
-      type: "website",
-      url: `${BASE_URL}/${slug}`,
-      siteName: "Svivva",
-    },
-    twitter: { card: "summary_large_image", title: page.metaTitle || page.title, description },
-    robots: { index: true, follow: true },
-  };
+    path: `/${slug}`,
+  });
 }
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -102,6 +104,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
   const mainContent = getContentWithoutFaq(page.content);
   const relatedPages = await getRelatedPages(page.relatedSlugs || []);
   const miniApp = isMiniApp(page);
+  const hubPath = pickHubForPage(page);
 
   // Build JSON-LD: WebPage base + SoftwareApplication for mini-app pages + FAQPage if applicable
   const ldJsonItems: object[] = [
@@ -192,13 +195,16 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
           </div>
         </nav>
 
-        {/* Breadcrumb */}
-        <div className="max-w-5xl mx-auto px-6 py-3 text-xs text-white/30 flex items-center gap-1.5">
-          <Link href="/" className="hover:text-white/60 transition-colors">
-            Home
-          </Link>
-          <span>/</span>
-          <span className="text-white/50">{page.title}</span>
+        <div className="max-w-5xl mx-auto px-6 pt-4">
+          <SeoBreadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              ...(hubPath !== "/" && hubPath !== `/${slug}` ?
+                [{ label: hubLabel(hubPath), href: hubPath }]
+              : []),
+              { label: page.title },
+            ]}
+          />
         </div>
 
         {/* Hero */}
@@ -395,6 +401,17 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
             </TrackedCta>
           </div>
         </section>
+
+        <div className="max-w-5xl mx-auto px-6">
+          <ConversionFunnel
+            variant="bottom"
+            headline={miniApp ? `Try ${page.title} on Svivva` : "Ship your next AI project"}
+            primaryHref="/signup"
+            primaryLabel="Start free"
+            secondaryHref={hubPath !== "/" ? hubPath : "/tools"}
+            secondaryLabel="More tools"
+          />
+        </div>
 
         <footer className="border-t border-white/10 py-8 px-6">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">

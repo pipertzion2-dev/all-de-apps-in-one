@@ -73,3 +73,30 @@ export function trackButtonClick(buttonName: string, pageLocation?: string) {
     page_location: pageLocation,
   });
 }
+
+export function trackPageView(pagePath: string, pageTitle?: string) {
+  trackEvent("page_view", {
+    page_path: pagePath,
+    page_title: pageTitle ?? (typeof document !== "undefined" ? document.title : undefined),
+  });
+}
+
+export function trackScrollDepth(percent: number, pagePath: string) {
+  trackEvent("scroll_depth", { percent, page_path: pagePath });
+}
+
+export function trackSignupStart(method: string = "replit_oidc") {
+  trackEvent("signup_start", { method });
+}
+
+export function trackToolUse(toolSlug: string, toolName?: string) {
+  trackEvent("tool_use", { tool_slug: toolSlug, tool_name: toolName ?? toolSlug });
+}
+
+export function trackEmailCapture(source: string) {
+  trackEvent("email_capture", { source });
+}
+
+export function trackExitIntent(pagePath: string) {
+  trackEvent("exit_intent", { page_path: pagePath });
+}

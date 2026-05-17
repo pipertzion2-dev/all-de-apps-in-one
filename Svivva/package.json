@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "db:push": "drizzle-kit push",
     "secrets:for-deploy": "node scripts/gen-deploy-secrets.mjs",
-    "stripe:seed": "tsx scripts/seed-products.ts"
+    "stripe:seed": "tsx scripts/seed-products.ts",
+    "seo:audit": "tsx scripts/seo-audit.ts"
   },
   "engines": {
     "node": "22.x"

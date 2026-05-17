@@ -81,6 +81,55 @@ export default function SeoHealthPage() {
     staleTime: 60_000,
   });
 
+  const auditMutation = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch("/api/seo/audit");
+      if (!r.ok) throw new Error(`Audit HTTP ${r.status}`);
+      return r.json();
+    },
+    onSuccess: (d) => {
+      setSubmitMsg({
+        text: `Site audit: ${d.site_map?.sitemapUrlCount ?? "?"} sitemap URLs, ${d.orphan_pages?.orphans?.length ?? 0} orphans, ${d.thin_content?.belowThreshold?.length ?? 0} thin pages.`,
+        ok: true,
+      });
+    },
+    onError: (e: Error) => setSubmitMsg({ text: e.message, ok: false }),
+  });
+
+  const monitorMutation = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch("/api/seo/monitor");
+      if (!r.ok) throw new Error(`Monitor HTTP ${r.status}`);
+      return r.json();
+    },
+    onSuccess: (d) => {
+      const critical = d.alerts?.filter((a: { severity: string }) => a.severity === "critical")
+        .length;
+      setSubmitMsg({
+        text: d.ok
+          ? `Monitor OK — ${d.metrics?.sitemapUrls ?? 0} URLs indexed in sitemap.`
+          : `Monitor: ${critical ?? 0} critical alert(s). See Launchpad or run npm run seo:audit locally.`,
+        ok: !!d.ok,
+      });
+    },
+    onError: (e: Error) => setSubmitMsg({ text: e.message, ok: false }),
+  });
+
+  const healLinksMutation = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch("/api/seo/internal-links/heal", { method: "POST" });
+      if (!r.ok) throw new Error(`Heal HTTP ${r.status}`);
+      return r.json();
+    },
+    onSuccess: (d) => {
+      setSubmitMsg({
+        text: `Internal links: updated ${d.updated ?? 0} pages, ${d.orphanSlugsRemaining ?? 0} orphans remaining.`,
+        ok: true,
+      });
+    },
+    onError: (e: Error) => setSubmitMsg({ text: e.message, ok: false }),
+  });
+
   const indexNowMutation = useMutation({
     mutationFn: async () => {
       const r = await authFetch("/api/indexnow/submit", { method: "POST" });
@@ -111,6 +160,36 @@ export default function SeoHealthPage() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSubmitMsg(null);
+              auditMutation.mutate();
+            }}
+            disabled={auditMutation.isPending}
+          >
+            Run site audit
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSubmitMsg(null);
+              monitorMutation.mutate();
+            }}
+            disabled={monitorMutation.isPending}
+          >
+            Self-heal check
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSubmitMsg(null);
+              healLinksMutation.mutate();
+            }}
+            disabled={healLinksMutation.isPending}
+          >
+            Fix orphan links
+          </Button>
           <Button
             variant="outline"
             onClick={() => {

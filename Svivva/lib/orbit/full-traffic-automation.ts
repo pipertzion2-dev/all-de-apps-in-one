@@ -2,6 +2,7 @@ import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { fillMarketingGaps, stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
+import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
@@ -26,6 +27,11 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
   ];
 
   summaryLines.push(...(await ensureOrbitHubPages()));
+
+  const linkHeal = await healOrphanInternalLinks();
+  if (linkHeal.updated > 0) {
+    summaryLines.push(`▸ Internal links: filled relatedSlugs on ${linkHeal.updated} pages`);
+  }
 
   summaryLines.push("", "▸ Phase 1 — Publish all content on svivva.com (DB)");
 

@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
       body: JSON.stringify({ action: "submit_sitemap" }),
       signal: AbortSignal.timeout(35_000),
     }).then(async (r) => ({ ok: r.ok, status: r.status, body: await r.json().catch(() => ({})) }));
-    out.seo = { indexNow, gsc };
+    const { runSeoMonitor } = await import("@/lib/seo/monitoring/detector");
+    const monitor = await runSeoMonitor();
+    out.seo = { indexNow, gsc, monitor };
   }
 
   if (job === "growth" || job === "all") {
