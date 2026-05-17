@@ -17,9 +17,18 @@ import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 
 export const revalidate = 3600;
 
+/** Never treat platform/metadata paths as SEO landing pages. */
+const RESERVED_SLUGS = new Set([
+  "sitemap.xml",
+  "robots.txt",
+  "favicon.ico",
+  "pyracrypt-sitemap.xml",
+]);
+
 type LandingPage = typeof seoLandingPages.$inferSelect;
 
 async function getPage(slug: string): Promise<LandingPage | null> {
+  if (RESERVED_SLUGS.has(slug)) return null;
   try {
     const [page] = await db
       .select()
