@@ -6,9 +6,9 @@ import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { runAnalysis } from "@/lib/svivva-play/pipeline";
 import { execFile } from "child_process";
-import { writeFile, unlink, mkdir, copyFile, access } from "fs/promises";
+import { writeFile, unlink, mkdir, copyFile } from "fs/promises";
 import path from "path";
-import { constants } from "fs";
+import { analyzeWavFile } from "@/lib/svivva-play/server-audio-analysis";
 
 function convertMp3ToWav(inputPath: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -24,34 +24,6 @@ function convertMp3ToWav(inputPath: string, outputPath: string): Promise<void> {
         }
       },
     );
-  });
-}
-
-function runPythonAnalysis(
-  filePath: string,
-): Promise<{ bpm: number; key: string; keyConfidence: number }> {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), "scripts", "analyze_audio.py");
-    execFile("python", [scriptPath, filePath], { timeout: 120000 }, (error, stdout, stderr) => {
-      if (stderr) {
-        console.log("Python analysis debug:", stderr);
-      }
-      if (error) {
-        console.error("Python analysis stderr:", stderr);
-        reject(new Error(`Python analysis failed: ${error.message}`));
-        return;
-      }
-      try {
-        const result = JSON.parse(stdout.trim());
-        if (result.error) {
-          reject(new Error(result.error));
-        } else {
-          resolve(result);
-        }
-      } catch (e) {
-        reject(new Error(`Failed to parse Python output: ${stdout}`));
-      }
-    });
   });
 }
 
@@ -113,11 +85,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      console.log("Starting Python analysis for file:", audioFile.name, "size:", audioFile.size);
-      realAnalysis = await runPythonAnalysis(analysisPath);
-      console.log("✅ Python DSP analysis succeeded:", realAnalysis);
+      console.log("Running built-in key/tempo analysis for:", audioFile.name, "size:", audioFile.size);
+      realAnalysis = await analyzeWavFile(analysisPath);
+      console.log("✅ Built-in analysis succeeded:", realAnalysis);
     } catch (err) {
-      console.warn("⚠️ Python analysis failed, falling back to LLM:", err);
+      console.warn("⚠️ Built-in analysis failed, falling back to LLM:", err);
       console.log(
         "File info - name:",
         audioFile.name,
