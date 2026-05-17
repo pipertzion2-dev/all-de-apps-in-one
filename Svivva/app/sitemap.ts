@@ -1,17 +1,13 @@
 import type { MetadataRoute } from "next";
-import {
-  SITEMAP_CHUNK_IDS,
-  buildSitemapChunk,
-  type SitemapChunkId,
-} from "@/lib/seo/sitemap/registry";
+import { getSitemapEntries } from "@/lib/seo/sitemap/registry";
 
-export async function generateSitemaps() {
-  return SITEMAP_CHUNK_IDS.map((id) => ({ id }));
-}
-
-export default async function sitemap(props: {
-  id: Promise<SitemapChunkId>;
-}): Promise<MetadataRoute.Sitemap> {
-  const id = await props.id;
-  return buildSitemapChunk(id);
+/** Single sitemap at /sitemap.xml — avoids conflict with `(seo)/[slug]` and route handlers. */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const entries = await getSitemapEntries();
+  return entries.map(({ url, lastModified, changeFrequency, priority }) => ({
+    url,
+    lastModified,
+    changeFrequency,
+    priority,
+  }));
 }
