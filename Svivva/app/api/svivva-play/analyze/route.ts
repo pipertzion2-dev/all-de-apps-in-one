@@ -85,7 +85,12 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      console.log("Running built-in key/tempo analysis for:", audioFile.name, "size:", audioFile.size);
+      console.log(
+        "Running built-in key/tempo analysis for:",
+        audioFile.name,
+        "size:",
+        audioFile.size,
+      );
       realAnalysis = await analyzeWavFile(analysisPath);
       console.log("✅ Built-in analysis succeeded:", realAnalysis);
     } catch (err) {

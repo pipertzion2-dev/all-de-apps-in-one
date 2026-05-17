@@ -21,7 +21,12 @@ function parseWav(buffer: Buffer): WavInfo {
   let dataSize = 0;
 
   while (pos < buffer.length - 8) {
-    const chunkId = String.fromCharCode(buffer[pos], buffer[pos + 1], buffer[pos + 2], buffer[pos + 3]);
+    const chunkId = String.fromCharCode(
+      buffer[pos],
+      buffer[pos + 1],
+      buffer[pos + 2],
+      buffer[pos + 3],
+    );
     const chunkSize = view.getInt32(pos + 4, true);
     if (chunkId === "fmt ") {
       fmtPos = pos + 8;
@@ -57,7 +62,7 @@ function parseWav(buffer: Buffer): WavInfo {
           const b0 = buffer[offset];
           const b1 = buffer[offset + 1];
           const b2 = buffer[offset + 2];
-          val = ((b0 | (b1 << 8) | (b2 << 16)) | 0) / 8388608;
+          val = (b0 | (b1 << 8) | (b2 << 16) | 0) / 8388608;
         } else if (bitsPerSample === 32) {
           val = view.getInt32(offset, true) / 2147483648;
         } else if (bitsPerSample === 8) {
@@ -106,7 +111,11 @@ function fftInPlace(real: Float64Array, imag: Float64Array, n: number): void {
 
 function correlate(chromagram: number[], profile: number[]): number {
   const n = 12;
-  let sumXY = 0, sumX = 0, sumY = 0, sumX2 = 0, sumY2 = 0;
+  let sumXY = 0,
+    sumX = 0,
+    sumY = 0,
+    sumX2 = 0,
+    sumY2 = 0;
   for (let i = 0; i < n; i++) {
     sumXY += chromagram[i] * profile[i];
     sumX += chromagram[i];
@@ -155,7 +164,8 @@ function detectKey(mono: Float32Array, sampleRate: number): { key: string; confi
         const bin = Math.round((freq * fftSize) / sampleRate);
         if (bin > 0 && bin < fftSize / 2 - 1) {
           const weight = 1.0 / octave;
-          energy += ((magnitudes[bin - 1] + magnitudes[bin] * 2 + magnitudes[bin + 1]) * weight) / 4;
+          energy +=
+            ((magnitudes[bin - 1] + magnitudes[bin] * 2 + magnitudes[bin + 1]) * weight) / 4;
         }
       }
       chromagram[noteIdx] += energy;
@@ -196,7 +206,10 @@ function detectKey(mono: Float32Array, sampleRate: number): { key: string; confi
     }
   }
 
-  const confidence = Math.min(99, Math.max(30, Math.round(((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50)));
+  const confidence = Math.min(
+    99,
+    Math.max(30, Math.round(((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50)),
+  );
   return { key: bestKey, confidence };
 }
 
@@ -243,7 +256,9 @@ function detectBPM(mono: Float32Array, sampleRate: number): number {
   return Math.round(bpm);
 }
 
-export async function analyzeWavFile(wavPath: string): Promise<{ bpm: number; key: string; keyConfidence: number }> {
+export async function analyzeWavFile(
+  wavPath: string,
+): Promise<{ bpm: number; key: string; keyConfidence: number }> {
   const buffer = await readFile(wavPath);
   const { sampleRate, data } = parseWav(buffer);
   const bpm = detectBPM(data, sampleRate);
