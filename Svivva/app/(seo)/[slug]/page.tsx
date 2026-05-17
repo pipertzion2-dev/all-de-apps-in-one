@@ -199,9 +199,9 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
           <SeoBreadcrumbs
             items={[
               { label: "Home", href: "/" },
-              ...(hubPath !== "/" && hubPath !== `/${slug}` ?
-                [{ label: hubLabel(hubPath), href: hubPath }]
-              : []),
+              ...(hubPath !== "/" && hubPath !== `/${slug}`
+                ? [{ label: hubLabel(hubPath), href: hubPath }]
+                : []),
               { label: page.title },
             ]}
           />

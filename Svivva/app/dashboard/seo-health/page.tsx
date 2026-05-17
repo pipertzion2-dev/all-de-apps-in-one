@@ -103,8 +103,9 @@ export default function SeoHealthPage() {
       return r.json();
     },
     onSuccess: (d) => {
-      const critical = d.alerts?.filter((a: { severity: string }) => a.severity === "critical")
-        .length;
+      const critical = d.alerts?.filter(
+        (a: { severity: string }) => a.severity === "critical",
+      ).length;
       setSubmitMsg({
         text: d.ok
           ? `Monitor OK — ${d.metrics?.sitemapUrls ?? 0} URLs indexed in sitemap.`
