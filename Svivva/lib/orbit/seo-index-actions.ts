@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { runSiteAudit } from "@/lib/seo/audit/run-audit";
 import { buildInternalLinkMap, healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
@@ -17,7 +18,7 @@ export type SeoIndexRunResult = {
 
 async function writeAuditReports(audit: Awaited<ReturnType<typeof runSiteAudit>>): Promise<string> {
   const linkMap = await buildInternalLinkMap();
-  const outDir = path.join(process.cwd(), "seo-reports");
+  const outDir = process.env.SEO_REPORTS_DIR || path.join(os.tmpdir(), "svivva-seo-reports");
   await mkdir(outDir, { recursive: true });
 
   const files: [string, unknown][] = [
@@ -131,7 +132,7 @@ export async function runSeoIndexStep(stepId: string): Promise<SeoIndexRunResult
     case 4: {
       const linkMap = await buildInternalLinkMap();
       const heal = await healOrphanInternalLinks();
-      const outDir = path.join(process.cwd(), "seo-reports");
+      const outDir = process.env.SEO_REPORTS_DIR || path.join(os.tmpdir(), "svivva-seo-reports");
       await mkdir(outDir, { recursive: true });
       await writeFile(
         path.join(outDir, "internal_link_map.json"),
@@ -169,7 +170,7 @@ export async function runSeoIndexStep(stepId: string): Promise<SeoIndexRunResult
         hasImageConfig: true,
         hasCacheHeaders: true,
       });
-      const outDir = path.join(process.cwd(), "seo-reports");
+      const outDir = process.env.SEO_REPORTS_DIR || path.join(os.tmpdir(), "svivva-seo-reports");
       await mkdir(outDir, { recursive: true });
       await writeFile(
         path.join(outDir, "performance_report.json"),
@@ -198,7 +199,7 @@ export async function runSeoIndexStep(stepId: string): Promise<SeoIndexRunResult
     }
     case 8: {
       const map = buildAnalyticsMap();
-      const outDir = path.join(process.cwd(), "seo-reports");
+      const outDir = process.env.SEO_REPORTS_DIR || path.join(os.tmpdir(), "svivva-seo-reports");
       await mkdir(outDir, { recursive: true });
       await writeFile(path.join(outDir, "analytics_map.json"), JSON.stringify(map, null, 2));
       return {
