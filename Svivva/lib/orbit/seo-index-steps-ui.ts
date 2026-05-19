@@ -10,7 +10,7 @@ import {
   Activity,
   Sparkles,
 } from "lucide-react";
-import { SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
+import { SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 
 export type OrbitStepUi = {
   id: string;

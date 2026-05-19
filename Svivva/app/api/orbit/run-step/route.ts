@@ -48,7 +48,8 @@ import {
   generateMiniCNAMETargets,
   generateMiniImportTools,
 } from "@/lib/orbit/content-templates";
-import { isSeoIndexStepId, runSeoIndexStep } from "@/lib/orbit/seo-index-phases";
+import { isSeoIndexStepId } from "@/lib/orbit/seo-index-phases";
+import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 
 export const maxDuration = 300;
 

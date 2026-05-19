@@ -37,7 +37,7 @@ import {
   Radar,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
-import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
+import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
@@ -2550,9 +2550,11 @@ export default function LaunchpadPage() {
     setStatuses((prev) => {
       const next = { ...prev };
       let changed = false;
+      // Sync authoritative server completion: set done when true, reset to pending when false.
       for (const [id, ok] of Object.entries(completion)) {
-        if (ok && next[id] !== "done") {
-          next[id] = "done";
+        const target: StepStatus = ok ? "done" : "pending";
+        if (next[id] !== target) {
+          next[id] = target;
           changed = true;
         }
       }

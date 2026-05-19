@@ -3,7 +3,8 @@ import { fillMarketingGaps, stepCompletionFromCounts } from "@/lib/orbit/fill-ma
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
-import { runSeoIndexStep, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
+import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
+import { SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
