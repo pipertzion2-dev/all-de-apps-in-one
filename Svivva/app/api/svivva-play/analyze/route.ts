@@ -10,11 +10,11 @@ import { writeFile, unlink, mkdir, copyFile } from "fs/promises";
 import path from "path";
 import { analyzeWavFile } from "@/lib/svivva-play/server-audio-analysis";
 
-function convertMp3ToWav(inputPath: string, outputPath: string): Promise<void> {
+function convertAudioToWav(inputPath: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(
       "ffmpeg",
-      ["-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", outputPath],
+      ["-y", "-nostdin", "-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", outputPath],
       { timeout: 60000 },
       (error) => {
         if (error) {
@@ -70,19 +70,16 @@ export async function POST(request: NextRequest) {
       const debugCopy = path.join(tmpDir, `last_play_upload${ext}`);
       await copyFile(tempFilePath, debugCopy).catch(() => {});
 
+      const wavPath = path.join(tmpDir, `${sessionId}.wav`);
       let analysisPath = tempFilePath;
-      // Convert MP3 to WAV if needed
-      if (ext.toLowerCase() === ".mp3" || audioFile.type === "audio/mpeg") {
-        console.log("🔄 Converting MP3 to WAV for analysis...");
-        const wavPath = path.join(tmpDir, `${sessionId}.wav`);
-        try {
-          await convertMp3ToWav(tempFilePath, wavPath);
-          analysisPath = wavPath;
-          console.log("✅ MP3 converted to WAV");
-        } catch (convertErr) {
-          console.warn("⚠️ MP3 conversion failed, trying raw MP3:", convertErr);
-          // Try with raw MP3 anyway
-        }
+      console.log("🔄 Attempting to normalize upload to WAV for analysis...");
+      try {
+        await convertAudioToWav(tempFilePath, wavPath);
+        analysisPath = wavPath;
+        console.log("✅ Audio converted to WAV");
+      } catch (convertErr) {
+        console.warn("⚠️ Audio conversion failed, falling back to raw upload:", convertErr);
+        // If the input was already WAV, analyze that directly; otherwise let parseWav fail and fall back.
       }
 
       console.log(
