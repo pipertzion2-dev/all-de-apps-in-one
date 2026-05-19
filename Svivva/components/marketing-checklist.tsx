@@ -138,6 +138,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Key exists in DB — search engines will accept URL submissions"
             : `Run 'Set Up IndexNow' in the ${ORBIT_HOST} tab`,
           status: orbitStatus?.indexNowKey ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -147,6 +149,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Bing/Yandex/Yahoo notified — automated weekly"
             : "Run IndexNow step or click 'Run Weekly Tasks' in Growth Engine",
           status: orbitStatus?.indexNowSubmitted ? "auto" : "missing",
+          link: "/dashboard/growth",
+          linkLabel: "Go to Growth Engine →",
           priority: "high",
         },
         {
@@ -215,6 +219,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-seo-pages")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
         },
         {
           id: "content-comparisons",
@@ -229,6 +235,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-comparisons")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -258,6 +266,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-aeo")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -273,6 +283,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-integrations")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -288,6 +300,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-usecases")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -303,6 +317,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-templates")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
         },
         {
           id: "content-paa",
@@ -317,6 +333,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
               : orbitStepDone("svivva-paa")
                 ? "done"
                 : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -326,6 +344,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Articles generated — need to be published on platforms (see below)"
             : "Run 'Parasite SEO Articles' step in Orbit",
           status: orbitStepDone("svivva-parasite") ? "warn" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
           priority: "high",
         },
         {
@@ -335,6 +355,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Twitter thread, LinkedIn, Product Hunt copy generated"
             : "Run 'Full Social Launch Pack' step",
           status: orbitStepDone("svivva-social") ? "warn" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
         },
         {
           id: "content-community",
@@ -343,6 +365,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Reddit, Show HN, IH posts drafted — need manual posting"
             : "Run 'Community Strategy Pack' step",
           status: orbitStepDone("svivva-communities") ? "warn" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
         },
         {
           id: "content-outreach",
@@ -351,6 +375,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
             ? "Press release + 10 newsletter pitches + 8 podcast pitches generated"
             : "Run 'PR & Newsletter Pitches' step",
           status: orbitStepDone("svivva-outreach") ? "warn" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Go to Orbit →",
         },
       ],
     },
