@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Clutety",
+    "slug": "clutety",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "clutety",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080c14"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.svivva.clutety",
+      "buildNumber": "1",
+      "infoPlist": {
+        "CFBundleDisplayName": "Clutety",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.svivva.clutety",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080c14"
+      }
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "clutetyWebUrl": "https://svivva.com/clutety/app"
+    }
+  }
+}

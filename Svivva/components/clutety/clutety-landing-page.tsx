@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,16 +14,11 @@ import {
   Check,
   Star,
 } from "lucide-react";
-import {
-  CLUTETY_BURG,
-  CLUTETY_LOGO_PATH,
-  CLUTETY_TEAL,
-  getClutetyEmbedUrl,
-} from "@/lib/clutety/config";
+import { ClutetyEmbeddedApp } from "@/components/clutety/clutety-embedded-app";
+import { CLUTETY_BURG, CLUTETY_LOGO_PATH, CLUTETY_TEAL } from "@/lib/clutety/config";
 
 const TEAL = CLUTETY_TEAL;
 const BURG = CLUTETY_BURG;
-const CLUTETY_EMBED_URL = getClutetyEmbedUrl();
 
 const features = [
   {
@@ -74,7 +68,7 @@ const plans = [
     ],
     cta: "Start Free",
     ctaStyle: "border",
-    href: CLUTETY_EMBED_URL,
+    href: "#app",
   },
   {
     name: "Pro",
@@ -91,7 +85,7 @@ const plans = [
     ],
     cta: "Get Pro",
     ctaStyle: "solid",
-    href: CLUTETY_EMBED_URL,
+    href: "#app",
   },
   {
     name: "Team",
@@ -108,7 +102,7 @@ const plans = [
     ],
     cta: "Get Team",
     ctaStyle: "solid",
-    href: CLUTETY_EMBED_URL,
+    href: "#app",
   },
   {
     name: "Enterprise",
@@ -125,7 +119,7 @@ const plans = [
     ],
     cta: "Get Enterprise",
     ctaStyle: "burg",
-    href: CLUTETY_EMBED_URL,
+    href: "#app",
   },
 ];
 
@@ -153,9 +147,6 @@ const faqs = [
 ];
 
 export default function ClutetyLandingPage() {
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [iframeError, setIframeError] = useState(false);
-
   return (
     <div className="min-h-screen bg-[#080c14] text-white overflow-x-hidden">
       {/* Nav */}
@@ -209,7 +200,7 @@ export default function ClutetyLandingPage() {
         </div>
 
         {/* Live App Window */}
-        <div className="relative mx-auto max-w-4xl">
+        <div id="app" className="relative mx-auto max-w-4xl scroll-mt-24">
           <div
             className="absolute -inset-8 rounded-3xl opacity-30 blur-3xl pointer-events-none"
             style={{
@@ -256,66 +247,8 @@ export default function ClutetyLandingPage() {
               </div>
             </div>
 
-            {/* iframe */}
-            <div className="relative" style={{ height: "560px" }}>
-              {!iframeError ? (
-                <>
-                  {!iframeLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                        style={{ background: `${TEAL}20`, border: `1px solid ${TEAL}40` }}
-                      >
-                        <Lock className="w-6 h-6" style={{ color: TEAL }} />
-                      </div>
-                      <p className="text-sm text-white/40">Loading Clutety…</p>
-                      <div className="flex gap-1">
-                        {[0, 1, 2].map((i) => (
-                          <div
-                            key={i}
-                            className="w-1.5 h-1.5 rounded-full animate-bounce"
-                            style={{ background: TEAL, animationDelay: `${i * 0.15}s` }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <iframe
-                    src={CLUTETY_EMBED_URL}
-                    title="Clutety — File Protection Tool"
-                    className="w-full h-full border-0"
-                    style={{ opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.4s ease" }}
-                    onLoad={() => setIframeLoaded(true)}
-                    onError={() => setIframeError(true)}
-                    sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"
-                  />
-                </>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 text-center">
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                    style={{ background: `${TEAL}15`, border: `1px solid ${TEAL}30` }}
-                  >
-                    <Shield className="w-8 h-8" style={{ color: TEAL }} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-white mb-2">Clutety</p>
-                    <p className="text-sm text-white/50 mb-6 max-w-sm">
-                      Encrypted file protection, right in your browser. No uploads. No accounts.
-                      Just shield.
-                    </p>
-                    <a
-                      href={CLUTETY_EMBED_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
-                      style={{ background: TEAL }}
-                    >
-                      Open Clutety <ArrowRight className="w-4 h-4" />
-                    </a>
-                  </div>
-                </div>
-              )}
+            <div className="relative overflow-hidden" style={{ height: "min(72vh, 640px)" }}>
+              <ClutetyEmbeddedApp />
             </div>
 
             <div
@@ -340,9 +273,7 @@ export default function ClutetyLandingPage() {
         {/* CTA below window */}
         <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
           <a
-            href={CLUTETY_EMBED_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#app"
             className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold"
             style={{ background: TEAL }}
           >
@@ -491,9 +422,7 @@ export default function ClutetyLandingPage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <a
-              href={CLUTETY_EMBED_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#app"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
