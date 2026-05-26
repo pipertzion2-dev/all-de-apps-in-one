@@ -4,22 +4,59 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Shield, Lock, Key, FileText, ArrowRight,
-  ShieldCheck, Eye, Zap, Check, Star
+  Shield,
+  Lock,
+  Key,
+  FileText,
+  ArrowRight,
+  ShieldCheck,
+  Eye,
+  Zap,
+  Check,
+  Star,
 } from "lucide-react";
-import { CLUTETY_BURG, CLUTETY_LOGO_PATH, CLUTETY_TEAL, getClutetyEmbedUrl } from "@/lib/clutety/config";
+import {
+  CLUTETY_BURG,
+  CLUTETY_LOGO_PATH,
+  CLUTETY_TEAL,
+  getClutetyEmbedUrl,
+} from "@/lib/clutety/config";
 
 const TEAL = CLUTETY_TEAL;
 const BURG = CLUTETY_BURG;
 const CLUTETY_EMBED_URL = getClutetyEmbedUrl();
 
 const features = [
-  { icon: Shield,      title: "Military-Grade Encryption",  desc: "AES-256 and ChaCha20 algorithms lock your files before they ever leave your device." },
-  { icon: Eye,         title: "Zero-Knowledge Architecture", desc: "Nothing is uploaded. All processing happens locally in your browser — your keys stay yours alone." },
-  { icon: Zap,         title: "Instant, No Account Needed", desc: "Open the tool and start protecting files in seconds. No sign-up. No waiting." },
-  { icon: FileText,    title: "Feed-Aware Blocking",        desc: "Tune what appears on YouTube, TikTok, and other feeds — Clutety filters without rebuilding your apps." },
-  { icon: Key,         title: "Brute-Force Resistant Keys", desc: "PBKDF2 with 600,000 iterations makes automated attack attempts computationally infeasible." },
-  { icon: ShieldCheck, title: "Open & Auditable",           desc: "Client-side code you can inspect yourself. No black boxes. No tracking. No surprises." },
+  {
+    icon: Shield,
+    title: "Military-Grade Encryption",
+    desc: "AES-256 and ChaCha20 algorithms lock your files before they ever leave your device.",
+  },
+  {
+    icon: Eye,
+    title: "Zero-Knowledge Architecture",
+    desc: "Nothing is uploaded. All processing happens locally in your browser — your keys stay yours alone.",
+  },
+  {
+    icon: Zap,
+    title: "Instant, No Account Needed",
+    desc: "Open the tool and start protecting files in seconds. No sign-up. No waiting.",
+  },
+  {
+    icon: FileText,
+    title: "Feed-Aware Blocking",
+    desc: "Tune what appears on YouTube, TikTok, and other feeds — Clutety filters without rebuilding your apps.",
+  },
+  {
+    icon: Key,
+    title: "Brute-Force Resistant Keys",
+    desc: "PBKDF2 with 600,000 iterations makes automated attack attempts computationally infeasible.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Open & Auditable",
+    desc: "Client-side code you can inspect yourself. No black boxes. No tracking. No surprises.",
+  },
 ];
 
 const plans = [
@@ -93,11 +130,26 @@ const plans = [
 ];
 
 const faqs = [
-  { q: "Is the free plan really free?", a: "Yes — completely free, no sign-up, no limits on the core tool. Paid plans unlock advanced scanning, team seats, and reporting." },
-  { q: "Does Clutety block content on social feeds?", a: "Yes — Clutety is built to filter unwanted items on feeds like YouTube and similar apps, using the same secure shell embedded in Svivva." },
-  { q: "Where does my data go?", a: "Nowhere by default. Clutety processes controls locally in your browser. Your keys and preferences stay yours." },
-  { q: "What makes the paid plans different?", a: "The free plan gives you one scan per day and a basic report. Pro unlocks unlimited scans and all five protection modes. Team adds multi-seat access, API hooks, and Slack alerts. Enterprise adds white-label reports and a dedicated AI engine." },
-  { q: "Is this connected to Svivva's AI platform?", a: "Clutety is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core." },
+  {
+    q: "Is the free plan really free?",
+    a: "Yes — completely free, no sign-up, no limits on the core tool. Paid plans unlock advanced scanning, team seats, and reporting.",
+  },
+  {
+    q: "Does Clutety block content on social feeds?",
+    a: "Yes — Clutety is built to filter unwanted items on feeds like YouTube and similar apps, using the same secure shell embedded in Svivva.",
+  },
+  {
+    q: "Where does my data go?",
+    a: "Nowhere by default. Clutety processes controls locally in your browser. Your keys and preferences stay yours.",
+  },
+  {
+    q: "What makes the paid plans different?",
+    a: "The free plan gives you one scan per day and a basic report. Pro unlocks unlimited scans and all five protection modes. Team adds multi-seat access, API hooks, and Slack alerts. Enterprise adds white-label reports and a dedicated AI engine.",
+  },
+  {
+    q: "Is this connected to Svivva's AI platform?",
+    a: "Clutety is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+  },
 ];
 
 export default function ClutetyLandingPage() {
@@ -106,11 +158,12 @@ export default function ClutetyLandingPage() {
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white overflow-x-hidden">
-
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#080c14]/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>← Svivva</Link>
+          <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>
+            ← Svivva
+          </Link>
           <div className="flex items-center gap-3">
             <span className="text-xs text-white/40">Integrates with the Svivva platform</span>
             <a
@@ -149,8 +202,9 @@ export default function ClutetyLandingPage() {
             <span className="text-white/50">Block what you don&apos;t want on YouTube & more</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Clutety is embedded in Svivva with the same interface you know from Pyracrypt — scan, shield,
-            and filter unwanted content across social feeds. Nothing leaves your device without your say.
+            Clutety is embedded in Svivva with the same interface you know from Pyracrypt — scan,
+            shield, and filter unwanted content across social feeds. Nothing leaves your device
+            without your say.
           </p>
         </div>
 
@@ -158,7 +212,9 @@ export default function ClutetyLandingPage() {
         <div className="relative mx-auto max-w-4xl">
           <div
             className="absolute -inset-8 rounded-3xl opacity-30 blur-3xl pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at center, ${TEAL}40 0%, ${BURG}20 60%, transparent 100%)` }}
+            style={{
+              background: `radial-gradient(ellipse at center, ${TEAL}40 0%, ${BURG}20 60%, transparent 100%)`,
+            }}
           />
           <div
             className="relative rounded-2xl overflow-hidden"
@@ -172,7 +228,10 @@ export default function ClutetyLandingPage() {
             {/* Title bar */}
             <div
               className="flex items-center gap-3 px-4 py-3"
-              style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+              }}
             >
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
@@ -181,9 +240,18 @@ export default function ClutetyLandingPage() {
               </div>
               <div
                 className="flex-1 mx-3 flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-white/40"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
               >
-                <Image src={CLUTETY_LOGO_PATH} alt="" width={72} height={18} className="h-4 w-auto object-contain" />
+                <Image
+                  src={CLUTETY_LOGO_PATH}
+                  alt=""
+                  width={72}
+                  height={18}
+                  className="h-4 w-auto object-contain"
+                />
                 <span className="truncate font-medium tracking-wide">Clutety — Feed & Shield</span>
               </div>
             </div>
@@ -233,7 +301,8 @@ export default function ClutetyLandingPage() {
                   <div>
                     <p className="text-lg font-bold text-white mb-2">Clutety</p>
                     <p className="text-sm text-white/50 mb-6 max-w-sm">
-                      Encrypted file protection, right in your browser. No uploads. No accounts. Just shield.
+                      Encrypted file protection, right in your browser. No uploads. No accounts.
+                      Just shield.
                     </p>
                     <a
                       href={CLUTETY_EMBED_URL}
@@ -251,7 +320,10 @@ export default function ClutetyLandingPage() {
 
             <div
               className="flex items-center justify-between px-4 py-2.5"
-              style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
+              }}
             >
               <span className="text-[11px] text-white/25">Works with the Svivva platform</span>
               <a
@@ -288,13 +360,18 @@ export default function ClutetyLandingPage() {
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <h2 className="text-2xl font-black text-center mb-3">Why Clutety?</h2>
-        <p className="text-center text-white/40 mb-12 text-sm">No cloud. No backdoors. No compromises.</p>
+        <p className="text-center text-white/40 mb-12 text-sm">
+          No cloud. No backdoors. No compromises.
+        </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
             <div
               key={f.title}
               className="rounded-2xl p-5"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
@@ -328,9 +405,7 @@ export default function ClutetyLandingPage() {
                   background: isPopular
                     ? `linear-gradient(135deg, ${TEAL}18, ${TEAL}08)`
                     : "rgba(255,255,255,0.03)",
-                  border: isPopular
-                    ? `1.5px solid ${TEAL}60`
-                    : "1px solid rgba(255,255,255,0.07)",
+                  border: isPopular ? `1.5px solid ${TEAL}60` : "1px solid rgba(255,255,255,0.07)",
                   boxShadow: isPopular ? `0 0 32px ${TEAL}18` : "none",
                 }}
               >
@@ -365,8 +440,11 @@ export default function ClutetyLandingPage() {
                     plan.ctaStyle === "solid"
                       ? { background: TEAL, color: "#fff" }
                       : plan.ctaStyle === "burg"
-                      ? { background: BURG, color: "#fff" }
-                      : { border: `1px solid rgba(255,255,255,0.15)`, color: "rgba(255,255,255,0.6)" }
+                        ? { background: BURG, color: "#fff" }
+                        : {
+                            border: `1px solid rgba(255,255,255,0.15)`,
+                            color: "rgba(255,255,255,0.6)",
+                          }
                   }
                 >
                   {plan.cta} {plan.ctaStyle !== "border" && <ArrowRight className="w-3.5 h-3.5" />}
@@ -385,7 +463,10 @@ export default function ClutetyLandingPage() {
             <div
               key={faq.q}
               className="rounded-2xl p-5"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}
             >
               <p className="font-bold text-white text-sm mb-2">{faq.q}</p>
               <p className="text-sm text-white/50 leading-relaxed">{faq.a}</p>
@@ -398,11 +479,16 @@ export default function ClutetyLandingPage() {
       <section className="border-t border-white/5 py-16 text-center px-4">
         <div
           className="inline-block rounded-3xl px-10 py-10 max-w-lg"
-          style={{ background: `linear-gradient(135deg, ${TEAL}10, ${BURG}10)`, border: `1px solid ${TEAL}20` }}
+          style={{
+            background: `linear-gradient(135deg, ${TEAL}10, ${BURG}10)`,
+            border: `1px solid ${TEAL}20`,
+          }}
         >
           <Lock className="w-10 h-10 mx-auto mb-4" style={{ color: TEAL }} />
           <h3 className="text-xl font-black mb-3">Your files deserve a shield</h3>
-          <p className="text-sm text-white/50 mb-6">Start free. Upgrade when your team needs more firepower.</p>
+          <p className="text-sm text-white/50 mb-6">
+            Start free. Upgrade when your team needs more firepower.
+          </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <a
               href={CLUTETY_EMBED_URL}

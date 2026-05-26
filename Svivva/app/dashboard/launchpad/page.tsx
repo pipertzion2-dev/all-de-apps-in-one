@@ -1645,7 +1645,12 @@ const SUBDOMAINS = [
   { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
   { sub: "security", target: "security.svivva.com", label: "Clutety main app", color: "#5BA8A0" },
   { sub: "clutety", target: "clutety.svivva.com", label: "Clutety alias", color: "#5BA8A0" },
-  { sub: "pyracrypt", target: "clutety.svivva.com", label: "Pyracrypt legacy alias", color: "#5BA8A0" },
+  {
+    sub: "pyracrypt",
+    target: "clutety.svivva.com",
+    label: "Pyracrypt legacy alias",
+    color: "#5BA8A0",
+  },
 ];
 
 function CopyInline({ text }: { text: string }) {
