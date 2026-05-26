@@ -8,18 +8,32 @@ function trimUrl(u: string): string {
   return u.trim().replace(/\/$/, "");
 }
 
-/** Main embedded Clutter experience (historically Pyracrypt). */
-export function getPyracryptMainAppUrl(): string {
-  const env = process.env.NEXT_PUBLIC_PYRACRYPT_MAIN_URL?.trim();
+/** Main embedded Clutety experience (historically Pyracrypt / Clutter). */
+export function getClutetyMainAppUrl(): string {
+  const env =
+    process.env.NEXT_PUBLIC_CLUTETY_MAIN_URL?.trim() ||
+    process.env.NEXT_PUBLIC_PYRACRYPT_MAIN_URL?.trim();
   if (env) return trimUrl(env);
-  return `${DEFAULT_SITE}/clutter`;
+  return `${DEFAULT_SITE}/clutety`;
+}
+
+/** @deprecated Use getClutetyMainAppUrl */
+export function getPyracryptMainAppUrl(): string {
+  return getClutetyMainAppUrl();
 }
 
 /** Mini-tools / hub base URL (sitemap + tool discovery). */
-export function getPyracryptMiniAppsBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL?.trim();
+export function getClutetyMiniAppsBaseUrl(): string {
+  const env =
+    process.env.NEXT_PUBLIC_CLUTETY_MINI_APPS_URL?.trim() ||
+    process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL?.trim();
   if (env) return trimUrl(env);
   return `${DEFAULT_SITE}/ai-tools-hub`;
+}
+
+/** @deprecated Use getClutetyMiniAppsBaseUrl */
+export function getPyracryptMiniAppsBaseUrl(): string {
+  return getClutetyMiniAppsBaseUrl();
 }
 
 /** AI Tools Hub - collection of AI generators and tools. */
@@ -63,10 +77,10 @@ export function getAllWorkspaceProjects(): Array<{
       description: "AI-powered app builder — the core platform",
     },
     {
-      name: "Pyracrypt",
-      url: getPyracryptMainAppUrl(),
+      name: "Clutety",
+      url: getClutetyMainAppUrl(),
       category: "security",
-      description: "End-to-end encryption & security tools",
+      description: "Feed filtering & protection — embedded in Svivva",
     },
     {
       name: "AI Tools Hub",
@@ -104,14 +118,19 @@ export function hostnameFromHttpUrl(url: string): string | null {
 }
 
 /** Launchpad preset card + Launch Everything fallback when no tools URL is set. */
-export function getPyracryptOrbitPreset() {
+export function getClutetyOrbitPreset() {
   return {
-    name: "Pyracrypt",
-    sourceUrl: getPyracryptMainAppUrl(),
-    miniAppsUrl: getPyracryptMiniAppsBaseUrl(),
+    name: "Clutety",
+    sourceUrl: getClutetyMainAppUrl(),
+    miniAppsUrl: getClutetyMiniAppsBaseUrl(),
     description:
-      "Defaults use svivva.com; override with NEXT_PUBLIC_PYRACRYPT_* in .env if your apps live elsewhere.",
+      "Defaults use svivva.com/clutety; override with NEXT_PUBLIC_CLUTETY_* or NEXT_PUBLIC_PYRACRYPT_* in .env.",
   };
+}
+
+/** @deprecated Use getClutetyOrbitPreset */
+export function getPyracryptOrbitPreset() {
+  return getClutetyOrbitPreset();
 }
 
 /** GoDaddy CNAME targets when the user has not connected tool URLs in Orbit. */
@@ -120,26 +139,28 @@ export function getDefaultSubdomainCnameTargets(): {
   target: string;
   label: string;
 }[] {
-  const miniHost = hostnameFromHttpUrl(getPyracryptMiniAppsBaseUrl());
-  const mainHost = hostnameFromHttpUrl(getPyracryptMainAppUrl());
+  const miniHost = hostnameFromHttpUrl(getClutetyMiniAppsBaseUrl());
+  const mainHost = hostnameFromHttpUrl(getClutetyMainAppUrl());
   if (miniHost && mainHost) {
     return [
       { sub: "apps", target: miniHost, label: "Mini apps hub" },
-      { sub: "security", target: mainHost, label: "Pyracrypt main" },
-      { sub: "pyracrypt", target: mainHost, label: "Pyracrypt alias" },
+      { sub: "security", target: mainHost, label: "Clutety main" },
+      { sub: "clutety", target: mainHost, label: "Clutety alias" },
+      { sub: "pyracrypt", target: mainHost, label: "Pyracrypt legacy alias" },
     ];
   }
   return [
     {
       sub: "apps",
       target: "svivva.com",
-      label: "Mini apps (set NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL)",
+      label: "Mini apps (set NEXT_PUBLIC_CLUTETY_MINI_APPS_URL)",
     },
     {
       sub: "security",
       target: "svivva.com",
-      label: "Main app (set NEXT_PUBLIC_PYRACRYPT_MAIN_URL)",
+      label: "Main app (set NEXT_PUBLIC_CLUTETY_MAIN_URL)",
     },
-    { sub: "pyracrypt", target: "svivva.com", label: "Alias" },
+    { sub: "clutety", target: "svivva.com", label: "Clutety alias" },
+    { sub: "pyracrypt", target: "svivva.com", label: "Pyracrypt legacy alias" },
   ];
 }

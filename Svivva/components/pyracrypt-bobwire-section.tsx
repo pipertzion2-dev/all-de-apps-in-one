@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import Link from "next/link";
+import Image from "next/image";
 import { Lock, ArrowRight, Shield } from "lucide-react";
+import { CLUTETY_LOGO_PATH } from "@/lib/clutety/config";
 
 const TEAL_N = 0x5ba8a0;
 const BURG_N = 0x9b3a5e; // brightened burgundy so barbs pop
@@ -294,12 +296,18 @@ export function PyracryptBobwireSection() {
           <Shield className="w-3.5 h-3.5" /> Integrates with the Svivva platform
         </div>
 
-        <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4 text-white">
-          <span style={{ color: TEAL }}>Clutter</span>
-        </h2>
+        <div className="flex justify-center mb-4">
+          <Image
+            src={CLUTETY_LOGO_PATH}
+            alt="Clutety"
+            width={280}
+            height={70}
+            className="h-12 sm:h-14 w-auto object-contain"
+          />
+        </div>
         <p className="text-lg sm:text-xl text-white/60 max-w-xl mx-auto mb-4 leading-relaxed">
-          Lock your files so only you can open them. AES-256 encryption that runs entirely in your
-          browser — nothing ever leaves your device.
+          Block unwanted feed content on YouTube and more — same Pyracrypt-grade UI, embedded in
+          Svivva. Nothing leaves your device without your control.
         </p>
         <p className="text-sm text-white/35 max-w-md mx-auto mb-10">
           Free forever · Pro plans from $19/mo · Zero upload · No sign-up needed
@@ -307,14 +315,14 @@ export function PyracryptBobwireSection() {
 
         <div className="flex flex-wrap gap-3 justify-center">
           <Link
-            href="/clutter"
+            href="/clutety"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-bold text-sm"
             style={{ background: TEAL, boxShadow: `0 0 28px ${TEAL}50` }}
           >
-            <Lock className="w-4 h-4" /> Open Clutter
+            <Lock className="w-4 h-4" /> Open Clutety
           </Link>
           <Link
-            href="/clutter#pricing"
+            href="/clutety#pricing"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm border text-white/60 hover:text-white transition-colors"
             style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
           >

@@ -9,7 +9,7 @@ import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
-type ProductKey = "svivva" | "clutter" | "mini_apps";
+type ProductKey = "svivva" | "clutety" | "clutter" | "mini_apps";
 
 type ProductInfo = {
   name: string;
@@ -40,21 +40,31 @@ function getProducts(): Record<ProductKey, ProductInfo> {
         "build AI product",
       ],
     },
-    clutter: {
-      name: "Clutter",
-      tagline: "Svivva mobile shell — embedded privacy UX powered by Pyracrypt",
-      url: `${base}/clutter`,
+    clutety: {
+      name: "Clutety",
+      tagline: "Feed filtering & protection — embedded in Svivva",
+      url: `${base}/clutety`,
       description:
-        "Clutter is the embedded mobile experience inside Svivva, using Pyracrypt-grade privacy patterns. Same platform, same domain — not a separate app.",
-      audience: "mobile users, creators, builders, privacy-conscious users",
-      competitors: ["Notion mobile", "Obsidian mobile", "Apple Notes", "Anytype"],
+        "Clutety blocks unwanted content on YouTube and other social feeds, using the Pyracrypt-grade UI embedded in Svivva. Same platform, same domain.",
+      audience: "parents, creators, privacy-conscious users, mobile-first users",
+      competitors: ["YouTube Kids", "BlockSite", "Freedom", "Screen Time"],
       keywords: [
-        "mobile productivity app",
-        "secure workspace",
-        "embedded privacy",
-        "feed and mood app",
-        "mobile shell for AI",
+        "block youtube content",
+        "feed filter app",
+        "social media blocker",
+        "parental feed controls",
+        "clutety svivva",
       ],
+    },
+    clutter: {
+      name: "Clutety",
+      tagline: "Feed filtering & protection — embedded in Svivva",
+      url: `${base}/clutety`,
+      description:
+        "Clutety blocks unwanted content on feeds (YouTube, etc.) — embedded in Svivva with the Pyracrypt UI.",
+      audience: "parents, creators, privacy-conscious users",
+      competitors: ["YouTube Kids", "BlockSite", "Freedom"],
+      keywords: ["feed filter", "block youtube", "clutety"],
     },
     mini_apps: {
       name: "Svivva Mini Apps",

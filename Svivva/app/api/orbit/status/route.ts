@@ -151,7 +151,7 @@ export async function GET() {
 
     const coreUrls = [
       { label: "Homepage", url: `${BASE}/` },
-      { label: "Clutter", url: `${BASE}/clutter` },
+      { label: "Clutety", url: `${BASE}/clutety` },
       { label: "Blog", url: `${BASE}/blog` },
       { label: "Tools Hub", url: `${BASE}/tools` },
       { label: "LP: Builder", url: `${BASE}/lp/ai-api-builder` },

@@ -1909,8 +1909,8 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/clutter" className="hover:text-foreground transition-colors">
-                      Clutter
+                    <Link href="/clutety" className="hover:text-foreground transition-colors">
+                      Clutety
                     </Link>
                   </li>
                 </ul>

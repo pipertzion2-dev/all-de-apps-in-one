@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import ClutetyLandingPage from "@/components/clutety/clutety-landing-page";
 
-export default function ClutetyRedirect() {
-  redirect("/clutter");
+export default function ClutetyPage() {
+  return <ClutetyLandingPage />;
 }

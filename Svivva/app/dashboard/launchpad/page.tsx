@@ -42,7 +42,7 @@ import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
-import { getPyracryptOrbitPreset } from "@/lib/workspace-external-apps";
+import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
 
 const TEAL = "#5BA8A0";
@@ -263,7 +263,7 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       ],
       manual: [
         `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
-        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /clutter, /blog, /tools, and each LP)",
+        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /clutety, /blog, /tools, and each LP)",
       ],
     },
     {
@@ -420,7 +420,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       icon: Activity,
       estimate: "~5s",
       description:
-        "Auto-creates apps.svivva.com, security.svivva.com, pyracrypt.svivva.com via GoDaddy API",
+        "Auto-creates apps.svivva.com, security.svivva.com, clutety.svivva.com via GoDaddy API",
       auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
       manual: [
         "Wait 24–48 hours for DNS propagation before the subdomains resolve",
@@ -446,15 +446,15 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
   ];
 }
 
-const PYRACRYPT_PRESET = getPyracryptOrbitPreset();
+const CLUTETY_PRESET = getClutetyOrbitPreset();
 
 /** Every mini-app hub Orbit scans to build svivva.com SEO pages */
 const ORBIT_HUB_URLS = [
-  PYRACRYPT_PRESET.miniAppsUrl,
+  CLUTETY_PRESET.miniAppsUrl,
   "https://svivva.com/ai-tools-hub",
   "https://svivva.com/cyber-security-mini-apps",
   "https://svivva.com/seo-pack",
-  PYRACRYPT_PRESET.sourceUrl,
+  CLUTETY_PRESET.sourceUrl,
 ];
 
 const STORAGE_KEY = "orbit_v3";
@@ -862,7 +862,7 @@ function MiniSourceConfig({
               { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
               { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
               { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-              { name: "Clutter", url: "https://svivva.com/clutter" },
+              { name: "Clutety", url: "https://svivva.com/clutety" },
               { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
             ]
               .filter(
@@ -905,7 +905,7 @@ function MiniSourceConfig({
                   },
                   { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
                   { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-                  { name: "Clutter", url: "https://svivva.com/clutter" },
+                  { name: "Clutety", url: "https://svivva.com/clutety" },
                   { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
                 ];
                 const existing = entries.filter((e) => e.url.trim());
@@ -1642,9 +1642,10 @@ function StepCard({
 
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
-  { sub: "apps", target: "apps.svivva.com", label: "Pyracrypt mini-apps", color: "#6B2C4A" },
-  { sub: "security", target: "security.svivva.com", label: "Pyracrypt main app", color: "#5BA8A0" },
-  { sub: "pyracrypt", target: "pyracrypt.svivva.com", label: "Pyracrypt alias", color: "#5BA8A0" },
+  { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
+  { sub: "security", target: "security.svivva.com", label: "Clutety main app", color: "#5BA8A0" },
+  { sub: "clutety", target: "clutety.svivva.com", label: "Clutety alias", color: "#5BA8A0" },
+  { sub: "pyracrypt", target: "clutety.svivva.com", label: "Pyracrypt legacy alias", color: "#5BA8A0" },
 ];
 
 function CopyInline({ text }: { text: string }) {
@@ -2931,7 +2932,7 @@ export default function LaunchpadPage() {
     await discoverAllHubTools();
 
     // Always ensure mini steps have a sourceUrl — fall back to the Pyracrypt preset
-    const miniSrc = sourceUrlRef.current.trim() || PYRACRYPT_PRESET.miniAppsUrl;
+    const miniSrc = sourceUrlRef.current.trim() || CLUTETY_PRESET.miniAppsUrl;
     if (!sourceUrlRef.current.trim()) {
       setSourceUrl(miniSrc);
       sourceUrlRef.current = miniSrc;
@@ -3048,7 +3049,7 @@ export default function LaunchpadPage() {
         });
       }
 
-      const miniSrc = sourceUrlRef.current.trim() || PYRACRYPT_PRESET.miniAppsUrl;
+      const miniSrc = sourceUrlRef.current.trim() || CLUTETY_PRESET.miniAppsUrl;
       if (!sourceUrlRef.current.trim()) {
         setSourceUrl(miniSrc);
         sourceUrlRef.current = miniSrc;
@@ -4557,7 +4558,7 @@ export default function LaunchpadPage() {
             {[
               { label: "Marketing Hub", href: "/marketing-hub" },
               { label: "Marketing AI", href: "/dashboard/marketing" },
-              { label: "Clutter", href: "/clutter" },
+              { label: "Clutety", href: "/clutety" },
               { label: "AI Tools Hub", href: "/ai-tools-hub" },
               { label: "Cyber Security", href: "/cyber-security-mini-apps" },
               { label: "SEO Pack", href: "/seo-pack" },

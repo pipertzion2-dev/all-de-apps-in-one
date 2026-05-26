@@ -1047,7 +1047,7 @@ function GscSetupCard({ siteUrl }: { siteUrl: string }) {
         <div className="mt-1 space-y-1">
           {[
             { url: domain, label: "Homepage" },
-            { url: `${domain}/clutter`, label: "Clutter" },
+            { url: `${domain}/clutety`, label: "Clutety" },
             { url: `${domain}/blog`, label: "Blog" },
             { url: `${domain}/tools`, label: "Tools Hub" },
             { url: `${domain}/lp/ai-api-builder`, label: "LP: Builder" },

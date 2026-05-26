@@ -7,7 +7,7 @@ export async function GET() {
   const base = getSiteUrl().replace(/\/$/, "");
   const xml = sitemapUrlsetXml([
     {
-      url: `${base}/clutter`,
+      url: `${base}/clutety`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.85,
