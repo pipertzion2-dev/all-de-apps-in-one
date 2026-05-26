@@ -263,7 +263,7 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       ],
       manual: [
         `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
-        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /pyracrypt, /blog, /tools, and each LP)",
+        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /clutter, /blog, /tools, and each LP)",
       ],
     },
     {
@@ -862,7 +862,7 @@ function MiniSourceConfig({
               { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
               { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
               { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-              { name: "Pyracrypt", url: "https://svivva.com/pyracrypt" },
+              { name: "Clutter", url: "https://svivva.com/clutter" },
               { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
             ]
               .filter(
@@ -905,7 +905,7 @@ function MiniSourceConfig({
                   },
                   { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
                   { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-                  { name: "Pyracrypt", url: "https://svivva.com/pyracrypt" },
+                  { name: "Clutter", url: "https://svivva.com/clutter" },
                   { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
                 ];
                 const existing = entries.filter((e) => e.url.trim());
@@ -4557,7 +4557,7 @@ export default function LaunchpadPage() {
             {[
               { label: "Marketing Hub", href: "/marketing-hub" },
               { label: "Marketing AI", href: "/dashboard/marketing" },
-              { label: "Pyracrypt", href: "/pyracrypt" },
+              { label: "Clutter", href: "/clutter" },
               { label: "AI Tools Hub", href: "/ai-tools-hub" },
               { label: "Cyber Security", href: "/cyber-security-mini-apps" },
               { label: "SEO Pack", href: "/seo-pack" },

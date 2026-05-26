@@ -8,11 +8,11 @@ function trimUrl(u: string): string {
   return u.trim().replace(/\/$/, "");
 }
 
-/** Main Pyracrypt product / landing (used for CNAME presets and links). */
+/** Main embedded Clutter experience (historically Pyracrypt). */
 export function getPyracryptMainAppUrl(): string {
   const env = process.env.NEXT_PUBLIC_PYRACRYPT_MAIN_URL?.trim();
   if (env) return trimUrl(env);
-  return `${DEFAULT_SITE}/pyracrypt`;
+  return `${DEFAULT_SITE}/clutter`;
 }
 
 /** Mini-tools / hub base URL (sitemap + tool discovery). */

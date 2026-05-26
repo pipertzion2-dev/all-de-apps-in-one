@@ -34,7 +34,7 @@ function staticPagesEntries(): SitemapEntry[] {
     { path: "", priority: 1, changeFrequency: "weekly" },
     { path: "/blog", priority: 0.9, changeFrequency: "daily" },
     { path: "/tools", priority: 0.9, changeFrequency: "weekly" },
-    { path: "/pyracrypt", priority: 0.85, changeFrequency: "monthly" },
+    { path: "/clutter", priority: 0.85, changeFrequency: "monthly" },
     { path: "/ai-tools-hub", priority: 0.85, changeFrequency: "weekly" },
     { path: "/cyber-security-mini-apps", priority: 0.85, changeFrequency: "weekly" },
     { path: "/seo-pack", priority: 0.8, changeFrequency: "monthly" },

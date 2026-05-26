@@ -295,7 +295,7 @@ export function PyracryptBobwireSection() {
         </div>
 
         <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4 text-white">
-          <span style={{ color: TEAL }}>Pyracrypt</span>
+          <span style={{ color: TEAL }}>Clutter</span>
         </h2>
         <p className="text-lg sm:text-xl text-white/60 max-w-xl mx-auto mb-4 leading-relaxed">
           Lock your files so only you can open them. AES-256 encryption that runs entirely in your
@@ -307,14 +307,14 @@ export function PyracryptBobwireSection() {
 
         <div className="flex flex-wrap gap-3 justify-center">
           <Link
-            href="/pyracrypt"
+            href="/clutter"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-bold text-sm"
             style={{ background: TEAL, boxShadow: `0 0 28px ${TEAL}50` }}
           >
-            <Lock className="w-4 h-4" /> Try Pyracrypt Free
+            <Lock className="w-4 h-4" /> Open Clutter
           </Link>
           <Link
-            href="/pyracrypt#pricing"
+            href="/clutter#pricing"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm border text-white/60 hover:text-white transition-colors"
             style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
           >

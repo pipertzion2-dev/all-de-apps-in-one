@@ -9,7 +9,7 @@ import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
-type ProductKey = "svivva" | "pyracrypt" | "mini_apps";
+type ProductKey = "svivva" | "clutter" | "mini_apps";
 
 type ProductInfo = {
   name: string;
@@ -40,20 +40,20 @@ function getProducts(): Record<ProductKey, ProductInfo> {
         "build AI product",
       ],
     },
-    pyracrypt: {
-      name: "Pyracrypt",
-      tagline: "Military-grade browser file encryption — zero knowledge, zero server",
-      url: `${base}/pyracrypt`,
+    clutter: {
+      name: "Clutter",
+      tagline: "Svivva mobile shell — embedded privacy UX powered by Pyracrypt",
+      url: `${base}/clutter`,
       description:
-        "Pyracrypt encrypts your files directly in the browser using AES-256 and ChaCha20. Files never touch a server. Zero knowledge architecture.",
-      audience: "privacy-conscious users, journalists, lawyers, activists, developers",
-      competitors: ["Cryptomator", "VeraCrypt", "BoxCryptor", "7-Zip encryption"],
+        "Clutter is the embedded mobile experience inside Svivva, using Pyracrypt-grade privacy patterns. Same platform, same domain — not a separate app.",
+      audience: "mobile users, creators, builders, privacy-conscious users",
+      competitors: ["Notion mobile", "Obsidian mobile", "Apple Notes", "Anytype"],
       keywords: [
-        "browser encryption",
-        "file encryption online",
-        "AES-256 encrypt",
-        "zero knowledge encryption",
-        "private file encryption",
+        "mobile productivity app",
+        "secure workspace",
+        "embedded privacy",
+        "feed and mood app",
+        "mobile shell for AI",
       ],
     },
     mini_apps: {

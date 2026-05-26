@@ -23,7 +23,7 @@ export default function robots(): MetadataRoute.Robots {
           "/orbit",
           "/seeds",
           "/referrals",
-          "/pyracrypt",
+          "/clutter",
           "/ai-tools-hub",
           "/cyber-security-mini-apps",
           "/seo-pack",

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pyracrypt",
+  title: "Clutter",
   description:
-    "Encrypt any file with AES-256 directly in your browser. Zero uploads, zero sign-up, zero cost. Pyracrypt keeps your data private — nothing ever leaves your device.",
+    "Clutter is embedded into Svivva (powered by Pyracrypt UI). This route redirects to /clutter.",
   keywords: [
     "file encryption",
     "browser encryption",
@@ -15,21 +15,21 @@ export const metadata: Metadata = {
     "Pyracrypt",
   ],
   openGraph: {
-    title: "Pyracrypt — Free File Encryption in Your Browser",
+    title: "Clutter — embedded in Svivva",
     description:
-      "AES-256 file encryption that runs entirely in your browser. No account, no uploads, no cost. Your files stay on your device.",
-    url: "https://svivva.com/pyracrypt",
+      "Clutter is embedded into Svivva (powered by Pyracrypt UI). This route redirects to /clutter.",
+    url: "https://svivva.com/clutter",
     siteName: "Svivva",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pyracrypt — Free AES-256 File Encryption",
+    title: "Clutter — embedded in Svivva",
     description:
-      "Encrypt any file directly in your browser. Zero uploads. No sign-up. Integrates with the Svivva platform.",
+      "Clutter is embedded into Svivva (powered by Pyracrypt UI). This route redirects to /clutter.",
   },
   alternates: {
-    canonical: "https://svivva.com/pyracrypt",
+    canonical: "https://svivva.com/clutter",
   },
 };
 
@@ -83,13 +83,13 @@ const faqSchema = {
 const softwareSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Pyracrypt",
+  name: "Clutter",
   operatingSystem: "Web",
-  applicationCategory: "SecurityApplication",
+  applicationCategory: "ProductivityApplication",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   description:
-    "Free browser-based file encryption using AES-256-GCM. No sign-up, no server uploads. Files never leave your device.",
-  url: "https://svivva.com/pyracrypt",
+    "Embedded Svivva mobile experience powered by Pyracrypt UI patterns. Redirects to /clutter.",
+  url: "https://svivva.com/clutter",
 };
 
 export default function PyracryptLayout({ children }: { children: React.ReactNode }) {

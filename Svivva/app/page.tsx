@@ -1909,8 +1909,8 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/pyracrypt" className="hover:text-foreground transition-colors">
-                      Pyracrypt
+                    <Link href="/clutter" className="hover:text-foreground transition-colors">
+                      Clutter
                     </Link>
                   </li>
                 </ul>

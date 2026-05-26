@@ -7,7 +7,7 @@ export async function GET() {
   const base = getSiteUrl().replace(/\/$/, "");
   const xml = sitemapUrlsetXml([
     {
-      url: `${base}/pyracrypt`,
+      url: `${base}/clutter`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.85,
