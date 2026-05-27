@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "Clutety App",
-  description: "Clutety — feed shield and security scanner, embedded in Svivva.",
+  description: "Pyracrypt Lock UI — encrypt and scan in your browser, on Svivva.",
   appleWebApp: {
     capable: true,
     title: "Clutety",
@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#080c14",
+  themeColor: "#EEF2F8",
 };
 
 export default function ClutetyAppLayout({ children }: { children: React.ReactNode }) {

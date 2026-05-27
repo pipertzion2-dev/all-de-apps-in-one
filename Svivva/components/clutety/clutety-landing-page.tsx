@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   Shield,
   Lock,
@@ -14,11 +13,11 @@ import {
   Check,
   Star,
 } from "lucide-react";
-import { ClutetyEmbeddedApp } from "@/components/clutety/clutety-embedded-app";
-import { CLUTETY_BURG, CLUTETY_LOGO_PATH, CLUTETY_TEAL } from "@/lib/clutety/config";
+import { ClutetyAppFrame } from "@/components/clutety/clutety-app-frame";
 
-const TEAL = CLUTETY_TEAL;
-const BURG = CLUTETY_BURG;
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
+const APP_ANCHOR = "#app";
 
 const features = [
   {
@@ -38,8 +37,8 @@ const features = [
   },
   {
     icon: FileText,
-    title: "Feed-Aware Blocking",
-    desc: "Tune what appears on YouTube, TikTok, and other feeds — Clutety filters without rebuilding your apps.",
+    title: "Any File Type",
+    desc: "Documents, images, archives, executables — Pyracrypt handles all of them without limits.",
   },
   {
     icon: Key,
@@ -68,7 +67,7 @@ const plans = [
     ],
     cta: "Start Free",
     ctaStyle: "border",
-    href: "#app",
+    href: APP_ANCHOR,
   },
   {
     name: "Pro",
@@ -85,7 +84,7 @@ const plans = [
     ],
     cta: "Get Pro",
     ctaStyle: "solid",
-    href: "#app",
+    href: APP_ANCHOR,
   },
   {
     name: "Team",
@@ -102,7 +101,7 @@ const plans = [
     ],
     cta: "Get Team",
     ctaStyle: "solid",
-    href: "#app",
+    href: APP_ANCHOR,
   },
   {
     name: "Enterprise",
@@ -119,7 +118,7 @@ const plans = [
     ],
     cta: "Get Enterprise",
     ctaStyle: "burg",
-    href: "#app",
+    href: APP_ANCHOR,
   },
 ];
 
@@ -129,12 +128,12 @@ const faqs = [
     a: "Yes — completely free, no sign-up, no limits on the core tool. Paid plans unlock advanced scanning, team seats, and reporting.",
   },
   {
-    q: "Does Clutety block content on social feeds?",
-    a: "Yes — Clutety is built to filter unwanted items on feeds like YouTube and similar apps, using the same secure shell embedded in Svivva.",
+    q: "Where do my files go?",
+    a: "Nowhere. Pyracrypt processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
   },
   {
-    q: "Where does my data go?",
-    a: "Nowhere by default. Clutety processes controls locally in your browser. Your keys and preferences stay yours.",
+    q: "Can I decrypt files without Pyracrypt?",
+    a: "Yes. Pyracrypt uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
   },
   {
     q: "What makes the paid plans different?",
@@ -142,7 +141,7 @@ const faqs = [
   },
   {
     q: "Is this connected to Svivva's AI platform?",
-    a: "Clutety is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+    a: "Pyracrypt is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
   },
 ];
 
@@ -177,25 +176,16 @@ export default function ClutetyLandingPage() {
           >
             <Shield className="w-3.5 h-3.5" /> Free plan · No sign-up · Browser-based
           </div>
-          <div className="flex justify-center mb-5">
-            <Image
-              src={CLUTETY_LOGO_PATH}
-              alt="Clutety"
-              width={320}
-              height={80}
-              className="h-14 sm:h-16 w-auto object-contain"
-              priority
-            />
-          </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
-            <span className="text-white/90">Protect Your Feeds</span>
+            <span style={{ color: TEAL }}>Pyracrypt</span>
+            <span className="text-white/90"> — Protect Your Files</span>
             <br />
-            <span className="text-white/50">Block what you don&apos;t want on YouTube & more</span>
+            <span className="text-white/50">From Threats No One Sees Coming</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Clutety is embedded in Svivva with the same interface you know from Pyracrypt — scan,
-            shield, and filter unwanted content across social feeds. Nothing leaves your device
-            without your say.
+            Encrypt, scan, and shield any file in your browser using AES-256. Nothing leaves your
+            device. No accounts needed. Trusted by individuals and teams who take data privacy
+            seriously.
           </p>
         </div>
 
@@ -236,23 +226,14 @@ export default function ClutetyLandingPage() {
                   border: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
-                <Image
-                  src={CLUTETY_LOGO_PATH}
-                  alt=""
-                  width={72}
-                  height={18}
-                  className="h-4 w-auto object-contain"
-                />
-                <span className="truncate font-medium tracking-wide">Clutety — Feed & Shield</span>
+                <Lock className="w-3 h-3 text-[#28C840]" />
+                <span className="truncate font-medium tracking-wide">
+                  Pyracrypt — Encrypted & Secure
+                </span>
               </div>
             </div>
 
-            <div
-              className="relative overflow-hidden overscroll-contain"
-              style={{ height: "min(72vh, 640px)", WebkitOverflowScrolling: "touch" }}
-            >
-              <ClutetyEmbeddedApp />
-            </div>
+            <ClutetyAppFrame height={560} />
 
             <div
               className="flex items-center justify-between px-4 py-2.5"
@@ -276,11 +257,11 @@ export default function ClutetyLandingPage() {
         {/* CTA below window */}
         <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
           <a
-            href="#app"
+            href={APP_ANCHOR}
             className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold"
             style={{ background: TEAL }}
           >
-            Try Clutety Free <ArrowRight className="w-4 h-4" />
+            Try Pyracrypt Free <ArrowRight className="w-4 h-4" />
           </a>
           <a
             href="#pricing"
@@ -293,7 +274,7 @@ export default function ClutetyLandingPage() {
 
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <h2 className="text-2xl font-black text-center mb-3">Why Clutety?</h2>
+        <h2 className="text-2xl font-black text-center mb-3">Why Pyracrypt?</h2>
         <p className="text-center text-white/40 mb-12 text-sm">
           No cloud. No backdoors. No compromises.
         </p>
@@ -367,8 +348,6 @@ export default function ClutetyLandingPage() {
                 </ul>
                 <a
                   href={plan.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-opacity hover:opacity-90"
                   style={
                     plan.ctaStyle === "solid"
@@ -425,7 +404,7 @@ export default function ClutetyLandingPage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <a
-              href="#app"
+              href={APP_ANCHOR}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
