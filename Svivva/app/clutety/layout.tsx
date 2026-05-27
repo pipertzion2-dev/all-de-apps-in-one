@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Clutety",
   description:
-    "Clutety embeds the original Pyracrypt protection app in Svivva — encrypt, scan, and shield locally.",
+    "Clutety — detect threats before they strike. Original Replit UI with WireBar, embedded in Svivva.",
   openGraph: {
     title: "Clutety — embedded in Svivva",
     description:
-      "The original Pyracrypt UI, hosted on Svivva. Encrypt, scan, and shield files in your browser.",
+      "Clutety brings the original cybersecurity UI to Svivva — LED controls, WireBar, and threat analysis.",
     url: "https://svivva.com/clutety",
     siteName: "Svivva",
     type: "website",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Clutety — embedded in Svivva",
-    description: "Block unwanted feed content — embedded in Svivva.",
+    description: "Clutety — original protection UI embedded in Svivva.",
   },
   alternates: {
     canonical: "https://svivva.com/clutety",

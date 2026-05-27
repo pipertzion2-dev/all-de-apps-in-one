@@ -12,7 +12,10 @@ type Props = {
 };
 
 /** Replit-builder live window: original Pyracrypt UI bundle in an iframe. */
-export function ClutetyAppFrame({ height = 560, title = "Clutety — Protection Tool" }: Props) {
+export function ClutetyAppFrame({
+  height = "min(78vh, 720px)",
+  title = "Clutety — Protection Tool",
+}: Props) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const src = CLUTETY_EMBED_PATH;
