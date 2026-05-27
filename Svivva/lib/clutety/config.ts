@@ -5,7 +5,7 @@ export const CLUTETY_BURG = "#6B2C4A";
 export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
 
 /** Same-origin embed path for the original Pyracrypt UI bundle. */
-export const CLUTETY_EMBED_PATH = "/clutety-shell/?skip";
+export const CLUTETY_EMBED_PATH = "/clutety-shell/index.html?skip";
 
 /** Optional external Vite build; otherwise use {@link CLUTETY_EMBED_PATH}. */
 export function getClutetyEmbedUrl(): string {
