@@ -9,6 +9,8 @@ const config = [
       ".vercel/**",
       "dist/**",
       "coverage/**",
+      // Embedded static bundle (generated) — not lintable source
+      "public/clutety-shell/**",
       // Bundled skill/artifact templates — not application source
       ".local/**",
       ".config/**",
