@@ -35,7 +35,8 @@ export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, status } = body;
-    if (!id || !status) return NextResponse.json({ error: "id and status required" }, { status: 400 });
+    if (!id || !status)
+      return NextResponse.json({ error: "id and status required" }, { status: 400 });
     const lead = await updateLeadStatus(id, status);
     return NextResponse.json(lead);
   } catch (error) {

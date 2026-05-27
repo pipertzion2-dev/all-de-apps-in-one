@@ -5,13 +5,37 @@
  */
 
 const CATEGORY_PHRASES = {
-  violence: ["murder", "killed", "shooting", "stabbing", "gore", "graphic violence", "war crime", "massacre"],
+  violence: [
+    "murder",
+    "killed",
+    "shooting",
+    "stabbing",
+    "gore",
+    "graphic violence",
+    "war crime",
+    "massacre",
+  ],
   adult: ["onlyfans", "nsfw", "explicit", "porn", "xxx", "nude leak"],
   gambling: ["sportsbook", "bet now", "casino", "crypto pump", "100x", "get rich quick"],
-  politics: ["breaking: trump", "breaking: biden", "culture war", "owned the libs", "election fraud", "woke mob"],
+  politics: [
+    "breaking: trump",
+    "breaking: biden",
+    "culture war",
+    "owned the libs",
+    "election fraud",
+    "woke mob",
+  ],
   scams: ["giveaway scam", "send bitcoin", "verify your wallet", "free iphone click"],
   sensational: ["you won't believe", "gone wrong", "shocking truth", "what happened next"],
-  celebrity_gossip: ["breakup", "cheating", "feud", "drama", "exposed", "leaked texts", "plastic surgery"],
+  celebrity_gossip: [
+    "breakup",
+    "cheating",
+    "feud",
+    "drama",
+    "exposed",
+    "leaked texts",
+    "plastic surgery",
+  ],
   tragedy: ["dead at", "dies at", "found dead", "fatal crash", "shooting victim", "obituary"],
 };
 
@@ -50,7 +74,8 @@ function matchPerson(person, corpus) {
  */
 function analyzeFeedItem(item, rules) {
   if (!rules?.enabled) return { action: "allow", reasons: ["disabled"], matches: [] };
-  if (!rules.platforms?.[item.platform]) return { action: "allow", reasons: ["platform off"], matches: [] };
+  if (!rules.platforms?.[item.platform])
+    return { action: "allow", reasons: ["platform off"], matches: [] };
 
   const parts = [];
   if (item.title) parts.push(item.title);

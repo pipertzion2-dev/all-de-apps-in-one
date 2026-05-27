@@ -30,7 +30,10 @@ export async function createUtmLink(data: {
   campaignId?: string;
 }) {
   const shortCode = Math.random().toString(36).slice(2, 8);
-  const [link] = await db.insert(marketingUtmLinks).values({ ...data, shortCode }).returning();
+  const [link] = await db
+    .insert(marketingUtmLinks)
+    .values({ ...data, shortCode })
+    .returning();
   return link;
 }
 
@@ -46,5 +49,8 @@ export async function getUtmLinkById(id: string) {
 export async function incrementUtmClicks(id: string) {
   const [link] = await db.select().from(marketingUtmLinks).where(eq(marketingUtmLinks.id, id));
   if (!link) return null;
-  await db.update(marketingUtmLinks).set({ clicks: (link.clicks ?? 0) + 1 }).where(eq(marketingUtmLinks.id, id));
+  await db
+    .update(marketingUtmLinks)
+    .set({ clicks: (link.clicks ?? 0) + 1 })
+    .where(eq(marketingUtmLinks.id, id));
 }

@@ -3,7 +3,11 @@ import { marketingReferrals, marketingReferralEvents } from "@/lib/marketing/sch
 import { eq, desc } from "drizzle-orm";
 
 function generateCode(email: string): string {
-  const base = email.split("@")[0].replace(/[^a-z0-9]/gi, "").slice(0, 6).toUpperCase();
+  const base = email
+    .split("@")[0]
+    .replace(/[^a-z0-9]/gi, "")
+    .slice(0, 6)
+    .toUpperCase();
   const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `${base}${suffix}`;
 }
@@ -43,10 +47,22 @@ export async function getReferralByCode(code: string) {
   return referral ?? null;
 }
 
-export async function trackReferralEvent(referralId: string, eventType: "click" | "signup" | "conversion", extra?: { referredEmail?: string; ip?: string; userAgent?: string }) {
+export async function trackReferralEvent(
+  referralId: string,
+  eventType: "click" | "signup" | "conversion",
+  extra?: { referredEmail?: string; ip?: string; userAgent?: string },
+) {
   await db.insert(marketingReferralEvents).values({ referralId, eventType, ...extra });
-  const field = eventType === "click" ? { clicks: 1 } : eventType === "signup" ? { signups: 1 } : { conversions: 1 };
-  const referral = await db.select().from(marketingReferrals).where(eq(marketingReferrals.id, referralId));
+  const field =
+    eventType === "click"
+      ? { clicks: 1 }
+      : eventType === "signup"
+        ? { signups: 1 }
+        : { conversions: 1 };
+  const referral = await db
+    .select()
+    .from(marketingReferrals)
+    .where(eq(marketingReferrals.id, referralId));
   if (referral[0]) {
     const current = referral[0];
     await db
@@ -54,7 +70,8 @@ export async function trackReferralEvent(referralId: string, eventType: "click" 
       .set({
         clicks: eventType === "click" ? (current.clicks ?? 0) + 1 : current.clicks,
         signups: eventType === "signup" ? (current.signups ?? 0) + 1 : current.signups,
-        conversions: eventType === "conversion" ? (current.conversions ?? 0) + 1 : current.conversions,
+        conversions:
+          eventType === "conversion" ? (current.conversions ?? 0) + 1 : current.conversions,
       })
       .where(eq(marketingReferrals.id, referralId));
   }
@@ -69,7 +86,14 @@ export async function getReferralStats() {
     totalSignups: all.reduce((s, r) => s + (r.signups ?? 0), 0),
     totalConversions: all.reduce((s, r) => s + (r.conversions ?? 0), 0),
     conversionRate: all.length
-      ? ((all.reduce((s, r) => s + (r.conversions ?? 0), 0) / Math.max(all.reduce((s, r) => s + (r.clicks ?? 0), 0), 1)) * 100).toFixed(1)
+      ? (
+          (all.reduce((s, r) => s + (r.conversions ?? 0), 0) /
+            Math.max(
+              all.reduce((s, r) => s + (r.clicks ?? 0), 0),
+              1,
+            )) *
+          100
+        ).toFixed(1)
       : "0",
   };
 }

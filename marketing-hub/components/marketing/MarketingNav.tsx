@@ -17,7 +17,8 @@ export function MarketingNav() {
   return (
     <nav className="flex gap-1 flex-wrap border-b border-border pb-4 mb-6">
       {navItems.map((item) => {
-        const active = pathname === item.href || (item.href !== "/marketing" && pathname.startsWith(item.href));
+        const active =
+          pathname === item.href || (item.href !== "/marketing" && pathname.startsWith(item.href));
         return (
           <Link
             key={item.href}

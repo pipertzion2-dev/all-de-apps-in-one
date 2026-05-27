@@ -4,15 +4,15 @@ A complete multi-channel marketing system built for your Svivva Next.js project.
 
 ## What's Included
 
-| Feature | Route | Description |
-|---|---|---|
-| Dashboard | `/marketing` | KPI overview, pipeline, channel breakdown |
-| Campaigns | `/marketing/campaigns` | Create & manage multi-channel campaigns |
-| Leads | `/marketing/leads` | Lead capture, scoring, and pipeline management |
-| Referrals | `/marketing/referrals` | Viral referral program with tracked links |
-| UTM Builder | `/marketing/utm` | Build & track campaign URLs with UTM params |
-| Content Amplifier | `/marketing/amplify` | Repurpose content for all channels via AI (OpenAI) |
-| A/B Tests | `/marketing/ab-tests` | Test variants and track conversion rates |
+| Feature           | Route                  | Description                                        |
+| ----------------- | ---------------------- | -------------------------------------------------- |
+| Dashboard         | `/marketing`           | KPI overview, pipeline, channel breakdown          |
+| Campaigns         | `/marketing/campaigns` | Create & manage multi-channel campaigns            |
+| Leads             | `/marketing/leads`     | Lead capture, scoring, and pipeline management     |
+| Referrals         | `/marketing/referrals` | Viral referral program with tracked links          |
+| UTM Builder       | `/marketing/utm`       | Build & track campaign URLs with UTM params        |
+| Content Amplifier | `/marketing/amplify`   | Repurpose content for all channels via AI (OpenAI) |
+| A/B Tests         | `/marketing/ab-tests`  | Test variants and track conversion rates           |
 
 ## How to Install
 
@@ -81,6 +81,7 @@ PATCH     /api/marketing/ab-tests
 ## Lead Scoring System
 
 Leads are automatically scored 0-100:
+
 - Base score: 10
 - Has company name: +20
 - Has phone number: +10

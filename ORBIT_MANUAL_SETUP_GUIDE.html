@@ -1,273 +1,419 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>Orbit Admin — Manual Setup Guide</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #1a1a2e; }
-  h1 { font-size: 28px; border-bottom: 3px solid #e94560; padding-bottom: 10px; margin-bottom: 8px; }
-  h2 { font-size: 20px; color: #16213e; border-bottom: 2px solid #eee; padding-bottom: 6px; margin-top: 32px; }
-  h3 { font-size: 16px; color: #e94560; margin-top: 24px; }
-  code { background: #f1f1f1; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-  pre { background: #16213e; color: #00fff5; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-  th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-  th { background: #16213e; color: white; }
-  tr:nth-child(even) { background: #f9f9f9; }
-  .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 16px 0; }
-  .tip { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 12px 16px; margin: 16px 0; }
-  .print-btn { position: fixed; top: 20px; right: 20px; background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-  @media print { .print-btn { display: none; } body { margin: 20px; } }
-</style>
-</head>
-<body>
-<button class="print-btn" onclick="window.print()">Save as PDF</button>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Orbit Admin — Manual Setup Guide</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        line-height: 1.6;
+        color: #1a1a2e;
+      }
+      h1 {
+        font-size: 28px;
+        border-bottom: 3px solid #e94560;
+        padding-bottom: 10px;
+        margin-bottom: 8px;
+      }
+      h2 {
+        font-size: 20px;
+        color: #16213e;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 6px;
+        margin-top: 32px;
+      }
+      h3 {
+        font-size: 16px;
+        color: #e94560;
+        margin-top: 24px;
+      }
+      code {
+        background: #f1f1f1;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      pre {
+        background: #16213e;
+        color: #00fff5;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 13px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 14px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background: #16213e;
+        color: white;
+      }
+      tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+      .warning {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px 16px;
+        margin: 16px 0;
+      }
+      .tip {
+        background: #d1ecf1;
+        border-left: 4px solid #17a2b8;
+        padding: 12px 16px;
+        margin: 16px 0;
+      }
+      .print-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #e94560;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      @media print {
+        .print-btn {
+          display: none;
+        }
+        body {
+          margin: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-btn" onclick="window.print()">Save as PDF</button>
 
-<h1>Orbit Admin — Manual Setup Checklist</h1>
-<p><strong>Everything the Gold Button Didn't Fully Automate</strong></p>
+    <h1>Orbit Admin — Manual Setup Checklist</h1>
+    <p><strong>Everything the Gold Button Didn't Fully Automate</strong></p>
 
-<div class="warning">
-<strong>Current Issue:</strong> The gold button runs 22 steps but may show "19/22" or "20/23" done because some steps silently fail or require external accounts/API keys that cannot be automated.
-</div>
+    <div class="warning">
+      <strong>Current Issue:</strong> The gold button runs 22 steps but may show "19/22" or "20/23"
+      done because some steps silently fail or require external accounts/API keys that cannot be
+      automated.
+    </div>
 
-<h2>1. STRIPE PAYMENT SETUP (Required for Revenue)</h2>
-<p>The gold button does <strong>NOT</strong> configure your Stripe keys. You must do this manually in Orbit Admin.</p>
+    <h2>1. STRIPE PAYMENT SETUP (Required for Revenue)</h2>
+    <p>
+      The gold button does <strong>NOT</strong> configure your Stripe keys. You must do this
+      manually in Orbit Admin.
+    </p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Go to <code>/dashboard/launchpad</code> → scroll to "Stripe Keys" section</li>
-<li>Enter your <strong>Stripe Secret Key</strong> (starts with <code>sk_live_</code> or <code>sk_test_</code>)</li>
-<li>Enter your <strong>Stripe Publishable Key</strong> (starts with <code>pk_live_</code> or <code>pk_test_</code>)</li>
-<li>Enter your <strong>Stripe Webhook Secret</strong> (starts with <code>whsec_</code>)</li>
-<li>Click <strong>Save</strong></li>
-<li><strong>IMPORTANT:</strong> Do NOT refresh the page immediately — verify the keys saved correctly first</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>Go to <code>/dashboard/launchpad</code> → scroll to "Stripe Keys" section</li>
+      <li>
+        Enter your <strong>Stripe Secret Key</strong> (starts with <code>sk_live_</code> or
+        <code>sk_test_</code>)
+      </li>
+      <li>
+        Enter your <strong>Stripe Publishable Key</strong> (starts with <code>pk_live_</code> or
+        <code>pk_test_</code>)
+      </li>
+      <li>Enter your <strong>Stripe Webhook Secret</strong> (starts with <code>whsec_</code>)</li>
+      <li>Click <strong>Save</strong></li>
+      <li>
+        <strong>IMPORTANT:</strong> Do NOT refresh the page immediately — verify the keys saved
+        correctly first
+      </li>
+    </ol>
 
-<h3>Verification:</h3>
-<ul>
-<li>Check that payments work by creating a test checkout session</li>
-<li>Verify webhook endpoint is configured in your Stripe Dashboard</li>
-</ul>
+    <h3>Verification:</h3>
+    <ul>
+      <li>Check that payments work by creating a test checkout session</li>
+      <li>Verify webhook endpoint is configured in your Stripe Dashboard</li>
+    </ul>
 
-<h2>2. GOOGLE SEARCH CONSOLE (Required for Google Indexing)</h2>
-<p>The gold button submits to IndexNow (Bing/Yandex) but <strong>CANNOT</strong> submit to Google automatically without a service account.</p>
+    <h2>2. GOOGLE SEARCH CONSOLE (Required for Google Indexing)</h2>
+    <p>
+      The gold button submits to IndexNow (Bing/Yandex) but <strong>CANNOT</strong> submit to Google
+      automatically without a service account.
+    </p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Go to <a href="https://search.google.com/search-console">Google Search Console</a></li>
-<li>Add your property: <code>https://svivva.com</code></li>
-<li>Verify ownership (via DNS record or HTML file)</li>
-<li>Create a <a href="https://console.cloud.google.com/">Google Cloud Service Account</a></li>
-<li>Enable "Google Search Console API" for that project</li>
-<li>Download the JSON service account key</li>
-<li>Go to Orbit Admin → "Google Service Account JSON" section</li>
-<li>Paste the entire JSON key content</li>
-<li>Save</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>Go to <a href="https://search.google.com/search-console">Google Search Console</a></li>
+      <li>Add your property: <code>https://svivva.com</code></li>
+      <li>Verify ownership (via DNS record or HTML file)</li>
+      <li>Create a <a href="https://console.cloud.google.com/">Google Cloud Service Account</a></li>
+      <li>Enable "Google Search Console API" for that project</li>
+      <li>Download the JSON service account key</li>
+      <li>Go to Orbit Admin → "Google Service Account JSON" section</li>
+      <li>Paste the entire JSON key content</li>
+      <li>Save</li>
+    </ol>
 
-<h3>Verification:</h3>
-<ul>
-<li>Check <code>/dashboard/growth</code> → "Submit to Google" button should work</li>
-<li>Visit Search Console → "URL Inspection" → test any page</li>
-</ul>
+    <h3>Verification:</h3>
+    <ul>
+      <li>Check <code>/dashboard/growth</code> → "Submit to Google" button should work</li>
+      <li>Visit Search Console → "URL Inspection" → test any page</li>
+    </ul>
 
-<h2>3. INDEXNOW KEY (Required for Bing/Yandex Indexing)</h2>
-<p>The gold button may create this, but you should verify it's working.</p>
+    <h2>3. INDEXNOW KEY (Required for Bing/Yandex Indexing)</h2>
+    <p>The gold button may create this, but you should verify it's working.</p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Go to <a href="https://www.bing.com/webmasters">Bing Webmaster Tools</a></li>
-<li>Add and verify your site: <code>svivva.com</code></li>
-<li>Generate an IndexNow key (or use the one Orbit created)</li>
-<li>Upload the key file to your site root (e.g., <code>svivva.com/abcd1234.txt</code>)</li>
-<li>In Orbit Admin, verify the key is saved in "Platform Secrets"</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>Go to <a href="https://www.bing.com/webmasters">Bing Webmaster Tools</a></li>
+      <li>Add and verify your site: <code>svivva.com</code></li>
+      <li>Generate an IndexNow key (or use the one Orbit created)</li>
+      <li>Upload the key file to your site root (e.g., <code>svivva.com/abcd1234.txt</code>)</li>
+      <li>In Orbit Admin, verify the key is saved in "Platform Secrets"</li>
+    </ol>
 
-<h3>Verification:</h3>
-<ul>
-<li>Visit <code>https://svivva.com/[your-indexnow-key].txt</code> — should show the key value</li>
-<li>Check Bing Webmaster Tools → "URL Submission" for submitted URLs</li>
-</ul>
+    <h3>Verification:</h3>
+    <ul>
+      <li>
+        Visit <code>https://svivva.com/[your-indexnow-key].txt</code> — should show the key value
+      </li>
+      <li>Check Bing Webmaster Tools → "URL Submission" for submitted URLs</li>
+    </ul>
 
-<h2>4. MARKETING STATUS CHECKS (Verify Content Was Created)</h2>
-<p>The gold button generates pages, but you must verify the counts match expectations.</p>
+    <h2>4. MARKETING STATUS CHECKS (Verify Content Was Created)</h2>
+    <p>The gold button generates pages, but you must verify the counts match expectations.</p>
 
-<table>
-<tr><th>Category</th><th>Expected</th><th>How to Check</th></tr>
-<tr><td>SEO Landing Pages</td><td>40+</td><td><code>/api/orbit/status</code> → <code>seoPages</code></td></tr>
-<tr><td>Competitor Pages</td><td>8+</td><td>Check <code>comparisons</code> count</td></tr>
-<tr><td>Blog Posts</td><td>10+</td><td><code>/api/orbit/status</code> → <code>blogPosts</code></td></tr>
-<tr><td>AEO Pages</td><td>10+</td><td><code>/api/orbit/status</code> → <code>aeoPages</code></td></tr>
-<tr><td>Integration Pages</td><td>30</td><td><code>/api/orbit/status</code> → <code>integrationPages</code></td></tr>
-<tr><td>Industry Use Cases</td><td>20</td><td><code>/api/orbit/status</code> → <code>usecasePages</code></td></tr>
-<tr><td>API Templates</td><td>25</td><td><code>/api/orbit/status</code> → <code>templatePages</code></td></tr>
-<tr><td>PAA Pages</td><td>15</td><td><code>/api/orbit/status</code> → <code>paaPages</code></td></tr>
-<tr><td>Tools SEO Pages</td><td>All mini tools</td><td>Check <code>miniPages</code> count</td></tr>
-</table>
+    <table>
+      <tr>
+        <th>Category</th>
+        <th>Expected</th>
+        <th>How to Check</th>
+      </tr>
+      <tr>
+        <td>SEO Landing Pages</td>
+        <td>40+</td>
+        <td><code>/api/orbit/status</code> → <code>seoPages</code></td>
+      </tr>
+      <tr>
+        <td>Competitor Pages</td>
+        <td>8+</td>
+        <td>Check <code>comparisons</code> count</td>
+      </tr>
+      <tr>
+        <td>Blog Posts</td>
+        <td>10+</td>
+        <td><code>/api/orbit/status</code> → <code>blogPosts</code></td>
+      </tr>
+      <tr>
+        <td>AEO Pages</td>
+        <td>10+</td>
+        <td><code>/api/orbit/status</code> → <code>aeoPages</code></td>
+      </tr>
+      <tr>
+        <td>Integration Pages</td>
+        <td>30</td>
+        <td><code>/api/orbit/status</code> → <code>integrationPages</code></td>
+      </tr>
+      <tr>
+        <td>Industry Use Cases</td>
+        <td>20</td>
+        <td><code>/api/orbit/status</code> → <code>usecasePages</code></td>
+      </tr>
+      <tr>
+        <td>API Templates</td>
+        <td>25</td>
+        <td><code>/api/orbit/status</code> → <code>templatePages</code></td>
+      </tr>
+      <tr>
+        <td>PAA Pages</td>
+        <td>15</td>
+        <td><code>/api/orbit/status</code> → <code>paaPages</code></td>
+      </tr>
+      <tr>
+        <td>Tools SEO Pages</td>
+        <td>All mini tools</td>
+        <td>Check <code>miniPages</code> count</td>
+      </tr>
+    </table>
 
-<h3>If Counts Are Low:</h3>
-<ol>
-<li>Go to <code>/dashboard/launchpad</code></li>
-<li>Click individual steps that show low counts (e.g., "30 Integration Pages")</li>
-<li>Run them manually — they will regenerate missing content</li>
-<li>Re-check <code>/api/orbit/status</code></li>
-</ol>
+    <h3>If Counts Are Low:</h3>
+    <ol>
+      <li>Go to <code>/dashboard/launchpad</code></li>
+      <li>Click individual steps that show low counts (e.g., "30 Integration Pages")</li>
+      <li>Run them manually — they will regenerate missing content</li>
+      <li>Re-check <code>/api/orbit/status</code></li>
+    </ol>
 
-<h2>5. DIRECTORY SUBMISSIONS (100+ Listings)</h2>
-<p>The gold button may fail on directory submissions due to connection issues or required manual accounts.</p>
+    <h2>5. DIRECTORY SUBMISSIONS (100+ Listings)</h2>
+    <p>
+      The gold button may fail on directory submissions due to connection issues or required manual
+      accounts.
+    </p>
 
-<h3>Manual Steps:</h3>
-<ol>
-<li>Create accounts on these directories:
-   <ul>
-   <li>Product Hunt</li>
-   <li>G2</li>
-   <li>Capterra</li>
-   <li>TrustRadius</li>
-   <li>SaaSworthy</li>
-   <li>BetaList</li>
-   <li>Indie Hackers</li>
-   <li>Hacker News (Show HN)</li>
-   <li>Alternativeto.net</li>
-   <li>Slant.co</li>
-   </ul>
-</li>
-<li>Submit Svivva to each with consistent branding</li>
-<li>Use the listing text generated by Orbit's "Directory Submissions" step</li>
-</ol>
+    <h3>Manual Steps:</h3>
+    <ol>
+      <li>
+        Create accounts on these directories:
+        <ul>
+          <li>Product Hunt</li>
+          <li>G2</li>
+          <li>Capterra</li>
+          <li>TrustRadius</li>
+          <li>SaaSworthy</li>
+          <li>BetaList</li>
+          <li>Indie Hackers</li>
+          <li>Hacker News (Show HN)</li>
+          <li>Alternativeto.net</li>
+          <li>Slant.co</li>
+        </ul>
+      </li>
+      <li>Submit Svivva to each with consistent branding</li>
+      <li>Use the listing text generated by Orbit's "Directory Submissions" step</li>
+    </ol>
 
-<h2>6. SOCIAL MEDIA ACCOUNTS</h2>
-<p>The gold button generates social content but cannot create accounts for you.</p>
+    <h2>6. SOCIAL MEDIA ACCOUNTS</h2>
+    <p>The gold button generates social content but cannot create accounts for you.</p>
 
-<h3>Required Accounts:</h3>
-<ul>
-<li><strong>Twitter/X</strong> — for automated posting</li>
-<li><strong>LinkedIn</strong> — for B2B reach</li>
-<li><strong>Reddit</strong> — for community posts (r/SideProject, r/webdev, r/artificial)</li>
-<li><strong>Hacker News</strong> — for "Show HN" posts</li>
-<li><strong>Indie Hackers</strong> — for product announcements</li>
-</ul>
+    <h3>Required Accounts:</h3>
+    <ul>
+      <li><strong>Twitter/X</strong> — for automated posting</li>
+      <li><strong>LinkedIn</strong> — for B2B reach</li>
+      <li><strong>Reddit</strong> — for community posts (r/SideProject, r/webdev, r/artificial)</li>
+      <li><strong>Hacker News</strong> — for "Show HN" posts</li>
+      <li><strong>Indie Hackers</strong> — for product announcements</li>
+    </ul>
 
-<h2>7. MINI APP TOOL DISCOVERY & INDEXING</h2>
-<p>The gold button discovers tools but may miss some depending on hub availability.</p>
+    <h2>7. MINI APP TOOL DISCOVERY & INDEXING</h2>
+    <p>The gold button discovers tools but may miss some depending on hub availability.</p>
 
-<h3>Verify All Tools Were Found:</h3>
-<ol>
-<li>Go to <code>/dashboard/launchpad</code></li>
-<li>Check "Discovered Tools" count — should be 50+</li>
-<li>If low, manually enter URLs for these hubs:
-   <ul>
-   <li><code>https://svivva.com/ai-tools-hub</code></li>
-   <li><code>https://svivva.com/cyber-security-mini-apps</code></li>
-   <li><code>https://svivva.com/seo-pack</code></li>
-   </ul>
-</li>
-<li>Click "Discover Tools" button to refresh</li>
-</ol>
+    <h3>Verify All Tools Were Found:</h3>
+    <ol>
+      <li>Go to <code>/dashboard/launchpad</code></li>
+      <li>Check "Discovered Tools" count — should be 50+</li>
+      <li>
+        If low, manually enter URLs for these hubs:
+        <ul>
+          <li><code>https://svivva.com/ai-tools-hub</code></li>
+          <li><code>https://svivva.com/cyber-security-mini-apps</code></li>
+          <li><code>https://svivva.com/seo-pack</code></li>
+        </ul>
+      </li>
+      <li>Click "Discover Tools" button to refresh</li>
+    </ol>
 
-<h2>8. BACKLINK & OUTREACH</h2>
-<p>The gold button generates outreach templates but cannot send emails.</p>
+    <h2>8. BACKLINK & OUTREACH</h2>
+    <p>The gold button generates outreach templates but cannot send emails.</p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Find relevant websites in your niche (AI tools, SaaS, developer tools)</li>
-<li>Use the PR & Newsletter pitch templates from Orbit</li>
-<li>Send personalized outreach emails</li>
-<li>Guest post on relevant blogs using the parasite SEO articles generated</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>Find relevant websites in your niche (AI tools, SaaS, developer tools)</li>
+      <li>Use the PR & Newsletter pitch templates from Orbit</li>
+      <li>Send personalized outreach emails</li>
+      <li>Guest post on relevant blogs using the parasite SEO articles generated</li>
+    </ol>
 
-<h2>9. COMMUNITY ENGAGEMENT</h2>
-<p>The gold button generates a strategy but you must execute it.</p>
+    <h2>9. COMMUNITY ENGAGEMENT</h2>
+    <p>The gold button generates a strategy but you must execute it.</p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Join these subreddits:
-   <ul>
-   <li>r/SideProject (1.7M subscribers)</li>
-   <li>r/webdev (1.4M subscribers)</li>
-   <li>r/artificial (1.8M subscribers)</li>
-   </ul>
-</li>
-<li>Use the generated post templates from "Community Strategy Pack"</li>
-<li>Post genuinely — don't spam</li>
-<li>Engage with comments and questions</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>
+        Join these subreddits:
+        <ul>
+          <li>r/SideProject (1.7M subscribers)</li>
+          <li>r/webdev (1.4M subscribers)</li>
+          <li>r/artificial (1.8M subscribers)</li>
+        </ul>
+      </li>
+      <li>Use the generated post templates from "Community Strategy Pack"</li>
+      <li>Post genuinely — don't spam</li>
+      <li>Engage with comments and questions</li>
+    </ol>
 
-<h2>10. SCHEMA.ORG & STRUCTURED DATA</h2>
-<p>The gold button adds schema markup but you should verify it's correct.</p>
+    <h2>10. SCHEMA.ORG & STRUCTURED DATA</h2>
+    <p>The gold button adds schema markup but you should verify it's correct.</p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Go to <a href="https://search.google.com/test/rich-results">Google Rich Results Test</a></li>
-<li>Test your homepage and key landing pages</li>
-<li>Verify these schema types are present:
-   <ul>
-   <li>Organization</li>
-   <li>WebSite</li>
-   <li>FAQPage (on PAA pages)</li>
-   <li>SoftwareApplication (on tool pages)</li>
-   </ul>
-</li>
-<li>Fix any errors reported</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>
+        Go to <a href="https://search.google.com/test/rich-results">Google Rich Results Test</a>
+      </li>
+      <li>Test your homepage and key landing pages</li>
+      <li>
+        Verify these schema types are present:
+        <ul>
+          <li>Organization</li>
+          <li>WebSite</li>
+          <li>FAQPage (on PAA pages)</li>
+          <li>SoftwareApplication (on tool pages)</li>
+        </ul>
+      </li>
+      <li>Fix any errors reported</li>
+    </ol>
 
-<h2>11. ANALYTICS & TRACKING</h2>
-<p>The gold button doesn't set up analytics.</p>
+    <h2>11. ANALYTICS & TRACKING</h2>
+    <p>The gold button doesn't set up analytics.</p>
 
-<h3>Steps:</h3>
-<ol>
-<li>Add Google Analytics 4 (GA4) tracking code to your site</li>
-<li>Add Google Tag Manager if using advanced tracking</li>
-<li>Set up conversion events for sign-ups, checkouts, tool usage</li>
-<li>Verify in GA4 Real-Time reports that data is flowing</li>
-</ol>
+    <h3>Steps:</h3>
+    <ol>
+      <li>Add Google Analytics 4 (GA4) tracking code to your site</li>
+      <li>Add Google Tag Manager if using advanced tracking</li>
+      <li>Set up conversion events for sign-ups, checkouts, tool usage</li>
+      <li>Verify in GA4 Real-Time reports that data is flowing</li>
+    </ol>
 
-<h2>12. DOMAIN & DNS CHECKS</h2>
-<ol>
-<li>Check <code>https://svivva.com</code> loads correctly</li>
-<li>Verify HTTPS certificate is active</li>
-<li>Check DNS records (A, CNAME, TXT for verification)</li>
-<li>Ensure <code>www.svivva.com</code> redirects correctly</li>
-</ol>
+    <h2>12. DOMAIN & DNS CHECKS</h2>
+    <ol>
+      <li>Check <code>https://svivva.com</code> loads correctly</li>
+      <li>Verify HTTPS certificate is active</li>
+      <li>Check DNS records (A, CNAME, TXT for verification)</li>
+      <li>Ensure <code>www.svivva.com</code> redirects correctly</li>
+    </ol>
 
-<h2>13. WEEKLY MAINTENANCE TASKS</h2>
-<ol>
-<li>Go to <code>/dashboard/growth</code></li>
-<li>Click "Run Weekly Tasks"</li>
-<li>Verify sitemap is pinged to Google & Bing</li>
-<li>Check IndexNow submissions succeeded</li>
-<li>Review Google Search Console for crawl errors</li>
-<li>Check for broken links or 404s</li>
-</ol>
+    <h2>13. WEEKLY MAINTENANCE TASKS</h2>
+    <ol>
+      <li>Go to <code>/dashboard/growth</code></li>
+      <li>Click "Run Weekly Tasks"</li>
+      <li>Verify sitemap is pinged to Google & Bing</li>
+      <li>Check IndexNow submissions succeeded</li>
+      <li>Review Google Search Console for crawl errors</li>
+      <li>Check for broken links or 404s</li>
+    </ol>
 
-<h2>14. TROUBLESHOOTING</h2>
+    <h2>14. TROUBLESHOOTING</h2>
 
-<div class="warning">
-<strong>"Stuck at 19/22" or "20/23"</strong><br>
-Cause: Steps marked "done" but didn't actually finish<br>
-Fix: Click individual step buttons to re-run them, or clear browser localStorage and re-run gold button
-</div>
+    <div class="warning">
+      <strong>"Stuck at 19/22" or "20/23"</strong><br />
+      Cause: Steps marked "done" but didn't actually finish<br />
+      Fix: Click individual step buttons to re-run them, or clear browser localStorage and re-run
+      gold button
+    </div>
 
-<div class="warning">
-<strong>"0 Pages" in Marketing Status</strong><br>
-Cause: Step ran but pages weren't generated<br>
-Fix: Re-run the specific step manually. Check browser console for errors.
-</div>
+    <div class="warning">
+      <strong>"0 Pages" in Marketing Status</strong><br />
+      Cause: Step ran but pages weren't generated<br />
+      Fix: Re-run the specific step manually. Check browser console for errors.
+    </div>
 
-<div class="warning">
-<strong>"Connection Error" on Directory Submissions</strong><br>
-Cause: AI key not configured or timeout<br>
-Fix: Add OpenAI/Gemini key in "Platform Secrets" or run step again
-</div>
+    <div class="warning">
+      <strong>"Connection Error" on Directory Submissions</strong><br />
+      Cause: AI key not configured or timeout<br />
+      Fix: Add OpenAI/Gemini key in "Platform Secrets" or run step again
+    </div>
 
-<div class="tip">
-<strong>Stripe Keys Keep Disappearing</strong><br>
-Fix: Enter keys → Save → wait 5 seconds → refresh. Verify keys show in "Platform Secrets".
-</div>
+    <div class="tip">
+      <strong>Stripe Keys Keep Disappearing</strong><br />
+      Fix: Enter keys → Save → wait 5 seconds → refresh. Verify keys show in "Platform Secrets".
+    </div>
 
-<h2>15. QUICK VERIFICATION COMMANDS</h2>
-<p>Run these in your browser console:</p>
-<pre>
+    <h2>15. QUICK VERIFICATION COMMANDS</h2>
+    <p>Run these in your browser console:</p>
+    <pre>
 // Check total steps done
 JSON.parse(localStorage.getItem('orbit_manual_v1') || '{}')
 
@@ -275,45 +421,111 @@ JSON.parse(localStorage.getItem('orbit_manual_v1') || '{}')
 Object.entries(JSON.parse(localStorage.getItem('orbit_manual_v1') || '{}'))
   .filter(([k,v]) => v === true)
   .map(([k]) => k)
-</pre>
+</pre
+    >
 
-<h2>16. ORDER OF OPERATIONS (Recommended)</h2>
-<ol>
-<li><strong>Set up Stripe keys</strong> (enables revenue)</li>
-<li><strong>Set up Google Search Console + Service Account</strong> (enables Google indexing)</li>
-<li><strong>Verify IndexNow key</strong> (enables Bing indexing)</li>
-<li><strong>Run Gold Button</strong> (generates all content)</li>
-<li><strong>Check Marketing Status</strong> — re-run any steps with low counts</li>
-<li><strong>Set up social media accounts</strong></li>
-<li><strong>Submit to directories manually</strong></li>
-<li><strong>Post to communities</strong></li>
-<li><strong>Run growth engine weekly</strong></li>
-<li><strong>Monitor analytics and adjust</strong></li>
-</ol>
+    <h2>16. ORDER OF OPERATIONS (Recommended)</h2>
+    <ol>
+      <li><strong>Set up Stripe keys</strong> (enables revenue)</li>
+      <li>
+        <strong>Set up Google Search Console + Service Account</strong> (enables Google indexing)
+      </li>
+      <li><strong>Verify IndexNow key</strong> (enables Bing indexing)</li>
+      <li><strong>Run Gold Button</strong> (generates all content)</li>
+      <li><strong>Check Marketing Status</strong> — re-run any steps with low counts</li>
+      <li><strong>Set up social media accounts</strong></li>
+      <li><strong>Submit to directories manually</strong></li>
+      <li><strong>Post to communities</strong></li>
+      <li><strong>Run growth engine weekly</strong></li>
+      <li><strong>Monitor analytics and adjust</strong></li>
+    </ol>
 
-<h2>SUMMARY TABLE</h2>
-<table>
-<tr><th>Category</th><th>Automated?</th><th>You Still Need To</th></tr>
-<tr><td>SEO Pages</td><td>Yes (40+)</td><td>Verify counts</td></tr>
-<tr><td>Blog Posts</td><td>Yes (10+)</td><td>Verify counts</td></tr>
-<tr><td>AEO Pages</td><td>Yes (10+)</td><td>Verify counts</td></tr>
-<tr><td>Integrations</td><td>Yes (30)</td><td>Verify counts</td></tr>
-<tr><td>Use Cases</td><td>Yes (20)</td><td>Verify counts</td></tr>
-<tr><td>Templates</td><td>Yes (25)</td><td>Verify counts</td></tr>
-<tr><td>PAA Pages</td><td>Yes (15)</td><td>Verify counts</td></tr>
-<tr><td>Stripe Keys</td><td><strong>NO</strong></td><td>Enter manually</td></tr>
-<tr><td>Google Search Console</td><td><strong>NO</strong></td><td>Create account, verify</td></tr>
-<tr><td>IndexNow/Bing</td><td>Partial</td><td>Verify key, add site</td></tr>
-<tr><td>Directory Submissions</td><td>Partial</td><td>Create accounts, submit</td></tr>
-<tr><td>Social Media</td><td><strong>NO</strong></td><td>Create accounts, post</td></tr>
-<tr><td>Community Engagement</td><td><strong>NO</strong></td><td>Join, post manually</td></tr>
-<tr><td>Outreach/Backlinks</td><td><strong>NO</strong></td><td>Send emails manually</td></tr>
-<tr><td>Analytics</td><td><strong>NO</strong></td><td>Set up GA4 manually</td></tr>
-</table>
+    <h2>SUMMARY TABLE</h2>
+    <table>
+      <tr>
+        <th>Category</th>
+        <th>Automated?</th>
+        <th>You Still Need To</th>
+      </tr>
+      <tr>
+        <td>SEO Pages</td>
+        <td>Yes (40+)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>Blog Posts</td>
+        <td>Yes (10+)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>AEO Pages</td>
+        <td>Yes (10+)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>Integrations</td>
+        <td>Yes (30)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>Use Cases</td>
+        <td>Yes (20)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>Templates</td>
+        <td>Yes (25)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>PAA Pages</td>
+        <td>Yes (15)</td>
+        <td>Verify counts</td>
+      </tr>
+      <tr>
+        <td>Stripe Keys</td>
+        <td><strong>NO</strong></td>
+        <td>Enter manually</td>
+      </tr>
+      <tr>
+        <td>Google Search Console</td>
+        <td><strong>NO</strong></td>
+        <td>Create account, verify</td>
+      </tr>
+      <tr>
+        <td>IndexNow/Bing</td>
+        <td>Partial</td>
+        <td>Verify key, add site</td>
+      </tr>
+      <tr>
+        <td>Directory Submissions</td>
+        <td>Partial</td>
+        <td>Create accounts, submit</td>
+      </tr>
+      <tr>
+        <td>Social Media</td>
+        <td><strong>NO</strong></td>
+        <td>Create accounts, post</td>
+      </tr>
+      <tr>
+        <td>Community Engagement</td>
+        <td><strong>NO</strong></td>
+        <td>Join, post manually</td>
+      </tr>
+      <tr>
+        <td>Outreach/Backlinks</td>
+        <td><strong>NO</strong></td>
+        <td>Send emails manually</td>
+      </tr>
+      <tr>
+        <td>Analytics</td>
+        <td><strong>NO</strong></td>
+        <td>Set up GA4 manually</td>
+      </tr>
+    </table>
 
-<p style="margin-top: 40px; color: #666; font-size: 12px; text-align: center;">
-Generated for Svivva Orbit Admin — Open this file in Chrome and click "Save as PDF" to export
-</p>
-
-</body>
+    <p style="margin-top: 40px; color: #666; font-size: 12px; text-align: center">
+      Generated for Svivva Orbit Admin — Open this file in Chrome and click "Save as PDF" to export
+    </p>
+  </body>
 </html>

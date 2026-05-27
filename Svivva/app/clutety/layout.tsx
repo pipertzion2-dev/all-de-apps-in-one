@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Clutety",
   description:
-    "Pyracrypt-grade file protection in your browser — encrypt, scan, and shield locally. Embedded in Svivva.",
+    "Clutety embeds the original Pyracrypt protection app in Svivva — encrypt, scan, and shield locally.",
   openGraph: {
-    title: "Clutety — Pyracrypt on Svivva",
+    title: "Clutety — embedded in Svivva",
     description:
-      "Encrypt, scan, and shield files in your browser. The original Pyracrypt Lock UI, hosted on Svivva.",
+      "The original Pyracrypt UI, hosted on Svivva. Encrypt, scan, and shield files in your browser.",
     url: "https://svivva.com/clutety",
     siteName: "Svivva",
     type: "website",

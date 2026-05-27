@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCampaigns, createCampaign, getCampaignSummary, updateCampaignStatus } from "@/lib/marketing/campaigns";
+import {
+  getCampaigns,
+  createCampaign,
+  getCampaignSummary,
+  updateCampaignStatus,
+} from "@/lib/marketing/campaigns";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,11 +24,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, channel, budget, targetAudience, startDate, endDate, goals, tags } = body;
+    const { name, description, channel, budget, targetAudience, startDate, endDate, goals, tags } =
+      body;
     if (!name || !channel) {
       return NextResponse.json({ error: "name and channel are required" }, { status: 400 });
     }
-    const campaign = await createCampaign({ name, description, channel, budget, targetAudience, startDate, endDate, goals, tags });
+    const campaign = await createCampaign({
+      name,
+      description,
+      channel,
+      budget,
+      targetAudience,
+      startDate,
+      endDate,
+      goals,
+      tags,
+    });
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to create campaign" }, { status: 500 });

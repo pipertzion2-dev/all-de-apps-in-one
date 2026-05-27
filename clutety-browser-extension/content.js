@@ -107,7 +107,8 @@
       return (n?.textContent || "").trim().slice(0, 500);
     };
 
-    const title = pick(titleSel[platform]) || (el.getAttribute("aria-label") || "").trim().slice(0, 200);
+    const title =
+      pick(titleSel[platform]) || (el.getAttribute("aria-label") || "").trim().slice(0, 200);
     const channel = pick(channelSel[platform]);
 
     return {
@@ -121,10 +122,7 @@
   }
 
   function isDone(el) {
-    return (
-      el.getAttribute(ATTR_HIDDEN) === "1" ||
-      el.getAttribute(ATTR_ALLOWED) === "1"
-    );
+    return el.getAttribute(ATTR_HIDDEN) === "1" || el.getAttribute(ATTR_ALLOWED) === "1";
   }
 
   function markChecking(el) {
@@ -268,12 +266,14 @@
     if (rafId) cancelAnimationFrame(rafId);
     rafId = 0;
 
-    document.querySelectorAll(`[${ATTR_HIDDEN}], [${ATTR_CHECKING}], [${ATTR_ALLOWED}]`).forEach((el) => {
-      el.removeAttribute(ATTR_HIDDEN);
-      el.removeAttribute(ATTR_CHECKING);
-      el.removeAttribute(ATTR_ALLOWED);
-      el.removeAttribute("title");
-    });
+    document
+      .querySelectorAll(`[${ATTR_HIDDEN}], [${ATTR_CHECKING}], [${ATTR_ALLOWED}]`)
+      .forEach((el) => {
+        el.removeAttribute(ATTR_HIDDEN);
+        el.removeAttribute(ATTR_CHECKING);
+        el.removeAttribute(ATTR_ALLOWED);
+        el.removeAttribute("title");
+      });
 
     collectFeedItems(document);
     setupIntersectionObserver();
