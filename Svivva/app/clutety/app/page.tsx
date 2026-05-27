@@ -1,10 +1,6 @@
-import { LockScanner } from "@/components/clutety/lock-scanner";
+import { redirect } from "next/navigation";
 
-/** Full-screen Pyracrypt Lock UI — iOS WebView and direct app entry. */
+/** Full-screen original Pyracrypt app (static shell) — iOS WebView entry. */
 export default function ClutetyAppPage() {
-  return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto overscroll-contain bg-[#EEF2F8]">
-      <LockScanner />
-    </div>
-  );
+  redirect("/clutety-shell/?skip");
 }

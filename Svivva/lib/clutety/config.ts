@@ -4,8 +4,8 @@ export const CLUTETY_BURG = "#6B2C4A";
 
 export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
 
-/** Same-origin embed: original Lock UI only (no tab shell). */
-export const CLUTETY_EMBED_PATH = "/clutety/embed";
+/** Same-origin embed path for the original Pyracrypt UI bundle. */
+export const CLUTETY_EMBED_PATH = "/clutety-shell/?skip";
 
 /** Optional external Vite build; otherwise use {@link CLUTETY_EMBED_PATH}. */
 export function getClutetyEmbedUrl(): string {

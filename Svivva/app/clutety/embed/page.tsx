@@ -1,9 +1,6 @@
-import { LockScanner } from "@/components/clutety/lock-scanner";
+import { redirect } from "next/navigation";
 
+/** Legacy embed path → original Pyracrypt static bundle. */
 export default function ClutetyEmbedPage() {
-  return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto overscroll-contain">
-      <LockScanner />
-    </div>
-  );
+  redirect("/clutety-shell/?skip");
 }

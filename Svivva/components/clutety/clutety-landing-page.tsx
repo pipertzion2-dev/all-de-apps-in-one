@@ -38,7 +38,7 @@ const features = [
   {
     icon: FileText,
     title: "Any File Type",
-    desc: "Documents, images, archives, executables — Pyracrypt handles all of them without limits.",
+    desc: "Documents, images, archives, executables — Clutety handles all of them without limits.",
   },
   {
     icon: Key,
@@ -129,11 +129,11 @@ const faqs = [
   },
   {
     q: "Where do my files go?",
-    a: "Nowhere. Pyracrypt processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
+    a: "Nowhere. Clutety processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
   },
   {
-    q: "Can I decrypt files without Pyracrypt?",
-    a: "Yes. Pyracrypt uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
+    q: "Can I decrypt files without Clutety?",
+    a: "Yes. Clutety uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
   },
   {
     q: "What makes the paid plans different?",
@@ -141,7 +141,7 @@ const faqs = [
   },
   {
     q: "Is this connected to Svivva's AI platform?",
-    a: "Pyracrypt is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+    a: "Clutety is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
   },
 ];
 
@@ -177,15 +177,14 @@ export default function ClutetyLandingPage() {
             <Shield className="w-3.5 h-3.5" /> Free plan · No sign-up · Browser-based
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
-            <span style={{ color: TEAL }}>Pyracrypt</span>
-            <span className="text-white/90"> — Protect Your Files</span>
+            <span style={{ color: TEAL }}>Clutety</span>
+            <span className="text-white/90"> — Powered by Pyracrypt</span>
             <br />
             <span className="text-white/50">From Threats No One Sees Coming</span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Encrypt, scan, and shield any file in your browser using AES-256. Nothing leaves your
-            device. No accounts needed. Trusted by individuals and teams who take data privacy
-            seriously.
+            The original Pyracrypt protection UI, embedded in Svivva. Encrypt, scan, and shield any
+            file in your browser — nothing leaves your device.
           </p>
         </div>
 
@@ -228,12 +227,12 @@ export default function ClutetyLandingPage() {
               >
                 <Lock className="w-3 h-3 text-[#28C840]" />
                 <span className="truncate font-medium tracking-wide">
-                  Pyracrypt — Encrypted & Secure
+                  Clutety — Encrypted & Secure
                 </span>
               </div>
             </div>
 
-            <ClutetyAppFrame height={560} />
+            <ClutetyAppFrame height="min(78vh, 720px)" />
 
             <div
               className="flex items-center justify-between px-4 py-2.5"
@@ -261,7 +260,7 @@ export default function ClutetyLandingPage() {
             className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold"
             style={{ background: TEAL }}
           >
-            Try Pyracrypt Free <ArrowRight className="w-4 h-4" />
+            Try Clutety Free <ArrowRight className="w-4 h-4" />
           </a>
           <a
             href="#pricing"
@@ -274,7 +273,7 @@ export default function ClutetyLandingPage() {
 
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <h2 className="text-2xl font-black text-center mb-3">Why Pyracrypt?</h2>
+        <h2 className="text-2xl font-black text-center mb-3">Why Clutety?</h2>
         <p className="text-center text-white/40 mb-12 text-sm">
           No cloud. No backdoors. No compromises.
         </p>
@@ -408,7 +407,7 @@ export default function ClutetyLandingPage() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
-              Try Free <ArrowRight className="w-4 h-4" />
+              Try Clutety <ArrowRight className="w-4 h-4" />
             </a>
             <a
               href="#pricing"

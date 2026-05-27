@@ -11,11 +11,8 @@ type Props = {
   title?: string;
 };
 
-/** Replit-builder live window: Pyracrypt Lock UI in an iframe. */
-export function ClutetyAppFrame({
-  height = 560,
-  title = "Pyracrypt — File Protection Tool",
-}: Props) {
+/** Replit-builder live window: original Pyracrypt UI bundle in an iframe. */
+export function ClutetyAppFrame({ height = 560, title = "Clutety — Protection Tool" }: Props) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const src = CLUTETY_EMBED_PATH;
@@ -34,7 +31,7 @@ export function ClutetyAppFrame({
               >
                 <Lock className="w-6 h-6" style={{ color: TEAL }} />
               </div>
-              <p className="text-sm text-white/40">Loading Pyracrypt…</p>
+              <p className="text-sm text-white/40">Loading Clutety…</p>
               <div className="flex gap-1">
                 {[0, 1, 2].map((i) => (
                   <div
@@ -67,7 +64,7 @@ export function ClutetyAppFrame({
             <Shield className="w-8 h-8" style={{ color: TEAL }} />
           </div>
           <div>
-            <p className="text-lg font-bold text-white mb-2">Pyracrypt</p>
+            <p className="text-lg font-bold text-white mb-2">Clutety</p>
             <p className="text-sm text-white/50 mb-6 max-w-sm">
               Encrypted file protection, right in your browser. No uploads. No accounts. Just
               shield.
@@ -77,7 +74,7 @@ export function ClutetyAppFrame({
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
-              Open Pyracrypt <ArrowRight className="w-4 h-4" />
+              Open Clutety <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         </div>
