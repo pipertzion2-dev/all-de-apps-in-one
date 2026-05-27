@@ -22,7 +22,7 @@ export function ClutetyEmbeddedApp() {
         {(
           [
             { id: "scanner" as const, label: "Shield Scanner", sub: "Pyracrypt lock UI" },
-            { id: "feeds" as const, label: "Feed Shield", sub: "YouTube & social" },
+            { id: "feeds" as const, label: "Feed Shield", sub: "People, topics & transcripts" },
           ] as const
         ).map((t) => (
           <button

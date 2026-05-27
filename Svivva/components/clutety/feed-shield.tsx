@@ -1,72 +1,33 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Download, Plus, Trash2, UserX } from "lucide-react";
+import { ExtensionInstallCard } from "@/components/clutety/extension-install-card";
+import { FeedShieldAnalyzer } from "@/components/clutety/feed-shield-analyzer";
+import type { BlockedPerson, FeedShieldRules, PlatformId } from "@/lib/clutety/feed-shield-types";
+import { CATEGORY_DEFS, PLATFORM_LABELS } from "@/lib/clutety/feed-shield-types";
+import {
+  exportFeedShieldRulesJson,
+  loadFeedShieldRules,
+  saveFeedShieldRules,
+} from "@/lib/clutety/feed-shield-storage";
 
-const STORAGE_KEY = "clutety-feed-shield-v1";
-
-type PlatformId = "youtube" | "tiktok" | "instagram" | "x" | "reddit";
-
-type FeedShieldRules = {
-  enabled: boolean;
-  platforms: Record<PlatformId, boolean>;
-  categories: Record<string, boolean>;
-  keywords: string[];
-};
-
-const PLATFORMS: { id: PlatformId; label: string }[] = [
-  { id: "youtube", label: "YouTube" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "instagram", label: "Instagram" },
-  { id: "x", label: "X (Twitter)" },
-  { id: "reddit", label: "Reddit" },
-];
-
-const CATEGORIES = [
-  { id: "violence", label: "Violence & gore" },
-  { id: "adult", label: "Adult content" },
-  { id: "gambling", label: "Gambling & betting" },
-  { id: "politics", label: "Political rage-bait" },
-  { id: "scams", label: "Scams & crypto pumps" },
-  { id: "sensational", label: "Sensational / clickbait" },
-];
-
-const DEFAULT_RULES: FeedShieldRules = {
-  enabled: true,
-  platforms: {
-    youtube: true,
-    tiktok: true,
-    instagram: false,
-    x: false,
-    reddit: false,
-  },
-  categories: Object.fromEntries(CATEGORIES.map((c) => [c.id, true])),
-  keywords: [],
-};
-
-function loadRules(): FeedShieldRules {
-  if (typeof window === "undefined") return DEFAULT_RULES;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_RULES;
-    return { ...DEFAULT_RULES, ...JSON.parse(raw) };
-  } catch {
-    return DEFAULT_RULES;
-  }
-}
+const TEAL = "#5BA8A0";
 
 export function FeedShield() {
-  const [rules, setRules] = useState<FeedShieldRules>(DEFAULT_RULES);
+  const [rules, setRules] = useState<FeedShieldRules>(() => loadFeedShieldRules());
   const [keywordInput, setKeywordInput] = useState("");
+  const [personName, setPersonName] = useState("");
+  const [personAlias, setPersonAlias] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setRules(loadRules());
+    setRules(loadFeedShieldRules());
   }, []);
 
   const persist = useCallback((next: FeedShieldRules) => {
     setRules(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    saveFeedShieldRules(next);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }, []);
@@ -82,7 +43,51 @@ export function FeedShield() {
     persist({ ...rules, keywords: rules.keywords.filter((k) => k !== kw) });
   }
 
-  const activePlatforms = PLATFORMS.filter((p) => rules.platforms[p.id]).map((p) => p.label);
+  function addBlockedPerson() {
+    const name = personName.trim();
+    if (!name) return;
+    const aliases = personAlias
+      .split(",")
+      .map((a) => a.trim())
+      .filter(Boolean);
+    const person: BlockedPerson = {
+      id: crypto.randomUUID(),
+      displayName: name,
+      aliases: aliases.length ? aliases : [name.split(" ").pop() ?? name].filter(Boolean),
+      blockAllMentions: true,
+      addedAt: Date.now(),
+    };
+    persist({ ...rules, blockedPeople: [...rules.blockedPeople, person] });
+    setPersonName("");
+    setPersonAlias("");
+  }
+
+  function removePerson(id: string) {
+    persist({ ...rules, blockedPeople: rules.blockedPeople.filter((p) => p.id !== id) });
+  }
+
+  function exportRules() {
+    const blob = new Blob([exportFeedShieldRulesJson(rules)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "clutety-feed-shield-rules.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const activePlatforms = (Object.keys(PLATFORM_LABELS) as PlatformId[])
+    .filter((p) => rules.platforms[p])
+    .map((p) => PLATFORM_LABELS[p]);
+
+  const sectionLabel: React.CSSProperties = {
+    fontSize: 8,
+    fontWeight: 800,
+    letterSpacing: "0.18em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.4)",
+    marginBottom: 10,
+  };
 
   return (
     <div
@@ -94,21 +99,21 @@ export function FeedShield() {
         overflow: "auto",
       }}
     >
-      <div style={{ maxWidth: 480, margin: "0 auto" }}>
+      <div style={{ maxWidth: 520, margin: "0 auto" }}>
         <p
           style={{
             fontSize: 8,
             fontWeight: 800,
             letterSpacing: "0.24em",
             textTransform: "uppercase",
-            color: "#5BA8A0",
+            color: TEAL,
             margin: "0 0 8px",
           }}
         >
           Feed Shield
         </p>
         <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>
-          Block unwanted feed content
+          Hide people & topics across social feeds
         </h3>
         <p
           style={{
@@ -118,8 +123,9 @@ export function FeedShield() {
             lineHeight: 1.6,
           }}
         >
-          Rules are saved in your browser. Pair with the Clutety browser extension (coming soon) or
-          export rules for your team.
+          Block news about specific people, celebrities, or topics on YouTube, TikTok, Instagram, X,
+          Reddit, and more. Clutety scans titles, descriptions, channel names, tags, and transcript
+          text before content reaches your feed.
         </p>
 
         <label
@@ -127,7 +133,7 @@ export function FeedShield() {
             display: "flex",
             alignItems: "center",
             gap: 10,
-            marginBottom: 20,
+            marginBottom: 16,
             padding: "12px 14px",
             borderRadius: 10,
             background: "rgba(91,168,160,0.12)",
@@ -144,65 +150,175 @@ export function FeedShield() {
         </label>
 
         <section style={{ marginBottom: 20 }}>
-          <p
-            style={{
-              fontSize: 8,
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.4)",
-              marginBottom: 10,
-            }}
-          >
-            Platforms
-          </p>
+          <p style={sectionLabel}>Social platforms</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {PLATFORMS.map((p) => (
+            {(Object.keys(PLATFORM_LABELS) as PlatformId[]).map((p) => (
               <button
-                key={p.id}
+                key={p}
                 type="button"
                 onClick={() =>
                   persist({
                     ...rules,
-                    platforms: { ...rules.platforms, [p.id]: !rules.platforms[p.id] },
+                    platforms: { ...rules.platforms, [p]: !rules.platforms[p] },
                   })
                 }
                 style={{
-                  padding: "8px 14px",
+                  padding: "8px 12px",
                   borderRadius: 20,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 700,
                   cursor: "pointer",
-                  border: rules.platforms[p.id]
-                    ? "1px solid #5BA8A0"
+                  border: rules.platforms[p]
+                    ? `1px solid ${TEAL}`
                     : "1px solid rgba(255,255,255,0.12)",
-                  background: rules.platforms[p.id]
+                  background: rules.platforms[p]
                     ? "rgba(91,168,160,0.2)"
                     : "rgba(255,255,255,0.04)",
-                  color: rules.platforms[p.id] ? "#5BA8A0" : "rgba(255,255,255,0.45)",
+                  color: rules.platforms[p] ? TEAL : "rgba(255,255,255,0.45)",
                 }}
               >
-                {p.label}
+                {PLATFORM_LABELS[p]}
               </button>
             ))}
           </div>
         </section>
 
         <section style={{ marginBottom: 20 }}>
-          <p
+          <p style={sectionLabel}>People to hide (all mentions & news)</p>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", margin: "0 0 10px" }}>
+            Add a famous person, ex, brand, or anyone you never want in your feed again.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+            <input
+              value={personName}
+              onChange={(e) => setPersonName(e.target.value)}
+              placeholder="Full name (e.g. Taylor Swift)"
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.25)",
+                color: "#fff",
+                fontSize: 12,
+              }}
+            />
+            <input
+              value={personAlias}
+              onChange={(e) => setPersonAlias(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addBlockedPerson()}
+              placeholder="Aliases, handles (comma-separated): swift, taylorswift13"
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.25)",
+                color: "#fff",
+                fontSize: 12,
+              }}
+            />
+            <button
+              type="button"
+              onClick={addBlockedPerson}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 8,
+                background: TEAL,
+                border: "none",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              <UserX className="w-4 h-4" /> Block this person everywhere
+            </button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {rules.blockedPeople.map((p) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  fontSize: 12,
+                }}
+              >
+                <div>
+                  <strong>{p.displayName}</strong>
+                  {p.aliases.length > 0 && (
+                    <span style={{ color: "rgba(255,255,255,0.4)", marginLeft: 8, fontSize: 10 }}>
+                      {p.aliases.join(", ")}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removePerson(p.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.4)",
+                  }}
+                  aria-label={`Remove ${p.displayName}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ marginBottom: 20 }}>
+          <p style={sectionLabel}>Analysis settings</p>
+          <label
             style={{
-              fontSize: 8,
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.4)",
-              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 8,
+              fontSize: 12,
+              cursor: "pointer",
             }}
           >
-            Block categories
-          </p>
+            <input
+              type="checkbox"
+              checked={rules.analyzeTranscripts}
+              onChange={(e) => persist({ ...rules, analyzeTranscripts: e.target.checked })}
+            />
+            Scan YouTube / podcast transcripts & captions
+          </label>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: 12,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={rules.scanChannelNames}
+              onChange={(e) => persist({ ...rules, scanChannelNames: e.target.checked })}
+            />
+            Scan channel & creator names
+          </label>
+        </section>
+
+        <section style={{ marginBottom: 20 }}>
+          <p style={sectionLabel}>Block categories</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {CATEGORIES.map((c) => (
+            {CATEGORY_DEFS.map((c) => (
               <label
                 key={c.id}
                 style={{
@@ -234,24 +350,13 @@ export function FeedShield() {
         </section>
 
         <section style={{ marginBottom: 20 }}>
-          <p
-            style={{
-              fontSize: 8,
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.4)",
-              marginBottom: 10,
-            }}
-          >
-            Custom keywords
-          </p>
+          <p style={sectionLabel}>Custom keywords & topics</p>
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             <input
               value={keywordInput}
               onChange={(e) => setKeywordInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addKeyword()}
-              placeholder="Add word or phrase…"
+              placeholder="Topic, phrase, or hashtag…"
               style={{
                 flex: 1,
                 padding: "10px 12px",
@@ -268,7 +373,7 @@ export function FeedShield() {
               style={{
                 padding: "10px 14px",
                 borderRadius: 8,
-                background: "#5BA8A0",
+                background: TEAL,
                 border: "none",
                 color: "#fff",
                 cursor: "pointer",
@@ -302,7 +407,6 @@ export function FeedShield() {
                     color: "rgba(255,255,255,0.5)",
                     padding: 0,
                   }}
-                  aria-label={`Remove ${kw}`}
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -310,6 +414,34 @@ export function FeedShield() {
             ))}
           </div>
         </section>
+
+        <ExtensionInstallCard />
+
+        <FeedShieldAnalyzer rules={rules} />
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={exportRules}
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.04)",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+            }}
+          >
+            <Download className="w-3.5 h-3.5" /> Export rules
+          </button>
+        </div>
 
         <div
           style={{
@@ -322,15 +454,17 @@ export function FeedShield() {
             lineHeight: 1.6,
           }}
         >
-          <strong style={{ color: "#5BA8A0" }}>Active on:</strong>{" "}
+          <strong style={{ color: TEAL }}>Active on:</strong>{" "}
           {activePlatforms.length ? activePlatforms.join(", ") : "No platforms selected"}
-          {rules.enabled && (
+          {rules.blockedPeople.length > 0 && (
+            <>
+              <br />
+              <strong style={{ color: TEAL }}>Blocking {rules.blockedPeople.length} people</strong>
+            </>
+          )}
+          {saved && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
-              {saved && (
-                <>
-                  <Check className="w-3 h-3" style={{ color: "#5BA8A0" }} /> Saved
-                </>
-              )}
+              <Check className="w-3 h-3" style={{ color: TEAL }} /> Saved
             </span>
           )}
         </div>

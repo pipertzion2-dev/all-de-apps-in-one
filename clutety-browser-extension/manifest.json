@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Clutety Feed Shield",
+  "version": "1.0.0",
+  "description": "Hide blocked people, celebrities, and topics from YouTube, TikTok, Instagram, X, Reddit, and more.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.tiktok.com/*",
+    "*://*.instagram.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.reddit.com/*",
+    "*://*.facebook.com/*",
+    "*://*.linkedin.com/*",
+    "*://*.threads.net/*",
+    "*://svivva.com/*",
+    "*://*.svivva.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://*.tiktok.com/*",
+        "*://*.instagram.com/*",
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.reddit.com/*",
+        "*://*.old.reddit.com/*",
+        "*://*.facebook.com/*",
+        "*://*.linkedin.com/*",
+        "*://*.threads.net/*"
+      ],
+      "js": ["matcher.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://svivva.com/*", "*://*.svivva.com/*"],
+      "js": ["sync-from-svivva.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Clutety Feed Shield",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "icon128.png"
+  }
+}
