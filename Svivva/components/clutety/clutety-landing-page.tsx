@@ -247,7 +247,10 @@ export default function ClutetyLandingPage() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden" style={{ height: "min(72vh, 640px)" }}>
+            <div
+              className="relative overflow-hidden overscroll-contain"
+              style={{ height: "min(72vh, 640px)", WebkitOverflowScrolling: "touch" }}
+            >
               <ClutetyEmbeddedApp />
             </div>
 

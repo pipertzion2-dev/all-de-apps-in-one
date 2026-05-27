@@ -45,7 +45,10 @@ export function ClutetyEmbeddedApp() {
           </button>
         ))}
       </div>
-      <div className="flex-1 overflow-hidden rounded-b-xl">
+      <div
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden rounded-b-xl overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {tab === "scanner" ? <LockScanner /> : <FeedShield />}
       </div>
     </div>

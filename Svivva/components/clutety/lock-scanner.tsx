@@ -61,7 +61,10 @@ export function LockScanner() {
         alignItems: "center",
         padding: "24px 16px 32px",
         position: "relative",
-        overflow: "auto",
+        overflowY: "auto",
+        overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+        overscrollBehavior: "contain",
       }}
     >
       <style>{`

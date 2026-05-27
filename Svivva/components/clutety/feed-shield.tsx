@@ -96,7 +96,10 @@ export function FeedShield() {
         background: "linear-gradient(160deg, #0a0e18 0%, #121a28 50%, #0d1119 100%)",
         color: "#e8ecf4",
         padding: "24px 20px 32px",
-        overflow: "auto",
+        overflowY: "auto",
+        overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+        overscrollBehavior: "contain",
       }}
     >
       <div style={{ maxWidth: 520, margin: "0 auto" }}>
