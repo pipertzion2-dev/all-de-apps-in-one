@@ -11181,7 +11181,7 @@ function iC() {
     [d, p] = ze.useState(null),
     [m, y] = ze.useState(!0);
   ze.useEffect(() => {
-    ((document.title = "Admin · Cybersecurity Wavy"),
+    ((document.title = "Admin · Clutety"),
       nC()
         .then(e)
         .catch((E) => p(E.message))
@@ -61005,7 +61005,7 @@ function _z() {
                 children: [
                   de.jsx("h1", {
                     className: "text-lg font-semibold u-text",
-                    children: "Cybersecurity Wavy",
+                    children: "Clutety",
                   }),
                   de.jsx("p", {
                     className: "mt-1 max-w-2xl text-sm u-muted",
