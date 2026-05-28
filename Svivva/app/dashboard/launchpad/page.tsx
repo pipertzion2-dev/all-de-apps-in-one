@@ -905,7 +905,10 @@ function MiniSourceConfig({
                   },
                   { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
                   { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-                  { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
+                  {
+                    name: "Cyber Security Tools",
+                    url: "https://svivva.com/cyber-security-mini-apps",
+                  },
                   { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
                 ];
                 const existing = entries.filter((e) => e.url.trim());
@@ -1644,7 +1647,12 @@ function StepCard({
 const SUBDOMAINS = [
   { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
   { sub: "security", target: "svivva.com", label: "Cyber security tools hub", color: "#5BA8A0" },
-  { sub: "clutety", target: "svivva.com", label: "Legacy alias → /cyber-security-mini-apps", color: "#5BA8A0" },
+  {
+    sub: "clutety",
+    target: "svivva.com",
+    label: "Legacy alias → /cyber-security-mini-apps",
+    color: "#5BA8A0",
+  },
   {
     sub: "pyracrypt",
     target: "svivva.com",

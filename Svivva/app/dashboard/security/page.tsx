@@ -39,7 +39,10 @@ export default function SecurityDashboardPage() {
           <FeedShield />
         </TabsContent>
 
-        <TabsContent value="scan" className="mt-4 rounded-xl border bg-card overflow-hidden min-h-[640px]">
+        <TabsContent
+          value="scan"
+          className="mt-4 rounded-xl border bg-card overflow-hidden min-h-[640px]"
+        >
           <LockScanner />
         </TabsContent>
       </Tabs>

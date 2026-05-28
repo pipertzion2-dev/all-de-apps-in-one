@@ -178,13 +178,15 @@ export default function ClutetyLandingPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
             <span style={{ color: TEAL }}>Clutety</span>
-            <span className="text-white/90"> — Protect Your Files</span>
+            <span className="text-white/90"> — Control Your Feeds</span>
             <br />
-            <span className="text-white/50">From Threats No One Sees Coming</span>
+            <span className="text-white/50">
+              Block what you don&apos;t want on YouTube &amp; more
+            </span>
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Detect threats before they strike — with the original Replit-grade UI, barbed-wire
-            WireBar visuals, and LED controls. Embedded in Svivva. Nothing leaves your device.
+            The original Replit-grade UI with WireBar and LED controls — now tuned for feed
+            blocking. Embedded in Svivva. Your rules stay in your browser.
           </p>
         </div>
 
