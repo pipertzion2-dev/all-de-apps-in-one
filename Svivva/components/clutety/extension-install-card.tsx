@@ -39,7 +39,7 @@ export function ExtensionInstallCard() {
         }}
       >
         Rules you set here apply on <strong>YouTube</strong>, TikTok, Instagram, X, Reddit,
-        Facebook, LinkedIn, and Threads when you install the Clutety browser extension. Visit this
+        Facebook, LinkedIn, and Threads when you install the browser extension. Visit this
         page after saving rules to sync them automatically.
       </p>
       <ol
@@ -58,7 +58,7 @@ export function ExtensionInstallCard() {
         <li>Open YouTube (or any supported site) — blocked people & topics disappear from feeds</li>
       </ol>
       <a
-        href="https://svivva.com/clutety/app"
+        href="https://svivva.com/dashboard/security"
         target="_blank"
         rel="noopener noreferrer"
         style={{

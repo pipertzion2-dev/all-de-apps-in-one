@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
-export default function PyracryptRedirect() {
-  redirect("/clutety");
+/** Legacy route — security features live in Svivva dashboard. */
+export default function PyracryptLegacyPage() {
+  redirect("/dashboard/security");
 }

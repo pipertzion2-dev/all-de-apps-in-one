@@ -71,7 +71,7 @@ export function FeedShield() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "clutety-feed-shield-rules.json";
+    a.download = "svivva-feed-shield-rules.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -127,7 +127,7 @@ export function FeedShield() {
           }}
         >
           Block news about specific people, celebrities, or topics on YouTube, TikTok, Instagram, X,
-          Reddit, and more. Clutety scans titles, descriptions, channel names, tags, and transcript
+          Reddit, and more. Svivva scans titles, descriptions, channel names, tags, and transcript
           text before content reaches your feed.
         </p>
 

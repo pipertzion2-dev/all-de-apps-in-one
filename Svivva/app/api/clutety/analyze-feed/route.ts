@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         .map((p) => `${p.displayName} (${p.aliases.join(", ")})`)
         .join("; ");
       const keywords = body.rules.keywords.join(", ");
-      const prompt = `You are Clutety Feed Shield. Decide if this social feed item should be HIDDEN from the user.
+      const prompt = `You are Svivva Feed Shield. Decide if this social feed item should be HIDDEN from the user.
 
 Blocked people (hide all news/mentions): ${people || "none"}
 Blocked keywords: ${keywords || "none"}

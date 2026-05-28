@@ -100,20 +100,20 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
     try {
       let hy = await postJson<{ hypothesis: string; confidence: number }[]>(
-        "/api/clutety/hypothesis",
+        "/api/security/hypothesis",
         { system: target },
       ).catch(() => mockHypotheses(target));
       set({ hypotheses: hy, activeStepIndex: 1 });
       await delay(400);
 
-      let co = await postJson<ReturnType<typeof mockCombine>>("/api/clutety/combine", {
+      let co = await postJson<ReturnType<typeof mockCombine>>("/api/security/combine", {
         system: target,
       }).catch(() => mockCombine(target));
       set({ combined: co, activeStepIndex: 2 });
       layoutGraph(co.new_structure);
       await delay(400);
 
-      let mu = await postJson<ReturnType<typeof mockMutate>>("/api/clutety/mutate", {
+      let mu = await postJson<ReturnType<typeof mockMutate>>("/api/security/mutate", {
         system: co.new_structure,
       }).catch(() => mockMutate());
       set({ mutated: mu, activeStepIndex: 3 });
@@ -121,13 +121,13 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
       set({ visualPhase: "ATTACK" });
       const primary = hy[0] || { hypothesis: "Feed manipulation surface", confidence: 0.7 };
-      let sim = await postJson<ReturnType<typeof mockSimulate>>("/api/clutety/simulate", {
+      let sim = await postJson<ReturnType<typeof mockSimulate>>("/api/security/simulate", {
         hypothesis: primary,
       }).catch(() => mockSimulate(primary.hypothesis));
       set({ simulated: sim, activeStepIndex: 4 });
       await delay(400);
 
-      let rem = await postJson<ReturnType<typeof mockRemedy>>("/api/clutety/remedy", {
+      let rem = await postJson<ReturnType<typeof mockRemedy>>("/api/security/remedy", {
         attack: {
           hypothesis: primary.hypothesis,
           attack_steps: sim.attack_steps,

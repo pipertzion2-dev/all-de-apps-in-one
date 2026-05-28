@@ -1,5 +1,6 @@
-import ClutetyLandingPage from "@/components/clutety/clutety-landing-page";
+import { redirect } from "next/navigation";
 
-export default function ClutetyPage() {
-  return <ClutetyLandingPage />;
+/** Legacy route — security features live in Svivva dashboard. */
+export default function ClutetyLegacyPage() {
+  redirect("/dashboard/security");
 }

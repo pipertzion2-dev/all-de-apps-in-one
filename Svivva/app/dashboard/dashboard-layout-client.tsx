@@ -91,6 +91,12 @@ const digitalMenuGroups: MenuGroup[] = [
         icon: FlaskConical,
         proOnly: true,
       },
+      {
+        title: "Security",
+        desc: "Feeds & threats",
+        href: "/dashboard/security",
+        icon: Lock,
+      },
     ],
   },
   {
@@ -177,6 +183,12 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Innovation engine",
         href: "/dashboard/hypothesis-hardware",
         icon: FlaskConical,
+      },
+      {
+        title: "Security",
+        desc: "Feeds & threats",
+        href: "/dashboard/security",
+        icon: Lock,
       },
     ],
   },

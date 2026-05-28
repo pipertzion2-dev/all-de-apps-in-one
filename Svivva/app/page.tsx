@@ -41,8 +41,6 @@ import {
   TrendingUp,
   Lock,
 } from "lucide-react";
-import { PyracryptBobwireSection } from "@/components/pyracrypt-bobwire-section";
-
 const features = [
   {
     icon: Shield,
@@ -1795,9 +1793,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Pyracrypt Bobwire Section */}
-        <PyracryptBobwireSection />
-
         <section className="py-24 relative bg-gradient-to-b from-transparent to-background/50">
           <div className="max-w-4xl mx-auto px-6 text-center">
             <div className="rounded-3xl p-6 sm:p-8 md:p-12 space-y-6 sm:space-y-8 bg-card/95 backdrop-blur-xl border border-border/50">
@@ -1909,8 +1904,11 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/clutety" className="hover:text-foreground transition-colors">
-                      Clutety
+                    <Link
+                      href="/dashboard/security"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Security
                     </Link>
                   </li>
                 </ul>

@@ -37,7 +37,7 @@ export function FeedShieldAnalyzer({ rules }: Props) {
     if (!url) return;
     setFetchingYoutube(true);
     try {
-      const res = await fetch("/api/clutety/fetch-youtube", {
+      const res = await fetch("/api/security/fetch-youtube", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, rules, includeAnalysis: true }),
@@ -94,7 +94,7 @@ export function FeedShieldAnalyzer({ rules }: Props) {
         return;
       }
 
-      const res = await fetch("/api/clutety/analyze-feed", {
+      const res = await fetch("/api/security/analyze-feed", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ item, rules, deepAnalyze: true }),
@@ -138,7 +138,7 @@ export function FeedShieldAnalyzer({ rules }: Props) {
         style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginBottom: 12, lineHeight: 1.5 }}
       >
         Paste a YouTube URL to pull title, description, channel, and auto-captions — or enter fields
-        manually. Clutety checks blocked people (e.g. celebrities you never want news about) and
+        manually. Feed Shield checks blocked people (e.g. celebrities you never want news about) and
         topics before content hits your feed.
       </p>
 

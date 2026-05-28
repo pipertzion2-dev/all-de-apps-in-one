@@ -4,18 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CLUTETY_TEAL } from "@/lib/clutety/config";
+const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v2";
 
-const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v1";
+/** External Clutety product URL (logo-only promo; not part of Svivva UI). */
+function getClutetyExternalUrl(): string {
+  if (typeof window !== "undefined") {
+    const env = process.env.NEXT_PUBLIC_CLUTETY_EXTERNAL_URL?.trim();
+    if (env) return env.replace(/\/$/, "");
+  }
+  return (
+    process.env.NEXT_PUBLIC_CLUTETY_EXTERNAL_URL?.trim()?.replace(/\/$/, "") ||
+    "https://clutety.svivva.com"
+  );
+}
 
-type Props = {
-  href?: string;
-};
-
-export function ClutetyCornerAd({ href = "/clutety?skip" }: Props) {
+export function ClutetyCornerAd() {
   const [dismissed, setDismissed] = useState(true);
+  const href = getClutetyExternalUrl();
 
   useEffect(() => {
     try {
@@ -29,97 +34,42 @@ export function ClutetyCornerAd({ href = "/clutety?skip" }: Props) {
     if (dismissed) return false;
     if (typeof window === "undefined") return false;
     const p = window.location.pathname || "";
-    // Don't advertise on the Clutety pages themselves.
-    if (p.startsWith("/clutety")) return false;
+    if (p.startsWith("/dashboard/security")) return false;
     return true;
   }, [dismissed]);
 
   if (!canShow) return null;
 
   return (
-    <div className="fixed right-4 bottom-4 z-[60] w-[min(320px,calc(100vw-2rem))]">
-      <div
-        className="rounded-2xl border bg-background/35 backdrop-blur-xl shadow-lg overflow-hidden"
-        style={{
-          borderColor: "rgba(255,255,255,0.10)",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
+    <div className="fixed right-4 bottom-4 z-[60] flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, "1");
+          } catch {}
+          setDismissed(true);
         }}
+        className="text-[10px] text-foreground/40 hover:text-foreground/70 px-1"
+        aria-label="Dismiss"
       >
-        <div className="p-3">
-          <div className="flex items-start gap-3">
-            <div
-              className="shrink-0 rounded-xl border p-2"
-              style={{
-                borderColor: "rgba(255,255,255,0.10)",
-                background: "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.10))",
-              }}
-            >
-              <Image src="/clutety-logo.png" alt="Clutety" width={28} height={28} />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-semibold text-foreground/90 truncate">
-                    Clutety
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] px-2 py-[2px]"
-                    style={{ borderColor: `${CLUTETY_TEAL}55`, color: `${CLUTETY_TEAL}` }}
-                  >
-                    Feed Shield
-                  </Badge>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try {
-                      localStorage.setItem(STORAGE_KEY, "1");
-                    } catch {}
-                    setDismissed(true);
-                  }}
-                  className="shrink-0 rounded-md px-2 py-1 text-xs text-foreground/55 hover:text-foreground/80 transition"
-                  aria-label="Dismiss"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <p className="mt-1 text-xs leading-relaxed text-foreground/60">
-                Transparent, local-only feed blocking — tuned for YouTube and beyond.
-              </p>
-
-              <div className="mt-3 flex items-center justify-between gap-2">
-                <Button asChild size="sm" className="h-8 px-3 text-xs">
-                  <Link href={href}>Open</Link>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 px-2 text-xs text-foreground/60 hover:text-foreground/80"
-                  onClick={() => {
-                    try {
-                      localStorage.setItem(STORAGE_KEY, "1");
-                    } catch {}
-                    setDismissed(true);
-                  }}
-                >
-                  Not now
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="h-[2px]"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${CLUTETY_TEAL}AA, transparent)`,
-          }}
+        ✕
+      </button>
+      <Link
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group block rounded-2xl p-2 border border-white/10 bg-background/25 backdrop-blur-md shadow-lg transition hover:bg-background/40 hover:border-white/20"
+        aria-label="Clutety"
+      >
+        <Image
+          src="/clutety-logo.png"
+          alt="Clutety"
+          width={40}
+          height={40}
+          className="opacity-75 group-hover:opacity-100 transition-opacity"
         />
-      </div>
+      </Link>
     </div>
   );
 }
-
