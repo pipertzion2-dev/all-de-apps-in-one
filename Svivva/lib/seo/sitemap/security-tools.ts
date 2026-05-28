@@ -36,7 +36,6 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
     const pages = await db
       .select({
         slug: seoLandingPages.slug,
-        updatedAt: seoLandingPages.updatedAt,
         createdAt: seoLandingPages.createdAt,
         category: seoLandingPages.category,
         keyword: seoLandingPages.keyword,
@@ -57,7 +56,7 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
 
       toolPages.push({
         url: `${base}/${page.slug}`,
-        lastModified: page.updatedAt || page.createdAt || now,
+        lastModified: page.createdAt || now,
         changeFrequency: "weekly",
         priority: 0.75,
       });
