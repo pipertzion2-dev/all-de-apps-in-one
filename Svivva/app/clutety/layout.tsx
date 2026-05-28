@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Clutety",
   description:
-    "Clutety — detect threats before they strike. Original Replit UI with WireBar, embedded in Svivva.",
+    "Clutety — control what appears on your feeds. Original Replit UI with WireBar, embedded in Svivva.",
   openGraph: {
     title: "Clutety — embedded in Svivva",
     description:
