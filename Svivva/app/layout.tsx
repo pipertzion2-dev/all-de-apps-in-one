@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
+import { ClutetyCornerAd } from "@/components/clutety/clutety-corner-ad";
 import { PlatformProvider } from "@/lib/platform-context";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
@@ -263,6 +264,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PlatformProvider>
             <Providers>{children}</Providers>
             <Toaster />
+            <ClutetyCornerAd />
           </PlatformProvider>
         </ThemeProvider>
       </body>
