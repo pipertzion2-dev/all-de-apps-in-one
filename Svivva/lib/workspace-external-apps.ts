@@ -8,13 +8,22 @@ function trimUrl(u: string): string {
   return u.trim().replace(/\/$/, "");
 }
 
-/** Main embedded Clutety experience (historically Pyracrypt / Clutter). */
+/** Public security tools hub (indexed; drives organic traffic). */
+export function getSecurityToolsHubUrl(): string {
+  const env =
+    process.env.NEXT_PUBLIC_SECURITY_TOOLS_URL?.trim() ||
+    process.env.NEXT_PUBLIC_CYBER_SECURITY_MINI_APPS_URL?.trim();
+  if (env) return trimUrl(env);
+  return `${DEFAULT_SITE}/cyber-security-mini-apps`;
+}
+
+/** @deprecated Legacy Clutety path — redirects to security hub */
 export function getClutetyMainAppUrl(): string {
   const env =
     process.env.NEXT_PUBLIC_CLUTETY_MAIN_URL?.trim() ||
     process.env.NEXT_PUBLIC_PYRACRYPT_MAIN_URL?.trim();
   if (env) return trimUrl(env);
-  return `${DEFAULT_SITE}/clutety`;
+  return getSecurityToolsHubUrl();
 }
 
 /** @deprecated Use getClutetyMainAppUrl */
@@ -26,7 +35,8 @@ export function getPyracryptMainAppUrl(): string {
 export function getClutetyMiniAppsBaseUrl(): string {
   const env =
     process.env.NEXT_PUBLIC_CLUTETY_MINI_APPS_URL?.trim() ||
-    process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL?.trim();
+    process.env.NEXT_PUBLIC_PYRACRYPT_MINI_APPS_URL?.trim() ||
+    process.env.NEXT_PUBLIC_AI_TOOLS_HUB_URL?.trim();
   if (env) return trimUrl(env);
   return `${DEFAULT_SITE}/ai-tools-hub`;
 }
@@ -45,9 +55,7 @@ export function getAiToolsHubUrl(): string {
 
 /** Cyber Security Mini Apps - security tools and utilities. */
 export function getCyberSecurityMiniAppsUrl(): string {
-  const env = process.env.NEXT_PUBLIC_CYBER_SECURITY_MINI_APPS_URL?.trim();
-  if (env) return trimUrl(env);
-  return `${DEFAULT_SITE}/cyber-security-mini-apps`;
+  return getSecurityToolsHubUrl();
 }
 
 /** Svivva SEO Pack - SEO tools and resources. */
@@ -60,6 +68,11 @@ export function getSvivvaSeoPackUrl(): string {
 /** Marketing Hub - campaigns, leads, referrals, UTM, content amplification, A/B tests. */
 export function getMarketingHubUrl(): string {
   return `${DEFAULT_SITE}/marketing-hub`;
+}
+
+/** Logged-in Security Center (not for sitemap / organic). */
+export function getSecurityCenterUrl(): string {
+  return `${DEFAULT_SITE}/dashboard/security`;
 }
 
 /** Get all workspace projects for Orbit autopilot and marketing. */
@@ -77,22 +90,16 @@ export function getAllWorkspaceProjects(): Array<{
       description: "AI-powered app builder — the core platform",
     },
     {
-      name: "Clutety",
-      url: getClutetyMainAppUrl(),
-      category: "security",
-      description: "Feed filtering & protection — embedded in Svivva",
+      name: "Cyber Security Mini Apps",
+      url: getCyberSecurityMiniAppsUrl(),
+      category: "security-tools",
+      description: "Free security scanners, feed tools & hardening utilities on Svivva",
     },
     {
       name: "AI Tools Hub",
       url: getAiToolsHubUrl(),
       category: "ai-tools",
       description: "Collection of AI generators and utilities",
-    },
-    {
-      name: "Cyber Security Mini Apps",
-      url: getCyberSecurityMiniAppsUrl(),
-      category: "security-tools",
-      description: "Security scanners, analyzers & hardening tools",
     },
     {
       name: "Svivva SEO Pack",
@@ -105,6 +112,12 @@ export function getAllWorkspaceProjects(): Array<{
       url: getMarketingHubUrl(),
       category: "marketing",
       description: "Campaigns, leads, referrals, UTM tracking & A/B tests",
+    },
+    {
+      name: "Security Center",
+      url: getSecurityCenterUrl(),
+      category: "security-app",
+      description: "Feed Shield & threat scanner for logged-in users",
     },
   ];
 }
@@ -120,11 +133,11 @@ export function hostnameFromHttpUrl(url: string): string | null {
 /** Launchpad preset card + Launch Everything fallback when no tools URL is set. */
 export function getClutetyOrbitPreset() {
   return {
-    name: "Clutety",
-    sourceUrl: getClutetyMainAppUrl(),
+    name: "Security Tools",
+    sourceUrl: getCyberSecurityMiniAppsUrl(),
     miniAppsUrl: getClutetyMiniAppsBaseUrl(),
     description:
-      "Defaults use svivva.com/clutety; override with NEXT_PUBLIC_CLUTETY_* or NEXT_PUBLIC_PYRACRYPT_* in .env.",
+      "Organic funnel: /cyber-security-mini-apps + /ai-tools-hub. Logged-in features at /dashboard/security.",
   };
 }
 
@@ -140,27 +153,24 @@ export function getDefaultSubdomainCnameTargets(): {
   label: string;
 }[] {
   const miniHost = hostnameFromHttpUrl(getClutetyMiniAppsBaseUrl());
-  const mainHost = hostnameFromHttpUrl(getClutetyMainAppUrl());
-  if (miniHost && mainHost) {
+  const securityHost = hostnameFromHttpUrl(getCyberSecurityMiniAppsUrl());
+  if (miniHost && securityHost) {
     return [
-      { sub: "apps", target: miniHost, label: "Mini apps hub" },
-      { sub: "security", target: mainHost, label: "Clutety main" },
-      { sub: "clutety", target: mainHost, label: "Clutety alias" },
-      { sub: "pyracrypt", target: mainHost, label: "Pyracrypt legacy alias" },
+      { sub: "apps", target: miniHost, label: "AI & mini apps hub" },
+      { sub: "security", target: securityHost, label: "Cyber security tools" },
+      { sub: "tools", target: miniHost, label: "Tools alias" },
     ];
   }
   return [
     {
       sub: "apps",
       target: "svivva.com",
-      label: "Mini apps (set NEXT_PUBLIC_CLUTETY_MINI_APPS_URL)",
+      label: "Mini apps (set NEXT_PUBLIC_AI_TOOLS_HUB_URL)",
     },
     {
       sub: "security",
       target: "svivva.com",
-      label: "Main app (set NEXT_PUBLIC_CLUTETY_MAIN_URL)",
+      label: "Security tools (cyber-security-mini-apps)",
     },
-    { sub: "clutety", target: "svivva.com", label: "Clutety alias" },
-    { sub: "pyracrypt", target: "svivva.com", label: "Pyracrypt legacy alias" },
   ];
 }

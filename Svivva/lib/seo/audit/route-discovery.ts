@@ -25,7 +25,17 @@ const NOINDEX_PREFIXES = [
   "/api-card",
 ];
 
-const DISALLOWED_IN_ROBOTS = ["/dashboard", "/api", "/_next", "/gate", "/play"];
+const DISALLOWED_IN_ROBOTS = [
+  "/dashboard",
+  "/api",
+  "/_next",
+  "/gate",
+  "/play",
+  "/clutety",
+  "/pyracrypt",
+  "/clutter",
+  "/clutety-shell",
+];
 
 function segmentToPath(parts: string[]): string {
   const filtered = parts.filter((p) => !p.startsWith("(") && !p.startsWith("@"));

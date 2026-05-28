@@ -7,7 +7,7 @@ import { buildAnalyticsMap } from "@/lib/seo/analytics-events";
 import { buildPerformanceReport } from "@/lib/seo/performance/budget";
 import { runSeoMonitor } from "@/lib/seo/monitoring/detector";
 import { getSitemapEntries } from "@/lib/seo/sitemap/registry";
-import { getSiteUrl, getPyracryptSitemapUrl } from "@/lib/site-url";
+import { getSecuritySitemapUrl, getSiteUrl } from "@/lib/site-url";
 import { SEO_INDEX_PHASES } from "./seo-index-phases";
 
 export type SeoIndexRunResult = {
@@ -103,18 +103,20 @@ export async function runSeoIndexStep(stepId: string): Promise<SeoIndexRunResult
       const entries = await getSitemapEntries();
       const robots = await probeUrl("/robots.txt");
       const sitemap = await probeUrl("/sitemap.xml");
-      const pyra = await probeUrl("/pyracrypt-sitemap.xml");
-      const ok = robots === 200 && sitemap === 200 && pyra === 200;
+      const securityMap = await probeUrl("/security-sitemap.xml");
+      const cyberHub = await probeUrl("/cyber-security-mini-apps");
+      const ok = robots === 200 && sitemap === 200 && securityMap === 200 && cyberHub === 200;
       return {
         ok,
         summary: [
           `✓ Phase 2 — ${phase.title}`,
           `Sitemap registry: ${entries.length} URLs (lastmod/priority/changefreq)`,
-          `Live probes: robots=${robots} sitemap=${sitemap} pyracrypt-sitemap=${pyra}`,
+          `Live probes: robots=${robots} sitemap=${sitemap} security-sitemap=${securityMap} cyber-hub=${cyberHub}`,
           `Canonical base: ${base}`,
           ok ? "All indexing surfaces return 200" : "Fix non-200 URLs before submitting to GSC",
+          "Legacy /clutety & /pyracrypt → 308 to /cyber-security-mini-apps",
         ].join("\n"),
-        details: { urlCount: entries.length, robots, sitemap, pyra },
+        details: { urlCount: entries.length, robots, sitemap, securityMap, cyberHub },
       };
     }
     case 3: {
@@ -227,7 +229,7 @@ export async function runSeoIndexStep(stepId: string): Promise<SeoIndexRunResult
                 .map((a) => `• [${a.severity}] ${a.message}`)
                 .join("\n")
             : "No blocking issues — monitor cron runs daily",
-          `Pyracrypt sitemap: ${getPyracryptSitemapUrl()}`,
+          `Security sitemap: ${getSecuritySitemapUrl()}`,
         ].join("\n"),
         details: { alerts: monitor.alerts.length, critical },
       };

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function ClutterRedirect() {
-  redirect("/clutety");
+export default function ClutterLegacyPage() {
+  redirect("/cyber-security-mini-apps");
 }

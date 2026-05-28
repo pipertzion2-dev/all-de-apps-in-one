@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { growthTasks } from "@/lib/schema";
 import { desc } from "drizzle-orm";
 import { getInternalAppOrigin } from "@/lib/internal-app-origin";
-import { getSitemapUrl, getPyracryptSitemapUrl } from "@/lib/site-url";
+import { getSecuritySitemapUrl, getSitemapUrl } from "@/lib/site-url";
 import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const appOrigin = getInternalAppOrigin();
 
   const mainSitemap = getSitemapUrl();
-  const pyracryptSitemap = getPyracryptSitemapUrl();
+  const securitySitemap = getSecuritySitemapUrl();
 
   // 1. Ping Svivva sitemap (Bing only — Google retired ?ping= in June 2023.
   //    The real GSC submission happens via the scheduler's submit_sitemap action,
@@ -48,21 +48,25 @@ export async function POST(req: NextRequest) {
     results.push({ task: "Svivva sitemap ping", status: "error", detail: e.message });
   }
 
-  // 2. Ping Pyracrypt sitemap (Bing only)
+  // 2. Ping security / cyber mini-apps sitemap (Bing only)
   try {
     const b = await fetch(
-      `https://www.bing.com/ping?sitemap=${encodeURIComponent(pyracryptSitemap)}`,
+      `https://www.bing.com/ping?sitemap=${encodeURIComponent(securitySitemap)}`,
       { signal: AbortSignal.timeout(8000) },
     );
     await db.insert(growthTasks).values({
       taskType: "sitemap_ping",
-      product: "pyracrypt",
+      product: "mini_apps",
       status: "completed",
       details: { bing: b.status },
     });
-    results.push({ task: "Pyracrypt sitemap ping", status: "ok", detail: `Bing ${b.status}` });
+    results.push({
+      task: "Security tools sitemap ping",
+      status: "ok",
+      detail: `Bing ${b.status}`,
+    });
   } catch (e: any) {
-    results.push({ task: "Pyracrypt sitemap ping", status: "error", detail: e.message });
+    results.push({ task: "Security tools sitemap ping", status: "error", detail: e.message });
   }
 
   // 3. IndexNow submission for Svivva

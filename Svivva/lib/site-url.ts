@@ -27,6 +27,11 @@ export function getSitemapUrl(): string {
   return `${getSiteUrl()}/sitemap.xml`;
 }
 
+export function getSecuritySitemapUrl(): string {
+  return `${getSiteUrl()}/security-sitemap.xml`;
+}
+
+/** @deprecated Use {@link getSecuritySitemapUrl} — kept for GSC pings that still reference this path. */
 export function getPyracryptSitemapUrl(): string {
   return `${getSiteUrl()}/pyracrypt-sitemap.xml`;
 }

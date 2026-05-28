@@ -1905,10 +1905,10 @@ export default function LandingPage() {
                   </li>
                   <li>
                     <Link
-                      href="/dashboard/security"
+                      href="/cyber-security-mini-apps"
                       className="hover:text-foreground transition-colors"
                     >
-                      Security
+                      Security Tools
                     </Link>
                   </li>
                 </ul>

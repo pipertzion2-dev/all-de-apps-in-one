@@ -38,10 +38,10 @@ export const SEO_INDEX_PHASES: SeoIndexPhaseDef[] = [
     subtitle: "robots.txt · sitemaps · canonical · OG · schema",
     objectives: [
       "robots.txt allow/disallow crawl traps and APIs",
-      "sitemap.xml + pyracrypt-sitemap.xml with lastmod/priority",
+      "sitemap.xml + security-sitemap.xml with lastmod/priority",
       "rel=canonical, Open Graph, Twitter, structured data",
     ],
-    deliverables: ["/robots.txt", "/sitemap.xml", "/pyracrypt-sitemap.xml", "Schema.org JSON-LD"],
+    deliverables: ["/robots.txt", "/sitemap.xml", "/security-sitemap.xml", "Schema.org JSON-LD"],
   },
   {
     id: "seo-index-3",

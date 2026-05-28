@@ -1,1 +1,1 @@
-export { POST } from "../../clutety/ALL DE APPS IN fetch-youtube/route";
+export { POST } from "../../clutety/fetch-youtube/route";

@@ -23,6 +23,7 @@ const RESERVED_SLUGS = new Set([
   "robots.txt",
   "favicon.ico",
   "pyracrypt-sitemap.xml",
+  "security-sitemap.xml",
 ]);
 
 type LandingPage = typeof seoLandingPages.$inferSelect;

@@ -263,7 +263,7 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       ],
       manual: [
         `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
-        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /clutety, /blog, /tools, and each LP)",
+        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /cyber-security-mini-apps, /blog, /tools, and each LP)",
       ],
     },
     {
@@ -420,7 +420,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       icon: Activity,
       estimate: "~5s",
       description:
-        "Auto-creates apps.svivva.com, security.svivva.com, clutety.svivva.com via GoDaddy API",
+        "Auto-creates apps.svivva.com, security.svivva.com (→ /cyber-security-mini-apps) via GoDaddy API",
       auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
       manual: [
         "Wait 24–48 hours for DNS propagation before the subdomains resolve",
@@ -862,7 +862,7 @@ function MiniSourceConfig({
               { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
               { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
               { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-              { name: "Clutety", url: "https://svivva.com/clutety" },
+              { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
               { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
             ]
               .filter(
@@ -905,7 +905,7 @@ function MiniSourceConfig({
                   },
                   { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
                   { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-                  { name: "Clutety", url: "https://svivva.com/clutety" },
+                  { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
                   { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
                 ];
                 const existing = entries.filter((e) => e.url.trim());
@@ -1643,11 +1643,11 @@ function StepCard({
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
   { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
-  { sub: "security", target: "security.svivva.com", label: "Clutety main app", color: "#5BA8A0" },
-  { sub: "clutety", target: "clutety.svivva.com", label: "Clutety alias", color: "#5BA8A0" },
+  { sub: "security", target: "svivva.com", label: "Cyber security tools hub", color: "#5BA8A0" },
+  { sub: "clutety", target: "svivva.com", label: "Legacy alias → /cyber-security-mini-apps", color: "#5BA8A0" },
   {
     sub: "pyracrypt",
-    target: "clutety.svivva.com",
+    target: "svivva.com",
     label: "Pyracrypt legacy alias",
     color: "#5BA8A0",
   },
@@ -4563,7 +4563,7 @@ export default function LaunchpadPage() {
             {[
               { label: "Marketing Hub", href: "/marketing-hub" },
               { label: "Marketing AI", href: "/dashboard/marketing" },
-              { label: "Clutety", href: "/clutety" },
+              { label: "Cyber Security", href: "/cyber-security-mini-apps" },
               { label: "AI Tools Hub", href: "/ai-tools-hub" },
               { label: "Cyber Security", href: "/cyber-security-mini-apps" },
               { label: "SEO Pack", href: "/seo-pack" },

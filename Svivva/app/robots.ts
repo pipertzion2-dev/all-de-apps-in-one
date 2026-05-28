@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl, getPyracryptSitemapUrl, getSitemapUrl } from "@/lib/site-url";
+import { getSecuritySitemapUrl, getSitemapUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = getSiteUrl().replace(/\/$/, "");
@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           "/blog",
           "/blog/*",
           "/tools",
+          "/tools/*",
           "/tools/category/*",
           "/lp/*",
           "/about",
@@ -23,7 +24,6 @@ export default function robots(): MetadataRoute.Robots {
           "/orbit",
           "/seeds",
           "/referrals",
-          "/clutety",
           "/ai-tools-hub",
           "/cyber-security-mini-apps",
           "/seo-pack",
@@ -31,6 +31,14 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/dashboard",
           "/dashboard/*",
+          "/clutety",
+          "/clutety/*",
+          "/pyracrypt",
+          "/pyracrypt/*",
+          "/clutter",
+          "/clutter/*",
+          "/clutety-shell",
+          "/clutety-shell/*",
           "/api",
           "/api/*",
           "/_next",
@@ -45,11 +53,10 @@ export default function robots(): MetadataRoute.Robots {
           "/badge",
           "/api-card",
           "/api-card/*",
-          "/*?*",
         ],
       },
     ],
-    sitemap: [getSitemapUrl(), getPyracryptSitemapUrl()],
+    sitemap: [getSitemapUrl(), getSecuritySitemapUrl()],
     host: baseUrl,
   };
 }

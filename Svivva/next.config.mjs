@@ -37,6 +37,30 @@ const nextConfig = {
         source: "/pyracrypt-sitemap.xml",
         headers: [{ key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" }],
       },
+      {
+        source: "/security-sitemap.xml",
+        headers: [{ key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" }],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      { source: "/clutety", destination: "/cyber-security-mini-apps", permanent: true },
+      { source: "/clutety/:path*", destination: "/cyber-security-mini-apps", permanent: true },
+      { source: "/pyracrypt", destination: "/cyber-security-mini-apps", permanent: true },
+      { source: "/pyracrypt/:path*", destination: "/cyber-security-mini-apps", permanent: true },
+      { source: "/clutter", destination: "/cyber-security-mini-apps", permanent: true },
+      { source: "/clutter/:path*", destination: "/cyber-security-mini-apps", permanent: true },
+      {
+        source: "/clutety-shell",
+        destination: "/cyber-security-mini-apps",
+        permanent: true,
+      },
+      {
+        source: "/clutety-shell/:path*",
+        destination: "/cyber-security-mini-apps",
+        permanent: true,
+      },
     ];
   },
 };

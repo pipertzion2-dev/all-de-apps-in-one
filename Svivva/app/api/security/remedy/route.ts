@@ -1,1 +1,1 @@
-export { POST } from "../../clutety/ALL DE APPS IN remedy/route";
+export { POST } from "../../clutety/remedy/route";

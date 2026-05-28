@@ -3,7 +3,7 @@ import { sitemapUrlsetXml } from "@/lib/seo/sitemap/xml";
 
 export const dynamic = "force-dynamic";
 
-/** Legacy URL — same entries as security-sitemap.xml for GSC continuity. */
+/** Security & cyber mini-app URLs — indexable public funnel pages on Svivva. */
 export async function GET() {
   const entries = await getSecuritySitemapEntries();
   const xml = sitemapUrlsetXml(entries);
