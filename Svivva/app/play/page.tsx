@@ -296,7 +296,8 @@ export default function SvivvaPlayPage() {
   const [audioName, setAudioName] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const effectiveAnalysis = mode === "composition" ? (analysis ?? FALLBACK_ANALYSIS) : analysis;
+  const effectiveAnalysis = analysis;
+  const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState("");
@@ -445,10 +446,26 @@ export default function SvivvaPlayPage() {
 
       setIsAnalyzing(true);
       try {
+        let clientDetection: { bpm: number; key: string; keyConfidence: number } | null = null;
+        try {
+          const { analyzeAudioFile } = await import("@/lib/svivva-play/client-audio-analysis");
+          clientDetection = await analyzeAudioFile(file);
+          if (clientDetection) {
+            console.log("✅ Client key/tempo:", clientDetection);
+          }
+        } catch (clientErr) {
+          console.warn("Client key/tempo detection failed:", clientErr);
+        }
+
         const formData = new FormData();
         formData.append("audio", file);
         formData.append("mode", mode);
         if (userPrompt) formData.append("userHint", userPrompt);
+        if (clientDetection) {
+          formData.append("detectedBpm", String(clientDetection.bpm));
+          formData.append("detectedKey", clientDetection.key);
+          formData.append("detectedKeyConfidence", String(clientDetection.keyConfidence));
+        }
         console.log("🎵 Uploading audio:", file.name, file.size, "bytes");
         const res = await fetch("/api/svivva-play/analyze", { method: "POST", body: formData });
         const data = await res.json();
@@ -460,8 +477,17 @@ export default function SvivvaPlayPage() {
           setErrorMsg(data.error);
           console.error("Analysis error:", data.error);
         } else if (data.analysis) {
-          console.log("✅ Analysis success, key:", data.analysis.key, "bpm:", data.analysis.bpm);
-          setAnalysis(data.analysis);
+          const merged = { ...data.analysis };
+          if (clientDetection) {
+            merged.bpm = clientDetection.bpm;
+            merged.key = clientDetection.key;
+            merged.keyConfidence = Math.max(
+              clientDetection.keyConfidence,
+              merged.keyConfidence ?? 0,
+            );
+          }
+          console.log("✅ Analysis success, key:", merged.key, "bpm:", merged.bpm);
+          setAnalysis(merged);
           setSessionId(data.sessionId);
         } else {
           console.error("Unexpected response structure:", data);
@@ -1046,12 +1072,12 @@ export default function SvivvaPlayPage() {
   }, [mode, stopPositionTracking]);
 
   useEffect(() => {
-    const keySrc = effectiveAnalysis;
+    const keySrc = analysis ?? compositionFallback;
     if (!keySrc) return;
     const keyStr = manualKey ?? keySrc.key;
     const rootMatch = keyStr.match(/^([A-G][b#]?)/);
     if (rootMatch) setChordRoot(rootMatch[1]);
-  }, [effectiveAnalysis, manualKey]);
+  }, [analysis, compositionFallback, manualKey]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
     setIsGenerating(true);
@@ -1758,6 +1784,9 @@ export default function SvivvaPlayPage() {
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">Analyzing Audio</h3>
                       <p className="text-sm text-gray-400">
                         Detecting key, tempo, chords, sections, and timbral characteristics...
+                        <span className="block text-[11px] text-gray-500 mt-1">
+                          Key and tempo are analyzed in your browser first for accuracy.
+                        </span>
                       </p>
                     </div>
                   )}

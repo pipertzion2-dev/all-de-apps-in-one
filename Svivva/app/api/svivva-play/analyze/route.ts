@@ -27,6 +27,62 @@ function convertAudioToWav(inputPath: string, outputPath: string): Promise<void>
   });
 }
 
+function parseClientDetection(
+  formData: FormData,
+): { bpm: number; key: string; keyConfidence: number } | undefined {
+  const bpmRaw = formData.get("detectedBpm");
+  const keyRaw = formData.get("detectedKey");
+  const confRaw = formData.get("detectedKeyConfidence");
+  if (bpmRaw == null || keyRaw == null) return undefined;
+
+  const bpm = Number(bpmRaw);
+  const key = String(keyRaw).trim();
+  const keyConfidence = confRaw != null ? Number(confRaw) : 50;
+
+  if (!Number.isFinite(bpm) || bpm < 30 || bpm > 300 || !key) return undefined;
+
+  return {
+    bpm: Math.round(bpm),
+    key,
+    keyConfidence: Number.isFinite(keyConfidence)
+      ? Math.min(99, Math.max(0, Math.round(keyConfidence)))
+      : 50,
+  };
+}
+
+function mergeDetections(
+  client?: { bpm: number; key: string; keyConfidence: number },
+  server?: { bpm: number; key: string; keyConfidence: number },
+): { bpm: number; key: string; keyConfidence: number } | undefined {
+  if (!client && !server) return undefined;
+  const bpmOk = (bpm: number) => bpm >= 40 && bpm <= 220;
+  const keyOk = (d: { key: string; keyConfidence: number }) =>
+    Boolean(d.key) && d.keyConfidence >= 25;
+
+  const bpm =
+    client && bpmOk(client.bpm)
+      ? client.bpm
+      : server && bpmOk(server.bpm)
+        ? server.bpm
+        : (client?.bpm ?? server?.bpm ?? 120);
+
+  const key =
+    client && keyOk(client)
+      ? client.key
+      : server && keyOk(server)
+        ? server.key
+        : (client?.key ?? server?.key ?? "C major");
+
+  const keyConfidence = Math.max(
+    client && keyOk(client) ? client.keyConfidence : 0,
+    server && keyOk(server) ? server.keyConfidence : 0,
+    client?.keyConfidence ?? 0,
+    server?.keyConfidence ?? 0,
+  );
+
+  return { bpm, key, keyConfidence: keyConfidence || 50 };
+}
+
 export async function POST(request: NextRequest) {
   let tempFilePath: string | null = null;
   try {
@@ -40,6 +96,7 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get("audio") as File | null;
     const mode = (formData.get("mode") as string) || "composition";
     const userHint = (formData.get("userHint") as string) || "";
+    const clientDetection = parseClientDetection(formData);
     if (!audioFile) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
@@ -65,7 +122,13 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     await writeFile(tempFilePath, Buffer.from(arrayBuffer));
 
-    let realAnalysis: { bpm: number; key: string; keyConfidence: number } | undefined;
+    let realAnalysis: { bpm: number; key: string; keyConfidence: number } | undefined =
+      clientDetection;
+
+    if (clientDetection) {
+      console.log("✅ Client key/tempo received:", clientDetection);
+    }
+
     try {
       const debugCopy = path.join(tmpDir, `last_play_upload${ext}`);
       await copyFile(tempFilePath, debugCopy).catch(() => {});
@@ -79,28 +142,39 @@ export async function POST(request: NextRequest) {
         console.log("✅ Audio converted to WAV");
       } catch (convertErr) {
         console.warn("⚠️ Audio conversion failed, falling back to raw upload:", convertErr);
-        // If the input was already WAV, analyze that directly; otherwise let parseWav fail and fall back.
       }
 
-      console.log(
-        "Running built-in key/tempo analysis for:",
-        audioFile.name,
-        "size:",
-        audioFile.size,
-      );
-      realAnalysis = await analyzeWavFile(analysisPath);
-      console.log("✅ Built-in analysis succeeded:", realAnalysis);
+      if (!clientDetection || clientDetection.keyConfidence < 25) {
+        console.log(
+          "Running server key/tempo analysis for:",
+          audioFile.name,
+          "size:",
+          audioFile.size,
+        );
+        const serverDetection = await analyzeWavFile(analysisPath);
+        console.log("✅ Server analysis succeeded:", serverDetection);
+        realAnalysis = mergeDetections(clientDetection, serverDetection);
+      }
     } catch (err) {
-      console.warn("⚠️ Built-in analysis failed, falling back to LLM:", err);
-      console.log(
-        "File info - name:",
-        audioFile.name,
-        "type:",
-        audioFile.type,
-        "size:",
-        audioFile.size,
-      );
+      console.warn("⚠️ Server analysis failed:", err);
+      if (clientDetection) {
+        realAnalysis = clientDetection;
+      } else {
+        console.log(
+          "File info - name:",
+          audioFile.name,
+          "type:",
+          audioFile.type,
+          "size:",
+          audioFile.size,
+        );
+      }
     }
+
+    const dspHint = realAnalysis
+      ? `Detected BPM: ${realAnalysis.bpm}. Detected key: ${realAnalysis.key}.`
+      : "";
+    const combinedHint = [userHint, dspHint].filter(Boolean).join("\n");
 
     const result = await runAnalysis(
       {
@@ -108,7 +182,7 @@ export async function POST(request: NextRequest) {
         size: audioFile.size,
         type: audioFile.type,
       },
-      userHint,
+      combinedHint,
       realAnalysis,
     );
 
