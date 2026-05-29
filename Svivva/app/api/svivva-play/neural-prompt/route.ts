@@ -132,7 +132,7 @@ function formatSections(sections: Analysis["sections"]): string {
   return sections.map((s) => `${s.name} (${s.t0.toFixed(1)}s - ${s.t1.toFixed(1)}s)`).join(", ");
 }
 
-function useOrchestralProfile(body: RequestBody): boolean {
+function shouldUseOrchestralProfile(body: RequestBody): boolean {
   const profile = body.config?.promptProfile;
   if (isOrchestralNeuralProfile(profile)) return true;
   if (isOrchestralPreset(body.style)) return true;
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const orchestral = useOrchestralProfile(body);
+    const orchestral = shouldUseOrchestralProfile(body);
     const systemPrompt = orchestral ? ORCHESTRAL_NEURAL_SYSTEM : STANDARD_NEURAL_SYSTEM;
 
     const userMessage = `Analyze this musical composition and generate an optimized neural audio prompt:
