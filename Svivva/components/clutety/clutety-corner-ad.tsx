@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CLUTETY_COMING_SOON_PATH, getClutetyPromoHref } from "@/lib/clutety/config";
+import {
+  CLUTETY_COMING_SOON_PATH,
+  CLUTETY_CORNER_LOGO_PATH,
+  getClutetyPromoHref,
+} from "@/lib/clutety/config";
 
-const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v3";
-const CORNER_MARK_SRC = "/clutety-corner-mark.svg?v=1";
+const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v4";
+const LOGO_SRC = `${CLUTETY_CORNER_LOGO_PATH}?v=5`;
 
 function isInternalHref(href: string): boolean {
   return href.startsWith("/") && !href.startsWith("//");
@@ -36,13 +40,14 @@ export function ClutetyCornerAd() {
   if (!canShow) return null;
 
   const logo = (
+    // Official Clutety glitch wordmark — black keyed out of source asset
     <img
-      src={CORNER_MARK_SRC}
+      src={LOGO_SRC}
       alt="Clutety — coming soon"
-      width={110}
-      height={30}
-      className="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
-      style={{ display: "block", background: "none" }}
+      width={140}
+      height={48}
+      className="h-9 w-auto max-w-[140px] object-contain opacity-95 group-hover:opacity-100 transition-opacity"
+      style={{ display: "block", background: "transparent", mixBlendMode: "screen" }}
       decoding="async"
     />
   );

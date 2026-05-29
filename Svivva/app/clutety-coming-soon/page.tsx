@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Apple, ArrowRight, Shield } from "lucide-react";
 import {
@@ -27,15 +26,14 @@ export default function ClutetyComingSoonPage() {
       }}
     >
       <div className="max-w-md w-full flex flex-col items-center gap-6">
-        <Image
-          src={CLUTETY_LOGO_PATH}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${CLUTETY_LOGO_PATH}?v=5`}
           alt="Clutety"
-          width={200}
-          height={54}
-          priority
-          unoptimized
-          className="w-[min(200px,80vw)] h-auto object-contain bg-transparent drop-shadow-[0_4px_24px_rgba(91,168,160,0.35)]"
-          style={{ background: "transparent" }}
+          width={320}
+          height={213}
+          className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-[0_4px_24px_rgba(91,168,160,0.35)]"
+          style={{ background: "transparent", mixBlendMode: "screen" }}
         />
 
         <div className="space-y-2">
