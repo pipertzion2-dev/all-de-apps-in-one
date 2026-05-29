@@ -12,7 +12,7 @@ import os from "os";
 import { analyzeWavFileHybrid } from "@/lib/svivva-play/server-audio-analysis";
 import { mergeDetectionMeta, refineTempoKeyWithAI } from "@/lib/svivva-play/refine-tempo-key-ai";
 import { finalizeHybridFromMeta, type DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
-import { getActiveAiProvider } from "@/lib/llm/openai";
+import { getActiveAiProvider, getRuntimeLabel } from "@/lib/llm/openai";
 
 export const maxDuration = 120;
 export const runtime = "nodejs";
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
       refined.reason ?? "",
     );
 
-    console.log(`✅ Play AI provider: ${getActiveAiProvider()}`);
+    console.log(`✅ Runtime: ${getRuntimeLabel()}, AI: ${getActiveAiProvider()}`);
 
     if (!realAnalysis.bpm || !realAnalysis.key) {
       if (dbAvailable && sessionId) {

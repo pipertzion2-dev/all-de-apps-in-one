@@ -1,12 +1,17 @@
 import OpenAI from "openai";
 import { getGeminiApiKey, getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl } from "@/lib/env";
 
-export type AiProvider = "replit" | "gemini" | "ollama" | "openai" | "none";
+export type AiProvider = "gemini" | "openai" | "replit" | "ollama" | "none";
 
 let cachedOllamaUrl: string | null | undefined;
 
 export function resetProviderCache(): void {
   cachedOllamaUrl = undefined;
+}
+
+/** True on Vercel production/preview (svivva.com, *.vercel.app). */
+export function isOnVercelRuntime(): boolean {
+  return !!(process.env.VERCEL || process.env.VERCEL_ENV);
 }
 
 export function isOnReplitRuntime(): boolean {
@@ -26,34 +31,45 @@ export function hasReplitAiIntegration(): boolean {
 }
 
 export function getActiveAiProvider(): AiProvider {
-  if (hasReplitAiIntegration()) return "replit";
   if (getGeminiApiKey()?.trim()) return "gemini";
-  if (getOllamaUrl()?.trim() || cachedOllamaUrl) return "ollama";
+
   const openaiKey = getOpenAIApiKey()?.trim();
+  const customBase = getOpenAIBaseUrl()?.trim();
+  if (openaiKey && (customBase || openaiKey.startsWith("sk-"))) return "openai";
   if (openaiKey) return "openai";
+
+  // Replit/Ollama are not used on Vercel — serverless has no localhost Ollama
+  if (!isOnVercelRuntime()) {
+    if (hasReplitAiIntegration()) return "replit";
+    if (getOllamaUrl()?.trim() || cachedOllamaUrl) return "ollama";
+  }
+
   return "none";
 }
 
 export function isZeroConfigAiAvailable(): boolean {
-  const provider = getActiveAiProvider();
-  if (provider !== "none") return true;
-  return isOnReplitRuntime() && hasReplitAiIntegration();
+  return getActiveAiProvider() !== "none" || cachedOllamaUrl != null;
 }
 
 export function isAnyAiProviderAvailable(): boolean {
-  return getActiveAiProvider() !== "none" || cachedOllamaUrl != null;
+  return isZeroConfigAiAvailable();
+}
+
+export function getRuntimeLabel(): string {
+  if (isOnVercelRuntime()) return "vercel";
+  if (isOnReplitRuntime()) return "replit";
+  return "self-hosted";
 }
 
 export function getDefaultModelForProvider(provider: AiProvider = getActiveAiProvider()): string {
   switch (provider) {
-    case "replit":
-      return "gpt-4o-mini";
     case "gemini":
       return "gemini-2.0-flash";
-    case "ollama":
-      return "llama3.2";
+    case "replit":
     case "openai":
       return "gpt-4o-mini";
+    case "ollama":
+      return "llama3.2";
     default:
       return "gpt-4o-mini";
   }
@@ -61,11 +77,11 @@ export function getDefaultModelForProvider(provider: AiProvider = getActiveAiPro
 
 export function getModelFallbackChain(provider: AiProvider = getActiveAiProvider()): string[] {
   switch (provider) {
+    case "gemini":
+      return ["gemini-2.0-flash", "gemini-1.5-flash"];
     case "replit":
     case "openai":
       return ["gpt-4o-mini", "gpt-4o"];
-    case "gemini":
-      return ["gemini-2.0-flash", "gemini-1.5-flash"];
     case "ollama":
       return ["llama3.2", "llama3.1", "mistral", "phi3"];
     default:
@@ -84,14 +100,24 @@ async function probeOllamaEndpoint(baseUrl: string): Promise<boolean> {
   }
 }
 
-/** Try common local Ollama URLs once per process — no env var required on dev machines. */
+/** Local dev only — skipped on Vercel. */
 export async function probeAndCacheOllama(): Promise<string | null> {
+  if (isOnVercelRuntime()) {
+    cachedOllamaUrl = null;
+    return null;
+  }
+
   if (cachedOllamaUrl !== undefined) return cachedOllamaUrl;
 
   const explicit = getOllamaUrl()?.trim();
   if (explicit) {
     cachedOllamaUrl = explicit.replace(/\/$/, "");
     return cachedOllamaUrl;
+  }
+
+  if (process.env.NODE_ENV !== "development") {
+    cachedOllamaUrl = null;
+    return null;
   }
 
   const candidates = ["http://127.0.0.1:11434", "http://localhost:11434"];
@@ -117,17 +143,9 @@ export function buildAiClient(): {
   const ollamaUrl = getOllamaUrl() ?? cachedOllamaUrl ?? "";
   const openaiKey = getOpenAIApiKey() ?? "";
   const customBase = getOpenAIBaseUrl() ?? "";
+  const onVercel = isOnVercelRuntime();
 
-  // 1) Replit-managed OpenAI — zero API key setup when integration is provisioned
-  if (hasReplitAiIntegration()) {
-    const client = new OpenAI({
-      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL!,
-    });
-    return { client, provider: "replit", isGemini: false, isOllama: false };
-  }
-
-  // 2) Gemini free tier (only if user already has a key in env)
+  // 1) Gemini — recommended on Vercel (set GEMINI_API_KEY in project env once)
   if (geminiKey.length > 10) {
     const client = new OpenAI({
       apiKey: geminiKey,
@@ -136,8 +154,28 @@ export function buildAiClient(): {
     return { client, provider: "gemini", isGemini: true, isOllama: false };
   }
 
-  // 3) Ollama — local, no API key
-  if (ollamaUrl) {
+  // 2) OpenAI or OpenAI-compatible proxy (Vercel env vars, AI Gateway, etc.)
+  if (customBase && openaiKey) {
+    const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
+    return { client, provider: "openai", isGemini: false, isOllama: false };
+  }
+
+  if (openaiKey) {
+    const client = new OpenAI({ apiKey: openaiKey });
+    return { client, provider: "openai", isGemini: false, isOllama: false };
+  }
+
+  // 3) Replit-managed OpenAI — local Replit only, never on Vercel
+  if (!onVercel && hasReplitAiIntegration()) {
+    const client = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL!,
+    });
+    return { client, provider: "replit", isGemini: false, isOllama: false };
+  }
+
+  // 4) Ollama — local dev / self-hosted only
+  if (!onVercel && ollamaUrl) {
     const client = new OpenAI({
       apiKey: "ollama",
       baseURL: `${ollamaUrl.replace(/\/$/, "")}/v1`,
@@ -145,30 +183,6 @@ export function buildAiClient(): {
     return { client, provider: "ollama", isGemini: false, isOllama: true };
   }
 
-  // 4) Generic OpenAI-compatible proxy (Replit secrets, host env, etc.)
-  if (customBase && openaiKey) {
-    const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
-    return { client, provider: "openai", isGemini: false, isOllama: false };
-  }
-
-  if (openaiKey) {
-    const client = new OpenAI({
-      apiKey: openaiKey,
-      ...(openaiKey.startsWith("sk-") ? {} : {}),
-    });
-    return { client, provider: "openai", isGemini: false, isOllama: false };
-  }
-
-  // 5) Dev-only localhost Ollama fallback
-  if (process.env.NODE_ENV === "development" && cachedOllamaUrl) {
-    const client = new OpenAI({
-      apiKey: "ollama",
-      baseURL: `${cachedOllamaUrl}/v1`,
-    });
-    return { client, provider: "ollama", isGemini: false, isOllama: true };
-  }
-
-  // Inert client — callers must check isAnyAiProviderAvailable() first
   const client = new OpenAI({ apiKey: "unconfigured", baseURL: "http://127.0.0.1:1/v1" });
   return { client, provider: "none", isGemini: false, isOllama: false };
 }

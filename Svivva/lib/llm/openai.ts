@@ -13,6 +13,8 @@ export {
   probeAndCacheOllama,
   isAnyAiProviderAvailable,
   getActiveAiProvider,
+  getRuntimeLabel,
+  isOnVercelRuntime,
 } from "@/lib/llm/providers";
 
 let _client: OpenAI | null = null;

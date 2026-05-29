@@ -10,16 +10,21 @@ export async function register() {
       );
     }
     try {
-      const { probeAndCacheOllama } = await import("./lib/llm/providers");
-      const ollama = await probeAndCacheOllama();
-      if (ollama) console.log("[instrumentation] Ollama auto-detected at", ollama);
+      const { probeAndCacheOllama, isOnVercelRuntime } = await import("./lib/llm/providers");
+      if (!isOnVercelRuntime()) {
+        const ollama = await probeAndCacheOllama();
+        if (ollama) console.log("[instrumentation] Ollama auto-detected at", ollama);
+      }
     } catch {
       /* optional local AI */
     }
     try {
-      const { resetOpenAIClientCache, getActiveAiProvider } = await import("./lib/llm/openai");
+      const { resetOpenAIClientCache, getActiveAiProvider, getRuntimeLabel } =
+        await import("./lib/llm/openai");
       resetOpenAIClientCache();
-      console.log("[instrumentation] Play AI provider:", getActiveAiProvider());
+      console.log(
+        `[instrumentation] Runtime: ${getRuntimeLabel()}, Play AI: ${getActiveAiProvider()}`,
+      );
     } catch {
       /* ignore */
     }
