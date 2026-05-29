@@ -59,15 +59,15 @@ export function ClutetyCornerAd() {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="group block rounded-2xl p-2 border border-white/10 bg-background/25 backdrop-blur-md shadow-lg transition hover:bg-background/40 hover:border-white/20"
+        className="group block bg-transparent p-0 shadow-none"
         aria-label="Clutety"
       >
         <Image
-          src="/clutety-logo.png"
+          src="/clutety-shell/pyracrypt-logo-nobg.png"
           alt="Clutety"
-          width={40}
-          height={40}
-          className="opacity-75 group-hover:opacity-100 transition-opacity"
+          width={44}
+          height={44}
+          className="opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
         />
       </Link>
     </div>
