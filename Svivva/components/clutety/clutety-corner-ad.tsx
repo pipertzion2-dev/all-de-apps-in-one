@@ -47,8 +47,7 @@ export function ClutetyCornerAd() {
     />
   );
 
-  const linkClass =
-    "group block p-0 m-0 border-0 bg-transparent shadow-none outline-none ring-0";
+  const linkClass = "group block p-0 m-0 border-0 bg-transparent shadow-none outline-none ring-0";
 
   return (
     <div className="fixed right-4 bottom-4 z-[60] flex flex-col items-end gap-1 pointer-events-none">
