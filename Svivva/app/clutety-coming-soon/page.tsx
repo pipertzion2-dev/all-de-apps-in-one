@@ -30,10 +30,12 @@ export default function ClutetyComingSoonPage() {
         <Image
           src={CLUTETY_LOGO_PATH}
           alt="Clutety"
-          width={72}
-          height={72}
+          width={200}
+          height={54}
           priority
-          className="drop-shadow-[0_4px_24px_rgba(91,168,160,0.35)]"
+          unoptimized
+          className="w-[min(200px,80vw)] h-auto object-contain bg-transparent drop-shadow-[0_4px_24px_rgba(91,168,160,0.35)]"
+          style={{ background: "transparent" }}
         />
 
         <div className="space-y-2">
