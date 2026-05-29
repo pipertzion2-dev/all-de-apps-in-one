@@ -190,10 +190,44 @@ export function bpmFromOnsetIntervals(onsetTimes: number[]): number | null {
 }
 
 function tempoPrior(bpm: number): number {
+  if (bpm >= 90 && bpm <= 150) return 1.3;
   if (bpm >= 80 && bpm <= 160) return 1.15;
   if (bpm >= 70 && bpm <= 180) return 1.05;
-  if (bpm === 60 || bpm === 50) return 0.82;
+  if (bpm <= 65) return 0.55;
   return 1;
+}
+
+/** Brute-force beat-grid search — resolves half/double tempo (60 vs 120). */
+export function detectBpmBeatGridSearch(onsetTimes: number[]): number | null {
+  if (onsetTimes.length < 6) return null;
+
+  let bestBpm = 120;
+  let bestScore = -Infinity;
+  for (let bpm = 60; bpm <= 180; bpm++) {
+    const alignment = scoreTempoAlignment(onsetTimes, bpm);
+    const score = alignment * tempoPrior(bpm);
+    if (score > bestScore) {
+      bestScore = score;
+      bestBpm = bpm;
+    }
+  }
+
+  return bestScore > 0.12 ? bestBpm : null;
+}
+
+export function finalizeHybridFromMeta(
+  meta: DetectionMeta,
+  onsetTimes: number[] = [],
+): { bpm: number; key: string; keyConfidence: number; bpmConfidence: number } {
+  const candidates = [...meta.bpmCandidates];
+  const gridBpm = detectBpmBeatGridSearch(onsetTimes);
+  if (gridBpm) {
+    candidates.push({ bpm: gridBpm, weight: 1.5, source: "beat-grid" });
+  }
+
+  const { bpm, confidence: bpmConfidence } = fuseBpmCandidates(candidates, onsetTimes);
+  const { key, confidence: keyConfidence } = fuseKeyCandidates(meta.keyCandidates);
+  return { bpm, key, keyConfidence, bpmConfidence };
 }
 
 export function fuseBpmCandidates(
@@ -247,7 +281,7 @@ export function fuseBpmCandidates(
   for (const [bpm, cluster] of clusters) {
     const alignment = scoreTempoAlignment(onsetTimes, bpm);
     const score =
-      cluster.weight * 2 + alignment * 3 + tempoPrior(bpm) + cluster.sources.size * 0.15;
+      cluster.weight * 2 + alignment * 8 + tempoPrior(bpm) + cluster.sources.size * 0.15;
     if (score > bestScore) {
       bestScore = score;
       bestBpm = bpm;
@@ -482,14 +516,20 @@ export function runHybridDetection(
   keyCandidates: KeyCandidate[],
   onsetTimes: number[],
 ): HybridDetectionResult {
-  const { bpm, confidence: bpmConfidence } = fuseBpmCandidates(bpmCandidates, onsetTimes);
+  const withGrid = [...bpmCandidates];
+  const gridBpm = detectBpmBeatGridSearch(onsetTimes);
+  if (gridBpm) {
+    withGrid.push({ bpm: gridBpm, weight: 1.5, source: "beat-grid" });
+  }
+
+  const { bpm, confidence: bpmConfidence } = fuseBpmCandidates(withGrid, onsetTimes);
   const { key, confidence: keyConfidence } = fuseKeyCandidates(keyCandidates);
   return {
     bpm,
     bpmConfidence,
     key,
     keyConfidence,
-    bpmCandidates,
+    bpmCandidates: withGrid,
     keyCandidates,
   };
 }

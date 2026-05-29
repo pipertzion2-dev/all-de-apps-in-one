@@ -46,13 +46,26 @@ function buildClient(): { client: OpenAI; isOllama: boolean; isGemini: boolean }
     return { client, isOllama: false, isGemini: false };
   }
 
-  // Nothing configured — default to local Ollama (zero-config fallback)
-  const defaultOllama = "http://127.0.0.1:11434";
-  const client = new OpenAI({
-    apiKey: "ollama",
-    baseURL: `${defaultOllama}/v1`,
-  });
-  return { client, isOllama: true, isGemini: false };
+  if (openaiKey) {
+    const client = new OpenAI({
+      apiKey: openaiKey,
+      ...(customBase ? { baseURL: customBase } : {}),
+    });
+    return { client, isOllama: false, isGemini: false };
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    const defaultOllama = "http://127.0.0.1:11434";
+    const client = new OpenAI({
+      apiKey: "ollama",
+      baseURL: `${defaultOllama}/v1`,
+    });
+    return { client, isOllama: true, isGemini: false };
+  }
+
+  throw new Error(
+    "No AI provider configured. Set GEMINI_API_KEY, AI_INTEGRATIONS_OPENAI_API_KEY, or OLLAMA_URL.",
+  );
 }
 
 function getClientSync(): OpenAI {

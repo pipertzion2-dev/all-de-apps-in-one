@@ -445,13 +445,14 @@ export default function SvivvaPlayPage() {
       }
 
       setIsAnalyzing(true);
+      let clientDetection: {
+        bpm: number;
+        key: string;
+        keyConfidence: number;
+        bpmConfidence: number;
+        meta?: import("@/lib/svivva-play/tempo-key-core").DetectionMeta;
+      } | null = null;
       try {
-        let clientDetection: {
-          bpm: number;
-          key: string;
-          keyConfidence: number;
-          meta?: import("@/lib/svivva-play/tempo-key-core").DetectionMeta;
-        } | null = null;
         try {
           const { analyzeAudioFile } = await import("@/lib/svivva-play/client-audio-analysis");
           clientDetection = await analyzeAudioFile(file);
@@ -470,6 +471,7 @@ export default function SvivvaPlayPage() {
           formData.append("detectedBpm", String(clientDetection.bpm));
           formData.append("detectedKey", clientDetection.key);
           formData.append("detectedKeyConfidence", String(clientDetection.keyConfidence));
+          formData.append("detectedBpmConfidence", String(clientDetection.bpmConfidence));
           if (clientDetection.meta) {
             formData.append("detectionMeta", JSON.stringify(clientDetection.meta));
           }
@@ -498,17 +500,8 @@ export default function SvivvaPlayPage() {
           setErrorMsg(data.error);
           console.error("Analysis error:", data.error);
         } else if (data.analysis) {
-          const merged = { ...data.analysis };
-          if (clientDetection) {
-            merged.bpm = clientDetection.bpm;
-            merged.key = clientDetection.key;
-            merged.keyConfidence = Math.max(
-              clientDetection.keyConfidence,
-              merged.keyConfidence ?? 0,
-            );
-          }
-          console.log("✅ Analysis success, key:", merged.key, "bpm:", merged.bpm);
-          setAnalysis(merged);
+          console.log("✅ Analysis success, key:", data.analysis.key, "bpm:", data.analysis.bpm);
+          setAnalysis(data.analysis);
           setSessionId(data.sessionId ?? null);
         } else {
           console.error("Unexpected response structure:", data);
@@ -516,12 +509,35 @@ export default function SvivvaPlayPage() {
         }
       } catch (err) {
         console.error("🔴 Analysis request failed:", err);
-        const detail = err instanceof Error ? err.message : "";
-        setErrorMsg(
-          detail && !detail.includes("Failed to fetch")
-            ? `Analysis failed: ${detail}`
-            : "Analysis failed. Check your connection and try again.",
-        );
+        if (clientDetection) {
+          setAnalysis({
+            bpm: clientDetection.bpm,
+            key: clientDetection.key,
+            keyConfidence: clientDetection.keyConfidence,
+            timeSignature: "4/4",
+            chords: [],
+            sections: [
+              {
+                name: "Full",
+                t0: 0,
+                t1: clientDetection.meta?.durationSec ?? 180,
+                bars: 32,
+              },
+            ],
+            downbeats: [],
+            styleCompatibility: [],
+          });
+          setErrorMsg(
+            "Server analysis unavailable — showing local tempo/key detection. Generation may be limited until the server responds.",
+          );
+        } else {
+          const detail = err instanceof Error ? err.message : "";
+          setErrorMsg(
+            detail && !detail.includes("Failed to fetch")
+              ? `Analysis failed: ${detail}`
+              : "Analysis failed. Check your connection and try again.",
+          );
+        }
       } finally {
         setIsAnalyzing(false);
       }

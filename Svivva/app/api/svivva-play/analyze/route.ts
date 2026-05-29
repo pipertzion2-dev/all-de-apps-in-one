@@ -4,16 +4,16 @@ import { playSessions, playAnalyses } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { runAnalysis } from "@/lib/svivva-play/pipeline";
+import { buildMinimalPlayAnalysis, runAnalysis } from "@/lib/svivva-play/pipeline";
 import { execFile } from "child_process";
 import { writeFile, unlink, mkdir, copyFile } from "fs/promises";
 import path from "path";
 import os from "os";
 import { analyzeWavFileHybrid } from "@/lib/svivva-play/server-audio-analysis";
 import { mergeDetectionMeta, refineTempoKeyWithAI } from "@/lib/svivva-play/refine-tempo-key-ai";
-import type { DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
+import { finalizeHybridFromMeta, type DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 export const runtime = "nodejs";
 
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
@@ -27,7 +27,7 @@ function convertAudioToWav(inputPath: string, outputPath: string): Promise<void>
     execFile(
       "ffmpeg",
       ["-y", "-nostdin", "-i", inputPath, "-acodec", "pcm_s16le", "-ar", "44100", outputPath],
-      { timeout: 60000 },
+      { timeout: 120000 },
       (error) => {
         if (error) {
           reject(new Error(`FFmpeg conversion failed: ${error.message}`));
@@ -54,15 +54,17 @@ function parseClientDetectionMeta(formData: FormData): DetectionMeta | undefined
 
 function parseClientDetection(
   formData: FormData,
-): { bpm: number; key: string; keyConfidence: number } | undefined {
+): { bpm: number; key: string; keyConfidence: number; bpmConfidence?: number } | undefined {
   const bpmRaw = formData.get("detectedBpm");
   const keyRaw = formData.get("detectedKey");
   const confRaw = formData.get("detectedKeyConfidence");
+  const bpmConfRaw = formData.get("detectedBpmConfidence");
   if (bpmRaw == null || keyRaw == null) return undefined;
 
   const bpm = Number(bpmRaw);
   const key = String(keyRaw).trim();
   const keyConfidence = confRaw != null ? Number(confRaw) : 50;
+  const bpmConfidence = bpmConfRaw != null ? Number(bpmConfRaw) : undefined;
 
   if (!Number.isFinite(bpm) || bpm < 30 || bpm > 300 || !key) return undefined;
 
@@ -72,54 +74,41 @@ function parseClientDetection(
     keyConfidence: Number.isFinite(keyConfidence)
       ? Math.min(99, Math.max(0, Math.round(keyConfidence)))
       : 50,
+    bpmConfidence:
+      bpmConfidence != null && Number.isFinite(bpmConfidence)
+        ? Math.min(99, Math.max(0, Math.round(bpmConfidence)))
+        : undefined,
   };
 }
 
-function mergeDetections(
-  client?: { bpm: number; key: string; keyConfidence: number },
-  server?: { bpm: number; key: string; keyConfidence: number },
-): { bpm: number; key: string; keyConfidence: number } | undefined {
-  if (!client && !server) return undefined;
-  const bpmOk = (bpm: number) => bpm >= 40 && bpm <= 220;
-  const keyOk = (d: { key: string; keyConfidence: number }) =>
-    Boolean(d.key) && d.keyConfidence >= 25;
-
-  let bpm =
-    client && bpmOk(client.bpm)
-      ? client.bpm
-      : server && bpmOk(server.bpm)
-        ? server.bpm
-        : (client?.bpm ?? server?.bpm ?? 120);
-
-  if (client && server && bpmOk(client.bpm) && bpmOk(server.bpm)) {
-    const ratio = client.bpm / server.bpm;
-    if (ratio >= 0.45 && ratio <= 0.55) {
-      bpm = server.bpm;
-    } else if (ratio >= 1.8 && ratio <= 2.2) {
-      bpm = client.bpm;
-    }
-  }
-
-  const key =
-    client && keyOk(client)
-      ? client.key
-      : server && keyOk(server)
-        ? server.key
-        : (client?.key ?? server?.key ?? "C major");
-
-  const keyConfidence = Math.max(
-    client && keyOk(client) ? client.keyConfidence : 0,
-    server && keyOk(server) ? server.keyConfidence : 0,
-    client?.keyConfidence ?? 0,
-    server?.keyConfidence ?? 0,
-  );
-
-  return { bpm, key, keyConfidence: keyConfidence || 50 };
+function toApiAnalysis(analysis: {
+  bpm: number;
+  time_signature: string;
+  key: string;
+  key_confidence: number;
+  chords: unknown[];
+  sections: unknown[];
+  downbeats: unknown[];
+  style_compatibility: unknown[];
+  timbre_descriptors?: Record<string, unknown>;
+}) {
+  return {
+    bpm: analysis.bpm,
+    timeSignature: analysis.time_signature,
+    key: analysis.key,
+    keyConfidence: analysis.key_confidence,
+    chords: analysis.chords,
+    sections: analysis.sections,
+    downbeats: analysis.downbeats,
+    styleCompatibility: analysis.style_compatibility,
+    timbreDescriptors: analysis.timbre_descriptors,
+  };
 }
 
 export async function POST(request: NextRequest) {
   const tempPaths: string[] = [];
   let sessionId: string | null = null;
+  let dbAvailable = true;
 
   try {
     let userId: string | null = null;
@@ -133,7 +122,6 @@ export async function POST(request: NextRequest) {
     const mode = (formData.get("mode") as string) || "composition";
     const userHint = (formData.get("userHint") as string) || "";
     const clientDetection = parseClientDetection(formData);
-
     const clientDetectionMeta = parseClientDetectionMeta(formData);
 
     if (!audioFile) {
@@ -159,7 +147,6 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     await writeFile(tempFilePath, Buffer.from(arrayBuffer));
 
-    let dbAvailable = true;
     try {
       await db.insert(playSessions).values({
         id: sessionId,
@@ -180,23 +167,28 @@ export async function POST(request: NextRequest) {
       bpmCandidates: [],
       keyCandidates: [],
     };
-    let realAnalysis:
-      | { bpm: number; key: string; keyConfidence: number; bpmConfidence?: number }
-      | undefined = clientDetection
-      ? {
-          bpm: clientDetection.bpm,
-          key: clientDetection.key,
-          keyConfidence: clientDetection.keyConfidence,
-        }
-      : undefined;
 
     if (clientDetection) {
+      detectionMeta.bpmCandidates.push({
+        bpm: clientDetection.bpm,
+        weight: 1.0,
+        source: "client-fusion",
+      });
+      detectionMeta.keyCandidates.push({
+        key: clientDetection.key,
+        confidence: clientDetection.keyConfidence,
+        source: "client-fusion",
+      });
+      if (clientDetectionMeta?.durationSec) {
+        detectionMeta.durationSec = clientDetectionMeta.durationSec;
+      }
       console.log("✅ Client key/tempo received:", clientDetection);
     }
 
+    let onsetTimes: number[] = [];
+
     try {
-      const debugCopy = path.join(tmpDir, `last_play_upload${ext}`);
-      await copyFile(tempFilePath, debugCopy).catch(() => {});
+      await copyFile(tempFilePath, path.join(tmpDir, `last_play_upload${ext}`)).catch(() => {});
 
       const wavPath = path.join(tmpDir, `${sessionId}.wav`);
       tempPaths.push(wavPath);
@@ -206,63 +198,51 @@ export async function POST(request: NextRequest) {
         await convertAudioToWav(tempFilePath, wavPath);
         analysisPath = wavPath;
       } catch (convertErr) {
-        console.warn("⚠️ Audio conversion failed, using raw upload:", convertErr);
+        console.warn(
+          "⚠️ FFmpeg unavailable or conversion failed — using browser detection only:",
+          convertErr,
+        );
       }
 
       if (analysisPath.endsWith(".wav")) {
         try {
           const serverHybrid = await analyzeWavFileHybrid(analysisPath);
           detectionMeta = mergeDetectionMeta(detectionMeta, serverHybrid.meta);
-          realAnalysis = mergeDetections(realAnalysis, {
-            bpm: serverHybrid.bpm,
-            key: serverHybrid.key,
-            keyConfidence: serverHybrid.keyConfidence,
-          }) ?? {
-            bpm: serverHybrid.bpm,
-            key: serverHybrid.key,
-            keyConfidence: serverHybrid.keyConfidence,
-            bpmConfidence: serverHybrid.bpmConfidence,
-          };
-          if (realAnalysis) {
-            realAnalysis.bpmConfidence = serverHybrid.bpmConfidence;
-          }
+          onsetTimes = serverHybrid.onsetTimes;
         } catch (serverErr) {
           console.warn("⚠️ Server hybrid analysis failed:", serverErr);
         }
       }
     } catch (err) {
-      console.warn("⚠️ Server DSP analysis failed:", err);
+      console.warn("⚠️ Server audio processing failed:", err);
     }
 
-    if (realAnalysis) {
-      const refined = await refineTempoKeyWithAI(
-        {
-          bpm: realAnalysis.bpm,
-          key: realAnalysis.key,
-          keyConfidence: realAnalysis.keyConfidence,
-          bpmConfidence: realAnalysis.bpmConfidence,
-        },
-        detectionMeta,
-        {
-          name: audioFile.name,
-          type: audioFile.type,
-          durationSec: detectionMeta.durationSec,
-        },
-      );
-      realAnalysis = {
-        bpm: refined.bpm,
-        key: refined.key,
-        keyConfidence: refined.keyConfidence,
-        bpmConfidence: refined.bpmConfidence,
-      };
-      console.log(
-        `✅ Final tempo/key (${refined.source}): ${refined.bpm} BPM, ${refined.key}`,
-        refined.reason ?? "",
-      );
-    }
+    const fused = finalizeHybridFromMeta(detectionMeta, onsetTimes);
+    let realAnalysis = {
+      bpm: fused.bpm,
+      key: fused.key,
+      keyConfidence: fused.keyConfidence,
+      bpmConfidence: fused.bpmConfidence,
+    };
 
-    if (!realAnalysis) {
-      if (dbAvailable) {
+    const refined = await refineTempoKeyWithAI(realAnalysis, detectionMeta, {
+      name: audioFile.name,
+      type: audioFile.type,
+      durationSec: detectionMeta.durationSec,
+    });
+    realAnalysis = {
+      bpm: refined.bpm,
+      key: refined.key,
+      keyConfidence: refined.keyConfidence,
+      bpmConfidence: refined.bpmConfidence,
+    };
+    console.log(
+      `✅ Final tempo/key (${refined.source}): ${refined.bpm} BPM, ${refined.key}`,
+      refined.reason ?? "",
+    );
+
+    if (!realAnalysis.bpm || !realAnalysis.key) {
+      if (dbAvailable && sessionId) {
         await db
           .update(playSessions)
           .set({ status: "error" })
@@ -281,27 +261,34 @@ export async function POST(request: NextRequest) {
     const dspHint = `Detected BPM: ${realAnalysis.bpm}. Detected key: ${realAnalysis.key}.`;
     const combinedHint = [userHint, dspHint].filter(Boolean).join("\n");
 
-    const result = await runAnalysis(
+    let analysis = buildMinimalPlayAnalysis({
+      bpm: realAnalysis.bpm,
+      key: realAnalysis.key,
+      keyConfidence: realAnalysis.keyConfidence,
+      durationSec: detectionMeta.durationSec,
+    });
+
+    const llmResult = await runAnalysis(
       {
         name: audioFile.name,
         size: audioFile.size,
         type: audioFile.type,
+        durationEstimate: detectionMeta.durationSec,
       },
       combinedHint,
       realAnalysis,
     );
 
-    if (!result.success || !result.data) {
-      await db.update(playSessions).set({ status: "error" }).where(eq(playSessions.id, sessionId));
-      return NextResponse.json(
-        { error: result.error || "Analysis failed. Check AI keys or try again." },
-        { status: 500 },
-      );
+    if (llmResult.success && llmResult.data) {
+      analysis = llmResult.data;
+      analysis.bpm = realAnalysis.bpm;
+      analysis.key = realAnalysis.key;
+      analysis.key_confidence = realAnalysis.keyConfidence;
+    } else if (llmResult.error) {
+      console.warn("LLM enrichment skipped (DSP-only analysis):", llmResult.error);
     }
 
-    const analysis = result.data;
-
-    if (dbAvailable) {
+    if (dbAvailable && sessionId) {
       try {
         await db.insert(playAnalyses).values({
           id: analysisId,
@@ -330,21 +317,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sessionId,
       analysisId,
-      analysis: {
-        bpm: analysis.bpm,
-        timeSignature: analysis.time_signature,
-        key: analysis.key,
-        keyConfidence: analysis.key_confidence,
-        chords: analysis.chords,
-        sections: analysis.sections,
-        downbeats: analysis.downbeats,
-        styleCompatibility: analysis.style_compatibility,
-        timbreDescriptors: analysis.timbre_descriptors,
-      },
+      analysis: toApiAnalysis(analysis),
     });
   } catch (error) {
     console.error("Analysis error:", error);
-    if (sessionId) {
+    if (dbAvailable && sessionId) {
       await db
         .update(playSessions)
         .set({ status: "error" })
@@ -354,12 +331,6 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Analysis failed";
     return NextResponse.json({ error: message }, { status: 500 });
   } finally {
-    await Promise.all(
-      tempPaths.map((p) =>
-        unlink(p).catch(() => {
-          /* ignore cleanup errors on serverless */
-        }),
-      ),
-    );
+    await Promise.all(tempPaths.map((p) => unlink(p).catch(() => {})));
   }
 }

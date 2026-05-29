@@ -87,6 +87,7 @@ export interface ServerHybridResult {
   keyConfidence: number;
   bpmConfidence: number;
   meta: DetectionMeta;
+  onsetTimes: number[];
 }
 
 export async function analyzeWavFileHybrid(wavPath: string): Promise<ServerHybridResult> {
@@ -111,6 +112,7 @@ export async function analyzeWavFileHybrid(wavPath: string): Promise<ServerHybri
     key: hybrid.key,
     keyConfidence: hybrid.keyConfidence,
     bpmConfidence: hybrid.bpmConfidence,
+    onsetTimes,
     meta: {
       bpmCandidates: hybrid.bpmCandidates,
       keyCandidates: hybrid.keyCandidates,

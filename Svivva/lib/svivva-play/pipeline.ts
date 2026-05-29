@@ -81,12 +81,13 @@ async function callLLM(systemPrompt: string, userInput: Record<string, unknown>)
   return completion.choices[0].message.content || "{}";
 }
 
-function buildDspFallbackAnalysis(realAnalysis: {
+export function buildMinimalPlayAnalysis(realAnalysis: {
   bpm: number;
   key: string;
   keyConfidence: number;
+  durationSec?: number;
 }): Analysis {
-  const durationSec = 180;
+  const durationSec = realAnalysis.durationSec ?? 180;
   return {
     bpm: realAnalysis.bpm,
     time_signature: "4/4",
@@ -98,6 +99,15 @@ function buildDspFallbackAnalysis(realAnalysis: {
     style_compatibility: [],
     timbre_descriptors: {},
   };
+}
+
+function buildDspFallbackAnalysis(realAnalysis: {
+  bpm: number;
+  key: string;
+  keyConfidence: number;
+  durationSec?: number;
+}): Analysis {
+  return buildMinimalPlayAnalysis(realAnalysis);
 }
 
 export async function runAnalysis(
