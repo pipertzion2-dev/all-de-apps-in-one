@@ -9,7 +9,9 @@ import { execFile } from "child_process";
 import { writeFile, unlink, mkdir, copyFile } from "fs/promises";
 import path from "path";
 import os from "os";
-import { analyzeWavFile } from "@/lib/svivva-play/server-audio-analysis";
+import { analyzeWavFileHybrid } from "@/lib/svivva-play/server-audio-analysis";
+import { mergeDetectionMeta, refineTempoKeyWithAI } from "@/lib/svivva-play/refine-tempo-key-ai";
+import type { DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -35,6 +37,19 @@ function convertAudioToWav(inputPath: string, outputPath: string): Promise<void>
       },
     );
   });
+}
+
+function parseClientDetectionMeta(formData: FormData): DetectionMeta | undefined {
+  const raw = formData.get("detectionMeta");
+  if (typeof raw !== "string" || !raw.trim()) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as DetectionMeta;
+    if (!Array.isArray(parsed.bpmCandidates) || !Array.isArray(parsed.keyCandidates))
+      return undefined;
+    return parsed;
+  } catch {
+    return undefined;
+  }
 }
 
 function parseClientDetection(
@@ -69,12 +84,21 @@ function mergeDetections(
   const keyOk = (d: { key: string; keyConfidence: number }) =>
     Boolean(d.key) && d.keyConfidence >= 25;
 
-  const bpm =
+  let bpm =
     client && bpmOk(client.bpm)
       ? client.bpm
       : server && bpmOk(server.bpm)
         ? server.bpm
         : (client?.bpm ?? server?.bpm ?? 120);
+
+  if (client && server && bpmOk(client.bpm) && bpmOk(server.bpm)) {
+    const ratio = client.bpm / server.bpm;
+    if (ratio >= 0.45 && ratio <= 0.55) {
+      bpm = server.bpm;
+    } else if (ratio >= 1.8 && ratio <= 2.2) {
+      bpm = client.bpm;
+    }
+  }
 
   const key =
     client && keyOk(client)
@@ -109,6 +133,8 @@ export async function POST(request: NextRequest) {
     const mode = (formData.get("mode") as string) || "composition";
     const userHint = (formData.get("userHint") as string) || "";
     const clientDetection = parseClientDetection(formData);
+
+    const clientDetectionMeta = parseClientDetectionMeta(formData);
 
     if (!audioFile) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
@@ -150,8 +176,19 @@ export async function POST(request: NextRequest) {
       console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
     }
 
-    let realAnalysis: { bpm: number; key: string; keyConfidence: number } | undefined =
-      clientDetection;
+    let detectionMeta: DetectionMeta = clientDetectionMeta ?? {
+      bpmCandidates: [],
+      keyCandidates: [],
+    };
+    let realAnalysis:
+      | { bpm: number; key: string; keyConfidence: number; bpmConfidence?: number }
+      | undefined = clientDetection
+      ? {
+          bpm: clientDetection.bpm,
+          key: clientDetection.key,
+          keyConfidence: clientDetection.keyConfidence,
+        }
+      : undefined;
 
     if (clientDetection) {
       console.log("✅ Client key/tempo received:", clientDetection);
@@ -172,15 +209,56 @@ export async function POST(request: NextRequest) {
         console.warn("⚠️ Audio conversion failed, using raw upload:", convertErr);
       }
 
-      if (!clientDetection || clientDetection.keyConfidence < 25) {
-        const serverDetection = await analyzeWavFile(analysisPath);
-        realAnalysis = mergeDetections(clientDetection, serverDetection);
+      if (analysisPath.endsWith(".wav")) {
+        try {
+          const serverHybrid = await analyzeWavFileHybrid(analysisPath);
+          detectionMeta = mergeDetectionMeta(detectionMeta, serverHybrid.meta);
+          realAnalysis = mergeDetections(realAnalysis, {
+            bpm: serverHybrid.bpm,
+            key: serverHybrid.key,
+            keyConfidence: serverHybrid.keyConfidence,
+          }) ?? {
+            bpm: serverHybrid.bpm,
+            key: serverHybrid.key,
+            keyConfidence: serverHybrid.keyConfidence,
+            bpmConfidence: serverHybrid.bpmConfidence,
+          };
+          if (realAnalysis) {
+            realAnalysis.bpmConfidence = serverHybrid.bpmConfidence;
+          }
+        } catch (serverErr) {
+          console.warn("⚠️ Server hybrid analysis failed:", serverErr);
+        }
       }
     } catch (err) {
       console.warn("⚠️ Server DSP analysis failed:", err);
-      if (clientDetection) {
-        realAnalysis = clientDetection;
-      }
+    }
+
+    if (realAnalysis) {
+      const refined = await refineTempoKeyWithAI(
+        {
+          bpm: realAnalysis.bpm,
+          key: realAnalysis.key,
+          keyConfidence: realAnalysis.keyConfidence,
+          bpmConfidence: realAnalysis.bpmConfidence,
+        },
+        detectionMeta,
+        {
+          name: audioFile.name,
+          type: audioFile.type,
+          durationSec: detectionMeta.durationSec,
+        },
+      );
+      realAnalysis = {
+        bpm: refined.bpm,
+        key: refined.key,
+        keyConfidence: refined.keyConfidence,
+        bpmConfidence: refined.bpmConfidence,
+      };
+      console.log(
+        `✅ Final tempo/key (${refined.source}): ${refined.bpm} BPM, ${refined.key}`,
+        refined.reason ?? "",
+      );
     }
 
     if (!realAnalysis) {

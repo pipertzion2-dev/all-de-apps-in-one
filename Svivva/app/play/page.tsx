@@ -446,7 +446,12 @@ export default function SvivvaPlayPage() {
 
       setIsAnalyzing(true);
       try {
-        let clientDetection: { bpm: number; key: string; keyConfidence: number } | null = null;
+        let clientDetection: {
+          bpm: number;
+          key: string;
+          keyConfidence: number;
+          meta?: import("@/lib/svivva-play/tempo-key-core").DetectionMeta;
+        } | null = null;
         try {
           const { analyzeAudioFile } = await import("@/lib/svivva-play/client-audio-analysis");
           clientDetection = await analyzeAudioFile(file);
@@ -465,6 +470,9 @@ export default function SvivvaPlayPage() {
           formData.append("detectedBpm", String(clientDetection.bpm));
           formData.append("detectedKey", clientDetection.key);
           formData.append("detectedKeyConfidence", String(clientDetection.keyConfidence));
+          if (clientDetection.meta) {
+            formData.append("detectionMeta", JSON.stringify(clientDetection.meta));
+          }
         }
         console.log("🎵 Uploading audio:", file.name, file.size, "bytes");
         if (file.size > 12 * 1024 * 1024) {
