@@ -3,24 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CLUTETY_COMING_SOON_PATH, CLUTETY_LOGO_PATH, getClutetyPromoHref } from "@/lib/clutety/config";
 
 const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v2";
 
-/** External Clutety product URL (logo-only promo; not part of Svivva UI). */
-function getClutetyExternalUrl(): string {
-  if (typeof window !== "undefined") {
-    const env = process.env.NEXT_PUBLIC_CLUTETY_EXTERNAL_URL?.trim();
-    if (env) return env.replace(/\/$/, "");
-  }
-  return (
-    process.env.NEXT_PUBLIC_CLUTETY_EXTERNAL_URL?.trim()?.replace(/\/$/, "") ||
-    "https://clutety.svivva.com"
-  );
+function isInternalHref(href: string): boolean {
+  return href.startsWith("/") && !href.startsWith("//");
 }
 
 export function ClutetyCornerAd() {
   const [dismissed, setDismissed] = useState(true);
-  const href = getClutetyExternalUrl();
+  const href = getClutetyPromoHref();
+  const internal = isInternalHref(href);
 
   useEffect(() => {
     try {
@@ -35,10 +29,21 @@ export function ClutetyCornerAd() {
     if (typeof window === "undefined") return false;
     const p = window.location.pathname || "";
     if (p.startsWith("/dashboard/security")) return false;
+    if (p.startsWith(CLUTETY_COMING_SOON_PATH)) return false;
     return true;
   }, [dismissed]);
 
   if (!canShow) return null;
+
+  const logo = (
+    <Image
+      src={CLUTETY_LOGO_PATH}
+      alt="Clutety — coming soon"
+      width={44}
+      height={44}
+      className="opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+    />
+  );
 
   return (
     <div className="fixed right-4 bottom-4 z-[60] flex flex-col items-end gap-1">
@@ -51,25 +56,29 @@ export function ClutetyCornerAd() {
           setDismissed(true);
         }}
         className="text-[10px] text-foreground/40 hover:text-foreground/70 px-1"
-        aria-label="Dismiss"
+        aria-label="Dismiss Clutety promo"
       >
         ✕
       </button>
-      <Link
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group block bg-transparent p-0 shadow-none"
-        aria-label="Clutety"
-      >
-        <Image
-          src="/clutety-shell/pyracrypt-logo-nobg.png"
-          alt="Clutety"
-          width={44}
-          height={44}
-          className="opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-        />
-      </Link>
+      {internal ? (
+        <Link
+          href={href}
+          className="group block bg-transparent p-0 shadow-none"
+          aria-label="Clutety — coming soon"
+        >
+          {logo}
+        </Link>
+      ) : (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block bg-transparent p-0 shadow-none"
+          aria-label="Clutety — coming soon"
+        >
+          {logo}
+        </a>
+      )}
     </div>
   );
 }
