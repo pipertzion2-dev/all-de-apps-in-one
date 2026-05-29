@@ -4,6 +4,9 @@ export const CLUTETY_BURG = "#6B2C4A";
 
 export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
 
+/** Corner ad only — black matte removed (colorkey); do not reuse JPEG mislabeled as PNG. */
+export const CLUTETY_CORNER_LOGO_PATH = "/clutety-corner-logo.png";
+
 /** Internal landing while Clutety iOS / standalone app is not live yet. */
 export const CLUTETY_COMING_SOON_PATH = "/clutety-coming-soon";
 

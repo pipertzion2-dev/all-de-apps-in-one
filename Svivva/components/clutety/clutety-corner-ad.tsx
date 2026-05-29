@@ -2,13 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  CLUTETY_COMING_SOON_PATH,
-  CLUTETY_LOGO_PATH,
-  getClutetyPromoHref,
-} from "@/lib/clutety/config";
+import { CLUTETY_COMING_SOON_PATH, getClutetyPromoHref } from "@/lib/clutety/config";
 
-const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v2";
+const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v3";
+const CORNER_MARK_SRC = "/clutety-corner-mark.svg?v=1";
 
 function isInternalHref(href: string): boolean {
   return href.startsWith("/") && !href.startsWith("//");
@@ -39,14 +36,13 @@ export function ClutetyCornerAd() {
   if (!canShow) return null;
 
   const logo = (
-    // Native img keeps PNG alpha; Next/Image can matte transparent assets on some themes.
     <img
-      src={CLUTETY_LOGO_PATH}
+      src={CORNER_MARK_SRC}
       alt="Clutety — coming soon"
-      width={96}
-      height={64}
-      className="h-10 w-auto max-w-[96px] object-contain opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-      style={{ background: "transparent", display: "block" }}
+      width={110}
+      height={30}
+      className="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
+      style={{ display: "block", background: "none" }}
       decoding="async"
     />
   );
@@ -70,7 +66,11 @@ export function ClutetyCornerAd() {
         ✕
       </button>
       {internal ? (
-        <Link href={href} className={`${linkClass} pointer-events-auto`} aria-label="Clutety — coming soon">
+        <Link
+          href={href}
+          className={`${linkClass} pointer-events-auto`}
+          aria-label="Clutety — coming soon"
+        >
           {logo}
         </Link>
       ) : (

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 36" role="img" aria-label="Clutety">
+  <defs>
+    <linearGradient id="clutetyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5BA8A0" />
+      <stop offset="55%" stop-color="#B87888" />
+      <stop offset="100%" stop-color="#6B2C4A" />
+    </linearGradient>
+  </defs>
+  <text
+    x="0"
+    y="27"
+    fill="url(#clutetyGrad)"
+    font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="22"
+    font-weight="700"
+    letter-spacing="0.04em"
+  >
+    Clutety
+  </text>
+</svg>
