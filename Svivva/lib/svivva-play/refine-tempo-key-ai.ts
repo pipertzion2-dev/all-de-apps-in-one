@@ -1,5 +1,4 @@
-import { openai, getDefaultModel } from "@/lib/llm/openai";
-import { getGeminiApiKey, getOpenAIApiKey, getOllamaUrl } from "@/lib/env";
+import { openai, getPlayModelChain, isAnyAiProviderAvailable } from "@/lib/llm/openai";
 import type { DetectionMeta, TempoCandidate, KeyCandidate } from "./tempo-key-core";
 
 export interface RefinedDetection {
@@ -9,10 +8,6 @@ export interface RefinedDetection {
   bpmConfidence: number;
   source: "ai" | "dsp";
   reason?: string;
-}
-
-function isAiAvailable(): boolean {
-  return !!(getGeminiApiKey()?.trim() || getOpenAIApiKey()?.trim() || getOllamaUrl()?.trim());
 }
 
 function summarizeCandidates(meta: DetectionMeta): string {
@@ -40,24 +35,10 @@ export async function refineTempoKeyWithAI(
     source: "dsp",
   };
 
-  if (!isAiAvailable()) return fallback;
-
-  const hasOctaveConflict = meta.bpmCandidates.some((a, i) =>
-    meta.bpmCandidates.some(
-      (b, j) =>
-        i !== j &&
-        a.bpm !== b.bpm &&
-        (Math.abs(a.bpm / b.bpm - 2) < 0.06 || Math.abs(b.bpm / a.bpm - 2) < 0.06),
-    ),
-  );
-  const hasAmbiguity = hasOctaveConflict || meta.bpmCandidates.length >= 2;
-
-  if (!hasAmbiguity && (dspResult.bpmConfidence ?? dspResult.keyConfidence) >= 80) {
-    return fallback;
-  }
+  if (!isAnyAiProviderAvailable()) return fallback;
 
   const systemPrompt = `You are an expert musicologist and audio engineer specializing in tempo and key detection.
-Multiple DSP algorithms (peak histogram, autocorrelation, web-audio-beat-detector, onset intervals, Krumhansl-Schmuckler key profiles) have analyzed a track.
+Multiple DSP algorithms (peak histogram, autocorrelation, web-audio-beat-detector, beat-grid search, Krumhansl-Schmuckler key profiles) have analyzed a track.
 
 Your job: pick the TRUE tempo and key. Critical rules:
 - Half/double tempo errors are extremely common (60 vs 120, 70 vs 140). Prefer the tempo where onsets align to a musical pulse, typically 80–160 BPM for pop/rock/electronic/hip-hop.
@@ -80,45 +61,51 @@ Return JSON:
   "reason": "<one short sentence>"
 }`;
 
-  try {
-    const completion = await openai.chat.completions.create({
-      model: getDefaultModel(),
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-    });
+  for (const model of getPlayModelChain()) {
+    try {
+      const completion = await openai.chat.completions.create(
+        {
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+        },
+        { timeout: 15000 },
+      );
 
-    const raw = completion.choices[0].message.content || "{}";
-    const parsed = JSON.parse(raw) as {
-      bpm?: number;
-      key?: string;
-      bpm_confidence?: number;
-      key_confidence?: number;
-      reason?: string;
-    };
+      const raw = completion.choices[0].message.content || "{}";
+      const parsed = JSON.parse(raw) as {
+        bpm?: number;
+        key?: string;
+        bpm_confidence?: number;
+        key_confidence?: number;
+        reason?: string;
+      };
 
-    const bpm = Math.round(parsed.bpm ?? dspResult.bpm);
-    const key = String(parsed.key ?? dspResult.key).trim();
-    if (bpm < 40 || bpm > 220 || !key) return fallback;
+      const bpm = Math.round(parsed.bpm ?? dspResult.bpm);
+      const key = String(parsed.key ?? dspResult.key).trim();
+      if (bpm < 40 || bpm > 220 || !key) continue;
 
-    return {
-      bpm,
-      key,
-      keyConfidence: Math.min(
-        99,
-        Math.max(25, Math.round(parsed.key_confidence ?? dspResult.keyConfidence)),
-      ),
-      bpmConfidence: Math.min(99, Math.max(25, Math.round(parsed.bpm_confidence ?? 70))),
-      source: "ai",
-      reason: parsed.reason,
-    };
-  } catch (err) {
-    console.warn("AI tempo/key refinement failed, using DSP fusion:", err);
-    return fallback;
+      return {
+        bpm,
+        key,
+        keyConfidence: Math.min(
+          99,
+          Math.max(25, Math.round(parsed.key_confidence ?? dspResult.keyConfidence)),
+        ),
+        bpmConfidence: Math.min(99, Math.max(25, Math.round(parsed.bpm_confidence ?? 70))),
+        source: "ai",
+        reason: parsed.reason,
+      };
+    } catch (err) {
+      console.warn(`AI tempo/key refinement failed on ${model}:`, err);
+    }
   }
+
+  return fallback;
 }
 
 export function mergeDetectionMeta(a?: DetectionMeta, b?: DetectionMeta): DetectionMeta {

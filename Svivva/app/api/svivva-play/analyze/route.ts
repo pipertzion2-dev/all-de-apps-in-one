@@ -12,6 +12,7 @@ import os from "os";
 import { analyzeWavFileHybrid } from "@/lib/svivva-play/server-audio-analysis";
 import { mergeDetectionMeta, refineTempoKeyWithAI } from "@/lib/svivva-play/refine-tempo-key-ai";
 import { finalizeHybridFromMeta, type DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
+import { getActiveAiProvider } from "@/lib/llm/openai";
 
 export const maxDuration = 120;
 export const runtime = "nodejs";
@@ -240,6 +241,8 @@ export async function POST(request: NextRequest) {
       `✅ Final tempo/key (${refined.source}): ${refined.bpm} BPM, ${refined.key}`,
       refined.reason ?? "",
     );
+
+    console.log(`✅ Play AI provider: ${getActiveAiProvider()}`);
 
     if (!realAnalysis.bpm || !realAnalysis.key) {
       if (dbAvailable && sessionId) {

@@ -1,102 +1,63 @@
 import OpenAI from "openai";
-import { getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl, getGeminiApiKey } from "@/lib/env";
+import {
+  buildAiClient,
+  getActiveAiProvider,
+  getDefaultModelForProvider,
+  getModelFallbackChain,
+  isAnyAiProviderAvailable,
+  probeAndCacheOllama,
+  resetProviderCache,
+} from "@/lib/llm/providers";
+
+export {
+  probeAndCacheOllama,
+  isAnyAiProviderAvailable,
+  getActiveAiProvider,
+} from "@/lib/llm/providers";
 
 let _client: OpenAI | null = null;
 let _lastSig = "";
 let _isOllama = false;
 let _isGemini = false;
+let _provider = getActiveAiProvider();
 
 export function resetOpenAIClientCache() {
   _client = null;
   _lastSig = "";
   _isOllama = false;
   _isGemini = false;
-}
-
-function buildClient(): { client: OpenAI; isOllama: boolean; isGemini: boolean } {
-  const geminiKey = getGeminiApiKey() ?? "";
-  const ollamaUrl = getOllamaUrl();
-  const openaiKey = getOpenAIApiKey() ?? "";
-  const customBase = getOpenAIBaseUrl() ?? "";
-
-  // Priority: 1) Gemini (free, cloud, works on Vercel)  2) Ollama (free, local)  3) OpenAI (paid)
-  if (geminiKey && geminiKey.length > 10) {
-    const client = new OpenAI({
-      apiKey: geminiKey,
-      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-    });
-    return { client, isOllama: false, isGemini: true };
-  }
-
-  if (ollamaUrl) {
-    const client = new OpenAI({
-      apiKey: "ollama",
-      baseURL: `${ollamaUrl.replace(/\/$/, "")}/v1`,
-    });
-    return { client, isOllama: true, isGemini: false };
-  }
-
-  if (customBase && openaiKey) {
-    const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
-    return { client, isOllama: false, isGemini: false };
-  }
-
-  if (openaiKey && openaiKey.startsWith("sk-")) {
-    const client = new OpenAI({ apiKey: openaiKey });
-    return { client, isOllama: false, isGemini: false };
-  }
-
-  if (openaiKey) {
-    const client = new OpenAI({
-      apiKey: openaiKey,
-      ...(customBase ? { baseURL: customBase } : {}),
-    });
-    return { client, isOllama: false, isGemini: false };
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    const defaultOllama = "http://127.0.0.1:11434";
-    const client = new OpenAI({
-      apiKey: "ollama",
-      baseURL: `${defaultOllama}/v1`,
-    });
-    return { client, isOllama: true, isGemini: false };
-  }
-
-  throw new Error(
-    "No AI provider configured. Set GEMINI_API_KEY, AI_INTEGRATIONS_OPENAI_API_KEY, or OLLAMA_URL.",
-  );
+  resetProviderCache();
+  _provider = getActiveAiProvider();
 }
 
 function getClientSync(): OpenAI {
-  const geminiKey = getGeminiApiKey() ?? "";
-  const ollamaUrl = getOllamaUrl();
-  const openaiKey = getOpenAIApiKey() ?? "";
-  const customBase = getOpenAIBaseUrl() ?? "";
-  const sig = `${openaiKey}\0${customBase}\0${ollamaUrl ?? ""}\0${geminiKey}`;
+  const sig = `${process.env.AI_INTEGRATIONS_OPENAI_API_KEY ?? ""}\0${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? ""}\0${process.env.OPENAI_API_KEY ?? ""}\0${process.env.GEMINI_API_KEY ?? ""}\0${process.env.OLLAMA_URL ?? ""}`;
   if (!_client || sig !== _lastSig) {
-    const { client, isOllama, isGemini } = buildClient();
-    _client = client;
-    _isOllama = isOllama;
-    _isGemini = isGemini;
+    const built = buildAiClient();
+    _client = built.client;
+    _isOllama = built.isOllama;
+    _isGemini = built.isGemini;
+    _provider = built.provider;
     _lastSig = sig;
   }
   return _client;
 }
 
-/** True when the active client points to a local Ollama instance. */
 export function isUsingOllama(): boolean {
   getClientSync();
   return _isOllama;
 }
 
-/** True when the active client points to Google Gemini. */
 export function isUsingGemini(): boolean {
   getClientSync();
   return _isGemini;
 }
 
-/** Lazily built so DB-hydrated keys apply after instrumentation. */
+export function isUsingReplitAi(): boolean {
+  getClientSync();
+  return _provider === "replit";
+}
+
 export const openai = new Proxy({} as OpenAI, {
   get(_target, prop) {
     const client = getClientSync();
@@ -106,26 +67,20 @@ export const openai = new Proxy({} as OpenAI, {
   },
 });
 
-/** Preferred model — Gemini/Ollama-compatible. */
-export const DEFAULT_MODEL = "gemini-2.0-flash";
+export const DEFAULT_MODEL = "gpt-4o-mini";
 
-/** Runtime model selection — Gemini first, then Ollama, then OpenAI. */
 export function getDefaultModel(): string {
-  const hasGemini = !!getGeminiApiKey();
-  const hasOllamaEnv = !!getOllamaUrl();
-  const hasOpenAI = !!getOpenAIApiKey();
-  if (hasGemini) return "gemini-2.0-flash";
-  if (hasOllamaEnv || !hasOpenAI) return "llama3.2";
-  return "gpt-4o";
+  getClientSync();
+  return getDefaultModelForProvider(_provider);
 }
 
-/**
- * Orbit / Launchpad marketing steps: use only “free-tier friendly” providers.
- * - Google Gemini (`GEMINI_API_KEY` from AI Studio — generous free quota)
- * - Self-hosted Ollama (`OLLAMA_URL`)
- *
- * Paid OpenAI is intentionally excluded so Orbit never consumes `sk-*` keys here.
- */
+export function getPlayModelChain(): string[] {
+  getClientSync();
+  const chain = getModelFallbackChain(_provider);
+  const primary = getDefaultModel();
+  return [...new Set([primary, ...chain])];
+}
+
 export function isOrbitFreeAIConfigured(): boolean {
-  return !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim());
+  return isAnyAiProviderAvailable();
 }

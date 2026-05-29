@@ -1,4 +1,4 @@
-import { openai, getDefaultModel } from "@/lib/llm/openai";
+import { openai, getPlayModelChain, isAnyAiProviderAvailable } from "@/lib/llm/openai";
 import {
   ANALYSIS_ORCHESTRATOR,
   ARRANGEMENT_PLANNER,
@@ -7,6 +7,7 @@ import {
   MODE_PROMPT_ADDONS,
   fillTemplate,
 } from "./templates";
+import { enrichAnalysisHeuristically } from "./heuristic-analysis";
 import {
   isOrchestralPreset,
   ORCHESTRAL_MIDI_ADDON,
@@ -62,23 +63,39 @@ export interface PipelineStageResult<T> {
 }
 
 async function callLLM(systemPrompt: string, userInput: Record<string, unknown>): Promise<string> {
-  const filledPrompt = fillTemplate(systemPrompt, userInput);
+  if (!isAnyAiProviderAvailable()) {
+    throw new Error("no-ai-provider");
+  }
 
+  const filledPrompt = fillTemplate(systemPrompt, userInput);
   const parts = filledPrompt.split("USER INPUT (JSON):");
   const systemPart = parts[0].replace("SYSTEM:\n", "").replace("DEVELOPER:\n", "\n").trim();
   const userPart = parts[1]?.trim() || JSON.stringify(userInput, null, 2);
 
-  const completion = await openai.chat.completions.create({
-    model: getDefaultModel(),
-    messages: [
-      { role: "system", content: systemPart },
-      { role: "user", content: userPart },
-    ],
-    temperature: 1,
-    response_format: { type: "json_object" },
-  });
+  let lastError: unknown;
+  for (const model of getPlayModelChain()) {
+    try {
+      const completion = await openai.chat.completions.create(
+        {
+          model,
+          messages: [
+            { role: "system", content: systemPart },
+            { role: "user", content: userPart },
+          ],
+          temperature: 0.7,
+          response_format: { type: "json_object" },
+        },
+        { timeout: 25000 },
+      );
+      const content = completion.choices[0].message.content;
+      if (content) return content;
+    } catch (err) {
+      lastError = err;
+      console.warn(`LLM model ${model} failed, trying next:`, err);
+    }
+  }
 
-  return completion.choices[0].message.content || "{}";
+  throw lastError ?? new Error("All LLM models failed");
 }
 
 export function buildMinimalPlayAnalysis(realAnalysis: {
@@ -88,7 +105,7 @@ export function buildMinimalPlayAnalysis(realAnalysis: {
   durationSec?: number;
 }): Analysis {
   const durationSec = realAnalysis.durationSec ?? 180;
-  return {
+  const base: Analysis = {
     bpm: realAnalysis.bpm,
     time_signature: "4/4",
     key: realAnalysis.key,
@@ -99,6 +116,7 @@ export function buildMinimalPlayAnalysis(realAnalysis: {
     style_compatibility: [],
     timbre_descriptors: {},
   };
+  return enrichAnalysisHeuristically(base, durationSec);
 }
 
 function buildDspFallbackAnalysis(realAnalysis: {
