@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Apple, ArrowRight, Shield } from "lucide-react";
-import { CLUTETY_BURG, CLUTETY_COMING_SOON_PATH, CLUTETY_LOGO_PATH, CLUTETY_TEAL } from "@/lib/clutety/config";
+import {
+  CLUTETY_BURG,
+  CLUTETY_COMING_SOON_PATH,
+  CLUTETY_LOGO_PATH,
+  CLUTETY_TEAL,
+} from "@/lib/clutety/config";
 
 export const metadata: Metadata = {
   title: "Clutety — Coming Soon",

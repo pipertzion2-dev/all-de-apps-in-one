@@ -3,7 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CLUTETY_COMING_SOON_PATH, CLUTETY_LOGO_PATH, getClutetyPromoHref } from "@/lib/clutety/config";
+import {
+  CLUTETY_COMING_SOON_PATH,
+  CLUTETY_LOGO_PATH,
+  getClutetyPromoHref,
+} from "@/lib/clutety/config";
 
 const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v2";
 
