@@ -467,11 +467,24 @@ export default function SvivvaPlayPage() {
           formData.append("detectedKeyConfidence", String(clientDetection.keyConfidence));
         }
         console.log("🎵 Uploading audio:", file.name, file.size, "bytes");
+        if (file.size > 12 * 1024 * 1024) {
+          setErrorMsg("Audio file is too large. Please use a file under 12 MB.");
+          setIsAnalyzing(false);
+          return;
+        }
+
         const res = await fetch("/api/svivva-play/analyze", { method: "POST", body: formData });
-        const data = await res.json();
+        const raw = await res.text();
+        let data: { error?: string; analysis?: AnalysisResult; sessionId?: string } = {};
+        try {
+          data = raw ? JSON.parse(raw) : {};
+        } catch {
+          setErrorMsg(`Analysis failed (HTTP ${res.status}). Server returned an invalid response.`);
+          return;
+        }
         console.log("🎵 Analysis response:", data);
         if (res.status !== 200) {
-          setErrorMsg(data.error || `HTTP ${res.status}`);
+          setErrorMsg(data.error || `Analysis failed (HTTP ${res.status})`);
           console.error("Analysis HTTP error:", res.status, data);
         } else if (data.error) {
           setErrorMsg(data.error);
@@ -488,14 +501,19 @@ export default function SvivvaPlayPage() {
           }
           console.log("✅ Analysis success, key:", merged.key, "bpm:", merged.bpm);
           setAnalysis(merged);
-          setSessionId(data.sessionId);
+          setSessionId(data.sessionId ?? null);
         } else {
           console.error("Unexpected response structure:", data);
           setErrorMsg("Invalid response from analysis");
         }
       } catch (err) {
         console.error("🔴 Analysis request failed:", err);
-        setErrorMsg("Analysis failed. Please try again.");
+        const detail = err instanceof Error ? err.message : "";
+        setErrorMsg(
+          detail && !detail.includes("Failed to fetch")
+            ? `Analysis failed: ${detail}`
+            : "Analysis failed. Check your connection and try again.",
+        );
       } finally {
         setIsAnalyzing(false);
       }

@@ -8,7 +8,17 @@ import { runAnalysis } from "@/lib/svivva-play/pipeline";
 import { execFile } from "child_process";
 import { writeFile, unlink, mkdir, copyFile } from "fs/promises";
 import path from "path";
+import os from "os";
 import { analyzeWavFile } from "@/lib/svivva-play/server-audio-analysis";
+
+export const maxDuration = 60;
+export const runtime = "nodejs";
+
+const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+
+function getTempDir(): string {
+  return path.join(os.tmpdir(), "svivva-play");
+}
 
 function convertAudioToWav(inputPath: string, outputPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -84,7 +94,9 @@ function mergeDetections(
 }
 
 export async function POST(request: NextRequest) {
-  let tempFilePath: string | null = null;
+  const tempPaths: string[] = [];
+  let sessionId: string | null = null;
+
   try {
     let userId: string | null = null;
     try {
@@ -97,30 +109,46 @@ export async function POST(request: NextRequest) {
     const mode = (formData.get("mode") as string) || "composition";
     const userHint = (formData.get("userHint") as string) || "";
     const clientDetection = parseClientDetection(formData);
+
     if (!audioFile) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
-    const sessionId = uuidv4();
+    if (audioFile.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Audio file is too large. Please use a file under 12 MB." },
+        { status: 413 },
+      );
+    }
+
+    sessionId = uuidv4();
     const analysisId = uuidv4();
 
-    await db.insert(playSessions).values({
-      id: sessionId,
-      userId,
-      name: audioFile.name || "Untitled Session",
-      mode,
-      status: "analyzing",
-      sourceAudioName: audioFile.name,
-      sourceAudioDuration: null,
-      analysisId,
-    });
-
-    const tmpDir = path.join(process.cwd(), "tmp");
+    const tmpDir = getTempDir();
     await mkdir(tmpDir, { recursive: true });
     const ext = path.extname(audioFile.name) || ".wav";
-    tempFilePath = path.join(tmpDir, `${sessionId}${ext}`);
+    const tempFilePath = path.join(tmpDir, `${sessionId}${ext}`);
+    tempPaths.push(tempFilePath);
+
     const arrayBuffer = await audioFile.arrayBuffer();
     await writeFile(tempFilePath, Buffer.from(arrayBuffer));
+
+    let dbAvailable = true;
+    try {
+      await db.insert(playSessions).values({
+        id: sessionId,
+        userId,
+        name: audioFile.name || "Untitled Session",
+        mode,
+        status: "analyzing",
+        sourceAudioName: audioFile.name,
+        sourceAudioDuration: null,
+        analysisId,
+      });
+    } catch (dbErr) {
+      dbAvailable = false;
+      console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
+    }
 
     let realAnalysis: { bpm: number; key: string; keyConfidence: number } | undefined =
       clientDetection;
@@ -134,46 +162,45 @@ export async function POST(request: NextRequest) {
       await copyFile(tempFilePath, debugCopy).catch(() => {});
 
       const wavPath = path.join(tmpDir, `${sessionId}.wav`);
+      tempPaths.push(wavPath);
       let analysisPath = tempFilePath;
-      console.log("🔄 Attempting to normalize upload to WAV for analysis...");
+
       try {
         await convertAudioToWav(tempFilePath, wavPath);
         analysisPath = wavPath;
-        console.log("✅ Audio converted to WAV");
       } catch (convertErr) {
-        console.warn("⚠️ Audio conversion failed, falling back to raw upload:", convertErr);
+        console.warn("⚠️ Audio conversion failed, using raw upload:", convertErr);
       }
 
       if (!clientDetection || clientDetection.keyConfidence < 25) {
-        console.log(
-          "Running server key/tempo analysis for:",
-          audioFile.name,
-          "size:",
-          audioFile.size,
-        );
         const serverDetection = await analyzeWavFile(analysisPath);
-        console.log("✅ Server analysis succeeded:", serverDetection);
         realAnalysis = mergeDetections(clientDetection, serverDetection);
       }
     } catch (err) {
-      console.warn("⚠️ Server analysis failed:", err);
+      console.warn("⚠️ Server DSP analysis failed:", err);
       if (clientDetection) {
         realAnalysis = clientDetection;
-      } else {
-        console.log(
-          "File info - name:",
-          audioFile.name,
-          "type:",
-          audioFile.type,
-          "size:",
-          audioFile.size,
-        );
       }
     }
 
-    const dspHint = realAnalysis
-      ? `Detected BPM: ${realAnalysis.bpm}. Detected key: ${realAnalysis.key}.`
-      : "";
+    if (!realAnalysis) {
+      if (dbAvailable) {
+        await db
+          .update(playSessions)
+          .set({ status: "error" })
+          .where(eq(playSessions.id, sessionId))
+          .catch(() => {});
+      }
+      return NextResponse.json(
+        {
+          error:
+            "Could not detect key or tempo from this file. Try a shorter clip or a different format (MP3/WAV).",
+        },
+        { status: 422 },
+      );
+    }
+
+    const dspHint = `Detected BPM: ${realAnalysis.bpm}. Detected key: ${realAnalysis.key}.`;
     const combinedHint = [userHint, dspHint].filter(Boolean).join("\n");
 
     const result = await runAnalysis(
@@ -188,30 +215,39 @@ export async function POST(request: NextRequest) {
 
     if (!result.success || !result.data) {
       await db.update(playSessions).set({ status: "error" }).where(eq(playSessions.id, sessionId));
-      return NextResponse.json({ error: result.error || "Analysis failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: result.error || "Analysis failed. Check AI keys or try again." },
+        { status: 500 },
+      );
     }
 
     const analysis = result.data;
 
-    await db.insert(playAnalyses).values({
-      id: analysisId,
-      sessionId,
-      bpm: Math.round(analysis.bpm),
-      timeSignature: analysis.time_signature,
-      key: analysis.key,
-      keyConfidence: Math.round(analysis.key_confidence),
-      chords: analysis.chords as any,
-      sections: analysis.sections as any,
-      downbeats: analysis.downbeats as any,
-      styleCompatibility: analysis.style_compatibility as any,
-      timbreDescriptors: (analysis.timbre_descriptors || {}) as any,
-      status: "complete",
-    });
+    if (dbAvailable) {
+      try {
+        await db.insert(playAnalyses).values({
+          id: analysisId,
+          sessionId,
+          bpm: Math.round(analysis.bpm),
+          timeSignature: analysis.time_signature,
+          key: analysis.key,
+          keyConfidence: Math.round(analysis.key_confidence),
+          chords: analysis.chords as any,
+          sections: analysis.sections as any,
+          downbeats: analysis.downbeats as any,
+          styleCompatibility: analysis.style_compatibility as any,
+          timbreDescriptors: (analysis.timbre_descriptors || {}) as any,
+          status: "complete",
+        });
 
-    await db
-      .update(playSessions)
-      .set({ status: "analyzed", analysisId })
-      .where(eq(playSessions.id, sessionId));
+        await db
+          .update(playSessions)
+          .set({ status: "analyzed", analysisId })
+          .where(eq(playSessions.id, sessionId));
+      } catch (dbErr) {
+        console.warn("⚠️ DB analysis persist failed, returning result anyway:", dbErr);
+      }
+    }
 
     return NextResponse.json({
       sessionId,
@@ -230,12 +266,22 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Analysis error:", error);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
-  } finally {
-    if (tempFilePath) {
-      try {
-        await unlink(tempFilePath);
-      } catch {}
+    if (sessionId) {
+      await db
+        .update(playSessions)
+        .set({ status: "error" })
+        .where(eq(playSessions.id, sessionId))
+        .catch(() => {});
     }
+    const message = error instanceof Error ? error.message : "Analysis failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  } finally {
+    await Promise.all(
+      tempPaths.map((p) =>
+        unlink(p).catch(() => {
+          /* ignore cleanup errors on serverless */
+        }),
+      ),
+    );
   }
 }

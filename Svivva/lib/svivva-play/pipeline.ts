@@ -1,4 +1,4 @@
-import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { openai, getDefaultModel } from "@/lib/llm/openai";
 import {
   ANALYSIS_ORCHESTRATOR,
   ARRANGEMENT_PLANNER,
@@ -69,7 +69,7 @@ async function callLLM(systemPrompt: string, userInput: Record<string, unknown>)
   const userPart = parts[1]?.trim() || JSON.stringify(userInput, null, 2);
 
   const completion = await openai.chat.completions.create({
-    model: DEFAULT_MODEL,
+    model: getDefaultModel(),
     messages: [
       { role: "system", content: systemPart },
       { role: "user", content: userPart },
@@ -79,6 +79,25 @@ async function callLLM(systemPrompt: string, userInput: Record<string, unknown>)
   });
 
   return completion.choices[0].message.content || "{}";
+}
+
+function buildDspFallbackAnalysis(realAnalysis: {
+  bpm: number;
+  key: string;
+  keyConfidence: number;
+}): Analysis {
+  const durationSec = 180;
+  return {
+    bpm: realAnalysis.bpm,
+    time_signature: "4/4",
+    key: realAnalysis.key,
+    key_confidence: Math.max(25, realAnalysis.keyConfidence),
+    chords: [],
+    sections: [{ name: "Full", t0: 0, t1: durationSec, bars: 32 }],
+    downbeats: [],
+    style_compatibility: [],
+    timbre_descriptors: {},
+  };
 }
 
 export async function runAnalysis(
@@ -121,12 +140,32 @@ export async function runAnalysis(
       input.audio_data_sample = audioMeta.audioBase64;
     }
 
-    const raw = await callLLM(ANALYSIS_ORCHESTRATOR, input);
-    const parsed = JSON.parse(raw);
+    let raw: string;
+    try {
+      raw = await callLLM(ANALYSIS_ORCHESTRATOR, input);
+    } catch (llmError) {
+      console.error("Analysis LLM error:", llmError);
+      if (realAnalysis && (bpmValid || keyValid)) {
+        return { success: true, data: buildDspFallbackAnalysis(realAnalysis) };
+      }
+      throw llmError;
+    }
 
-    let finalBpm = parsed.bpm ?? 120;
-    let finalKey = parsed.key ?? "C major";
-    let finalKeyConfidence = parsed.key_confidence ?? parsed.keyConfidence ?? 75;
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (parseError) {
+      console.error("Analysis JSON parse error:", parseError);
+      if (realAnalysis && (bpmValid || keyValid)) {
+        return { success: true, data: buildDspFallbackAnalysis(realAnalysis) };
+      }
+      throw parseError;
+    }
+
+    let finalBpm = (parsed.bpm as number) ?? 120;
+    let finalKey = (parsed.key as string) ?? "C major";
+    let finalKeyConfidence =
+      (parsed.key_confidence as number) ?? (parsed.keyConfidence as number) ?? 75;
 
     if (bpmValid) finalBpm = realAnalysis!.bpm;
     if (keyValid) {
@@ -139,7 +178,8 @@ export async function runAnalysis(
 
     const normalized = {
       bpm: finalBpm,
-      time_signature: parsed.time_signature ?? parsed.timeSignature ?? "4/4",
+      time_signature:
+        (parsed.time_signature as string) ?? (parsed.timeSignature as string) ?? "4/4",
       key: finalKey,
       key_confidence: finalKeyConfidence,
       chords: Array.isArray(parsed.chords) ? parsed.chords : [],
@@ -160,6 +200,9 @@ export async function runAnalysis(
     return { success: true, data: validated.data, rawResponse: raw };
   } catch (error) {
     console.error("Analysis pipeline error:", error);
+    if (realAnalysis && realAnalysis.bpm >= 40 && realAnalysis.bpm <= 220) {
+      return { success: true, data: buildDspFallbackAnalysis(realAnalysis) };
+    }
     return { success: false, error: String(error) };
   }
 }
