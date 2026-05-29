@@ -9,7 +9,7 @@ import {
 } from "@/lib/clutety/config";
 
 const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v4";
-const LOGO_SRC = `${CLUTETY_CORNER_LOGO_PATH}?v=5`;
+const LOGO_SRC = `${CLUTETY_CORNER_LOGO_PATH}?v=6`;
 
 function isInternalHref(href: string): boolean {
   return href.startsWith("/") && !href.startsWith("//");

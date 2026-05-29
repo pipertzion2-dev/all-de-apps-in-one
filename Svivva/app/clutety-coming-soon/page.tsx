@@ -28,7 +28,7 @@ export default function ClutetyComingSoonPage() {
       <div className="max-w-md w-full flex flex-col items-center gap-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${CLUTETY_LOGO_PATH}?v=5`}
+          src={`${CLUTETY_LOGO_PATH}?v=6`}
           alt="Clutety"
           width={320}
           height={213}
