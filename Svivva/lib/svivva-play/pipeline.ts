@@ -8,6 +8,11 @@ import {
   fillTemplate,
 } from "./templates";
 import {
+  isOrchestralPreset,
+  ORCHESTRAL_MIDI_ADDON,
+  ORCHESTRAL_PLAN_ADDON,
+} from "./prompts/orchestral-composer";
+import {
   AnalysisSchema,
   PlanSchema,
   MidiOutputSchema,
@@ -46,6 +51,7 @@ export interface PipelineSettings {
   loopT1?: number;
   lockedNotes?: string[];
   scale?: string;
+  stylePreset?: string;
 }
 
 export interface PipelineStageResult<T> {
@@ -166,6 +172,7 @@ export async function runPlan(
 ): Promise<PipelineStageResult<Plan>> {
   try {
     const modeAddon = MODE_PROMPT_ADDONS[mode] || "";
+    const orchestralAddon = isOrchestralPreset(stylePreset) ? ORCHESTRAL_PLAN_ADDON : "";
     const constraints = buildConstraints(mode, settings);
 
     const input = {
@@ -176,7 +183,7 @@ export async function runPlan(
       constraints,
     };
 
-    const fullPrompt = ARRANGEMENT_PLANNER + "\n\n" + modeAddon;
+    const fullPrompt = ARRANGEMENT_PLANNER + "\n\n" + modeAddon + orchestralAddon;
     const raw = await callLLM(fullPrompt, input);
     const parsed = JSON.parse(raw);
 
@@ -232,7 +239,13 @@ export async function runMidiGeneration(
       },
     };
 
-    const raw = await callLLM(MIDI_GENERATOR, input);
+    const preset = settings.stylePreset;
+    const orchestralMidiAddon = isOrchestralPreset(preset) ? ORCHESTRAL_MIDI_ADDON : "";
+    const midiPrompt = orchestralMidiAddon
+      ? `${MIDI_GENERATOR}\n\n${orchestralMidiAddon}`
+      : MIDI_GENERATOR;
+
+    const raw = await callLLM(midiPrompt, input);
     const parsed = JSON.parse(raw);
 
     const normalized = {

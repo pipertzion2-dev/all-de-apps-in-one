@@ -285,6 +285,7 @@ export async function POST(request: NextRequest) {
     const planResult = await runPlan(analysisForGeneration, mode, stylePreset, {
       ...settings,
       seed,
+      stylePreset,
     });
 
     if (!planResult.success || !planResult.data) {
@@ -319,6 +320,7 @@ export async function POST(request: NextRequest) {
       {
         ...settings,
         seed,
+        stylePreset,
       },
     );
 

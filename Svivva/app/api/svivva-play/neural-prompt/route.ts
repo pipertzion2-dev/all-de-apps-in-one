@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import {
+  isOrchestralNeuralProfile,
+  isOrchestralPreset,
+  ORCHESTRAL_NEURAL_SYSTEM,
+} from "@/lib/svivva-play/prompts/orchestral-composer";
 
 interface MidiEvent {
   type: string;
@@ -40,6 +45,7 @@ interface Config {
   instruments?: string[];
   duration?: number;
   quality?: string;
+  promptProfile?: "standard" | "orchestral";
 }
 
 interface RequestBody {
@@ -59,7 +65,41 @@ interface PromptResponse {
     cfgScale: number;
     duration: number;
   };
+  orchestrationBrief?: string;
+  stemLayout?: string[];
+  humanizationNotes?: string;
+  mixRouting?: string;
 }
+
+const STANDARD_NEURAL_SYSTEM = `You are a neural audio prompt engineer specializing in generating optimized prompts for advanced audio synthesis systems like Suno, Udio, and similar neural audio models.
+
+Your task is to translate musical MIDI analysis data and stem information into rich, detailed, production-ready prompts that capture:
+1. Genre and style characteristics
+2. Instrumentation and orchestration details
+3. Tempo, rhythm feel, and groove characteristics
+4. Harmonic characteristics and chord progressions
+5. Dynamic and energy arc throughout the composition
+6. Production quality descriptors (warm, crisp, lush, clean, saturated, etc.)
+7. Reference artists/sounds when appropriate
+8. Special effects, textures, and production techniques
+
+Return a JSON object with:
+{
+  "prompt": "A detailed, evocative prompt (2-4 sentences) optimized for neural audio generation",
+  "tags": ["genre1", "mood1", "instrument1", "style1", ...],
+  "qualityScore": 0-100 estimate of how well this prompt will generate high-quality audio,
+  "modelSettings": {
+    "steps": 50-100 (inference steps, higher for complex compositions),
+    "cfgScale": 7.0-9.5 (guidance scale for adherence to prompt),
+    "duration": seconds (recommended generation duration based on composition)
+  }
+}
+
+Focus on creating prompts that are:
+- Specific and descriptive (avoid generic terms)
+- Technically grounded in the actual musical data
+- Evocative and inspiring to the model
+- Optimized for the audio generation model's strengths`;
 
 function formatStemAnalysis(stems: Stem[]): string {
   return stems
@@ -92,6 +132,13 @@ function formatSections(sections: Analysis["sections"]): string {
   return sections.map((s) => `${s.name} (${s.t0.toFixed(1)}s - ${s.t1.toFixed(1)}s)`).join(", ");
 }
 
+function useOrchestralProfile(body: RequestBody): boolean {
+  const profile = body.config?.promptProfile;
+  if (isOrchestralNeuralProfile(profile)) return true;
+  if (isOrchestralPreset(body.style)) return true;
+  return body.mode === "ensemble" && body.style === "hyperreal_orchestral";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: RequestBody = await request.json();
@@ -112,40 +159,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = `You are a neural audio prompt engineer specializing in generating optimized prompts for advanced audio synthesis systems like Suno, Udio, and similar neural audio models.
-
-Your task is to translate musical MIDI analysis data and stem information into rich, detailed, production-ready prompts that capture:
-1. Genre and style characteristics
-2. Instrumentation and orchestration details
-3. Tempo, rhythm feel, and groove characteristics
-4. Harmonic characteristics and chord progressions
-5. Dynamic and energy arc throughout the composition
-6. Production quality descriptors (warm, crisp, lush, clean, saturated, etc.)
-7. Reference artists/sounds when appropriate
-8. Special effects, textures, and production techniques
-
-Return a JSON object with:
-{
-  "prompt": "A detailed, evocative prompt (2-4 sentences) optimized for neural audio generation",
-  "tags": ["genre1", "mood1", "instrument1", "style1", ...],
-  "qualityScore": 0-100 estimate of how well this prompt will generate high-quality audio,
-  "modelSettings": {
-    "steps": 50-100 (inference steps, higher for complex compositions),
-    "cfgScale": 7.0-9.5 (guidance scale for adherence to prompt),
-    "duration": seconds (recommended generation duration based on composition)
-  }
-}
-
-Focus on creating prompts that are:
-- Specific and descriptive (avoid generic terms)
-- Technically grounded in the actual musical data
-- Evocative and inspiring to the model
-- Optimized for the audio generation model's strengths`;
+    const orchestral = useOrchestralProfile(body);
+    const systemPrompt = orchestral ? ORCHESTRAL_NEURAL_SYSTEM : STANDARD_NEURAL_SYSTEM;
 
     const userMessage = `Analyze this musical composition and generate an optimized neural audio prompt:
 
 MODE: ${mode}
 USER STYLE: ${style || "Not specified"}
+PROMPT PROFILE: ${orchestral ? "orchestral (Reich × Shaw × hyper-real stems)" : "standard"}
 
 ANALYSIS DATA:
 - BPM: ${analysis.bpm}
@@ -184,8 +205,8 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
           content: userMessage,
         },
       ],
-      temperature: 1,
-      max_tokens: 1024,
+      temperature: orchestral ? 0.85 : 1,
+      max_tokens: orchestral ? 2048 : 1024,
       response_format: { type: "json_object" },
     });
 
@@ -204,7 +225,6 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
       );
     }
 
-    // Validate response structure
     if (
       !parsedResponse.prompt ||
       !Array.isArray(parsedResponse.tags) ||
@@ -217,10 +237,8 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
       );
     }
 
-    // Ensure quality score is within bounds
     parsedResponse.qualityScore = Math.max(0, Math.min(100, parsedResponse.qualityScore));
 
-    // Ensure model settings are within reasonable bounds
     parsedResponse.modelSettings.steps = Math.max(
       20,
       Math.min(100, parsedResponse.modelSettings.steps),
@@ -234,7 +252,10 @@ Generate a comprehensive prompt optimized for neural audio generation that captu
       Math.min(600, parsedResponse.modelSettings.duration),
     );
 
-    return NextResponse.json(parsedResponse);
+    return NextResponse.json({
+      ...parsedResponse,
+      promptProfile: orchestral ? "orchestral" : "standard",
+    });
   } catch (error) {
     console.error("Neural prompt generation error:", error);
 

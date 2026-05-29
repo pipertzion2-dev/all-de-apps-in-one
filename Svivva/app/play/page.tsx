@@ -44,6 +44,10 @@ import {
 } from "lucide-react";
 import { GiSaxophone } from "react-icons/gi";
 import { getSoundEngine, type StemPlayback } from "@/lib/svivva-play/sound-engine";
+import {
+  ORCHESTRAL_STYLE_PRESET_ID,
+  isOrchestralPreset,
+} from "@/lib/svivva-play/prompts/orchestral-composer";
 import { HolographicNoise } from "@/components/holographic-noise";
 import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
 import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png";
@@ -223,6 +227,11 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
       label: "Combinatorial Harmony",
       desc: "Chord set traversal and catalog",
     },
+    {
+      id: ORCHESTRAL_STYLE_PRESET_ID,
+      label: "Prompt Orchestral",
+      desc: "Reich phasing × Shaw intimacy — hyper-real stems",
+    },
   ],
   interpolation: [
     { id: "genre_transfer", label: "Genre Transfer", desc: "Transform genre while keeping DNA" },
@@ -258,6 +267,11 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
     { id: "granular", label: "Granular Texture", desc: "Ambient pads, atmosphere" },
   ],
   ensemble: [
+    {
+      id: ORCHESTRAL_STYLE_PRESET_ID,
+      label: "Prompt Orchestral",
+      desc: "27+ stems, humanized MIDI, Reich × Shaw hybrid",
+    },
     {
       id: "cinematic_orchestra",
       label: "Cinematic Orchestra",
@@ -378,8 +392,16 @@ export default function SvivvaPlayPage() {
     tags: string[];
     qualityScore: number;
     modelSettings: { steps: number; cfgScale: number; duration: number };
+    promptProfile?: "standard" | "orchestral";
+    orchestrationBrief?: string;
+    stemLayout?: string[];
+    humanizationNotes?: string;
+    mixRouting?: string;
   } | null>(null);
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [neuralPromptProfile, setNeuralPromptProfile] = useState<"standard" | "orchestral">(
+    "standard",
+  );
   const [neuralGenre, setNeuralGenre] = useState("");
   const [neuralMood, setNeuralMood] = useState("");
   const [neuralEnergy, setNeuralEnergy] = useState("medium");
@@ -488,7 +510,10 @@ export default function SvivvaPlayPage() {
         return {
           ...base,
           vocalistEnabled,
-          ensembleSize: selectedPreset === "cinematic_orchestra" ? 40 : 12,
+          ensembleSize:
+            selectedPreset === "cinematic_orchestra" || isOrchestralPreset(selectedPreset)
+              ? 40
+              : 12,
         };
       default:
         return base;
@@ -938,6 +963,10 @@ export default function SvivvaPlayPage() {
             mood: neuralMood || undefined,
             energy: neuralEnergy,
             quality: neuralQuality,
+            promptProfile:
+              neuralPromptProfile === "orchestral" || isOrchestralPreset(selectedPreset)
+                ? "orchestral"
+                : "standard",
           },
         }),
       });
@@ -961,9 +990,22 @@ export default function SvivvaPlayPage() {
     neuralMood,
     neuralEnergy,
     neuralQuality,
+    neuralPromptProfile,
     manualKey,
     manualTempo,
   ]);
+
+  useEffect(() => {
+    if (!isOrchestralPreset(selectedPreset)) return;
+    setNeuralPromptProfile("orchestral");
+    setNeuralGenre((g) => g || "contemporary orchestral");
+    setNeuralMood((m) => m || "fragile, hypnotic, unresolved");
+    setUserPrompt(
+      (p) =>
+        p ||
+        "Reich phasing + Shaw fragile modernism. Hyper-real stems, humanized MIDI, no trailer clichés.",
+    );
+  }, [selectedPreset]);
 
   const copyNeuralPrompt = useCallback(() => {
     if (!neuralPromptResult) return;
@@ -2873,6 +2915,30 @@ export default function SvivvaPlayPage() {
                     {showNeuralPanel && (
                       <div className="mt-2 space-y-2">
                         <div>
+                          <label className="text-[9px] text-gray-400">Prompt engineer</label>
+                          <select
+                            value={neuralPromptProfile}
+                            onChange={(e) =>
+                              setNeuralPromptProfile(
+                                e.target.value === "orchestral" ? "orchestral" : "standard",
+                              )
+                            }
+                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A05068] mt-0.5 bg-gray-800/50 text-gray-200"
+                            data-testid="select-neural-prompt-profile"
+                          >
+                            <option value="standard">Standard (Suno / Udio)</option>
+                            <option value="orchestral">Prompt orchestral (Reich × Shaw)</option>
+                          </select>
+                          {neuralPromptProfile === "orchestral" && (
+                            <p className="text-[8px] text-gray-500 mt-1 leading-relaxed">
+                              Full stem roster, articulation maps, humanization, and DAW routing
+                              metadata in the neural response. Use style preset{" "}
+                              <span className="text-gray-400">Prompt Orchestral</span> when
+                              generating MIDI.
+                            </p>
+                          )}
+                        </div>
+                        <div>
                           <label className="text-[9px] text-gray-400">Genre</label>
                           <input
                             value={neuralGenre}
@@ -2923,7 +2989,11 @@ export default function SvivvaPlayPage() {
                           ) : (
                             <BrainCircuit className="w-3 h-3" />
                           )}
-                          {isGeneratingPrompt ? "Generating..." : "Generate Neural Prompt"}
+                          {isGeneratingPrompt
+                            ? "Generating..."
+                            : neuralPromptProfile === "orchestral"
+                              ? "Prompt orchestral"
+                              : "Generate Neural Prompt"}
                         </Button>
                         {stems.length === 0 && (
                           <p className="text-[9px] text-gray-500">
@@ -2979,6 +3049,49 @@ export default function SvivvaPlayPage() {
                               </div>
                               <div>Duration: {neuralPromptResult.modelSettings.duration}s</div>
                             </div>
+                            {(neuralPromptResult.promptProfile === "orchestral" ||
+                              neuralPromptProfile === "orchestral") && (
+                              <div className="space-y-1.5 pt-1 border-t border-gray-700/50">
+                                {neuralPromptResult.orchestrationBrief && (
+                                  <div>
+                                    <span className="text-[8px] font-medium text-gray-400 uppercase">
+                                      Orchestration
+                                    </span>
+                                    <p className="text-[8px] text-gray-400 leading-relaxed mt-0.5">
+                                      {neuralPromptResult.orchestrationBrief}
+                                    </p>
+                                  </div>
+                                )}
+                                {neuralPromptResult.humanizationNotes && (
+                                  <div>
+                                    <span className="text-[8px] font-medium text-gray-400 uppercase">
+                                      Humanization
+                                    </span>
+                                    <p className="text-[8px] text-gray-400 leading-relaxed mt-0.5">
+                                      {neuralPromptResult.humanizationNotes}
+                                    </p>
+                                  </div>
+                                )}
+                                {neuralPromptResult.mixRouting && (
+                                  <div>
+                                    <span className="text-[8px] font-medium text-gray-400 uppercase">
+                                      Mix / stems
+                                    </span>
+                                    <p className="text-[8px] text-gray-400 leading-relaxed mt-0.5">
+                                      {neuralPromptResult.mixRouting}
+                                    </p>
+                                  </div>
+                                )}
+                                {neuralPromptResult.stemLayout &&
+                                  neuralPromptResult.stemLayout.length > 0 && (
+                                    <div className="max-h-20 overflow-y-auto text-[7px] text-gray-500 font-mono space-y-0.5">
+                                      {neuralPromptResult.stemLayout.slice(0, 12).map((line, i) => (
+                                        <div key={i}>{line}</div>
+                                      ))}
+                                    </div>
+                                  )}
+                              </div>
+                            )}
                           </div>
                         )}
                         <a
