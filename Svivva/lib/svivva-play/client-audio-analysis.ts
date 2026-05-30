@@ -1,6 +1,9 @@
 import { analyze } from "web-audio-beat-detector";
 import {
   monoFromAudioBuffer,
+  findLoudestAnalysisWindow,
+  sliceMonoWindow,
+  emphasizePercussive,
   extractOnsetTimes,
   detectBpmAutocorrelation,
   detectBpmPeakHistogram,
@@ -20,55 +23,103 @@ export interface AudioAnalysisResult {
 
 async function decodeAudioFile(file: File): Promise<AudioBuffer> {
   const arrayBuffer = await file.arrayBuffer();
-  const audioCtx = new AudioContext();
+  const AudioCtx =
+    typeof window !== "undefined"
+      ? window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      : null;
+  if (!AudioCtx) throw new Error("Web Audio API unavailable");
+
+  const audioCtx = new AudioCtx();
   try {
+    if (audioCtx.state === "suspended") {
+      await audioCtx.resume();
+    }
     return await audioCtx.decodeAudioData(arrayBuffer.slice(0));
   } finally {
     await audioCtx.close().catch(() => {});
   }
 }
 
+function sliceAudioBuffer(
+  audioBuffer: AudioBuffer,
+  offsetSec: number,
+  durationSec: number,
+): Promise<AudioBuffer> {
+  const sampleRate = audioBuffer.sampleRate;
+  const startSample = Math.floor(offsetSec * sampleRate);
+  const frameCount = Math.min(
+    Math.floor(durationSec * sampleRate),
+    audioBuffer.length - startSample,
+  );
+  const offline = new OfflineAudioContext(
+    audioBuffer.numberOfChannels,
+    frameCount,
+    sampleRate,
+  );
+  const source = offline.createBufferSource();
+  const sliced = offline.createBuffer(
+    audioBuffer.numberOfChannels,
+    frameCount,
+    sampleRate,
+  );
+  for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+    const channel = audioBuffer.getChannelData(ch);
+    sliced.copyToChannel(channel.subarray(startSample, startSample + frameCount), ch);
+  }
+  source.buffer = sliced;
+  source.connect(offline.destination);
+  source.start(0);
+  return offline.startRendering();
+}
+
 export async function analyzeAudioBuffer(
   audioBuffer: AudioBuffer,
 ): Promise<AudioAnalysisResult | null> {
-  if (audioBuffer.duration < 1) return null;
+  if (audioBuffer.duration < 0.5) return null;
 
-  const mono = monoFromAudioBuffer(audioBuffer);
+  const fullMono = monoFromAudioBuffer(audioBuffer);
   const sampleRate = audioBuffer.sampleRate;
-  const onsetTimes = extractOnsetTimes(mono, sampleRate);
+  const window = findLoudestAnalysisWindow(fullMono, sampleRate, 45);
+  const analysisMono = sliceMonoWindow(fullMono, window.offset, window.length);
+  const percussive = emphasizePercussive(analysisMono);
+  const onsetTimes = extractOnsetTimes(percussive, sampleRate);
 
   const bpmCandidates: TempoCandidate[] = [];
+  const offsetSec = window.offset / sampleRate;
+  const windowSec = window.length / sampleRate;
 
-  try {
-    const webBpm = Math.round(await analyze(audioBuffer));
-    if (webBpm >= 40 && webBpm <= 220) {
-      bpmCandidates.push({ bpm: webBpm, weight: 1.2, source: "web-audio-beat-detector" });
+  const beatDetectorPromise = (async () => {
+    try {
+      const slice =
+        offsetSec > 0.5 || windowSec < audioBuffer.duration - 0.5
+          ? await sliceAudioBuffer(audioBuffer, offsetSec, windowSec)
+          : audioBuffer;
+      const webBpm = Math.round(await analyze(slice));
+      if (webBpm >= 40 && webBpm <= 220) {
+        return { bpm: webBpm, weight: 1.25, source: "web-audio-beat-detector" } as TempoCandidate;
+      }
+    } catch {
+      /* optional detector */
     }
-  } catch {
-    /* optional detector */
-  }
+    return null;
+  })();
 
-  const peakBpm = detectBpmPeakHistogram(mono, sampleRate);
+  const peakBpm = detectBpmPeakHistogram(percussive, sampleRate);
   if (peakBpm) {
-    bpmCandidates.push({ bpm: peakBpm, weight: 0.95, source: "peak-histogram" });
+    bpmCandidates.push({ bpm: peakBpm, weight: 1.0, source: "peak-histogram" });
   }
 
-  const autoBpm = detectBpmAutocorrelation(mono, sampleRate);
+  const autoBpm = detectBpmAutocorrelation(percussive, sampleRate);
   if (autoBpm) {
-    bpmCandidates.push({ bpm: autoBpm, weight: 0.85, source: "autocorrelation" });
+    bpmCandidates.push({ bpm: autoBpm, weight: 0.9, source: "autocorrelation" });
   }
 
-  const keyCandidates = detectKeyHybrid(mono, sampleRate);
-  const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);
+  const beatCandidate = await beatDetectorPromise;
+  if (beatCandidate) bpmCandidates.push(beatCandidate);
 
-  console.log(
-    "🎵 Hybrid tempo/key:",
-    hybrid.bpm,
-    "BPM",
-    hybrid.key,
-    "| candidates:",
-    bpmCandidates.map((c) => `${c.bpm}(${c.source})`).join(", "),
-  );
+  const keyCandidates = detectKeyHybrid(analysisMono, sampleRate);
+  const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);
 
   return {
     bpm: hybrid.bpm,

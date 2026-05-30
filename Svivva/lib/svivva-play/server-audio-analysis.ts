@@ -5,6 +5,9 @@ import {
   detectBpmPeakHistogram,
   detectKeyHybrid,
   runHybridDetection,
+  findLoudestAnalysisWindow,
+  sliceMonoWindow,
+  emphasizePercussive,
   type DetectionMeta,
   type TempoCandidate,
 } from "./tempo-key-core";
@@ -94,17 +97,20 @@ export async function analyzeWavFileHybrid(wavPath: string): Promise<ServerHybri
   const buffer = await readFile(wavPath);
   const { sampleRate, data } = parseWav(buffer);
   const durationSec = data.length / sampleRate;
-  const onsetTimes = extractOnsetTimes(data, sampleRate);
+  const window = findLoudestAnalysisWindow(data, sampleRate, 45);
+  const analysisMono = sliceMonoWindow(data, window.offset, window.length);
+  const percussive = emphasizePercussive(analysisMono);
+  const onsetTimes = extractOnsetTimes(percussive, sampleRate);
 
   const bpmCandidates: TempoCandidate[] = [];
 
-  const peakBpm = detectBpmPeakHistogram(data, sampleRate);
+  const peakBpm = detectBpmPeakHistogram(percussive, sampleRate);
   if (peakBpm) bpmCandidates.push({ bpm: peakBpm, weight: 0.95, source: "server-peak" });
 
-  const autoBpm = detectBpmAutocorrelation(data, sampleRate);
+  const autoBpm = detectBpmAutocorrelation(percussive, sampleRate);
   if (autoBpm) bpmCandidates.push({ bpm: autoBpm, weight: 0.85, source: "server-autocorr" });
 
-  const keyCandidates = detectKeyHybrid(data, sampleRate);
+  const keyCandidates = detectKeyHybrid(analysisMono, sampleRate);
   const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);
 
   return {

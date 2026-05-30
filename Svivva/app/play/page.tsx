@@ -295,6 +295,7 @@ export default function SvivvaPlayPage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioName, setAudioName] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const effectiveAnalysis = analysis;
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
@@ -310,6 +311,8 @@ export default function SvivvaPlayPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [importSeq, setImportSeq] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const [density, setDensity] = useState(50);
   const [complexity, setComplexity] = useState(50);
@@ -418,25 +421,75 @@ export default function SvivvaPlayPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number | null>(null);
+  const modeRef = useRef(mode);
+  const userPromptRef = useRef(userPrompt);
+  const analysisRunRef = useRef(0);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  useEffect(() => {
+    userPromptRef.current = userPrompt;
+  }, [userPrompt]);
 
   const handleImport = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
+  const acceptImportFile = useCallback((file: File) => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    setAudioFile(file);
+    setAudioName(file.name);
+    setAnalysis(null);
+    setSessionId(null);
+    setStems([]);
+    setPatchResult(null);
+    setPlanInfo(null);
+    setErrorMsg("");
+    setManualTempo(null);
+    setManualKey(null);
+    setIsEnriching(false);
+    setAudioUrl(URL.createObjectURL(file));
+    setImportSeq((n) => n + 1);
+  }, []);
+
   const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
+      if (file) acceptImportFile(file);
+    },
+    [acceptImportFile],
+  );
+
+  const handleDropImport = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files?.[0];
       if (!file) return;
-      setAudioFile(file);
-      setAudioName(file.name);
-      setAnalysis(null);
-      setStems([]);
-      setPatchResult(null);
-      setPlanInfo(null);
+      const isAudio =
+        file.type.startsWith("audio/") ||
+        /\.(mp3|wav|ogg|m4a|aac|flac|aiff?)$/i.test(file.name);
+      if (isAudio) acceptImportFile(file);
+      else setErrorMsg("Please drop an audio file (MP3, WAV, M4A, etc.).");
+    },
+    [acceptImportFile],
+  );
+
+  useEffect(() => {
+    if (!audioFile || importSeq === 0) return;
+
+    const runId = ++analysisRunRef.current;
+    let cancelled = false;
+
+    (async () => {
+      setIsAnalyzing(true);
+      setIsEnriching(false);
       setErrorMsg("");
-      const url = URL.createObjectURL(file);
-      setAudioUrl(url);
-      // Pre-warm the audio context on iOS while still inside a user gesture chain
+
       try {
         const { getSoundEngine } = await import("@/lib/svivva-play/sound-engine");
         await getSoundEngine().init();
@@ -444,106 +497,36 @@ export default function SvivvaPlayPage() {
         /* silent — will retry on play */
       }
 
-      setIsAnalyzing(true);
-      let clientDetection: {
-        bpm: number;
-        key: string;
-        keyConfidence: number;
-        bpmConfidence: number;
-        meta?: import("@/lib/svivva-play/tempo-key-core").DetectionMeta;
-      } | null = null;
-      try {
-        try {
-          const { analyzeAudioFile } = await import("@/lib/svivva-play/client-audio-analysis");
-          clientDetection = await analyzeAudioFile(file);
-          if (clientDetection) {
-            console.log("✅ Client key/tempo:", clientDetection);
-          }
-        } catch (clientErr) {
-          console.warn("Client key/tempo detection failed:", clientErr);
-        }
-
-        const formData = new FormData();
-        formData.append("audio", file);
-        formData.append("mode", mode);
-        if (userPrompt) formData.append("userHint", userPrompt);
-        if (clientDetection) {
-          formData.append("detectedBpm", String(clientDetection.bpm));
-          formData.append("detectedKey", clientDetection.key);
-          formData.append("detectedKeyConfidence", String(clientDetection.keyConfidence));
-          formData.append("detectedBpmConfidence", String(clientDetection.bpmConfidence));
-          if (clientDetection.meta) {
-            formData.append("detectionMeta", JSON.stringify(clientDetection.meta));
-          }
-        }
-        console.log("🎵 Uploading audio:", file.name, file.size, "bytes");
-        if (file.size > 12 * 1024 * 1024) {
-          setErrorMsg("Audio file is too large. Please use a file under 12 MB.");
+      const { runImportAnalysis } = await import("@/lib/svivva-play/run-import-analysis");
+      const result = await runImportAnalysis({
+        file: audioFile,
+        mode: modeRef.current,
+        userHint: userPromptRef.current,
+        onInstantResult: (instant) => {
+          if (cancelled || runId !== analysisRunRef.current) return;
+          setAnalysis(instant);
           setIsAnalyzing(false);
-          return;
-        }
+          setIsEnriching(true);
+        },
+      });
 
-        const res = await fetch("/api/svivva-play/analyze", { method: "POST", body: formData });
-        const raw = await res.text();
-        let data: { error?: string; analysis?: AnalysisResult; sessionId?: string } = {};
-        try {
-          data = raw ? JSON.parse(raw) : {};
-        } catch {
-          setErrorMsg(`Analysis failed (HTTP ${res.status}). Server returned an invalid response.`);
-          return;
-        }
-        console.log("🎵 Analysis response:", data);
-        if (res.status !== 200) {
-          setErrorMsg(data.error || `Analysis failed (HTTP ${res.status})`);
-          console.error("Analysis HTTP error:", res.status, data);
-        } else if (data.error) {
-          setErrorMsg(data.error);
-          console.error("Analysis error:", data.error);
-        } else if (data.analysis) {
-          console.log("✅ Analysis success, key:", data.analysis.key, "bpm:", data.analysis.bpm);
-          setAnalysis(data.analysis);
-          setSessionId(data.sessionId ?? null);
-        } else {
-          console.error("Unexpected response structure:", data);
-          setErrorMsg("Invalid response from analysis");
-        }
-      } catch (err) {
-        console.error("🔴 Analysis request failed:", err);
-        if (clientDetection) {
-          setAnalysis({
-            bpm: clientDetection.bpm,
-            key: clientDetection.key,
-            keyConfidence: clientDetection.keyConfidence,
-            timeSignature: "4/4",
-            chords: [],
-            sections: [
-              {
-                name: "Full",
-                t0: 0,
-                t1: clientDetection.meta?.durationSec ?? 180,
-                bars: 32,
-              },
-            ],
-            downbeats: [],
-            styleCompatibility: [],
-          });
-          setErrorMsg(
-            "Server analysis unavailable — showing local tempo/key detection. Generation may be limited until the server responds.",
-          );
-        } else {
-          const detail = err instanceof Error ? err.message : "";
-          setErrorMsg(
-            detail && !detail.includes("Failed to fetch")
-              ? `Analysis failed: ${detail}`
-              : "Analysis failed. Check your connection and try again.",
-          );
-        }
-      } finally {
-        setIsAnalyzing(false);
+      if (cancelled || runId !== analysisRunRef.current) return;
+
+      if (result.analysis) {
+        setAnalysis(result.analysis);
+        setSessionId(result.sessionId);
       }
-    },
-    [mode, userPrompt],
-  );
+      setErrorMsg(result.warning || result.error || "");
+    })().finally(() => {
+      if (cancelled || runId !== analysisRunRef.current) return;
+      setIsAnalyzing(false);
+      setIsEnriching(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [audioFile, importSeq]);
 
   const buildSettings = useCallback(() => {
     const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
@@ -1628,10 +1611,18 @@ export default function SvivvaPlayPage() {
               border: "3px solid #3a3a3a",
             }}
           >
-            <div className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 flex-shrink-0">
+            <div
+              className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 flex-shrink-0"
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragOver(true);
+              }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={handleDropImport}
+            >
               <div className="flex items-center gap-3">
                 <div
-                  className="flex-1 rounded-md px-3 py-1.5 sm:py-2 flex flex-col gap-1 min-w-0"
+                  className={`flex-1 rounded-md px-3 py-1.5 sm:py-2 flex flex-col gap-1 min-w-0 transition-colors ${isDragOver ? "ring-2 ring-[#A05068]/60" : ""}`}
                   style={{
                     background: "linear-gradient(180deg, #111, #0a0a0a)",
                     boxShadow: "inset 2px 2px 6px rgba(0,0,0,0.8)",
@@ -1650,6 +1641,11 @@ export default function SvivvaPlayPage() {
                         >
                           {audioName}
                         </span>
+                        {isAnalyzing && (
+                          <Badge className="bg-amber-900/30 text-amber-300 text-[8px] border-amber-700/40 py-0 animate-pulse">
+                            Analyzing…
+                          </Badge>
+                        )}
                         {effectiveAnalysis && (
                           <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
                             <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">
@@ -1788,7 +1784,6 @@ export default function SvivvaPlayPage() {
                   }}
                 >
                   {!audioFile &&
-                    mode !== "composition" &&
                     !isAnalyzing &&
                     stems.length === 0 &&
                     !patchResult && (
@@ -1803,31 +1798,63 @@ export default function SvivvaPlayPage() {
                           {MODE_CONFIG[mode].description}
                         </p>
 
-                        <div className="w-full max-w-lg mb-3 sm:mb-4">
-                          <textarea
-                            value={userPrompt}
-                            onChange={(e) => setUserPrompt(e.target.value)}
-                            placeholder="Describe what you want to create... e.g. 'ethereal ambient pads with shimmering arpeggios in D minor'"
-                            className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A05068] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
-                            data-testid="input-prompt-home"
-                          />
-                        </div>
+                        {mode !== "composition" && (
+                          <div className="w-full max-w-lg mb-3 sm:mb-4">
+                            <textarea
+                              value={userPrompt}
+                              onChange={(e) => setUserPrompt(e.target.value)}
+                              placeholder="Describe what you want to create... e.g. 'ethereal ambient pads with shimmering arpeggios in D minor'"
+                              className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A05068] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
+                              data-testid="input-prompt-home"
+                            />
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleImport}
+                          className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A05068] text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                          data-testid="button-drop-import"
+                        >
+                          <Upload className="w-4 h-4 inline mr-2" />
+                          Import audio — tempo &amp; key analyze automatically
+                        </button>
 
                         <p className="text-[10px] text-gray-500 max-w-sm">
-                          Use the Import button above to analyze key, tempo, chords, and structure.
-                          Then generate professional MIDI output.
+                          Drop a file on the bar above, or click Import. Analysis starts immediately.
                         </p>
                       </div>
                     )}
 
-                  {isAnalyzing && (
+                  {audioFile && !effectiveAnalysis && !isAnalyzing && !isGenerating && (
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                      <AlertTriangle className="w-10 h-10 text-amber-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-200 mb-1">Analysis Incomplete</h3>
+                      <p className="text-sm text-gray-400 mb-4 max-w-sm">
+                        {errorMsg ||
+                          "Could not read tempo or key from this file. Try MP3/WAV, or a shorter clip."}
+                      </p>
+                      <button
+                        onClick={handleImport}
+                        className="px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider text-gray-200"
+                        style={{
+                          background: "linear-gradient(180deg, #444, #333)",
+                          border: "2px solid #555",
+                        }}
+                      >
+                        Try Another File
+                      </button>
+                    </div>
+                  )}
+
+                  {isAnalyzing && !effectiveAnalysis && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                       <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">Analyzing Audio</h3>
                       <p className="text-sm text-gray-400">
-                        Detecting key, tempo, chords, sections, and timbral characteristics...
+                        Detecting tempo and key in your browser…
                         <span className="block text-[11px] text-gray-500 mt-1">
-                          Key and tempo are analyzed in your browser first for accuracy.
+                          Results appear in seconds — chord map refines in the background.
                         </span>
                       </p>
                     </div>
@@ -1849,6 +1876,14 @@ export default function SvivvaPlayPage() {
                     !patchResult &&
                     !isGenerating && (
                       <div className="flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto">
+                        {isEnriching && (
+                          <div className="mb-3 p-2.5 rounded-lg bg-[#A05068]/10 border border-[#A05068]/25 flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 text-[#B87888] animate-spin flex-shrink-0" />
+                            <p className="text-[11px] text-gray-400">
+                              Refining chord map and structure in the cloud…
+                            </p>
+                          </div>
+                        )}
                         <div className="mb-5">
                           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                             Analysis

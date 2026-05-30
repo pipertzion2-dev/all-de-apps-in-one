@@ -112,8 +112,151 @@ export function monoFromAudioBuffer(audioBuffer: AudioBuffer, maxSeconds = 90): 
   return mono;
 }
 
-/** Low-pass filtered envelope peaks → onset times in seconds. */
-export function extractOnsetTimes(mono: Float32Array, sampleRate: number): number[] {
+/** Skip silence and pick the loudest contiguous window for stable tempo/key reads. */
+export function findLoudestAnalysisWindow(
+  mono: Float32Array,
+  sampleRate: number,
+  windowSec = 45,
+): { offset: number; length: number } {
+  const windowSamples = Math.min(mono.length, Math.floor(sampleRate * windowSec));
+  if (windowSamples <= sampleRate) {
+    return { offset: 0, length: mono.length };
+  }
+
+  const hop = Math.floor(sampleRate * 2);
+  let bestOffset = 0;
+  let bestEnergy = -Infinity;
+
+  for (let offset = 0; offset + windowSamples <= mono.length; offset += hop) {
+    let energy = 0;
+    const step = Math.max(1, Math.floor(windowSamples / 512));
+    for (let i = offset; i < offset + windowSamples; i += step) {
+      energy += mono[i] * mono[i];
+    }
+    if (energy > bestEnergy) {
+      bestEnergy = energy;
+      bestOffset = offset;
+    }
+  }
+
+  return { offset: bestOffset, length: windowSamples };
+}
+
+export function sliceMonoWindow(
+  mono: Float32Array,
+  offset: number,
+  length: number,
+): Float32Array {
+  const end = Math.min(mono.length, offset + length);
+  return mono.subarray(offset, end);
+}
+
+/** Percussive emphasis — improves onset clarity for tempo. */
+export function emphasizePercussive(mono: Float32Array, blockSize = 512): Float32Array {
+  const out = new Float32Array(mono.length);
+  const half = Math.floor(blockSize / 2);
+  for (let i = 0; i < mono.length; i++) {
+    const start = Math.max(0, i - half);
+    const end = Math.min(mono.length, i + half);
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += Math.abs(mono[j]);
+    const localMean = sum / (end - start);
+    out[i] = Math.max(0, mono[i] - localMean * 0.85);
+  }
+  return out;
+}
+
+/** Harmonic emphasis — suppresses transients for cleaner key reads. */
+export function emphasizeHarmonic(mono: Float32Array, blockSize = 2048): Float32Array {
+  const out = new Float32Array(mono.length);
+  const half = Math.floor(blockSize / 2);
+  for (let i = 0; i < mono.length; i++) {
+    const start = Math.max(0, i - half);
+    const end = Math.min(mono.length, i + half);
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += mono[j];
+    out[i] = sum / (end - start);
+  }
+  return out;
+}
+
+function pickOnsetPeaks(flux: Float32Array, fluxRate: number): number[] {
+  let maxFlux = 0;
+  for (let i = 0; i < flux.length; i++) {
+    if (flux[i] > maxFlux) maxFlux = flux[i];
+  }
+  if (maxFlux === 0) return [];
+
+  const threshold = maxFlux * 0.18;
+  const minDist = Math.max(1, Math.round((fluxRate * 60) / 220));
+  const peaks: number[] = [];
+
+  for (let i = 2; i < flux.length - 2; i++) {
+    if (
+      flux[i] > threshold &&
+      flux[i] > flux[i - 1] &&
+      flux[i] > flux[i - 2] &&
+      flux[i] >= flux[i + 1] &&
+      flux[i] >= flux[i + 2]
+    ) {
+      if (peaks.length === 0 || i - peaks[peaks.length - 1] >= minDist) {
+        peaks.push(i);
+      }
+    }
+  }
+
+  return peaks.map((p) => p / fluxRate);
+}
+
+/** Spectral-flux onsets — sharper transient detection than RMS envelope alone. */
+export function extractOnsetTimesSpectralFlux(mono: Float32Array, sampleRate: number): number[] {
+  const fftSize = 2048;
+  const hop = 512;
+  const frames = Math.floor((mono.length - fftSize) / hop);
+  if (frames < 8) return [];
+
+  const hann = new Float64Array(fftSize);
+  for (let i = 0; i < fftSize; i++) {
+    hann[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (fftSize - 1)));
+  }
+
+  const flux = new Float32Array(frames);
+  let prevMag: Float64Array | null = null;
+
+  for (let frame = 0; frame < frames; frame++) {
+    const offset = frame * hop;
+    const real = new Float64Array(fftSize);
+    const imag = new Float64Array(fftSize);
+    for (let i = 0; i < fftSize; i++) {
+      real[i] = (mono[offset + i] || 0) * hann[i];
+    }
+    fftInPlace(real, imag, fftSize);
+
+    const mag = new Float64Array(fftSize / 2);
+    for (let i = 0; i < fftSize / 2; i++) {
+      mag[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
+    }
+
+    if (prevMag) {
+      let sum = 0;
+      for (let i = 8; i < mag.length; i++) {
+        const d = mag[i] - prevMag[i];
+        if (d > 0) sum += d;
+      }
+      flux[frame] = sum;
+    }
+    prevMag = mag;
+  }
+
+  const fluxRate = sampleRate / hop;
+  const peaks = pickOnsetPeaks(flux, fluxRate);
+  if (peaks.length >= 4) return peaks;
+
+  return extractOnsetTimesEnvelope(mono, sampleRate);
+}
+
+/** RMS envelope peaks → onset times in seconds (fallback). */
+export function extractOnsetTimesEnvelope(mono: Float32Array, sampleRate: number): number[] {
   const windowMs = 10;
   const windowSamples = Math.max(1, Math.round((sampleRate * windowMs) / 1000));
   const envLength = Math.floor(mono.length / windowSamples);
@@ -129,32 +272,13 @@ export function extractOnsetTimes(mono: Float32Array, sampleRate: number): numbe
     envelope[i] = Math.sqrt(sum / windowSamples);
   }
 
-  let maxEnv = 0;
-  for (let i = 0; i < envelope.length; i++) {
-    if (envelope[i] > maxEnv) maxEnv = envelope[i];
-  }
-  if (maxEnv === 0) return [];
-
   const envRate = 1000 / windowMs;
-  const threshold = maxEnv * 0.25;
-  const minDist = Math.max(1, Math.round((envRate * 60) / 220));
+  return pickOnsetPeaks(envelope, envRate);
+}
 
-  const peaks: number[] = [];
-  for (let i = 2; i < envelope.length - 2; i++) {
-    if (
-      envelope[i] > threshold &&
-      envelope[i] > envelope[i - 1] &&
-      envelope[i] > envelope[i - 2] &&
-      envelope[i] >= envelope[i + 1] &&
-      envelope[i] >= envelope[i + 2]
-    ) {
-      if (peaks.length === 0 || i - peaks[peaks.length - 1] >= minDist) {
-        peaks.push(i);
-      }
-    }
-  }
-
-  return peaks.map((p) => p / envRate);
+/** Primary onset extractor — spectral flux with envelope fallback. */
+export function extractOnsetTimes(mono: Float32Array, sampleRate: number): number[] {
+  return extractOnsetTimesSpectralFlux(mono, sampleRate);
 }
 
 export function scoreTempoAlignment(onsetTimes: number[], bpm: number): number {
@@ -212,7 +336,23 @@ export function detectBpmBeatGridSearch(onsetTimes: number[]): number | null {
     }
   }
 
-  return bestScore > 0.12 ? bestBpm : null;
+  if (bestScore <= 0.12) return null;
+  return refineBpmFine(onsetTimes, bestBpm);
+}
+
+/** Sub-BPM refinement around the coarse grid winner. */
+export function refineBpmFine(onsetTimes: number[], coarseBpm: number): number {
+  let bestBpm = coarseBpm;
+  let bestScore = -Infinity;
+  for (let bpm = coarseBpm - 2; bpm <= coarseBpm + 2; bpm += 0.5) {
+    const alignment = scoreTempoAlignment(onsetTimes, bpm);
+    const score = alignment * tempoPrior(bpm);
+    if (score > bestScore) {
+      bestScore = score;
+      bestBpm = bpm;
+    }
+  }
+  return Math.round(bestBpm);
 }
 
 export function finalizeHybridFromMeta(
@@ -381,21 +521,22 @@ function detectKeyFromSegment(
 }
 
 export function detectKeyHybrid(mono: Float32Array, sampleRate: number): KeyCandidate[] {
-  const analyzeLength = Math.min(mono.length, sampleRate * 60);
+  const harmonic = emphasizeHarmonic(mono);
+  const analyzeLength = Math.min(harmonic.length, sampleRate * 60);
   const segmentLen = Math.floor(analyzeLength / 4);
   const offsets = [0, segmentLen, segmentLen * 2, segmentLen * 3];
   const candidates: KeyCandidate[] = [];
 
   for (let i = 0; i < offsets.length; i++) {
-    const start = Math.floor((mono.length - analyzeLength) / 2) + offsets[i];
-    const len = Math.min(segmentLen, mono.length - start);
+    const start = Math.floor((harmonic.length - analyzeLength) / 2) + offsets[i];
+    const len = Math.min(segmentLen, harmonic.length - start);
     if (len <= 4096) continue;
-    const { key, confidence } = detectKeyFromSegment(mono, sampleRate, start, len);
+    const { key, confidence } = detectKeyFromSegment(harmonic, sampleRate, start, len);
     candidates.push({ key, confidence, source: `segment-${i + 1}` });
   }
 
   if (candidates.length === 0) {
-    const full = detectKeyFromSegment(mono, sampleRate, 0, mono.length);
+    const full = detectKeyFromSegment(harmonic, sampleRate, 0, harmonic.length);
     return [{ ...full, source: "full" }];
   }
   return candidates;
