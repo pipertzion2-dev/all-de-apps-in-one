@@ -325,18 +325,21 @@ export async function runMidiGeneration(
             name: String(s.name || "Untitled"),
             midi_events: Array.isArray(s.midi_events)
               ? s.midi_events
-                  .filter(
-                    (e: any) =>
+                  .filter((e: Record<string, unknown>) => {
+                    const start = e.startBeat ?? e.start_beat;
+                    const dur = e.duration ?? e.duration_beats;
+                    return (
                       typeof e.note === "number" &&
-                      typeof e.startBeat === "number" &&
-                      typeof e.duration === "number",
-                  )
-                  .map((e: any) => ({
-                    note: Math.max(0, Math.min(127, e.note)),
-                    velocity: Math.max(1, Math.min(127, e.velocity || 80)),
-                    startBeat: Math.max(0, e.startBeat),
-                    duration: Math.max(0.01, e.duration),
-                    channel: Math.max(0, Math.min(15, e.channel || 0)),
+                      typeof start === "number" &&
+                      typeof dur === "number"
+                    );
+                  })
+                  .map((e: Record<string, unknown>) => ({
+                    note: Math.max(0, Math.min(127, Number(e.note))),
+                    velocity: Math.max(1, Math.min(127, Number(e.velocity || 80))),
+                    startBeat: Math.max(0, Number(e.startBeat ?? e.start_beat)),
+                    duration: Math.max(0.01, Number(e.duration ?? e.duration_beats)),
+                    channel: Math.max(0, Math.min(15, Number(e.channel || 0))),
                   }))
               : [],
             expression: {

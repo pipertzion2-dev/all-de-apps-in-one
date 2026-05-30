@@ -321,6 +321,7 @@ export async function POST(request: NextRequest) {
       sessionId,
       analysisId,
       analysis: toApiAnalysis(analysis),
+      persisted: dbAvailable,
     });
   } catch (error) {
     console.error("Analysis error:", error);

@@ -86,7 +86,7 @@ export async function runImportAnalysis(options: {
           analysis: buildInstantPlayAnalysis(clientDetection),
           sessionId: null,
           warning:
-            "Cloud enrichment unavailable — local tempo/key detection is active. MIDI generation may require retrying.",
+            "Cloud enrichment unavailable — local tempo/key detection is active. You can still generate MIDI.",
         };
       }
       return {
@@ -103,7 +103,7 @@ export async function runImportAnalysis(options: {
           sessionId: null,
           warning:
             data.error ||
-            "Cloud enrichment unavailable — local tempo/key detection is active. Try again for MIDI generation.",
+            "Cloud enrichment unavailable — local tempo/key detection is active. You can still generate MIDI.",
         };
       }
       return {
@@ -136,7 +136,7 @@ export async function runImportAnalysis(options: {
         analysis: buildInstantPlayAnalysis(clientDetection),
         sessionId: null,
         warning:
-          "Server analysis unavailable — showing local tempo/key detection. Retry import for MIDI generation.",
+          "Server analysis unavailable — showing local tempo/key detection. You can still generate and export MIDI.",
       };
     }
     const detail = err instanceof Error ? err.message : "";

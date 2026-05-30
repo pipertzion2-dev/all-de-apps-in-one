@@ -11,7 +11,17 @@ import {
   type PipelineSettings,
 } from "@/lib/svivva-play/pipeline";
 import type { Analysis } from "@/lib/svivva-play/schemas";
-import { generateNeoSoulChords, getProgressionLabels } from "@/lib/svivva-play/chord-engine";
+import {
+  applyChordEditsToAnalysis,
+  playViewToAnalysis,
+} from "@/lib/svivva-play/analysis-utils";
+import {
+  generateDeterministicChordStems,
+  persistGenerationBundle,
+  type GeneratedStemResult,
+} from "@/lib/svivva-play/generate-helpers";
+import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
+import type { PlayAnalysisView } from "@/lib/svivva-play/instant-analysis";
 
 function parseRootFromKey(key: string): string {
   const m = (key || "").match(/^([A-G][b#]?)/);
@@ -41,7 +51,6 @@ function meendPitchbendForEvents(
     const end = Math.max(0, e.startBeat + d * 0.98);
     out.push({ beat: start, value: 0 }, { beat: mid, value: 850 }, { beat: end, value: 0 });
   }
-  // Sort + lightly dedupe (keep first entry for a beat)
   out.sort((a, b) => a.beat - b.beat);
   const dedup: typeof out = [];
   for (const p of out) {
@@ -51,62 +60,81 @@ function meendPitchbendForEvents(
   return dedup;
 }
 
+async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
+  const sessions = await db.select().from(playSessions).where(eq(playSessions.id, sessionId));
+  if (sessions.length === 0) return null;
+  const session = sessions[0];
+  if (!session.analysisId) return null;
+
+  const analyses = await db
+    .select()
+    .from(playAnalyses)
+    .where(eq(playAnalyses.id, session.analysisId));
+  if (!analyses[0]) return null;
+
+  const a = analyses[0];
+  return {
+    bpm: a.bpm || 120,
+    time_signature: a.timeSignature || "4/4",
+    key: a.key || "C major",
+    key_confidence: a.keyConfidence || 75,
+    chords: (a.chords as Analysis["chords"]) || [],
+    sections: (a.sections as Analysis["sections"]) || [],
+    downbeats: (a.downbeats as number[]) || [],
+    style_compatibility: (a.styleCompatibility as string[]) || [],
+    timbre_descriptors: (a.timbreDescriptors as Record<string, unknown>) || {},
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
       sessionId,
+      inlineAnalysis,
       mode,
       stylePreset,
       quality,
       settings = {},
+      manualKey,
+      manualTempo,
+      chordEdits,
     } = body as {
-      sessionId: string;
+      sessionId?: string;
+      inlineAnalysis?: PlayAnalysisView;
       mode: PlayMode;
       stylePreset: string;
       quality: "preview" | "full";
       settings: PipelineSettings;
+      manualKey?: string | null;
+      manualTempo?: number | null;
+      chordEdits?: Record<number, string>;
     };
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "sessionId required" }, { status: 400 });
-    }
-
-    const sessions = await db.select().from(playSessions).where(eq(playSessions.id, sessionId));
-    if (sessions.length === 0) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
-    }
-
-    const session = sessions[0];
-
     let analysisData: Analysis | null = null;
-    if (session.analysisId) {
-      const analyses = await db
-        .select()
-        .from(playAnalyses)
-        .where(eq(playAnalyses.id, session.analysisId));
-      if (analyses[0]) {
-        const a = analyses[0];
-        analysisData = {
-          bpm: a.bpm || 120,
-          time_signature: a.timeSignature || "4/4",
-          key: a.key || "C major",
-          key_confidence: a.keyConfidence || 75,
-          chords: (a.chords as any) || [],
-          sections: (a.sections as any) || [],
-          downbeats: (a.downbeats as any) || [],
-          style_compatibility: (a.styleCompatibility as any) || [],
-          timbre_descriptors: (a.timbreDescriptors as any) || {},
-        };
-      }
+    let resolvedSessionId = sessionId ?? null;
+
+    if (inlineAnalysis) {
+      analysisData = playViewToAnalysis(inlineAnalysis, {
+        bpm: manualTempo,
+        key: manualKey,
+      });
+    } else if (sessionId) {
+      analysisData = await loadAnalysisFromSession(sessionId);
     }
 
     if (!analysisData) {
-      return NextResponse.json({ error: "No analysis found for this session" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No analysis found. Import audio and wait for analysis to finish." },
+        { status: 400 },
+      );
     }
+
+    analysisData = applyChordEditsToAnalysis(analysisData, chordEdits);
 
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
+    const renderQuality = quality || "preview";
 
     const analysisForGeneration: Analysis =
       mode === "solo" && (settings.meend ?? false)
@@ -120,26 +148,69 @@ export async function POST(request: NextRequest) {
           }
         : analysisData;
 
-    await db.insert(playGenerations).values({
-      id: generationId,
-      sessionId,
-      mode: mode || session.mode,
-      status: "planning",
-      renderQuality: quality || "preview",
-      seed,
-    });
+    const compingPattern = (
+      settings.compingPattern === "rhythmic_stabs" ||
+      settings.compingPattern === "arpeggiated"
+        ? settings.compingPattern
+        : "sustained_pads"
+    ) as "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
+
+    const finishWithStems = async (
+      stems: GeneratedStemResult[],
+      plan: Record<string, unknown>,
+      pipeline: { stage: string; stages: string[] },
+      extra?: Record<string, unknown>,
+    ) => {
+      if (resolvedSessionId) {
+        try {
+          await persistGenerationBundle(db, playGenerations, playStems, {
+            generationId,
+            sessionId: resolvedSessionId,
+            mode: mode || "chords",
+            quality: renderQuality,
+            seed,
+            stems,
+            plan,
+          });
+        } catch (dbErr) {
+          console.warn("⚠️ Generation DB persist failed (stems still returned):", dbErr);
+        }
+      }
+
+      return NextResponse.json({
+        generationId,
+        stems,
+        plan,
+        qualityTier: "professional",
+        pipeline,
+        persisted: Boolean(resolvedSessionId),
+        ...extra,
+      });
+    };
 
     if (mode === "patch") {
-      const patchResult = await runPatchDesign(analysisData, {
-        ...settings,
-        seed,
-      });
+      if (!resolvedSessionId) {
+        return NextResponse.json(
+          { error: "Patch design requires a saved session. Re-import your audio." },
+          { status: 400 },
+        );
+      }
 
+      try {
+        await db.insert(playGenerations).values({
+          id: generationId,
+          sessionId: resolvedSessionId,
+          mode: mode || "patch",
+          status: "planning",
+          renderQuality,
+          seed,
+        });
+      } catch (dbErr) {
+        console.warn("⚠️ Patch generation record insert failed:", dbErr);
+      }
+
+      const patchResult = await runPatchDesign(analysisData, { ...settings, seed });
       if (!patchResult.success || !patchResult.data) {
-        await db
-          .update(playGenerations)
-          .set({ status: "failed" })
-          .where(eq(playGenerations.id, generationId));
         return NextResponse.json(
           { error: patchResult.error || "Patch design failed" },
           { status: 500 },
@@ -148,26 +219,28 @@ export async function POST(request: NextRequest) {
 
       const patchData = patchResult.data;
       const patchId = uuidv4();
-
-      await db.insert(playPatches).values({
-        id: patchId,
-        sessionId,
-        name: patchData.name || "Untitled Patch",
-        synthFamily: patchData.synth_family || "subtractive",
-        patchData: patchData as any,
-        instructions: patchData.instructions || "",
-        macros: patchData.macros as any,
-        status: "complete",
-      });
-
-      await db
-        .update(playGenerations)
-        .set({
+      try {
+        await db.insert(playPatches).values({
+          id: patchId,
+          sessionId: resolvedSessionId,
+          name: patchData.name || "Untitled Patch",
+          synthFamily: patchData.synth_family || "subtractive",
+          patchData: patchData as any,
+          instructions: patchData.instructions || "",
+          macros: patchData.macros as any,
           status: "complete",
-          plan: patchData as any,
-          completedAt: new Date(),
-        })
-        .where(eq(playGenerations.id, generationId));
+        });
+        await db
+          .update(playGenerations)
+          .set({
+            status: "complete",
+            plan: patchData as Record<string, unknown>,
+            completedAt: new Date(),
+          })
+          .where(eq(playGenerations.id, generationId));
+      } catch (dbErr) {
+        console.warn("⚠️ Patch persist failed:", dbErr);
+      }
 
       return NextResponse.json({
         generationId,
@@ -177,110 +250,32 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ── Deterministic chord engine (bypasses LLM) ──────────────────────────
+    // Deterministic chord engine — always works without LLM
     if (mode === "chords") {
-      const progressionSeed = seed % 5;
-      const totalBars = quality === "full" ? 16 : 8;
-      const chordStems = generateNeoSoulChords({
-        key: analysisData.key,
-        bpm: analysisData.bpm,
-        barsPerChord: 2,
-        totalBars,
-        pattern: "sustained_pads",
-        progressionSeed,
-        includeBass: true,
-      });
-
-      const chordNames = getProgressionLabels(analysisData.key, progressionSeed);
-
-      const stemResults: {
-        id: string;
-        name: string;
-        role: string;
-        register: string;
-        instrumentHint: string;
-        muted: boolean;
-        soloed: boolean;
-        pan: number;
-        gainDb: number;
-        midiEvents: unknown[];
-        expression: unknown;
-        articulations: string[];
-        qualityTier: string;
-      }[] = [];
-
-      for (const stem of chordStems) {
-        const stemId = uuidv4();
-        const events = stem.midiEvents.map((e) => ({
-          note: e.note,
-          velocity: e.velocity,
-          start_beat: e.startBeat,
-          duration_beats: e.duration,
-          channel: e.channel,
-        }));
-
-        await db.insert(playStems).values({
-          id: stemId,
-          generationId,
-          name: stem.name,
-          role: stem.role,
-          instrumentHint: stem.instrumentHint,
-          midiEvents: events as any,
-          expression: {} as any,
-          pan: stem.pan,
-          gainDb: stem.gainDb,
-          muted: false,
-          soloed: false,
-        });
-
-        stemResults.push({
-          id: stemId,
-          name: stem.name,
-          role: stem.role,
-          register: stem.role === "bass" ? "low" : "mid",
-          instrumentHint: stem.instrumentHint,
-          muted: false,
-          soloed: false,
-          pan: stem.pan,
-          gainDb: stem.gainDb,
-          midiEvents: events,
-          expression: {},
-          articulations: [],
-          qualityTier: "professional",
-        });
-      }
-
-      await db
-        .update(playGenerations)
-        .set({
-          status: "complete",
-          plan: {
-            chordProgression: chordNames,
-            key: analysisData.key,
-            bpm: analysisData.bpm,
-          } as any,
-          midiData: { stems: chordStems } as any,
-          completedAt: new Date(),
-        })
-        .where(eq(playGenerations.id, generationId));
-
-      return NextResponse.json({
-        generationId,
-        stems: stemResults,
-        plan: {
-          stemCount: stemResults.length,
-          chordProgression: chordNames,
-          key: analysisData.key,
-          bpm: analysisData.bpm,
-          form: { total_bars: totalBars },
-          harmonyRules: `Neo-soul voicings in ${analysisData.key} (Glasper/Lins style)`,
-          meendApplicableStems: [],
-        },
-        qualityTier: "professional",
-        pipeline: { stage: "complete", stages: ["chord_engine"] },
-      });
+      const result = generateDeterministicChordStems(
+        analysisData,
+        renderQuality,
+        seed,
+        compingPattern,
+      );
+      return finishWithStems(result.stems, result.plan, result.pipeline);
     }
-    // ──────────────────────────────────────────────────────────────────────
+
+    // LLM path with deterministic fallback
+    if (resolvedSessionId) {
+      try {
+        await db.insert(playGenerations).values({
+          id: generationId,
+          sessionId: resolvedSessionId,
+          mode: mode || "composition",
+          status: "planning",
+          renderQuality,
+          seed,
+        });
+      } catch (dbErr) {
+        console.warn("⚠️ Generation record insert failed:", dbErr);
+      }
+    }
 
     const planResult = await runPlan(analysisForGeneration, mode, stylePreset, {
       ...settings,
@@ -289,69 +284,56 @@ export async function POST(request: NextRequest) {
     });
 
     if (!planResult.success || !planResult.data) {
-      await db
-        .update(playGenerations)
-        .set({ status: "failed" })
-        .where(eq(playGenerations.id, generationId));
-      return NextResponse.json(
-        { error: planResult.error || "Arrangement planning failed" },
-        { status: 500 },
+      console.warn("LLM plan failed, using deterministic chord arrangement:", planResult.error);
+      const fallback = generateDeterministicChordStems(
+        analysisData,
+        renderQuality,
+        seed,
+        compingPattern,
       );
+      return finishWithStems(fallback.stems, {
+        ...fallback.plan,
+        harmonyRules: `Deterministic fallback (LLM unavailable): ${fallback.plan.harmonyRules}`,
+      }, fallback.pipeline);
     }
 
     const plan = planResult.data;
 
-    await db
-      .update(playGenerations)
-      .set({
-        status: "generating_midi",
-        plan: plan as any,
-      })
-      .where(eq(playGenerations.id, generationId));
+    if (resolvedSessionId) {
+      try {
+        await db
+          .update(playGenerations)
+          .set({ status: "generating_midi", plan: plan as Record<string, unknown> })
+          .where(eq(playGenerations.id, generationId));
+      } catch {
+        /* non-fatal */
+      }
+    }
 
-    const barCount = quality === "full" ? plan.form?.total_bars || 64 : 16;
+    const barCount = renderQuality === "full" ? plan.form?.total_bars || 64 : 16;
     const midiResult = await runMidiGeneration(
       analysisForGeneration,
       plan,
-      {
-        startBar: 0,
-        endBar: barCount,
-      },
-      {
-        ...settings,
-        seed,
-        stylePreset,
-      },
+      { startBar: 0, endBar: barCount },
+      { ...settings, seed, stylePreset },
     );
 
     if (!midiResult.success || !midiResult.data) {
-      await db
-        .update(playGenerations)
-        .set({ status: "failed" })
-        .where(eq(playGenerations.id, generationId));
-      return NextResponse.json(
-        { error: midiResult.error || "MIDI generation failed" },
-        { status: 500 },
+      console.warn("LLM MIDI failed, using deterministic chord arrangement:", midiResult.error);
+      const fallback = generateDeterministicChordStems(
+        analysisData,
+        renderQuality,
+        seed,
+        compingPattern,
       );
+      return finishWithStems(fallback.stems, {
+        ...fallback.plan,
+        harmonyRules: `Deterministic fallback (MIDI LLM unavailable): ${fallback.plan.harmonyRules}`,
+      }, fallback.pipeline);
     }
 
     const midiOutput = midiResult.data;
-
-    const stemResults: {
-      id: string;
-      name: string;
-      role: string;
-      register: string;
-      instrumentHint: string;
-      muted: boolean;
-      soloed: boolean;
-      pan: number;
-      gainDb: number;
-      midiEvents: unknown[];
-      expression: unknown;
-      articulations: string[];
-      qualityTier: string;
-    }[] = [];
+    const stemResults: GeneratedStemResult[] = [];
 
     for (let i = 0; i < midiOutput.stems.length; i++) {
       const midiStem = midiOutput.stems[i];
@@ -365,37 +347,40 @@ export async function POST(request: NextRequest) {
           planStem?.role === "vocal" ||
           i === 0)
       ) {
-        const pb = Array.isArray((midiStem as any).expression?.pitchbend)
-          ? (midiStem as any).expression.pitchbend
+        const pb = Array.isArray((midiStem as { expression?: { pitchbend?: unknown[] } }).expression?.pitchbend)
+          ? (midiStem as { expression: { pitchbend: unknown[] } }).expression.pitchbend
           : [];
-        if (
-          pb.length === 0 &&
-          Array.isArray(midiStem.midi_events) &&
-          midiStem.midi_events.length > 0
-        ) {
-          (midiStem as any).expression = {
-            ...(midiStem as any).expression,
-            pitchbend: meendPitchbendForEvents(midiStem.midi_events),
+        const events = normalizeMidiEvents(midiStem.midi_events);
+        if (pb.length === 0 && events.length > 0) {
+          (midiStem as { expression?: Record<string, unknown> }).expression = {
+            ...(midiStem as { expression?: Record<string, unknown> }).expression,
+            pitchbend: meendPitchbendForEvents(events),
           };
         }
       }
 
       const stemId = uuidv4();
-      const events = midiStem.midi_events;
+      const events = normalizeMidiEvents(midiStem.midi_events);
 
-      await db.insert(playStems).values({
-        id: stemId,
-        generationId,
-        name: midiStem.name,
-        role: planStem?.role || "melody",
-        instrumentHint: planStem?.instrument_hint || "Piano",
-        midiEvents: events as any,
-        expression: midiStem.expression as any,
-        pan: planStem?.pan || 0,
-        gainDb: 0,
-        muted: false,
-        soloed: false,
-      });
+      if (resolvedSessionId) {
+        try {
+          await db.insert(playStems).values({
+            id: stemId,
+            generationId,
+            name: midiStem.name,
+            role: planStem?.role || "melody",
+            instrumentHint: planStem?.instrument_hint || "Piano",
+            midiEvents: events as unknown[],
+            expression: midiStem.expression as any,
+            pan: planStem?.pan || 0,
+            gainDb: 0,
+            muted: false,
+            soloed: false,
+          });
+        } catch (dbErr) {
+          console.warn("⚠️ Stem persist failed:", dbErr);
+        }
+      }
 
       stemResults.push({
         id: stemId,
@@ -408,22 +393,26 @@ export async function POST(request: NextRequest) {
         pan: planStem?.pan || 0,
         gainDb: 0,
         midiEvents: events,
-        expression: midiStem.expression,
+        expression: (midiStem.expression as Record<string, unknown>) || {},
         articulations: planStem?.articulations || [],
         qualityTier: "professional",
       });
     }
 
-    await db
-      .update(playGenerations)
-      .set({
-        status: "complete",
-        midiData: { stems: midiOutput.stems } as any,
-        completedAt: new Date(),
-      })
-      .where(eq(playGenerations.id, generationId));
-
-    const isMeendApplicable = plan.meend_applicable_stems || [];
+    if (resolvedSessionId) {
+      try {
+        await db
+          .update(playGenerations)
+          .set({
+            status: "complete",
+            midiData: { stems: midiOutput.stems } as Record<string, unknown>,
+            completedAt: new Date(),
+          })
+          .where(eq(playGenerations.id, generationId));
+      } catch {
+        /* non-fatal */
+      }
+    }
 
     return NextResponse.json({
       generationId,
@@ -433,15 +422,13 @@ export async function POST(request: NextRequest) {
         form: plan.form,
         dynamics: plan.dynamics,
         harmonyRules: plan.harmony_rules,
-        meendApplicableStems: isMeendApplicable,
+        meendApplicableStems: plan.meend_applicable_stems || [],
       },
       qualityTier: "professional",
       qualityNote:
         "MIDI output is professional quality. Audio preview rendering is available as BETA.",
-      pipeline: {
-        stage: "complete",
-        stages: ["plan", "midi_generation"],
-      },
+      pipeline: { stage: "complete", stages: ["plan", "midi_generation"] },
+      persisted: Boolean(resolvedSessionId),
     });
   } catch (error) {
     console.error("Generation error:", error);

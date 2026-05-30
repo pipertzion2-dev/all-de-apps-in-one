@@ -62,6 +62,7 @@ import {
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
 import { SvivvaPlayStage3D, type PlayStageModel } from "@/components/svivva-play-stage-3d";
+import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
 
@@ -297,7 +298,8 @@ export default function SvivvaPlayPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const effectiveAnalysis = analysis;
+  const effectiveAnalysis =
+    analysis ?? (mode === "composition" && !audioFile ? FALLBACK_ANALYSIS : null);
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
@@ -310,6 +312,7 @@ export default function SvivvaPlayPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [warningMsg, setWarningMsg] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [importSeq, setImportSeq] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -489,6 +492,8 @@ export default function SvivvaPlayPage() {
       setIsAnalyzing(true);
       setIsEnriching(false);
       setErrorMsg("");
+      setWarningMsg("");
+      setErrorMsg("");
 
       try {
         const { getSoundEngine } = await import("@/lib/svivva-play/sound-engine");
@@ -514,9 +519,10 @@ export default function SvivvaPlayPage() {
 
       if (result.analysis) {
         setAnalysis(result.analysis);
-        setSessionId(result.sessionId);
+        setSessionId(result.sessionId ?? null);
       }
-      setErrorMsg(result.warning || result.error || "");
+      setWarningMsg(result.warning || "");
+      setErrorMsg(result.error || "");
     })().finally(() => {
       if (cancelled || runId !== analysisRunRef.current) return;
       setIsAnalyzing(false);
@@ -598,7 +604,10 @@ export default function SvivvaPlayPage() {
 
   const handleGenerate = useCallback(
     async (quality: "preview" | "full" = "preview") => {
-      if (!sessionId || !analysis) return;
+      if (!analysis) {
+        setErrorMsg("Import audio first — tempo and key are detected automatically on import.");
+        return;
+      }
       setIsGenerating(true);
       setPipelineStage(
         mode === "patch" ? "Designing patch..." : "Stage 1: Planning arrangement...",
@@ -607,11 +616,24 @@ export default function SvivvaPlayPage() {
       setPatchResult(null);
       setPlanInfo(null);
       setErrorMsg("");
+      setWarningMsg("");
       setSoloTakes([]);
       setActiveTake(0);
 
       try {
         const settings = buildSettings();
+
+        const generatePayload = {
+          sessionId: sessionId ?? undefined,
+          inlineAnalysis: analysis,
+          mode,
+          stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
+          quality,
+          manualKey,
+          manualTempo,
+          settings,
+          chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,
+        };
 
         if (mode === "solo") {
           setPipelineStage("Generating solo takes...");
@@ -622,12 +644,8 @@ export default function SvivvaPlayPage() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                sessionId,
-                mode,
-                stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
-                quality,
+                ...generatePayload,
                 settings: { ...settings, seed: takeSeed },
-                chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,
               }),
             });
             const data = await res.json();
@@ -665,14 +683,7 @@ export default function SvivvaPlayPage() {
           const res = await fetch("/api/svivva-play/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sessionId,
-              mode,
-              stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
-              quality,
-              settings,
-              chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,
-            }),
+            body: JSON.stringify(generatePayload),
           });
           const data = await res.json();
           if (data.error) {
@@ -717,7 +728,7 @@ export default function SvivvaPlayPage() {
         setIsGenerating(false);
       }
     },
-    [sessionId, analysis, mode, selectedPreset, buildSettings, useSeed, versionHistory, chordEdits],
+    [sessionId, analysis, mode, selectedPreset, buildSettings, useSeed, versionHistory, chordEdits, manualKey, manualTempo],
   );
 
   const handleRegenerateStem = useCallback(
@@ -799,7 +810,48 @@ export default function SvivvaPlayPage() {
 
   const handleExport = useCallback(
     async (format: "json" | "midi" | "patch" = "json") => {
-      if (!sessionId) return;
+      const bpm = manualTempo ?? analysis?.bpm ?? 120;
+      const downloadName = `svivva-play-${mode}-${Date.now()}`;
+
+      if (format === "midi" && stems.length > 0) {
+        try {
+          const res = sessionId
+            ? await fetch(`/api/svivva-play/export?sessionId=${sessionId}&format=midi`)
+            : await fetch("/api/svivva-play/export", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  stems: stems.map((s) => ({
+                    name: s.name,
+                    midiEvents: s.midiEvents,
+                  })),
+                  bpm,
+                  filename: downloadName,
+                }),
+              });
+          if (!res.ok) {
+            setErrorMsg("MIDI export failed.");
+            return;
+          }
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${downloadName}.mid`;
+          a.click();
+          URL.revokeObjectURL(url);
+          return;
+        } catch (err) {
+          console.error("MIDI export failed:", err);
+          setErrorMsg("MIDI export failed.");
+          return;
+        }
+      }
+
+      if (!sessionId) {
+        setErrorMsg("Session export requires cloud analysis. Generate MIDI first, then export.");
+        return;
+      }
       try {
         const res = await fetch(`/api/svivva-play/export?sessionId=${sessionId}&format=${format}`);
         const blob = await res.blob();
@@ -813,7 +865,7 @@ export default function SvivvaPlayPage() {
         console.error("Export failed:", err);
       }
     },
-    [sessionId],
+    [sessionId, stems, analysis?.bpm, manualTempo, mode],
   );
 
   const buildStemPlaybacks = useCallback((currentStems: StemData[]): StemPlayback[] => {
@@ -821,7 +873,7 @@ export default function SvivvaPlayPage() {
       name: s.name,
       role: s.role,
       instrumentHint: s.instrumentHint,
-      midiEvents: (s.midiEvents || []) as any[],
+      midiEvents: normalizeMidiEvents(s.midiEvents),
       muted: s.muted,
       soloed: s.soloed,
       pan: s.pan,
@@ -963,6 +1015,7 @@ export default function SvivvaPlayPage() {
     setSessionId(null);
     setIsPlaying(false);
     setErrorMsg("");
+    setWarningMsg("");
     setEngineReady(false);
     setPlaybackPos(0);
     setPlaybackDuration(0);
@@ -1860,6 +1913,13 @@ export default function SvivvaPlayPage() {
                     </div>
                   )}
 
+                  {warningMsg && !isAnalyzing && !isGenerating && (
+                    <div className="mx-4 mt-4 p-3 bg-amber-900/20 border border-amber-700/30 rounded-lg flex items-start gap-2">
+                      <Info className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-amber-300/90">{warningMsg}</p>
+                    </div>
+                  )}
+
                   {errorMsg && !isAnalyzing && !isGenerating && (
                     <div className="mx-4 mt-4 p-3 bg-red-900/20 border border-red-700/30 rounded-lg flex items-start gap-2">
                       <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
@@ -1888,6 +1948,13 @@ export default function SvivvaPlayPage() {
                           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                             Analysis
                           </h3>
+                          {audioFile && analysis && (
+                            <p className="text-[10px] text-gray-500 mb-3 leading-relaxed">
+                              Tempo and key detected. Choose a mode tab, pick a style preset, then
+                              Generate to build multi-stem MIDI (chords, bass, pads). Export .mid
+                              after generation.
+                            </p>
+                          )}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                             <AnalysisCard
                               label="Key"
@@ -2487,9 +2554,31 @@ export default function SvivvaPlayPage() {
                               {reichType === "counterpoint" ? "Counterpoint" : "Hocket"}
                             </Button>
                           ) : mode === "chords" ? (
-                            <div className="text-[10px] text-gray-500">
-                              Select chords above to explore voicings
-                            </div>
+                            <>
+                              <Button
+                                onClick={() => handleGenerate("preview")}
+                                className="gap-1.5 sm:gap-2 text-white text-xs sm:text-sm holo-gradient"
+                                style={{
+                                  background:
+                                    "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                }}
+                                disabled={isGenerating || !analysis}
+                                data-testid="button-generate-chords-preview"
+                              >
+                                <HolographicNoise />
+                                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Generate Neo-Soul
+                                (8 bars)
+                              </Button>
+                              <Button
+                                onClick={() => handleGenerate("full")}
+                                variant="outline"
+                                className="gap-1.5 sm:gap-2 border-gray-700 text-xs sm:text-sm"
+                                disabled={isGenerating || !analysis}
+                                data-testid="button-generate-chords-full"
+                              >
+                                <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Full (16 bars)
+                              </Button>
+                            </>
                           ) : (
                             <>
                               <Button
@@ -2499,7 +2588,7 @@ export default function SvivvaPlayPage() {
                                   background:
                                     "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
                                 }}
-                                disabled={isGenerating}
+                                disabled={isGenerating || !analysis}
                                 data-testid="button-generate-preview"
                               >
                                 <HolographicNoise />
@@ -2510,7 +2599,7 @@ export default function SvivvaPlayPage() {
                                 onClick={() => handleGenerate("full")}
                                 variant="outline"
                                 className="gap-1.5 sm:gap-2 border-gray-700 text-xs sm:text-sm"
-                                disabled={isGenerating}
+                                disabled={isGenerating || !analysis}
                                 data-testid="button-generate-full"
                               >
                                 <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Full Render
