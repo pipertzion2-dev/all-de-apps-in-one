@@ -14,6 +14,7 @@ export async function GET() {
     database: {
       connected: boolean;
       latencyMs?: number;
+      playTablesReady?: boolean;
       error?: string;
     };
     environment: {
@@ -45,9 +46,18 @@ export async function GET() {
     await db.execute(sql`SELECT 1`);
     const latencyMs = Date.now() - start;
 
+    let playTablesReady = false;
+    try {
+      await db.execute(sql`SELECT 1 FROM play_sessions LIMIT 1`);
+      playTablesReady = true;
+    } catch {
+      playTablesReady = false;
+    }
+
     health.database = {
       connected: true,
       latencyMs,
+      playTablesReady,
     };
   } catch (error) {
     health.status = "error";

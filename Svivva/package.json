@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
-    "build:vercel": "npm run verify && next build",
+    "build:vercel": "node scripts/vercel-prebuild.mjs && npm run verify && next build",
+    "db:play": "node scripts/play-db-migrate.mjs",
     "vercel-build": "next build",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
