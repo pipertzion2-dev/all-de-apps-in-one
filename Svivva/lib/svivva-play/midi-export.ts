@@ -39,10 +39,7 @@ export function buildMidiFile(
     for (const evt of sorted) {
       try {
         const startTick = Math.round(evt.startBeat * ticksPerBeat);
-        const durationTick = Math.max(
-          ticksPerBeat / 4,
-          Math.round(evt.duration * ticksPerBeat),
-        );
+        const durationTick = Math.max(ticksPerBeat / 4, Math.round(evt.duration * ticksPerBeat));
         const delay = Math.max(0, startTick - currentTick);
         track.addNote(channel, evt.note, durationTick, delay, evt.velocity);
         currentTick = startTick + durationTick;

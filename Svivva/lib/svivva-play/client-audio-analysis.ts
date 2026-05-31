@@ -52,17 +52,9 @@ function sliceAudioBuffer(
     Math.floor(durationSec * sampleRate),
     audioBuffer.length - startSample,
   );
-  const offline = new OfflineAudioContext(
-    audioBuffer.numberOfChannels,
-    frameCount,
-    sampleRate,
-  );
+  const offline = new OfflineAudioContext(audioBuffer.numberOfChannels, frameCount, sampleRate);
   const source = offline.createBufferSource();
-  const sliced = offline.createBuffer(
-    audioBuffer.numberOfChannels,
-    frameCount,
-    sampleRate,
-  );
+  const sliced = offline.createBuffer(audioBuffer.numberOfChannels, frameCount, sampleRate);
   for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
     const channel = audioBuffer.getChannelData(ch);
     sliced.copyToChannel(channel.subarray(startSample, startSample + frameCount), ch);

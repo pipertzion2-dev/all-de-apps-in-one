@@ -55,8 +55,6 @@ export function applyChordEditsToAnalysis(
   }
   return {
     ...analysis,
-    chords: analysis.chords.map((c, i) =>
-      chordEdits[i] ? { ...c, symbol: chordEdits[i] } : c,
-    ),
+    chords: analysis.chords.map((c, i) => (chordEdits[i] ? { ...c, symbol: chordEdits[i] } : c)),
   };
 }

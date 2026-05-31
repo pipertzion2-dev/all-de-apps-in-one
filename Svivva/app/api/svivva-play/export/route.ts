@@ -31,7 +31,14 @@ export async function GET(request: NextRequest) {
       .where(eq(playGenerations.sessionId, sessionId));
     const latestGen = generations[generations.length - 1];
 
-    let stems: { name: string; role: string; instrumentHint: string | null; midiEvents: unknown; pan: number; gainDb: number }[] = [];
+    let stems: {
+      name: string;
+      role: string;
+      instrumentHint: string | null;
+      midiEvents: unknown;
+      pan: number;
+      gainDb: number;
+    }[] = [];
     if (latestGen) {
       stems = await db.select().from(playStems).where(eq(playStems.generationId, latestGen.id));
     }
@@ -136,7 +143,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { stems, bpm = 120, filename = "svivva-play" } = body as {
+    const {
+      stems,
+      bpm = 120,
+      filename = "svivva-play",
+    } = body as {
       stems?: { name: string; midiEvents?: unknown[] }[];
       bpm?: number;
       filename?: string;

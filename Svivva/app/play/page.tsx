@@ -474,8 +474,7 @@ export default function SvivvaPlayPage() {
       const file = e.dataTransfer.files?.[0];
       if (!file) return;
       const isAudio =
-        file.type.startsWith("audio/") ||
-        /\.(mp3|wav|ogg|m4a|aac|flac|aiff?)$/i.test(file.name);
+        file.type.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac|aiff?)$/i.test(file.name);
       if (isAudio) acceptImportFile(file);
       else setErrorMsg("Please drop an audio file (MP3, WAV, M4A, etc.).");
     },
@@ -728,7 +727,18 @@ export default function SvivvaPlayPage() {
         setIsGenerating(false);
       }
     },
-    [sessionId, analysis, mode, selectedPreset, buildSettings, useSeed, versionHistory, chordEdits, manualKey, manualTempo],
+    [
+      sessionId,
+      analysis,
+      mode,
+      selectedPreset,
+      buildSettings,
+      useSeed,
+      versionHistory,
+      chordEdits,
+      manualKey,
+      manualTempo,
+    ],
   );
 
   const handleRegenerateStem = useCallback(
@@ -1836,53 +1846,52 @@ export default function SvivvaPlayPage() {
                     border: "1px solid #1a1a1a",
                   }}
                 >
-                  {!audioFile &&
-                    !isAnalyzing &&
-                    stems.length === 0 &&
-                    !patchResult && (
-                      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 text-center overflow-y-auto">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700/50 flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0">
-                          <ModeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" />
-                        </div>
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-200 mb-1">
-                          {MODE_CONFIG[mode].label}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-gray-400 max-w-md mb-3 sm:mb-4">
-                          {MODE_CONFIG[mode].description}
-                        </p>
-
-                        {mode !== "composition" && (
-                          <div className="w-full max-w-lg mb-3 sm:mb-4">
-                            <textarea
-                              value={userPrompt}
-                              onChange={(e) => setUserPrompt(e.target.value)}
-                              placeholder="Describe what you want to create... e.g. 'ethereal ambient pads with shimmering arpeggios in D minor'"
-                              className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A05068] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
-                              data-testid="input-prompt-home"
-                            />
-                          </div>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={handleImport}
-                          className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A05068] text-xs text-gray-400 hover:text-gray-200 transition-colors"
-                          data-testid="button-drop-import"
-                        >
-                          <Upload className="w-4 h-4 inline mr-2" />
-                          Import audio — tempo &amp; key analyze automatically
-                        </button>
-
-                        <p className="text-[10px] text-gray-500 max-w-sm">
-                          Drop a file on the bar above, or click Import. Analysis starts immediately.
-                        </p>
+                  {!audioFile && !isAnalyzing && stems.length === 0 && !patchResult && (
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 text-center overflow-y-auto">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700/50 flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0">
+                        <ModeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" />
                       </div>
-                    )}
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-200 mb-1">
+                        {MODE_CONFIG[mode].label}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-400 max-w-md mb-3 sm:mb-4">
+                        {MODE_CONFIG[mode].description}
+                      </p>
+
+                      {mode !== "composition" && (
+                        <div className="w-full max-w-lg mb-3 sm:mb-4">
+                          <textarea
+                            value={userPrompt}
+                            onChange={(e) => setUserPrompt(e.target.value)}
+                            placeholder="Describe what you want to create... e.g. 'ethereal ambient pads with shimmering arpeggios in D minor'"
+                            className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A05068] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
+                            data-testid="input-prompt-home"
+                          />
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleImport}
+                        className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A05068] text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                        data-testid="button-drop-import"
+                      >
+                        <Upload className="w-4 h-4 inline mr-2" />
+                        Import audio — tempo &amp; key analyze automatically
+                      </button>
+
+                      <p className="text-[10px] text-gray-500 max-w-sm">
+                        Drop a file on the bar above, or click Import. Analysis starts immediately.
+                      </p>
+                    </div>
+                  )}
 
                   {audioFile && !effectiveAnalysis && !isAnalyzing && !isGenerating && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                       <AlertTriangle className="w-10 h-10 text-amber-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-200 mb-1">Analysis Incomplete</h3>
+                      <h3 className="text-lg font-semibold text-gray-200 mb-1">
+                        Analysis Incomplete
+                      </h3>
                       <p className="text-sm text-gray-400 mb-4 max-w-sm">
                         {errorMsg ||
                           "Could not read tempo or key from this file. Try MP3/WAV, or a shorter clip."}

@@ -18,16 +18,11 @@ export function normalizeMidiEvent(raw: unknown): NormalizedMidiEvent | null {
   }
   return {
     note: Math.max(0, Math.min(127, Math.round(note))),
-    velocity: Math.max(
-      1,
-      Math.min(127, Math.round(Number(e.velocity ?? 80) || 80)),
-    ),
+    velocity: Math.max(1, Math.min(127, Math.round(Number(e.velocity ?? 80) || 80))),
     startBeat: Math.max(0, startBeat),
     duration: Math.max(0.01, duration),
     channel:
-      e.channel != null
-        ? Math.max(0, Math.min(15, Math.round(Number(e.channel))))
-        : undefined,
+      e.channel != null ? Math.max(0, Math.min(15, Math.round(Number(e.channel)))) : undefined,
   };
 }
 

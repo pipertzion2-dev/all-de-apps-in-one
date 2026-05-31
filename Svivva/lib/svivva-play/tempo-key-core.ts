@@ -142,11 +142,7 @@ export function findLoudestAnalysisWindow(
   return { offset: bestOffset, length: windowSamples };
 }
 
-export function sliceMonoWindow(
-  mono: Float32Array,
-  offset: number,
-  length: number,
-): Float32Array {
+export function sliceMonoWindow(mono: Float32Array, offset: number, length: number): Float32Array {
   const end = Math.min(mono.length, offset + length);
   return mono.subarray(offset, end);
 }

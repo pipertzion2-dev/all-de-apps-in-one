@@ -11,10 +11,7 @@ import {
   type PipelineSettings,
 } from "@/lib/svivva-play/pipeline";
 import type { Analysis } from "@/lib/svivva-play/schemas";
-import {
-  applyChordEditsToAnalysis,
-  playViewToAnalysis,
-} from "@/lib/svivva-play/analysis-utils";
+import { applyChordEditsToAnalysis, playViewToAnalysis } from "@/lib/svivva-play/analysis-utils";
 import {
   generateDeterministicChordStems,
   persistGenerationBundle,
@@ -149,8 +146,7 @@ export async function POST(request: NextRequest) {
         : analysisData;
 
     const compingPattern = (
-      settings.compingPattern === "rhythmic_stabs" ||
-      settings.compingPattern === "arpeggiated"
+      settings.compingPattern === "rhythmic_stabs" || settings.compingPattern === "arpeggiated"
         ? settings.compingPattern
         : "sustained_pads"
     ) as "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
@@ -291,10 +287,14 @@ export async function POST(request: NextRequest) {
         seed,
         compingPattern,
       );
-      return finishWithStems(fallback.stems, {
-        ...fallback.plan,
-        harmonyRules: `Deterministic fallback (LLM unavailable): ${fallback.plan.harmonyRules}`,
-      }, fallback.pipeline);
+      return finishWithStems(
+        fallback.stems,
+        {
+          ...fallback.plan,
+          harmonyRules: `Deterministic fallback (LLM unavailable): ${fallback.plan.harmonyRules}`,
+        },
+        fallback.pipeline,
+      );
     }
 
     const plan = planResult.data;
@@ -326,10 +326,14 @@ export async function POST(request: NextRequest) {
         seed,
         compingPattern,
       );
-      return finishWithStems(fallback.stems, {
-        ...fallback.plan,
-        harmonyRules: `Deterministic fallback (MIDI LLM unavailable): ${fallback.plan.harmonyRules}`,
-      }, fallback.pipeline);
+      return finishWithStems(
+        fallback.stems,
+        {
+          ...fallback.plan,
+          harmonyRules: `Deterministic fallback (MIDI LLM unavailable): ${fallback.plan.harmonyRules}`,
+        },
+        fallback.pipeline,
+      );
     }
 
     const midiOutput = midiResult.data;
@@ -347,7 +351,9 @@ export async function POST(request: NextRequest) {
           planStem?.role === "vocal" ||
           i === 0)
       ) {
-        const pb = Array.isArray((midiStem as { expression?: { pitchbend?: unknown[] } }).expression?.pitchbend)
+        const pb = Array.isArray(
+          (midiStem as { expression?: { pitchbend?: unknown[] } }).expression?.pitchbend,
+        )
           ? (midiStem as { expression: { pitchbend: unknown[] } }).expression.pitchbend
           : [];
         const events = normalizeMidiEvents(midiStem.midi_events);
