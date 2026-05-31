@@ -13,11 +13,16 @@ import { analyzeWavFileHybrid } from "@/lib/svivva-play/server-audio-analysis";
 import { mergeDetectionMeta, refineTempoKeyWithAI } from "@/lib/svivva-play/refine-tempo-key-ai";
 import { finalizeHybridFromMeta, type DetectionMeta } from "@/lib/svivva-play/tempo-key-core";
 import { getActiveAiProvider, getRuntimeLabel } from "@/lib/llm/openai";
+import {
+  isClientDetectionReliable,
+  MAX_CLOUD_UPLOAD_BYTES,
+  formatMegabytes,
+} from "@/lib/svivva-play/upload-limits";
 
 export const maxDuration = 120;
 export const runtime = "nodejs";
 
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = MAX_CLOUD_UPLOAD_BYTES;
 
 function getTempDir(): string {
   return path.join(os.tmpdir(), "svivva-play");
@@ -120,49 +125,30 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File | null;
+    const metadataOnly = formData.get("metadataOnly") === "1";
+    const sourceName =
+      (formData.get("sourceName") as string)?.trim() || audioFile?.name || "Untitled Session";
     const mode = (formData.get("mode") as string) || "composition";
     const userHint = (formData.get("userHint") as string) || "";
     const clientDetection = parseClientDetection(formData);
     const clientDetectionMeta = parseClientDetectionMeta(formData);
+    const fastMode = formData.get("fast") === "1";
 
-    if (!audioFile) {
+    if (!audioFile && !(metadataOnly && fastMode && clientDetection)) {
       return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
     }
 
-    if (audioFile.size > MAX_UPLOAD_BYTES) {
+    if (audioFile && audioFile.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json(
-        { error: "Audio file is too large. Please use a file under 12 MB." },
+        {
+          error: `Upload clip is too large (max ${formatMegabytes(MAX_UPLOAD_BYTES)}).`,
+        },
         { status: 413 },
       );
     }
 
     sessionId = uuidv4();
     const analysisId = uuidv4();
-
-    const tmpDir = getTempDir();
-    await mkdir(tmpDir, { recursive: true });
-    const ext = path.extname(audioFile.name) || ".wav";
-    const tempFilePath = path.join(tmpDir, `${sessionId}${ext}`);
-    tempPaths.push(tempFilePath);
-
-    const arrayBuffer = await audioFile.arrayBuffer();
-    await writeFile(tempFilePath, Buffer.from(arrayBuffer));
-
-    try {
-      await db.insert(playSessions).values({
-        id: sessionId,
-        userId,
-        name: audioFile.name || "Untitled Session",
-        mode,
-        status: "analyzing",
-        sourceAudioName: audioFile.name,
-        sourceAudioDuration: null,
-        analysisId,
-      });
-    } catch (dbErr) {
-      dbAvailable = false;
-      console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
-    }
 
     let detectionMeta: DetectionMeta = clientDetectionMeta ?? {
       bpmCandidates: [],
@@ -184,6 +170,103 @@ export async function POST(request: NextRequest) {
         detectionMeta.durationSec = clientDetectionMeta.durationSec;
       }
       console.log("✅ Client key/tempo received:", clientDetection);
+    }
+
+    const clientReliable = !!clientDetection && isClientDetectionReliable(clientDetection);
+
+    if (fastMode && clientReliable && clientDetection) {
+      try {
+        await db.insert(playSessions).values({
+          id: sessionId,
+          userId,
+          name: sourceName,
+          mode,
+          status: "analyzed",
+          sourceAudioName: sourceName,
+          sourceAudioDuration: detectionMeta.durationSec
+            ? Math.round(detectionMeta.durationSec)
+            : null,
+          analysisId,
+        });
+      } catch (dbErr) {
+        dbAvailable = false;
+        console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
+      }
+
+      const realAnalysis = {
+        bpm: clientDetection.bpm,
+        key: clientDetection.key,
+        keyConfidence: clientDetection.keyConfidence,
+        bpmConfidence: clientDetection.bpmConfidence ?? clientDetection.keyConfidence,
+      };
+      const analysis = buildMinimalPlayAnalysis({
+        bpm: realAnalysis.bpm,
+        key: realAnalysis.key,
+        keyConfidence: realAnalysis.keyConfidence,
+        durationSec: detectionMeta.durationSec,
+      });
+
+      if (dbAvailable && sessionId) {
+        try {
+          await db.insert(playAnalyses).values({
+            id: analysisId,
+            sessionId,
+            bpm: Math.round(analysis.bpm),
+            timeSignature: analysis.time_signature,
+            key: analysis.key,
+            keyConfidence: Math.round(analysis.key_confidence),
+            chords: analysis.chords as any,
+            sections: analysis.sections as any,
+            downbeats: analysis.downbeats as any,
+            styleCompatibility: analysis.style_compatibility as any,
+            timbreDescriptors: (analysis.timbre_descriptors || {}) as any,
+            status: "complete",
+          });
+        } catch (dbErr) {
+          console.warn("⚠️ DB fast analysis persist failed:", dbErr);
+        }
+      }
+
+      return NextResponse.json({
+        sessionId,
+        analysisId,
+        analysis: toApiAnalysis(analysis),
+        persisted: dbAvailable,
+        fast: true,
+        metadataOnly,
+      });
+    }
+
+    if (!audioFile) {
+      return NextResponse.json(
+        { error: "Client detection was not reliable enough for metadata-only analysis." },
+        { status: 422 },
+      );
+    }
+
+    const tmpDir = getTempDir();
+    await mkdir(tmpDir, { recursive: true });
+    const ext = path.extname(audioFile.name) || ".wav";
+    const tempFilePath = path.join(tmpDir, `${sessionId}${ext}`);
+    tempPaths.push(tempFilePath);
+
+    const arrayBuffer = await audioFile.arrayBuffer();
+    await writeFile(tempFilePath, Buffer.from(arrayBuffer));
+
+    try {
+      await db.insert(playSessions).values({
+        id: sessionId,
+        userId,
+        name: sourceName,
+        mode,
+        status: "analyzing",
+        sourceAudioName: sourceName,
+        sourceAudioDuration: null,
+        analysisId,
+      });
+    } catch (dbErr) {
+      dbAvailable = false;
+      console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
     }
 
     let onsetTimes: number[] = [];

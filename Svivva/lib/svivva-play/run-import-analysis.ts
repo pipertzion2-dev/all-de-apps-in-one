@@ -1,8 +1,17 @@
-import { analyzeAudioFile } from "./client-audio-analysis";
+import { analyzeAudioFileFast } from "./client-audio-analysis";
 import { buildInstantPlayAnalysis, type PlayAnalysisView } from "./instant-analysis";
 import type { DetectionMeta } from "./tempo-key-core";
+import {
+  formatMegabytes,
+  getMaxLocalFileBytes,
+  isClientDetectionReliable,
+  isLocalFileTooLarge,
+  MAX_CLOUD_UPLOAD_BYTES,
+  needsCloudClip,
+} from "./upload-limits";
+import { buildWavUploadClip, isWavFile } from "./wav-utils";
 
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const CLOUD_ENRICH_MS = 18_000;
 
 export interface ImportAnalysisResult {
   analysis: PlayAnalysisView | null;
@@ -19,45 +28,47 @@ type ClientDetection = {
   meta?: DetectionMeta;
 };
 
-export async function runImportAnalysis(options: {
+async function prepareCloudUploadFile(
+  file: File,
+  clientDetection: ClientDetection | null,
+): Promise<{ upload: File | null; metadataOnly: boolean }> {
+  if (clientDetection && isClientDetectionReliable(clientDetection)) {
+    return { upload: null, metadataOnly: true };
+  }
+  if (file.size <= MAX_CLOUD_UPLOAD_BYTES) {
+    return { upload: file, metadataOnly: false };
+  }
+  if (isWavFile(file)) {
+    try {
+      const clip = await buildWavUploadClip(file);
+      return { upload: clip, metadataOnly: false };
+    } catch (err) {
+      console.warn("WAV clip build failed:", err);
+    }
+  }
+  return { upload: null, metadataOnly: true };
+}
+
+async function cloudEnrichImportAnalysis(options: {
   file: File;
   mode: string;
   userHint?: string;
-  onInstantResult?: (analysis: PlayAnalysisView) => void;
+  clientDetection: ClientDetection | null;
 }): Promise<ImportAnalysisResult> {
-  const { file, mode, userHint, onInstantResult } = options;
+  const { file, mode, userHint, clientDetection } = options;
 
-  let clientDetection: ClientDetection | null = null;
-
-  try {
-    clientDetection = await analyzeAudioFile(file);
-    if (clientDetection) {
-      const instant = buildInstantPlayAnalysis(clientDetection);
-      onInstantResult?.(instant);
-    }
-  } catch (err) {
-    console.warn("Svivva Play client analysis failed:", err);
-  }
-
-  if (file.size > MAX_UPLOAD_BYTES) {
-    if (clientDetection) {
-      return {
-        analysis: buildInstantPlayAnalysis(clientDetection),
-        sessionId: null,
-        warning:
-          "File is over 12 MB — showing local tempo/key only. Use a shorter clip for full cloud analysis and MIDI generation.",
-      };
-    }
-    return {
-      analysis: null,
-      sessionId: null,
-      error: "Audio file is too large. Please use a file under 12 MB.",
-    };
-  }
+  const { upload, metadataOnly } = await prepareCloudUploadFile(file, clientDetection);
 
   const formData = new FormData();
-  formData.append("audio", file);
   formData.append("mode", mode);
+  formData.append("fast", "1");
+  formData.append("sourceName", file.name);
+  formData.append("sourceSize", String(file.size));
+  if (metadataOnly) {
+    formData.append("metadataOnly", "1");
+  } else if (upload) {
+    formData.append("audio", upload);
+  }
   if (userHint?.trim()) formData.append("userHint", userHint.trim());
   if (clientDetection) {
     formData.append("detectedBpm", String(clientDetection.bpm));
@@ -69,8 +80,15 @@ export async function runImportAnalysis(options: {
     }
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CLOUD_ENRICH_MS);
+
   try {
-    const res = await fetch("/api/svivva-play/analyze", { method: "POST", body: formData });
+    const res = await fetch("/api/svivva-play/analyze", {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
     const raw = await res.text();
     let data: {
       error?: string;
@@ -85,8 +103,7 @@ export async function runImportAnalysis(options: {
         return {
           analysis: buildInstantPlayAnalysis(clientDetection),
           sessionId: null,
-          warning:
-            "Cloud enrichment unavailable — local tempo/key detection is active. You can still generate MIDI.",
+          warning: "Cloud enrichment timed out — local tempo/key is active.",
         };
       }
       return {
@@ -102,8 +119,7 @@ export async function runImportAnalysis(options: {
           analysis: buildInstantPlayAnalysis(clientDetection),
           sessionId: null,
           warning:
-            data.error ||
-            "Cloud enrichment unavailable — local tempo/key detection is active. You can still generate MIDI.",
+            data.error || "Cloud enrichment unavailable — local tempo/key detection is active.",
         };
       }
       return {
@@ -130,13 +146,15 @@ export async function runImportAnalysis(options: {
 
     return { analysis: null, sessionId: null, error: "Invalid response from analysis" };
   } catch (err) {
-    console.error("Svivva Play import analysis failed:", err);
+    console.error("Svivva Play cloud enrichment failed:", err);
     if (clientDetection) {
+      const aborted = err instanceof Error && err.name === "AbortError";
       return {
         analysis: buildInstantPlayAnalysis(clientDetection),
         sessionId: null,
-        warning:
-          "Server analysis unavailable — showing local tempo/key detection. You can still generate and export MIDI.",
+        warning: aborted
+          ? "Cloud refinement skipped (slow connection) — local tempo/key is ready to use."
+          : "Server analysis unavailable — local tempo/key detection is active.",
       };
     }
     const detail = err instanceof Error ? err.message : "";
@@ -148,5 +166,73 @@ export async function runImportAnalysis(options: {
           ? `Analysis failed: ${detail}`
           : "Analysis failed. Check your connection and try again.",
     };
+  } finally {
+    clearTimeout(timeout);
   }
+}
+
+export async function runImportAnalysis(options: {
+  file: File;
+  mode: string;
+  userHint?: string;
+  onInstantResult?: (analysis: PlayAnalysisView) => void;
+  onCloudComplete?: (result: ImportAnalysisResult) => void;
+}): Promise<ImportAnalysisResult> {
+  const { file, mode, userHint, onInstantResult, onCloudComplete } = options;
+
+  if (isLocalFileTooLarge(file)) {
+    const maxMb = formatMegabytes(getMaxLocalFileBytes(file));
+    return {
+      analysis: null,
+      sessionId: null,
+      error: `File is too large for browser analysis (max ${maxMb} for ${isWavFile(file) ? "WAV" : "this format"}).`,
+    };
+  }
+
+  let clientDetection: ClientDetection | null = null;
+
+  try {
+    clientDetection = await analyzeAudioFileFast(file);
+    if (clientDetection) {
+      onInstantResult?.(buildInstantPlayAnalysis(clientDetection));
+    }
+  } catch (err) {
+    console.warn("Svivva Play client analysis failed:", err);
+  }
+
+  const largeFileNote =
+    file.size > MAX_CLOUD_UPLOAD_BYTES
+      ? needsCloudClip(file)
+        ? " Large WAV — cloud session uses a short clip; full file stays in your browser for playback."
+        : " Large file — cloud session saves metadata only; full file stays in your browser."
+      : "";
+
+  const instantResult: ImportAnalysisResult = clientDetection
+    ? {
+        analysis: buildInstantPlayAnalysis(clientDetection),
+        sessionId: null,
+        warning: largeFileNote.trim() || undefined,
+      }
+    : { analysis: null, sessionId: null };
+
+  if (!clientDetection || !onCloudComplete) {
+    const cloud = await cloudEnrichImportAnalysis({ file, mode, userHint, clientDetection });
+    if (largeFileNote && cloud.warning) {
+      cloud.warning = `${cloud.warning}${largeFileNote}`;
+    } else if (largeFileNote && !cloud.error) {
+      cloud.warning = largeFileNote.trim();
+    }
+    return cloud;
+  }
+
+  void cloudEnrichImportAnalysis({ file, mode, userHint, clientDetection }).then((cloud) => {
+    if (largeFileNote && cloud.warning) {
+      cloud.warning = `${cloud.warning}${largeFileNote}`;
+    } else if (largeFileNote && !cloud.error) {
+      cloud.warning = largeFileNote.trim();
+    }
+    onCloudComplete(cloud);
+  });
+
+  return instantResult;
 }

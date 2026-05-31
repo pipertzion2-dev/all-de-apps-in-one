@@ -492,14 +492,10 @@ export default function SvivvaPlayPage() {
       setIsEnriching(false);
       setErrorMsg("");
       setWarningMsg("");
-      setErrorMsg("");
 
-      try {
-        const { getSoundEngine } = await import("@/lib/svivva-play/sound-engine");
-        await getSoundEngine().init();
-      } catch {
-        /* silent — will retry on play */
-      }
+      void import("@/lib/svivva-play/sound-engine")
+        .then(({ getSoundEngine }) => getSoundEngine().init())
+        .catch(() => {});
 
       const { runImportAnalysis } = await import("@/lib/svivva-play/run-import-analysis");
       const result = await runImportAnalysis({
@@ -512,20 +508,30 @@ export default function SvivvaPlayPage() {
           setIsAnalyzing(false);
           setIsEnriching(true);
         },
+        onCloudComplete: (cloud) => {
+          if (cancelled || runId !== analysisRunRef.current) return;
+          if (cloud.analysis) {
+            setAnalysis(cloud.analysis);
+            setSessionId(cloud.sessionId ?? null);
+          }
+          setWarningMsg(cloud.warning || "");
+          if (cloud.error) setErrorMsg(cloud.error);
+          setIsEnriching(false);
+        },
       });
 
       if (cancelled || runId !== analysisRunRef.current) return;
 
       if (result.analysis) {
         setAnalysis(result.analysis);
-        setSessionId(result.sessionId ?? null);
+        if (result.sessionId) setSessionId(result.sessionId);
       }
-      setWarningMsg(result.warning || "");
-      setErrorMsg(result.error || "");
+      if (result.warning) setWarningMsg(result.warning);
+      if (result.error) setErrorMsg(result.error);
+      setIsAnalyzing(false);
     })().finally(() => {
       if (cancelled || runId !== analysisRunRef.current) return;
       setIsAnalyzing(false);
-      setIsEnriching(false);
     });
 
     return () => {
@@ -1878,6 +1884,9 @@ export default function SvivvaPlayPage() {
                       >
                         <Upload className="w-4 h-4 inline mr-2" />
                         Import audio — tempo &amp; key analyze automatically
+                        <span className="block text-[9px] text-gray-500 font-normal mt-1 normal-case tracking-normal">
+                          WAV up to 250 MB (partial scan). MP3/M4A up to 80 MB.
+                        </span>
                       </button>
 
                       <p className="text-[10px] text-gray-500 max-w-sm">
@@ -1949,7 +1958,7 @@ export default function SvivvaPlayPage() {
                           <div className="mb-3 p-2.5 rounded-lg bg-[#A05068]/10 border border-[#A05068]/25 flex items-center gap-2">
                             <Loader2 className="w-3.5 h-3.5 text-[#B87888] animate-spin flex-shrink-0" />
                             <p className="text-[11px] text-gray-400">
-                              Refining chord map and structure in the cloud…
+                              Saving session and refining chords in the background…
                             </p>
                           </div>
                         )}

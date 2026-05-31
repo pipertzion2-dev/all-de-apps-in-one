@@ -1,17 +1,25 @@
 import { analyze } from "web-audio-beat-detector";
 import {
-  monoFromAudioBuffer,
   findLoudestAnalysisWindow,
   sliceMonoWindow,
   emphasizePercussive,
   extractOnsetTimes,
+  extractOnsetTimesEnvelope,
   detectBpmAutocorrelation,
   detectBpmPeakHistogram,
   detectKeyHybrid,
   runHybridDetection,
+  monoFromAudioBuffer,
   type DetectionMeta,
   type TempoCandidate,
 } from "./tempo-key-core";
+import { isWavFile, WAV_PARTIAL_READ_SEC } from "./upload-limits";
+import { downsampleMono, readWavMonoPartial } from "./wav-utils";
+
+const FAST_WINDOW_SEC = 18;
+const FULL_WINDOW_SEC = 45;
+const PARTIAL_WAV_THRESHOLD_BYTES = 3 * 1024 * 1024;
+const ANALYSIS_DOWNSAMPLE_HZ = 22050;
 
 export interface AudioAnalysisResult {
   bpm: number;
@@ -65,37 +73,31 @@ function sliceAudioBuffer(
   return offline.startRendering();
 }
 
-export async function analyzeAudioBuffer(
-  audioBuffer: AudioBuffer,
+async function analyzeMonoSamples(
+  fullMono: Float32Array,
+  sampleRate: number,
+  durationSec: number,
+  options?: { fast?: boolean; audioBuffer?: AudioBuffer },
 ): Promise<AudioAnalysisResult | null> {
-  if (audioBuffer.duration < 0.5) return null;
+  const fast = options?.fast ?? false;
+  if (durationSec < 0.5 || fullMono.length < sampleRate * 0.5) return null;
 
-  const fullMono = monoFromAudioBuffer(audioBuffer);
-  const sampleRate = audioBuffer.sampleRate;
-  const window = findLoudestAnalysisWindow(fullMono, sampleRate, 45);
-  const analysisMono = sliceMonoWindow(fullMono, window.offset, window.length);
+  let mono = fullMono;
+  if (fast && sampleRate > ANALYSIS_DOWNSAMPLE_HZ) {
+    ({ mono, sampleRate } = downsampleMono(fullMono, sampleRate, ANALYSIS_DOWNSAMPLE_HZ));
+  }
+
+  const windowSec = fast ? FAST_WINDOW_SEC : FULL_WINDOW_SEC;
+  const window = findLoudestAnalysisWindow(mono, sampleRate, windowSec);
+  const analysisMono = sliceMonoWindow(mono, window.offset, window.length);
   const percussive = emphasizePercussive(analysisMono);
-  const onsetTimes = extractOnsetTimes(percussive, sampleRate);
+  const onsetTimes = fast
+    ? extractOnsetTimesEnvelope(percussive, sampleRate)
+    : extractOnsetTimes(percussive, sampleRate);
 
   const bpmCandidates: TempoCandidate[] = [];
   const offsetSec = window.offset / sampleRate;
-  const windowSec = window.length / sampleRate;
-
-  const beatDetectorPromise = (async () => {
-    try {
-      const slice =
-        offsetSec > 0.5 || windowSec < audioBuffer.duration - 0.5
-          ? await sliceAudioBuffer(audioBuffer, offsetSec, windowSec)
-          : audioBuffer;
-      const webBpm = Math.round(await analyze(slice));
-      if (webBpm >= 40 && webBpm <= 220) {
-        return { bpm: webBpm, weight: 1.25, source: "web-audio-beat-detector" } as TempoCandidate;
-      }
-    } catch {
-      /* optional detector */
-    }
-    return null;
-  })();
+  const windowSecActual = window.length / sampleRate;
 
   const peakBpm = detectBpmPeakHistogram(percussive, sampleRate);
   if (peakBpm) {
@@ -107,8 +109,25 @@ export async function analyzeAudioBuffer(
     bpmCandidates.push({ bpm: autoBpm, weight: 0.9, source: "autocorrelation" });
   }
 
-  const beatCandidate = await beatDetectorPromise;
-  if (beatCandidate) bpmCandidates.push(beatCandidate);
+  const audioBuffer = options?.audioBuffer;
+  if (!fast && audioBuffer) {
+    try {
+      const slice =
+        offsetSec > 0.5 || windowSecActual < audioBuffer.duration - 0.5
+          ? await sliceAudioBuffer(audioBuffer, offsetSec, windowSecActual)
+          : audioBuffer;
+      const webBpm = Math.round(await analyze(slice));
+      if (webBpm >= 40 && webBpm <= 220) {
+        bpmCandidates.push({
+          bpm: webBpm,
+          weight: 1.25,
+          source: "web-audio-beat-detector",
+        });
+      }
+    } catch {
+      /* optional detector */
+    }
+  }
 
   const keyCandidates = detectKeyHybrid(analysisMono, sampleRate);
   const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);
@@ -121,15 +140,63 @@ export async function analyzeAudioBuffer(
     meta: {
       bpmCandidates: hybrid.bpmCandidates,
       keyCandidates: hybrid.keyCandidates,
-      durationSec: audioBuffer.duration,
+      durationSec,
     },
   };
 }
 
+async function loadAnalysisSource(file: File): Promise<{
+  mono: Float32Array;
+  sampleRate: number;
+  durationSec: number;
+  audioBuffer?: AudioBuffer;
+}> {
+  if (isWavFile(file) && file.size > PARTIAL_WAV_THRESHOLD_BYTES) {
+    const partial = await readWavMonoPartial(file, WAV_PARTIAL_READ_SEC);
+    return partial;
+  }
+
+  const audioBuffer = await decodeAudioFile(file);
+  return {
+    mono: monoFromAudioBuffer(audioBuffer, WAV_PARTIAL_READ_SEC),
+    sampleRate: audioBuffer.sampleRate,
+    durationSec: audioBuffer.duration,
+    audioBuffer,
+  };
+}
+
+export async function analyzeAudioBuffer(
+  audioBuffer: AudioBuffer,
+  options?: { fast?: boolean },
+): Promise<AudioAnalysisResult | null> {
+  return analyzeMonoSamples(
+    monoFromAudioBuffer(audioBuffer, WAV_PARTIAL_READ_SEC),
+    audioBuffer.sampleRate,
+    audioBuffer.duration,
+    { fast: options?.fast, audioBuffer: options?.fast ? undefined : audioBuffer },
+  );
+}
+
+/** Fast path: partial WAV read for large files, downsampled DSP, no beat-detector offline render. */
+export async function analyzeAudioFileFast(file: File): Promise<AudioAnalysisResult | null> {
+  try {
+    const source = await loadAnalysisSource(file);
+    return analyzeMonoSamples(source.mono, source.sampleRate, source.durationSec, {
+      fast: true,
+    });
+  } catch (error) {
+    console.warn("Client fast audio analysis failed:", error);
+    return null;
+  }
+}
+
 export async function analyzeAudioFile(file: File): Promise<AudioAnalysisResult | null> {
   try {
-    const audioBuffer = await decodeAudioFile(file);
-    return analyzeAudioBuffer(audioBuffer);
+    const source = await loadAnalysisSource(file);
+    return analyzeMonoSamples(source.mono, source.sampleRate, source.durationSec, {
+      fast: false,
+      audioBuffer: source.audioBuffer,
+    });
   } catch (error) {
     console.warn("Client audio analysis failed:", error);
     return null;
