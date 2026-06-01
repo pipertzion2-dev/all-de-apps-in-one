@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
+import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 
 /** Public indexable security / mini-app URLs (no auth, no redirects). */
 export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap> {
@@ -43,10 +44,8 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
       .from(seoLandingPages)
       .where(eq(seoLandingPages.published, true));
 
-    const hubSlugs = new Set(["ai-tools-hub", "cyber-security-mini-apps", "seo-pack", "clutety"]);
-
     for (const page of pages) {
-      if (!page.slug || hubSlugs.has(page.slug)) continue;
+      if (!page.slug || isNonIndexableSlug(page.slug)) continue;
       const isSecurity =
         page.category === "seed-marketing" ||
         /security|cyber|threat|password|scan|vuln|encrypt|shield|feed/i.test(
@@ -66,4 +65,30 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
   }
 
   return [...hubs, ...toolPages];
+}
+
+/** Hubs only — used when DB sitemap generation fails. */
+export function getSecuritySitemapFallback(): MetadataRoute.Sitemap {
+  const base = getSiteUrl().replace(/\/$/, "");
+  const now = new Date();
+  return [
+    {
+      url: `${base}/cyber-security-mini-apps`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${base}/ai-tools-hub`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/tools`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+  ];
 }

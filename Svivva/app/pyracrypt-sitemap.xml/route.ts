@@ -1,11 +1,21 @@
-import { getSecuritySitemapEntries } from "@/lib/seo/sitemap/security-tools";
+import {
+  getSecuritySitemapEntries,
+  getSecuritySitemapFallback,
+} from "@/lib/seo/sitemap/security-tools";
 import { sitemapUrlsetXml } from "@/lib/seo/sitemap/xml";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 /** Legacy URL — same entries as security-sitemap.xml for GSC continuity. */
 export async function GET() {
-  const entries = await getSecuritySitemapEntries();
+  let entries;
+  try {
+    entries = await getSecuritySitemapEntries();
+  } catch (err) {
+    console.error("[pyracrypt-sitemap.xml] generation failed, serving hub fallback:", err);
+    entries = getSecuritySitemapFallback();
+  }
   const xml = sitemapUrlsetXml(entries);
 
   return new Response(xml, {

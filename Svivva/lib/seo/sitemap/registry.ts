@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { blogPosts, seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
+import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
 
@@ -68,9 +69,14 @@ function lpEntries(): SitemapEntry[] {
   }));
 }
 
+/** Minimal sitemap when DB or runtime fails — keeps GSC from seeing 500 on /sitemap.xml. */
+export function getStaticSitemapFallback(): SitemapEntry[] {
+  return [...staticPagesEntries(), ...lpEntries()];
+}
+
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const b = base();
-  const entries: SitemapEntry[] = [...staticPagesEntries(), ...lpEntries()];
+  const entries: SitemapEntry[] = getStaticSitemapFallback();
 
   try {
     const posts = await db.select().from(blogPosts).where(eq(blogPosts.published, true));
@@ -93,6 +99,7 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
       .from(seoLandingPages)
       .where(eq(seoLandingPages.published, true));
     for (const page of pages) {
+      if (!page.slug || isNonIndexableSlug(page.slug)) continue;
       const isTool =
         page.category === "seed-marketing" || page.category === "seo-landing" || !!page.toolUrl;
       entries.push({

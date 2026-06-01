@@ -14,22 +14,14 @@ import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
 import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
+import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 
 export const revalidate = 3600;
-
-/** Never treat platform/metadata paths as SEO landing pages. */
-const RESERVED_SLUGS = new Set([
-  "sitemap.xml",
-  "robots.txt",
-  "favicon.ico",
-  "pyracrypt-sitemap.xml",
-  "security-sitemap.xml",
-]);
 
 type LandingPage = typeof seoLandingPages.$inferSelect;
 
 async function getPage(slug: string): Promise<LandingPage | null> {
-  if (RESERVED_SLUGS.has(slug)) return null;
+  if (isNonIndexableSlug(slug)) return null;
   try {
     const [page] = await db
       .select()
