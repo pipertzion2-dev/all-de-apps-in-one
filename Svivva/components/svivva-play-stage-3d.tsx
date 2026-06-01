@@ -126,8 +126,17 @@ export function SvivvaPlayStage3D({
     >
       <div ref={wrapRef} className="w-full h-[220px] sm:h-[260px]" />
       {err && (
-        <div className="absolute inset-0 flex items-center justify-center text-[10px] text-amber-600/90 px-4 text-center bg-black/50">
-          {err}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#121218] to-[#060606] px-4">
+          <div className="flex gap-0.5 mb-2">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-3 rounded-sm ${i % 7 === 0 || i % 7 === 2 ? "h-8 bg-[#1a1a22]" : "h-12 bg-[#e8e0ec]"}`}
+                style={{ opacity: 0.35 + (i % 5) * 0.1 }}
+              />
+            ))}
+          </div>
+          <p className="text-[9px] text-gray-500">Stage instrument (2D fallback)</p>
         </div>
       )}
       {!ready && !err && (

@@ -19,6 +19,10 @@ import {
 } from "@/lib/svivva-play/generate-helpers";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 import type { PlayAnalysisView } from "@/lib/svivva-play/instant-analysis";
+import {
+  generateStrategicStems,
+  type HarmonicContextInput,
+} from "@/lib/svivva-play/strategic-compose";
 
 function parseRootFromKey(key: string): string {
   const m = (key || "").match(/^([A-G][b#]?)/);
@@ -96,6 +100,7 @@ export async function POST(request: NextRequest) {
       manualKey,
       manualTempo,
       chordEdits,
+      harmonicContext,
     } = body as {
       sessionId?: string;
       inlineAnalysis?: PlayAnalysisView;
@@ -106,6 +111,7 @@ export async function POST(request: NextRequest) {
       manualKey?: string | null;
       manualTempo?: number | null;
       chordEdits?: Record<number, string>;
+      harmonicContext?: HarmonicContextInput;
     };
 
     let analysisData: Analysis | null = null;
@@ -246,8 +252,51 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Deterministic chord engine — always works without LLM
+    const richHarmonic =
+      harmonicContext &&
+      (harmonicContext.chords.length >= 2 ||
+        harmonicContext.melodyneNotes.length > 8 ||
+        harmonicContext.audioNotes.length > 12);
+
+    const runStrategic = () =>
+      generateStrategicStems(analysisData, harmonicContext!, renderQuality, seed, {
+        seed,
+        density: settings.density,
+        complexity: settings.complexity,
+        compingPattern,
+        harmonyMode: settings.harmonyMode,
+      });
+
+    // Strategic listen-first compose when harmonic session data is present
+    if (richHarmonic && mode !== "solo") {
+      const strategic = runStrategic();
+      return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline, {
+        composer: "strategic",
+      });
+    }
+
+    // Deterministic chord engine — uses analysis chords when no harmonic context
     if (mode === "chords") {
+      if (analysisData.chords.length >= 2) {
+        const ctx: HarmonicContextInput = {
+          chords: analysisData.chords.map((c) => ({
+            t0: c.t0,
+            t1: c.t1,
+            symbol: c.symbol,
+            confidence: c.confidence ?? 55,
+            pitchClasses: [],
+          })),
+          audioNotes: [],
+          melodyneNotes: [],
+          durationSec: analysisData.sections?.[0]?.t1 ?? 64,
+        };
+        const strategic = generateStrategicStems(analysisData, ctx, renderQuality, seed, {
+          seed,
+          density: settings.density,
+          compingPattern,
+        });
+        return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline);
+      }
       const result = generateDeterministicChordStems(
         analysisData,
         renderQuality,
@@ -319,7 +368,11 @@ export async function POST(request: NextRequest) {
     );
 
     if (!midiResult.success || !midiResult.data) {
-      console.warn("LLM MIDI failed, using deterministic chord arrangement:", midiResult.error);
+      console.warn("LLM MIDI failed, using strategic/deterministic fallback:", midiResult.error);
+      if (harmonicContext && harmonicContext.chords.length >= 2) {
+        const strategic = runStrategic();
+        return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline);
+      }
       const fallback = generateDeterministicChordStems(
         analysisData,
         renderQuality,

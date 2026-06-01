@@ -1,5 +1,6 @@
 import { analyzeAudioFile, analyzeAudioFileFast } from "./client-audio-analysis";
 import { buildInstantPlayAnalysis, type PlayAnalysisView } from "./instant-analysis";
+import { buildHarmonicSession, type HarmonicSession } from "./harmonic-session";
 import type { DetectionMeta } from "./tempo-key-core";
 import {
   formatMegabytes,
@@ -17,6 +18,7 @@ const CLOUD_ENRICH_MS = 18_000;
 export interface ImportAnalysisResult {
   analysis: PlayAnalysisView | null;
   sessionId: string | null;
+  transcription?: HarmonicSession | null;
   error?: string;
   warning?: string;
 }
@@ -177,12 +179,15 @@ async function cloudEnrichImportAnalysis(options: {
 
 export async function runImportAnalysis(options: {
   file: File;
+  melodyneFile?: File | null;
   mode: string;
   userHint?: string;
   onInstantResult?: (analysis: PlayAnalysisView) => void;
+  onTranscription?: (session: HarmonicSession) => void;
   onCloudComplete?: (result: ImportAnalysisResult) => void;
 }): Promise<ImportAnalysisResult> {
-  const { file, mode, userHint, onInstantResult, onCloudComplete } = options;
+  const { file, melodyneFile, mode, userHint, onInstantResult, onTranscription, onCloudComplete } =
+    options;
 
   if (isLocalFileTooLarge(file)) {
     const maxMb = formatMegabytes(getMaxLocalFileBytes(file));
@@ -195,10 +200,26 @@ export async function runImportAnalysis(options: {
 
   let clientDetection: ClientDetection | null = null;
 
+  let transcription: HarmonicSession | null = null;
+
   try {
     clientDetection = (await analyzeAudioFile(file)) ?? (await analyzeAudioFileFast(file));
     if (clientDetection) {
-      onInstantResult?.(buildInstantPlayAnalysis(clientDetection));
+      const det = clientDetection;
+      onInstantResult?.(buildInstantPlayAnalysis(det));
+      void buildHarmonicSession({
+        audioFile: file,
+        melodyneFile: melodyneFile ?? null,
+        bpm: det.bpm,
+        key: det.key,
+      })
+        .then((session) => {
+          if (!session) return;
+          transcription = session;
+          onTranscription?.(session);
+          onInstantResult?.(buildInstantPlayAnalysis(det, session));
+        })
+        .catch(() => {});
     }
   } catch (err) {
     console.warn("Svivva Play client analysis failed:", err);
@@ -211,13 +232,34 @@ export async function runImportAnalysis(options: {
         : " Large file — cloud session saves metadata only; full file stays in your browser."
       : "";
 
+  if (clientDetection && !transcription) {
+    try {
+      transcription = await buildHarmonicSession({
+        audioFile: file,
+        melodyneFile: melodyneFile ?? null,
+        bpm: clientDetection.bpm,
+        key: clientDetection.key,
+      });
+    } catch {
+      /* optional */
+    }
+  }
+
+  const melodyneNote =
+    melodyneFile && clientDetection
+      ? " Audio + Melodyne MIDI analyzed together for chord progression."
+      : melodyneFile
+        ? " Melodyne MIDI queued — waiting for tempo/key."
+        : "";
+
   const instantResult: ImportAnalysisResult = clientDetection
     ? {
-        analysis: buildInstantPlayAnalysis(clientDetection),
+        analysis: buildInstantPlayAnalysis(clientDetection, transcription),
         sessionId: null,
-        warning: largeFileNote.trim() || undefined,
+        transcription,
+        warning: [largeFileNote.trim(), melodyneNote.trim()].filter(Boolean).join("") || undefined,
       }
-    : { analysis: null, sessionId: null };
+    : { analysis: null, sessionId: null, transcription: null };
 
   if (!clientDetection || !onCloudComplete) {
     const cloud = await cloudEnrichImportAnalysis({ file, mode, userHint, clientDetection });

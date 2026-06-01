@@ -1,0 +1,179 @@
+import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
+import { transcribeAudioFile } from "./audio-transcription";
+import { chordsFromPolyphonicNotes, mergeChordTimelines } from "./chords-from-notes";
+import { alignMidiToAudio, applyOffsetToNotes } from "./midi-alignment";
+import { parseMidiFile } from "./midi-file-parse";
+
+export type HarmonicSources = {
+  audioTranscription: boolean;
+  melodyneMidi: boolean;
+};
+
+export type HarmonicSession = AudioTranscription & {
+  /** Monophonic pitch track from audio DSP. */
+  audioNotes: TranscribedNote[];
+  /** Harmonic / polyphonic notes from Melodyne MIDI export. */
+  melodyneNotes: TranscribedNote[];
+  melodyneRawNotes: TranscribedNote[];
+  alignOffsetSec: number;
+  alignScore: number;
+  sources: HarmonicSources;
+};
+
+export function isAudioImportFile(file: File): boolean {
+  return file.type.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac|aiff?)$/i.test(file.name);
+}
+
+export function isMelodyneImportFile(file: File): boolean {
+  return (
+    file.type === "audio/midi" || file.type === "audio/mid" || /\.(mid|midi)$/i.test(file.name)
+  );
+}
+
+export function splitSessionFiles(files: FileList | File[]): {
+  audio: File | null;
+  melodyne: File | null;
+  extras: File[];
+} {
+  let audio: File | null = null;
+  let melodyne: File | null = null;
+  const extras: File[] = [];
+  for (const f of files) {
+    if (!audio && isAudioImportFile(f)) audio = f;
+    else if (!melodyne && isMelodyneImportFile(f)) melodyne = f;
+    else extras.push(f);
+  }
+  return { audio, melodyne, extras };
+}
+
+function emptyTranscription(durationSec = 0): HarmonicSession {
+  return {
+    notes: [],
+    audioNotes: [],
+    melodyneNotes: [],
+    melodyneRawNotes: [],
+    chords: [],
+    waveformPeaks: [],
+    durationSec,
+    alignOffsetSec: 0,
+    alignScore: 0,
+    sources: { audioTranscription: false, melodyneMidi: false },
+  };
+}
+
+/** Build one harmonic model from audio + optional Melodyne MIDI (parallel when both provided). */
+export async function buildHarmonicSession(options: {
+  audioFile: File;
+  melodyneFile?: File | null;
+  bpm: number;
+  key: string;
+}): Promise<HarmonicSession | null> {
+  const { audioFile, melodyneFile, bpm, key } = options;
+
+  const [audioTx, melodyneParsed] = await Promise.all([
+    transcribeAudioFile(audioFile, bpm, key),
+    melodyneFile
+      ? melodyneFile.arrayBuffer().then((buf) => parseMidiFile(buf))
+      : Promise.resolve(null),
+  ]);
+
+  if (!audioTx && !melodyneParsed?.notes.length) return null;
+
+  const base = audioTx ?? emptyTranscription(melodyneParsed?.durationSec ?? 0);
+  let melodyneRaw = melodyneParsed?.notes ?? [];
+  let melodyneAligned = melodyneRaw;
+  let alignOffsetSec = 0;
+  let alignScore = 0;
+
+  const audioNotes = base.notes;
+
+  if (melodyneRaw.length && audioNotes.length) {
+    const align = alignMidiToAudio(audioNotes, melodyneRaw);
+    alignOffsetSec = align.offsetSec;
+    alignScore = align.score;
+    melodyneAligned = applyOffsetToNotes(melodyneRaw, alignOffsetSec);
+  }
+
+  const durationSec = Math.max(
+    base.durationSec,
+    melodyneAligned.reduce((m, n) => Math.max(m, n.endSec), 0),
+    melodyneParsed?.durationSec ?? 0,
+  );
+
+  const melodyneChords = melodyneAligned.length
+    ? chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, key, 68)
+    : [];
+  const mergedChords = mergeChordTimelines(melodyneChords, base.chords);
+
+  return {
+    ...base,
+    notes: audioNotes,
+    audioNotes,
+    melodyneNotes: melodyneAligned,
+    melodyneRawNotes: melodyneRaw,
+    chords: mergedChords,
+    durationSec,
+    waveformPeaks: base.waveformPeaks,
+    alignOffsetSec,
+    alignScore,
+    sources: {
+      audioTranscription: audioNotes.length > 0,
+      melodyneMidi: melodyneAligned.length > 0,
+    },
+  };
+}
+
+/** Merge Melodyne into an existing session after audio-only import. */
+export function attachMelodyneToSession(
+  session: HarmonicSession,
+  melodyneFile: File,
+  bpm: number,
+  key: string,
+): Promise<HarmonicSession | null> {
+  return melodyneFile.arrayBuffer().then((buf) => {
+    const parsed = parseMidiFile(buf);
+    if (!parsed.notes.length) return null;
+
+    let alignOffsetSec = 0;
+    let alignScore = 0;
+    let melodyneAligned = parsed.notes;
+    if (session.audioNotes.length) {
+      const align = alignMidiToAudio(session.audioNotes, parsed.notes);
+      alignOffsetSec = align.offsetSec;
+      alignScore = align.score;
+      melodyneAligned = applyOffsetToNotes(parsed.notes, alignOffsetSec);
+    }
+
+    const durationSec = Math.max(
+      session.durationSec,
+      melodyneAligned.reduce((m, n) => Math.max(m, n.endSec), 0),
+      parsed.durationSec,
+    );
+
+    const melodyneChords = chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, key, 68);
+    const mergedChords = mergeChordTimelines(melodyneChords, session.chords);
+
+    return {
+      ...session,
+      melodyneNotes: melodyneAligned,
+      melodyneRawNotes: parsed.notes,
+      chords: mergedChords,
+      durationSec,
+      alignOffsetSec,
+      alignScore,
+      sources: {
+        ...session.sources,
+        melodyneMidi: true,
+      },
+    };
+  });
+}
+
+export function sessionToAnalysisChords(session: HarmonicSession) {
+  return session.chords.map((c) => ({
+    t0: c.t0,
+    t1: c.t1,
+    symbol: c.symbol,
+    confidence: c.confidence,
+  }));
+}

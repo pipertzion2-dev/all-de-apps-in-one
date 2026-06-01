@@ -1,4 +1,5 @@
 import type { AudioAnalysisResult } from "./client-audio-analysis";
+import type { HarmonicSession } from "./harmonic-session";
 import { enrichAnalysisHeuristically } from "./heuristic-analysis";
 import type { Analysis } from "./schemas";
 
@@ -18,20 +19,35 @@ export function buildInstantPlayAnalysis(
   client: Pick<AudioAnalysisResult, "bpm" | "key" | "keyConfidence" | "bpmConfidence"> & {
     meta?: AudioAnalysisResult["meta"];
   },
+  transcription?: HarmonicSession | null,
 ): PlayAnalysisView {
-  const durationSec = client.meta?.durationSec ?? 180;
+  const durationSec = transcription?.durationSec ?? client.meta?.durationSec ?? 180;
+  const minChordConf = transcription?.sources.melodyneMidi ? 35 : 40;
+  const transcribedChords =
+    transcription?.chords
+      ?.filter((c) => c.confidence >= minChordConf)
+      .map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence,
+      })) ?? [];
+
   const base: Analysis = {
     bpm: client.bpm,
     time_signature: "4/4",
     key: client.key,
     key_confidence: Math.max(25, client.keyConfidence),
-    chords: [],
+    chords: transcribedChords,
     sections: [],
     downbeats: [],
     style_compatibility: [],
     timbre_descriptors: {},
   };
   const enriched = enrichAnalysisHeuristically(base, durationSec);
+  if (transcribedChords.length >= 2) {
+    enriched.chords = transcribedChords;
+  }
   return {
     bpm: enriched.bpm,
     timeSignature: enriched.time_signature,

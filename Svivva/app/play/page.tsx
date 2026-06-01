@@ -61,7 +61,21 @@ import {
   type VoicePart,
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
-import { SvivvaPlayStage3D, type PlayStageModel } from "@/components/svivva-play-stage-3d";
+import { SvivvaPlayStagePanel } from "@/components/svivva-play-stage-panel";
+import type { PlayStageModel } from "@/components/svivva-play-stage-3d";
+import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
+import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
+import { composeWithChordProgression } from "@/lib/svivva-play/compose-from-chords";
+import {
+  attachMelodyneToSession,
+  splitSessionFiles,
+  type HarmonicSession,
+} from "@/lib/svivva-play/harmonic-session";
+import {
+  composeStrategicReich,
+  generateStrategicStems,
+  voicePartsToStemResults,
+} from "@/lib/svivva-play/strategic-compose";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
@@ -385,6 +399,16 @@ export default function SvivvaPlayPage() {
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
 
+  const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
+  const [melodyneFile, setMelodyneFile] = useState<File | null>(null);
+  const [midiRawNotes, setMidiRawNotes] = useState<TranscribedNote[]>([]);
+  const [midiReferenceNotes, setMidiReferenceNotes] = useState<TranscribedNote[]>([]);
+  const [alignOffsetSec, setAlignOffsetSec] = useState(0);
+  const [alignScore, setAlignScore] = useState(0);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
+  const [midiFileName, setMidiFileName] = useState("");
+
   const playStageModel = useMemo<PlayStageModel>(() => {
     if (mode === "patch") return "moog";
     if (mode !== "composition") return "notebook";
@@ -421,7 +445,8 @@ export default function SvivvaPlayPage() {
   const [isRendering, setIsRendering] = useState(false);
   const [masterVolume, setMasterVolume] = useState(80);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const sessionInputRef = useRef<HTMLInputElement>(null);
+  const melodyneOnlyInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const modeRef = useRef(mode);
@@ -437,14 +462,42 @@ export default function SvivvaPlayPage() {
   }, [userPrompt]);
 
   const handleImport = useCallback(() => {
-    fileInputRef.current?.click();
+    sessionInputRef.current?.click();
   }, []);
 
-  const acceptImportFile = useCallback((file: File) => {
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const applyHarmonicSession = useCallback((session: HarmonicSession) => {
+    setTranscription(session);
+    setMidiRawNotes(session.melodyneRawNotes);
+    setMidiReferenceNotes(session.melodyneNotes);
+    setAlignOffsetSec(session.alignOffsetSec);
+    setAlignScore(session.alignScore);
+    setAnalysis((prev) => ({
+      ...(prev ?? {
+        bpm: 120,
+        timeSignature: "4/4",
+        key: "C major",
+        keyConfidence: 50,
+        chords: [],
+        sections: [],
+        downbeats: [],
+        styleCompatibility: [],
+      }),
+      chords: session.chords.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence,
+      })),
+    }));
+  }, []);
 
-    setAudioFile(file);
-    setAudioName(file.name);
+  const acceptSessionImport = useCallback((audio: File, melodyne?: File | null) => {
+    if (sessionInputRef.current) sessionInputRef.current.value = "";
+
+    setAudioFile(audio);
+    setAudioName(audio.name);
+    setMelodyneFile(melodyne ?? null);
+    setMidiFileName(melodyne?.name ?? "");
     setAnalysis(null);
     setSessionId(null);
     setStems([]);
@@ -454,16 +507,86 @@ export default function SvivvaPlayPage() {
     setManualTempo(null);
     setManualKey(null);
     setIsEnriching(false);
-    setAudioUrl(URL.createObjectURL(file));
+    setTranscription(null);
+    setMidiRawNotes([]);
+    setMidiReferenceNotes([]);
+    setAlignOffsetSec(0);
+    setAlignScore(0);
+    setIsTranscribing(false);
+    setAudioUrl(URL.createObjectURL(audio));
     setImportSeq((n) => n + 1);
   }, []);
 
-  const handleFileChange = useCallback(
+  const handleMidiImport = useCallback(() => {
+    melodyneOnlyInputRef.current?.click();
+  }, []);
+
+  const handleAddMelodyneOnly = useCallback(
+    async (file: File) => {
+      if (!transcription) {
+        setWarningMsg("Import audio + Melodyne together, or wait for audio analysis to finish.");
+        return;
+      }
+      setErrorMsg("");
+      setMelodyneFile(file);
+      setMidiFileName(file.name);
+      setIsTranscribing(true);
+      const bpm = manualTempo ?? analysis?.bpm ?? 120;
+      const key = manualKey ?? analysis?.key ?? "C major";
+      const updated = await attachMelodyneToSession(transcription, file, bpm, key);
+      setIsTranscribing(false);
+      if (!updated?.melodyneNotes?.length) {
+        setWarningMsg(
+          "Could not read Melodyne MIDI — export harmonic tracks as .mid from Melodyne.",
+        );
+        return;
+      }
+      applyHarmonicSession(updated);
+    },
+    [transcription, analysis, manualTempo, manualKey, applyHarmonicSession],
+  );
+
+  const handleAlignOffsetChange = useCallback(
+    (sec: number) => {
+      setAlignOffsetSec(sec);
+      if (!midiRawNotes.length) return;
+      setMidiReferenceNotes(applyOffsetToNotes(midiRawNotes, sec));
+    },
+    [midiRawNotes],
+  );
+
+  const handleSessionFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const list = e.target.files;
+      if (!list?.length) return;
+      const { audio, melodyne, extras } = splitSessionFiles(list);
+      if (!audio) {
+        if (melodyne && audioFile) {
+          void handleAddMelodyneOnly(melodyne);
+          return;
+        }
+        setErrorMsg(
+          "Select your audio file. Hold Cmd/Ctrl to also select the Melodyne .mid export in one step.",
+        );
+        return;
+      }
+      if (extras.length) {
+        setWarningMsg(
+          `Ignored ${extras.length} extra file(s) — use one audio + one Melodyne MIDI.`,
+        );
+      }
+      acceptSessionImport(audio, melodyne);
+    },
+    [acceptSessionImport, audioFile, handleAddMelodyneOnly],
+  );
+
+  const handleMelodyneOnlyFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) acceptImportFile(file);
+      if (melodyneOnlyInputRef.current) melodyneOnlyInputRef.current.value = "";
+      if (file) void handleAddMelodyneOnly(file);
     },
-    [acceptImportFile],
+    [handleAddMelodyneOnly],
   );
 
   const handleDropImport = useCallback(
@@ -471,14 +594,21 @@ export default function SvivvaPlayPage() {
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
-      const file = e.dataTransfer.files?.[0];
-      if (!file) return;
-      const isAudio =
-        file.type.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac|aiff?)$/i.test(file.name);
-      if (isAudio) acceptImportFile(file);
-      else setErrorMsg("Please drop an audio file (MP3, WAV, M4A, etc.).");
+      const { audio, melodyne, extras } = splitSessionFiles(e.dataTransfer.files);
+      if (!audio) {
+        if (melodyne) {
+          setErrorMsg("Drop your audio file together with the Melodyne MIDI export.");
+        } else {
+          setErrorMsg("Drop audio + Melodyne MIDI (.mid) together for full harmonic analysis.");
+        }
+        return;
+      }
+      if (extras.length) {
+        setWarningMsg(`Ignored ${extras.length} extra file(s).`);
+      }
+      acceptSessionImport(audio, melodyne);
     },
-    [acceptImportFile],
+    [acceptSessionImport],
   );
 
   useEffect(() => {
@@ -489,6 +619,7 @@ export default function SvivvaPlayPage() {
 
     (async () => {
       setIsAnalyzing(true);
+      setIsTranscribing(true);
       setIsEnriching(false);
       setErrorMsg("");
       setWarningMsg("");
@@ -500,6 +631,7 @@ export default function SvivvaPlayPage() {
       const { runImportAnalysis } = await import("@/lib/svivva-play/run-import-analysis");
       const result = await runImportAnalysis({
         file: audioFile,
+        melodyneFile,
         mode: modeRef.current,
         userHint: userPromptRef.current,
         onInstantResult: (instant) => {
@@ -508,10 +640,24 @@ export default function SvivvaPlayPage() {
           setIsAnalyzing(false);
           setIsEnriching(true);
         },
+        onTranscription: (session) => {
+          if (cancelled || runId !== analysisRunRef.current) return;
+          applyHarmonicSession(session);
+          setIsTranscribing(false);
+        },
         onCloudComplete: (cloud) => {
           if (cancelled || runId !== analysisRunRef.current) return;
           if (cloud.analysis) {
-            setAnalysis(cloud.analysis);
+            const cloudAnalysis = cloud.analysis;
+            setAnalysis((prev) => {
+              const base = cloudAnalysis;
+              if (!prev?.chords?.length) return base;
+              return {
+                ...base,
+                bpm: base.bpm ?? prev.bpm,
+                chords: prev.chords,
+              };
+            });
             setSessionId(cloud.sessionId ?? null);
           }
           setWarningMsg(cloud.warning || "");
@@ -526,6 +672,10 @@ export default function SvivvaPlayPage() {
         setAnalysis(result.analysis);
         if (result.sessionId) setSessionId(result.sessionId);
       }
+      if (result.transcription) {
+        applyHarmonicSession(result.transcription);
+        setIsTranscribing(false);
+      }
       if (result.warning) setWarningMsg(result.warning);
       if (result.error) setErrorMsg(result.error);
       setIsAnalyzing(false);
@@ -537,7 +687,7 @@ export default function SvivvaPlayPage() {
     return () => {
       cancelled = true;
     };
-  }, [audioFile, importSeq]);
+  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession]);
 
   const buildSettings = useCallback(() => {
     const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
@@ -615,7 +765,11 @@ export default function SvivvaPlayPage() {
       }
       setIsGenerating(true);
       setPipelineStage(
-        mode === "patch" ? "Designing patch..." : "Stage 1: Planning arrangement...",
+        mode === "patch"
+          ? "Designing patch..."
+          : transcription
+            ? "Strategic compose — listening to your harmonic session…"
+            : "Stage 1: Planning arrangement...",
       );
       setStems([]);
       setPatchResult(null);
@@ -628,6 +782,16 @@ export default function SvivvaPlayPage() {
       try {
         const settings = buildSettings();
 
+        const harmonicContext = transcription
+          ? {
+              chords: transcription.chords,
+              audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
+              melodyneNotes: transcription.melodyneNotes ?? [],
+              durationSec: transcription.durationSec,
+              sources: transcription.sources,
+            }
+          : undefined;
+
         const generatePayload = {
           sessionId: sessionId ?? undefined,
           inlineAnalysis: analysis,
@@ -638,6 +802,7 @@ export default function SvivvaPlayPage() {
           manualTempo,
           settings,
           chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,
+          harmonicContext,
         };
 
         if (mode === "solo") {
@@ -744,6 +909,7 @@ export default function SvivvaPlayPage() {
       chordEdits,
       manualKey,
       manualTempo,
+      transcription,
     ],
   );
 
@@ -1023,6 +1189,13 @@ export default function SvivvaPlayPage() {
     setAudioUrl(null);
     setAudioName("");
     setAnalysis(null);
+    setTranscription(null);
+    setMidiRawNotes([]);
+    setMidiReferenceNotes([]);
+    setAlignOffsetSec(0);
+    setAlignScore(0);
+    setMidiFileName("");
+    setIsTranscribing(false);
     setManualTempo(null);
     setManualKey(null);
     setStems([]);
@@ -1175,7 +1348,11 @@ export default function SvivvaPlayPage() {
 
   const handleLocalCompositionGenerate = useCallback(() => {
     setIsGenerating(true);
-    setPipelineStage("Composing locally...");
+    setPipelineStage(
+      transcription
+        ? "Strategic compose — voice-leading from your audio + chord map…"
+        : "Composing locally…",
+    );
     setStems([]);
     setErrorMsg("");
     setReichVoices([]);
@@ -1197,22 +1374,62 @@ export default function SvivvaPlayPage() {
       const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
       if (!useSeed) setSeed(currentSeed);
 
+      const chordSource =
+        (analysis?.chords?.length ? analysis.chords : transcription?.chords)?.map((c, i) => ({
+          t0: c.t0,
+          t1: c.t1,
+          symbol: chordEdits[i] ?? c.symbol,
+          confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
+          pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
+        })) ?? [];
+
+      const harmonicCtx = transcription
+        ? {
+            chords: chordSource,
+            audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
+            melodyneNotes: transcription.melodyneNotes ?? [],
+            durationSec: transcription.durationSec || reichDuration,
+            sources: transcription.sources,
+          }
+        : null;
+
       const voices =
-        reichType === "counterpoint"
-          ? composeCounterpoint({
+        harmonicCtx && chordSource.length >= 2
+          ? composeStrategicReich({
               durationSec: reichDuration,
               bpm,
               scale,
               style: reichStyle,
               seed: currentSeed,
+              type: reichType,
+              ctx: harmonicCtx,
             })
-          : composeHocket({
-              durationSec: reichDuration,
-              bpm,
-              scale,
-              style: reichStyle,
-              seed: currentSeed,
-            });
+          : chordSource.length >= 2
+            ? composeWithChordProgression({
+                durationSec: reichDuration,
+                bpm,
+                scale,
+                style: reichStyle,
+                seed: currentSeed,
+                type: reichType,
+                chords: chordSource,
+                melodyneNotes: transcription?.melodyneNotes ?? [],
+              })
+            : reichType === "counterpoint"
+              ? composeCounterpoint({
+                  durationSec: reichDuration,
+                  bpm,
+                  scale,
+                  style: reichStyle,
+                  seed: currentSeed,
+                })
+              : composeHocket({
+                  durationSec: reichDuration,
+                  bpm,
+                  scale,
+                  style: reichStyle,
+                  seed: currentSeed,
+                });
       setReichVoices(voices);
 
       const hintRot =
@@ -1293,7 +1510,23 @@ export default function SvivvaPlayPage() {
     seed,
     useSeed,
     meend,
+    analysis,
+    transcription,
+    chordEdits,
   ]);
+
+  useEffect(() => {
+    if (stems.length > 0 || !audioRef.current) return;
+    let raf = 0;
+    const tick = () => {
+      if (audioRef.current && isPlaying) {
+        setStagePlaybackSec(audioRef.current.currentTime);
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    if (isPlaying) raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isPlaying, stems.length]);
 
   const ModeIcon = MODE_CONFIG[mode].icon;
 
@@ -1616,12 +1849,21 @@ export default function SvivvaPlayPage() {
         </defs>
       </svg>
       <input
-        ref={fileInputRef}
+        ref={sessionInputRef}
         type="file"
-        accept="audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/aac,audio/m4a,.mp3,.wav,.ogg,.m4a,.aac"
+        multiple
+        accept="audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/aac,audio/m4a,audio/flac,.mp3,.wav,.ogg,.m4a,.aac,.mid,.midi,audio/midi"
         className="hidden"
-        onChange={handleFileChange}
-        data-testid="input-audio-file"
+        onChange={handleSessionFileChange}
+        data-testid="input-session-files"
+      />
+      <input
+        ref={melodyneOnlyInputRef}
+        type="file"
+        accept=".mid,.midi,audio/midi"
+        className="hidden"
+        onChange={handleMelodyneOnlyFileChange}
+        data-testid="input-melodyne-file"
       />
       {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />}
 
@@ -1705,11 +1947,19 @@ export default function SvivvaPlayPage() {
                           <FileAudio className="w-3.5 h-3.5" />
                         </span>
                         <span
-                          className="text-[10px] sm:text-xs font-mono text-gray-200 flex-shrink-0"
+                          className="text-[10px] sm:text-xs font-mono text-gray-200 flex-shrink-0 truncate max-w-[140px]"
                           data-testid="text-audio-name"
                         >
                           {audioName}
                         </span>
+                        {midiFileName && (
+                          <span
+                            className="text-[9px] font-mono text-[#5BA8A0] truncate max-w-[120px] hidden sm:inline"
+                            title={midiFileName}
+                          >
+                            + {midiFileName}
+                          </span>
+                        )}
                         {isAnalyzing && (
                           <Badge className="bg-amber-900/30 text-amber-300 text-[8px] border-amber-700/40 py-0 animate-pulse">
                             Analyzing…
@@ -1775,7 +2025,23 @@ export default function SvivvaPlayPage() {
                   }}
                   data-testid="button-import"
                 >
-                  <Upload className="w-3.5 h-3.5" /> import
+                  <Upload className="w-3.5 h-3.5" /> Session
+                </button>
+                <button
+                  onClick={handleMidiImport}
+                  disabled={!audioFile}
+                  className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 flex-shrink-0 transition-all disabled:opacity-40"
+                  style={{
+                    background: "linear-gradient(180deg, #2a3a38, #1e2a28)",
+                    border: "2px solid #3a5550",
+                  }}
+                  data-testid="button-import-midi"
+                  title={
+                    midiFileName ||
+                    "Add Melodyne harmonic MIDI (or pick audio + MIDI together via Session)"
+                  }
+                >
+                  <Piano className="w-3.5 h-3.5" /> + Melodyne
                 </button>
               </div>
             </div>
@@ -1883,9 +2149,10 @@ export default function SvivvaPlayPage() {
                         data-testid="button-drop-import"
                       >
                         <Upload className="w-4 h-4 inline mr-2" />
-                        Import audio — tempo &amp; key analyze automatically
+                        Import audio + Melodyne MIDI together (recommended)
                         <span className="block text-[9px] text-gray-500 font-normal mt-1 normal-case tracking-normal">
-                          WAV up to 250 MB (partial scan). MP3/M4A up to 80 MB.
+                          Session: pick both files at once (Cmd/Ctrl+click). Export harmonic tracks
+                          as .mid from Melodyne.
                         </span>
                       </button>
 
@@ -1923,9 +2190,9 @@ export default function SvivvaPlayPage() {
                       <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">Analyzing Audio</h3>
                       <p className="text-sm text-gray-400">
-                        Detecting tempo and key in your browser…
+                        Detecting tempo, key, pitch track, and chord progression…
                         <span className="block text-[11px] text-gray-500 mt-1">
-                          Results appear in seconds — chord map refines in the background.
+                          The play stage above fills in as transcription completes.
                         </span>
                       </p>
                     </div>
@@ -1968,10 +2235,32 @@ export default function SvivvaPlayPage() {
                           </h3>
                           {audioFile && analysis && (
                             <p className="text-[10px] text-gray-500 mb-3 leading-relaxed">
-                              Tempo and key detected. Choose a mode tab, pick a style preset, then
-                              Generate to build multi-stem MIDI (chords, bass, pads). Export .mid
-                              after generation.
+                              Combined harmonic model: audio pitch track + Melodyne MIDI (when
+                              provided). Chords prefer Melodyne harmony; composition follows the
+                              merged progression.
                             </p>
+                          )}
+                          {transcription?.sources && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {transcription.sources.audioTranscription && (
+                                <Badge className="bg-[#A05068]/15 text-[#B87888] text-[8px] border-[#A05068]/30">
+                                  Audio pitch map
+                                </Badge>
+                              )}
+                              {transcription.sources.melodyneMidi && (
+                                <Badge className="bg-[#5BA8A0]/15 text-[#5BA8A0] text-[8px] border-[#5BA8A0]/30">
+                                  Melodyne harmonics
+                                </Badge>
+                              )}
+                              {!transcription.sources.melodyneMidi && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[8px] text-amber-400/90 border-amber-700/40"
+                                >
+                                  Add Melodyne .mid for full harmonic data
+                                </Badge>
+                              )}
+                            </div>
                           )}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                             <AnalysisCard
@@ -2462,17 +2751,10 @@ export default function SvivvaPlayPage() {
                               />
                               <span className="text-[9px] text-gray-500">{reichDuration}s</span>
                             </div>
-                            <div className="mb-3 space-y-2">
-                              <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                                Play stage
-                              </h4>
-                              <SvivvaPlayStage3D model={playStageModel} className="shadow-inner" />
-                              <p className="text-[9px] text-gray-500 leading-relaxed">
-                                Visual matches your style: phase canon shows the V‑1 console;
-                                hocketing leans vibraphone & steel pan; counterpoint defaults to
-                                piano. Patch mode uses the modular synth model.
-                              </p>
-                            </div>
+                            <p className="text-[9px] text-gray-500 leading-relaxed mb-3">
+                              Use the play stage above for waveform, pitch map, and chord grid.
+                              Generate uses transcribed chords when available.
+                            </p>
                             <div className="mb-3 p-3 rounded-lg bg-[#0d0a12] border border-[#A05068]/25">
                               <h4 className="text-[10px] font-semibold text-[#B87888] uppercase tracking-wider mb-1.5">
                                 Add‑ons integrated (clean)
