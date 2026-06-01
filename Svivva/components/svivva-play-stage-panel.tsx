@@ -94,12 +94,12 @@ export function SvivvaPlayStagePanel({
       <div className="px-3 py-2 border-b border-gray-800/80 flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-            Play stage — harmonic session
+            Play stage — audio + Melodyne
           </h4>
           <p className="text-[9px] text-gray-500 mt-0.5">
-            {audioName || "Import audio + Melodyne MIDI together"} · rose = audio pitch · teal =
-            Melodyne harmonics
-            {hasMelodyne && hasAudioTrack ? " · merged chords" : ""}
+            {audioName || "Add your audio file and matching Melodyne .mid"} · rose = audio pitch ·
+            teal = Melodyne harmonics
+            {hasMelodyne && hasAudioTrack ? " · chords from both" : ""}
           </p>
         </div>
         {midiNotes.length > 0 && (

@@ -445,8 +445,8 @@ export default function SvivvaPlayPage() {
   const [isRendering, setIsRendering] = useState(false);
   const [masterVolume, setMasterVolume] = useState(80);
 
-  const sessionInputRef = useRef<HTMLInputElement>(null);
-  const melodyneOnlyInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const melodyneInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const modeRef = useRef(mode);
@@ -461,8 +461,8 @@ export default function SvivvaPlayPage() {
     userPromptRef.current = userPrompt;
   }, [userPrompt]);
 
-  const handleImport = useCallback(() => {
-    sessionInputRef.current?.click();
+  const handleImportAudio = useCallback(() => {
+    audioInputRef.current?.click();
   }, []);
 
   const applyHarmonicSession = useCallback((session: HarmonicSession) => {
@@ -491,8 +491,8 @@ export default function SvivvaPlayPage() {
     }));
   }, []);
 
-  const acceptSessionImport = useCallback((audio: File, melodyne?: File | null) => {
-    if (sessionInputRef.current) sessionInputRef.current.value = "";
+  const acceptAudioAndMelodyne = useCallback((audio: File, melodyne?: File | null) => {
+    if (audioInputRef.current) audioInputRef.current.value = "";
 
     setAudioFile(audio);
     setAudioName(audio.name);
@@ -517,14 +517,20 @@ export default function SvivvaPlayPage() {
     setImportSeq((n) => n + 1);
   }, []);
 
-  const handleMidiImport = useCallback(() => {
-    melodyneOnlyInputRef.current?.click();
-  }, []);
+  const handleImportMelodyne = useCallback(() => {
+    if (!audioFile) {
+      setErrorMsg("Import your audio file first, then add the matching Melodyne .mid export.");
+      return;
+    }
+    melodyneInputRef.current?.click();
+  }, [audioFile]);
 
   const handleAddMelodyneOnly = useCallback(
     async (file: File) => {
       if (!transcription) {
-        setWarningMsg("Import audio + Melodyne together, or wait for audio analysis to finish.");
+        setWarningMsg(
+          "Wait for audio analysis to finish, then add your Melodyne .mid (or drop both files on the bar).",
+        );
         return;
       }
       setErrorMsg("");
@@ -555,36 +561,26 @@ export default function SvivvaPlayPage() {
     [midiRawNotes],
   );
 
-  const handleSessionFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const list = e.target.files;
-      if (!list?.length) return;
-      const { audio, melodyne, extras } = splitSessionFiles(list);
-      if (!audio) {
-        if (melodyne && audioFile) {
-          void handleAddMelodyneOnly(melodyne);
-          return;
-        }
-        setErrorMsg(
-          "Select your audio file. Hold Cmd/Ctrl to also select the Melodyne .mid export in one step.",
-        );
-        return;
-      }
-      if (extras.length) {
-        setWarningMsg(
-          `Ignored ${extras.length} extra file(s) — use one audio + one Melodyne MIDI.`,
-        );
-      }
-      acceptSessionImport(audio, melodyne);
-    },
-    [acceptSessionImport, audioFile, handleAddMelodyneOnly],
-  );
-
-  const handleMelodyneOnlyFileChange = useCallback(
+  const handleAudioFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (melodyneOnlyInputRef.current) melodyneOnlyInputRef.current.value = "";
-      if (file) void handleAddMelodyneOnly(file);
+      if (audioInputRef.current) audioInputRef.current.value = "";
+      if (!file) return;
+      acceptAudioAndMelodyne(file, null);
+    },
+    [acceptAudioAndMelodyne],
+  );
+
+  const handleMelodyneFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (melodyneInputRef.current) melodyneInputRef.current.value = "";
+      if (!file) return;
+      if (!audioFile) {
+        setErrorMsg("Import your audio file first, then add the matching Melodyne .mid export.");
+        return;
+      }
+      void handleAddMelodyneOnly(file);
     },
     [handleAddMelodyneOnly],
   );
@@ -606,9 +602,9 @@ export default function SvivvaPlayPage() {
       if (extras.length) {
         setWarningMsg(`Ignored ${extras.length} extra file(s).`);
       }
-      acceptSessionImport(audio, melodyne);
+      acceptAudioAndMelodyne(audio, melodyne);
     },
-    [acceptSessionImport],
+    [acceptAudioAndMelodyne],
   );
 
   useEffect(() => {
@@ -768,7 +764,7 @@ export default function SvivvaPlayPage() {
         mode === "patch"
           ? "Designing patch..."
           : transcription
-            ? "Strategic compose — listening to your harmonic session…"
+            ? "Strategic compose — from your audio + Melodyne chords…"
             : "Stage 1: Planning arrangement...",
       );
       setStems([]);
@@ -1031,7 +1027,7 @@ export default function SvivvaPlayPage() {
       }
 
       if (!sessionId) {
-        setErrorMsg("Session export requires cloud analysis. Generate MIDI first, then export.");
+        setErrorMsg("Cloud export needs server analysis. Generate MIDI first, then export.");
         return;
       }
       try {
@@ -1849,20 +1845,19 @@ export default function SvivvaPlayPage() {
         </defs>
       </svg>
       <input
-        ref={sessionInputRef}
+        ref={audioInputRef}
         type="file"
-        multiple
-        accept="audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/aac,audio/m4a,audio/flac,.mp3,.wav,.ogg,.m4a,.aac,.mid,.midi,audio/midi"
+        accept="audio/mpeg,audio/wav,audio/x-wav,audio/ogg,audio/aac,audio/m4a,audio/flac,.mp3,.wav,.ogg,.m4a,.aac"
         className="hidden"
-        onChange={handleSessionFileChange}
-        data-testid="input-session-files"
+        onChange={handleAudioFileChange}
+        data-testid="input-audio-file"
       />
       <input
-        ref={melodyneOnlyInputRef}
+        ref={melodyneInputRef}
         type="file"
         accept=".mid,.midi,audio/midi"
         className="hidden"
-        onChange={handleMelodyneOnlyFileChange}
+        onChange={handleMelodyneFileChange}
         data-testid="input-melodyne-file"
       />
       {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />}
@@ -1942,46 +1937,57 @@ export default function SvivvaPlayPage() {
                 >
                   {audioName ? (
                     <>
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="holo-icon flex-shrink-0">
-                          <FileAudio className="w-3.5 h-3.5" />
-                        </span>
-                        <span
-                          className="text-[10px] sm:text-xs font-mono text-gray-200 flex-shrink-0 truncate max-w-[140px]"
-                          data-testid="text-audio-name"
-                        >
-                          {audioName}
-                        </span>
-                        {midiFileName && (
-                          <span
-                            className="text-[9px] font-mono text-[#5BA8A0] truncate max-w-[120px] hidden sm:inline"
-                            title={midiFileName}
-                          >
-                            + {midiFileName}
-                          </span>
-                        )}
-                        {isAnalyzing && (
-                          <Badge className="bg-amber-900/30 text-amber-300 text-[8px] border-amber-700/40 py-0 animate-pulse">
-                            Analyzing…
-                          </Badge>
-                        )}
-                        {effectiveAnalysis && (
-                          <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
-                            <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">
-                              {manualKey ?? effectiveAnalysis.key}
-                            </Badge>
-                            <Badge className="bg-gray-700/20 text-gray-300 text-[8px] border-gray-600/30 py-0">
-                              {manualTempo ?? effectiveAnalysis.bpm} BPM
-                            </Badge>
+                      <div className="flex items-start gap-2 flex-1 min-w-0">
+                        <div className="flex flex-col gap-0.5 flex-1 min-w-0 text-[9px] sm:text-[10px]">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-gray-500 uppercase tracking-wide flex-shrink-0 w-14">
+                              Audio
+                            </span>
+                            <FileAudio className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                            <span
+                              className="font-mono text-gray-200 truncate"
+                              data-testid="text-audio-name"
+                            >
+                              {audioName}
+                            </span>
                           </div>
-                        )}
-                        <button
-                          onClick={clearAudio}
-                          className="flex-shrink-0 text-gray-500 hover:text-gray-400"
-                          data-testid="button-clear-audio"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-gray-500 uppercase tracking-wide flex-shrink-0 w-14">
+                              Melodyne
+                            </span>
+                            <Piano className="w-3 h-3 text-[#5BA8A0] flex-shrink-0" />
+                            <span
+                              className={`font-mono truncate ${midiFileName ? "text-[#5BA8A0]" : "text-gray-600 italic"}`}
+                              data-testid="text-melodyne-name"
+                            >
+                              {midiFileName || "Add .mid — harmonic tracks from Melodyne"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isAnalyzing && (
+                            <Badge className="bg-amber-900/30 text-amber-300 text-[8px] border-amber-700/40 py-0 animate-pulse">
+                              Analyzing…
+                            </Badge>
+                          )}
+                          {effectiveAnalysis && (
+                            <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+                              <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">
+                                {manualKey ?? effectiveAnalysis.key}
+                              </Badge>
+                              <Badge className="bg-gray-700/20 text-gray-300 text-[8px] border-gray-600/30 py-0">
+                                {manualTempo ?? effectiveAnalysis.bpm} BPM
+                              </Badge>
+                            </div>
+                          )}
+                          <button
+                            onClick={clearAudio}
+                            className="text-gray-500 hover:text-gray-400"
+                            data-testid="button-clear-audio"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                       <div
                         className="flex items-center gap-[1px] w-full h-6"
@@ -2016,32 +2022,32 @@ export default function SvivvaPlayPage() {
                   )}
                 </div>
                 <button
-                  onClick={handleImport}
+                  onClick={handleImportAudio}
                   className="flex items-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 flex-shrink-0 transition-all active:translate-y-[1px]"
                   style={{
                     background: "linear-gradient(180deg, #444, #333)",
                     boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
                     border: "2px solid #555",
                   }}
-                  data-testid="button-import"
+                  data-testid="button-import-audio"
+                  title="Your mix or bounce (MP3, WAV, etc.)"
                 >
-                  <Upload className="w-3.5 h-3.5" /> Session
+                  <Upload className="w-3.5 h-3.5" /> Audio
                 </button>
                 <button
-                  onClick={handleMidiImport}
-                  disabled={!audioFile}
-                  className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 flex-shrink-0 transition-all disabled:opacity-40"
+                  onClick={handleImportMelodyne}
+                  className="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 flex-shrink-0 transition-all"
                   style={{
                     background: "linear-gradient(180deg, #2a3a38, #1e2a28)",
                     border: "2px solid #3a5550",
                   }}
-                  data-testid="button-import-midi"
+                  data-testid="button-import-melodyne"
                   title={
                     midiFileName ||
-                    "Add Melodyne harmonic MIDI (or pick audio + MIDI together via Session)"
+                    "Matching Melodyne export (.mid) — import audio first, then add this file"
                   }
                 >
-                  <Piano className="w-3.5 h-3.5" /> + Melodyne
+                  <Piano className="w-3.5 h-3.5" /> Melodyne MIDI
                 </button>
               </div>
             </div>
@@ -2144,20 +2150,20 @@ export default function SvivvaPlayPage() {
 
                       <button
                         type="button"
-                        onClick={handleImport}
+                        onClick={handleImportAudio}
                         className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A05068] text-xs text-gray-400 hover:text-gray-200 transition-colors"
                         data-testid="button-drop-import"
                       >
                         <Upload className="w-4 h-4 inline mr-2" />
-                        Import audio + Melodyne MIDI together (recommended)
+                        Import audio, then matching Melodyne .mid
                         <span className="block text-[9px] text-gray-500 font-normal mt-1 normal-case tracking-normal">
-                          Session: pick both files at once (Cmd/Ctrl+click). Export harmonic tracks
-                          as .mid from Melodyne.
+                          Two inputs: Audio (tempo/key + pitch map) and Melodyne MIDI (chord
+                          harmonics). Or drop both files on the bar above at once.
                         </span>
                       </button>
 
                       <p className="text-[10px] text-gray-500 max-w-sm">
-                        Drop a file on the bar above, or click Import. Analysis starts immediately.
+                        Use Audio and Melodyne MIDI buttons on the bar, or drag both files onto it.
                       </p>
                     </div>
                   )}
@@ -2173,7 +2179,7 @@ export default function SvivvaPlayPage() {
                           "Could not read tempo or key from this file. Try MP3/WAV, or a shorter clip."}
                       </p>
                       <button
-                        onClick={handleImport}
+                        onClick={handleImportAudio}
                         className="px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider text-gray-200"
                         style={{
                           background: "linear-gradient(180deg, #444, #333)",
@@ -3329,7 +3335,7 @@ export default function SvivvaPlayPage() {
                 {effectiveAnalysis && (
                   <div className="hidden md:block mt-3 lg:mt-4 space-y-2 lg:space-y-3">
                     <h4 className="text-[9px] lg:text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                      Session
+                      Track info
                     </h4>
                     <div className="space-y-1.5 text-[11px]">
                       <InfoRow label="Mode" value={MODE_CONFIG[mode].label} />
@@ -3658,9 +3664,7 @@ export default function SvivvaPlayPage() {
                     <Download className="w-3.5 h-3.5 text-gray-400" />
                     <div>
                       <div className="font-semibold">JSON Project</div>
-                      <div className="text-[10px] text-gray-400">
-                        Complete session data & metadata
-                      </div>
+                      <div className="text-[10px] text-gray-400">Full project data & metadata</div>
                     </div>
                   </button>
                 </div>
