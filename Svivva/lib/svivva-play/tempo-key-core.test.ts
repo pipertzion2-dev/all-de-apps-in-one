@@ -33,6 +33,20 @@ describe("tempo harmonic resolution", () => {
     expect(runHybridDetection(wrong, [], onsets).bpm).toBe(134);
   });
 
+  it("resolves 4/3 tempo alias (120) to 90 BPM", () => {
+    const onsets = syntheticOnsets(90, 30, 2);
+    expect(resolveTempoHarmonics(120, onsets)).toBe(90);
+    expect(
+      fuseBpmCandidates([{ bpm: 120, weight: 1.2, source: "peak-histogram" }], onsets).bpm,
+    ).toBe(90);
+  });
+
+  it("resolves double-time alias (180) to 90 BPM", () => {
+    const onsets = syntheticOnsets(90, 30, 2);
+    expect(detectBpmBeatGridSearch(onsets)).toBe(90);
+    expect(resolveTempoHarmonics(180, onsets)).toBe(90);
+  });
+
   it("keeps in-range tempos stable (no erroneous 2/3 pull-down)", () => {
     const onsets = syntheticOnsets(120, 24, 2);
     expect(resolveTempoHarmonics(120, onsets)).toBe(120);

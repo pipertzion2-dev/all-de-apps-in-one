@@ -178,8 +178,11 @@ export function emphasizeHarmonic(mono: Float32Array, blockSize = 2048): Float32
   return out;
 }
 
+/** Max BPM for pulse thinning during tempo detection — keeps quarter-note pulse, not 8ths. */
+const TEMPO_PULSE_MAX_BPM = 108;
+
 /** Keep one onset per pulse — reduces subdivision/triplet false tempos (e.g. 134 vs 201). */
-export function thinOnsetsToPulse(onsetTimes: number[], maxBpm = 155): number[] {
+export function thinOnsetsToPulse(onsetTimes: number[], maxBpm = TEMPO_PULSE_MAX_BPM): number[] {
   if (onsetTimes.length < 3) return onsetTimes;
   const minInterval = (60 / maxBpm) * 0.82;
   const thinned: number[] = [onsetTimes[0]];
@@ -343,7 +346,7 @@ export function bpmFromOnsetIntervals(onsetTimes: number[]): number | null {
   const median = intervals[Math.floor(intervals.length / 2)];
 
   const hints: number[] = [];
-  for (const mult of [1, 2, 3, 4, 0.5, 2 / 3, 1.5]) {
+  for (const mult of [1, 2, 3, 4, 0.5, 2 / 3, 0.75, 1.5, 4 / 3]) {
     const bpm = Math.round(60 / (median * mult));
     if (bpm >= 40 && bpm <= 220) hints.push(bpm);
   }
@@ -362,13 +365,33 @@ export function bpmFromOnsetIntervals(onsetTimes: number[]): number | null {
 }
 
 function tempoPrior(bpm: number): number {
-  if (bpm >= 95 && bpm <= 145) return 1.45;
-  if (bpm >= 88 && bpm <= 155) return 1.3;
-  if (bpm >= 80 && bpm <= 165) return 1.15;
-  if (bpm >= 70 && bpm <= 175) return 1.0;
-  if (bpm > 175) return 0.42;
-  if (bpm <= 65) return 0.48;
-  return 0.9;
+  if (bpm >= 86 && bpm <= 98) return 1.5;
+  if (bpm >= 95 && bpm <= 145) return 1.38;
+  if (bpm >= 88 && bpm <= 155) return 1.22;
+  if (bpm >= 80 && bpm <= 165) return 1.08;
+  if (bpm >= 70 && bpm <= 175) return 0.95;
+  if (bpm > 175) return 0.38;
+  if (bpm <= 65) return 0.45;
+  return 0.85;
+}
+
+function tempoOverfitPenalty(bpm: number, pulseAlign: number): number {
+  let penalty = 0;
+  if (bpm >= 150 && pulseAlign > 1.05) penalty += (pulseAlign - 1.05) * 11;
+  if (bpm >= 115 && pulseAlign > 1.45) penalty += (pulseAlign - 1.45) * 7;
+  return penalty;
+}
+
+function harmonicBpmAlias(seedBpm: number, ratio: number): number {
+  return Math.round((seedBpm * ratio) / 2) * 2;
+}
+
+function harmonicTempoRatios(seedBpm: number): number[] {
+  const ratios = [1, 0.5, 2, 2 / 3, 0.75, 1.5, 4 / 3];
+  if (seedBpm > 165) return [1, 2 / 3, 0.75, 0.5];
+  if (seedBpm < 72) return [1, 2, 1.5, 4 / 3];
+  if (seedBpm >= 100 && seedBpm <= 145) return [1, 0.75, 2 / 3, 0.5, 4 / 3, 2];
+  return ratios;
 }
 
 function expandTempoHarmonics(c: TempoCandidate): TempoCandidate[] {
@@ -376,7 +399,7 @@ function expandTempoHarmonics(c: TempoCandidate): TempoCandidate[] {
   const bpm = c.bpm;
 
   const pushAlias = (ratio: number, label: string, penalty: number) => {
-    const alias = Math.round(bpm * ratio);
+    const alias = harmonicBpmAlias(bpm, ratio);
     if (alias < 40 || alias > 220 || alias === bpm) return;
     out.push({
       bpm: alias,
@@ -396,6 +419,10 @@ function expandTempoHarmonics(c: TempoCandidate): TempoCandidate[] {
   } else {
     pushAlias(0.5, "×0.5", 0.9);
     pushAlias(2, "×2", 0.9);
+    if (bpm >= 100 && bpm <= 145) {
+      pushAlias(0.75, "×3/4", 0.92);
+      pushAlias(2 / 3, "×2/3", 0.9);
+    }
     if (bpm > 150) pushAlias(2 / 3, "×2/3", 0.88);
     if (bpm < 95) pushAlias(3 / 2, "×3/2", 0.88);
   }
@@ -403,42 +430,43 @@ function expandTempoHarmonics(c: TempoCandidate): TempoCandidate[] {
   return out;
 }
 
+function scoreTempoCandidate(bpm: number, onsetTimes: number[], pulseOnsets: number[]): number {
+  const pulseAlign = scoreTempoAlignment(pulseOnsets, bpm);
+  const fullAlign = scoreTempoAlignment(onsetTimes, bpm);
+  const penalty = tempoOverfitPenalty(bpm, pulseAlign);
+  return pulseAlign * 16 + fullAlign * 5 + tempoPrior(bpm) * 5 - penalty;
+}
+
 function pickBestHarmonicTempo(
   seedBpm: number,
   onsetTimes: number[],
   pulseOnsets: number[],
 ): number {
-  const ratios: number[] = [1];
-  if (seedBpm > 165) {
-    ratios.push(2 / 3, 0.75, 0.5);
-  } else if (seedBpm < 72) {
-    ratios.push(2, 1.5, 4 / 3);
-  } else {
-    ratios.push(0.5, 2);
-    if (seedBpm > 150) ratios.push(2 / 3);
-    if (seedBpm < 95) ratios.push(1.5);
-  }
-
   const scored: Array<{ bpm: number; score: number }> = [];
-  for (const ratio of ratios) {
-    const candidate = Math.round(seedBpm * ratio);
+
+  for (const ratio of harmonicTempoRatios(seedBpm)) {
+    const candidate = harmonicBpmAlias(seedBpm, ratio);
     if (candidate < 40 || candidate > 220) continue;
-    const fullAlign = scoreTempoAlignment(onsetTimes, candidate);
-    const pulseAlign = scoreTempoAlignment(pulseOnsets, candidate);
-    const score = fullAlign * 10 + pulseAlign * 16 + tempoPrior(candidate) * 3;
-    scored.push({ bpm: candidate, score });
+    scored.push({
+      bpm: candidate,
+      score: scoreTempoCandidate(candidate, onsetTimes, pulseOnsets),
+    });
   }
 
   if (scored.length === 0) return seedBpm;
   scored.sort((a, b) => b.score - a.score);
 
   const top = scored[0];
-  for (const alt of scored.slice(1, 4)) {
-    if (top.score - alt.score > 0.1) continue;
-    if (alt.bpm >= 85 && alt.bpm <= 155 && top.bpm > 165) return alt.bpm;
-    if (alt.bpm >= 85 && alt.bpm <= 155 && alt.bpm < top.bpm && top.bpm > 155) {
-      return alt.bpm;
-    }
+  if (top.bpm <= 155 && top.bpm <= seedBpm * 0.72) {
+    return top.bpm;
+  }
+
+  for (const alt of scored.slice(1, 6)) {
+    if (top.score - alt.score > 0.85) continue;
+    const ratio = alt.bpm / top.bpm;
+    if (seedBpm > 165 && ratio >= 0.64 && ratio <= 0.69 && alt.bpm >= 100) return alt.bpm;
+    if (top.bpm >= 118 && top.bpm <= 128 && ratio >= 0.72 && ratio <= 0.78) return alt.bpm;
+    if (top.bpm >= 150 && alt.bpm >= 80 && alt.bpm < top.bpm) return alt.bpm;
   }
 
   return top.bpm;
@@ -447,7 +475,7 @@ function pickBestHarmonicTempo(
 /** Resolve half/double/triplet tempo aliases using onset grid alignment. */
 export function resolveTempoHarmonics(bpm: number, onsetTimes: number[]): number {
   if (onsetTimes.length < 6 || bpm <= 0) return bpm;
-  const pulseOnsets = thinOnsetsToPulse(onsetTimes, 155);
+  const pulseOnsets = thinOnsetsToPulse(onsetTimes, TEMPO_PULSE_MAX_BPM);
   const resolved = pickBestHarmonicTempo(bpm, onsetTimes, pulseOnsets);
   return refineBpmFine(pulseOnsets.length >= 6 ? pulseOnsets : onsetTimes, resolved);
 }
@@ -507,15 +535,13 @@ export function detectBpmOnsetAutocorrelation(onsetTimes: number[]): number | nu
 export function detectBpmBeatGridSearch(onsetTimes: number[]): number | null {
   if (onsetTimes.length < 6) return null;
 
-  const pulseOnsets = thinOnsetsToPulse(onsetTimes, 155);
+  const pulseOnsets = thinOnsetsToPulse(onsetTimes, TEMPO_PULSE_MAX_BPM);
   const gridOnsets = pulseOnsets.length >= 6 ? pulseOnsets : onsetTimes;
 
-  let bestBpm = 120;
+  let bestBpm = 90;
   let bestScore = -Infinity;
   for (let bpm = 40; bpm <= 200; bpm++) {
-    const pulseAlign = scoreTempoAlignment(gridOnsets, bpm);
-    const fullAlign = scoreTempoAlignment(onsetTimes, bpm);
-    const score = pulseAlign * 14 + fullAlign * 6 + tempoPrior(bpm) * 2;
+    const score = scoreTempoCandidate(bpm, onsetTimes, gridOnsets);
     if (score > bestScore) {
       bestScore = score;
       bestBpm = bpm;
@@ -566,7 +592,7 @@ export function fuseBpmCandidates(
     expanded.push(...expandTempoHarmonics(c));
   }
 
-  const pulseOnsets = thinOnsetsToPulse(onsetTimes, 155);
+  const pulseOnsets = thinOnsetsToPulse(onsetTimes, TEMPO_PULSE_MAX_BPM);
   const intervalSource = pulseOnsets.length >= 5 ? pulseOnsets : onsetTimes;
 
   const intervalBpm = bpmFromOnsetIntervals(intervalSource);
@@ -678,6 +704,8 @@ function detectKeyFromSegment(
   let bestCorr = -Infinity;
   let bestKey = "C major";
   let secondBest = -Infinity;
+  const majorCorrs: number[] = [];
+  const minorCorrs: number[] = [];
 
   for (let shift = 0; shift < 12; shift++) {
     const rotated = new Array(12);
@@ -686,6 +714,8 @@ function detectKeyFromSegment(
     }
     const majorCorr = correlate(rotated, MAJOR_PROFILE);
     const minorCorr = correlate(rotated, MINOR_PROFILE);
+    majorCorrs.push(majorCorr);
+    minorCorrs.push(minorCorr);
 
     if (majorCorr > bestCorr) {
       secondBest = bestCorr;
@@ -701,6 +731,20 @@ function detectKeyFromSegment(
       bestKey = `${NOTE_NAMES[shift]} minor`;
     } else if (minorCorr > secondBest) {
       secondBest = minorCorr;
+    }
+  }
+
+  if (bestKey.endsWith("minor")) {
+    const minorRoot = bestKey.split(" ")[0];
+    const minorIdx = NOTE_NAMES.indexOf(minorRoot);
+    if (minorIdx >= 0) {
+      const relMajorIdx = (minorIdx + 3) % 12;
+      const relMajorCorr = majorCorrs[relMajorIdx];
+      const minorWinCorr = minorCorrs[minorIdx];
+      if (relMajorCorr >= minorWinCorr * 0.9) {
+        bestKey = `${NOTE_NAMES[relMajorIdx]} major`;
+        bestCorr = relMajorCorr;
+      }
     }
   }
 
