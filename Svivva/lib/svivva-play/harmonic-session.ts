@@ -1,7 +1,7 @@
 import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
 import { transcribeAudioFile } from "./audio-transcription";
 import { chordsFromPolyphonicNotes, mergeChordTimelines } from "./chords-from-notes";
-import { alignMidiToAudio, applyOffsetToNotes } from "./midi-alignment";
+import { alignMidiToAudio, applyOffsetToNotes, normalizeMidiToBarOne } from "./midi-alignment";
 import { parseMidiFile } from "./midi-file-parse";
 
 export type HarmonicSources = {
@@ -81,6 +81,9 @@ export async function buildHarmonicSession(options: {
 
   const base = audioTx ?? emptyTranscription(melodyneParsed?.durationSec ?? 0);
   let melodyneRaw = melodyneParsed?.notes ?? [];
+  if (melodyneRaw.length && bpm > 0) {
+    melodyneRaw = normalizeMidiToBarOne(melodyneRaw, bpm).notes;
+  }
   let melodyneAligned = melodyneRaw;
   let alignOffsetSec = 0;
   let alignScore = 0;
@@ -88,7 +91,7 @@ export async function buildHarmonicSession(options: {
   const audioNotes = base.notes;
 
   if (melodyneRaw.length && audioNotes.length) {
-    const align = alignMidiToAudio(audioNotes, melodyneRaw);
+    const align = alignMidiToAudio(audioNotes, melodyneRaw, { bpm });
     alignOffsetSec = align.offsetSec;
     alignScore = align.score;
     melodyneAligned = applyOffsetToNotes(melodyneRaw, alignOffsetSec);
@@ -134,14 +137,18 @@ export function attachMelodyneToSession(
     const parsed = parseMidiFile(buf);
     if (!parsed.notes.length) return null;
 
+    let melodyneRaw = parsed.notes;
+    if (bpm > 0) {
+      melodyneRaw = normalizeMidiToBarOne(melodyneRaw, bpm).notes;
+    }
     let alignOffsetSec = 0;
     let alignScore = 0;
-    let melodyneAligned = parsed.notes;
+    let melodyneAligned = melodyneRaw;
     if (session.audioNotes.length) {
-      const align = alignMidiToAudio(session.audioNotes, parsed.notes);
+      const align = alignMidiToAudio(session.audioNotes, melodyneRaw, { bpm });
       alignOffsetSec = align.offsetSec;
       alignScore = align.score;
-      melodyneAligned = applyOffsetToNotes(parsed.notes, alignOffsetSec);
+      melodyneAligned = applyOffsetToNotes(melodyneRaw, alignOffsetSec);
     }
 
     const durationSec = Math.max(
@@ -156,7 +163,7 @@ export function attachMelodyneToSession(
     return {
       ...session,
       melodyneNotes: melodyneAligned,
-      melodyneRawNotes: parsed.notes,
+      melodyneRawNotes: melodyneRaw,
       chords: mergedChords,
       durationSec,
       alignOffsetSec,
