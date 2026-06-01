@@ -7,7 +7,8 @@ import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
-import { and, eq, isNotNull } from "drizzle-orm";
+import { unpublishLegacySeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
+import { eq } from "drizzle-orm";
 
 export const maxDuration = 60;
 
@@ -113,7 +114,7 @@ export async function POST() {
     ]);
     checks.push(...infraChecks);
 
-    const toolPages = await db
+    const publishedPages = await db
       .select({
         id: seoLandingPages.id,
         slug: seoLandingPages.slug,
@@ -121,11 +122,14 @@ export async function POST() {
         toolUrl: seoLandingPages.toolUrl,
       })
       .from(seoLandingPages)
-      .where(and(eq(seoLandingPages.published, true), isNotNull(seoLandingPages.toolUrl)))
-      .limit(200);
+      .where(eq(seoLandingPages.published, true))
+      .limit(400);
 
-    const unpublished: { slug: string; reason: string }[] = [];
+    const unpublished = await unpublishLegacySeoSlugs(400);
+
+    const toolPages = publishedPages.filter((p) => p.toolUrl);
     for (const page of toolPages) {
+      if (unpublished.some((u) => u.slug === page.slug)) continue;
       const toolUrl = page.toolUrl || "";
       let shouldUnpublish = false;
       let reason = "";

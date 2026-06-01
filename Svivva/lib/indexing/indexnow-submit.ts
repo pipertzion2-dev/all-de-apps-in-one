@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { desc, eq, isNotNull } from "drizzle-orm";
+import { isIndexablePublicUrl } from "@/lib/seo/legacy-paths";
 import { getSiteUrl } from "@/lib/site-url";
 
 /** IndexNow allows large batches; stay under 10k URLs and reasonable JSON size per request. */
@@ -72,8 +73,8 @@ export async function submitIndexNowBatched(
   let allAccepted = true;
   const chunks = Math.ceil(urls.length / INDEXNOW_CHUNK_SIZE);
 
-  for (let i = 0; i < urls.length; i += INDEXNOW_CHUNK_SIZE) {
-    const chunk = urls.slice(i, i + INDEXNOW_CHUNK_SIZE);
+  for (let i = 0; i < indexableUrls.length; i += INDEXNOW_CHUNK_SIZE) {
+    const chunk = indexableUrls.slice(i, i + INDEXNOW_CHUNK_SIZE);
     const body = JSON.stringify({ host, key, keyLocation, urlList: chunk });
 
     let status = 0;

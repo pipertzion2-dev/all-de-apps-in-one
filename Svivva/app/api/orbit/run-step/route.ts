@@ -939,11 +939,11 @@ Return JSON with these 4 keys:
       const created: { title: string; url: string }[] = [];
 
       for (const tool of passedTools.slice(0, 25)) {
-        const slugBase = `pyracrypt-${tool.name
+        const slugBase = `security-tool-${tool.name
           .toLowerCase()
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "")
-          .slice(0, 48)}`;
+          .slice(0, 44)}`;
         const variants = [
           {
             slug: slugBase,
@@ -982,7 +982,7 @@ Return JSON with these 4 keys:
             whoItsFor: variant.whoItsFor,
             content: `<h1>${variant.headline}</h1><p>${tool.description || tool.name}</p><p><a href="${tool.url}">Open live app</a></p>`,
             metaTitle: variant.title,
-            metaDescription: `${tool.name} security page generated from Pyracrypt.`,
+            metaDescription: `${tool.name} security guide on Svivva — part of the cyber mini-apps hub.`,
             category: "seed-marketing",
             published: true,
             toolUrl: sourceUrl || tool.url,

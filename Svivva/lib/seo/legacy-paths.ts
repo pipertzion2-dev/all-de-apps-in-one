@@ -33,3 +33,20 @@ export const LEGACY_REDIRECT_PREFIXES = [
   "/clutter",
   "/clutety-shell",
 ] as const;
+
+/** First path segment from an absolute site URL (e.g. https://svivva.com/foo → foo). */
+export function slugFromPublicUrl(url: string): string | null {
+  try {
+    const pathname = new URL(url).pathname.replace(/\/$/, "");
+    const segment = pathname.split("/").filter(Boolean)[0];
+    return segment ? segment.toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isIndexablePublicUrl(url: string): boolean {
+  const slug = slugFromPublicUrl(url);
+  if (!slug) return true;
+  return !isNonIndexableSlug(slug);
+}
