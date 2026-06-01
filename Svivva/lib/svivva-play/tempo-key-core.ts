@@ -493,9 +493,7 @@ export function detectBpmOnsetAutocorrelation(onsetTimes: number[]): number | nu
     const rounded = Math.round(c.bpm);
     if (rounded < 40 || rounded > 220) continue;
     const score =
-      c.corr * 12 +
-      tempoPrior(rounded) * 2.5 +
-      scoreTempoAlignment(onsetTimes, rounded) * 8;
+      c.corr * 12 + tempoPrior(rounded) * 2.5 + scoreTempoAlignment(onsetTimes, rounded) * 8;
     if (score > bestScore) {
       bestScore = score;
       bestBpm = rounded;
