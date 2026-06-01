@@ -42,10 +42,25 @@ export function isClientDetectionReliable(detection: {
   keyConfidence: number;
   bpmConfidence?: number;
 }): boolean {
+  const bpmConf = detection.bpmConfidence ?? detection.keyConfidence;
+  const inMusicalRange = detection.bpm >= 72 && detection.bpm <= 168;
+  if (detection.bpm > 175) return false;
   return (
     detection.bpm >= 40 &&
-    detection.bpm <= 220 &&
-    detection.keyConfidence >= 35 &&
-    (detection.bpmConfidence ?? detection.keyConfidence) >= 35
+    detection.bpm <= 175 &&
+    detection.keyConfidence >= 40 &&
+    bpmConf >= 48 &&
+    inMusicalRange &&
+    bpmConf >= 52
   );
+}
+
+/** Extreme BPM or low confidence — send audio clip for server re-validation. */
+export function isClientBpmNeedsValidation(detection: {
+  bpm: number;
+  bpmConfidence?: number;
+  keyConfidence: number;
+}): boolean {
+  const bpmConf = detection.bpmConfidence ?? detection.keyConfidence;
+  return detection.bpm > 175 || detection.bpm < 68 || bpmConf < 58;
 }

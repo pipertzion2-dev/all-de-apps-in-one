@@ -1,10 +1,11 @@
-import { analyzeAudioFileFast } from "./client-audio-analysis";
+import { analyzeAudioFile, analyzeAudioFileFast } from "./client-audio-analysis";
 import { buildInstantPlayAnalysis, type PlayAnalysisView } from "./instant-analysis";
 import type { DetectionMeta } from "./tempo-key-core";
 import {
   formatMegabytes,
   getMaxLocalFileBytes,
   isClientDetectionReliable,
+  isClientBpmNeedsValidation,
   isLocalFileTooLarge,
   MAX_CLOUD_UPLOAD_BYTES,
   needsCloudClip,
@@ -32,7 +33,10 @@ async function prepareCloudUploadFile(
   file: File,
   clientDetection: ClientDetection | null,
 ): Promise<{ upload: File | null; metadataOnly: boolean }> {
-  if (clientDetection && isClientDetectionReliable(clientDetection)) {
+  const reliable = clientDetection && isClientDetectionReliable(clientDetection);
+  const needsBpmValidation = clientDetection && isClientBpmNeedsValidation(clientDetection);
+
+  if (reliable && !needsBpmValidation) {
     return { upload: null, metadataOnly: true };
   }
   if (file.size <= MAX_CLOUD_UPLOAD_BYTES) {
@@ -192,7 +196,7 @@ export async function runImportAnalysis(options: {
   let clientDetection: ClientDetection | null = null;
 
   try {
-    clientDetection = await analyzeAudioFileFast(file);
+    clientDetection = (await analyzeAudioFile(file)) ?? (await analyzeAudioFileFast(file));
     if (clientDetection) {
       onInstantResult?.(buildInstantPlayAnalysis(clientDetection));
     }

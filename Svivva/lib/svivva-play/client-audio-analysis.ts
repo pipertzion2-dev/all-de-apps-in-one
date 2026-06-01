@@ -4,22 +4,22 @@ import {
   sliceMonoWindow,
   emphasizePercussive,
   extractOnsetTimes,
-  extractOnsetTimesEnvelope,
   detectBpmAutocorrelation,
   detectBpmPeakHistogram,
   detectKeyHybrid,
   runHybridDetection,
   monoFromAudioBuffer,
+  compactOnsetTimesForMeta,
   type DetectionMeta,
   type TempoCandidate,
 } from "./tempo-key-core";
 import { isWavFile, WAV_PARTIAL_READ_SEC } from "./upload-limits";
 import { downsampleMono, readWavMonoPartial } from "./wav-utils";
 
-const FAST_WINDOW_SEC = 18;
+const FAST_WINDOW_SEC = 32;
 const FULL_WINDOW_SEC = 45;
 const PARTIAL_WAV_THRESHOLD_BYTES = 3 * 1024 * 1024;
-const ANALYSIS_DOWNSAMPLE_HZ = 22050;
+const ANALYSIS_DOWNSAMPLE_HZ = 44100;
 
 export interface AudioAnalysisResult {
   bpm: number;
@@ -82,35 +82,39 @@ async function analyzeMonoSamples(
   const fast = options?.fast ?? false;
   if (durationSec < 0.5 || fullMono.length < sampleRate * 0.5) return null;
 
-  let mono = fullMono;
-  if (fast && sampleRate > ANALYSIS_DOWNSAMPLE_HZ) {
-    ({ mono, sampleRate } = downsampleMono(fullMono, sampleRate, ANALYSIS_DOWNSAMPLE_HZ));
+  const windowSec = fast ? FAST_WINDOW_SEC : FULL_WINDOW_SEC;
+  const window = findLoudestAnalysisWindow(fullMono, sampleRate, windowSec);
+  const analysisMono = sliceMonoWindow(fullMono, window.offset, window.length);
+
+  let dspMono = analysisMono;
+  let dspRate = sampleRate;
+  if (sampleRate > ANALYSIS_DOWNSAMPLE_HZ) {
+    ({ mono: dspMono, sampleRate: dspRate } = downsampleMono(
+      analysisMono,
+      sampleRate,
+      ANALYSIS_DOWNSAMPLE_HZ,
+    ));
   }
 
-  const windowSec = fast ? FAST_WINDOW_SEC : FULL_WINDOW_SEC;
-  const window = findLoudestAnalysisWindow(mono, sampleRate, windowSec);
-  const analysisMono = sliceMonoWindow(mono, window.offset, window.length);
-  const percussive = emphasizePercussive(analysisMono);
-  const onsetTimes = fast
-    ? extractOnsetTimesEnvelope(percussive, sampleRate)
-    : extractOnsetTimes(percussive, sampleRate);
+  const percussive = emphasizePercussive(dspMono);
+  const onsetTimes = extractOnsetTimes(percussive, dspRate);
 
   const bpmCandidates: TempoCandidate[] = [];
   const offsetSec = window.offset / sampleRate;
   const windowSecActual = window.length / sampleRate;
 
-  const peakBpm = detectBpmPeakHistogram(percussive, sampleRate);
+  const peakBpm = detectBpmPeakHistogram(percussive, dspRate);
   if (peakBpm) {
     bpmCandidates.push({ bpm: peakBpm, weight: 1.0, source: "peak-histogram" });
   }
 
-  const autoBpm = detectBpmAutocorrelation(percussive, sampleRate);
+  const autoBpm = detectBpmAutocorrelation(percussive, dspRate);
   if (autoBpm) {
     bpmCandidates.push({ bpm: autoBpm, weight: 0.9, source: "autocorrelation" });
   }
 
   const audioBuffer = options?.audioBuffer;
-  if (!fast && audioBuffer) {
+  if (audioBuffer) {
     try {
       const slice =
         offsetSec > 0.5 || windowSecActual < audioBuffer.duration - 0.5
@@ -129,7 +133,7 @@ async function analyzeMonoSamples(
     }
   }
 
-  const keyCandidates = detectKeyHybrid(analysisMono, sampleRate);
+  const keyCandidates = detectKeyHybrid(dspMono, dspRate);
   const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);
 
   return {
@@ -141,6 +145,7 @@ async function analyzeMonoSamples(
       bpmCandidates: hybrid.bpmCandidates,
       keyCandidates: hybrid.keyCandidates,
       durationSec,
+      onsetTimes: compactOnsetTimesForMeta(onsetTimes),
     },
   };
 }
@@ -173,7 +178,7 @@ export async function analyzeAudioBuffer(
     monoFromAudioBuffer(audioBuffer, WAV_PARTIAL_READ_SEC),
     audioBuffer.sampleRate,
     audioBuffer.duration,
-    { fast: options?.fast, audioBuffer: options?.fast ? undefined : audioBuffer },
+    { fast: options?.fast, audioBuffer },
   );
 }
 

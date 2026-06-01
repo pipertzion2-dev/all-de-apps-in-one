@@ -3,6 +3,7 @@ import {
   extractOnsetTimes,
   detectBpmAutocorrelation,
   detectBpmPeakHistogram,
+  detectBpmOnsetAutocorrelation,
   detectKeyHybrid,
   runHybridDetection,
   findLoudestAnalysisWindow,
@@ -109,6 +110,11 @@ export async function analyzeWavFileHybrid(wavPath: string): Promise<ServerHybri
 
   const autoBpm = detectBpmAutocorrelation(percussive, sampleRate);
   if (autoBpm) bpmCandidates.push({ bpm: autoBpm, weight: 0.85, source: "server-autocorr" });
+
+  const onsetAcBpm = detectBpmOnsetAutocorrelation(onsetTimes);
+  if (onsetAcBpm) {
+    bpmCandidates.push({ bpm: onsetAcBpm, weight: 1.1, source: "server-onset-ac" });
+  }
 
   const keyCandidates = detectKeyHybrid(analysisMono, sampleRate);
   const hybrid = runHybridDetection(bpmCandidates, keyCandidates, onsetTimes);

@@ -15,6 +15,7 @@ import { finalizeHybridFromMeta, type DetectionMeta } from "@/lib/svivva-play/te
 import { getActiveAiProvider, getRuntimeLabel } from "@/lib/llm/openai";
 import {
   isClientDetectionReliable,
+  isClientBpmNeedsValidation,
   MAX_CLOUD_UPLOAD_BYTES,
   formatMegabytes,
 } from "@/lib/svivva-play/upload-limits";
@@ -173,8 +174,35 @@ export async function POST(request: NextRequest) {
     }
 
     const clientReliable = !!clientDetection && isClientDetectionReliable(clientDetection);
+    const needsBpmValidation = !!clientDetection && isClientBpmNeedsValidation(clientDetection);
 
-    if (fastMode && clientReliable && clientDetection) {
+    const skipServerAudio = metadataOnly && !audioFile;
+    if (fastMode && clientReliable && clientDetection && skipServerAudio) {
+      let validated = {
+        bpm: clientDetection.bpm,
+        key: clientDetection.key,
+        keyConfidence: clientDetection.keyConfidence,
+        bpmConfidence: clientDetection.bpmConfidence ?? clientDetection.keyConfidence,
+      };
+
+      if (clientDetectionMeta?.onsetTimes?.length) {
+        const fused = finalizeHybridFromMeta(detectionMeta, clientDetectionMeta.onsetTimes);
+        validated = {
+          bpm: fused.bpm,
+          key: fused.key,
+          keyConfidence: fused.keyConfidence,
+          bpmConfidence: fused.bpmConfidence,
+        };
+        console.log(
+          `✅ Server harmonic tempo validation: ${clientDetection.bpm} → ${validated.bpm} BPM`,
+        );
+      }
+
+      if (needsBpmValidation && !clientDetectionMeta?.onsetTimes?.length) {
+        console.warn(
+          "⚠️ Client BPM needs validation but no onset metadata — trusting client value",
+        );
+      }
       try {
         await db.insert(playSessions).values({
           id: sessionId,
@@ -193,12 +221,7 @@ export async function POST(request: NextRequest) {
         console.warn("⚠️ DB session insert failed, continuing without persistence:", dbErr);
       }
 
-      const realAnalysis = {
-        bpm: clientDetection.bpm,
-        key: clientDetection.key,
-        keyConfidence: clientDetection.keyConfidence,
-        bpmConfidence: clientDetection.bpmConfidence ?? clientDetection.keyConfidence,
-      };
+      const realAnalysis = validated;
       const analysis = buildMinimalPlayAnalysis({
         bpm: realAnalysis.bpm,
         key: realAnalysis.key,

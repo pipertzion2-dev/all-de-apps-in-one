@@ -42,6 +42,7 @@ Multiple DSP algorithms (peak histogram, autocorrelation, web-audio-beat-detecto
 
 Your job: pick the TRUE tempo and key. Critical rules:
 - Half/double tempo errors are extremely common (60 vs 120, 70 vs 140). Prefer the tempo where onsets align to a musical pulse, typically 80–160 BPM for pop/rock/electronic/hip-hop.
+- Triplet-subdivision errors are also common (134 vs 201 BPM ≈ ×3/2). When candidates differ by ~1.5× or ~0.67×, prefer the value in the 80–160 BPM range with stronger onset alignment.
 - If one detector says 60 and another says 120, strongly prefer 120 unless the track is ballad/slow jazz.
 - Key must be "X major" or "X minor" with standard note names (C, C#, D, etc.).
 - Return ONLY valid JSON, no markdown.`;
