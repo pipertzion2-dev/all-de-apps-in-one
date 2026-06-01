@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { desc, eq, isNotNull } from "drizzle-orm";
-import { isIndexablePublicUrl } from "@/lib/seo/legacy-paths";
+import { isLegacyBrandSlug, slugFromPublicUrl } from "@/lib/seo/legacy-paths";
 import { getSiteUrl } from "@/lib/site-url";
 
 /** IndexNow allows large batches; stay under 10k URLs and reasonable JSON size per request. */
@@ -30,7 +30,11 @@ export async function submitIndexNowBatched(
   urls: string[],
   options?: SubmitIndexNowOptions,
 ): Promise<IndexNowSubmitResult> {
-  const totalUrls = urls.length;
+  const indexableUrls = urls.filter((url) => {
+    const slug = slugFromPublicUrl(url);
+    return !slug || !isLegacyBrandSlug(slug);
+  });
+  const totalUrls = indexableUrls.length;
   if (totalUrls === 0) {
     return {
       ok: true,
@@ -71,7 +75,7 @@ export async function submitIndexNowBatched(
   let submittedCount = 0;
   let lastHttpStatus = 0;
   let allAccepted = true;
-  const chunks = Math.ceil(urls.length / INDEXNOW_CHUNK_SIZE);
+  const chunks = Math.ceil(indexableUrls.length / INDEXNOW_CHUNK_SIZE);
 
   for (let i = 0; i < indexableUrls.length; i += INDEXNOW_CHUNK_SIZE) {
     const chunk = indexableUrls.slice(i, i + INDEXNOW_CHUNK_SIZE);

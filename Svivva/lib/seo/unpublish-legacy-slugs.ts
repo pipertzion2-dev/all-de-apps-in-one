@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
+import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
 
 export type UnpublishedLegacyPage = { slug: string; reason: string };
 
@@ -19,7 +19,7 @@ export async function unpublishLegacySeoSlugs(limit = 500): Promise<UnpublishedL
 
   const unpublished: UnpublishedLegacyPage[] = [];
   for (const page of published) {
-    if (!page.slug || !isNonIndexableSlug(page.slug)) continue;
+    if (!page.slug || !isLegacyBrandSlug(page.slug)) continue;
     await db
       .update(seoLandingPages)
       .set({ published: false })

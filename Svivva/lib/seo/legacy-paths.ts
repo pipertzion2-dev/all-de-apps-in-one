@@ -2,15 +2,18 @@
  * Paths and slugs that must not appear in sitemaps or SEO landing resolution.
  * Pyracrypt is a Svivva feature — canonical hub is /cyber-security-mini-apps.
  */
-const EXACT_SLUGS = new Set([
+/** Canonical hubs — served via (seo)/[slug] and listed in static sitemap; skip duplicate DB rows only. */
+export const HUB_SLUGS = new Set(["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"]);
+
+const LEGACY_BRAND_SLUGS = new Set([
   "pyracrypt",
   "clutety",
   "clutter",
   "clutety-shell",
   "clutety-coming-soon",
-  "ai-tools-hub",
-  "cyber-security-mini-apps",
-  "seo-pack",
+]);
+
+const RESERVED_PATH_SLUGS = new Set([
   "sitemap.xml",
   "robots.txt",
   "favicon.ico",
@@ -18,13 +21,21 @@ const EXACT_SLUGS = new Set([
   "pyracrypt-sitemap.xml",
 ]);
 
-/** Legacy brand slugs or reserved platform paths — exclude from indexable URL lists. */
-export function isNonIndexableSlug(slug: string): boolean {
+/** Legacy Pyracrypt/Clutety brand URLs — 404 on (seo) routes; unpublish from DB. */
+export function isLegacyBrandSlug(slug: string): boolean {
   const s = slug.trim().toLowerCase();
-  if (!s || EXACT_SLUGS.has(s)) return true;
+  if (!s || LEGACY_BRAND_SLUGS.has(s)) return true;
   if (s.startsWith("pyracrypt-") || s.startsWith("pyracrypt/")) return true;
   if (s.startsWith("clutety-") || s.startsWith("clutety/")) return true;
   return false;
+}
+
+/** Skip duplicate sitemap rows (hubs already in static list) or block legacy/reserved paths. */
+export function isNonIndexableSlug(slug: string): boolean {
+  const s = slug.trim().toLowerCase();
+  if (!s || RESERVED_PATH_SLUGS.has(s)) return true;
+  if (HUB_SLUGS.has(s)) return true;
+  return isLegacyBrandSlug(s);
 }
 
 export const LEGACY_REDIRECT_PREFIXES = [
@@ -48,5 +59,5 @@ export function slugFromPublicUrl(url: string): string | null {
 export function isIndexablePublicUrl(url: string): boolean {
   const slug = slugFromPublicUrl(url);
   if (!slug) return true;
-  return !isNonIndexableSlug(slug);
+  return !isLegacyBrandSlug(slug);
 }

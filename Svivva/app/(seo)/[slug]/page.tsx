@@ -14,14 +14,14 @@ import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
 import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
-import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
+import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
 
 export const revalidate = 3600;
 
 type LandingPage = typeof seoLandingPages.$inferSelect;
 
 async function getPage(slug: string): Promise<LandingPage | null> {
-  if (isNonIndexableSlug(slug)) return null;
+  if (isLegacyBrandSlug(slug)) return null;
   try {
     const [page] = await db
       .select()
