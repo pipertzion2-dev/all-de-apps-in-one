@@ -49,9 +49,7 @@ export function buildInstantPlayAnalysis(
     enriched.chords = transcribedChords;
   }
 
-  const useMidiKey = Boolean(
-    transcription?.sources.melodyneMidi && transcription?.harmonicKey,
-  );
+  const useMidiKey = Boolean(transcription?.sources.melodyneMidi && transcription?.harmonicKey);
 
   return {
     bpm: enriched.bpm,

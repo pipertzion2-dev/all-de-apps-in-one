@@ -668,8 +668,7 @@ export default function SvivvaPlayPage() {
               const base = cloudAnalysis;
               if (melodyneFile) {
                 const midiKey = melodyneKeyRef.current ?? prev?.key;
-                const keepKey =
-                  midiKey && !midiKey.startsWith("Detecting") ? midiKey : prev?.key;
+                const keepKey = midiKey && !midiKey.startsWith("Detecting") ? midiKey : prev?.key;
                 return {
                   ...base,
                   bpm: base.bpm ?? prev?.bpm,
