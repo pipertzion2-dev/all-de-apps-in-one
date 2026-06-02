@@ -50,6 +50,24 @@ describe("key-from-notes", () => {
     expect(det?.key).toBe("A major");
   });
 
+  it("detects A major over C# when chord roots are A–D–E", () => {
+    const notes: TranscribedNote[] = [];
+    const chords = [
+      [57, 61, 64],
+      [62, 66, 69],
+      [64, 68, 71],
+      [57, 61, 64],
+    ];
+    let t = 0;
+    for (const triad of chords) {
+      for (const m of triad) notes.push(note(m, t, 1.9));
+      t += 2;
+    }
+    for (let i = 0; i < 24; i++) notes.push(note(73 + (i % 3), 0.2 + i * 0.15, 0.12));
+    const det = detectKeyFromMidiNotes(notes, 120);
+    expect(det?.key).toBe("A major");
+  });
+
   it("always prefers MIDI key over wrong audio key when Melodyne is loaded", () => {
     const resolved = resolveKeyWithMelodyne("C# major", 99, aMajorProgression(), 120);
     expect(resolved.key).toBe("A major");

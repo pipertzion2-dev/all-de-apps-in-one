@@ -16,6 +16,15 @@ export function normalizeKeyLabel(key: string): string {
   return trimmed;
 }
 
+/** Map "A major" / "Am" → select value "A" / "Am". */
+export function keyToSelectValue(key: string): string {
+  const normalized = normalizeKeyLabel(key);
+  const m = normalized.match(/^([A-G][#b]?)\s+(major|minor)$/i);
+  if (!m) return key.trim();
+  const root = m[1]!;
+  return m[2]!.toLowerCase() === "minor" ? `${root}m` : root;
+}
+
 export function playViewToAnalysis(
   view: PlayAnalysisView,
   overrides?: { bpm?: number | null; key?: string | null },

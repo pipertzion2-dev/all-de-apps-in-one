@@ -77,6 +77,7 @@ import {
   voicePartsToStemResults,
 } from "@/lib/svivva-play/strategic-compose";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
+import { keyToSelectValue, normalizeKeyLabel } from "@/lib/svivva-play/analysis-utils";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
 
@@ -452,6 +453,7 @@ export default function SvivvaPlayPage() {
   const modeRef = useRef(mode);
   const userPromptRef = useRef(userPrompt);
   const analysisRunRef = useRef(0);
+  const melodyneKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     modeRef.current = mode;
@@ -482,15 +484,14 @@ export default function SvivvaPlayPage() {
         downbeats: [],
         styleCompatibility: [],
       };
-      const useMidiKey =
-        session.harmonicKeySource === "midi" &&
-        session.harmonicKey &&
-        (session.harmonicKeyConfidence ?? 0) >= 40;
+      const useMidiKey = Boolean(session.sources.melodyneMidi && session.harmonicKey);
+      const resolvedKey = useMidiKey ? normalizeKeyLabel(session.harmonicKey!) : base.key;
+      if (useMidiKey) melodyneKeyRef.current = resolvedKey;
       return {
         ...base,
         ...(useMidiKey
           ? {
-              key: session.harmonicKey!,
+              key: resolvedKey,
               keyConfidence: session.harmonicKeyConfidence ?? base.keyConfidence,
             }
           : {}),
@@ -526,6 +527,7 @@ export default function SvivvaPlayPage() {
     setAlignOffsetSec(0);
     setAlignScore(0);
     setIsTranscribing(false);
+    melodyneKeyRef.current = null;
     setAudioUrl(URL.createObjectURL(audio));
     setImportSeq((n) => n + 1);
   }, []);
@@ -645,7 +647,11 @@ export default function SvivvaPlayPage() {
         userHint: userPromptRef.current,
         onInstantResult: (instant) => {
           if (cancelled || runId !== analysisRunRef.current) return;
-          setAnalysis(instant);
+          setAnalysis(
+            melodyneFile
+              ? { ...instant, key: "Detecting from Melodyne…", keyConfidence: 0 }
+              : instant,
+          );
           setIsAnalyzing(false);
           setIsEnriching(true);
         },
@@ -2374,9 +2380,11 @@ export default function SvivvaPlayPage() {
                                 )}
                               </div>
                               <select
-                                value={manualKey ?? effectiveAnalysis.key}
+                                value={keyToSelectValue(manualKey ?? effectiveAnalysis.key)}
                                 onChange={(e) =>
-                                  setManualKey(e.target.value ? e.target.value : null)
+                                  setManualKey(
+                                    e.target.value ? normalizeKeyLabel(e.target.value) : null,
+                                  )
                                 }
                                 className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
                                 data-testid="select-manual-key"

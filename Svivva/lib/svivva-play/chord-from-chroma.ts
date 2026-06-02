@@ -40,6 +40,30 @@ function chordScore(chroma: Float64Array, rootPc: number, template: number[]): n
   return score;
 }
 
+/** Chord detection without a key hint — used to infer key from Melodyne. */
+export function detectChordRootAgnostic(chroma: Float64Array): {
+  rootPc: number;
+  symbol: string;
+  score: number;
+} {
+  let bestRoot = 0;
+  let bestSymbol = "C";
+  let bestScore = -1;
+
+  for (let root = 0; root < 12; root++) {
+    for (const tmpl of CHORD_TEMPLATES) {
+      const score = chordScore(chroma, root, tmpl.pcs);
+      if (score > bestScore) {
+        bestScore = score;
+        bestRoot = root;
+        bestSymbol = `${NOTE_NAMES[root]}${tmpl.symbol}`;
+      }
+    }
+  }
+
+  return { rootPc: bestRoot, symbol: bestSymbol, score: bestScore };
+}
+
 export function detectChordAtTime(
   chroma: Float64Array,
   key: string,
