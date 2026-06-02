@@ -72,6 +72,7 @@ import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
 import { composeWithChordProgression } from "@/lib/svivva-play/compose-from-chords";
 import {
   attachMelodyneToSession,
+  buildHarmonicSession,
   splitSessionFiles,
   type HarmonicSession,
 } from "@/lib/svivva-play/harmonic-session";
@@ -549,29 +550,51 @@ export default function SvivvaPlayPage() {
 
   const handleAddMelodyneOnly = useCallback(
     async (file: File) => {
-      if (!transcription) {
+      if (!audioFile) {
+        setErrorMsg("Import your audio file first, then add the matching Melodyne .mid export.");
+        return;
+      }
+      if (!analysis && !transcription) {
         setWarningMsg(
           "Wait for audio analysis to finish, then add your Melodyne .mid (or drop both files on the bar).",
         );
         return;
       }
       setErrorMsg("");
+      setWarningMsg("");
       setMelodyneFile(file);
       setMidiFileName(file.name);
       setIsTranscribing(true);
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const key = manualKey ?? analysis?.key ?? "C major";
-      const updated = await attachMelodyneToSession(transcription, file, bpm, key);
-      setIsTranscribing(false);
-      if (!updated?.melodyneNotes?.length) {
+      try {
+        const updated = transcription
+          ? await attachMelodyneToSession(transcription, file, bpm, key)
+          : await buildHarmonicSession({
+              audioFile,
+              melodyneFile: file,
+              bpm,
+              key,
+              keyHint: userPrompt,
+            });
+        if (!updated?.melodyneNotes?.length) {
+          setWarningMsg(
+            "Could not read notes from this .mid — in Melodyne, export harmonic tracks (not just audio) as Standard MIDI File (.mid).",
+          );
+          return;
+        }
+        applyHarmonicSession(updated);
         setWarningMsg(
-          "Could not read Melodyne MIDI — export harmonic tracks as .mid from Melodyne.",
+          `Melodyne loaded: ${updated.melodyneNotes.length} notes, ${updated.chords.length} chord regions — key ${updated.harmonicKey ?? key}.`,
         );
-        return;
+      } catch (err) {
+        console.warn("Melodyne MIDI import failed:", err);
+        setErrorMsg(err instanceof Error ? err.message : "Failed to parse Melodyne MIDI file.");
+      } finally {
+        setIsTranscribing(false);
       }
-      applyHarmonicSession(updated);
     },
-    [transcription, analysis, manualTempo, manualKey, applyHarmonicSession],
+    [audioFile, transcription, analysis, manualTempo, manualKey, userPrompt, applyHarmonicSession],
   );
 
   const handleAlignOffsetChange = useCallback(
@@ -2322,6 +2345,27 @@ export default function SvivvaPlayPage() {
                             <p className="text-[11px] text-gray-400">
                               Saving session and refining chords in the background…
                             </p>
+                          </div>
+                        )}
+                        {audioFile && (
+                          <div className="mb-4">
+                            <SvivvaPlayStagePanel
+                              model={playStageModel}
+                              waveformPeaks={transcription?.waveformPeaks ?? []}
+                              audioNotes={transcription?.audioNotes ?? transcription?.notes ?? []}
+                              midiNotes={midiReferenceNotes}
+                              chords={transcription?.chords ?? []}
+                              durationSec={transcription?.durationSec ?? 0}
+                              bpm={manualTempo ?? effectiveAnalysis?.bpm ?? 120}
+                              playbackSec={stagePlaybackSec}
+                              alignOffsetSec={alignOffsetSec}
+                              alignScore={alignScore}
+                              onAlignOffsetChange={handleAlignOffsetChange}
+                              isTranscribing={isTranscribing || isAnalyzing}
+                              audioName={audioName}
+                              hasMelodyne={Boolean(transcription?.sources.melodyneMidi)}
+                              hasAudioTrack={Boolean(transcription?.sources.audioTranscription)}
+                            />
                           </div>
                         )}
                         <div className="mb-5">

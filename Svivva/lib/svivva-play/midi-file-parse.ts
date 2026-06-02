@@ -14,13 +14,14 @@ function parseTrack(
   data: Uint8Array,
   ticksPerBeat: number,
   tempoUsPerBeat: number,
-): TranscribedNote[] {
+): { notes: TranscribedNote[]; tempoUs: number } {
   const notes: TranscribedNote[] = [];
   const active = new Map<number, { startTick: number; velocity: number }>();
   const pos = { i: 0 };
   let tick = 0;
+  let tempoUs = tempoUsPerBeat;
 
-  const tickToSec = (t: number) => (t * tempoUsPerBeat) / (ticksPerBeat * 1_000_000);
+  const tickToSec = (t: number) => (t * tempoUs) / (ticksPerBeat * 1_000_000);
 
   while (pos.i < data.length) {
     const delta = readVarLen(data, pos);
@@ -74,16 +75,20 @@ function parseTrack(
       const meta = data[pos.i++];
       const len = readVarLen(data, pos);
       if (meta === 0x51 && len === 3) {
-        const us = (data[pos.i] << 16) | (data[pos.i + 1] << 8) | data[pos.i + 2];
+        tempoUs = (data[pos.i]! << 16) | (data[pos.i + 1]! << 8) | data[pos.i + 2]!;
         pos.i += len;
-        void us;
       } else {
         pos.i += len;
       }
+    } else if (status === 0xf0 || status === 0xf7) {
+      const len = readVarLen(data, pos);
+      pos.i += len;
     } else if (type === 0xa0 || type === 0xb0 || type === 0xe0) {
       pos.i += 2;
     } else if (type === 0xc0 || type === 0xd0) {
       pos.i += 1;
+    } else if (pos.i < data.length) {
+      pos.i++;
     } else {
       break;
     }
@@ -100,7 +105,7 @@ function parseTrack(
     });
   }
 
-  return notes.sort((a, b) => a.startSec - b.startSec);
+  return { notes: notes.sort((a, b) => a.startSec - b.startSec), tempoUs };
 }
 
 /** Parse Standard MIDI File (type 0/1) into timed notes in seconds. */
@@ -130,8 +135,9 @@ export function parseMidiFile(buffer: ArrayBuffer): {
       (data[pos + 4] << 24) | (data[pos + 5] << 16) | (data[pos + 6] << 8) | data[pos + 7];
     pos += 8;
     const trackData = data.subarray(pos, pos + trackLen);
-    const trackNotes = parseTrack(trackData, ticksPerBeat, tempoUs);
-    allNotes.push(...trackNotes);
+    const parsed = parseTrack(trackData, ticksPerBeat, tempoUs);
+    if (parsed.tempoUs > 0) tempoUs = parsed.tempoUs;
+    allNotes.push(...parsed.notes);
     pos += trackLen;
   }
 

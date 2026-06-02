@@ -245,7 +245,7 @@ export async function runImportAnalysis(options: {
         : " Large file — cloud session saves metadata only; full file stays in your browser."
       : "";
 
-  if (clientDetection && melodyneFile && harmonicPromise) {
+  if (clientDetection && harmonicPromise) {
     try {
       transcription = await harmonicPromise;
       if (transcription) onTranscription?.(transcription);
