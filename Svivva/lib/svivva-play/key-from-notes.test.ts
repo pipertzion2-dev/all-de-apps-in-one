@@ -81,4 +81,13 @@ describe("key-from-notes", () => {
     expect(resolved.key).toBe("A major");
     expect(resolved.source).toBe("audio");
   });
+
+  it("keeps A major when agnostic chord labels vote C major", () => {
+    const resolved = resolveKeyWithMelodyne("A major", 78, aMajorProgression(), 120, [
+      { t0: 0, t1: 2, symbol: "F#m7", confidence: 70 },
+      { t0: 2, t1: 4, symbol: "D", confidence: 70 },
+      { t0: 4, t1: 6, symbol: "C#m7", confidence: 70 },
+    ]);
+    expect(resolved.key).toBe("A major");
+  });
 });

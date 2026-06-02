@@ -24,6 +24,10 @@ function parseKeySignature(key: string): { rootPc: number; isMinor: boolean } | 
   };
 }
 
+function isCMajorPlaceholder(cand: { rootPc: number; isMinor: boolean }, audio: { rootPc: number; isMinor: boolean }): boolean {
+  return !cand.isMinor && cand.rootPc === 0 && (audio.isMinor || audio.rootPc !== 0);
+}
+
 /** When audio and MIDI disagree, don't let weak MIDI (often C major) override good audio. */
 function reconcileAudioMidiKey(
   audioKey: string,
@@ -46,22 +50,27 @@ function reconcileAudioMidiKey(
     };
   }
 
-  // Strong Melodyne bass/progression detection beats wrong audio chroma (e.g. C# vs A).
+  // Strong note-based Melodyne detection beats wrong audio chroma (e.g. C# vs A).
   if (fromMidi && candidate.source === "midi" && fromMidi.confidence >= 72) {
+    const midiSig = parseKeySignature(fromMidi.key);
+    if (midiSig && !isCMajorPlaceholder(midiSig, audio)) {
+      return {
+        key: normalizeKeyLabel(fromMidi.key),
+        confidence: fromMidi.confidence,
+        source: "midi",
+      };
+    }
+  }
+
+  if (isCMajorPlaceholder(cand, audio) && audioConfidence >= 45) {
     return {
-      key: normalizeKeyLabel(fromMidi.key),
-      confidence: fromMidi.confidence,
-      source: "midi",
+      key: normalizeKeyLabel(audioKey),
+      confidence: audioConfidence,
+      source: "audio",
     };
   }
 
-  const cMajorPlaceholder =
-    !cand.isMinor && cand.rootPc === 0 && audio.rootPc !== 0 && candidate.confidence < 82;
-
-  if (
-    audioConfidence >= 50 &&
-    (cMajorPlaceholder || candidate.confidence < audioConfidence + 12)
-  ) {
+  if (audioConfidence >= 50 && candidate.confidence < audioConfidence + 12) {
     return {
       key: normalizeKeyLabel(audioKey),
       confidence: audioConfidence,
@@ -109,9 +118,8 @@ export function resolveHarmonicKey(options: {
         confidence: Math.max(fromMidi.confidence, fromChords.confidence, 78),
         source: "midi",
       };
-    } else if (fromChords.confidence >= fromMidi.confidence - 8) {
-      candidate = { key: fromChords.key, confidence: fromChords.confidence, source: "midi" };
     } else {
+      // Note-based key beats agnostic chord symbols (often mislabel F#m7 / C#m7 on A major).
       candidate = { key: fromMidi.key, confidence: fromMidi.confidence, source: "midi" };
     }
   } else if (fromChords) {

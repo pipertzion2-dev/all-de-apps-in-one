@@ -63,16 +63,24 @@ export function buildInstantPlayAnalysis(
       (sessionKey === audioKey || midiConf >= enriched.key_confidence + 8),
   );
 
+  const displayKey =
+    useMidiKey && sessionKey
+      ? sessionKey
+      : transcription?.harmonicKeySource === "audio"
+        ? audioKey
+        : sessionKey ?? audioKey;
+
   return {
     bpm: enriched.bpm,
     timeSignature: enriched.time_signature,
-    key: transcription?.sources.melodyneMidi && sessionKey ? sessionKey : enriched.key,
-    keyConfidence:
-      transcription?.sources.melodyneMidi && sessionKey
-        ? useMidiKey
-          ? Math.min(92, midiConf)
-          : Math.max(enriched.key_confidence, midiConf)
-        : enriched.key_confidence,
+    key: displayKey,
+    keyConfidence: useMidiKey
+      ? Math.min(92, midiConf)
+      : transcription?.harmonicKeySource === "audio"
+        ? Math.max(enriched.key_confidence, midiConf)
+        : transcription?.sources.melodyneMidi && sessionKey
+          ? Math.max(enriched.key_confidence, midiConf)
+          : enriched.key_confidence,
     chords: enriched.chords,
     sections: enriched.sections,
     downbeats: enriched.downbeats,
