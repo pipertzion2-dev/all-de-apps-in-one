@@ -322,7 +322,6 @@ export default function SvivvaPlayPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const effectiveAnalysis =
     analysis ?? (mode === "composition" && !audioFile ? FALLBACK_ANALYSIS : null);
-  const analysisBusy = isAnalyzing || isTranscribing || isEnriching;
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
@@ -415,6 +414,7 @@ export default function SvivvaPlayPage() {
   const [alignOffsetSec, setAlignOffsetSec] = useState(0);
   const [alignScore, setAlignScore] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const analysisBusy = isAnalyzing || isTranscribing || isEnriching;
   const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
   const [midiFileName, setMidiFileName] = useState("");
 
