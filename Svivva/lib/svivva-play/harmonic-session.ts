@@ -125,7 +125,7 @@ export async function buildHarmonicSession(options: {
   const alignScore = alignedTrack.alignScore;
 
   const keyResolved = melodyneAligned.length
-    ? resolveKeyWithMelodyne(key, 70, melodyneAligned)
+    ? resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm)
     : { key, confidence: 70, source: "audio" as const };
   const resolvedKey = keyResolved.key;
 
@@ -179,7 +179,7 @@ export function attachMelodyneToSession(
     const alignedTrack = alignMelodyneTrack(session.audioNotes, melodyneRaw, bpm);
     const melodyneAligned = alignedTrack.notes;
 
-    const keyResolved = resolveKeyWithMelodyne(key, 70, melodyneAligned);
+    const keyResolved = resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm);
     const resolvedKey = keyResolved.key;
 
     const durationSec = Math.max(

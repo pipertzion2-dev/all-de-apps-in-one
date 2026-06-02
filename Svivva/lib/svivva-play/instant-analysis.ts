@@ -52,7 +52,7 @@ export function buildInstantPlayAnalysis(
   const useMidiKey =
     transcription?.harmonicKeySource === "midi" &&
     transcription.harmonicKey &&
-    (transcription.harmonicKeyConfidence ?? 0) >= 52;
+    (transcription.harmonicKeyConfidence ?? 0) >= 40;
 
   return {
     bpm: enriched.bpm,

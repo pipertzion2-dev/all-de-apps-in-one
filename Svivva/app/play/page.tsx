@@ -485,7 +485,7 @@ export default function SvivvaPlayPage() {
       const useMidiKey =
         session.harmonicKeySource === "midi" &&
         session.harmonicKey &&
-        (session.harmonicKeyConfidence ?? 0) >= 52;
+        (session.harmonicKeyConfidence ?? 0) >= 40;
       return {
         ...base,
         ...(useMidiKey
@@ -660,11 +660,15 @@ export default function SvivvaPlayPage() {
             const cloudAnalysis = cloud.analysis;
             setAnalysis((prev) => {
               const base = cloudAnalysis;
-              if (!prev?.chords?.length) return base;
+              const keepMelodyneKey = Boolean(melodyneFile && prev);
+              if (!prev?.chords?.length && !keepMelodyneKey) return base;
               return {
                 ...base,
-                bpm: base.bpm ?? prev.bpm,
-                chords: prev.chords,
+                bpm: base.bpm ?? prev?.bpm,
+                ...(keepMelodyneKey && prev
+                  ? { key: prev.key, keyConfidence: prev.keyConfidence }
+                  : {}),
+                ...(prev?.chords?.length ? { chords: prev.chords } : {}),
               };
             });
             setSessionId(cloud.sessionId ?? null);
@@ -677,13 +681,28 @@ export default function SvivvaPlayPage() {
 
       if (cancelled || runId !== analysisRunRef.current) return;
 
-      if (result.analysis) {
-        setAnalysis(result.analysis);
-        if (result.sessionId) setSessionId(result.sessionId);
-      }
       if (result.transcription) {
         applyHarmonicSession(result.transcription);
         setIsTranscribing(false);
+      }
+      if (result.analysis) {
+        setAnalysis((prev) => {
+          const base = result.analysis!;
+          if (!prev) return base;
+          const keepMelodyneKey =
+            Boolean(melodyneFile) && result.transcription?.harmonicKeySource === "midi";
+          return {
+            ...base,
+            ...(keepMelodyneKey && result.transcription?.harmonicKey
+              ? {
+                  key: result.transcription.harmonicKey,
+                  keyConfidence: result.transcription.harmonicKeyConfidence ?? prev.keyConfidence,
+                }
+              : {}),
+            chords: prev.chords?.length ? prev.chords : base.chords,
+          };
+        });
+        if (result.sessionId) setSessionId(result.sessionId);
       }
       if (result.warning) setWarningMsg(result.warning);
       if (result.error) setErrorMsg(result.error);
