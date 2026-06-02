@@ -322,6 +322,7 @@ export default function SvivvaPlayPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const effectiveAnalysis =
     analysis ?? (mode === "composition" && !audioFile ? FALLBACK_ANALYSIS : null);
+  const analysisBusy = isAnalyzing || isTranscribing || isEnriching;
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
@@ -571,6 +572,8 @@ export default function SvivvaPlayPage() {
     setIsTranscribing(false);
     melodyneKeyRef.current = null;
     audioKeyRef.current = null;
+    setIsAnalyzing(true);
+    setIsTranscribing(Boolean(melodyne));
     setAudioUrl(URL.createObjectURL(audio));
     setImportSeq((n) => n + 1);
   }, []);
@@ -718,18 +721,13 @@ export default function SvivvaPlayPage() {
             audioKeyRef.current = normalizeKeyLabel(instant.key);
             if (!melodyneFile) melodyneKeyRef.current = audioKeyRef.current;
           }
-          setAnalysis(
-            melodyneFile
-              ? { ...instant, key: "Detecting from Melodyne…", keyConfidence: 0 }
-              : instant,
-          );
+          setAnalysis(instant);
           setIsAnalyzing(false);
           setIsEnriching(true);
         },
         onTranscription: (session) => {
           if (cancelled || runId !== analysisRunRef.current) return;
           applyHarmonicSession(session);
-          setIsTranscribing(false);
         },
         onCloudComplete: (cloud) => {
           if (cancelled || runId !== analysisRunRef.current) return;
@@ -780,9 +778,9 @@ export default function SvivvaPlayPage() {
 
       if (result.transcription) {
         applyHarmonicSession(result.transcription);
-        setIsTranscribing(false);
       }
-          if (result.analysis) {
+      setIsTranscribing(false);
+      if (result.analysis) {
         setAnalysis((prev) => {
           const base = result.analysis!;
           const anchor =
@@ -2466,7 +2464,7 @@ export default function SvivvaPlayPage() {
                     </div>
                   )}
 
-                  {audioFile && !effectiveAnalysis && !isAnalyzing && !isGenerating && (
+                  {audioFile && !effectiveAnalysis && !analysisBusy && !isGenerating && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                       <AlertTriangle className="w-10 h-10 text-amber-400 mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">
@@ -2489,10 +2487,12 @@ export default function SvivvaPlayPage() {
                     </div>
                   )}
 
-                  {isAnalyzing && !effectiveAnalysis && (
+                  {analysisBusy && !effectiveAnalysis && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                       <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-200 mb-1">Analyzing Audio</h3>
+                      <h3 className="text-lg font-semibold text-gray-200 mb-1">
+                        {isTranscribing && melodyneFile ? "Analyzing Audio + Melodyne" : "Analyzing Audio"}
+                      </h3>
                       <p className="text-sm text-gray-400">
                         Detecting tempo, key, pitch track, and chord progression…
                         <span className="block text-[11px] text-gray-500 mt-1">

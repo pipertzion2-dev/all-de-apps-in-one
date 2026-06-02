@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { playSessions, playAnalyses, playGenerations, playStems, playPatches } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { buildMidiFile } from "@/lib/svivva-play/midi-export";
+import { buildStemMidiZipBuffer } from "@/lib/svivva-play/midi-stems-zip";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +47,24 @@ export async function GET(request: NextRequest) {
 
     const patches = await db.select().from(playPatches).where(eq(playPatches.sessionId, sessionId));
 
-    if (format === "midi" && stems.length > 0) {
+    if ((format === "midi" || format === "midi-zip") && stems.length > 0) {
+      if (format === "midi-zip") {
+        const zipBuffer = await buildStemMidiZipBuffer({
+          bpm,
+          stems: stems.map((s) => ({
+            name: s.name,
+            role: s.role,
+            midiEvents: Array.isArray(s.midiEvents) ? s.midiEvents : [],
+          })),
+          projectName: `svivva-play-${sessionId}`,
+        });
+        return new NextResponse(zipBuffer, {
+          headers: {
+            "Content-Type": "application/zip",
+            "Content-Disposition": `attachment; filename="svivva-play-stems-${sessionId}.zip"`,
+          },
+        });
+      }
       const midiBytes = buildMidiFile(
         stems.map((s) => ({
           name: s.name,
@@ -147,17 +166,39 @@ export async function POST(request: NextRequest) {
       stems,
       bpm = 120,
       filename = "svivva-play",
+      format = "midi-zip",
+      melodyneNotes,
     } = body as {
-      stems?: { name: string; midiEvents?: unknown[] }[];
+      stems?: { name: string; role?: string; midiEvents?: unknown[] }[];
       bpm?: number;
       filename?: string;
+      format?: "midi" | "midi-zip";
+      melodyneNotes?: TranscribedNote[];
     };
 
-    if (!stems?.length) {
-      return NextResponse.json({ error: "No stems to export" }, { status: 400 });
+    const hasStems = stems?.some((s) => Array.isArray(s.midiEvents) && s.midiEvents.length > 0);
+    const hasMelodyne = Array.isArray(melodyneNotes) && melodyneNotes.length > 0;
+
+    if (!hasStems && !hasMelodyne) {
+      return NextResponse.json({ error: "No MIDI to export — generate stems or load Melodyne" }, { status: 400 });
     }
 
-    const midiBytes = buildMidiFile(stems, bpm);
+    if (format === "midi-zip") {
+      const zipBuffer = await buildStemMidiZipBuffer({
+        bpm,
+        stems: stems ?? [],
+        melodyneNotes: hasMelodyne ? melodyneNotes : undefined,
+        projectName: filename,
+      });
+      return new NextResponse(zipBuffer, {
+        headers: {
+          "Content-Type": "application/zip",
+          "Content-Disposition": `attachment; filename="${filename}-ableton-stems.zip"`,
+        },
+      });
+    }
+
+    const midiBytes = buildMidiFile(stems ?? [], bpm);
     const buffer = Buffer.from(midiBytes);
     return new NextResponse(buffer, {
       headers: {

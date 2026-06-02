@@ -215,25 +215,17 @@ export async function runImportAnalysis(options: {
         keyConfidence: det.keyConfidence,
         keyHint: userHint,
       });
-      if (!melodyneFile) {
-        onInstantResult?.(buildInstantPlayAnalysis(det));
-        void harmonicPromise
-          .then((session) => {
-            if (!session) return;
-            transcription = session;
-            onTranscription?.(session);
-          })
-          .catch(() => {});
-      } else {
-        void harmonicPromise
-          .then((session) => {
-            if (!session) return;
-            transcription = session;
-            onTranscription?.(session);
+      onInstantResult?.(buildInstantPlayAnalysis(det));
+      void harmonicPromise
+        .then((session) => {
+          if (!session) return;
+          transcription = session;
+          onTranscription?.(session);
+          if (melodyneFile) {
             onInstantResult?.(buildInstantPlayAnalysis(det, session));
-          })
-          .catch(() => {});
-      }
+          }
+        })
+        .catch(() => {});
     }
   } catch (err) {
     console.warn("Svivva Play client analysis failed:", err);

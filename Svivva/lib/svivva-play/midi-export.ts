@@ -1,6 +1,8 @@
 import Midi from "jsmidgen";
 import { normalizeMidiEvents } from "./midi-normalize";
 
+export { stemMidiFilename } from "./midi-filenames";
+
 export function buildMidiFile(
   stems: { name?: string; midiEvents?: unknown[] }[],
   bpm: number,
