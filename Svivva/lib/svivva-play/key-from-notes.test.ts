@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TranscribedNote } from "./audio-transcription";
-import { detectKeyFromMidiNotes, resolveKeyWithMelodyne } from "./key-from-notes";
+import { detectKeyFromMidiNotes } from "./key-from-notes";
+import { resolveKeyWithMelodyne } from "./resolve-harmonic-key";
 
 function note(midi: number, start = 0, dur = 0.5): TranscribedNote {
   return { midi, startSec: start, endSec: start + dur, velocity: 90, cents: 0 };

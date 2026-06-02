@@ -1,6 +1,55 @@
 import type { ChordSegment } from "./chord-from-chroma";
-import { detectChordAtTime } from "./chord-from-chroma";
+import { detectChordAtTime, detectChordRootAgnostic } from "./chord-from-chroma";
 import type { TranscribedNote } from "./audio-transcription";
+
+/** Bar chords without key bias — used before tonic is known. */
+export function chordsFromPolyphonicNotesAgnostic(
+  notes: TranscribedNote[],
+  bpm: number,
+  durationSec: number,
+  minConfidence = 62,
+): ChordSegment[] {
+  if (!notes.length || bpm < 30) return [];
+
+  const barSec = (60 / bpm) * 4;
+  const bars = Math.max(1, Math.ceil(durationSec / barSec));
+  const segments: ChordSegment[] = [];
+
+  for (let bar = 0; bar < bars; bar++) {
+    const t0 = bar * barSec;
+    const t1 = Math.min(durationSec, (bar + 1) * barSec);
+
+    const active = notes.filter((n) => n.startSec < t1 && n.endSec > t0);
+    if (!active.length) continue;
+
+    const chroma = new Float64Array(12);
+    for (const n of active) {
+      const weight = Math.min(1, (n.endSec - n.startSec) / barSec) * (n.velocity / 127);
+      chroma[n.midi % 12] += 0.35 + weight;
+    }
+    const max = Math.max(...Array.from(chroma));
+    if (max > 0) for (let i = 0; i < 12; i++) chroma[i] /= max;
+
+    const det = detectChordRootAgnostic(chroma);
+    const confidence = Math.min(95, Math.max(minConfidence, Math.round(det.score * 28 + 40)));
+
+    const prev = segments[segments.length - 1];
+    if (prev && prev.symbol === det.symbol) {
+      prev.t1 = t1;
+      prev.confidence = Math.round((prev.confidence + confidence) / 2);
+    } else {
+      segments.push({
+        t0: Number(t0.toFixed(3)),
+        t1: Number(t1.toFixed(3)),
+        symbol: det.symbol,
+        confidence,
+        pitchClasses: [],
+      });
+    }
+  }
+
+  return segments;
+}
 
 /** Infer bar-aligned chords from polyphonic note data (e.g. Melodyne harmonic export). */
 export function chordsFromPolyphonicNotes(

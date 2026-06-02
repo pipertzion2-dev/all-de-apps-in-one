@@ -1,8 +1,9 @@
 import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
 import { transcribeAudioFile } from "./audio-transcription";
-import { chordsFromPolyphonicNotes, mergeChordTimelines } from "./chords-from-notes";
-import { parseKeyFromUserHint, normalizeKeyLabel } from "./analysis-utils";
-import { resolveKeyWithMelodyne } from "./key-from-notes";
+import { mergeChordTimelines } from "./chords-from-notes";
+import { normalizeKeyLabel } from "./analysis-utils";
+import { resolveHarmonicKey } from "./resolve-harmonic-key";
+import { chordsFromPolyphonicNotesAgnostic } from "./chords-from-notes";
 import {
   alignMidiToAudio,
   anchorMelodyneToAudioFileStart,
@@ -105,7 +106,6 @@ export async function buildHarmonicSession(options: {
   keyHint?: string;
 }): Promise<HarmonicSession | null> {
   const { audioFile, melodyneFile, bpm, key, keyHint } = options;
-  const hintKey = parseKeyFromUserHint(keyHint);
 
   const [audioTx, melodyneParsed] = await Promise.all([
     transcribeAudioFile(audioFile, bpm, key),
@@ -132,21 +132,6 @@ export async function buildHarmonicSession(options: {
   melodyneAligned = fitted.melodyneNotes;
   melodyneRaw = fitted.melodyneRaw;
 
-  const keyResolved = melodyneAligned.length
-    ? resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm)
-    : { key, confidence: 70, source: "audio" as const };
-  let resolvedKey = keyResolved.key;
-  if (hintKey) {
-    resolvedKey = normalizeKeyLabel(hintKey);
-  } else if (
-    melodyneAligned.length > 0 &&
-    keyResolved.source === "midi" &&
-    normalizeKeyLabel(key).toLowerCase().startsWith("c# major") &&
-    normalizeKeyLabel(resolvedKey).toLowerCase().startsWith("a major")
-  ) {
-    resolvedKey = "A major";
-  }
-
   const durationSec =
     base.durationSec > 0
       ? fitted.durationSec
@@ -156,9 +141,23 @@ export async function buildHarmonicSession(options: {
           melodyneParsed?.durationSec ?? 0,
         );
 
-  const melodyneChords = melodyneAligned.length
-    ? chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, resolvedKey, 68)
+  const agnosticChords = melodyneAligned.length
+    ? chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec)
     : [];
+
+  const keyResolved = melodyneAligned.length
+    ? resolveHarmonicKey({
+        audioKey: key,
+        audioConfidence: 70,
+        midiNotes: melodyneAligned,
+        chords: agnosticChords,
+        bpm,
+        keyHint,
+      })
+    : { key, confidence: 70, source: "audio" as const };
+  const resolvedKey = normalizeKeyLabel(keyResolved.key);
+
+  const melodyneChords = agnosticChords;
   const mergedChords = mergeChordTimelines(melodyneChords, base.chords)
     .filter((c) => c.t0 < durationSec)
     .map((c) => ({ ...c, t1: Math.min(c.t1, durationSec) }));
@@ -176,7 +175,7 @@ export async function buildHarmonicSession(options: {
     alignScore,
     harmonicKey: resolvedKey,
     harmonicKeyConfidence: keyResolved.confidence,
-    harmonicKeySource: keyResolved.source,
+    harmonicKeySource: keyResolved.source === "audio" ? "audio" : "midi",
     sources: {
       audioTranscription: audioNotes.length > 0,
       melodyneMidi: melodyneAligned.length > 0,
@@ -209,19 +208,19 @@ export function attachMelodyneToSession(
     const melodyneAligned = fitted.melodyneNotes;
     melodyneRaw = fitted.melodyneRaw;
 
-    const keyResolved = resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm);
-    const resolvedKey = keyResolved.key;
-
     const durationSec =
       session.durationSec > 0 ? fitted.durationSec : fitted.durationSec || parsed.durationSec;
 
-    const melodyneChords = chordsFromPolyphonicNotes(
-      melodyneAligned,
+    const agnosticChords = chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec);
+    const keyResolved = resolveHarmonicKey({
+      audioKey: key,
+      audioConfidence: 70,
+      midiNotes: melodyneAligned,
+      chords: agnosticChords,
       bpm,
-      durationSec,
-      resolvedKey,
-      68,
-    );
+    });
+    const resolvedKey = normalizeKeyLabel(keyResolved.key);
+    const melodyneChords = agnosticChords;
     const mergedChords = mergeChordTimelines(melodyneChords, session.chords)
       .filter((c) => c.t0 < durationSec)
       .map((c) => ({ ...c, t1: Math.min(c.t1, durationSec) }));
@@ -236,7 +235,7 @@ export function attachMelodyneToSession(
       alignScore: alignedTrack.alignScore,
       harmonicKey: resolvedKey,
       harmonicKeyConfidence: keyResolved.confidence,
-      harmonicKeySource: keyResolved.source,
+      harmonicKeySource: keyResolved.source === "audio" ? "audio" : "midi",
       sources: {
         ...session.sources,
         melodyneMidi: true,

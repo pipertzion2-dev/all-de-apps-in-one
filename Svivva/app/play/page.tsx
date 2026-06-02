@@ -83,6 +83,7 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 import { keyToSelectValue, normalizeKeyLabel } from "@/lib/svivva-play/analysis-utils";
+import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
 
@@ -866,12 +867,19 @@ export default function SvivvaPlayPage() {
       try {
         const settings = buildSettings();
 
+        const sessionKey =
+          manualKey ??
+          (transcription?.harmonicKey
+            ? normalizeKeyLabel(transcription.harmonicKey)
+            : analysis.key);
         const harmonicContext = transcription
           ? {
               chords: transcription.chords,
               audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
               melodyneNotes: transcription.melodyneNotes ?? [],
               durationSec: transcription.durationSec,
+              key: sessionKey,
+              keySource: transcription.harmonicKeySource,
               sources: transcription.sources,
             }
           : undefined;
@@ -1115,7 +1123,29 @@ export default function SvivvaPlayPage() {
       }
 
       if (!sessionId) {
-        setErrorMsg("Cloud export needs server analysis. Generate MIDI first, then export.");
+        if (format === "json" && transcription && analysis) {
+          const payload = buildClientSessionExport({
+            mode,
+            audioName,
+            analysis,
+            transcription,
+            stems,
+          });
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${downloadName}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          setWarningMsg(
+            "Saved local session JSON (Melodyne key + chords). Cloud session ID not required.",
+          );
+          return;
+        }
+        setErrorMsg(
+          "Cloud export needs server analysis. Generate MIDI first, or export JSON with a loaded session.",
+        );
         return;
       }
       try {
@@ -1131,7 +1161,7 @@ export default function SvivvaPlayPage() {
         console.error("Export failed:", err);
       }
     },
-    [sessionId, stems, analysis?.bpm, manualTempo, mode],
+    [sessionId, stems, analysis, transcription, audioName, mode, manualTempo],
   );
 
   const buildStemPlaybacks = useCallback((currentStems: StemData[]): StemPlayback[] => {

@@ -16,6 +16,8 @@ export type HarmonicContextInput = {
   audioNotes: TranscribedNote[];
   melodyneNotes: TranscribedNote[];
   durationSec: number;
+  key?: string;
+  keySource?: "midi" | "audio" | "hint";
   sources?: { audioTranscription?: boolean; melodyneMidi?: boolean };
 };
 

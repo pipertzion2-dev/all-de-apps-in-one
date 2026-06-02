@@ -135,6 +135,26 @@ export async function POST(request: NextRequest) {
 
     analysisData = applyChordEditsToAnalysis(analysisData, chordEdits);
 
+    if (
+      harmonicContext?.key &&
+      (harmonicContext.sources?.melodyneMidi || harmonicContext.keySource === "midi")
+    ) {
+      analysisData = {
+        ...analysisData,
+        key: harmonicContext.key,
+        key_confidence: Math.min(92, analysisData.key_confidence ?? 75),
+        chords:
+          harmonicContext.chords.length >= 2
+            ? harmonicContext.chords.map((c) => ({
+                t0: c.t0,
+                t1: c.t1,
+                symbol: c.symbol,
+                confidence: c.confidence ?? 70,
+              }))
+            : analysisData.chords,
+      };
+    }
+
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
     const renderQuality = quality || "preview";
