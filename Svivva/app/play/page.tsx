@@ -45,6 +45,10 @@ import {
 import { GiSaxophone } from "react-icons/gi";
 import { getSoundEngine, type StemPlayback } from "@/lib/svivva-play/sound-engine";
 import {
+  barAlignedDurationAtMostSec,
+  barAlignedDurationSec,
+} from "@/lib/svivva-play/session-duration";
+import {
   ORCHESTRAL_STYLE_PRESET_ID,
   isOrchestralPreset,
 } from "@/lib/svivva-play/prompts/orchestral-composer";
@@ -473,6 +477,9 @@ export default function SvivvaPlayPage() {
     setMidiReferenceNotes(session.melodyneNotes);
     setAlignOffsetSec(session.alignOffsetSec);
     setAlignScore(session.alignScore);
+    if (session.durationSec > 0) {
+      setReichDuration(Math.round(session.durationSec));
+    }
     setAnalysis((prev) => {
       const base = prev ?? {
         bpm: 120,
@@ -1110,6 +1117,7 @@ export default function SvivvaPlayPage() {
       role: s.role,
       instrumentHint: s.instrumentHint,
       midiEvents: normalizeMidiEvents(s.midiEvents),
+      expression: s.expression as StemPlayback["expression"],
       muted: s.muted,
       soloed: s.soloed,
       pan: s.pan,
@@ -1124,13 +1132,17 @@ export default function SvivvaPlayPage() {
         await engine.init();
         engine.setBpm(bpm || 120);
         engine.loadStems(buildStemPlaybacks(currentStems));
-        setPlaybackDuration(engine.getDuration());
+        const engineDur = engine.getDuration();
+        const sampleDur = transcription?.durationSec;
+        setPlaybackDuration(
+          sampleDur && sampleDur > 0 ? Math.min(engineDur, sampleDur) : engineDur,
+        );
         setEngineReady(true);
       } catch (err) {
         console.error("Sound engine load error:", err);
       }
     },
-    [buildStemPlaybacks],
+    [buildStemPlaybacks, transcription?.durationSec],
   );
 
   useEffect(() => {
@@ -1425,6 +1437,13 @@ export default function SvivvaPlayPage() {
       const effectiveScaleName = pickedRaga ?? reichScale;
       const scale = resolveScale(isMinor ? "minor" : "major", rootNote, effectiveScaleName);
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
+      const audioSampleSec =
+        audioRef.current?.duration && Number.isFinite(audioRef.current.duration)
+          ? audioRef.current.duration
+          : 0;
+      const durationSec = audioSampleSec
+        ? barAlignedDurationAtMostSec(audioSampleSec, bpm)
+        : barAlignedDurationSec(transcription?.durationSec || reichDuration, bpm);
       const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
       if (!useSeed) setSeed(currentSeed);
 
@@ -1442,7 +1461,7 @@ export default function SvivvaPlayPage() {
             chords: chordSource,
             audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
             melodyneNotes: transcription.melodyneNotes ?? [],
-            durationSec: transcription.durationSec || reichDuration,
+            durationSec,
             sources: transcription.sources,
           }
         : null;
@@ -1450,7 +1469,7 @@ export default function SvivvaPlayPage() {
       const voices =
         harmonicCtx && chordSource.length >= 2
           ? composeStrategicReich({
-              durationSec: reichDuration,
+              durationSec,
               bpm,
               scale,
               style: reichStyle,
@@ -1460,7 +1479,7 @@ export default function SvivvaPlayPage() {
             })
           : chordSource.length >= 2
             ? composeWithChordProgression({
-                durationSec: reichDuration,
+                durationSec,
                 bpm,
                 scale,
                 style: reichStyle,
@@ -1471,14 +1490,14 @@ export default function SvivvaPlayPage() {
               })
             : reichType === "counterpoint"
               ? composeCounterpoint({
-                  durationSec: reichDuration,
+                  durationSec,
                   bpm,
                   scale,
                   style: reichStyle,
                   seed: currentSeed,
                 })
               : composeHocket({
-                  durationSec: reichDuration,
+                  durationSec,
                   bpm,
                   scale,
                   style: reichStyle,
@@ -1918,7 +1937,19 @@ export default function SvivvaPlayPage() {
         onChange={handleMelodyneFileChange}
         data-testid="input-melodyne-file"
       />
-      {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onLoadedMetadata={() => {
+            const d = audioRef.current?.duration;
+            if (!d || !Number.isFinite(d) || d <= 0) return;
+            const bpm = manualTempo ?? analysis?.bpm ?? 120;
+            setReichDuration(Math.round(barAlignedDurationAtMostSec(d, bpm)));
+          }}
+          onEnded={() => setIsPlaying(false)}
+        />
+      )}
 
       <nav className="h-11 sm:h-12 border-b border-gray-200 flex-shrink-0 z-50 bg-white">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 h-full flex items-center justify-between gap-2">
@@ -2803,19 +2834,33 @@ export default function SvivvaPlayPage() {
                               </div>
                             </div>
                             <div className="flex flex-col gap-1.5 mb-3">
+                              <CheckboxOption
+                                label="Indian Meend (continuous pitch bend)"
+                                checked={meend}
+                                onChange={setMeend}
+                              />
                               <label className="text-[10px] font-semibold text-gray-400 uppercase">
-                                Duration (seconds)
+                                Duration (bar-aligned to sample)
                               </label>
                               <input
                                 type="range"
                                 min="4"
-                                max="60"
-                                value={reichDuration}
+                                max={Math.max(
+                                  60,
+                                  Math.ceil(transcription?.durationSec ?? reichDuration),
+                                )}
+                                value={Math.round(transcription?.durationSec ?? reichDuration)}
                                 onChange={(e) => setReichDuration(Number(e.target.value))}
-                                className="accent-[#A05068]"
+                                disabled={Boolean(transcription?.durationSec && audioFile)}
+                                className="accent-[#A05068] disabled:opacity-50"
                                 data-testid="slider-reich-duration"
                               />
-                              <span className="text-[9px] text-gray-500">{reichDuration}s</span>
+                              <span className="text-[9px] text-gray-500">
+                                {Math.round(transcription?.durationSec ?? reichDuration)}s
+                                {transcription?.durationSec && audioFile
+                                  ? " — locked to your audio"
+                                  : ""}
+                              </span>
                             </div>
                             <p className="text-[9px] text-gray-500 leading-relaxed mb-3">
                               Use the play stage above for waveform, pitch map, and chord grid.
@@ -3867,6 +3912,7 @@ export default function SvivvaPlayPage() {
           onClose={() => setShowGuidedBuilder(false)}
           onApply={(prompt) => {
             setUserPrompt(prompt);
+            setMeend(/\bmeend\b/i.test(prompt));
             setShowGuidedBuilder(false);
           }}
           currentMode={mode}

@@ -307,6 +307,10 @@ export class SvivvaSoundEngine {
 
       const scheduledIds: number[] = [];
       const events = (stem.midiEvents || []) as MidiEvent[];
+      const hasMeend = (stem.expression?.pitchbend?.length ?? 0) > 0;
+      if (hasMeend && synth instanceof Tone.MonoSynth) {
+        synth.portamento = 0.12;
+      }
 
       for (const evt of events) {
         const time = this.beatToSeconds(evt.startBeat);
@@ -339,6 +343,24 @@ export class SvivvaSoundEngine {
           }
         }, time);
         scheduledIds.push(id);
+      }
+
+      for (const pb of stem.expression?.pitchbend ?? []) {
+        const pbTime = this.beatToSeconds(pb.beat);
+        scheduledIds.push(
+          transport.schedule((t) => {
+            const cents = (pb.value / 8192) * 140;
+            try {
+              if (synth instanceof Tone.PolySynth) {
+                synth.set({ detune: cents });
+              } else if (synth instanceof Tone.MonoSynth) {
+                synth.detune.value = cents;
+              }
+            } catch (e) {
+              console.error("Meend pitchbend error:", e);
+            }
+          }, pbTime),
+        );
       }
 
       this.channels.set(stem.name, {

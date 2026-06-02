@@ -10,6 +10,7 @@ import {
   normalizeMidiToBarOne,
 } from "./midi-alignment";
 import { parseMidiFile } from "./midi-file-parse";
+import { fitMelodyneToAudioDuration } from "./session-duration";
 
 export type HarmonicSources = {
   audioTranscription: boolean;
@@ -127,6 +128,10 @@ export async function buildHarmonicSession(options: {
   const alignOffsetSec = alignedTrack.alignOffsetSec;
   const alignScore = alignedTrack.alignScore;
 
+  const fitted = fitMelodyneToAudioDuration(base.durationSec, melodyneAligned, melodyneRaw, bpm);
+  melodyneAligned = fitted.melodyneNotes;
+  melodyneRaw = fitted.melodyneRaw;
+
   const keyResolved = melodyneAligned.length
     ? resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm)
     : { key, confidence: 70, source: "audio" as const };
@@ -142,16 +147,21 @@ export async function buildHarmonicSession(options: {
     resolvedKey = "A major";
   }
 
-  const durationSec = Math.max(
-    base.durationSec,
-    melodyneAligned.reduce((m, n) => Math.max(m, n.endSec), 0),
-    melodyneParsed?.durationSec ?? 0,
-  );
+  const durationSec =
+    base.durationSec > 0
+      ? fitted.durationSec
+      : fitted.durationSec ||
+        Math.max(
+          melodyneAligned.reduce((m, n) => Math.max(m, n.endSec), 0),
+          melodyneParsed?.durationSec ?? 0,
+        );
 
   const melodyneChords = melodyneAligned.length
     ? chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, resolvedKey, 68)
     : [];
-  const mergedChords = mergeChordTimelines(melodyneChords, base.chords);
+  const mergedChords = mergeChordTimelines(melodyneChords, base.chords)
+    .filter((c) => c.t0 < durationSec)
+    .map((c) => ({ ...c, t1: Math.min(c.t1, durationSec) }));
 
   return {
     ...base,
@@ -190,16 +200,20 @@ export function attachMelodyneToSession(
       melodyneRaw = normalizeMidiToBarOne(melodyneRaw, bpm).notes;
     }
     const alignedTrack = alignMelodyneTrack(session.audioNotes, melodyneRaw, bpm);
-    const melodyneAligned = alignedTrack.notes;
+    const fitted = fitMelodyneToAudioDuration(
+      session.durationSec,
+      alignedTrack.notes,
+      melodyneRaw,
+      bpm,
+    );
+    const melodyneAligned = fitted.melodyneNotes;
+    melodyneRaw = fitted.melodyneRaw;
 
     const keyResolved = resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm);
     const resolvedKey = keyResolved.key;
 
-    const durationSec = Math.max(
-      session.durationSec,
-      melodyneAligned.reduce((m, n) => Math.max(m, n.endSec), 0),
-      parsed.durationSec,
-    );
+    const durationSec =
+      session.durationSec > 0 ? fitted.durationSec : fitted.durationSec || parsed.durationSec;
 
     const melodyneChords = chordsFromPolyphonicNotes(
       melodyneAligned,
@@ -208,7 +222,9 @@ export function attachMelodyneToSession(
       resolvedKey,
       68,
     );
-    const mergedChords = mergeChordTimelines(melodyneChords, session.chords);
+    const mergedChords = mergeChordTimelines(melodyneChords, session.chords)
+      .filter((c) => c.t0 < durationSec)
+      .map((c) => ({ ...c, t1: Math.min(c.t1, durationSec) }));
 
     return {
       ...session,
