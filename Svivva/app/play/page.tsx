@@ -471,8 +471,8 @@ export default function SvivvaPlayPage() {
     setMidiReferenceNotes(session.melodyneNotes);
     setAlignOffsetSec(session.alignOffsetSec);
     setAlignScore(session.alignScore);
-    setAnalysis((prev) => ({
-      ...(prev ?? {
+    setAnalysis((prev) => {
+      const base = prev ?? {
         bpm: 120,
         timeSignature: "4/4",
         key: "C major",
@@ -481,14 +481,27 @@ export default function SvivvaPlayPage() {
         sections: [],
         downbeats: [],
         styleCompatibility: [],
-      }),
-      chords: session.chords.map((c) => ({
-        t0: c.t0,
-        t1: c.t1,
-        symbol: c.symbol,
-        confidence: c.confidence,
-      })),
-    }));
+      };
+      const useMidiKey =
+        session.harmonicKeySource === "midi" &&
+        session.harmonicKey &&
+        (session.harmonicKeyConfidence ?? 0) >= 52;
+      return {
+        ...base,
+        ...(useMidiKey
+          ? {
+              key: session.harmonicKey!,
+              keyConfidence: session.harmonicKeyConfidence ?? base.keyConfidence,
+            }
+          : {}),
+        chords: session.chords.map((c) => ({
+          t0: c.t0,
+          t1: c.t1,
+          symbol: c.symbol,
+          confidence: c.confidence,
+        })),
+      };
+    });
   }, []);
 
   const acceptAudioAndMelodyne = useCallback((audio: File, melodyne?: File | null) => {

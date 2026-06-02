@@ -1,7 +1,13 @@
 import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
 import { transcribeAudioFile } from "./audio-transcription";
 import { chordsFromPolyphonicNotes, mergeChordTimelines } from "./chords-from-notes";
-import { alignMidiToAudio, applyOffsetToNotes, normalizeMidiToBarOne } from "./midi-alignment";
+import { resolveKeyWithMelodyne } from "./key-from-notes";
+import {
+  alignMidiToAudio,
+  anchorMelodyneToAudioFileStart,
+  applyOffsetToNotes,
+  normalizeMidiToBarOne,
+} from "./midi-alignment";
 import { parseMidiFile } from "./midi-file-parse";
 
 export type HarmonicSources = {
@@ -18,6 +24,9 @@ export type HarmonicSession = AudioTranscription & {
   alignOffsetSec: number;
   alignScore: number;
   sources: HarmonicSources;
+  harmonicKey?: string;
+  harmonicKeyConfidence?: number;
+  harmonicKeySource?: "midi" | "audio";
 };
 
 export function isAudioImportFile(file: File): boolean {
@@ -44,6 +53,30 @@ export function splitSessionFiles(files: FileList | File[]): {
     else extras.push(f);
   }
   return { audio, melodyne, extras };
+}
+
+function alignMelodyneTrack(
+  audioNotes: TranscribedNote[],
+  melodyneRaw: TranscribedNote[],
+  bpm: number,
+): { notes: TranscribedNote[]; alignOffsetSec: number; alignScore: number } {
+  if (!melodyneRaw.length) {
+    return { notes: [], alignOffsetSec: 0, alignScore: 0 };
+  }
+  if (!audioNotes.length) {
+    const anchor = anchorMelodyneToAudioFileStart([], melodyneRaw, bpm);
+    return { notes: anchor.notes, alignOffsetSec: anchor.extraOffsetSec, alignScore: 0 };
+  }
+
+  const align = alignMidiToAudio(audioNotes, melodyneRaw, { bpm });
+  let aligned = applyOffsetToNotes(melodyneRaw, align.offsetSec);
+  const anchor = anchorMelodyneToAudioFileStart(audioNotes, aligned, bpm);
+  aligned = anchor.notes;
+  return {
+    notes: aligned,
+    alignOffsetSec: Number((align.offsetSec + anchor.extraOffsetSec).toFixed(3)),
+    alignScore: align.score,
+  };
 }
 
 function emptyTranscription(durationSec = 0): HarmonicSession {
@@ -84,18 +117,17 @@ export async function buildHarmonicSession(options: {
   if (melodyneRaw.length && bpm > 0) {
     melodyneRaw = normalizeMidiToBarOne(melodyneRaw, bpm).notes;
   }
-  let melodyneAligned = melodyneRaw;
-  let alignOffsetSec = 0;
-  let alignScore = 0;
-
   const audioNotes = base.notes;
 
-  if (melodyneRaw.length && audioNotes.length) {
-    const align = alignMidiToAudio(audioNotes, melodyneRaw, { bpm });
-    alignOffsetSec = align.offsetSec;
-    alignScore = align.score;
-    melodyneAligned = applyOffsetToNotes(melodyneRaw, alignOffsetSec);
-  }
+  const alignedTrack = alignMelodyneTrack(audioNotes, melodyneRaw, bpm);
+  let melodyneAligned = alignedTrack.notes;
+  const alignOffsetSec = alignedTrack.alignOffsetSec;
+  const alignScore = alignedTrack.alignScore;
+
+  const keyResolved = melodyneAligned.length
+    ? resolveKeyWithMelodyne(key, 70, melodyneAligned)
+    : { key, confidence: 70, source: "audio" as const };
+  const resolvedKey = keyResolved.key;
 
   const durationSec = Math.max(
     base.durationSec,
@@ -104,7 +136,7 @@ export async function buildHarmonicSession(options: {
   );
 
   const melodyneChords = melodyneAligned.length
-    ? chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, key, 68)
+    ? chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, resolvedKey, 68)
     : [];
   const mergedChords = mergeChordTimelines(melodyneChords, base.chords);
 
@@ -119,6 +151,9 @@ export async function buildHarmonicSession(options: {
     waveformPeaks: base.waveformPeaks,
     alignOffsetSec,
     alignScore,
+    harmonicKey: resolvedKey,
+    harmonicKeyConfidence: keyResolved.confidence,
+    harmonicKeySource: keyResolved.source,
     sources: {
       audioTranscription: audioNotes.length > 0,
       melodyneMidi: melodyneAligned.length > 0,
@@ -141,15 +176,11 @@ export function attachMelodyneToSession(
     if (bpm > 0) {
       melodyneRaw = normalizeMidiToBarOne(melodyneRaw, bpm).notes;
     }
-    let alignOffsetSec = 0;
-    let alignScore = 0;
-    let melodyneAligned = melodyneRaw;
-    if (session.audioNotes.length) {
-      const align = alignMidiToAudio(session.audioNotes, melodyneRaw, { bpm });
-      alignOffsetSec = align.offsetSec;
-      alignScore = align.score;
-      melodyneAligned = applyOffsetToNotes(melodyneRaw, alignOffsetSec);
-    }
+    const alignedTrack = alignMelodyneTrack(session.audioNotes, melodyneRaw, bpm);
+    const melodyneAligned = alignedTrack.notes;
+
+    const keyResolved = resolveKeyWithMelodyne(key, 70, melodyneAligned);
+    const resolvedKey = keyResolved.key;
 
     const durationSec = Math.max(
       session.durationSec,
@@ -157,7 +188,13 @@ export function attachMelodyneToSession(
       parsed.durationSec,
     );
 
-    const melodyneChords = chordsFromPolyphonicNotes(melodyneAligned, bpm, durationSec, key, 68);
+    const melodyneChords = chordsFromPolyphonicNotes(
+      melodyneAligned,
+      bpm,
+      durationSec,
+      resolvedKey,
+      68,
+    );
     const mergedChords = mergeChordTimelines(melodyneChords, session.chords);
 
     return {
@@ -166,8 +203,11 @@ export function attachMelodyneToSession(
       melodyneRawNotes: melodyneRaw,
       chords: mergedChords,
       durationSec,
-      alignOffsetSec,
-      alignScore,
+      alignOffsetSec: alignedTrack.alignOffsetSec,
+      alignScore: alignedTrack.alignScore,
+      harmonicKey: resolvedKey,
+      harmonicKeyConfidence: keyResolved.confidence,
+      harmonicKeySource: keyResolved.source,
       sources: {
         ...session.sources,
         melodyneMidi: true,

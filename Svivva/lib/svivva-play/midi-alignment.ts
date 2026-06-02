@@ -227,6 +227,45 @@ export function applyOffsetToNotes(notes: TranscribedNote[], offsetSec: number):
   }));
 }
 
+/**
+ * After correlation align, lock Melodyne to the audio file timeline:
+ * when audio starts near t=0, first MIDI hit lands at file start (beat 1).
+ */
+export function anchorMelodyneToAudioFileStart(
+  audioNotes: TranscribedNote[],
+  midiNotes: TranscribedNote[],
+  bpm: number,
+): { notes: TranscribedNote[]; extraOffsetSec: number } {
+  if (!midiNotes.length) return { notes: midiNotes, extraOffsetSec: 0 };
+
+  const barSec = barDurationSec(bpm);
+  const audioFirst = audioNotes.length ? firstMusicalOnset(audioNotes) : 0;
+  const midiFirst = firstMusicalOnset(midiNotes);
+
+  if (audioNotes.length === 0) {
+    if (midiFirst > 0.02 && midiFirst < barSec * 12) {
+      const shift = -midiFirst;
+      return { notes: applyOffsetToNotes(midiNotes, shift), extraOffsetSec: shift };
+    }
+    return { notes: midiNotes, extraOffsetSec: 0 };
+  }
+
+  if (audioFirst <= barSec * 0.4) {
+    const shift = -midiFirst;
+    if (Math.abs(shift) > 0.008 && Math.abs(shift) < barSec * 12) {
+      return { notes: applyOffsetToNotes(midiNotes, shift), extraOffsetSec: shift };
+    }
+  } else {
+    const target = Math.floor(audioFirst / barSec) * barSec;
+    const shift = target - midiFirst;
+    if (Math.abs(shift) > 0.008 && Math.abs(shift) < barSec * 16) {
+      return { notes: applyOffsetToNotes(midiNotes, shift), extraOffsetSec: shift };
+    }
+  }
+
+  return { notes: midiNotes, extraOffsetSec: 0 };
+}
+
 /** Shift notes so bar 1 beat 1 is at t=0 (trim DAW pre-roll). */
 export function normalizeMidiToBarOne(
   notes: TranscribedNote[],

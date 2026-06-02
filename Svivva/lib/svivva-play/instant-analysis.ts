@@ -48,11 +48,19 @@ export function buildInstantPlayAnalysis(
   if (transcribedChords.length >= 2) {
     enriched.chords = transcribedChords;
   }
+
+  const useMidiKey =
+    transcription?.harmonicKeySource === "midi" &&
+    transcription.harmonicKey &&
+    (transcription.harmonicKeyConfidence ?? 0) >= 52;
+
   return {
     bpm: enriched.bpm,
     timeSignature: enriched.time_signature,
-    key: enriched.key,
-    keyConfidence: enriched.key_confidence,
+    key: useMidiKey ? transcription!.harmonicKey! : enriched.key,
+    keyConfidence: useMidiKey
+      ? (transcription!.harmonicKeyConfidence ?? enriched.key_confidence)
+      : enriched.key_confidence,
     chords: enriched.chords,
     sections: enriched.sections,
     downbeats: enriched.downbeats,
