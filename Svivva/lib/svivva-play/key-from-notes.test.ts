@@ -74,4 +74,11 @@ describe("key-from-notes", () => {
     expect(resolved.key).toBe("A major");
     expect(resolved.source).toBe("midi");
   });
+
+  it("keeps audio key when MIDI would falsely snap to C major", () => {
+    const sparse: TranscribedNote[] = [note(60, 0, 0.2), note(64, 0.5, 0.2), note(67, 1, 0.2)];
+    const resolved = resolveKeyWithMelodyne("A major", 78, sparse, 120);
+    expect(resolved.key).toBe("A major");
+    expect(resolved.source).toBe("audio");
+  });
 });

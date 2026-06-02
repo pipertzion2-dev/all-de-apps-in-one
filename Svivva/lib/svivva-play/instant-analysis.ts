@@ -1,4 +1,5 @@
 import type { AudioAnalysisResult } from "./client-audio-analysis";
+import { normalizeKeyLabel } from "./analysis-utils";
 import type { HarmonicSession } from "./harmonic-session";
 import { enrichAnalysisHeuristically } from "./heuristic-analysis";
 import type { Analysis } from "./schemas";
@@ -49,15 +50,29 @@ export function buildInstantPlayAnalysis(
     enriched.chords = transcribedChords;
   }
 
-  const useMidiKey = Boolean(transcription?.sources.melodyneMidi && transcription?.harmonicKey);
+  const sessionKey = transcription?.harmonicKey
+    ? normalizeKeyLabel(transcription.harmonicKey)
+    : null;
+  const audioKey = normalizeKeyLabel(enriched.key);
+  const midiConf = transcription?.harmonicKeyConfidence ?? 0;
+  const useMidiKey = Boolean(
+    transcription?.sources.melodyneMidi &&
+      sessionKey &&
+      transcription.harmonicKeySource === "midi" &&
+      midiConf >= 65 &&
+      (sessionKey === audioKey || midiConf >= enriched.key_confidence + 8),
+  );
 
   return {
     bpm: enriched.bpm,
     timeSignature: enriched.time_signature,
-    key: useMidiKey ? transcription!.harmonicKey! : enriched.key,
-    keyConfidence: useMidiKey
-      ? (transcription!.harmonicKeyConfidence ?? enriched.key_confidence)
-      : enriched.key_confidence,
+    key: transcription?.sources.melodyneMidi && sessionKey ? sessionKey : enriched.key,
+    keyConfidence:
+      transcription?.sources.melodyneMidi && sessionKey
+        ? useMidiKey
+          ? Math.min(92, midiConf)
+          : Math.max(enriched.key_confidence, midiConf)
+        : enriched.key_confidence,
     chords: enriched.chords,
     sections: enriched.sections,
     downbeats: enriched.downbeats,

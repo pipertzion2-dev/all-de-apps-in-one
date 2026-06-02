@@ -7,7 +7,76 @@ import {
   type KeyFromNotesResult,
 } from "./key-from-notes";
 
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
 export type HarmonicKeySource = "hint" | "midi" | "audio";
+
+type ResolvedKey = { key: string; confidence: number; source: HarmonicKeySource };
+
+function parseKeySignature(key: string): { rootPc: number; isMinor: boolean } | null {
+  const norm = normalizeKeyLabel(key);
+  const m = norm.match(/^([A-G][#b]?)\s+(major|minor)$/i);
+  if (!m) return null;
+  const idx = NOTE_NAMES.findIndex((n) => n === m[1]);
+  return {
+    rootPc: idx >= 0 ? idx : 0,
+    isMinor: (m[2] ?? "major").toLowerCase() === "minor",
+  };
+}
+
+/** When audio and MIDI disagree, don't let weak MIDI (often C major) override good audio. */
+function reconcileAudioMidiKey(
+  audioKey: string,
+  audioConfidence: number,
+  candidate: ResolvedKey,
+  fromMidi: KeyFromNotesResult | null,
+): ResolvedKey {
+  if (candidate.source === "hint") return candidate;
+
+  const audio = parseKeySignature(audioKey);
+  const cand = parseKeySignature(candidate.key);
+  if (!audio || !cand) return candidate;
+
+  const sameTonic = audio.rootPc === cand.rootPc && audio.isMinor === cand.isMinor;
+  if (sameTonic) {
+    return {
+      key: normalizeKeyLabel(candidate.key),
+      confidence: Math.max(candidate.confidence, audioConfidence),
+      source: candidate.source === "audio" ? "audio" : "midi",
+    };
+  }
+
+  // Strong Melodyne bass/progression detection beats wrong audio chroma (e.g. C# vs A).
+  if (fromMidi && candidate.source === "midi" && fromMidi.confidence >= 72) {
+    return {
+      key: normalizeKeyLabel(fromMidi.key),
+      confidence: fromMidi.confidence,
+      source: "midi",
+    };
+  }
+
+  const cMajorPlaceholder =
+    !cand.isMinor && cand.rootPc === 0 && audio.rootPc !== 0 && candidate.confidence < 82;
+
+  if (
+    audioConfidence >= 50 &&
+    (cMajorPlaceholder || candidate.confidence < audioConfidence + 12)
+  ) {
+    return {
+      key: normalizeKeyLabel(audioKey),
+      confidence: audioConfidence,
+      source: "audio",
+    };
+  }
+
+  if (candidate.confidence >= audioConfidence + 18) return candidate;
+
+  return {
+    key: normalizeKeyLabel(audioKey),
+    confidence: audioConfidence,
+    source: "audio",
+  };
+}
 
 export function resolveHarmonicKey(options: {
   audioKey: string;
@@ -16,7 +85,7 @@ export function resolveHarmonicKey(options: {
   chords?: ChordSegment[];
   bpm: number;
   keyHint?: string | null;
-}): { key: string; confidence: number; source: HarmonicKeySource } {
+}): ResolvedKey {
   const { audioKey, audioConfidence, midiNotes, chords = [], bpm, keyHint } = options;
 
   const hint = parseKeyFromUserHint(keyHint ?? undefined);
@@ -29,30 +98,31 @@ export function resolveHarmonicKey(options: {
   const fromChords: KeyFromNotesResult | null =
     chords.length >= 2 ? inferKeyFromChordSegments(chords) : null;
 
+  let candidate: ResolvedKey;
+
   if (fromMidi && fromChords) {
     const sameRoot = fromMidi.rootPc === fromChords.rootPc;
     const sameMode = fromMidi.isMinor === fromChords.isMinor;
     if (sameRoot && sameMode) {
-      return {
+      candidate = {
         key: fromMidi.key,
         confidence: Math.max(fromMidi.confidence, fromChords.confidence, 78),
         source: "midi",
       };
+    } else if (fromChords.confidence >= fromMidi.confidence - 8) {
+      candidate = { key: fromChords.key, confidence: fromChords.confidence, source: "midi" };
+    } else {
+      candidate = { key: fromMidi.key, confidence: fromMidi.confidence, source: "midi" };
     }
-    if (fromChords.confidence >= fromMidi.confidence - 8) {
-      return { key: fromChords.key, confidence: fromChords.confidence, source: "midi" };
-    }
-    return { key: fromMidi.key, confidence: fromMidi.confidence, source: "midi" };
+  } else if (fromChords) {
+    candidate = { key: fromChords.key, confidence: fromChords.confidence, source: "midi" };
+  } else if (fromMidi) {
+    candidate = { key: fromMidi.key, confidence: fromMidi.confidence, source: "midi" };
+  } else {
+    return { key: normalizeKeyLabel(audioKey), confidence: audioConfidence, source: "audio" };
   }
 
-  if (fromChords) {
-    return { key: fromChords.key, confidence: fromChords.confidence, source: "midi" };
-  }
-  if (fromMidi) {
-    return { key: fromMidi.key, confidence: fromMidi.confidence, source: "midi" };
-  }
-
-  return { key: audioKey, confidence: audioConfidence, source: "audio" };
+  return reconcileAudioMidiKey(audioKey, audioConfidence, candidate, fromMidi);
 }
 
 /** Melodyne-aware key resolution (notes + chord timeline + optional hint). */

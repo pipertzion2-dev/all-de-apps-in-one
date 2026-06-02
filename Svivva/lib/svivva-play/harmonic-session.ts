@@ -103,9 +103,10 @@ export async function buildHarmonicSession(options: {
   melodyneFile?: File | null;
   bpm: number;
   key: string;
+  keyConfidence?: number;
   keyHint?: string;
 }): Promise<HarmonicSession | null> {
-  const { audioFile, melodyneFile, bpm, key, keyHint } = options;
+  const { audioFile, melodyneFile, bpm, key, keyConfidence = 70, keyHint } = options;
 
   const [audioTx, melodyneParsed] = await Promise.all([
     transcribeAudioFile(audioFile, bpm, key),
@@ -148,13 +149,13 @@ export async function buildHarmonicSession(options: {
   const keyResolved = melodyneAligned.length
     ? resolveHarmonicKey({
         audioKey: key,
-        audioConfidence: 70,
+        audioConfidence: keyConfidence,
         midiNotes: melodyneAligned,
         chords: agnosticChords,
         bpm,
         keyHint,
       })
-    : { key, confidence: 70, source: "audio" as const };
+    : { key, confidence: keyConfidence, source: "audio" as const };
   const resolvedKey = normalizeKeyLabel(keyResolved.key);
 
   const melodyneChords = agnosticChords;
@@ -189,6 +190,7 @@ export function attachMelodyneToSession(
   melodyneFile: File,
   bpm: number,
   key: string,
+  audioConfidence = 70,
 ): Promise<HarmonicSession | null> {
   return melodyneFile.arrayBuffer().then((buf) => {
     const parsed = parseMidiFile(buf);
@@ -214,7 +216,7 @@ export function attachMelodyneToSession(
     const agnosticChords = chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec);
     const keyResolved = resolveHarmonicKey({
       audioKey: key,
-      audioConfidence: 70,
+      audioConfidence,
       midiNotes: melodyneAligned,
       chords: agnosticChords,
       bpm,

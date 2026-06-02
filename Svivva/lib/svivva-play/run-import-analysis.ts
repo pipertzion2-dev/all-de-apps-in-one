@@ -212,6 +212,7 @@ export async function runImportAnalysis(options: {
         melodyneFile: melodyneFile ?? null,
         bpm: det.bpm,
         key: det.key,
+        keyConfidence: det.keyConfidence,
         keyHint: userHint,
       });
       if (!melodyneFile) {

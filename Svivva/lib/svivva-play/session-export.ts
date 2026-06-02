@@ -20,8 +20,8 @@ export function buildClientSessionExport(options: {
     analysis: {
       bpm: analysis.bpm,
       time_signature: analysis.timeSignature,
-      key: transcription?.harmonicKey ?? analysis.key,
-      key_confidence: transcription?.harmonicKeyConfidence ?? analysis.keyConfidence,
+      key: analysis.key,
+      key_confidence: analysis.keyConfidence,
       key_source: transcription?.harmonicKeySource ?? "audio",
       chords: transcription?.chords?.length ? transcription.chords : analysis.chords,
       sections: analysis.sections,

@@ -137,7 +137,8 @@ export async function POST(request: NextRequest) {
 
     if (
       harmonicContext?.key &&
-      (harmonicContext.sources?.melodyneMidi || harmonicContext.keySource === "midi")
+      harmonicContext.sources?.melodyneMidi &&
+      harmonicContext.keySource === "midi"
     ) {
       analysisData = {
         ...analysisData,

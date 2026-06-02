@@ -493,17 +493,46 @@ export default function SvivvaPlayPage() {
         downbeats: [],
         styleCompatibility: [],
       };
-      const useMidiKey = Boolean(session.sources.melodyneMidi && session.harmonicKey);
-      const resolvedKey = useMidiKey ? normalizeKeyLabel(session.harmonicKey!) : base.key;
-      if (useMidiKey) melodyneKeyRef.current = resolvedKey;
+      const prevKey =
+        base.key && !base.key.startsWith("Detecting") ? normalizeKeyLabel(base.key) : null;
+      const sessionKey = session.harmonicKey
+        ? normalizeKeyLabel(session.harmonicKey)
+        : null;
+      const midiConf = session.harmonicKeyConfidence ?? 0;
+      const prevConf = base.keyConfidence ?? 50;
+      const useMidiKey = Boolean(
+        session.sources.melodyneMidi &&
+          sessionKey &&
+          session.harmonicKeySource === "midi" &&
+          midiConf >= 65 &&
+          (!prevKey ||
+            sessionKey === prevKey ||
+            midiConf >= prevConf + 8 ||
+            prevKey.startsWith("C major")),
+      );
+      const keepAudioKey =
+        session.sources.melodyneMidi &&
+        prevKey &&
+        session.harmonicKeySource === "audio";
+      const resolvedKey = keepAudioKey
+        ? prevKey!
+        : useMidiKey
+          ? sessionKey!
+          : sessionKey && !prevKey
+            ? sessionKey
+            : prevKey ?? sessionKey ?? base.key;
+      if (session.sources.melodyneMidi && resolvedKey) {
+        melodyneKeyRef.current = resolvedKey;
+      }
+      const resolvedConf = keepAudioKey
+        ? prevConf
+        : useMidiKey
+          ? Math.min(92, midiConf)
+          : Math.max(prevConf, midiConf, session.harmonicKeyConfidence ?? 0);
       return {
         ...base,
-        ...(useMidiKey
-          ? {
-              key: resolvedKey,
-              keyConfidence: Math.min(92, session.harmonicKeyConfidence ?? 80),
-            }
-          : {}),
+        key: resolvedKey,
+        keyConfidence: resolvedConf,
         chords: session.chords.map((c) => ({
           t0: c.t0,
           t1: c.t1,
@@ -568,14 +597,16 @@ export default function SvivvaPlayPage() {
       setIsTranscribing(true);
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const key = manualKey ?? analysis?.key ?? "C major";
+      const keyConfidence = analysis?.keyConfidence ?? 70;
       try {
         const updated = transcription
-          ? await attachMelodyneToSession(transcription, file, bpm, key)
+          ? await attachMelodyneToSession(transcription, file, bpm, key, keyConfidence)
           : await buildHarmonicSession({
               audioFile,
               melodyneFile: file,
               bpm,
               key,
+              keyConfidence,
               keyHint: userPrompt,
             });
         if (!updated?.melodyneNotes?.length) {
@@ -867,11 +898,7 @@ export default function SvivvaPlayPage() {
       try {
         const settings = buildSettings();
 
-        const sessionKey =
-          manualKey ??
-          (transcription?.harmonicKey
-            ? normalizeKeyLabel(transcription.harmonicKey)
-            : analysis.key);
+        const sessionKey = manualKey ?? analysis.key;
         const harmonicContext = transcription
           ? {
               chords: transcription.chords,
