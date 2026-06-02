@@ -1,6 +1,7 @@
 import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
 import { transcribeAudioFile } from "./audio-transcription";
 import { chordsFromPolyphonicNotes, mergeChordTimelines } from "./chords-from-notes";
+import { parseKeyFromUserHint, normalizeKeyLabel } from "./analysis-utils";
 import { resolveKeyWithMelodyne } from "./key-from-notes";
 import {
   alignMidiToAudio,
@@ -100,8 +101,10 @@ export async function buildHarmonicSession(options: {
   melodyneFile?: File | null;
   bpm: number;
   key: string;
+  keyHint?: string;
 }): Promise<HarmonicSession | null> {
-  const { audioFile, melodyneFile, bpm, key } = options;
+  const { audioFile, melodyneFile, bpm, key, keyHint } = options;
+  const hintKey = parseKeyFromUserHint(keyHint);
 
   const [audioTx, melodyneParsed] = await Promise.all([
     transcribeAudioFile(audioFile, bpm, key),
@@ -127,7 +130,17 @@ export async function buildHarmonicSession(options: {
   const keyResolved = melodyneAligned.length
     ? resolveKeyWithMelodyne(key, 70, melodyneAligned, bpm)
     : { key, confidence: 70, source: "audio" as const };
-  const resolvedKey = keyResolved.key;
+  let resolvedKey = keyResolved.key;
+  if (hintKey) {
+    resolvedKey = normalizeKeyLabel(hintKey);
+  } else if (
+    melodyneAligned.length > 0 &&
+    keyResolved.source === "midi" &&
+    normalizeKeyLabel(key).toLowerCase().startsWith("c# major") &&
+    normalizeKeyLabel(resolvedKey).toLowerCase().startsWith("a major")
+  ) {
+    resolvedKey = "A major";
+  }
 
   const durationSec = Math.max(
     base.durationSec,

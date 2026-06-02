@@ -492,7 +492,7 @@ export default function SvivvaPlayPage() {
         ...(useMidiKey
           ? {
               key: resolvedKey,
-              keyConfidence: session.harmonicKeyConfidence ?? base.keyConfidence,
+              keyConfidence: Math.min(92, session.harmonicKeyConfidence ?? 80),
             }
           : {}),
         chords: session.chords.map((c) => ({
@@ -666,15 +666,26 @@ export default function SvivvaPlayPage() {
             const cloudAnalysis = cloud.analysis;
             setAnalysis((prev) => {
               const base = cloudAnalysis;
-              const keepMelodyneKey = Boolean(melodyneFile && prev);
-              if (!prev?.chords?.length && !keepMelodyneKey) return base;
+              if (melodyneFile) {
+                const midiKey = melodyneKeyRef.current ?? prev?.key;
+                const keepKey =
+                  midiKey && !midiKey.startsWith("Detecting") ? midiKey : prev?.key;
+                return {
+                  ...base,
+                  bpm: base.bpm ?? prev?.bpm,
+                  key: keepKey ?? "A major",
+                  keyConfidence: prev?.keyConfidence ?? (melodyneKeyRef.current ? 80 : 0),
+                  chords: prev?.chords?.length ? prev.chords : base.chords,
+                  sections: base.sections?.length ? base.sections : prev?.sections,
+                };
+              }
+              if (!prev?.chords?.length) return base;
               return {
                 ...base,
-                bpm: base.bpm ?? prev?.bpm,
-                ...(keepMelodyneKey && prev
-                  ? { key: prev.key, keyConfidence: prev.keyConfidence }
-                  : {}),
-                ...(prev?.chords?.length ? { chords: prev.chords } : {}),
+                bpm: base.bpm ?? prev.bpm,
+                key: prev.key,
+                keyConfidence: prev.keyConfidence,
+                chords: prev.chords,
               };
             });
             setSessionId(cloud.sessionId ?? null);
@@ -694,18 +705,28 @@ export default function SvivvaPlayPage() {
       if (result.analysis) {
         setAnalysis((prev) => {
           const base = result.analysis!;
+          const midiKey =
+            melodyneKeyRef.current ??
+            (result.transcription?.harmonicKey
+              ? normalizeKeyLabel(result.transcription.harmonicKey)
+              : null);
+          if (melodyneFile && midiKey) {
+            return {
+              ...base,
+              key: midiKey,
+              keyConfidence: Math.min(
+                92,
+                result.transcription?.harmonicKeyConfidence ?? prev?.keyConfidence ?? 80,
+              ),
+              chords: prev?.chords?.length ? prev.chords : base.chords,
+              bpm: base.bpm ?? prev?.bpm,
+            };
+          }
           if (!prev) return base;
-          const keepMelodyneKey =
-            Boolean(melodyneFile) && result.transcription?.harmonicKeySource === "midi";
           return {
             ...base,
-            ...(keepMelodyneKey && result.transcription?.harmonicKey
-              ? {
-                  key: result.transcription.harmonicKey,
-                  keyConfidence: result.transcription.harmonicKeyConfidence ?? prev.keyConfidence,
-                }
-              : {}),
             chords: prev.chords?.length ? prev.chords : base.chords,
+            bpm: base.bpm ?? prev.bpm,
           };
         });
         if (result.sessionId) setSessionId(result.sessionId);

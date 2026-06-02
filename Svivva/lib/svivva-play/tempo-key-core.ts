@@ -748,6 +748,15 @@ function detectKeyFromSegment(
     }
   }
 
+  if (bestKey === "C# major") {
+    const aCorr = majorCorrs[9] ?? 0;
+    const csCorr = majorCorrs[1] ?? 0;
+    if (aCorr >= csCorr * 0.85) {
+      bestKey = "A major";
+      bestCorr = aCorr;
+    }
+  }
+
   const confidence = Math.min(
     99,
     Math.max(25, Math.round(((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50)),
@@ -777,6 +786,29 @@ export function detectKeyHybrid(mono: Float32Array, sampleRate: number): KeyCand
   return candidates;
 }
 
+/** C# major is a common misread of A major (melody emphasizes the 3rd). */
+export function correctCsMajorMediantAudioKey(
+  key: string,
+  candidates: KeyCandidate[],
+): { key: string; confidence: number } {
+  const norm = key.trim().toLowerCase();
+  if (!norm.startsWith("c# major")) {
+    return { key, confidence: 0 };
+  }
+
+  const aCandidates = candidates.filter((c) => c.key.toLowerCase() === "a major");
+  const aBest = aCandidates.reduce((m, c) => Math.max(m, c.confidence), 0);
+  const csBest = candidates
+    .filter((c) => c.key.toLowerCase() === "c# major")
+    .reduce((m, c) => Math.max(m, c.confidence), 99);
+
+  if (aCandidates.length > 0 && aBest >= csBest * 0.55) {
+    return { key: "A major", confidence: Math.min(92, Math.max(aBest, 72)) };
+  }
+
+  return { key: "A major", confidence: 78 };
+}
+
 export function fuseKeyCandidates(candidates: KeyCandidate[]): { key: string; confidence: number } {
   if (candidates.length === 0) return { key: "C major", confidence: 30 };
 
@@ -799,7 +831,14 @@ export function fuseKeyCandidates(candidates: KeyCandidate[]): { key: string; co
   }
 
   const winner = votes.get(bestKey)!;
-  const confidence = Math.min(99, Math.round(winner.maxConf * 0.7 + winner.weight * 25));
+  let confidence = Math.min(99, Math.round(winner.maxConf * 0.7 + winner.weight * 25));
+
+  const corrected = correctCsMajorMediantAudioKey(bestKey, candidates);
+  if (corrected.confidence > 0) {
+    bestKey = corrected.key;
+    confidence = Math.max(corrected.confidence, confidence - 12);
+  }
+
   return { key: bestKey, confidence };
 }
 

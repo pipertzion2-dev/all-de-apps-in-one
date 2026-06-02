@@ -16,6 +16,29 @@ export function normalizeKeyLabel(key: string): string {
   return trimmed;
 }
 
+/** Pull key from user prompt e.g. "in A major", "key of A", "Am". */
+export function parseKeyFromUserHint(prompt: string | undefined): string | null {
+  if (!prompt?.trim()) return null;
+  const text = prompt.trim();
+  const patterns = [
+    /\b(?:in|key\s+of|key:?)\s+([A-G][#b]?)\s*(major|minor|maj|min|m)\b/i,
+    /\b([A-G][#b]?)\s*(major|minor|maj|min)\b/i,
+    /\b([A-G][#b]?)m\b/i,
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (!m) continue;
+    const root = m[1]!;
+    if (m[2]?.toLowerCase() === "m" || m[0]?.endsWith("m")) {
+      return `${root} minor`;
+    }
+    const mode = m[2]?.toLowerCase();
+    if (mode === "minor" || mode === "min") return `${root} minor`;
+    return `${root} major`;
+  }
+  return null;
+}
+
 /** Map "A major" / "Am" → select value "A" / "Am". */
 export function keyToSelectValue(key: string): string {
   const normalized = normalizeKeyLabel(key);

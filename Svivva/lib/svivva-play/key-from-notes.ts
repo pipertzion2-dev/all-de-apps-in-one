@@ -229,6 +229,22 @@ function detectKeyFromBarChordRoots(
   };
 }
 
+function preferAMajorOverCsTrap(
+  result: KeyFromNotesResult,
+  barKey: KeyFromNotesResult | null,
+): KeyFromNotesResult {
+  if (result.isMinor || result.rootPc !== 1) return result;
+  if (barKey && !barKey.isMinor && barKey.rootPc === 9) {
+    return {
+      key: barKey.key,
+      confidence: Math.max(result.confidence, barKey.confidence),
+      rootPc: 9,
+      isMinor: false,
+    };
+  }
+  return result;
+}
+
 /** C# major is often a misread of A major (C# is the mediant, not the tonic). */
 function correctMediantMajorTrap(
   rootPc: number,
@@ -362,7 +378,12 @@ export function detectKeyFromMidiNotes(
   const bassPc = bassTonicPitchClass(notes);
 
   if (bassPc != null) {
-    const rootPc = correctMediantMajorTrap(bassPc, false, bassChroma, fullChroma);
+    let rootPc = bassPc;
+    if (barKey && !barKey.isMinor && bassPc === 1 && barKey.rootPc === 9) {
+      rootPc = 9;
+    } else {
+      rootPc = correctMediantMajorTrap(rootPc, false, bassChroma, fullChroma);
+    }
     return {
       key: `${NOTE_NAMES[rootPc]} major`,
       confidence: Math.max(barKey?.confidence ?? 0, 74),
@@ -437,12 +458,15 @@ export function detectKeyFromMidiNotes(
 
   const confidence = Math.min(99, Math.round(58 + bestScore * 12));
 
-  return {
-    key: `${NOTE_NAMES[rootPc]} ${isMinor ? "minor" : "major"}`,
-    confidence,
-    rootPc,
-    isMinor,
-  };
+  return preferAMajorOverCsTrap(
+    {
+      key: `${NOTE_NAMES[rootPc]} ${isMinor ? "minor" : "major"}`,
+      confidence,
+      rootPc,
+      isMinor,
+    },
+    barKey,
+  );
 }
 
 /** When Melodyne MIDI is present, it is the harmonic ground truth — always prefer over audio. */

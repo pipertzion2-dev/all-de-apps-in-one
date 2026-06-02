@@ -201,25 +201,38 @@ export async function runImportAnalysis(options: {
   let clientDetection: ClientDetection | null = null;
 
   let transcription: HarmonicSession | null = null;
+  let harmonicPromise: Promise<HarmonicSession | null> | null = null;
 
   try {
     clientDetection = (await analyzeAudioFile(file)) ?? (await analyzeAudioFileFast(file));
     if (clientDetection) {
       const det = clientDetection;
-      onInstantResult?.(buildInstantPlayAnalysis(det));
-      void buildHarmonicSession({
+      harmonicPromise = buildHarmonicSession({
         audioFile: file,
         melodyneFile: melodyneFile ?? null,
         bpm: det.bpm,
         key: det.key,
-      })
-        .then((session) => {
-          if (!session) return;
-          transcription = session;
-          onTranscription?.(session);
-          onInstantResult?.(buildInstantPlayAnalysis(det, session));
-        })
-        .catch(() => {});
+        keyHint: userHint,
+      });
+      if (!melodyneFile) {
+        onInstantResult?.(buildInstantPlayAnalysis(det));
+        void harmonicPromise
+          .then((session) => {
+            if (!session) return;
+            transcription = session;
+            onTranscription?.(session);
+          })
+          .catch(() => {});
+      } else {
+        void harmonicPromise
+          .then((session) => {
+            if (!session) return;
+            transcription = session;
+            onTranscription?.(session);
+            onInstantResult?.(buildInstantPlayAnalysis(det, session));
+          })
+          .catch(() => {});
+      }
     }
   } catch (err) {
     console.warn("Svivva Play client analysis failed:", err);
@@ -232,14 +245,10 @@ export async function runImportAnalysis(options: {
         : " Large file — cloud session saves metadata only; full file stays in your browser."
       : "";
 
-  if (clientDetection && !transcription) {
+  if (clientDetection && melodyneFile && harmonicPromise) {
     try {
-      transcription = await buildHarmonicSession({
-        audioFile: file,
-        melodyneFile: melodyneFile ?? null,
-        bpm: clientDetection.bpm,
-        key: clientDetection.key,
-      });
+      transcription = await harmonicPromise;
+      onTranscription?.(transcription);
     } catch {
       /* optional */
     }
