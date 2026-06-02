@@ -248,7 +248,7 @@ export async function runImportAnalysis(options: {
   if (clientDetection && melodyneFile && harmonicPromise) {
     try {
       transcription = await harmonicPromise;
-      onTranscription?.(transcription);
+      if (transcription) onTranscription?.(transcription);
     } catch {
       /* optional */
     }

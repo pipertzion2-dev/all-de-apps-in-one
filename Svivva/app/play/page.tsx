@@ -676,7 +676,7 @@ export default function SvivvaPlayPage() {
                   key: keepKey ?? "A major",
                   keyConfidence: prev?.keyConfidence ?? (melodyneKeyRef.current ? 80 : 0),
                   chords: prev?.chords?.length ? prev.chords : base.chords,
-                  sections: base.sections?.length ? base.sections : prev?.sections,
+                  sections: base.sections?.length ? base.sections : (prev?.sections ?? []),
                 };
               }
               if (!prev?.chords?.length) return base;
