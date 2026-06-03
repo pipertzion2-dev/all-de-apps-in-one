@@ -605,8 +605,16 @@ export default function SvivvaPlayPage() {
       setMidiFileName(file.name);
       setIsTranscribing(true);
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
-      const key = manualKey ?? analysis?.key ?? "C major";
-      const keyConfidence = analysis?.keyConfidence ?? 70;
+      const key =
+        manualKey ??
+        audioKeyRef.current ??
+        (analysis?.key && !analysis.key.startsWith("Detecting") ? analysis.key : null) ??
+        "C major";
+      const keyConfidence = Math.max(
+        analysis?.keyConfidence ?? 0,
+        audioKeyRef.current ? 70 : 0,
+        65,
+      );
       try {
         const updated = transcription
           ? await attachMelodyneToSession(transcription, file, bpm, key, keyConfidence)

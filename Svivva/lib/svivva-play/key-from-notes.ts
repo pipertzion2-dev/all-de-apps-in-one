@@ -229,7 +229,9 @@ function detectKeyFromBarChordRoots(
 
     const chroma = new Float64Array(12);
     for (const n of active) {
-      const w = Math.max(0.04, n.endSec - n.startSec) * (n.velocity / 127);
+      const dur = Math.max(0.04, n.endSec - n.startSec);
+      const bassBoost = n.midi <= 52 ? 3.5 : n.midi <= 57 ? 2.6 : n.midi <= 62 ? 1.4 : 0.7;
+      const w = dur * (n.velocity / 127) * bassBoost;
       chroma[n.midi % 12] += w;
     }
     const max = Math.max(...Array.from(chroma));
@@ -238,8 +240,11 @@ function detectKeyFromBarChordRoots(
     const { rootPc, score } = detectChordRootAgnostic(chroma);
     const barWeight = bar === 0 ? 2.8 : bar === bars - 1 ? 1.2 : 1;
     rootVotes[rootPc] += Math.max(0.1, score) * barWeight;
-    const bass = active.reduce((low, n) => (n.midi < low.midi ? n : low), active[0]!);
-    rootVotes[bass.midi % 12] += barWeight * 1.4;
+    const bassNotes = active.filter((n) => n.midi < 58);
+    if (bassNotes.length) {
+      const bass = bassNotes.reduce((low, n) => (n.midi < low.midi ? n : low), bassNotes[0]!);
+      rootVotes[bass.midi % 12] += barWeight * 2.2;
+    }
   }
 
   let topRoot = 0;
