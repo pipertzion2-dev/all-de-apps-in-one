@@ -24,7 +24,10 @@ function parseKeySignature(key: string): { rootPc: number; isMinor: boolean } | 
   };
 }
 
-function isCMajorPlaceholder(cand: { rootPc: number; isMinor: boolean }, audio: { rootPc: number; isMinor: boolean }): boolean {
+function isCMajorPlaceholder(
+  cand: { rootPc: number; isMinor: boolean },
+  audio: { rootPc: number; isMinor: boolean },
+): boolean {
   return !cand.isMinor && cand.rootPc === 0 && (audio.isMinor || audio.rootPc !== 0);
 }
 

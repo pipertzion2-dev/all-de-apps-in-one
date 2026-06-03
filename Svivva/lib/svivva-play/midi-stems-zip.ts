@@ -60,10 +60,7 @@ export function buildStemMidiZipBuffer(options: {
     });
 
     withNotes.forEach((stem, i) => {
-      const buf = buildMidiFile(
-        [{ name: stem.name, midiEvents: stem.midiEvents }],
-        bpm,
-      );
+      const buf = buildMidiFile([{ name: stem.name, midiEvents: stem.midiEvents }], bpm);
       archive.append(buf, { name: stemMidiFilename(stem.name, stem.role, i) });
     });
 

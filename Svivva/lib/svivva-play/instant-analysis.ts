@@ -57,10 +57,10 @@ export function buildInstantPlayAnalysis(
   const midiConf = transcription?.harmonicKeyConfidence ?? 0;
   const useMidiKey = Boolean(
     transcription?.sources.melodyneMidi &&
-      sessionKey &&
-      transcription.harmonicKeySource === "midi" &&
-      midiConf >= 65 &&
-      (sessionKey === audioKey || midiConf >= enriched.key_confidence + 8),
+    sessionKey &&
+    transcription.harmonicKeySource === "midi" &&
+    midiConf >= 65 &&
+    (sessionKey === audioKey || midiConf >= enriched.key_confidence + 8),
   );
 
   const displayKey =
@@ -68,7 +68,7 @@ export function buildInstantPlayAnalysis(
       ? sessionKey
       : transcription?.harmonicKeySource === "audio"
         ? audioKey
-        : sessionKey ?? audioKey;
+        : (sessionKey ?? audioKey);
 
   return {
     bpm: enriched.bpm,

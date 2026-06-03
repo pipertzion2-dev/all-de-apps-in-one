@@ -180,7 +180,10 @@ export async function POST(request: NextRequest) {
     const hasMelodyne = Array.isArray(melodyneNotes) && melodyneNotes.length > 0;
 
     if (!hasStems && !hasMelodyne) {
-      return NextResponse.json({ error: "No MIDI to export — generate stems or load Melodyne" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No MIDI to export — generate stems or load Melodyne" },
+        { status: 400 },
+      );
     }
 
     if (format === "midi-zip") {

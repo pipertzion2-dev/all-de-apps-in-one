@@ -499,33 +499,27 @@ export default function SvivvaPlayPage() {
       const prevKey =
         base.key && !base.key.startsWith("Detecting") ? normalizeKeyLabel(base.key) : null;
       const audioAnchor = audioKeyRef.current ?? prevKey;
-      const sessionKey = session.harmonicKey
-        ? normalizeKeyLabel(session.harmonicKey)
-        : null;
+      const sessionKey = session.harmonicKey ? normalizeKeyLabel(session.harmonicKey) : null;
       const midiConf = session.harmonicKeyConfidence ?? 0;
       const prevConf = base.keyConfidence ?? 50;
-      const cMajorTrap =
-        sessionKey === "C major" && audioAnchor && audioAnchor !== "C major";
+      const cMajorTrap = sessionKey === "C major" && audioAnchor && audioAnchor !== "C major";
       const keepAudioKey =
         session.harmonicKeySource === "audio" ||
         cMajorTrap ||
-        (Boolean(audioAnchor) &&
-          prevConf >= 50 &&
-          sessionKey !== audioAnchor &&
-          midiConf < 72);
+        (Boolean(audioAnchor) && prevConf >= 50 && sessionKey !== audioAnchor && midiConf < 72);
       const useMidiKey =
         !keepAudioKey &&
         Boolean(
           session.sources.melodyneMidi &&
-            sessionKey &&
-            session.harmonicKeySource === "midi" &&
-            midiConf >= 72,
+          sessionKey &&
+          session.harmonicKeySource === "midi" &&
+          midiConf >= 72,
         );
       const resolvedKey = keepAudioKey
-        ? audioAnchor ?? sessionKey ?? base.key
+        ? (audioAnchor ?? sessionKey ?? base.key)
         : useMidiKey
           ? sessionKey!
-          : audioAnchor ?? sessionKey ?? base.key;
+          : (audioAnchor ?? sessionKey ?? base.key);
       if (session.sources.melodyneMidi && resolvedKey) {
         melodyneKeyRef.current = resolvedKey;
       }
@@ -744,9 +738,8 @@ export default function SvivvaPlayPage() {
                 const display =
                   melodyneKeyRef.current && !melodyneKeyRef.current.startsWith("Detecting")
                     ? melodyneKeyRef.current
-                    : anchor ?? prev?.key;
-                const cTrap =
-                  display === "C major" && anchor && anchor !== "C major";
+                    : (anchor ?? prev?.key);
+                const cTrap = display === "C major" && anchor && anchor !== "C major";
                 const keepKey = cTrap ? anchor : display;
                 return {
                   ...base,
@@ -794,10 +787,10 @@ export default function SvivvaPlayPage() {
           const displayKey =
             melodyneFile && anchor && (keySource === "audio" || cTrap)
               ? anchor
-              : melodyneKeyRef.current ??
+              : (melodyneKeyRef.current ??
                 (keySource === "midi" && sessionKey && !cTrap ? sessionKey : null) ??
                 anchor ??
-                base.key;
+                base.key);
           if (melodyneFile && displayKey) {
             melodyneKeyRef.current = displayKey;
             return {
@@ -1171,7 +1164,9 @@ export default function SvivvaPlayPage() {
         }
         const blob = await res.blob();
         downloadMidiBlob(blob, stemMidiFilename(stem.name, stem.role, stemIndex));
-        setWarningMsg(`Downloaded ${stemMidiFilename(stem.name, stem.role, stemIndex)} — drag into Ableton.`);
+        setWarningMsg(
+          `Downloaded ${stemMidiFilename(stem.name, stem.role, stemIndex)} — drag into Ableton.`,
+        );
       } catch (err) {
         console.error("Stem MIDI download failed:", err);
         setErrorMsg("Stem MIDI download failed.");
@@ -1217,7 +1212,10 @@ export default function SvivvaPlayPage() {
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const downloadName = `svivva-play-${mode}-${Date.now()}`;
 
-      if ((format === "midi" || format === "midi-zip") && (stems.length > 0 || transcription?.melodyneNotes?.length)) {
+      if (
+        (format === "midi" || format === "midi-zip") &&
+        (stems.length > 0 || transcription?.melodyneNotes?.length)
+      ) {
         try {
           const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
           const res = sessionId
@@ -2491,7 +2489,9 @@ export default function SvivvaPlayPage() {
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                       <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">
-                        {isTranscribing && melodyneFile ? "Analyzing Audio + Melodyne" : "Analyzing Audio"}
+                        {isTranscribing && melodyneFile
+                          ? "Analyzing Audio + Melodyne"
+                          : "Analyzing Audio"}
                       </h3>
                       <p className="text-sm text-gray-400">
                         Detecting tempo, key, pitch track, and chord progression…
