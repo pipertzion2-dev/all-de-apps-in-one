@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAudioKeyAnchor,
   correctCommonMajorMisreads,
+  isMajorKeyMisreadTrap,
   pickBestMajorKey,
   scoreMajorKeyFromChroma,
 } from "./key-detection-advanced";
@@ -35,6 +37,20 @@ describe("key-detection-advanced", () => {
   it("corrects B major misread to A when progression implies A", () => {
     const chroma = chromaFromPcs({ 9: 0.9, 11: 1, 1: 0.8, 2: 0.7, 4: 0.75, 6: 0.7, 8: 0.65 });
     expect(correctCommonMajorMisreads(11, chroma, chroma, 9)).toBe(9);
+  });
+
+  it("flags B major as misread when audio anchor is A major", () => {
+    expect(isMajorKeyMisreadTrap(9, 11)).toBe(true);
+    expect(isMajorKeyMisreadTrap(9, 9)).toBe(false);
+  });
+
+  it("applyAudioKeyAnchor snaps B back to anchored A", () => {
+    const out = applyAudioKeyAnchor(
+      { rootPc: 11, key: "B major", confidence: 82, isMinor: false },
+      { rootPc: 9, key: "A major", confidence: 76 },
+    );
+    expect(out.key).toBe("A major");
+    expect(out.rootPc).toBe(9);
   });
 
   it("scores A major higher than B for A-major pitch material", () => {

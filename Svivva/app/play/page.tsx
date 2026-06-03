@@ -503,17 +503,24 @@ export default function SvivvaPlayPage() {
       const midiConf = session.harmonicKeyConfidence ?? 0;
       const prevConf = base.keyConfidence ?? 50;
       const cMajorTrap = sessionKey === "C major" && audioAnchor && audioAnchor !== "C major";
+      const bForATrap = sessionKey === "B major" && audioAnchor === "A major";
+      const csForATrap = sessionKey === "C# major" && audioAnchor === "A major";
+      const melodyneMisreadTrap = bForATrap || csForATrap || cMajorTrap;
       const keepAudioKey =
         session.harmonicKeySource === "audio" ||
-        cMajorTrap ||
-        (Boolean(audioAnchor) && prevConf >= 50 && sessionKey !== audioAnchor && midiConf < 72);
+        melodyneMisreadTrap ||
+        (Boolean(audioAnchor) &&
+          prevConf >= 48 &&
+          sessionKey !== audioAnchor &&
+          (midiConf < 80 || melodyneMisreadTrap));
       const useMidiKey =
         !keepAudioKey &&
         Boolean(
           session.sources.melodyneMidi &&
           sessionKey &&
           session.harmonicKeySource === "midi" &&
-          midiConf >= 72,
+          midiConf >= 80 &&
+          !melodyneMisreadTrap,
         );
       const resolvedKey = keepAudioKey
         ? (audioAnchor ?? sessionKey ?? base.key)

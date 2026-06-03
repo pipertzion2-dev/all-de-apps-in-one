@@ -3,10 +3,13 @@ import type { ChordSegment } from "./chord-from-chroma";
 import { detectChordRootAgnostic } from "./chord-from-chroma";
 import { chordsFromPolyphonicNotesAgnostic } from "./chords-from-notes";
 import {
+  applyAudioKeyAnchor,
   cadenceTonicFromNotes,
   correctCommonMajorMisreads,
+  isMajorKeyMisreadTrap,
   pickBestMajorKey,
   scoreMajorKeyFromChroma,
+  type AudioKeyAnchor,
 } from "./key-detection-advanced";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -463,10 +466,22 @@ function finalizeMajorKey(
   return preferAMajorOverCsTrap(result, barKey);
 }
 
+function finishMidiKey(
+  result: KeyFromNotesResult,
+  notes: TranscribedNote[],
+  barKey: KeyFromNotesResult | null,
+  bpm: number,
+  anchor: AudioKeyAnchor | null | undefined,
+): KeyFromNotesResult {
+  const finalized = finalizeMajorKey(result, notes, barKey, bpm);
+  return anchor ? applyAudioKeyAnchor(finalized, anchor) : finalized;
+}
+
 /** Detect key from Melodyne MIDI — progression roots first, then chroma ensemble. */
 export function detectKeyFromMidiNotes(
   notes: TranscribedNote[],
   bpm = 120,
+  audioAnchor?: AudioKeyAnchor | null,
 ): KeyFromNotesResult | null {
   if (!notes.length) return null;
 
@@ -477,35 +492,40 @@ export function detectKeyFromMidiNotes(
   const cadencePc = cadenceTonicFromNotes(notes, bpm);
 
   if (barKey && bassPc != null && barKey.rootPc === bassPc && !barKey.isMinor) {
-    return finalizeMajorKey(barKey, notes, barKey, bpm);
+    return finishMidiKey(barKey, notes, barKey, bpm, audioAnchor);
   }
 
   if (bassPc != null) {
     let rootPc = bassPc;
     const progRoot = barKey && !barKey.isMinor ? barKey.rootPc : cadencePc;
-    if (barKey && !barKey.isMinor && barKey.rootPc !== bassPc) {
+    if (barKey && !barKey.isMinor && barKey.rootPc === 9 && bassPc === 11) {
+      rootPc = 9;
+    } else if (audioAnchor && isMajorKeyMisreadTrap(audioAnchor.rootPc, bassPc)) {
+      rootPc = audioAnchor.rootPc;
+    } else if (barKey && !barKey.isMinor && barKey.rootPc !== bassPc) {
       const barScore = scoreMajorKeyFromChroma(bassChroma, barKey.rootPc, bassChroma);
       const bassScore = scoreMajorKeyFromChroma(bassChroma, bassPc, bassChroma);
-      if (barKey.confidence >= 58 && barScore >= bassScore * 0.88) {
+      if (barKey.confidence >= 52 && barScore >= bassScore * 0.82) {
         rootPc = barKey.rootPc;
       }
     }
     rootPc = correctMediantMajorTrap(rootPc, false, bassChroma, fullChroma, progRoot);
-    return finalizeMajorKey(
+    return finishMidiKey(
       {
         key: `${NOTE_NAMES[rootPc]} major`,
-        confidence: Math.max(barKey?.confidence ?? 0, 74),
+        confidence: Math.max(barKey?.confidence ?? 0, audioAnchor?.confidence ?? 0, 74),
         rootPc,
         isMinor: false,
       },
       notes,
       barKey,
       bpm,
+      audioAnchor,
     );
   }
 
   if (barKey && barKey.confidence >= 55 && !barKey.isMinor) {
-    return finalizeMajorKey(barKey, notes, barKey, bpm);
+    return finishMidiKey(barKey, notes, barKey, bpm, audioAnchor);
   }
 
   const endSec = notes.reduce((m, n) => Math.max(m, n.endSec), 0);
@@ -513,7 +533,11 @@ export function detectKeyFromMidiNotes(
     chordsFromPolyphonicNotesAgnostic(notes, bpm, Math.max(endSec, 1)),
   );
   if (chordKey && barKey && chordKey.rootPc === barKey.rootPc) {
-    return finalizeMajorKey(chordKey, notes, barKey, bpm);
+    return finishMidiKey(chordKey, notes, barKey, bpm, audioAnchor);
+  }
+
+  if (chordKey && audioAnchor && chordKey.rootPc === audioAnchor.rootPc) {
+    return finishMidiKey(chordKey, notes, barKey, bpm, audioAnchor);
   }
 
   const triadKey = detectKeyFromTriadRoots(notes, bpm);
@@ -524,8 +548,8 @@ export function detectKeyFromMidiNotes(
     rootPc: advanced.rootPc,
     isMinor: false,
   };
-  const winner = voteKeyCandidates([barKey, triadKey, kh]);
-  if (winner) return finalizeMajorKey(winner, notes, barKey, bpm);
+  const winner = voteKeyCandidates([barKey, chordKey, triadKey, kh]);
+  if (winner) return finishMidiKey(winner, notes, barKey, bpm, audioAnchor);
 
   let rootPc = advanced.rootPc;
   rootPc = correctMediantMajorTrap(
@@ -533,9 +557,9 @@ export function detectKeyFromMidiNotes(
     false,
     bassChroma,
     fullChroma,
-    barKey?.rootPc ?? cadencePc,
+    barKey?.rootPc ?? cadencePc ?? audioAnchor?.rootPc ?? null,
   );
-  return finalizeMajorKey(
+  return finishMidiKey(
     {
       key: `${NOTE_NAMES[rootPc]} major`,
       confidence: advanced.confidence,
@@ -545,5 +569,6 @@ export function detectKeyFromMidiNotes(
     notes,
     barKey,
     bpm,
+    audioAnchor,
   );
 }

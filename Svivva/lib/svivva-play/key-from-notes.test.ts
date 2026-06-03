@@ -104,6 +104,29 @@ describe("key-from-notes", () => {
     expect(resolved.source).toBe("midi");
   });
 
+  it("locks A major audio when Melodyne would flip to B major", () => {
+    const resolved = resolveKeyWithMelodyne("A major", 76, aMajorProgression(), 120);
+    expect(resolved.key).toBe("A major");
+    expect(["audio", "midi"]).toContain(resolved.source);
+  });
+
+  it("locks A major when melody is loud on B but harmony is A–D–E", () => {
+    const notes: TranscribedNote[] = [];
+    const chords = [
+      [57, 61, 64],
+      [62, 66, 69],
+      [64, 68, 71],
+    ];
+    let t = 0;
+    for (const triad of chords) {
+      for (const m of triad) notes.push(note(m, t, 1.9));
+      for (let i = 0; i < 8; i++) notes.push(note(71 + (i % 2), t + 0.1 + i * 0.08, 0.35));
+      t += 2;
+    }
+    const resolved = resolveKeyWithMelodyne("A major", 80, notes, 120);
+    expect(resolved.key).toBe("A major");
+  });
+
   it("keeps A major when agnostic chord labels vote C major", () => {
     const resolved = resolveKeyWithMelodyne("A major", 78, aMajorProgression(), 120, [
       { t0: 0, t1: 2, symbol: "F#m7", confidence: 70, pitchClasses: [6, 9, 1, 4] },

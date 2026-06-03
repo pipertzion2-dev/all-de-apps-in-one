@@ -219,3 +219,39 @@ export function cadenceTonicFromNotes(
   }
   return best > 0 ? bestPc : null;
 }
+
+/** Trusted audio tonic vs Melodyne/chroma misread (supertonic, mediant, C placeholder). */
+export function isMajorKeyMisreadTrap(trustedRootPc: number, detectedRootPc: number): boolean {
+  if (trustedRootPc === detectedRootPc) return false;
+  if (trustedRootPc === 9 && (detectedRootPc === 11 || detectedRootPc === 1)) return true;
+  if (trustedRootPc !== 0 && detectedRootPc === 0) return true;
+  return false;
+}
+
+export type AudioKeyAnchor = {
+  rootPc: number;
+  key: string;
+  confidence: number;
+};
+
+export function parseMajorRootPc(key: string): number | null {
+  const m = key.trim().match(/^([A-G][#b]?)\s+major$/i);
+  if (!m) return null;
+  const idx = NOTE_NAMES.findIndex((n) => n.toLowerCase() === m[1]!.toLowerCase());
+  return idx >= 0 ? idx : null;
+}
+
+/** Snap MIDI/chroma result back to a reliable audio key when in a known trap. */
+export function applyAudioKeyAnchor<
+  T extends { rootPc: number; key: string; confidence: number; isMinor: boolean },
+>(result: T, anchor: AudioKeyAnchor | null | undefined): T {
+  if (!anchor || anchor.confidence < 40 || result.isMinor) return result;
+  if (!isMajorKeyMisreadTrap(anchor.rootPc, result.rootPc)) return result;
+  return {
+    ...result,
+    rootPc: anchor.rootPc,
+    key: anchor.key,
+    confidence: Math.max(anchor.confidence, result.confidence - 8),
+    isMinor: false,
+  };
+}
