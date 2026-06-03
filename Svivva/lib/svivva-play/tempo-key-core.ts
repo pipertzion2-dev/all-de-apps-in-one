@@ -1,3 +1,5 @@
+import { correctCommonMajorMisreads, pickBestMajorKey } from "./key-detection-advanced";
+
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MAJOR_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
 const MINOR_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
@@ -658,6 +660,7 @@ function detectKeyFromSegment(
 ) {
   const fftSize = 4096;
   const chromagram = new Float64Array(12);
+  const bassChromagram = new Float64Array(12);
   const hopSize = fftSize;
   const numFrames = Math.floor((length - fftSize) / hopSize);
   if (numFrames <= 0) return { key: "C major", confidence: 30 };
@@ -683,83 +686,82 @@ function detectKeyFromSegment(
 
     for (let noteIdx = 0; noteIdx < 12; noteIdx++) {
       let energy = 0;
+      let bassEnergy = 0;
       for (let octave = 1; octave <= 7; octave++) {
         const freq = 440 * Math.pow(2, (noteIdx - 9 + (octave - 4) * 12) / 12);
         const bin = Math.round((freq * fftSize) / sampleRate);
         if (bin > 0 && bin < fftSize / 2 - 1) {
           const weight = 1.0 / octave;
-          energy +=
+          const binEnergy =
             ((magnitudes[bin - 1] + magnitudes[bin] * 2 + magnitudes[bin + 1]) * weight) / 4;
+          energy += binEnergy;
+          if (octave <= 3) bassEnergy += binEnergy * (4 - octave) * 0.55;
         }
       }
       chromagram[noteIdx] += energy;
+      bassChromagram[noteIdx] += bassEnergy;
     }
   }
 
-  const maxChroma = Math.max(...Array.from(chromagram));
-  if (maxChroma > 0) {
-    for (let i = 0; i < 12; i++) chromagram[i] /= maxChroma;
-  }
+  const normalize = (c: Float64Array) => {
+    const max = Math.max(...Array.from(c));
+    if (max > 0) for (let i = 0; i < 12; i++) c[i] /= max;
+  };
+  normalize(chromagram);
+  normalize(bassChromagram);
+
+  const advanced = pickBestMajorKey(chromagram, bassChromagram);
 
   let bestCorr = -Infinity;
-  let bestKey = "C major";
   let secondBest = -Infinity;
-  const majorCorrs: number[] = [];
   const minorCorrs: number[] = [];
+  let bestMinorKey = "A minor";
 
   for (let shift = 0; shift < 12; shift++) {
     const rotated = new Array(12);
     for (let i = 0; i < 12; i++) {
       rotated[i] = chromagram[(i + shift) % 12];
     }
-    const majorCorr = correlate(rotated, MAJOR_PROFILE);
     const minorCorr = correlate(rotated, MINOR_PROFILE);
-    majorCorrs.push(majorCorr);
     minorCorrs.push(minorCorr);
-
-    if (majorCorr > bestCorr) {
-      secondBest = bestCorr;
-      bestCorr = majorCorr;
-      bestKey = `${NOTE_NAMES[shift]} major`;
-    } else if (majorCorr > secondBest) {
-      secondBest = majorCorr;
-    }
 
     if (minorCorr > bestCorr) {
       secondBest = bestCorr;
       bestCorr = minorCorr;
-      bestKey = `${NOTE_NAMES[shift]} minor`;
+      bestMinorKey = `${NOTE_NAMES[shift]} minor`;
     } else if (minorCorr > secondBest) {
       secondBest = minorCorr;
     }
   }
 
-  if (bestKey.endsWith("minor")) {
-    const minorRoot = bestKey.split(" ")[0];
+  const majorScore = advanced.majorScores[advanced.rootPc] ?? 0;
+  let bestKey = advanced.key;
+  let bestWin = majorScore;
+
+  if (bestCorr > majorScore * 1.08) {
+    const minorRoot = bestMinorKey.split(" ")[0]!;
     const minorIdx = NOTE_NAMES.indexOf(minorRoot);
     if (minorIdx >= 0) {
       const relMajorIdx = (minorIdx + 3) % 12;
-      const relMajorCorr = majorCorrs[relMajorIdx];
-      const minorWinCorr = minorCorrs[minorIdx];
-      if (relMajorCorr >= minorWinCorr * 0.9) {
+      const relMajorScore = advanced.majorScores[relMajorIdx] ?? 0;
+      if (relMajorScore >= bestCorr * 0.88) {
         bestKey = `${NOTE_NAMES[relMajorIdx]} major`;
-        bestCorr = relMajorCorr;
+        bestWin = relMajorScore;
+      } else {
+        bestKey = bestMinorKey;
+        bestWin = bestCorr;
       }
-    }
-  }
-
-  if (bestKey === "C# major") {
-    const aCorr = majorCorrs[9] ?? 0;
-    const csCorr = majorCorrs[1] ?? 0;
-    if (aCorr >= csCorr * 0.85) {
-      bestKey = "A major";
-      bestCorr = aCorr;
     }
   }
 
   const confidence = Math.min(
     99,
-    Math.max(25, Math.round(((bestCorr - secondBest) / (Math.abs(bestCorr) + 0.001)) * 200 + 50)),
+    Math.max(
+      25,
+      Math.round(
+        advanced.confidence * 0.65 + ((bestWin - secondBest) / (Math.abs(bestWin) + 0.001)) * 80,
+      ),
+    ),
   );
   return { key: bestKey, confidence };
 }
@@ -786,27 +788,34 @@ export function detectKeyHybrid(mono: Float32Array, sampleRate: number): KeyCand
   return candidates;
 }
 
-/** C# major is a common misread of A major (melody emphasizes the 3rd). */
+/** Correct common major misreads when segment voting disagrees (C# or B vs A). */
 export function correctCsMajorMediantAudioKey(
   key: string,
   candidates: KeyCandidate[],
 ): { key: string; confidence: number } {
   const norm = key.trim().toLowerCase();
-  if (!norm.startsWith("c# major")) {
-    return { key, confidence: 0 };
-  }
+  const traps: { wrong: string; right: string }[] = [
+    { wrong: "c# major", right: "a major" },
+    { wrong: "b major", right: "a major" },
+  ];
+  const trap = traps.find((t) => norm === t.wrong);
+  if (!trap) return { key, confidence: 0 };
 
-  const aCandidates = candidates.filter((c) => c.key.toLowerCase() === "a major");
-  const aBest = aCandidates.reduce((m, c) => Math.max(m, c.confidence), 0);
-  const csBest = candidates
-    .filter((c) => c.key.toLowerCase() === "c# major")
+  const rightCandidates = candidates.filter((c) => c.key.toLowerCase() === trap.right);
+  const rightBest = rightCandidates.reduce((m, c) => Math.max(m, c.confidence), 0);
+  const wrongBest = candidates
+    .filter((c) => c.key.toLowerCase() === trap.wrong)
     .reduce((m, c) => Math.max(m, c.confidence), 99);
 
-  if (aCandidates.length > 0 && aBest >= csBest * 0.55) {
-    return { key: "A major", confidence: Math.min(92, Math.max(aBest, 72)) };
+  if (rightCandidates.length > 0 && rightBest >= wrongBest * 0.5) {
+    const label = trap.right === "a major" ? "A major" : trap.right;
+    return { key: label, confidence: Math.min(92, Math.max(rightBest, 74)) };
   }
 
-  return { key: "A major", confidence: 78 };
+  if (trap.right === "a major") {
+    return { key: "A major", confidence: 76 };
+  }
+  return { key, confidence: 0 };
 }
 
 export function fuseKeyCandidates(candidates: KeyCandidate[]): { key: string; confidence: number } {
@@ -833,10 +842,14 @@ export function fuseKeyCandidates(candidates: KeyCandidate[]): { key: string; co
   const winner = votes.get(bestKey)!;
   let confidence = Math.min(99, Math.round(winner.maxConf * 0.7 + winner.weight * 25));
 
-  const corrected = correctCsMajorMediantAudioKey(bestKey, candidates);
-  if (corrected.confidence > 0) {
-    bestKey = corrected.key;
-    confidence = Math.max(corrected.confidence, confidence - 12);
+  for (const trap of ["c# major", "b major"] as const) {
+    if (bestKey.toLowerCase() === trap) {
+      const corrected = correctCsMajorMediantAudioKey(bestKey, candidates);
+      if (corrected.confidence > 0) {
+        bestKey = corrected.key;
+        confidence = Math.max(corrected.confidence, confidence - 8);
+      }
+    }
   }
 
   return { key: bestKey, confidence };

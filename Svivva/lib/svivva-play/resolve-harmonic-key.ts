@@ -73,6 +73,22 @@ function reconcileAudioMidiKey(
     };
   }
 
+  const audioBWrongMidiA =
+    audio.rootPc === 11 &&
+    !audio.isMinor &&
+    cand.rootPc === 9 &&
+    !cand.isMinor &&
+    fromMidi &&
+    fromMidi.confidence >= 68;
+
+  if (audioBWrongMidiA) {
+    return {
+      key: normalizeKeyLabel(fromMidi!.key),
+      confidence: fromMidi!.confidence,
+      source: "midi",
+    };
+  }
+
   if (audioConfidence >= 50 && candidate.confidence < audioConfidence + 12) {
     return {
       key: normalizeKeyLabel(audioKey),

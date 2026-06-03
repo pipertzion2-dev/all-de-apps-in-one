@@ -2,6 +2,12 @@ import type { TranscribedNote } from "./audio-transcription";
 import type { ChordSegment } from "./chord-from-chroma";
 import { detectChordRootAgnostic } from "./chord-from-chroma";
 import { chordsFromPolyphonicNotesAgnostic } from "./chords-from-notes";
+import {
+  cadenceTonicFromNotes,
+  correctCommonMajorMisreads,
+  pickBestMajorKey,
+  scoreMajorKeyFromChroma,
+} from "./key-detection-advanced";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MAJOR_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
@@ -292,21 +298,15 @@ function preferAMajorOverCsTrap(
   return result;
 }
 
-/** C# major is often a misread of A major (C# is the mediant, not the tonic). */
 function correctMediantMajorTrap(
   rootPc: number,
   isMinor: boolean,
   bassChroma: Float64Array,
   fullChroma: Float64Array,
+  progressionRoot?: number | null,
 ): number {
-  if (isMinor || rootPc !== 1) return rootPc;
-  const tonicA = 9;
-  const fitCs =
-    diatonicFitScore(bassChroma, rootPc, false) + diatonicFitScore(fullChroma, rootPc, false);
-  const fitA =
-    diatonicFitScore(bassChroma, tonicA, false) + diatonicFitScore(fullChroma, tonicA, false);
-  if (fitA >= fitCs * 0.88 && bassChroma[tonicA]! >= bassChroma[rootPc]! * 0.5) return tonicA;
-  return rootPc;
+  if (isMinor) return rootPc;
+  return correctCommonMajorMisreads(rootPc, fullChroma, bassChroma, progressionRoot ?? null);
 }
 
 function triadFitScore(pcs: Map<number, number>, root: number, template: number[]): number {
@@ -398,7 +398,7 @@ function detectKeyFromTriadRoots(notes: TranscribedNote[], bpm: number): KeyFrom
   if (!isMinor) {
     const bassChroma = buildBassWeightedChroma(notes);
     const fullChroma = buildChromaFromNotes(notes);
-    bestRoot = correctMediantMajorTrap(bestRoot, false, bassChroma, fullChroma);
+    bestRoot = correctMediantMajorTrap(bestRoot, false, bassChroma, fullChroma, null);
   }
 
   return {
@@ -439,11 +439,25 @@ function finalizeMajorKey(
   result: KeyFromNotesResult,
   notes: TranscribedNote[],
   barKey: KeyFromNotesResult | null,
+  bpm = 120,
 ): KeyFromNotesResult {
   const bassChroma = buildBassWeightedChroma(notes);
   const fullChroma = buildChromaFromNotes(notes);
   if (!result.isMinor) {
-    const rootPc = correctMediantMajorTrap(result.rootPc, false, bassChroma, fullChroma);
+    const progRoot = barKey && !barKey.isMinor ? barKey.rootPc : null;
+    let rootPc = correctMediantMajorTrap(result.rootPc, false, bassChroma, fullChroma, progRoot);
+    const advanced = pickBestMajorKey(fullChroma, bassChroma);
+    if (
+      advanced.rootPc !== rootPc &&
+      scoreMajorKeyFromChroma(fullChroma, advanced.rootPc, bassChroma) >=
+        scoreMajorKeyFromChroma(fullChroma, rootPc, bassChroma) * 1.05
+    ) {
+      rootPc = advanced.rootPc;
+    }
+    const cadence = cadenceTonicFromNotes(notes, bpm);
+    if (cadence != null && !result.isMinor) {
+      rootPc = correctCommonMajorMisreads(rootPc, fullChroma, bassChroma, cadence);
+    }
     result = { ...result, rootPc, key: `${NOTE_NAMES[rootPc]} major` };
   }
   return preferAMajorOverCsTrap(result, barKey);
@@ -460,18 +474,23 @@ export function detectKeyFromMidiNotes(
   const bassChroma = buildBassWeightedChroma(notes);
   const fullChroma = buildChromaFromNotes(notes);
   const bassPc = bassTonicPitchClass(notes);
+  const cadencePc = cadenceTonicFromNotes(notes, bpm);
 
   if (barKey && bassPc != null && barKey.rootPc === bassPc && !barKey.isMinor) {
-    return finalizeMajorKey(barKey, notes, barKey);
+    return finalizeMajorKey(barKey, notes, barKey, bpm);
   }
 
   if (bassPc != null) {
     let rootPc = bassPc;
-    if (barKey && !barKey.isMinor && bassPc === 1 && barKey.rootPc === 9) {
-      rootPc = 9;
-    } else {
-      rootPc = correctMediantMajorTrap(rootPc, false, bassChroma, fullChroma);
+    const progRoot = barKey && !barKey.isMinor ? barKey.rootPc : cadencePc;
+    if (barKey && !barKey.isMinor && barKey.rootPc !== bassPc) {
+      const barScore = scoreMajorKeyFromChroma(bassChroma, barKey.rootPc, bassChroma);
+      const bassScore = scoreMajorKeyFromChroma(bassChroma, bassPc, bassChroma);
+      if (barKey.confidence >= 58 && barScore >= bassScore * 0.88) {
+        rootPc = barKey.rootPc;
+      }
     }
+    rootPc = correctMediantMajorTrap(rootPc, false, bassChroma, fullChroma, progRoot);
     return finalizeMajorKey(
       {
         key: `${NOTE_NAMES[rootPc]} major`,
@@ -481,11 +500,12 @@ export function detectKeyFromMidiNotes(
       },
       notes,
       barKey,
+      bpm,
     );
   }
 
   if (barKey && barKey.confidence >= 55 && !barKey.isMinor) {
-    return finalizeMajorKey(barKey, notes, barKey);
+    return finalizeMajorKey(barKey, notes, barKey, bpm);
   }
 
   const endSec = notes.reduce((m, n) => Math.max(m, n.endSec), 0);
@@ -493,39 +513,37 @@ export function detectKeyFromMidiNotes(
     chordsFromPolyphonicNotesAgnostic(notes, bpm, Math.max(endSec, 1)),
   );
   if (chordKey && barKey && chordKey.rootPc === barKey.rootPc) {
-    return finalizeMajorKey(chordKey, notes, barKey);
+    return finalizeMajorKey(chordKey, notes, barKey, bpm);
   }
 
   const triadKey = detectKeyFromTriadRoots(notes, bpm);
-  const kh = krumhanslKey(bassChroma);
+  const advanced = pickBestMajorKey(fullChroma, bassChroma);
+  const kh: KeyFromNotesResult = {
+    key: advanced.key,
+    confidence: advanced.confidence,
+    rootPc: advanced.rootPc,
+    isMinor: false,
+  };
   const winner = voteKeyCandidates([barKey, triadKey, kh]);
-  if (winner) return finalizeMajorKey(winner, notes, barKey);
+  if (winner) return finalizeMajorKey(winner, notes, barKey, bpm);
 
-  const majorScores: { root: number; score: number }[] = [];
-  for (let r = 0; r < 12; r++) {
-    majorScores.push({
-      root: r,
-      score:
-        diatonicFitScore(bassChroma, r, false) * 0.7 + diatonicFitScore(fullChroma, r, false) * 0.3,
-    });
-  }
-  majorScores.sort((a, b) => b.score - a.score);
-  const bestMajor = majorScores[0]!;
-  let rootPc = bestMajor.root;
-  if (majorScores.length > 1 && bestMajor.score - majorScores[1]!.score < 0.12) {
-    const candidates = majorScores.filter((c) => bestMajor.score - c.score < 0.12);
-    candidates.sort((a, b) => bassChroma[b.root]! - bassChroma[a.root]!);
-    rootPc = candidates[0]!.root;
-  }
-  rootPc = correctMediantMajorTrap(rootPc, false, bassChroma, fullChroma);
+  let rootPc = advanced.rootPc;
+  rootPc = correctMediantMajorTrap(
+    rootPc,
+    false,
+    bassChroma,
+    fullChroma,
+    barKey?.rootPc ?? cadencePc,
+  );
   return finalizeMajorKey(
     {
       key: `${NOTE_NAMES[rootPc]} major`,
-      confidence: Math.min(99, Math.round(58 + bestMajor.score * 12)),
+      confidence: advanced.confidence,
       rootPc,
       isMinor: false,
     },
     notes,
     barKey,
+    bpm,
   );
 }

@@ -82,6 +82,28 @@ describe("key-from-notes", () => {
     expect(resolved.source).toBe("audio");
   });
 
+  it("detects A major when melody emphasizes B (supertonic trap)", () => {
+    const notes: TranscribedNote[] = [];
+    let t = 0;
+    for (let bar = 0; bar < 4; bar++) {
+      notes.push(note(45, t, 1.8));
+      notes.push(note(57, t, 1.4));
+      notes.push(note(64, t, 1.4));
+      notes.push(note(71, t + 0.05, 1.3));
+      notes.push(note(73, t + 0.08, 1.1));
+      notes.push(note(76, t + 0.1, 0.9));
+      t += 2;
+    }
+    const det = detectKeyFromMidiNotes(notes, 120);
+    expect(det?.key).toBe("A major");
+  });
+
+  it("prefers MIDI A major over wrong B major audio key", () => {
+    const resolved = resolveKeyWithMelodyne("B major", 82, aMajorProgression(), 120);
+    expect(resolved.key).toBe("A major");
+    expect(resolved.source).toBe("midi");
+  });
+
   it("keeps A major when agnostic chord labels vote C major", () => {
     const resolved = resolveKeyWithMelodyne("A major", 78, aMajorProgression(), 120, [
       { t0: 0, t1: 2, symbol: "F#m7", confidence: 70, pitchClasses: [6, 9, 1, 4] },
