@@ -12,6 +12,7 @@ import {
 } from "./midi-alignment";
 import { parseMidiFile } from "./midi-file-parse";
 import { fitMelodyneToAudioDuration } from "./session-duration";
+import { alignChordTimelineToBeatGrid } from "./scale-key-guard";
 
 export type HarmonicSources = {
   audioTranscription: boolean;
@@ -143,7 +144,10 @@ export async function buildHarmonicSession(options: {
         );
 
   const agnosticChords = melodyneAligned.length
-    ? chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec)
+    ? alignChordTimelineToBeatGrid(
+        chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec),
+        bpm,
+      )
     : [];
 
   const keyResolved = melodyneAligned.length
@@ -213,7 +217,10 @@ export function attachMelodyneToSession(
     const durationSec =
       session.durationSec > 0 ? fitted.durationSec : fitted.durationSec || parsed.durationSec;
 
-    const agnosticChords = chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec);
+    const agnosticChords = alignChordTimelineToBeatGrid(
+      chordsFromPolyphonicNotesAgnostic(melodyneAligned, bpm, durationSec),
+      bpm,
+    );
     const keyResolved = resolveHarmonicKey({
       audioKey: key,
       audioConfidence,

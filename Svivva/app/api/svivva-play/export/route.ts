@@ -4,7 +4,20 @@ import { playSessions, playAnalyses, playGenerations, playStems, playPatches } f
 import { eq } from "drizzle-orm";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { buildMidiFile } from "@/lib/svivva-play/midi-export";
-import { buildStemMidiZipBuffer } from "@/lib/svivva-play/midi-stems-zip";
+import {
+  buildStemMidiZipBuffer,
+  stemPackHasMidiContent,
+} from "@/lib/svivva-play/midi-stems-zip";
+
+function zipResponse(zipBuffer: Buffer, filename: string) {
+  return new NextResponse(new Uint8Array(zipBuffer), {
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Length": String(zipBuffer.length),
+    },
+  });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,36 +60,35 @@ export async function GET(request: NextRequest) {
 
     const patches = await db.select().from(playPatches).where(eq(playPatches.sessionId, sessionId));
 
-    if ((format === "midi" || format === "midi-zip") && stems.length > 0) {
+    if (format === "midi" || format === "midi-zip") {
+      const stemExports = stems.map((s) => ({
+        name: s.name,
+        role: s.role,
+        midiEvents: Array.isArray(s.midiEvents) ? s.midiEvents : [],
+      }));
+
+      if (!stemPackHasMidiContent({ stems: stemExports })) {
+        return NextResponse.json(
+          { error: "No MIDI to export — generate stems first" },
+          { status: 400 },
+        );
+      }
+
       if (format === "midi-zip") {
         const zipBuffer = await buildStemMidiZipBuffer({
           bpm,
-          stems: stems.map((s) => ({
-            name: s.name,
-            role: s.role,
-            midiEvents: Array.isArray(s.midiEvents) ? s.midiEvents : [],
-          })),
+          stems: stemExports,
           projectName: `svivva-play-${sessionId}`,
         });
-        return new NextResponse(zipBuffer, {
-          headers: {
-            "Content-Type": "application/zip",
-            "Content-Disposition": `attachment; filename="svivva-play-stems-${sessionId}.zip"`,
-          },
-        });
+        return zipResponse(zipBuffer, `svivva-play-stem-pack-${sessionId}.zip`);
       }
-      const midiBytes = buildMidiFile(
-        stems.map((s) => ({
-          name: s.name,
-          midiEvents: Array.isArray(s.midiEvents) ? s.midiEvents : [],
-        })),
-        bpm,
-      );
-      const buffer = Buffer.from(midiBytes);
-      return new NextResponse(buffer, {
+
+      const midiBytes = buildMidiFile(stemExports, bpm);
+      return new NextResponse(new Uint8Array(midiBytes), {
         headers: {
           "Content-Type": "audio/midi",
           "Content-Disposition": `attachment; filename="svivva-play-${sessionId}.mid"`,
+          "Content-Length": String(midiBytes.length),
         },
       });
     }
@@ -193,20 +205,15 @@ export async function POST(request: NextRequest) {
         melodyneNotes: hasMelodyne ? melodyneNotes : undefined,
         projectName: filename,
       });
-      return new NextResponse(zipBuffer, {
-        headers: {
-          "Content-Type": "application/zip",
-          "Content-Disposition": `attachment; filename="${filename}-ableton-stems.zip"`,
-        },
-      });
+      return zipResponse(zipBuffer, `${filename}-stem-pack.zip`);
     }
 
     const midiBytes = buildMidiFile(stems ?? [], bpm);
-    const buffer = Buffer.from(midiBytes);
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(midiBytes), {
       headers: {
         "Content-Type": "audio/midi",
         "Content-Disposition": `attachment; filename="${filename}.mid"`,
+        "Content-Length": String(midiBytes.length),
       },
     });
   } catch (error) {

@@ -941,30 +941,40 @@ export default function SvivvaPlayPage() {
       try {
         const settings = buildSettings();
 
-        const sessionKey = manualKey ?? analysis.key;
+        const lockedKey =
+          manualKey ??
+          audioKeyRef.current ??
+          (analysis.key && !analysis.key.startsWith("Detecting") ? analysis.key : "C major");
         const harmonicContext = transcription
           ? {
               chords: transcription.chords,
               audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
               melodyneNotes: transcription.melodyneNotes ?? [],
               durationSec: transcription.durationSec,
-              key: sessionKey,
-              keySource: transcription.harmonicKeySource,
+              key: lockedKey,
+              keySource:
+                audioKeyRef.current &&
+                transcription.harmonicKey &&
+                normalizeKeyLabel(transcription.harmonicKey) !==
+                  normalizeKeyLabel(audioKeyRef.current)
+                  ? ("audio" as const)
+                  : transcription.harmonicKeySource,
               sources: transcription.sources,
             }
           : undefined;
 
         const generatePayload = {
           sessionId: sessionId ?? undefined,
-          inlineAnalysis: analysis,
+          inlineAnalysis: { ...analysis, key: lockedKey },
           mode,
           stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
           quality,
-          manualKey,
+          manualKey: manualKey ?? lockedKey,
           manualTempo,
           settings,
           chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,
           harmonicContext,
+          audioAnchorKey: audioKeyRef.current,
         };
 
         if (mode === "solo") {
@@ -1186,7 +1196,7 @@ export default function SvivvaPlayPage() {
         const blob = await res.blob();
         downloadMidiBlob(blob, stemMidiFilename(stem.name, stem.role, stemIndex));
         setWarningMsg(
-          `Downloaded ${stemMidiFilename(stem.name, stem.role, stemIndex)} — drag into Ableton.`,
+          `Downloaded ${stemMidiFilename(stem.name, stem.role, stemIndex)} — drag into your DAW.`,
         );
       } catch (err) {
         console.error("Stem MIDI download failed:", err);
@@ -1221,7 +1231,7 @@ export default function SvivvaPlayPage() {
       }
       const blob = await res.blob();
       downloadMidiBlob(blob, "melodyne_reference.zip");
-      setWarningMsg("Downloaded melodyne_reference.mid (inside zip) — drag into Ableton.");
+      setWarningMsg("STEM pack downloaded — unzip and drag melodyne_reference.mid into your DAW.");
     } catch (err) {
       console.error("Melodyne MIDI export failed:", err);
       setErrorMsg("Melodyne MIDI export failed.");
@@ -1239,40 +1249,43 @@ export default function SvivvaPlayPage() {
       ) {
         try {
           const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
-          const res = sessionId
-            ? await fetch(
-                `/api/svivva-play/export?sessionId=${sessionId}&format=${exportFormat === "midi-zip" ? "midi-zip" : "midi"}`,
-              )
-            : await fetch("/api/svivva-play/export", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  format: exportFormat,
-                  stems: stems.map((s) => ({
-                    name: s.name,
-                    role: s.role,
-                    midiEvents: s.midiEvents,
-                  })),
-                  melodyneNotes: transcription?.melodyneNotes ?? [],
-                  bpm,
-                  filename: downloadName,
-                }),
-              });
+          const res = await fetch("/api/svivva-play/export", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              format: exportFormat,
+              stems: stems.map((s) => ({
+                name: s.name,
+                role: s.role,
+                midiEvents: s.midiEvents,
+              })),
+              melodyneNotes: transcription?.melodyneNotes ?? [],
+              bpm,
+              filename: downloadName,
+            }),
+          });
           if (!res.ok) {
-            setErrorMsg("MIDI export failed.");
+            const errBody = await res.json().catch(() => null);
+            setErrorMsg(
+              (errBody as { error?: string } | null)?.error ?? "MIDI export failed.",
+            );
+            return;
+          }
+          const contentType = res.headers.get("Content-Type") ?? "";
+          if (exportFormat === "midi-zip" && !contentType.includes("zip")) {
+            setErrorMsg("STEM pack export failed — server returned an invalid file.");
             return;
           }
           const blob = await res.blob();
-          const ext = exportFormat === "midi-zip" ? "zip" : "mid";
           downloadMidiBlob(
             blob,
             exportFormat === "midi-zip"
-              ? `${downloadName}-ableton-stems.zip`
+              ? `${downloadName}-stem-pack.zip`
               : `${downloadName}.mid`,
           );
           if (exportFormat === "midi-zip") {
             setWarningMsg(
-              "STEM pack downloaded — unzip and drag each .mid into Ableton (melody, harmony, Melodyne reference).",
+              "STEM pack downloaded — unzip and drag each .mid into your DAW (melody, harmony, Melodyne reference).",
             );
           }
           return;
@@ -2357,7 +2370,7 @@ export default function SvivvaPlayPage() {
                     type="button"
                     onClick={() => void handleDownloadMelodyneMidi()}
                     className="flex items-center gap-1 px-2 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-semibold text-[#5BA8A0] flex-shrink-0 border border-[#3a5550] hover:bg-[#1e2a28]"
-                    title="Download aligned Melodyne as .mid for Ableton"
+                    title="Download aligned Melodyne as STEM pack (.zip)"
                     data-testid="button-download-melodyne-midi"
                   >
                     <Download className="w-3 h-3" />
@@ -3493,7 +3506,7 @@ export default function SvivvaPlayPage() {
                                 onClick={() => void handleDownloadStemMidi(stem, i)}
                                 disabled={!stem.midiEvents?.length}
                                 className="p-0.5 sm:p-1 rounded text-gray-400 hover:text-[#5BA8A0] disabled:opacity-30"
-                                title="Download this stem as .mid for Ableton"
+                                title="Download this stem as .mid for your DAW"
                                 data-testid={`button-download-stem-midi-${i}`}
                               >
                                 <Download className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -4011,7 +4024,7 @@ export default function SvivvaPlayPage() {
                   >
                     <Music className="w-3.5 h-3.5 text-[#5BA8A0]" />
                     <div>
-                      <div className="font-semibold">Ableton STEM pack (.zip)</div>
+                      <div className="font-semibold">STEM pack (.zip)</div>
                       <div className="text-[10px] text-gray-400">
                         Separate .mid per part — melody, harmony, Melodyne
                       </div>

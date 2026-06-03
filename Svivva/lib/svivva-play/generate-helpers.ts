@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
+import { constrainGeneratedStems } from "./scale-key-guard";
+import type { ChordSegment } from "./chord-from-chroma";
 
 type CompPattern = "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
 
@@ -22,8 +24,11 @@ export interface GeneratedStemResult {
   qualityTier: string;
 }
 
-export function chordStemsToResults(chordStems: ChordStem[]): GeneratedStemResult[] {
-  return chordStems.map((stem) => ({
+export function chordStemsToResults(
+  chordStems: ChordStem[],
+  lock?: { key: string; chords?: ChordSegment[]; bpm?: number },
+): GeneratedStemResult[] {
+  const results = chordStems.map((stem) => ({
     id: uuidv4(),
     name: stem.name,
     role: stem.role,
@@ -38,6 +43,8 @@ export function chordStemsToResults(chordStems: ChordStem[]): GeneratedStemResul
     articulations: [],
     qualityTier: "professional",
   }));
+  if (!lock?.key) return results;
+  return constrainGeneratedStems(results, lock.key, lock.chords ?? [], lock.bpm ?? 120);
 }
 
 export function generateDeterministicChordStems(
@@ -59,7 +66,10 @@ export function generateDeterministicChordStems(
   });
   const chordNames = getProgressionLabels(analysis.key, progressionSeed);
   return {
-    stems: chordStemsToResults(chordStems),
+    stems: chordStemsToResults(chordStems, {
+      key: analysis.key,
+      bpm: analysis.bpm,
+    }),
     plan: {
       stemCount: chordStems.length,
       chordProgression: chordNames,

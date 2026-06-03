@@ -51,5 +51,5 @@ export function buildMidiFile(
     }
   }
 
-  return file.toBytes();
+  return Buffer.from(file.toBytes());
 }

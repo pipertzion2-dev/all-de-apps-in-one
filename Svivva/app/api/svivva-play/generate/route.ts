@@ -23,6 +23,11 @@ import {
   generateStrategicStems,
   type HarmonicContextInput,
 } from "@/lib/svivva-play/strategic-compose";
+import {
+  constrainGeneratedStems,
+  resolveLockedGenerationKey,
+} from "@/lib/svivva-play/scale-key-guard";
+import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
 
 function parseRootFromKey(key: string): string {
   const m = (key || "").match(/^([A-G][b#]?)/);
@@ -101,6 +106,7 @@ export async function POST(request: NextRequest) {
       manualTempo,
       chordEdits,
       harmonicContext,
+      audioAnchorKey,
     } = body as {
       sessionId?: string;
       inlineAnalysis?: PlayAnalysisView;
@@ -112,6 +118,7 @@ export async function POST(request: NextRequest) {
       manualTempo?: number | null;
       chordEdits?: Record<number, string>;
       harmonicContext?: HarmonicContextInput;
+      audioAnchorKey?: string | null;
     };
 
     let analysisData: Analysis | null = null;
@@ -135,26 +142,36 @@ export async function POST(request: NextRequest) {
 
     analysisData = applyChordEditsToAnalysis(analysisData, chordEdits);
 
-    if (
-      harmonicContext?.key &&
-      harmonicContext.sources?.melodyneMidi &&
-      harmonicContext.keySource === "midi"
-    ) {
-      analysisData = {
-        ...analysisData,
-        key: harmonicContext.key,
-        key_confidence: Math.min(92, analysisData.key_confidence ?? 75),
-        chords:
-          harmonicContext.chords.length >= 2
-            ? harmonicContext.chords.map((c) => ({
-                t0: c.t0,
-                t1: c.t1,
-                symbol: c.symbol,
-                confidence: c.confidence ?? 70,
-              }))
-            : analysisData.chords,
-      };
-    }
+    const lockedKey = resolveLockedGenerationKey({
+      manualKey,
+      analysisKey: analysisData.key,
+      audioAnchorKey,
+      harmonicContext,
+    });
+    analysisData = {
+      ...analysisData,
+      key: lockedKey,
+      chords:
+        harmonicContext && harmonicContext.chords.length >= 2
+          ? harmonicContext.chords.map((c) => ({
+              t0: c.t0,
+              t1: c.t1,
+              symbol: c.symbol,
+              confidence: c.confidence ?? 70,
+            }))
+          : analysisData.chords,
+    };
+
+    const sessionChords: ChordSegment[] =
+      harmonicContext && harmonicContext.chords.length >= 2
+        ? harmonicContext.chords
+        : analysisData.chords.map((c) => ({
+            t0: c.t0,
+            t1: c.t1,
+            symbol: c.symbol,
+            confidence: c.confidence ?? 55,
+            pitchClasses: [],
+          }));
 
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
@@ -184,6 +201,12 @@ export async function POST(request: NextRequest) {
       pipeline: { stage: string; stages: string[] },
       extra?: Record<string, unknown>,
     ) => {
+      const guardedStems = constrainGeneratedStems(
+        stems,
+        lockedKey,
+        sessionChords,
+        analysisData.bpm,
+      );
       if (resolvedSessionId) {
         try {
           await persistGenerationBundle(db, playGenerations, playStems, {
@@ -192,7 +215,7 @@ export async function POST(request: NextRequest) {
             mode: mode || "chords",
             quality: renderQuality,
             seed,
-            stems,
+            stems: guardedStems,
             plan,
           });
         } catch (dbErr) {
@@ -202,8 +225,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         generationId,
-        stems,
-        plan,
+        stems: guardedStems,
+        plan: { ...plan, key: lockedKey },
         qualityTier: "professional",
         pipeline,
         persisted: Boolean(resolvedSessionId),
@@ -291,6 +314,7 @@ export async function POST(request: NextRequest) {
     // Strategic listen-first compose when harmonic session data is present
     if (richHarmonic && mode !== "solo") {
       const strategic = runStrategic();
+      if (harmonicContext) harmonicContext.key = lockedKey;
       return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline, {
         composer: "strategic",
       });
@@ -479,6 +503,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const guardedStemResults = constrainGeneratedStems(
+      stemResults,
+      lockedKey,
+      sessionChords,
+      analysisData.bpm,
+    );
+
     if (resolvedSessionId) {
       try {
         await db
@@ -496,13 +527,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       generationId,
-      stems: stemResults,
+      stems: guardedStemResults,
       plan: {
         stemCount: plan.stems.length,
         form: plan.form,
         dynamics: plan.dynamics,
         harmonyRules: plan.harmony_rules,
         meendApplicableStems: plan.meend_applicable_stems || [],
+        key: lockedKey,
       },
       qualityTier: "professional",
       qualityNote:

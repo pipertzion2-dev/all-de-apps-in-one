@@ -8,8 +8,10 @@ import type { Analysis } from "./schemas";
 import type { ChordMidiEvent, ChordStem } from "./chord-engine";
 import { composeWithChordProgression } from "./compose-from-chords";
 import type { VoicePart, ScaleResolution } from "./reich-engine";
+import { normalizeKeyLabel } from "./analysis-utils";
 import { chordStemsToResults, type GeneratedStemResult } from "./generate-helpers";
 import { normalizeMidiEvents } from "./midi-normalize";
+import { constrainGeneratedStems, parseScaleFromKey, snapNoteToScale } from "./scale-key-guard";
 
 export type HarmonicContextInput = {
   chords: ChordSegment[];
@@ -255,9 +257,11 @@ function buildMelodyEvents(
   bpm: number,
   profile: ListeningProfile,
   seed: number,
+  sessionKey: string,
 ): ChordMidiEvent[] {
   const beatSec = 60 / bpm;
   const pool = profile.hasMelodyne ? ctx.melodyneNotes : ctx.audioNotes;
+  const scale = parseScaleFromKey(sessionKey);
   const events: ChordMidiEvent[] = [];
 
   if (pool.length >= 6) {
@@ -280,6 +284,7 @@ function buildMelodyEvents(
         const oct = Math.floor(note / 12);
         note = midiFromPc((root + targetPc) % 12, Math.min(6, Math.max(4, oct)));
       }
+      note = snapNoteToScale(note, scale);
       events.push({
         note,
         velocity: Math.min(105, n.velocity + 8),
@@ -347,9 +352,10 @@ export function generateStrategicStems(
 
   const trimmed = chords.filter((c) => c.t0 < (totalBars * 60 * 4) / bpm).slice(0, totalBars);
 
+  const sessionKey = normalizeKeyLabel(ctx.key ?? analysis.key);
   const harmonyEvents = buildHarmonyEvents(trimmed, bpm, profile, pattern, density);
   const bassEvents = buildBassEvents(trimmed, bpm, profile);
-  const melodyEvents = buildMelodyEvents(trimmed, ctx, bpm, profile, seed);
+  const melodyEvents = buildMelodyEvents(trimmed, ctx, bpm, profile, seed, sessionKey);
 
   const chordStems: ChordStem[] = [
     {
@@ -414,7 +420,11 @@ export function generateStrategicStems(
   const labels = chordProgressionLabels(trimmed);
 
   return {
-    stems: chordStemsToResults(chordStems),
+    stems: chordStemsToResults(chordStems, {
+      key: sessionKey,
+      chords: trimmed,
+      bpm,
+    }),
     plan: {
       stemCount: chordStems.length,
       chordProgression: labels,
