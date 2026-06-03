@@ -4,10 +4,7 @@ import { playSessions, playAnalyses, playGenerations, playStems, playPatches } f
 import { eq } from "drizzle-orm";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { buildMidiFile } from "@/lib/svivva-play/midi-export";
-import {
-  buildStemMidiZipBuffer,
-  stemPackHasMidiContent,
-} from "@/lib/svivva-play/midi-stems-zip";
+import { buildStemMidiZipBuffer, stemPackHasMidiContent } from "@/lib/svivva-play/midi-stems-zip";
 
 function zipResponse(zipBuffer: Buffer, filename: string) {
   return new NextResponse(new Uint8Array(zipBuffer), {

@@ -9,7 +9,9 @@ describe("stemPackHasMidiContent", () => {
   it("is true when a stem has normalized MIDI", () => {
     expect(
       stemPackHasMidiContent({
-        stems: [{ name: "Melody", midiEvents: [{ note: 60, velocity: 80, startBeat: 0, duration: 1 }] }],
+        stems: [
+          { name: "Melody", midiEvents: [{ note: 60, velocity: 80, startBeat: 0, duration: 1 }] },
+        ],
       }),
     ).toBe(true);
   });
@@ -18,9 +20,7 @@ describe("stemPackHasMidiContent", () => {
     expect(
       stemPackHasMidiContent({
         stems: [],
-        melodyneNotes: [
-          { midi: 60, velocity: 80, startSec: 0, endSec: 0.5, cents: 0 },
-        ],
+        melodyneNotes: [{ midi: 60, velocity: 80, startSec: 0, endSec: 0.5, cents: 0 }],
       }),
     ).toBe(true);
   });

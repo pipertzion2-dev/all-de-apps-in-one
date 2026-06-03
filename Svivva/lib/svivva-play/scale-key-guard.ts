@@ -112,7 +112,8 @@ export function alignChordTimelineToBeatGrid(
 ): ChordSegment[] {
   if (!chords.length || bpm <= 0) return chords;
   const beatSec = 60 / bpm;
-  const snapSec = (t: number) => Math.max(0, Math.round(t / (beatSec * gridBeats)) * beatSec * gridBeats);
+  const snapSec = (t: number) =>
+    Math.max(0, Math.round(t / (beatSec * gridBeats)) * beatSec * gridBeats);
 
   const sorted = [...chords].sort((a, b) => a.t0 - b.t0);
   const out: ChordSegment[] = [];

@@ -1266,9 +1266,7 @@ export default function SvivvaPlayPage() {
           });
           if (!res.ok) {
             const errBody = await res.json().catch(() => null);
-            setErrorMsg(
-              (errBody as { error?: string } | null)?.error ?? "MIDI export failed.",
-            );
+            setErrorMsg((errBody as { error?: string } | null)?.error ?? "MIDI export failed.");
             return;
           }
           const contentType = res.headers.get("Content-Type") ?? "";
@@ -1279,9 +1277,7 @@ export default function SvivvaPlayPage() {
           const blob = await res.blob();
           downloadMidiBlob(
             blob,
-            exportFormat === "midi-zip"
-              ? `${downloadName}-stem-pack.zip`
-              : `${downloadName}.mid`,
+            exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`,
           );
           if (exportFormat === "midi-zip") {
             setWarningMsg(
