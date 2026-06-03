@@ -458,6 +458,7 @@ export default function SvivvaPlayPage() {
   const melodyneInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number | null>(null);
+  const importDurationSecRef = useRef(0);
   const modeRef = useRef(mode);
   const userPromptRef = useRef(userPrompt);
   const analysisRunRef = useRef(0);
@@ -471,6 +472,36 @@ export default function SvivvaPlayPage() {
   useEffect(() => {
     userPromptRef.current = userPrompt;
   }, [userPrompt]);
+
+  const resolveImportDurationSec = useCallback((): number => {
+    const bpm = manualTempo ?? analysis?.bpm ?? 120;
+    const audioDur =
+      audioRef.current?.duration && Number.isFinite(audioRef.current.duration)
+        ? audioRef.current.duration
+        : 0;
+    if (audioDur > 0) return barAlignedDurationAtMostSec(audioDur, bpm);
+    if (transcription?.durationSec && transcription.durationSec > 0) {
+      return barAlignedDurationAtMostSec(transcription.durationSec, bpm);
+    }
+    if (reichDuration > 0) return barAlignedDurationSec(reichDuration, bpm);
+    return 0;
+  }, [manualTempo, analysis?.bpm, transcription?.durationSec, reichDuration]);
+
+  const syncPlaybackDuration = useCallback(() => {
+    const importDur = resolveImportDurationSec();
+    importDurationSecRef.current = importDur;
+    if (importDur <= 0) return;
+    if (engineReady) {
+      const engineDur = getSoundEngine().getDuration();
+      setPlaybackDuration(Math.min(engineDur > 0 ? engineDur : importDur, importDur));
+    } else {
+      setPlaybackDuration(importDur);
+    }
+  }, [resolveImportDurationSec, engineReady]);
+
+  useEffect(() => {
+    syncPlaybackDuration();
+  }, [syncPlaybackDuration, transcription?.durationSec, reichDuration, manualTempo, analysis?.bpm]);
 
   const handleImportAudio = useCallback(() => {
     audioInputRef.current?.click();
@@ -1356,16 +1387,17 @@ export default function SvivvaPlayPage() {
         engine.setBpm(bpm || 120);
         engine.loadStems(buildStemPlaybacks(currentStems));
         const engineDur = engine.getDuration();
-        const sampleDur = transcription?.durationSec;
+        const importDur = resolveImportDurationSec();
+        importDurationSecRef.current = importDur;
         setPlaybackDuration(
-          sampleDur && sampleDur > 0 ? Math.min(engineDur, sampleDur) : engineDur,
+          importDur > 0 ? Math.min(engineDur > 0 ? engineDur : importDur, importDur) : engineDur,
         );
         setEngineReady(true);
       } catch (err) {
         console.error("Sound engine load error:", err);
       }
     },
-    [buildStemPlaybacks, transcription?.durationSec],
+    [buildStemPlaybacks, resolveImportDurationSec],
   );
 
   useEffect(() => {
@@ -1384,23 +1416,33 @@ export default function SvivvaPlayPage() {
     );
   }, [stems, engineReady]);
 
-  const startPositionTracking = useCallback(() => {
-    const update = () => {
-      const engine = getSoundEngine();
-      setPlaybackPos(engine.getPosition());
-      if (engine.getPlayState()) {
-        animFrameRef.current = requestAnimationFrame(update);
-      }
-    };
-    animFrameRef.current = requestAnimationFrame(update);
-  }, []);
-
   const stopPositionTracking = useCallback(() => {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
     }
   }, []);
+
+  const startPositionTracking = useCallback(() => {
+    const update = () => {
+      const engine = getSoundEngine();
+      const cap = importDurationSecRef.current;
+      let pos = engine.getPosition();
+      if (cap > 0 && pos >= cap - 0.02) {
+        engine.pause();
+        engine.seek(cap);
+        setPlaybackPos(cap);
+        stopPositionTracking();
+        setIsPlaying(false);
+        return;
+      }
+      setPlaybackPos(pos);
+      if (engine.getPlayState()) {
+        animFrameRef.current = requestAnimationFrame(update);
+      }
+    };
+    animFrameRef.current = requestAnimationFrame(update);
+  }, [stopPositionTracking]);
 
   const togglePlay = useCallback(async () => {
     if (stems.length > 0 && engineReady) {
@@ -1815,14 +1857,23 @@ export default function SvivvaPlayPage() {
     if (stems.length > 0 || !audioRef.current) return;
     let raf = 0;
     const tick = () => {
-      if (audioRef.current && isPlaying) {
-        setStagePlaybackSec(audioRef.current.currentTime);
-        raf = requestAnimationFrame(tick);
+      const audio = audioRef.current;
+      if (!audio || !isPlaying) return;
+      const cap = importDurationSecRef.current || playbackDuration;
+      const t = cap > 0 ? Math.min(audio.currentTime, cap) : audio.currentTime;
+      setStagePlaybackSec(t);
+      if (cap > 0 && audio.currentTime >= cap - 0.05) {
+        audio.pause();
+        audio.currentTime = cap;
+        setStagePlaybackSec(cap);
+        setIsPlaying(false);
+        return;
       }
+      raf = requestAnimationFrame(tick);
     };
     if (isPlaying) raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [isPlaying, stems.length]);
+  }, [isPlaying, stems.length, playbackDuration]);
 
   const ModeIcon = MODE_CONFIG[mode].icon;
 
@@ -2168,7 +2219,10 @@ export default function SvivvaPlayPage() {
             const d = audioRef.current?.duration;
             if (!d || !Number.isFinite(d) || d <= 0) return;
             const bpm = manualTempo ?? analysis?.bpm ?? 120;
-            setReichDuration(Math.round(barAlignedDurationAtMostSec(d, bpm)));
+            const barDur = barAlignedDurationAtMostSec(d, bpm);
+            setReichDuration(Math.round(barDur));
+            importDurationSecRef.current = barDur;
+            syncPlaybackDuration();
           }}
           onEnded={() => setIsPlaying(false)}
         />
@@ -4127,9 +4181,11 @@ export default function SvivvaPlayPage() {
                 ))}
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-gray-300 font-mono flex-shrink-0 font-bold">
-                {engineReady
-                  ? `${formatTime(playbackPos)}/${formatTime(playbackDuration)}`
-                  : "--:--"}
+                {(() => {
+                  const pos = engineReady ? playbackPos : stagePlaybackSec;
+                  const dur = playbackDuration;
+                  return dur > 0 ? `${formatTime(pos)}/${formatTime(dur)}` : "--:--";
+                })()}
               </div>
               <div
                 className="flex-1 h-2 rounded-full overflow-hidden cursor-pointer"
@@ -4153,7 +4209,9 @@ export default function SvivvaPlayPage() {
                     background:
                       "linear-gradient(90deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
                     width:
-                      playbackDuration > 0 ? `${(playbackPos / playbackDuration) * 100}%` : "0%",
+                      playbackDuration > 0
+                        ? `${(Math.min(playbackPos, playbackDuration) / playbackDuration) * 100}%`
+                        : "0%",
                   }}
                 >
                   <HolographicNoise />
