@@ -746,8 +746,11 @@ export default function SvivvaPlayPage() {
                   melodyneKeyRef.current && !melodyneKeyRef.current.startsWith("Detecting")
                     ? melodyneKeyRef.current
                     : (anchor ?? prev?.key);
-                const cTrap = display === "C major" && anchor && anchor !== "C major";
-                const keepKey = cTrap ? anchor : display;
+                const keyTrap =
+                  (display === "C major" && anchor && anchor !== "C major") ||
+                  (display === "B major" && anchor === "A major") ||
+                  (display === "C# major" && anchor === "A major");
+                const keepKey = keyTrap ? anchor : display;
                 return {
                   ...base,
                   bpm: base.bpm ?? prev?.bpm,
@@ -791,11 +794,14 @@ export default function SvivvaPlayPage() {
             : null;
           const keySource = result.transcription?.harmonicKeySource;
           const cTrap = sessionKey === "C major" && anchor && anchor !== "C major";
+          const bTrap = sessionKey === "B major" && anchor === "A major";
+          const csTrap = sessionKey === "C# major" && anchor === "A major";
+          const keyTrap = cTrap || bTrap || csTrap;
           const displayKey =
-            melodyneFile && anchor && (keySource === "audio" || cTrap)
+            melodyneFile && anchor && (keySource === "audio" || keyTrap)
               ? anchor
               : (melodyneKeyRef.current ??
-                (keySource === "midi" && sessionKey && !cTrap ? sessionKey : null) ??
+                (keySource === "midi" && sessionKey && !keyTrap ? sessionKey : null) ??
                 anchor ??
                 base.key);
           if (melodyneFile && displayKey) {
