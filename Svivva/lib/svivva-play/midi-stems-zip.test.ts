@@ -19,7 +19,7 @@ describe("stemPackHasMidiContent", () => {
       stemPackHasMidiContent({
         stems: [],
         melodyneNotes: [
-          { midi: 60, velocity: 80, startSec: 0, endSec: 0.5, pitch: "C4", confidence: 1 },
+          { midi: 60, velocity: 80, startSec: 0, endSec: 0.5, cents: 0 },
         ],
       }),
     ).toBe(true);
