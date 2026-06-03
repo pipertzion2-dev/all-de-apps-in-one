@@ -8,11 +8,11 @@ export function buildMidiFile(
   bpm: number,
 ): Buffer {
   const file = new Midi.File();
-  file.setTempo(bpm);
 
   for (const stem of stems) {
     const track = new Midi.Track();
     file.addTrack(track);
+    track.setTempo(bpm);
 
     track.addEvent(
       new Midi.MetaEvent({
@@ -22,14 +22,7 @@ export function buildMidiFile(
     );
 
     const channel = 0;
-    track.addEvent(
-      new Midi.ControllerEvent({
-        type: Midi.ControllerEvent.PROGRAM_CHANGE,
-        channel,
-        param1: 0,
-        param2: 0,
-      }),
-    );
+    track.setInstrument(channel, 0, 0);
 
     const events = normalizeMidiEvents(stem.midiEvents);
     if (events.length === 0) continue;
