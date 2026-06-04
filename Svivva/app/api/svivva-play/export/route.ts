@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 import { db } from "@/lib/db";
 import { playSessions, playAnalyses, playGenerations, playStems, playPatches } from "@/lib/schema";
 import { eq } from "drizzle-orm";

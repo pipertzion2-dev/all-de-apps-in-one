@@ -51,6 +51,17 @@ export function composeWithChordProgression(options: {
   if (!chords.length) return base;
 
   const anchor = melodicAnchorMidi(melodyneNotes);
+
+  if (type === "hocket") {
+    return base.map((voice, vi) => ({
+      ...voice,
+      notes: voice.notes.map((n) => ({
+        ...n,
+        note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "harmony", { anchorMidi: anchor }),
+      })),
+    }));
+  }
+
   const beatSec = 60 / bpm;
   return base.map((voice, vi) => {
     const notes = voice.notes.map((n) => {

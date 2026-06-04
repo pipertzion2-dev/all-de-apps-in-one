@@ -202,6 +202,31 @@ function voiceBaseOctave(vi: number, numVoices: number, base = 3): number {
   return vi < spread.length ? base + spread[vi] : base + Math.floor(vi / 2);
 }
 
+/** v2 Reich Composer: one shared melodic cell, random scale degrees + octave spread. */
+function buildMasterMidiCell(
+  rootPc: number,
+  absPcs: number[],
+  cellLen: number,
+  style: StyleName,
+  seed: number,
+  baseOctave: number,
+): number[] {
+  const rng = new Rng(seed);
+  const rel = relativeSteps(absPcs, rootPc);
+  if (style === "reich_electric" || style === "phase_canon") {
+    const out: number[] = [];
+    for (let i = 0; i < cellLen; i++) {
+      const deg = Math.floor(rng.next() * rel.length);
+      const pc = (rootPc + rel[deg]) % 12;
+      const octave = baseOctave + Math.floor(rng.next() * 2);
+      out.push(clampMidi(12 * (octave + 1) + pc));
+    }
+    return out;
+  }
+  const degrees = buildMelodicCell(rootPc, absPcs, cellLen, style, rng, 0);
+  return cellToMidis(rootPc, absPcs, degrees, baseOctave);
+}
+
 export interface MidiNote {
   note: number;
   velocity: number;
@@ -309,62 +334,36 @@ export function composeHocket(opts: {
   const rng = new Rng((seed || 0) ^ 0xc0ffee);
   const total = sixteenthsForDuration(durationSec, bpm);
   const sixteenthBeats = 0.25;
+  const cellLen = style === "shaw_interlace" ? CP_CELL_LEN : HK_CELL_LEN;
 
-  const cells: number[][] = [];
-  if (style === "phase_canon") {
-    const master = buildMelodicCell(
-      scale.rootPc,
-      scale.pitchClasses,
-      HK_CELL_LEN,
-      "reich_electric",
-      rng,
-    );
-    for (let v = 0; v < 6; v++) cells.push(rotateCell(master, v * 3));
-  } else if (style === "reich_electric") {
-    const master = buildMelodicCell(
-      scale.rootPc,
-      scale.pitchClasses,
-      HK_CELL_LEN,
-      "reich_electric",
-      rng,
-      0,
-    );
-    for (let v = 0; v < 6; v++) cells.push(rotateCell(master, HK_ROTATIONS[v]));
-  } else {
-    for (let v = 0; v < 6; v++) {
-      const vRng = new Rng((seed || 0) + v * 104729);
-      cells.push(buildMelodicCell(scale.rootPc, scale.pitchClasses, HK_CELL_LEN, style, vRng, v));
-    }
-  }
+  const masterMidis = buildMasterMidiCell(
+    scale.rootPc,
+    scale.pitchClasses,
+    cellLen,
+    style,
+    seed || 42,
+    3,
+  );
 
   const parts: VoicePart[] = [];
   for (let v = 0; v < 6; v++) {
-    const bo = voiceBaseOctave(v, 6, 3);
-    const seqMidis = cellToMidis(scale.rootPc, scale.pitchClasses, cells[v], bo);
     const notes: MidiNote[] = [];
-    let s = v % Math.max(1, Math.min(6, total));
-    let i = 0;
-    while (s < total) {
-      if (style === "shaw_interlace" && rng.next() < 0.18) {
-        s += 6;
-        i++;
-        continue;
-      }
-      const pitch = seqMidis[i % seqMidis.length];
+    const entry = style === "phase_canon" ? v : 0;
+    for (let s = entry; s < total; s++) {
+      if (style === "shaw_interlace" && rng.next() < 0.12) continue;
+      const idx = s % masterMidis.length;
+      if (idx % 6 !== v) continue;
       notes.push({
-        note: pitch,
+        note: masterMidis[idx]!,
         velocity: 72 + Math.floor(rng.next() * 16),
         startBeat: s * sixteenthBeats,
-        duration: sixteenthBeats * 0.95,
+        duration: sixteenthBeats * 0.75,
       });
-      s += 6;
-      i++;
     }
     if (notes.length === 0) {
-      const pc = scale.pitchClasses[v % scale.pitchClasses.length] ?? scale.rootPc;
-      const fallback = clampMidi(12 * bo + pc);
+      const idx = v % masterMidis.length;
       notes.push({
-        note: fallback,
+        note: masterMidis[idx]!,
         velocity: 70,
         startBeat: v * sixteenthBeats * 0.25,
         duration: sixteenthBeats * 2,
@@ -397,7 +396,8 @@ export function strategiesInfo() {
     hocket: {
       sharedMasterCell: true,
       cellLengthSixteenths: HK_CELL_LEN,
-      voiceRotations: HK_ROTATIONS,
+      interlock: "sixteenth_slot_mod_6",
+      note: "Matches v2 Reich Composer: one master cell, each voice plays indices i where i%6===voice.",
     },
   };
 }

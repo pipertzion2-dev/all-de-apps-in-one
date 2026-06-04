@@ -1,5 +1,6 @@
 import archiver from "archiver";
 import { PassThrough } from "stream";
+import { finished } from "stream/promises";
 import type { TranscribedNote } from "./audio-transcription";
 import { transcriptionToMidiEvents } from "./audio-transcription";
 import { stemMidiFilename } from "./midi-filenames";
@@ -76,13 +77,11 @@ export async function buildStemMidiZipBuffer(options: {
     archive.append(combined, { name: "all_stems_multitrack.mid" });
   }
 
-  await archive.finalize();
-
-  await new Promise<void>((resolve, reject) => {
-    passthrough.on("end", resolve);
-    passthrough.on("error", reject);
-    archive.on("error", reject);
+  archive.on("error", (err) => {
+    passthrough.destroy(err);
   });
+  await archive.finalize();
+  await finished(passthrough);
 
   const zipBuffer = Buffer.concat(chunks);
   if (zipBuffer.length < 22) {

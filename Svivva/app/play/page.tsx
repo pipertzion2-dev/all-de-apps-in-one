@@ -516,6 +516,7 @@ export default function SvivvaPlayPage() {
   const [playbackPos, setPlaybackPos] = useState(0);
   const [playbackDuration, setPlaybackDuration] = useState(0);
   const [isRendering, setIsRendering] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [masterVolume, setMasterVolume] = useState(80);
 
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -1275,13 +1276,22 @@ export default function SvivvaPlayPage() {
     [analysis],
   );
 
-  const downloadMidiBlob = useCallback((blob: Blob, filename: string) => {
+  const downloadMidiBlob = useCallback((blob: Blob, filename: string): boolean => {
+    if (!blob || blob.size < 22) {
+      setErrorMsg("Export produced an empty file — generate stems again, then retry.");
+      return false;
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return true;
   }, []);
 
   const handleDownloadStemMidi = useCallback(
@@ -1360,6 +1370,8 @@ export default function SvivvaPlayPage() {
         (format === "midi" || format === "midi-zip") &&
         (stems.length > 0 || transcription?.melodyneNotes?.length)
       ) {
+        setIsExporting(true);
+        setErrorMsg("");
         try {
           const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
           const res = await fetch("/api/svivva-play/export", {
@@ -1383,16 +1395,29 @@ export default function SvivvaPlayPage() {
             return;
           }
           const contentType = res.headers.get("Content-Type") ?? "";
-          if (exportFormat === "midi-zip" && !contentType.includes("zip")) {
-            setErrorMsg("STEM pack export failed — server returned an invalid file.");
-            return;
+          if (
+            exportFormat === "midi-zip" &&
+            !contentType.includes("zip") &&
+            !contentType.includes("octet-stream")
+          ) {
+            const peek = await res.clone().text();
+            if (peek.trimStart().startsWith("{")) {
+              try {
+                const errJson = JSON.parse(peek) as { error?: string };
+                setErrorMsg(errJson.error ?? "STEM pack export failed.");
+              } catch {
+                setErrorMsg("STEM pack export failed — server returned an invalid file.");
+              }
+              return;
+            }
           }
           const blob = await res.blob();
-          downloadMidiBlob(
-            blob,
-            exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`,
-          );
-          if (exportFormat === "midi-zip") {
+          const filename =
+            exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`;
+          if (
+            downloadMidiBlob(blob, filename) &&
+            exportFormat === "midi-zip"
+          ) {
             setWarningMsg(
               "STEM pack downloaded — unzip and drag each .mid into your DAW (melody, harmony, Melodyne reference).",
             );
@@ -1400,8 +1425,10 @@ export default function SvivvaPlayPage() {
           return;
         } catch (err) {
           console.error("MIDI export failed:", err);
-          setErrorMsg("MIDI export failed.");
+          setErrorMsg("MIDI export failed — check connection and try again.");
           return;
+        } finally {
+          setIsExporting(false);
         }
       }
 
@@ -1444,7 +1471,7 @@ export default function SvivvaPlayPage() {
         console.error("Export failed:", err);
       }
     },
-    [sessionId, stems, analysis, transcription, audioName, mode, manualTempo, downloadMidiBlob],
+    [sessionId, stems, analysis, transcription, audioName, mode, manualTempo, downloadMidiBlob, setErrorMsg, setWarningMsg],
   );
 
   const buildStemPlaybacks = useCallback((currentStems: StemData[]): StemPlayback[] => {
@@ -4332,22 +4359,49 @@ export default function SvivvaPlayPage() {
             </div>
 
             <div className="px-3 sm:px-5 pt-1 relative">
-              <button
-                onClick={() => setShowExportMenu(!showExportMenu)}
-                disabled={stems.length === 0 && !patchResult}
-                className="flex items-center justify-center gap-1.5 w-full py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 disabled:text-gray-500 disabled:opacity-40 transition-all active:translate-y-[1px]"
-                style={{
-                  background:
-                    stems.length > 0 || patchResult
-                      ? "linear-gradient(180deg, #5BA8A0, #4A8890)"
-                      : "linear-gradient(180deg, #444, #333)",
-                  boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
-                  border: "2px solid " + (stems.length > 0 || patchResult ? "#5BA8A0" : "#555"),
-                }}
-                data-testid="button-export"
-              >
-                <Download className="w-3.5 h-3.5" /> export
-              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => void handleExport("midi-zip")}
+                  disabled={
+                    (stems.length === 0 && !transcription?.melodyneNotes?.length) || isExporting
+                  }
+                  className="flex flex-1 items-center justify-center gap-1.5 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 disabled:text-gray-500 disabled:opacity-40 transition-all active:translate-y-[1px]"
+                  style={{
+                    background:
+                      stems.length > 0 || transcription?.melodyneNotes?.length
+                        ? "linear-gradient(180deg, #5BA8A0, #4A8890)"
+                        : "linear-gradient(180deg, #444, #333)",
+                    boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                    border:
+                      "2px solid " +
+                      (stems.length > 0 || transcription?.melodyneNotes?.length
+                        ? "#5BA8A0"
+                        : "#555"),
+                  }}
+                  data-testid="button-export-stem-pack"
+                >
+                  {isExporting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  {isExporting ? "packaging…" : "download stem pack"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  disabled={stems.length === 0 && !patchResult}
+                  className="px-2.5 py-2 sm:py-2.5 rounded-md text-gray-200 disabled:opacity-40"
+                  style={{
+                    background: "linear-gradient(180deg, #444, #333)",
+                    border: "2px solid #555",
+                  }}
+                  aria-label="More export formats"
+                  data-testid="button-export"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
               {showExportMenu && (
                 <div
