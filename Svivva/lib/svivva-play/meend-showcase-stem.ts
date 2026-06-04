@@ -9,82 +9,36 @@ type MeendStemLike = {
   role: string;
   instrumentHint: string;
   midiEvents: NormalizedMidiEvent[];
-  expression?: Record<string, unknown>;
-  muted?: boolean;
-  soloed?: boolean;
-  pan?: number;
-  gainDb?: number;
 };
 
-/** One legato line for preview — highest note wins on overlap so glides stay audible. */
-export function mergeMeendShowcaseEvents(stems: MeendStemLike[]): NormalizedMidiEvent[] {
-  const merged: NormalizedMidiEvent[] = [];
-  for (const stem of stems) {
-    for (const e of stem.midiEvents) merged.push(e);
-  }
-  if (merged.length === 0) return [];
-  merged.sort((a, b) => a.startBeat - b.startBeat || b.note - a.note);
-
-  const out: NormalizedMidiEvent[] = [];
-  for (const evt of merged) {
-    const last = out[out.length - 1];
-    if (!last) {
-      out.push({ ...evt });
-      continue;
-    }
-    const overlap = evt.startBeat < last.startBeat + last.duration - 0.02;
-    if (overlap) {
-      if (evt.note >= last.note) {
-        out[out.length - 1] = {
-          ...last,
-          note: evt.note,
-          velocity: Math.max(last.velocity, evt.velocity),
-          startBeat: Math.min(last.startBeat, evt.startBeat),
-          duration: Math.max(
-            last.duration,
-            evt.startBeat + evt.duration - Math.min(last.startBeat, evt.startBeat),
-          ),
-        };
-      }
-      continue;
-    }
-    out.push({ ...evt });
-  }
-  return prepareMeendPreviewEvents(out, 1.35);
+/** Best single-voice line for legato meend — never merge overlapping hocket hits. */
+export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null {
+  const withNotes = stems.filter((s) => s.midiEvents.length > 0);
+  if (withNotes.length === 0) return null;
+  const melody = withNotes.find((s) => {
+    const r = s.role.toLowerCase();
+    return r === "melody" || r === "lead" || r === "solo";
+  });
+  if (melody) return melody;
+  return withNotes.reduce((best, s) =>
+    s.midiEvents.length > best.midiEvents.length ? s : best,
+  );
 }
 
-export function buildMeendShowcasePlayback(stems: MeendStemLike[]): StemPlayback | null {
-  const events = mergeMeendShowcaseEvents(stems);
-  if (events.length === 0) return null;
-  const pitchbend = meendPitchbendForEvents(events);
+export function buildMeendLeadPlayback(stems: MeendStemLike[]): StemPlayback | null {
+  const lead = pickMeendLeadStem(stems);
+  if (!lead) return null;
+  const midiEvents = prepareMeendPreviewEvents([...lead.midiEvents], 1.25);
+  if (midiEvents.length === 0) return null;
   return {
     name: MEEND_PREVIEW_STEM_NAME,
     role: "melody",
     instrumentHint: "sitar",
-    midiEvents: events,
-    expression: { meend: true, pitchbend },
+    midiEvents,
+    expression: { meend: true, pitchbend: meendPitchbendForEvents(midiEvents) },
     muted: false,
     soloed: false,
     pan: 0,
-    gainDb: 6,
+    gainDb: 4,
   };
-}
-
-export function appendMeendShowcaseForPreview(playbacks: StemPlayback[]): StemPlayback[] {
-  const showcase = buildMeendShowcasePlayback(
-    playbacks.map((p) => ({
-      name: p.name,
-      role: p.role,
-      instrumentHint: p.instrumentHint,
-      midiEvents: p.midiEvents as NormalizedMidiEvent[],
-      expression: p.expression as Record<string, unknown> | undefined,
-    })),
-  );
-  if (!showcase) return playbacks;
-  return [
-    ...playbacks.map((p) =>
-      p.name === MEEND_PREVIEW_STEM_NAME ? p : { ...p, muted: true },
-    ),
-    showcase,
-  ];
 }

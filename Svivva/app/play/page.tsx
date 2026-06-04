@@ -62,7 +62,6 @@ import {
   resolveMeendScaleName,
   stableGenerationSeed,
 } from "@/lib/svivva-play/indian-raga-scale";
-import { appendMeendShowcaseForPreview } from "@/lib/svivva-play/meend-showcase-stem";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import {
@@ -1665,11 +1664,7 @@ export default function SvivvaPlayPage() {
       await engine.warmUpForPlayback();
       engine.init();
       engine.setBpm(tempo);
-      const playbacks = buildStemPlaybacks(currentStems);
-      await engine.loadStems(
-        meend ? appendMeendShowcaseForPreview(playbacks) : playbacks,
-        { forceMeend: meend },
-      );
+      await engine.loadStems(buildStemPlaybacks(currentStems), { forceMeend: meend });
       if (loadGen !== engineLoadGenRef.current) return;
       engine.setMasterVolume(masterVolume);
       engine.applySoloState(
@@ -2118,8 +2113,11 @@ export default function SvivvaPlayPage() {
     if (candidate) setManualKey(candidate);
   }, [analysis?.key, importSeq, manualKey]);
 
+  const prevMeendRef = useRef(false);
   useEffect(() => {
-    if (!meend || isIndianRagaScaleName(reichScale)) return;
+    const justEnabled = meend && !prevMeendRef.current;
+    prevMeendRef.current = meend;
+    if (!justEnabled || isIndianRagaScaleName(reichScale)) return;
     const lockedKey = generationKeyLabel;
     const stable = stableGenerationSeed({ useSeed, seed, lockedKey, importSeq });
     setReichScale(
@@ -4031,9 +4029,9 @@ export default function SvivvaPlayPage() {
                               </h4>
                               <p className="text-[9px] text-gray-400">
                                 Turn on <span className="text-gray-300">Indian Meend</span> for
-                                raga-leaning scales and pitch bends on all voices. Preview plays a
-                                solo meend lead so glides are audible over hocket; key and raga stay
-                                locked to your import until you change seed or scale.
+                                raga-leaning scales and legato pitch bends on the lead voice (full
+                                hocket mix stays in preview). Key and raga stay locked to your import
+                                until you change seed or scale.
                               </p>
                             </div>
                           </div>

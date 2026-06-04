@@ -1,49 +1,51 @@
 import { describe, expect, it } from "vitest";
 import {
   MEEND_PREVIEW_STEM_NAME,
-  appendMeendShowcaseForPreview,
-  mergeMeendShowcaseEvents,
+  buildMeendLeadPlayback,
+  pickMeendLeadStem,
 } from "./meend-showcase-stem";
 
-describe("meend showcase stem", () => {
-  it("merges overlapping voices to one legato line", () => {
-    const merged = mergeMeendShowcaseEvents([
+describe("meend lead stem", () => {
+  it("picks melody role over harmony", () => {
+    const lead = pickMeendLeadStem([
       {
-        name: "v1",
-        role: "melody",
-        instrumentHint: "piano",
-        midiEvents: [
-          { note: 60, velocity: 80, startBeat: 0, duration: 0.25 },
-          { note: 64, velocity: 80, startBeat: 1, duration: 0.25 },
-        ],
-      },
-      {
-        name: "v2",
+        name: "h1",
         role: "harmony",
         instrumentHint: "piano",
-        midiEvents: [{ note: 67, velocity: 70, startBeat: 0, duration: 0.25 }],
+        midiEvents: Array.from({ length: 20 }, (_, i) => ({
+          note: 60 + i,
+          velocity: 80,
+          startBeat: i,
+          duration: 0.25,
+        })),
+      },
+      {
+        name: "m1",
+        role: "melody",
+        instrumentHint: "sitar",
+        midiEvents: [
+          { note: 60, velocity: 90, startBeat: 0, duration: 0.5 },
+          { note: 64, velocity: 90, startBeat: 1, duration: 0.5 },
+        ],
       },
     ]);
-    expect(merged.length).toBeGreaterThanOrEqual(2);
-    expect(merged[0]!.duration).toBeGreaterThanOrEqual(1.15);
+    expect(lead?.name).toBe("m1");
   });
 
-  it("appends a preview stem and mutes the rest", () => {
-    const out = appendMeendShowcaseForPreview([
+  it("builds lead playback with multiple notes (no merge collapse)", () => {
+    const playback = buildMeendLeadPlayback([
       {
         name: "Voice 1",
         role: "melody",
         instrumentHint: "piano",
-        midiEvents: [{ note: 60, velocity: 90, startBeat: 0, duration: 0.5 }],
-        muted: false,
-        soloed: false,
-        pan: 0,
-        gainDb: 0,
+        midiEvents: [
+          { note: 60, velocity: 90, startBeat: 0, duration: 0.5 },
+          { note: 64, velocity: 90, startBeat: 2, duration: 0.5 },
+          { note: 67, velocity: 90, startBeat: 4, duration: 0.5 },
+        ],
       },
     ]);
-    const showcase = out.find((s) => s.name === MEEND_PREVIEW_STEM_NAME);
-    expect(showcase).toBeDefined();
-    expect(showcase!.muted).toBe(false);
-    expect(out.filter((s) => s.muted).length).toBe(1);
+    expect(playback?.name).toBe(MEEND_PREVIEW_STEM_NAME);
+    expect(playback!.midiEvents.length).toBe(3);
   });
 });

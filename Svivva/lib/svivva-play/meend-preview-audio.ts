@@ -30,7 +30,7 @@ export function buildMeendLegatoTimeline(
   const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
   if (sorted.length === 0) return [];
 
-  const glideSec = 0.24;
+  const glideSec = 0.38;
   const timeline: MeendTimelineEvent[] = [];
   const first = sorted[0]!;
 

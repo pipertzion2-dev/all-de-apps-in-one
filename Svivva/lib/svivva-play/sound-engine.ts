@@ -6,7 +6,6 @@ import {
   buildMeendLegatoTimeline,
   type MeendTimelineEvent,
 } from "./meend-preview-audio";
-import { MEEND_PREVIEW_STEM_NAME } from "./meend-showcase-stem";
 import { meendPitchbendForEvents, prepareMeendPreviewEvents } from "./scale-key-guard";
 
 export interface MidiEvent {
@@ -314,8 +313,12 @@ export class SvivvaSoundEngine {
     }
   }
 
-  private previewGainDb(role: string, gainDb: number): number {
+  private previewGainDb(role: string, gainDb: number, forceMeend = false): number {
     const r = role.toLowerCase();
+    if (forceMeend) {
+      if (r === "melody" || r === "lead" || r === "solo") return gainDb + 8;
+      return gainDb - 12;
+    }
     if (r === "melody" || r === "lead" || r === "solo") return gainDb + 4;
     return gainDb;
   }
@@ -368,12 +371,8 @@ export class SvivvaSoundEngine {
   }
 
   async loadStems(stems: StemPlayback[], options?: LoadStemsOptions) {
-    const showcaseStem = stems.find(
-      (s) => s.name === MEEND_PREVIEW_STEM_NAME && !s.muted && (s.midiEvents?.length ?? 0) > 0,
-    );
-    const stemsToLoad =
-      options?.forceMeend && showcaseStem ? [showcaseStem] : stems;
-    console.log("🎵 Loading", stemsToLoad.length, "stems");
+    const forceMeend = Boolean(options?.forceMeend);
+    console.log("🎵 Loading", stems.length, "stems");
     this.prepareMasterBus();
     this.disposeChannels();
     const transport = Tone.getTransport();
@@ -388,7 +387,7 @@ export class SvivvaSoundEngine {
     let maxBeat = 0;
     this.duration = 0;
 
-    for (const stem of stemsToLoad) {
+    for (const stem of stems) {
       try {
         const events = (stem.midiEvents || []) as MidiEvent[];
         const sortedEvents = [...events].sort((a, b) => a.startBeat - b.startBeat);
@@ -397,11 +396,14 @@ export class SvivvaSoundEngine {
           continue;
         }
 
-        const forceMeend = Boolean(options?.forceMeend);
         let midiEvents = sortedEvents;
         let pitchBends = stem.expression?.pitchbend ?? [];
+        const r = stem.role.toLowerCase();
+        const isLeadRole = r === "melody" || r === "lead" || r === "solo";
         const hasMeend =
-          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
+          (forceMeend && isLeadRole) ||
+          pitchBends.length > 0 ||
+          Boolean(stem.expression?.meend);
 
         if (hasMeend) {
           midiEvents = prepareMeendPreviewEvents(midiEvents, 1.15);
@@ -419,12 +421,10 @@ export class SvivvaSoundEngine {
           synth.portamento = MEEND_PREVIEW.portamento ?? 0.35;
         }
         const panner = new Tone.Panner(stem.pan / 100);
-        const meendGain = hasMeend
-          ? stem.name === MEEND_PREVIEW_STEM_NAME
-            ? 14
-            : 8
-          : 0;
-        const volume = new Tone.Volume(this.previewGainDb(stem.role, stem.gainDb || 0) + meendGain);
+        const meendGain = hasMeend ? 10 : 0;
+        const volume = new Tone.Volume(
+          this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend) + meendGain,
+        );
         const effects = this.createLiveEffectsChain();
 
         const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
