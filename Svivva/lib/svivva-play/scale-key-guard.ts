@@ -2,8 +2,9 @@
  * Locks generated MIDI to the session key and chord map — no out-of-key notes from compose/LLM.
  */
 import type { ChordSegment } from "./chord-from-chroma";
-import { normalizeKeyLabel } from "./analysis-utils";
+import { normalizeKeyLabel, parseRootFromKeyLabel, isMinorKeyLabel } from "./analysis-utils";
 import type { NormalizedMidiEvent } from "./midi-normalize";
+import { resolveScale, type ScaleResolution } from "./reich-engine";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
@@ -17,18 +18,80 @@ export type ScaleInfo = {
 };
 
 export function parseScaleFromKey(key: string): ScaleInfo {
-  const norm = normalizeKeyLabel(key);
-  const m = norm.match(/^([A-G][#b]?)\s+(major|minor)$/i);
-  const rootName = m?.[1] ?? "C";
-  const isMinor = (m?.[2] ?? "major").toLowerCase() === "minor";
-  const rootPc = NOTE_NAMES.findIndex((n) => n === rootName);
-  const rel = isMinor ? MINOR_SCALE : MAJOR_SCALE;
-  const scalePcs = new Set(rel.map((s) => (rootPc + s + 12) % 12));
+  return resolveCompositionScale(key, "major").scaleInfo;
+}
+
+const MINOR_SCALE_NAMES = new Set([
+  "minor",
+  "natural_minor",
+  "harmonic_minor",
+  "melodic_minor_asc",
+  "pentatonic_minor",
+  "blues_minor",
+  "raga_bhairavi",
+  "raga_todi",
+]);
+
+/** Guess major vs minor from chord symbols when key detection is ambiguous. */
+export function inferKeyModeFromChords(chords: ChordSegment[]): "major" | "minor" | null {
+  if (!chords.length) return null;
+  let minorish = 0;
+  let majorish = 0;
+  for (const c of chords) {
+    const s = c.symbol.replace(/\s+/g, "");
+    if (!s) continue;
+    if (/^[A-G][#b]?m(?!aj)/i.test(s) || /\bmin/i.test(s) || /dim|°/i.test(s)) minorish++;
+    else majorish++;
+  }
+  if (majorish >= minorish + 2) return "major";
+  if (minorish >= majorish + 2) return "minor";
+  return null;
+}
+
+function modeFromScaleName(scaleName: string, fallback: "major" | "minor"): "major" | "minor" {
+  const sn = scaleName.toLowerCase().replace(/ /g, "_");
+  if (MINOR_SCALE_NAMES.has(sn)) return "minor";
+  if (
+    sn === "major" ||
+    sn === "ionian" ||
+    sn === "pentatonic_major" ||
+    sn === "lydian" ||
+    sn === "mixolydian" ||
+    sn === "whole_tone" ||
+    sn.startsWith("raga_")
+  ) {
+    if (sn === "raga_bhairavi" || sn === "raga_todi") return "minor";
+    return "major";
+  }
+  return fallback;
+}
+
+/** Authoritative scale for compose + constrain (matches reich-engine lookup). */
+export function resolveCompositionScale(
+  key: string,
+  scaleName = "major",
+  manualKey?: string | null,
+  chords: ChordSegment[] = [],
+): { scaleInfo: ScaleInfo; resolution: ScaleResolution } {
+  const effectiveKey = normalizeKeyLabel(manualKey?.trim() || key);
+  const root = parseRootFromKeyLabel(effectiveKey);
+  let mode: "major" | "minor" = isMinorKeyLabel(effectiveKey) ? "minor" : "major";
+
+  if (!manualKey?.trim()) {
+    const fromChords = inferKeyModeFromChords(chords);
+    if (fromChords) mode = fromChords;
+  }
+  mode = modeFromScaleName(scaleName, mode);
+
+  const resolution = resolveScale(mode, root, scaleName);
   return {
-    keyLabel: norm,
-    rootPc: rootPc >= 0 ? rootPc : 0,
-    isMinor,
-    scalePcs,
+    resolution,
+    scaleInfo: {
+      keyLabel: `${root} ${mode}`,
+      rootPc: resolution.rootPc,
+      isMinor: mode === "minor",
+      scalePcs: new Set(resolution.pitchClasses),
+    },
   };
 }
 
@@ -284,9 +347,11 @@ export function constrainGeneratedStems<T extends ConstrainableStem>(
   key: string,
   chords: ChordSegment[] = [],
   bpm = 120,
-  opts?: { anchorMidi?: number },
+  opts?: { anchorMidi?: number; scaleName?: string; scaleInfo?: ScaleInfo },
 ): T[] {
-  const scale = parseScaleFromKey(key);
+  const scale =
+    opts?.scaleInfo ??
+    resolveCompositionScale(key, opts?.scaleName ?? "major", null, chords).scaleInfo;
   return stems.map((stem) => ({
     ...stem,
     midiEvents: stem.midiEvents.map((evt) =>

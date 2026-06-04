@@ -48,6 +48,16 @@ export function keyToSelectValue(key: string): string {
   return m[2]!.toLowerCase() === "minor" ? `${root}m` : root;
 }
 
+export function parseRootFromKeyLabel(key: string): string {
+  const norm = normalizeKeyLabel(key);
+  const m = norm.match(/^([A-G][#b]?)/);
+  return m ? m[1]! : "C";
+}
+
+export function isMinorKeyLabel(key: string): boolean {
+  return /\sminor$/i.test(normalizeKeyLabel(key));
+}
+
 export function playViewToAnalysis(
   view: PlayAnalysisView,
   overrides?: { bpm?: number | null; key?: string | null },

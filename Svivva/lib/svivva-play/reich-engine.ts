@@ -78,6 +78,25 @@ export function listScales(): string[] {
   return Object.keys(SCALE_DEFS).sort();
 }
 
+const SPELL_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+/** Human-readable scale catalog for the Play UI. */
+export function describeScaleLookup(): { name: string; label: string; pitchClasses: number[] }[] {
+  return Object.entries(SCALE_DEFS)
+    .map(([name, pitchClasses]) => ({
+      name,
+      label: name.replace(/_/g, " "),
+      pitchClasses,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/** Spell scale degrees in a given root (e.g. major in A → A B C# …). */
+export function scaleNoteNames(scaleName: string, root: string): string[] {
+  const resolved = resolveScale("major", root, scaleName);
+  return resolved.pitchClasses.map((pc) => SPELL_NAMES[pc] ?? "?");
+}
+
 function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }

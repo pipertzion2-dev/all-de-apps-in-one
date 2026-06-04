@@ -49,7 +49,10 @@ import {
   barAlignedDurationSec,
 } from "@/lib/svivva-play/session-duration";
 import {
+  constrainGeneratedStems,
   meendPitchbendForEvents,
+  melodicAnchorMidi,
+  resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
 import {
@@ -62,10 +65,10 @@ import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FA
 import svivvaCrateOpen from "@/attached_assets/Svivva_Crate_1770908797554.png";
 import * as ChordKit from "@/lib/svivva-play/chordkit";
 import {
-  resolveScale,
   composeCounterpoint,
   composeHocket,
   listScales,
+  scaleNoteNames,
   type VoicePart,
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
@@ -86,7 +89,11 @@ import {
   voicePartsToStemResults,
 } from "@/lib/svivva-play/strategic-compose";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
-import { keyToSelectValue, normalizeKeyLabel } from "@/lib/svivva-play/analysis-utils";
+import {
+  keyToSelectValue,
+  normalizeKeyLabel,
+  parseRootFromKeyLabel,
+} from "@/lib/svivva-play/analysis-utils";
 import { stemMidiFilename } from "@/lib/svivva-play/midi-filenames";
 import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
@@ -444,6 +451,32 @@ export default function SvivvaPlayPage() {
   const [alignScore, setAlignScore] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const analysisBusy = isAnalyzing || isTranscribing || isEnriching;
+  const generationKeyLabel = useMemo(
+    () => normalizeKeyLabel(manualKey ?? effectiveAnalysis?.key ?? "C major"),
+    [manualKey, effectiveAnalysis?.key],
+  );
+  const generationScaleLookup = useMemo(() => {
+    const chordSegments =
+      effectiveAnalysis?.chords?.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence ?? 55,
+        pitchClasses: [] as number[],
+      })) ?? [];
+    const { scaleInfo, resolution } = resolveCompositionScale(
+      generationKeyLabel,
+      reichScale,
+      manualKey,
+      chordSegments,
+    );
+    const root = parseRootFromKeyLabel(generationKeyLabel);
+    return {
+      scaleInfo,
+      noteNames: scaleNoteNames(resolution.scaleName, root),
+      label: resolution.scaleName.replace(/_/g, " "),
+    };
+  }, [generationKeyLabel, reichScale, manualKey, effectiveAnalysis?.chords]);
   const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
   const [midiFileName, setMidiFileName] = useState("");
 
@@ -1847,19 +1880,15 @@ export default function SvivvaPlayPage() {
     setErrorMsg("");
     setReichVoices([]);
     try {
-      const keyStr = manualKey ?? analysis?.key ?? "C major";
-      const rootMatch = keyStr.match(/^([A-G][b#]?)/);
-      const rootNote = rootMatch ? rootMatch[1] : "C";
-      const isMinor = /minor|m$/i.test(keyStr);
+      const lockedKey = normalizeKeyLabel(manualKey ?? analysis?.key ?? "C major");
       const ragaMajor = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
       const ragaMinor = ["raga_todi", "raga_bhairavi"] as const;
       const pickedRaga = meend
-        ? isMinor
+        ? generationScaleLookup.scaleInfo.isMinor
           ? ragaMinor[Math.floor(Math.random() * ragaMinor.length)]
           : ragaMajor[Math.floor(Math.random() * ragaMajor.length)]
         : null;
       const effectiveScaleName = pickedRaga ?? reichScale;
-      const scale = resolveScale(isMinor ? "minor" : "major", rootNote, effectiveScaleName);
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const audioSampleSec =
         audioRef.current?.duration && Number.isFinite(audioRef.current.duration)
@@ -1880,6 +1909,17 @@ export default function SvivvaPlayPage() {
           pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
         })) ?? [];
       const chordSource = stabilizeHarmonicTimeline(chordSourceRaw, durationSec, bpm);
+      const { resolution: scale, scaleInfo } = resolveCompositionScale(
+        lockedKey,
+        effectiveScaleName,
+        manualKey,
+        chordSource,
+      );
+      const anchorMidi = melodicAnchorMidi(
+        transcription?.melodyneNotes?.length
+          ? transcription.melodyneNotes
+          : (transcription?.audioNotes ?? transcription?.notes ?? []),
+      );
 
       const harmonicCtx = transcription
         ? {
@@ -1934,7 +1974,7 @@ export default function SvivvaPlayPage() {
         reichType === "hocket"
           ? ["vibraphone", "steel_drums", "piano", "marimba", "rhodes", "synth_lead"]
           : ["piano", "vibraphone", "marimba"];
-      const newStems: StemData[] = voices.map((v, i) => {
+      const rawStems: StemData[] = voices.map((v, i) => {
         const midiEvents = v.notes.map((n) => ({
           note: n.note,
           velocity: n.velocity,
@@ -1960,6 +2000,13 @@ export default function SvivvaPlayPage() {
           qualityTier: "professional",
         };
       });
+      const newStems = constrainGeneratedStems(
+        rawStems as unknown as Parameters<typeof constrainGeneratedStems>[0],
+        lockedKey,
+        chordSource,
+        bpm,
+        { anchorMidi, scaleInfo },
+      ) as unknown as StemData[];
       setStems(newStems);
       setPipelineStage("Complete");
       setVersionHistory((prev) => {
@@ -1999,6 +2046,7 @@ export default function SvivvaPlayPage() {
     analysis,
     transcription,
     chordEdits,
+    generationScaleLookup.scaleInfo.isMinor,
   ]);
 
   useEffect(() => {
@@ -2995,6 +3043,43 @@ export default function SvivvaPlayPage() {
                                   ? `Custom: ${manualKey}`
                                   : `Detected: ${effectiveAnalysis.key}`}
                               </span>
+                            </div>
+                            <div className="col-span-2 flex flex-col gap-1.5">
+                              <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                                Scale (generation)
+                              </label>
+                              <select
+                                value={reichScale}
+                                onChange={(e) => setReichScale(e.target.value)}
+                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                data-testid="select-generation-scale"
+                              >
+                                {listScales().map((s) => (
+                                  <option key={s} value={s}>
+                                    {s.replace(/_/g, " ")}
+                                  </option>
+                                ))}
+                              </select>
+                              <div
+                                className="rounded border border-gray-800 bg-[#0d0d0d] px-2 py-1.5"
+                                data-testid="scale-lookup-panel"
+                              >
+                                <div className="text-[9px] font-semibold uppercase tracking-wide text-gray-500 mb-1">
+                                  Scale lookup
+                                </div>
+                                <div className="text-[11px] text-gray-300">
+                                  {parseRootFromKeyLabel(generationKeyLabel)}{" "}
+                                  {generationScaleLookup.label}
+                                  <span className="text-gray-500">
+                                    {" "}
+                                    ({generationScaleLookup.scaleInfo.isMinor ? "minor" : "major"}{" "}
+                                    mode)
+                                  </span>
+                                </div>
+                                <div className="mt-1 font-mono text-[10px] text-[#A05068] tracking-wide">
+                                  {generationScaleLookup.noteNames.join(" · ")}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

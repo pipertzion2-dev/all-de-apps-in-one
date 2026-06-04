@@ -11,7 +11,7 @@ import {
   type PipelineSettings,
 } from "@/lib/svivva-play/pipeline";
 import type { Analysis } from "@/lib/svivva-play/schemas";
-import { applyChordEditsToAnalysis, playViewToAnalysis } from "@/lib/svivva-play/analysis-utils";
+import { applyChordEditsToAnalysis, playViewToAnalysis, parseRootFromKeyLabel, isMinorKeyLabel } from "@/lib/svivva-play/analysis-utils";
 import {
   generateDeterministicChordStems,
   persistGenerationBundle,
@@ -32,18 +32,10 @@ import {
   stabilizeHarmonicTimeline,
   melodicAnchorMidi,
   meendPitchbendForEvents,
+  resolveCompositionScale,
 } from "@/lib/svivva-play/scale-key-guard";
-import { resolveScale, type StyleName } from "@/lib/svivva-play/reich-engine";
+import { type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
-
-function parseRootFromKey(key: string): string {
-  const m = (key || "").match(/^([A-G][b#]?)/);
-  return m ? m[1] : "C";
-}
-
-function isMinorKey(key: string): boolean {
-  return /minor|(^|\s)m($|\s)/i.test(key || "");
-}
 
 function pickIndianRagaScaleName(opts: { root: string; minor: boolean; seed: number }): string {
   const major = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
@@ -190,9 +182,9 @@ export async function POST(request: NextRequest) {
       mode === "solo" && (settings.meend ?? false)
         ? {
             ...analysisData,
-            key: `${parseRootFromKey(analysisData.key)} ${pickIndianRagaScaleName({
-              root: parseRootFromKey(analysisData.key),
-              minor: isMinorKey(analysisData.key),
+            key: `${parseRootFromKeyLabel(analysisData.key)} ${pickIndianRagaScaleName({
+              root: parseRootFromKeyLabel(analysisData.key),
+              minor: isMinorKeyLabel(analysisData.key),
               seed,
             })}`,
           }
@@ -204,18 +196,33 @@ export async function POST(request: NextRequest) {
         : "sustained_pads"
     ) as "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
 
+    const compositionScaleName =
+      (settings.meend ?? false)
+        ? pickIndianRagaScaleName({
+            root: parseRootFromKeyLabel(lockedKey),
+            minor: isMinorKeyLabel(manualKey ?? lockedKey),
+            seed,
+          })
+        : (settings.reichScale as string | undefined) || "major";
+
     const finishWithStems = async (
       stems: GeneratedStemResult[],
       plan: Record<string, unknown>,
       pipeline: { stage: string; stages: string[] },
       extra?: Record<string, unknown>,
     ) => {
+      const { scaleInfo } = resolveCompositionScale(
+        lockedKey,
+        compositionScaleName,
+        manualKey,
+        sessionChords,
+      );
       const guardedStems = constrainGeneratedStems(
         stems,
         lockedKey,
         sessionChords,
         analysisData.bpm,
-        { anchorMidi: melodicAnchor },
+        { anchorMidi: melodicAnchor, scaleInfo },
       );
       if (resolvedSessionId) {
         try {
@@ -322,15 +329,22 @@ export async function POST(request: NextRequest) {
       });
 
     const runReichComposition = () => {
-      const root = parseRootFromKey(lockedKey);
-      const minor = isMinorKey(lockedKey);
       const scaleName =
         (settings.meend ?? false)
-          ? pickIndianRagaScaleName({ root, minor, seed })
+          ? pickIndianRagaScaleName({
+              root: parseRootFromKeyLabel(lockedKey),
+              minor: isMinorKeyLabel(manualKey ?? lockedKey),
+              seed,
+            })
           : (settings.reichScale as string | undefined) || "major";
+      const { resolution: scale } = resolveCompositionScale(
+        lockedKey,
+        scaleName,
+        manualKey,
+        sessionChords,
+      );
       const reichStyle = (settings.reichStyle || stylePreset || "reich_electric") as StyleName;
       const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
-      const scale = resolveScale(minor ? "minor" : "major", root, scaleName);
       const voices = composeStrategicReich({
         durationSec: sessionDurationSec,
         bpm: analysisData.bpm,
@@ -346,9 +360,16 @@ export async function POST(request: NextRequest) {
           : ["piano", "vibraphone", "marimba"];
       let stems = voicePartsToStemResults(voices, hints);
       if (settings.meend ?? false) stems = applyMeendToStems(stems);
+      const { scaleInfo } = resolveCompositionScale(
+        lockedKey,
+        scaleName,
+        manualKey,
+        sessionChords,
+      );
       return {
         stems: constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
           anchorMidi: melodicAnchor,
+          scaleInfo,
         }),
         plan: {
           stemCount: stems.length,
@@ -561,12 +582,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const { scaleInfo: llmScaleInfo } = resolveCompositionScale(
+      lockedKey,
+      compositionScaleName,
+      manualKey,
+      sessionChords,
+    );
     const guardedStemResults = constrainGeneratedStems(
       stemResults,
       lockedKey,
       sessionChords,
       analysisData.bpm,
-      { anchorMidi: melodicAnchor },
+      { anchorMidi: melodicAnchor, scaleInfo: llmScaleInfo },
     );
 
     if (resolvedSessionId) {
