@@ -1,6 +1,7 @@
 /**
  * V-1 JAWN Ollama scale resolver — local LLM with alternates + fuzzy fallback.
  */
+import { getOllamaApiBase, getOllamaModel } from "@/lib/env";
 import { lookupScaleLocal, matchFromAiPayload, type ScaleLookupAlternate } from "./scale-lookup";
 import { scaleNoteNames } from "./reich-engine";
 import { registerDynamicScale } from "./dynamic-scales";
@@ -34,8 +35,8 @@ export async function lookupScaleWithOllama(
   resolved: ReturnType<typeof matchFromAiPayload>;
   alternates: ScaleLookupAlternate[];
 } | null> {
-  const host = process.env.OLLAMA_HOST ?? "http://localhost:11434";
-  const model = process.env.OLLAMA_MODEL ?? "llama3.1";
+  const host = getOllamaApiBase() ?? "http://127.0.0.1:11434";
+  const model = getOllamaModel();
 
   try {
     const resp = await fetch(`${host}/api/chat`, {

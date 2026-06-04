@@ -1,6 +1,6 @@
 import type { TranscribedNote } from "./audio-transcription";
 import { transcriptionToMidiEvents } from "./audio-transcription";
-import { buildMidiFile, buildMidiFileBytes, type MidiStemInput } from "./midi-export";
+import { buildMidiFileBytes, type MidiStemInput } from "./midi-export";
 import { stemMidiFilename } from "./midi-filenames";
 import { normalizeMidiEvents } from "./midi-normalize";
 
@@ -71,7 +71,7 @@ export function buildPlayExportPackFiles(options: {
   if (sessionJson) {
     files.push({
       name: "svivva-play-session.json",
-      data: Buffer.from(JSON.stringify(sessionJson, null, 2), "utf8"),
+      data: new TextEncoder().encode(JSON.stringify(sessionJson, null, 2)),
     });
   }
 
@@ -90,33 +90,4 @@ export function buildPlayExportPackFiles(options: {
   ].join("\n");
 
   return { readme, sessionJson: sessionJson ? JSON.stringify(sessionJson, null, 2) : undefined, files };
-}
-
-/** Node: zip buffer via archiver (server export route). */
-export async function buildPlayExportZipBuffer(
-  options: Parameters<typeof buildPlayExportPackFiles>[0],
-): Promise<Buffer> {
-  const archiver = (await import("archiver")).default;
-  const { PassThrough } = await import("stream");
-  const { finished } = await import("stream/promises");
-
-  const pack = buildPlayExportPackFiles(options);
-  const archive = archiver("zip", { zlib: { level: 9 } });
-  const passthrough = new PassThrough();
-  const chunks: Buffer[] = [];
-  passthrough.on("data", (chunk: Buffer) => chunks.push(chunk));
-  archive.pipe(passthrough);
-
-  archive.append(pack.readme, { name: "README.txt" });
-  for (const f of pack.files) {
-    archive.append(Buffer.from(f.data), { name: f.name });
-  }
-
-  archive.on("error", (err) => passthrough.destroy(err));
-  await archive.finalize();
-  await finished(passthrough);
-
-  const zipBuffer = Buffer.concat(chunks);
-  if (zipBuffer.length < 22) throw new Error("Export zip is empty");
-  return zipBuffer;
 }

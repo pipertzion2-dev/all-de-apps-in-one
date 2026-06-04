@@ -40,6 +40,17 @@ export function getOllamaUrl(): string | undefined {
   return process.env.OLLAMA_URL?.trim() || undefined;
 }
 
+/** Base URL for Ollama HTTP API (`/api/chat`), from OLLAMA_URL or OLLAMA_HOST. */
+export function getOllamaApiBase(): string | undefined {
+  const raw = process.env.OLLAMA_HOST?.trim() || getOllamaUrl();
+  if (!raw) return undefined;
+  return raw.replace(/\/v1\/?$/i, "").replace(/\/$/, "");
+}
+
+export function getOllamaModel(): string {
+  return process.env.OLLAMA_MODEL?.trim() || "llama3.1";
+}
+
 export function getGeminiApiKey(): string | undefined {
   return process.env.GEMINI_API_KEY?.trim() || undefined;
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getOllamaApiBase } from "@/lib/env";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { isAnyAiProviderAvailable } from "@/lib/llm/providers";
 import {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     let result = lookupScaleLocal(query, keyRoot);
 
     if (!result.resolved && (body.useAi !== false)) {
-      const ollamaHit = process.env.OLLAMA_HOST
+      const ollamaHit = getOllamaApiBase()
         ? await lookupScaleWithOllama(query, keyRoot)
         : null;
       if (ollamaHit?.resolved) {
