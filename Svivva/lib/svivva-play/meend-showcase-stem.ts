@@ -1,5 +1,5 @@
 import type { StemPlayback } from "./sound-engine";
-import { meendPitchbendForEvents, prepareMeendPreviewEvents } from "./scale-key-guard";
+import { buildMeendStemExpression } from "./meend-midi";
 import type { NormalizedMidiEvent } from "./midi-normalize";
 
 export const MEEND_PREVIEW_STEM_NAME = "Indian Meend (preview)";
@@ -28,14 +28,14 @@ export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null 
 export function buildMeendLeadPlayback(stems: MeendStemLike[]): StemPlayback | null {
   const lead = pickMeendLeadStem(stems);
   if (!lead) return null;
-  const midiEvents = prepareMeendPreviewEvents([...lead.midiEvents]);
-  if (midiEvents.length === 0) return null;
+  const built = buildMeendStemExpression([...lead.midiEvents], false);
+  if (built.midiEvents.length === 0) return null;
   return {
     name: MEEND_PREVIEW_STEM_NAME,
     role: "melody",
     instrumentHint: "sitar",
-    midiEvents,
-    expression: { meend: true, pitchbend: meendPitchbendForEvents(midiEvents) },
+    midiEvents: built.midiEvents,
+    expression: { meend: true, pitchbend: built.pitchbend },
     muted: false,
     soloed: false,
     pan: 0,

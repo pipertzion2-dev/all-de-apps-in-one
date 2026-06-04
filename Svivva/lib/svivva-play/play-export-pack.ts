@@ -1,6 +1,7 @@
 import type { TranscribedNote } from "./audio-transcription";
 import { transcriptionToMidiEvents } from "./audio-transcription";
 import { buildMidiFileBytes, type MidiStemInput } from "./midi-export";
+import { MEEND_MIDI_BEND_RANGE_SEMITONES } from "./meend-midi";
 import { stemMidiFilename } from "./midi-filenames";
 import { normalizeMidiEvents } from "./midi-normalize";
 
@@ -86,7 +87,9 @@ export function buildPlayExportPackFiles(options: {
     "- melodyne_reference.mid — imported Melodyne notes (if present)",
     "- all_stems_multitrack.mid — all generated parts in one file",
     "",
-    "Drag .mid files into your DAW. Meend uses MIDI pitch wheel data on every stem when enabled.",
+    `Drag .mid files into Ableton/DAW. Indian Meend = MIDI pitch wheel (±${MEEND_MIDI_BEND_RANGE_SEMITONES} semitone range).`,
+    `In Ableton: select each track instrument → Pitch Bend Range → ${MEEND_MIDI_BEND_RANGE_SEMITONES} semitones (matches Svivva preview).`,
+    "Monophonic stems include inter-note glides; chord/pad stems use per-note ornaments only.",
   ].join("\n");
 
   return { readme, sessionJson: sessionJson ? JSON.stringify(sessionJson, null, 2) : undefined, files };

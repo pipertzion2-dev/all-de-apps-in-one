@@ -3,12 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
-import {
-  constrainGeneratedStems,
-  meendPitchbendForEvents,
-  prepareMeendPreviewEvents,
-  stemHasOverlappingNotes,
-} from "./scale-key-guard";
+import { buildMeendStemExpression, constrainGeneratedStems, stemHasOverlappingNotes } from "./scale-key-guard";
 import type { ChordSegment } from "./chord-from-chroma";
 
 type CompPattern = "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
@@ -58,16 +53,14 @@ export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemRe
   return stems.map((stem) => {
     if (stem.midiEvents.length === 0) return stem;
     const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
-    const meendEvents = polyphonic
-      ? stem.midiEvents
-      : prepareMeendPreviewEvents(stem.midiEvents);
+    const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
     return {
       ...stem,
-      midiEvents: meendEvents,
+      midiEvents: built.midiEvents,
       expression: {
         ...stem.expression,
-        meend: !polyphonic,
-        pitchbend: meendPitchbendForEvents(meendEvents),
+        meend: true,
+        pitchbend: built.pitchbend,
       },
     };
   });

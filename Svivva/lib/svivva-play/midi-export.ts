@@ -1,6 +1,11 @@
 import Midi from "jsmidgen";
 import { normalizeMidiEvents } from "./midi-normalize";
-import { meendPitchbendForEvents } from "./scale-key-guard";
+import {
+  MEEND_MIDI_BEND_RANGE_SEMITONES,
+  meendPitchbendForEvents,
+  prepareMeendLegatoMidiEvents,
+} from "./meend-midi";
+import { stemHasOverlappingNotes } from "./scale-key-guard";
 
 export { stemMidiFilename } from "./midi-filenames";
 
@@ -21,6 +26,17 @@ function midiPitchBendValue(offset: number): number {
   return Math.max(0, Math.min(16383, 8192 + Math.round(offset)));
 }
 
+function addMeendTrackMeta(track: InstanceType<typeof Midi.Track>, stem: MidiStemInput): void {
+  const hasMeend = Boolean(stem.expression?.meend) || (stem.expression?.pitchbend?.length ?? 0) > 0;
+  if (!hasMeend) return;
+  track.addEvent(
+    new Midi.MetaEvent({
+      type: Midi.MetaEvent.MARKER,
+      data: `Svivva Meend: set Pitch Bend Range to ${MEEND_MIDI_BEND_RANGE_SEMITONES} st in Ableton`,
+    }),
+  );
+}
+
 type TimelineEntry =
   | { kind: "note"; tick: number; note: number; durationTick: number; velocity: number }
   | { kind: "bend"; tick: number; value: number };
@@ -30,7 +46,11 @@ function buildStemTimeline(
   expression?: MidiStemExpression,
 ): TimelineEntry[] {
   const timeline: TimelineEntry[] = [];
-  const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
+  let sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
+  const wantsMeend = Boolean(expression?.meend) || (expression?.pitchbend?.length ?? 0) > 0;
+  if (wantsMeend && !stemHasOverlappingNotes(sorted)) {
+    sorted = prepareMeendLegatoMidiEvents(sorted);
+  }
 
   for (const evt of sorted) {
     const startTick = Math.round(evt.startBeat * TICKS_PER_BEAT);
@@ -48,8 +68,10 @@ function buildStemTimeline(
   }
 
   let pitchBends = expression?.pitchbend ?? [];
-  if ((expression?.meend || pitchBends.length > 0) && pitchBends.length === 0 && sorted.length) {
-    pitchBends = meendPitchbendForEvents(sorted);
+  if (wantsMeend && pitchBends.length === 0 && sorted.length) {
+    pitchBends = meendPitchbendForEvents(sorted, {
+      interNote: !stemHasOverlappingNotes(sorted),
+    });
   }
   for (const pb of pitchBends) {
     timeline.push({
@@ -108,6 +130,7 @@ export function buildMidiFile(stems: MidiStemInput[], bpm: number): Buffer {
     );
 
     track.setInstrument(0, 0, 0);
+    addMeendTrackMeta(track, stem);
 
     const events = normalizeMidiEvents(stem.midiEvents);
     if (events.length === 0) continue;

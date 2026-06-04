@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { buildMeendLegatoTimeline, meendWheelToPreviewCents } from "./meend-preview-audio";
 
 describe("meend preview audio", () => {
-  it("maps wheel to wide cent range", () => {
-    expect(meendWheelToPreviewCents(8191)).toBeGreaterThan(400);
+  it("maps wheel to 12-semitone preview range (Ableton parity)", () => {
+    expect(meendWheelToPreviewCents(8191)).toBeCloseTo(1200, -1);
   });
 
   it("builds legato glide between consecutive notes", () => {

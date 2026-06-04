@@ -4029,8 +4029,8 @@ export default function SvivvaPlayPage() {
                               </h4>
                               <p className="text-[9px] text-gray-400">
                                 Turn on <span className="text-gray-300">Indian Meend</span> for
-                                raga scales and pitch bends. Chords and pads stay polyphonic; hocket
-                                voices keep their rhythm with meend on each line.
+                                raga scales and V-1-style pitch slides (preview matches MIDI export).
+                                In Ableton set each instrument Pitch Bend Range to 12 semitones.
                               </p>
                             </div>
                           </div>

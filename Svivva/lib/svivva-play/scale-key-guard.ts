@@ -5,6 +5,19 @@ import type { ChordSegment } from "./chord-from-chroma";
 import { normalizeKeyLabel, parseRootFromKeyLabel, isMinorKeyLabel } from "./analysis-utils";
 import type { NormalizedMidiEvent } from "./midi-normalize";
 import { resolveScale, type ScaleResolution } from "./reich-engine";
+import {
+  buildMeendStemExpression,
+  meendPitchbendForEvents,
+  prepareMeendLegatoMidiEvents,
+  MEEND_MIDI_BEND_RANGE_SEMITONES,
+} from "./meend-midi";
+
+export {
+  buildMeendStemExpression,
+  meendPitchbendForEvents,
+  prepareMeendLegatoMidiEvents,
+  MEEND_MIDI_BEND_RANGE_SEMITONES,
+};
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
@@ -296,34 +309,6 @@ export function prepareMeendPreviewEvents<T extends { startBeat: number; duratio
   });
 }
 
-/** V-1 INDIAN: S-curve meend mapped to MIDI pitch wheel (audible in preview + export). */
-export function meendPitchbendForEvents(
-  events: { startBeat: number; duration: number }[],
-): { beat: number; value: number }[] {
-  const out: { beat: number; value: number }[] = [];
-  const peakBend = 8191;
-  for (const e of events) {
-    const d = Math.max(0.08, e.duration || 0.25);
-    const t0 = e.startBeat;
-    const steps = 8;
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const beat = t0 + d * (0.2 + t * 0.72);
-      const sigmoid = 1 / (1 + Math.exp(-5 * (t - 0.5))) - 0.5;
-      const value = Math.round(peakBend * sigmoid * 2);
-      out.push({ beat, value });
-    }
-    out.push({ beat: t0 + d * 0.97, value: 0 });
-  }
-  out.sort((a, b) => a.beat - b.beat);
-  const dedup: typeof out = [];
-  for (const p of out) {
-    const last = dedup[dedup.length - 1];
-    if (!last || Math.abs(last.beat - p.beat) > 1e-4) dedup.push(p);
-  }
-  return dedup;
-}
-
 export function quantizeBeat(beat: number, grid = 0.25): number {
   return Math.max(0, Math.round(beat / grid) * grid);
 }
@@ -405,14 +390,15 @@ export type ConstrainableStem = {
 export function refreshMeendExpression<T extends ConstrainableStem>(stem: T): T {
   const expr = stem.expression;
   if (!expr?.meend && !(expr?.pitchbend?.length ?? 0)) return stem;
-  const meendEvents = prepareMeendPreviewEvents(stem.midiEvents);
+  const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
+  const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
   return {
     ...stem,
-    midiEvents: meendEvents,
+    midiEvents: built.midiEvents,
     expression: {
       ...expr,
       meend: true,
-      pitchbend: meendPitchbendForEvents(meendEvents),
+      pitchbend: built.pitchbend,
     },
   };
 }

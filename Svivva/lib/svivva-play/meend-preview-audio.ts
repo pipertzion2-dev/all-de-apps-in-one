@@ -11,10 +11,7 @@ export type MeendTimelineEvent =
   | { type: "bend"; time: number; cents: number; glide: number }
   | { type: "release"; time: number };
 
-/** Wheel → cents; preview uses a wide range so meend is obvious. */
-export function meendWheelToPreviewCents(wheel: number): number {
-  return Math.max(-480, Math.min(480, (wheel / 8192) * 480));
-}
+export { meendWheelToPreviewCents } from "./meend-midi";
 
 const EVENT_ORDER = { attack: 0, glide: 1, bend: 2, release: 3 } as const;
 

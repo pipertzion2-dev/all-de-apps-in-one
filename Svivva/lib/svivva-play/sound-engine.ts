@@ -7,8 +7,7 @@ import {
   type MeendTimelineEvent,
 } from "./meend-preview-audio";
 import {
-  meendPitchbendForEvents,
-  prepareMeendPreviewEvents,
+  buildMeendStemExpression,
   stemHasOverlappingNotes,
 } from "./scale-key-guard";
 
@@ -403,11 +402,10 @@ export class SvivvaSoundEngine {
         const wantsMeend =
           forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
 
-        if (wantsMeend && !polyphonic) {
-          midiEvents = prepareMeendPreviewEvents(midiEvents);
-          pitchBends = meendPitchbendForEvents(midiEvents);
-        } else if (wantsMeend && pitchBends.length === 0) {
-          pitchBends = meendPitchbendForEvents(midiEvents);
+        if (wantsMeend) {
+          const built = buildMeendStemExpression(midiEvents, polyphonic);
+          midiEvents = built.midiEvents as MidiEvent[];
+          pitchBends = built.pitchbend;
         }
 
         const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
