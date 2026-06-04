@@ -1442,7 +1442,7 @@ export default function SvivvaPlayPage() {
       try {
         const tempo = bpm > 0 ? bpm : 120;
         const engine = getSoundEngine();
-        await engine.init();
+        engine.init();
         engine.setBpm(tempo);
         await engine.loadStems(buildStemPlaybacks(currentStems));
         if (loadGen !== engineLoadGenRef.current) return;
@@ -1457,10 +1457,14 @@ export default function SvivvaPlayPage() {
       } catch (err) {
         if (loadGen !== engineLoadGenRef.current) return;
         console.error("Sound engine load error:", err);
-        const tempo = bpm > 0 ? bpm : 120;
-        const stemDur = stemTimelineDurationSec(currentStems, tempo);
-        const importDur = resolveImportDurationSec();
-        setErrorMsg("Could not load composition for playback. Try generating again.");
+        const playable = currentStems.filter((s) => normalizeMidiEvents(s.midiEvents).length > 0);
+        if (playable.length === 0) {
+          setErrorMsg("Generated stems have no MIDI notes. Try generating again.");
+        } else {
+          setErrorMsg(
+            "Could not load synth preview. Wait a moment, then press play on the transport bar.",
+          );
+        }
       } finally {
         if (loadGen === engineLoadGenRef.current) {
           setEngineLoading(false);

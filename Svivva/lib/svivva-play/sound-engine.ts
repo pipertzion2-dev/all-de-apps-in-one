@@ -49,27 +49,30 @@ export class SvivvaSoundEngine {
   private duration: number = 0;
   private masterVolume: Tone.Volume | null = null;
 
-  /** Start/resume Web Audio — must run on user gesture before audible playback. */
+  private isNodeDisposed(node: Tone.ToneAudioNode): boolean {
+    return Boolean((node as { disposed?: boolean }).disposed);
+  }
+
+  /** Build routing graph without requiring a user gesture (suspended context is OK). */
+  private prepareMasterBus(): void {
+    if (this.masterVolume && !this.isNodeDisposed(this.masterVolume)) return;
+    this.masterVolume = new Tone.Volume(3).toDestination();
+  }
+
+  /** Start/resume Web Audio — call from play() after user gesture. */
   private async ensureAudioRunning(): Promise<void> {
     await Tone.start();
     const ctx = Tone.getContext();
     if (ctx.state !== "running") {
       await ctx.resume();
     }
-    if (!this.masterVolume || this.masterVolume.disposed) {
-      this.masterVolume = new Tone.Volume(3).toDestination();
-    }
+    this.prepareMasterBus();
     this.isInitialized = true;
   }
 
-  async init() {
-    try {
-      await this.ensureAudioRunning();
-      console.log("🎵 Sound engine ready, context:", Tone.getContext().state);
-    } catch (err) {
-      console.error("🔴 Sound engine init error:", err);
-      throw err;
-    }
+  /** Prepare graph for stem scheduling (no Tone.start — safe from useEffect). */
+  init() {
+    this.prepareMasterBus();
   }
 
   setMasterVolume(percent: number) {
@@ -164,6 +167,12 @@ export class SvivvaSoundEngine {
       }
     }
     return effects;
+  }
+
+  /** Live preview: skip reverb (async generate() fails/timeouts during background load). */
+  private createLiveEffectsChain(fxDefs?: InstrumentPreset["fx"]): Tone.ToneAudioNode[] {
+    const withoutReverb = fxDefs?.filter((fx) => fx.type !== "reverb") ?? [];
+    return this.createEffectsChain(withoutReverb);
   }
 
   private createSynth(preset: InstrumentPreset): StemChannel["synth"] {
@@ -270,16 +279,11 @@ export class SvivvaSoundEngine {
   }
 
   async loadStems(stems: StemPlayback[]) {
-    console.log(
-      "🎵 Loading",
-      stems.length,
-      "stems, masterVolume:",
-      this.masterVolume ? "connected" : "null (will use destination)",
-    );
+    console.log("🎵 Loading", stems.length, "stems");
+    this.prepareMasterBus();
     this.disposeChannels();
     const transport = Tone.getTransport();
 
-    // Ensure transport is stopped and reset
     if (transport.state === "started" || transport.state === "paused") {
       transport.stop();
     }
@@ -291,94 +295,92 @@ export class SvivvaSoundEngine {
     this.duration = 0;
 
     for (const stem of stems) {
-      const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
-      const pitchBends = stem.expression?.pitchbend ?? [];
-      const hasMeend = pitchBends.length > 0 || Boolean(stem.expression?.meend);
-      const synth = this.createSynth(
-        hasMeend ? { ...preset, synthType: "mono", portamento: 0.22 } : preset,
-      );
-      const panner = new Tone.Panner(stem.pan / 100);
-      const volume = new Tone.Volume(stem.gainDb || 0);
-      const effects = this.createEffectsChain(preset.fx);
-      for (const fx of effects) {
-        if (fx instanceof Tone.Reverb) {
-          await fx.generate();
+      try {
+        const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
+        const pitchBends = stem.expression?.pitchbend ?? [];
+        const hasMeend = pitchBends.length > 0 || Boolean(stem.expression?.meend);
+        const synth = this.createSynth(
+          hasMeend ? { ...preset, synthType: "mono", portamento: 0.22 } : preset,
+        );
+        const panner = new Tone.Panner(stem.pan / 100);
+        const volume = new Tone.Volume(stem.gainDb || 0);
+        const effects = this.createLiveEffectsChain(preset.fx);
+
+        const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
+        for (let i = 0; i < chain.length - 1; i++) {
+          chain[i].connect(chain[i + 1]);
         }
-      }
+        const destination = this.masterVolume || Tone.getDestination();
+        chain[chain.length - 1].connect(destination);
 
-      const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
-      for (let i = 0; i < chain.length - 1; i++) {
-        chain[i].connect(chain[i + 1]);
-      }
-      const destination = this.masterVolume || Tone.getDestination();
-      chain[chain.length - 1].connect(destination);
-      console.log(`🎵 Stem "${stem.name}" connected (gain: ${stem.gainDb || 0}dB)`);
+        const scheduledIds: number[] = [];
+        const events = (stem.midiEvents || []) as MidiEvent[];
+        const sortedEvents = [...events].sort((a, b) => a.startBeat - b.startBeat);
 
-      const scheduledIds: number[] = [];
-      const events = (stem.midiEvents || []) as MidiEvent[];
-      const sortedEvents = [...events].sort((a, b) => a.startBeat - b.startBeat);
+        for (const evt of sortedEvents) {
+          const time = this.beatToSeconds(evt.startBeat);
+          const dur = this.beatToSeconds(evt.duration);
+          const note = this.noteToFreq(evt.note);
+          const vel = Math.max(0.01, Math.min(1, evt.velocity / 127));
+          const endBeat = evt.startBeat + evt.duration;
+          if (endBeat > maxBeat) maxBeat = endBeat;
 
-      for (const evt of sortedEvents) {
-        const time = this.beatToSeconds(evt.startBeat);
-        const dur = this.beatToSeconds(evt.duration);
-        const note = this.noteToFreq(evt.note);
-        const vel = Math.max(0.01, Math.min(1, evt.velocity / 127));
-        const endBeat = evt.startBeat + evt.duration;
-        if (endBeat > maxBeat) maxBeat = endBeat;
-
-        const id = transport.schedule((t) => {
-          try {
-            if (synth instanceof Tone.MonoSynth) {
-              if (hasMeend) synth.detune.value = 0;
-              synth.triggerAttackRelease(note, dur, t, vel);
-            } else if (synth instanceof Tone.MembraneSynth) {
-              synth.triggerAttackRelease(note, dur, t, vel);
-            } else if (synth instanceof Tone.MetalSynth) {
-              synth.triggerAttackRelease(dur, t, vel);
-            } else if (synth instanceof Tone.PluckSynth) {
-              synth.triggerAttack(note, t);
-            } else if (synth instanceof Tone.NoiseSynth) {
-              synth.triggerAttackRelease(dur, t, vel);
-            } else if (synth instanceof Tone.PolySynth) {
-              synth.triggerAttackRelease(note, dur, t, vel);
+          const id = transport.schedule((t) => {
+            try {
+              if (synth instanceof Tone.MonoSynth) {
+                if (hasMeend) synth.detune.value = 0;
+                synth.triggerAttackRelease(note, dur, t, vel);
+              } else if (synth instanceof Tone.MembraneSynth) {
+                synth.triggerAttackRelease(note, dur, t, vel);
+              } else if (synth instanceof Tone.MetalSynth) {
+                synth.triggerAttackRelease(dur, t, vel);
+              } else if (synth instanceof Tone.PluckSynth) {
+                synth.triggerAttack(note, t);
+              } else if (synth instanceof Tone.NoiseSynth) {
+                synth.triggerAttackRelease(dur, t, vel);
+              } else if (synth instanceof Tone.PolySynth) {
+                synth.triggerAttackRelease(note, dur, t, vel);
+              }
+            } catch (e) {
+              console.error("Note trigger error:", e);
             }
-            if (evt === sortedEvents[0]) {
-              console.log(`🔊 First note scheduled: ${stem.name}, note ${evt.note}, vel ${vel}`);
-            }
-          } catch (e) {
-            console.error("Note trigger error:", e);
-          }
-        }, time);
-        scheduledIds.push(id);
+          }, time);
+          scheduledIds.push(id);
 
-        if (hasMeend && synth instanceof Tone.MonoSynth) {
-          for (const pb of pitchBends) {
-            if (pb.beat < evt.startBeat - 0.001 || pb.beat > endBeat + 0.001) continue;
-            const pbTime = this.beatToSeconds(pb.beat);
-            scheduledIds.push(
-              transport.schedule(() => {
-                synth.detune.value = (pb.value / 8192) * 200;
-              }, pbTime),
-            );
+          if (hasMeend && synth instanceof Tone.MonoSynth) {
+            for (const pb of pitchBends) {
+              if (pb.beat < evt.startBeat - 0.001 || pb.beat > endBeat + 0.001) continue;
+              const pbTime = this.beatToSeconds(pb.beat);
+              scheduledIds.push(
+                transport.schedule(() => {
+                  synth.detune.value = (pb.value / 8192) * 200;
+                }, pbTime),
+              );
+            }
           }
         }
-      }
 
-      this.channels.set(stem.name, {
-        synth,
-        panner,
-        volume,
-        effects,
-        scheduledIds,
-      });
+        this.channels.set(stem.name, {
+          synth,
+          panner,
+          volume,
+          effects,
+          scheduledIds,
+        });
+      } catch (stemErr) {
+        console.error(`🔴 Failed to load stem "${stem.name}":`, stemErr);
+      }
     }
 
-    // Calculate duration: convert max beat to seconds + add 0.5 sec buffer for note release/reverb decay
+    if (this.channels.size === 0) {
+      throw new Error("No stems could be loaded for playback");
+    }
+
     const maxBeatDuration = maxBeat > 0 ? this.beatToSeconds(maxBeat) : 0;
-    const releaseBuffer = 0.5; // Minimal buffer for synth release
+    const releaseBuffer = 0.5;
     this.duration = maxBeatDuration + releaseBuffer;
     console.log(
-      `🎵 Song duration: ${maxBeat} beats = ${maxBeatDuration.toFixed(2)}s + ${releaseBuffer}s buffer = ${this.duration.toFixed(2)}s total`,
+      `🎵 Loaded ${this.channels.size}/${stems.length} stems, duration ${this.duration.toFixed(2)}s`,
     );
   }
 
