@@ -56,6 +56,10 @@ export interface PipelineSettings {
   reichStyle?: string;
   reichType?: string;
   reichScale?: string;
+  /** 0–100, BLUES JAWN jazz swing on 16th grid. */
+  swingAmount?: number;
+  /** AI V-2 hocket groove style when reichType is hocket. */
+  hocketGroove?: string;
 }
 
 export interface PipelineStageResult<T> {

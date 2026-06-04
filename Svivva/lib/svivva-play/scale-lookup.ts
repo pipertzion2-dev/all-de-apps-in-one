@@ -6,21 +6,29 @@ import {
   EXTENDED_BUILTIN_SCALES,
 } from "./dynamic-scales";
 import { listScales, scaleNoteNames } from "./reich-engine";
+import { ensureV1ScalesRegistered, lookupV1ScaleDb } from "./v1-scale-db";
 
 export type ScaleLookupMatch = {
   scaleId: string;
   label: string;
-  source: "catalog" | "alias" | "fuzzy" | "tonal" | "ai";
+  source: "catalog" | "alias" | "fuzzy" | "tonal" | "ai" | "v1_db" | "ollama";
   confidence: number;
   relativeSteps: number[];
   noteNames?: string[];
   reason?: string;
 };
 
+export type ScaleLookupAlternate = {
+  scaleId: string;
+  label: string;
+  relativeSteps: number[];
+};
+
 export type ScaleLookupResult = {
   query: string;
   resolved: ScaleLookupMatch | null;
   suggestions: ScaleLookupMatch[];
+  alternates?: ScaleLookupAlternate[];
 };
 
 /** Common misspellings and colloquial names → catalog id. */
@@ -178,6 +186,27 @@ export function lookupScaleLocal(query: string, keyRoot = "C"): ScaleLookupResul
   const q = normalizeQuery(raw);
   const id = normalizeScaleId(raw);
   const suggestions: ScaleLookupMatch[] = [];
+
+  ensureV1ScalesRegistered();
+  const v1Hit = lookupV1ScaleDb(raw);
+  if (v1Hit) {
+    const scaleId = listScales().includes(`raga_${v1Hit.id}`)
+      ? `raga_${v1Hit.id}`
+      : listScales().includes(v1Hit.id)
+        ? v1Hit.id
+        : `raga_${v1Hit.id}`;
+    registerDynamicScale(scaleId, v1Hit.steps);
+    const resolved: ScaleLookupMatch = {
+      scaleId,
+      label: v1Hit.id.replace(/_/g, " "),
+      source: "v1_db",
+      confidence: 94,
+      relativeSteps: v1Hit.steps,
+      noteNames: scaleNoteNames(scaleId, keyRoot),
+      reason: `V-1 JAWN / Indian raga catalog (${v1Hit.id}).`,
+    };
+    return { query: raw, resolved, suggestions: fuzzySearch(raw, 5) };
+  }
 
   // Exact catalog
   if (listScales().includes(id) || EXTENDED_BUILTIN_SCALES[id]) {

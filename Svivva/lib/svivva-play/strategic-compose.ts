@@ -471,6 +471,8 @@ export function composeStrategicReich(options: {
   seed: number;
   type: "counterpoint" | "hocket";
   ctx: HarmonicContextInput;
+  hocketGroove?: import("./hocket-groove-v2").HocketGrooveStyle;
+  swingAmount?: number;
 }): VoicePart[] {
   const chords = options.ctx.chords.length >= 2 ? options.ctx.chords : options.ctx.chords;
   return composeWithChordProgression({
@@ -482,6 +484,7 @@ export function composeStrategicReich(options: {
     type: options.type,
     chords,
     melodyneNotes: options.ctx.melodyneNotes,
+    hocketGroove: options.hocketGroove,
   });
 }
 

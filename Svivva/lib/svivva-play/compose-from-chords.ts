@@ -1,6 +1,7 @@
 import type { ChordSegment } from "./chord-from-chroma";
 import type { TranscribedNote } from "./audio-transcription";
 import { composeCounterpoint, composeHocket, type VoicePart } from "./reich-engine";
+import type { HocketGrooveStyle } from "./hocket-groove-v2";
 import type { ScaleResolution } from "./reich-engine";
 import { clampNoteToRegister, melodicAnchorMidi } from "./scale-key-guard";
 
@@ -41,12 +42,14 @@ export function composeWithChordProgression(options: {
   type: "counterpoint" | "hocket";
   chords: ChordSegment[];
   melodyneNotes?: TranscribedNote[];
+  hocketGroove?: HocketGrooveStyle;
 }): VoicePart[] {
-  const { durationSec, bpm, scale, style, seed, type, chords, melodyneNotes = [] } = options;
+  const { durationSec, bpm, scale, style, seed, type, chords, melodyneNotes = [], hocketGroove } =
+    options;
   const base =
     type === "counterpoint"
       ? composeCounterpoint({ durationSec, bpm, scale, style, seed })
-      : composeHocket({ durationSec, bpm, scale, style, seed });
+      : composeHocket({ durationSec, bpm, scale, style, seed, hocketGroove });
 
   if (!chords.length) return base;
 

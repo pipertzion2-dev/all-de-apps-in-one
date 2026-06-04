@@ -56,6 +56,8 @@ import {
   resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
+import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
+import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import {
   suggestCompositionScale,
   type ScaleSuggestion,
@@ -457,6 +459,8 @@ export default function SvivvaPlayPage() {
   const [reichType, setReichType] = useState<"counterpoint" | "hocket">("counterpoint");
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
+  const [swingAmount, setSwingAmount] = useState(0);
+  const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_interlock");
 
   const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
   const [melodyneFile, setMelodyneFile] = useState<File | null>(null);
@@ -1081,7 +1085,7 @@ export default function SvivvaPlayPage() {
               : 12,
         };
       default:
-        return { ...base, reichStyle, reichType, reichScale };
+        return { ...base, reichStyle, reichType, reichScale, swingAmount, hocketGroove };
     }
   }, [
     mode,
@@ -1095,6 +1099,8 @@ export default function SvivvaPlayPage() {
     reichStyle,
     reichType,
     reichScale,
+    swingAmount,
+    hocketGroove,
     tension,
     rootMovement,
     voiceLeading,
@@ -2079,6 +2085,7 @@ export default function SvivvaPlayPage() {
               seed: currentSeed,
               type: reichType,
               ctx: harmonicCtx,
+              hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
             })
           : chordSource.length >= 1
             ? composeWithChordProgression({
@@ -2090,6 +2097,7 @@ export default function SvivvaPlayPage() {
                 type: reichType,
                 chords: chordSource,
                 melodyneNotes: transcription?.melodyneNotes ?? [],
+                hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
               })
             : reichType === "counterpoint"
               ? composeCounterpoint({
@@ -2105,6 +2113,7 @@ export default function SvivvaPlayPage() {
                   scale,
                   style: reichStyle,
                   seed: currentSeed,
+                  hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
                 });
       setReichVoices(voices);
 
@@ -2159,13 +2168,21 @@ export default function SvivvaPlayPage() {
           },
         };
       }
-      const newStems = constrainGeneratedStems(
+      let newStems = constrainGeneratedStems(
         rawStems as unknown as Parameters<typeof constrainGeneratedStems>[0],
         lockedKey,
         chordSource,
         bpm,
         { anchorMidi, scaleInfo },
       ) as unknown as StemData[];
+      const swingAmt = Math.max(0, Math.min(1, swingAmount / 100));
+      if (swingAmt > 0) {
+        newStems = applySwingToStems(
+          newStems.map((s) => ({ ...s, midiEvents: normalizeMidiEvents(s.midiEvents) })),
+          bpm,
+          swingAmt,
+        ) as unknown as StemData[];
+      }
       setStems(newStems);
       setPipelineStage("Complete");
       setVersionHistory((prev) => {
@@ -2209,6 +2226,8 @@ export default function SvivvaPlayPage() {
     aiScaleSuggestion,
     scaleSuggestionApplied,
     applyAiScaleSuggestion,
+    swingAmount,
+    hocketGroove,
   ]);
 
   useEffect(() => {
@@ -3639,6 +3658,47 @@ export default function SvivvaPlayPage() {
                                 </select>
                               </div>
                             </div>
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                                  Jazz swing (BLUES JAWN)
+                                </label>
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={100}
+                                  value={swingAmount}
+                                  onChange={(e) => setSwingAmount(Number(e.target.value))}
+                                  className="w-full accent-[#5BA8A0]"
+                                  data-testid="slider-swing"
+                                />
+                                <span className="text-[9px] text-gray-500">
+                                  {swingAmount === 0 ? "Straight 16ths" : `${swingAmount}% swing`}
+                                </span>
+                              </div>
+                              {reichType === "hocket" && (
+                                <div className="flex flex-col gap-1.5">
+                                  <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                                    Hocket groove (AI V-2)
+                                  </label>
+                                  <select
+                                    value={hocketGroove}
+                                    onChange={(e) =>
+                                      setHocketGroove(e.target.value as HocketGrooveStyle)
+                                    }
+                                    className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                    data-testid="select-hocket-groove"
+                                  >
+                                    <option value="reich_interlock">Reich v2 interlock</option>
+                                    <option value="reich_phase">Reich phase shift</option>
+                                    <option value="shaw_interlock">Shaw interlock</option>
+                                    <option value="minimalist_cells">Minimalist cells</option>
+                                    <option value="polyrhythmic">Polyrhythmic</option>
+                                    <option value="asymmetric">Asymmetric</option>
+                                  </select>
+                                </div>
+                              )}
+                            </div>
                             <div
                               className="mb-3 rounded-lg border border-[#A05068]/40 bg-[#1a1018] p-3"
                               data-testid="ai-scale-lookup-panel"
@@ -3671,8 +3731,32 @@ export default function SvivvaPlayPage() {
                                   )}
                                 </button>
                               </div>
+                              {scaleLookupResult?.alternates && scaleLookupResult.alternates.length > 0 ? (
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  <span className="text-[9px] text-gray-500 w-full">Alternates:</span>
+                                  {scaleLookupResult.alternates.map((alt) => (
+                                    <button
+                                      key={alt.scaleId}
+                                      type="button"
+                                      onClick={() =>
+                                        applyScaleLookupMatch({
+                                          scaleId: alt.scaleId,
+                                          label: alt.label,
+                                          source: "ollama",
+                                          confidence: 80,
+                                          relativeSteps: alt.relativeSteps,
+                                        })
+                                      }
+                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A05068]"
+                                    >
+                                      {alt.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
                               {scaleLookupResult?.suggestions.length && !scaleLookupResult.resolved ? (
                                 <div className="flex flex-wrap gap-1 mb-2">
+                                  <span className="text-[9px] text-amber-500/90 w-full">Did you mean:</span>
                                   {scaleLookupResult.suggestions.slice(0, 5).map((s) => (
                                     <button
                                       key={s.scaleId}

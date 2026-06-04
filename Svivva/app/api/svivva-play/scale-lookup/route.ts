@@ -7,6 +7,7 @@ import {
   matchFromAiPayload,
   type ScaleLookupResult,
 } from "@/lib/svivva-play/scale-lookup";
+import { lookupScaleWithOllama } from "@/lib/svivva-play/scale-lookup-ollama";
 import { scaleNoteNames } from "@/lib/svivva-play/reich-engine";
 import { parseRootFromKeyLabel } from "@/lib/svivva-play/analysis-utils";
 
@@ -18,16 +19,16 @@ async function lookupScaleWithAi(
 ): Promise<ScaleLookupResult["resolved"]> {
   if (!isAnyAiProviderAvailable()) return null;
 
-  const completion = await openai.chat.completions.create({
-    model: DEFAULT_MODEL,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a music-theory scale database. Given a scale name (any spelling, language, or tradition), return JSON only: {\"scaleId\":\"snake_case_id\",\"relativeSemitoneSteps\":[0,2,4,...],\"displayName\":\"Human Name\",\"reason\":\"one sentence\"}. relativeSemitoneSteps are semitone offsets from the root within one octave (unique, sorted, at least 5 for heptatonic). Use established interval patterns (e.g. Brazilian → mixolydian-like or regional pentatonics).",
-      },
+    const completion = await openai.chat.completions.create({
+      model: DEFAULT_MODEL,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content:
+            'You are a music-theory scale database (V-1 JAWN style). Return JSON: {"scaleId":"snake_case","relativeSemitoneSteps":[0,2,...],"displayName":"Name","confidence":0.9,"alternates":[{"name":"...","intervals":[...]}],"reason":"..."}.',
+        },
       { role: "user", content: `Scale query: "${query}"` },
     ],
   });
@@ -40,6 +41,7 @@ async function lookupScaleWithAi(
       relativeSemitoneSteps?: number[];
       displayName?: string;
       reason?: string;
+      alternates?: { name?: string; intervals?: number[] }[];
     };
     const match = matchFromAiPayload(parsed);
     if (!match) return null;
@@ -67,13 +69,25 @@ export async function POST(request: NextRequest) {
     let result = lookupScaleLocal(query, keyRoot);
 
     if (!result.resolved && (body.useAi !== false)) {
-      const aiMatch = await lookupScaleWithAi(query, keyRoot);
-      if (aiMatch) {
+      const ollamaHit = process.env.OLLAMA_HOST
+        ? await lookupScaleWithOllama(query, keyRoot)
+        : null;
+      if (ollamaHit?.resolved) {
         result = {
           query,
-          resolved: aiMatch,
+          resolved: ollamaHit.resolved,
           suggestions: result.suggestions,
+          alternates: ollamaHit.alternates,
         };
+      } else {
+        const aiMatch = await lookupScaleWithAi(query, keyRoot);
+        if (aiMatch) {
+          result = {
+            query,
+            resolved: aiMatch,
+            suggestions: result.suggestions,
+          };
+        }
       }
     }
 

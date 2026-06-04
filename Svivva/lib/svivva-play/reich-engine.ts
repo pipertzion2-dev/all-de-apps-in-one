@@ -1,4 +1,8 @@
 import { getBuiltinOrDynamicSteps, listDynamicScales } from "./dynamic-scales";
+import {
+  buildV2HocketSlotPattern,
+  type HocketGrooveStyle,
+} from "./hocket-groove-v2";
 
 export type StyleName = "reich_electric" | "shaw_interlace" | "phase_canon";
 
@@ -333,8 +337,10 @@ export function composeHocket(opts: {
   scale: ScaleResolution;
   style?: StyleName;
   seed?: number;
+  /** AI V-2 groove variety vs strict Reich v2 i%6 interlock. */
+  hocketGroove?: HocketGrooveStyle;
 }): VoicePart[] {
-  const { durationSec, bpm, scale, style = "reich_electric", seed = 42 } = opts;
+  const { durationSec, bpm, scale, style = "reich_electric", seed = 42, hocketGroove } = opts;
   const rng = new Rng((seed || 0) ^ 0xc0ffee);
   const total = sixteenthsForDuration(durationSec, bpm);
   const sixteenthBeats = 0.25;
@@ -349,14 +355,18 @@ export function composeHocket(opts: {
     3,
   );
 
+  const grooveStyle: HocketGrooveStyle =
+    hocketGroove ??
+    (style === "shaw_interlace" ? "shaw_interlock" : "reich_interlock");
+  const slotPattern = buildV2HocketSlotPattern(total, 6, seed || 42, grooveStyle);
+
   const parts: VoicePart[] = [];
   for (let v = 0; v < 6; v++) {
     const notes: MidiNote[] = [];
-    const entry = style === "phase_canon" ? v : 0;
-    for (let s = entry; s < total; s++) {
+    const slots = slotPattern[v] ?? [];
+    for (const s of slots) {
       if (style === "shaw_interlace" && rng.next() < 0.12) continue;
       const idx = s % masterMidis.length;
-      if (idx % 6 !== v) continue;
       notes.push({
         note: masterMidis[idx]!,
         velocity: 72 + Math.floor(rng.next() * 16),
@@ -401,7 +411,15 @@ export function strategiesInfo() {
       sharedMasterCell: true,
       cellLengthSixteenths: HK_CELL_LEN,
       interlock: "sixteenth_slot_mod_6",
-      note: "Matches v2 Reich Composer: one master cell, each voice plays indices i where i%6===voice.",
+      grooveStyles: [
+        "reich_interlock",
+        "reich_phase",
+        "shaw_interlock",
+        "minimalist_cells",
+        "polyrhythmic",
+        "asymmetric",
+      ],
+      note: "reich_interlock matches v2 Reich Composer (i%6===voice). Other styles follow AI V-2 variety with one voice per slot.",
     },
   };
 }

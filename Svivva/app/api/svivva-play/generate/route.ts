@@ -34,6 +34,8 @@ import {
   meendPitchbendForEvents,
   resolveCompositionScale,
 } from "@/lib/svivva-play/scale-key-guard";
+import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
+import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import { type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
 
@@ -345,6 +347,7 @@ export async function POST(request: NextRequest) {
       );
       const reichStyle = (settings.reichStyle || stylePreset || "reich_electric") as StyleName;
       const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
+      const hocketGroove = (settings.hocketGroove as HocketGrooveStyle | undefined) ?? undefined;
       const voices = composeStrategicReich({
         durationSec: sessionDurationSec,
         bpm: analysisData.bpm,
@@ -353,6 +356,7 @@ export async function POST(request: NextRequest) {
         seed,
         type: reichType,
         ctx: harmonicContext!,
+        hocketGroove,
       });
       const hints =
         reichType === "hocket"
@@ -366,19 +370,26 @@ export async function POST(request: NextRequest) {
         manualKey,
         sessionChords,
       );
+      let guardedStems = constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
+        anchorMidi: melodicAnchor,
+        scaleInfo,
+      });
+      const swingAmt = Math.max(0, Math.min(1, Number(settings.swingAmount ?? 0) / 100));
+      if (swingAmt > 0) {
+        guardedStems = applySwingToStems(guardedStems, analysisData.bpm, swingAmt);
+      }
       return {
-        stems: constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
-          anchorMidi: melodicAnchor,
-          scaleInfo,
-        }),
+        stems: guardedStems,
         plan: {
-          stemCount: stems.length,
+          stemCount: guardedStems.length,
           key: lockedKey,
           bpm: analysisData.bpm,
           harmonyRules: `Reich ${reichType} (${reichStyle}) — interlocking cells from import harmony`,
           meendApplicableStems:
-            (settings.meend ?? false) ? stems.filter((_, i) => i === 0).map((s) => s.name) : [],
+            (settings.meend ?? false) ? guardedStems.filter((_, i) => i === 0).map((s) => s.name) : [],
           composer: "reich",
+          hocketGroove: hocketGroove ?? "reich_interlock",
+          swingAmount: settings.swingAmount,
         },
         pipeline: { stage: "complete", stages: ["reich_listen", "reich_compose"] },
       };
