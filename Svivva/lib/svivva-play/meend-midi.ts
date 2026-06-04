@@ -8,7 +8,7 @@ export const MEEND_MIDI_BEND_RANGE_SEMITONES = 12;
 
 export type MeendNoteEvent = {
   note: number;
-  velocity?: number;
+  velocity: number;
   startBeat: number;
   duration: number;
 };

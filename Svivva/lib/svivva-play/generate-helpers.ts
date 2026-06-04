@@ -56,7 +56,7 @@ export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemRe
     const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
     return {
       ...stem,
-      midiEvents: built.midiEvents,
+      midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
       expression: {
         ...stem.expression,
         meend: true,

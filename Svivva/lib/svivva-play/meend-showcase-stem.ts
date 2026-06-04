@@ -34,7 +34,7 @@ export function buildMeendLeadPlayback(stems: MeendStemLike[]): StemPlayback | n
     name: MEEND_PREVIEW_STEM_NAME,
     role: "melody",
     instrumentHint: "sitar",
-    midiEvents: built.midiEvents,
+    midiEvents: built.midiEvents as NormalizedMidiEvent[],
     expression: { meend: true, pitchbend: built.pitchbend },
     muted: false,
     soloed: false,

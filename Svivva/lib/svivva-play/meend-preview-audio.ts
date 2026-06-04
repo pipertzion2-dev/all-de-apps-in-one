@@ -11,7 +11,9 @@ export type MeendTimelineEvent =
   | { type: "bend"; time: number; cents: number; glide: number }
   | { type: "release"; time: number };
 
-export { meendWheelToPreviewCents } from "./meend-midi";
+import { meendWheelToPreviewCents } from "./meend-midi";
+
+export { meendWheelToPreviewCents };
 
 const EVENT_ORDER = { attack: 0, glide: 1, bend: 2, release: 3 } as const;
 
