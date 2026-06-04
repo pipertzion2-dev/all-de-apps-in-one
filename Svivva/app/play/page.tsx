@@ -2481,50 +2481,6 @@ export default function SvivvaPlayPage() {
     }
   };
 
-  const handleCrateClick = useCallback(() => {
-    if (crateState !== "closed") return;
-    setCrateState("opening");
-    setTimeout(() => setCrateState("open"), 1200);
-  }, [crateState]);
-
-  if (crateState !== "open") {
-    return (
-      <div
-        className="h-[100dvh] bg-white flex flex-col items-center justify-center overflow-hidden"
-        style={{ colorScheme: "light" }}
-      >
-        <div
-          className={`relative cursor-pointer select-none transition-transform duration-700 ${crateState === "opening" ? "scale-[1.02]" : "hover:scale-[1.01]"}`}
-          onClick={handleCrateClick}
-          data-testid="button-crate-open"
-        >
-          <Image
-            src={crateState === "opening" ? svivvaCrateOpen : svivvaCrateClosed}
-            alt="Svivva Play"
-            width={360}
-            height={360}
-            className={`object-contain transition-opacity duration-500 max-w-[60vw] max-h-[50dvh] w-auto h-auto ${crateState === "opening" ? "animate-pulse" : ""}`}
-            priority
-          />
-          {crateState === "opening" && (
-            <div className="absolute inset-0 flex items-end justify-center pb-4">
-              <div className="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full">
-                <span className="text-gray-500 text-xs font-medium tracking-wider">
-                  Loading instrument...
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-        {crateState === "closed" && (
-          <p className="mt-8 text-gray-500 text-xs tracking-widest uppercase animate-pulse">
-            Tap to open
-          </p>
-        )}
-      </div>
-    );
-  }
-
   const acknowledgeBeta = useCallback(() => {
     try {
       window.localStorage.setItem("svivva-play-beta-ack", "1");
@@ -2534,46 +2490,106 @@ export default function SvivvaPlayPage() {
     setBetaAcknowledged(true);
   }, []);
 
+  const handleCrateClick = useCallback(() => {
+    if (crateState !== "closed") return;
+    setCrateState("opening");
+    setTimeout(() => setCrateState("open"), 1200);
+  }, [crateState]);
+
+  const playBetaBanner = (
+    <div
+      className="w-full shrink-0 border-b-2 border-amber-500 bg-amber-50 px-4 py-3 text-center"
+      role="status"
+      data-testid="banner-play-beta"
+    >
+      <p className="text-sm font-semibold text-amber-950">
+        <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white mr-2 align-middle">
+          BETA
+        </span>
+        Svivva Play is in beta — preview audio, meend, swing, and AI tools may change or fail.
+        Exports may differ from what you hear in the browser.
+      </p>
+    </div>
+  );
+
+  if (crateState !== "open") {
+    return (
+      <div
+        className="h-[100dvh] bg-white flex flex-col overflow-hidden"
+        style={{ colorScheme: "light" }}
+      >
+        {playBetaBanner}
+        {!betaAcknowledged ? (
+          <div
+            className="flex-1 flex flex-col items-center justify-center px-6 pb-8"
+            data-testid="gate-play-beta"
+          >
+            <div className="max-w-lg w-full rounded-2xl border-2 border-amber-400 bg-white shadow-lg p-8 text-center">
+              <AlertTriangle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Svivva Play — Beta</h1>
+              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                You are entering an experimental studio. Features break, shift, and improve often.
+                If the page fails to load, refresh or try again later. MIDI export is the most
+                reliable output; in-browser preview is best-effort only.
+              </p>
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={acknowledgeBeta}
+                data-testid="button-play-beta-ack"
+              >
+                I understand — continue to Svivva Play
+              </Button>
+              <Link
+                href="/"
+                className="inline-block mt-4 text-sm text-gray-500 hover:text-gray-800 underline"
+              >
+                Back to Svivva home
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div
+              className={`relative cursor-pointer select-none transition-transform duration-700 ${crateState === "opening" ? "scale-[1.02]" : "hover:scale-[1.01]"}`}
+              onClick={handleCrateClick}
+              data-testid="button-crate-open"
+            >
+              <Image
+                src={crateState === "opening" ? svivvaCrateOpen : svivvaCrateClosed}
+                alt="Svivva Play"
+                width={360}
+                height={360}
+                className={`object-contain transition-opacity duration-500 max-w-[60vw] max-h-[50dvh] w-auto h-auto ${crateState === "opening" ? "animate-pulse" : ""}`}
+                priority
+              />
+              {crateState === "opening" && (
+                <div className="absolute inset-0 flex items-end justify-center pb-4">
+                  <div className="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full">
+                    <span className="text-gray-500 text-xs font-medium tracking-wider">
+                      Loading instrument...
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            {crateState === "closed" && (
+              <p className="mt-8 text-gray-500 text-xs tracking-widest uppercase animate-pulse">
+                Tap to open
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-[100dvh] flex flex-col text-gray-900 bg-white"
       style={{ colorScheme: "light" }}
     >
-      {!betaAcknowledged && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="svivva-play-beta-title"
-          data-testid="dialog-play-beta"
-        >
-          <div className="max-w-md w-full rounded-2xl border border-amber-200/80 bg-white shadow-2xl p-6">
-            <div className="flex items-start gap-3 mb-4">
-              <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <h2
-                  id="svivva-play-beta-title"
-                  className="text-lg font-semibold text-gray-900"
-                >
-                  Svivva Play is in beta
-                </h2>
-                <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                  Preview audio, Indian meend, swing, and AI scale lookup are experimental.
-                  Timing and expression may differ from exported MIDI in your DAW. Features can
-                  change or break between releases.
-                </p>
-              </div>
-            </div>
-            <Button
-              className="w-full"
-              onClick={acknowledgeBeta}
-              data-testid="button-play-beta-ack"
-            >
-              I understand — continue to Play
-            </Button>
-          </div>
-        </div>
-      )}
+      {playBetaBanner}
       <style>{`
         .holo-gradient {
           position: relative;
