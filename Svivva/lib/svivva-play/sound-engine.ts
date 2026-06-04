@@ -2,7 +2,7 @@
 
 import * as Tone from "tone";
 import { MEEND_PREVIEW, resolveInstrumentPreset, type InstrumentPreset } from "./instruments";
-import { midiPitchWheelToCents } from "./scale-key-guard";
+import { meendPitchbendForEvents, prepareMeendPreviewEvents } from "./scale-key-guard";
 
 export interface MidiEvent {
   note: number;
@@ -28,6 +28,21 @@ export interface StemPlayback {
   };
 }
 
+export type LoadStemsOptions = {
+  /** Apply meend preview to every stem (matches Play UI checkbox). */
+  forceMeend?: boolean;
+};
+
+type MeendPartEvent =
+  | {
+      type: "note";
+      time: number;
+      note: string;
+      duration: number;
+      velocity: number;
+    }
+  | { type: "bend"; time: number; cents: number; glide: number };
+
 interface StemChannel {
   synth:
     | Tone.PolySynth
@@ -40,7 +55,11 @@ interface StemChannel {
   volume: Tone.Volume;
   effects: Tone.ToneAudioNode[];
   part: Tone.Part | null;
-  bendPart: Tone.Part | null;
+}
+
+/** Stronger cents than generic MIDI wheel — meend should be obvious in preview. */
+function meendBendToCents(wheel: number): number {
+  return Math.max(-320, Math.min(320, (wheel / 8192) * 320));
 }
 
 export class SvivvaSoundEngine {
@@ -358,7 +377,7 @@ export class SvivvaSoundEngine {
     }
   }
 
-  async loadStems(stems: StemPlayback[]) {
+  async loadStems(stems: StemPlayback[], options?: LoadStemsOptions) {
     console.log("🎵 Loading", stems.length, "stems");
     this.prepareMasterBus();
     this.disposeChannels();
@@ -383,12 +402,26 @@ export class SvivvaSoundEngine {
           continue;
         }
 
-        const pitchBends = stem.expression?.pitchbend ?? [];
-        const hasMeend = pitchBends.length > 0 || Boolean(stem.expression?.meend);
+        const forceMeend = Boolean(options?.forceMeend);
+        let midiEvents = sortedEvents;
+        let pitchBends = stem.expression?.pitchbend ?? [];
+        const hasMeend =
+          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
+
+        if (hasMeend) {
+          midiEvents = prepareMeendPreviewEvents(midiEvents, 0.85);
+          if (pitchBends.length === 0) {
+            pitchBends = meendPitchbendForEvents(midiEvents);
+          }
+        }
+
         const preset = hasMeend
           ? MEEND_PREVIEW
           : resolveInstrumentPreset(stem.instrumentHint, stem.role);
         const synth = this.createSynthSafe(preset);
+        if (hasMeend && synth instanceof Tone.MonoSynth) {
+          synth.portamento = MEEND_PREVIEW.portamento ?? 0.55;
+        }
         const panner = new Tone.Panner(stem.pan / 100);
         const volume = new Tone.Volume(
           this.previewGainDb(stem.role, stem.gainDb || 0) + (hasMeend ? 10 : 0),
@@ -405,76 +438,84 @@ export class SvivvaSoundEngine {
           chain[chain.length - 1].toDestination();
         }
 
-        const partEvents: {
-          time: number;
-          note: string;
-          duration: number;
-          velocity: number;
-          startBeat: number;
-          endBeat: number;
-        }[] = [];
+        const timeline: MeendPartEvent[] = [];
+        const noteSpans: { startBeat: number; endBeat: number }[] = [];
 
-        for (const evt of sortedEvents) {
+        for (const evt of midiEvents) {
           const endBeat = evt.startBeat + evt.duration;
           if (endBeat > maxBeat) maxBeat = endBeat;
-          partEvents.push({
+          noteSpans.push({ startBeat: evt.startBeat, endBeat });
+          timeline.push({
+            type: "note",
             time: this.beatToSeconds(evt.startBeat),
             note: this.noteToFreq(evt.note),
             duration: this.beatToSeconds(evt.duration),
             velocity: Math.max(0.01, Math.min(1, evt.velocity / 127)),
-            startBeat: evt.startBeat,
-            endBeat,
           });
         }
 
-        const part = new Tone.Part((time, value) => {
-          try {
-            this.triggerNoteAt(
-              synth,
-              value.note,
-              value.duration,
-              time,
-              value.velocity,
-              hasMeend,
-            );
-          } catch (e) {
-            console.error("Note trigger error:", e);
-          }
-        }, partEvents);
-
-        let bendPart: Tone.Part | null = null;
         if (hasMeend && synth instanceof Tone.MonoSynth) {
-          const bendEvents: { time: number; cents: number; glide: number }[] = [];
-          for (const value of partEvents) {
-            let noteBends = pitchBends.filter(
-              (pb) => pb.beat >= value.startBeat - 0.001 && pb.beat <= value.endBeat + 0.001,
-            );
-            if (!noteBends.length && stem.expression?.meend) {
-              const d = value.endBeat - value.startBeat;
-              noteBends = [
-                { beat: value.startBeat + d * 0.2, value: 0 },
-                { beat: value.startBeat + d * 0.55, value: 6800 },
-                { beat: value.startBeat + d * 0.97, value: 0 },
-              ];
-            }
-            for (const pb of noteBends) {
-              bendEvents.push({
-                time: this.beatToSeconds(pb.beat),
-                cents: midiPitchWheelToCents(pb.value),
-                glide: 0.07,
-              });
-            }
+          for (const pb of pitchBends) {
+            timeline.push({
+              type: "bend",
+              time: this.beatToSeconds(pb.beat),
+              cents: meendBendToCents(pb.value),
+              glide: 0.09,
+            });
           }
-          bendEvents.sort((a, b) => a.time - b.time);
-          if (bendEvents.length > 0) {
-            bendPart = new Tone.Part((time, bend: { cents: number; glide: number }) => {
-              synth.detune.rampTo(bend.cents, bend.glide, time);
-            }, bendEvents);
-            bendPart.start(0);
+          for (const span of noteSpans) {
+            const d = span.endBeat - span.startBeat;
+            if (d <= 0) continue;
+            const hasBend = pitchBends.some(
+              (pb) => pb.beat >= span.startBeat - 0.001 && pb.beat <= span.endBeat + 0.001,
+            );
+            if (!hasBend) {
+              timeline.push(
+                {
+                  type: "bend",
+                  time: this.beatToSeconds(span.startBeat + d * 0.25),
+                  cents: 0,
+                  glide: 0.05,
+                },
+                {
+                  type: "bend",
+                  time: this.beatToSeconds(span.startBeat + d * 0.55),
+                  cents: meendBendToCents(7200),
+                  glide: 0.12,
+                },
+                {
+                  type: "bend",
+                  time: this.beatToSeconds(span.startBeat + d * 0.95),
+                  cents: 0,
+                  glide: 0.08,
+                },
+              );
+            }
           }
         }
 
-        part.start(0);
+        timeline.sort((a, b) => a.time - b.time || (a.type === "bend" ? -1 : 1));
+
+        const part = new Tone.Part((time, value: MeendPartEvent) => {
+          try {
+            if (value.type === "bend" && synth instanceof Tone.MonoSynth) {
+              synth.detune.rampTo(value.cents, value.glide, time);
+              return;
+            }
+            if (value.type === "note") {
+              this.triggerNoteAt(
+                synth,
+                value.note,
+                value.duration,
+                time,
+                value.velocity,
+                hasMeend,
+              );
+            }
+          } catch (e) {
+            console.error("Part event error:", e);
+          }
+        }, timeline);
 
         this.channels.set(stem.name, {
           synth,
@@ -482,7 +523,6 @@ export class SvivvaSoundEngine {
           volume,
           effects,
           part,
-          bendPart,
         });
       } catch (stemErr) {
         console.error(`🔴 Failed to load stem "${stem.name}":`, stemErr);
@@ -660,7 +700,6 @@ export class SvivvaSoundEngine {
     for (const [, ch] of this.channels) {
       try {
         ch.part?.dispose();
-        ch.bendPart?.dispose();
         if ("releaseAll" in ch.synth && typeof ch.synth.releaseAll === "function") {
           (ch.synth as any).releaseAll();
         }

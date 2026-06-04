@@ -264,7 +264,7 @@ export function midiPitchWheelToCents(wheel: number): number {
 /** Longer sustains so preview meend (portamento + pitch wheel) is audible on hocket lines. */
 export function prepareMeendPreviewEvents<T extends { startBeat: number; duration: number }>(
   events: T[],
-  minDurationBeats = 0.6,
+  minDurationBeats = 0.85,
 ): T[] {
   return events.map((e) => ({
     ...e,
@@ -277,7 +277,7 @@ export function meendPitchbendForEvents(
   events: { startBeat: number; duration: number }[],
 ): { beat: number; value: number }[] {
   const out: { beat: number; value: number }[] = [];
-  const peakBend = 6800;
+  const peakBend = 7600;
   for (const e of events) {
     const d = Math.max(0.08, e.duration || 0.25);
     const t0 = e.startBeat;

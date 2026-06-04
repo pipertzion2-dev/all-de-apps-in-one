@@ -1637,7 +1637,7 @@ export default function SvivvaPlayPage() {
       await engine.warmUpForPlayback();
       engine.init();
       engine.setBpm(tempo);
-      await engine.loadStems(buildStemPlaybacks(currentStems));
+      await engine.loadStems(buildStemPlaybacks(currentStems), { forceMeend: meend });
       if (loadGen !== engineLoadGenRef.current) return;
       engine.setMasterVolume(masterVolume);
       engine.applySoloState(
@@ -1658,7 +1658,7 @@ export default function SvivvaPlayPage() {
       setEngineReady(true);
       setErrorMsg("");
     },
-    [buildStemPlaybacks, resolveImportDurationSec, masterVolume],
+    [buildStemPlaybacks, resolveImportDurationSec, masterVolume, meend],
   );
 
   const stemsPlaybackKey = useCallback(
