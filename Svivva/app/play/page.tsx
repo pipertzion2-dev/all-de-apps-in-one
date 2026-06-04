@@ -466,7 +466,7 @@ export default function SvivvaPlayPage() {
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
   const [swingAmount, setSwingAmount] = useState(0);
-  const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_interlock");
+  const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_phase");
 
   const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
   const [melodyneFile, setMelodyneFile] = useState<File | null>(null);
@@ -2147,7 +2147,7 @@ export default function SvivvaPlayPage() {
         reichType === "hocket"
           ? ["vibraphone", "steel_drums", "piano", "marimba", "rhodes", "synth_lead"]
           : ["piano", "vibraphone", "marimba"];
-      const rawStems: StemData[] = voices.map((v, i) => {
+      let rawStems: StemData[] = voices.map((v, i) => {
         const midiEvents = v.notes.map((n) => ({
           note: n.note,
           velocity: n.velocity,
@@ -2172,28 +2172,9 @@ export default function SvivvaPlayPage() {
         };
       });
       if (meend && rawStems.length > 0) {
-        let leadIdx = 0;
-        let bestWeight = 0;
-        for (let i = 0; i < rawStems.length; i++) {
-          const role = rawStems[i]!.role.toLowerCase();
-          const count = normalizeMidiEvents(rawStems[i]!.midiEvents).length;
-          const weight =
-            count +
-            (role === "melody" || role === "lead" || role === "solo" ? 8 : 0);
-          if (weight > bestWeight) {
-            bestWeight = weight;
-            leadIdx = i;
-          }
-        }
-        const leadEvents = normalizeMidiEvents(rawStems[leadIdx]!.midiEvents);
-        rawStems[leadIdx] = {
-          ...rawStems[leadIdx]!,
-          instrumentHint: "sitar",
-          expression: {
-            meend: true,
-            pitchbend: meendPitchbendForEvents(leadEvents),
-          },
-        };
+        rawStems = applyMeendToStems(
+          rawStems as Parameters<typeof applyMeendToStems>[0],
+        ) as typeof rawStems;
       }
       let newStems = constrainGeneratedStems(
         rawStems as unknown as Parameters<typeof constrainGeneratedStems>[0],
@@ -3935,9 +3916,9 @@ export default function SvivvaPlayPage() {
                               </h4>
                               <p className="text-[9px] text-gray-400">
                                 Turn on <span className="text-gray-300">Indian Meend</span> to get
-                                raga-leaning scales (Bhairav/Marwa/Purvi/Todi/Bhairavi) plus subtle
-                                pitch‑bend expression on the lead voice — integrated directly into
-                                Svivva Play (no external zip stacks).
+                                raga-leaning scales (Bhairav/Marwa/Purvi/Todi/Bhairavi) plus
+                                pitch‑bend expression on every generated voice — integrated directly
+                                into Svivva Play (no external zip stacks).
                               </p>
                             </div>
                           </div>

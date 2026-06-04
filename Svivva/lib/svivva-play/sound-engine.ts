@@ -321,8 +321,13 @@ export class SvivvaSoundEngine {
   ): void {
     const duration = Math.max(0.05, dur);
     if (synth instanceof Tone.MonoSynth) {
-      if (hasMeend) synth.detune.value = 0;
-      synth.triggerAttackRelease(note, duration, time, vel);
+      if (hasMeend) {
+        synth.detune.value = 0;
+        synth.triggerAttack(note, time, vel);
+        synth.triggerRelease(time + duration);
+      } else {
+        synth.triggerAttackRelease(note, duration, time, vel);
+      }
     } else if (synth instanceof Tone.MembraneSynth) {
       synth.triggerAttackRelease(note, duration, time, vel);
     } else if (synth instanceof Tone.MetalSynth) {
@@ -386,7 +391,7 @@ export class SvivvaSoundEngine {
         const synth = this.createSynthSafe(preset);
         const panner = new Tone.Panner(stem.pan / 100);
         const volume = new Tone.Volume(
-          this.previewGainDb(stem.role, stem.gainDb || 0) + (hasMeend ? 5 : 0),
+          this.previewGainDb(stem.role, stem.gainDb || 0) + (hasMeend ? 10 : 0),
         );
         const effects = this.createLiveEffectsChain();
 

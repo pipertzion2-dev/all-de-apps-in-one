@@ -3,6 +3,7 @@ import {
   buildV2HocketSlotPattern,
   type HocketGrooveStyle,
 } from "./hocket-groove-v2";
+import { addV2HocketRapidFire, buildV2HocketMelodyNotes } from "./hocket-melody-v2";
 
 export type StyleName = "reich_electric" | "shaw_interlace" | "phase_canon";
 
@@ -331,6 +332,10 @@ export function composeCounterpoint(opts: {
   return parts;
 }
 
+function eighthSlotsForDuration(durationSec: number, bpm: number): number {
+  return Math.max(1, Math.round(durationSec * (bpm / 60) * 2));
+}
+
 export function composeHocket(opts: {
   durationSec: number;
   bpm: number;
@@ -342,46 +347,74 @@ export function composeHocket(opts: {
 }): VoicePart[] {
   const { durationSec, bpm, scale, style = "reich_electric", seed = 42, hocketGroove } = opts;
   const rng = new Rng((seed || 0) ^ 0xc0ffee);
-  const total = sixteenthsForDuration(durationSec, bpm);
-  const sixteenthBeats = 0.25;
-  const cellLen = style === "shaw_interlace" ? CP_CELL_LEN : HK_CELL_LEN;
-
-  const masterMidis = buildMasterMidiCell(
-    scale.rootPc,
-    scale.pitchClasses,
-    cellLen,
-    style,
-    seed || 42,
-    3,
-  );
-
   const grooveStyle: HocketGrooveStyle =
     hocketGroove ??
-    (style === "shaw_interlace" ? "shaw_interlock" : "reich_interlock");
-  const slotPattern = buildV2HocketSlotPattern(total, 6, seed || 42, grooveStyle);
+    (style === "shaw_interlace" ? "shaw_interlock" : "reich_phase");
+
+  if (grooveStyle === "reich_interlock") {
+    const total = sixteenthsForDuration(durationSec, bpm);
+    const sixteenthBeats = 0.25;
+    const cellLen = style === "shaw_interlace" ? CP_CELL_LEN : HK_CELL_LEN;
+    const masterMidis = buildMasterMidiCell(
+      scale.rootPc,
+      scale.pitchClasses,
+      cellLen,
+      style,
+      seed || 42,
+      3,
+    );
+    const slotPattern = buildV2HocketSlotPattern(total, 6, seed || 42, "reich_interlock");
+    const parts: VoicePart[] = [];
+    for (let v = 0; v < 6; v++) {
+      const notes: MidiNote[] = [];
+      const slots = slotPattern[v] ?? [];
+      for (const s of slots) {
+        if (style === "shaw_interlace" && rng.next() < 0.12) continue;
+        const idx = s % masterMidis.length;
+        notes.push({
+          note: masterMidis[idx]!,
+          velocity: 72 + Math.floor(rng.next() * 16),
+          startBeat: s * sixteenthBeats,
+          duration: sixteenthBeats * 0.75,
+        });
+      }
+      if (notes.length === 0) {
+        const idx = v % masterMidis.length;
+        notes.push({
+          note: masterMidis[idx]!,
+          velocity: 70,
+          startBeat: v * sixteenthBeats * 0.25,
+          duration: sixteenthBeats * 2,
+        });
+      }
+      parts.push({ voiceIndex: v, notes, name: `Hocket Voice ${v + 1}` });
+    }
+    return parts;
+  }
+
+  const numVoices = 8;
+  const totalEighths = eighthSlotsForDuration(durationSec, bpm);
+  const eighthBeats = 0.5;
+  const slotPattern = buildV2HocketSlotPattern(totalEighths, numVoices, seed || 42, grooveStyle);
+  let voiceNotes = buildV2HocketMelodyNotes(slotPattern, scale, eighthBeats, seed || 42);
+  voiceNotes = addV2HocketRapidFire(voiceNotes, durationSec, bpm, scale, seed || 42);
 
   const parts: VoicePart[] = [];
-  for (let v = 0; v < 6; v++) {
-    const notes: MidiNote[] = [];
-    const slots = slotPattern[v] ?? [];
-    for (const s of slots) {
-      if (style === "shaw_interlace" && rng.next() < 0.12) continue;
-      const idx = s % masterMidis.length;
-      notes.push({
-        note: masterMidis[idx]!,
-        velocity: 72 + Math.floor(rng.next() * 16),
-        startBeat: s * sixteenthBeats,
-        duration: sixteenthBeats * 0.75,
-      });
+  for (let v = 0; v < numVoices; v++) {
+    let notes = voiceNotes[v] ?? [];
+    if (style === "shaw_interlace" && notes.length > 1) {
+      notes = notes.filter(() => rng.next() >= 0.08);
     }
     if (notes.length === 0) {
-      const idx = v % masterMidis.length;
-      notes.push({
-        note: masterMidis[idx]!,
-        velocity: 70,
-        startBeat: v * sixteenthBeats * 0.25,
-        duration: sixteenthBeats * 2,
-      });
+      const bo = voiceBaseOctave(v, 4, 4);
+      notes = [
+        {
+          note: clampMidi(12 * bo + scale.rootPc),
+          velocity: 70,
+          startBeat: v * eighthBeats * 0.25,
+          duration: eighthBeats * 2,
+        },
+      ];
     }
     parts.push({ voiceIndex: v, notes, name: `Hocket Voice ${v + 1}` });
   }

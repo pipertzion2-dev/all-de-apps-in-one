@@ -86,7 +86,7 @@ export function buildPlayExportPackFiles(options: {
     "- melodyne_reference.mid — imported Melodyne notes (if present)",
     "- all_stems_multitrack.mid — all generated parts in one file",
     "",
-    "Drag .mid files into your DAW. Meend uses MIDI pitch wheel data on the lead stem.",
+    "Drag .mid files into your DAW. Meend uses MIDI pitch wheel data on every stem when enabled.",
   ].join("\n");
 
   return { readme, sessionJson: sessionJson ? JSON.stringify(sessionJson, null, 2) : undefined, files };

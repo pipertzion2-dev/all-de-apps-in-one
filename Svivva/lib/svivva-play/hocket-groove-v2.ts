@@ -109,17 +109,9 @@ export function buildV2HocketSlotPattern(
     }
   }
 
-  // Resolve collisions: first voice claiming a slot wins
-  const owner = new Map<number, number>();
+  // AI V-2: overlapping slots across voices (no collision stripping).
   for (let v = 0; v < numVoices; v++) {
-    const kept: number[] = [];
-    for (const slot of pattern[v]!) {
-      if (!owner.has(slot)) {
-        owner.set(slot, v);
-        kept.push(slot);
-      }
-    }
-    pattern[v] = kept.sort((a, b) => a - b);
+    pattern[v] = [...pattern[v]!].sort((a, b) => a - b);
   }
 
   return pattern;

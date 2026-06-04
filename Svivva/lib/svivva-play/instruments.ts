@@ -256,10 +256,10 @@ const SITAR: InstrumentPreset = {
 export const MEEND_PREVIEW: InstrumentPreset = {
   synthType: "mono",
   oscillator: { type: "sine" },
-  envelope: { attack: 0.04, decay: 0.12, sustain: 0.88, release: 0.65 },
-  filter: { type: "lowpass", frequency: 3600, rolloff: -12, Q: 1.2 },
-  portamento: 0.42,
-  volume: -2,
+  envelope: { attack: 0.02, decay: 0.08, sustain: 0.92, release: 0.5 },
+  filter: { type: "lowpass", frequency: 4200, rolloff: -12, Q: 1.2 },
+  portamento: 0.55,
+  volume: 2,
 };
 
 const DEFAULT_PRESET: InstrumentPreset = {

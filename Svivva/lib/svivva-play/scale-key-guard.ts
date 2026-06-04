@@ -261,6 +261,17 @@ export function midiPitchWheelToCents(wheel: number): number {
   return (wheel / 8192) * 200;
 }
 
+/** Longer sustains so preview meend (portamento + pitch wheel) is audible on hocket lines. */
+export function prepareMeendPreviewEvents<T extends { startBeat: number; duration: number }>(
+  events: T[],
+  minDurationBeats = 0.6,
+): T[] {
+  return events.map((e) => ({
+    ...e,
+    duration: Math.max(e.duration || 0.25, minDurationBeats),
+  }));
+}
+
 /** V-1 INDIAN: S-curve meend mapped to MIDI pitch wheel (audible in preview + export). */
 export function meendPitchbendForEvents(
   events: { startBeat: number; duration: number }[],
@@ -370,12 +381,14 @@ export type ConstrainableStem = {
 export function refreshMeendExpression<T extends ConstrainableStem>(stem: T): T {
   const expr = stem.expression;
   if (!expr?.meend && !(expr?.pitchbend?.length ?? 0)) return stem;
+  const meendEvents = prepareMeendPreviewEvents(stem.midiEvents);
   return {
     ...stem,
+    midiEvents: meendEvents,
     expression: {
       ...expr,
       meend: true,
-      pitchbend: meendPitchbendForEvents(stem.midiEvents),
+      pitchbend: meendPitchbendForEvents(meendEvents),
     },
   };
 }

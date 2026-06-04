@@ -16,6 +16,7 @@ import {
   generateDeterministicChordStems,
   persistGenerationBundle,
   applyMeendToStems,
+  meendApplicableStemNames,
   type GeneratedStemResult,
 } from "@/lib/svivva-play/generate-helpers";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
@@ -31,7 +32,6 @@ import {
   resolveLockedGenerationKey,
   stabilizeHarmonicTimeline,
   melodicAnchorMidi,
-  meendPitchbendForEvents,
   resolveCompositionScale,
 } from "@/lib/svivva-play/scale-key-guard";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
@@ -347,7 +347,8 @@ export async function POST(request: NextRequest) {
       );
       const reichStyle = (settings.reichStyle || stylePreset || "reich_electric") as StyleName;
       const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
-      const hocketGroove = (settings.hocketGroove as HocketGrooveStyle | undefined) ?? undefined;
+      const hocketGroove =
+        (settings.hocketGroove as HocketGrooveStyle | undefined) ?? "reich_phase";
       const voices = composeStrategicReich({
         durationSec: sessionDurationSec,
         bpm: analysisData.bpm,
@@ -386,7 +387,7 @@ export async function POST(request: NextRequest) {
           bpm: analysisData.bpm,
           harmonyRules: `Reich ${reichType} (${reichStyle}) — interlocking cells from import harmony`,
           meendApplicableStems:
-            (settings.meend ?? false) ? guardedStems.filter((_, i) => i === 0).map((s) => s.name) : [],
+            (settings.meend ?? false) ? meendApplicableStemNames(guardedStems) : [],
           composer: "reich",
           hocketGroove: hocketGroove ?? "reich_interlock",
           swingAmount: settings.swingAmount,
@@ -531,28 +532,6 @@ export async function POST(request: NextRequest) {
       const midiStem = midiOutput.stems[i];
       const planStem = plan.stems[i] || plan.stems.find((s) => s.name === midiStem.name);
 
-      if (
-        (settings.meend ?? false) &&
-        (mode === "solo" || mode === "composition") &&
-        (planStem?.role === "lead" ||
-          planStem?.role === "melody" ||
-          planStem?.role === "vocal" ||
-          i === 0)
-      ) {
-        const pb = Array.isArray(
-          (midiStem as { expression?: { pitchbend?: unknown[] } }).expression?.pitchbend,
-        )
-          ? (midiStem as { expression: { pitchbend: unknown[] } }).expression.pitchbend
-          : [];
-        const events = normalizeMidiEvents(midiStem.midi_events);
-        if (pb.length === 0 && events.length > 0) {
-          (midiStem as { expression?: Record<string, unknown> }).expression = {
-            ...(midiStem as { expression?: Record<string, unknown> }).expression,
-            pitchbend: meendPitchbendForEvents(events),
-          };
-        }
-      }
-
       const stemId = uuidv4();
       const events = normalizeMidiEvents(midiStem.midi_events);
 
@@ -599,13 +578,16 @@ export async function POST(request: NextRequest) {
       manualKey,
       sessionChords,
     );
-    const guardedStemResults = constrainGeneratedStems(
+    let guardedStemResults = constrainGeneratedStems(
       stemResults,
       lockedKey,
       sessionChords,
       analysisData.bpm,
       { anchorMidi: melodicAnchor, scaleInfo: llmScaleInfo },
     );
+    if (settings.meend ?? false) {
+      guardedStemResults = applyMeendToStems(guardedStemResults);
+    }
 
     if (resolvedSessionId) {
       try {
@@ -630,7 +612,10 @@ export async function POST(request: NextRequest) {
         form: plan.form,
         dynamics: plan.dynamics,
         harmonyRules: plan.harmony_rules,
-        meendApplicableStems: plan.meend_applicable_stems || [],
+        meendApplicableStems:
+          (settings.meend ?? false)
+            ? meendApplicableStemNames(guardedStemResults)
+            : plan.meend_applicable_stems || [],
         key: lockedKey,
       },
       qualityTier: "professional",

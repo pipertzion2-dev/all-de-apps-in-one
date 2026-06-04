@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { composeHocket } from "./reich-engine";
-import { resolveScale } from "./reich-engine";
+import { composeHocket, resolveScale } from "./reich-engine";
 
-describe("composeHocket v2 interlock", () => {
-  it("assigns each sixteenth slot to exactly one of six voices", () => {
+describe("composeHocket", () => {
+  it("reich_interlock assigns each sixteenth slot to exactly one of six voices", () => {
     const scale = resolveScale("major", "C", "major");
     const parts = composeHocket({
       durationSec: 4,
@@ -11,6 +10,7 @@ describe("composeHocket v2 interlock", () => {
       scale,
       style: "reich_electric",
       seed: 42,
+      hocketGroove: "reich_interlock",
     });
     expect(parts).toHaveLength(6);
     const slotOwner = new Map<number, number>();
@@ -23,5 +23,21 @@ describe("composeHocket v2 interlock", () => {
       }
     }
     expect(slotOwner.size).toBeGreaterThan(8);
+  });
+
+  it("V-2 groove produces eight voices with ghost notes and rapid-fire density", () => {
+    const scale = resolveScale("major", "C", "major");
+    const parts = composeHocket({
+      durationSec: 8,
+      bpm: 120,
+      scale,
+      seed: 99,
+      hocketGroove: "shaw_interlock",
+    });
+    expect(parts).toHaveLength(8);
+    const totalNotes = parts.reduce((sum, p) => sum + p.notes.length, 0);
+    expect(totalNotes).toBeGreaterThan(40);
+    const hasSoftGhost = parts.some((p) => p.notes.some((n) => n.velocity < 55));
+    expect(hasSoftGhost).toBe(true);
   });
 });

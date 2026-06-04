@@ -3,7 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
-import { constrainGeneratedStems, meendPitchbendForEvents } from "./scale-key-guard";
+import {
+  constrainGeneratedStems,
+  meendPitchbendForEvents,
+  prepareMeendPreviewEvents,
+} from "./scale-key-guard";
 import type { ChordSegment } from "./chord-from-chroma";
 
 type CompPattern = "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
@@ -49,36 +53,24 @@ export function chordStemsToResults(
   });
 }
 
-function meendStemIndex(stems: GeneratedStemResult[]): number {
-  let best = 0;
-  let bestCount = 0;
-  for (let i = 0; i < stems.length; i++) {
-    const role = String(stems[i]!.role || "").toLowerCase();
-    const count = stems[i]!.midiEvents.length;
-    const weight =
-      count + (role === "melody" || role === "lead" || role === "solo" || role === "vocal" ? 8 : 0);
-    if (weight > bestCount) {
-      bestCount = weight;
-      best = i;
-    }
-  }
-  return best;
-}
-
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
-  const leadIdx = meendStemIndex(stems);
-  return stems.map((stem, i) => {
-    if (i !== leadIdx || stem.midiEvents.length === 0) return stem;
+  return stems.map((stem) => {
+    if (stem.midiEvents.length === 0) return stem;
+    const meendEvents = prepareMeendPreviewEvents(stem.midiEvents);
     return {
       ...stem,
-      instrumentHint: "sitar",
+      midiEvents: meendEvents,
       expression: {
         ...stem.expression,
         meend: true,
-        pitchbend: meendPitchbendForEvents(stem.midiEvents),
+        pitchbend: meendPitchbendForEvents(meendEvents),
       },
     };
   });
+}
+
+export function meendApplicableStemNames(stems: { name: string; midiEvents: unknown[] }[]): string[] {
+  return stems.filter((s) => s.midiEvents.length > 0).map((s) => s.name);
 }
 
 export function generateDeterministicChordStems(
