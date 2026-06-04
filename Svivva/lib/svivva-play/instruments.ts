@@ -252,14 +252,14 @@ const SITAR: InstrumentPreset = {
   fx: [{ type: "reverb", wet: 0.3, decay: 3.0, preDelay: 0.02 }],
 };
 
-/** Sustained mono voice for live meend preview (pitch wheel / portamento). */
+/** Sustained mono voice for live meend preview (legato glides + pitch wheel). */
 export const MEEND_PREVIEW: InstrumentPreset = {
   synthType: "mono",
-  oscillator: { type: "sine" },
-  envelope: { attack: 0.02, decay: 0.08, sustain: 0.92, release: 0.5 },
-  filter: { type: "lowpass", frequency: 4200, rolloff: -12, Q: 1.2 },
-  portamento: 0.55,
-  volume: 2,
+  oscillator: { type: "sawtooth" },
+  envelope: { attack: 0.06, decay: 0.1, sustain: 0.95, release: 0.85 },
+  filter: { type: "lowpass", frequency: 5200, rolloff: -12, Q: 0.9 },
+  portamento: 0.35,
+  volume: 4,
 };
 
 const DEFAULT_PRESET: InstrumentPreset = {
