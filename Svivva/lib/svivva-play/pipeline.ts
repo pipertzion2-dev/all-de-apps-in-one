@@ -53,6 +53,9 @@ export interface PipelineSettings {
   lockedNotes?: string[];
   scale?: string;
   stylePreset?: string;
+  reichStyle?: string;
+  reichType?: string;
+  reichScale?: string;
 }
 
 export interface PipelineStageResult<T> {

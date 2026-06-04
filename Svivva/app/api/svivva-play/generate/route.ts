@@ -15,18 +15,25 @@ import { applyChordEditsToAnalysis, playViewToAnalysis } from "@/lib/svivva-play
 import {
   generateDeterministicChordStems,
   persistGenerationBundle,
+  applyMeendToStems,
   type GeneratedStemResult,
 } from "@/lib/svivva-play/generate-helpers";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 import type { PlayAnalysisView } from "@/lib/svivva-play/instant-analysis";
 import {
+  composeStrategicReich,
   generateStrategicStems,
+  voicePartsToStemResults,
   type HarmonicContextInput,
 } from "@/lib/svivva-play/strategic-compose";
 import {
   constrainGeneratedStems,
   resolveLockedGenerationKey,
+  stabilizeHarmonicTimeline,
+  melodicAnchorMidi,
+  meendPitchbendForEvents,
 } from "@/lib/svivva-play/scale-key-guard";
+import { resolveScale, type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
 
 function parseRootFromKey(key: string): string {
@@ -38,32 +45,11 @@ function isMinorKey(key: string): boolean {
   return /minor|(^|\s)m($|\s)/i.test(key || "");
 }
 
-function pickIndianRagaKeyLabel(opts: { root: string; minor: boolean; seed: number }): string {
+function pickIndianRagaScaleName(opts: { root: string; minor: boolean; seed: number }): string {
   const major = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
   const minor = ["raga_todi", "raga_bhairavi"] as const;
   const list = opts.minor ? minor : major;
-  const picked = list[Math.abs(opts.seed) % list.length];
-  return `${opts.root} ${picked}`;
-}
-
-function meendPitchbendForEvents(
-  events: { startBeat: number; duration: number }[],
-): { beat: number; value: number }[] {
-  const out: { beat: number; value: number }[] = [];
-  for (const e of events) {
-    const d = Math.max(0.05, e.duration || 0.25);
-    const start = Math.max(0, e.startBeat + d * 0.7);
-    const mid = Math.max(0, e.startBeat + d * 0.85);
-    const end = Math.max(0, e.startBeat + d * 0.98);
-    out.push({ beat: start, value: 0 }, { beat: mid, value: 850 }, { beat: end, value: 0 });
-  }
-  out.sort((a, b) => a.beat - b.beat);
-  const dedup: typeof out = [];
-  for (const p of out) {
-    const last = dedup[dedup.length - 1];
-    if (!last || Math.abs(last.beat - p.beat) > 1e-4) dedup.push(p);
-  }
-  return dedup;
+  return list[Math.abs(opts.seed) % list.length];
 }
 
 async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
@@ -151,19 +137,16 @@ export async function POST(request: NextRequest) {
     analysisData = {
       ...analysisData,
       key: lockedKey,
-      chords:
-        harmonicContext && harmonicContext.chords.length >= 2
-          ? harmonicContext.chords.map((c) => ({
-              t0: c.t0,
-              t1: c.t1,
-              symbol: c.symbol,
-              confidence: c.confidence ?? 70,
-            }))
-          : analysisData.chords,
     };
 
-    const sessionChords: ChordSegment[] =
-      harmonicContext && harmonicContext.chords.length >= 2
+    const sessionDurationSec =
+      harmonicContext?.durationSec ??
+      analysisData.sections?.[0]?.t1 ??
+      (analysisData.chords.length ? analysisData.chords[analysisData.chords.length - 1]?.t1 : 64) ??
+      64;
+
+    const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
+      harmonicContext && harmonicContext.chords.length >= 1
         ? harmonicContext.chords
         : analysisData.chords.map((c) => ({
             t0: c.t0,
@@ -171,7 +154,33 @@ export async function POST(request: NextRequest) {
             symbol: c.symbol,
             confidence: c.confidence ?? 55,
             pitchClasses: [],
-          }));
+          })),
+      sessionDurationSec,
+      analysisData.bpm,
+    );
+
+    const melodicAnchor = harmonicContext
+      ? melodicAnchorMidi(
+          harmonicContext.melodyneNotes.length
+            ? harmonicContext.melodyneNotes
+            : harmonicContext.audioNotes,
+        )
+      : undefined;
+
+    analysisData = {
+      ...analysisData,
+      chords: sessionChords.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence ?? 70,
+      })),
+    };
+
+    if (harmonicContext) {
+      harmonicContext.chords = sessionChords;
+      harmonicContext.key = lockedKey;
+    }
 
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
@@ -181,11 +190,11 @@ export async function POST(request: NextRequest) {
       mode === "solo" && (settings.meend ?? false)
         ? {
             ...analysisData,
-            key: pickIndianRagaKeyLabel({
+            key: `${parseRootFromKey(analysisData.key)} ${pickIndianRagaScaleName({
               root: parseRootFromKey(analysisData.key),
               minor: isMinorKey(analysisData.key),
               seed,
-            }),
+            })}`,
           }
         : analysisData;
 
@@ -206,6 +215,7 @@ export async function POST(request: NextRequest) {
         lockedKey,
         sessionChords,
         analysisData.bpm,
+        { anchorMidi: melodicAnchor },
       );
       if (resolvedSessionId) {
         try {
@@ -311,8 +321,56 @@ export async function POST(request: NextRequest) {
         harmonyMode: settings.harmonyMode,
       });
 
+    const runReichComposition = () => {
+      const root = parseRootFromKey(lockedKey);
+      const minor = isMinorKey(lockedKey);
+      const scaleName =
+        (settings.meend ?? false)
+          ? pickIndianRagaScaleName({ root, minor, seed })
+          : (settings.reichScale as string | undefined) || "major";
+      const reichStyle = (settings.reichStyle || stylePreset || "reich_electric") as StyleName;
+      const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
+      const scale = resolveScale(minor ? "minor" : "major", root, scaleName);
+      const voices = composeStrategicReich({
+        durationSec: sessionDurationSec,
+        bpm: analysisData.bpm,
+        scale,
+        style: reichStyle,
+        seed,
+        type: reichType,
+        ctx: harmonicContext!,
+      });
+      const hints =
+        reichType === "hocket"
+          ? ["vibraphone", "steel_drums", "piano", "marimba", "rhodes", "synth_lead"]
+          : ["piano", "vibraphone", "marimba"];
+      let stems = voicePartsToStemResults(voices, hints);
+      if (settings.meend ?? false) stems = applyMeendToStems(stems);
+      return {
+        stems: constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
+          anchorMidi: melodicAnchor,
+        }),
+        plan: {
+          stemCount: stems.length,
+          key: lockedKey,
+          bpm: analysisData.bpm,
+          harmonyRules: `Reich ${reichType} (${reichStyle}) — interlocking cells from import harmony`,
+          meendApplicableStems:
+            (settings.meend ?? false) ? stems.filter((_, i) => i === 0).map((s) => s.name) : [],
+          composer: "reich",
+        },
+        pipeline: { stage: "complete", stages: ["reich_listen", "reich_compose"] },
+      };
+    };
+
+    // Composition mode: Reich interlocking voices (v-1 / v-2 style), not pad-stab strategic
+    if (mode === "composition" && harmonicContext) {
+      const reich = runReichComposition();
+      return finishWithStems(reich.stems, reich.plan, reich.pipeline, { composer: "reich" });
+    }
+
     // Strategic listen-first compose when harmonic session data is present
-    if (richHarmonic && mode !== "solo") {
+    if (richHarmonic && mode !== "solo" && mode !== "composition") {
       const strategic = runStrategic();
       if (harmonicContext) harmonicContext.key = lockedKey;
       return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline, {
@@ -442,8 +500,8 @@ export async function POST(request: NextRequest) {
       const planStem = plan.stems[i] || plan.stems.find((s) => s.name === midiStem.name);
 
       if (
-        mode === "solo" &&
         (settings.meend ?? false) &&
+        (mode === "solo" || mode === "composition") &&
         (planStem?.role === "lead" ||
           planStem?.role === "melody" ||
           planStem?.role === "vocal" ||
@@ -508,6 +566,7 @@ export async function POST(request: NextRequest) {
       lockedKey,
       sessionChords,
       analysisData.bpm,
+      { anchorMidi: melodicAnchor },
     );
 
     if (resolvedSessionId) {

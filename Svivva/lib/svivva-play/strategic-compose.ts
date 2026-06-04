@@ -11,7 +11,14 @@ import type { VoicePart, ScaleResolution } from "./reich-engine";
 import { normalizeKeyLabel } from "./analysis-utils";
 import { chordStemsToResults, type GeneratedStemResult } from "./generate-helpers";
 import { normalizeMidiEvents } from "./midi-normalize";
-import { constrainGeneratedStems, parseScaleFromKey, snapNoteToScale } from "./scale-key-guard";
+import {
+  constrainGeneratedStems,
+  parseScaleFromKey,
+  snapNoteToScale,
+  stabilizeHarmonicTimeline,
+  melodicAnchorMidi,
+  clampNoteToRegister,
+} from "./scale-key-guard";
 
 export type HarmonicContextInput = {
   chords: ChordSegment[];
@@ -52,7 +59,7 @@ function pcsForSymbol(symbol: string): number[] {
 }
 
 function midiFromPc(pc: number, octave: number): number {
-  return Math.max(36, Math.min(96, octave * 12 + pc));
+  return Math.max(36, Math.min(84, octave * 12 + pc));
 }
 
 function chordAt(chords: ChordSegment[], tSec: number): ChordSegment | null {
@@ -113,7 +120,7 @@ function voiceLeadVoicing(
 ): number[] {
   const pcs = chord.pitchClasses?.length > 0 ? chord.pitchClasses : pcsForSymbol(chord.symbol);
   const root = parseRoot(chord.symbol);
-  const baseOct = register === "low" ? 2 : register === "high" ? 4 : 3;
+  const baseOct = register === "low" ? 2 : register === "high" ? 3 : 3;
 
   if (!prevVoicing.length) {
     return pcs.map((pc, i) => midiFromPc((root + pc) % 12, baseOct + (i > 2 ? 1 : 0)));
@@ -258,6 +265,7 @@ function buildMelodyEvents(
   profile: ListeningProfile,
   seed: number,
   sessionKey: string,
+  anchorMidi?: number,
 ): ChordMidiEvent[] {
   const beatSec = 60 / bpm;
   const pool = profile.hasMelodyne ? ctx.melodyneNotes : ctx.audioNotes;
@@ -285,6 +293,7 @@ function buildMelodyEvents(
         note = midiFromPc((root + targetPc) % 12, Math.min(6, Math.max(4, oct)));
       }
       note = snapNoteToScale(note, scale);
+      note = clampNoteToRegister(note, "melody", { anchorMidi });
       events.push({
         note,
         velocity: Math.min(105, n.velocity + 8),
@@ -301,7 +310,11 @@ function buildMelodyEvents(
     const root = parseRoot(chord.symbol);
     const startBeat = chord.t0 / beatSec;
     const oct = Math.floor(profile.melodicRegister / 12);
-    const note = midiFromPc((root + pcs[1 % pcs.length]) % 12, Math.min(6, oct));
+    const note = clampNoteToRegister(
+      midiFromPc((root + pcs[1 % pcs.length]) % 12, Math.min(5, oct)),
+      "melody",
+      { anchorMidi: profile.melodicRegister },
+    );
     events.push({
       note,
       velocity: 72,
@@ -334,8 +347,8 @@ export function generateStrategicStems(
   pipeline: { stage: string; stages: string[] };
 } {
   const bpm = analysis.bpm || 120;
-  const chords =
-    ctx.chords.length >= 2
+  const rawChords =
+    ctx.chords.length >= 1
       ? ctx.chords
       : (analysis.chords as ChordSegment[]).map((c) => ({
           t0: c.t0,
@@ -344,6 +357,10 @@ export function generateStrategicStems(
           confidence: c.confidence ?? 55,
           pitchClasses: pcsForSymbol(c.symbol),
         }));
+  const chords = stabilizeHarmonicTimeline(rawChords, ctx.durationSec, bpm);
+  const anchorMidi = melodicAnchorMidi(
+    ctx.melodyneNotes.length ? ctx.melodyneNotes : ctx.audioNotes,
+  );
 
   const profile = analyzeListening(ctx, bpm, chords);
   const density = settings.density ?? 55;
@@ -355,7 +372,7 @@ export function generateStrategicStems(
   const sessionKey = normalizeKeyLabel(ctx.key ?? analysis.key);
   const harmonyEvents = buildHarmonyEvents(trimmed, bpm, profile, pattern, density);
   const bassEvents = buildBassEvents(trimmed, bpm, profile);
-  const melodyEvents = buildMelodyEvents(trimmed, ctx, bpm, profile, seed, sessionKey);
+  const melodyEvents = buildMelodyEvents(trimmed, ctx, bpm, profile, seed, sessionKey, anchorMidi);
 
   const chordStems: ChordStem[] = [
     {
@@ -424,6 +441,7 @@ export function generateStrategicStems(
       key: sessionKey,
       chords: trimmed,
       bpm,
+      anchorMidi,
     }),
     plan: {
       stemCount: chordStems.length,

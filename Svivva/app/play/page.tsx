@@ -49,6 +49,10 @@ import {
   barAlignedDurationSec,
 } from "@/lib/svivva-play/session-duration";
 import {
+  meendPitchbendForEvents,
+  stabilizeHarmonicTimeline,
+} from "@/lib/svivva-play/scale-key-guard";
+import {
   ORCHESTRAL_STYLE_PRESET_ID,
   isOrchestralPreset,
 } from "@/lib/svivva-play/prompts/orchestral-composer";
@@ -918,7 +922,7 @@ export default function SvivvaPlayPage() {
               : 12,
         };
       default:
-        return base;
+        return { ...base, reichStyle, reichType, reichScale };
     }
   }, [
     mode,
@@ -929,6 +933,9 @@ export default function SvivvaPlayPage() {
     userPrompt,
     useSeed,
     seed,
+    reichStyle,
+    reichType,
+    reichScale,
     tension,
     rootMovement,
     voiceLeading,
@@ -978,7 +985,11 @@ export default function SvivvaPlayPage() {
           (analysis.key && !analysis.key.startsWith("Detecting") ? analysis.key : "C major");
         const harmonicContext = transcription
           ? {
-              chords: transcription.chords,
+              chords: stabilizeHarmonicTimeline(
+                transcription.chords,
+                transcription.durationSec,
+                manualTempo ?? analysis.bpm ?? 120,
+              ),
               audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
               melodyneNotes: transcription.melodyneNotes ?? [],
               durationSec: transcription.durationSec,
@@ -1712,7 +1723,7 @@ export default function SvivvaPlayPage() {
       const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
       if (!useSeed) setSeed(currentSeed);
 
-      const chordSource =
+      const chordSourceRaw =
         (analysis?.chords?.length ? analysis.chords : transcription?.chords)?.map((c, i) => ({
           t0: c.t0,
           t1: c.t1,
@@ -1720,6 +1731,7 @@ export default function SvivvaPlayPage() {
           confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
           pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
         })) ?? [];
+      const chordSource = stabilizeHarmonicTimeline(chordSourceRaw, durationSec, bpm);
 
       const harmonicCtx = transcription
         ? {
@@ -1732,7 +1744,7 @@ export default function SvivvaPlayPage() {
         : null;
 
       const voices =
-        harmonicCtx && chordSource.length >= 2
+        harmonicCtx && chordSource.length >= 1
           ? composeStrategicReich({
               durationSec,
               bpm,
@@ -1742,7 +1754,7 @@ export default function SvivvaPlayPage() {
               type: reichType,
               ctx: harmonicCtx,
             })
-          : chordSource.length >= 2
+          : chordSource.length >= 1
             ? composeWithChordProgression({
                 durationSec,
                 bpm,
@@ -1781,20 +1793,8 @@ export default function SvivvaPlayPage() {
           startBeat: n.startBeat,
           duration: n.duration,
         }));
-        const pitchbend: { beat: number; value: number }[] = [];
-        if (meend && i === 0) {
-          // Subtle meend ramps near the end of each note (MIDI pitchbend: -8192..8191).
-          for (const n of v.notes) {
-            const start = n.startBeat + Math.max(0.01, n.duration * 0.7);
-            const mid = n.startBeat + Math.max(0.02, n.duration * 0.85);
-            const end = n.startBeat + Math.max(0.03, n.duration * 0.98);
-            pitchbend.push(
-              { beat: start, value: 0 },
-              { beat: mid, value: 850 },
-              { beat: end, value: 0 },
-            );
-          }
-        }
+        const expression =
+          meend && i === 0 ? { meend: true, pitchbend: meendPitchbendForEvents(midiEvents) } : {};
 
         return {
           id: `voice-${i}`,
@@ -1807,7 +1807,7 @@ export default function SvivvaPlayPage() {
           pan: Math.round((i / Math.max(voices.length - 1, 1)) * 200 - 100),
           gainDb: 0,
           midiEvents,
-          expression: meend && i === 0 ? { pitchbend } : {},
+          expression,
           articulations: [],
           qualityTier: "professional",
         };

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
-import { constrainGeneratedStems } from "./scale-key-guard";
+import { constrainGeneratedStems, meendPitchbendForEvents } from "./scale-key-guard";
 import type { ChordSegment } from "./chord-from-chroma";
 
 type CompPattern = "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
@@ -26,7 +26,7 @@ export interface GeneratedStemResult {
 
 export function chordStemsToResults(
   chordStems: ChordStem[],
-  lock?: { key: string; chords?: ChordSegment[]; bpm?: number },
+  lock?: { key: string; chords?: ChordSegment[]; bpm?: number; anchorMidi?: number },
 ): GeneratedStemResult[] {
   const results = chordStems.map((stem) => ({
     id: uuidv4(),
@@ -44,7 +44,28 @@ export function chordStemsToResults(
     qualityTier: "professional",
   }));
   if (!lock?.key) return results;
-  return constrainGeneratedStems(results, lock.key, lock.chords ?? [], lock.bpm ?? 120);
+  return constrainGeneratedStems(results, lock.key, lock.chords ?? [], lock.bpm ?? 120, {
+    anchorMidi: lock.anchorMidi,
+  });
+}
+
+export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
+  return stems.map((stem, i) => {
+    const isLead =
+      i === 0 ||
+      ["melody", "lead", "solo", "vocal"].includes(String(stem.role || "").toLowerCase());
+    if (!isLead || stem.midiEvents.length === 0) return stem;
+    return {
+      ...stem,
+      instrumentHint:
+        stem.role === "melody" || stem.role === "lead" ? "lead synth" : stem.instrumentHint,
+      expression: {
+        ...stem.expression,
+        meend: true,
+        pitchbend: meendPitchbendForEvents(stem.midiEvents),
+      },
+    };
+  });
 }
 
 export function generateDeterministicChordStems(

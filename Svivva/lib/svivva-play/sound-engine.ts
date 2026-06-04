@@ -23,6 +23,7 @@ export interface StemPlayback {
   expression?: {
     cc?: { beat: number; cc_number: number; value: number }[];
     pitchbend?: { beat: number; value: number }[];
+    meend?: boolean;
   };
 }
 
@@ -292,7 +293,11 @@ export class SvivvaSoundEngine {
 
     for (const stem of stems) {
       const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
-      const synth = this.createSynth(preset);
+      const pitchBends = stem.expression?.pitchbend ?? [];
+      const hasMeend = pitchBends.length > 0 || Boolean(stem.expression?.meend);
+      const synth = this.createSynth(
+        hasMeend ? { ...preset, synthType: "mono", portamento: 0.22 } : preset,
+      );
       const panner = new Tone.Panner(stem.pan / 100);
       const volume = new Tone.Volume(stem.gainDb || 0);
       const effects = this.createEffectsChain(preset.fx);
@@ -307,12 +312,9 @@ export class SvivvaSoundEngine {
 
       const scheduledIds: number[] = [];
       const events = (stem.midiEvents || []) as MidiEvent[];
-      const hasMeend = (stem.expression?.pitchbend?.length ?? 0) > 0;
-      if (hasMeend && synth instanceof Tone.MonoSynth) {
-        synth.portamento = 0.12;
-      }
+      const sortedEvents = [...events].sort((a, b) => a.startBeat - b.startBeat);
 
-      for (const evt of events) {
+      for (const evt of sortedEvents) {
         const time = this.beatToSeconds(evt.startBeat);
         const dur = this.beatToSeconds(evt.duration);
         const note = this.noteToFreq(evt.note);
@@ -323,6 +325,7 @@ export class SvivvaSoundEngine {
         const id = transport.schedule((t) => {
           try {
             if (synth instanceof Tone.MonoSynth) {
+              if (hasMeend) synth.detune.value = 0;
               synth.triggerAttackRelease(note, dur, t, vel);
             } else if (synth instanceof Tone.MembraneSynth) {
               synth.triggerAttackRelease(note, dur, t, vel);
@@ -335,7 +338,7 @@ export class SvivvaSoundEngine {
             } else if (synth instanceof Tone.PolySynth) {
               synth.triggerAttackRelease(note, dur, t, vel);
             }
-            if (evt === events[0]) {
+            if (evt === sortedEvents[0]) {
               console.log(`🔊 First note scheduled: ${stem.name}, note ${evt.note}, vel ${vel}`);
             }
           } catch (e) {
@@ -343,24 +346,18 @@ export class SvivvaSoundEngine {
           }
         }, time);
         scheduledIds.push(id);
-      }
 
-      for (const pb of stem.expression?.pitchbend ?? []) {
-        const pbTime = this.beatToSeconds(pb.beat);
-        scheduledIds.push(
-          transport.schedule((t) => {
-            const cents = (pb.value / 8192) * 140;
-            try {
-              if (synth instanceof Tone.PolySynth) {
-                synth.set({ detune: cents });
-              } else if (synth instanceof Tone.MonoSynth) {
-                synth.detune.value = cents;
-              }
-            } catch (e) {
-              console.error("Meend pitchbend error:", e);
-            }
-          }, pbTime),
-        );
+        if (hasMeend && synth instanceof Tone.MonoSynth) {
+          for (const pb of pitchBends) {
+            if (pb.beat < evt.startBeat - 0.001 || pb.beat > endBeat + 0.001) continue;
+            const pbTime = this.beatToSeconds(pb.beat);
+            scheduledIds.push(
+              transport.schedule(() => {
+                synth.detune.value = (pb.value / 8192) * 200;
+              }, pbTime),
+            );
+          }
+        }
       }
 
       this.channels.set(stem.name, {

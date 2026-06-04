@@ -2,6 +2,7 @@ import type { ChordSegment } from "./chord-from-chroma";
 import type { TranscribedNote } from "./audio-transcription";
 import { composeCounterpoint, composeHocket, type VoicePart } from "./reich-engine";
 import type { ScaleResolution } from "./reich-engine";
+import { clampNoteToRegister, melodicAnchorMidi } from "./scale-key-guard";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -49,6 +50,7 @@ export function composeWithChordProgression(options: {
 
   if (!chords.length) return base;
 
+  const anchor = melodicAnchorMidi(melodyneNotes);
   const beatSec = 60 / bpm;
   return base.map((voice, vi) => {
     const notes = voice.notes.map((n) => {
@@ -58,10 +60,18 @@ export function composeWithChordProgression(options: {
         (mn) => Math.abs(mn.startSec - tSec) < beatSec * 0.45,
       );
       if (nearbyMelodyne.length > 0 && vi > 0) {
-        const anchor = nearbyMelodyne[vi % nearbyMelodyne.length];
-        return { ...n, note: anchor.midi };
+        const anchorNote = nearbyMelodyne[vi % nearbyMelodyne.length];
+        const note = clampNoteToRegister(anchorNote.midi, "melody", { anchorMidi: anchor });
+        return { ...n, note };
       }
-      if (!chord) return n;
+      if (!chord) {
+        return {
+          ...n,
+          note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "harmony", {
+            anchorMidi: anchor,
+          }),
+        };
+      }
       const pcs =
         chord.pitchClasses?.length > 0 ? chord.pitchClasses : pitchClassesForSymbol(chord.symbol);
       const root = parseChordRoot(chord.symbol);
@@ -69,7 +79,8 @@ export function composeWithChordProgression(options: {
       const octave = Math.floor(n.note / 12);
       let note = octave * 12 + ((root + targetPc) % 12);
       if (note < 48) note += 12;
-      if (note > 84) note -= 12;
+      if (note > 80) note -= 12;
+      note = clampNoteToRegister(note, vi === 0 ? "melody" : "harmony", { anchorMidi: anchor });
       return { ...n, note };
     });
     return { ...voice, notes };

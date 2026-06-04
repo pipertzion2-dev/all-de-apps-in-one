@@ -82,8 +82,8 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }
 
-function clampMidi(note: number): number {
-  return Math.max(36, Math.min(108, Math.round(note)));
+function clampMidi(note: number, max = 84): number {
+  return Math.max(36, Math.min(max, Math.round(note)));
 }
 
 function midiForDegree(rootPc: number, absPcs: number[], degree: number, baseOctave = 4): number {
@@ -157,7 +157,7 @@ function buildMelodicCell(
       continue;
     }
     deg += weightedDelta(rng, weights);
-    deg = Math.max(n, Math.min(n * 5, deg));
+    deg = Math.max(n, Math.min(n * 4, deg));
     out.push(deg);
   }
   return out;
@@ -178,7 +178,7 @@ function cellToMidis(
   return degrees.map((d) => midiForDegree(rootPc, absPcs, d, baseOctave));
 }
 
-function voiceBaseOctave(vi: number, numVoices: number, base = 4): number {
+function voiceBaseOctave(vi: number, numVoices: number, base = 3): number {
   const spread = [0, 0, 1, 1, 2, 2].slice(0, numVoices);
   return vi < spread.length ? base + spread[vi] : base + Math.floor(vi / 2);
 }
@@ -244,7 +244,7 @@ export function composeCounterpoint(opts: {
 
   const parts: VoicePart[] = [];
   for (let v = 0; v < 3; v++) {
-    const bo = voiceBaseOctave(v, 3, 4);
+    const bo = voiceBaseOctave(v, 3, 3);
     const seqMidis = cellToMidis(scale.rootPc, scale.pitchClasses, baseCells[v], bo);
     const notes: MidiNote[] = [];
     let s = v % Math.max(1, Math.min(3, total));
@@ -320,7 +320,7 @@ export function composeHocket(opts: {
 
   const parts: VoicePart[] = [];
   for (let v = 0; v < 6; v++) {
-    const bo = voiceBaseOctave(v, 6, 4);
+    const bo = voiceBaseOctave(v, 6, 3);
     const seqMidis = cellToMidis(scale.rootPc, scale.pitchClasses, cells[v], bo);
     const notes: MidiNote[] = [];
     let s = v % Math.max(1, Math.min(6, total));

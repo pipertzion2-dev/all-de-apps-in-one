@@ -4,7 +4,6 @@
 import type { ChordSegment } from "./chord-from-chroma";
 import { normalizeKeyLabel } from "./analysis-utils";
 import type { NormalizedMidiEvent } from "./midi-normalize";
-import type { GeneratedStemResult } from "./generate-helpers";
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
@@ -100,6 +99,109 @@ export function snapNoteToScale(note: number, scale: ScaleInfo): number {
   return snapNoteToPitchClasses(note, scale.scalePcs);
 }
 
+/** Keep generated notes in a musical register (anchored to source melody when known). */
+export function clampNoteToRegister(
+  note: number,
+  role: string,
+  opts?: { anchorMidi?: number },
+): number {
+  const roleNorm = role.toLowerCase();
+  if (roleNorm === "bass") return Math.max(36, Math.min(55, note));
+  if (roleNorm === "harmony" || roleNorm === "pad") return Math.max(48, Math.min(72, note));
+  const anchor = opts?.anchorMidi ?? 67;
+  const min = Math.max(55, anchor - 14);
+  const max = Math.min(84, anchor + 10);
+  return Math.max(min, Math.min(max, note));
+}
+
+function normalizeChordSymbol(symbol: string): string {
+  return symbol.replace(/\s+/g, "").replace(/\/.*$/, "").toUpperCase();
+}
+
+function chordRootPc(symbol: string): number {
+  return parseChordRoot(symbol);
+}
+
+function mergeAdjacentSameChords(chords: ChordSegment[]): ChordSegment[] {
+  if (!chords.length) return chords;
+  const sorted = [...chords].sort((a, b) => a.t0 - b.t0);
+  const out: ChordSegment[] = [{ ...sorted[0]! }];
+  for (let i = 1; i < sorted.length; i++) {
+    const c = sorted[i]!;
+    const prev = out[out.length - 1]!;
+    if (normalizeChordSymbol(prev.symbol) === normalizeChordSymbol(c.symbol)) {
+      prev.t1 = Math.max(prev.t1, c.t1);
+      prev.confidence = Math.max(prev.confidence ?? 0, c.confidence ?? 0);
+    } else {
+      out.push({ ...c });
+    }
+  }
+  return out;
+}
+
+/**
+ * When import harmony is static (one chord / one root), do not invent progressions.
+ */
+export function stabilizeHarmonicTimeline(
+  chords: ChordSegment[],
+  durationSec: number,
+  bpm: number,
+): ChordSegment[] {
+  if (!chords.length) return chords;
+  const aligned = alignChordTimelineToBeatGrid(chords, bpm);
+  const merged = mergeAdjacentSameChords(aligned);
+  const end = Math.max(durationSec, merged[merged.length - 1]?.t1 ?? durationSec);
+
+  const uniqueSymbols = [...new Set(merged.map((c) => normalizeChordSymbol(c.symbol)))];
+  if (uniqueSymbols.length <= 1) {
+    const c = merged[0]!;
+    return [{ ...c, t0: 0, t1: end, symbol: c.symbol }];
+  }
+
+  const uniqueRoots = [...new Set(merged.map((c) => chordRootPc(c.symbol)))];
+  if (uniqueRoots.length <= 1) {
+    let best = merged[0]!;
+    let bestSpan = 0;
+    for (const c of merged) {
+      const span = c.t1 - c.t0;
+      if (span > bestSpan) {
+        bestSpan = span;
+        best = c;
+      }
+    }
+    return [{ ...best, t0: 0, t1: end }];
+  }
+
+  return merged.map((c, i) => (i === merged.length - 1 ? { ...c, t1: Math.max(c.t1, end) } : c));
+}
+
+export function melodicAnchorMidi(notes: { midi: number }[]): number | undefined {
+  if (!notes.length) return undefined;
+  const sorted = [...notes].map((n) => n.midi).sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)]!;
+}
+
+export function meendPitchbendForEvents(
+  events: { startBeat: number; duration: number }[],
+): { beat: number; value: number }[] {
+  const out: { beat: number; value: number }[] = [];
+  for (const e of events) {
+    const d = Math.max(0.05, e.duration || 0.25);
+    const start = Math.max(0, e.startBeat + d * 0.55);
+    const peak = Math.max(0, e.startBeat + d * 0.78);
+    const end = Math.max(0, e.startBeat + d * 0.98);
+    // ~80–100 cent meend slide (audible on MonoSynth / portamento)
+    out.push({ beat: start, value: 0 }, { beat: peak, value: 3600 }, { beat: end, value: 0 });
+  }
+  out.sort((a, b) => a.beat - b.beat);
+  const dedup: typeof out = [];
+  for (const p of out) {
+    const last = dedup[dedup.length - 1];
+    if (!last || Math.abs(last.beat - p.beat) > 1e-4) dedup.push(p);
+  }
+  return dedup;
+}
+
 export function quantizeBeat(beat: number, grid = 0.25): number {
   return Math.max(0, Math.round(beat / grid) * grid);
 }
@@ -133,6 +235,7 @@ export function constrainMidiEvent(
   role: string,
   chords: ChordSegment[],
   bpm: number,
+  anchorMidi?: number,
 ): NormalizedMidiEvent {
   const grid = bpm >= 140 ? 0.125 : 0.25;
   const startBeat = quantizeBeat(evt.startBeat, grid);
@@ -161,6 +264,8 @@ export function constrainMidiEvent(
     note = snapNoteToScale(note, scale);
   }
 
+  note = clampNoteToRegister(note, roleNorm, { anchorMidi });
+
   return {
     ...evt,
     note,
@@ -169,17 +274,23 @@ export function constrainMidiEvent(
   };
 }
 
-export function constrainGeneratedStems(
-  stems: GeneratedStemResult[],
+export type ConstrainableStem = {
+  role: string;
+  midiEvents: NormalizedMidiEvent[];
+};
+
+export function constrainGeneratedStems<T extends ConstrainableStem>(
+  stems: T[],
   key: string,
   chords: ChordSegment[] = [],
   bpm = 120,
-): GeneratedStemResult[] {
+  opts?: { anchorMidi?: number },
+): T[] {
   const scale = parseScaleFromKey(key);
   return stems.map((stem) => ({
     ...stem,
     midiEvents: stem.midiEvents.map((evt) =>
-      constrainMidiEvent(evt, scale, stem.role, chords, bpm),
+      constrainMidiEvent(evt, scale, stem.role, chords, bpm, opts?.anchorMidi),
     ),
   }));
 }
