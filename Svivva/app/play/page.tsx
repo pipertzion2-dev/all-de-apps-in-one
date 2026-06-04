@@ -4029,9 +4029,8 @@ export default function SvivvaPlayPage() {
                               </h4>
                               <p className="text-[9px] text-gray-400">
                                 Turn on <span className="text-gray-300">Indian Meend</span> for
-                                raga-leaning scales and legato pitch bends on the lead voice (full
-                                hocket mix stays in preview). Key and raga stay locked to your import
-                                until you change seed or scale.
+                                raga scales and pitch bends. Chords and pads stay polyphonic; hocket
+                                voices keep their rhythm with meend on each line.
                               </p>
                             </div>
                           </div>

@@ -6,7 +6,11 @@ import {
   buildMeendLegatoTimeline,
   type MeendTimelineEvent,
 } from "./meend-preview-audio";
-import { meendPitchbendForEvents, prepareMeendPreviewEvents } from "./scale-key-guard";
+import {
+  meendPitchbendForEvents,
+  prepareMeendPreviewEvents,
+  stemHasOverlappingNotes,
+} from "./scale-key-guard";
 
 export interface MidiEvent {
   note: number;
@@ -315,10 +319,7 @@ export class SvivvaSoundEngine {
 
   private previewGainDb(role: string, gainDb: number, forceMeend = false): number {
     const r = role.toLowerCase();
-    if (forceMeend) {
-      if (r === "melody" || r === "lead" || r === "solo") return gainDb + 8;
-      return gainDb - 12;
-    }
+    if (forceMeend && (r === "melody" || r === "lead" || r === "solo")) return gainDb + 6;
     if (r === "melody" || r === "lead" || r === "solo") return gainDb + 4;
     return gainDb;
   }
@@ -398,30 +399,26 @@ export class SvivvaSoundEngine {
 
         let midiEvents = sortedEvents;
         let pitchBends = stem.expression?.pitchbend ?? [];
-        const r = stem.role.toLowerCase();
-        const isLeadRole = r === "melody" || r === "lead" || r === "solo";
-        const hasMeend =
-          (forceMeend && isLeadRole) ||
-          pitchBends.length > 0 ||
-          Boolean(stem.expression?.meend);
+        const polyphonic = stemHasOverlappingNotes(sortedEvents);
+        const wantsMeend =
+          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
 
-        if (hasMeend) {
-          midiEvents = prepareMeendPreviewEvents(midiEvents, 1.15);
+        if (wantsMeend && !polyphonic) {
+          midiEvents = prepareMeendPreviewEvents(midiEvents);
+          pitchBends = meendPitchbendForEvents(midiEvents);
+        } else if (wantsMeend && pitchBends.length === 0) {
           pitchBends = meendPitchbendForEvents(midiEvents);
         }
 
-        const preset = hasMeend
-          ? MEEND_PREVIEW
-          : resolveInstrumentPreset(stem.instrumentHint, stem.role);
+        const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
         const synth = this.createSynthSafe(preset);
-        if (hasMeend && !(synth instanceof Tone.MonoSynth)) {
-          console.warn(`Meend stem "${stem.name}" fell back to non-mono synth — meend will be weak`);
-        }
-        if (hasMeend && synth instanceof Tone.MonoSynth) {
+        const useLegatoMeend = wantsMeend && !polyphonic && synth instanceof Tone.MonoSynth;
+
+        if (useLegatoMeend) {
           synth.portamento = MEEND_PREVIEW.portamento ?? 0.35;
         }
         const panner = new Tone.Panner(stem.pan / 100);
-        const meendGain = hasMeend ? 10 : 0;
+        const meendGain = useLegatoMeend ? 8 : 0;
         const volume = new Tone.Volume(
           this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend) + meendGain,
         );
@@ -444,7 +441,7 @@ export class SvivvaSoundEngine {
           velocity: number;
         }[];
 
-        if (hasMeend && synth instanceof Tone.MonoSynth) {
+        if (useLegatoMeend) {
           timeline = buildMeendLegatoTimeline(
             midiEvents,
             pitchBends,
@@ -474,7 +471,7 @@ export class SvivvaSoundEngine {
         const part = new Tone.Part((time, value: MeendTimelineEvent | { note: string; duration: number; velocity: number }) => {
           try {
             if (!synth) return;
-            if (hasMeend && synth instanceof Tone.MonoSynth && "type" in value) {
+            if (useLegatoMeend && "type" in value) {
               const ev = value as MeendTimelineEvent;
               if (ev.type === "attack") {
                 synth.detune.value = 0;

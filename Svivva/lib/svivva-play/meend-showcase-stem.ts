@@ -28,7 +28,7 @@ export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null 
 export function buildMeendLeadPlayback(stems: MeendStemLike[]): StemPlayback | null {
   const lead = pickMeendLeadStem(stems);
   if (!lead) return null;
-  const midiEvents = prepareMeendPreviewEvents([...lead.midiEvents], 1.25);
+  const midiEvents = prepareMeendPreviewEvents([...lead.midiEvents]);
   if (midiEvents.length === 0) return null;
   return {
     name: MEEND_PREVIEW_STEM_NAME,

@@ -261,15 +261,39 @@ export function midiPitchWheelToCents(wheel: number): number {
   return (wheel / 8192) * 200;
 }
 
-/** Longer sustains so preview meend (portamento + pitch wheel) is audible on hocket lines. */
+/** True when a stem plays more than one pitch at the same time (chord pads, etc.). */
+export function stemHasOverlappingNotes(
+  events: { startBeat: number; duration: number }[],
+): boolean {
+  const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
+  for (let i = 0; i < sorted.length; i++) {
+    const end = sorted[i]!.startBeat + Math.max(sorted[i]!.duration || 0.25, 0.08);
+    for (let j = i + 1; j < sorted.length; j++) {
+      if (sorted[j]!.startBeat >= end - 1e-4) break;
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Sustains for meend without overlapping the next note (keeps hocket/poly texture). */
 export function prepareMeendPreviewEvents<T extends { startBeat: number; duration: number }>(
   events: T[],
-  minDurationBeats = 1.15,
+  minDurationBeats = 0.35,
+  maxSustainBeats = 1.1,
 ): T[] {
-  return events.map((e) => ({
-    ...e,
-    duration: Math.max(e.duration || 0.25, minDurationBeats),
-  }));
+  const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
+  return sorted.map((e, i) => {
+    const next = sorted[i + 1];
+    let duration = Math.max(e.duration || 0.25, minDurationBeats);
+    if (next) {
+      const gap = next.startBeat - e.startBeat;
+      duration = Math.min(duration, Math.max(0.2, gap - 0.04));
+    } else {
+      duration = Math.min(duration, maxSustainBeats);
+    }
+    return { ...e, duration };
+  });
 }
 
 /** V-1 INDIAN: S-curve meend mapped to MIDI pitch wheel (audible in preview + export). */

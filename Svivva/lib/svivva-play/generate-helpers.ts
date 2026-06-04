@@ -7,6 +7,7 @@ import {
   constrainGeneratedStems,
   meendPitchbendForEvents,
   prepareMeendPreviewEvents,
+  stemHasOverlappingNotes,
 } from "./scale-key-guard";
 import type { ChordSegment } from "./chord-from-chroma";
 
@@ -56,13 +57,16 @@ export function chordStemsToResults(
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
   return stems.map((stem) => {
     if (stem.midiEvents.length === 0) return stem;
-    const meendEvents = prepareMeendPreviewEvents(stem.midiEvents);
+    const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
+    const meendEvents = polyphonic
+      ? stem.midiEvents
+      : prepareMeendPreviewEvents(stem.midiEvents);
     return {
       ...stem,
       midiEvents: meendEvents,
       expression: {
         ...stem.expression,
-        meend: true,
+        meend: !polyphonic,
         pitchbend: meendPitchbendForEvents(meendEvents),
       },
     };
