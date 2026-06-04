@@ -12,11 +12,12 @@ const root = resolve(__dirname, "..");
 const timeout = process.env.VERCEL_DEPLOY_TIMEOUT?.trim() || "15m";
 const deploymentArg = process.argv[2]?.trim();
 
-function runVercel(args) {
+function runVercel(args, options = {}) {
   const result = spawnSync("vercel", args, {
     cwd: root,
     encoding: "utf8",
     env: process.env,
+    stdio: options.inheritStderr ? ["ignore", "pipe", "inherit"] : "pipe",
   });
 
   if (result.error) {
@@ -64,15 +65,10 @@ function latestProductionUrl() {
 const target = deploymentArg ? deploymentUrl(deploymentArg) : latestProductionUrl();
 console.log(`Waiting for ${target} (timeout ${timeout})…`);
 
-const waitResult = runVercel([
-  "inspect",
-  target,
-  "--wait",
-  "--format",
-  "json",
-  "--timeout",
-  timeout,
-]);
+const waitResult = runVercel(
+  ["inspect", target, "--wait", "--format", "json", "--timeout", timeout],
+  { inheritStderr: true },
+);
 
 if (waitResult.status !== 0) {
   process.stderr.write(waitResult.stderr || waitResult.stdout || "vercel inspect --wait failed\n");
@@ -81,7 +77,7 @@ if (waitResult.status !== 0) {
 
 const deployment = parseJson(waitResult.stdout);
 const state = (deployment.readyState || deployment.state || "UNKNOWN").toUpperCase();
-const aliases = deployment.aliasAssigned
+const aliases = (deployment.aliases || deployment.aliasAssigned)
   ?.map((entry) => (typeof entry === "string" ? entry : entry.domain))
   .filter(Boolean);
 
