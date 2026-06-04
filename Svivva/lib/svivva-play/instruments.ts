@@ -21,7 +21,7 @@ export interface InstrumentPreset {
 
 const PIANO: InstrumentPreset = {
   synthType: "synth",
-  oscillator: { type: "triangle8", partialCount: 8 },
+  oscillator: { type: "triangle" },
   envelope: { attack: 0.005, decay: 1.2, sustain: 0.1, release: 1.5 },
   filter: { type: "lowpass", frequency: 4000, rolloff: -12, Q: 1 },
   volume: -6,
@@ -76,7 +76,7 @@ const SYNTH_BASS: InstrumentPreset = {
 
 const STRINGS: InstrumentPreset = {
   synthType: "synth",
-  oscillator: { type: "sawtooth8", partialCount: 8 },
+  oscillator: { type: "sawtooth" },
   envelope: { attack: 0.4, decay: 0.5, sustain: 0.85, release: 1.5 },
   filter: { type: "lowpass", frequency: 3000, rolloff: -12, Q: 0.5 },
   detune: 5,
@@ -89,7 +89,7 @@ const STRINGS: InstrumentPreset = {
 
 const PAD: InstrumentPreset = {
   synthType: "synth",
-  oscillator: { type: "sine4", partialCount: 4 },
+  oscillator: { type: "sine" },
   envelope: { attack: 0.8, decay: 1.0, sustain: 0.9, release: 3.0 },
   filter: { type: "lowpass", frequency: 2500, rolloff: -12, Q: 0.3 },
   volume: -12,
@@ -208,7 +208,7 @@ const HIHAT: InstrumentPreset = {
 
 const TEXTURE: InstrumentPreset = {
   synthType: "am",
-  oscillator: { type: "sine4", partialCount: 4 },
+  oscillator: { type: "sine" },
   envelope: { attack: 1.0, decay: 1.5, sustain: 0.8, release: 4.0 },
   harmonicity: 2.5,
   volume: -14,

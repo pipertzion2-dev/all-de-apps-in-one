@@ -56,7 +56,21 @@ export class SvivvaSoundEngine {
   /** Build routing graph without requiring a user gesture (suspended context is OK). */
   private prepareMasterBus(): void {
     if (this.masterVolume && !this.isNodeDisposed(this.masterVolume)) return;
-    this.masterVolume = new Tone.Volume(3).toDestination();
+    try {
+      this.masterVolume = new Tone.Volume(3).toDestination();
+    } catch (err) {
+      console.warn("Master bus setup deferred:", err);
+      this.masterVolume = null;
+    }
+  }
+
+  private normalizeOscillatorType(type: string): string {
+    const base = type.replace(/\d+$/, "");
+    if (["sine", "triangle", "sawtooth", "square"].includes(base)) return base;
+    if (base.startsWith("triangle") || type.includes("triangle")) return "triangle";
+    if (base.startsWith("sawtooth") || type.includes("saw")) return "sawtooth";
+    if (base.startsWith("sine")) return "sine";
+    return "triangle";
   }
 
   /** Start/resume Web Audio — call from play() after user gesture. */
@@ -73,6 +87,11 @@ export class SvivvaSoundEngine {
   /** Prepare graph for stem scheduling (no Tone.start — safe from useEffect). */
   init() {
     this.prepareMasterBus();
+  }
+
+  /** Unlock audio output — call from play button (user gesture). */
+  async warmUpForPlayback(): Promise<void> {
+    await this.ensureAudioRunning();
   }
 
   setMasterVolume(percent: number) {
@@ -169,14 +188,13 @@ export class SvivvaSoundEngine {
     return effects;
   }
 
-  /** Live preview: skip reverb (async generate() fails/timeouts during background load). */
-  private createLiveEffectsChain(fxDefs?: InstrumentPreset["fx"]): Tone.ToneAudioNode[] {
-    const withoutReverb = fxDefs?.filter((fx) => fx.type !== "reverb") ?? [];
-    return this.createEffectsChain(withoutReverb);
+  /** Live preview: dry synth only (effects often fail without a user gesture). */
+  private createLiveEffectsChain(): Tone.ToneAudioNode[] {
+    return [];
   }
 
   private createSynth(preset: InstrumentPreset): StemChannel["synth"] {
-    const oscType = preset.oscillator.type as any;
+    const oscType = this.normalizeOscillatorType(preset.oscillator.type) as OscillatorType;
 
     switch (preset.synthType) {
       case "fm":
@@ -278,6 +296,23 @@ export class SvivvaSoundEngine {
     }
   }
 
+  private createSynthSafe(preset: InstrumentPreset): StemChannel["synth"] {
+    try {
+      return this.createSynth(preset);
+    } catch (err) {
+      console.warn("Synth preset fallback:", preset.oscillator.type, err);
+      return new Tone.PolySynth(Tone.Synth, {
+        maxPolyphony: 12,
+        voice: Tone.Synth,
+        options: {
+          oscillator: { type: "triangle" },
+          envelope: { attack: 0.02, decay: 0.25, sustain: 0.45, release: 0.35 },
+          volume: -6,
+        },
+      } as any);
+    }
+  }
+
   async loadStems(stems: StemPlayback[]) {
     console.log("🎵 Loading", stems.length, "stems");
     this.prepareMasterBus();
@@ -299,12 +334,12 @@ export class SvivvaSoundEngine {
         const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
         const pitchBends = stem.expression?.pitchbend ?? [];
         const hasMeend = pitchBends.length > 0 || Boolean(stem.expression?.meend);
-        const synth = this.createSynth(
+        const synth = this.createSynthSafe(
           hasMeend ? { ...preset, synthType: "mono", portamento: 0.22 } : preset,
         );
         const panner = new Tone.Panner(stem.pan / 100);
         const volume = new Tone.Volume(stem.gainDb || 0);
-        const effects = this.createLiveEffectsChain(preset.fx);
+        const effects = this.createLiveEffectsChain();
 
         const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
         for (let i = 0; i < chain.length - 1; i++) {

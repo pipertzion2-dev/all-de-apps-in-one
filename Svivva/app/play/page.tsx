@@ -493,6 +493,7 @@ export default function SvivvaPlayPage() {
   const userPromptRef = useRef(userPrompt);
   const analysisRunRef = useRef(0);
   const engineLoadGenRef = useRef(0);
+  const engineStemsKeyRef = useRef("");
   const melodyneKeyRef = useRef<string | null>(null);
   const audioKeyRef = useRef<string | null>(null);
 
@@ -1427,8 +1428,6 @@ export default function SvivvaPlayPage() {
   const loadStemsIntoEngine = useCallback(
     async (currentStems: StemData[], bpm: number) => {
       const loadGen = ++engineLoadGenRef.current;
-      setEngineLoading(true);
-      setEngineReady(false);
       setIsPlaying(false);
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
@@ -1439,45 +1438,45 @@ export default function SvivvaPlayPage() {
       } catch {
         /* engine may not be loaded yet */
       }
-      try {
-        const tempo = bpm > 0 ? bpm : 120;
-        const engine = getSoundEngine();
-        engine.init();
-        engine.setBpm(tempo);
-        await engine.loadStems(buildStemPlaybacks(currentStems));
-        if (loadGen !== engineLoadGenRef.current) return;
-        engine.setMasterVolume(masterVolume);
+      const tempo = bpm > 0 ? bpm : 120;
+      const engine = getSoundEngine();
+      await engine.warmUpForPlayback();
+      engine.init();
+      engine.setBpm(tempo);
+      await engine.loadStems(buildStemPlaybacks(currentStems));
+      if (loadGen !== engineLoadGenRef.current) return;
+      engine.setMasterVolume(masterVolume);
+      engine.applySoloState(
+        currentStems.map((s) => ({
+          name: s.name,
+          soloed: s.soloed,
+          muted: s.muted,
+          gainDb: s.gainDb,
+        })),
+      );
 
-        const engineDur = engine.getDuration();
-        const importDur = resolveImportDurationSec();
-        const stemDur = stemTimelineDurationSec(currentStems, tempo);
-        importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
-        setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
-        setEngineReady(true);
-      } catch (err) {
-        if (loadGen !== engineLoadGenRef.current) return;
-        console.error("Sound engine load error:", err);
-        const playable = currentStems.filter((s) => normalizeMidiEvents(s.midiEvents).length > 0);
-        if (playable.length === 0) {
-          setErrorMsg("Generated stems have no MIDI notes. Try generating again.");
-        } else {
-          setErrorMsg(
-            "Could not load synth preview. Wait a moment, then press play on the transport bar.",
-          );
-        }
-      } finally {
-        if (loadGen === engineLoadGenRef.current) {
-          setEngineLoading(false);
-        }
-      }
+      const engineDur = engine.getDuration();
+      const importDur = resolveImportDurationSec();
+      const stemDur = stemTimelineDurationSec(currentStems, tempo);
+      importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+      setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
+      setEngineReady(true);
+      setErrorMsg("");
     },
     [buildStemPlaybacks, resolveImportDurationSec, masterVolume],
+  );
+
+  const stemsPlaybackKey = useCallback(
+    (currentStems: StemData[], bpm: number) =>
+      `${bpm}|${currentStems.map((s) => `${s.id}:${s.muted}:${s.soloed}:${s.pan}:${s.gainDb}`).join(";")}`,
+    [],
   );
 
   useEffect(() => {
     if (stems.length === 0) {
       setEngineReady(false);
       setEngineLoading(false);
+      engineStemsKeyRef.current = "";
       return;
     }
     const baseBpm =
@@ -1486,16 +1485,35 @@ export default function SvivvaPlayPage() {
       analysis?.bpm ??
       (mode === "composition" ? FALLBACK_ANALYSIS.bpm : 120);
     if (baseBpm == null || baseBpm <= 0) return;
-    void loadStemsIntoEngine(stems, baseBpm);
-  }, [stems, effectiveAnalysis?.bpm, analysis?.bpm, manualTempo, mode, loadStemsIntoEngine]);
+
+    const tempo = baseBpm;
+    const importDur = resolveImportDurationSec();
+    const stemDur = stemTimelineDurationSec(stems, tempo);
+    importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+    setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
+
+    const hasNotes = stems.some((s) => normalizeMidiEvents(s.midiEvents).length > 0);
+    setEngineReady(hasNotes);
+    engineStemsKeyRef.current = "";
+    if (!hasNotes) {
+      setErrorMsg("Generated stems have no MIDI notes. Try generating again.");
+    }
+  }, [
+    stems,
+    effectiveAnalysis?.bpm,
+    analysis?.bpm,
+    manualTempo,
+    mode,
+    resolveImportDurationSec,
+  ]);
 
   useEffect(() => {
-    if (!engineReady) return;
+    if (!engineStemsKeyRef.current) return;
     const engine = getSoundEngine();
     engine.applySoloState(
       stems.map((s) => ({ name: s.name, soloed: s.soloed, muted: s.muted, gainDb: s.gainDb })),
     );
-  }, [stems, engineReady]);
+  }, [stems]);
 
   const stopPositionTracking = useCallback(() => {
     if (animFrameRef.current) {
@@ -1565,26 +1583,54 @@ export default function SvivvaPlayPage() {
       return;
     }
     pauseInputAudio();
+    const tempo =
+      manualTempo ??
+      effectiveAnalysis?.bpm ??
+      analysis?.bpm ??
+      (mode === "composition" ? FALLBACK_ANALYSIS.bpm : 120);
+    const playbackKey = stemsPlaybackKey(stems, tempo);
+    setEngineLoading(true);
     try {
+      if (engineStemsKeyRef.current !== playbackKey) {
+        await loadStemsIntoEngine(stems, tempo);
+        engineStemsKeyRef.current = playbackKey;
+      }
       engine.setMasterVolume(masterVolume);
       await engine.play();
       startPositionTracking();
       setIsPlaying(true);
     } catch (err) {
       console.error("Composition playback failed:", err);
-      alert(
-        err instanceof Error && err.message.includes("No stems")
-          ? "Composition is still loading. Wait for the timer, then press play again."
-          : "Composition playback failed. Tap play again to unlock browser audio.",
+      engineStemsKeyRef.current = "";
+      const playable = stems.filter((s) => normalizeMidiEvents(s.midiEvents).length > 0);
+      setErrorMsg(
+        playable.length === 0
+          ? "Generated stems have no MIDI notes. Try generating again."
+          : "Synth preview failed to start. Tap play again.",
       );
+      alert(
+        playable.length === 0
+          ? "Generated stems have no MIDI notes. Try generating again."
+          : "Synth preview failed to start. Tap play again.",
+      );
+    } finally {
+      setEngineLoading(false);
     }
   }, [
     isPlaying,
+    stems,
     stems.length,
     engineReady,
+    manualTempo,
+    effectiveAnalysis?.bpm,
+    analysis?.bpm,
+    mode,
+    masterVolume,
     pauseComposition,
     pauseInputAudio,
     startPositionTracking,
+    loadStemsIntoEngine,
+    stemsPlaybackKey,
   ]);
 
   const stopPlayback = useCallback(() => {
