@@ -39,12 +39,7 @@ import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import { type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
 
-function pickIndianRagaScaleName(opts: { root: string; minor: boolean; seed: number }): string {
-  const major = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
-  const minor = ["raga_todi", "raga_bhairavi"] as const;
-  const list = opts.minor ? minor : major;
-  return list[Math.abs(opts.seed) % list.length];
-}
+import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
 
 async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
   const sessions = await db.select().from(playSessions).where(eq(playSessions.id, sessionId));

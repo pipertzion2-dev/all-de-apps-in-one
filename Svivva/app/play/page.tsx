@@ -57,6 +57,12 @@ import {
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
 import { applyMeendToStems } from "@/lib/svivva-play/generate-helpers";
+import {
+  isIndianRagaScaleName,
+  resolveMeendScaleName,
+  stableGenerationSeed,
+} from "@/lib/svivva-play/indian-raga-scale";
+import { appendMeendShowcaseForPreview } from "@/lib/svivva-play/meend-showcase-stem";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import {
@@ -1053,8 +1059,20 @@ export default function SvivvaPlayPage() {
   }, [audioFile, melodyneFile, importSeq, applyHarmonicSession]);
 
   const buildSettings = useCallback(() => {
-    const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
+    const lockedKey = normalizeKeyLabel(manualKey ?? analysis?.key ?? "C major");
+    const currentSeed = stableGenerationSeed({
+      useSeed,
+      seed,
+      lockedKey,
+      importSeq,
+    });
     if (!useSeed) setSeed(currentSeed);
+    const effectiveReichScale = resolveMeendScaleName({
+      lockedKey,
+      reichScale,
+      seed: currentSeed,
+      meend,
+    });
     const base = {
       density,
       complexity,
@@ -1091,7 +1109,14 @@ export default function SvivvaPlayPage() {
               : 12,
         };
       default:
-        return { ...base, reichStyle, reichType, reichScale, swingAmount, hocketGroove };
+        return {
+          ...base,
+          reichStyle,
+          reichType,
+          reichScale: effectiveReichScale,
+          swingAmount,
+          hocketGroove,
+        };
     }
   }, [
     mode,
@@ -1123,6 +1148,9 @@ export default function SvivvaPlayPage() {
     macroSpace,
     vocalistEnabled,
     selectedPreset,
+    manualKey,
+    analysis?.key,
+    importSeq,
   ]);
 
   const handleGenerate = useCallback(
@@ -1313,7 +1341,7 @@ export default function SvivvaPlayPage() {
       setRegeneratingStem(stemName);
       try {
         const settings = buildSettings();
-        const regenSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
+        const regenSeed = settings.seed;
         const res = await fetch("/api/svivva-play/regenerate-stem", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1637,7 +1665,11 @@ export default function SvivvaPlayPage() {
       await engine.warmUpForPlayback();
       engine.init();
       engine.setBpm(tempo);
-      await engine.loadStems(buildStemPlaybacks(currentStems), { forceMeend: meend });
+      const playbacks = buildStemPlaybacks(currentStems);
+      await engine.loadStems(
+        meend ? appendMeendShowcaseForPreview(playbacks) : playbacks,
+        { forceMeend: meend },
+      );
       if (loadGen !== engineLoadGenRef.current) return;
       engine.setMasterVolume(masterVolume);
       engine.applySoloState(
@@ -1701,6 +1733,43 @@ export default function SvivvaPlayPage() {
     manualTempo,
     mode,
     resolveImportDurationSec,
+  ]);
+
+  useEffect(() => {
+    if (!meend || stems.length === 0) return;
+    const baseBpm =
+      manualTempo ??
+      effectiveAnalysis?.bpm ??
+      analysis?.bpm ??
+      (mode === "composition" ? FALLBACK_ANALYSIS.bpm : 120);
+    if (baseBpm == null || baseBpm <= 0) return;
+    const hasNotes = stems.some((s) => normalizeMidiEvents(s.midiEvents).length > 0);
+    if (!hasNotes) return;
+
+    const tempo = baseBpm;
+    let cancelled = false;
+    const loadGen = ++engineLoadGenRef.current;
+    setEngineLoading(true);
+    void loadStemsIntoEngine(stems, tempo)
+      .then(() => {
+        if (cancelled || loadGen !== engineLoadGenRef.current) return;
+        engineStemsKeyRef.current = stemsPlaybackKey(stems, tempo);
+      })
+      .finally(() => {
+        if (!cancelled && loadGen === engineLoadGenRef.current) setEngineLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    meend,
+    stems,
+    manualTempo,
+    effectiveAnalysis?.bpm,
+    analysis?.bpm,
+    mode,
+    loadStemsIntoEngine,
+    stemsPlaybackKey,
   ]);
 
   useEffect(() => {
@@ -2036,6 +2105,28 @@ export default function SvivvaPlayPage() {
     if (rootMatch) setChordRoot(rootMatch[1]);
   }, [analysis, compositionFallback, manualKey]);
 
+  useEffect(() => {
+    if (manualKey) return;
+    const fromAudio = audioKeyRef.current;
+    const fromAnalysis = analysis?.key;
+    const candidate =
+      fromAudio && !fromAudio.startsWith("Detecting")
+        ? fromAudio
+        : fromAnalysis && !fromAnalysis.startsWith("Detecting")
+          ? normalizeKeyLabel(fromAnalysis)
+          : null;
+    if (candidate) setManualKey(candidate);
+  }, [analysis?.key, importSeq, manualKey]);
+
+  useEffect(() => {
+    if (!meend || isIndianRagaScaleName(reichScale)) return;
+    const lockedKey = generationKeyLabel;
+    const stable = stableGenerationSeed({ useSeed, seed, lockedKey, importSeq });
+    setReichScale(
+      resolveMeendScaleName({ lockedKey, reichScale, seed: stable, meend: true }),
+    );
+  }, [meend, importSeq, useSeed, seed, generationKeyLabel, reichScale]);
+
   const handleLocalCompositionGenerate = useCallback(() => {
     if (aiScaleSuggestion && !scaleSuggestionApplied) {
       applyAiScaleSuggestion();
@@ -2050,15 +2141,26 @@ export default function SvivvaPlayPage() {
     setErrorMsg("");
     setReichVoices([]);
     try {
-      const lockedKey = normalizeKeyLabel(manualKey ?? analysis?.key ?? "C major");
-      const ragaMajor = ["raga_bhairav", "raga_marwa", "raga_purvi"] as const;
-      const ragaMinor = ["raga_todi", "raga_bhairavi"] as const;
-      const pickedRaga = meend
-        ? generationScaleLookup.scaleInfo.isMinor
-          ? ragaMinor[Math.floor(Math.random() * ragaMinor.length)]
-          : ragaMajor[Math.floor(Math.random() * ragaMajor.length)]
-        : null;
-      const effectiveScaleName = pickedRaga ?? reichScale;
+      const lockedKey = normalizeKeyLabel(
+        manualKey ??
+          audioKeyRef.current ??
+          analysis?.key ??
+          transcription?.harmonicKey ??
+          "C major",
+      );
+      const currentSeed = stableGenerationSeed({
+        useSeed,
+        seed,
+        lockedKey,
+        importSeq,
+      });
+      if (!useSeed) setSeed(currentSeed);
+      const effectiveScaleName = resolveMeendScaleName({
+        lockedKey,
+        reichScale,
+        seed: currentSeed,
+        meend,
+      });
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
       const audioSampleSec =
         audioRef.current?.duration && Number.isFinite(audioRef.current.duration)
@@ -2067,9 +2169,6 @@ export default function SvivvaPlayPage() {
       const durationSec = audioSampleSec
         ? barAlignedDurationAtMostSec(audioSampleSec, bpm)
         : barAlignedDurationSec(transcription?.durationSec || reichDuration, bpm);
-      const currentSeed = useSeed ? seed : Math.floor(Math.random() * 999999);
-      if (!useSeed) setSeed(currentSeed);
-
       const chordSourceRaw =
         (analysis?.chords?.length ? analysis.chords : transcription?.chords)?.map((c, i) => ({
           t0: c.t0,
@@ -2230,7 +2329,7 @@ export default function SvivvaPlayPage() {
     analysis,
     transcription,
     chordEdits,
-    generationScaleLookup.scaleInfo.isMinor,
+    importSeq,
     aiScaleSuggestion,
     scaleSuggestionApplied,
     applyAiScaleSuggestion,
@@ -3931,10 +4030,10 @@ export default function SvivvaPlayPage() {
                                 Add‑ons integrated (clean)
                               </h4>
                               <p className="text-[9px] text-gray-400">
-                                Turn on <span className="text-gray-300">Indian Meend</span> to get
-                                raga-leaning scales (Bhairav/Marwa/Purvi/Todi/Bhairavi) plus
-                                pitch‑bend expression on every generated voice — integrated directly
-                                into Svivva Play (no external zip stacks).
+                                Turn on <span className="text-gray-300">Indian Meend</span> for
+                                raga-leaning scales and pitch bends on all voices. Preview plays a
+                                solo meend lead so glides are audible over hocket; key and raga stay
+                                locked to your import until you change seed or scale.
                               </p>
                             </div>
                           </div>

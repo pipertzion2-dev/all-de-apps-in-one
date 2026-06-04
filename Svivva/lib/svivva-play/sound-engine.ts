@@ -6,6 +6,7 @@ import {
   buildMeendLegatoTimeline,
   type MeendTimelineEvent,
 } from "./meend-preview-audio";
+import { MEEND_PREVIEW_STEM_NAME } from "./meend-showcase-stem";
 import { meendPitchbendForEvents, prepareMeendPreviewEvents } from "./scale-key-guard";
 
 export interface MidiEvent {
@@ -367,7 +368,12 @@ export class SvivvaSoundEngine {
   }
 
   async loadStems(stems: StemPlayback[], options?: LoadStemsOptions) {
-    console.log("🎵 Loading", stems.length, "stems");
+    const showcaseStem = stems.find(
+      (s) => s.name === MEEND_PREVIEW_STEM_NAME && !s.muted && (s.midiEvents?.length ?? 0) > 0,
+    );
+    const stemsToLoad =
+      options?.forceMeend && showcaseStem ? [showcaseStem] : stems;
+    console.log("🎵 Loading", stemsToLoad.length, "stems");
     this.prepareMasterBus();
     this.disposeChannels();
     const transport = Tone.getTransport();
@@ -382,7 +388,7 @@ export class SvivvaSoundEngine {
     let maxBeat = 0;
     this.duration = 0;
 
-    for (const stem of stems) {
+    for (const stem of stemsToLoad) {
       try {
         const events = (stem.midiEvents || []) as MidiEvent[];
         const sortedEvents = [...events].sort((a, b) => a.startBeat - b.startBeat);
@@ -413,7 +419,11 @@ export class SvivvaSoundEngine {
           synth.portamento = MEEND_PREVIEW.portamento ?? 0.35;
         }
         const panner = new Tone.Panner(stem.pan / 100);
-        const meendGain = hasMeend ? 8 : 0;
+        const meendGain = hasMeend
+          ? stem.name === MEEND_PREVIEW_STEM_NAME
+            ? 14
+            : 8
+          : 0;
         const volume = new Tone.Volume(this.previewGainDb(stem.role, stem.gainDb || 0) + meendGain);
         const effects = this.createLiveEffectsChain();
 
