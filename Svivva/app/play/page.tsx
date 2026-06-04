@@ -56,6 +56,11 @@ import {
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
 import {
+  suggestCompositionScale,
+  type ScaleSuggestion,
+} from "@/lib/svivva-play/scale-suggest";
+import { buildStemPackZipBlobClient } from "@/lib/svivva-play/stem-pack-client";
+import {
   ORCHESTRAL_STYLE_PRESET_ID,
   isOrchestralPreset,
 } from "@/lib/svivva-play/prompts/orchestral-composer";
@@ -440,6 +445,7 @@ export default function SvivvaPlayPage() {
   const [chordInversion, setChordInversion] = useState(0);
   const [reichVoices, setReichVoices] = useState<VoicePart[]>([]);
   const [reichScale, setReichScale] = useState("major");
+  const [scaleSuggestionApplied, setScaleSuggestionApplied] = useState(false);
   const [reichType, setReichType] = useState<"counterpoint" | "hocket">("counterpoint");
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
@@ -478,6 +484,41 @@ export default function SvivvaPlayPage() {
       label: resolution.scaleName.replace(/_/g, " "),
     };
   }, [generationKeyLabel, reichScale, manualKey, effectiveAnalysis?.chords]);
+
+  const aiScaleSuggestion = useMemo((): ScaleSuggestion | null => {
+    if (!effectiveAnalysis) return null;
+    const chords =
+      transcription?.chords?.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
+        pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
+      })) ??
+      effectiveAnalysis.chords?.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence ?? 55,
+        pitchClasses: [] as number[],
+      })) ??
+      [];
+    return suggestCompositionScale({
+      analysisKey: manualKey ?? effectiveAnalysis.key,
+      chords,
+      melodyneNotes: transcription?.melodyneNotes,
+      audioNotes: transcription?.audioNotes ?? transcription?.notes,
+    });
+  }, [effectiveAnalysis, manualKey, transcription]);
+
+  const applyAiScaleSuggestion = useCallback(() => {
+    if (!aiScaleSuggestion) return;
+    setReichScale(aiScaleSuggestion.scaleName);
+    setManualKey(aiScaleSuggestion.keyLabel);
+    setScaleSuggestionApplied(true);
+    setWarningMsg(`Scale set to ${aiScaleSuggestion.keyLabel} · ${aiScaleSuggestion.scaleName.replace(/_/g, " ")} (${aiScaleSuggestion.confidence}% match).`);
+  }, [aiScaleSuggestion]);
+
   const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
   const [midiFileName, setMidiFileName] = useState("");
 
@@ -1029,6 +1070,9 @@ export default function SvivvaPlayPage() {
         setErrorMsg("Import audio first — tempo and key are detected automatically on import.");
         return;
       }
+      if (mode === "composition" && aiScaleSuggestion && !scaleSuggestionApplied) {
+        applyAiScaleSuggestion();
+      }
       setIsGenerating(true);
       setPipelineStage(
         mode === "patch"
@@ -1196,6 +1240,9 @@ export default function SvivvaPlayPage() {
       manualKey,
       manualTempo,
       transcription,
+      aiScaleSuggestion,
+      scaleSuggestionApplied,
+      applyAiScaleSuggestion,
     ],
   );
 
@@ -1288,9 +1335,13 @@ export default function SvivvaPlayPage() {
     a.rel = "noopener";
     a.style.display = "none";
     document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+    requestAnimationFrame(() => {
+      a.click();
+      window.setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 4000);
+    });
     return true;
   }, []);
 
@@ -1372,18 +1423,41 @@ export default function SvivvaPlayPage() {
       ) {
         setIsExporting(true);
         setErrorMsg("");
+        const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
+        const stemPayload = stems.map((s) => ({
+          name: s.name,
+          role: s.role,
+          midiEvents: s.midiEvents,
+        }));
+        const filename =
+          exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`;
+
         try {
-          const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
+          if (exportFormat === "midi-zip") {
+            try {
+              const blob = await buildStemPackZipBlobClient({
+                bpm,
+                stems: stemPayload,
+                melodyneNotes: transcription?.melodyneNotes,
+                projectName: downloadName,
+              });
+              if (downloadMidiBlob(blob, filename)) {
+                setWarningMsg(
+                  "STEM pack downloaded — unzip and drag each .mid into your DAW.",
+                );
+              }
+              return;
+            } catch (clientErr) {
+              console.warn("Client STEM pack zip failed, trying server:", clientErr);
+            }
+          }
+
           const res = await fetch("/api/svivva-play/export", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               format: exportFormat,
-              stems: stems.map((s) => ({
-                name: s.name,
-                role: s.role,
-                midiEvents: s.midiEvents,
-              })),
+              stems: stemPayload,
               melodyneNotes: transcription?.melodyneNotes ?? [],
               bpm,
               filename: downloadName,
@@ -1412,12 +1486,7 @@ export default function SvivvaPlayPage() {
             }
           }
           const blob = await res.blob();
-          const filename =
-            exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`;
-          if (
-            downloadMidiBlob(blob, filename) &&
-            exportFormat === "midi-zip"
-          ) {
+          if (downloadMidiBlob(blob, filename) && exportFormat === "midi-zip") {
             setWarningMsg(
               "STEM pack downloaded — unzip and drag each .mid into your DAW (melody, harmony, Melodyne reference).",
             );
@@ -1906,6 +1975,9 @@ export default function SvivvaPlayPage() {
   }, [analysis, compositionFallback, manualKey]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
+    if (aiScaleSuggestion && !scaleSuggestionApplied) {
+      applyAiScaleSuggestion();
+    }
     setIsGenerating(true);
     setPipelineStage(
       transcription
@@ -2083,6 +2155,9 @@ export default function SvivvaPlayPage() {
     transcription,
     chordEdits,
     generationScaleLookup.scaleInfo.isMinor,
+    aiScaleSuggestion,
+    scaleSuggestionApplied,
+    applyAiScaleSuggestion,
   ]);
 
   useEffect(() => {
@@ -3453,7 +3528,10 @@ export default function SvivvaPlayPage() {
                                 </label>
                                 <select
                                   value={reichScale}
-                                  onChange={(e) => setReichScale(e.target.value)}
+                                  onChange={(e) => {
+                                    setReichScale(e.target.value);
+                                    setScaleSuggestionApplied(false);
+                                  }}
                                   className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
                                   data-testid="select-reich-scale"
                                 >
@@ -3464,6 +3542,64 @@ export default function SvivvaPlayPage() {
                                   ))}
                                 </select>
                               </div>
+                            </div>
+                            <div
+                              className="mb-3 rounded-lg border border-[#A05068]/40 bg-[#1a1018] p-3"
+                              data-testid="ai-scale-lookup-panel"
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <div className="flex items-center gap-1.5">
+                                  <BrainCircuit className="w-3.5 h-3.5 text-[#A05068]" />
+                                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wide">
+                                    AI scale lookup
+                                  </span>
+                                </div>
+                                {aiScaleSuggestion && (
+                                  <span className="text-[9px] text-gray-500">
+                                    {aiScaleSuggestion.confidence}% match
+                                  </span>
+                                )}
+                              </div>
+                              {aiScaleSuggestion ? (
+                                <>
+                                  <p className="text-[10px] text-gray-400 mb-2 leading-relaxed">
+                                    {aiScaleSuggestion.reason}
+                                  </p>
+                                  <div className="text-xs text-gray-200 mb-1">
+                                    Suggested:{" "}
+                                    <span className="font-semibold text-[#B87888]">
+                                      {aiScaleSuggestion.keyLabel} ·{" "}
+                                      {aiScaleSuggestion.scaleName.replace(/_/g, " ")}
+                                    </span>
+                                  </div>
+                                  <div className="font-mono text-[10px] text-[#A05068] tracking-wide mb-2">
+                                    {aiScaleSuggestion.noteNames.join(" · ")}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={applyAiScaleSuggestion}
+                                    className="w-full py-2 rounded-md text-[10px] font-bold uppercase tracking-wide text-white holo-gradient"
+                                    data-testid="button-apply-ai-scale"
+                                  >
+                                    Use suggested scale before generate
+                                  </button>
+                                  {scaleSuggestionApplied && (
+                                    <p className="text-[9px] text-emerald-500/90 mt-1.5 text-center">
+                                      Applied — hocket will use this scale
+                                    </p>
+                                  )}
+                                  {!scaleSuggestionApplied && (
+                                    <p className="text-[9px] text-amber-500/90 mt-1.5 text-center">
+                                      Apply before Generate to avoid minor/major mismatch
+                                    </p>
+                                  )}
+                                </>
+                              ) : (
+                                <p className="text-[10px] text-gray-500">
+                                  Import audio (and Melodyne .mid if you have it) to unlock
+                                  AI scale lookup.
+                                </p>
+                              )}
                             </div>
                             <div className="flex flex-col gap-1.5 mb-3">
                               <CheckboxOption

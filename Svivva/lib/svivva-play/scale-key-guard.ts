@@ -75,13 +75,25 @@ export function resolveCompositionScale(
 ): { scaleInfo: ScaleInfo; resolution: ScaleResolution } {
   const effectiveKey = normalizeKeyLabel(manualKey?.trim() || key);
   const root = parseRootFromKeyLabel(effectiveKey);
-  let mode: "major" | "minor" = isMinorKeyLabel(effectiveKey) ? "minor" : "major";
+  const sn = scaleName.toLowerCase().replace(/ /g, "_");
+  const scaleLocksMode =
+    sn === "major" ||
+    sn === "ionian" ||
+    sn === "minor" ||
+    sn === "natural_minor" ||
+    sn === "pentatonic_major" ||
+    sn === "pentatonic_minor";
 
-  if (!manualKey?.trim()) {
-    const fromChords = inferKeyModeFromChords(chords);
-    if (fromChords) mode = fromChords;
+  let mode: "major" | "minor" = isMinorKeyLabel(effectiveKey) ? "minor" : "major";
+  if (scaleLocksMode) {
+    mode = modeFromScaleName(scaleName, mode);
+  } else {
+    if (!manualKey?.trim()) {
+      const fromChords = inferKeyModeFromChords(chords);
+      if (fromChords) mode = fromChords;
+    }
+    mode = modeFromScaleName(scaleName, mode);
   }
-  mode = modeFromScaleName(scaleName, mode);
 
   const resolution = resolveScale(mode, root, scaleName);
   return {

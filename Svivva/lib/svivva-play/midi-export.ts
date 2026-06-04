@@ -46,3 +46,11 @@ export function buildMidiFile(
 
   return Buffer.from(file.toBytes());
 }
+
+/** Browser-safe MIDI bytes (no Node Buffer). */
+export function buildMidiFileBytes(
+  stems: { name?: string; midiEvents?: unknown[] }[],
+  bpm: number,
+): Uint8Array {
+  return new Uint8Array(buildMidiFile(stems, bpm));
+}

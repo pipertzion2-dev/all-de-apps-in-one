@@ -25,4 +25,14 @@ describe("resolveCompositionScale", () => {
     expect(scaleInfo.isMinor).toBe(false);
     expect(scaleInfo.keyLabel).toBe("A major");
   });
+
+  it("locks to major when scale dropdown is major despite Am chords", () => {
+    const { scaleInfo } = resolveCompositionScale(
+      "C major",
+      "major",
+      null,
+      [{ t0: 0, t1: 4, symbol: "Am", confidence: 80, pitchClasses: [0, 3, 7] }],
+    );
+    expect(scaleInfo.isMinor).toBe(false);
+  });
 });
