@@ -92,6 +92,30 @@ import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
 const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
 
+function stemTimelineDurationSec(stems: { midiEvents: unknown[] }[], bpm: number): number {
+  if (bpm <= 0) return 0;
+  let maxBeat = 0;
+  for (const stem of stems) {
+    for (const evt of normalizeMidiEvents(stem.midiEvents)) {
+      maxBeat = Math.max(maxBeat, evt.startBeat + evt.duration);
+    }
+  }
+  if (maxBeat <= 0) return 0;
+  return (maxBeat * 60) / bpm + 0.5;
+}
+
+function resolvePlaybackDurationSec(
+  engineDur: number,
+  importDur: number,
+  stemDur: number,
+): number {
+  const timeline = Math.max(engineDur, stemDur);
+  if (importDur > 0) {
+    return Math.min(timeline > 0 ? timeline : importDur, importDur);
+  }
+  return timeline > 0 ? timeline : 8;
+}
+
 type PlayMode = "composition" | "interpolation" | "chords" | "solo" | "patch" | "ensemble";
 
 interface AnalysisResult {
@@ -454,6 +478,7 @@ export default function SvivvaPlayPage() {
   const [promptCopied, setPromptCopied] = useState(false);
 
   const [engineReady, setEngineReady] = useState(false);
+  const [engineLoading, setEngineLoading] = useState(false);
   const [playbackPos, setPlaybackPos] = useState(0);
   const [playbackDuration, setPlaybackDuration] = useState(0);
   const [isRendering, setIsRendering] = useState(false);
@@ -467,6 +492,7 @@ export default function SvivvaPlayPage() {
   const modeRef = useRef(mode);
   const userPromptRef = useRef(userPrompt);
   const analysisRunRef = useRef(0);
+  const engineLoadGenRef = useRef(0);
   const melodyneKeyRef = useRef<string | null>(null);
   const audioKeyRef = useRef<string | null>(null);
 
@@ -494,15 +520,19 @@ export default function SvivvaPlayPage() {
 
   const syncPlaybackDuration = useCallback(() => {
     const importDur = resolveImportDurationSec();
-    importDurationSecRef.current = importDur;
-    if (importDur <= 0) return;
+    const stemDur = stemTimelineDurationSec(
+      stems,
+      manualTempo ?? effectiveAnalysis?.bpm ?? analysis?.bpm ?? 120,
+    );
+    importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+    if (importDur <= 0 && stemDur <= 0) return;
     if (engineReady) {
       const engineDur = getSoundEngine().getDuration();
-      setPlaybackDuration(Math.min(engineDur > 0 ? engineDur : importDur, importDur));
+      setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
     } else {
-      setPlaybackDuration(importDur);
+      setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
     }
-  }, [resolveImportDurationSec, engineReady]);
+  }, [resolveImportDurationSec, engineReady, stems, manualTempo, effectiveAnalysis?.bpm, analysis?.bpm]);
 
   useEffect(() => {
     syncPlaybackDuration();
@@ -974,6 +1004,9 @@ export default function SvivvaPlayPage() {
       setPlanInfo(null);
       setErrorMsg("");
       setWarningMsg("");
+      setEngineReady(false);
+      setEngineLoading(false);
+      setPlaybackPos(0);
       setSoloTakes([]);
       setActiveTake(0);
 
@@ -1393,32 +1426,69 @@ export default function SvivvaPlayPage() {
 
   const loadStemsIntoEngine = useCallback(
     async (currentStems: StemData[], bpm: number) => {
+      const loadGen = ++engineLoadGenRef.current;
+      setEngineLoading(true);
+      setEngineReady(false);
+      setIsPlaying(false);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
       try {
+        getSoundEngine().pause();
+      } catch {
+        /* engine may not be loaded yet */
+      }
+      try {
+        const tempo = bpm > 0 ? bpm : 120;
         const engine = getSoundEngine();
         await engine.init();
-        engine.setBpm(bpm || 120);
+        engine.setBpm(tempo);
         engine.loadStems(buildStemPlaybacks(currentStems));
+        if (loadGen !== engineLoadGenRef.current) return;
+
         const engineDur = engine.getDuration();
         const importDur = resolveImportDurationSec();
-        importDurationSecRef.current = importDur;
-        setPlaybackDuration(
-          importDur > 0 ? Math.min(engineDur > 0 ? engineDur : importDur, importDur) : engineDur,
-        );
+        const stemDur = stemTimelineDurationSec(currentStems, tempo);
+        importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+        setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
         setEngineReady(true);
       } catch (err) {
+        if (loadGen !== engineLoadGenRef.current) return;
         console.error("Sound engine load error:", err);
+        const tempo = bpm > 0 ? bpm : 120;
+        const stemDur = stemTimelineDurationSec(currentStems, tempo);
+        const importDur = resolveImportDurationSec();
+        if (stemDur > 0 || importDur > 0) {
+          setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
+          setEngineReady(true);
+          setWarningMsg("Synth preview loaded with limited quality. Tap play to start audio.");
+        } else {
+          setErrorMsg("Could not load composition for playback. Try generating again.");
+        }
+      } finally {
+        if (loadGen === engineLoadGenRef.current) {
+          setEngineLoading(false);
+        }
       }
     },
     [buildStemPlaybacks, resolveImportDurationSec],
   );
 
   useEffect(() => {
-    if (stems.length === 0) return;
-    const baseBpm = analysis?.bpm ?? (mode === "composition" ? FALLBACK_ANALYSIS.bpm : undefined);
-    if (baseBpm == null) return;
-    const effectiveTempo = manualTempo ?? baseBpm;
-    loadStemsIntoEngine(stems, effectiveTempo);
-  }, [stems, analysis?.bpm, manualTempo, mode, loadStemsIntoEngine]);
+    if (stems.length === 0) {
+      setEngineReady(false);
+      setEngineLoading(false);
+      return;
+    }
+    const baseBpm =
+      manualTempo ??
+      effectiveAnalysis?.bpm ??
+      analysis?.bpm ??
+      (mode === "composition" ? FALLBACK_ANALYSIS.bpm : 120);
+    if (baseBpm == null || baseBpm <= 0) return;
+    void loadStemsIntoEngine(stems, baseBpm);
+  }, [stems, effectiveAnalysis?.bpm, analysis?.bpm, manualTempo, mode, loadStemsIntoEngine]);
 
   useEffect(() => {
     if (!engineReady) return;
@@ -1573,6 +1643,8 @@ export default function SvivvaPlayPage() {
     setErrorMsg("");
     setWarningMsg("");
     setEngineReady(false);
+    setEngineLoading(false);
+    engineLoadGenRef.current += 1;
     setPlaybackPos(0);
     setPlaybackDuration(0);
     stopPositionTracking();
@@ -1685,6 +1757,8 @@ export default function SvivvaPlayPage() {
     setPlaybackPos(0);
     setPlaybackDuration(0);
     setEngineReady(false);
+    setEngineLoading(false);
+    engineLoadGenRef.current += 1;
     setVersionHistory([]);
     setActiveVersion(0);
     setSoloTakes([]);
@@ -4245,9 +4319,11 @@ export default function SvivvaPlayPage() {
               <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-gray-300 font-mono flex-shrink-0 font-bold">
                 {engineReady && stems.length > 0 && playbackDuration > 0
                   ? `${formatTime(playbackPos)}/${formatTime(playbackDuration)}`
-                  : stems.length > 0
+                  : engineLoading
                     ? "Loading…"
-                    : "Generate to play"}
+                    : stems.length > 0
+                      ? "Preparing…"
+                      : "Generate to play"}
               </div>
               <div
                 className="flex-1 h-2 rounded-full overflow-hidden cursor-pointer"

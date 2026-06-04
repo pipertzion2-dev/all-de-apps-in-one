@@ -290,6 +290,7 @@ export class SvivvaSoundEngine {
     transport.cancel();
 
     let maxBeat = 0;
+    this.duration = 0;
 
     for (const stem of stems) {
       const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
