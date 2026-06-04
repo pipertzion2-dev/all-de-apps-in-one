@@ -118,7 +118,8 @@ function resolvePlaybackDurationSec(
 ): number {
   const timeline = Math.max(engineDur, stemDur);
   if (importDur > 0) {
-    return Math.min(timeline > 0 ? timeline : importDur, importDur);
+    // Hear full generated MIDI even when import analysis window is shorter
+    return Math.max(importDur, timeline > 0 ? timeline : importDur);
   }
   return timeline > 0 ? timeline : 8;
 }
@@ -522,6 +523,7 @@ export default function SvivvaPlayPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const importDurationSecRef = useRef(0);
+  const audioImportCapSecRef = useRef(0);
   const modeRef = useRef(mode);
   const userPromptRef = useRef(userPrompt);
   const analysisRunRef = useRef(0);
@@ -558,7 +560,8 @@ export default function SvivvaPlayPage() {
       stems,
       manualTempo ?? effectiveAnalysis?.bpm ?? analysis?.bpm ?? 120,
     );
-    importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+    audioImportCapSecRef.current = importDur;
+    importDurationSecRef.current = Math.max(importDur > 0 ? importDur : 0, stemDur);
     if (importDur <= 0 && stemDur <= 0) return;
     if (engineReady) {
       const engineDur = getSoundEngine().getDuration();
@@ -1491,7 +1494,8 @@ export default function SvivvaPlayPage() {
       const engineDur = engine.getDuration();
       const importDur = resolveImportDurationSec();
       const stemDur = stemTimelineDurationSec(currentStems, tempo);
-      importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+      audioImportCapSecRef.current = importDur;
+      importDurationSecRef.current = Math.max(importDur > 0 ? importDur : 0, stemDur, engineDur);
       setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
       setEngineReady(true);
       setErrorMsg("");
@@ -1522,7 +1526,8 @@ export default function SvivvaPlayPage() {
     const tempo = baseBpm;
     const importDur = resolveImportDurationSec();
     const stemDur = stemTimelineDurationSec(stems, tempo);
-    importDurationSecRef.current = importDur > 0 ? importDur : stemDur;
+    audioImportCapSecRef.current = importDur;
+    importDurationSecRef.current = Math.max(importDur > 0 ? importDur : 0, stemDur);
     setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
 
     const hasNotes = stems.some((s) => normalizeMidiEvents(s.midiEvents).length > 0);
@@ -1558,7 +1563,11 @@ export default function SvivvaPlayPage() {
   const startPositionTracking = useCallback(() => {
     const update = () => {
       const engine = getSoundEngine();
-      const cap = importDurationSecRef.current;
+      const cap = Math.max(
+        importDurationSecRef.current,
+        engine.getDuration(),
+        playbackDuration,
+      );
       let pos = engine.getPosition();
       if (cap > 0 && pos >= cap - 0.02) {
         engine.pause();
@@ -1574,7 +1583,7 @@ export default function SvivvaPlayPage() {
       }
     };
     animFrameRef.current = requestAnimationFrame(update);
-  }, [stopPositionTracking]);
+  }, [stopPositionTracking, playbackDuration]);
 
   const pauseInputAudio = useCallback(() => {
     if (audioRef.current) {
@@ -2059,7 +2068,7 @@ export default function SvivvaPlayPage() {
     const tick = () => {
       const audio = audioRef.current;
       if (!audio || !isInputPlaying) return;
-      const cap = importDurationSecRef.current || playbackDuration;
+      const cap = audioImportCapSecRef.current || playbackDuration;
       const t = cap > 0 ? Math.min(audio.currentTime, cap) : audio.currentTime;
       setStagePlaybackSec(t);
       if (cap > 0 && audio.currentTime >= cap - 0.05) {
