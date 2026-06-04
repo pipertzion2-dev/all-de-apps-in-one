@@ -8,6 +8,7 @@
     "build": "tsx script/build.ts",
     "build:vercel": "node scripts/vercel-prebuild.mjs && npm run check && npm run test && next build",
     "deploy:prod": "vercel deploy --prod --yes",
+    "deploy:wait": "node scripts/wait-vercel-deploy.mjs",
     "db:play": "node scripts/play-db-migrate.mjs",
     "vercel-build": "next build",
     "start": "NODE_ENV=production node dist/index.cjs",
