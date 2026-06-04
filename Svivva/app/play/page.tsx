@@ -336,6 +336,7 @@ export default function SvivvaPlayPage() {
   const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
   const [patchResult, setPatchResult] = useState<PatchData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isInputPlaying, setIsInputPlaying] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [warningMsg, setWarningMsg] = useState("");
@@ -1455,40 +1456,63 @@ export default function SvivvaPlayPage() {
     animFrameRef.current = requestAnimationFrame(update);
   }, [stopPositionTracking]);
 
-  const togglePlay = useCallback(async () => {
-    if (stems.length > 0 && engineReady) {
-      const engine = getSoundEngine();
-      if (isPlaying) {
-        engine.pause();
-        stopPositionTracking();
-        setIsPlaying(false);
-      } else {
-        try {
-          // Ensure Tone.js context is started (required for iOS)
-          await engine.init();
-          console.log("🎵 Audio context ready, starting playback");
-          await engine.play();
-          startPositionTracking();
-          setIsPlaying(true);
-        } catch (err) {
-          console.error("🔴 Failed to start playback:", err);
-          alert("Audio playback failed. Please try again.");
-        }
-      }
+  const pauseInputAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsInputPlaying(false);
+  }, []);
+
+  const pauseComposition = useCallback(() => {
+    try {
+      getSoundEngine().pause();
+    } catch {
+      /* engine may not be loaded */
+    }
+    stopPositionTracking();
+    setIsPlaying(false);
+  }, [stopPositionTracking]);
+
+  const toggleInputPlay = useCallback(async () => {
+    if (!audioRef.current || !audioUrl) return;
+    if (isInputPlaying) {
+      pauseInputAudio();
       return;
     }
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      try {
-        await audioRef.current.play();
-      } catch (err) {
-        console.error("🔴 Audio playback blocked:", err);
-      }
+    pauseComposition();
+    try {
+      await audioRef.current.play();
+      setIsInputPlaying(true);
+    } catch (err) {
+      console.error("Input audio playback blocked:", err);
     }
-    setIsPlaying(!isPlaying);
-  }, [isPlaying, stems.length, engineReady, startPositionTracking, stopPositionTracking]);
+  }, [audioUrl, isInputPlaying, pauseInputAudio, pauseComposition]);
+
+  const toggleCompositionPlay = useCallback(async () => {
+    if (stems.length === 0 || !engineReady) return;
+    const engine = getSoundEngine();
+    if (isPlaying) {
+      pauseComposition();
+      return;
+    }
+    pauseInputAudio();
+    try {
+      await engine.init();
+      await engine.play();
+      startPositionTracking();
+      setIsPlaying(true);
+    } catch (err) {
+      console.error("Composition playback failed:", err);
+      alert("Composition playback failed. Please try again.");
+    }
+  }, [
+    isPlaying,
+    stems.length,
+    engineReady,
+    pauseComposition,
+    pauseInputAudio,
+    startPositionTracking,
+  ]);
 
   const stopPlayback = useCallback(() => {
     const engine = getSoundEngine();
@@ -1545,6 +1569,7 @@ export default function SvivvaPlayPage() {
     setPlanInfo(null);
     setSessionId(null);
     setIsPlaying(false);
+    setIsInputPlaying(false);
     setErrorMsg("");
     setWarningMsg("");
     setEngineReady(false);
@@ -1854,11 +1879,15 @@ export default function SvivvaPlayPage() {
   ]);
 
   useEffect(() => {
-    if (stems.length > 0 || !audioRef.current) return;
+    if (stems.length > 0) pauseInputAudio();
+  }, [stems.length, pauseInputAudio]);
+
+  useEffect(() => {
+    if (!audioUrl) return;
     let raf = 0;
     const tick = () => {
       const audio = audioRef.current;
-      if (!audio || !isPlaying) return;
+      if (!audio || !isInputPlaying) return;
       const cap = importDurationSecRef.current || playbackDuration;
       const t = cap > 0 ? Math.min(audio.currentTime, cap) : audio.currentTime;
       setStagePlaybackSec(t);
@@ -1866,14 +1895,14 @@ export default function SvivvaPlayPage() {
         audio.pause();
         audio.currentTime = cap;
         setStagePlaybackSec(cap);
-        setIsPlaying(false);
+        setIsInputPlaying(false);
         return;
       }
       raf = requestAnimationFrame(tick);
     };
-    if (isPlaying) raf = requestAnimationFrame(tick);
+    if (isInputPlaying) raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [isPlaying, stems.length, playbackDuration]);
+  }, [isInputPlaying, audioUrl, playbackDuration]);
 
   const ModeIcon = MODE_CONFIG[mode].icon;
 
@@ -2224,7 +2253,7 @@ export default function SvivvaPlayPage() {
             importDurationSecRef.current = barDur;
             syncPlaybackDuration();
           }}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => setIsInputPlaying(false)}
         />
       )}
 
@@ -2347,6 +2376,26 @@ export default function SvivvaPlayPage() {
                             </div>
                           )}
                           <button
+                            type="button"
+                            onClick={() => void toggleInputPlay()}
+                            disabled={!audioUrl}
+                            className="p-1.5 rounded-md text-gray-200 disabled:opacity-30 transition-all active:translate-y-[1px]"
+                            style={{
+                              background: "linear-gradient(180deg, #444, #333)",
+                              boxShadow:
+                                "2px 2px 5px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                              border: "2px solid #555",
+                            }}
+                            title="Play imported audio"
+                            data-testid="button-input-play-pause"
+                          >
+                            {isInputPlaying ? (
+                              <Pause className="w-3.5 h-3.5" />
+                            ) : (
+                              <Play className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <button
                             onClick={clearAudio}
                             className="text-gray-500 hover:text-gray-400"
                             data-testid="button-clear-audio"
@@ -2372,7 +2421,7 @@ export default function SvivvaPlayPage() {
                               style={{
                                 height: `${Math.max(8, h * 100)}%`,
                                 opacity: 0.35 + h * 0.55,
-                                animation: isPlaying
+                                animation: isInputPlaying
                                   ? `waveformPulse 0.6s ease-in-out ${i * 0.015}s infinite alternate`
                                   : "none",
                               }}
@@ -2619,6 +2668,31 @@ export default function SvivvaPlayPage() {
                         )}
                         {audioFile && (
                           <div className="mb-4">
+                            <div className="mb-2 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void toggleInputPlay()}
+                                disabled={!audioUrl}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold text-gray-200 disabled:opacity-40"
+                                style={{
+                                  background: "linear-gradient(180deg, #444, #333)",
+                                  border: "2px solid #555",
+                                }}
+                                data-testid="button-input-play-stage"
+                              >
+                                {isInputPlaying ? (
+                                  <Pause className="w-3 h-3" />
+                                ) : (
+                                  <Play className="w-3 h-3" />
+                                )}
+                                Play import
+                              </button>
+                              <span className="text-[10px] text-gray-500 font-mono">
+                                {transcription?.durationSec
+                                  ? `${formatTime(stagePlaybackSec)} / ${formatTime(transcription.durationSec)}`
+                                  : "Imported audio"}
+                              </span>
+                            </div>
                             <SvivvaPlayStagePanel
                               model={playStageModel}
                               waveformPeaks={transcription?.waveformPeaks ?? []}
@@ -4119,47 +4193,35 @@ export default function SvivvaPlayPage() {
                 {[
                   {
                     onClick: () => {
-                      if (engineReady && stems.length > 0) {
-                        const engine = getSoundEngine();
-                        engine.seek(Math.max(0, engine.getPosition() - 5));
-                        setPlaybackPos(engine.getPosition());
-                      } else if (audioRef.current) {
-                        audioRef.current.currentTime = Math.max(
-                          0,
-                          audioRef.current.currentTime - 5,
-                        );
-                      }
+                      if (!engineReady || stems.length === 0) return;
+                      const engine = getSoundEngine();
+                      engine.seek(Math.max(0, engine.getPosition() - 5));
+                      setPlaybackPos(engine.getPosition());
                     },
-                    disabled: !audioUrl && !engineReady,
+                    disabled: !engineReady || stems.length === 0,
                     icon: <SkipBack className="w-4 h-4" />,
                     testId: "button-skip-back",
                   },
                   {
-                    onClick: togglePlay,
-                    disabled: !audioUrl && !engineReady,
+                    onClick: () => void toggleCompositionPlay(),
+                    disabled: !engineReady || stems.length === 0,
                     icon: isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />,
                     testId: "button-play-pause",
                   },
                   {
                     onClick: stopPlayback,
-                    disabled: !engineReady,
+                    disabled: !engineReady || stems.length === 0,
                     icon: <Square className="w-3.5 h-3.5" />,
                     testId: "button-stop",
                   },
                   {
                     onClick: () => {
-                      if (engineReady && stems.length > 0) {
-                        const engine = getSoundEngine();
-                        engine.seek(Math.min(playbackDuration, engine.getPosition() + 5));
-                        setPlaybackPos(engine.getPosition());
-                      } else if (audioRef.current) {
-                        audioRef.current.currentTime = Math.min(
-                          audioRef.current.duration,
-                          audioRef.current.currentTime + 5,
-                        );
-                      }
+                      if (!engineReady || stems.length === 0) return;
+                      const engine = getSoundEngine();
+                      engine.seek(Math.min(playbackDuration, engine.getPosition() + 5));
+                      setPlaybackPos(engine.getPosition());
                     },
-                    disabled: !audioUrl && !engineReady,
+                    disabled: !engineReady || stems.length === 0,
                     icon: <SkipForward className="w-4 h-4" />,
                     testId: "button-skip-forward",
                   },
@@ -4181,11 +4243,11 @@ export default function SvivvaPlayPage() {
                 ))}
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-gray-300 font-mono flex-shrink-0 font-bold">
-                {(() => {
-                  const pos = engineReady ? playbackPos : stagePlaybackSec;
-                  const dur = playbackDuration;
-                  return dur > 0 ? `${formatTime(pos)}/${formatTime(dur)}` : "--:--";
-                })()}
+                {engineReady && stems.length > 0 && playbackDuration > 0
+                  ? `${formatTime(playbackPos)}/${formatTime(playbackDuration)}`
+                  : stems.length > 0
+                    ? "Loading…"
+                    : "Generate to play"}
               </div>
               <div
                 className="flex-1 h-2 rounded-full overflow-hidden cursor-pointer"
@@ -4194,7 +4256,7 @@ export default function SvivvaPlayPage() {
                   boxShadow: "inset 1px 1px 3px rgba(0,0,0,0.5)",
                 }}
                 onClick={(e) => {
-                  if (!engineReady || playbackDuration <= 0) return;
+                  if (!engineReady || stems.length === 0 || playbackDuration <= 0) return;
                   const rect = e.currentTarget.getBoundingClientRect();
                   const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                   const engine = getSoundEngine();
