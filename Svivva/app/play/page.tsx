@@ -1444,8 +1444,9 @@ export default function SvivvaPlayPage() {
         const engine = getSoundEngine();
         await engine.init();
         engine.setBpm(tempo);
-        engine.loadStems(buildStemPlaybacks(currentStems));
+        await engine.loadStems(buildStemPlaybacks(currentStems));
         if (loadGen !== engineLoadGenRef.current) return;
+        engine.setMasterVolume(masterVolume);
 
         const engineDur = engine.getDuration();
         const importDur = resolveImportDurationSec();
@@ -1459,20 +1460,14 @@ export default function SvivvaPlayPage() {
         const tempo = bpm > 0 ? bpm : 120;
         const stemDur = stemTimelineDurationSec(currentStems, tempo);
         const importDur = resolveImportDurationSec();
-        if (stemDur > 0 || importDur > 0) {
-          setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
-          setEngineReady(true);
-          setWarningMsg("Synth preview loaded with limited quality. Tap play to start audio.");
-        } else {
-          setErrorMsg("Could not load composition for playback. Try generating again.");
-        }
+        setErrorMsg("Could not load composition for playback. Try generating again.");
       } finally {
         if (loadGen === engineLoadGenRef.current) {
           setEngineLoading(false);
         }
       }
     },
-    [buildStemPlaybacks, resolveImportDurationSec],
+    [buildStemPlaybacks, resolveImportDurationSec, masterVolume],
   );
 
   useEffect(() => {
@@ -1567,13 +1562,17 @@ export default function SvivvaPlayPage() {
     }
     pauseInputAudio();
     try {
-      await engine.init();
+      engine.setMasterVolume(masterVolume);
       await engine.play();
       startPositionTracking();
       setIsPlaying(true);
     } catch (err) {
       console.error("Composition playback failed:", err);
-      alert("Composition playback failed. Please try again.");
+      alert(
+        err instanceof Error && err.message.includes("No stems")
+          ? "Composition is still loading. Wait for the timer, then press play again."
+          : "Composition playback failed. Tap play again to unlock browser audio.",
+      );
     }
   }, [
     isPlaying,

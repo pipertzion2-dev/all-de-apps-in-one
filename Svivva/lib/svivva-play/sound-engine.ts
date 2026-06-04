@@ -49,25 +49,23 @@ export class SvivvaSoundEngine {
   private duration: number = 0;
   private masterVolume: Tone.Volume | null = null;
 
-  async init() {
-    if (this.isInitialized) return;
-    try {
-      await Tone.start();
-      console.log("🎵 Tone.js context started, state:", Tone.getContext().state);
-      // Ensure context is running
-      if (Tone.getContext().state !== "running") {
-        await Tone.getContext().resume();
-        console.log("🎵 Audio context resumed");
-      }
-      // Set master volume to slightly boost output (3dB = more audible)
+  /** Start/resume Web Audio — must run on user gesture before audible playback. */
+  private async ensureAudioRunning(): Promise<void> {
+    await Tone.start();
+    const ctx = Tone.getContext();
+    if (ctx.state !== "running") {
+      await ctx.resume();
+    }
+    if (!this.masterVolume || this.masterVolume.disposed) {
       this.masterVolume = new Tone.Volume(3).toDestination();
-      console.log("🎵 Master volume connected at 3dB, volume dB:", this.masterVolume.volume.value);
-      this.isInitialized = true;
-      console.log(
-        "🎵 Sound engine initialized, destination:",
-        Tone.getDestination().numberOfOutputs,
-        "outputs",
-      );
+    }
+    this.isInitialized = true;
+  }
+
+  async init() {
+    try {
+      await this.ensureAudioRunning();
+      console.log("🎵 Sound engine ready, context:", Tone.getContext().state);
     } catch (err) {
       console.error("🔴 Sound engine init error:", err);
       throw err;
@@ -271,14 +269,14 @@ export class SvivvaSoundEngine {
     }
   }
 
-  loadStems(stems: StemPlayback[]) {
+  async loadStems(stems: StemPlayback[]) {
     console.log(
       "🎵 Loading",
       stems.length,
       "stems, masterVolume:",
       this.masterVolume ? "connected" : "null (will use destination)",
     );
-    this.dispose();
+    this.disposeChannels();
     const transport = Tone.getTransport();
 
     // Ensure transport is stopped and reset
@@ -302,6 +300,11 @@ export class SvivvaSoundEngine {
       const panner = new Tone.Panner(stem.pan / 100);
       const volume = new Tone.Volume(stem.gainDb || 0);
       const effects = this.createEffectsChain(preset.fx);
+      for (const fx of effects) {
+        if (fx instanceof Tone.Reverb) {
+          await fx.generate();
+        }
+      }
 
       const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
       for (let i = 0; i < chain.length - 1; i++) {
@@ -408,21 +411,25 @@ export class SvivvaSoundEngine {
 
   async play() {
     try {
-      if (!this.isInitialized) await this.init();
+      await this.ensureAudioRunning();
+      if (this.channels.size === 0) {
+        throw new Error("No stems loaded for playback");
+      }
       const transport = Tone.getTransport();
       console.log(
         "🎵 Starting playback, channels:",
         this.channels.size,
         "duration:",
         this.duration,
-        "transport state:",
+        "context:",
+        Tone.getContext().state,
+        "transport:",
         transport.state,
-        "position:",
-        transport.position,
       );
 
-      // Only start if not already running
-      if (transport.state !== "started") {
+      if (transport.state === "paused") {
+        transport.start();
+      } else if (transport.state !== "started") {
         transport.start();
       }
       this.isPlaying = true;
@@ -472,7 +479,9 @@ export class SvivvaSoundEngine {
         const synth = this.createSynth(preset);
         const panner = new Tone.Panner(stem.pan / 100);
         const vol = new Tone.Volume(stem.gainDb || 0);
-        const effects = this.createEffectsChain(preset.fx);
+        const effects = this.createEffectsChain(
+          preset.fx?.filter((fx) => fx.type !== "reverb"),
+        );
 
         const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, vol];
         for (let i = 0; i < chain.length - 1; i++) {
@@ -516,7 +525,8 @@ export class SvivvaSoundEngine {
     return new Blob([wav], { type: "audio/wav" });
   }
 
-  dispose() {
+  /** Tear down stem voices/schedules; keep master bus for the next load. */
+  private disposeChannels() {
     const transport = Tone.getTransport();
     transport.stop();
     transport.cancel();
@@ -535,6 +545,18 @@ export class SvivvaSoundEngine {
     }
     this.channels.clear();
     this.isPlaying = false;
+  }
+
+  dispose() {
+    this.disposeChannels();
+    try {
+      this.masterVolume?.dispose();
+    } catch {
+      /* skip */
+    }
+    this.masterVolume = null;
+    this.isInitialized = false;
+    this.duration = 0;
   }
 }
 
