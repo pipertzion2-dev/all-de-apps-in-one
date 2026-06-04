@@ -256,24 +256,29 @@ export function melodicAnchorMidi(notes: { midi: number }[]): number | undefined
   return sorted[Math.floor(sorted.length / 2)]!;
 }
 
-/** V-1 INDIAN: gentle S-curve meend (~6% pitch rise) mapped to MIDI pitch wheel. */
+/** MIDI pitch wheel (-8192…8191) → cents (±200 ≈ ±2 semitones). */
+export function midiPitchWheelToCents(wheel: number): number {
+  return (wheel / 8192) * 200;
+}
+
+/** V-1 INDIAN: S-curve meend mapped to MIDI pitch wheel (audible in preview + export). */
 export function meendPitchbendForEvents(
   events: { startBeat: number; duration: number }[],
 ): { beat: number; value: number }[] {
   const out: { beat: number; value: number }[] = [];
-  const peakBend = 3200;
+  const peakBend = 6800;
   for (const e of events) {
-    const d = Math.max(0.05, e.duration || 0.25);
+    const d = Math.max(0.08, e.duration || 0.25);
     const t0 = e.startBeat;
-    const steps = 5;
+    const steps = 8;
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
-      const beat = t0 + d * (0.55 + t * 0.4);
-      const sigmoid = 1 / (1 + Math.exp(-6 * (t - 0.5))) - 0.5;
+      const beat = t0 + d * (0.2 + t * 0.72);
+      const sigmoid = 1 / (1 + Math.exp(-5 * (t - 0.5))) - 0.5;
       const value = Math.round(peakBend * sigmoid * 2);
       out.push({ beat, value });
     }
-    out.push({ beat: t0 + d * 0.98, value: 0 });
+    out.push({ beat: t0 + d * 0.97, value: 0 });
   }
   out.sort((a, b) => a.beat - b.beat);
   const dedup: typeof out = [];

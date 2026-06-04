@@ -56,6 +56,7 @@ import {
   resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
+import { applyMeendToStems } from "@/lib/svivva-play/generate-helpers";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import {
@@ -421,6 +422,11 @@ export default function SvivvaPlayPage() {
   const [scaleLookupBusy, setScaleLookupBusy] = useState(false);
   const [scaleLookupResult, setScaleLookupResult] = useState<ScaleLookupResult | null>(null);
   const [crateState, setCrateState] = useState<"closed" | "opening" | "open">("closed");
+  const [betaAcknowledged, setBetaAcknowledged] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("svivva-play-beta-ack") === "1",
+  );
 
   const [seed, setSeed] = useState(Math.floor(Math.random() * 999999));
   const [useSeed, setUseSeed] = useState(false);
@@ -1579,19 +1585,39 @@ export default function SvivvaPlayPage() {
     setWarningMsg,
   ]);
 
-  const buildStemPlaybacks = useCallback((currentStems: StemData[]): StemPlayback[] => {
-    return currentStems.map((s) => ({
-      name: s.name,
-      role: s.role,
-      instrumentHint: s.instrumentHint,
-      midiEvents: normalizeMidiEvents(s.midiEvents),
-      expression: s.expression as StemPlayback["expression"],
-      muted: s.muted,
-      soloed: s.soloed,
-      pan: s.pan,
-      gainDb: s.gainDb,
-    }));
-  }, []);
+  const buildStemPlaybacks = useCallback(
+    (currentStems: StemData[]): StemPlayback[] => {
+      const tempo =
+        manualTempo ??
+        effectiveAnalysis?.bpm ??
+        analysis?.bpm ??
+        (mode === "composition" ? FALLBACK_ANALYSIS.bpm : 120);
+
+      let prepared = currentStems.map((s) => ({
+        ...s,
+        midiEvents: normalizeMidiEvents(s.midiEvents),
+      }));
+
+      if (meend && prepared.some((s) => s.midiEvents.length > 0)) {
+        prepared = applyMeendToStems(
+          prepared as Parameters<typeof applyMeendToStems>[0],
+        ) as typeof prepared;
+      }
+
+      return prepared.map((s) => ({
+        name: s.name,
+        role: s.role,
+        instrumentHint: s.instrumentHint,
+        midiEvents: s.midiEvents,
+        expression: s.expression as StemPlayback["expression"],
+        muted: s.muted,
+        soloed: s.soloed,
+        pan: s.pan,
+        gainDb: s.gainDb,
+      }));
+    },
+    [meend, manualTempo, effectiveAnalysis?.bpm, analysis?.bpm, mode],
+  );
 
   const loadStemsIntoEngine = useCallback(
     async (currentStems: StemData[], bpm: number) => {
@@ -1637,8 +1663,8 @@ export default function SvivvaPlayPage() {
 
   const stemsPlaybackKey = useCallback(
     (currentStems: StemData[], bpm: number) =>
-      `${bpm}|${currentStems.map((s) => `${s.id}:${s.muted}:${s.soloed}:${s.pan}:${s.gainDb}`).join(";")}`,
-    [],
+      `${bpm}|meend:${meend ? 1 : 0}|swing:${swingAmount}|${currentStems.map((s) => `${s.id}:${s.muted}:${s.soloed}:${s.pan}:${s.gainDb}`).join(";")}`,
+    [meend, swingAmount],
   );
 
   useEffect(() => {
@@ -2162,6 +2188,7 @@ export default function SvivvaPlayPage() {
         const leadEvents = normalizeMidiEvents(rawStems[leadIdx]!.midiEvents);
         rawStems[leadIdx] = {
           ...rawStems[leadIdx]!,
+          instrumentHint: "sitar",
           expression: {
             meend: true,
             pitchbend: meendPitchbendForEvents(leadEvents),
@@ -2517,11 +2544,55 @@ export default function SvivvaPlayPage() {
     );
   }
 
+  const acknowledgeBeta = useCallback(() => {
+    try {
+      window.localStorage.setItem("svivva-play-beta-ack", "1");
+    } catch {
+      /* private mode */
+    }
+    setBetaAcknowledged(true);
+  }, []);
+
   return (
     <div
       className="min-h-[100dvh] flex flex-col text-gray-900 bg-white"
       style={{ colorScheme: "light" }}
     >
+      {!betaAcknowledged && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="svivva-play-beta-title"
+          data-testid="dialog-play-beta"
+        >
+          <div className="max-w-md w-full rounded-2xl border border-amber-200/80 bg-white shadow-2xl p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <h2
+                  id="svivva-play-beta-title"
+                  className="text-lg font-semibold text-gray-900"
+                >
+                  Svivva Play is in beta
+                </h2>
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                  Preview audio, Indian meend, swing, and AI scale lookup are experimental.
+                  Timing and expression may differ from exported MIDI in your DAW. Features can
+                  change or break between releases.
+                </p>
+              </div>
+            </div>
+            <Button
+              className="w-full"
+              onClick={acknowledgeBeta}
+              data-testid="button-play-beta-ack"
+            >
+              I understand — continue to Play
+            </Button>
+          </div>
+        </div>
+      )}
       <style>{`
         .holo-gradient {
           position: relative;
@@ -3673,7 +3744,9 @@ export default function SvivvaPlayPage() {
                                   data-testid="slider-swing"
                                 />
                                 <span className="text-[9px] text-gray-500">
-                                  {swingAmount === 0 ? "Straight 16ths" : `${swingAmount}% swing`}
+                                  {swingAmount === 0
+                                    ? "Straight 16ths — regenerate after changing"
+                                    : `${swingAmount}% swing — regenerate to apply`}
                                 </span>
                               </div>
                               {reichType === "hocket" && (

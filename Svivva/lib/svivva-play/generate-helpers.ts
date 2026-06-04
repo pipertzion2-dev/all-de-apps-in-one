@@ -71,8 +71,7 @@ export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemRe
     if (i !== leadIdx || stem.midiEvents.length === 0) return stem;
     return {
       ...stem,
-      instrumentHint:
-        stem.role === "melody" || stem.role === "lead" ? "lead synth" : stem.instrumentHint,
+      instrumentHint: "sitar",
       expression: {
         ...stem.expression,
         meend: true,

@@ -252,6 +252,16 @@ const SITAR: InstrumentPreset = {
   fx: [{ type: "reverb", wet: 0.3, decay: 3.0, preDelay: 0.02 }],
 };
 
+/** Sustained mono voice for live meend preview (pitch wheel / portamento). */
+export const MEEND_PREVIEW: InstrumentPreset = {
+  synthType: "mono",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.04, decay: 0.12, sustain: 0.88, release: 0.65 },
+  filter: { type: "lowpass", frequency: 3600, rolloff: -12, Q: 1.2 },
+  portamento: 0.42,
+  volume: -2,
+};
+
 const DEFAULT_PRESET: InstrumentPreset = {
   synthType: "synth",
   oscillator: { type: "triangle" },

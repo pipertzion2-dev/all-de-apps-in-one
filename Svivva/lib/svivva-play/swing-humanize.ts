@@ -16,7 +16,10 @@ function swingOffsetBeats(sixteenthIndex: number, gridBeats: number, ratio: numb
   if (amount <= 0) return 0;
   const offbeat = sixteenthIndex % 2 === 1;
   if (!offbeat) return 0;
-  return gridBeats * (ratio - 0.5) * amount;
+  // Triplet feel: delay offbeat 16ths by up to ~⅓ of a 16th (BLUES JAWN–style, clearly audible).
+  const tripletDelay = gridBeats * (2 / 3);
+  const ratioBlend = gridBeats * (ratio - 0.5) * 2;
+  return (tripletDelay * 0.75 + ratioBlend * 0.25) * amount;
 }
 
 function dynamicVelocityScale(sixteenthIndex: number, baseVelocity: number): number {
