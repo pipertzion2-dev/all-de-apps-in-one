@@ -41,6 +41,7 @@ import {
   BrainCircuit,
   Copy,
   Check,
+  Search,
 } from "lucide-react";
 import { GiSaxophone } from "react-icons/gi";
 import { getSoundEngine, type StemPlayback } from "@/lib/svivva-play/sound-engine";
@@ -60,6 +61,11 @@ import {
   type ScaleSuggestion,
 } from "@/lib/svivva-play/scale-suggest";
 import { buildStemPackZipBlobClient } from "@/lib/svivva-play/stem-pack-client";
+import {
+  lookupScaleLocal,
+  type ScaleLookupResult,
+  type ScaleLookupMatch,
+} from "@/lib/svivva-play/scale-lookup";
 import {
   ORCHESTRAL_STYLE_PRESET_ID,
   isOrchestralPreset,
@@ -409,7 +415,9 @@ export default function SvivvaPlayPage() {
 
   const [showGuidedBuilder, setShowGuidedBuilder] = useState(false);
   const [guidedStep, setGuidedStep] = useState(0);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [scaleSearchQuery, setScaleSearchQuery] = useState("");
+  const [scaleLookupBusy, setScaleLookupBusy] = useState(false);
+  const [scaleLookupResult, setScaleLookupResult] = useState<ScaleLookupResult | null>(null);
   const [crateState, setCrateState] = useState<"closed" | "opening" | "open">("closed");
 
   const [seed, setSeed] = useState(Math.floor(Math.random() * 999999));
@@ -518,6 +526,47 @@ export default function SvivvaPlayPage() {
     setScaleSuggestionApplied(true);
     setWarningMsg(`Scale set to ${aiScaleSuggestion.keyLabel} · ${aiScaleSuggestion.scaleName.replace(/_/g, " ")} (${aiScaleSuggestion.confidence}% match).`);
   }, [aiScaleSuggestion]);
+
+  const applyScaleLookupMatch = useCallback((match: ScaleLookupMatch) => {
+    setReichScale(match.scaleId);
+    setScaleSuggestionApplied(true);
+    setWarningMsg(
+      `Scale set to ${match.label} (${match.source}, ${match.confidence}% match).`,
+    );
+  }, []);
+
+  const runScaleLookup = useCallback(async () => {
+    const q = scaleSearchQuery.trim();
+    if (!q) return;
+    setScaleLookupBusy(true);
+    setErrorMsg("");
+    const root = parseRootFromKeyLabel(generationKeyLabel);
+    const local = lookupScaleLocal(q, root);
+    setScaleLookupResult(local);
+    if (local.resolved) {
+      applyScaleLookupMatch(local.resolved);
+      setScaleLookupBusy(false);
+      return;
+    }
+    try {
+      const res = await fetch("/api/svivva-play/scale-lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, key: generationKeyLabel, useAi: true }),
+      });
+      if (res.ok) {
+        const remote = (await res.json()) as ScaleLookupResult;
+        setScaleLookupResult(remote);
+        if (remote.resolved) applyScaleLookupMatch(remote.resolved);
+      } else {
+        setErrorMsg("Scale lookup failed — try a different spelling.");
+      }
+    } catch {
+      setErrorMsg("Scale lookup failed — check connection.");
+    } finally {
+      setScaleLookupBusy(false);
+    }
+  }, [scaleSearchQuery, generationKeyLabel, applyScaleLookupMatch]);
 
   const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
   const [midiFileName, setMidiFileName] = useState("");
@@ -1412,136 +1461,117 @@ export default function SvivvaPlayPage() {
     }
   }, [transcription, analysis, manualTempo, downloadMidiBlob]);
 
-  const handleExport = useCallback(
-    async (format: "json" | "midi" | "midi-zip" | "patch" = "json") => {
-      const bpm = manualTempo ?? analysis?.bpm ?? 120;
-      const downloadName = `svivva-play-${mode}-${Date.now()}`;
+  const handleExport = useCallback(async () => {
+    const bpm = manualTempo ?? analysis?.bpm ?? 120;
+    const downloadName = `svivva-play-${mode}-${Date.now()}`;
+    const filename = `${downloadName}-export.zip`;
 
-      if (
-        (format === "midi" || format === "midi-zip") &&
-        (stems.length > 0 || transcription?.melodyneNotes?.length)
-      ) {
-        setIsExporting(true);
-        setErrorMsg("");
-        const exportFormat = format === "midi-zip" ? "midi-zip" : "midi";
-        const stemPayload = stems.map((s) => ({
-          name: s.name,
-          role: s.role,
-          midiEvents: s.midiEvents,
-        }));
-        const filename =
-          exportFormat === "midi-zip" ? `${downloadName}-stem-pack.zip` : `${downloadName}.mid`;
+    if (stems.length === 0 && !transcription?.melodyneNotes?.length) {
+      setErrorMsg("Generate stems or import Melodyne before exporting.");
+      return;
+    }
 
-        try {
-          if (exportFormat === "midi-zip") {
-            try {
-              const blob = await buildStemPackZipBlobClient({
-                bpm,
-                stems: stemPayload,
-                melodyneNotes: transcription?.melodyneNotes,
-                projectName: downloadName,
-              });
-              if (downloadMidiBlob(blob, filename)) {
-                setWarningMsg(
-                  "STEM pack downloaded — unzip and drag each .mid into your DAW.",
-                );
-              }
-              return;
-            } catch (clientErr) {
-              console.warn("Client STEM pack zip failed, trying server:", clientErr);
-            }
-          }
+    setIsExporting(true);
+    setErrorMsg("");
 
-          const res = await fetch("/api/svivva-play/export", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              format: exportFormat,
-              stems: stemPayload,
-              melodyneNotes: transcription?.melodyneNotes ?? [],
-              bpm,
-              filename: downloadName,
-            }),
-          });
-          if (!res.ok) {
-            const errBody = await res.json().catch(() => null);
-            setErrorMsg((errBody as { error?: string } | null)?.error ?? "MIDI export failed.");
-            return;
-          }
-          const contentType = res.headers.get("Content-Type") ?? "";
-          if (
-            exportFormat === "midi-zip" &&
-            !contentType.includes("zip") &&
-            !contentType.includes("octet-stream")
-          ) {
-            const peek = await res.clone().text();
-            if (peek.trimStart().startsWith("{")) {
-              try {
-                const errJson = JSON.parse(peek) as { error?: string };
-                setErrorMsg(errJson.error ?? "STEM pack export failed.");
-              } catch {
-                setErrorMsg("STEM pack export failed — server returned an invalid file.");
-              }
-              return;
-            }
-          }
-          const blob = await res.blob();
-          if (downloadMidiBlob(blob, filename) && exportFormat === "midi-zip") {
-            setWarningMsg(
-              "STEM pack downloaded — unzip and drag each .mid into your DAW (melody, harmony, Melodyne reference).",
-            );
-          }
-          return;
-        } catch (err) {
-          console.error("MIDI export failed:", err);
-          setErrorMsg("MIDI export failed — check connection and try again.");
-          return;
-        } finally {
-          setIsExporting(false);
-        }
-      }
+    const stemPayload = stems.map((s) => ({
+      name: s.name,
+      role: s.role,
+      midiEvents: s.midiEvents,
+      expression: s.expression as
+        | { meend?: boolean; pitchbend?: { beat: number; value: number }[] }
+        | undefined,
+    }));
 
-      if (!sessionId) {
-        if (format === "json" && transcription && analysis) {
-          const payload = buildClientSessionExport({
+    const sessionJson =
+      analysis && transcription
+        ? buildClientSessionExport({
             mode,
             audioName,
             analysis,
             transcription,
             stems,
-          });
-          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${downloadName}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
+          })
+        : analysis
+          ? buildClientSessionExport({
+              mode,
+              audioName,
+              analysis,
+              transcription: null,
+              stems,
+            })
+          : undefined;
+
+    try {
+      try {
+        const blob = await buildStemPackZipBlobClient({
+          bpm,
+          stems: stemPayload,
+          melodyneNotes: transcription?.melodyneNotes,
+          projectName: downloadName,
+          sessionJson,
+        });
+        if (downloadMidiBlob(blob, filename)) {
           setWarningMsg(
-            "Saved local session JSON (Melodyne key + chords). Cloud session ID not required.",
+            "Full export downloaded — zip includes all MIDI stems (with Meend bends), session JSON, and Melodyne reference.",
           );
-          return;
         }
-        setErrorMsg(
-          "Cloud export needs server analysis. Generate MIDI first, or export JSON with a loaded session.",
-        );
+        return;
+      } catch (clientErr) {
+        console.warn("Client export zip failed, trying server:", clientErr);
+      }
+
+      const res = await fetch("/api/svivva-play/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format: "midi-zip",
+          stems: stemPayload,
+          melodyneNotes: transcription?.melodyneNotes ?? [],
+          bpm,
+          filename: downloadName,
+          sessionJson,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        setErrorMsg((errBody as { error?: string } | null)?.error ?? "Export failed.");
         return;
       }
-      try {
-        const res = await fetch(`/api/svivva-play/export?sessionId=${sessionId}&format=${format}`);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `svivva-play-${sessionId}.${format === "midi" ? "mid" : "json"}`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error("Export failed:", err);
+      const contentType = res.headers.get("Content-Type") ?? "";
+      if (!contentType.includes("zip") && !contentType.includes("octet-stream")) {
+        const peek = await res.clone().text();
+        if (peek.trimStart().startsWith("{")) {
+          try {
+            const errJson = JSON.parse(peek) as { error?: string };
+            setErrorMsg(errJson.error ?? "Export failed.");
+          } catch {
+            setErrorMsg("Export failed — server returned an invalid file.");
+          }
+          return;
+        }
       }
-    },
-    [sessionId, stems, analysis, transcription, audioName, mode, manualTempo, downloadMidiBlob, setErrorMsg, setWarningMsg],
-  );
+      const blob = await res.blob();
+      if (downloadMidiBlob(blob, filename)) {
+        setWarningMsg("Full export downloaded — unzip for MIDI stems, session JSON, and README.");
+      }
+    } catch (err) {
+      console.error("Export failed:", err);
+      setErrorMsg("Export failed — check connection and try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    stems,
+    analysis,
+    transcription,
+    audioName,
+    mode,
+    manualTempo,
+    downloadMidiBlob,
+    setErrorMsg,
+    setWarningMsg,
+  ]);
 
   const buildStemPlaybacks = useCallback((currentStems: StemData[]): StemPlayback[] => {
     return currentStems.map((s) => ({
@@ -2089,8 +2119,6 @@ export default function SvivvaPlayPage() {
           startBeat: n.startBeat,
           duration: n.duration,
         }));
-        const expression =
-          meend && i === 0 ? { meend: true, pitchbend: meendPitchbendForEvents(midiEvents) } : {};
 
         return {
           id: `voice-${i}`,
@@ -2103,11 +2131,34 @@ export default function SvivvaPlayPage() {
           pan: Math.round((i / Math.max(voices.length - 1, 1)) * 200 - 100),
           gainDb: 0,
           midiEvents,
-          expression,
+          expression: {},
           articulations: [],
           qualityTier: "professional",
         };
       });
+      if (meend && rawStems.length > 0) {
+        let leadIdx = 0;
+        let bestWeight = 0;
+        for (let i = 0; i < rawStems.length; i++) {
+          const role = rawStems[i]!.role.toLowerCase();
+          const count = normalizeMidiEvents(rawStems[i]!.midiEvents).length;
+          const weight =
+            count +
+            (role === "melody" || role === "lead" || role === "solo" ? 8 : 0);
+          if (weight > bestWeight) {
+            bestWeight = weight;
+            leadIdx = i;
+          }
+        }
+        const leadEvents = normalizeMidiEvents(rawStems[leadIdx]!.midiEvents);
+        rawStems[leadIdx] = {
+          ...rawStems[leadIdx]!,
+          expression: {
+            meend: true,
+            pitchbend: meendPitchbendForEvents(leadEvents),
+          },
+        };
+      }
       const newStems = constrainGeneratedStems(
         rawStems as unknown as Parameters<typeof constrainGeneratedStems>[0],
         lockedKey,
@@ -3172,20 +3223,65 @@ export default function SvivvaPlayPage() {
                                 ))}
                               </select>
                               <div
-                                className="rounded border border-gray-800 bg-[#0d0d0d] px-2 py-1.5"
+                                className="rounded border border-[#A05068]/35 bg-[#0d0d0d] px-2 py-2"
                                 data-testid="scale-lookup-panel"
                               >
-                                <div className="text-[9px] font-semibold uppercase tracking-wide text-gray-500 mb-1">
-                                  Scale lookup
+                                <div className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                                  Scale lookup (any name)
                                 </div>
+                                <div className="flex gap-1 mb-1.5">
+                                  <input
+                                    value={scaleSearchQuery}
+                                    onChange={(e) => setScaleSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") void runScaleLookup();
+                                    }}
+                                    placeholder="e.g. brazilian, hungarian minor, raga yaman"
+                                    className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]"
+                                    data-testid="input-scale-lookup"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => void runScaleLookup()}
+                                    disabled={scaleLookupBusy || !scaleSearchQuery.trim()}
+                                    className="px-2 rounded border border-[#A05068]/50 text-[#B87888] hover:bg-[#A05068]/10 disabled:opacity-40"
+                                    data-testid="button-scale-lookup-search"
+                                  >
+                                    {scaleLookupBusy ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Search className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
+                                {scaleLookupResult?.resolved ? (
+                                  <p className="text-[10px] text-emerald-500/90 mb-1">
+                                    {scaleLookupResult.resolved.label} ·{" "}
+                                    {scaleLookupResult.resolved.confidence}% (
+                                    {scaleLookupResult.resolved.source})
+                                  </p>
+                                ) : scaleLookupResult?.suggestions.length ? (
+                                  <div className="mb-1">
+                                    <p className="text-[9px] text-amber-500/90 mb-1">
+                                      Did you mean:
+                                    </p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {scaleLookupResult.suggestions.slice(0, 6).map((s) => (
+                                        <button
+                                          key={s.scaleId}
+                                          type="button"
+                                          onClick={() => applyScaleLookupMatch(s)}
+                                          className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 hover:border-[#A05068]"
+                                        >
+                                          {s.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : null}
                                 <div className="text-[11px] text-gray-300">
-                                  {parseRootFromKeyLabel(generationKeyLabel)}{" "}
+                                  Active: {parseRootFromKeyLabel(generationKeyLabel)}{" "}
                                   {generationScaleLookup.label}
-                                  <span className="text-gray-500">
-                                    {" "}
-                                    ({generationScaleLookup.scaleInfo.isMinor ? "minor" : "major"}{" "}
-                                    mode)
-                                  </span>
                                 </div>
                                 <div className="mt-1 font-mono text-[10px] text-[#A05068] tracking-wide">
                                   {generationScaleLookup.noteNames.join(" · ")}
@@ -3547,11 +3643,53 @@ export default function SvivvaPlayPage() {
                               className="mb-3 rounded-lg border border-[#A05068]/40 bg-[#1a1018] p-3"
                               data-testid="ai-scale-lookup-panel"
                             >
-                              <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="text-[10px] font-semibold text-gray-300 uppercase tracking-wide mb-2">
+                                Scale lookup (search any scale)
+                              </div>
+                              <div className="flex gap-1 mb-2">
+                                <input
+                                  value={scaleSearchQuery}
+                                  onChange={(e) => setScaleSearchQuery(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") void runScaleLookup();
+                                  }}
+                                  placeholder="brazilian, hungarian minor, raga yaman…"
+                                  className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]"
+                                  data-testid="input-scale-lookup-composition"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => void runScaleLookup()}
+                                  disabled={scaleLookupBusy || !scaleSearchQuery.trim()}
+                                  className="px-2 rounded border border-[#A05068]/50 text-[#B87888] hover:bg-[#A05068]/10 disabled:opacity-40"
+                                  data-testid="button-scale-lookup-search-composition"
+                                >
+                                  {scaleLookupBusy ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Search className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                              {scaleLookupResult?.suggestions.length && !scaleLookupResult.resolved ? (
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {scaleLookupResult.suggestions.slice(0, 5).map((s) => (
+                                    <button
+                                      key={s.scaleId}
+                                      type="button"
+                                      onClick={() => applyScaleLookupMatch(s)}
+                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A05068]"
+                                    >
+                                      {s.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
+                              <div className="flex items-center justify-between gap-2 mb-2 pt-1 border-t border-gray-800">
                                 <div className="flex items-center gap-1.5">
                                   <BrainCircuit className="w-3.5 h-3.5 text-[#A05068]" />
-                                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wide">
-                                    AI scale lookup
+                                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+                                    From your audio
                                   </span>
                                 </div>
                                 {aiScaleSuggestion && (
@@ -4494,105 +4632,37 @@ export default function SvivvaPlayPage() {
               </div>
             </div>
 
-            <div className="px-3 sm:px-5 pt-1 relative">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => void handleExport("midi-zip")}
-                  disabled={
-                    (stems.length === 0 && !transcription?.melodyneNotes?.length) || isExporting
-                  }
-                  className="flex flex-1 items-center justify-center gap-1.5 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 disabled:text-gray-500 disabled:opacity-40 transition-all active:translate-y-[1px]"
-                  style={{
-                    background:
-                      stems.length > 0 || transcription?.melodyneNotes?.length
-                        ? "linear-gradient(180deg, #5BA8A0, #4A8890)"
-                        : "linear-gradient(180deg, #444, #333)",
-                    boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
-                    border:
-                      "2px solid " +
-                      (stems.length > 0 || transcription?.melodyneNotes?.length
-                        ? "#5BA8A0"
-                        : "#555"),
-                  }}
-                  data-testid="button-export-stem-pack"
-                >
-                  {isExporting ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Download className="w-3.5 h-3.5" />
-                  )}
-                  {isExporting ? "packaging…" : "download stem pack"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                  disabled={stems.length === 0 && !patchResult}
-                  className="px-2.5 py-2 sm:py-2.5 rounded-md text-gray-200 disabled:opacity-40"
-                  style={{
-                    background: "linear-gradient(180deg, #444, #333)",
-                    border: "2px solid #555",
-                  }}
-                  aria-label="More export formats"
-                  data-testid="button-export"
-                >
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {showExportMenu && (
-                <div
-                  className="absolute bottom-full left-3 right-3 mb-2 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-lg z-50"
-                  data-testid="export-menu"
-                >
-                  <button
-                    onClick={() => {
-                      handleExport("midi-zip");
-                      setShowExportMenu(false);
-                    }}
-                    disabled={stems.length === 0 && !transcription?.melodyneNotes?.length}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-gray-200 hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-[#1a1a1a] border-b border-gray-700"
-                    data-testid="export-option-midi-zip"
-                  >
-                    <Music className="w-3.5 h-3.5 text-[#5BA8A0]" />
-                    <div>
-                      <div className="font-semibold">STEM pack (.zip)</div>
-                      <div className="text-[10px] text-gray-400">
-                        Separate .mid per part — melody, harmony, Melodyne
-                      </div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleExport("midi");
-                      setShowExportMenu(false);
-                    }}
-                    disabled={stems.length === 0}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-gray-200 hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-[#1a1a1a] border-b border-gray-700 last:border-b-0"
-                    data-testid="export-option-midi"
-                  >
-                    <Download className="w-3.5 h-3.5 text-gray-500" />
-                    <div>
-                      <div className="font-semibold">Single combined .mid</div>
-                      <div className="text-[10px] text-gray-400">All tracks in one file</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleExport("json");
-                      setShowExportMenu(false);
-                    }}
-                    disabled={stems.length === 0 && !patchResult}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-gray-200 hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-[#1a1a1a]"
-                    data-testid="export-option-json"
-                  >
-                    <Download className="w-3.5 h-3.5 text-gray-400" />
-                    <div>
-                      <div className="font-semibold">JSON Project</div>
-                      <div className="text-[10px] text-gray-400">Full project data & metadata</div>
-                    </div>
-                  </button>
-                </div>
-              )}
+            <div className="px-3 sm:px-5 pt-1">
+              <button
+                onClick={() => void handleExport()}
+                disabled={
+                  (stems.length === 0 && !transcription?.melodyneNotes?.length) || isExporting
+                }
+                className="flex w-full items-center justify-center gap-1.5 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-200 disabled:text-gray-500 disabled:opacity-40 transition-all active:translate-y-[1px]"
+                style={{
+                  background:
+                    stems.length > 0 || transcription?.melodyneNotes?.length
+                      ? "linear-gradient(180deg, #5BA8A0, #4A8890)"
+                      : "linear-gradient(180deg, #444, #333)",
+                  boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  border:
+                    "2px solid " +
+                    (stems.length > 0 || transcription?.melodyneNotes?.length
+                      ? "#5BA8A0"
+                      : "#555"),
+                }}
+                data-testid="button-export-stem-pack"
+              >
+                {isExporting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                {isExporting ? "packaging…" : "download full export"}
+              </button>
+              <p className="text-[9px] text-gray-500 text-center mt-1">
+                Zip: all MIDI stems (Meend bends), multitrack, Melodyne, session JSON
+              </p>
             </div>
 
             <div className="px-3 sm:px-5 pb-3 sm:pb-4 pt-1 flex items-center gap-2 sm:gap-3 flex-shrink-0">

@@ -435,10 +435,22 @@ export class SvivvaSoundEngine {
 
         if (hasMeend && synth instanceof Tone.MonoSynth) {
           for (const value of partEvents) {
-            for (const pb of pitchBends) {
-              if (pb.beat < value.startBeat - 0.001 || pb.beat > value.endBeat + 0.001) continue;
+            const noteBends = pitchBends.filter(
+              (pb) => pb.beat >= value.startBeat - 0.001 && pb.beat <= value.endBeat + 0.001,
+            );
+            if (!noteBends.length && stem.expression?.meend) {
+              const d = value.endBeat - value.startBeat;
+              noteBends.push(
+                { beat: value.startBeat + d * 0.55, value: 0 },
+                { beat: value.startBeat + d * 0.78, value: 3600 },
+                { beat: value.startBeat + d * 0.98, value: 0 },
+              );
+            }
+            for (const pb of noteBends) {
               part.add(this.beatToSeconds(pb.beat), () => {
-                synth.detune.value = (pb.value / 8192) * 200;
+                if (synth instanceof Tone.MonoSynth) {
+                  synth.detune.value = (pb.value / 8192) * 200;
+                }
               });
             }
           }

@@ -1,3 +1,5 @@
+import { getBuiltinOrDynamicSteps, listDynamicScales } from "./dynamic-scales";
+
 export type StyleName = "reich_electric" | "shaw_interlace" | "phase_canon";
 
 const SCALE_DEFS: Record<string, number[]> = {
@@ -67,15 +69,17 @@ export function resolveScale(
 ): ScaleResolution {
   const rootPc = parseRootNote(keyRoot);
   const sn = scaleName || (detectedMode === "major" ? "major" : "natural_minor");
+  const snNorm = sn.toLowerCase().replace(/ /g, "_");
   const rel =
-    SCALE_DEFS[sn.toLowerCase().replace(/ /g, "_")] ||
+    SCALE_DEFS[snNorm] ||
+    getBuiltinOrDynamicSteps(snNorm) ||
     SCALE_DEFS[detectedMode === "major" ? "major" : "natural_minor"];
   const absPcs = [...new Set(rel.map((p) => (rootPc + p) % 12))].sort((a, b) => a - b);
   return { rootPc, pitchClasses: absPcs, scaleName: sn, detectedMode, keyRoot };
 }
 
 export function listScales(): string[] {
-  return Object.keys(SCALE_DEFS).sort();
+  return [...new Set([...Object.keys(SCALE_DEFS), ...listDynamicScales()])].sort();
 }
 
 const SPELL_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];

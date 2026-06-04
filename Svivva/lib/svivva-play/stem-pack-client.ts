@@ -1,60 +1,22 @@
 import JSZip from "jszip";
 import type { TranscribedNote } from "./audio-transcription";
-import { transcriptionToMidiEvents } from "./audio-transcription";
-import { buildMidiFileBytes } from "./midi-export";
-import { stemMidiFilename } from "./midi-filenames";
-import { normalizeMidiEvents } from "./midi-normalize";
+import { buildPlayExportPackFiles, type StemExportInput } from "./play-export-pack";
 
-export type StemMidiExport = {
-  name: string;
-  role?: string;
-  midiEvents?: unknown[];
-};
+export type { StemExportInput as StemMidiExport };
 
 export async function buildStemPackZipBlobClient(options: {
   bpm: number;
-  stems: StemMidiExport[];
+  stems: StemExportInput[];
   melodyneNotes?: TranscribedNote[];
   projectName?: string;
+  sessionJson?: Record<string, unknown>;
 }): Promise<Blob> {
-  const { bpm, stems, melodyneNotes, projectName = "svivva-play" } = options;
-  const withNotes = stems.filter((s) => normalizeMidiEvents(s.midiEvents).length > 0);
-  const hasMelodyne = Array.isArray(melodyneNotes) && melodyneNotes.length > 0;
-  if (!withNotes.length && !hasMelodyne) {
-    throw new Error("No MIDI notes to export");
-  }
-
+  const pack = buildPlayExportPackFiles(options);
   const zip = new JSZip();
-  zip.file(
-    "README.txt",
-    [
-      "Svivva Play — STEM pack",
-      `Project: ${projectName}`,
-      `Tempo: ${bpm} BPM`,
-      "",
-      "Drag each .mid into your DAW.",
-    ].join("\n"),
-  );
+  zip.file("README.txt", pack.readme);
 
-  if (hasMelodyne) {
-    const events = transcriptionToMidiEvents(melodyneNotes!, bpm, 0);
-    zip.file(
-      "melodyne_reference.mid",
-      buildMidiFileBytes([{ name: "Melodyne Reference", midiEvents: events }], bpm),
-      { binary: true },
-    );
-  }
-
-  withNotes.forEach((stem, i) => {
-    zip.file(
-      stemMidiFilename(stem.name, stem.role, i),
-      buildMidiFileBytes([{ name: stem.name, midiEvents: stem.midiEvents }], bpm),
-      { binary: true },
-    );
-  });
-
-  if (withNotes.length > 1) {
-    zip.file("all_stems_multitrack.mid", buildMidiFileBytes(withNotes, bpm), { binary: true });
+  for (const f of pack.files) {
+    zip.file(f.name, f.data, { binary: true });
   }
 
   return zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });

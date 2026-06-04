@@ -352,7 +352,21 @@ export function constrainMidiEvent(
 export type ConstrainableStem = {
   role: string;
   midiEvents: NormalizedMidiEvent[];
+  expression?: { meend?: boolean; pitchbend?: { beat: number; value: number }[] };
 };
+
+export function refreshMeendExpression<T extends ConstrainableStem>(stem: T): T {
+  const expr = stem.expression;
+  if (!expr?.meend && !(expr?.pitchbend?.length ?? 0)) return stem;
+  return {
+    ...stem,
+    expression: {
+      ...expr,
+      meend: true,
+      pitchbend: meendPitchbendForEvents(stem.midiEvents),
+    },
+  };
+}
 
 export function constrainGeneratedStems<T extends ConstrainableStem>(
   stems: T[],
@@ -364,12 +378,15 @@ export function constrainGeneratedStems<T extends ConstrainableStem>(
   const scale =
     opts?.scaleInfo ??
     resolveCompositionScale(key, opts?.scaleName ?? "major", null, chords).scaleInfo;
-  return stems.map((stem) => ({
-    ...stem,
-    midiEvents: stem.midiEvents.map((evt) =>
-      constrainMidiEvent(evt, scale, stem.role, chords, bpm, opts?.anchorMidi),
-    ),
-  }));
+  return stems.map((stem) => {
+    const constrained = {
+      ...stem,
+      midiEvents: stem.midiEvents.map((evt) =>
+        constrainMidiEvent(evt, scale, stem.role, chords, bpm, opts?.anchorMidi),
+      ),
+    };
+    return refreshMeendExpression(constrained);
+  });
 }
 
 export type HarmonicContextKeyInput = {

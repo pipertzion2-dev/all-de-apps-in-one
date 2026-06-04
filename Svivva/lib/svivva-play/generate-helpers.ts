@@ -49,12 +49,26 @@ export function chordStemsToResults(
   });
 }
 
+function meendStemIndex(stems: GeneratedStemResult[]): number {
+  let best = 0;
+  let bestCount = 0;
+  for (let i = 0; i < stems.length; i++) {
+    const role = String(stems[i]!.role || "").toLowerCase();
+    const count = stems[i]!.midiEvents.length;
+    const weight =
+      count + (role === "melody" || role === "lead" || role === "solo" || role === "vocal" ? 8 : 0);
+    if (weight > bestCount) {
+      bestCount = weight;
+      best = i;
+    }
+  }
+  return best;
+}
+
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
+  const leadIdx = meendStemIndex(stems);
   return stems.map((stem, i) => {
-    const isLead =
-      i === 0 ||
-      ["melody", "lead", "solo", "vocal"].includes(String(stem.role || "").toLowerCase());
-    if (!isLead || stem.midiEvents.length === 0) return stem;
+    if (i !== leadIdx || stem.midiEvents.length === 0) return stem;
     return {
       ...stem,
       instrumentHint:

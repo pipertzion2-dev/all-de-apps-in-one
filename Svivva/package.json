@@ -61,6 +61,8 @@
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.1.0",
     "@tanstack/react-query": "^5.60.5",
+    "@tonaljs/note": "^4.12.1",
+    "@tonaljs/scale": "^4.13.4",
     "@types/archiver": "^7.0.0",
     "@types/memoizee": "^0.4.12",
     "@types/pdfkit": "^0.17.5",

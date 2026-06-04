@@ -179,12 +179,19 @@ export async function POST(request: NextRequest) {
       filename = "svivva-play",
       format = "midi-zip",
       melodyneNotes,
+      sessionJson,
     } = body as {
-      stems?: { name: string; role?: string; midiEvents?: unknown[] }[];
+      stems?: {
+        name: string;
+        role?: string;
+        midiEvents?: unknown[];
+        expression?: { meend?: boolean; pitchbend?: { beat: number; value: number }[] };
+      }[];
       bpm?: number;
       filename?: string;
       format?: "midi" | "midi-zip";
       melodyneNotes?: TranscribedNote[];
+      sessionJson?: Record<string, unknown>;
     };
 
     const hasStems = stems?.some((s) => Array.isArray(s.midiEvents) && s.midiEvents.length > 0);
@@ -203,8 +210,9 @@ export async function POST(request: NextRequest) {
         stems: stems ?? [],
         melodyneNotes: hasMelodyne ? melodyneNotes : undefined,
         projectName: filename,
+        sessionJson,
       });
-      return zipResponse(zipBuffer, `${filename}-stem-pack.zip`);
+      return zipResponse(zipBuffer, `${filename}-export.zip`);
     }
 
     const midiBytes = buildMidiFile(stems ?? [], bpm);
