@@ -12,6 +12,7 @@ import { normalizeKeyLabel } from "./analysis-utils";
 import { chordStemsToResults, type GeneratedStemResult } from "./generate-helpers";
 import { normalizeMidiEvents } from "./midi-normalize";
 import {
+  chordSegmentPitchClasses,
   constrainGeneratedStems,
   parseScaleFromKey,
   snapNoteToScale,
@@ -118,20 +119,17 @@ function voiceLeadVoicing(
   prevVoicing: number[],
   register: "low" | "mid" | "high",
 ): number[] {
-  const pcs = chord.pitchClasses?.length > 0 ? chord.pitchClasses : pcsForSymbol(chord.symbol);
-  const root = parseRoot(chord.symbol);
+  const absPcs = chordSegmentPitchClasses(chord);
   const baseOct = register === "low" ? 2 : register === "high" ? 3 : 3;
 
   if (!prevVoicing.length) {
-    return pcs.map((pc, i) => midiFromPc((root + pc) % 12, baseOct + (i > 2 ? 1 : 0)));
+    return absPcs.map((pc, i) => midiFromPc(pc, baseOct + (i > 2 ? 1 : 0)));
   }
 
   const candidates: number[][] = [];
-  for (let inv = 0; inv < pcs.length; inv++) {
-    const rotated = [...pcs.slice(inv), ...pcs.slice(0, inv)];
-    const voicing = rotated.map((pc, i) =>
-      midiFromPc((root + pc) % 12, baseOct + Math.floor(i / 3)),
-    );
+  for (let inv = 0; inv < absPcs.length; inv++) {
+    const rotated = [...absPcs.slice(inv), ...absPcs.slice(0, inv)];
+    const voicing = rotated.map((pc, i) => midiFromPc(pc, baseOct + Math.floor(i / 3)));
     candidates.push(voicing);
   }
 
@@ -260,10 +258,9 @@ function buildBassEvents(
   const beatSec = 60 / bpm;
   const events: ChordMidiEvent[] = [];
   for (const chord of chords) {
-    const root = parseRoot(chord.symbol);
-    const pcs = chord.pitchClasses?.length ? chord.pitchClasses : pcsForSymbol(chord.symbol);
-    const rootMidi = midiFromPc(root, 2);
-    const fifthPc = pcs.length > 2 ? (root + pcs[2]) % 12 : (root + 7) % 12;
+    const absPcs = chordSegmentPitchClasses(chord);
+    const rootMidi = midiFromPc(absPcs[0] ?? parseRoot(chord.symbol), 2);
+    const fifthPc = absPcs.length > 2 ? absPcs[2]! : (parseRoot(chord.symbol) + 7) % 12;
     const fifthMidi = midiFromPc(fifthPc, 2);
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
@@ -316,19 +313,14 @@ function buildMelodyEvents(
     for (let i = 0; i < sorted.length; i += step) {
       const n = sorted[i];
       const chord = chordAt(chords, n.startSec + 0.01);
-      const pcs = chord
-        ? chord.pitchClasses?.length
-          ? chord.pitchClasses
-          : pcsForSymbol(chord.symbol)
-        : [0, 4, 7];
-      const root = chord ? parseRoot(chord.symbol) : 0;
+      const absPcs = chord ? chordSegmentPitchClasses(chord) : [0, 4, 7];
       let note = n.midi;
       const pc = note % 12;
-      const chordTone = pcs.some((p) => (root + p) % 12 === pc);
+      const chordTone = absPcs.includes(pc);
       if (!chordTone && chord) {
-        const targetPc = pcs[(i + seed) % pcs.length];
+        const targetPc = absPcs[(i + seed) % absPcs.length]!;
         const oct = Math.floor(note / 12);
-        note = midiFromPc((root + targetPc) % 12, Math.min(6, Math.max(4, oct)));
+        note = midiFromPc(targetPc, Math.min(6, Math.max(4, oct)));
       }
       note = snapNoteToScale(note, scale);
       note = clampNoteToRegister(note, "melody", { anchorMidi });
@@ -344,12 +336,11 @@ function buildMelodyEvents(
   }
 
   for (const chord of chords) {
-    const pcs = chord.pitchClasses?.length ? chord.pitchClasses : pcsForSymbol(chord.symbol);
-    const root = parseRoot(chord.symbol);
+    const absPcs = chordSegmentPitchClasses(chord);
     const startBeat = chord.t0 / beatSec;
     const oct = Math.floor(profile.melodicRegister / 12);
     const note = clampNoteToRegister(
-      midiFromPc((root + pcs[1 % pcs.length]) % 12, Math.min(5, oct)),
+      midiFromPc(absPcs[1 % absPcs.length]!, Math.min(5, oct)),
       "melody",
       { anchorMidi: profile.melodicRegister },
     );
@@ -522,6 +513,7 @@ export function composeStrategicReich(options: {
     type: options.type,
     chords,
     melodyneNotes: options.ctx.melodyneNotes,
+    audioNotes: options.ctx.audioNotes,
     hocketGroove: options.hocketGroove,
   });
 }
@@ -546,7 +538,13 @@ export function voicePartsToStemResults(
   return voices.map((v, i) => ({
     id: `strategic-v-${i}`,
     name: v.name,
-    role: i === 0 ? "melody" : "harmony",
+    role: v.name.toLowerCase().includes("hocket")
+      ? i === 0
+        ? "melody"
+        : "hocket"
+      : i === 0
+        ? "melody"
+        : "harmony",
     register: i < 2 ? "mid" : "high",
     instrumentHint: hints[i % hints.length],
     muted: false,

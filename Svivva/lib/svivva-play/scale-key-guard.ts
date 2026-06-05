@@ -138,22 +138,12 @@ function chordPcsAtBeat(
   for (const c of chords) {
     if (tSec >= c.t0 && tSec < c.t1) {
       const rootPc = parseChordRoot(c.symbol);
-      const pcs =
-        c.pitchClasses?.length > 0
-          ? c.pitchClasses.map((p) => (rootPc + p) % 12)
-          : defaultTriadPcs(c.symbol, rootPc);
-      return { rootPc, pcs };
+      return { rootPc, pcs: chordSegmentPitchClasses(c) };
     }
   }
   const last = chords[chords.length - 1]!;
   const rootPc = parseChordRoot(last.symbol);
-  return {
-    rootPc,
-    pcs:
-      last.pitchClasses?.length > 0
-        ? last.pitchClasses.map((p) => (rootPc + p) % 12)
-        : defaultTriadPcs(last.symbol, rootPc),
-  };
+  return { rootPc, pcs: chordSegmentPitchClasses(last) };
 }
 
 function defaultTriadPcs(symbol: string, rootPc: number): number[] {
@@ -162,6 +152,29 @@ function defaultTriadPcs(symbol: string, rootPc: number): number[] {
     return [0, 3, 7].map((p) => (rootPc + p) % 12);
   }
   return [0, 4, 7].map((p) => (rootPc + p) % 12);
+}
+
+function overlapPitchClasses(a: number[], b: number[]): number {
+  return a.filter((p) => b.includes(p)).length;
+}
+
+/**
+ * Absolute pitch classes for a chord segment.
+ * Chroma detection stores absolute PCs (e.g. A major → [9,1,4]); tests/Melodyne may store root-relative [0,4,7].
+ */
+export function chordSegmentPitchClasses(chord: ChordSegment): number[] {
+  const rootPc = parseChordRoot(chord.symbol);
+  const fromSymbol = defaultTriadPcs(chord.symbol, rootPc);
+  if (!chord.pitchClasses?.length) return fromSymbol;
+
+  const stored = [...new Set(chord.pitchClasses.map((p) => ((p % 12) + 12) % 12))].sort(
+    (a, b) => a - b,
+  );
+  const asRelative = stored.map((p) => (rootPc + p) % 12);
+  const overlapAbs = overlapPitchClasses(stored, fromSymbol);
+  const overlapRel = overlapPitchClasses(asRelative, fromSymbol);
+  const pcs = overlapAbs >= overlapRel ? stored : asRelative;
+  return [...new Set(pcs)].sort((a, b) => a - b);
 }
 
 /** Nearest pitch class in allowed set, preserving octave. */
@@ -188,18 +201,41 @@ export function snapNoteToScale(note: number, scale: ScaleInfo): number {
   return snapNoteToPitchClasses(note, scale.scalePcs);
 }
 
-/** Keep generated notes in a musical register (anchored to source melody when known). */
+function registerBounds(
+  role: string,
+  opts?: { anchorMidi?: number },
+): { min: number; max: number } {
+  const roleNorm = role.toLowerCase();
+  if (roleNorm === "bass") return { min: 36, max: 55 };
+  if (roleNorm === "harmony" || roleNorm === "pad") return { min: 48, max: 72 };
+  const anchor = opts?.anchorMidi ?? 67;
+  return {
+    min: Math.max(55, anchor - 14),
+    max: Math.min(84, anchor + 10),
+  };
+}
+
+/** Keep generated notes in a musical register without changing pitch class. */
 export function clampNoteToRegister(
   note: number,
   role: string,
   opts?: { anchorMidi?: number },
 ): number {
-  const roleNorm = role.toLowerCase();
-  if (roleNorm === "bass") return Math.max(36, Math.min(55, note));
-  if (roleNorm === "harmony" || roleNorm === "pad") return Math.max(48, Math.min(72, note));
-  const anchor = opts?.anchorMidi ?? 67;
-  const min = Math.max(55, anchor - 14);
-  const max = Math.min(84, anchor + 10);
+  const { min, max } = registerBounds(role, opts);
+  if (note >= min && note <= max) return note;
+
+  const pc = ((note % 12) + 12) % 12;
+  let best = note;
+  let bestDist = Infinity;
+  for (let midi = min; midi <= max; midi++) {
+    if (midi % 12 !== pc) continue;
+    const dist = Math.abs(midi - note);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = midi;
+    }
+  }
+  if (bestDist < Infinity) return best;
   return Math.max(min, Math.min(max, note));
 }
 
@@ -378,6 +414,13 @@ export function constrainMidiEvent(
     } else {
       note = Math.max(36, Math.min(84, note));
     }
+    return { ...evt, note, startBeat, duration };
+  } else if (
+    chordCtx &&
+    (roleNorm === "hocket" || roleNorm.includes("hocket"))
+  ) {
+    note = snapNoteToPitchClasses(note, new Set(chordCtx.pcs));
+    note = clampNoteToRegister(note, roleNorm, { anchorMidi });
     return { ...evt, note, startBeat, duration };
   } else if (chordCtx && (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo")) {
     const chordTones = new Set(chordCtx.pcs);

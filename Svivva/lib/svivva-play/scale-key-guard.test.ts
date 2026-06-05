@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveCompositionKey, resolveCompositionScale } from "./scale-key-guard";
+import {
+  chordSegmentPitchClasses,
+  clampNoteToRegister,
+  resolveCompositionKey,
+  resolveCompositionScale,
+} from "./scale-key-guard";
 
 describe("resolveCompositionScale", () => {
   it("prefers explicit major scale over minor key detection and Am chords", () => {
@@ -76,5 +81,35 @@ describe("resolveCompositionKey", () => {
       ],
     });
     expect(key).toBe("A major");
+  });
+});
+
+describe("chordSegmentPitchClasses", () => {
+  it("reads absolute pitchClasses from chroma detection", () => {
+    const pcs = chordSegmentPitchClasses({
+      t0: 0,
+      t1: 2,
+      symbol: "A",
+      confidence: 80,
+      pitchClasses: [9, 1, 4],
+    });
+    expect(pcs).toEqual([1, 4, 9]);
+  });
+
+  it("reads root-relative pitchClasses from Melodyne-style storage", () => {
+    const pcs = chordSegmentPitchClasses({
+      t0: 0,
+      t1: 2,
+      symbol: "Am",
+      confidence: 80,
+      pitchClasses: [0, 3, 7],
+    });
+    expect(pcs).toEqual([0, 4, 9]); // A C E
+  });
+});
+
+describe("clampNoteToRegister", () => {
+  it("preserves pitch class when clamping into melodic register", () => {
+    expect(clampNoteToRegister(45, "melody")).toBe(57);
   });
 });

@@ -2354,6 +2354,7 @@ export default function SvivvaPlayPage() {
                 type: reichType,
                 chords: chordSource,
                 melodyneNotes: transcription?.melodyneNotes ?? [],
+                audioNotes: transcription?.audioNotes ?? transcription?.notes ?? [],
                 hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
               })
             : reichType === "counterpoint"
@@ -2389,7 +2390,14 @@ export default function SvivvaPlayPage() {
         return {
           id: `voice-${i}`,
           name: v.name,
-          role: i === 0 ? "melody" : "harmony",
+          role:
+            reichType === "hocket"
+              ? i === 0
+                ? "melody"
+                : "hocket"
+              : i === 0
+                ? "melody"
+                : "harmony",
           register: i < 2 ? "mid" : "high",
           instrumentHint: hintRot[i % hintRot.length],
           muted: false,
