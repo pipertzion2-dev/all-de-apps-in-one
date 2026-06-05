@@ -476,11 +476,13 @@ export function resolveCompositionKey(options: {
   const fromChords = inferKeyFromChordSegments(chords);
   if (!fromChords || fromChords.confidence < 62) return locked;
 
-  const mode = inferKeyModeFromChords(chords) ?? "major";
+  const mode = inferKeyModeFromChords(chords) ?? (locked.includes("minor") ? "minor" : "major");
   const chordKey = normalizeKeyLabel(`${NOTE_NAMES[fromChords.rootPc]} ${mode}`);
 
   const lockedScale = parseScaleFromKey(locked);
-  if (lockedScale.rootPc === fromChords.rootPc && lockedScale.isMinor === (mode === "minor")) {
+  // Same tonic as detected key — never flip major↔minor from chord symbols alone
+  // (Am/F/C/G in A major must stay A major, not A minor).
+  if (lockedScale.rootPc === fromChords.rootPc) {
     return locked;
   }
 

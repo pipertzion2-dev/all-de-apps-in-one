@@ -63,4 +63,18 @@ describe("resolveCompositionKey", () => {
     });
     expect(key).toBe("D major");
   });
+
+  it("keeps A major when vi chords (Am) appear in a major progression", () => {
+    const key = resolveCompositionKey({
+      analysisKey: "A major",
+      audioAnchorKey: "A major",
+      chords: [
+        { t0: 0, t1: 2, symbol: "Am", confidence: 80, pitchClasses: [] },
+        { t0: 2, t1: 4, symbol: "F", confidence: 80, pitchClasses: [] },
+        { t0: 4, t1: 6, symbol: "C", confidence: 80, pitchClasses: [] },
+        { t0: 6, t1: 8, symbol: "G", confidence: 80, pitchClasses: [] },
+      ],
+    });
+    expect(key).toBe("A major");
+  });
 });

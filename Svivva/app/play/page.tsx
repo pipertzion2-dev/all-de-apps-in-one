@@ -509,7 +509,11 @@ export default function SvivvaPlayPage() {
     return resolveCompositionKey({
       manualKey,
       analysisKey: effectiveAnalysis?.key ?? "C major",
-      audioAnchorKey,
+      audioAnchorKey:
+        audioAnchorKey ??
+        (effectiveAnalysis?.key && !effectiveAnalysis.key.startsWith("Detecting")
+          ? normalizeKeyLabel(effectiveAnalysis.key)
+          : null),
       harmonicContext: transcription
         ? {
             key: transcription.harmonicKey,
@@ -1200,9 +1204,6 @@ export default function SvivvaPlayPage() {
       if (!analysis) {
         setErrorMsg("Import audio first — tempo and key are detected automatically on import.");
         return;
-      }
-      if (mode === "composition" && aiScaleSuggestion && !scaleSuggestionApplied) {
-        applyAiScaleSuggestion();
       }
       setIsGenerating(true);
       setPipelineStage(
@@ -2268,9 +2269,6 @@ export default function SvivvaPlayPage() {
   }, [meend, importSeq, useSeed, seed, generationKeyLabel, reichScale]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
-    if (aiScaleSuggestion && !scaleSuggestionApplied) {
-      applyAiScaleSuggestion();
-    }
     setIsGenerating(true);
     setPipelineStage(
       transcription
