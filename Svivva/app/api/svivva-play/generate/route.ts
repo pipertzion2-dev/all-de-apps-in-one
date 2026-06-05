@@ -402,7 +402,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Strategic listen-first compose when harmonic session data is present
-    if (richHarmonic && mode !== "solo" && mode !== "composition") {
+    // NOTE: chord mode always bypasses strategic path to use the dedicated chord engine.
+    if (richHarmonic && mode !== "solo" && mode !== "composition" && mode !== "chords") {
       const strategic = runStrategic();
       if (harmonicContext) harmonicContext.key = lockedKey;
       return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline, {
@@ -410,7 +411,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Smart chord engine — uses real analyzed chords with full ChordKit voicings + piano variation
+    // Smart chord engine — uses real analyzed chords with correct jazz voicings
     if (mode === "chords") {
       const result = generateSmartChordStems(
         sessionChords,
