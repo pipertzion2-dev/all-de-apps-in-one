@@ -417,12 +417,12 @@ export function constrainMidiEvent(
     return { ...evt, note, startBeat, duration };
   } else if (
     chordCtx &&
-    (roleNorm === "hocket" || roleNorm.includes("hocket"))
+    (roleNorm === "melody" ||
+      roleNorm === "lead" ||
+      roleNorm === "solo" ||
+      roleNorm === "hocket" ||
+      roleNorm.includes("hocket"))
   ) {
-    note = snapNoteToPitchClasses(note, new Set(chordCtx.pcs));
-    note = clampNoteToRegister(note, roleNorm, { anchorMidi });
-    return { ...evt, note, startBeat, duration };
-  } else if (chordCtx && (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo")) {
     const chordTones = new Set(chordCtx.pcs);
     const pc = note % 12;
     if (!chordTones.has(pc) && !scale.scalePcs.has(pc)) {

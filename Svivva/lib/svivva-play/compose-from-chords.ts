@@ -3,34 +3,12 @@ import type { TranscribedNote } from "./audio-transcription";
 import { composeCounterpoint, composeHocket, type VoicePart } from "./reich-engine";
 import type { HocketGrooveStyle } from "./hocket-groove-v2";
 import type { ScaleResolution } from "./reich-engine";
-import * as ChordKit from "./chordkit";
 import {
   chordSegmentPitchClasses,
   clampNoteToRegister,
   melodicAnchorMidi,
   snapNoteToPitchClasses,
 } from "./scale-key-guard";
-
-function parseChordRoot(symbol: string): number {
-  const m = symbol.match(/^([A-Ga-g][#b♭♯]?)/);
-  return ChordKit.parseRoot(m?.[1] ?? "C");
-}
-
-/** Absolute pitch classes (0–11) for a chord symbol. */
-function pitchClassesForSymbol(symbol: string): number[] {
-  const root = parseChordRoot(symbol);
-  const s = symbol.toLowerCase();
-  if (s.includes("dim")) return [0, 3, 6].map((p) => (root + p) % 12);
-  if (s.includes("m7") && !s.includes("maj")) return [0, 3, 7, 10].map((p) => (root + p) % 12);
-  if (s.includes("maj7") || s.includes("ma7")) return [0, 4, 7, 11].map((p) => (root + p) % 12);
-  if (s.includes("7")) return [0, 4, 7, 10].map((p) => (root + p) % 12);
-  if (/m(?!aj)/.test(s) || s.includes("min")) return [0, 3, 7].map((p) => (root + p) % 12);
-  return [0, 4, 7].map((p) => (root + p) % 12);
-}
-
-function absolutePitchClassesForChord(chord: ChordSegment): number[] {
-  return chordSegmentPitchClasses(chord);
-}
 
 function chordAtTime(chords: ChordSegment[], tSec: number): ChordSegment | null {
   for (const c of chords) {
@@ -39,74 +17,31 @@ function chordAtTime(chords: ChordSegment[], tSec: number): ChordSegment | null 
   return chords[chords.length - 1] ?? null;
 }
 
-function noteFromChordTone(
-  chord: ChordSegment,
-  voiceIndex: number,
-  referenceNote: number,
+/**
+ * Keep Reich/V-2 melodic motion (scale tones, passing notes, voice-leading tension).
+ * Only correct notes that are outside both the session scale and current chord.
+ */
+function softHarmonicNudge(
+  note: number,
+  chord: ChordSegment | null,
+  scalePcs: Set<number>,
+  role: string,
   anchorMidi?: number,
-  role: "melody" | "harmony" = "harmony",
 ): number {
-  const pcs = absolutePitchClassesForChord(chord);
-  if (pcs.length === 0) {
-    return clampNoteToRegister(referenceNote, role, { anchorMidi });
+  let n = note;
+  const pc = ((n % 12) + 12) % 12;
+  if (chord) {
+    const chordPcs = new Set(chordSegmentPitchClasses(chord));
+    if (!chordPcs.has(pc) && !scalePcs.has(pc)) {
+      n = snapNoteToPitchClasses(n, chordPcs);
+    }
+  } else if (!scalePcs.has(pc)) {
+    n = snapNoteToPitchClasses(n, scalePcs);
   }
-  const targetPc = pcs[voiceIndex % pcs.length]!;
-  let octave = Math.floor(referenceNote / 12);
-  let note = octave * 12 + targetPc;
-  while (note < referenceNote - 7) note += 12;
-  while (note > referenceNote + 7) note -= 12;
-  note = snapNoteToPitchClasses(note, new Set(pcs));
-  return clampNoteToRegister(note, role, { anchorMidi });
+  return clampNoteToRegister(n, role, { anchorMidi });
 }
 
-function alignVoicesToProgression(options: {
-  base: VoicePart[];
-  chords: ChordSegment[];
-  bpm: number;
-  guideNotes: TranscribedNote[];
-  anchorMidi?: number;
-}): VoicePart[] {
-  const { base, chords, bpm, guideNotes, anchorMidi } = options;
-  const beatSec = 60 / bpm;
-
-  return base.map((voice, vi) => {
-    const role = vi === 0 ? "melody" : "harmony";
-    const notes = voice.notes.map((n) => {
-      const tSec = n.startBeat * beatSec;
-      const chord = chordAtTime(chords, tSec);
-
-      const nearbyGuide = guideNotes.filter(
-        (gn) => Math.abs(gn.startSec - tSec) < beatSec * 0.45,
-      );
-      if (nearbyGuide.length > 0 && (vi === 0 || vi % 2 === 1)) {
-        const guide = nearbyGuide[vi % nearbyGuide.length]!;
-        let note = guide.midi;
-        if (chord) {
-          const pcs = new Set(absolutePitchClassesForChord(chord));
-          if (!pcs.has(note % 12)) {
-            note = snapNoteToPitchClasses(note, pcs);
-          }
-        }
-        return { ...n, note: clampNoteToRegister(note, role, { anchorMidi }) };
-      }
-
-      if (!chord) {
-        return {
-          ...n,
-          note: clampNoteToRegister(n.note, role, { anchorMidi }),
-        };
-      }
-
-      return {
-        ...n,
-        note: noteFromChordTone(chord, vi, n.note, anchorMidi, role),
-      };
-    });
-    return { ...voice, notes };
-  });
-}
-
-/** Bias hocket/counterpoint toward the analyzed chord map + optional audio/Melodyne guide. */
+/** Bias counterpoint toward the analyzed chord map; hocket keeps full procedural musicality. */
 export function composeWithChordProgression(options: {
   durationSec: number;
   bpm: number;
@@ -140,12 +75,34 @@ export function composeWithChordProgression(options: {
 
   const guideNotes = melodyneNotes.length > 0 ? melodyneNotes : audioNotes;
   const anchor = melodicAnchorMidi(guideNotes);
+  const scalePcs = new Set(scale.pitchClasses);
 
-  return alignVoicesToProgression({
-    base,
-    chords,
-    bpm,
-    guideNotes,
-    anchorMidi: anchor,
+  // Six-voice Reich interlock: preserve master-cell variety + strategic scale/chord color.
+  if (type === "hocket") {
+    return base.map((voice, vi) => ({
+      ...voice,
+      notes: voice.notes.map((n) => ({
+        ...n,
+        note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "harmony", { anchorMidi: anchor }),
+      })),
+    }));
+  }
+
+  const beatSec = 60 / bpm;
+  return base.map((voice, vi) => {
+    const role = vi === 0 ? "melody" : "harmony";
+    const notes = voice.notes.map((n) => {
+      const tSec = n.startBeat * beatSec;
+      const chord = chordAtTime(chords, tSec);
+      const nearbyGuide = guideNotes.filter(
+        (gn) => Math.abs(gn.startSec - tSec) < beatSec * 0.45,
+      );
+      if (nearbyGuide.length > 0 && vi > 0) {
+        const guide = nearbyGuide[vi % nearbyGuide.length]!;
+        return { ...n, note: softHarmonicNudge(guide.midi, chord, scalePcs, role, anchor) };
+      }
+      return { ...n, note: softHarmonicNudge(n.note, chord, scalePcs, role, anchor) };
+    });
+    return { ...voice, notes };
   });
 }

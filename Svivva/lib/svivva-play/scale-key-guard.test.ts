@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   chordSegmentPitchClasses,
   clampNoteToRegister,
+  constrainMidiEvent,
+  parseScaleFromKey,
   resolveCompositionKey,
   resolveCompositionScale,
 } from "./scale-key-guard";
@@ -111,5 +113,15 @@ describe("chordSegmentPitchClasses", () => {
 describe("clampNoteToRegister", () => {
   it("preserves pitch class when clamping into melodic register", () => {
     expect(clampNoteToRegister(45, "melody")).toBe(57);
+  });
+});
+
+describe("constrainMidiEvent hocket", () => {
+  it("keeps scale tones that are not current chord tones (strategic color)", () => {
+    const scale = parseScaleFromKey("A major");
+    const evt = { note: 62, velocity: 80, startBeat: 0, duration: 0.25, channel: 0 };
+    const chords = [{ t0: 0, t1: 4, symbol: "A", confidence: 80, pitchClasses: [9, 1, 4] }];
+    const out = constrainMidiEvent(evt, scale, "hocket", chords, 120);
+    expect(out.note % 12).toBe(2); // D — scale tone, not A-triad, preserved
   });
 });
