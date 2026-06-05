@@ -120,7 +120,7 @@ import {
 import { stemMidiFilename } from "@/lib/svivva-play/midi-filenames";
 import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
-const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble"];
+const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble", "chords"];
 
 function stemTimelineDurationSec(stems: { midiEvents: unknown[] }[], bpm: number): number {
   if (bpm <= 0) return 0;
