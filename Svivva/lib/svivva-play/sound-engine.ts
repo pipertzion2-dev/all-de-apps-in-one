@@ -462,7 +462,13 @@ export class SvivvaSoundEngine {
         const wantsMeend =
           forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
         const isMeendAccent = isMeendAccentStem(stem.name);
-        const useMeendMono = isMeendAccent && wantsMeend && !polyphonic;
+        // Also allow meend on any explicitly-flagged monophonic stem (e.g. hocket voices
+        // that had applyMeendToStems called on them), not just showcase accent stems.
+        const useMeendMono =
+          wantsMeend &&
+          !polyphonic &&
+          (isMeendAccent ||
+            (Boolean(stem.expression?.meend) && Boolean(stem.expression?.monophonic)));
 
         if (useMeendMono) {
           const built = buildMeendStemExpression(midiEvents, false);

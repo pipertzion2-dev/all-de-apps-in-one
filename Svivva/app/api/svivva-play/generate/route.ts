@@ -26,6 +26,7 @@ import {
   composeStrategicReich,
   generateStrategicStems,
   voicePartsToStemResults,
+  harmonicContextFromAnalysis,
   type HarmonicContextInput,
 } from "@/lib/svivva-play/strategic-compose";
 import {
@@ -348,6 +349,16 @@ export async function POST(request: NextRequest) {
       const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
       const hocketGroove =
         (settings.hocketGroove as HocketGrooveStyle | undefined) ?? "reich_phase";
+
+      // Build a harmonic context even when no Melodyne transcription was provided —
+      // this ensures composition / hocket mode always generates all 8 voices.
+      const reichCtx =
+        harmonicContext ??
+        harmonicContextFromAnalysis(analysisData, {
+          chords: sessionChords,
+          durationSec: sessionDurationSec,
+        });
+
       const voices = composeStrategicReich({
         durationSec: sessionDurationSec,
         bpm: analysisData.bpm,
@@ -355,7 +366,7 @@ export async function POST(request: NextRequest) {
         style: reichStyle,
         seed,
         type: reichType,
-        ctx: harmonicContext!,
+        ctx: reichCtx,
         hocketGroove,
       });
       const hints =
@@ -395,15 +406,16 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    // Composition mode: Reich interlocking voices (v-1 / v-2 style), not pad-stab strategic
-    if (mode === "composition" && harmonicContext) {
+    // Composition mode: Reich interlocking voices — always runs regardless of whether
+    // a Melodyne transcription (harmonicContext) is present.
+    if (mode === "composition") {
       const reich = runReichComposition();
       return finishWithStems(reich.stems, reich.plan, reich.pipeline, { composer: "reich" });
     }
 
     // Strategic listen-first compose when harmonic session data is present
-    // NOTE: chord mode always bypasses strategic path to use the dedicated chord engine.
-    if (richHarmonic && mode !== "solo" && mode !== "composition" && mode !== "chords") {
+    // NOTE: composition and chord modes are handled above and never reach here.
+    if (richHarmonic && mode !== "solo" && mode !== "chords") {
       const strategic = runStrategic();
       if (harmonicContext) harmonicContext.key = lockedKey;
       return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline, {
