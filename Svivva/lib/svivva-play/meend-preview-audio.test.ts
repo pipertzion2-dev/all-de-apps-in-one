@@ -1,24 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { buildMeendLegatoTimeline, meendWheelToPreviewCents } from "./meend-preview-audio";
+import {
+  buildMeendLegatoTimeline,
+  MEEND_PREVIEW_GAMAK_CENTS,
+  MEEND_PREVIEW_TAIL_BOOST,
+} from "./meend-preview-audio";
+import { V1_GAMAK_START, V1_MEEND_TAIL_START } from "./meend-midi";
 
 describe("meend preview audio", () => {
-  it("maps wheel to 12-semitone preview range (Ableton parity)", () => {
-    expect(meendWheelToPreviewCents(8191)).toBeCloseTo(1200, -1);
-  });
-
-  it("builds legato glide between consecutive notes", () => {
+  it("attacks each swara with gamak in the middle and tail bend at 80%", () => {
+    const beatToSec = (b: number) => b * 0.5;
     const timeline = buildMeendLegatoTimeline(
       [
-        { note: 60, velocity: 90, startBeat: 0, duration: 0.5 },
-        { note: 64, velocity: 90, startBeat: 1, duration: 0.5 },
+        { note: 60, velocity: 90, startBeat: 0, duration: 1 },
+        { note: 64, velocity: 90, startBeat: 1, duration: 1 },
       ],
-      [{ beat: 0.6, value: 7000 }],
-      (b) => b * 0.5,
+      [],
+      beatToSec,
       (midi) => `N${midi}`,
     );
-    expect(timeline.some((e) => e.type === "attack")).toBe(true);
-    expect(timeline.some((e) => e.type === "glide")).toBe(true);
-    expect(timeline.some((e) => e.type === "bend")).toBe(true);
-    expect(timeline.some((e) => e.type === "release")).toBe(true);
+    const attacks = timeline.filter((e) => e.type === "attack");
+    expect(attacks.length).toBe(2);
+
+    const tail = timeline.find((e) => e.type === "tailBend");
+    expect(tail).toBeDefined();
+    expect(tail!.time).toBeGreaterThanOrEqual(beatToSec(V1_MEEND_TAIL_START));
+    expect(tail!.cents).toBeCloseTo(4 * 100 * MEEND_PREVIEW_TAIL_BOOST, 0);
+
+    const gamak = timeline.filter((e) => e.type === "bend" && e.cents !== 0);
+    expect(gamak[0]!.time).toBeGreaterThanOrEqual(beatToSec(V1_GAMAK_START));
+    const peakGamak = Math.max(...gamak.map((b) => Math.abs(b.cents)));
+    expect(peakGamak).toBeLessThanOrEqual(MEEND_PREVIEW_GAMAK_CENTS + 1);
+    expect(peakGamak).toBeGreaterThan(60);
   });
 });

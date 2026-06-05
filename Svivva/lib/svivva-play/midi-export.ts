@@ -26,6 +26,58 @@ function midiPitchBendValue(offset: number): number {
   return Math.max(0, Math.min(16383, 8192 + Math.round(offset)));
 }
 
+function binaryStringToUint8Array(s: string): Uint8Array {
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) {
+    out[i] = s.charCodeAt(i) & 0xff;
+  }
+  return out;
+}
+
+/** ASCII-only track names — DAWs reject some UTF-8 meta payloads. */
+function sanitizeMidiTrackName(name: string): string {
+  const ascii = name.replace(/[^\x20-\x7E]/g, "").trim();
+  return (ascii || "Untitled").slice(0, 64);
+}
+
+type AtomicMidiEvent =
+  | { tick: number; kind: "noteOn"; note: number; velocity: number }
+  | { tick: number; kind: "noteOff"; note: number }
+  | { tick: number; kind: "bend"; value: number };
+
+const ATOMIC_KIND_ORDER: Record<AtomicMidiEvent["kind"], number> = {
+  noteOn: 0,
+  bend: 1,
+  noteOff: 2,
+};
+
+function expandTimelineToAtomicEvents(timeline: TimelineEntry[]): AtomicMidiEvent[] {
+  const atoms: AtomicMidiEvent[] = [];
+  for (const item of timeline) {
+    if (item.kind === "note") {
+      atoms.push({
+        tick: item.tick,
+        kind: "noteOn",
+        note: item.note,
+        velocity: item.velocity,
+      });
+      atoms.push({
+        tick: item.tick + item.durationTick,
+        kind: "noteOff",
+        note: item.note,
+      });
+    } else {
+      atoms.push({ tick: item.tick, kind: "bend", value: item.value });
+    }
+  }
+  atoms.sort(
+    (a, b) =>
+      a.tick - b.tick ||
+      ATOMIC_KIND_ORDER[a.kind] - ATOMIC_KIND_ORDER[b.kind],
+  );
+  return atoms;
+}
+
 function addMeendTrackMeta(track: InstanceType<typeof Midi.Track>, stem: MidiStemInput): void {
   const hasMeend = Boolean(stem.expression?.meend) || (stem.expression?.pitchbend?.length ?? 0) > 0;
   if (!hasMeend) return;
@@ -89,9 +141,29 @@ function writeTimelineToTrack(track: InstanceType<typeof Midi.Track>, timeline: 
   const channel = 0;
   let currentTick = 0;
 
-  for (const item of timeline) {
+  for (const item of expandTimelineToAtomicEvents(timeline)) {
     const delay = Math.max(0, item.tick - currentTick);
-    if (item.kind === "bend") {
+    if (item.kind === "noteOn") {
+      track.addEvent(
+        new Midi.Event({
+          type: Midi.Event.NOTE_ON,
+          channel,
+          param1: item.note,
+          param2: item.velocity,
+          time: delay,
+        }),
+      );
+    } else if (item.kind === "noteOff") {
+      track.addEvent(
+        new Midi.Event({
+          type: Midi.Event.NOTE_OFF,
+          channel,
+          param1: item.note,
+          param2: 0,
+          time: delay,
+        }),
+      );
+    } else {
       const v = item.value;
       track.addEvent(
         new Midi.Event({
@@ -102,22 +174,24 @@ function writeTimelineToTrack(track: InstanceType<typeof Midi.Track>, timeline: 
           time: delay,
         }),
       );
-      currentTick = item.tick;
-    } else {
-      try {
-        track.addNote(channel, item.note, item.durationTick, delay, item.velocity);
-        currentTick = item.tick + item.durationTick;
-      } catch (e) {
-        console.warn("MIDI note write error:", e);
-      }
     }
+    currentTick = item.tick;
   }
 }
 
 export function buildMidiFile(stems: MidiStemInput[], bpm: number): Buffer {
-  const file = new Midi.File();
+  const bytes = buildMidiFileBytes(stems, bpm);
+  return Buffer.from(bytes);
+}
+
+/** Browser-safe MIDI bytes (no Node Buffer). */
+export function buildMidiFileBytes(stems: MidiStemInput[], bpm: number): Uint8Array {
+  const file = new Midi.File({ ticks: TICKS_PER_BEAT });
 
   for (const stem of stems) {
+    const events = normalizeMidiEvents(stem.midiEvents);
+    if (events.length === 0) continue;
+
     const track = new Midi.Track();
     file.addTrack(track);
     track.setTempo(bpm);
@@ -125,24 +199,22 @@ export function buildMidiFile(stems: MidiStemInput[], bpm: number): Buffer {
     track.addEvent(
       new Midi.MetaEvent({
         type: Midi.MetaEvent.TRACK_NAME,
-        data: stem.name || "Untitled",
+        data: sanitizeMidiTrackName(stem.name || "Untitled"),
       }),
     );
 
     track.setInstrument(0, 0, 0);
     addMeendTrackMeta(track, stem);
 
-    const events = normalizeMidiEvents(stem.midiEvents);
-    if (events.length === 0) continue;
-
     const timeline = buildStemTimeline(events, stem.expression);
     writeTimelineToTrack(track, timeline);
   }
 
-  return Buffer.from(file.toBytes());
-}
+  if (file.tracks.length === 0) {
+    throw new Error("No MIDI notes to export");
+  }
 
-/** Browser-safe MIDI bytes (no Node Buffer). */
-export function buildMidiFileBytes(stems: MidiStemInput[], bpm: number): Uint8Array {
-  return new Uint8Array(buildMidiFile(stems, bpm));
+  // jsmidgen emits a *binary* string; we must convert with charCodeAt().
+  // (Their `toUint8Array()` uses `Uint8Array.from(string)` which produces 0s.)
+  return binaryStringToUint8Array(file.toBytes());
 }

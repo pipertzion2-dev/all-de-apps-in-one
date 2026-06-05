@@ -1,10 +1,16 @@
 /**
- * Indian meend — aligned with V-1 INDIAN (sigmoid pitch slides + legato between swaras).
+ * Indian meend — aligned with V-1 INDIAN (gamak in note middle, meend on tail).
  * Same pitch-bend timeline drives browser preview and MIDI export (Ableton).
  */
 
 /** Set Ableton instrument pitch bend range to this value (semtones) for export to match preview. */
 export const MEEND_MIDI_BEND_RANGE_SEMITONES = 12;
+
+/** V-1 INDIAN.zip — ornament placement on each beat/note. */
+export const V1_GAMAK_START = 0.4;
+export const V1_GAMAK_FRAC = 0.3;
+export const V1_MEEND_TAIL_START = 0.8;
+export const V1_MEEND_TAIL_FRAC = 0.15;
 
 export type MeendNoteEvent = {
   note: number;
@@ -27,8 +33,8 @@ export function midiPitchWheelToSemitones(wheel: number): number {
   return (wheel / 8191) * MEEND_MIDI_BEND_RANGE_SEMITONES;
 }
 
-/** Preview detune — boosted so meend is obvious in browser (export MIDI unchanged). */
-export const MEEND_PREVIEW_CENT_BOOST = 1.75;
+/** Preview detune — boosted so gamak is obvious in browser (export MIDI unchanged). */
+export const MEEND_PREVIEW_CENT_BOOST = 3.5;
 
 export function meendWheelToPreviewCents(wheel: number): number {
   return midiPitchWheelToSemitones(wheel) * 100 * MEEND_PREVIEW_CENT_BOOST;
@@ -51,25 +57,27 @@ function sigmoidBend(t: number): number {
   return 1 / (1 + Math.exp(-6 * (t - 0.5))) - 0.5;
 }
 
-/** S-curve ornament on each note body (V-1 meend tail ~6% pitch ratio → ~1 semitone at peak). */
-function addIntraNoteMeendBends(
+/** Gamak — oscillating pitch in the middle of the note (V-1: 40%–70% of beat). */
+function addGamakBends(
   e: MeendNoteEvent,
   out: MeendPitchBend[],
-  peakSemitones = 1.25,
+  peakSemitones = 0.45,
 ): void {
-  const d = Math.max(0.08, e.duration || 0.25);
+  const d = Math.max(0.12, e.duration || 0.25);
   const t0 = e.startBeat;
-  const steps = 10;
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const beat = t0 + d * (0.55 + t * 0.38);
-    const value = semitonesToMidiPitchWheel(peakSemitones * sigmoidBend(t) * 2);
-    out.push({ beat, value });
+  const gamakStart = t0 + d * V1_GAMAK_START;
+  const gamakEnd = gamakStart + d * V1_GAMAK_FRAC;
+  const steps = 12;
+  for (let s = 0; s <= steps; s++) {
+    const t = s / steps;
+    const beat = gamakStart + t * (gamakEnd - gamakStart);
+    const osc = Math.sin(2 * Math.PI * 2 * t) * Math.exp(-1.5 * t);
+    out.push({ beat, value: semitonesToMidiPitchWheel(peakSemitones * osc) });
   }
-  out.push({ beat: t0 + d * 0.98, value: 0 });
+  out.push({ beat: gamakEnd + 0.001, value: 0 });
 }
 
-/** Glide pitch from one swara to the next (core meend between notes). */
+/** Meend tail slide toward the next swara (V-1: starts ~80% into the note). */
 function addInterNoteMeendBends(
   from: MeendNoteEvent,
   to: MeendNoteEvent,
@@ -78,11 +86,11 @@ function addInterNoteMeendBends(
   const semitoneDelta = to.note - from.note;
   if (Math.abs(semitoneDelta) < 0.01) return;
 
-  const glideStart = from.startBeat + from.duration * 0.45;
+  const glideStart = from.startBeat + from.duration * V1_MEEND_TAIL_START;
   const glideEnd = to.startBeat;
   if (glideEnd <= glideStart + 0.02) return;
 
-  const steps = Math.max(8, Math.ceil((glideEnd - glideStart) / 0.04));
+  const steps = Math.max(8, Math.ceil((glideEnd - glideStart) / 0.035));
   for (let s = 0; s <= steps; s++) {
     const t = s / steps;
     const beat = glideStart + t * (glideEnd - glideStart);
@@ -104,7 +112,7 @@ function dedupeBends(bends: MeendPitchBend[]): MeendPitchBend[] {
 }
 
 /**
- * Full meend map: intra-note S-curves + inter-note glides (monophonic streams only).
+ * Full meend map: gamak (middle) + tail glides between swaras (monophonic only).
  */
 export function meendPitchbendForEvents(
   events: MeendNoteEvent[],
@@ -118,7 +126,7 @@ export function meendPitchbendForEvents(
 
   for (let i = 0; i < sorted.length; i++) {
     const e = sorted[i]!;
-    addIntraNoteMeendBends(e, out);
+    addGamakBends(e, out);
     if (interNote && i < sorted.length - 1) {
       addInterNoteMeendBends(e, sorted[i + 1]!, out);
     }

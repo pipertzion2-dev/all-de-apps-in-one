@@ -1,0 +1,149 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 3535 >>
+stream
+BT /F1 12 Tf 44 720 Td (FeedOS Guide for Svivva + Pyracrypt) Tj
+T*
+T* (Purpose:) Tj
+T* (Use deployed Svivva as the app shell, growth engine, marketing engine, and mini-app creation platform.) Tj
+T* (Use Pyracrypt as the secure AI intelligence orchestration layer, model host, and data privacy service.) Tj
+T*
+T* (How to use Svivva now:) Tj
+T* (1. Open your deployed Svivva front end on Vercel or your active domain.) Tj
+T* (2. Treat Svivva as a single platform, not a separate app: it becomes the container for FeedOS intelligence.) Tj
+T* (3. Use Svivva's existing page structure and content modules to add new feed, mood, analysis, and mini-app flows.) Tj
+T*
+T* (Svivva roles for FeedOS:) Tj
+T* (- Growth engine: landing pages, referral gates, waitlists, onboarding funnels, share mechanics.) Tj
+T* (- Marketing engine: auto-generated landing pages, social copy, email campaign drafts, SEO pages, campaign hooks.) Tj
+T* (- Mini-app creation engine: build trend trackers, niche feeds, creator dashboards, research tools, mood feeds.) Tj
+T* (- Automation layer: background queues, scheduled intelligence updates, prompt-driven content generation.) Tj
+T* (- Experimentation platform: A/B page variants, feature tests, recommendation variants, campaign metrics.) Tj
+T* (- AI workflow layer: connect model outputs, embeddings, feed scoring, and x-ray explanations into Svivva UI.) Tj
+T*
+T* (How to use Pyracrypt now:) Tj
+T* (1. Use Pyracrypt as the backend service that manages secure AI model access and local model orchestration.) Tj
+T* (2. Point Svivva AI-driven routes at Pyracrypt-hosted endpoints for transcription, embeddings, vision, and generation.) Tj
+T* (3. Use Pyracrypt to keep your stack low-cost by running local open-source models instead of expensive cloud APIs.) Tj
+T* (4. Use Pyracrypt for secure storage of API keys, prompt templates, and model metadata in a safe backend service.) Tj
+T*
+T* (Key FeedOS components to activate in Svivva:) Tj
+T* (- Feed page: ingest content, show ranked discoveries, and surface recommendations.) Tj
+T* (- Mood selector: let users pick modes like Deep Focus, Learning, Calm, Music, Fashion, Creative.) Tj
+T* (- X-ray panel: display intent, emotion, credibility, repost risk, and recommendation reason.) Tj
+T* (- Taste graph: show evolving personalization signals across colors, style, pace, humor, music energy.) Tj
+T* (- Mini-app builder: generate specialized feeds and research tools from templates.) Tj
+T* (- Analytics dashboard: track retention, engagement, saves, shares, conversion, and mini-app usage.) Tj
+T* (- Daily brief: surface trends, top ideas, emerging creators, and niche opportunities.) Tj
+T*
+T* (Feeds, ingestion, and data sources:) Tj
+T* (Start by wiring Svivva to the sources you can already support: YouTube, Reddit, RSS, podcasts, and user uploads.) Tj
+T* (For MVP, prioritize sources with available RSS or public APIs, then add TikTok / Instagram / X later.) Tj
+T* (Extract the content fields Svivva needs: titles, captions, descriptions, comments, transcripts, frames, image features.) Tj
+T*
+T* (AI stack strategy \(free / local first\):) Tj
+T* (- Transcription: whisper.cpp locally or Faster-Whisper for audio/video transcript extraction.) Tj
+T* (- Embeddings: sentence-transformers / all-MiniLM-L6-v2 for semantic search and taste matching.) Tj
+T* (- Vision: CLIP, SigLIP, or Florence-2 for image and frame understanding.) Tj
+T* (- Generation: Ollama local models using Llama 3 3B for fast responses, Qwen 8B for reasoning, Mistral Small for better text.) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 0 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 3453 >>
+stream
+BT /F1 12 Tf 44 720 Td (- Vector store: pgvector in Postgres for embeddings and similarity search.) Tj
+T* (- Queue: BullMQ for background tasks and batch scoring.) Tj
+T* (- Cache: Redis for session state, feed caches, and fast query results.) Tj
+T* (- Database: PostgreSQL for user data, feeds, experiments, and analytics.) Tj
+T* (- Auth: Clerk free tier for user sign-in and access control.) Tj
+T*
+T* (How to use Svivva to build FeedOS without coding the whole product from scratch:) Tj
+T* (1. Identify the existing Svivva pages you can reuse and extend for the FeedOS experience.) Tj
+T* (2. Add a dedicated integration module inside Svivva for FeedOS intelligence and Pyracrypt model orchestration.) Tj
+T* (3. Build incrementally: first launch a feed page, mood selector, and X-ray panel; then add taste graphs and mini-app builder.) Tj
+T* (4. Use Svivva's growth and marketing automation to launch each mini-app as a product experiment, not just a feature.) Tj
+T*
+T* (Mini-app ideas to deploy from Svivva:) Tj
+T* (- Trend tracker: daily viral topic heatmap and content surge alerts.) Tj
+T* (- Niche feed: curated recommendations for specific interests like fashion, streetwear, or micro-learning.) Tj
+T* (- Creator dashboard: discovery score, audience fit, and creator growth signals.) Tj
+T* (- Mood feed: personalized playlists for Creative Inspiration, Deep Focus, Calm, or Music Discovery.) Tj
+T* (- Audience analyzer: sentiment, engagement style, and attention signals for a target segment.) Tj
+T* (- Research lab: generate niche topic briefs, competitor summaries, and micro-trend insights.) Tj
+T*
+T* (Marketing and launch playbook:) Tj
+T* (- Use Svivva to generate landing pages for each mini-app, then A/B test headlines and CTAs.) Tj
+T* (- Create social content, email sequences, and TikTok scripts from the same AI engine that fuels FeedOS insights.) Tj
+T* (- Build waitlists and referral incentives inside Svivva so each new mini-app can be promoted as a launch feature.) Tj
+T* (- Track conversion events in the analytics dashboard and iterate on the highest-performing growth loop.) Tj
+T*
+T* (Practical MVP rollout in under 2 weeks:) Tj
+T* (Week 1: wire data ingestion, launch one feed page, connect Pyracrypt AI generation, and set up user auth.) Tj
+T* (Week 2: add mood selector, X-ray explanation layer, mini-app template, and marketing page with growth triggers.) Tj
+T* (Keep scope narrow: one source, one mood feed, one marketing funnel, one analytics dashboard.) Tj
+T*
+T* (What to do immediately in the deployed app:) Tj
+T* (- Use Svivva's existing deployment to host the front end and management UI.) Tj
+T* (- Connect an active PostgreSQL + Redis environment via Vercel or Railway/Supabase to support FeedOS data and queues.) Tj
+T* (- Use Pyracrypt for secure local model endpoints and prompt orchestration rather than expensive cloud AI services.) Tj
+T*
+T* (How to market this using Svivva and Pyracrypt together:) Tj
+T* (- Sell FeedOS as an AI attention OS powered by Svivva's growth and mini-app engine.) Tj
+T* (- Position Svivva as the platform and Pyracrypt as the intelligence / privacy layer.) Tj
+T* (- Publish campaign pages, viral scripts, SEO tools, and creator showcases from Svivva's marketing engine.) Tj
+T* (- Use mini-app releases to generate new launch moments and audience experiments.) Tj
+T*
+T* (Scale plan:) Tj
+T* (- Keep the first launch cheap with local open-source models and Vercel free tier front end.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 0 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 631 >>
+stream
+BT /F1 12 Tf 44 720 Td (- Add new sources and more advanced model variants only after the initial MVP shows engagement.) Tj
+T* (- Expand to more Svivva mini-app templates and automation recipes as growth tools for users.) Tj
+T*
+T* (Key success path:) Tj
+T* (Make Svivva the platform, not a separate app. Let FeedOS become the intelligence layer that adds value through content understanding, recommendations, and marketing automation.) Tj
+T* (Use Pyracrypt to keep the AI stack low-cost, secure, and model-flexible.) Tj
+T* (Focus first on product-market fit with one feed, one mood experience, and one mini-app launch story.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 0 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000003666 00000 n 
+0000003792 00000 n 
+0000007297 00000 n 
+0000007423 00000 n 
+0000008105 00000 n 
+0000008231 00000 n 
+0000008300 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R >>
+startxref
+8349
+%%EOF

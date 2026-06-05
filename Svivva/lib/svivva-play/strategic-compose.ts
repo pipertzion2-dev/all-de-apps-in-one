@@ -163,20 +163,45 @@ function buildHarmonyEvents(
   const useStabs = pattern === "rhythmic_stabs" || profile.onsetDensity > 6;
   const useArp = pattern === "arpeggiated";
 
-  for (const chord of chords) {
+  // Track how many times each chord symbol has appeared for voicing variation.
+  const seenSymbol = new Map<string, number>();
+
+  // Alternate patterns per section for variety even when chords repeat.
+  const patternCycle: ("pad" | "stab" | "arp")[] = ["pad", "stab", "pad", "arp"];
+
+  for (let ci = 0; ci < chords.length; ci++) {
+    const chord = chords[ci]!;
+    const timesSeenBefore = seenSymbol.get(chord.symbol) ?? 0;
+    seenSymbol.set(chord.symbol, timesSeenBefore + 1);
+
+    // Invert voicing when the same chord recurs to avoid identical clusters.
     const voicing = voiceLeadVoicing(chord, prevVoicing, "mid");
-    prevVoicing = voicing;
+    let finalVoicing = voicing;
+    if (timesSeenBefore > 0 && voicing.length > 2) {
+      // Rotate upper voices to get a new inversion.
+      const inv = timesSeenBefore % (voicing.length - 1);
+      const upper = voicing.slice(1);
+      const rotated = [...upper.slice(inv), ...upper.slice(0, inv).map((n) => n + 12)];
+      finalVoicing = [voicing[0]!, ...rotated.filter((n) => n <= 88)];
+    }
+    prevVoicing = finalVoicing;
+
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
     const span = Math.max(0.5, endBeat - startBeat);
 
-    if (useArp) {
+    // Pick pattern: caller-supplied, but cycle on repeating sections.
+    const sectionPattern = patternCycle[Math.floor(startBeat / 16) % patternCycle.length]!;
+    const doArp = useArp || (timesSeenBefore > 1 && sectionPattern === "arp");
+    const doStabs = !doArp && (useStabs || sectionPattern === "stab");
+
+    if (doArp) {
       const step = 0.5;
       let t = startBeat;
       let vi = 0;
       while (t < endBeat - 0.1) {
         events.push({
-          note: voicing[vi % voicing.length],
+          note: finalVoicing[vi % finalVoicing.length]!,
           velocity: 58 + (density % 25),
           startBeat: t,
           duration: step * 0.85,
@@ -185,11 +210,11 @@ function buildHarmonyEvents(
         t += step;
         vi++;
       }
-    } else if (useStabs) {
+    } else if (doStabs) {
       const hits = Math.max(2, Math.min(8, Math.round(span / 2)));
       for (let h = 0; h < hits; h++) {
         const t = startBeat + (h / hits) * span;
-        for (const note of voicing) {
+        for (const note of finalVoicing) {
           events.push({
             note,
             velocity: 52 + (h === 0 ? 18 : 8),
@@ -200,7 +225,7 @@ function buildHarmonyEvents(
         }
       }
     } else {
-      for (const note of voicing) {
+      for (const note of finalVoicing) {
         events.push({
           note,
           velocity: 64 + (density % 20),
@@ -208,6 +233,19 @@ function buildHarmonyEvents(
           duration: Math.max(0.25, span - 0.08),
           channel: 0,
         });
+      }
+      // Glasper re-attack of upper 2 notes at mid-point of long chords.
+      if (span >= 4) {
+        const upper = finalVoicing.filter((n) => n >= 60).slice(-2);
+        for (const note of upper) {
+          events.push({
+            note,
+            velocity: 50 + (density % 15),
+            startBeat: startBeat + span / 2,
+            duration: Math.max(0.2, span / 2 - 0.1),
+            channel: 0,
+          });
+        }
       }
     }
   }

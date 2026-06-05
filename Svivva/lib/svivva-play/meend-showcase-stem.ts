@@ -1,44 +1,84 @@
 import type { StemPlayback } from "./sound-engine";
 import { buildMeendStemExpression } from "./meend-midi";
 import type { NormalizedMidiEvent } from "./midi-normalize";
+import { stemHasOverlappingNotes } from "./scale-key-guard";
 
+/** @deprecated Legacy single-stem name — use {@link MEEND_ACCENT_PREFIX}. */
 export const MEEND_PREVIEW_STEM_NAME = "Indian Meend (preview)";
+
+export const MEEND_ACCENT_PREFIX = "Meend · ";
+
+/** Blended under full mix — audible, not clipping. */
+export const MEEND_ACCENT_GAIN_DB = 2;
+
+export function meendAccentStemName(sourceName: string): string {
+  return `${MEEND_ACCENT_PREFIX}${sourceName}`;
+}
+
+export function isMeendAccentStem(name: string): boolean {
+  return name.startsWith(MEEND_ACCENT_PREFIX) || name === MEEND_PREVIEW_STEM_NAME;
+}
+
+export function meendAccentSourceName(accentName: string): string | null {
+  if (accentName.startsWith(MEEND_ACCENT_PREFIX)) {
+    return accentName.slice(MEEND_ACCENT_PREFIX.length);
+  }
+  return null;
+}
 
 type MeendStemLike = {
   name: string;
   role: string;
   instrumentHint: string;
   midiEvents: NormalizedMidiEvent[];
+  pan?: number;
 };
 
-/** Best single-voice line for legato meend — never merge overlapping hocket hits. */
+/** Monophonic hocket / melody lines that can carry meend ornaments. */
+export function pickMeendVoices(stems: MeendStemLike[]): MeendStemLike[] {
+  return stems.filter(
+    (s) => s.midiEvents.length > 0 && !stemHasOverlappingNotes(s.midiEvents),
+  );
+}
+
+/** Best single-voice line (legacy). */
 export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null {
-  const withNotes = stems.filter((s) => s.midiEvents.length > 0);
-  if (withNotes.length === 0) return null;
-  const melody = withNotes.find((s) => {
+  const voices = pickMeendVoices(stems);
+  if (voices.length === 0) return null;
+  const melody = voices.find((s) => {
     const r = s.role.toLowerCase();
     return r === "melody" || r === "lead" || r === "solo";
   });
-  if (melody) return melody;
-  return withNotes.reduce((best, s) =>
+  return melody ?? voices.reduce((best, s) =>
     s.midiEvents.length > best.midiEvents.length ? s : best,
   );
 }
 
+/** One meend accent layer per monophonic voice (hocket-friendly). */
+export function buildMeendAccentPlaybacks(stems: MeendStemLike[]): StemPlayback[] {
+  const voices = pickMeendVoices(stems);
+  const out: StemPlayback[] = [];
+  for (let i = 0; i < voices.length; i++) {
+    const stem = voices[i]!;
+    const built = buildMeendStemExpression([...stem.midiEvents], false);
+    if (built.midiEvents.length === 0) continue;
+    out.push({
+      name: meendAccentStemName(stem.name),
+      role: stem.role,
+      instrumentHint: "sitar",
+      midiEvents: built.midiEvents as NormalizedMidiEvent[],
+      expression: { meend: true, monophonic: true, pitchbend: built.pitchbend },
+      muted: false,
+      soloed: false,
+      pan: stem.pan ?? 0,
+      gainDb: MEEND_ACCENT_GAIN_DB - Math.min(i, 2),
+    });
+  }
+  return out;
+}
+
+/** @deprecated Use {@link buildMeendAccentPlaybacks}. */
 export function buildMeendLeadPlayback(stems: MeendStemLike[]): StemPlayback | null {
-  const lead = pickMeendLeadStem(stems);
-  if (!lead) return null;
-  const built = buildMeendStemExpression([...lead.midiEvents], false);
-  if (built.midiEvents.length === 0) return null;
-  return {
-    name: MEEND_PREVIEW_STEM_NAME,
-    role: "melody",
-    instrumentHint: "sitar",
-    midiEvents: built.midiEvents as NormalizedMidiEvent[],
-    expression: { meend: true, pitchbend: built.pitchbend },
-    muted: false,
-    soloed: false,
-    pan: 0,
-    gainDb: 4,
-  };
+  const accents = buildMeendAccentPlaybacks(stems);
+  return accents[0] ?? null;
 }

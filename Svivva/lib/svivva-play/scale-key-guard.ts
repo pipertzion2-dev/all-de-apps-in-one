@@ -229,16 +229,25 @@ function mergeAdjacentSameChords(chords: ChordSegment[]): ChordSegment[] {
 
 /**
  * When import harmony is static (one chord / one root), do not invent progressions.
+ *
+ * @param preserveAll – when true (chord player mode) do NOT collapse to a single chord even if
+ *   the input has only one unique symbol/root.  The caller wants to cycle through every entry.
  */
 export function stabilizeHarmonicTimeline(
   chords: ChordSegment[],
   durationSec: number,
   bpm: number,
+  preserveAll = false,
 ): ChordSegment[] {
   if (!chords.length) return chords;
   const aligned = alignChordTimelineToBeatGrid(chords, bpm);
   const merged = mergeAdjacentSameChords(aligned);
   const end = Math.max(durationSec, merged[merged.length - 1]?.t1 ?? durationSec);
+
+  // In chord-player mode, always keep every entry so the progression loops naturally.
+  if (preserveAll) {
+    return merged.map((c, i) => (i === merged.length - 1 ? { ...c, t1: Math.max(c.t1, end) } : c));
+  }
 
   const uniqueSymbols = [...new Set(merged.map((c) => normalizeChordSymbol(c.symbol)))];
   if (uniqueSymbols.length <= 1) {
@@ -344,21 +353,31 @@ export function constrainMidiEvent(
   bpm: number,
   anchorMidi?: number,
 ): NormalizedMidiEvent {
-  const grid = bpm >= 140 ? 0.125 : 0.25;
+  const roleNorm = role.toLowerCase();
+  // Melodic lines (especially hocket voices) need a tighter grid so quantization
+  // doesn't collapse adjacent hits onto the same beat (can sound "corrupted").
+  const isMelodic =
+    roleNorm.includes("melody") ||
+    roleNorm.includes("lead") ||
+    roleNorm.includes("solo") ||
+    roleNorm.includes("hocket");
+  const grid = isMelodic ? 0.125 : bpm >= 140 ? 0.125 : 0.25;
   const startBeat = quantizeBeat(evt.startBeat, grid);
   const duration = Math.max(grid * 0.5, quantizeBeat(evt.duration, grid));
 
-  const roleNorm = role.toLowerCase();
   const chordCtx = chordPcsAtBeat(chords, startBeat, bpm);
   let note = evt.note;
 
-  if (chordCtx && (roleNorm === "bass" || roleNorm === "harmony" || roleNorm === "pad")) {
-    const allowed = new Set(chordCtx.pcs);
-    note = snapNoteToPitchClasses(note, allowed);
+  // Harmony / pad / bass stems ARE the chord definitions — snapping their notes to chord pitch
+  // classes or the scale would destroy the very voicings that were generated. Apply only a
+  // register clamp so notes stay in a musical range.
+  if (roleNorm === "harmony" || roleNorm === "pad" || roleNorm === "bass") {
     if (roleNorm === "bass") {
-      const oct = Math.floor(note / 12);
-      note = Math.max(36, Math.min(55, oct * 12 + (note % 12)));
+      note = Math.max(28, Math.min(55, note));
+    } else {
+      note = Math.max(36, Math.min(84, note));
     }
+    return { ...evt, note, startBeat, duration };
   } else if (chordCtx && (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo")) {
     const chordTones = new Set(chordCtx.pcs);
     const pc = note % 12;

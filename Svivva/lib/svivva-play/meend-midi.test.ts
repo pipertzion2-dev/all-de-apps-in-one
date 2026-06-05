@@ -3,6 +3,7 @@ import {
   meendPitchbendForEvents,
   prepareMeendLegatoMidiEvents,
   semitonesToMidiPitchWheel,
+  V1_MEEND_TAIL_START,
 } from "./meend-midi";
 
 describe("meend MIDI (V-1 style)", () => {
@@ -14,7 +15,7 @@ describe("meend MIDI (V-1 style)", () => {
     expect(legato[0]!.duration).toBe(1);
   });
 
-  it("adds inter-note pitch bends between swaras", () => {
+  it("adds tail meend bends after 80% of the note (V-1 INDIAN)", () => {
     const bends = meendPitchbendForEvents(
       [
         { note: 60, velocity: 90, startBeat: 0, duration: 1 },
@@ -22,9 +23,13 @@ describe("meend MIDI (V-1 style)", () => {
       ],
       { interNote: true },
     );
-    const midGlide = bends.filter((b) => b.beat > 0.4 && b.beat < 1 && b.value !== 0);
-    expect(midGlide.length).toBeGreaterThan(3);
-    expect(Math.max(...midGlide.map((b) => Math.abs(b.value)))).toBeGreaterThan(500);
+    const tailGlide = bends.filter(
+      (b) => b.beat >= V1_MEEND_TAIL_START - 0.01 && b.beat < 1 && b.value !== 0,
+    );
+    expect(tailGlide.length).toBeGreaterThan(3);
+    expect(Math.max(...tailGlide.map((b) => Math.abs(b.value)))).toBeGreaterThan(500);
+    const early = bends.filter((b) => b.beat < 0.35 && b.value !== 0);
+    expect(early.length).toBe(0);
   });
 
   it("maps semitones to wheel for 12-st bend range", () => {

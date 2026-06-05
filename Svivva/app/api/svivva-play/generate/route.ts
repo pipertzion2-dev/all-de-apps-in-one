@@ -14,6 +14,7 @@ import type { Analysis } from "@/lib/svivva-play/schemas";
 import { applyChordEditsToAnalysis, playViewToAnalysis, parseRootFromKeyLabel, isMinorKeyLabel } from "@/lib/svivva-play/analysis-utils";
 import {
   generateDeterministicChordStems,
+  generateSmartChordStems,
   persistGenerationBundle,
   applyMeendToStems,
   meendApplicableStemNames,
@@ -134,6 +135,8 @@ export async function POST(request: NextRequest) {
       (analysisData.chords.length ? analysisData.chords[analysisData.chords.length - 1]?.t1 : 64) ??
       64;
 
+    // In chord mode we always want every chord entry preserved so the progression cycles properly.
+    const preserveChordTimeline = mode === "chords";
     const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
       harmonicContext && harmonicContext.chords.length >= 1
         ? harmonicContext.chords
@@ -146,6 +149,7 @@ export async function POST(request: NextRequest) {
           })),
       sessionDurationSec,
       analysisData.bpm,
+      preserveChordTimeline,
     );
 
     const melodicAnchor = harmonicContext
@@ -406,29 +410,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Deterministic chord engine — uses analysis chords when no harmonic context
+    // Smart chord engine — uses real analyzed chords with full ChordKit voicings + piano variation
     if (mode === "chords") {
-      if (analysisData.chords.length >= 2) {
-        const ctx: HarmonicContextInput = {
-          chords: analysisData.chords.map((c) => ({
-            t0: c.t0,
-            t1: c.t1,
-            symbol: c.symbol,
-            confidence: c.confidence ?? 55,
-            pitchClasses: [],
-          })),
-          audioNotes: [],
-          melodyneNotes: [],
-          durationSec: analysisData.sections?.[0]?.t1 ?? 64,
-        };
-        const strategic = generateStrategicStems(analysisData, ctx, renderQuality, seed, {
-          seed,
-          density: settings.density,
-          compingPattern,
-        });
-        return finishWithStems(strategic.stems, strategic.plan, strategic.pipeline);
-      }
-      const result = generateDeterministicChordStems(
+      const result = generateSmartChordStems(
+        sessionChords,
         analysisData,
         renderQuality,
         seed,

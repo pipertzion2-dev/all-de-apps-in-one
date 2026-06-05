@@ -274,6 +274,120 @@ function generateCompEvents(
   return events;
 }
 
+// ─── Advanced chord parsing (for real analyzed chord symbols) ────────────────
+
+/** Parse a chord symbol like "Dm7", "G7", "Cmaj7", "F#m9", "Bb13sus4" → pitch classes. */
+function pitchClassesForSymbol(symbol: string): number[] {
+  const rootMatch = symbol.match(/^([A-G][b#]?)/);
+  if (!rootMatch) return [0, 4, 7];
+  const rootPc = NOTE_NAMES[rootMatch[1]] ?? 0;
+  const s = symbol.slice(rootMatch[1].length).toLowerCase();
+
+  const intervals: number[] = [0];
+  const isMinorQ = s.startsWith("m") && !s.startsWith("maj");
+  const isDim = s.includes("dim") || s.includes("°");
+  const isAug = s.includes("aug") || s.includes("+");
+  const isSus4 = s.includes("sus4");
+  const isSus2 = s.includes("sus2");
+  const hasMaj7 = s.includes("maj7") || s.includes("∆7") || s.includes("△7");
+  const hasDom7 = !hasMaj7 && (s.includes("7") || s.includes("9") || s.includes("11") || s.includes("13"));
+  const has9 = s.includes("9") || s.includes("add9");
+  const has11 = s.includes("11") || s.includes("add11") || s.includes("sus");
+  const has13 = s.includes("13");
+
+  // Third
+  if (isSus4) intervals.push(5);
+  else if (isSus2) intervals.push(2);
+  else if (isDim) intervals.push(3);
+  else if (isMinorQ) intervals.push(3);
+  else intervals.push(4);
+
+  // Fifth
+  if (isDim) intervals.push(6);
+  else if (isAug) intervals.push(8);
+  else intervals.push(7);
+
+  // Seventh
+  if (hasMaj7) intervals.push(11);
+  else if (isDim && (s.includes("7") || s.includes("dim7"))) intervals.push(9);
+  else if (hasDom7) intervals.push(10);
+
+  // Extensions
+  if (has9) intervals.push(14 % 12 === 2 ? 14 : 2); // 9th = major 2nd up an octave, store as 2
+  if (has11) intervals.push(5);
+  if (has13) intervals.push(9);
+
+  const unique = [...new Set(intervals.map((p) => ((rootPc + p) % 12)))];
+  return unique.sort((a, b) => a - b);
+}
+
+/** Build a close-voiced cluster for real-analysis chords with optional inversion. */
+function buildRealChordVoicing(symbol: string, inversion = 0, voiceLeadFrom?: number[]): number[] {
+  const rootMatch = symbol.match(/^([A-G][b#]?)/);
+  if (!rootMatch) return [48, 52, 55];
+  const rootPc = NOTE_NAMES[rootMatch[1]] ?? 0;
+  const pcs = pitchClassesForSymbol(symbol);
+  const rotated = [...pcs.slice(inversion % pcs.length), ...pcs.slice(0, inversion % pcs.length)];
+
+  const notes: number[] = [];
+  // Bass note always in low register
+  notes.push(midi(rootPc, 2));
+
+  // Upper voicing: start at mid-register, apply voice leading from previous chord
+  const baseTarget = voiceLeadFrom?.length
+    ? Math.round(voiceLeadFrom.reduce((a, b) => a + b, 0) / voiceLeadFrom.length)
+    : 65;
+  const baseOct = Math.max(3, Math.min(5, Math.floor(baseTarget / 12) - 1));
+
+  let current = midi(rotated[0] ?? rootPc, baseOct);
+  for (const pc of rotated) {
+    let cand = midi(pc, baseOct);
+    while (cand < current - 2) cand += 12;
+    while (cand > current + 13) cand -= 12;
+    if (cand > 88) cand -= 12;
+    notes.push(cand);
+    current = cand;
+  }
+  return notes;
+}
+
+// ─── Variation machinery ─────────────────────────────────────────────────────
+
+/** Comping patterns cycle to avoid repeating the same texture on every chord. */
+const PATTERN_CYCLE: CompPattern[] = [
+  "sustained_pads",
+  "rhythmic_stabs",
+  "sustained_pads",
+  "arpeggiated",
+];
+
+/**
+ * Insert a passing chord (secondary dominant or tritone sub) before a target chord
+ * at the last beat of the preceding bar.
+ */
+function buildPassingChordEvent(
+  targetSymbol: string,
+  insertBeat: number,
+  bpm: number,
+): ChordMidiEvent[] {
+  const rootMatch = targetSymbol.match(/^([A-G][b#]?)/);
+  if (!rootMatch) return [];
+  const targetRoot = NOTE_NAMES[rootMatch[1]] ?? 0;
+  // Secondary dominant: V7 of the target
+  const secDomRoot = (targetRoot + 7) % 12; // dominant is a 5th above target
+  const name = Object.keys(NOTE_NAMES).find((k) => NOTE_NAMES[k] === secDomRoot && !k.includes("b") && k.length <= 2) ?? "C";
+  const voicing = buildRealChordVoicing(`${name}7`, 0);
+  const beatSec = 60 / bpm;
+  const events: ChordMidiEvent[] = voicing.slice(1).map((note) => ({
+    note,
+    velocity: 52,
+    startBeat: insertBeat,
+    duration: 0.9,
+    channel: 0,
+  }));
+  return events;
+}
+
 // ─── Main export ────────────────────────────────────────────────────────────
 
 export interface ChordEngineOptions {
@@ -284,6 +398,9 @@ export interface ChordEngineOptions {
   pattern?: CompPattern; // default sustained_pads
   progressionSeed?: number; // pick which Glasper progression template
   includeBass?: boolean; // separate bass stem
+  /** Real analyzed chord timeline from the input audio. When provided, these chords are used
+   *  directly (in order) rather than a fixed 4-chord progression template. */
+  inputChords?: { symbol: string; startBeat: number; endBeat: number }[];
 }
 
 export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
@@ -294,65 +411,160 @@ export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
     pattern = "sustained_pads",
     progressionSeed = 0,
     includeBass = true,
+    inputChords,
   } = opts;
-
-  const { root, isMinor } = parseKey(opts.key);
-  const diatonicChords = buildDiatonicChords(root, isMinor);
-  const progression = selectProgression(isMinor, progressionSeed);
-
-  // Repeat progression to fill totalBars
-  const chordsPerRepeat = progression.length;
-  const repeats = Math.ceil(totalBars / (chordsPerRepeat * barsPerChord));
 
   const chordEvents: ChordMidiEvent[] = [];
   const bassEvents: ChordMidiEvent[] = [];
 
-  for (let rep = 0; rep < repeats; rep++) {
-    for (let i = 0; i < chordsPerRepeat; i++) {
-      const degreeIdx = progression[i];
-      const chord = diatonicChords[degreeIdx];
-      const startBeat = (rep * chordsPerRepeat + i) * barsPerChord * 4;
+  // ── Path A: real analyzed chords from audio ──────────────────────────────
+  if (inputChords && inputChords.length >= 2) {
+    let prevUpperVoicing: number[] = [];
+    const seen = new Map<string, number>(); // symbol → times seen
 
-      if (startBeat >= totalBars * 4) break;
+    // Deduplicate consecutive identical symbols while keeping the longest span
+    const merged: typeof inputChords = [];
+    for (const c of inputChords) {
+      const last = merged[merged.length - 1];
+      if (last && last.symbol === c.symbol) {
+        last.endBeat = c.endBeat;
+      } else {
+        merged.push({ ...c });
+      }
+    }
 
-      // Separate bass from upper voicing
-      const bassNote = chord.voicing[0];
-      const upperVoicing = chord.voicing.slice(1);
+    for (let ci = 0; ci < merged.length; ci++) {
+      const chord = merged[ci]!;
+      const span = chord.endBeat - chord.startBeat;
+      if (span < 0.25) continue;
 
-      // Generate comping events for upper voices
-      const upperEvents = generateCompEvents(upperVoicing, startBeat, barsPerChord, bpm, pattern);
-      chordEvents.push(...upperEvents);
+      const timesSeenBefore = seen.get(chord.symbol) ?? 0;
+      seen.set(chord.symbol, timesSeenBefore + 1);
 
-      // Separate bass line (simpler rhythmic pattern)
+      // Vary inversion on repeats to avoid identical voicings
+      const inversion = timesSeenBefore % 3;
+      // Vary pattern per 4-bar section
+      const sectionIdx = Math.floor(chord.startBeat / 16);
+      const localPattern: CompPattern = PATTERN_CYCLE[sectionIdx % PATTERN_CYCLE.length]!;
+
+      const voicing = buildRealChordVoicing(chord.symbol, inversion, prevUpperVoicing);
+      const upperVoicing = voicing.slice(1);
+      const bassNote = voicing[0]!;
+      prevUpperVoicing = upperVoicing;
+
+      // Upper comping events
+      const events = generateCompEvents(upperVoicing, chord.startBeat, Math.max(1, Math.round(span / 4)), bpm, localPattern);
+      chordEvents.push(...events);
+
+      // Secondary dominant passing chord: only on non-first appearances,
+      // if there's room (the previous chord span ≥ 2 bars) and this chord is a "resolving" target.
+      if (timesSeenBefore > 0 && ci > 0 && span >= 4) {
+        const passAt = chord.startBeat - 0.5;
+        if (passAt > 0) {
+          chordEvents.push(...buildPassingChordEvent(chord.symbol, passAt, bpm));
+        }
+      }
+
+      // Bass
       if (includeBass) {
-        const bassBeats = barsPerChord * 4;
-        // Root on 1, then octave up on beat 3 for movement
         bassEvents.push({
           note: bassNote,
           velocity: 82,
-          startBeat,
-          duration: 1.9,
+          startBeat: chord.startBeat,
+          duration: Math.min(1.9, span * 0.45),
           channel: 1,
         });
-        if (barsPerChord >= 2) {
-          // Add a walking note — 5th of chord (2nd note of upper)
-          const fifth = upperVoicing[0]; // first upper voice (usually 3rd or 5th)
+        if (span >= 4) {
+          const fifth = upperVoicing[0] ?? bassNote;
           bassEvents.push({
-            note: Math.max(36, fifth - 12), // drop an octave
-            velocity: 70,
-            startBeat: startBeat + 2,
-            duration: 1.9,
+            note: Math.max(36, fifth - 12),
+            velocity: 68,
+            startBeat: chord.startBeat + 2,
+            duration: 1.8,
             channel: 1,
           });
         }
-        // Anticipate next chord on beat 4 (Glasper characteristic)
-        bassEvents.push({
-          note: bassNote,
-          velocity: 65,
-          startBeat: startBeat + barsPerChord * 4 - 0.5,
-          duration: 0.4,
-          channel: 1,
-        });
+        // Anticipation into next chord
+        if (ci < merged.length - 1) {
+          bassEvents.push({
+            note: bassNote,
+            velocity: 60,
+            startBeat: chord.endBeat - 0.5,
+            duration: 0.4,
+            channel: 1,
+          });
+        }
+      }
+    }
+  } else {
+    // ── Path B: deterministic progression when no real chords available ─────
+    const { root, isMinor } = parseKey(opts.key);
+    const diatonicChords = buildDiatonicChords(root, isMinor);
+    const progression = selectProgression(isMinor, progressionSeed);
+
+    const chordsPerRepeat = progression.length;
+    const repeats = Math.ceil(totalBars / (chordsPerRepeat * barsPerChord));
+
+    const seen = new Map<number, number>();
+
+    for (let rep = 0; rep < repeats; rep++) {
+      for (let i = 0; i < chordsPerRepeat; i++) {
+        const degreeIdx = progression[i]!;
+        const chord = diatonicChords[degreeIdx]!;
+        const startBeat = (rep * chordsPerRepeat + i) * barsPerChord * 4;
+        if (startBeat >= totalBars * 4) break;
+
+        const timesSeen = seen.get(degreeIdx) ?? 0;
+        seen.set(degreeIdx, timesSeen + 1);
+
+        // Rotate voicing on repeats so it's never identical
+        const bassNote = chord.voicing[0]!;
+        const upperVoicingFull = chord.voicing.slice(1);
+        // Invert by rotating upper voices
+        const rotOff = timesSeen % upperVoicingFull.length;
+        const upperVoicing = [
+          ...upperVoicingFull.slice(rotOff),
+          ...upperVoicingFull.slice(0, rotOff).map((n) => n + 12),
+        ].filter((n) => n <= 88);
+
+        // Vary pattern per section
+        const sectionIdx = Math.floor(startBeat / 16);
+        const localPattern: CompPattern = PATTERN_CYCLE[sectionIdx % PATTERN_CYCLE.length]!;
+
+        const upperEvents = generateCompEvents(upperVoicing, startBeat, barsPerChord, bpm, localPattern);
+        chordEvents.push(...upperEvents);
+
+        // Secondary dominant before resolution on repeats
+        if (timesSeen > 0 && i === 0 && startBeat >= 0.5) {
+          chordEvents.push(...buildPassingChordEvent(chord.label, startBeat - 0.5, bpm));
+        }
+
+        if (includeBass) {
+          bassEvents.push({
+            note: bassNote,
+            velocity: 82,
+            startBeat,
+            duration: 1.9,
+            channel: 1,
+          });
+          if (barsPerChord >= 2 && upperVoicingFull.length > 0) {
+            const fifth = upperVoicingFull[0]!;
+            bassEvents.push({
+              note: Math.max(36, fifth - 12),
+              velocity: 70,
+              startBeat: startBeat + 2,
+              duration: 1.9,
+              channel: 1,
+            });
+          }
+          bassEvents.push({
+            note: bassNote,
+            velocity: 65,
+            startBeat: startBeat + barsPerChord * 4 - 0.5,
+            duration: 0.4,
+            channel: 1,
+          });
+        }
       }
     }
   }
@@ -393,5 +605,5 @@ export function getProgressionLabels(key: string, progressionSeed = 0): string[]
   const { root, isMinor } = parseKey(key);
   const diatonicChords = buildDiatonicChords(root, isMinor);
   const progression = selectProgression(isMinor, progressionSeed);
-  return progression.map((i) => diatonicChords[i].label);
+  return progression.map((i) => diatonicChords[i]?.label ?? "?");
 }

@@ -58,6 +58,10 @@ import {
 } from "@/lib/svivva-play/scale-key-guard";
 import { applyMeendToStems } from "@/lib/svivva-play/generate-helpers";
 import {
+  buildMeendAccentPlaybacks,
+  meendAccentSourceName,
+} from "@/lib/svivva-play/meend-showcase-stem";
+import {
   isIndianRagaScaleName,
   resolveMeendScaleName,
   stableGenerationSeed,
@@ -1433,6 +1437,15 @@ export default function SvivvaPlayPage() {
     return true;
   }, []);
 
+  const sniffBlobMagic = useCallback(async (blob: Blob, n = 4): Promise<string> => {
+    try {
+      const buf = await blob.slice(0, n).arrayBuffer();
+      return String.fromCharCode(...new Uint8Array(buf));
+    } catch {
+      return "";
+    }
+  }, []);
+
   const handleDownloadStemMidi = useCallback(
     async (stem: StemData, stemIndex: number) => {
       const bpm = manualTempo ?? analysis?.bpm ?? 120;
@@ -1446,7 +1459,14 @@ export default function SvivvaPlayPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             format: "midi",
-            stems: [{ name: stem.name, role: stem.role, midiEvents: stem.midiEvents }],
+            stems: [
+              {
+                name: stem.name,
+                role: stem.role,
+                midiEvents: stem.midiEvents,
+                expression: stem.expression,
+              },
+            ],
             bpm,
             filename: stem.name.replace(/\s+/g, "_"),
           }),
@@ -1456,6 +1476,13 @@ export default function SvivvaPlayPage() {
           return;
         }
         const blob = await res.blob();
+        const magic = await sniffBlobMagic(blob, 4);
+        if (magic !== "MThd") {
+          const peek = await res.clone().text().catch(() => "");
+          console.warn("Stem MIDI download invalid file:", { magic, peek: peek.slice(0, 200) });
+          setErrorMsg("Stem export failed — server returned a non-MIDI file.");
+          return;
+        }
         downloadMidiBlob(blob, stemMidiFilename(stem.name, stem.role, stemIndex));
         setWarningMsg(
           `Downloaded ${stemMidiFilename(stem.name, stem.role, stemIndex)} — drag into your DAW.`,
@@ -1465,7 +1492,7 @@ export default function SvivvaPlayPage() {
         setErrorMsg("Stem MIDI download failed.");
       }
     },
-    [analysis, manualTempo, downloadMidiBlob],
+    [analysis, manualTempo, downloadMidiBlob, sniffBlobMagic],
   );
 
   const handleDownloadMelodyneMidi = useCallback(async () => {
@@ -1492,13 +1519,20 @@ export default function SvivvaPlayPage() {
         return;
       }
       const blob = await res.blob();
+      const magic = await sniffBlobMagic(blob, 2);
+      if (magic !== "PK") {
+        const peek = await res.clone().text().catch(() => "");
+        console.warn("Melodyne export invalid zip:", { magic, peek: peek.slice(0, 200) });
+        setErrorMsg("Melodyne export failed — server returned a non-zip file.");
+        return;
+      }
       downloadMidiBlob(blob, "melodyne_reference.zip");
       setWarningMsg("STEM pack downloaded — unzip and drag melodyne_reference.mid into your DAW.");
     } catch (err) {
       console.error("Melodyne MIDI export failed:", err);
       setErrorMsg("Melodyne MIDI export failed.");
     }
-  }, [transcription, analysis, manualTempo, downloadMidiBlob]);
+  }, [transcription, analysis, manualTempo, downloadMidiBlob, sniffBlobMagic]);
 
   const handleExport = useCallback(async () => {
     const bpm = manualTempo ?? analysis?.bpm ?? 120;
@@ -1631,7 +1665,7 @@ export default function SvivvaPlayPage() {
         ) as typeof prepared;
       }
 
-      return prepared.map((s) => ({
+      let playbacks: StemPlayback[] = prepared.map((s) => ({
         name: s.name,
         role: s.role,
         instrumentHint: s.instrumentHint,
@@ -1642,12 +1676,78 @@ export default function SvivvaPlayPage() {
         pan: s.pan,
         gainDb: s.gainDb,
       }));
+
+      if (meend) {
+        const accents = buildMeendAccentPlaybacks(
+          prepared.map((s) => ({
+            name: s.name,
+            role: s.role,
+            instrumentHint: s.instrumentHint,
+            midiEvents: s.midiEvents,
+            pan: s.pan,
+          })),
+        );
+        if (accents.length > 0) {
+          const accented = new Set(
+            accents
+              .map((a) => meendAccentSourceName(a.name))
+              .filter((n): n is string => Boolean(n)),
+          );
+          playbacks = playbacks.map((p) =>
+            accented.has(p.name) ? { ...p, gainDb: (p.gainDb || 0) - 1 } : p,
+          );
+          playbacks.push(...accents);
+        }
+      }
+
+      return playbacks;
     },
     [meend, manualTempo, effectiveAnalysis?.bpm, analysis?.bpm, mode],
   );
 
+  const buildEngineSoloState = useCallback(
+    (currentStems: StemData[]) => {
+      const base = currentStems.map((s) => ({
+        name: s.name,
+        soloed: s.soloed,
+        muted: s.muted,
+        gainDb: s.gainDb,
+      }));
+      if (!meend) return base;
+      const accents = buildMeendAccentPlaybacks(
+        currentStems.map((s) => ({
+          name: s.name,
+          role: s.role,
+          instrumentHint: s.instrumentHint,
+          midiEvents: normalizeMidiEvents(s.midiEvents),
+          pan: s.pan,
+        })),
+      );
+      if (accents.length === 0) return base;
+      const anySoloed = currentStems.some((s) => s.soloed);
+      const accentStates = accents.map((accent) => {
+        const sourceName = meendAccentSourceName(accent.name);
+        const source = sourceName
+          ? currentStems.find((s) => s.name === sourceName)
+          : undefined;
+        return {
+          name: accent.name,
+          soloed: false,
+          muted: Boolean(source?.muted) || (anySoloed && !source?.soloed),
+          gainDb: accent.gainDb,
+        };
+      });
+      return [...base, ...accentStates];
+    },
+    [meend],
+  );
+
   const loadStemsIntoEngine = useCallback(
-    async (currentStems: StemData[], bpm: number) => {
+    async (
+      currentStems: StemData[],
+      bpm: number,
+      opts?: { skipWarmUp?: boolean },
+    ) => {
       const loadGen = ++engineLoadGenRef.current;
       setIsPlaying(false);
       if (animFrameRef.current) {
@@ -1661,31 +1761,31 @@ export default function SvivvaPlayPage() {
       }
       const tempo = bpm > 0 ? bpm : 120;
       const engine = getSoundEngine();
-      await engine.warmUpForPlayback();
-      engine.init();
-      engine.setBpm(tempo);
-      await engine.loadStems(buildStemPlaybacks(currentStems), { forceMeend: meend });
-      if (loadGen !== engineLoadGenRef.current) return;
-      engine.setMasterVolume(masterVolume);
-      engine.applySoloState(
-        currentStems.map((s) => ({
-          name: s.name,
-          soloed: s.soloed,
-          muted: s.muted,
-          gainDb: s.gainDb,
-        })),
-      );
+      try {
+        await engine.warmUpForPlayback({ skipWarmUp: opts?.skipWarmUp });
+        engine.init();
+        engine.setBpm(tempo);
+        await engine.loadStems(buildStemPlaybacks(currentStems), { forceMeend: meend });
+        if (loadGen !== engineLoadGenRef.current) return;
+        engine.setMasterVolume(masterVolume);
+        engine.applySoloState(buildEngineSoloState(currentStems));
 
-      const engineDur = engine.getDuration();
-      const importDur = resolveImportDurationSec();
-      const stemDur = stemTimelineDurationSec(currentStems, tempo);
-      audioImportCapSecRef.current = importDur;
-      importDurationSecRef.current = Math.max(importDur > 0 ? importDur : 0, stemDur, engineDur);
-      setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
-      setEngineReady(true);
-      setErrorMsg("");
+        const engineDur = engine.getDuration();
+        const importDur = resolveImportDurationSec();
+        const stemDur = stemTimelineDurationSec(currentStems, tempo);
+        audioImportCapSecRef.current = importDur;
+        importDurationSecRef.current = Math.max(importDur > 0 ? importDur : 0, stemDur, engineDur);
+        setPlaybackDuration(resolvePlaybackDurationSec(engineDur, importDur, stemDur));
+        setEngineReady(true);
+        setErrorMsg("");
+      } catch (err) {
+        console.error("Stem engine load failed:", err);
+        engineStemsKeyRef.current = "";
+        setEngineReady(false);
+        throw err;
+      }
     },
-    [buildStemPlaybacks, resolveImportDurationSec, masterVolume, meend],
+    [buildStemPlaybacks, buildEngineSoloState, resolveImportDurationSec, masterVolume, meend],
   );
 
   const stemsPlaybackKey = useCallback(
@@ -1743,15 +1843,17 @@ export default function SvivvaPlayPage() {
 
     const tempo = baseBpm;
     let cancelled = false;
-    const loadGen = ++engineLoadGenRef.current;
     setEngineLoading(true);
-    void loadStemsIntoEngine(stems, tempo)
+    void loadStemsIntoEngine(stems, tempo, { skipWarmUp: true })
       .then(() => {
-        if (cancelled || loadGen !== engineLoadGenRef.current) return;
+        if (cancelled) return;
         engineStemsKeyRef.current = stemsPlaybackKey(stems, tempo);
       })
+      .catch((err) => {
+        if (!cancelled) console.error("Meend preload failed:", err);
+      })
       .finally(() => {
-        if (!cancelled && loadGen === engineLoadGenRef.current) setEngineLoading(false);
+        if (!cancelled) setEngineLoading(false);
       });
     return () => {
       cancelled = true;
@@ -1770,10 +1872,8 @@ export default function SvivvaPlayPage() {
   useEffect(() => {
     if (!engineStemsKeyRef.current) return;
     const engine = getSoundEngine();
-    engine.applySoloState(
-      stems.map((s) => ({ name: s.name, soloed: s.soloed, muted: s.muted, gainDb: s.gainDb })),
-    );
-  }, [stems]);
+    engine.applySoloState(buildEngineSoloState(stems));
+  }, [stems, buildEngineSoloState]);
 
   const stopPositionTracking = useCallback(() => {
     if (animFrameRef.current) {
@@ -1855,7 +1955,9 @@ export default function SvivvaPlayPage() {
     const playbackKey = stemsPlaybackKey(stems, tempo);
     setEngineLoading(true);
     try {
-      if (engineStemsKeyRef.current !== playbackKey) {
+      const needsReload =
+        engineStemsKeyRef.current !== playbackKey || !engine.hasStems();
+      if (needsReload) {
         await loadStemsIntoEngine(stems, tempo);
         engineStemsKeyRef.current = playbackKey;
       }
@@ -1957,6 +2059,7 @@ export default function SvivvaPlayPage() {
     setWarningMsg("");
     setEngineReady(false);
     setEngineLoading(false);
+    engineStemsKeyRef.current = "";
     engineLoadGenRef.current += 1;
     setPlaybackPos(0);
     setPlaybackDuration(0);
@@ -2071,6 +2174,7 @@ export default function SvivvaPlayPage() {
     setPlaybackDuration(0);
     setEngineReady(false);
     setEngineLoading(false);
+    engineStemsKeyRef.current = "";
     engineLoadGenRef.current += 1;
     setVersionHistory([]);
     setActiveVersion(0);
@@ -4133,8 +4237,8 @@ export default function SvivvaPlayPage() {
                                 data-testid="button-generate-chords-preview"
                               >
                                 <HolographicNoise />
-                                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Generate Neo-Soul
-                                (8 bars)
+                                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Generate Chords
+                                (16 bars)
                               </Button>
                               <Button
                                 onClick={() => handleGenerate("full")}

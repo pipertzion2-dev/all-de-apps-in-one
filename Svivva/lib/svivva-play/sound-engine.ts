@@ -7,6 +7,10 @@ import {
   type MeendTimelineEvent,
 } from "./meend-preview-audio";
 import {
+  isMeendAccentStem,
+  MEEND_ACCENT_GAIN_DB,
+} from "./meend-showcase-stem";
+import {
   buildMeendStemExpression,
   stemHasOverlappingNotes,
 } from "./scale-key-guard";
@@ -32,12 +36,18 @@ export interface StemPlayback {
     cc?: { beat: number; cc_number: number; value: number }[];
     pitchbend?: { beat: number; value: number }[];
     meend?: boolean;
+    monophonic?: boolean;
   };
 }
 
 export type LoadStemsOptions = {
   /** Apply meend preview to every stem (matches Play UI checkbox). */
   forceMeend?: boolean;
+};
+
+export type WarmUpOptions = {
+  /** Build routing only — skip Tone.start (safe from useEffect). */
+  skipWarmUp?: boolean;
 };
 
 interface StemChannel {
@@ -52,6 +62,7 @@ interface StemChannel {
   volume: Tone.Volume;
   effects: Tone.ToneAudioNode[];
   part: Tone.Part | null;
+  previewGainDb: number;
 }
 
 export class SvivvaSoundEngine {
@@ -61,6 +72,7 @@ export class SvivvaSoundEngine {
   private isPlaying: boolean = false;
   private duration: number = 0;
   private masterVolume: Tone.Volume | null = null;
+  private loadMutex: Promise<void> = Promise.resolve();
 
   private isNodeDisposed(node: Tone.ToneAudioNode): boolean {
     return Boolean((node as { disposed?: boolean }).disposed);
@@ -95,10 +107,14 @@ export class SvivvaSoundEngine {
 
   /** Start/resume Web Audio — call from play() after user gesture. */
   private async ensureAudioRunning(): Promise<void> {
-    await Tone.start();
-    const ctx = Tone.getContext();
-    if (ctx.state !== "running") {
-      await ctx.resume();
+    try {
+      await Tone.start();
+      const ctx = Tone.getContext();
+      if (ctx.state !== "running") {
+        await ctx.resume();
+      }
+    } catch (err) {
+      console.warn("AudioContext resume deferred:", err);
     }
     this.prepareMasterBus();
     this.isInitialized = true;
@@ -110,8 +126,16 @@ export class SvivvaSoundEngine {
   }
 
   /** Unlock audio output — call from play button (user gesture). */
-  async warmUpForPlayback(): Promise<void> {
+  async warmUpForPlayback(options?: WarmUpOptions): Promise<void> {
+    if (options?.skipWarmUp) {
+      this.init();
+      return;
+    }
     await this.ensureAudioRunning();
+  }
+
+  hasStems(): boolean {
+    return this.channels.size > 0;
   }
 
   setMasterVolume(percent: number) {
@@ -219,7 +243,7 @@ export class SvivvaSoundEngine {
     switch (preset.synthType) {
       case "fm":
         return new Tone.PolySynth(Tone.FMSynth, {
-          maxPolyphony: 16,
+          maxPolyphony: 24,
           voice: Tone.FMSynth,
           options: {
             oscillator: { type: oscType },
@@ -231,7 +255,7 @@ export class SvivvaSoundEngine {
         } as any);
       case "am":
         return new Tone.PolySynth(Tone.AMSynth, {
-          maxPolyphony: 16,
+          maxPolyphony: 24,
           voice: Tone.AMSynth,
           options: {
             oscillator: { type: oscType },
@@ -305,7 +329,7 @@ export class SvivvaSoundEngine {
         });
       default:
         return new Tone.PolySynth(Tone.Synth, {
-          maxPolyphony: 16,
+          maxPolyphony: 24,
           voice: Tone.Synth,
           options: {
             oscillator: { type: oscType },
@@ -320,6 +344,8 @@ export class SvivvaSoundEngine {
     const r = role.toLowerCase();
     if (forceMeend && (r === "melody" || r === "lead" || r === "solo")) return gainDb + 6;
     if (r === "melody" || r === "lead" || r === "solo") return gainDb + 4;
+    // Chords/harmony need a solid boost so they cut through clearly.
+    if (r === "harmony" || r === "chords" || r === "comp" || r === "pad") return gainDb + 6;
     return gainDb;
   }
 
@@ -359,7 +385,7 @@ export class SvivvaSoundEngine {
     } catch (err) {
       console.warn("Synth preset fallback:", preset.oscillator.type, err);
       return new Tone.PolySynth(Tone.Synth, {
-        maxPolyphony: 12,
+        maxPolyphony: 20,
         voice: Tone.Synth,
         options: {
           oscillator: { type: "triangle" },
@@ -370,7 +396,38 @@ export class SvivvaSoundEngine {
     }
   }
 
+  /** Meend preview must stay monophonic — never fall back to PolySynth. */
+  private createMeendSynth(): Tone.MonoSynth {
+    try {
+      const synth = this.createSynth(MEEND_PREVIEW);
+      if (synth instanceof Tone.MonoSynth) return synth;
+    } catch (err) {
+      console.warn("MEEND_PREVIEW preset failed, using bare MonoSynth:", err);
+    }
+    return new Tone.MonoSynth({
+      oscillator: { type: "triangle" },
+      envelope: { attack: 0.05, decay: 0.12, sustain: 0.62, release: 0.4 },
+      volume: -5,
+    });
+  }
+
   async loadStems(stems: StemPlayback[], options?: LoadStemsOptions) {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const prev = this.loadMutex;
+    this.loadMutex = prev.then(() => gate);
+    await prev;
+
+    try {
+      await this.loadStemsBody(stems, options);
+    } finally {
+      release();
+    }
+  }
+
+  private async loadStemsBody(stems: StemPlayback[], options?: LoadStemsOptions) {
     const forceMeend = Boolean(options?.forceMeend);
     console.log("🎵 Loading", stems.length, "stems");
     this.prepareMasterBus();
@@ -398,31 +455,34 @@ export class SvivvaSoundEngine {
 
         let midiEvents = sortedEvents;
         let pitchBends = stem.expression?.pitchbend ?? [];
-        const polyphonic = stemHasOverlappingNotes(sortedEvents);
+        const polyphonic =
+          typeof stem.expression?.monophonic === "boolean"
+            ? !stem.expression.monophonic
+            : stemHasOverlappingNotes(sortedEvents);
         const wantsMeend =
           forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
+        const isMeendAccent = isMeendAccentStem(stem.name);
+        const useMeendMono = isMeendAccent && wantsMeend && !polyphonic;
 
-        if (wantsMeend) {
-          const built = buildMeendStemExpression(midiEvents, polyphonic);
+        if (useMeendMono) {
+          const built = buildMeendStemExpression(midiEvents, false);
           midiEvents = built.midiEvents as MidiEvent[];
           pitchBends = built.pitchbend;
         }
 
-        const useMeendMono = wantsMeend && !polyphonic;
         const preset = useMeendMono
           ? MEEND_PREVIEW
           : resolveInstrumentPreset(stem.instrumentHint, stem.role);
-        const synth = this.createSynthSafe(preset);
-        const useLegatoMeend = useMeendMono && synth instanceof Tone.MonoSynth;
+        const synth = useMeendMono
+          ? this.createMeendSynth()
+          : this.createSynthSafe(preset);
+        let useLegatoMeend = useMeendMono;
 
-        if (useLegatoMeend) {
-          synth.portamento = 0.42;
-        }
         const panner = new Tone.Panner(stem.pan / 100);
-        const meendGain = useLegatoMeend ? 12 : 0;
-        const volume = new Tone.Volume(
-          this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend) + meendGain,
-        );
+        const previewGainDb = isMeendAccent
+          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
+          : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
+        const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();
 
         const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, volume];
@@ -440,21 +500,27 @@ export class SvivvaSoundEngine {
           note: string;
           duration: number;
           velocity: number;
-        }[];
+        }[] = [];
 
         if (useLegatoMeend) {
-          timeline = buildMeendLegatoTimeline(
+          const legatoTimeline = buildMeendLegatoTimeline(
             midiEvents,
             pitchBends,
             (b) => this.beatToSeconds(b),
             (midi) => this.noteToFreq(midi),
           );
-          for (const evt of midiEvents) {
-            maxBeat = Math.max(maxBeat, evt.startBeat + evt.duration);
+          if (legatoTimeline.length === 0) {
+            useLegatoMeend = false;
+          } else {
+            timeline = legatoTimeline;
+            for (const evt of midiEvents) {
+              maxBeat = Math.max(maxBeat, evt.startBeat + evt.duration);
+            }
+            const release = legatoTimeline.find((e) => e.type === "release");
+            if (release) maxBeat = Math.max(maxBeat, (release.time * this.bpm) / 60);
           }
-          const release = timeline.find((e) => e.type === "release");
-          if (release) maxBeat = Math.max(maxBeat, (release.time * this.bpm) / 60);
-        } else {
+        }
+        if (!useLegatoMeend) {
           const plain: { time: number; note: string; duration: number; velocity: number }[] = [];
           for (const evt of midiEvents) {
             const endBeat = evt.startBeat + evt.duration;
@@ -469,22 +535,20 @@ export class SvivvaSoundEngine {
           timeline = plain;
         }
 
+        const legatoActive = useLegatoMeend;
         const part = new Tone.Part((time, value: MeendTimelineEvent | { note: string; duration: number; velocity: number }) => {
           try {
             if (!synth) return;
-            if (useLegatoMeend && "type" in value) {
+            if (legatoActive && "type" in value) {
               const ev = value as MeendTimelineEvent;
+              if (!(synth instanceof Tone.MonoSynth)) return;
               if (ev.type === "attack") {
                 synth.detune.value = 0;
                 synth.triggerAttack(ev.note, time, ev.velocity);
-              } else if (ev.type === "glide") {
-                synth.detune.rampTo(0, 0.02, time);
-                const freq = Tone.Frequency(ev.note).toFrequency();
-                synth.frequency.rampTo(freq, ev.glide, time);
-                synth.volume.rampTo(Tone.gainToDb(ev.velocity), 0.02, time);
-              } else if (ev.type === "bend") {
+              } else if (ev.type === "tailBend" || ev.type === "bend") {
                 synth.detune.rampTo(ev.cents, ev.glide, time);
               } else if (ev.type === "release") {
+                synth.detune.rampTo(0, 0.05, time);
                 synth.triggerRelease(time);
               }
               return;
@@ -504,12 +568,26 @@ export class SvivvaSoundEngine {
           }
         }, timeline as MeendTimelineEvent[]);
 
+        if (timeline.length === 0) {
+          console.warn(`Skipping stem "${stem.name}" — empty playback timeline`);
+          try {
+            part.dispose();
+            synth.dispose();
+            panner.dispose();
+            volume.dispose();
+          } catch {
+            /* skip */
+          }
+          continue;
+        }
+
         this.channels.set(stem.name, {
           synth,
           panner,
           volume,
           effects,
           part,
+          previewGainDb,
         });
       } catch (stemErr) {
         console.error(`🔴 Failed to load stem "${stem.name}":`, stemErr);
@@ -547,10 +625,11 @@ export class SvivvaSoundEngine {
     for (const stem of stems) {
       const ch = this.channels.get(stem.name);
       if (!ch) continue;
+      const gain = ch.previewGainDb ?? stem.gainDb ?? 0;
       if (anySoloed) {
-        ch.volume.volume.value = stem.soloed ? stem.gainDb || 0 : -Infinity;
+        ch.volume.volume.value = stem.soloed ? gain : -Infinity;
       } else {
-        ch.volume.volume.value = stem.muted ? -Infinity : stem.gainDb || 0;
+        ch.volume.volume.value = stem.muted ? -Infinity : gain;
       }
     }
   }
@@ -593,8 +672,23 @@ export class SvivvaSoundEngine {
     }
   }
 
+  private releaseAllVoices(): void {
+    for (const ch of this.channels.values()) {
+      try {
+        if (ch.synth instanceof Tone.MonoSynth) {
+          ch.synth.triggerRelease();
+        } else if ("releaseAll" in ch.synth && typeof ch.synth.releaseAll === "function") {
+          (ch.synth as Tone.PolySynth).releaseAll(0);
+        }
+      } catch {
+        /* skip */
+      }
+    }
+  }
+
   pause() {
     Tone.getTransport().pause();
+    this.releaseAllVoices();
     this.isPlaying = false;
   }
 
@@ -602,6 +696,14 @@ export class SvivvaSoundEngine {
     const transport = Tone.getTransport();
     transport.stop();
     transport.position = 0;
+    for (const ch of this.channels.values()) {
+      try {
+        ch.part?.stop(0);
+      } catch {
+        /* skip */
+      }
+    }
+    this.releaseAllVoices();
     this.isPlaying = false;
   }
 

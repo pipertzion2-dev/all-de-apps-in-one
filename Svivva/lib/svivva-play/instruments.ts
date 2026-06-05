@@ -31,13 +31,14 @@ const PIANO: InstrumentPreset = {
 const ELECTRIC_PIANO: InstrumentPreset = {
   synthType: "fm",
   oscillator: { type: "sine" },
-  envelope: { attack: 0.01, decay: 1.0, sustain: 0.3, release: 1.2 },
-  modulationIndex: 3.5,
-  harmonicity: 3.01,
-  volume: -8,
+  // Slightly slower attack so the note speaks, punchy decay like a real Rhodes
+  envelope: { attack: 0.008, decay: 1.4, sustain: 0.18, release: 1.0 },
+  modulationIndex: 5,
+  harmonicity: 3.5,
+  volume: -4,
   fx: [
-    { type: "chorus", wet: 0.3, frequency: 1.5, delayTime: 3.5, depth: 0.5 },
-    { type: "reverb", wet: 0.2, decay: 2.0, preDelay: 0.01 },
+    { type: "chorus", wet: 0.25, frequency: 1.2, delayTime: 3.5, depth: 0.4 },
+    { type: "reverb", wet: 0.18, decay: 1.8, preDelay: 0.01 },
   ],
 };
 
@@ -252,14 +253,14 @@ const SITAR: InstrumentPreset = {
   fx: [{ type: "reverb", wet: 0.3, decay: 3.0, preDelay: 0.02 }],
 };
 
-/** Sustained mono voice for live meend preview (legato glides + pitch wheel). */
+/** Meend accent — triangle voice blended with the full arrangement. */
 export const MEEND_PREVIEW: InstrumentPreset = {
   synthType: "mono",
-  oscillator: { type: "sawtooth" },
-  envelope: { attack: 0.06, decay: 0.1, sustain: 0.95, release: 0.85 },
-  filter: { type: "lowpass", frequency: 5200, rolloff: -12, Q: 0.9 },
-  volume: 6,
-  portamento: 0.42,
+  oscillator: { type: "triangle" },
+  envelope: { attack: 0.05, decay: 0.12, sustain: 0.62, release: 0.4 },
+  filter: { type: "lowpass", frequency: 3600, rolloff: -12, Q: 0.55 },
+  volume: -2,
+  portamento: 0,
 };
 
 const DEFAULT_PRESET: InstrumentPreset = {
@@ -365,7 +366,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
 
 const ROLE_FALLBACKS: Record<string, InstrumentPreset> = {
   bass: BASS,
-  harmony: PIANO,
+  harmony: ELECTRIC_PIANO,
   melody: SYNTH_LEAD,
   percussion: PERCUSSION,
   pad: PAD,

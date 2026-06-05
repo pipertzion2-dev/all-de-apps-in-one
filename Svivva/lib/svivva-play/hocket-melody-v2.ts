@@ -74,8 +74,9 @@ export function buildV2HocketMelodyNotes(
       const duration = gridBeats * (0.9 + rng.next() * 0.2);
       const velocity = Math.round(80 + rng.next() * 24);
 
-      if (rng.next() < 0.5 && prevDegree !== currentDegree) {
-        const ghostBeat = Math.max(0, startBeat - gridBeats * 0.15);
+      // Ghost notes: only add when there's enough time before the main note to avoid t=0 overlap.
+      if (rng.next() < 0.5 && prevDegree !== currentDegree && startBeat >= gridBeats) {
+        const ghostBeat = startBeat - gridBeats * 0.15;
         voices[voiceIdx]!.push({
           note: degreeToMidi(scale.rootPc, pcs, prevDegree, baseOctave + (voiceIdx % 2)),
           velocity: Math.round(velocity * 0.55),
@@ -97,7 +98,10 @@ export function buildV2HocketMelodyNotes(
   return voices;
 }
 
-/** V-2 rapid-fire bursts appended per voice. */
+/**
+ * V-2 rapid-fire accents — one small burst per voice placed on a metrically-aligned beat.
+ * Deliberately small (max 4 notes per voice) so no voice is overloaded and tempo stays tight.
+ */
 export function addV2HocketRapidFire(
   voices: HocketMidiNote[][],
   durationSec: number,
@@ -106,61 +110,29 @@ export function addV2HocketRapidFire(
   seed: number,
 ): HocketMidiNote[][] {
   const rng = new Rng(seed ^ 0xfa57);
-  const eighthSec = (60 / bpm) / 2;
-  const tripletSec = eighthSec / 3;
   const pcs = scale.pitchClasses.length ? scale.pitchClasses : [0, 2, 4, 5, 7, 9, 11];
-  const rapidStyle = rng.choice([
-    "shaw_triplets",
-    "reich_phasing",
-    "minimalist_bursts",
-    "polyrhythmic_rapid",
-  ] as const);
   const out = voices.map((v) => [...v]);
 
-  const pushNote = (voiceIdx: number, timeSec: number, degree: number, velScale: number, durScale: number) => {
-    if (timeSec >= durationSec) return;
-    const startBeat = (timeSec * bpm) / 60;
-    const duration = ((tripletSec * durScale) * bpm) / 60;
-    out[voiceIdx]!.push({
-      note: degreeToMidi(scale.rootPc, pcs, degree % pcs.length, 4 + (voiceIdx % 2)),
-      velocity: Math.round(70 + velScale * 30),
-      startBeat,
-      duration: Math.max(0.08, duration),
-    });
-  };
+  // One 3-note triplet accent per voice, aligned to a beat boundary, max 4 notes.
+  const beatDur = 60 / bpm;
+  const tripletDur = beatDur / 3;
+  const totalBeats = (durationSec * bpm) / 60;
 
-  if (rapidStyle === "shaw_triplets") {
-    const positions = [0.2, 0.4, 0.6, 0.8].map((f) => durationSec * f);
-    for (let v = 0; v < out.length; v++) {
-      for (const pos of positions) {
-        if (rng.next() >= 0.7) continue;
-        const burstLen = rng.choice([6, 8, 10, 12]);
-        for (let i = 0; i < burstLen; i++) {
-          pushNote(v, pos + i * tripletSec, Math.floor(rng.next() * pcs.length), 0.9, 0.9);
-        }
-      }
-    }
-  } else if (rapidStyle === "reich_phasing") {
-    for (let v = 0; v < out.length; v++) {
-      const phase = v * 0.1;
-      for (let i = 0; i < durationSec * 2; i += 2) {
-        pushNote(v, i + phase, Math.floor(rng.next() * pcs.length), 0.8, 1.2);
-      }
-    }
-  } else if (rapidStyle === "minimalist_bursts") {
-    for (let v = 0; v < out.length; v++) {
-      const cell = rng.choice([3, 4, 5, 6]);
-      for (let i = 0; i < durationSec * 3; i += cell) {
-        pushNote(v, i + v * 0.2, Math.floor(rng.next() * pcs.length), 0.7, 0.7);
-      }
-    }
-  } else {
-    const rhythms = Array.from({ length: out.length }, () => rng.choice([2, 3, 4, 5, 6, 7]));
-    for (let v = 0; v < out.length; v++) {
-      const rhythm = rhythms[v]!;
-      for (let i = 0; i < durationSec * rhythm; i += rhythm) {
-        pushNote(v, i + v * 0.15, Math.floor(rng.next() * pcs.length), 0.8, 1);
-      }
+  for (let v = 0; v < out.length; v++) {
+    if (rng.next() < 0.45) continue; // ~55% chance to add accent — not every voice
+    const burstLen = rng.choice([2, 3, 3, 4]);
+    // Pick a beat in the latter half of the piece, snapped to the nearest beat boundary.
+    const accentBeat = Math.floor(rng.next() * totalBeats * 0.5 + totalBeats * 0.5);
+    const degree = Math.floor(rng.next() * pcs.length);
+    for (let i = 0; i < burstLen; i++) {
+      const startBeat = accentBeat + i * (tripletDur / beatDur);
+      if (startBeat >= totalBeats) break;
+      out[v]!.push({
+        note: degreeToMidi(scale.rootPc, pcs, (degree + i) % pcs.length, 4 + (v % 2)),
+        velocity: Math.round(68 + rng.next() * 18),
+        startBeat,
+        duration: Math.max(0.1, tripletDur / beatDur * 0.85),
+      });
     }
   }
 
