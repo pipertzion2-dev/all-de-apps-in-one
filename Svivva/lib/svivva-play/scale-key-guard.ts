@@ -3,6 +3,7 @@
  */
 import type { ChordSegment } from "./chord-from-chroma";
 import { normalizeKeyLabel, parseRootFromKeyLabel, isMinorKeyLabel } from "./analysis-utils";
+import { inferKeyFromChordSegments } from "./key-from-notes";
 import type { NormalizedMidiEvent } from "./midi-normalize";
 import { resolveScale, type ScaleResolution } from "./reich-engine";
 import {
@@ -448,6 +449,70 @@ export type HarmonicContextKeyInput = {
   keySource?: "midi" | "audio" | "hint";
   sources?: { melodyneMidi?: boolean };
 };
+
+/**
+ * Authoritative composition key — audio anchor + Melodyne reconciliation, then chord map.
+ * Use this (not raw analysis.key) so hocket/counterpoint matches imported audio.
+ */
+export function resolveCompositionKey(options: {
+  manualKey?: string | null;
+  analysisKey: string;
+  audioAnchorKey?: string | null;
+  harmonicContext?: HarmonicContextKeyInput | null;
+  chords?: ChordSegment[];
+}): string {
+  const locked = resolveLockedGenerationKey({
+    manualKey: options.manualKey,
+    analysisKey: options.analysisKey,
+    audioAnchorKey: options.audioAnchorKey,
+    harmonicContext: options.harmonicContext,
+  });
+
+  if (options.manualKey?.trim()) return locked;
+
+  const chords = options.chords ?? [];
+  if (chords.length < 2) return locked;
+
+  const fromChords = inferKeyFromChordSegments(chords);
+  if (!fromChords || fromChords.confidence < 62) return locked;
+
+  const mode = inferKeyModeFromChords(chords) ?? "major";
+  const chordKey = normalizeKeyLabel(`${NOTE_NAMES[fromChords.rootPc]} ${mode}`);
+
+  const lockedScale = parseScaleFromKey(locked);
+  if (lockedScale.rootPc === fromChords.rootPc && lockedScale.isMinor === (mode === "minor")) {
+    return locked;
+  }
+
+  const anchor = options.audioAnchorKey?.trim()
+    ? normalizeKeyLabel(options.audioAnchorKey)
+    : null;
+  const anchorScale = anchor ? parseScaleFromKey(anchor) : null;
+
+  // Audio anchor wins when chord read disagrees (Eb/Bb/F misread as C major, etc.)
+  if (
+    anchorScale &&
+    (anchorScale.rootPc !== fromChords.rootPc || anchorScale.isMinor !== (mode === "minor"))
+  ) {
+    if (lockedScale.rootPc === anchorScale.rootPc && lockedScale.isMinor === anchorScale.isMinor) {
+      return locked;
+    }
+  }
+
+  if (
+    anchorScale &&
+    anchorScale.rootPc === fromChords.rootPc &&
+    anchorScale.isMinor === (mode === "minor")
+  ) {
+    return chordKey;
+  }
+
+  if (fromChords.confidence >= 70 && !anchorScale) return chordKey;
+
+  if (locked === "C major" && fromChords.rootPc !== 0 && !anchorScale) return chordKey;
+
+  return locked;
+}
 
 /** Single authoritative key for all generation paths. */
 export function resolveLockedGenerationKey(options: {

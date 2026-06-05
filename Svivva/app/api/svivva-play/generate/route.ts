@@ -31,7 +31,7 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import {
   constrainGeneratedStems,
-  resolveLockedGenerationKey,
+  resolveCompositionKey,
   stabilizeHarmonicTimeline,
   melodicAnchorMidi,
   resolveCompositionScale,
@@ -119,26 +119,14 @@ export async function POST(request: NextRequest) {
 
     analysisData = applyChordEditsToAnalysis(analysisData, chordEdits);
 
-    const lockedKey = resolveLockedGenerationKey({
-      manualKey,
-      analysisKey: analysisData.key,
-      audioAnchorKey,
-      harmonicContext,
-    });
-    analysisData = {
-      ...analysisData,
-      key: lockedKey,
-    };
-
     const sessionDurationSec =
       harmonicContext?.durationSec ??
       analysisData.sections?.[0]?.t1 ??
       (analysisData.chords.length ? analysisData.chords[analysisData.chords.length - 1]?.t1 : 64) ??
       64;
 
-    // In chord mode we always want every chord entry preserved so the progression cycles properly.
     const preserveChordTimeline = mode === "chords";
-    const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
+    const rawSessionChords: ChordSegment[] =
       harmonicContext && harmonicContext.chords.length >= 1
         ? harmonicContext.chords
         : analysisData.chords.map((c) => ({
@@ -147,7 +135,22 @@ export async function POST(request: NextRequest) {
             symbol: c.symbol,
             confidence: c.confidence ?? 55,
             pitchClasses: [],
-          })),
+          }));
+
+    const lockedKey = resolveCompositionKey({
+      manualKey,
+      analysisKey: analysisData.key,
+      audioAnchorKey,
+      harmonicContext,
+      chords: rawSessionChords,
+    });
+    analysisData = {
+      ...analysisData,
+      key: lockedKey,
+    };
+
+    const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
+      rawSessionChords,
       sessionDurationSec,
       analysisData.bpm,
       preserveChordTimeline,

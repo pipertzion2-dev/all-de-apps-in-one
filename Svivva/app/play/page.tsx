@@ -53,6 +53,7 @@ import {
   constrainGeneratedStems,
   meendPitchbendForEvents,
   melodicAnchorMidi,
+  resolveCompositionKey,
   resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
@@ -385,6 +386,7 @@ export default function SvivvaPlayPage() {
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
+  const [audioAnchorKey, setAudioAnchorKey] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [pipelineStage, setPipelineStage] = useState("");
@@ -486,10 +488,44 @@ export default function SvivvaPlayPage() {
   const [alignScore, setAlignScore] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const analysisBusy = isAnalyzing || isTranscribing || isEnriching;
-  const generationKeyLabel = useMemo(
-    () => normalizeKeyLabel(manualKey ?? effectiveAnalysis?.key ?? "C major"),
-    [manualKey, effectiveAnalysis?.key],
-  );
+  const generationKeyLabel = useMemo(() => {
+    const chordSegments =
+      transcription?.chords?.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
+        pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
+      })) ??
+      effectiveAnalysis?.chords?.map((c) => ({
+        t0: c.t0,
+        t1: c.t1,
+        symbol: c.symbol,
+        confidence: c.confidence ?? 55,
+        pitchClasses: [] as number[],
+      })) ??
+      [];
+
+    return resolveCompositionKey({
+      manualKey,
+      analysisKey: effectiveAnalysis?.key ?? "C major",
+      audioAnchorKey,
+      harmonicContext: transcription
+        ? {
+            key: transcription.harmonicKey,
+            keySource: transcription.harmonicKeySource,
+            sources: transcription.sources,
+          }
+        : null,
+      chords: chordSegments,
+    });
+  }, [
+    manualKey,
+    effectiveAnalysis?.key,
+    effectiveAnalysis?.chords,
+    transcription,
+    audioAnchorKey,
+  ]);
   const generationScaleLookup = useMemo(() => {
     const chordSegments =
       effectiveAnalysis?.chords?.map((c) => ({
@@ -778,6 +814,7 @@ export default function SvivvaPlayPage() {
     setErrorMsg("");
     setManualTempo(null);
     setManualKey(null);
+    setAudioAnchorKey(null);
     setIsEnriching(false);
     setTranscription(null);
     setMidiRawNotes([]);
@@ -941,8 +978,10 @@ export default function SvivvaPlayPage() {
         onInstantResult: (instant) => {
           if (cancelled || runId !== analysisRunRef.current) return;
           if (instant.key && !instant.key.startsWith("Detecting")) {
-            audioKeyRef.current = normalizeKeyLabel(instant.key);
-            if (!melodyneFile) melodyneKeyRef.current = audioKeyRef.current;
+            const k = normalizeKeyLabel(instant.key);
+            audioKeyRef.current = k;
+            setAudioAnchorKey(k);
+            if (!melodyneFile) melodyneKeyRef.current = k;
           }
           setAnalysis(instant);
           setIsAnalyzing(false);
@@ -1063,7 +1102,7 @@ export default function SvivvaPlayPage() {
   }, [audioFile, melodyneFile, importSeq, applyHarmonicSession]);
 
   const buildSettings = useCallback(() => {
-    const lockedKey = normalizeKeyLabel(manualKey ?? analysis?.key ?? "C major");
+    const lockedKey = generationKeyLabel;
     const currentSeed = stableGenerationSeed({
       useSeed,
       seed,
@@ -1152,8 +1191,7 @@ export default function SvivvaPlayPage() {
     macroSpace,
     vocalistEnabled,
     selectedPreset,
-    manualKey,
-    analysis?.key,
+    generationKeyLabel,
     importSeq,
   ]);
 
@@ -1188,10 +1226,7 @@ export default function SvivvaPlayPage() {
       try {
         const settings = buildSettings();
 
-        const lockedKey =
-          manualKey ??
-          audioKeyRef.current ??
-          (analysis.key && !analysis.key.startsWith("Detecting") ? analysis.key : "C major");
+        const lockedKey = generationKeyLabel;
         const harmonicContext = transcription
           ? {
               chords: stabilizeHarmonicTimeline(
@@ -2064,6 +2099,7 @@ export default function SvivvaPlayPage() {
     setIsTranscribing(false);
     setManualTempo(null);
     setManualKey(null);
+    setAudioAnchorKey(null);
     setStems([]);
     setPatchResult(null);
     setPlanInfo(null);
@@ -2219,19 +2255,6 @@ export default function SvivvaPlayPage() {
     if (rootMatch) setChordRoot(rootMatch[1]);
   }, [analysis, compositionFallback, manualKey]);
 
-  useEffect(() => {
-    if (manualKey) return;
-    const fromAudio = audioKeyRef.current;
-    const fromAnalysis = analysis?.key;
-    const candidate =
-      fromAudio && !fromAudio.startsWith("Detecting")
-        ? fromAudio
-        : fromAnalysis && !fromAnalysis.startsWith("Detecting")
-          ? normalizeKeyLabel(fromAnalysis)
-          : null;
-    if (candidate) setManualKey(candidate);
-  }, [analysis?.key, importSeq, manualKey]);
-
   const prevMeendRef = useRef(false);
   useEffect(() => {
     const justEnabled = meend && !prevMeendRef.current;
@@ -2258,13 +2281,7 @@ export default function SvivvaPlayPage() {
     setErrorMsg("");
     setReichVoices([]);
     try {
-      const lockedKey = normalizeKeyLabel(
-        manualKey ??
-          audioKeyRef.current ??
-          analysis?.key ??
-          transcription?.harmonicKey ??
-          "C major",
-      );
+      const lockedKey = generationKeyLabel;
       const currentSeed = stableGenerationSeed({
         useSeed,
         seed,
@@ -2434,7 +2451,7 @@ export default function SvivvaPlayPage() {
     }
   }, [
     analysis,
-    manualKey,
+    generationKeyLabel,
     manualTempo,
     reichScale,
     reichType,
@@ -2443,7 +2460,6 @@ export default function SvivvaPlayPage() {
     seed,
     useSeed,
     meend,
-    analysis,
     transcription,
     chordEdits,
     importSeq,
