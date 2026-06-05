@@ -72,46 +72,46 @@ export function meendApplicableStemNames(stems: { name: string; midiEvents: unkn
   return stems.filter((s) => s.midiEvents.length > 0).map((s) => s.name);
 }
 
-// ─── Advanced Jazz/Neo-Soul Chord Engine ────────────────────────────────────
+// ─── Correct Jazz/Neo-Soul Chord Engine ─────────────────────────────────────
 
 interface ChordMidiEvent {
   note: number; velocity: number; startBeat: number; duration: number; channel: number;
 }
 
 /**
- * Map a raw chord suffix to the best ChordKit id, ordered longest→shortest to avoid
- * "m" matching "maj7" etc.
+ * Map a raw chord suffix to the best ChordKit id.
+ * Ordered longest→shortest to avoid "m" swallowing "maj7" etc.
  */
 function matchChordKitId(symbol: string): string {
   const raw = symbol.replace(/^[A-Ga-g][b#♭♯]?/, "").trim();
   const lo = raw.toLowerCase();
   const candidates: [string, string][] = [
-    ["mmaj9", "mM9"], ["mmaj7", "mM7"],
-    ["m13", "min13"], ["m11", "min11"], ["m9", "min9"],
-    ["m7b5", "min7b5"], ["m7♭5", "min7b5"], ["ø7", "min7b5"],
-    ["m6/9", "min69"], ["m6", "min6"], ["m7", "min7"],
-    ["maj13#11", "maj13sharp11"], ["maj13", "maj13"],
-    ["maj9#11", "maj9sharp11"], ["maj9", "maj9"],
-    ["maj7sus4", "maj7sus4"], ["maj7#11", "maj7sharp11"],
-    ["maj7add2", "maj7add2"], ["maj7", "maj7"],
-    ["6/9", "maj69"], ["maj6", "maj6"],
-    ["13sus4", "13sus4"], ["13", "dom13"],
-    ["11", "dom11"], ["9sus4", "9sus4"], ["9", "dom9"],
-    ["7#11", "7sharp11"], ["7♯11", "7sharp11"],
-    ["7#9", "7sharp9"], ["7♯9", "7sharp9"],
-    ["7b9", "7b9"], ["7♭9", "7b9"],
-    ["7sus4", "7sus4"], ["7b5", "dom7b5"], ["7#5", "dom7sharp5"],
-    ["7", "dom7"],
-    ["dim7", "dim7"], ["°7", "dim7"],
-    ["dim", "dim"], ["°", "dim"],
-    ["aug7", "aug7"], ["aug", "aug"], ["+", "aug"],
-    ["add9", "add9"], ["add2", "mu_major"],
-    ["sus4", "sus4"], ["sus2", "sus2"],
-    ["alt", "alt"],
-    ["m", "min"],
-    ["6", "maj6"],
-    ["5", "power5"],
-    ["", "maj"],
+    ["mmaj9","mM9"],["mmaj7","mM7"],
+    ["m13","min13"],["m11","min11"],["m9","min9"],
+    ["m7b5","min7b5"],["m7♭5","min7b5"],["ø7","min7b5"],["ø","min7b5"],
+    ["m6/9","min69"],["m6","min6"],["m7","min7"],
+    ["maj13#11","maj13sharp11"],["maj13","maj13"],
+    ["maj9#11","maj9sharp11"],["maj9","maj9"],
+    ["maj7sus4","maj7sus4"],["maj7#11","maj7sharp11"],
+    ["maj7add2","maj7add2"],["maj7","maj7"],
+    ["6/9","maj69"],["maj6","maj6"],
+    ["13sus4","13sus4"],["13","dom13"],
+    ["11","dom11"],["9sus4","9sus4"],["9","dom9"],
+    ["7#11","7sharp11"],["7♯11","7sharp11"],
+    ["7#9","7sharp9"],["7♯9","7sharp9"],
+    ["7b9","7b9"],["7♭9","7b9"],
+    ["7sus4","7sus4"],["7b5","dom7b5"],["7#5","dom7sharp5"],
+    ["7","dom7"],
+    ["dim7","dim7"],["°7","dim7"],
+    ["dim","dim"],["°","dim"],
+    ["aug7","aug7"],["aug","aug"],["+","aug"],
+    ["add9","add9"],["add2","mu_major"],
+    ["sus4","sus4"],["sus2","sus2"],
+    ["alt","alt"],
+    ["m","min"],
+    ["6","maj6"],
+    ["5","power5"],
+    ["","maj"],
   ];
   for (const [suffix, id] of candidates) {
     if (lo === suffix.toLowerCase()) return id;
@@ -124,92 +124,105 @@ function matchChordKitId(symbol: string): string {
 }
 
 /**
- * Automatically upgrade a simple chord to a richer jazz/neo-soul variant
- * so plain "C" becomes "Cmaj9", "Am" → "Am11", "G7" → "G13" etc.
+ * Upgrade simple chord qualities to richer jazz/neo-soul extensions.
+ * Only a single step so the sound stays musical and coherent.
  */
-function upgradeChordId(chordId: string): string {
-  const upgrades: Record<string, string> = {
-    maj:    "maj9",
-    min:    "min9",
-    dom7:   "dom9",
-    maj7:   "maj9",
-    min7:   "min9",
-    dom9:   "dom13",
-    min9:   "min11",
-    sus4:   "9sus4",
-    sus2:   "sus2",       // keep, already ambiguous
-    add9:   "add9",
-    power5: "power5",
-    dim:    "dim7",
-    aug:    "aug7",
+function upgradeChordId(id: string): string {
+  const map: Record<string,string> = {
+    maj:"maj9", min:"min9",
+    dom7:"dom9", maj7:"maj9", min7:"min9",
+    dom9:"dom13",
+    sus4:"9sus4", dim:"dim7", aug:"aug7",
   };
-  return upgrades[chordId] ?? chordId;
+  return map[id] ?? id;
 }
 
 /**
- * Build an advanced jazz piano voicing in a clean mid-register range.
+ * Build a correct jazz piano shell voicing using midiVoicing (correct root-position
+ * intervals) rather than the buggy ChordKit.voicing (which sorts PCs 0-11 and produces
+ * wrong root notes for chords whose root > F).
  *
- * Strategy:
- *   Bass: root in octave 2 (MIDI 36-47)
- *   Shell: 3rd + 7th in octave 3-4 (48-65)  — defines the chord quality
- *   Color: 9th/11th/13th on top (62-84)    — adds sophistication
- *
- * Voice leading: shift the whole upper cluster by ±12 to stay close to the
- * previous voicing, minimising large jumps.
+ * Shell strategy: root+3rd+7th+extension = 4 clear notes
+ *   - Root goes in bass stem; upper voices hold 3rd, 7th, and best extension
+ *   - 5th dropped (least important in jazz harmony)
+ *   - Target register: MIDI 57–81 (A3–A5)
+ *   - Voice leading: shift whole cluster ±12 toward previous voicing center
  */
-function buildAdvancedVoicing(
+function buildJazzShellVoicing(
   symbol: string,
   prevUpper: number[],
-  inversion = 0,
+  inversion: number,
 ): { bass: number; upper: number[] } {
   const rootMatch = symbol.match(/^([A-Ga-g][b#♭♯]?)/);
   const rootStr = rootMatch?.[1] ?? "C";
+  const rootPc = ChordKit.parseRoot(rootStr);
+
   const rawId = matchChordKitId(symbol);
   const chordId = upgradeChordId(rawId);
 
-  // Try upgraded id first, fall back to raw if not in registry
-  let v = ChordKit.voicing(rootStr, chordId, { inversion: 0, octave: 4 });
-  if (!v || v.midi.length < 2) {
-    v = ChordKit.voicing(rootStr, rawId, { inversion: 0, octave: 4 });
+  // midiVoicing builds notes from root upward using intervals — always correct.
+  // base octave 3 → root starts around MIDI 48-59 (one below middle C).
+  let allNotes = ChordKit.midiVoicing(rootStr, chordId, 3);
+  if (allNotes.length < 2) allNotes = ChordKit.midiVoicing(rootStr, rawId, 3);
+  if (allNotes.length < 2) allNotes = ChordKit.midiVoicing(rootStr, "maj7", 3);
+  if (allNotes.length < 2) {
+    // Hard fallback: build basic triad manually
+    const r = 48 + rootPc;
+    return { bass: r - 12, upper: [r, r + 4, r + 7] };
   }
-  if (!v || v.midi.length < 2) {
-    v = ChordKit.voicing(rootStr, "maj7", { inversion: 0, octave: 4 });
+
+  // Bass: root at octave 2 (MIDI 24-35 range, then clamp 28-50)
+  const bass = Math.max(28, Math.min(50, 24 + rootPc));
+
+  // Build shell voicing: skip root (index 0), skip 5th (interval = 7)
+  const def = ChordKit.get(chordId) ?? ChordKit.get(rawId);
+  const intervals = def?.intervals ?? [];
+  const fifthIdx = intervals.indexOf(7); // perfect 5th at 7 semitones
+
+  const shell: number[] = [];
+  for (let i = 1; i < allNotes.length && shell.length < 4; i++) {
+    if (i === fifthIdx) continue; // drop 5th
+    shell.push(allNotes[i]!);
   }
-  if (!v) return { bass: 48, upper: [60, 64, 67, 71] };
+  // If stripping the 5th left us with fewer than 2 notes, add it back
+  if (shell.length < 2 && fifthIdx > 0 && fifthIdx < allNotes.length) {
+    shell.push(allNotes[fifthIdx]!);
+  }
+  if (shell.length === 0) shell.push(...allNotes.slice(1, 4));
 
-  // Bass: root two octaves below root of voicing, clamped 28-50
-  const rootPc = ChordKit.parseRoot(rootStr);
-  const bass = Math.max(28, Math.min(50, 36 + rootPc));
+  // Shift the whole cluster into target register 57–79 (A3–G5)
+  let upper = [...shell].sort((a, b) => a - b);
+  const center = (upper[0]! + upper[upper.length - 1]!) / 2;
+  const target = 68; // E4 — sweet spot for comp piano
+  const octShift = Math.round((target - center) / 12) * 12;
+  upper = upper.map(n => n + octShift);
 
-  // Upper voices: MIDI notes from voicing, clamped 57-84
-  let upper = v.midi.map((n) => {
-    while (n < 57) n += 12;
+  // Final range clamp: keep every note inside 52–84
+  upper = upper.map(n => {
+    while (n < 52) n += 12;
     while (n > 84) n -= 12;
     return n;
   });
+  upper = [...new Set(upper)].sort((a, b) => a - b).filter(n => n >= 52 && n <= 84);
+  if (upper.length === 0) upper = [60 + rootPc % 12, 64 + rootPc % 12, 67 + rootPc % 12];
 
-  // Apply inversion by rotating upper voices
-  if (inversion > 0 && upper.length > 1) {
-    const inv = inversion % upper.length;
-    upper = [...upper.slice(inv), ...upper.slice(0, inv).map((n) => {
-      let shifted = n + 12;
-      while (shifted > 84) shifted -= 12;
-      return shifted;
-    })];
+  // Apply inversion: rotate bottom note to top
+  for (let i = 0; i < (inversion % upper.length); i++) {
+    const first = upper.shift()!;
+    let top = first + 12;
+    while (top > 84) top -= 12;
+    upper.push(top);
   }
+  upper.sort((a, b) => a - b);
 
-  // Deduplicate and sort
-  upper = [...new Set(upper)].sort((a, b) => a - b).filter((n) => n >= 55 && n <= 84);
-  if (upper.length === 0) upper = [60, 64, 67];
-
-  // Voice lead: shift by whole octaves to stay close to previous voicing
-  if (prevUpper.length > 0) {
+  // Voice leading: shift whole cluster by ±12 to stay close to previous voicing
+  if (prevUpper.length >= 2) {
     const prevCenter = prevUpper.reduce((s, n) => s + n, 0) / prevUpper.length;
     const curCenter = upper.reduce((s, n) => s + n, 0) / upper.length;
-    const diff = Math.round((prevCenter - curCenter) / 12) * 12;
-    if (Math.abs(diff) <= 12) {
-      const shifted = upper.map((n) => n + diff);
-      if (shifted.every((n) => n >= 52 && n <= 88)) upper = shifted;
+    const shift = Math.round((prevCenter - curCenter) / 12) * 12;
+    if (Math.abs(shift) <= 12) {
+      const shifted = upper.map(n => n + shift);
+      if (shifted.every(n => n >= 48 && n <= 88)) upper = shifted.sort((a,b)=>a-b);
     }
   }
 
@@ -217,16 +230,9 @@ function buildAdvancedVoicing(
 }
 
 /**
- * Quarter-note jazz/R&B comping on the given chord voicing.
- *
- * Each beat in the span gets a chord hit.  The rhythm is varied slightly
- * from beat to beat so it breathes rather than sounding mechanical:
- *   Beat 1    — full chord  (all upper voices + bass already in separate stem)
- *   Beat 2    — top 3 voices, slightly lighter
- *   Beat 2.5  — single-note interior pickup (Glasper-style between-beat touch)
- *   Beat 3    — full chord, slightly softer
- *   Beat 4    — 2-note fragment as anticipation into next chord
- * This pattern repeats every 4 beats, with slight velocity humanisation.
+ * Quarter-note jazz/R&B comp hits.
+ * One clean chord event per beat — no offbeat clutters.
+ * Beat 1 = full chord (strongest), beat 2 = top voices, beat 3 = full, beat 4 = fragment.
  */
 function generateQuarterNoteComp(
   upper: number[],
@@ -235,108 +241,83 @@ function generateQuarterNoteComp(
   repeatCount: number,
 ): ChordMidiEvent[] {
   const events: ChordMidiEvent[] = [];
-  // Humanise velocity with a tiny deterministic offset per beat
-  const velBase = 72 - Math.min(12, repeatCount * 2); // slightly softer on repeats
+  const velBase = Math.max(58, 76 - Math.min(10, repeatCount * 2));
 
-  let b = startBeat;
-  while (b < startBeat + spanBeats - 0.01) {
-    const offset = b - startBeat;
-    const beatInBar = offset % 4;
-    const fraction = offset - Math.floor(offset); // sub-beat
-    const isBeat = fraction < 0.05;
-    const isOffbeat = Math.abs(fraction - 0.5) < 0.05;
+  for (let beatOff = 0; beatOff < spanBeats - 0.01; beatOff += 1) {
+    const b = startBeat + beatOff;
+    const beatInBar = Math.round(beatOff) % 4;
+    const maxDur = Math.min(0.88, spanBeats - beatOff - 0.04);
+    if (maxDur <= 0) break;
 
-    if (!isBeat && !isOffbeat) {
-      b += 0.25;
-      continue;
-    }
+    let notes: number[];
+    let vel: number;
+    let dur: number;
 
-    let notes: number[] = [];
-    let vel = velBase;
-    let dur = 0.85; // slightly shorter than 1 beat so notes don't overlap
-
-    if (isBeat) {
-      if (beatInBar < 0.05) {
-        // Beat 1: Full voicing
-        notes = upper;
-        vel = velBase + 8;
-        dur = 0.9;
-      } else if (Math.abs(beatInBar - 1) < 0.05) {
-        // Beat 2: Top 3 voices
-        notes = upper.slice(-Math.min(3, upper.length));
-        vel = velBase - 4;
-        dur = 0.7;
-      } else if (Math.abs(beatInBar - 2) < 0.05) {
-        // Beat 3: Full voicing, slightly different registration
-        notes = upper.length > 3 ? [...upper.slice(0, 2), ...upper.slice(-1)] : upper;
-        vel = velBase + 2;
-        dur = 0.85;
-      } else if (Math.abs(beatInBar - 3) < 0.05) {
-        // Beat 4: 2-note fragment (top + a lower)
-        notes = upper.length >= 2 ? [upper[0]!, upper[upper.length - 1]!] : upper;
-        vel = velBase - 10;
-        dur = 0.6;
-      } else {
-        notes = upper.slice(-2);
-        vel = velBase - 6;
-      }
+    if (beatInBar === 0) {
+      // Downbeat: full chord, loudest
+      notes = upper;
+      vel = velBase + 8;
+      dur = Math.min(0.88, maxDur);
+    } else if (beatInBar === 1) {
+      // Beat 2: top half of voicing, lighter
+      notes = upper.slice(Math.max(0, upper.length - 2));
+      vel = velBase - 8;
+      dur = Math.min(0.70, maxDur);
+    } else if (beatInBar === 2) {
+      // Beat 3 (backbeat): full chord, medium
+      notes = upper;
+      vel = velBase + 2;
+      dur = Math.min(0.82, maxDur);
     } else {
-      // Offbeat (beat "and"): single inner voice, very light
-      // Glasper-style: pick a middle note
-      const midIdx = Math.floor(upper.length / 2);
-      notes = [upper[midIdx] ?? upper[0]!];
-      vel = velBase - 18;
-      dur = 0.3;
+      // Beat 4: anticipation fragment — bottom + top note only
+      notes = upper.length >= 2 ? [upper[0]!, upper[upper.length - 1]!] : upper;
+      vel = velBase - 14;
+      dur = Math.min(0.55, maxDur);
     }
-
-    // Clamp duration so it doesn't bleed past span end
-    const maxDur = Math.max(0.1, (startBeat + spanBeats) - b - 0.04);
-    dur = Math.min(dur, maxDur);
 
     for (const note of notes) {
-      events.push({ note, velocity: Math.max(30, Math.min(110, vel)), startBeat: b, duration: dur, channel: 0 });
+      events.push({
+        note,
+        velocity: Math.max(30, Math.min(110, vel)),
+        startBeat: b,
+        duration: dur,
+        channel: 0,
+      });
     }
-
-    b += 0.5; // advance in 8th-note steps so we hit beats and offbeats
   }
 
   return events;
 }
 
 /**
- * Jazz/R&B bass line: root on 1, 5th on 3, chromatic approach a half-step
- * below the next chord root on beat 4, octave pedal on beat 2.
+ * Solid jazz/R&B bass line:
+ *   Beat 1 — root (strong)
+ *   Beat 2 — root (softer, pedal)
+ *   Beat 3 — 5th or 4th
+ *   Beat 4 — chromatic approach into next chord root
  */
 function generateJazzBassLine(
-  bass: number,
-  nextBass: number | null,
+  bassNote: number,
+  nextBassNote: number | null,
   startBeat: number,
   spanBeats: number,
 ): ChordMidiEvent[] {
   const events: ChordMidiEvent[] = [];
-  const bassNote = Math.max(28, Math.min(50, bass));
-  const fifth = bassNote + 7 > 52 ? bassNote - 5 : bassNote + 7; // perfect 5th, keep low
+  const root = Math.max(28, Math.min(50, bassNote));
+  const fifth = root + 7 <= 52 ? root + 7 : root - 5;
 
-  // Beat 1: root
-  events.push({ note: bassNote, velocity: 88, startBeat, duration: Math.min(0.9, spanBeats * 0.4), channel: 1 });
+  events.push({ note: root, velocity: 90, startBeat, duration: Math.min(0.88, spanBeats * 0.4), channel: 1 });
 
   if (spanBeats >= 2) {
-    // Beat 2: octave above root (pedal motion)
-    const oct = Math.min(52, bassNote + 12);
-    events.push({ note: oct, velocity: 68, startBeat: startBeat + 1, duration: 0.7, channel: 1 });
+    events.push({ note: root, velocity: 70, startBeat: startBeat + 1, duration: 0.75, channel: 1 });
   }
-
   if (spanBeats >= 3) {
-    // Beat 3: 5th
-    events.push({ note: fifth, velocity: 76, startBeat: startBeat + 2, duration: 0.85, channel: 1 });
+    events.push({ note: fifth, velocity: 78, startBeat: startBeat + 2, duration: 0.80, channel: 1 });
   }
-
-  if (spanBeats >= 4) {
-    // Beat 4: chromatic approach note into next chord
-    const target = nextBass ?? bassNote;
-    const approach = (target % 12 === 0) ? target - 1 : target - 1;
-    const approachNote = Math.max(28, Math.min(52, approach));
-    events.push({ note: approachNote, velocity: 62, startBeat: startBeat + 3, duration: 0.55, channel: 1 });
+  if (spanBeats >= 4 && nextBassNote !== null) {
+    // Approach: half-step below target on beat 4
+    const approach = Math.max(28, Math.min(52, nextBassNote - 1));
+    events.push({ note: approach, velocity: 64, startBeat: startBeat + 3, duration: 0.50, channel: 1 });
   }
 
   return events;
@@ -345,18 +326,16 @@ function generateJazzBassLine(
 /**
  * Full advanced chord arrangement from analyzed input chords.
  *
- * - Upgrades simple chord qualities to jazz/neo-soul extensions (maj→maj9, min→min11, etc.)
- * - Generates quarter-note piano comping per beat (not slow pads)
- * - Proper mid-register voicing (MIDI 57–84) with bass separated (28–50)
- * - Piano-style voice leading between consecutive chords
- * - Walking/pedal jazz bass line with chromatic approach notes
- * - Voicing inversion rotates on every repeat for variation
+ * Uses ChordKit.midiVoicing (correct root-position intervals) to build voicings.
+ * Quarter-note comping: one clean chord hit per beat, no offbeat clutter.
+ * Shell voicings: 3rd + 7th + extension (5th dropped, root in bass stem).
+ * Voice leading: cluster shifts by ±12 to minimise movement between chords.
  */
 export function generateSmartChordStems(
   sessionChords: ChordSegment[],
   analysis: Analysis,
   quality: "preview" | "full",
-  seed: number,
+  _seed: number,
   _pattern: "sustained_pads" | "rhythmic_stabs" | "arpeggiated" = "sustained_pads",
 ): { stems: GeneratedStemResult[]; plan: Record<string, unknown>; pipeline: { stage: string; stages: string[] } } {
   const bpm = analysis.bpm || 120;
@@ -368,15 +347,12 @@ export function generateSmartChordStems(
   const bassEvents: ChordMidiEvent[] = [];
 
   let prevUpper: number[] = [];
-  const symbolsSeen = new Map<string, number>(); // symbol → times seen
+  const symbolsSeen = new Map<string, number>();
 
-  const keyRoot = analysis.key.split(" ")[0] ?? "C";
+  const keyRoot = (analysis.key.split(" ")[0] ?? "C");
   const srcChords: ChordSegment[] = sessionChords.length > 0 ? sessionChords : [{
-    t0: 0,
-    t1: (maxBeat * 60) / bpm,
-    symbol: keyRoot + "maj9",
-    confidence: 70,
-    pitchClasses: [],
+    t0: 0, t1: (maxBeat * 60) / bpm,
+    symbol: keyRoot + "maj9", confidence: 70, pitchClasses: [],
   }];
 
   let beat = 0;
@@ -393,32 +369,29 @@ export function generateSmartChordStems(
     const timesSeenBefore = symbolsSeen.get(src.symbol) ?? 0;
     symbolsSeen.set(src.symbol, timesSeenBefore + 1);
 
-    const inversion = timesSeenBefore % 3;
-    const { bass, upper } = buildAdvancedVoicing(src.symbol, prevUpper, inversion);
+    const { bass, upper } = buildJazzShellVoicing(src.symbol, prevUpper, timesSeenBefore % 3);
     prevUpper = upper;
 
-    // Quarter-note chord comping
     chordEvents.push(...generateQuarterNoteComp(upper, beat, spanBeats, timesSeenBefore));
 
-    // Bass line
-    const nextBassNote = nextSrc
-      ? Math.max(28, Math.min(50, 36 + ChordKit.parseRoot(nextSrc.symbol.match(/^([A-Ga-g][b#♭♯]?)/)?.[1] ?? "C")))
+    const nextBass = nextSrc
+      ? Math.max(28, Math.min(50, 24 + ChordKit.parseRoot(nextSrc.symbol.match(/^([A-Ga-g][b#♭♯]?)/)?.[1] ?? "C")))
       : null;
-    bassEvents.push(...generateJazzBassLine(bass, nextBassNote, beat, spanBeats));
+    bassEvents.push(...generateJazzBassLine(bass, nextBass, beat, spanBeats));
 
     beat += spanBeats;
     srcIdx++;
   }
 
-  const uniqueChordNames = [...symbolsSeen.keys()];
+  const uniqueChords = [...symbolsSeen.keys()];
 
   const harmStem = chordStemsToResults([{
     name: "Piano Chords",
     role: "harmony",
-    instrumentHint: "electric piano",
+    instrumentHint: "comp piano",
     midiEvents: chordEvents,
-    pan: -12,
-    gainDb: 2,
+    pan: -10,
+    gainDb: 1,
     muted: false,
     soloed: false,
   }]);
@@ -438,13 +411,13 @@ export function generateSmartChordStems(
     stems: [...harmStem, ...bassStem],
     plan: {
       stemCount: 2,
-      chordProgression: uniqueChordNames,
+      chordProgression: uniqueChords,
       key: analysis.key,
       bpm,
       form: { total_bars: totalBars },
-      harmonyRules: `Advanced jazz/neo-soul — ${uniqueChordNames.length} chords, quarter-note comping, voice-led`,
+      harmonyRules: `Jazz shell voicings — ${uniqueChords.length} chords, correct root-position, quarter-note comp`,
     },
-    pipeline: { stage: "complete", stages: ["advanced_chord_engine"] },
+    pipeline: { stage: "complete", stages: ["jazz_chord_engine_v2"] },
   };
 }
 

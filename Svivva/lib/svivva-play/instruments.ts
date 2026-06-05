@@ -31,15 +31,25 @@ const PIANO: InstrumentPreset = {
 const ELECTRIC_PIANO: InstrumentPreset = {
   synthType: "fm",
   oscillator: { type: "sine" },
-  // Slightly slower attack so the note speaks, punchy decay like a real Rhodes
-  envelope: { attack: 0.008, decay: 1.4, sustain: 0.18, release: 1.0 },
-  modulationIndex: 5,
-  harmonicity: 3.5,
-  volume: -4,
+  envelope: { attack: 0.01, decay: 1.0, sustain: 0.3, release: 1.2 },
+  modulationIndex: 3.5,
+  harmonicity: 3.01,
+  volume: -8,
   fx: [
-    { type: "chorus", wet: 0.25, frequency: 1.2, delayTime: 3.5, depth: 0.4 },
-    { type: "reverb", wet: 0.18, decay: 1.8, preDelay: 0.01 },
+    { type: "chorus", wet: 0.3, frequency: 1.5, delayTime: 3.5, depth: 0.5 },
+    { type: "reverb", wet: 0.2, decay: 2.0, preDelay: 0.01 },
   ],
+};
+
+// Clean piano-style comp synth — triangle wave, piano ADSR, no FM intermodulation.
+// Used for chord comping so stacked notes sound clear, not buzzy.
+const COMP_PIANO: InstrumentPreset = {
+  synthType: "synth",
+  oscillator: { type: "triangle" },
+  envelope: { attack: 0.004, decay: 0.9, sustain: 0.12, release: 1.0 },
+  filter: { type: "lowpass", frequency: 4200, rolloff: -12, Q: 0.7 },
+  volume: -2,
+  fx: [{ type: "reverb", wet: 0.22, decay: 1.6, preDelay: 0.01 }],
 };
 
 const BASS: InstrumentPreset = {
@@ -275,6 +285,8 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   piano: PIANO,
   "acoustic piano": PIANO,
   "grand piano": PIANO,
+  "comp piano": COMP_PIANO,
+  "jazz piano": COMP_PIANO,
   "electric piano": ELECTRIC_PIANO,
   rhodes: ELECTRIC_PIANO,
   wurlitzer: ELECTRIC_PIANO,
@@ -366,7 +378,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
 
 const ROLE_FALLBACKS: Record<string, InstrumentPreset> = {
   bass: BASS,
-  harmony: ELECTRIC_PIANO,
+  harmony: COMP_PIANO,
   melody: SYNTH_LEAD,
   percussion: PERCUSSION,
   pad: PAD,
