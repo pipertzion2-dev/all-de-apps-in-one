@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
       role: string;
       instrumentHint: string | null;
       midiEvents: unknown;
+      expression: unknown;
       pan: number;
       gainDb: number;
     }[] = [];
@@ -64,6 +65,9 @@ export async function GET(request: NextRequest) {
         name: s.name,
         role: s.role,
         midiEvents: Array.isArray(s.midiEvents) ? s.midiEvents : [],
+        expression: (s.expression ?? undefined) as
+          | { meend?: boolean; pitchbend?: { beat: number; value: number }[] }
+          | undefined,
       }));
 
       if (!stemPackHasMidiContent({ stems: stemExports })) {
@@ -142,7 +146,7 @@ export async function GET(request: NextRequest) {
         midi: `midi/${s.name.replace(/\s+/g, "_").toLowerCase()}.mid`,
         pan: s.pan,
         gain_db: s.gainDb,
-        expression: { mpe: false, meend: false },
+        expression: s.expression ?? { meend: false },
         midi_events: s.midiEvents,
       })),
       patches: patches.map((p) => ({

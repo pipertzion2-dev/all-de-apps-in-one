@@ -73,6 +73,7 @@ import {
   type ScaleSuggestion,
 } from "@/lib/svivva-play/scale-suggest";
 import { buildStemPackZipBlobClient } from "@/lib/svivva-play/stem-pack-client";
+import { prepareStemsForMidiExport } from "@/lib/svivva-play/stem-export-prep";
 import {
   lookupScaleLocal,
   type ScaleLookupResult,
@@ -1448,8 +1449,25 @@ export default function SvivvaPlayPage() {
 
   const handleDownloadStemMidi = useCallback(
     async (stem: StemData, stemIndex: number) => {
-      const bpm = manualTempo ?? analysis?.bpm ?? 120;
+      const bpm = manualTempo ?? effectiveAnalysis?.bpm ?? analysis?.bpm ?? 120;
       if (!stem.midiEvents?.length) {
+        setWarningMsg("This stem has no MIDI notes yet.");
+        return;
+      }
+      const [exportStem] = prepareStemsForMidiExport(
+        [
+          {
+            name: stem.name,
+            role: stem.role,
+            instrumentHint: stem.instrumentHint,
+            midiEvents: stem.midiEvents,
+            expression: stem.expression as Record<string, unknown> | undefined,
+            pan: stem.pan,
+          },
+        ],
+        { meend, includeAccentLayers: false },
+      );
+      if (!exportStem) {
         setWarningMsg("This stem has no MIDI notes yet.");
         return;
       }
@@ -1459,14 +1477,7 @@ export default function SvivvaPlayPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             format: "midi",
-            stems: [
-              {
-                name: stem.name,
-                role: stem.role,
-                midiEvents: stem.midiEvents,
-                expression: stem.expression,
-              },
-            ],
+            stems: [exportStem],
             bpm,
             filename: stem.name.replace(/\s+/g, "_"),
           }),
@@ -1492,7 +1503,7 @@ export default function SvivvaPlayPage() {
         setErrorMsg("Stem MIDI download failed.");
       }
     },
-    [analysis, manualTempo, downloadMidiBlob, sniffBlobMagic],
+    [analysis, effectiveAnalysis?.bpm, manualTempo, meend, downloadMidiBlob, sniffBlobMagic],
   );
 
   const handleDownloadMelodyneMidi = useCallback(async () => {
@@ -1547,14 +1558,17 @@ export default function SvivvaPlayPage() {
     setIsExporting(true);
     setErrorMsg("");
 
-    const stemPayload = stems.map((s) => ({
-      name: s.name,
-      role: s.role,
-      midiEvents: s.midiEvents,
-      expression: s.expression as
-        | { meend?: boolean; pitchbend?: { beat: number; value: number }[] }
-        | undefined,
-    }));
+    const stemPayload = prepareStemsForMidiExport(
+      stems.map((s) => ({
+        name: s.name,
+        role: s.role,
+        instrumentHint: s.instrumentHint,
+        midiEvents: s.midiEvents,
+        expression: s.expression as Record<string, unknown> | undefined,
+        pan: s.pan,
+      })),
+      { meend, includeAccentLayers: meend },
+    );
 
     const sessionJson =
       analysis && transcription
@@ -1641,6 +1655,7 @@ export default function SvivvaPlayPage() {
     audioName,
     mode,
     manualTempo,
+    meend,
     downloadMidiBlob,
     setErrorMsg,
     setWarningMsg,
