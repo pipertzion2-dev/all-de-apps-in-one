@@ -27,9 +27,11 @@ export function midiPitchWheelToSemitones(wheel: number): number {
   return (wheel / 8191) * MEEND_MIDI_BEND_RANGE_SEMITONES;
 }
 
-/** Preview detune uses the same bend range as exported MIDI. */
+/** Preview detune — boosted so meend is obvious in browser (export MIDI unchanged). */
+export const MEEND_PREVIEW_CENT_BOOST = 1.75;
+
 export function meendWheelToPreviewCents(wheel: number): number {
-  return midiPitchWheelToSemitones(wheel) * 100;
+  return midiPitchWheelToSemitones(wheel) * 100 * MEEND_PREVIEW_CENT_BOOST;
 }
 
 /** Legato ties for monophonic lines so pitch wheel bends sound during the glide (DAW + preview). */
@@ -53,7 +55,7 @@ function sigmoidBend(t: number): number {
 function addIntraNoteMeendBends(
   e: MeendNoteEvent,
   out: MeendPitchBend[],
-  peakSemitones = 0.85,
+  peakSemitones = 1.25,
 ): void {
   const d = Math.max(0.08, e.duration || 0.25);
   const t0 = e.startBeat;

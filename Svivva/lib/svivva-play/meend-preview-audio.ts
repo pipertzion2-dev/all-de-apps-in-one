@@ -37,17 +37,20 @@ export function buildMeendLegatoTimeline(
     type: "attack",
     time: beatToSeconds(first.startBeat),
     note: noteName(first.note),
-    velocity: Math.max(0.15, Math.min(1, first.velocity / 127)),
+    velocity: Math.max(0.2, Math.min(1, first.velocity / 127)),
   });
 
   for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1]!;
     const evt = sorted[i]!;
+    const gapBeats = Math.max(0.08, evt.startBeat - prev.startBeat);
+    const glide = Math.min(0.6, Math.max(0.18, beatToSeconds(gapBeats) * 0.9));
     timeline.push({
       type: "glide",
       time: beatToSeconds(evt.startBeat),
       note: noteName(evt.note),
-      glide: glideSec,
-      velocity: Math.max(0.12, Math.min(1, evt.velocity / 127)),
+      glide,
+      velocity: Math.max(0.15, Math.min(1, evt.velocity / 127)),
     });
   }
 

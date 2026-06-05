@@ -258,8 +258,8 @@ export const MEEND_PREVIEW: InstrumentPreset = {
   oscillator: { type: "sawtooth" },
   envelope: { attack: 0.06, decay: 0.1, sustain: 0.95, release: 0.85 },
   filter: { type: "lowpass", frequency: 5200, rolloff: -12, Q: 0.9 },
-  portamento: 0.35,
-  volume: 4,
+  volume: 6,
+  portamento: 0.42,
 };
 
 const DEFAULT_PRESET: InstrumentPreset = {

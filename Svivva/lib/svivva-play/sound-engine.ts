@@ -408,15 +408,18 @@ export class SvivvaSoundEngine {
           pitchBends = built.pitchbend;
         }
 
-        const preset = resolveInstrumentPreset(stem.instrumentHint, stem.role);
+        const useMeendMono = wantsMeend && !polyphonic;
+        const preset = useMeendMono
+          ? MEEND_PREVIEW
+          : resolveInstrumentPreset(stem.instrumentHint, stem.role);
         const synth = this.createSynthSafe(preset);
-        const useLegatoMeend = wantsMeend && !polyphonic && synth instanceof Tone.MonoSynth;
+        const useLegatoMeend = useMeendMono && synth instanceof Tone.MonoSynth;
 
         if (useLegatoMeend) {
-          synth.portamento = MEEND_PREVIEW.portamento ?? 0.35;
+          synth.portamento = 0.42;
         }
         const panner = new Tone.Panner(stem.pan / 100);
-        const meendGain = useLegatoMeend ? 8 : 0;
+        const meendGain = useLegatoMeend ? 12 : 0;
         const volume = new Tone.Volume(
           this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend) + meendGain,
         );
@@ -475,6 +478,7 @@ export class SvivvaSoundEngine {
                 synth.detune.value = 0;
                 synth.triggerAttack(ev.note, time, ev.velocity);
               } else if (ev.type === "glide") {
+                synth.detune.rampTo(0, 0.02, time);
                 const freq = Tone.Frequency(ev.note).toFrequency();
                 synth.frequency.rampTo(freq, ev.glide, time);
                 synth.volume.rampTo(Tone.gainToDb(ev.velocity), 0.02, time);
