@@ -9,6 +9,7 @@ import {
   ABLETON_ORCHESTRAL_STEMS,
   ENSEMBLE_ORCHESTRAL_PRESETS,
   isEnsembleOrchestralPreset,
+  tempoFeelForOrchestra,
 } from "./orchestral-compose";
 import { resolveScale } from "./reich-engine";
 
@@ -17,6 +18,14 @@ describe("resolvePatternCellLengths", () => {
     expect(resolvePatternCellLengths("standard").cpCellLen).toBe(12);
     expect(resolvePatternCellLengths("extended").hkCellLen).toBe(48);
     expect(resolvePatternCellLengths("long").cpCellLen).toBe(36);
+  });
+});
+
+describe("tempoFeelForOrchestra", () => {
+  it("slows grid at 134 BPM for elegant phrasing", () => {
+    const feel = tempoFeelForOrchestra(134);
+    expect(feel.themeStepBeats).toBeGreaterThanOrEqual(1);
+    expect(feel.themeDurBeats).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -31,23 +40,25 @@ describe("composeOrchestralEnsemble", () => {
     expect(isEnsembleOrchestralPreset(BJORK_LINS_ORCHESTRAL_PRESET)).toBe(true);
   });
 
-  it("generates distinct pitches per string stem", () => {
+  it("generates distinct pitches and slower notes at 134 BPM", () => {
     const scale = resolveScale("major", "A");
     const voices = composeOrchestralEnsemble({
       durationSec: 16,
-      bpm: 120,
+      bpm: 134,
       scale,
       seed: 7,
       patternLength: "extended",
       preset: BJORK_LINS_ORCHESTRAL_PRESET,
     });
-    const v1 = voices.find((v) => v.name === "Violin 1")?.notes.map((n) => n.note) ?? [];
-    const v2 = voices.find((v) => v.name === "Violin 2")?.notes.map((n) => n.note) ?? [];
-    const cello = voices.find((v) => v.name === "Cello")?.notes.map((n) => n.note) ?? [];
-    expect(v1.length).toBeGreaterThan(4);
-    expect(new Set(v1).size).toBeGreaterThan(2);
-    expect(v2.join(",")).not.toBe(v1.join(","));
-    expect(cello.some((n) => !v1.includes(n))).toBe(true);
+    const v1 = voices.find((v) => v.name === "Violin 1")!;
+    const v2 = voices.find((v) => v.name === "Violin 2")!;
+    expect(v1.notes.length).toBeGreaterThan(3);
+    expect(v1.notes.length).toBeLessThan(40);
+    expect(v1.notes.every((n) => n.duration >= 0.85)).toBe(true);
+    expect(new Set(v1.notes.map((n) => n.note)).size).toBeGreaterThan(2);
+    expect(v2.notes.map((n) => n.note).join(",")).not.toBe(
+      v1.notes.map((n) => n.note).join(","),
+    );
   });
 
   it("includes timpani and Ableton stem roster", () => {

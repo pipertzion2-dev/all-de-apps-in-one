@@ -87,14 +87,52 @@ const SYNTH_BASS: InstrumentPreset = {
 
 const STRINGS: InstrumentPreset = {
   synthType: "synth",
-  oscillator: { type: "sawtooth" },
-  envelope: { attack: 0.4, decay: 0.5, sustain: 0.85, release: 1.5 },
-  filter: { type: "lowpass", frequency: 3000, rolloff: -12, Q: 0.5 },
-  detune: 5,
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.45, decay: 0.35, sustain: 0.9, release: 2.4 },
+  filter: { type: "lowpass", frequency: 3800, rolloff: -12, Q: 0.45 },
+  detune: 3,
+  volume: -11,
+  fx: [
+    { type: "chorus", wet: 0.35, frequency: 0.5, delayTime: 5, depth: 0.5 },
+    { type: "reverb", wet: 0.48, decay: 5.0, preDelay: 0.04 },
+  ],
+};
+
+const ORCH_CELLO: InstrumentPreset = {
+  synthType: "synth",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.35, decay: 0.4, sustain: 0.88, release: 2.0 },
+  filter: { type: "lowpass", frequency: 2200, rolloff: -12, Q: 0.5 },
+  volume: -12,
+  fx: [{ type: "reverb", wet: 0.42, decay: 4.5, preDelay: 0.03 }],
+};
+
+const ORCH_BASS: InstrumentPreset = {
+  synthType: "synth",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.25, decay: 0.3, sustain: 0.85, release: 1.6 },
+  filter: { type: "lowpass", frequency: 900, rolloff: -12, Q: 0.6 },
+  volume: -13,
+  fx: [{ type: "reverb", wet: 0.25, decay: 3.0, preDelay: 0.02 }],
+};
+
+const ORCH_HARP: InstrumentPreset = {
+  synthType: "pluck",
+  oscillator: { type: "triangle" },
+  envelope: { attack: 0.004, decay: 1.8, sustain: 0.04, release: 2.5 },
+  volume: -14,
+  fx: [{ type: "reverb", wet: 0.5, decay: 5.5, preDelay: 0.04 }],
+};
+
+const SOLO_VIOLIN: InstrumentPreset = {
+  synthType: "synth",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.2, decay: 0.25, sustain: 0.92, release: 2.8 },
+  filter: { type: "lowpass", frequency: 4800, rolloff: -12, Q: 0.55 },
   volume: -10,
   fx: [
-    { type: "chorus", wet: 0.4, frequency: 0.8, delayTime: 4, depth: 0.6 },
-    { type: "reverb", wet: 0.35, decay: 3.5, preDelay: 0.02 },
+    { type: "chorus", wet: 0.25, frequency: 0.6, delayTime: 4, depth: 0.35 },
+    { type: "reverb", wet: 0.5, decay: 5.5, preDelay: 0.04 },
   ],
 };
 
@@ -301,7 +339,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   "string ensemble": STRINGS,
   violin: STRINGS,
   viola: STRINGS,
-  cello: STRINGS,
+  cello: ORCH_CELLO,
   "string quartet": STRINGS,
   pad: PAD,
   "synth pad": PAD,
@@ -347,10 +385,10 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   "tubular bells": BELL,
   chimes: BELL,
   celesta: BELL,
-  harp: STRINGS,
-  contrabass: BASS,
-  "double bass": BASS,
-  "solo violin": STRINGS,
+  harp: ORCH_HARP,
+  contrabass: ORCH_BASS,
+  "double bass": ORCH_BASS,
+  "solo violin": SOLO_VIOLIN,
   "1st violins": STRINGS,
   "2nd violins": STRINGS,
   "orchestral percussion": PERCUSSION,
@@ -388,14 +426,14 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
 };
 
 const ROLE_FALLBACKS: Record<string, InstrumentPreset> = {
-  bass: BASS,
-  harmony: COMP_PIANO,
-  melody: SYNTH_LEAD,
+  bass: ORCH_BASS,
+  harmony: STRINGS,
+  melody: SOLO_VIOLIN,
   percussion: PERCUSSION,
   pad: PAD,
   texture: TEXTURE,
-  lead: SYNTH_LEAD,
-  arpeggio: ARPEGGIO,
+  lead: SOLO_VIOLIN,
+  arpeggio: ORCH_HARP,
   vocal: VOCAL_SYNTH,
 };
 

@@ -1,6 +1,6 @@
 /**
- * Procedural orchestral ensemble — Juilliard voice-leading, jazz harmony,
- * Björk fragility (woodwinds) × Ivan Lins Brazilian phrasing (strings).
+ * Procedural orchestral ensemble — Reich/Shaw canon structure, Brazilian elegance,
+ * Juilliard voice-leading. Tempo-aware: slower grid at fast BPM (e.g. 134).
  */
 import type { ChordSegment } from "./chord-from-chroma";
 import type { TranscribedNote } from "./audio-transcription";
@@ -21,8 +21,22 @@ export const ENSEMBLE_ORCHESTRAL_PRESETS = [
 
 export type EnsembleOrchestralPreset = (typeof ENSEMBLE_ORCHESTRAL_PRESETS)[number];
 
-export function isEnsembleOrchestralPreset(stylePreset?: string): stylePreset is EnsembleOrchestralPreset {
+export function isEnsembleOrchestralPreset(
+  stylePreset?: string,
+): stylePreset is EnsembleOrchestralPreset {
   return (ENSEMBLE_ORCHESTRAL_PRESETS as readonly string[]).includes(stylePreset ?? "");
+}
+
+/** Stems that receive Indian Meend when enabled. */
+export const ORCHESTRAL_MEEND_STEM_NAMES = [
+  "Violin 1",
+  "Solo Violin",
+  "Flute",
+  "Oboe",
+] as const;
+
+export function isOrchestralMeendStem(name: string): boolean {
+  return ORCHESTRAL_MEEND_STEM_NAMES.some((n) => n === name);
 }
 
 type VoiceRole =
@@ -46,14 +60,17 @@ type StemDef = {
   baseOctave: number;
   pan: number;
   voiceRole: VoiceRole;
-  phase: number;
-  stride: number;
+  canonEntryBeats: number;
+  stepMul: number;
   restChance: number;
   durMul: number;
   velBase: number;
 };
 
-export const ABLETON_ORCHESTRAL_STEMS: Omit<StemDef, "voiceRole" | "phase" | "stride" | "restChance" | "durMul" | "velBase">[] = [
+export const ABLETON_ORCHESTRAL_STEMS: Omit<
+  StemDef,
+  "voiceRole" | "canonEntryBeats" | "stepMul" | "restChance" | "durMul" | "velBase"
+>[] = [
   { name: "Violin 1", hint: "violin", role: "melody", register: "high", baseOctave: 5, pan: -55 },
   { name: "Violin 2", hint: "violin", role: "harmony", register: "high", baseOctave: 5, pan: -35 },
   { name: "Viola", hint: "viola", role: "harmony", register: "mid", baseOctave: 4, pan: -15 },
@@ -64,21 +81,117 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<StemDef, "voiceRole" | "phase" | "st
   { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 5, pan: 45 },
   { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 4, pan: 50 },
   { name: "Timpani", hint: "timpani", role: "percussion", register: "low", baseOctave: 2, pan: 0 },
-  { name: "Percussion", hint: "orchestral percussion", role: "percussion", register: "mid", baseOctave: 3, pan: 60 },
+  {
+    name: "Percussion",
+    hint: "orchestral percussion",
+    role: "percussion",
+    register: "mid",
+    baseOctave: 3,
+    pan: 60,
+  },
 ];
 
+/** Reich staggered canon entries (beats) + Shaw sparse woodwinds. */
 const STEM_PROFILES: StemDef[] = [
-  { ...ABLETON_ORCHESTRAL_STEMS[0]!, voiceRole: "lead", phase: 0, stride: 2, restChance: 0.06, durMul: 0.95, velBase: 78 },
-  { ...ABLETON_ORCHESTRAL_STEMS[1]!, voiceRole: "counter", phase: 2, stride: 2, restChance: 0.1, durMul: 0.88, velBase: 72 },
-  { ...ABLETON_ORCHESTRAL_STEMS[2]!, voiceRole: "inner", phase: 1, stride: 3, restChance: 0.14, durMul: 0.82, velBase: 68 },
-  { ...ABLETON_ORCHESTRAL_STEMS[3]!, voiceRole: "cello", phase: 0, stride: 4, restChance: 0.08, durMul: 1.05, velBase: 74 },
-  { ...ABLETON_ORCHESTRAL_STEMS[4]!, voiceRole: "bass", phase: 0, stride: 8, restChance: 0.2, durMul: 1.2, velBase: 70 },
-  { ...ABLETON_ORCHESTRAL_STEMS[5]!, voiceRole: "solo", phase: 4, stride: 3, restChance: 0.12, durMul: 1.1, velBase: 80 },
-  { ...ABLETON_ORCHESTRAL_STEMS[6]!, voiceRole: "harp", phase: 0, stride: 1, restChance: 0, durMul: 0.75, velBase: 58 },
-  { ...ABLETON_ORCHESTRAL_STEMS[7]!, voiceRole: "flute", phase: 3, stride: 6, restChance: 0.35, durMul: 1.15, velBase: 64 },
-  { ...ABLETON_ORCHESTRAL_STEMS[8]!, voiceRole: "oboe", phase: 5, stride: 6, restChance: 0.32, durMul: 1.08, velBase: 66 },
-  { ...ABLETON_ORCHESTRAL_STEMS[9]!, voiceRole: "timpani", phase: 0, stride: 16, restChance: 0.5, durMul: 0.4, velBase: 88 },
-  { ...ABLETON_ORCHESTRAL_STEMS[10]!, voiceRole: "percussion", phase: 2, stride: 8, restChance: 0.45, durMul: 0.15, velBase: 52 },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[0]!,
+    voiceRole: "lead",
+    canonEntryBeats: 0,
+    stepMul: 1,
+    restChance: 0.04,
+    durMul: 1.15,
+    velBase: 74,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[1]!,
+    voiceRole: "counter",
+    canonEntryBeats: 1,
+    stepMul: 1,
+    restChance: 0.08,
+    durMul: 1.08,
+    velBase: 68,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[2]!,
+    voiceRole: "inner",
+    canonEntryBeats: 2,
+    stepMul: 2,
+    restChance: 0.12,
+    durMul: 1.2,
+    velBase: 64,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[3]!,
+    voiceRole: "cello",
+    canonEntryBeats: 1.5,
+    stepMul: 2,
+    restChance: 0.06,
+    durMul: 1.35,
+    velBase: 70,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[4]!,
+    voiceRole: "bass",
+    canonEntryBeats: 0,
+    stepMul: 4,
+    restChance: 0.15,
+    durMul: 1.5,
+    velBase: 66,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[5]!,
+    voiceRole: "solo",
+    canonEntryBeats: 4,
+    stepMul: 1.5,
+    restChance: 0.18,
+    durMul: 1.4,
+    velBase: 76,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[6]!,
+    voiceRole: "harp",
+    canonEntryBeats: 0,
+    stepMul: 0.5,
+    restChance: 0,
+    durMul: 0.9,
+    velBase: 54,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[7]!,
+    voiceRole: "flute",
+    canonEntryBeats: 6,
+    stepMul: 4,
+    restChance: 0.42,
+    durMul: 1.6,
+    velBase: 58,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[8]!,
+    voiceRole: "oboe",
+    canonEntryBeats: 8,
+    stepMul: 4,
+    restChance: 0.38,
+    durMul: 1.55,
+    velBase: 60,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[9]!,
+    voiceRole: "timpani",
+    canonEntryBeats: 0,
+    stepMul: 4,
+    restChance: 0.55,
+    durMul: 0.45,
+    velBase: 82,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[10]!,
+    voiceRole: "percussion",
+    canonEntryBeats: 2,
+    stepMul: 8,
+    restChance: 0.5,
+    durMul: 0.12,
+    velBase: 48,
+  },
 ];
 
 type ThemeEvent = { startBeat: number; degree: number; duration: number; accent: boolean };
@@ -86,9 +199,16 @@ type ThemeEvent = { startBeat: number; degree: number; duration: number; accent:
 type StyleTuning = {
   syncopation: number;
   phraseBars: number;
-  hocketDensity: number;
   sustainBias: number;
   counterInterval: 3 | 4 | 6;
+  cellRotations: number[];
+};
+
+type TempoFeel = {
+  themeStepBeats: number;
+  themeDurBeats: number;
+  voiceStepBeats: number;
+  legatoOverlap: number;
 };
 
 class Rng {
@@ -134,68 +254,74 @@ function chordAtBeat(chords: ChordSegment[], beat: number, bpm: number): ChordSe
   return chords[chords.length - 1] ?? null;
 }
 
+/** Half-time elegant grid when BPM is fast (134 → ~1 beat steps, ~2 beat sustains). */
+export function tempoFeelForOrchestra(bpm: number): TempoFeel {
+  if (bpm >= 128) {
+    return { themeStepBeats: 1, themeDurBeats: 2.5, voiceStepBeats: 1, legatoOverlap: 0.18 };
+  }
+  if (bpm >= 108) {
+    return { themeStepBeats: 0.75, themeDurBeats: 2, voiceStepBeats: 0.75, legatoOverlap: 0.15 };
+  }
+  if (bpm >= 88) {
+    return { themeStepBeats: 0.5, themeDurBeats: 1.5, voiceStepBeats: 0.5, legatoOverlap: 0.12 };
+  }
+  return { themeStepBeats: 0.5, themeDurBeats: 1.25, voiceStepBeats: 0.5, legatoOverlap: 0.1 };
+}
+
 function styleTuning(preset: EnsembleOrchestralPreset): StyleTuning {
   switch (preset) {
     case BJORK_LINS_ORCHESTRAL_PRESET:
-      return { syncopation: 0.35, phraseBars: 4, hocketDensity: 0.72, sustainBias: 0.15, counterInterval: 3 };
+      return {
+        syncopation: 0.1,
+        phraseBars: 8,
+        sustainBias: 0.9,
+        counterInterval: 3,
+        cellRotations: [0, 2, 4, 6, 3, 5],
+      };
     case CINEMATIC_ORCHESTRA_PRESET:
-      return { syncopation: 0.12, phraseBars: 8, hocketDensity: 0.55, sustainBias: 0.45, counterInterval: 6 };
+      return {
+        syncopation: 0.06,
+        phraseBars: 8,
+        sustainBias: 1.1,
+        counterInterval: 6,
+        cellRotations: [0, 4, 8, 12],
+      };
     default:
-      return { syncopation: 0.22, phraseBars: 4, hocketDensity: 0.65, sustainBias: 0.25, counterInterval: 4 };
+      return {
+        syncopation: 0.14,
+        phraseBars: 4,
+        sustainBias: 0.75,
+        counterInterval: 4,
+        cellRotations: [0, 1, 2, 3, 4, 5],
+      };
   }
 }
 
-/** Primary theme — antecedent/consequent phrases with jazz approach tones. */
-function buildPrimaryTheme(
+function buildMelodicCell(
   scale: ScaleResolution,
-  chords: ChordSegment[],
-  bpm: number,
-  durationSec: number,
+  cellLen: number,
   seed: number,
-  patternLength: PatternLength,
-  guideNotes: TranscribedNote[],
   tuning: StyleTuning,
-): ThemeEvent[] {
-  const rng = new Rng(seed ^ 0x7e4e);
-  const beatSec = 60 / bpm;
-  const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
-  const { cpCellLen } = resolvePatternCellLengths(patternLength);
-  const phraseBeats = tuning.phraseBars * 4;
-  const events: ThemeEvent[] = [];
-
-  let degree = rng.int(2, 5);
-  let beat = 0;
-
-  while (beat < totalBeats - 0.5) {
-    const chord = chordAtBeat(chords, beat, bpm);
-    const phrasePos = beat % phraseBeats;
-    const isCadence = phrasePos >= phraseBeats - 2;
-    const isSyncopated = rng.next() < tuning.syncopation;
-
-    if (guideNotes.length && rng.next() < 0.45) {
-      const tSec = beat * beatSec;
-      const guided = nearestGuideMidi(guideNotes, tSec);
-      if (guided != null) {
-        degree = midiToNearestDegree(guided, scale, degree);
-      }
+): number[] {
+  const rng = new Rng(seed ^ 0xce11);
+  const rel = relativeSteps(scale.pitchClasses, scale.rootPc);
+  const n = rel.length || 1;
+  let deg = rng.int(1, n + 2);
+  const out: number[] = [];
+  const weights: [number, number][] = [
+    [0, 0.18],
+    [1, 0.26],
+    [-1, 0.26],
+    [2, 0.12],
+    [-2, 0.1],
+    [3, 0.05],
+    [-3, 0.03],
+  ];
+  for (let i = 0; i < cellLen; i++) {
+    if (rng.next() < 0.08) {
+      out.push(deg);
+      continue;
     }
-
-    const weights: [number, number][] = isCadence
-      ? [
-          [-1, 0.35],
-          [0, 0.25],
-          [1, 0.25],
-          [-2, 0.15],
-        ]
-      : [
-          [0, 0.12],
-          [1, 0.28],
-          [-1, 0.28],
-          [2, 0.14],
-          [-2, 0.1],
-          [3, 0.05],
-          [-3, 0.03],
-        ];
     let t = rng.next() * weights.reduce((s, w) => s + w[1], 0);
     let delta = 0;
     for (const [d, w] of weights) {
@@ -205,23 +331,74 @@ function buildPrimaryTheme(
         break;
       }
     }
-    degree = Math.max(0, Math.min(cpCellLen * 2, degree + delta));
+    deg = Math.max(0, Math.min(n * 5, deg + delta));
+    out.push(deg);
+  }
+  return out;
+}
 
-    const dur = isSyncopated
-      ? 0.35 + tuning.sustainBias * 0.4
-      : 0.5 + tuning.sustainBias * 0.55 + rng.next() * 0.15;
-    const accent = beat % 4 === 0 || (isSyncopated && beat % 1 === 0.5);
+function rotateDegrees(degrees: number[], offset: number): number[] {
+  if (!degrees.length) return degrees;
+  const o = ((offset % degrees.length) + degrees.length) % degrees.length;
+  return [...degrees.slice(o), ...degrees.slice(0, o)];
+}
+
+/** Phrase-structured theme on a slow beat grid (not sixteenth hocket). */
+function buildPrimaryTheme(
+  scale: ScaleResolution,
+  chords: ChordSegment[],
+  bpm: number,
+  durationSec: number,
+  seed: number,
+  patternLength: PatternLength,
+  guideNotes: TranscribedNote[],
+  tuning: StyleTuning,
+  feel: TempoFeel,
+): ThemeEvent[] {
+  const rng = new Rng(seed ^ 0x7e4e);
+  const beatSec = 60 / bpm;
+  const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
+  const { cpCellLen } = resolvePatternCellLengths(patternLength);
+  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning);
+  const phraseBeats = tuning.phraseBars * 4;
+  const events: ThemeEvent[] = [];
+
+  let beat = 0;
+  let cellIdx = 0;
+
+  while (beat < totalBeats - 0.5) {
+    const phrasePos = beat % phraseBeats;
+    const isCadence = phrasePos >= phraseBeats - 2;
+    const isSyncopated = !isCadence && rng.next() < tuning.syncopation;
+
+    if (guideNotes.length && rng.next() < 0.4) {
+      const guided = nearestGuideMidi(guideNotes, beat * beatSec);
+      if (guided != null) {
+        cell[cellIdx % cell.length] = midiToNearestDegree(guided, scale, cell[cellIdx % cell.length]!);
+      }
+    }
+
+    const degree = cell[cellIdx % cell.length]!;
+    cellIdx++;
+
+    const dur =
+      feel.themeDurBeats * (1 + tuning.sustainBias * 0.15) * (isCadence ? 1.15 : 1);
+    const accent = beat % 4 === 0;
 
     events.push({ startBeat: beat, degree, duration: dur, accent });
-    beat += isSyncopated ? 0.5 + rng.next() * 0.5 : 0.25 + rng.int(0, 2) * 0.25;
+    beat += isSyncopated
+      ? feel.themeStepBeats + 0.5
+      : feel.themeStepBeats + (rng.next() < 0.2 ? 0.5 : 0);
   }
 
-  if (events.length < 8) {
-    for (let i = 0; i < 8; i++) {
-      events.push({ startBeat: i * 0.5, degree: 2 + i, duration: 0.5, accent: i % 2 === 0 });
-    }
-  }
-  return events;
+  return events.length >= 4
+    ? events
+    : Array.from({ length: 8 }, (_, i) => ({
+        startBeat: i * feel.themeStepBeats,
+        degree: 2 + i,
+        duration: feel.themeDurBeats,
+        accent: i % 2 === 0,
+      }));
 }
 
 function nearestGuideMidi(notes: TranscribedNote[], tSec: number): number | null {
@@ -239,11 +416,9 @@ function nearestGuideMidi(notes: TranscribedNote[], tSec: number): number | null
 }
 
 function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: number): number {
-  const rel = relativeSteps(scale.pitchClasses, scale.rootPc);
-  const targetPc = ((midi % 12) + 12) % 12;
   let bestDeg = fallback;
   let bestDist = Infinity;
-  for (let d = 0; d < rel.length * 4; d++) {
+  for (let d = 0; d < 28; d++) {
     const m = midiFromDegree(scale.rootPc, scale.pitchClasses, d, 4);
     const dist = Math.abs(m - midi);
     if (dist < bestDist) {
@@ -255,12 +430,10 @@ function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: num
 }
 
 function nearestScaleMidi(note: number, scale: ScaleResolution, baseOctave: number): number {
-  const rel = relativeSteps(scale.pitchClasses, scale.rootPc);
-  const pc = ((note % 12) + 12) % 12;
   let best = midiFromDegree(scale.rootPc, scale.pitchClasses, 0, baseOctave);
   let bestDist = Infinity;
   for (let o = baseOctave - 1; o <= baseOctave + 2; o++) {
-    for (const step of rel) {
+    for (const step of relativeSteps(scale.pitchClasses, scale.rootPc)) {
       const m = clampMidi(12 * (o + 1) + scale.rootPc + step);
       const dist = Math.abs(m - note);
       if (dist < bestDist) {
@@ -269,10 +442,7 @@ function nearestScaleMidi(note: number, scale: ScaleResolution, baseOctave: numb
       }
     }
   }
-  if (!rel.includes(((pc - scale.rootPc + 12) % 12))) {
-    return best;
-  }
-  return clampMidi(12 * (baseOctave + 1) + pc);
+  return best;
 }
 
 function voiceLeadForRole(
@@ -292,38 +462,40 @@ function voiceLeadForRole(
     case "solo":
       return nearestScaleMidi(leadMidi, scale, baseOctave);
     case "counter": {
-      const interval = tuning.counterInterval + (rng.next() < 0.3 ? 1 : 0);
-      const dir = rng.next() < 0.5 ? -1 : 1;
+      const interval = tuning.counterInterval + (rng.next() < 0.25 ? 1 : 0);
+      const dir = eventIdx % 2 === 0 ? -1 : 1;
       return nearestScaleMidi(leadMidi + dir * interval, scale, baseOctave);
     }
     case "inner": {
-      const mid = chordPcs[1] ?? chordPcs[0] ?? scale.rootPc;
-      return clampMidi(12 * (baseOctave + 1) + mid);
+      const third = chordPcs[1] ?? chordPcs[0] ?? scale.rootPc;
+      return clampMidi(12 * (baseOctave + 1) + third);
     }
     case "cello": {
       const root = chordPcs[0] ?? scale.rootPc;
-      const fifth = chordPcs[2] ?? chordPcs[1] ?? root;
-      const pick = eventIdx % 3 === 0 ? fifth : root;
-      return clampMidi(12 * (baseOctave + 1) + pick);
+      const fifth = chordPcs[Math.min(2, chordPcs.length - 1)] ?? root;
+      return clampMidi(12 * (baseOctave + 1) + (eventIdx % 4 === 0 ? fifth : root));
     }
     case "bass": {
       const root = chordPcs[0] ?? scale.rootPc;
-      return clampMidi(12 * (baseOctave + 1) + root, 28, 55);
+      return clampMidi(12 * (baseOctave + 1) + root, 28, 52);
     }
     case "flute":
-      return eventIdx % 4 === 0
+      return eventIdx % 3 === 0
         ? nearestScaleMidi(leadMidi + 12, scale, baseOctave)
-        : nearestScaleMidi(leadMidi + 7, scale, baseOctave);
+        : nearestScaleMidi(leadMidi + 5, scale, baseOctave);
     case "oboe":
-      return eventIdx % 5 === 2
-        ? nearestScaleMidi(leadMidi - 5, scale, baseOctave)
-        : nearestScaleMidi(leadMidi - 3, scale, baseOctave);
+      return nearestScaleMidi(leadMidi - 4, scale, baseOctave);
     default:
       return leadMidi;
   }
 }
 
-function buildHarpArpeggios(chords: ChordSegment[], bpm: number, seed: number): MidiNote[] {
+function buildHarpArpeggios(
+  chords: ChordSegment[],
+  bpm: number,
+  seed: number,
+  feel: TempoFeel,
+): MidiNote[] {
   const rng = new Rng(seed ^ 0xface);
   const beatSec = 60 / bpm;
   const notes: MidiNote[] = [];
@@ -333,23 +505,18 @@ function buildHarpArpeggios(chords: ChordSegment[], bpm: number, seed: number): 
       : chordSegmentPitchClasses(chord);
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
-    const patterns = [
-      [0, 1, 2, 1],
-      [0, 2, 1, 2],
-      [2, 1, 0, 1],
-    ];
-    const pat = patterns[rng.int(0, patterns.length - 1)]!;
+    const step = Math.max(0.5, feel.voiceStepBeats);
     let t = startBeat;
     let vi = 0;
-    while (t < endBeat - 0.08) {
-      const pc = pcs[pat[vi % pat.length]! % pcs.length] ?? 0;
+    while (t < endBeat - step * 0.5) {
+      const pc = pcs[vi % pcs.length] ?? 0;
       notes.push({
         note: clampMidi(12 * 5 + pc),
-        velocity: 52 + Math.floor(rng.next() * 22),
+        velocity: 48 + rng.int(0, 18),
         startBeat: t,
-        duration: 0.2,
+        duration: step * 0.85,
       });
-      t += 0.25;
+      t += step;
       vi++;
     }
   }
@@ -367,14 +534,15 @@ function buildTimpaniHits(
   const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
   const notes: MidiNote[] = [];
   for (let b = 0; b < totalBeats; b++) {
+    if (b % 4 !== 0) continue;
     const chord = chordAtBeat(chords, b, bpm);
     const root = chord ? (chordSegmentPitchClasses(chord)[0] ?? 0) : 0;
-    const low = clampMidi(12 * 3 + root, 28, 48);
-    if (b % 4 === 0) {
-      notes.push({ note: low, velocity: 92 + rng.int(0, 6), startBeat: b, duration: 0.35 });
-    } else if (b % 4 === 2 && rng.next() < 0.55) {
-      notes.push({ note: low, velocity: 70 + rng.int(0, 12), startBeat: b + 0.5, duration: 0.18 });
-    }
+    notes.push({
+      note: clampMidi(12 * 3 + root, 28, 48),
+      velocity: 88 + rng.int(0, 8),
+      startBeat: b,
+      duration: 0.5,
+    });
   }
   return notes;
 }
@@ -385,45 +553,54 @@ function buildPercussionHits(durationSec: number, bpm: number, seed: number): Mi
   const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
   const notes: MidiNote[] = [];
   for (let b = 0; b < totalBeats; b++) {
-    if (b % 2 !== 1 && b % 4 !== 3) continue;
-    if (rng.next() < 0.4) continue;
+    if (b % 4 !== 2) continue;
+    if (rng.next() < 0.45) continue;
     notes.push({
-      note: 60 + rng.int(0, 3),
-      velocity: 44 + rng.int(0, 22),
-      startBeat: b + (rng.next() < 0.35 ? 0.5 : 0),
-      duration: 0.1,
+      note: 60,
+      velocity: 42 + rng.int(0, 16),
+      startBeat: b + 0.5,
+      duration: 0.08,
     });
   }
   return notes;
 }
 
+/** Reich canon: each voice enters late, shares cell but own rhythm grid. */
 function composeStemLine(
   profile: StemDef,
   theme: ThemeEvent[],
+  cell: number[],
+  cellRotation: number,
   scale: ScaleResolution,
   chords: ChordSegment[],
   bpm: number,
-  totalSixteenths: number,
+  totalBeats: number,
   tuning: StyleTuning,
+  feel: TempoFeel,
   seed: number,
 ): MidiNote[] {
   const rng = new Rng((seed || 1) + profile.name.length * 131);
-  const sixteenth = 0.25;
+  const rotatedCell = rotateDegrees(cell, cellRotation);
   const notes: MidiNote[] = [];
-  let themeCursor = profile.phase;
+  const step = feel.voiceStepBeats * profile.stepMul;
+  let themeIdx = 0;
 
-  for (let s = profile.phase; s < totalSixteenths; s += profile.stride) {
-    if (rng.next() < profile.restChance * (1 - tuning.hocketDensity)) continue;
+  for (
+    let beat = profile.canonEntryBeats;
+    beat < totalBeats - 0.25;
+    beat += step
+  ) {
+    if (rng.next() < profile.restChance) continue;
 
-    const beat = s * sixteenth;
-    const event = theme[themeCursor % theme.length]!;
-    themeCursor += 1;
+    const event = theme[themeIdx % theme.length]!;
+    themeIdx++;
+    const degree = rotatedCell[themeIdx % rotatedCell.length] ?? event.degree;
 
     const leadMidi = midiFromDegree(
       scale.rootPc,
       scale.pitchClasses,
-      event.degree + profile.phase,
-      profile.baseOctave + (profile.voiceRole === "solo" ? 0 : -1),
+      degree,
+      profile.baseOctave + (profile.voiceRole === "solo" ? 1 : 0),
     );
 
     const chord = chordAtBeat(chords, beat, bpm);
@@ -435,18 +612,22 @@ function composeStemLine(
       profile.baseOctave,
       tuning,
       rng,
-      themeCursor,
+      themeIdx,
     );
 
-    const syncBoost = beat % 1 === 0.5 ? 4 : 0;
+    const dur = Math.max(
+      step * profile.durMul * (1 + tuning.sustainBias * 0.2),
+      feel.themeDurBeats * 0.85,
+    );
+
     notes.push({
       note: pitch,
       velocity: Math.min(
-        127,
-        profile.velBase + syncBoost + (event.accent ? 8 : 0) + rng.int(-4, 6),
+        118,
+        profile.velBase + (event.accent ? 6 : 0) + rng.int(-3, 5),
       ),
       startBeat: beat,
-      duration: sixteenth * profile.durMul * (1 + tuning.sustainBias),
+      duration: dur + feel.legatoOverlap,
     });
   }
 
@@ -477,8 +658,12 @@ export function composeOrchestralEnsemble(opts: {
   } = opts;
 
   const tuning = styleTuning(preset);
+  const feel = tempoFeelForOrchestra(bpm);
   const guideNotes = melodyneNotes.length ? melodyneNotes : audioNotes;
-  const totalSixteenths = Math.max(16, Math.round(durationSec * (bpm / 60) * 4));
+  const beatSec = 60 / bpm;
+  const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
+  const { cpCellLen } = resolvePatternCellLengths(patternLength);
+  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning);
 
   const theme = buildPrimaryTheme(
     scale,
@@ -489,16 +674,18 @@ export function composeOrchestralEnsemble(opts: {
     patternLength,
     guideNotes,
     tuning,
+    feel,
   );
 
   const parts: VoicePart[] = [];
 
   for (let i = 0; i < STEM_PROFILES.length; i++) {
     const profile = STEM_PROFILES[i]!;
+    const rotation = tuning.cellRotations[i % tuning.cellRotations.length] ?? 0;
     let notes: MidiNote[] = [];
 
     if (profile.voiceRole === "harp") {
-      notes = buildHarpArpeggios(chords, bpm, seed);
+      notes = buildHarpArpeggios(chords, bpm, seed, feel);
     } else if (profile.voiceRole === "timpani") {
       notes = buildTimpaniHits(durationSec, bpm, seed, chords);
     } else if (profile.voiceRole === "percussion") {
@@ -507,11 +694,14 @@ export function composeOrchestralEnsemble(opts: {
       notes = composeStemLine(
         profile,
         theme,
+        cell,
+        rotation,
         scale,
         chords,
         bpm,
-        totalSixteenths,
+        totalBeats,
         tuning,
+        feel,
         seed + i * 997,
       );
     }
@@ -520,8 +710,8 @@ export function composeOrchestralEnsemble(opts: {
       notes.push({
         note: midiFromDegree(scale.rootPc, scale.pitchClasses, 2, profile.baseOctave),
         velocity: profile.velBase,
-        startBeat: i * 0.25,
-        duration: 0.5,
+        startBeat: profile.canonEntryBeats,
+        duration: feel.themeDurBeats,
       });
     }
 
@@ -531,7 +721,6 @@ export function composeOrchestralEnsemble(opts: {
   return parts;
 }
 
-/** @deprecated use composeOrchestralEnsemble */
 export function composeBjorkLinsOrchestral(
   opts: Parameters<typeof composeOrchestralEnsemble>[0],
 ): VoicePart[] {

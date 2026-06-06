@@ -57,7 +57,7 @@ import {
   resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
-import { applyMeendToStems } from "@/lib/svivva-play/generate-helpers";
+import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "@/lib/svivva-play/generate-helpers";
 import {
   buildMeendAccentPlaybacks,
   meendAccentSourceName,
@@ -1521,7 +1521,7 @@ export default function SvivvaPlayPage() {
             pan: stem.pan,
           },
         ],
-        { meend, includeAccentLayers: false },
+        { meend, includeAccentLayers: false, ensembleOrchestral: mode === "ensemble" },
       );
       if (!exportStem) {
         setWarningMsg("This stem has no MIDI notes yet.");
@@ -1623,7 +1623,7 @@ export default function SvivvaPlayPage() {
         expression: s.expression as Record<string, unknown> | undefined,
         pan: s.pan,
       })),
-      { meend, includeAccentLayers: meend },
+      { meend, includeAccentLayers: meend, ensembleOrchestral: mode === "ensemble" },
     );
 
     const sessionJson =
@@ -1731,7 +1731,9 @@ export default function SvivvaPlayPage() {
       }));
 
       if (meend && prepared.some((s) => s.midiEvents.length > 0)) {
-        prepared = applyMeendToStems(
+        const applyMeend =
+          mode === "ensemble" ? applyMeendToOrchestralMelodyStems : applyMeendToStems;
+        prepared = applyMeend(
           prepared as Parameters<typeof applyMeendToStems>[0],
         ) as typeof prepared;
       }
@@ -1810,7 +1812,7 @@ export default function SvivvaPlayPage() {
       });
       return [...base, ...accentStates];
     },
-    [meend],
+    [meend, manualTempo, effectiveAnalysis?.bpm, analysis?.bpm, mode],
   );
 
   const loadStemsIntoEngine = useCallback(
@@ -1856,7 +1858,7 @@ export default function SvivvaPlayPage() {
         throw err;
       }
     },
-    [buildStemPlaybacks, buildEngineSoloState, resolveImportDurationSec, masterVolume, meend],
+    [buildStemPlaybacks, buildEngineSoloState, resolveImportDurationSec, masterVolume, meend, mode],
   );
 
   const stemsPlaybackKey = useCallback(
@@ -2610,10 +2612,15 @@ export default function SvivvaPlayPage() {
               Viola, Cello, Contrabass, Harp, Flute, Oboe, Timpani per track name.
             </p>
             <CheckboxOption
-              label="Indian Meend (continuous pitch bend on melody stems)"
+              label="Indian Meend — off by default (Violin 1, Solo Violin, Flute, Oboe only)"
               checked={meend}
               onChange={setMeend}
             />
+            {meend && (
+              <p className="text-[9px] text-gray-500 mt-1">
+                Uncheck to disable pitch bend on preview and export.
+              </p>
+            )}
             <div className="flex items-center gap-4">
               <RadioOption
                 label="Match Harmony"

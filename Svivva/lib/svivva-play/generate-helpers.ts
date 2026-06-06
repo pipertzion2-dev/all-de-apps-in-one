@@ -51,21 +51,38 @@ export function chordStemsToResults(
 }
 
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
-  return stems.map((stem) => {
-    if (stem.midiEvents.length === 0) return stem;
-    const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
-    const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
-    return {
-      ...stem,
-      midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
-      expression: {
-        ...stem.expression,
-        meend: true,
-        pitchbend: built.pitchbend,
-        monophonic: !polyphonic,
-      },
-    };
-  });
+  return stems.map((stem) => meendStemIfMonophonic(stem));
+}
+
+function meendStemIfMonophonic(stem: GeneratedStemResult): GeneratedStemResult {
+  if (stem.midiEvents.length === 0) return stem;
+  const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
+  const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
+  return {
+    ...stem,
+    midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
+    expression: {
+      ...stem.expression,
+      meend: true,
+      pitchbend: built.pitchbend,
+      monophonic: !polyphonic,
+    },
+  };
+}
+
+/** Meend only on lyrical orchestral stems — not bass, harp, or percussion. */
+export function applyMeendToOrchestralMelodyStems(
+  stems: GeneratedStemResult[],
+): GeneratedStemResult[] {
+  return stems.map((stem) =>
+    /violin 1|solo violin|flute|oboe/i.test(stem.name)
+      ? meendStemIfMonophonic(stem)
+      : stem,
+  );
+}
+
+export function orchestralMeendStemNames(stems: { name: string }[]): string[] {
+  return stems.filter((s) => /violin 1|solo violin|flute|oboe/i.test(s.name)).map((s) => s.name);
 }
 
 export function meendApplicableStemNames(stems: { name: string; midiEvents: unknown[] }[]): string[] {

@@ -17,6 +17,8 @@ import {
   generateSmartChordStems,
   persistGenerationBundle,
   applyMeendToStems,
+  applyMeendToOrchestralMelodyStems,
+  orchestralMeendStemNames,
   meendApplicableStemNames,
   type GeneratedStemResult,
 } from "@/lib/svivva-play/generate-helpers";
@@ -451,7 +453,9 @@ export async function POST(request: NextRequest) {
         chords: sessionChords,
       });
       let stems = voicePartsToOrchestralStems(voices) as GeneratedStemResult[];
-      if (settings.meend ?? false) stems = applyMeendToStems(stems);
+      if (settings.meend ?? false) {
+        stems = applyMeendToOrchestralMelodyStems(stems);
+      }
       const swingAmt = Math.max(0, Math.min(1, Number(settings.swingAmount ?? 0) / 100));
       if (swingAmt > 0) {
         stems = applySwingToStems(stems, analysisData.bpm, swingAmt);
@@ -470,7 +474,7 @@ export async function POST(request: NextRequest) {
           bpm: analysisData.bpm,
           harmonyRules: `${presetLabel} — classically voice-led stems (Ableton Orchestral hints)`,
           meendApplicableStems:
-            (settings.meend ?? false) ? meendApplicableStemNames(stems) : [],
+            (settings.meend ?? false) ? orchestralMeendStemNames(stems) : [],
           composer: preset,
           patternLength,
           abletonInstruments: stems.map((s) => `${s.name} → ${s.instrumentHint}`),
