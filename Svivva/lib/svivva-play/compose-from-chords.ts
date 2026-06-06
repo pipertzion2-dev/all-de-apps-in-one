@@ -82,12 +82,23 @@ export function composeWithChordProgression(options: {
 
   // Six-voice Reich interlock: preserve master-cell variety + strategic scale/chord color.
   if (type === "hocket") {
+    const beatSec = 60 / bpm;
     return base.map((voice, vi) => ({
       ...voice,
-      notes: voice.notes.map((n) => ({
-        ...n,
-        note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "hocket", { anchorMidi: anchor }),
-      })),
+      notes: voice.notes.map((n) => {
+        const tSec = n.startBeat * beatSec;
+        const chord = chordAtTime(chords, tSec);
+        return {
+          ...n,
+          note: softHarmonicNudge(
+            n.note,
+            chord,
+            scalePcs,
+            vi === 0 ? "melody" : "hocket",
+            anchor,
+          ),
+        };
+      }),
     }));
   }
 

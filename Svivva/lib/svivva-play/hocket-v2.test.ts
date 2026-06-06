@@ -44,7 +44,7 @@ describe("composeHocket", () => {
     expect(Math.max(...v6.notes.map((n) => n.note))).toBeLessThanOrEqual(84);
   });
 
-  it("V-2 groove produces eight voices with ghost notes and rapid-fire density", () => {
+  it("8-voice groove produces eight voices with interlocking density", () => {
     const scale = resolveScale("major", "C", "major");
     const parts = composeHocket({
       durationSec: 8,
@@ -56,7 +56,9 @@ describe("composeHocket", () => {
     expect(parts).toHaveLength(8);
     const totalNotes = parts.reduce((sum, p) => sum + p.notes.length, 0);
     expect(totalNotes).toBeGreaterThan(40);
-    const hasSoftGhost = parts.some((p) => p.notes.some((n) => n.velocity < 55));
-    expect(hasSoftGhost).toBe(true);
+    const uniquePcs = new Set(
+      parts.flatMap((p) => p.notes.map((n) => ((n.note % 12) + 12) % 12)),
+    );
+    expect(uniquePcs.size).toBeGreaterThanOrEqual(4);
   });
 });

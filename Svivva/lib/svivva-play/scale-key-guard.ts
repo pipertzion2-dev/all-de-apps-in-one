@@ -431,22 +431,8 @@ export function constrainMidiEvent(
       note = Math.max(36, Math.min(84, note));
     }
     return { ...evt, note, startBeat, duration };
-  } else if (roleNorm.includes("hocket")) {
-    const pc = ((note % 12) + 12) % 12;
-    if (!scale.scalePcs.has(pc)) {
-      note = snapNoteToScale(note, scale);
-    }
-  } else if (
-    chordCtx &&
-    (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo")
-  ) {
-    const chordTones = new Set(chordCtx.pcs);
-    const pc = note % 12;
-    if (!chordTones.has(pc) && !scale.scalePcs.has(pc)) {
-      note = snapNoteToPitchClasses(note, chordTones);
-    } else if (!scale.scalePcs.has(pc)) {
-      note = snapNoteToScale(note, scale);
-    }
+  } else if (roleNorm.includes("hocket") || roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo") {
+    note = snapNoteToScale(note, scale);
   } else {
     note = snapNoteToScale(note, scale);
   }

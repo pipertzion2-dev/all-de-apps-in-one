@@ -1,9 +1,5 @@
 import { getBuiltinOrDynamicSteps, listDynamicScales } from "./dynamic-scales";
-import {
-  buildV2HocketSlotPattern,
-  type HocketGrooveStyle,
-} from "./hocket-groove-v2";
-import { addV2HocketRapidFire, buildV2HocketMelodyNotes } from "./hocket-melody-v2";
+import { buildV2HocketSlotPattern, type HocketGrooveStyle } from "./hocket-groove-v2";
 import { resolvePatternCellLengths, type PatternLength } from "./pattern-length";
 
 export type StyleName = "reich_electric" | "shaw_interlace" | "phase_canon";
@@ -140,6 +136,19 @@ function midiForDegree(rootPc: number, absPcs: number[], degree: number, baseOct
   const idx = ((safeDeg % n) + n) % n;
   const raw = 12 * (baseOctave + octJump) + rootPc + rel[idx];
   return clampMidiPreservePc(raw);
+}
+
+/** Map scale degree index → MIDI (pitchClasses from resolveScale are absolute). */
+export function midiFromScaleDegree(
+  scale: ScaleResolution,
+  degree: number,
+  octave: number,
+): number {
+  const pcs = scale.pitchClasses.length ? scale.pitchClasses : [scale.rootPc];
+  const n = pcs.length;
+  const idx = ((degree % n) + n) % n;
+  const pc = pcs[idx] ?? scale.rootPc;
+  return clampMidiPreservePc(12 * octave + pc);
 }
 
 class Rng {
@@ -342,7 +351,7 @@ export function composeCounterpoint(opts: {
     }
     if (notes.length === 0) {
       const fallback = clampMidiPreservePc(
-        12 * bo + scale.rootPc + (scale.pitchClasses[0] ?? 0),
+        12 * bo + (scale.pitchClasses[0] ?? scale.rootPc),
       );
       notes.push({
         note: fallback,
@@ -431,32 +440,40 @@ export function composeHocket(opts: {
   const numVoices = 8;
   const totalEighths = eighthSlotsForDuration(durationSec, bpm);
   const eighthBeats = 0.5;
+  const masterMidis = buildMasterMidiCell(
+    scale.rootPc,
+    scale.pitchClasses,
+    hkCellLen,
+    style,
+    seed || 42,
+    3,
+  );
   const slotPattern = buildV2HocketSlotPattern(totalEighths, numVoices, seed || 42, grooveStyle);
-  let voiceNotes = buildV2HocketMelodyNotes(slotPattern, scale, eighthBeats, seed || 42);
-  voiceNotes = addV2HocketRapidFire(voiceNotes, durationSec, bpm, scale, seed || 42);
 
   const parts: VoicePart[] = [];
   for (let v = 0; v < numVoices; v++) {
-    let notes = voiceNotes[v] ?? [];
+    const notes: MidiNote[] = [];
+    const slots = slotPattern[v] ?? [];
     const baseOct = voiceBaseOctave(v, numVoices, 3);
-    const octShift = (baseOct - 4) * 12;
-    notes = notes.map((n) => ({
-      ...n,
-      note: clampMidiPreservePc(n.note + octShift),
-    }));
-    if (style === "shaw_interlace" && notes.length > 1) {
-      notes = notes.filter(() => rng.next() >= 0.08);
+    const octShift = (baseOct - 3) * 12;
+    for (const s of slots) {
+      if (style === "shaw_interlace" && rng.next() < 0.12) continue;
+      const idx = (s + v * 3) % masterMidis.length;
+      notes.push({
+        note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+        velocity: 72 + Math.floor(rng.next() * 16),
+        startBeat: s * eighthBeats,
+        duration: eighthBeats * 0.75,
+      });
     }
     if (notes.length === 0) {
-      const bo = voiceBaseOctave(v, numVoices, 4);
-      notes = [
-        {
-          note: clampMidiPreservePc(12 * bo + scale.rootPc),
-          velocity: 70,
-          startBeat: v * eighthBeats * 0.25,
-          duration: eighthBeats * 2,
-        },
-      ];
+      const bo = voiceBaseOctave(v, numVoices, 3);
+      notes.push({
+        note: clampMidiPreservePc(12 * bo + (scale.pitchClasses[0] ?? scale.rootPc)),
+        velocity: 70,
+        startBeat: v * eighthBeats * 0.25,
+        duration: eighthBeats * 2,
+      });
     }
     parts.push({ voiceIndex: v, notes, name: `Hocket Voice ${v + 1}` });
   }

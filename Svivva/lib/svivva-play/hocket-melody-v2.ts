@@ -1,7 +1,7 @@
 /**
  * AI V-2 melody, ghost-note, and rapid-fire layers for hocket voices.
  */
-import type { ScaleResolution } from "./reich-engine";
+import { midiFromScaleDegree, type ScaleResolution } from "./reich-engine";
 
 export type HocketMidiNote = {
   note: number;
@@ -26,9 +26,8 @@ class Rng {
 
 export type HocketMelodicStyle = "reich_cells" | "shaw_phrases" | "minimalist_ostinato";
 
-function degreeToMidi(rootPc: number, pitchClasses: number[], degree: number, octave: number): number {
-  const pc = (rootPc + (pitchClasses[degree % pitchClasses.length] ?? 0)) % 12;
-  return 12 * octave + pc;
+function degreeToMidi(scale: ScaleResolution, degree: number, octave: number): number {
+  return midiFromScaleDegree(scale, degree, octave);
 }
 
 /** Per-voice melodic walks (V-2 generate_melody_notes). */
@@ -44,7 +43,7 @@ export function buildV2HocketMelodyNotes(
     "shaw_phrases",
     "minimalist_ostinato",
   ] as HocketMelodicStyle[]);
-  const pcs = scale.pitchClasses.length ? scale.pitchClasses : [0, 2, 4, 5, 7, 9, 11];
+  const pcs = scale.pitchClasses.length ? scale.pitchClasses : [scale.rootPc];
   const numVoices = slotPattern.length;
   const voices: HocketMidiNote[][] = Array.from({ length: numVoices }, () => []);
   const previousDegree = new Array(numVoices).fill(0);
@@ -73,12 +72,12 @@ export function buildV2HocketMelodyNotes(
       const startBeat = slot * gridBeats;
       const duration = gridBeats * (0.9 + rng.next() * 0.2);
       const velocity = Math.round(80 + rng.next() * 24);
+      const octave = baseOctave + (voiceIdx % 2);
 
-      // Ghost notes: only add when there's enough time before the main note to avoid t=0 overlap.
-      if (rng.next() < 0.5 && prevDegree !== currentDegree && startBeat >= gridBeats) {
+      if (rng.next() < 0.3 && prevDegree !== currentDegree && startBeat >= gridBeats) {
         const ghostBeat = startBeat - gridBeats * 0.15;
         voices[voiceIdx]!.push({
-          note: degreeToMidi(scale.rootPc, pcs, prevDegree, baseOctave + (voiceIdx % 2)),
+          note: degreeToMidi(scale, prevDegree, octave),
           velocity: Math.round(velocity * 0.55),
           startBeat: ghostBeat,
           duration: gridBeats * 0.3,
@@ -86,7 +85,7 @@ export function buildV2HocketMelodyNotes(
       }
 
       voices[voiceIdx]!.push({
-        note: degreeToMidi(scale.rootPc, pcs, currentDegree, baseOctave + (voiceIdx % 2)),
+        note: degreeToMidi(scale, currentDegree, octave),
         velocity,
         startBeat,
         duration,
@@ -99,8 +98,7 @@ export function buildV2HocketMelodyNotes(
 }
 
 /**
- * V-2 rapid-fire accents — one small burst per voice placed on a metrically-aligned beat.
- * Deliberately small (max 4 notes per voice) so no voice is overloaded and tempo stays tight.
+ * V-2 rapid-fire accents — sparse triplet bursts aligned to beat boundaries.
  */
 export function addV2HocketRapidFire(
   voices: HocketMidiNote[][],
@@ -110,25 +108,23 @@ export function addV2HocketRapidFire(
   seed: number,
 ): HocketMidiNote[][] {
   const rng = new Rng(seed ^ 0xfa57);
-  const pcs = scale.pitchClasses.length ? scale.pitchClasses : [0, 2, 4, 5, 7, 9, 11];
+  const pcs = scale.pitchClasses.length ? scale.pitchClasses : [scale.rootPc];
   const out = voices.map((v) => [...v]);
 
-  // One 3-note triplet accent per voice, aligned to a beat boundary, max 4 notes.
   const beatDur = 60 / bpm;
   const tripletDur = beatDur / 3;
   const totalBeats = (durationSec * bpm) / 60;
 
   for (let v = 0; v < out.length; v++) {
-    if (rng.next() < 0.45) continue; // ~55% chance to add accent — not every voice
-    const burstLen = rng.choice([2, 3, 3, 4]);
-    // Pick a beat in the latter half of the piece, snapped to the nearest beat boundary.
+    if (rng.next() < 0.65) continue;
+    const burstLen = rng.choice([2, 3]);
     const accentBeat = Math.floor(rng.next() * totalBeats * 0.5 + totalBeats * 0.5);
     const degree = Math.floor(rng.next() * pcs.length);
     for (let i = 0; i < burstLen; i++) {
       const startBeat = accentBeat + i * (tripletDur / beatDur);
       if (startBeat >= totalBeats) break;
       out[v]!.push({
-        note: degreeToMidi(scale.rootPc, pcs, (degree + i) % pcs.length, 4 + (v % 2)),
+        note: degreeToMidi(scale, (degree + i) % pcs.length, 4 + (v % 2)),
         velocity: Math.round(68 + rng.next() * 18),
         startBeat,
         duration: Math.max(0.1, tripletDur / beatDur * 0.85),
