@@ -67,6 +67,21 @@ type StemDef = {
   velBase: number;
 };
 
+/** Hybrid role map — Reich canon / Shaw sparse / Lins harmony / Björk lyric. */
+export const ENSEMBLE_VOICE_ROLES: Record<string, string> = {
+  "Violin 1": "Reich — primary canon theme (enters bar 1)",
+  "Violin 2": "Reich — staggered canon counter (3rd below)",
+  Viola: "Shaw — inner harmonic pulse on chord tones",
+  Cello: "Lins — warm bass-line fifths and roots",
+  Contrabass: "Foundation — root on downbeats",
+  "Solo Violin": "Björk — lyrical peaks (sparse, enters late)",
+  Harp: "Lins — bossa arpeggios on changes",
+  Flute: "Shaw — color accents (sparse, high register)",
+  Oboe: "Björk — expressive counter-melody",
+  Timpani: "Downbeat accent — root on bar 1",
+  "Suspended Cymbal · Triangle · Cabasa": "Lins groove — sus. cymbal swells + triangle on 2 + cabasa shuffle",
+};
+
 export const ABLETON_ORCHESTRAL_STEMS: Omit<
   StemDef,
   "voiceRole" | "canonEntryBeats" | "stepMul" | "restChance" | "durMul" | "velBase"
@@ -82,8 +97,8 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<
   { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 3, pan: 50 },
   { name: "Timpani", hint: "timpani", role: "percussion", register: "low", baseOctave: 2, pan: 0 },
   {
-    name: "Percussion",
-    hint: "orchestral percussion",
+    name: "Suspended Cymbal · Triangle · Cabasa",
+    hint: "suspended cymbal",
     role: "percussion",
     register: "mid",
     baseOctave: 3,
@@ -649,14 +664,31 @@ function buildPercussionHits(durationSec: number, bpm: number, seed: number): Mi
   const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
   const notes: MidiNote[] = [];
   for (let b = 0; b < totalBeats; b++) {
-    if (b % 4 !== 2) continue;
-    if (rng.next() < 0.45) continue;
-    notes.push({
-      note: clampForVoice(45, "percussion"),
-      velocity: 42 + rng.int(0, 16),
-      startBeat: b + 0.5,
-      duration: 0.08,
-    });
+    const barPos = b % 4;
+    if (barPos === 0) {
+      notes.push({
+        note: clampForVoice(43, "percussion"),
+        velocity: 34 + rng.int(0, 10),
+        startBeat: b,
+        duration: 2.5,
+      });
+    }
+    if (barPos === 2) {
+      notes.push({
+        note: clampForVoice(45, "percussion"),
+        velocity: 48 + rng.int(0, 14),
+        startBeat: b + 0.02,
+        duration: 0.12,
+      });
+    }
+    if (barPos === 2 && rng.next() > 0.35) {
+      notes.push({
+        note: clampForVoice(47, "percussion"),
+        velocity: 36 + rng.int(0, 12),
+        startBeat: b + 0.55,
+        duration: 0.1,
+      });
+    }
   }
   return notes;
 }

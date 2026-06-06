@@ -250,6 +250,28 @@ const BELL: InstrumentPreset = {
   fx: [{ type: "reverb", wet: 0.45, decay: 4.0, preDelay: 0.03 }],
 };
 
+const SUSPENDED_CYMBAL: InstrumentPreset = {
+  synthType: "metal",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.08, decay: 2.4, sustain: 0.15, release: 3.2 },
+  volume: -16,
+  fx: [{ type: "reverb", wet: 0.55, decay: 5.0, preDelay: 0.04 }],
+};
+
+const TRIANGLE: InstrumentPreset = {
+  synthType: "metal",
+  oscillator: { type: "triangle" },
+  envelope: { attack: 0.001, decay: 0.35, sustain: 0.0, release: 0.25 },
+  volume: -18,
+};
+
+const CABASA: InstrumentPreset = {
+  synthType: "noise",
+  oscillator: { type: "pink" },
+  envelope: { attack: 0.002, decay: 0.12, sustain: 0.0, release: 0.08 },
+  volume: -22,
+};
+
 const PERCUSSION: InstrumentPreset = {
   synthType: "membrane",
   oscillator: { type: "sine" },
@@ -401,6 +423,9 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   "1st violins": STRINGS,
   "2nd violins": STRINGS,
   "orchestral percussion": PERCUSSION,
+  "suspended cymbal": SUSPENDED_CYMBAL,
+  triangle: TRIANGLE,
+  cabasa: CABASA,
   drums: PERCUSSION,
   kick: PERCUSSION,
   snare: PERCUSSION,
@@ -454,6 +479,13 @@ export function resolveInstrumentPreset(instrumentHint: string, role?: string): 
   }
   if (role && ROLE_FALLBACKS[role]) return ROLE_FALLBACKS[role];
   return DEFAULT_PRESET;
+}
+
+/** Ensemble percussion stem — note 43 cymbal, 45 triangle, 47 cabasa. */
+export function resolveOrchestralPercussionPreset(note: number): InstrumentPreset {
+  if (note >= 46) return CABASA;
+  if (note >= 44) return TRIANGLE;
+  return SUSPENDED_CYMBAL;
 }
 
 export function getAvailableInstruments(): string[] {

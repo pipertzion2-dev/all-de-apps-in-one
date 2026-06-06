@@ -33,11 +33,13 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import {
   constrainGeneratedStems,
+  ensembleCompositionScaleName,
   resolveCompositionKey,
   stabilizeHarmonicTimeline,
   melodicAnchorMidi,
   resolveCompositionScale,
 } from "@/lib/svivva-play/scale-key-guard";
+import { applyPlayDynamicsToStems } from "@/lib/svivva-play/play-dynamics";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import { type StyleName } from "@/lib/svivva-play/reich-engine";
@@ -225,19 +227,32 @@ export async function POST(request: NextRequest) {
       pipeline: { stage: string; stages: string[] },
       extra?: Record<string, unknown>,
     ) => {
+      const orchPreset = isEnsembleOrchestralPreset(String(extra?.composer ?? stylePreset ?? ""));
+      const ensembleScale =
+        mode === "ensemble" || orchPreset
+          ? ensembleCompositionScaleName(
+              lockedKey,
+              manualKey,
+              (settings.reichScale as string | undefined) ?? null,
+            )
+          : compositionScaleName;
       const { scaleInfo } = resolveCompositionScale(
         lockedKey,
-        compositionScaleName,
+        ensembleScale,
         manualKey,
         sessionChords,
       );
-      const guardedStems = constrainGeneratedStems(
-        stems,
-        lockedKey,
-        sessionChords,
-        analysisData.bpm,
-        { anchorMidi: melodicAnchor, scaleInfo },
-      );
+      let guardedStems =
+        mode === "ensemble" || orchPreset
+          ? stems
+          : constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
+              anchorMidi: melodicAnchor,
+              scaleInfo,
+            });
+      guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
+        strength: mode === "ensemble" ? 0.48 : 0.38,
+        phraseBeats: mode === "ensemble" ? 32 : 16,
+      });
       if (resolvedSessionId) {
         try {
           await persistGenerationBundle(db, playGenerations, playStems, {
@@ -425,9 +440,11 @@ export async function POST(request: NextRequest) {
       const preset = (isEnsembleOrchestralPreset(stylePreset)
         ? stylePreset
         : "bjork_lins_orchestral") as EnsembleOrchestralPreset;
-      const scaleName =
-        (settings.reichScale as string | undefined) ||
-        (harmonicContext?.melodyneNotes.length ? "mixolydian" : "major");
+      const scaleName = ensembleCompositionScaleName(
+        lockedKey,
+        manualKey,
+        (settings.reichScale as string | undefined) ?? null,
+      );
       const { resolution: scale } = resolveCompositionScale(
         lockedKey,
         scaleName,
@@ -472,7 +489,7 @@ export async function POST(request: NextRequest) {
           stemCount: stems.length,
           key: lockedKey,
           bpm: analysisData.bpm,
-          harmonyRules: `${presetLabel} — classically voice-led stems (Ableton Orchestral hints)`,
+          harmonyRules: `${presetLabel} — Reich canon · Shaw woodwinds · Lins harmony · Björk lyric (key: ${lockedKey}, scale: ${scaleName.replace(/_/g, " ")})`,
           meendApplicableStems:
             (settings.meend ?? false) ? orchestralMeendStemNames(stems) : [],
           composer: preset,

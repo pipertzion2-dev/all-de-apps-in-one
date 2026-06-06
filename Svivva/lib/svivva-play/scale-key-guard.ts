@@ -500,6 +500,16 @@ export function constrainGeneratedStems<T extends ConstrainableStem>(
   });
 }
 
+/** Scale name shared by ensemble compose + export guard (no auto mixolydian). */
+export function ensembleCompositionScaleName(
+  lockedKey: string,
+  manualKey?: string | null,
+  userScale?: string | null,
+): string {
+  if (userScale?.trim()) return userScale.trim().toLowerCase().replace(/ /g, "_");
+  return isMinorKeyLabel(manualKey?.trim() || lockedKey) ? "natural_minor" : "major";
+}
+
 export type HarmonicContextKeyInput = {
   key?: string;
   keySource?: "midi" | "audio" | "hint";

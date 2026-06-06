@@ -61,7 +61,7 @@ describe("composeOrchestralEnsemble", () => {
     );
   });
 
-  it("includes timpani and Ableton stem roster", () => {
+  it("includes timpani, named percussion, and Ableton stem roster", () => {
     const scale = resolveScale("major", "D");
     const voices = composeBjorkLinsOrchestral({
       durationSec: 12,
@@ -71,6 +71,9 @@ describe("composeOrchestralEnsemble", () => {
     });
     expect(voices.length).toBeGreaterThanOrEqual(10);
     expect(ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Timpani")).toBe(true);
+    expect(
+      ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Suspended Cymbal · Triangle · Cabasa"),
+    ).toBe(true);
   });
 
   it("keeps each voice in idiomatic register and guarantees minimum notes", () => {

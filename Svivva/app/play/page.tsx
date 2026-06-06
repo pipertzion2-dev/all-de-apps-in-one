@@ -1084,6 +1084,7 @@ export default function SvivvaPlayPage() {
           meend,
           patternLength,
           ensembleSize: 11,
+          reichScale: effectiveReichScale,
         };
       default:
         return {
@@ -4220,9 +4221,10 @@ export default function SvivvaPlayPage() {
                                 </div>
                               </div>
                               <p className="text-[9px] text-gray-500 leading-relaxed">
-                                11 Ableton stems: Violin 1 &amp; 2, Viola, Cello, Contrabass, Solo
-                                Violin, Harp, Flute, Oboe, Timpani, Percussion — each with its own
-                                register and canon entry.
+                                11 stems — Reich canon (Violin 1 &amp; 2), Shaw woodwinds (Viola,
+                                Flute), Lins harmony (Cello, Harp), Björk lyric (Solo Violin, Oboe),
+                                Contrabass foundation, Timpani downbeats, Suspended Cymbal · Triangle ·
+                                Cabasa groove.
                               </p>
                             </div>
                           </div>

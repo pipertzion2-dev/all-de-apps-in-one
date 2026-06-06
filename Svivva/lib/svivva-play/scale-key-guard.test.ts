@@ -3,6 +3,7 @@ import {
   chordSegmentPitchClasses,
   clampNoteToRegister,
   constrainMidiEvent,
+  ensembleCompositionScaleName,
   parseScaleFromKey,
   resolveCompositionKey,
   resolveCompositionScale,
@@ -123,5 +124,16 @@ describe("constrainMidiEvent hocket", () => {
     const chords = [{ t0: 0, t1: 4, symbol: "A", confidence: 80, pitchClasses: [9, 1, 4] }];
     const out = constrainMidiEvent(evt, scale, "hocket", chords, 120);
     expect(out.note % 12).toBe(2); // D — scale tone, not A-triad, preserved
+  });
+});
+
+describe("ensembleCompositionScaleName", () => {
+  it("uses user scale when provided", () => {
+    expect(ensembleCompositionScaleName("A major", "A major", "dorian")).toBe("dorian");
+  });
+
+  it("derives major or natural_minor from locked key without mixolydian", () => {
+    expect(ensembleCompositionScaleName("A major", null, null)).toBe("major");
+    expect(ensembleCompositionScaleName("A minor", null, null)).toBe("natural_minor");
   });
 });
