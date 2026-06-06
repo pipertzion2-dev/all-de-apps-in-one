@@ -10,6 +10,7 @@ import { resolvePatternCellLengths, type PatternLength } from "./pattern-length"
 import type { ScaleResolution } from "./reich-engine";
 import type { MidiNote, VoicePart } from "./reich-engine";
 
+export const ENSEMBLE_STEM_COUNT = 13;
 export const BJORK_LINS_ORCHESTRAL_PRESET = "bjork_lins_orchestral";
 export const CINEMATIC_ORCHESTRA_PRESET = "cinematic_orchestra";
 export const HYPERREAL_ORCHESTRAL_PRESET = "hyperreal_orchestral";
@@ -53,6 +54,8 @@ type VoiceRole =
   | "timpani"
   | "percussion";
 
+type PercussionKind = "suspended_cymbal" | "triangle" | "cabasa";
+
 type StemDef = {
   name: string;
   hint: string;
@@ -66,6 +69,7 @@ type StemDef = {
   restChance: number;
   durMul: number;
   velBase: number;
+  percussionKind?: PercussionKind;
 };
 
 /** Hybrid role map — Reich canon / Shaw sparse / Lins harmony / Björk lyric. */
@@ -80,7 +84,9 @@ export const ENSEMBLE_VOICE_ROLES: Record<string, string> = {
   Flute: "Shaw — color accents (sparse, high register)",
   Oboe: "Björk — expressive counter-melody",
   Timpani: "Downbeat accent — root on bar 1",
-  "Suspended Cymbal · Triangle · Cabasa": "Lins groove — sus. cymbal swells + triangle on 2 + cabasa shuffle",
+  "Suspended Cymbal": "Lins groove — long swells on downbeats",
+  Triangle: "Accent on beat 2 of each bar",
+  Cabasa: "Offbeat shuffle on the and of 2",
 };
 
 export const ABLETON_ORCHESTRAL_STEMS: Omit<
@@ -98,12 +104,28 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<
   { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 3, pan: 50 },
   { name: "Timpani", hint: "timpani", role: "percussion", register: "low", baseOctave: 2, pan: 0 },
   {
-    name: "Suspended Cymbal · Triangle · Cabasa",
+    name: "Suspended Cymbal",
     hint: "suspended cymbal",
     role: "percussion",
     register: "mid",
     baseOctave: 3,
-    pan: 60,
+    pan: 52,
+  },
+  {
+    name: "Triangle",
+    hint: "triangle",
+    role: "percussion",
+    register: "mid",
+    baseOctave: 3,
+    pan: 62,
+  },
+  {
+    name: "Cabasa",
+    hint: "cabasa",
+    role: "percussion",
+    register: "mid",
+    baseOctave: 3,
+    pan: 72,
   },
 ];
 
@@ -202,11 +224,32 @@ const STEM_PROFILES: StemDef[] = [
   {
     ...ABLETON_ORCHESTRAL_STEMS[10]!,
     voiceRole: "percussion",
+    percussionKind: "suspended_cymbal",
+    canonEntryBeats: 0,
+    stepMul: 4,
+    restChance: 0.05,
+    durMul: 2.5,
+    velBase: 38,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[11]!,
+    voiceRole: "percussion",
+    percussionKind: "triangle",
     canonEntryBeats: 2,
     stepMul: 4,
-    restChance: 0.2,
+    restChance: 0.12,
     durMul: 0.12,
-    velBase: 48,
+    velBase: 52,
+  },
+  {
+    ...ABLETON_ORCHESTRAL_STEMS[12]!,
+    voiceRole: "percussion",
+    percussionKind: "cabasa",
+    canonEntryBeats: 2,
+    stepMul: 4,
+    restChance: 0.25,
+    durMul: 0.1,
+    velBase: 40,
   },
 ];
 
@@ -674,37 +717,54 @@ function buildTimpaniHits(
   return notes;
 }
 
-function buildPercussionHits(durationSec: number, bpm: number, seed: number): MidiNote[] {
+function buildSuspendedCymbalHits(durationSec: number, bpm: number, seed: number): MidiNote[] {
   const rng = new Rng(seed ^ 0xcafe);
   const beatSec = 60 / bpm;
   const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
   const notes: MidiNote[] = [];
   for (let b = 0; b < totalBeats; b++) {
-    const barPos = b % 4;
-    if (barPos === 0) {
-      notes.push({
-        note: clampForVoice(43, "percussion"),
-        velocity: 34 + rng.int(0, 10),
-        startBeat: b,
-        duration: 2.5,
-      });
-    }
-    if (barPos === 2) {
-      notes.push({
-        note: clampForVoice(45, "percussion"),
-        velocity: 48 + rng.int(0, 14),
-        startBeat: b + 0.02,
-        duration: 0.12,
-      });
-    }
-    if (barPos === 2 && rng.next() > 0.35) {
-      notes.push({
-        note: clampForVoice(47, "percussion"),
-        velocity: 36 + rng.int(0, 12),
-        startBeat: b + 0.55,
-        duration: 0.1,
-      });
-    }
+    if (b % 4 !== 0) continue;
+    notes.push({
+      note: clampForVoice(60, "percussion"),
+      velocity: 34 + rng.int(0, 10),
+      startBeat: b,
+      duration: 2.5,
+    });
+  }
+  return notes;
+}
+
+function buildTriangleHits(durationSec: number, bpm: number, seed: number): MidiNote[] {
+  const rng = new Rng(seed ^ 0xbeef);
+  const beatSec = 60 / bpm;
+  const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
+  const notes: MidiNote[] = [];
+  for (let b = 0; b < totalBeats; b++) {
+    if (b % 4 !== 2) continue;
+    notes.push({
+      note: clampForVoice(60, "percussion"),
+      velocity: 48 + rng.int(0, 14),
+      startBeat: b + 0.02,
+      duration: 0.12,
+    });
+  }
+  return notes;
+}
+
+function buildCabasaHits(durationSec: number, bpm: number, seed: number): MidiNote[] {
+  const rng = new Rng(seed ^ 0xface);
+  const beatSec = 60 / bpm;
+  const totalBeats = Math.max(8, Math.round(durationSec / beatSec));
+  const notes: MidiNote[] = [];
+  for (let b = 0; b < totalBeats; b++) {
+    if (b % 4 !== 2) continue;
+    if (rng.next() < 0.35) continue;
+    notes.push({
+      note: clampForVoice(60, "percussion"),
+      velocity: 36 + rng.int(0, 12),
+      startBeat: b + 0.55,
+      duration: 0.1,
+    });
   }
   return notes;
 }
@@ -945,8 +1005,12 @@ export function composeOrchestralEnsemble(opts: {
       notes = buildHarpArpeggios(chords, bpm, seed, feel);
     } else if (profile.voiceRole === "timpani") {
       notes = buildTimpaniHits(durationSec, bpm, seed, chords, scale);
-    } else if (profile.voiceRole === "percussion") {
-      notes = buildPercussionHits(durationSec, bpm, seed);
+    } else if (profile.percussionKind === "suspended_cymbal") {
+      notes = buildSuspendedCymbalHits(durationSec, bpm, seed);
+    } else if (profile.percussionKind === "triangle") {
+      notes = buildTriangleHits(durationSec, bpm, seed);
+    } else if (profile.percussionKind === "cabasa") {
+      notes = buildCabasaHits(durationSec, bpm, seed);
     } else {
       notes = composeStemLine(
         profile,
@@ -964,7 +1028,7 @@ export function composeOrchestralEnsemble(opts: {
       notes = ensureVoiceMinimum(notes, profile, scale, feel);
     }
 
-    if (notes.length === 0) {
+    if (notes.length === 0 && profile.voiceRole !== "timpani" && !profile.percussionKind) {
       notes.push({
         note: clampForVoice(
           midiFromDegree(scale.rootPc, scale.pitchClasses, 2, profile.baseOctave),

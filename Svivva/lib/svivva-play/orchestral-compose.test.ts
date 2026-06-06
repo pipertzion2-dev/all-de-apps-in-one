@@ -7,6 +7,7 @@ import {
   CINEMATIC_ORCHESTRA_PRESET,
   HYPERREAL_ORCHESTRAL_PRESET,
   ABLETON_ORCHESTRAL_STEMS,
+  ENSEMBLE_STEM_COUNT,
   ENSEMBLE_ORCHESTRAL_PRESETS,
   isEnsembleOrchestralPreset,
   tempoFeelForOrchestra,
@@ -61,7 +62,7 @@ describe("composeOrchestralEnsemble", () => {
     );
   });
 
-  it("includes timpani, named percussion, and Ableton stem roster", () => {
+  it("includes timpani and separate percussion stems", () => {
     const scale = resolveScale("major", "D");
     const voices = composeBjorkLinsOrchestral({
       durationSec: 12,
@@ -69,11 +70,11 @@ describe("composeOrchestralEnsemble", () => {
       scale,
       seed: 3,
     });
-    expect(voices.length).toBeGreaterThanOrEqual(10);
+    expect(voices.length).toBe(ENSEMBLE_STEM_COUNT);
     expect(ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Timpani")).toBe(true);
-    expect(
-      ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Suspended Cymbal · Triangle · Cabasa"),
-    ).toBe(true);
+    expect(ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Suspended Cymbal")).toBe(true);
+    expect(ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Triangle")).toBe(true);
+    expect(ABLETON_ORCHESTRAL_STEMS.some((s) => s.name === "Cabasa")).toBe(true);
   });
 
   it("keeps each voice in idiomatic register and guarantees minimum notes", () => {
@@ -107,7 +108,14 @@ describe("composeOrchestralEnsemble", () => {
     });
     const scalePcs = new Set(scale.pitchClasses);
     for (const voice of voices) {
-      if (voice.name.includes("Cymbal")) continue;
+      if (
+        voice.name === "Timpani" ||
+        voice.name === "Suspended Cymbal" ||
+        voice.name === "Triangle" ||
+        voice.name === "Cabasa"
+      ) {
+        continue;
+      }
       for (const n of voice.notes) {
         const pc = ((n.note % 12) + 12) % 12;
         expect(scalePcs.has(pc)).toBe(true);

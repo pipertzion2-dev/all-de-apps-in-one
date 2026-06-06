@@ -29,7 +29,7 @@ describe("applyPlayDynamicsToStems", () => {
     const stems = applyPlayDynamicsToStems(
       [
         {
-          name: "Suspended Cymbal · Triangle · Cabasa",
+          name: "Suspended Cymbal",
           role: "percussion",
           instrumentHint: "suspended cymbal",
           midiEvents: [

@@ -1083,7 +1083,7 @@ export default function SvivvaPlayPage() {
           ...base,
           meend,
           patternLength,
-          ensembleSize: 11,
+          ensembleSize: 13,
           reichScale: effectiveReichScale,
         };
       default:
@@ -4221,10 +4221,10 @@ export default function SvivvaPlayPage() {
                                 </div>
                               </div>
                               <p className="text-[9px] text-gray-500 leading-relaxed">
-                                11 stems — Reich canon (Violin 1 &amp; 2), Shaw woodwinds (Viola,
+                                13 stems — Reich canon (Violin 1 &amp; 2), Shaw woodwinds (Viola,
                                 Flute), Lins harmony (Cello, Harp), Björk lyric (Solo Violin, Oboe),
-                                Contrabass foundation, Timpani downbeats, Suspended Cymbal · Triangle ·
-                                Cabasa groove.
+                                Contrabass foundation, Timpani, Suspended Cymbal, Triangle, and
+                                Cabasa (each its own MIDI track).
                               </p>
                             </div>
                           </div>
