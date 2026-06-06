@@ -1187,7 +1187,7 @@ export default function SvivvaPlayPage() {
           mode,
           stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
           quality,
-          manualKey: manualKey ?? lockedKey,
+          manualKey: manualKey ?? undefined,
           manualTempo,
           settings,
           chordEdits: Object.keys(chordEdits).length > 0 ? chordEdits : undefined,

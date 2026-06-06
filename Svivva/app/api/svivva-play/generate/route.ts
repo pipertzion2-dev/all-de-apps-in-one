@@ -35,6 +35,7 @@ import {
   constrainGeneratedStems,
   ensembleCompositionScaleName,
   resolveCompositionKey,
+  resolveEnsembleComposeKey,
   stabilizeHarmonicTimeline,
   melodicAnchorMidi,
   resolveCompositionScale,
@@ -236,19 +237,25 @@ export async function POST(request: NextRequest) {
               (settings.reichScale as string | undefined) ?? null,
             )
           : compositionScaleName;
+      const composeKeyForGuard =
+        mode === "ensemble"
+          ? resolveEnsembleComposeKey({
+              lockedKey,
+              manualKey,
+              melodyneNotes: harmonicContext?.melodyneNotes,
+              bpm: analysisData.bpm,
+            })
+          : lockedKey;
       const { scaleInfo } = resolveCompositionScale(
-        lockedKey,
+        composeKeyForGuard,
         ensembleScale,
         manualKey,
         sessionChords,
       );
-      let guardedStems =
-        mode === "ensemble" || orchPreset
-          ? stems
-          : constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
-              anchorMidi: melodicAnchor,
-              scaleInfo,
-            });
+      let guardedStems = constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
+        anchorMidi: melodicAnchor,
+        scaleInfo,
+      });
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
         strength: mode === "ensemble" ? 0.48 : 0.38,
         phraseBeats: mode === "ensemble" ? 32 : 16,
@@ -440,23 +447,29 @@ export async function POST(request: NextRequest) {
       const preset = (isEnsembleOrchestralPreset(stylePreset)
         ? stylePreset
         : "bjork_lins_orchestral") as EnsembleOrchestralPreset;
-      const scaleName = ensembleCompositionScaleName(
-        lockedKey,
-        manualKey,
-        (settings.reichScale as string | undefined) ?? null,
-      );
-      const { resolution: scale } = resolveCompositionScale(
-        lockedKey,
-        scaleName,
-        manualKey,
-        sessionChords,
-      );
       const orchCtx =
         harmonicContext ??
         harmonicContextFromAnalysis(analysisData, {
           chords: sessionChords,
           durationSec: sessionDurationSec,
         });
+      const composeKey = resolveEnsembleComposeKey({
+        lockedKey,
+        manualKey,
+        melodyneNotes: orchCtx.melodyneNotes,
+        bpm: analysisData.bpm,
+      });
+      const scaleName = ensembleCompositionScaleName(
+        composeKey,
+        manualKey,
+        (settings.reichScale as string | undefined) ?? null,
+      );
+      const { resolution: scale } = resolveCompositionScale(
+        composeKey,
+        scaleName,
+        manualKey,
+        sessionChords,
+      );
 
       const voices = composeOrchestralEnsemble({
         durationSec: sessionDurationSec,
@@ -487,9 +500,9 @@ export async function POST(request: NextRequest) {
         stems,
         plan: {
           stemCount: stems.length,
-          key: lockedKey,
+          key: composeKey,
           bpm: analysisData.bpm,
-          harmonyRules: `${presetLabel} — Reich canon · Shaw woodwinds · Lins harmony · Björk lyric (key: ${lockedKey}, scale: ${scaleName.replace(/_/g, " ")})`,
+          harmonyRules: `${presetLabel} — Reich canon · Shaw woodwinds · Lins harmony · Björk lyric (key: ${composeKey}, scale: ${scaleName.replace(/_/g, " ")})`,
           meendApplicableStems:
             (settings.meend ?? false) ? orchestralMeendStemNames(stems) : [],
           composer: preset,

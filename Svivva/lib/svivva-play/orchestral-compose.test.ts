@@ -96,21 +96,22 @@ describe("composeOrchestralEnsemble", () => {
     expect(voices.find((v) => v.name === "Timpani")!.notes.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("applies phrase dynamics with varied velocities per voice", () => {
-    const scale = resolveScale("major", "D");
+  it("snaps all pitched voices to the composition scale", () => {
+    const scale = resolveScale("major", "A");
     const voices = composeOrchestralEnsemble({
       durationSec: 16,
       bpm: 100,
       scale,
-      seed: 5,
+      seed: 13,
       preset: BJORK_LINS_ORCHESTRAL_PRESET,
     });
-    const v1 = voices.find((v) => v.name === "Violin 1")!;
-    const timpani = voices.find((v) => v.name === "Timpani")!;
-    const v1Vels = v1.notes.map((n) => n.velocity);
-    const tVels = timpani.notes.map((n) => n.velocity);
-    expect(Math.max(...v1Vels) - Math.min(...v1Vels)).toBeGreaterThan(8);
-    expect(Math.min(...tVels)).toBeGreaterThanOrEqual(70);
-    expect(Math.max(...v1Vels)).toBeLessThanOrEqual(118);
+    const scalePcs = new Set(scale.pitchClasses);
+    for (const voice of voices) {
+      if (voice.name.includes("Cymbal")) continue;
+      for (const n of voice.notes) {
+        const pc = ((n.note % 12) + 12) % 12;
+        expect(scalePcs.has(pc)).toBe(true);
+      }
+    }
   });
 });

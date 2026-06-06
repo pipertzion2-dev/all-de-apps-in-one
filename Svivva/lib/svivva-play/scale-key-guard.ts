@@ -3,7 +3,8 @@
  */
 import type { ChordSegment } from "./chord-from-chroma";
 import { normalizeKeyLabel, parseRootFromKeyLabel, isMinorKeyLabel } from "./analysis-utils";
-import { inferKeyFromChordSegments } from "./key-from-notes";
+import { inferKeyFromChordSegments, detectKeyFromMidiNotes } from "./key-from-notes";
+import type { TranscribedNote } from "./audio-transcription";
 import type { NormalizedMidiEvent } from "./midi-normalize";
 import { resolveScale, type ScaleResolution } from "./reich-engine";
 import {
@@ -508,6 +509,47 @@ export function ensembleCompositionScaleName(
 ): string {
   if (userScale?.trim()) return userScale.trim().toLowerCase().replace(/ /g, "_");
   return isMinorKeyLabel(manualKey?.trim() || lockedKey) ? "natural_minor" : "major";
+}
+
+/**
+ * Prefer confident Melodyne key when the session key is still a placeholder or clearly wrong.
+ * Only runs when the user has not explicitly set manualKey.
+ */
+export function resolveEnsembleComposeKey(options: {
+  lockedKey: string;
+  manualKey?: string | null;
+  melodyneNotes?: TranscribedNote[];
+  bpm: number;
+}): string {
+  if (options.manualKey?.trim()) {
+    return normalizeKeyLabel(options.manualKey);
+  }
+
+  const notes = options.melodyneNotes ?? [];
+  if (notes.length < 6 || options.bpm < 30) {
+    return normalizeKeyLabel(options.lockedKey);
+  }
+
+  const fromMidi = detectKeyFromMidiNotes(notes, options.bpm);
+  if (!fromMidi || fromMidi.confidence < 65) {
+    return normalizeKeyLabel(options.lockedKey);
+  }
+
+  const lockedNorm = normalizeKeyLabel(options.lockedKey);
+  const midiKey = normalizeKeyLabel(fromMidi.key);
+  const locked = parseScaleFromKey(lockedNorm);
+  const midi = parseScaleFromKey(midiKey);
+
+  const lockedIsWeak =
+    !lockedNorm ||
+    lockedNorm.startsWith("Detecting") ||
+    lockedNorm === "C major";
+
+  if (lockedIsWeak && fromMidi.confidence >= 65) return midiKey;
+  if (locked.rootPc !== midi.rootPc && fromMidi.confidence >= 72) return midiKey;
+  if (locked.isMinor !== midi.isMinor && fromMidi.confidence >= 78) return midiKey;
+
+  return lockedNorm;
 }
 
 export type HarmonicContextKeyInput = {

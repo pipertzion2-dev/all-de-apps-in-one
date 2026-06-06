@@ -4,6 +4,7 @@ import {
   clampNoteToRegister,
   constrainMidiEvent,
   ensembleCompositionScaleName,
+  resolveEnsembleComposeKey,
   parseScaleFromKey,
   resolveCompositionKey,
   resolveCompositionScale,
@@ -135,5 +136,29 @@ describe("ensembleCompositionScaleName", () => {
   it("derives major or natural_minor from locked key without mixolydian", () => {
     expect(ensembleCompositionScaleName("A major", null, null)).toBe("major");
     expect(ensembleCompositionScaleName("A minor", null, null)).toBe("natural_minor");
+  });
+});
+
+describe("resolveEnsembleComposeKey", () => {
+  it("respects explicit manual key", () => {
+    expect(
+      resolveEnsembleComposeKey({
+        lockedKey: "C major",
+        manualKey: "E major",
+        melodyneNotes: [{ midi: 64, startSec: 0, endSec: 1, velocity: 80 }],
+        bpm: 120,
+      }),
+    ).toBe("E major");
+  });
+
+  it("keeps locked key when Melodyne evidence is weak", () => {
+    expect(
+      resolveEnsembleComposeKey({
+        lockedKey: "D major",
+        manualKey: null,
+        melodyneNotes: [{ midi: 62, startSec: 0, endSec: 1, velocity: 80 }],
+        bpm: 120,
+      }),
+    ).toBe("D major");
   });
 });

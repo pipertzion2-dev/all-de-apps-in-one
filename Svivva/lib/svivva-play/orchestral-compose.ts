@@ -4,7 +4,8 @@
  */
 import type { ChordSegment } from "./chord-from-chroma";
 import type { TranscribedNote } from "./audio-transcription";
-import { chordSegmentPitchClasses } from "./scale-key-guard";
+import { chordSegmentPitchClasses, snapNoteToScale } from "./scale-key-guard";
+import type { ScaleInfo } from "./scale-key-guard";
 import { resolvePatternCellLengths, type PatternLength } from "./pattern-length";
 import type { ScaleResolution } from "./reich-engine";
 import type { MidiNote, VoicePart } from "./reich-engine";
@@ -294,7 +295,20 @@ function clampMidi(note: number, min = 36, max = 92): number {
 
 function clampForVoice(note: number, role: VoiceRole): number {
   const { min, max } = VOICE_REGISTER[role];
-  return clampMidi(note, min, max);
+  const rounded = Math.round(note);
+  if (rounded >= min && rounded <= max) return rounded;
+  const pc = ((rounded % 12) + 12) % 12;
+  let bestDist = Infinity;
+  let picked = Math.max(min, Math.min(max, rounded));
+  for (let m = min; m <= max; m++) {
+    if (((m % 12) + 12) % 12 !== pc) continue;
+    const dist = Math.abs(m - rounded);
+    if (dist < bestDist) {
+      bestDist = dist;
+      picked = m;
+    }
+  }
+  return picked;
 }
 
 function midiFromDegree(
@@ -451,7 +465,10 @@ function buildPrimaryTheme(
 
     if (guideNotes.length && rng.next() < 0.4) {
       const guided = nearestGuideMidi(guideNotes, beat * beatSec);
-      if (guided != null) {
+      if (
+        guided != null &&
+        scale.pitchClasses.includes(((guided % 12) + 12) % 12)
+      ) {
         cell[cellIdx % cell.length] = midiToNearestDegree(guided, scale, cell[cellIdx % cell.length]!);
       }
     }
@@ -611,9 +628,7 @@ function buildHarpArpeggios(
   const beatSec = 60 / bpm;
   const notes: MidiNote[] = [];
   for (const chord of chords) {
-    const pcs = chord.pitchClasses?.length
-      ? chord.pitchClasses
-      : chordSegmentPitchClasses(chord);
+    const pcs = chordSegmentPitchClasses(chord);
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
     const step = Math.max(0.5, feel.voiceStepBeats);
@@ -639,6 +654,7 @@ function buildTimpaniHits(
   bpm: number,
   seed: number,
   chords: ChordSegment[],
+  scale: ScaleResolution,
 ): MidiNote[] {
   const rng = new Rng(seed ^ 0xbeef);
   const beatSec = 60 / bpm;
@@ -647,7 +663,7 @@ function buildTimpaniHits(
   for (let b = 0; b < totalBeats; b++) {
     if (b % 4 !== 0) continue;
     const chord = chordAtBeat(chords, b, bpm);
-    const root = chord ? (chordSegmentPitchClasses(chord)[0] ?? 0) : 0;
+    const root = chord ? (chordSegmentPitchClasses(chord)[0] ?? scale.rootPc) : scale.rootPc;
     notes.push({
       note: clampForVoice(clampMidi(12 * 3 + root, 28, 48), "timpani"),
       velocity: 88 + rng.int(0, 8),
@@ -839,7 +855,22 @@ function suppressRegisterOutliers(notes: MidiNote[], role: VoiceRole): MidiNote[
   const sorted = [...notes.map((n) => n.note)].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)]!;
   const ceiling = Math.min(VOICE_REGISTER[role].max, median + 6);
-  return notes.map((n) => ({ ...n, note: Math.min(n.note, ceiling) }));
+  return notes.map((n) => ({
+    ...n,
+    note: clampForVoice(Math.min(n.note, ceiling), role),
+  }));
+}
+
+function snapVoiceNotesToScale(
+  notes: MidiNote[],
+  scaleInfo: ScaleInfo,
+  role: VoiceRole,
+): MidiNote[] {
+  if (role === "percussion") return notes;
+  return notes.map((n) => ({
+    ...n,
+    note: clampForVoice(snapNoteToScale(n.note, scaleInfo), role),
+  }));
 }
 
 function sanitizeVoiceNotes(notes: MidiNote[], role: VoiceRole): MidiNote[] {
@@ -896,6 +927,13 @@ export function composeOrchestralEnsemble(opts: {
     preset,
   );
 
+  const scaleInfo: ScaleInfo = {
+    keyLabel: `${scale.keyRoot} ${scale.detectedMode}`,
+    rootPc: scale.rootPc,
+    isMinor: scale.detectedMode === "minor",
+    scalePcs: new Set(scale.pitchClasses),
+  };
+
   const parts: VoicePart[] = [];
 
   for (let i = 0; i < STEM_PROFILES.length; i++) {
@@ -906,7 +944,7 @@ export function composeOrchestralEnsemble(opts: {
     if (profile.voiceRole === "harp") {
       notes = buildHarpArpeggios(chords, bpm, seed, feel);
     } else if (profile.voiceRole === "timpani") {
-      notes = buildTimpaniHits(durationSec, bpm, seed, chords);
+      notes = buildTimpaniHits(durationSec, bpm, seed, chords, scale);
     } else if (profile.voiceRole === "percussion") {
       notes = buildPercussionHits(durationSec, bpm, seed);
     } else {
@@ -940,6 +978,7 @@ export function composeOrchestralEnsemble(opts: {
 
     notes = applyOrchestralDynamics(notes, profile, tuning);
     notes = sanitizeVoiceNotes(notes, profile.voiceRole);
+    notes = snapVoiceNotesToScale(notes, scaleInfo, profile.voiceRole);
 
     parts.push({ voiceIndex: i, notes, name: profile.name });
   }
