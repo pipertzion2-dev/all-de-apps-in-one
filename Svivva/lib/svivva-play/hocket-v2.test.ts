@@ -41,7 +41,21 @@ describe("composeHocket", () => {
     const avg = (p: typeof v1) =>
       p.notes.reduce((s, n) => s + n.note, 0) / Math.max(1, p.notes.length);
     expect(avg(v6)).toBeGreaterThan(avg(v1));
-    expect(Math.max(...v6.notes.map((n) => n.note))).toBeLessThanOrEqual(84);
+    expect(Math.max(...v6.notes.map((n) => n.note))).toBeLessThanOrEqual(74);
+  });
+
+  it("no hocket voice pierces the top register cap", () => {
+    const scale = resolveScale("major", "A", "major");
+    const parts = composeHocket({
+      durationSec: 16,
+      bpm: 134,
+      scale,
+      seed: 42,
+      hocketGroove: "reich_interlock",
+    });
+    for (const part of parts) {
+      expect(Math.max(...part.notes.map((n) => n.note))).toBeLessThanOrEqual(74);
+    }
   });
 
   it("8-voice groove produces eight voices with interlocking density", () => {

@@ -210,7 +210,7 @@ function registerBounds(
   if (roleNorm === "bass") return { min: 36, max: 55 };
   if (roleNorm === "harmony" || roleNorm === "pad") return { min: 48, max: 72 };
   if (roleNorm.includes("hocket")) {
-    return { min: 50, max: 76 };
+    return { min: 50, max: 74 };
   }
   if (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo") {
     const anchor = opts?.anchorMidi ?? 67;

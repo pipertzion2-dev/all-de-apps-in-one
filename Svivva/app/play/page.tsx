@@ -127,7 +127,7 @@ import {
 import { stemMidiFilename } from "@/lib/svivva-play/midi-filenames";
 import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
-const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "chords"];
+const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "chords", "ensemble"];
 
 function stemTimelineDurationSec(stems: { midiEvents: unknown[] }[], bpm: number): number {
   if (bpm <= 0) return 0;
@@ -268,7 +268,7 @@ const MODE_CONFIG: Record<
     label: "Ensemble",
     shortLabel: "Ens",
     icon: Users,
-    description: "Orchestral strings — Björk × Ivan Lins interlock for Ableton Orchestral",
+    description: "Coming soon — use Composition hocket for Reich interlock + Meend",
     qualityTier: "professional",
   },
 };
@@ -480,7 +480,7 @@ export default function SvivvaPlayPage() {
   const [reichStyle, setReichStyle] = useState<ReichStyle>("reich_electric");
   const [reichDuration, setReichDuration] = useState(16);
   const [swingAmount, setSwingAmount] = useState(0);
-  const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_phase");
+  const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_interlock");
   const [patternLength, setPatternLength] = useState<PatternLength>("standard");
 
   const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
@@ -688,6 +688,7 @@ export default function SvivvaPlayPage() {
 
   useEffect(() => {
     modeRef.current = mode;
+    if (mode === "ensemble") setMode("composition");
   }, [mode]);
 
   useEffect(() => {

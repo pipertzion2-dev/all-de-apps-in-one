@@ -55,8 +55,24 @@ export function chordStemsToResults(
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
   return stems.map((stem) => {
     if (stem.midiEvents.length === 0) return stem;
-    const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
-    const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
+    const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
+    const polyphonic = stemHasOverlappingNotes(sorted);
+    if (polyphonic) {
+      const built = buildMeendStemExpression(sorted, true);
+      return {
+        ...stem,
+        midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
+        expression: {
+          ...stem.expression,
+          meend: true,
+          pitchbend: built.pitchbend,
+          monophonic: false,
+        },
+      };
+    }
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.48, 2.5);
+    const legato = prepareMeendLegatoMidiEvents(monoReady);
+    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.95 });
     return {
       ...stem,
       midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
@@ -64,7 +80,7 @@ export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemRe
         ...stem.expression,
         meend: true,
         pitchbend: built.pitchbend,
-        monophonic: !polyphonic,
+        monophonic: true,
       },
     };
   });

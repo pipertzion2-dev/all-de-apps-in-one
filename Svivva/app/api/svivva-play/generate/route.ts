@@ -238,6 +238,14 @@ export async function POST(request: NextRequest) {
           ? "natural_minor"
           : "major";
 
+    // Ensemble temporarily disabled in UI — reject API calls until quality is restored.
+    if (mode === "ensemble") {
+      return NextResponse.json(
+        { error: "Ensemble is coming soon. Use Composition → Hocket with Meend enabled." },
+        { status: 400 },
+      );
+    }
+
     const finishWithStems = async (
       stems: GeneratedStemResult[],
       plan: Record<string, unknown>,
@@ -397,7 +405,7 @@ export async function POST(request: NextRequest) {
       const reichStyle = (settings.reichStyle || stylePreset || "reich_electric") as StyleName;
       const reichType = settings.reichType === "hocket" ? "hocket" : "counterpoint";
       const hocketGroove =
-        (settings.hocketGroove as HocketGrooveStyle | undefined) ?? "reich_phase";
+        (settings.hocketGroove as HocketGrooveStyle | undefined) ?? "reich_interlock";
 
       // Build a harmonic context even when no Melodyne transcription was provided —
       // this ensures composition / hocket mode always generates all 8 voices.

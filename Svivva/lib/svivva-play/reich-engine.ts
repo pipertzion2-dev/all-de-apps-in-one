@@ -107,11 +107,11 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }
 
-function clampMidi(note: number, max = 84): number {
+function clampMidi(note: number, max = 74): number {
   return Math.max(36, Math.min(max, Math.round(note)));
 }
 
-function clampMidiPreservePc(note: number, max = 84, min = 36): number {
+function clampMidiPreservePc(note: number, max = 74, min = 36): number {
   const pc = ((note % 12) + 12) % 12;
   let best = clampMidi(note, max);
   if (best % 12 === pc) return best;
@@ -235,9 +235,19 @@ function cellToMidis(
   return degrees.map((d) => midiForDegree(rootPc, absPcs, d, baseOctave));
 }
 
-function voiceBaseOctave(vi: number, numVoices: number, base = 3): number {
-  const spread = [0, 0, 1, 1, 2, 2, 2, 2].slice(0, numVoices);
-  return vi < spread.length ? base + spread[vi]! : base + Math.min(2, Math.floor(vi / 2));
+function voiceBaseOctave(vi: number, _numVoices: number, base = 3): number {
+  return base + (vi >= 3 ? 1 : 0);
+}
+
+/** Cap per voice so the top hocket lane stays musical (no piercing high line). */
+function hocketVoiceMaxMidi(voiceIndex: number): number {
+  if (voiceIndex <= 1) return 67;
+  if (voiceIndex <= 3) return 72;
+  return 74;
+}
+
+function clampHocketNote(note: number, voiceIndex: number): number {
+  return clampMidiPreservePc(note, hocketVoiceMaxMidi(voiceIndex), 48);
 }
 
 /** v2 Reich Composer: one shared melodic cell, random scale degrees + octave spread. */
@@ -256,8 +266,7 @@ function buildMasterMidiCell(
     for (let i = 0; i < cellLen; i++) {
       const deg = Math.floor(rng.next() * rel.length);
       const pc = (rootPc + rel[deg]) % 12;
-      const octave = baseOctave + Math.floor(rng.next() * 2);
-      out.push(clampMidiPreservePc(12 * (octave + 1) + pc));
+      out.push(clampMidiPreservePc(12 * (baseOctave + 1) + pc, 72));
     }
     return out;
   }
@@ -417,7 +426,7 @@ export function composeHocket(opts: {
         if (style === "shaw_interlace" && rng.next() < 0.12) continue;
         const idx = s % masterMidis.length;
         notes.push({
-          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+          note: clampHocketNote(masterMidis[idx]! + octShift, v),
           velocity: 72 + Math.floor(rng.next() * 16),
           startBeat: s * sixteenthBeats,
           duration: sixteenthBeats * 0.75,
@@ -426,7 +435,7 @@ export function composeHocket(opts: {
       if (notes.length === 0) {
         const idx = v % masterMidis.length;
         notes.push({
-          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+          note: clampHocketNote(masterMidis[idx]! + octShift, v),
           velocity: 70,
           startBeat: v * sixteenthBeats * 0.25,
           duration: sixteenthBeats * 2,
@@ -460,7 +469,7 @@ export function composeHocket(opts: {
       if (style === "shaw_interlace" && rng.next() < 0.12) continue;
       const idx = (s + v * 3) % masterMidis.length;
       notes.push({
-        note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+        note: clampHocketNote(masterMidis[idx]! + octShift, v),
         velocity: 72 + Math.floor(rng.next() * 16),
         startBeat: s * eighthBeats,
         duration: eighthBeats * 0.75,
@@ -469,7 +478,7 @@ export function composeHocket(opts: {
     if (notes.length === 0) {
       const bo = voiceBaseOctave(v, numVoices, 3);
       notes.push({
-        note: clampMidiPreservePc(12 * bo + (scale.pitchClasses[0] ?? scale.rootPc)),
+        note: clampHocketNote(12 * (bo + 1) + (scale.pitchClasses[0] ?? scale.rootPc), v),
         velocity: 70,
         startBeat: v * eighthBeats * 0.25,
         duration: eighthBeats * 2,
