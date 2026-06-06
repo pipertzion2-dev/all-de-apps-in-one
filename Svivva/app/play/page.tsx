@@ -4276,6 +4276,61 @@ export default function SvivvaPlayPage() {
                           </div>
                         )}
 
+                        {mode === "ensemble" && (
+                          <div className="mb-4">
+                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                              Ensemble options
+                            </h3>
+                            <div className="flex flex-col gap-1.5 mb-3 p-3 rounded-lg border border-[#A05068]/25 bg-[#0d0a12]">
+                              <CheckboxOption
+                                label="Indian Meend (Violin 1, Solo Violin, Flute, Oboe)"
+                                checked={meend}
+                                onChange={setMeend}
+                                data-testid="checkbox-ensemble-meend"
+                              />
+                              {meend && (
+                                <p className="text-[9px] text-gray-500">
+                                  Pitch slides on melody stems only. Set Ableton Pitch Bend Range to
+                                  12 semitones.
+                                </p>
+                              )}
+                              <CheckboxOption
+                                label="Analyze Melodyne + input only (skip cloud LLM)"
+                                checked={analysisFocus === "melodyne_mix"}
+                                onChange={(v) =>
+                                  setAnalysisFocus(v ? "melodyne_mix" : "full_cloud")
+                                }
+                              />
+                              <div>
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                                  Repeating pattern length
+                                </label>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  {(
+                                    [
+                                      ["standard", "Standard"],
+                                      ["extended", "Extended"],
+                                      ["long", "Long"],
+                                    ] as const
+                                  ).map(([v, label]) => (
+                                    <RadioOption
+                                      key={v}
+                                      label={label}
+                                      checked={patternLength === v}
+                                      onChange={() => setPatternLength(v)}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                              <p className="text-[9px] text-gray-500 leading-relaxed">
+                                11 Ableton stems: Violin 1 &amp; 2, Viola, Cello, Contrabass, Solo
+                                Violin, Harp, Flute, Oboe, Timpani, Percussion — each with its own
+                                register and canon entry.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
                         {mode !== "chords" && (
                           <>
                             <div className="mb-4">
@@ -5349,10 +5404,12 @@ function CheckboxOption({
   label,
   checked,
   onChange,
+  "data-testid": dataTestId,
 }: {
   label: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  "data-testid"?: string;
 }) {
   return (
     <label className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 cursor-pointer">
@@ -5361,6 +5418,7 @@ function CheckboxOption({
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         className="accent-[#A05068]"
+        data-testid={dataTestId}
       />
       {label}
     </label>

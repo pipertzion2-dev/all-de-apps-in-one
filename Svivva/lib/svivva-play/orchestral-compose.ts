@@ -71,15 +71,15 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<
   StemDef,
   "voiceRole" | "canonEntryBeats" | "stepMul" | "restChance" | "durMul" | "velBase"
 >[] = [
-  { name: "Violin 1", hint: "violin", role: "melody", register: "high", baseOctave: 5, pan: -55 },
-  { name: "Violin 2", hint: "violin", role: "harmony", register: "high", baseOctave: 5, pan: -35 },
-  { name: "Viola", hint: "viola", role: "harmony", register: "mid", baseOctave: 4, pan: -15 },
-  { name: "Cello", hint: "cello", role: "harmony", register: "mid", baseOctave: 3, pan: 15 },
-  { name: "Contrabass", hint: "contrabass", role: "bass", register: "low", baseOctave: 2, pan: 35 },
-  { name: "Solo Violin", hint: "solo violin", role: "melody", register: "high", baseOctave: 5, pan: -70 },
-  { name: "Harp", hint: "harp", role: "harmony", register: "mid", baseOctave: 4, pan: 25 },
-  { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 5, pan: 45 },
-  { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 4, pan: 50 },
+  { name: "Violin 1", hint: "violin", role: "melody", register: "high", baseOctave: 4, pan: -55 },
+  { name: "Violin 2", hint: "violin", role: "harmony", register: "high", baseOctave: 4, pan: -35 },
+  { name: "Viola", hint: "viola", role: "harmony", register: "mid", baseOctave: 3, pan: -15 },
+  { name: "Cello", hint: "cello", role: "harmony", register: "mid", baseOctave: 2, pan: 15 },
+  { name: "Contrabass", hint: "contrabass", role: "bass", register: "low", baseOctave: 1, pan: 35 },
+  { name: "Solo Violin", hint: "solo violin", role: "melody", register: "high", baseOctave: 4, pan: -70 },
+  { name: "Harp", hint: "harp", role: "harmony", register: "mid", baseOctave: 3, pan: 25 },
+  { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 4, pan: 45 },
+  { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 3, pan: 50 },
   { name: "Timpani", hint: "timpani", role: "percussion", register: "low", baseOctave: 2, pan: 0 },
   {
     name: "Percussion",
@@ -160,8 +160,8 @@ const STEM_PROFILES: StemDef[] = [
     ...ABLETON_ORCHESTRAL_STEMS[7]!,
     voiceRole: "flute",
     canonEntryBeats: 6,
-    stepMul: 4,
-    restChance: 0.42,
+    stepMul: 3,
+    restChance: 0.2,
     durMul: 1.6,
     velBase: 58,
   },
@@ -169,8 +169,8 @@ const STEM_PROFILES: StemDef[] = [
     ...ABLETON_ORCHESTRAL_STEMS[8]!,
     voiceRole: "oboe",
     canonEntryBeats: 8,
-    stepMul: 4,
-    restChance: 0.38,
+    stepMul: 3,
+    restChance: 0.16,
     durMul: 1.55,
     velBase: 60,
   },
@@ -179,7 +179,7 @@ const STEM_PROFILES: StemDef[] = [
     voiceRole: "timpani",
     canonEntryBeats: 0,
     stepMul: 4,
-    restChance: 0.55,
+    restChance: 0.1,
     durMul: 0.45,
     velBase: 82,
   },
@@ -187,8 +187,8 @@ const STEM_PROFILES: StemDef[] = [
     ...ABLETON_ORCHESTRAL_STEMS[10]!,
     voiceRole: "percussion",
     canonEntryBeats: 2,
-    stepMul: 8,
-    restChance: 0.5,
+    stepMul: 4,
+    restChance: 0.2,
     durMul: 0.12,
     velBase: 48,
   },
@@ -209,6 +209,34 @@ type TempoFeel = {
   themeDurBeats: number;
   voiceStepBeats: number;
   legatoOverlap: number;
+};
+
+/** Orchestral register limits (MIDI) — keeps timbres idiomatic. */
+const VOICE_REGISTER: Record<VoiceRole, { min: number; max: number }> = {
+  lead: { min: 55, max: 76 },
+  counter: { min: 53, max: 74 },
+  inner: { min: 48, max: 67 },
+  cello: { min: 36, max: 60 },
+  bass: { min: 28, max: 50 },
+  solo: { min: 58, max: 79 },
+  harp: { min: 48, max: 72 },
+  flute: { min: 62, max: 81 },
+  oboe: { min: 55, max: 77 },
+  timpani: { min: 28, max: 48 },
+  percussion: { min: 48, max: 72 },
+};
+
+const VOICE_MIN_NOTES: Partial<Record<VoiceRole, number>> = {
+  lead: 6,
+  counter: 5,
+  inner: 4,
+  cello: 4,
+  bass: 2,
+  solo: 4,
+  flute: 3,
+  oboe: 3,
+  timpani: 2,
+  percussion: 2,
 };
 
 class Rng {
@@ -233,6 +261,11 @@ function clampMidi(note: number, min = 36, max = 92): number {
   return Math.max(min, Math.min(max, Math.round(note)));
 }
 
+function clampForVoice(note: number, role: VoiceRole): number {
+  const { min, max } = VOICE_REGISTER[role];
+  return clampMidi(note, min, max);
+}
+
 function midiFromDegree(
   rootPc: number,
   absPcs: number[],
@@ -241,8 +274,9 @@ function midiFromDegree(
 ): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
-  const octJump = Math.floor(degree / n);
-  const idx = ((degree % n) + n) % n;
+  const cappedDegree = Math.max(0, Math.min(n * 3, degree));
+  const octJump = Math.floor(cappedDegree / n);
+  const idx = ((cappedDegree % n) + n) % n;
   return clampMidi(12 * (baseOctave + octJump) + rootPc + rel[idx]!);
 }
 
@@ -331,7 +365,7 @@ function buildMelodicCell(
         break;
       }
     }
-    deg = Math.max(0, Math.min(n * 5, deg + delta));
+    deg = Math.max(0, Math.min(n * 3, deg + delta));
     out.push(deg);
   }
   return out;
@@ -418,8 +452,8 @@ function nearestGuideMidi(notes: TranscribedNote[], tSec: number): number | null
 function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: number): number {
   let bestDeg = fallback;
   let bestDist = Infinity;
-  for (let d = 0; d < 28; d++) {
-    const m = midiFromDegree(scale.rootPc, scale.pitchClasses, d, 4);
+  for (let d = 0; d < 21; d++) {
+    const m = clampForVoice(midiFromDegree(scale.rootPc, scale.pitchClasses, d, 4), "lead");
     const dist = Math.abs(m - midi);
     if (dist < bestDist) {
       bestDist = dist;
@@ -429,12 +463,19 @@ function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: num
   return bestDeg;
 }
 
-function nearestScaleMidi(note: number, scale: ScaleResolution, baseOctave: number): number {
-  let best = midiFromDegree(scale.rootPc, scale.pitchClasses, 0, baseOctave);
+function nearestScaleMidi(
+  note: number,
+  scale: ScaleResolution,
+  baseOctave: number,
+  role: VoiceRole,
+): number {
+  const { min, max } = VOICE_REGISTER[role];
+  let best = clampForVoice(midiFromDegree(scale.rootPc, scale.pitchClasses, 0, baseOctave), role);
   let bestDist = Infinity;
-  for (let o = baseOctave - 1; o <= baseOctave + 2; o++) {
+  for (let o = baseOctave - 1; o <= baseOctave + 1; o++) {
     for (const step of relativeSteps(scale.pitchClasses, scale.rootPc)) {
-      const m = clampMidi(12 * (o + 1) + scale.rootPc + step);
+      const m = clampForVoice(12 * (o + 1) + scale.rootPc + step, role);
+      if (m < min || m > max) continue;
       const dist = Math.abs(m - note);
       if (dist < bestDist) {
         bestDist = dist;
@@ -460,33 +501,31 @@ function voiceLeadForRole(
   switch (role) {
     case "lead":
     case "solo":
-      return nearestScaleMidi(leadMidi, scale, baseOctave);
+      return nearestScaleMidi(leadMidi, scale, baseOctave, role);
     case "counter": {
       const interval = tuning.counterInterval + (rng.next() < 0.25 ? 1 : 0);
       const dir = eventIdx % 2 === 0 ? -1 : 1;
-      return nearestScaleMidi(leadMidi + dir * interval, scale, baseOctave);
+      return nearestScaleMidi(leadMidi + dir * interval, scale, baseOctave, role);
     }
     case "inner": {
       const third = chordPcs[1] ?? chordPcs[0] ?? scale.rootPc;
-      return clampMidi(12 * (baseOctave + 1) + third);
+      return clampForVoice(12 * (baseOctave + 1) + third, role);
     }
     case "cello": {
       const root = chordPcs[0] ?? scale.rootPc;
       const fifth = chordPcs[Math.min(2, chordPcs.length - 1)] ?? root;
-      return clampMidi(12 * (baseOctave + 1) + (eventIdx % 4 === 0 ? fifth : root));
+      return clampForVoice(12 * (baseOctave + 1) + (eventIdx % 4 === 0 ? fifth : root), role);
     }
     case "bass": {
       const root = chordPcs[0] ?? scale.rootPc;
-      return clampMidi(12 * (baseOctave + 1) + root, 28, 52);
+      return clampForVoice(12 * (baseOctave + 1) + root, role);
     }
     case "flute":
-      return eventIdx % 3 === 0
-        ? nearestScaleMidi(leadMidi + 12, scale, baseOctave)
-        : nearestScaleMidi(leadMidi + 5, scale, baseOctave);
+      return nearestScaleMidi(leadMidi + (eventIdx % 3 === 0 ? 7 : 4), scale, baseOctave, role);
     case "oboe":
-      return nearestScaleMidi(leadMidi - 4, scale, baseOctave);
+      return nearestScaleMidi(leadMidi - 3, scale, baseOctave, role);
     default:
-      return leadMidi;
+      return clampForVoice(leadMidi, role);
   }
 }
 
@@ -511,7 +550,7 @@ function buildHarpArpeggios(
     while (t < endBeat - step * 0.5) {
       const pc = pcs[vi % pcs.length] ?? 0;
       notes.push({
-        note: clampMidi(12 * 5 + pc),
+        note: clampForVoice(12 * 4 + pc, "harp"),
         velocity: 48 + rng.int(0, 18),
         startBeat: t,
         duration: step * 0.85,
@@ -538,7 +577,7 @@ function buildTimpaniHits(
     const chord = chordAtBeat(chords, b, bpm);
     const root = chord ? (chordSegmentPitchClasses(chord)[0] ?? 0) : 0;
     notes.push({
-      note: clampMidi(12 * 3 + root, 28, 48),
+      note: clampForVoice(clampMidi(12 * 3 + root, 28, 48), "timpani"),
       velocity: 88 + rng.int(0, 8),
       startBeat: b,
       duration: 0.5,
@@ -556,7 +595,7 @@ function buildPercussionHits(durationSec: number, bpm: number, seed: number): Mi
     if (b % 4 !== 2) continue;
     if (rng.next() < 0.45) continue;
     notes.push({
-      note: 60,
+      note: clampForVoice(60, "percussion"),
       velocity: 42 + rng.int(0, 16),
       startBeat: b + 0.5,
       duration: 0.08,
@@ -596,11 +635,9 @@ function composeStemLine(
     themeIdx++;
     const degree = rotatedCell[themeIdx % rotatedCell.length] ?? event.degree;
 
-    const leadMidi = midiFromDegree(
-      scale.rootPc,
-      scale.pitchClasses,
-      degree,
-      profile.baseOctave + (profile.voiceRole === "solo" ? 1 : 0),
+    const leadMidi = clampForVoice(
+      midiFromDegree(scale.rootPc, scale.pitchClasses, degree, profile.baseOctave),
+      profile.voiceRole,
     );
 
     const chord = chordAtBeat(chords, beat, bpm);
@@ -621,7 +658,7 @@ function composeStemLine(
     );
 
     notes.push({
-      note: pitch,
+      note: clampForVoice(pitch, profile.voiceRole),
       velocity: Math.min(
         118,
         profile.velBase + (event.accent ? 6 : 0) + rng.int(-3, 5),
@@ -632,6 +669,32 @@ function composeStemLine(
   }
 
   return notes;
+}
+
+function ensureVoiceMinimum(
+  notes: MidiNote[],
+  profile: StemDef,
+  scale: ScaleResolution,
+  feel: TempoFeel,
+): MidiNote[] {
+  const min = VOICE_MIN_NOTES[profile.voiceRole] ?? 2;
+  if (notes.length >= min) return notes;
+  const out = [...notes];
+  const rootDeg = 2;
+  for (let i = notes.length; i < min; i++) {
+    const beat = profile.canonEntryBeats + i * feel.voiceStepBeats * profile.stepMul;
+    const pitch = clampForVoice(
+      midiFromDegree(scale.rootPc, scale.pitchClasses, rootDeg + i, profile.baseOctave),
+      profile.voiceRole,
+    );
+    out.push({
+      note: pitch,
+      velocity: profile.velBase,
+      startBeat: beat,
+      duration: feel.themeDurBeats,
+    });
+  }
+  return out;
 }
 
 export function composeOrchestralEnsemble(opts: {
@@ -704,11 +767,15 @@ export function composeOrchestralEnsemble(opts: {
         feel,
         seed + i * 997,
       );
+      notes = ensureVoiceMinimum(notes, profile, scale, feel);
     }
 
     if (notes.length === 0) {
       notes.push({
-        note: midiFromDegree(scale.rootPc, scale.pitchClasses, 2, profile.baseOctave),
+        note: clampForVoice(
+          midiFromDegree(scale.rootPc, scale.pitchClasses, 2, profile.baseOctave),
+          profile.voiceRole,
+        ),
         velocity: profile.velBase,
         startBeat: profile.canonEntryBeats,
         duration: feel.themeDurBeats,
