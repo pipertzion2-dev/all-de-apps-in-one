@@ -92,4 +92,22 @@ describe("composeOrchestralEnsemble", () => {
     expect(voices.find((v) => v.name === "Oboe")!.notes.length).toBeGreaterThanOrEqual(3);
     expect(voices.find((v) => v.name === "Timpani")!.notes.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("applies phrase dynamics with varied velocities per voice", () => {
+    const scale = resolveScale("major", "D");
+    const voices = composeOrchestralEnsemble({
+      durationSec: 16,
+      bpm: 100,
+      scale,
+      seed: 5,
+      preset: BJORK_LINS_ORCHESTRAL_PRESET,
+    });
+    const v1 = voices.find((v) => v.name === "Violin 1")!;
+    const timpani = voices.find((v) => v.name === "Timpani")!;
+    const v1Vels = v1.notes.map((n) => n.velocity);
+    const tVels = timpani.notes.map((n) => n.velocity);
+    expect(Math.max(...v1Vels) - Math.min(...v1Vels)).toBeGreaterThan(8);
+    expect(Math.min(...tVels)).toBeGreaterThanOrEqual(70);
+    expect(Math.max(...v1Vels)).toBeLessThanOrEqual(118);
+  });
 });

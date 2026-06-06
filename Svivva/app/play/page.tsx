@@ -479,9 +479,6 @@ export default function SvivvaPlayPage() {
   const [swingAmount, setSwingAmount] = useState(0);
   const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_phase");
   const [patternLength, setPatternLength] = useState<PatternLength>("standard");
-  const [analysisFocus, setAnalysisFocus] = useState<"melodyne_mix" | "full_cloud">(
-    "melodyne_mix",
-  );
 
   const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
   const [melodyneFile, setMelodyneFile] = useState<File | null>(null);
@@ -578,12 +575,9 @@ export default function SvivvaPlayPage() {
       analysisKey: manualKey ?? effectiveAnalysis.key,
       chords,
       melodyneNotes: transcription?.melodyneNotes,
-      audioNotes:
-        analysisFocus === "melodyne_mix" && transcription?.melodyneNotes?.length
-          ? []
-          : (transcription?.audioNotes ?? transcription?.notes),
+      audioNotes: [],
     });
-  }, [effectiveAnalysis, manualKey, transcription, analysisFocus]);
+  }, [effectiveAnalysis, manualKey, transcription]);
 
   const applyAiScaleSuggestion = useCallback(() => {
     if (!aiScaleSuggestion) return;
@@ -983,71 +977,22 @@ export default function SvivvaPlayPage() {
       const result = await runImportAnalysis({
         file: audioFile,
         melodyneFile,
-        mode: modeRef.current,
+        bpm: manualTempo ?? analysis?.bpm ?? FALLBACK_ANALYSIS.bpm,
+        key: manualKey ?? analysis?.key ?? FALLBACK_ANALYSIS.key,
         userHint: userPromptRef.current,
-        analysisFocus,
         onInstantResult: (instant) => {
           if (cancelled || runId !== analysisRunRef.current) return;
-          if (instant.key && !instant.key.startsWith("Detecting")) {
-            const k = normalizeKeyLabel(instant.key);
-            audioKeyRef.current = k;
-            setAudioAnchorKey(k);
-            if (!melodyneFile) melodyneKeyRef.current = k;
-          }
-          setAnalysis(instant);
+          setAnalysis((prev) => ({
+            ...instant,
+            key: manualKey ?? instant.key,
+            bpm: manualTempo ?? instant.bpm,
+            chords: prev?.chords?.length ? prev.chords : instant.chords,
+          }));
           setIsAnalyzing(false);
-          if (analysisFocus !== "melodyne_mix" || !melodyneFile) {
-            setIsEnriching(true);
-          }
         },
         onTranscription: (session) => {
           if (cancelled || runId !== analysisRunRef.current) return;
           applyHarmonicSession(session);
-        },
-        onCloudComplete: (cloud) => {
-          if (cancelled || runId !== analysisRunRef.current) return;
-          if (cloud.analysis) {
-            const cloudAnalysis = cloud.analysis;
-            setAnalysis((prev) => {
-              const base = cloudAnalysis;
-              if (melodyneFile) {
-                const anchor =
-                  audioKeyRef.current ??
-                  (prev?.key && !prev.key.startsWith("Detecting")
-                    ? normalizeKeyLabel(prev.key)
-                    : null);
-                const display =
-                  melodyneKeyRef.current && !melodyneKeyRef.current.startsWith("Detecting")
-                    ? melodyneKeyRef.current
-                    : (anchor ?? prev?.key);
-                const keyTrap =
-                  (display === "C major" && anchor && anchor !== "C major") ||
-                  (display === "B major" && anchor === "A major") ||
-                  (display === "C# major" && anchor === "A major");
-                const keepKey = keyTrap ? anchor : display;
-                return {
-                  ...base,
-                  bpm: base.bpm ?? prev?.bpm,
-                  key: keepKey ?? anchor ?? "A major",
-                  keyConfidence: prev?.keyConfidence ?? (melodyneKeyRef.current ? 80 : 0),
-                  chords: prev?.chords?.length ? prev.chords : base.chords,
-                  sections: base.sections?.length ? base.sections : (prev?.sections ?? []),
-                };
-              }
-              if (!prev?.chords?.length) return base;
-              return {
-                ...base,
-                bpm: base.bpm ?? prev.bpm,
-                key: prev.key,
-                keyConfidence: prev.keyConfidence,
-                chords: prev.chords,
-              };
-            });
-            setSessionId(cloud.sessionId ?? null);
-          }
-          setWarningMsg(cloud.warning || "");
-          if (cloud.error) setErrorMsg(cloud.error);
-          setIsEnriching(false);
         },
       });
 
@@ -1058,55 +1003,30 @@ export default function SvivvaPlayPage() {
       }
       setIsTranscribing(false);
       if (result.analysis) {
-        setAnalysis((prev) => {
-          const base = result.analysis!;
-          const anchor =
-            audioKeyRef.current ??
-            (prev?.key && !prev.key.startsWith("Detecting") ? normalizeKeyLabel(prev.key) : null);
-          const sessionKey = result.transcription?.harmonicKey
-            ? normalizeKeyLabel(result.transcription.harmonicKey)
-            : null;
-          const keySource = result.transcription?.harmonicKeySource;
-          const cTrap = sessionKey === "C major" && anchor && anchor !== "C major";
-          const bTrap = sessionKey === "B major" && anchor === "A major";
-          const csTrap = sessionKey === "C# major" && anchor === "A major";
-          const keyTrap = cTrap || bTrap || csTrap;
-          const displayKey =
-            melodyneFile && anchor && (keySource === "audio" || keyTrap)
-              ? anchor
-              : (melodyneKeyRef.current ??
-                (keySource === "midi" && sessionKey && !keyTrap ? sessionKey : null) ??
-                anchor ??
-                base.key);
-          if (melodyneFile && displayKey) {
-            melodyneKeyRef.current = displayKey;
-            return {
-              ...base,
-              key: displayKey,
-              keyConfidence: Math.max(
-                prev?.keyConfidence ?? 0,
-                result.transcription?.harmonicKeyConfidence ?? 0,
-                base.keyConfidence,
-              ),
-              chords: prev?.chords?.length ? prev.chords : base.chords,
-              bpm: base.bpm ?? prev?.bpm,
-            };
-          }
-          if (!prev) return base;
-          return {
-            ...base,
-            chords: prev.chords?.length ? prev.chords : base.chords,
-            bpm: base.bpm ?? prev.bpm,
-          };
-        });
-        if (result.sessionId) setSessionId(result.sessionId);
+        const sessionKey = result.transcription?.harmonicKey
+          ? normalizeKeyLabel(result.transcription.harmonicKey)
+          : null;
+        setAnalysis((prev) => ({
+          ...result.analysis!,
+          key: manualKey ?? sessionKey ?? prev?.key ?? result.analysis!.key,
+          bpm: manualTempo ?? result.analysis!.bpm,
+          chords: result.transcription?.chords?.length
+            ? result.transcription.chords.map((c) => ({
+                t0: c.t0,
+                t1: c.t1,
+                symbol: c.symbol,
+                confidence: c.confidence,
+              }))
+            : (prev?.chords ?? result.analysis!.chords),
+        }));
+        if (sessionKey && result.transcription?.harmonicKeySource === "midi") {
+          melodyneKeyRef.current = sessionKey;
+        }
       }
       if (result.warning) setWarningMsg(result.warning);
       if (result.error) setErrorMsg(result.error);
       setIsAnalyzing(false);
-      if (analysisFocus === "melodyne_mix" && melodyneFile) {
-        setIsEnriching(false);
-      }
+      setIsEnriching(false);
     })().finally(() => {
       if (cancelled || runId !== analysisRunRef.current) return;
       setIsAnalyzing(false);
@@ -1115,7 +1035,7 @@ export default function SvivvaPlayPage() {
     return () => {
       cancelled = true;
     };
-  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession, analysisFocus]);
+  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession, manualTempo, manualKey, analysis?.bpm, analysis?.key]);
 
   const buildSettings = useCallback(() => {
     const lockedKey = generationKeyLabel;
@@ -1163,7 +1083,6 @@ export default function SvivvaPlayPage() {
           ...base,
           meend,
           patternLength,
-          analysisFocus,
           ensembleSize: 11,
         };
       default:
@@ -1175,7 +1094,6 @@ export default function SvivvaPlayPage() {
           swingAmount,
           hocketGroove,
           patternLength,
-          analysisFocus,
         };
     }
   }, [
@@ -1193,7 +1111,6 @@ export default function SvivvaPlayPage() {
     swingAmount,
     hocketGroove,
     patternLength,
-    analysisFocus,
     tension,
     rootMovement,
     voiceLeading,
@@ -1251,20 +1168,15 @@ export default function SvivvaPlayPage() {
                 transcription.durationSec,
                 manualTempo ?? activeAnalysis.bpm ?? 120,
               ),
-              audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
+              audioNotes: [],
               melodyneNotes: transcription.melodyneNotes ?? [],
               durationSec: transcription.durationSec,
               key: lockedKey,
-              keySource:
-                audioKeyRef.current &&
-                transcription.harmonicKey &&
-                normalizeKeyLabel(transcription.harmonicKey) !==
-                  normalizeKeyLabel(audioKeyRef.current)
-                  ? ("audio" as const)
-                  : transcription.harmonicKeySource,
+              keySource: transcription.sources?.melodyneMidi
+                ? ("midi" as const)
+                : transcription.harmonicKeySource,
               sources: transcription.sources,
-              melodyneMixOnly:
-                analysisFocus === "melodyne_mix" && Boolean(transcription.sources?.melodyneMidi),
+              melodyneMixOnly: Boolean(transcription.sources?.melodyneMidi),
             }
           : undefined;
 
@@ -1388,7 +1300,6 @@ export default function SvivvaPlayPage() {
       manualKey,
       manualTempo,
       transcription,
-      analysisFocus,
       aiScaleSuggestion,
       scaleSuggestionApplied,
       applyAiScaleSuggestion,
@@ -2338,21 +2249,16 @@ export default function SvivvaPlayPage() {
         manualKey,
         chordSource,
       );
-      const anchorMidi = melodicAnchorMidi(
-        transcription?.melodyneNotes?.length
-          ? transcription.melodyneNotes
-          : (transcription?.audioNotes ?? transcription?.notes ?? []),
-      );
+      const anchorMidi = melodicAnchorMidi(transcription?.melodyneNotes ?? []);
 
       const harmonicCtx = transcription
         ? {
             chords: chordSource,
-            audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
+            audioNotes: [],
             melodyneNotes: transcription.melodyneNotes ?? [],
             durationSec,
             sources: transcription.sources,
-            melodyneMixOnly:
-              analysisFocus === "melodyne_mix" && Boolean(transcription.sources?.melodyneMidi),
+            melodyneMixOnly: Boolean(transcription.sources?.melodyneMidi),
           }
         : null;
 
@@ -2503,7 +2409,6 @@ export default function SvivvaPlayPage() {
     swingAmount,
     hocketGroove,
     patternLength,
-    analysisFocus,
   ]);
 
   useEffect(() => {
@@ -4208,13 +4113,9 @@ export default function SvivvaPlayPage() {
                                 checked={meend}
                                 onChange={setMeend}
                               />
-                              <CheckboxOption
-                                label="Analyze Melodyne + input only (skip cloud LLM)"
-                                checked={analysisFocus === "melodyne_mix"}
-                                onChange={(v) =>
-                                  setAnalysisFocus(v ? "melodyne_mix" : "full_cloud")
-                                }
-                              />
+                              <p className="text-[9px] text-gray-500">
+                                Tempo and key are manual — Melodyne MIDI syncs pitch/chords only.
+                              </p>
                               <div>
                                 <label className="text-[10px] font-semibold text-gray-400 uppercase">
                                   Repeating pattern length
@@ -4294,13 +4195,9 @@ export default function SvivvaPlayPage() {
                                   12 semitones.
                                 </p>
                               )}
-                              <CheckboxOption
-                                label="Analyze Melodyne + input only (skip cloud LLM)"
-                                checked={analysisFocus === "melodyne_mix"}
-                                onChange={(v) =>
-                                  setAnalysisFocus(v ? "melodyne_mix" : "full_cloud")
-                                }
-                              />
+                              <p className="text-[9px] text-gray-500">
+                                Tempo and key are manual — Melodyne MIDI syncs pitch/chords only.
+                              </p>
                               <div>
                                 <label className="text-[10px] font-semibold text-gray-400 uppercase">
                                   Repeating pattern length

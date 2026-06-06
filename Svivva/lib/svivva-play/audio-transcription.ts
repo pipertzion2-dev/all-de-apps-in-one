@@ -198,6 +198,33 @@ export function transcribeMono(
   return { notes, chords, waveformPeaks, durationSec };
 }
 
+/** Decode audio for duration + waveform only — no pitch/key/tempo analysis. */
+export async function probeAudioFile(file: File): Promise<AudioTranscription | null> {
+  try {
+    const buf = await file.arrayBuffer();
+    const Ctx =
+      typeof window !== "undefined"
+        ? window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        : null;
+    if (!Ctx) return null;
+    const ctx = new Ctx();
+    try {
+      const decoded = await ctx.decodeAudioData(buf.slice(0));
+      const mono = monoFromAudioBuffer(decoded, 120);
+      const maxSamples = Math.min(mono.length, Math.floor(decoded.sampleRate * 120));
+      const work = mono.subarray(0, maxSamples);
+      const durationSec = decoded.duration;
+      const waveformPeaks = buildWaveformPeaks(work, 320);
+      return { notes: [], chords: [], waveformPeaks, durationSec };
+    } finally {
+      await ctx.close().catch(() => {});
+    }
+  } catch {
+    return null;
+  }
+}
+
 export async function transcribeAudioFile(
   file: File,
   bpm: number,

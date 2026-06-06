@@ -449,7 +449,7 @@ export async function POST(request: NextRequest) {
         patternLength,
         preset,
         melodyneNotes: orchCtx.melodyneNotes,
-        audioNotes: orchCtx.audioNotes,
+        audioNotes: [],
         chords: sessionChords,
       });
       let stems = voicePartsToOrchestralStems(voices) as GeneratedStemResult[];

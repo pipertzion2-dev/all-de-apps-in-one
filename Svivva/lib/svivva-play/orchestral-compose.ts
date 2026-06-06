@@ -239,6 +239,20 @@ const VOICE_MIN_NOTES: Partial<Record<VoiceRole, number>> = {
   percussion: 2,
 };
 
+const VOICE_DYNAMICS: Record<VoiceRole, { floor: number; ceiling: number; accent: number }> = {
+  lead: { floor: 58, ceiling: 96, accent: 10 },
+  counter: { floor: 52, ceiling: 88, accent: 7 },
+  inner: { floor: 48, ceiling: 78, accent: 5 },
+  cello: { floor: 50, ceiling: 82, accent: 6 },
+  bass: { floor: 44, ceiling: 72, accent: 4 },
+  solo: { floor: 60, ceiling: 98, accent: 12 },
+  harp: { floor: 40, ceiling: 68, accent: 3 },
+  flute: { floor: 50, ceiling: 84, accent: 8 },
+  oboe: { floor: 52, ceiling: 86, accent: 7 },
+  timpani: { floor: 72, ceiling: 112, accent: 14 },
+  percussion: { floor: 38, ceiling: 76, accent: 10 },
+};
+
 class Rng {
   private state: number;
   constructor(seed: number) {
@@ -697,6 +711,47 @@ function ensureVoiceMinimum(
   return out;
 }
 
+function phraseDynamicArc(beat: number, phraseBars: number): number {
+  const phraseLen = Math.max(4, phraseBars * 4);
+  const pos = beat % phraseLen;
+  if (pos >= phraseLen - 1) return 0.78;
+  return 0.68 + 0.32 * Math.sin((pos / phraseLen) * Math.PI);
+}
+
+function applyOrchestralDynamics(
+  notes: MidiNote[],
+  profile: StemDef,
+  tuning: StyleTuning,
+): MidiNote[] {
+  if (!notes.length) return notes;
+  const dyn = VOICE_DYNAMICS[profile.voiceRole];
+  return notes.map((n, idx) => {
+    const arc = phraseDynamicArc(n.startBeat, tuning.phraseBars);
+    const barPos = n.startBeat % 4;
+    const downbeatBoost = barPos < 0.2 ? dyn.accent : barPos > 2.75 ? -5 : 0;
+    const prev = idx > 0 ? notes[idx - 1]! : null;
+    const leap = prev ? Math.abs(n.note - prev.note) : 0;
+    const leapSoft = leap > 7 ? -6 : leap > 4 ? -3 : 0;
+    const sustainSoft = n.duration > 2.5 ? -4 : 0;
+    const target = dyn.floor + (dyn.ceiling - dyn.floor) * arc;
+    const velocity = Math.round(
+      Math.min(118, Math.max(28, target + downbeatBoost + leapSoft + sustainSoft)),
+    );
+    return { ...n, velocity };
+  });
+}
+
+function buildOrchestralExpression(notes: MidiNote[]): Record<string, unknown> {
+  const cc1 = notes.map((n) => ({
+    beat: n.startBeat,
+    value: Math.round((n.velocity / 127) * 127),
+  }));
+  return {
+    cc1,
+    cc11: cc1.map((c) => ({ beat: c.beat, value: Math.round(c.value * 0.88) })),
+  };
+}
+
 export function composeOrchestralEnsemble(opts: {
   durationSec: number;
   bpm: number;
@@ -722,7 +777,7 @@ export function composeOrchestralEnsemble(opts: {
 
   const tuning = styleTuning(preset);
   const feel = tempoFeelForOrchestra(bpm);
-  const guideNotes = melodyneNotes.length ? melodyneNotes : audioNotes;
+  const guideNotes = melodyneNotes;
   const beatSec = 60 / bpm;
   const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
   const { cpCellLen } = resolvePatternCellLengths(patternLength);
@@ -782,10 +837,23 @@ export function composeOrchestralEnsemble(opts: {
       });
     }
 
+    notes = applyOrchestralDynamics(notes, profile, tuning);
+
     parts.push({ voiceIndex: i, notes, name: profile.name });
   }
 
   return parts;
+}
+
+const STEM_EXPRESSION_CACHE = new WeakMap<MidiNote[], Record<string, unknown>>();
+
+function expressionForNotes(notes: MidiNote[]): Record<string, unknown> {
+  let cached = STEM_EXPRESSION_CACHE.get(notes);
+  if (!cached) {
+    cached = buildOrchestralExpression(notes);
+    STEM_EXPRESSION_CACHE.set(notes, cached);
+  }
+  return cached;
 }
 
 export function composeBjorkLinsOrchestral(
@@ -818,7 +886,7 @@ export function voicePartsToOrchestralStems(voices: VoicePart[]) {
         startBeat: n.startBeat,
         duration: n.duration,
       })),
-      expression: {},
+      expression: expressionForNotes(v.notes),
       articulations:
         profile?.voiceRole === "lead" || profile?.voiceRole === "solo"
           ? ["legato"]

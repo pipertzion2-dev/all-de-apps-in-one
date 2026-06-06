@@ -1,5 +1,5 @@
 import type { AudioTranscription, TranscribedNote } from "./audio-transcription";
-import { transcribeAudioFile } from "./audio-transcription";
+import { probeAudioFile, transcribeAudioFile } from "./audio-transcription";
 import { mergeChordTimelines } from "./chords-from-notes";
 import { normalizeKeyLabel } from "./analysis-utils";
 import { resolveHarmonicKey } from "./resolve-harmonic-key";
@@ -106,11 +106,23 @@ export async function buildHarmonicSession(options: {
   key: string;
   keyConfidence?: number;
   keyHint?: string;
+  /** Skip monophonic pitch/chord extraction from audio — Melodyne + timeline sync only. */
+  skipAudioPitchTrack?: boolean;
 }): Promise<HarmonicSession | null> {
-  const { audioFile, melodyneFile, bpm, key, keyConfidence = 70, keyHint } = options;
+  const {
+    audioFile,
+    melodyneFile,
+    bpm,
+    key,
+    keyConfidence = 70,
+    keyHint,
+    skipAudioPitchTrack = false,
+  } = options;
 
   const [audioTx, melodyneParsed] = await Promise.all([
-    transcribeAudioFile(audioFile, bpm, key),
+    skipAudioPitchTrack
+      ? probeAudioFile(audioFile)
+      : transcribeAudioFile(audioFile, bpm, key),
     melodyneFile
       ? melodyneFile.arrayBuffer().then((buf) => parseMidiFile(buf))
       : Promise.resolve(null),
@@ -153,7 +165,7 @@ export async function buildHarmonicSession(options: {
   const keyResolved = melodyneAligned.length
     ? resolveHarmonicKey({
         audioKey: key,
-        audioConfidence: keyConfidence,
+        audioConfidence: skipAudioPitchTrack ? 0 : keyConfidence,
         midiNotes: melodyneAligned,
         chords: agnosticChords,
         bpm,
