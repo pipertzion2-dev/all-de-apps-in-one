@@ -58,6 +58,7 @@ import {
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
 import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "@/lib/svivva-play/generate-helpers";
+import { applyPlayDynamicsToStems } from "@/lib/svivva-play/play-dynamics";
 import {
   buildMeendAccentPlaybacks,
   meendAccentSourceName,
@@ -2360,6 +2361,11 @@ export default function SvivvaPlayPage() {
         chordSource,
         bpm,
         { anchorMidi, scaleInfo },
+      ) as unknown as StemData[];
+      newStems = applyPlayDynamicsToStems(
+        newStems.map((s) => ({ ...s, midiEvents: normalizeMidiEvents(s.midiEvents) })),
+        bpm,
+        { strength: 0.38, phraseBeats: 16 },
       ) as unknown as StemData[];
       const swingAmt = Math.max(0, Math.min(1, swingAmount / 100));
       if (swingAmt > 0) {

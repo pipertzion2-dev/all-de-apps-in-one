@@ -79,9 +79,9 @@ export function applyMeendToOrchestralMelodyStems(
     if (!/violin 1|solo violin|flute|oboe/i.test(stem.name)) return stem;
     if (stem.midiEvents.length === 0) return stem;
     const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
-    const monoReady = prepareMeendPreviewEvents(sorted, 0.4, 2.0);
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.5, 2.6);
     const legato = prepareMeendLegatoMidiEvents(monoReady);
-    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.55 });
+    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.95 });
     return {
       ...stem,
       midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],

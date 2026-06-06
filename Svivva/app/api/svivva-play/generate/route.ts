@@ -53,7 +53,7 @@ import {
 } from "@/lib/svivva-play/orchestral-compose";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
-import { buildEnsembleChordTimeline } from "@/lib/svivva-play/ensemble-harmony";
+import { buildEnsembleChordTimeline, resolveEnsembleSessionChords } from "@/lib/svivva-play/ensemble-harmony";
 import { polishEnsembleStemsWithAi } from "@/lib/svivva-play/ensemble-ai-polish";
 
 async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
@@ -177,11 +177,12 @@ export async function POST(request: NextRequest) {
 
     const ensembleSessionChords =
       mode === "ensemble"
-        ? buildEnsembleChordTimeline(
+        ? resolveEnsembleSessionChords(
             composeKeyForEnsemble,
+            sessionChords,
             sessionDurationSec,
             manualTempo ?? analysisData.bpm,
-            seed,
+            manualKey,
           )
         : sessionChords;
 
@@ -269,7 +270,7 @@ export async function POST(request: NextRequest) {
         chordsForGuard,
         analysisData.bpm,
         {
-          anchorMidi: melodicAnchor,
+          anchorMidi: mode === "ensemble" ? undefined : melodicAnchor,
           scaleInfo,
         },
       );

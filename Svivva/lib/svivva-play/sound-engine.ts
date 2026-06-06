@@ -473,7 +473,11 @@ export class SvivvaSoundEngine {
         const isOrchMeend =
           Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
         const useMeendMono =
-          wantsMeend && !polyphonic && (isMeendAccent || Boolean(stem.expression?.meend));
+          wantsMeend &&
+          !polyphonic &&
+          (isMeendAccent ||
+            Boolean(stem.expression?.meend) ||
+            (forceMeend && isOrchestralMeendStem(stem.name)));
 
         if (useMeendMono && pitchBends.length === 0) {
           const built = buildMeendStemExpression(midiEvents, false);
@@ -494,7 +498,7 @@ export class SvivvaSoundEngine {
         const previewGainDb = isMeendAccent
           ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
           : isOrchMeend
-            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 4
+            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
             : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
         const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();

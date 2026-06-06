@@ -61,7 +61,8 @@ export function buildEnsembleChordTimeline(
   const isMinor = isMinorKeyLabel(key);
   const scalePcs = isMinor ? naturalMinorScalePcs(rootPc) : majorScalePcs(rootPc);
   const pool = isMinor ? MINOR_PROGRESSIONS : MAJOR_PROGRESSIONS;
-  const progression = pool[Math.abs(seed) % pool.length]!;
+  // Stable default progression (I–V–vi–IV / i–VI–III–VII); seed only rotates when explicitly varied.
+  const progression = pool[seed === 0 ? 0 : Math.abs(seed) % pool.length]!;
 
   const barSec = (60 / bpm) * 4;
   const totalBars = Math.max(4, Math.ceil(durationSec / barSec));
@@ -95,4 +96,29 @@ export function buildEnsembleChordTimeline(
   }
 
   return segments;
+}
+
+/** Prefer imported chord map; otherwise a stable diatonic progression in the user key. */
+export function resolveEnsembleSessionChords(
+  key: string,
+  sessionChords: ChordSegment[],
+  durationSec: number,
+  bpm: number,
+  manualKey?: string | null,
+): ChordSegment[] {
+  if (!manualKey?.trim() && sessionChords.length >= 2) {
+    const unique = new Set(
+      sessionChords.map((c) => c.symbol.replace(/\s+/g, "").replace(/\/.*$/, "").toUpperCase()),
+    );
+    if (unique.size >= 2) {
+      return sessionChords.map((c, i) =>
+        i === sessionChords.length - 1 ? { ...c, t1: Math.max(c.t1, durationSec) } : c,
+      );
+    }
+  }
+  if (!manualKey?.trim() && sessionChords.length === 1) {
+    const c = sessionChords[0]!;
+    return [{ ...c, t0: 0, t1: durationSec }];
+  }
+  return buildEnsembleChordTimeline(key, durationSec, bpm, 0);
 }

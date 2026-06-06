@@ -216,16 +216,16 @@ function registerBounds(
     roleNorm === "hocket" ||
     roleNorm.includes("hocket")
   ) {
-    const anchor = opts?.anchorMidi ?? 60;
+    const anchor = opts?.anchorMidi ?? 67;
     return {
-      min: Math.max(48, anchor - 12),
-      max: Math.min(74, anchor + 8),
+      min: Math.max(55, anchor - 14),
+      max: Math.min(84, anchor + 10),
     };
   }
-  const anchor = opts?.anchorMidi ?? 60;
+  const anchor = opts?.anchorMidi ?? 67;
   return {
-    min: Math.max(48, anchor - 12),
-    max: Math.min(74, anchor + 8),
+    min: Math.max(55, anchor - 14),
+    max: Math.min(84, anchor + 10),
   };
 }
 

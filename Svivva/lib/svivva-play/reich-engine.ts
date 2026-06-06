@@ -111,11 +111,11 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }
 
-function clampMidi(note: number, max = 76): number {
+function clampMidi(note: number, max = 84): number {
   return Math.max(36, Math.min(max, Math.round(note)));
 }
 
-function clampMidiPreservePc(note: number, max = 76, min = 36): number {
+function clampMidiPreservePc(note: number, max = 84, min = 36): number {
   const pc = ((note % 12) + 12) % 12;
   let best = clampMidi(note, max);
   if (best % 12 === pc) return best;
@@ -135,11 +135,11 @@ function clampMidiPreservePc(note: number, max = 76, min = 36): number {
 function midiForDegree(rootPc: number, absPcs: number[], degree: number, baseOctave = 4): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
-  const safeDeg = Math.max(0, Math.min(degree, n + 4));
+  const safeDeg = Math.max(0, Math.min(degree, n * 4));
   const octJump = Math.floor(safeDeg / n);
   const idx = ((safeDeg % n) + n) % n;
   const raw = 12 * (baseOctave + octJump) + rootPc + rel[idx];
-  return clampMidi(raw);
+  return clampMidiPreservePc(raw);
 }
 
 class Rng {
@@ -248,7 +248,7 @@ function buildMasterMidiCell(
       const deg = Math.floor(rng.next() * rel.length);
       const pc = (rootPc + rel[deg]) % 12;
       const octave = baseOctave + Math.floor(rng.next() * 2);
-      out.push(clampMidi(12 * (octave + 1) + pc));
+      out.push(clampMidiPreservePc(12 * (octave + 1) + pc));
     }
     return out;
   }

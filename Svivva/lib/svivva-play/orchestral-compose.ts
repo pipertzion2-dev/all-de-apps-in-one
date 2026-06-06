@@ -270,17 +270,17 @@ type TempoFeel = {
   legatoOverlap: number;
 };
 
-/** Orchestral register limits (MIDI) — warm mid register, no piercing highs. */
+/** Orchestral register limits (MIDI) — warm mid register, not piercing highs. */
 const VOICE_REGISTER: Record<VoiceRole, { min: number; max: number }> = {
-  lead: { min: 50, max: 62 },
-  counter: { min: 48, max: 60 },
-  inner: { min: 45, max: 58 },
-  cello: { min: 36, max: 52 },
-  bass: { min: 28, max: 43 },
-  solo: { min: 52, max: 64 },
-  harp: { min: 45, max: 60 },
-  flute: { min: 55, max: 64 },
-  oboe: { min: 52, max: 62 },
+  lead: { min: 55, max: 69 },
+  counter: { min: 53, max: 67 },
+  inner: { min: 48, max: 62 },
+  cello: { min: 36, max: 55 },
+  bass: { min: 28, max: 45 },
+  solo: { min: 58, max: 71 },
+  harp: { min: 48, max: 64 },
+  flute: { min: 58, max: 72 },
+  oboe: { min: 55, max: 69 },
   timpani: { min: 28, max: 42 },
   percussion: { min: 38, max: 48 },
 };
@@ -362,10 +362,37 @@ function midiFromDegree(
 ): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
-  const cappedDegree = Math.max(0, Math.min(n + 3, degree));
+  const cappedDegree = Math.max(0, Math.min(n * 3, degree));
   const octJump = Math.floor(cappedDegree / n);
   const idx = ((cappedDegree % n) + n) % n;
-  return clampMidi(12 * (baseOctave + octJump) + rootPc + rel[idx]!);
+  return 12 * (baseOctave + octJump) + rootPc + rel[idx]!;
+}
+
+function alignDegreeToChord(
+  degree: number,
+  chord: ChordSegment | null,
+  scale: ScaleResolution,
+): number {
+  if (!chord) return degree;
+  const chordPcs = new Set(chordSegmentPitchClasses(chord));
+  const rel = relativeSteps(scale.pitchClasses, scale.rootPc);
+  const n = rel.length || 1;
+  const candidates: number[] = [];
+  for (let d = 0; d <= n * 2; d++) {
+    const m = 12 * 4 + scale.rootPc + rel[d % n]!;
+    if (chordPcs.has(m % 12)) candidates.push(d);
+  }
+  if (!candidates.length) return degree;
+  let best = degree;
+  let bestDist = Infinity;
+  for (const d of candidates) {
+    const dist = Math.abs(d - degree);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = d;
+    }
+  }
+  return best;
 }
 
 function chordAtBeat(chords: ChordSegment[], beat: number, bpm: number): ChordSegment | null {
@@ -788,14 +815,15 @@ function composeStemLine(
 
     const event = theme[themeIdx % theme.length]!;
     themeIdx++;
-    const degree = rotatedCell[themeIdx % rotatedCell.length] ?? event.degree;
+    const rawDegree = rotatedCell[themeIdx % rotatedCell.length] ?? event.degree;
+    const chord = chordAtBeat(chords, beat, bpm);
+    const degree = alignDegreeToChord(rawDegree, chord, scale);
 
     const leadMidi = clampForVoice(
       midiFromDegree(scale.rootPc, scale.pitchClasses, degree, profile.baseOctave),
       profile.voiceRole,
     );
 
-    const chord = chordAtBeat(chords, beat, bpm);
     const pitch = smoothMelodicLeap(
       prevPitch,
       voiceLeadForRole(
