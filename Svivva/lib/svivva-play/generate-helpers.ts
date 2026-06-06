@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
-import { buildMeendStemExpression, constrainGeneratedStems, stemHasOverlappingNotes } from "./scale-key-guard";
+import { buildMeendStemExpression, constrainGeneratedStems, prepareMeendPreviewEvents, stemHasOverlappingNotes } from "./scale-key-guard";
+import { prepareMeendLegatoMidiEvents } from "./meend-midi";
 import type { ChordSegment } from "./chord-from-chroma";
 import * as ChordKit from "./chordkit";
 
@@ -70,15 +71,28 @@ function meendStemIfMonophonic(stem: GeneratedStemResult): GeneratedStemResult {
   };
 }
 
-/** Meend only on lyrical orchestral stems — not bass, harp, or percussion. */
+/** Meend only on lyrical orchestral stems — legato-prepared so preview bends are audible. */
 export function applyMeendToOrchestralMelodyStems(
   stems: GeneratedStemResult[],
 ): GeneratedStemResult[] {
-  return stems.map((stem) =>
-    /violin 1|solo violin|flute|oboe/i.test(stem.name)
-      ? meendStemIfMonophonic(stem)
-      : stem,
-  );
+  return stems.map((stem) => {
+    if (!/violin 1|solo violin|flute|oboe/i.test(stem.name)) return stem;
+    if (stem.midiEvents.length === 0) return stem;
+    const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 2.2);
+    const legato = prepareMeendLegatoMidiEvents(monoReady);
+    const built = buildMeendStemExpression(legato, false);
+    return {
+      ...stem,
+      midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
+      expression: {
+        ...stem.expression,
+        meend: true,
+        pitchbend: built.pitchbend,
+        monophonic: true,
+      },
+    };
+  });
 }
 
 export function orchestralMeendStemNames(stems: { name: string }[]): string[] {

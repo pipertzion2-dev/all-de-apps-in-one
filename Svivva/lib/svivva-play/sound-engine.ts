@@ -10,6 +10,7 @@ import {
   isMeendAccentStem,
   MEEND_ACCENT_GAIN_DB,
 } from "./meend-showcase-stem";
+import { isOrchestralMeendStem } from "./orchestral-compose";
 import {
   buildMeendStemExpression,
   stemHasOverlappingNotes,
@@ -401,17 +402,20 @@ export class SvivvaSoundEngine {
   }
 
   /** Meend preview must stay monophonic — never fall back to PolySynth. */
-  private createMeendSynth(): Tone.MonoSynth {
+  private createMeendSynth(preset: InstrumentPreset = MEEND_PREVIEW): Tone.MonoSynth {
     try {
-      const synth = this.createSynth(MEEND_PREVIEW);
-      if (synth instanceof Tone.MonoSynth) return synth;
+      const synth = this.createSynth(preset);
+      if (synth instanceof Tone.MonoSynth) {
+        synth.volume.value = (preset.volume ?? -8) + 6;
+        return synth;
+      }
     } catch (err) {
-      console.warn("MEEND_PREVIEW preset failed, using bare MonoSynth:", err);
+      console.warn("Meend preset failed, using bare MonoSynth:", err);
     }
     return new Tone.MonoSynth({
-      oscillator: { type: "triangle" },
-      envelope: { attack: 0.05, decay: 0.12, sustain: 0.62, release: 0.4 },
-      volume: -5,
+      oscillator: { type: (preset.oscillator.type as "sine") || "sine" },
+      envelope: preset.envelope,
+      volume: (preset.volume ?? -8) + 6,
     });
   }
 
@@ -466,13 +470,10 @@ export class SvivvaSoundEngine {
         const wantsMeend =
           forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
         const isMeendAccent = isMeendAccentStem(stem.name);
-        // Also allow meend on any explicitly-flagged monophonic stem (e.g. hocket voices
-        // that had applyMeendToStems called on them), not just showcase accent stems.
+        const isOrchMeend =
+          Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
         const useMeendMono =
-          wantsMeend &&
-          !polyphonic &&
-          (isMeendAccent ||
-            (Boolean(stem.expression?.meend) && Boolean(stem.expression?.monophonic)));
+          wantsMeend && !polyphonic && (isMeendAccent || Boolean(stem.expression?.meend));
 
         if (useMeendMono && pitchBends.length === 0) {
           const built = buildMeendStemExpression(midiEvents, false);
@@ -480,18 +481,21 @@ export class SvivvaSoundEngine {
           pitchBends = built.pitchbend;
         }
 
-        const preset = useMeendMono
-          ? MEEND_PREVIEW
-          : resolveInstrumentPreset(stem.instrumentHint, stem.role);
+        const meendPreset = isOrchMeend
+          ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
+          : MEEND_PREVIEW;
+        const preset = useMeendMono ? meendPreset : resolveInstrumentPreset(stem.instrumentHint, stem.role);
         const synth = useMeendMono
-          ? this.createMeendSynth()
+          ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);
         let useLegatoMeend = useMeendMono;
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
           ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
-          : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
+          : isOrchMeend
+            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
+            : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
         const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();
 

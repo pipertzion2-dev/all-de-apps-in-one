@@ -1697,7 +1697,7 @@ export default function SvivvaPlayPage() {
         muted: s.muted,
         gainDb: s.gainDb,
       }));
-      if (!meend) return base;
+      if (!meend || mode === "ensemble") return base;
       const accents = buildMeendAccentPlaybacks(
         currentStems.map((s) => ({
           name: s.name,

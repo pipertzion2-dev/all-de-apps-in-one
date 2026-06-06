@@ -18,10 +18,10 @@ import {
 } from "./meend-midi";
 
 /** Gamak depth — clear under a full mix without clipping. */
-export const MEEND_PREVIEW_GAMAK_CENTS = 90;
+export const MEEND_PREVIEW_GAMAK_CENTS = 115;
 
 /** Tail slide strength in preview. */
-export const MEEND_PREVIEW_TAIL_BOOST = 1.55;
+export const MEEND_PREVIEW_TAIL_BOOST = 1.85;
 
 const EVENT_ORDER = { attack: 0, bend: 1, tailBend: 2, release: 3 } as const;
 
@@ -48,7 +48,7 @@ export function buildMeendLegatoTimeline(
       type: "attack",
       time: beatToSeconds(evt.startBeat),
       note: noteName(evt.note),
-      velocity: Math.max(0.28, Math.min(0.55, (evt.velocity / 127) * 0.65)),
+      velocity: Math.max(0.42, Math.min(0.78, (evt.velocity / 127) * 0.82)),
     });
 
     const gamakStart = evt.startBeat + d * V1_GAMAK_START;

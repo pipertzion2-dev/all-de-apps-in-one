@@ -213,18 +213,20 @@ type TempoFeel = {
 
 /** Orchestral register limits (MIDI) — keeps timbres idiomatic. */
 const VOICE_REGISTER: Record<VoiceRole, { min: number; max: number }> = {
-  lead: { min: 55, max: 72 },
-  counter: { min: 53, max: 70 },
-  inner: { min: 48, max: 65 },
-  cello: { min: 36, max: 58 },
-  bass: { min: 28, max: 48 },
-  solo: { min: 58, max: 74 },
-  harp: { min: 48, max: 68 },
-  flute: { min: 60, max: 76 },
-  oboe: { min: 55, max: 72 },
-  timpani: { min: 28, max: 45 },
-  percussion: { min: 40, max: 52 },
+  lead: { min: 55, max: 69 },
+  counter: { min: 53, max: 67 },
+  inner: { min: 48, max: 62 },
+  cello: { min: 36, max: 55 },
+  bass: { min: 28, max: 45 },
+  solo: { min: 58, max: 71 },
+  harp: { min: 48, max: 64 },
+  flute: { min: 58, max: 72 },
+  oboe: { min: 55, max: 69 },
+  timpani: { min: 28, max: 42 },
+  percussion: { min: 38, max: 48 },
 };
+
+const MEEND_MELODY_ROLES: VoiceRole[] = ["lead", "solo", "flute", "oboe"];
 
 const VOICE_MIN_NOTES: Partial<Record<VoiceRole, number>> = {
   lead: 6,
@@ -350,23 +352,35 @@ function buildMelodicCell(
   cellLen: number,
   seed: number,
   tuning: StyleTuning,
+  preset: EnsembleOrchestralPreset,
 ): number[] {
   const rng = new Rng(seed ^ 0xce11);
   const rel = relativeSteps(scale.pitchClasses, scale.rootPc);
   const n = rel.length || 1;
-  let deg = rng.int(1, n + 2);
+  const bjorkLins = preset === BJORK_LINS_ORCHESTRAL_PRESET;
+  const maxDeg = bjorkLins ? Math.min(n + 2, 8) : n * 3;
+  let deg = rng.int(bjorkLins ? 1 : 1, bjorkLins ? n + 1 : n + 2);
   const out: number[] = [];
-  const weights: [number, number][] = [
-    [0, 0.18],
-    [1, 0.26],
-    [-1, 0.26],
-    [2, 0.12],
-    [-2, 0.1],
-    [3, 0.05],
-    [-3, 0.03],
-  ];
+  const weights: [number, number][] = bjorkLins
+    ? [
+        [0, 0.22],
+        [1, 0.3],
+        [-1, 0.3],
+        [2, 0.1],
+        [-2, 0.06],
+        [3, 0.02],
+      ]
+    : [
+        [0, 0.18],
+        [1, 0.26],
+        [-1, 0.26],
+        [2, 0.12],
+        [-2, 0.1],
+        [3, 0.05],
+        [-3, 0.03],
+      ];
   for (let i = 0; i < cellLen; i++) {
-    if (rng.next() < 0.08) {
+    if (rng.next() < 0.1) {
       out.push(deg);
       continue;
     }
@@ -379,7 +393,7 @@ function buildMelodicCell(
         break;
       }
     }
-    deg = Math.max(0, Math.min(n * 3, deg + delta));
+    deg = Math.max(0, Math.min(maxDeg, deg + delta));
     out.push(deg);
   }
   return out;
@@ -402,12 +416,13 @@ function buildPrimaryTheme(
   guideNotes: TranscribedNote[],
   tuning: StyleTuning,
   feel: TempoFeel,
+  preset: EnsembleOrchestralPreset,
 ): ThemeEvent[] {
   const rng = new Rng(seed ^ 0x7e4e);
   const beatSec = 60 / bpm;
   const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
   const { cpCellLen } = resolvePatternCellLengths(patternLength);
-  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning);
+  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning, preset);
   const phraseBeats = tuning.phraseBars * 4;
   const events: ThemeEvent[] = [];
 
@@ -477,6 +492,42 @@ function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: num
   return bestDeg;
 }
 
+function chordToneAtIndex(
+  chordPcs: number[],
+  scale: ScaleResolution,
+  index: number,
+  baseOctave: number,
+  role: VoiceRole,
+): number {
+  const scaleSet = new Set(relativeSteps(scale.pitchClasses, scale.rootPc));
+  const consonant = chordPcs.filter((pc) => scaleSet.has(((pc % 12) + 12) % 12));
+  const pool = consonant.length ? consonant : chordPcs;
+  const pc = ((pool[index % pool.length] ?? pool[0] ?? scale.rootPc) % 12 + 12) % 12;
+  return clampForVoice(12 * (baseOctave + 1) + pc, role);
+}
+
+function counterFromLeadDegree(
+  leadMidi: number,
+  scale: ScaleResolution,
+  baseOctave: number,
+  role: VoiceRole,
+  stepsBelow: number,
+): number {
+  const leadDeg = midiToNearestDegree(leadMidi, scale, 3);
+  const counterDeg = Math.max(0, leadDeg - stepsBelow);
+  return clampForVoice(
+    midiFromDegree(scale.rootPc, scale.pitchClasses, counterDeg, baseOctave),
+    role,
+  );
+}
+
+function smoothMelodicLeap(prev: number | null, pitch: number, role: VoiceRole): number {
+  if (prev == null) return pitch;
+  const leap = pitch - prev;
+  if (Math.abs(leap) <= 5) return pitch;
+  const step = leap > 0 ? prev + 2 : prev - 2;
+  return clampForVoice(step, role);
+}
 function nearestScaleMidi(
   note: number,
   scale: ScaleResolution,
@@ -517,27 +568,19 @@ function voiceLeadForRole(
     case "solo":
       return nearestScaleMidi(leadMidi, scale, baseOctave, role);
     case "counter": {
-      const interval = tuning.counterInterval + (rng.next() < 0.25 ? 1 : 0);
-      const dir = eventIdx % 2 === 0 ? -1 : 1;
-      return nearestScaleMidi(leadMidi + dir * interval, scale, baseOctave, role);
+      const steps = tuning.counterInterval === 6 ? 5 : tuning.counterInterval;
+      return counterFromLeadDegree(leadMidi, scale, baseOctave, role, steps);
     }
-    case "inner": {
-      const third = chordPcs[1] ?? chordPcs[0] ?? scale.rootPc;
-      return clampForVoice(12 * (baseOctave + 1) + third, role);
-    }
-    case "cello": {
-      const root = chordPcs[0] ?? scale.rootPc;
-      const fifth = chordPcs[Math.min(2, chordPcs.length - 1)] ?? root;
-      return clampForVoice(12 * (baseOctave + 1) + (eventIdx % 4 === 0 ? fifth : root), role);
-    }
-    case "bass": {
-      const root = chordPcs[0] ?? scale.rootPc;
-      return clampForVoice(12 * (baseOctave + 1) + root, role);
-    }
+    case "inner":
+      return chordToneAtIndex(chordPcs, scale, 1, baseOctave, role);
+    case "cello":
+      return chordToneAtIndex(chordPcs, scale, eventIdx % 4 === 0 ? 2 : 0, baseOctave, role);
+    case "bass":
+      return chordToneAtIndex(chordPcs, scale, 0, baseOctave, role);
     case "flute":
-      return nearestScaleMidi(leadMidi + (eventIdx % 3 === 0 ? 2 : 1), scale, baseOctave, role);
+      return counterFromLeadDegree(leadMidi, scale, baseOctave, role, eventIdx % 3 === 0 ? 1 : 2);
     case "oboe":
-      return nearestScaleMidi(leadMidi - 2, scale, baseOctave, role);
+      return counterFromLeadDegree(leadMidi, scale, baseOctave, role, 3);
     default:
       return clampForVoice(leadMidi, role);
   }
@@ -637,6 +680,8 @@ function composeStemLine(
   const notes: MidiNote[] = [];
   const step = feel.voiceStepBeats * profile.stepMul;
   let themeIdx = 0;
+  let prevPitch: number | null = null;
+  const overlap = MEEND_MELODY_ROLES.includes(profile.voiceRole) ? 0.04 : feel.legatoOverlap;
 
   for (
     let beat = profile.canonEntryBeats;
@@ -655,16 +700,21 @@ function composeStemLine(
     );
 
     const chord = chordAtBeat(chords, beat, bpm);
-    const pitch = voiceLeadForRole(
-      leadMidi,
+    const pitch = smoothMelodicLeap(
+      prevPitch,
+      voiceLeadForRole(
+        leadMidi,
+        profile.voiceRole,
+        chord,
+        scale,
+        profile.baseOctave,
+        tuning,
+        rng,
+        themeIdx,
+      ),
       profile.voiceRole,
-      chord,
-      scale,
-      profile.baseOctave,
-      tuning,
-      rng,
-      themeIdx,
     );
+    prevPitch = pitch;
 
     const dur = Math.max(
       step * profile.durMul * (1 + tuning.sustainBias * 0.2),
@@ -678,7 +728,7 @@ function composeStemLine(
         profile.velBase + (event.accent ? 6 : 0) + rng.int(-3, 5),
       ),
       startBeat: beat,
-      duration: dur + feel.legatoOverlap,
+      duration: dur + overlap,
     });
   }
 
@@ -752,11 +802,22 @@ function buildOrchestralExpression(notes: MidiNote[]): Record<string, unknown> {
   };
 }
 
+function suppressRegisterOutliers(notes: MidiNote[], role: VoiceRole): MidiNote[] {
+  if (notes.length < 3) return notes;
+  const sorted = [...notes.map((n) => n.note)].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)]!;
+  const ceiling = Math.min(VOICE_REGISTER[role].max, median + 6);
+  return notes.map((n) => ({ ...n, note: Math.min(n.note, ceiling) }));
+}
+
 function sanitizeVoiceNotes(notes: MidiNote[], role: VoiceRole): MidiNote[] {
-  return notes.map((n) => ({
-    ...n,
-    note: clampForVoice(n.note, role),
-  }));
+  return suppressRegisterOutliers(
+    notes.map((n) => ({
+      ...n,
+      note: clampForVoice(n.note, role),
+    })),
+    role,
+  );
 }
 
 export function composeOrchestralEnsemble(opts: {
@@ -788,7 +849,7 @@ export function composeOrchestralEnsemble(opts: {
   const beatSec = 60 / bpm;
   const totalBeats = Math.max(16, Math.round(durationSec / beatSec));
   const { cpCellLen } = resolvePatternCellLengths(patternLength);
-  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning);
+  const cell = buildMelodicCell(scale, cpCellLen, seed, tuning, preset);
 
   const theme = buildPrimaryTheme(
     scale,
@@ -800,6 +861,7 @@ export function composeOrchestralEnsemble(opts: {
     guideNotes,
     tuning,
     feel,
+    preset,
   );
 
   const parts: VoicePart[] = [];
