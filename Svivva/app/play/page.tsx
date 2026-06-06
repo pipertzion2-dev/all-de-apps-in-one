@@ -82,8 +82,11 @@ import {
 } from "@/lib/svivva-play/scale-lookup";
 import {
   ORCHESTRAL_STYLE_PRESET_ID,
+  BJORK_LINS_ORCHESTRAL_PRESET,
   isOrchestralPreset,
+  isBjorkLinsPreset,
 } from "@/lib/svivva-play/prompts/orchestral-composer";
+import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { HolographicNoise } from "@/components/holographic-noise";
 import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
 import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png";
@@ -122,7 +125,7 @@ import {
 import { stemMidiFilename } from "@/lib/svivva-play/midi-filenames";
 import { buildClientSessionExport } from "@/lib/svivva-play/session-export";
 
-const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "ensemble", "chords"];
+const COMING_SOON_MODES: PlayMode[] = ["interpolation", "solo", "patch", "chords"];
 
 function stemTimelineDurationSec(stems: { midiEvents: unknown[] }[], bpm: number): number {
   if (bpm <= 0) return 0;
@@ -263,7 +266,7 @@ const MODE_CONFIG: Record<
     label: "Ensemble",
     shortLabel: "Ens",
     icon: Users,
-    description: "Full band/orchestra arrangement up to 40 pieces",
+    description: "Orchestral strings — Björk × Ivan Lins interlock for Ableton Orchestral",
     qualityTier: "professional",
   },
 };
@@ -352,6 +355,11 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
   ],
   ensemble: [
     {
+      id: BJORK_LINS_ORCHESTRAL_PRESET,
+      label: "Björk × Ivan Lins Strings",
+      desc: "Brazilian interlocking strings — Ableton Orchestral instrument map",
+    },
+    {
       id: ORCHESTRAL_STYLE_PRESET_ID,
       label: "Prompt Orchestral",
       desc: "27+ stems, humanized MIDI, Reich × Shaw hybrid",
@@ -382,7 +390,8 @@ export default function SvivvaPlayPage() {
   const [isEnriching, setIsEnriching] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const effectiveAnalysis =
-    analysis ?? (mode === "composition" && !audioFile ? FALLBACK_ANALYSIS : null);
+    analysis ??
+    ((mode === "composition" || mode === "ensemble") && !audioFile ? FALLBACK_ANALYSIS : null);
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
   const [manualTempo, setManualTempo] = useState<number | null>(null);
   const [manualKey, setManualKey] = useState<string | null>(null);
@@ -479,6 +488,10 @@ export default function SvivvaPlayPage() {
   const [reichDuration, setReichDuration] = useState(16);
   const [swingAmount, setSwingAmount] = useState(0);
   const [hocketGroove, setHocketGroove] = useState<HocketGrooveStyle>("reich_phase");
+  const [patternLength, setPatternLength] = useState<PatternLength>("standard");
+  const [analysisFocus, setAnalysisFocus] = useState<"melodyne_mix" | "full_cloud">(
+    "melodyne_mix",
+  );
 
   const [transcription, setTranscription] = useState<HarmonicSession | null>(null);
   const [melodyneFile, setMelodyneFile] = useState<File | null>(null);
@@ -575,9 +588,12 @@ export default function SvivvaPlayPage() {
       analysisKey: manualKey ?? effectiveAnalysis.key,
       chords,
       melodyneNotes: transcription?.melodyneNotes,
-      audioNotes: transcription?.audioNotes ?? transcription?.notes,
+      audioNotes:
+        analysisFocus === "melodyne_mix" && transcription?.melodyneNotes?.length
+          ? []
+          : (transcription?.audioNotes ?? transcription?.notes),
     });
-  }, [effectiveAnalysis, manualKey, transcription]);
+  }, [effectiveAnalysis, manualKey, transcription, analysisFocus]);
 
   const applyAiScaleSuggestion = useCallback(() => {
     if (!aiScaleSuggestion) return;
@@ -979,6 +995,7 @@ export default function SvivvaPlayPage() {
         melodyneFile,
         mode: modeRef.current,
         userHint: userPromptRef.current,
+        analysisFocus,
         onInstantResult: (instant) => {
           if (cancelled || runId !== analysisRunRef.current) return;
           if (instant.key && !instant.key.startsWith("Detecting")) {
@@ -989,7 +1006,9 @@ export default function SvivvaPlayPage() {
           }
           setAnalysis(instant);
           setIsAnalyzing(false);
-          setIsEnriching(true);
+          if (analysisFocus !== "melodyne_mix" || !melodyneFile) {
+            setIsEnriching(true);
+          }
         },
         onTranscription: (session) => {
           if (cancelled || runId !== analysisRunRef.current) return;
@@ -1095,6 +1114,9 @@ export default function SvivvaPlayPage() {
       if (result.warning) setWarningMsg(result.warning);
       if (result.error) setErrorMsg(result.error);
       setIsAnalyzing(false);
+      if (analysisFocus === "melodyne_mix" && melodyneFile) {
+        setIsEnriching(false);
+      }
     })().finally(() => {
       if (cancelled || runId !== analysisRunRef.current) return;
       setIsAnalyzing(false);
@@ -1103,7 +1125,7 @@ export default function SvivvaPlayPage() {
     return () => {
       cancelled = true;
     };
-  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession]);
+  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession, analysisFocus]);
 
   const buildSettings = useCallback(() => {
     const lockedKey = generationKeyLabel;
@@ -1150,10 +1172,15 @@ export default function SvivvaPlayPage() {
         return {
           ...base,
           vocalistEnabled,
-          ensembleSize:
-            selectedPreset === "cinematic_orchestra" || isOrchestralPreset(selectedPreset)
+          patternLength,
+          analysisFocus,
+          ensembleSize: isBjorkLinsPreset(selectedPreset)
+            ? 11
+            : selectedPreset === "cinematic_orchestra"
               ? 40
-              : 12,
+              : isOrchestralPreset(selectedPreset)
+                ? 27
+                : 12,
         };
       default:
         return {
@@ -1163,6 +1190,8 @@ export default function SvivvaPlayPage() {
           reichScale: effectiveReichScale,
           swingAmount,
           hocketGroove,
+          patternLength,
+          analysisFocus,
         };
     }
   }, [
@@ -1179,6 +1208,8 @@ export default function SvivvaPlayPage() {
     reichScale,
     swingAmount,
     hocketGroove,
+    patternLength,
+    analysisFocus,
     tension,
     rootMovement,
     voiceLeading,
@@ -1201,7 +1232,8 @@ export default function SvivvaPlayPage() {
 
   const handleGenerate = useCallback(
     async (quality: "preview" | "full" = "preview") => {
-      if (!analysis) {
+      const activeAnalysis = analysis ?? effectiveAnalysis ?? FALLBACK_ANALYSIS;
+      if (!activeAnalysis) {
         setErrorMsg("Import audio first — tempo and key are detected automatically on import.");
         return;
       }
@@ -1233,7 +1265,7 @@ export default function SvivvaPlayPage() {
               chords: stabilizeHarmonicTimeline(
                 transcription.chords,
                 transcription.durationSec,
-                manualTempo ?? analysis.bpm ?? 120,
+                manualTempo ?? activeAnalysis.bpm ?? 120,
               ),
               audioNotes: transcription.audioNotes ?? transcription.notes ?? [],
               melodyneNotes: transcription.melodyneNotes ?? [],
@@ -1247,12 +1279,14 @@ export default function SvivvaPlayPage() {
                   ? ("audio" as const)
                   : transcription.harmonicKeySource,
               sources: transcription.sources,
+              melodyneMixOnly:
+                analysisFocus === "melodyne_mix" && Boolean(transcription.sources?.melodyneMidi),
             }
           : undefined;
 
         const generatePayload = {
           sessionId: sessionId ?? undefined,
-          inlineAnalysis: { ...analysis, key: lockedKey },
+          inlineAnalysis: { ...activeAnalysis, key: lockedKey },
           mode,
           stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
           quality,
@@ -1360,6 +1394,7 @@ export default function SvivvaPlayPage() {
     [
       sessionId,
       analysis,
+      effectiveAnalysis,
       mode,
       selectedPreset,
       buildSettings,
@@ -1369,6 +1404,7 @@ export default function SvivvaPlayPage() {
       manualKey,
       manualTempo,
       transcription,
+      analysisFocus,
       aiScaleSuggestion,
       scaleSuggestionApplied,
       applyAiScaleSuggestion,
@@ -2329,6 +2365,8 @@ export default function SvivvaPlayPage() {
             melodyneNotes: transcription.melodyneNotes ?? [],
             durationSec,
             sources: transcription.sources,
+            melodyneMixOnly:
+              analysisFocus === "melodyne_mix" && Boolean(transcription.sources?.melodyneMidi),
           }
         : null;
 
@@ -2343,6 +2381,7 @@ export default function SvivvaPlayPage() {
               type: reichType,
               ctx: harmonicCtx,
               hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
+              patternLength,
             })
           : chordSource.length >= 1
             ? composeWithChordProgression({
@@ -2356,6 +2395,7 @@ export default function SvivvaPlayPage() {
                 melodyneNotes: transcription?.melodyneNotes ?? [],
                 audioNotes: transcription?.audioNotes ?? transcription?.notes ?? [],
                 hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
+                patternLength,
               })
             : reichType === "counterpoint"
               ? composeCounterpoint({
@@ -2364,6 +2404,7 @@ export default function SvivvaPlayPage() {
                   scale,
                   style: reichStyle,
                   seed: currentSeed,
+                  patternLength,
                 })
               : composeHocket({
                   durationSec,
@@ -2372,6 +2413,7 @@ export default function SvivvaPlayPage() {
                   style: reichStyle,
                   seed: currentSeed,
                   hocketGroove: reichType === "hocket" ? hocketGroove : undefined,
+                  patternLength,
                 });
       setReichVoices(voices);
 
@@ -2474,6 +2516,8 @@ export default function SvivvaPlayPage() {
     applyAiScaleSuggestion,
     swingAmount,
     hocketGroove,
+    patternLength,
+    analysisFocus,
   ]);
 
   useEffect(() => {
@@ -2528,6 +2572,86 @@ export default function SvivvaPlayPage() {
               checked={meend}
               onChange={setMeend}
             />
+            <div>
+              <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
+                Repeating pattern length
+              </label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(
+                  [
+                    ["standard", "Standard (12/24)"],
+                    ["extended", "Extended (24/48)"],
+                    ["long", "Long (36/72)"],
+                  ] as const
+                ).map(([v, label]) => (
+                  <RadioOption
+                    key={v}
+                    label={label}
+                    checked={patternLength === v}
+                    onChange={() => setPatternLength(v)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case "ensemble":
+        return (
+          <div className="space-y-3">
+            <SliderControl label="Density" value={density} onChange={setDensity} />
+            <SliderControl label="Complexity" value={complexity} onChange={setComplexity} />
+            <div>
+              <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
+                Repeating pattern length
+              </label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(
+                  [
+                    ["standard", "Standard"],
+                    ["extended", "Extended"],
+                    ["long", "Long"],
+                  ] as const
+                ).map(([v, label]) => (
+                  <RadioOption
+                    key={v}
+                    label={label}
+                    checked={patternLength === v}
+                    onChange={() => setPatternLength(v)}
+                  />
+                ))}
+              </div>
+            </div>
+            <p className="text-[9px] text-gray-500 leading-relaxed">
+              Björk × Ivan Lins preset maps stems to Ableton Orchestral: Violin, Viola, Cello,
+              Contrabass, Harp, Flute, Oboe, Timpani, Percussion.
+            </p>
+            <div className="flex items-center gap-4">
+              <RadioOption
+                label="Match Harmony"
+                checked={harmonyMode === "match"}
+                onChange={() => setHarmonyMode("match")}
+              />
+              <RadioOption
+                label="Reharmonize"
+                checked={harmonyMode === "reharmonize"}
+                onChange={() => setHarmonyMode("reharmonize")}
+              />
+            </div>
+            <div>
+              <CheckboxOption
+                label="Enable Vocalist"
+                checked={vocalistEnabled}
+                onChange={setVocalistEnabled}
+              />
+              {vocalistEnabled && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <AlertTriangle className="w-3 h-3 text-amber-500" />
+                  <span className="text-[10px] text-amber-600">
+                    Vocalist audio rendering is BETA quality
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         );
       case "chords":
@@ -2678,40 +2802,6 @@ export default function SvivvaPlayPage() {
               value={Math.round(macroSpace * 100)}
               onChange={(v) => setMacroSpace(v / 100)}
             />
-          </div>
-        );
-      case "ensemble":
-        return (
-          <div className="space-y-3">
-            <SliderControl label="Density" value={density} onChange={setDensity} />
-            <SliderControl label="Complexity" value={complexity} onChange={setComplexity} />
-            <div className="flex items-center gap-4">
-              <RadioOption
-                label="Match Harmony"
-                checked={harmonyMode === "match"}
-                onChange={() => setHarmonyMode("match")}
-              />
-              <RadioOption
-                label="Reharmonize"
-                checked={harmonyMode === "reharmonize"}
-                onChange={() => setHarmonyMode("reharmonize")}
-              />
-            </div>
-            <div>
-              <CheckboxOption
-                label="Enable Vocalist"
-                checked={vocalistEnabled}
-                onChange={setVocalistEnabled}
-              />
-              {vocalistEnabled && (
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <AlertTriangle className="w-3 h-3 text-amber-500" />
-                  <span className="text-[10px] text-amber-600">
-                    Vocalist audio rendering is BETA quality
-                  </span>
-                </div>
-              )}
-            </div>
           </div>
         );
       default:
@@ -4137,6 +4227,34 @@ export default function SvivvaPlayPage() {
                                 checked={meend}
                                 onChange={setMeend}
                               />
+                              <CheckboxOption
+                                label="Analyze Melodyne + input only (skip cloud LLM)"
+                                checked={analysisFocus === "melodyne_mix"}
+                                onChange={(v) =>
+                                  setAnalysisFocus(v ? "melodyne_mix" : "full_cloud")
+                                }
+                              />
+                              <div>
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase">
+                                  Repeating pattern length
+                                </label>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  {(
+                                    [
+                                      ["standard", "Standard"],
+                                      ["extended", "Extended"],
+                                      ["long", "Long"],
+                                    ] as const
+                                  ).map(([v, label]) => (
+                                    <RadioOption
+                                      key={v}
+                                      label={label}
+                                      checked={patternLength === v}
+                                      onChange={() => setPatternLength(v)}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
                               <label className="text-[10px] font-semibold text-gray-400 uppercase">
                                 Duration (bar-aligned to sample)
                               </label>

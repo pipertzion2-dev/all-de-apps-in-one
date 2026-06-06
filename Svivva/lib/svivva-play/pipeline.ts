@@ -60,6 +60,10 @@ export interface PipelineSettings {
   swingAmount?: number;
   /** AI V-2 hocket groove style when reichType is hocket. */
   hocketGroove?: string;
+  /** Reich/orchestral repeating cell multiplier. */
+  patternLength?: "standard" | "extended" | "long";
+  /** Skip cloud LLM — use Melodyne + input alignment only. */
+  analysisFocus?: "melodyne_mix" | "full_cloud";
 }
 
 export interface PipelineStageResult<T> {

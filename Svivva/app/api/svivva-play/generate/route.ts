@@ -40,6 +40,12 @@ import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import { type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
+import {
+  composeBjorkLinsOrchestral,
+  voicePartsToOrchestralStems,
+} from "@/lib/svivva-play/orchestral-compose";
+import type { PatternLength } from "@/lib/svivva-play/pattern-length";
+import { isBjorkLinsPreset } from "@/lib/svivva-play/prompts/orchestral-composer";
 
 import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
 
@@ -355,6 +361,7 @@ export async function POST(request: NextRequest) {
 
       // Build a harmonic context even when no Melodyne transcription was provided —
       // this ensures composition / hocket mode always generates all 8 voices.
+      const patternLength = (settings.patternLength as PatternLength | undefined) ?? "extended";
       const reichCtx =
         harmonicContext ??
         harmonicContextFromAnalysis(analysisData, {
@@ -371,6 +378,7 @@ export async function POST(request: NextRequest) {
         type: reichType,
         ctx: reichCtx,
         hocketGroove,
+        patternLength,
       });
       const hints =
         reichType === "hocket"
@@ -408,6 +416,64 @@ export async function POST(request: NextRequest) {
         pipeline: { stage: "complete", stages: ["reich_listen", "reich_compose"] },
       };
     };
+
+    const runBjorkLinsOrchestral = () => {
+      const patternLength = (settings.patternLength as PatternLength | undefined) ?? "extended";
+      const scaleName =
+        (settings.reichScale as string | undefined) ||
+        (harmonicContext?.melodyneNotes.length ? "mixolydian" : "major");
+      const { resolution: scale } = resolveCompositionScale(
+        lockedKey,
+        scaleName,
+        manualKey,
+        sessionChords,
+      );
+      const orchCtx =
+        harmonicContext ??
+        harmonicContextFromAnalysis(analysisData, {
+          chords: sessionChords,
+          durationSec: sessionDurationSec,
+        });
+
+      const voices = composeBjorkLinsOrchestral({
+        durationSec: sessionDurationSec,
+        bpm: analysisData.bpm,
+        scale,
+        seed,
+        patternLength,
+        melodyneNotes: orchCtx.melodyneNotes,
+        audioNotes: orchCtx.audioNotes,
+        chords: sessionChords,
+      });
+      let stems = voicePartsToOrchestralStems(voices) as GeneratedStemResult[];
+      const swingAmt = Math.max(0, Math.min(1, Number(settings.swingAmount ?? 0) / 100));
+      if (swingAmt > 0) {
+        stems = applySwingToStems(stems, analysisData.bpm, swingAmt);
+      }
+      return {
+        stems,
+        plan: {
+          stemCount: stems.length,
+          key: lockedKey,
+          bpm: analysisData.bpm,
+          harmonyRules:
+            "Björk × Ivan Lins — Brazilian interlocking strings (Ableton Orchestral instrument hints)",
+          meendApplicableStems: [],
+          composer: "bjork_lins_orchestral",
+          patternLength,
+          abletonInstruments: stems.map((s) => `${s.name} → ${s.instrumentHint}`),
+        },
+        pipeline: { stage: "complete", stages: ["melodyne_listen", "orchestral_compose"] },
+      };
+    };
+
+    // Ensemble: procedural Björk × Ivan Lins strings (fast, no LLM)
+    if (mode === "ensemble" && isBjorkLinsPreset(stylePreset)) {
+      const orch = runBjorkLinsOrchestral();
+      return finishWithStems(orch.stems, orch.plan, orch.pipeline, {
+        composer: "bjork_lins_orchestral",
+      });
+    }
 
     // Composition mode: Reich interlocking voices — always runs regardless of whether
     // a Melodyne transcription (harmonicContext) is present.

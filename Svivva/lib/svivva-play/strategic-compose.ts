@@ -29,6 +29,8 @@ export type HarmonicContextInput = {
   key?: string;
   keySource?: "midi" | "audio" | "hint";
   sources?: { audioTranscription?: boolean; melodyneMidi?: boolean };
+  /** Prefer Melodyne-aligned material over cloud-derived harmony. */
+  melodyneMixOnly?: boolean;
 };
 
 export type StrategicComposeSettings = {
@@ -98,7 +100,10 @@ function analyzeListening(
     .filter((x) => x.c > avg * 1.2)
     .map((x) => x.i);
 
-  const melodyPool = ctx.melodyneNotes.length ? ctx.melodyneNotes : ctx.audioNotes;
+  const melodyPool =
+    ctx.melodyneMixOnly || ctx.melodyneNotes.length
+      ? ctx.melodyneNotes
+      : ctx.audioNotes;
   const melodicRegister =
     melodyPool.length > 0 ? melodyPool.reduce((s, n) => s + n.midi, 0) / melodyPool.length : 67;
 
@@ -502,6 +507,7 @@ export function composeStrategicReich(options: {
   ctx: HarmonicContextInput;
   hocketGroove?: import("./hocket-groove-v2").HocketGrooveStyle;
   swingAmount?: number;
+  patternLength?: import("./pattern-length").PatternLength;
 }): VoicePart[] {
   const chords = options.ctx.chords.length >= 2 ? options.ctx.chords : options.ctx.chords;
   return composeWithChordProgression({
@@ -515,6 +521,7 @@ export function composeStrategicReich(options: {
     melodyneNotes: options.ctx.melodyneNotes,
     audioNotes: options.ctx.audioNotes,
     hocketGroove: options.hocketGroove,
+    patternLength: options.patternLength,
   });
 }
 

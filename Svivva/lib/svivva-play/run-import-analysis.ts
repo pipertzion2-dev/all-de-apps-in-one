@@ -182,12 +182,22 @@ export async function runImportAnalysis(options: {
   melodyneFile?: File | null;
   mode: string;
   userHint?: string;
+  /** Skip cloud LLM enrichment — use Melodyne + input alignment only. */
+  analysisFocus?: "melodyne_mix" | "full_cloud";
   onInstantResult?: (analysis: PlayAnalysisView) => void;
   onTranscription?: (session: HarmonicSession) => void;
   onCloudComplete?: (result: ImportAnalysisResult) => void;
 }): Promise<ImportAnalysisResult> {
-  const { file, melodyneFile, mode, userHint, onInstantResult, onTranscription, onCloudComplete } =
-    options;
+  const {
+    file,
+    melodyneFile,
+    mode,
+    userHint,
+    analysisFocus = melodyneFile ? "melodyne_mix" : "full_cloud",
+    onInstantResult,
+    onTranscription,
+    onCloudComplete,
+  } = options;
 
   if (isLocalFileTooLarge(file)) {
     const maxMb = formatMegabytes(getMaxLocalFileBytes(file));
@@ -249,7 +259,9 @@ export async function runImportAnalysis(options: {
 
   const melodyneNote =
     melodyneFile && clientDetection
-      ? " Audio + Melodyne MIDI analyzed together for chord progression."
+      ? analysisFocus === "melodyne_mix"
+        ? " Melodyne + input analyzed locally — cloud LLM skipped."
+        : " Audio + Melodyne MIDI analyzed together for chord progression."
       : melodyneFile
         ? " Melodyne MIDI queued — waiting for tempo/key."
         : "";
@@ -263,7 +275,10 @@ export async function runImportAnalysis(options: {
       }
     : { analysis: null, sessionId: null, transcription: null };
 
-  if (!clientDetection || !onCloudComplete) {
+  const skipCloud = analysisFocus === "melodyne_mix" && Boolean(melodyneFile);
+
+  if (skipCloud || !clientDetection || !onCloudComplete) {
+    if (skipCloud) return instantResult;
     const cloud = await cloudEnrichImportAnalysis({ file, mode, userHint, clientDetection });
     if (largeFileNote && cloud.warning) {
       cloud.warning = `${cloud.warning}${largeFileNote}`;

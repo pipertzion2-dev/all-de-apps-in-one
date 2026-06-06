@@ -4,6 +4,7 @@ import {
   type HocketGrooveStyle,
 } from "./hocket-groove-v2";
 import { addV2HocketRapidFire, buildV2HocketMelodyNotes } from "./hocket-melody-v2";
+import { resolvePatternCellLengths, type PatternLength } from "./pattern-length";
 
 export type StyleName = "reich_electric" | "shaw_interlace" | "phase_canon";
 
@@ -184,6 +185,8 @@ const HK_CELL_LEN = 24;
 const CP_ROTATIONS = [0, 4, 8];
 const HK_ROTATIONS = [0, 4, 8, 12, 16, 20];
 
+export type { PatternLength };
+
 function buildMelodicCell(
   rootPc: number,
   absPcs: number[],
@@ -276,8 +279,10 @@ export function composeCounterpoint(opts: {
   scale: ScaleResolution;
   style?: StyleName;
   seed?: number;
+  patternLength?: PatternLength;
 }): VoicePart[] {
-  const { durationSec, bpm, scale, style = "reich_electric", seed = 42 } = opts;
+  const { durationSec, bpm, scale, style = "reich_electric", seed = 42, patternLength } = opts;
+  const { cpCellLen, cpRotations } = resolvePatternCellLengths(patternLength);
   const rng = new Rng(seed);
   const total = sixteenthsForDuration(durationSec, bpm);
   const sixteenthBeats = 0.25;
@@ -287,7 +292,7 @@ export function composeCounterpoint(opts: {
     const master = buildMelodicCell(
       scale.rootPc,
       scale.pitchClasses,
-      CP_CELL_LEN,
+      cpCellLen,
       "reich_electric",
       rng,
       0,
@@ -297,17 +302,17 @@ export function composeCounterpoint(opts: {
     const master = buildMelodicCell(
       scale.rootPc,
       scale.pitchClasses,
-      CP_CELL_LEN,
+      cpCellLen,
       "reich_electric",
       rng,
       0,
     );
-    for (let v = 0; v < 3; v++) baseCells.push(rotateCell(master, CP_ROTATIONS[v]));
+    for (let v = 0; v < 3; v++) baseCells.push(rotateCell(master, cpRotations[v] ?? 0));
   } else {
     for (let v = 0; v < 3; v++) {
       const vRng = new Rng((seed || 0) + v * 7919);
       baseCells.push(
-        buildMelodicCell(scale.rootPc, scale.pitchClasses, CP_CELL_LEN, style, vRng, v * 2),
+        buildMelodicCell(scale.rootPc, scale.pitchClasses, cpCellLen, style, vRng, v * 2),
       );
     }
   }
@@ -359,10 +364,20 @@ export function composeHocket(opts: {
   scale: ScaleResolution;
   style?: StyleName;
   seed?: number;
+  patternLength?: PatternLength;
   /** AI V-2 groove variety vs strict Reich v2 i%6 interlock. */
   hocketGroove?: HocketGrooveStyle;
 }): VoicePart[] {
-  const { durationSec, bpm, scale, style = "reich_electric", seed = 42, hocketGroove } = opts;
+  const {
+    durationSec,
+    bpm,
+    scale,
+    style = "reich_electric",
+    seed = 42,
+    hocketGroove,
+    patternLength,
+  } = opts;
+  const { cpCellLen, hkCellLen } = resolvePatternCellLengths(patternLength);
   const rng = new Rng((seed || 0) ^ 0xc0ffee);
   const grooveStyle: HocketGrooveStyle =
     hocketGroove ??
@@ -371,7 +386,7 @@ export function composeHocket(opts: {
   if (grooveStyle === "reich_interlock") {
     const total = sixteenthsForDuration(durationSec, bpm);
     const sixteenthBeats = 0.25;
-    const cellLen = style === "shaw_interlace" ? CP_CELL_LEN : HK_CELL_LEN;
+    const cellLen = style === "shaw_interlace" ? cpCellLen : hkCellLen;
     const masterMidis = buildMasterMidiCell(
       scale.rootPc,
       scale.pitchClasses,
