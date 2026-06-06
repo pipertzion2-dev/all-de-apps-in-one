@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
+import { prepareMeendLegatoMidiEvents } from "./meend-midi";
+import { isOrchestralMeendStem } from "./orchestral-compose";
 import { buildMeendStemExpression, constrainGeneratedStems, prepareMeendPreviewEvents, stemHasOverlappingNotes } from "./scale-key-guard";
 import type { ChordSegment } from "./chord-from-chroma";
 import * as ChordKit from "./chordkit";
@@ -73,12 +75,12 @@ export function applyMeendToOrchestralMelodyStems(
   stems: GeneratedStemResult[],
 ): GeneratedStemResult[] {
   return stems.map((stem) => {
-    if (!/violin 1|solo violin|flute|oboe/i.test(stem.name)) return stem;
+    if (!isOrchestralMeendStem(stem.name)) return stem;
     if (stem.midiEvents.length === 0) return stem;
     const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
-    const monoReady = prepareMeendPreviewEvents(sorted, 0.5, 2.6);
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.55, 3.2);
     const legato = prepareMeendLegatoMidiEvents(monoReady);
-    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.95 });
+    const built = buildMeendStemExpression(legato, false, { peakSemitones: 1.05 });
     return {
       ...stem,
       midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
@@ -93,7 +95,7 @@ export function applyMeendToOrchestralMelodyStems(
 }
 
 export function orchestralMeendStemNames(stems: { name: string }[]): string[] {
-  return stems.filter((s) => /violin 1|solo violin|flute|oboe/i.test(s.name)).map((s) => s.name);
+  return stems.filter((s) => isOrchestralMeendStem(s.name)).map((s) => s.name);
 }
 
 export function meendApplicableStemNames(stems: { name: string; midiEvents: unknown[] }[]): string[] {

@@ -32,7 +32,9 @@ export function isEnsembleOrchestralPreset(
 /** Stems that receive Indian Meend when enabled. */
 export const ORCHESTRAL_MEEND_STEM_NAMES = [
   "Violin 1",
+  "Violin 2",
   "Solo Violin",
+  "Viola",
   "Flute",
   "Oboe",
 ] as const;

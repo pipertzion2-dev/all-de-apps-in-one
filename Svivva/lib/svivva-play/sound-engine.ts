@@ -9,6 +9,7 @@ import {
 import {
   isMeendAccentStem,
   MEEND_ACCENT_GAIN_DB,
+  meendAccentSourceName,
 } from "./meend-showcase-stem";
 import { isOrchestralMeendStem } from "./orchestral-compose";
 import {
@@ -514,9 +515,9 @@ export class SvivvaSoundEngine {
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
-          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
+          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + (isOrchestralMeendStem(meendAccentSourceName(stem.name) ?? "") ? 10 : 8)
           : isOrchMeend
-            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
+            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 8
             : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
         const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();

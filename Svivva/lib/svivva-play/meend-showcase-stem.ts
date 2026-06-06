@@ -13,7 +13,7 @@ export const MEEND_ACCENT_PREFIX = "Meend · ";
 export const MEEND_ACCENT_GAIN_DB = 5;
 
 /** Louder sitar accent under dense orchestral mix. */
-export const ORCHESTRAL_MEEND_ACCENT_GAIN_DB = 6;
+export const ORCHESTRAL_MEEND_ACCENT_GAIN_DB = 9;
 
 export function meendAccentStemName(sourceName: string): string {
   return `${MEEND_ACCENT_PREFIX}${sourceName}`;
@@ -93,11 +93,11 @@ export function buildOrchestralMeendAccentPlaybacks(stems: MeendStemLike[]): Ste
   for (let i = 0; i < lyrical.length; i++) {
     const stem = lyrical[i]!;
     const built = buildMeendStemExpression([...stem.midiEvents], false, {
-      peakSemitones: 0.9,
+      peakSemitones: 1.05,
       shouldOrnament: (idx, e) => {
-        if ((e.duration ?? 0.25) < 0.22) return false;
+        if ((e.duration ?? 0.25) < 0.18) return false;
         const bar = Math.floor(e.startBeat / 4);
-        return (bar + idx + i) % 3 !== 1;
+        return (bar + idx + i) % 2 !== 0;
       },
     });
     if (built.midiEvents.length === 0) continue;

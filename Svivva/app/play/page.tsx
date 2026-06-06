@@ -61,6 +61,7 @@ import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "@/lib/sviv
 import { applyPlayDynamicsToStems } from "@/lib/svivva-play/play-dynamics";
 import {
   buildMeendAccentPlaybacks,
+  buildOrchestralMeendAccentPlaybacks,
   meendAccentSourceName,
 } from "@/lib/svivva-play/meend-showcase-stem";
 import {
@@ -1133,6 +1134,7 @@ export default function SvivvaPlayPage() {
     vocalistEnabled,
     selectedPreset,
     generationKeyLabel,
+    manualKey,
     importSeq,
   ]);
 
@@ -1667,6 +1669,26 @@ export default function SvivvaPlayPage() {
         gainDb: s.gainDb,
       }));
 
+      if (meend && mode === "ensemble") {
+        const accents = buildOrchestralMeendAccentPlaybacks(
+          prepared.map((s) => ({
+            name: s.name,
+            role: s.role,
+            instrumentHint: s.instrumentHint,
+            midiEvents: s.midiEvents,
+            pan: s.pan,
+          })),
+        );
+        if (accents.length > 0) {
+          playbacks = playbacks.map((p) =>
+            accents.some((a) => meendAccentSourceName(a.name) === p.name)
+              ? { ...p, gainDb: (p.gainDb || 0) - 2 }
+              : p,
+          );
+          playbacks.push(...accents);
+        }
+      }
+
       if (meend && mode !== "ensemble") {
         const accents = buildMeendAccentPlaybacks(
           prepared.map((s) => ({
@@ -1703,7 +1725,31 @@ export default function SvivvaPlayPage() {
         muted: s.muted,
         gainDb: s.gainDb,
       }));
-      if (!meend || mode === "ensemble") return base;
+      if (!meend || mode === "ensemble") {
+        if (meend && mode === "ensemble") {
+          const accents = buildOrchestralMeendAccentPlaybacks(
+            currentStems.map((s) => ({
+              name: s.name,
+              role: s.role,
+              instrumentHint: s.instrumentHint,
+              midiEvents: normalizeMidiEvents(s.midiEvents),
+              pan: s.pan,
+            })),
+          );
+          if (accents.length > 0) {
+            return [
+              ...base,
+              ...accents.map((a) => ({
+                name: a.name,
+                soloed: false,
+                muted: false,
+                gainDb: a.gainDb,
+              })),
+            ];
+          }
+        }
+        return base;
+      }
       const accents = buildMeendAccentPlaybacks(
         currentStems.map((s) => ({
           name: s.name,

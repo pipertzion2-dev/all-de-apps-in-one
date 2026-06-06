@@ -492,7 +492,7 @@ export function constrainGeneratedStems<T extends ConstrainableStem>(
 
 /** Scale name shared by ensemble compose + export guard (no auto mixolydian). */
 export function ensembleCompositionScaleName(
-  lockedKey: string,
+  composeKey: string,
   manualKey?: string | null,
   userScale?: string | null,
 ): string {
@@ -500,7 +500,8 @@ export function ensembleCompositionScaleName(
     const sn = userScale.trim().toLowerCase().replace(/ /g, "_");
     if (!isIndianRagaScaleName(sn)) return sn;
   }
-  return isMinorKeyLabel(manualKey?.trim() || lockedKey) ? "natural_minor" : "major";
+  const effectiveKey = normalizeKeyLabel(manualKey?.trim() || composeKey);
+  return isMinorKeyLabel(effectiveKey) ? "natural_minor" : "major";
 }
 
 /** Hard scale lock for ensemble — every pitched stem, no chord-extension bleed. */

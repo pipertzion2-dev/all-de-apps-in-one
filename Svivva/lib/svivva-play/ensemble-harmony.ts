@@ -98,27 +98,17 @@ export function buildEnsembleChordTimeline(
   return segments;
 }
 
-/** Prefer imported chord map; otherwise a stable diatonic progression in the user key. */
+/**
+ * Ensemble harmony always follows the user-locked key (manual or resolved).
+ * Imported chord symbols often misread mode (A major → Am/F/C/G) and clash with generation.
+ */
 export function resolveEnsembleSessionChords(
   key: string,
-  sessionChords: ChordSegment[],
+  _sessionChords: ChordSegment[],
   durationSec: number,
   bpm: number,
   manualKey?: string | null,
 ): ChordSegment[] {
-  if (!manualKey?.trim() && sessionChords.length >= 2) {
-    const unique = new Set(
-      sessionChords.map((c) => c.symbol.replace(/\s+/g, "").replace(/\/.*$/, "").toUpperCase()),
-    );
-    if (unique.size >= 2) {
-      return sessionChords.map((c, i) =>
-        i === sessionChords.length - 1 ? { ...c, t1: Math.max(c.t1, durationSec) } : c,
-      );
-    }
-  }
-  if (!manualKey?.trim() && sessionChords.length === 1) {
-    const c = sessionChords[0]!;
-    return [{ ...c, t0: 0, t1: durationSec }];
-  }
-  return buildEnsembleChordTimeline(key, durationSec, bpm, 0);
+  const normalizedKey = manualKey?.trim() ? manualKey.trim() : key;
+  return buildEnsembleChordTimeline(normalizedKey, durationSec, bpm, 0);
 }

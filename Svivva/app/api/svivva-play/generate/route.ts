@@ -32,6 +32,7 @@ import {
   type HarmonicContextInput,
 } from "@/lib/svivva-play/strategic-compose";
 import {
+  constrainEnsembleStemsToScale,
   constrainGeneratedStems,
   ensembleCompositionScaleName,
   resolveCompositionKey,
@@ -244,18 +245,18 @@ export async function POST(request: NextRequest) {
       extra?: Record<string, unknown>,
     ) => {
       const orchPreset = isEnsembleOrchestralPreset(String(extra?.composer ?? stylePreset ?? ""));
-      const ensembleScale =
-        mode === "ensemble" || orchPreset
-          ? ensembleCompositionScaleName(
-              lockedKey,
-              manualKey,
-              (settings.reichScale as string | undefined) ?? null,
-            )
-          : compositionScaleName;
       const composeKeyForGuard =
         mode === "ensemble"
           ? resolveEnsembleComposeKey({ lockedKey, manualKey })
           : lockedKey;
+      const ensembleScale =
+        mode === "ensemble" || orchPreset
+          ? ensembleCompositionScaleName(
+              composeKeyForGuard,
+              manualKey,
+              (settings.reichScale as string | undefined) ?? null,
+            )
+          : compositionScaleName;
       const chordsForGuard = mode === "ensemble" ? ensembleSessionChords : sessionChords;
       const { scaleInfo } = resolveCompositionScale(
         composeKeyForGuard,
@@ -263,16 +264,13 @@ export async function POST(request: NextRequest) {
         manualKey,
         chordsForGuard,
       );
-      let guardedStems = constrainGeneratedStems(
-        stems,
-        composeKeyForGuard,
-        chordsForGuard,
-        analysisData.bpm,
-        {
-          anchorMidi: mode === "ensemble" ? undefined : melodicAnchor,
-          scaleInfo,
-        },
-      );
+      let guardedStems =
+        mode === "ensemble"
+          ? constrainEnsembleStemsToScale(stems, scaleInfo, analysisData.bpm)
+          : constrainGeneratedStems(stems, composeKeyForGuard, chordsForGuard, analysisData.bpm, {
+              anchorMidi: melodicAnchor,
+              scaleInfo,
+            });
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
         strength: mode === "ensemble" ? 0.48 : 0.38,
         phraseBeats: mode === "ensemble" ? 32 : 16,
@@ -296,7 +294,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         generationId,
         stems: guardedStems,
-        plan: { ...plan, key: lockedKey },
+        plan: { ...plan, key: composeKeyForGuard },
         qualityTier: "professional",
         pipeline,
         persisted: Boolean(resolvedSessionId),
