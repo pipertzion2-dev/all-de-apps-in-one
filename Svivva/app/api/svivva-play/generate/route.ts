@@ -52,7 +52,7 @@ import {
   type EnsembleOrchestralPreset,
 } from "@/lib/svivva-play/orchestral-compose";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
-import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
+import { pickIndianRagaScaleName, isIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
 import { buildEnsembleChordTimeline, resolveEnsembleSessionChords } from "@/lib/svivva-play/ensemble-harmony";
 import { polishEnsembleStemsWithAi } from "@/lib/svivva-play/ensemble-ai-polish";
 
@@ -229,14 +229,13 @@ export async function POST(request: NextRequest) {
         : "sustained_pads"
     ) as "sustained_pads" | "rhythmic_stabs" | "arpeggiated";
 
+    const userScale = (settings.reichScale as string | undefined)?.trim();
     const compositionScaleName =
-      (settings.meend ?? false)
-        ? pickIndianRagaScaleName({
-            root: parseRootFromKeyLabel(lockedKey),
-            minor: isMinorKeyLabel(manualKey ?? lockedKey),
-            seed,
-          })
-        : (settings.reichScale as string | undefined) || "major";
+      userScale && !isIndianRagaScaleName(userScale)
+        ? userScale
+        : isMinorKeyLabel(manualKey ?? lockedKey)
+          ? "natural_minor"
+          : "major";
 
     const finishWithStems = async (
       stems: GeneratedStemResult[],

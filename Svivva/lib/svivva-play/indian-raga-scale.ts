@@ -23,10 +23,13 @@ export function resolveMeendScaleName(opts: {
   seed: number;
   meend: boolean;
 }): string {
-  if (!opts.meend) return opts.reichScale;
   if (isIndianRagaScaleName(opts.reichScale)) return opts.reichScale;
-  const minor = isMinorKeyLabel(opts.lockedKey);
-  return pickIndianRagaScaleName({ minor, seed: opts.seed });
+  const sn = opts.reichScale?.trim().toLowerCase().replace(/ /g, "_");
+  if (sn && sn !== "major" && sn !== "natural_minor" && sn !== "minor") {
+    return opts.reichScale;
+  }
+  // Meend uses pitch bend for ornaments — keep diatonic key unless user picked a raga.
+  return isMinorKeyLabel(opts.lockedKey) ? "natural_minor" : "major";
 }
 
 /** Stable seed when "Use seed" is off — same audio + key → same material. */

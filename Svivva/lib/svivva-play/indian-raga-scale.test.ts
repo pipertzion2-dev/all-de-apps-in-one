@@ -13,7 +13,26 @@ describe("indian raga scale", () => {
     expect(a.startsWith("raga_")).toBe(true);
   });
 
-  it("keeps an existing raga scale when meend is on", () => {
+  it("stays diatonic when meend is on unless user picked a raga", () => {
+    expect(
+      resolveMeendScaleName({
+        lockedKey: "A major",
+        reichScale: "major",
+        seed: 99,
+        meend: true,
+      }),
+    ).toBe("major");
+    expect(
+      resolveMeendScaleName({
+        lockedKey: "A minor",
+        reichScale: "major",
+        seed: 99,
+        meend: true,
+      }),
+    ).toBe("natural_minor");
+  });
+
+  it("keeps user-selected raga scale", () => {
     expect(
       resolveMeendScaleName({
         lockedKey: "A major",

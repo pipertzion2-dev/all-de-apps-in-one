@@ -2197,15 +2197,8 @@ export default function SvivvaPlayPage() {
 
   const prevMeendRef = useRef(false);
   useEffect(() => {
-    const justEnabled = meend && !prevMeendRef.current;
     prevMeendRef.current = meend;
-    if (!justEnabled || isIndianRagaScaleName(reichScale) || mode === "ensemble") return;
-    const lockedKey = generationKeyLabel;
-    const stable = stableGenerationSeed({ useSeed, seed, lockedKey, importSeq });
-    setReichScale(
-      resolveMeendScaleName({ lockedKey, reichScale, seed: stable, meend: true }),
-    );
-  }, [meend, importSeq, useSeed, seed, generationKeyLabel, reichScale, mode]);
+  }, [meend]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
     setIsGenerating(true);

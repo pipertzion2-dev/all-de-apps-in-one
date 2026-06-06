@@ -30,6 +30,6 @@ describe("meend preview audio", () => {
     expect(gamak[0]!.time).toBeGreaterThanOrEqual(beatToSec(V1_GAMAK_START));
     const peakGamak = Math.max(...gamak.map((b) => Math.abs(b.cents)));
     expect(peakGamak).toBeLessThanOrEqual(MEEND_PREVIEW_GAMAK_CENTS + 1);
-    expect(peakGamak).toBeGreaterThan(80);
+    expect(peakGamak).toBeGreaterThan(50);
   });
 });

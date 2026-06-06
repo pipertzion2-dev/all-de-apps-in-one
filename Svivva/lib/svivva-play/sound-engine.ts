@@ -1,7 +1,7 @@
 "use client";
 
 import * as Tone from "tone";
-import { MEEND_PREVIEW, resolveInstrumentPreset, type InstrumentPreset } from "./instruments";
+import { MEEND_PREVIEW, resolveInstrumentPreset, resolveOrchestralPercussionPreset, type InstrumentPreset } from "./instruments";
 import {
   buildMeendLegatoTimeline,
   type MeendTimelineEvent,
@@ -341,6 +341,25 @@ export class SvivvaSoundEngine {
     }
   }
 
+  private resolveStemPreset(stem: StemPlayback): InstrumentPreset {
+    const hint = (stem.instrumentHint ?? "").toLowerCase();
+    const name = stem.name.toLowerCase();
+    const role = (stem.role ?? "").toLowerCase();
+    if (
+      role === "percussion" ||
+      /cymbal|triangle|cabasa|timpani|percussion/.test(hint) ||
+      /cymbal|triangle|cabasa|timpani/.test(name)
+    ) {
+      if (/triangle/.test(hint) || /triangle/.test(name)) return resolveOrchestralPercussionPreset(45);
+      if (/cabasa/.test(hint) || /cabasa/.test(name)) return resolveOrchestralPercussionPreset(47);
+      if (/cymbal/.test(hint) || /cymbal/.test(name)) return resolveOrchestralPercussionPreset(43);
+      if (/timpani/.test(hint) || /timpani/.test(name)) return resolveInstrumentPreset("timpani", "percussion");
+      const firstNote = stem.midiEvents?.[0]?.note ?? 43;
+      return resolveOrchestralPercussionPreset(firstNote);
+    }
+    return resolveInstrumentPreset(stem.instrumentHint, stem.role);
+  }
+
   private previewGainDb(role: string, gainDb: number, forceMeend = false): number {
     const r = role.toLowerCase();
     if (forceMeend && (r === "melody" || r === "lead" || r === "solo" || r === "hocket")) {
@@ -491,7 +510,7 @@ export class SvivvaSoundEngine {
         const meendPreset = isOrchMeend
           ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
           : MEEND_PREVIEW;
-        const preset = useMeendMono ? meendPreset : resolveInstrumentPreset(stem.instrumentHint, stem.role);
+        const preset = useMeendMono ? meendPreset : this.resolveStemPreset(stem);
         const synth = useMeendMono
           ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);

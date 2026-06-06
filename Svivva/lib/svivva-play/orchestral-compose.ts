@@ -740,10 +740,10 @@ function buildSuspendedCymbalHits(durationSec: number, bpm: number, seed: number
   for (let b = 0; b < totalBeats; b++) {
     if (b % 4 !== 0) continue;
     notes.push({
-      note: clampForVoice(60, "percussion"),
+      note: 43,
       velocity: 34 + rng.int(0, 10),
       startBeat: b,
-      duration: 2.5,
+      duration: 1.2,
     });
   }
   return notes;
@@ -757,7 +757,7 @@ function buildTriangleHits(durationSec: number, bpm: number, seed: number): Midi
   for (let b = 0; b < totalBeats; b++) {
     if (b % 4 !== 2) continue;
     notes.push({
-      note: clampForVoice(60, "percussion"),
+      note: 45,
       velocity: 48 + rng.int(0, 14),
       startBeat: b + 0.02,
       duration: 0.12,
@@ -775,7 +775,7 @@ function buildCabasaHits(durationSec: number, bpm: number, seed: number): MidiNo
     if (b % 4 !== 2) continue;
     if (rng.next() < 0.35) continue;
     notes.push({
-      note: clampForVoice(60, "percussion"),
+      note: 47,
       velocity: 36 + rng.int(0, 12),
       startBeat: b + 0.55,
       duration: 0.1,

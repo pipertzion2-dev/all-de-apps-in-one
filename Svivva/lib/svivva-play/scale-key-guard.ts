@@ -416,6 +416,11 @@ export function constrainMidiEvent(
   const chordCtx = chordPcsAtBeat(chords, startBeat, bpm);
   let note = evt.note;
 
+  // Unpitched percussion — never scale-snap (was turning cymbal hits into pitched C tones).
+  if (roleNorm === "percussion") {
+    return { ...evt, startBeat, duration };
+  }
+
   // Harmony / pad / bass stems ARE the chord definitions — snapping their notes to chord pitch
   // classes or the scale would destroy the very voicings that were generated. Apply only a
   // register clamp so notes stay in a musical range.
