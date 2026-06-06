@@ -48,7 +48,7 @@ export function buildV2HocketMelodyNotes(
   const numVoices = slotPattern.length;
   const voices: HocketMidiNote[][] = Array.from({ length: numVoices }, () => []);
   const previousDegree = new Array(numVoices).fill(0);
-  const baseOctave = 4;
+  const baseOctave = 3;
 
   for (let voiceIdx = 0; voiceIdx < numVoices; voiceIdx++) {
     const slots = slotPattern[voiceIdx] ?? [];

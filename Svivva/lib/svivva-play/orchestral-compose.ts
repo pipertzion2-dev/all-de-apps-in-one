@@ -93,14 +93,14 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<
   StemDef,
   "voiceRole" | "canonEntryBeats" | "stepMul" | "restChance" | "durMul" | "velBase"
 >[] = [
-  { name: "Violin 1", hint: "violin", role: "melody", register: "high", baseOctave: 4, pan: -55 },
-  { name: "Violin 2", hint: "violin", role: "harmony", register: "high", baseOctave: 4, pan: -35 },
+  { name: "Violin 1", hint: "violin", role: "melody", register: "high", baseOctave: 3, pan: -55 },
+  { name: "Violin 2", hint: "violin", role: "harmony", register: "high", baseOctave: 3, pan: -35 },
   { name: "Viola", hint: "viola", role: "harmony", register: "mid", baseOctave: 3, pan: -15 },
   { name: "Cello", hint: "cello", role: "harmony", register: "mid", baseOctave: 2, pan: 15 },
   { name: "Contrabass", hint: "contrabass", role: "bass", register: "low", baseOctave: 1, pan: 35 },
-  { name: "Solo Violin", hint: "solo violin", role: "melody", register: "high", baseOctave: 4, pan: -70 },
+  { name: "Solo Violin", hint: "solo violin", role: "melody", register: "high", baseOctave: 3, pan: -70 },
   { name: "Harp", hint: "harp", role: "harmony", register: "mid", baseOctave: 3, pan: 25 },
-  { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 4, pan: 45 },
+  { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 3, pan: 45 },
   { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 3, pan: 50 },
   { name: "Timpani", hint: "timpani", role: "percussion", register: "low", baseOctave: 2, pan: 0 },
   {
@@ -270,17 +270,17 @@ type TempoFeel = {
   legatoOverlap: number;
 };
 
-/** Orchestral register limits (MIDI) — keeps timbres idiomatic. */
+/** Orchestral register limits (MIDI) — warm mid register, no piercing highs. */
 const VOICE_REGISTER: Record<VoiceRole, { min: number; max: number }> = {
-  lead: { min: 55, max: 67 },
-  counter: { min: 53, max: 65 },
-  inner: { min: 48, max: 62 },
-  cello: { min: 36, max: 55 },
-  bass: { min: 28, max: 45 },
-  solo: { min: 58, max: 68 },
-  harp: { min: 48, max: 64 },
-  flute: { min: 58, max: 68 },
-  oboe: { min: 55, max: 67 },
+  lead: { min: 50, max: 62 },
+  counter: { min: 48, max: 60 },
+  inner: { min: 45, max: 58 },
+  cello: { min: 36, max: 52 },
+  bass: { min: 28, max: 43 },
+  solo: { min: 52, max: 64 },
+  harp: { min: 45, max: 60 },
+  flute: { min: 55, max: 64 },
+  oboe: { min: 52, max: 62 },
   timpani: { min: 28, max: 42 },
   percussion: { min: 38, max: 48 },
 };
@@ -362,7 +362,7 @@ function midiFromDegree(
 ): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
-  const cappedDegree = Math.max(0, Math.min(n * 3, degree));
+  const cappedDegree = Math.max(0, Math.min(n + 3, degree));
   const octJump = Math.floor(cappedDegree / n);
   const idx = ((cappedDegree % n) + n) % n;
   return clampMidi(12 * (baseOctave + octJump) + rootPc + rel[idx]!);

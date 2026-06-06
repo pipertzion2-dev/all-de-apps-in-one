@@ -33,7 +33,6 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import {
   constrainGeneratedStems,
-  constrainEnsembleStemsToScale,
   ensembleCompositionScaleName,
   resolveCompositionKey,
   resolveEnsembleComposeKey,
@@ -264,19 +263,16 @@ export async function POST(request: NextRequest) {
         manualKey,
         chordsForGuard,
       );
-      let guardedStems =
-        mode === "ensemble"
-          ? constrainEnsembleStemsToScale(stems, scaleInfo, analysisData.bpm)
-          : constrainGeneratedStems(
-              stems,
-              composeKeyForGuard,
-              chordsForGuard,
-              analysisData.bpm,
-              {
-                anchorMidi: melodicAnchor,
-                scaleInfo,
-              },
-            );
+      let guardedStems = constrainGeneratedStems(
+        stems,
+        composeKeyForGuard,
+        chordsForGuard,
+        analysisData.bpm,
+        {
+          anchorMidi: melodicAnchor,
+          scaleInfo,
+        },
+      );
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
         strength: mode === "ensemble" ? 0.48 : 0.38,
         phraseBeats: mode === "ensemble" ? 32 : 16,
