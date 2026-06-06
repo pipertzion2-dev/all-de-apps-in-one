@@ -13,10 +13,10 @@ export type MidiExportStemLike = {
 };
 
 /**
- * Mirror preview playback prep so exported MIDI matches what you hear:
+ * Mirror preview playback prep for MIDI export:
  * - normalize events
- * - apply meend legato + pitch bends when meend is on
- * - optionally include Meend accent layers (same as preview mix)
+ * - meend pitch bends (short note lengths — preview legato is audio-only)
+ * - optionally include Meend accent layers
  */
 export function prepareStemsForMidiExport(
   stems: MidiExportStemLike[],

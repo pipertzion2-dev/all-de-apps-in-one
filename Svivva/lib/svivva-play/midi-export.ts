@@ -3,7 +3,6 @@ import { normalizeMidiEvents } from "./midi-normalize";
 import {
   MEEND_MIDI_BEND_RANGE_SEMITONES,
   meendPitchbendForEvents,
-  prepareMeendLegatoMidiEvents,
 } from "./meend-midi";
 import { stemHasOverlappingNotes } from "./scale-key-guard";
 
@@ -46,9 +45,9 @@ type AtomicMidiEvent =
   | { tick: number; kind: "bend"; value: number };
 
 const ATOMIC_KIND_ORDER: Record<AtomicMidiEvent["kind"], number> = {
-  noteOn: 0,
+  noteOff: 0,
   bend: 1,
-  noteOff: 2,
+  noteOn: 2,
 };
 
 function expandTimelineToAtomicEvents(timeline: TimelineEntry[]): AtomicMidiEvent[] {
@@ -98,13 +97,19 @@ function buildStemTimeline(
   expression?: MidiStemExpression,
 ): TimelineEntry[] {
   const timeline: TimelineEntry[] = [];
-  let sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
+  const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
   const wantsMeend = Boolean(expression?.meend) || (expression?.pitchbend?.length ?? 0) > 0;
-  if (wantsMeend && !stemHasOverlappingNotes(sorted)) {
-    sorted = prepareMeendLegatoMidiEvents(sorted);
-  }
 
-  for (const evt of sorted) {
+  // Keep short hocket hits discrete in DAWs — legato tie lengths collapse to one note in Ableton.
+  const exportNotes = sorted.map((e, i) => {
+    if (!wantsMeend) return e;
+    const next = sorted[i + 1];
+    const gap = next ? next.startBeat - e.startBeat : e.duration;
+    const maxDur = Math.min(e.duration, gap > 0 ? gap * 0.82 : e.duration, 0.42);
+    return { ...e, duration: Math.max(0.08, maxDur) };
+  });
+
+  for (const evt of exportNotes) {
     const startTick = Math.round(evt.startBeat * TICKS_PER_BEAT);
     const durationTick = Math.max(
       TICKS_PER_BEAT / 4,
@@ -120,9 +125,9 @@ function buildStemTimeline(
   }
 
   let pitchBends = expression?.pitchbend ?? [];
-  if (wantsMeend && pitchBends.length === 0 && sorted.length) {
-    pitchBends = meendPitchbendForEvents(sorted, {
-      interNote: !stemHasOverlappingNotes(sorted),
+  if (wantsMeend && pitchBends.length === 0 && exportNotes.length) {
+    pitchBends = meendPitchbendForEvents(exportNotes, {
+      interNote: !stemHasOverlappingNotes(exportNotes),
     });
   }
   for (const pb of pitchBends) {

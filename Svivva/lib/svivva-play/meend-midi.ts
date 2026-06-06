@@ -138,12 +138,15 @@ export function meendPitchbendForEvents(
 export function buildMeendStemExpression(
   events: MeendNoteEvent[],
   polyphonic: boolean,
+  opts?: { legato?: boolean },
 ): {
   meend: boolean;
   pitchbend: MeendPitchBend[];
   midiEvents: MeendNoteEvent[];
 } {
-  const midiEvents = polyphonic ? events : prepareMeendLegatoMidiEvents(events);
+  const legato = opts?.legato ?? false;
+  const midiEvents =
+    !polyphonic && legato ? prepareMeendLegatoMidiEvents(events) : events;
   return {
     meend: true,
     midiEvents,

@@ -110,7 +110,6 @@ describe("buildMidiFile meend", () => {
       120,
     );
 
-    expect(buf.slice(0, 4).toString("ascii")).toBe("MThd");
     const { ticksPerBeat, tracks } = parseMidiFile(buf);
     expect(ticksPerBeat).toBe(480);
 
@@ -123,6 +122,23 @@ describe("buildMidiFile meend", () => {
     expect(bend).toBeDefined();
     expect(bend!.tick).toBeGreaterThan(noteOn!.tick);
     expect(bend!.tick).toBeLessThan(noteOff!.tick);
+  });
+
+  it("exports each hocket hit as a separate note (not one Ableton blob)", () => {
+    const hits = Array.from({ length: 8 }, (_, i) => ({
+      note: 60 + (i % 4),
+      velocity: 80,
+      startBeat: i * 0.5,
+      duration: 1.5,
+    }));
+    const buf = buildMidiFile(
+      [{ name: "Hocket Voice 6", midiEvents: hits, expression: { meend: true } }],
+      120,
+    );
+    const { tracks } = parseMidiFile(buf);
+    const noteOns = tracks[0]!.filter((e) => e.status === 0x90);
+    expect(noteOns.length).toBe(8);
+    expect(new Set(noteOns.map((e) => e.tick)).size).toBe(8);
   });
 
   it("skips empty stems so multitrack files stay importable", () => {

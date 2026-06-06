@@ -385,13 +385,11 @@ export function composeHocket(opts: {
     for (let v = 0; v < 6; v++) {
       const notes: MidiNote[] = [];
       const slots = slotPattern[v] ?? [];
-      const baseOct = voiceBaseOctave(v, 6, 3);
-      const octShift = (baseOct - 3) * 12;
       for (const s of slots) {
         if (style === "shaw_interlace" && rng.next() < 0.12) continue;
         const idx = s % masterMidis.length;
         notes.push({
-          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+          note: masterMidis[idx]!,
           velocity: 72 + Math.floor(rng.next() * 16),
           startBeat: s * sixteenthBeats,
           duration: sixteenthBeats * 0.75,
@@ -400,7 +398,7 @@ export function composeHocket(opts: {
       if (notes.length === 0) {
         const idx = v % masterMidis.length;
         notes.push({
-          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
+          note: masterMidis[idx]!,
           velocity: 70,
           startBeat: v * sixteenthBeats * 0.25,
           duration: sixteenthBeats * 2,
