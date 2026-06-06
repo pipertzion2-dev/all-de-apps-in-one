@@ -71,17 +71,26 @@ function meendStemIfMonophonic(stem: GeneratedStemResult): GeneratedStemResult {
   };
 }
 
-/** Meend only on lyrical orchestral stems — legato-prepared so preview bends are audible. */
+/** Meend on lyrical orchestral stems — staggered ornaments per voice, legato for audible glides. */
 export function applyMeendToOrchestralMelodyStems(
   stems: GeneratedStemResult[],
 ): GeneratedStemResult[] {
+  let voicePhase = 0;
   return stems.map((stem) => {
     if (!/violin 1|solo violin|flute|oboe/i.test(stem.name)) return stem;
     if (stem.midiEvents.length === 0) return stem;
+    const phase = voicePhase++;
     const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
-    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 2.2);
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 2.4);
     const legato = prepareMeendLegatoMidiEvents(monoReady);
-    const built = buildMeendStemExpression(legato, false);
+    const built = buildMeendStemExpression(legato, false, {
+      peakSemitones: 0.85,
+      shouldOrnament: (idx, e) => {
+        if ((e.duration ?? 0.25) < 0.22) return false;
+        const bar = Math.floor(e.startBeat / 4);
+        return (bar + idx + phase) % 3 !== 1;
+      },
+    });
     return {
       ...stem,
       midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],

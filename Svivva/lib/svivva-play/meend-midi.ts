@@ -116,17 +116,23 @@ function dedupeBends(bends: MeendPitchBend[]): MeendPitchBend[] {
  */
 export function meendPitchbendForEvents(
   events: MeendNoteEvent[],
-  opts?: { interNote?: boolean },
+  opts?: {
+    interNote?: boolean;
+    peakSemitones?: number;
+    shouldOrnament?: (index: number, event: MeendNoteEvent) => boolean;
+  },
 ): MeendPitchBend[] {
   const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
   if (sorted.length === 0) return [];
 
   const interNote = opts?.interNote ?? true;
+  const peak = opts?.peakSemitones ?? 0.45;
   const out: MeendPitchBend[] = [];
 
   for (let i = 0; i < sorted.length; i++) {
     const e = sorted[i]!;
-    addGamakBends(e, out);
+    if (opts?.shouldOrnament && !opts.shouldOrnament(i, e)) continue;
+    addGamakBends(e, out, peak);
     if (interNote && i < sorted.length - 1) {
       addInterNoteMeendBends(e, sorted[i + 1]!, out);
     }
@@ -138,7 +144,11 @@ export function meendPitchbendForEvents(
 export function buildMeendStemExpression(
   events: MeendNoteEvent[],
   polyphonic: boolean,
-  opts?: { legato?: boolean },
+  opts?: {
+    legato?: boolean;
+    peakSemitones?: number;
+    shouldOrnament?: (index: number, event: MeendNoteEvent) => boolean;
+  },
 ): {
   meend: boolean;
   pitchbend: MeendPitchBend[];
@@ -150,6 +160,10 @@ export function buildMeendStemExpression(
   return {
     meend: true,
     midiEvents,
-    pitchbend: meendPitchbendForEvents(midiEvents, { interNote: !polyphonic }),
+    pitchbend: meendPitchbendForEvents(midiEvents, {
+      interNote: !polyphonic,
+      peakSemitones: opts?.peakSemitones,
+      shouldOrnament: opts?.shouldOrnament,
+    }),
   };
 }

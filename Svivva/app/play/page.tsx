@@ -60,6 +60,7 @@ import {
 import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "@/lib/svivva-play/generate-helpers";
 import {
   buildMeendAccentPlaybacks,
+  buildOrchestralMeendAccentPlaybacks,
   meendAccentSourceName,
 } from "@/lib/svivva-play/meend-showcase-stem";
 import {
@@ -1036,7 +1037,7 @@ export default function SvivvaPlayPage() {
     return () => {
       cancelled = true;
     };
-  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession, manualTempo, manualKey, analysis?.bpm, analysis?.key]);
+  }, [audioFile, melodyneFile, importSeq, applyHarmonicSession]);
 
   const buildSettings = useCallback(() => {
     const lockedKey = generationKeyLabel;
@@ -1165,6 +1166,7 @@ export default function SvivvaPlayPage() {
         const settings = buildSettings();
 
         const lockedKey = generationKeyLabel;
+        const composeKey = manualKey ? normalizeKeyLabel(manualKey) : lockedKey;
         const harmonicContext = transcription
           ? {
               chords: stabilizeHarmonicTimeline(
@@ -1175,7 +1177,7 @@ export default function SvivvaPlayPage() {
               audioNotes: [],
               melodyneNotes: transcription.melodyneNotes ?? [],
               durationSec: transcription.durationSec,
-              key: lockedKey,
+              key: composeKey,
               keySource: transcription.sources?.melodyneMidi
                 ? ("midi" as const)
                 : transcription.harmonicKeySource,
@@ -1186,7 +1188,7 @@ export default function SvivvaPlayPage() {
 
         const generatePayload = {
           sessionId: sessionId ?? undefined,
-          inlineAnalysis: { ...activeAnalysis, key: lockedKey },
+          inlineAnalysis: { ...activeAnalysis, key: composeKey },
           mode,
           stylePreset: selectedPreset || STYLE_PRESETS[mode][0]?.id,
           quality,
@@ -1665,16 +1667,27 @@ export default function SvivvaPlayPage() {
         gainDb: s.gainDb,
       }));
 
-      if (meend && mode !== "ensemble") {
-        const accents = buildMeendAccentPlaybacks(
-          prepared.map((s) => ({
-            name: s.name,
-            role: s.role,
-            instrumentHint: s.instrumentHint,
-            midiEvents: s.midiEvents,
-            pan: s.pan,
-          })),
-        );
+      if (meend) {
+        const accents =
+          mode === "ensemble"
+            ? buildOrchestralMeendAccentPlaybacks(
+                prepared.map((s) => ({
+                  name: s.name,
+                  role: s.role,
+                  instrumentHint: s.instrumentHint,
+                  midiEvents: s.midiEvents,
+                  pan: s.pan,
+                })),
+              )
+            : buildMeendAccentPlaybacks(
+                prepared.map((s) => ({
+                  name: s.name,
+                  role: s.role,
+                  instrumentHint: s.instrumentHint,
+                  midiEvents: s.midiEvents,
+                  pan: s.pan,
+                })),
+              );
         if (accents.length > 0) {
           const accented = new Set(
             accents
@@ -1701,16 +1714,27 @@ export default function SvivvaPlayPage() {
         muted: s.muted,
         gainDb: s.gainDb,
       }));
-      if (!meend || mode === "ensemble") return base;
-      const accents = buildMeendAccentPlaybacks(
-        currentStems.map((s) => ({
-          name: s.name,
-          role: s.role,
-          instrumentHint: s.instrumentHint,
-          midiEvents: normalizeMidiEvents(s.midiEvents),
-          pan: s.pan,
-        })),
-      );
+      if (!meend) return base;
+      const accents =
+        mode === "ensemble"
+          ? buildOrchestralMeendAccentPlaybacks(
+              currentStems.map((s) => ({
+                name: s.name,
+                role: s.role,
+                instrumentHint: s.instrumentHint,
+                midiEvents: normalizeMidiEvents(s.midiEvents),
+                pan: s.pan,
+              })),
+            )
+          : buildMeendAccentPlaybacks(
+              currentStems.map((s) => ({
+                name: s.name,
+                role: s.role,
+                instrumentHint: s.instrumentHint,
+                midiEvents: normalizeMidiEvents(s.midiEvents),
+                pan: s.pan,
+              })),
+            );
       if (accents.length === 0) return base;
       const anySoloed = currentStems.some((s) => s.soloed);
       const accentStates = accents.map((accent) => {
@@ -2153,6 +2177,7 @@ export default function SvivvaPlayPage() {
 
   useEffect(() => {
     setSelectedPreset(STYLE_PRESETS[mode][0]?.id || "");
+    if (mode === "ensemble") setMeend(true);
     setStems([]);
     setPatchResult(null);
     setPlanInfo(null);
@@ -2197,13 +2222,13 @@ export default function SvivvaPlayPage() {
   useEffect(() => {
     const justEnabled = meend && !prevMeendRef.current;
     prevMeendRef.current = meend;
-    if (!justEnabled || isIndianRagaScaleName(reichScale)) return;
+    if (!justEnabled || isIndianRagaScaleName(reichScale) || mode === "ensemble") return;
     const lockedKey = generationKeyLabel;
     const stable = stableGenerationSeed({ useSeed, seed, lockedKey, importSeq });
     setReichScale(
       resolveMeendScaleName({ lockedKey, reichScale, seed: stable, meend: true }),
     );
-  }, [meend, importSeq, useSeed, seed, generationKeyLabel, reichScale]);
+  }, [meend, importSeq, useSeed, seed, generationKeyLabel, reichScale, mode]);
 
   const handleLocalCompositionGenerate = useCallback(() => {
     setIsGenerating(true);
@@ -2521,13 +2546,13 @@ export default function SvivvaPlayPage() {
               Viola, Cello, Contrabass, Harp, Flute, Oboe, Timpani per track name.
             </p>
             <CheckboxOption
-              label="Indian Meend — off by default (Violin 1, Solo Violin, Flute, Oboe only)"
+              label="Indian Meend — lyrical voices (Violin 1, Solo Violin, Flute, Oboe)"
               checked={meend}
               onChange={setMeend}
             />
             {meend && (
               <p className="text-[9px] text-gray-500 mt-1">
-                Uncheck to disable pitch bend on preview and export.
+                Staggered pitch bends on each lyrical stem plus a sitar accent layer in preview.
               </p>
             )}
             <div className="flex items-center gap-4">
@@ -3432,9 +3457,18 @@ export default function SvivvaPlayPage() {
                                 min="30"
                                 max="300"
                                 value={manualTempo ?? effectiveAnalysis.bpm}
-                                onChange={(e) =>
-                                  setManualTempo(e.target.value ? parseInt(e.target.value) : null)
-                                }
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  if (!raw) {
+                                    setManualTempo(null);
+                                    return;
+                                  }
+                                  const n = parseInt(raw, 10);
+                                  if (!Number.isNaN(n)) setManualTempo(n);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") e.preventDefault();
+                                }}
                                 className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
                                 placeholder={String(effectiveAnalysis.bpm)}
                                 data-testid="input-manual-tempo"
