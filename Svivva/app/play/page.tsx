@@ -84,7 +84,6 @@ import {
   ORCHESTRAL_STYLE_PRESET_ID,
   BJORK_LINS_ORCHESTRAL_PRESET,
   isOrchestralPreset,
-  isBjorkLinsPreset,
 } from "@/lib/svivva-play/prompts/orchestral-composer";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { HolographicNoise } from "@/components/holographic-noise";
@@ -357,27 +356,18 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
     {
       id: BJORK_LINS_ORCHESTRAL_PRESET,
       label: "Björk × Ivan Lins Strings",
-      desc: "Brazilian interlocking strings — Ableton Orchestral instrument map",
+      desc: "Brazilian phrasing, jazz voice-leading — interlocking string orchestra",
     },
     {
       id: ORCHESTRAL_STYLE_PRESET_ID,
-      label: "Prompt Orchestral",
-      desc: "27+ stems, humanized MIDI, Reich × Shaw hybrid",
+      label: "Hyperreal Orchestral",
+      desc: "Reich phasing × Shaw intimacy — classically voice-led stems",
     },
     {
       id: "cinematic_orchestra",
       label: "Cinematic Orchestra",
-      desc: "40-piece with dynamics pp-ff",
+      desc: "Long-bow sustains, dynamic swells — film-score orchestration",
     },
-    { id: "60s_soul", label: "60s Soul Band", desc: "Bass, drums, keys, horns, strings" },
-    { id: "80s_synth_funk", label: "80s Synth-Funk", desc: "Synth-driven with drum machine" },
-    {
-      id: "70s_jazz_rock",
-      label: "70s Sophisticated Jazz-Rock",
-      desc: "Electric piano, sax, trumpet",
-    },
-    { id: "90s_rnb", label: "90s R&B", desc: "Lush pads, harmonies, strings" },
-    { id: "modern_hybrid", label: "Modern Hybrid", desc: "Orchestra meets electronics" },
   ],
 };
 
@@ -1171,16 +1161,10 @@ export default function SvivvaPlayPage() {
       case "ensemble":
         return {
           ...base,
-          vocalistEnabled,
+          meend,
           patternLength,
           analysisFocus,
-          ensembleSize: isBjorkLinsPreset(selectedPreset)
-            ? 11
-            : selectedPreset === "cinematic_orchestra"
-              ? 40
-              : isOrchestralPreset(selectedPreset)
-                ? 27
-                : 12,
+          ensembleSize: 11,
         };
       default:
         return {
@@ -2622,9 +2606,14 @@ export default function SvivvaPlayPage() {
               </div>
             </div>
             <p className="text-[9px] text-gray-500 leading-relaxed">
-              Björk × Ivan Lins preset maps stems to Ableton Orchestral: Violin, Viola, Cello,
-              Contrabass, Harp, Flute, Oboe, Timpani, Percussion.
+              Three orchestral presets only. Stems map to Ableton Orchestral — assign Violin,
+              Viola, Cello, Contrabass, Harp, Flute, Oboe, Timpani per track name.
             </p>
+            <CheckboxOption
+              label="Indian Meend (continuous pitch bend on melody stems)"
+              checked={meend}
+              onChange={setMeend}
+            />
             <div className="flex items-center gap-4">
               <RadioOption
                 label="Match Harmony"
@@ -2636,21 +2625,6 @@ export default function SvivvaPlayPage() {
                 checked={harmonyMode === "reharmonize"}
                 onChange={() => setHarmonyMode("reharmonize")}
               />
-            </div>
-            <div>
-              <CheckboxOption
-                label="Enable Vocalist"
-                checked={vocalistEnabled}
-                onChange={setVocalistEnabled}
-              />
-              {vocalistEnabled && (
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <AlertTriangle className="w-3 h-3 text-amber-500" />
-                  <span className="text-[10px] text-amber-600">
-                    Vocalist audio rendering is BETA quality
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         );

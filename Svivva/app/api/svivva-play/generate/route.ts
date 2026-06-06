@@ -41,11 +41,12 @@ import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
 import { type StyleName } from "@/lib/svivva-play/reich-engine";
 import type { ChordSegment } from "@/lib/svivva-play/chord-from-chroma";
 import {
-  composeBjorkLinsOrchestral,
+  composeOrchestralEnsemble,
+  isEnsembleOrchestralPreset,
   voicePartsToOrchestralStems,
+  type EnsembleOrchestralPreset,
 } from "@/lib/svivva-play/orchestral-compose";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
-import { isBjorkLinsPreset } from "@/lib/svivva-play/prompts/orchestral-composer";
 
 import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
 
@@ -417,8 +418,11 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    const runBjorkLinsOrchestral = () => {
+    const runOrchestralEnsemble = () => {
       const patternLength = (settings.patternLength as PatternLength | undefined) ?? "extended";
+      const preset = (isEnsembleOrchestralPreset(stylePreset)
+        ? stylePreset
+        : "bjork_lins_orchestral") as EnsembleOrchestralPreset;
       const scaleName =
         (settings.reichScale as string | undefined) ||
         (harmonicContext?.melodyneNotes.length ? "mixolydian" : "major");
@@ -435,31 +439,39 @@ export async function POST(request: NextRequest) {
           durationSec: sessionDurationSec,
         });
 
-      const voices = composeBjorkLinsOrchestral({
+      const voices = composeOrchestralEnsemble({
         durationSec: sessionDurationSec,
         bpm: analysisData.bpm,
         scale,
         seed,
         patternLength,
+        preset,
         melodyneNotes: orchCtx.melodyneNotes,
         audioNotes: orchCtx.audioNotes,
         chords: sessionChords,
       });
       let stems = voicePartsToOrchestralStems(voices) as GeneratedStemResult[];
+      if (settings.meend ?? false) stems = applyMeendToStems(stems);
       const swingAmt = Math.max(0, Math.min(1, Number(settings.swingAmount ?? 0) / 100));
       if (swingAmt > 0) {
         stems = applySwingToStems(stems, analysisData.bpm, swingAmt);
       }
+      const presetLabel =
+        preset === "bjork_lins_orchestral"
+          ? "Björk × Ivan Lins"
+          : preset === "cinematic_orchestra"
+            ? "Cinematic Orchestra"
+            : "Hyperreal Orchestral";
       return {
         stems,
         plan: {
           stemCount: stems.length,
           key: lockedKey,
           bpm: analysisData.bpm,
-          harmonyRules:
-            "Björk × Ivan Lins — Brazilian interlocking strings (Ableton Orchestral instrument hints)",
-          meendApplicableStems: [],
-          composer: "bjork_lins_orchestral",
+          harmonyRules: `${presetLabel} — classically voice-led stems (Ableton Orchestral hints)`,
+          meendApplicableStems:
+            (settings.meend ?? false) ? meendApplicableStemNames(stems) : [],
+          composer: preset,
           patternLength,
           abletonInstruments: stems.map((s) => `${s.name} → ${s.instrumentHint}`),
         },
@@ -467,11 +479,11 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    // Ensemble: procedural Björk × Ivan Lins strings (fast, no LLM)
-    if (mode === "ensemble" && isBjorkLinsPreset(stylePreset)) {
-      const orch = runBjorkLinsOrchestral();
+    // Ensemble: procedural orchestral only (3 presets — fast, no LLM)
+    if (mode === "ensemble") {
+      const orch = runOrchestralEnsemble();
       return finishWithStems(orch.stems, orch.plan, orch.pipeline, {
-        composer: "bjork_lins_orchestral",
+        composer: stylePreset || "bjork_lins_orchestral",
       });
     }
 
