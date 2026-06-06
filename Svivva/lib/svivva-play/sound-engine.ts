@@ -11,6 +11,7 @@ import {
   MEEND_ACCENT_GAIN_DB,
 } from "./meend-showcase-stem";
 import { isOrchestralMeendStem } from "./orchestral-compose";
+import { isCompositionMeendLeadName } from "./generate-helpers";
 import {
   buildMeendStemExpression,
   stemHasOverlappingNotes,
@@ -486,19 +487,22 @@ export class SvivvaSoundEngine {
           typeof stem.expression?.monophonic === "boolean"
             ? !stem.expression.monophonic
             : stemHasOverlappingNotes(sortedEvents);
+        const isMeendAccent = isMeendAccentStem(stem.name);
+        const isCompositionMeendLead = isCompositionMeendLeadName(stem.name);
         const isHocketStem =
-          stem.role.toLowerCase().includes("hocket") || /hocket voice/i.test(stem.name);
+          !isMeendAccent &&
+          !isCompositionMeendLead &&
+          (stem.role.toLowerCase().includes("hocket") || /^hocket voice \d/i.test(stem.name));
         const wantsMeend =
           !isHocketStem &&
           (forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend));
-        const isMeendAccent = isMeendAccentStem(stem.name);
         const isOrchMeend =
           Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
-        // Legato meend preview only for lyrical orchestral stems — never Reich hocket voices.
         const useMeendMono =
           wantsMeend &&
           !polyphonic &&
           (isMeendAccent ||
+            isCompositionMeendLead ||
             (Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name)));
 
         if (useMeendMono && pitchBends.length === 0) {
@@ -507,22 +511,26 @@ export class SvivvaSoundEngine {
           pitchBends = built.pitchbend;
         }
 
-        const meendPreset = isOrchMeend
-          ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
-          : MEEND_PREVIEW;
+        const meendPreset =
+          isOrchMeend || isCompositionMeendLead
+            ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
+            : MEEND_PREVIEW;
         const preset = useMeendMono ? meendPreset : this.resolveStemPreset(stem);
         const synth = useMeendMono
           ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);
         let useLegatoMeend =
-          useMeendMono && (isOrchestralMeendStem(stem.name) || isMeendAccent);
+          useMeendMono &&
+          (isMeendAccent || isCompositionMeendLead || isOrchestralMeendStem(stem.name));
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
-          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
-          : isOrchMeend
-            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
-            : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
+          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 10
+          : isCompositionMeendLead
+            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 5
+            : isOrchMeend
+              ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
+              : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
         const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();
 

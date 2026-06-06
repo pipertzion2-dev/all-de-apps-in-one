@@ -111,11 +111,11 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }
 
-function clampMidi(note: number, max = 84): number {
+function clampMidi(note: number, max = 76): number {
   return Math.max(36, Math.min(max, Math.round(note)));
 }
 
-function clampMidiPreservePc(note: number, max = 84, min = 36): number {
+function clampMidiPreservePc(note: number, max = 76, min = 36): number {
   const pc = ((note % 12) + 12) % 12;
   let best = clampMidi(note, max);
   if (best % 12 === pc) return best;

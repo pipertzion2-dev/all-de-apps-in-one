@@ -51,28 +51,30 @@ export function chordStemsToResults(
   });
 }
 
-export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
-  return stems.map((stem) => {
-    const role = stem.role.toLowerCase();
-    if (role.includes("hocket") || /hocket voice/i.test(stem.name)) return stem;
-    return meendStemIfMonophonic(stem);
-  });
+/** Lead line that carries audible meend in Reich composition (one voice only). */
+export function isCompositionMeendLeadName(name: string): boolean {
+  return /^hocket voice 1$/i.test(name) || /^counterpoint voice 1$/i.test(name);
 }
 
-function meendStemIfMonophonic(stem: GeneratedStemResult): GeneratedStemResult {
-  if (stem.midiEvents.length === 0) return stem;
-  const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
-  const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
-  return {
-    ...stem,
-    midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
-    expression: {
-      ...stem.expression,
-      meend: true,
-      pitchbend: built.pitchbend,
-      monophonic: !polyphonic,
-    },
-  };
+export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
+  return stems.map((stem) => {
+    if (!isCompositionMeendLeadName(stem.name)) return stem;
+    if (stem.midiEvents.length === 0) return stem;
+    const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
+    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 1.8);
+    const legato = prepareMeendLegatoMidiEvents(monoReady);
+    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.75 });
+    return {
+      ...stem,
+      midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
+      expression: {
+        ...stem.expression,
+        meend: true,
+        pitchbend: built.pitchbend,
+        monophonic: true,
+      },
+    };
+  });
 }
 
 /** Meend on lyrical orchestral stems when explicitly enabled — legato for audible glides. */
