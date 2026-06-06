@@ -18,10 +18,10 @@ import {
 } from "./meend-midi";
 
 /** Gamak depth — clear under a full mix without clipping. */
-export const MEEND_PREVIEW_GAMAK_CENTS = 115;
+export const MEEND_PREVIEW_GAMAK_CENTS = 75;
 
 /** Tail slide strength in preview. */
-export const MEEND_PREVIEW_TAIL_BOOST = 1.85;
+export const MEEND_PREVIEW_TAIL_BOOST = 1.15;
 
 const EVENT_ORDER = { attack: 0, bend: 1, tailBend: 2, release: 3 } as const;
 

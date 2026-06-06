@@ -341,7 +341,9 @@ export function composeCounterpoint(opts: {
       i++;
     }
     if (notes.length === 0) {
-      const fallback = clampMidi(12 * bo + scale.rootPc + (scale.pitchClasses[0] ?? 0));
+      const fallback = clampMidiPreservePc(
+        12 * bo + scale.rootPc + (scale.pitchClasses[0] ?? 0),
+      );
       notes.push({
         note: fallback,
         velocity: 72,
@@ -441,7 +443,7 @@ export function composeHocket(opts: {
       const bo = voiceBaseOctave(v, 4, 4);
       notes = [
         {
-          note: clampMidi(12 * bo + scale.rootPc),
+          note: clampMidiPreservePc(12 * bo + scale.rootPc),
           velocity: 70,
           startBeat: v * eighthBeats * 0.25,
           duration: eighthBeats * 2,

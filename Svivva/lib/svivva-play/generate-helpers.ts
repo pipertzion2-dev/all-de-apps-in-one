@@ -52,7 +52,11 @@ export function chordStemsToResults(
 }
 
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
-  return stems.map((stem) => meendStemIfMonophonic(stem));
+  return stems.map((stem) => {
+    const role = stem.role.toLowerCase();
+    if (role.includes("hocket") || /hocket voice/i.test(stem.name)) return stem;
+    return meendStemIfMonophonic(stem);
+  });
 }
 
 function meendStemIfMonophonic(stem: GeneratedStemResult): GeneratedStemResult {

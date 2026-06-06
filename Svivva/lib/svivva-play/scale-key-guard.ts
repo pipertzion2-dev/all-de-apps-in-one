@@ -209,17 +209,14 @@ function registerBounds(
   const roleNorm = role.toLowerCase();
   if (roleNorm === "bass") return { min: 36, max: 55 };
   if (roleNorm === "harmony" || roleNorm === "pad") return { min: 48, max: 72 };
-  if (
-    roleNorm === "melody" ||
-    roleNorm === "lead" ||
-    roleNorm === "solo" ||
-    roleNorm === "hocket" ||
-    roleNorm.includes("hocket")
-  ) {
+  if (roleNorm.includes("hocket")) {
+    return { min: 52, max: 84 };
+  }
+  if (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo") {
     const anchor = opts?.anchorMidi ?? 67;
     return {
-      min: Math.max(55, anchor - 14),
-      max: Math.min(84, anchor + 10),
+      min: Math.max(52, anchor - 16),
+      max: Math.min(84, anchor + 12),
     };
   }
   const anchor = opts?.anchorMidi ?? 67;
@@ -429,13 +426,14 @@ export function constrainMidiEvent(
       note = Math.max(36, Math.min(84, note));
     }
     return { ...evt, note, startBeat, duration };
+  } else if (roleNorm.includes("hocket")) {
+    const pc = ((note % 12) + 12) % 12;
+    if (!scale.scalePcs.has(pc)) {
+      note = snapNoteToScale(note, scale);
+    }
   } else if (
     chordCtx &&
-    (roleNorm === "melody" ||
-      roleNorm === "lead" ||
-      roleNorm === "solo" ||
-      roleNorm === "hocket" ||
-      roleNorm.includes("hocket"))
+    (roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo")
   ) {
     const chordTones = new Set(chordCtx.pcs);
     const pc = note % 12;

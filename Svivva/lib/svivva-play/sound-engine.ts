@@ -467,17 +467,20 @@ export class SvivvaSoundEngine {
           typeof stem.expression?.monophonic === "boolean"
             ? !stem.expression.monophonic
             : stemHasOverlappingNotes(sortedEvents);
+        const isHocketStem =
+          stem.role.toLowerCase().includes("hocket") || /hocket voice/i.test(stem.name);
         const wantsMeend =
-          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
+          !isHocketStem &&
+          (forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend));
         const isMeendAccent = isMeendAccentStem(stem.name);
         const isOrchMeend =
           Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
+        // Legato meend preview only for lyrical orchestral stems — never Reich hocket voices.
         const useMeendMono =
           wantsMeend &&
           !polyphonic &&
           (isMeendAccent ||
-            Boolean(stem.expression?.meend) ||
-            (forceMeend && isOrchestralMeendStem(stem.name)));
+            (Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name)));
 
         if (useMeendMono && pitchBends.length === 0) {
           const built = buildMeendStemExpression(midiEvents, false);
@@ -492,7 +495,8 @@ export class SvivvaSoundEngine {
         const synth = useMeendMono
           ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);
-        let useLegatoMeend = useMeendMono;
+        let useLegatoMeend =
+          useMeendMono && (isOrchestralMeendStem(stem.name) || isMeendAccent);
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
@@ -694,6 +698,7 @@ export class SvivvaSoundEngine {
     for (const ch of this.channels.values()) {
       try {
         if (ch.synth instanceof Tone.MonoSynth) {
+          ch.synth.detune.value = 0;
           ch.synth.triggerRelease();
         } else if ("releaseAll" in ch.synth && typeof ch.synth.releaseAll === "function") {
           (ch.synth as Tone.PolySynth).releaseAll(0);
