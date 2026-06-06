@@ -85,9 +85,9 @@ describe("composeOrchestralEnsemble", () => {
     const v1 = voices.find((v) => v.name === "Violin 1")!;
     const bass = voices.find((v) => v.name === "Contrabass")!;
     const flute = voices.find((v) => v.name === "Flute")!;
-    expect(v1.notes.every((n) => n.note >= 55 && n.note <= 76)).toBe(true);
-    expect(bass.notes.every((n) => n.note >= 28 && n.note <= 50)).toBe(true);
-    expect(flute.notes.every((n) => n.note >= 62 && n.note <= 81)).toBe(true);
+    expect(v1.notes.every((n) => n.note >= 55 && n.note <= 72)).toBe(true);
+    expect(bass.notes.every((n) => n.note >= 28 && n.note <= 48)).toBe(true);
+    expect(flute.notes.every((n) => n.note >= 60 && n.note <= 76)).toBe(true);
     expect(flute.notes.length).toBeGreaterThanOrEqual(3);
     expect(voices.find((v) => v.name === "Oboe")!.notes.length).toBeGreaterThanOrEqual(3);
     expect(voices.find((v) => v.name === "Timpani")!.notes.length).toBeGreaterThanOrEqual(2);

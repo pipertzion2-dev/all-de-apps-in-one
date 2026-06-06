@@ -215,10 +215,19 @@ const VIBRAPHONE: InstrumentPreset = {
 const FLUTE: InstrumentPreset = {
   synthType: "synth",
   oscillator: { type: "sine" },
-  envelope: { attack: 0.1, decay: 0.2, sustain: 0.8, release: 0.5 },
-  filter: { type: "bandpass", frequency: 2000, rolloff: -12, Q: 1 },
-  volume: -10,
+  envelope: { attack: 0.12, decay: 0.25, sustain: 0.75, release: 0.6 },
+  filter: { type: "lowpass", frequency: 2800, rolloff: -12, Q: 0.8 },
+  volume: -12,
   fx: [{ type: "reverb", wet: 0.3, decay: 2.5, preDelay: 0.02 }],
+};
+
+const ORCH_OBOE: InstrumentPreset = {
+  synthType: "synth",
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.1, decay: 0.22, sustain: 0.78, release: 0.55 },
+  filter: { type: "lowpass", frequency: 2400, rolloff: -12, Q: 0.75 },
+  volume: -12,
+  fx: [{ type: "reverb", wet: 0.28, decay: 2.2, preDelay: 0.02 }],
 };
 
 const WOODWIND: InstrumentPreset = {
@@ -373,7 +382,7 @@ const INSTRUMENT_MAP: Record<string, InstrumentPreset> = {
   piccolo: FLUTE,
   recorder: FLUTE,
   clarinet: WOODWIND,
-  oboe: WOODWIND,
+  oboe: ORCH_OBOE,
   bassoon: WOODWIND,
   sax: WOODWIND,
   saxophone: WOODWIND,

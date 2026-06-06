@@ -213,17 +213,17 @@ type TempoFeel = {
 
 /** Orchestral register limits (MIDI) — keeps timbres idiomatic. */
 const VOICE_REGISTER: Record<VoiceRole, { min: number; max: number }> = {
-  lead: { min: 55, max: 76 },
-  counter: { min: 53, max: 74 },
-  inner: { min: 48, max: 67 },
-  cello: { min: 36, max: 60 },
-  bass: { min: 28, max: 50 },
-  solo: { min: 58, max: 79 },
-  harp: { min: 48, max: 72 },
-  flute: { min: 62, max: 81 },
-  oboe: { min: 55, max: 77 },
-  timpani: { min: 28, max: 48 },
-  percussion: { min: 48, max: 72 },
+  lead: { min: 55, max: 72 },
+  counter: { min: 53, max: 70 },
+  inner: { min: 48, max: 65 },
+  cello: { min: 36, max: 58 },
+  bass: { min: 28, max: 48 },
+  solo: { min: 58, max: 74 },
+  harp: { min: 48, max: 68 },
+  flute: { min: 60, max: 76 },
+  oboe: { min: 55, max: 72 },
+  timpani: { min: 28, max: 45 },
+  percussion: { min: 40, max: 52 },
 };
 
 const VOICE_MIN_NOTES: Partial<Record<VoiceRole, number>> = {
@@ -460,7 +460,7 @@ function nearestGuideMidi(notes: TranscribedNote[], tSec: number): number | null
       best = n;
     }
   }
-  return best?.midi ?? null;
+  return best?.midi != null ? clampForVoice(best.midi, "lead") : null;
 }
 
 function midiToNearestDegree(midi: number, scale: ScaleResolution, fallback: number): number {
@@ -535,9 +535,9 @@ function voiceLeadForRole(
       return clampForVoice(12 * (baseOctave + 1) + root, role);
     }
     case "flute":
-      return nearestScaleMidi(leadMidi + (eventIdx % 3 === 0 ? 7 : 4), scale, baseOctave, role);
+      return nearestScaleMidi(leadMidi + (eventIdx % 3 === 0 ? 2 : 1), scale, baseOctave, role);
     case "oboe":
-      return nearestScaleMidi(leadMidi - 3, scale, baseOctave, role);
+      return nearestScaleMidi(leadMidi - 2, scale, baseOctave, role);
     default:
       return clampForVoice(leadMidi, role);
   }
@@ -564,7 +564,7 @@ function buildHarpArpeggios(
     while (t < endBeat - step * 0.5) {
       const pc = pcs[vi % pcs.length] ?? 0;
       notes.push({
-        note: clampForVoice(12 * 4 + pc, "harp"),
+        note: clampForVoice(12 * (3 + 1) + pc, "harp"),
         velocity: 48 + rng.int(0, 18),
         startBeat: t,
         duration: step * 0.85,
@@ -609,7 +609,7 @@ function buildPercussionHits(durationSec: number, bpm: number, seed: number): Mi
     if (b % 4 !== 2) continue;
     if (rng.next() < 0.45) continue;
     notes.push({
-      note: clampForVoice(60, "percussion"),
+      note: clampForVoice(45, "percussion"),
       velocity: 42 + rng.int(0, 16),
       startBeat: b + 0.5,
       duration: 0.08,
@@ -752,6 +752,13 @@ function buildOrchestralExpression(notes: MidiNote[]): Record<string, unknown> {
   };
 }
 
+function sanitizeVoiceNotes(notes: MidiNote[], role: VoiceRole): MidiNote[] {
+  return notes.map((n) => ({
+    ...n,
+    note: clampForVoice(n.note, role),
+  }));
+}
+
 export function composeOrchestralEnsemble(opts: {
   durationSec: number;
   bpm: number;
@@ -838,6 +845,7 @@ export function composeOrchestralEnsemble(opts: {
     }
 
     notes = applyOrchestralDynamics(notes, profile, tuning);
+    notes = sanitizeVoiceNotes(notes, profile.voiceRole);
 
     parts.push({ voiceIndex: i, notes, name: profile.name });
   }

@@ -1661,7 +1661,7 @@ export default function SvivvaPlayPage() {
         gainDb: s.gainDb,
       }));
 
-      if (meend) {
+      if (meend && mode !== "ensemble") {
         const accents = buildMeendAccentPlaybacks(
           prepared.map((s) => ({
             name: s.name,

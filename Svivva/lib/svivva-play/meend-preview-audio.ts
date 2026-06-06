@@ -18,7 +18,7 @@ import {
 } from "./meend-midi";
 
 /** Gamak depth — clear under a full mix without clipping. */
-export const MEEND_PREVIEW_GAMAK_CENTS = 140;
+export const MEEND_PREVIEW_GAMAK_CENTS = 90;
 
 /** Tail slide strength in preview. */
 export const MEEND_PREVIEW_TAIL_BOOST = 1.55;
@@ -76,7 +76,8 @@ export function buildMeendLegatoTimeline(
       const slideStartBeat = evt.startBeat + d * V1_MEEND_TAIL_START;
       const slideEndBeat = next.startBeat;
       if (slideEndBeat > slideStartBeat + 0.02) {
-        const semis = next.note - evt.note;
+        const rawSemis = next.note - evt.note;
+        const semis = Math.max(-5, Math.min(5, rawSemis));
         const glideSec = Math.max(0.07, beatToSeconds(slideEndBeat - slideStartBeat));
         timeline.push({
           type: "tailBend",

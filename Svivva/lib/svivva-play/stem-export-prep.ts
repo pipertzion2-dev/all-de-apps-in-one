@@ -23,8 +23,9 @@ export function prepareStemsForMidiExport(
   options?: { meend?: boolean; includeAccentLayers?: boolean; ensembleOrchestral?: boolean },
 ): StemExportInput[] {
   const meend = Boolean(options?.meend);
-  const includeAccents = options?.includeAccentLayers ?? meend;
   const ensembleOrchestral = Boolean(options?.ensembleOrchestral);
+  const includeAccents =
+    options?.includeAccentLayers ?? (meend && !ensembleOrchestral);
 
   let prepared = stems.map((s) => ({
     ...s,
