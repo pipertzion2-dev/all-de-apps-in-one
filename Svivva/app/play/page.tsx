@@ -117,6 +117,7 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import { normalizeMidiEvents } from "@/lib/svivva-play/midi-normalize";
 import {
+  isMinorKeyLabel,
   keyToSelectValue,
   normalizeKeyLabel,
   parseRootFromKeyLabel,
@@ -1084,7 +1085,9 @@ export default function SvivvaPlayPage() {
           meend,
           patternLength,
           ensembleSize: 13,
-          reichScale: effectiveReichScale,
+          reichScale: isMinorKeyLabel(manualKey ?? generationKeyLabel)
+            ? "natural_minor"
+            : "major",
         };
       default:
         return {

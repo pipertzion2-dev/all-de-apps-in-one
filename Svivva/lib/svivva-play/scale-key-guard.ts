@@ -4,6 +4,7 @@
 import type { ChordSegment } from "./chord-from-chroma";
 import { normalizeKeyLabel, parseRootFromKeyLabel, isMinorKeyLabel } from "./analysis-utils";
 import { inferKeyFromChordSegments } from "./key-from-notes";
+import { isIndianRagaScaleName } from "./indian-raga-scale";
 import type { NormalizedMidiEvent } from "./midi-normalize";
 import { resolveScale, type ScaleResolution } from "./reich-engine";
 import {
@@ -506,8 +507,35 @@ export function ensembleCompositionScaleName(
   manualKey?: string | null,
   userScale?: string | null,
 ): string {
-  if (userScale?.trim()) return userScale.trim().toLowerCase().replace(/ /g, "_");
+  if (userScale?.trim()) {
+    const sn = userScale.trim().toLowerCase().replace(/ /g, "_");
+    if (!isIndianRagaScaleName(sn)) return sn;
+  }
   return isMinorKeyLabel(manualKey?.trim() || lockedKey) ? "natural_minor" : "major";
+}
+
+/** Hard scale lock for ensemble — every pitched stem, no chord-extension bleed. */
+export function constrainEnsembleStemsToScale<T extends ConstrainableStem>(
+  stems: T[],
+  scaleInfo: ScaleInfo,
+  bpm: number,
+): T[] {
+  const grid = bpm >= 140 ? 0.125 : 0.25;
+  return stems.map((stem) => {
+    const roleNorm = stem.role.toLowerCase();
+    if (roleNorm === "percussion") return stem;
+    const constrained = {
+      ...stem,
+      midiEvents: stem.midiEvents.map((evt) => {
+        const startBeat = quantizeBeat(evt.startBeat, grid);
+        const duration = Math.max(grid * 0.5, quantizeBeat(evt.duration, grid));
+        let note = snapNoteToScale(evt.note, scaleInfo);
+        note = clampNoteToRegister(note, stem.role, {});
+        return { ...evt, note, startBeat, duration };
+      }),
+    };
+    return refreshMeendExpression(constrained);
+  });
 }
 
 /**

@@ -649,19 +649,24 @@ function buildHarpArpeggios(
   bpm: number,
   seed: number,
   feel: TempoFeel,
+  scale: ScaleResolution,
 ): MidiNote[] {
   const rng = new Rng(seed ^ 0xface);
   const beatSec = 60 / bpm;
+  const scaleSet = new Set(scale.pitchClasses);
   const notes: MidiNote[] = [];
   for (const chord of chords) {
-    const pcs = chordSegmentPitchClasses(chord);
+    const pcs = chordSegmentPitchClasses(chord).filter((pc) =>
+      scaleSet.has(((pc % 12) + 12) % 12),
+    );
+    const pool = pcs.length ? pcs : scale.pitchClasses;
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
     const step = Math.max(0.5, feel.voiceStepBeats);
     let t = startBeat;
     let vi = 0;
     while (t < endBeat - step * 0.5) {
-      const pc = pcs[vi % pcs.length] ?? 0;
+      const pc = pool[vi % pool.length] ?? scale.rootPc;
       notes.push({
         note: clampForVoice(12 * (3 + 1) + pc, "harp"),
         velocity: 48 + rng.int(0, 18),
@@ -1000,7 +1005,7 @@ export function composeOrchestralEnsemble(opts: {
     let notes: MidiNote[] = [];
 
     if (profile.voiceRole === "harp") {
-      notes = buildHarpArpeggios(chords, bpm, seed, feel);
+      notes = buildHarpArpeggios(chords, bpm, seed, feel, scale);
     } else if (profile.voiceRole === "timpani") {
       notes = buildTimpaniHits(durationSec, bpm, seed, chords, scale);
     } else if (profile.percussionKind === "suspended_cymbal") {

@@ -33,6 +33,7 @@ import {
 } from "@/lib/svivva-play/strategic-compose";
 import {
   constrainGeneratedStems,
+  constrainEnsembleStemsToScale,
   ensembleCompositionScaleName,
   resolveCompositionKey,
   resolveEnsembleComposeKey,
@@ -165,6 +166,9 @@ export async function POST(request: NextRequest) {
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
 
+    const composeKeyForEnsemble =
+      mode === "ensemble" ? resolveEnsembleComposeKey({ lockedKey, manualKey }) : lockedKey;
+
     const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
       rawSessionChords,
       sessionDurationSec,
@@ -175,7 +179,7 @@ export async function POST(request: NextRequest) {
     const ensembleSessionChords =
       mode === "ensemble"
         ? buildEnsembleChordTimeline(
-            lockedKey,
+            composeKeyForEnsemble,
             sessionDurationSec,
             manualTempo ?? analysisData.bpm,
             seed,
@@ -260,16 +264,19 @@ export async function POST(request: NextRequest) {
         manualKey,
         chordsForGuard,
       );
-      let guardedStems = constrainGeneratedStems(
-        stems,
-        composeKeyForGuard,
-        chordsForGuard,
-        analysisData.bpm,
-        {
-          anchorMidi: mode === "ensemble" ? undefined : melodicAnchor,
-          scaleInfo,
-        },
-      );
+      let guardedStems =
+        mode === "ensemble"
+          ? constrainEnsembleStemsToScale(stems, scaleInfo, analysisData.bpm)
+          : constrainGeneratedStems(
+              stems,
+              composeKeyForGuard,
+              chordsForGuard,
+              analysisData.bpm,
+              {
+                anchorMidi: melodicAnchor,
+                scaleInfo,
+              },
+            );
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
         strength: mode === "ensemble" ? 0.48 : 0.38,
         phraseBeats: mode === "ensemble" ? 32 : 16,
