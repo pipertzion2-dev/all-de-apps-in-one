@@ -11,7 +11,6 @@ import {
   MEEND_ACCENT_GAIN_DB,
 } from "./meend-showcase-stem";
 import { isOrchestralMeendStem } from "./orchestral-compose";
-import { isCompositionMeendLeadName } from "./generate-helpers";
 import {
   buildMeendStemExpression,
   stemHasOverlappingNotes,
@@ -488,22 +487,15 @@ export class SvivvaSoundEngine {
             ? !stem.expression.monophonic
             : stemHasOverlappingNotes(sortedEvents);
         const isMeendAccent = isMeendAccentStem(stem.name);
-        const isCompositionMeendLead = isCompositionMeendLeadName(stem.name);
-        const isHocketStem =
-          !isMeendAccent &&
-          !isCompositionMeendLead &&
-          (stem.role.toLowerCase().includes("hocket") || /^hocket voice \d/i.test(stem.name));
         const wantsMeend =
-          !isHocketStem &&
-          (forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend));
+          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
         const isOrchMeend =
           Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
         const useMeendMono =
           wantsMeend &&
           !polyphonic &&
           (isMeendAccent ||
-            isCompositionMeendLead ||
-            (Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name)));
+            (Boolean(stem.expression?.meend) && Boolean(stem.expression?.monophonic)));
 
         if (useMeendMono && pitchBends.length === 0) {
           const built = buildMeendStemExpression(midiEvents, false);
@@ -511,26 +503,21 @@ export class SvivvaSoundEngine {
           pitchBends = built.pitchbend;
         }
 
-        const meendPreset =
-          isOrchMeend || isCompositionMeendLead
-            ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
-            : MEEND_PREVIEW;
+        const meendPreset = isOrchMeend
+          ? resolveInstrumentPreset(stem.instrumentHint, stem.role)
+          : MEEND_PREVIEW;
         const preset = useMeendMono ? meendPreset : this.resolveStemPreset(stem);
         const synth = useMeendMono
           ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);
-        let useLegatoMeend =
-          useMeendMono &&
-          (isMeendAccent || isCompositionMeendLead || isOrchestralMeendStem(stem.name));
+        const useLegatoMeend = useMeendMono;
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
-          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 10
-          : isCompositionMeendLead
-            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 5
-            : isOrchMeend
-              ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
-              : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
+          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + 8
+          : isOrchMeend
+            ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 6
+            : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
         const volume = new Tone.Volume(previewGainDb);
         const effects = this.createLiveEffectsChain();
 

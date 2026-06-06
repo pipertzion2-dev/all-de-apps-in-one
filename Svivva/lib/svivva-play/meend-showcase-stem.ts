@@ -58,23 +58,13 @@ export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null 
   );
 }
 
-/** One meend accent layer on the lead + up to two supporting voices. */
+/** One meend accent layer per monophonic voice (hocket-friendly). */
 export function buildMeendAccentPlaybacks(stems: MeendStemLike[]): StemPlayback[] {
   const voices = pickMeendVoices(stems);
-  if (voices.length === 0) return [];
-  const lead = pickMeendLeadStem(stems);
-  const ordered = lead
-    ? [lead, ...voices.filter((v) => v.name !== lead.name)]
-    : [...voices];
-  const picked = ordered.slice(0, 3);
   const out: StemPlayback[] = [];
-  for (let i = 0; i < picked.length; i++) {
-    const stem = picked[i]!;
-    const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
-    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 1.6);
-    const built = buildMeendStemExpression(monoReady, false, {
-      peakSemitones: i === 0 ? 0.85 : 0.65,
-    });
+  for (let i = 0; i < voices.length; i++) {
+    const stem = voices[i]!;
+    const built = buildMeendStemExpression([...stem.midiEvents], false);
     if (built.midiEvents.length === 0) continue;
     out.push({
       name: meendAccentStemName(stem.name),
@@ -85,7 +75,7 @@ export function buildMeendAccentPlaybacks(stems: MeendStemLike[]): StemPlayback[
       muted: false,
       soloed: false,
       pan: stem.pan ?? 0,
-      gainDb: MEEND_ACCENT_GAIN_DB + (i === 0 ? 5 : i === 1 ? 2 : 0),
+      gainDb: MEEND_ACCENT_GAIN_DB - Math.min(i, 2),
     });
   }
   return out;

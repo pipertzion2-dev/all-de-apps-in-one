@@ -4,7 +4,6 @@ import type { Analysis } from "./schemas";
 import { generateNeoSoulChords, getProgressionLabels, type ChordStem } from "./chord-engine";
 import { normalizeMidiEvents } from "./midi-normalize";
 import { buildMeendStemExpression, constrainGeneratedStems, prepareMeendPreviewEvents, stemHasOverlappingNotes } from "./scale-key-guard";
-import { prepareMeendLegatoMidiEvents } from "./meend-midi";
 import type { ChordSegment } from "./chord-from-chroma";
 import * as ChordKit from "./chordkit";
 
@@ -51,19 +50,11 @@ export function chordStemsToResults(
   });
 }
 
-/** Lead line that carries audible meend in Reich composition (one voice only). */
-export function isCompositionMeendLeadName(name: string): boolean {
-  return /^hocket voice 1$/i.test(name) || /^counterpoint voice 1$/i.test(name);
-}
-
 export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemResult[] {
   return stems.map((stem) => {
-    if (!isCompositionMeendLeadName(stem.name)) return stem;
     if (stem.midiEvents.length === 0) return stem;
-    const sorted = [...stem.midiEvents].sort((a, b) => a.startBeat - b.startBeat);
-    const monoReady = prepareMeendPreviewEvents(sorted, 0.45, 1.8);
-    const legato = prepareMeendLegatoMidiEvents(monoReady);
-    const built = buildMeendStemExpression(legato, false, { peakSemitones: 0.75 });
+    const polyphonic = stemHasOverlappingNotes(stem.midiEvents);
+    const built = buildMeendStemExpression(stem.midiEvents, polyphonic);
     return {
       ...stem,
       midiEvents: built.midiEvents as GeneratedStemResult["midiEvents"],
@@ -71,7 +62,7 @@ export function applyMeendToStems(stems: GeneratedStemResult[]): GeneratedStemRe
         ...stem.expression,
         meend: true,
         pitchbend: built.pitchbend,
-        monophonic: true,
+        monophonic: !polyphonic,
       },
     };
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { composeHocket, resolveScale } from "./reich-engine";
 import { constrainGeneratedStems } from "./scale-key-guard";
-import { applyMeendToStems, isCompositionMeendLeadName } from "./generate-helpers";
+import { applyMeendToStems } from "./generate-helpers";
 
 describe("composition playback pipeline", () => {
   it("keeps diverse pitches through constrain and meend (no single-note collapse)", () => {
@@ -33,8 +33,8 @@ describe("composition playback pipeline", () => {
     expect(unique.length).toBeGreaterThanOrEqual(6);
     expect(guarded.some((s) => s.midiEvents.length >= 8)).toBe(true);
     for (const stem of guarded) {
-      if (/hocket voice/i.test(stem.name)) {
-        expect(stem.expression?.meend).toBe(isCompositionMeendLeadName(stem.name) ? true : undefined);
+      if (/hocket voice/i.test(stem.name) && stem.midiEvents.length > 0) {
+        expect(stem.expression?.meend).toBe(true);
       }
     }
   });

@@ -28,8 +28,7 @@ export type HocketMelodicStyle = "reich_cells" | "shaw_phrases" | "minimalist_os
 
 function degreeToMidi(rootPc: number, pitchClasses: number[], degree: number, octave: number): number {
   const pc = (rootPc + (pitchClasses[degree % pitchClasses.length] ?? 0)) % 12;
-  const midi = 12 * (octave + 1) + pc;
-  return Math.max(48, Math.min(76, midi));
+  return 12 * octave + pc;
 }
 
 /** Per-voice melodic walks (V-2 generate_melody_notes). */
@@ -49,7 +48,7 @@ export function buildV2HocketMelodyNotes(
   const numVoices = slotPattern.length;
   const voices: HocketMidiNote[][] = Array.from({ length: numVoices }, () => []);
   const previousDegree = new Array(numVoices).fill(0);
-  const baseOctave = 3;
+  const baseOctave = 4;
 
   for (let voiceIdx = 0; voiceIdx < numVoices; voiceIdx++) {
     const slots = slotPattern[voiceIdx] ?? [];
@@ -129,7 +128,7 @@ export function addV2HocketRapidFire(
       const startBeat = accentBeat + i * (tripletDur / beatDur);
       if (startBeat >= totalBeats) break;
       out[v]!.push({
-        note: degreeToMidi(scale.rootPc, pcs, (degree + i) % pcs.length, 3 + (v % 2)),
+        note: degreeToMidi(scale.rootPc, pcs, (degree + i) % pcs.length, 4 + (v % 2)),
         velocity: Math.round(68 + rng.next() * 18),
         startBeat,
         duration: Math.max(0.1, tripletDur / beatDur * 0.85),

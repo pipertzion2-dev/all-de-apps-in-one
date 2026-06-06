@@ -111,11 +111,11 @@ function relativeSteps(absPcs: number[], rootPc: number): number[] {
   return [...new Set(absPcs.map((p) => (((p - rootPc) % 12) + 12) % 12))].sort((a, b) => a - b);
 }
 
-function clampMidi(note: number, max = 76): number {
+function clampMidi(note: number, max = 84): number {
   return Math.max(36, Math.min(max, Math.round(note)));
 }
 
-function clampMidiPreservePc(note: number, max = 76, min = 36): number {
+function clampMidiPreservePc(note: number, max = 84, min = 36): number {
   const pc = ((note % 12) + 12) % 12;
   let best = clampMidi(note, max);
   if (best % 12 === pc) return best;
@@ -227,8 +227,8 @@ function cellToMidis(
 }
 
 function voiceBaseOctave(vi: number, numVoices: number, base = 3): number {
-  const spread = [0, 0, 1, 1, 2, 2].slice(0, numVoices);
-  return vi < spread.length ? base + spread[vi] : base + Math.floor(vi / 2);
+  const spread = [0, 0, 1, 1, 2, 2, 2, 2].slice(0, numVoices);
+  return vi < spread.length ? base + spread[vi]! : base + Math.min(2, Math.floor(vi / 2));
 }
 
 /** v2 Reich Composer: one shared melodic cell, random scale degrees + octave spread. */
@@ -402,11 +402,13 @@ export function composeHocket(opts: {
     for (let v = 0; v < 6; v++) {
       const notes: MidiNote[] = [];
       const slots = slotPattern[v] ?? [];
+      const baseOct = voiceBaseOctave(v, 6, 3);
+      const octShift = (baseOct - 3) * 12;
       for (const s of slots) {
         if (style === "shaw_interlace" && rng.next() < 0.12) continue;
         const idx = s % masterMidis.length;
         notes.push({
-          note: masterMidis[idx]!,
+          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
           velocity: 72 + Math.floor(rng.next() * 16),
           startBeat: s * sixteenthBeats,
           duration: sixteenthBeats * 0.75,
@@ -415,7 +417,7 @@ export function composeHocket(opts: {
       if (notes.length === 0) {
         const idx = v % masterMidis.length;
         notes.push({
-          note: masterMidis[idx]!,
+          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
           velocity: 70,
           startBeat: v * sixteenthBeats * 0.25,
           duration: sixteenthBeats * 2,
@@ -436,11 +438,17 @@ export function composeHocket(opts: {
   const parts: VoicePart[] = [];
   for (let v = 0; v < numVoices; v++) {
     let notes = voiceNotes[v] ?? [];
+    const baseOct = voiceBaseOctave(v, numVoices, 3);
+    const octShift = (baseOct - 4) * 12;
+    notes = notes.map((n) => ({
+      ...n,
+      note: clampMidiPreservePc(n.note + octShift),
+    }));
     if (style === "shaw_interlace" && notes.length > 1) {
       notes = notes.filter(() => rng.next() >= 0.08);
     }
     if (notes.length === 0) {
-      const bo = voiceBaseOctave(v, 4, 4);
+      const bo = voiceBaseOctave(v, numVoices, 4);
       notes = [
         {
           note: clampMidiPreservePc(12 * bo + scale.rootPc),
