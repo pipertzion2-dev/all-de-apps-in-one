@@ -342,8 +342,12 @@ export class SvivvaSoundEngine {
 
   private previewGainDb(role: string, gainDb: number, forceMeend = false): number {
     const r = role.toLowerCase();
-    if (forceMeend && (r === "melody" || r === "lead" || r === "solo")) return gainDb + 6;
-    if (r === "melody" || r === "lead" || r === "solo") return gainDb + 4;
+    if (forceMeend && (r === "melody" || r === "lead" || r === "solo" || r === "hocket")) {
+      return gainDb + 6;
+    }
+    if (r === "melody" || r === "lead" || r === "solo" || r === "hocket" || r.includes("hocket")) {
+      return gainDb + 4;
+    }
     // Chords/harmony need a solid boost so they cut through clearly.
     if (r === "harmony" || r === "chords" || r === "comp" || r === "pad") return gainDb + 6;
     return gainDb;
@@ -470,7 +474,7 @@ export class SvivvaSoundEngine {
           (isMeendAccent ||
             (Boolean(stem.expression?.meend) && Boolean(stem.expression?.monophonic)));
 
-        if (useMeendMono) {
+        if (useMeendMono && pitchBends.length === 0) {
           const built = buildMeendStemExpression(midiEvents, false);
           midiEvents = built.midiEvents as MidiEvent[];
           pitchBends = built.pitchbend;

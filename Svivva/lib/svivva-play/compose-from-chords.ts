@@ -83,7 +83,7 @@ export function composeWithChordProgression(options: {
       ...voice,
       notes: voice.notes.map((n) => ({
         ...n,
-        note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "harmony", { anchorMidi: anchor }),
+        note: clampNoteToRegister(n.note, vi === 0 ? "melody" : "hocket", { anchorMidi: anchor }),
       })),
     }));
   }

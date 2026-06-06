@@ -114,6 +114,23 @@ function clampMidi(note: number, max = 84): number {
   return Math.max(36, Math.min(max, Math.round(note)));
 }
 
+function clampMidiPreservePc(note: number, max = 84, min = 36): number {
+  const pc = ((note % 12) + 12) % 12;
+  let best = clampMidi(note, max);
+  if (best % 12 === pc) return best;
+  let bestDist = Infinity;
+  let picked = best;
+  for (let m = min; m <= max; m++) {
+    if (m % 12 !== pc) continue;
+    const dist = Math.abs(m - note);
+    if (dist < bestDist) {
+      bestDist = dist;
+      picked = m;
+    }
+  }
+  return picked;
+}
+
 function midiForDegree(rootPc: number, absPcs: number[], degree: number, baseOctave = 4): number {
   const rel = relativeSteps(absPcs, rootPc);
   const n = rel.length || 1;
@@ -368,11 +385,13 @@ export function composeHocket(opts: {
     for (let v = 0; v < 6; v++) {
       const notes: MidiNote[] = [];
       const slots = slotPattern[v] ?? [];
+      const baseOct = voiceBaseOctave(v, 6, 3);
+      const octShift = (baseOct - 3) * 12;
       for (const s of slots) {
         if (style === "shaw_interlace" && rng.next() < 0.12) continue;
         const idx = s % masterMidis.length;
         notes.push({
-          note: masterMidis[idx]!,
+          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
           velocity: 72 + Math.floor(rng.next() * 16),
           startBeat: s * sixteenthBeats,
           duration: sixteenthBeats * 0.75,
@@ -381,7 +400,7 @@ export function composeHocket(opts: {
       if (notes.length === 0) {
         const idx = v % masterMidis.length;
         notes.push({
-          note: masterMidis[idx]!,
+          note: clampMidiPreservePc(masterMidis[idx]! + octShift),
           velocity: 70,
           startBeat: v * sixteenthBeats * 0.25,
           duration: sixteenthBeats * 2,

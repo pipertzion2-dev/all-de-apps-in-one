@@ -71,7 +71,7 @@ export function buildMeendAccentPlaybacks(stems: MeendStemLike[]): StemPlayback[
       muted: false,
       soloed: false,
       pan: stem.pan ?? 0,
-      gainDb: MEEND_ACCENT_GAIN_DB - Math.min(i, 2),
+      gainDb: MEEND_ACCENT_GAIN_DB,
     });
   }
   return out;

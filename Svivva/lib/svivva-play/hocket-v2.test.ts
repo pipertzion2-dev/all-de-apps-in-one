@@ -25,6 +25,24 @@ describe("composeHocket", () => {
     expect(slotOwner.size).toBeGreaterThan(8);
   });
 
+  it("voice 6 sits in a higher register than voice 1 (Reich octave spread)", () => {
+    const scale = resolveScale("major", "C", "major");
+    const parts = composeHocket({
+      durationSec: 8,
+      bpm: 120,
+      scale,
+      style: "reich_electric",
+      seed: 42,
+      hocketGroove: "reich_interlock",
+    });
+    const v1 = parts[0]!;
+    const v6 = parts[5]!;
+    expect(v6.notes.length).toBeGreaterThan(0);
+    const avg = (p: typeof v1) =>
+      p.notes.reduce((s, n) => s + n.note, 0) / Math.max(1, p.notes.length);
+    expect(avg(v6)).toBeGreaterThan(avg(v1));
+  });
+
   it("V-2 groove produces eight voices with ghost notes and rapid-fire density", () => {
     const scale = resolveScale("major", "C", "major");
     const parts = composeHocket({
