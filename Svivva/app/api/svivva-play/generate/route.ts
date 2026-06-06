@@ -52,8 +52,9 @@ import {
   type EnsembleOrchestralPreset,
 } from "@/lib/svivva-play/orchestral-compose";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
-
 import { pickIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
+import { buildEnsembleChordTimeline } from "@/lib/svivva-play/ensemble-harmony";
+import { polishEnsembleStemsWithAi } from "@/lib/svivva-play/ensemble-ai-polish";
 
 async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
   const sessions = await db.select().from(playSessions).where(eq(playSessions.id, sessionId));
@@ -161,12 +162,25 @@ export async function POST(request: NextRequest) {
       key: lockedKey,
     };
 
+    const generationId = uuidv4();
+    const seed = settings.seed ?? Math.floor(Math.random() * 999999);
+
     const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
       rawSessionChords,
       sessionDurationSec,
       analysisData.bpm,
       preserveChordTimeline,
     );
+
+    const ensembleSessionChords =
+      mode === "ensemble"
+        ? buildEnsembleChordTimeline(
+            lockedKey,
+            sessionDurationSec,
+            manualTempo ?? analysisData.bpm,
+            seed,
+          )
+        : sessionChords;
 
     const melodicAnchor = harmonicContext
       ? melodicAnchorMidi(
@@ -191,8 +205,6 @@ export async function POST(request: NextRequest) {
       harmonicContext.key = lockedKey;
     }
 
-    const generationId = uuidv4();
-    const seed = settings.seed ?? Math.floor(Math.random() * 999999);
     const renderQuality = quality || "preview";
 
     const analysisForGeneration: Analysis =
@@ -239,23 +251,25 @@ export async function POST(request: NextRequest) {
           : compositionScaleName;
       const composeKeyForGuard =
         mode === "ensemble"
-          ? resolveEnsembleComposeKey({
-              lockedKey,
-              manualKey,
-              melodyneNotes: harmonicContext?.melodyneNotes,
-              bpm: analysisData.bpm,
-            })
+          ? resolveEnsembleComposeKey({ lockedKey, manualKey })
           : lockedKey;
+      const chordsForGuard = mode === "ensemble" ? ensembleSessionChords : sessionChords;
       const { scaleInfo } = resolveCompositionScale(
         composeKeyForGuard,
         ensembleScale,
         manualKey,
-        sessionChords,
+        chordsForGuard,
       );
-      let guardedStems = constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
-        anchorMidi: melodicAnchor,
-        scaleInfo,
-      });
+      let guardedStems = constrainGeneratedStems(
+        stems,
+        composeKeyForGuard,
+        chordsForGuard,
+        analysisData.bpm,
+        {
+          anchorMidi: mode === "ensemble" ? undefined : melodicAnchor,
+          scaleInfo,
+        },
+      );
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
         strength: mode === "ensemble" ? 0.48 : 0.38,
         phraseBeats: mode === "ensemble" ? 32 : 16,
@@ -447,18 +461,7 @@ export async function POST(request: NextRequest) {
       const preset = (isEnsembleOrchestralPreset(stylePreset)
         ? stylePreset
         : "bjork_lins_orchestral") as EnsembleOrchestralPreset;
-      const orchCtx =
-        harmonicContext ??
-        harmonicContextFromAnalysis(analysisData, {
-          chords: sessionChords,
-          durationSec: sessionDurationSec,
-        });
-      const composeKey = resolveEnsembleComposeKey({
-        lockedKey,
-        manualKey,
-        melodyneNotes: orchCtx.melodyneNotes,
-        bpm: analysisData.bpm,
-      });
+      const composeKey = resolveEnsembleComposeKey({ lockedKey, manualKey });
       const scaleName = ensembleCompositionScaleName(
         composeKey,
         manualKey,
@@ -468,7 +471,7 @@ export async function POST(request: NextRequest) {
         composeKey,
         scaleName,
         manualKey,
-        sessionChords,
+        ensembleSessionChords,
       );
 
       const voices = composeOrchestralEnsemble({
@@ -478,9 +481,9 @@ export async function POST(request: NextRequest) {
         seed,
         patternLength,
         preset,
-        melodyneNotes: orchCtx.melodyneNotes,
+        melodyneNotes: [],
         audioNotes: [],
-        chords: sessionChords,
+        chords: ensembleSessionChords,
       });
       let stems = voicePartsToOrchestralStems(voices) as GeneratedStemResult[];
       if (settings.meend ?? false) {
@@ -516,7 +519,22 @@ export async function POST(request: NextRequest) {
     // Ensemble: procedural orchestral only (3 presets — fast, no LLM)
     if (mode === "ensemble") {
       const orch = runOrchestralEnsemble();
-      return finishWithStems(orch.stems, orch.plan, orch.pipeline, {
+      const scaleName = ensembleCompositionScaleName(
+        String(orch.plan.key),
+        manualKey,
+        (settings.reichScale as string | undefined) ?? null,
+      );
+      const polished = await polishEnsembleStemsWithAi(orch.stems, {
+        key: String(orch.plan.key),
+        bpm: analysisData.bpm,
+        scaleName,
+        seed,
+      });
+      return finishWithStems(polished.stems, {
+        ...orch.plan,
+        aiPolish: polished.aiApplied,
+        orchestrationNote: polished.notes,
+      }, orch.pipeline, {
         composer: stylePreset || "bjork_lins_orchestral",
       });
     }

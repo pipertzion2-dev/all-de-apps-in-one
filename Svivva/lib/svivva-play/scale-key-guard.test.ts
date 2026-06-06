@@ -145,19 +145,15 @@ describe("resolveEnsembleComposeKey", () => {
       resolveEnsembleComposeKey({
         lockedKey: "C major",
         manualKey: "E major",
-        melodyneNotes: [{ midi: 64, startSec: 0, endSec: 1, velocity: 80 }],
-        bpm: 120,
       }),
     ).toBe("E major");
   });
 
-  it("keeps locked key when Melodyne evidence is weak", () => {
+  it("uses locked key when no manual key is set", () => {
     expect(
       resolveEnsembleComposeKey({
         lockedKey: "D major",
         manualKey: null,
-        melodyneNotes: [{ midi: 62, startSec: 0, endSec: 1, velocity: 80 }],
-        bpm: 120,
       }),
     ).toBe("D major");
   });
