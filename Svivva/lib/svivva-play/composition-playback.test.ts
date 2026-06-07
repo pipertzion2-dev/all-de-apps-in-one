@@ -13,9 +13,9 @@ describe("composition playback pipeline", () => {
       seed: 42,
       hocketGroove: "shaw_interlock",
     });
-    let stems = voices.map((v, i) => ({
+    let stems = voices.map((v) => ({
       name: v.name,
-      role: i === 0 ? "melody" : "hocket",
+      role: "hocket",
       midiEvents: v.notes.map((n) => ({
         note: n.note,
         velocity: n.velocity,
@@ -35,6 +35,9 @@ describe("composition playback pipeline", () => {
     for (const stem of guarded) {
       if (/hocket voice/i.test(stem.name) && stem.midiEvents.length > 0) {
         expect(stem.expression?.meend).toBe(true);
+        expect(stem.expression?.monophonic).toBe(true);
+        const maxNote = Math.max(...stem.midiEvents.map((e) => e.note));
+        expect(maxNote).toBeLessThanOrEqual(74);
       }
     }
   });

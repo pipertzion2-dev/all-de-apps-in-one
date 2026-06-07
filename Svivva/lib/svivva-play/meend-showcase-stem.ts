@@ -9,8 +9,8 @@ export const MEEND_PREVIEW_STEM_NAME = "Indian Meend (preview)";
 
 export const MEEND_ACCENT_PREFIX = "Meend · ";
 
-/** Blended under full mix — audible, not clipping. */
-export const MEEND_ACCENT_GAIN_DB = 5;
+/** Blended under full mix — audible over dense hocket texture. */
+export const MEEND_ACCENT_GAIN_DB = 10;
 
 /** Louder sitar accent under dense orchestral mix. */
 export const ORCHESTRAL_MEEND_ACCENT_GAIN_DB = 9;

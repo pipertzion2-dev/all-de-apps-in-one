@@ -464,6 +464,7 @@ export function refreshMeendExpression<T extends ConstrainableStem>(stem: T): T 
     expression: {
       ...expr,
       meend: true,
+      monophonic: !polyphonic,
       pitchbend: built.pitchbend,
     },
   };

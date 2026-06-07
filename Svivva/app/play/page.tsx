@@ -407,7 +407,7 @@ export default function SvivvaPlayPage() {
   const [density, setDensity] = useState(50);
   const [complexity, setComplexity] = useState(50);
   const [harmonyMode, setHarmonyMode] = useState<"match" | "reharmonize">("match");
-  const [meend, setMeend] = useState(false);
+  const [meend, setMeend] = useState(true);
   const [userPrompt, setUserPrompt] = useState("");
 
   const [tension, setTension] = useState(40);
@@ -2357,7 +2357,7 @@ export default function SvivvaPlayPage() {
 
       const hintRot =
         reichType === "hocket"
-          ? ["vibraphone", "steel_drums", "piano", "marimba", "rhodes", "synth_lead"]
+          ? ["vibraphone", "marimba", "piano", "rhodes", "vibraphone", "marimba"]
           : ["piano", "vibraphone", "marimba"];
       let rawStems: StemData[] = voices.map((v, i) => {
         const midiEvents = v.notes.map((n) => ({
@@ -2370,15 +2370,8 @@ export default function SvivvaPlayPage() {
         return {
           id: `voice-${i}`,
           name: v.name,
-          role:
-            reichType === "hocket"
-              ? i === 0
-                ? "melody"
-                : "hocket"
-              : i === 0
-                ? "melody"
-                : "harmony",
-          register: i < 2 ? "mid" : "high",
+          role: reichType === "hocket" ? "hocket" : i === 0 ? "melody" : "harmony",
+          register: reichType === "hocket" ? "mid" : i < 2 ? "mid" : "high",
           instrumentHint: hintRot[i % hintRot.length],
           muted: false,
           soloed: false,
@@ -2400,7 +2393,10 @@ export default function SvivvaPlayPage() {
         lockedKey,
         chordSource,
         bpm,
-        { anchorMidi, scaleInfo },
+        {
+          anchorMidi: reichType === "hocket" ? undefined : anchorMidi,
+          scaleInfo,
+        },
       ) as unknown as StemData[];
       newStems = applyPlayDynamicsToStems(
         newStems.map((s) => ({ ...s, midiEvents: normalizeMidiEvents(s.midiEvents) })),
