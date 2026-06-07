@@ -511,7 +511,7 @@ export class SvivvaSoundEngine {
         const synth = useMeendMono
           ? this.createMeendSynth(meendPreset)
           : this.createSynthSafe(preset);
-        const useLegatoMeend = useMeendMono;
+        let useLegatoMeend = useMeendMono;
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent

@@ -112,6 +112,13 @@ export async function POST(request: NextRequest) {
       audioAnchorKey?: string | null;
     };
 
+    if (mode === "ensemble") {
+      return NextResponse.json(
+        { error: "Ensemble is coming soon. Use Composition → Hocket with Meend enabled." },
+        { status: 400 },
+      );
+    }
+
     let analysisData: Analysis | null = null;
     let resolvedSessionId = sessionId ?? null;
 
@@ -166,8 +173,7 @@ export async function POST(request: NextRequest) {
     const generationId = uuidv4();
     const seed = settings.seed ?? Math.floor(Math.random() * 999999);
 
-    const composeKeyForEnsemble =
-      mode === "ensemble" ? resolveEnsembleComposeKey({ lockedKey, manualKey }) : lockedKey;
+    const composeKeyForEnsemble = lockedKey;
 
     const sessionChords: ChordSegment[] = stabilizeHarmonicTimeline(
       rawSessionChords,
@@ -176,16 +182,7 @@ export async function POST(request: NextRequest) {
       preserveChordTimeline,
     );
 
-    const ensembleSessionChords =
-      mode === "ensemble"
-        ? resolveEnsembleSessionChords(
-            composeKeyForEnsemble,
-            sessionChords,
-            sessionDurationSec,
-            manualTempo ?? analysisData.bpm,
-            manualKey,
-          )
-        : sessionChords;
+    const ensembleSessionChords = sessionChords;
 
     const melodicAnchor = harmonicContext
       ? melodicAnchorMidi(
@@ -238,50 +235,32 @@ export async function POST(request: NextRequest) {
           ? "natural_minor"
           : "major";
 
-    // Ensemble temporarily disabled in UI — reject API calls until quality is restored.
-    if (mode === "ensemble") {
-      return NextResponse.json(
-        { error: "Ensemble is coming soon. Use Composition → Hocket with Meend enabled." },
-        { status: 400 },
-      );
-    }
-
     const finishWithStems = async (
       stems: GeneratedStemResult[],
       plan: Record<string, unknown>,
       pipeline: { stage: string; stages: string[] },
       extra?: Record<string, unknown>,
     ) => {
-      const orchPreset = isEnsembleOrchestralPreset(String(extra?.composer ?? stylePreset ?? ""));
-      const composeKeyForGuard =
-        mode === "ensemble"
-          ? resolveEnsembleComposeKey({ lockedKey, manualKey })
-          : lockedKey;
-      const ensembleScale =
-        mode === "ensemble" || orchPreset
-          ? ensembleCompositionScaleName(
-              composeKeyForGuard,
-              manualKey,
-              (settings.reichScale as string | undefined) ?? null,
-            )
-          : compositionScaleName;
-      const chordsForGuard = mode === "ensemble" ? ensembleSessionChords : sessionChords;
+      const composeKeyForGuard = lockedKey;
       const { scaleInfo } = resolveCompositionScale(
         composeKeyForGuard,
-        ensembleScale,
+        compositionScaleName,
         manualKey,
-        chordsForGuard,
+        sessionChords,
       );
-      let guardedStems =
-        mode === "ensemble"
-          ? constrainEnsembleStemsToScale(stems, scaleInfo, analysisData.bpm)
-          : constrainGeneratedStems(stems, composeKeyForGuard, chordsForGuard, analysisData.bpm, {
-              anchorMidi: melodicAnchor,
-              scaleInfo,
-            });
+      let guardedStems = constrainGeneratedStems(
+        stems,
+        composeKeyForGuard,
+        sessionChords,
+        analysisData.bpm,
+        {
+          anchorMidi: melodicAnchor,
+          scaleInfo,
+        },
+      );
       guardedStems = applyPlayDynamicsToStems(guardedStems, analysisData.bpm, {
-        strength: mode === "ensemble" ? 0.48 : 0.38,
-        phraseBeats: mode === "ensemble" ? 32 : 16,
+        strength: 0.38,
+        phraseBeats: 16,
       });
       if (resolvedSessionId) {
         try {
@@ -524,29 +503,6 @@ export async function POST(request: NextRequest) {
         pipeline: { stage: "complete", stages: ["melodyne_listen", "orchestral_compose"] },
       };
     };
-
-    // Ensemble: procedural orchestral only (3 presets — fast, no LLM)
-    if (mode === "ensemble") {
-      const orch = runOrchestralEnsemble();
-      const scaleName = ensembleCompositionScaleName(
-        String(orch.plan.key),
-        manualKey,
-        (settings.reichScale as string | undefined) ?? null,
-      );
-      const polished = await polishEnsembleStemsWithAi(orch.stems, {
-        key: String(orch.plan.key),
-        bpm: analysisData.bpm,
-        scaleName,
-        seed,
-      });
-      return finishWithStems(polished.stems, {
-        ...orch.plan,
-        aiPolish: polished.aiApplied,
-        orchestrationNote: polished.notes,
-      }, orch.pipeline, {
-        composer: stylePreset || "bjork_lins_orchestral",
-      });
-    }
 
     // Composition mode: Reich interlocking voices — always runs regardless of whether
     // a Melodyne transcription (harmonicContext) is present.
