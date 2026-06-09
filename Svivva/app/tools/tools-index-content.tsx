@@ -30,6 +30,18 @@ interface PageCategory {
   description: string | null;
 }
 
+const NATIVE_TOOL_SLUGS = new Set([
+  "prompt-forge",
+  "json-schema-validator",
+  "ai-api-cost-calculator",
+]);
+
+function toolPageHref(slug: string, published: boolean): string {
+  if (NATIVE_TOOL_SLUGS.has(slug)) return `/tools/${slug}`;
+  if (published) return `/${slug}`;
+  return `/tools/${slug}`;
+}
+
 export default function ToolsIndexContent({
   tools,
   categories,
@@ -152,7 +164,7 @@ export default function ToolsIndexContent({
             {filteredTools.map((tool) => (
               <Link
                 key={tool.id}
-                href={`/tools/${tool.slug}`}
+                href={toolPageHref(tool.slug, tool.published)}
                 data-testid={`card-tool-${tool.slug}`}
                 className="group rounded-md border border-white/10 bg-white/5 p-6 hover-elevate transition-colors"
               >

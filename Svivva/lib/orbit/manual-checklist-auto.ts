@@ -40,7 +40,7 @@ export function shouldAutoCompleteManualTask(
   const mentionsGoogle =
     /google search console|\bgsc\b|url inspection|request indexing|sitemap.*submit/i.test(lower);
 
-  if (mentionsGoogle && ctx.googleSitemapOk && ctx.googleIndexingSubmitted > 0) {
+  if (mentionsGoogle && ctx.googleSitemapOk) {
     return true;
   }
 

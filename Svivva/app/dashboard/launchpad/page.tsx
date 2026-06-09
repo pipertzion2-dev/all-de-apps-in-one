@@ -255,17 +255,20 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
     },
     {
       id: "svivva-submit",
-      title: "Submit Everywhere",
+      title: "Submit Everywhere (Google + Bing)",
       icon: Activity,
-      estimate: "~10s",
-      description: "Ping Bing sitemap · Re-submit all URLs via IndexNow · Verify sitemap coverage",
+      estimate: "~30s",
+      description:
+        "IndexNow + Bing ping + Google Search Console sitemap API (when credentials saved at /dashboard/gsc-connect)",
       auto: [
-        "All URLs re-submitted to Bing, Yandex, Yahoo via IndexNow",
-        "Bing sitemap pinged directly",
+        "All URLs submitted to Bing, Yandex, Yahoo via IndexNow",
+        "Bing sitemap pinged",
+        "GSC sitemap registered via API when service account is configured",
+        "Google Indexing API nudge for first batches of URLs (optional)",
       ],
       manual: [
-        `Google Search Console → Sitemaps → paste ${sitemap} → Submit (one-time setup)`,
-        "Google Search Console → URL Inspection → paste each key URL → Request Indexing (do this for: homepage, /cyber-security-mini-apps, /blog, /tools, and each LP)",
+        "One-time: /dashboard/gsc-connect — paste GSC service account JSON and add that email as Owner in Search Console",
+        `Verify sitemap in GSC → Sitemaps: ${sitemap}`,
       ],
     },
     {
@@ -449,17 +452,19 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
     },
     {
       id: "mini-index",
-      title: "Index Everything",
+      title: "Index Everything (Google + Bing)",
       icon: Zap,
-      estimate: "~5s",
-      description: "Submit all SEO pages, hub and category pages to Bing/Yandex/Yahoo via IndexNow",
+      estimate: "~30s",
+      description:
+        "IndexNow + Bing + GSC sitemap API for all mini-app SEO pages, hubs, and /tools",
       auto: [
-        "All tool pages, hub page, and category pages submitted to Bing/Yandex/Yahoo/DuckDuckGo via IndexNow",
+        "All tool + hub URLs via IndexNow (Bing, Yandex, Yahoo, DuckDuckGo)",
+        "GSC sitemap registration when service account is saved",
+        "Curated traffic-safe tools only on import (native Svivva utilities prioritized)",
       ],
       manual: [
-        `Google Search Console → URL Inspection → paste ${site}/tools → Request Indexing`,
-        "Then request indexing for 5–10 of your most important tool pages",
-        "Google does NOT accept IndexNow submissions — GSC is required for Google",
+        "Connect Google once: /dashboard/gsc-connect (service account as GSC Owner)",
+        `Confirm in GSC → Sitemaps: ${site}/sitemap.xml shows Success`,
       ],
     },
   ];

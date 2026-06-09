@@ -20,6 +20,8 @@ import {
   buildGrowthIntelligenceReport,
   formatGrowthIntelSummary,
 } from "@/lib/orbit/growth-intelligence";
+import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
+import { filterToolsForTrafficDiscovery } from "@/lib/orbit/mini-app-curation";
 import {
   getDefaultSubdomainCnameTargets,
   getPyracryptMiniAppsBaseUrl,
@@ -655,29 +657,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ summary: lines.join("\n"), details: social });
     }
 
-    // ── STEP: Submit sitemap ─────────────────────────────────────────────────
+    // ── STEP: Submit sitemap (IndexNow + Bing + GSC when creds exist) ───────
     if (stepId === "svivva-submit") {
-      const urls = await getAllSiteUrlsForIndexing();
-
-      // Fire all IndexNow + Bing ping requests fire-and-forget — never block waiting for them
-      // (Cloud Run kills long-running requests; these network calls don't need to block the UI)
-      submitIndexNowBatched(urls).catch(() => {});
-      const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
-      fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
-        signal: AbortSignal.timeout(10000),
-      }).catch(() => {});
-
+      const auto = await runAutomatableManualActions({ googleMaxBatches: 3 });
       return NextResponse.json({
         summary: [
-          `✓ ${urls.length} URLs queued for submission to Bing, Yandex, Yahoo`,
-          "✓ IndexNow submission fired (runs in background)",
-          "✓ Bing sitemap ping fired",
+          ...auto.summaryLines,
           "",
-          `Sitemap URL: ${BASE_URL}/sitemap.xml`,
-          "For Google: go to Google Search Console → Sitemaps → paste your sitemap URL.",
-          "Indexing typically starts within 24-48 hours.",
+          `Sitemap: ${BASE_URL}/sitemap.xml`,
+          auto.googleSitemap.ok
+            ? "Google sitemap registered via API — check GSC → Sitemaps for status."
+            : "Google: connect service account at /dashboard/gsc-connect (Owner in GSC), then re-run this step.",
         ].join("\n"),
-        details: { urls: urls.length, indexnow: true, bing: true },
+        details: {
+          urls: auto.indexNow.totalUrls,
+          indexnow: auto.indexNow.ok,
+          bing: auto.bingPing.ok,
+          googleSitemap: auto.googleSitemap,
+          googleIndexing: auto.googleIndexing,
+        },
       });
     }
 
@@ -696,7 +694,13 @@ export async function POST(req: NextRequest) {
       } = body;
 
       // Auto-discover tools if none were passed from the UI
-      let allTools: DiscoveredTool[] = passedTools || [];
+      let allTools: DiscoveredTool[] = passedTools?.length
+        ? filterToolsForTrafficDiscovery(passedTools).map((t) => ({
+            name: t.name,
+            url: t.url,
+            description: t.description ?? "",
+          }))
+        : [];
       if (!allTools.length) {
         const miniAppsUrl = sourceUrl || getPyracryptMiniAppsBaseUrl();
         // Discover from all mini app hubs
@@ -717,7 +721,11 @@ export async function POST(req: NextRequest) {
             /* skip failed hubs */
           }
         }
-        allTools = Array.from(uniqueTools.values());
+        allTools = filterToolsForTrafficDiscovery(Array.from(uniqueTools.values())).map((t) => ({
+          name: t.name,
+          url: t.url,
+          description: t.description ?? "",
+        }));
         if (!allTools.length) {
           return NextResponse.json(
             {
@@ -1621,8 +1629,6 @@ Return JSON:
 
     // ── STEP: Index ALL app pages + hub + categories ──────────────────────────
     if (stepId === "mini-index") {
-      const allUrls = await getAllSiteUrlsForIndexing();
-
       const seedPages = await db
         .select({ slug: seoLandingPages.slug, category: seoLandingPages.category })
         .from(seoLandingPages)
@@ -1631,65 +1637,24 @@ Return JSON:
         .filter((p) => p.category === "seed-marketing")
         .map((p) => `${BASE_URL}/${p.slug}`);
 
-      const allSet = new Set([...allUrls, ...seedUrls]);
-      const finalUrls = Array.from(allSet);
-
-      const seoPageCount = seedUrls.length;
-      const allResult = await submitIndexNowBatched(finalUrls);
-
-      const sitemapUrl = encodeURIComponent(`${BASE_URL}/sitemap.xml`);
-      await Promise.allSettled([
-        fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`, {
-          signal: AbortSignal.timeout(10000),
-        }),
-      ]);
-
-      const [credsRow] = await db
-        .select({ json: seedCredentials.googleServiceAccountJson })
-        .from(seedCredentials)
-        .where(isNotNull(seedCredentials.googleServiceAccountJson))
-        .orderBy(desc(seedCredentials.updatedAt))
-        .limit(1);
-
-      let googleSubmitted = 0;
-      let googleDetail = "";
-      if (credsRow?.json) {
-        const GOOGLE_BATCH = 50;
-        for (let i = 0; i < finalUrls.length; i += GOOGLE_BATCH) {
-          const batch = finalUrls.slice(i, i + GOOGLE_BATCH);
-          const r = await submitUrlsToGoogleIndexingApi(credsRow.json, batch);
-          googleSubmitted += r.submitted;
-        }
-        googleDetail = `✓ Google Indexing API: ${googleSubmitted} URL notification(s) sent in ${Math.ceil(finalUrls.length / GOOGLE_BATCH)} batch(es) (requires Search Console service account).`;
-        try {
-          await db.execute(
-            sql`UPDATE seed_credentials SET last_google_indexing = NOW(), updated_at = NOW() WHERE google_service_account_json IS NOT NULL`,
-          );
-        } catch {
-          /* non-fatal */
-        }
-      } else {
-        googleDetail =
-          "○ Google Indexing API skipped — save a Search Console service account under Marketing → Google Search.";
-      }
+      const auto = await runAutomatableManualActions({ googleMaxBatches: 5 });
 
       return NextResponse.json({
         summary: [
-          `✓ ${seoPageCount} seed-marketing (mini-app) SEO URLs included`,
-          `✓ ${finalUrls.length} total unique URLs submitted to IndexNow`,
-          allResult.message,
-          googleDetail,
-          "✓ Bing sitemap pinged",
+          `✓ ${seedUrls.length} seed-marketing (mini-app) pages in sitemap`,
+          ...auto.summaryLines,
           "",
-          "Bing, Yandex, and Yahoo receive IndexNow pings for every URL on this host.",
-          "For Google: ensure sitemap is submitted in Search Console; Indexing API runs automatically when credentials exist.",
           `Sitemap: ${BASE_URL}/sitemap.xml`,
+          auto.googleSitemap.ok
+            ? "Google sitemap submitted via GSC API."
+            : "Connect GSC at /dashboard/gsc-connect, then re-run mini-index.",
         ].join("\n"),
         details: {
-          totalUrls: finalUrls.length,
-          seedPages: seoPageCount,
-          submitted: allResult.ok,
-          googleIndexingApi: googleSubmitted,
+          totalUrls: auto.indexNow.totalUrls,
+          seedPages: seedUrls.length,
+          submitted: auto.indexNow.ok,
+          googleSitemap: auto.googleSitemap,
+          googleIndexing: auto.googleIndexing,
         },
       });
     }

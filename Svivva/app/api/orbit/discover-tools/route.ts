@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { filterToolsForTrafficDiscovery } from "@/lib/orbit/mini-app-curation";
 
 export const maxDuration = 90;
 
@@ -487,14 +488,18 @@ Return JSON: { "tools": [{ "name": string, "url": string, "description": string 
               url: toEnrich[i]?.url || t.url, // always keep original URL
               description: t.description || "",
             }));
-          const finalTools = [...enriched, ...deduped.slice(toEnrich.length)];
+          const finalTools = filterToolsForTrafficDiscovery([
+            ...enriched,
+            ...deduped.slice(toEnrich.length),
+          ]);
           return NextResponse.json({ tools: finalTools, source, count: finalTools.length });
         }
       } catch (e) {
         console.log(`[discover-tools] AI error: ${e}`);
       }
 
-      return NextResponse.json({ tools: deduped, source, count: deduped.length });
+      const curated = filterToolsForTrafficDiscovery(deduped);
+      return NextResponse.json({ tools: curated, source, count: curated.length });
     }
 
     // ── Step 7: AI fallback from meta description ─────────────────────────────

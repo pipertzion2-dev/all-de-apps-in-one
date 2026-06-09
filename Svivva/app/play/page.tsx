@@ -1143,7 +1143,9 @@ export default function SvivvaPlayPage() {
     async (quality: "preview" | "full" = "preview") => {
       const activeAnalysis = analysis ?? effectiveAnalysis ?? FALLBACK_ANALYSIS;
       if (!activeAnalysis) {
-        setErrorMsg("Import audio first — tempo and key are detected automatically on import.");
+        setErrorMsg(
+          "Import audio (and Melodyne .mid for best results), then set key/tempo under Manual Overrides.",
+        );
         return;
       }
       setIsGenerating(true);
@@ -3263,10 +3265,10 @@ export default function SvivvaPlayPage() {
                         data-testid="button-drop-import"
                       >
                         <Upload className="w-4 h-4 inline mr-2" />
-                        Import audio, then matching Melodyne .mid
+                        Import audio + optional Melodyne .mid
                         <span className="block text-[9px] text-gray-500 font-normal mt-1 normal-case tracking-normal">
-                          Two inputs: Audio (tempo/key + pitch map) and Melodyne MIDI (chord
-                          harmonics). Or drop both files on the bar above at once.
+                          Melodyne MIDI gives reliable key/chords. Audio-only key/tempo is
+                          experimental — set Manual Overrides before composing.
                         </span>
                       </button>
 
@@ -3308,9 +3310,10 @@ export default function SvivvaPlayPage() {
                           : "Analyzing Audio"}
                       </h3>
                       <p className="text-sm text-gray-400">
-                        Detecting tempo, key, pitch track, and chord progression…
+                        Building harmonic session (pitch map + chords)…
                         <span className="block text-[11px] text-gray-500 mt-1">
-                          The play stage above fills in as transcription completes.
+                          Verify key and BPM under Manual Overrides — auto-detect without
+                          Melodyne is not production-accurate.
                         </span>
                       </p>
                     </div>
@@ -3426,6 +3429,16 @@ export default function SvivvaPlayPage() {
                               )}
                             </div>
                           )}
+                          {!manualKey &&
+                            !transcription?.sources?.melodyneMidi &&
+                            effectiveAnalysis.keyConfidence < 65 && (
+                              <div className="mb-3 p-2.5 rounded-lg bg-amber-900/20 border border-amber-700/30">
+                                <p className="text-[11px] text-amber-300/90">
+                                  Auto key/tempo without Melodyne MIDI is unreliable. Set Manual
+                                  Overrides below before generating.
+                                </p>
+                              </div>
+                            )}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                             <AnalysisCard
                               label="Key"
@@ -3433,14 +3446,22 @@ export default function SvivvaPlayPage() {
                               sub={
                                 manualKey
                                   ? "manual override"
-                                  : `${effectiveAnalysis.keyConfidence}% confidence`
+                                  : effectiveAnalysis.keyConfidence >= 65
+                                    ? `${effectiveAnalysis.keyConfidence}% confidence`
+                                    : "estimate — set manually"
                               }
                               color="#A05068"
                             />
                             <AnalysisCard
                               label="BPM"
                               value={String(manualTempo ?? effectiveAnalysis.bpm)}
-                              sub={manualTempo ? "manual override" : "tempo"}
+                              sub={
+                                manualTempo
+                                  ? "manual override"
+                                  : transcription?.sources?.melodyneMidi
+                                    ? "from MIDI"
+                                    : "estimate — set manually"
+                              }
                               color="#A05068"
                             />
                             <AnalysisCard
@@ -3463,7 +3484,7 @@ export default function SvivvaPlayPage() {
                             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                               Manual Overrides
                             </h3>
-                            <span className="text-[9px] text-gray-500">If detection is off</span>
+                            <span className="text-[9px] text-gray-500">Recommended without Melodyne</span>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="flex flex-col gap-1.5">

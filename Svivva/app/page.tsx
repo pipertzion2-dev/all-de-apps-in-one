@@ -1904,11 +1904,31 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
+                    <Link href="/ai-tools-hub" className="hover:text-foreground transition-colors">
+                      AI Tools Hub
+                    </Link>
+                  </li>
+                  <li>
                     <Link
                       href="/cyber-security-mini-apps"
                       className="hover:text-foreground transition-colors"
                     >
-                      Security Tools
+                      Security Tools (Clutety)
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/seo-pack" className="hover:text-foreground transition-colors">
+                      SEO Pack
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/blog" className="hover:text-foreground transition-colors">
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/orbit" className="hover:text-foreground transition-colors">
+                      Orbit Growth
                     </Link>
                   </li>
                 </ul>

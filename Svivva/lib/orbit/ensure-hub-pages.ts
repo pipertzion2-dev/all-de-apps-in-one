@@ -2,27 +2,28 @@ import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
+import { buildHubPageHtml, type HubSlug } from "@/lib/orbit/mini-app-curation";
 
 const BASE = getSiteUrl();
 
-const ORBIT_HUBS: { slug: string; title: string; keyword: string; blurb: string }[] = [
+const ORBIT_HUBS: { slug: HubSlug; title: string; keyword: string; blurb: string }[] = [
   {
     slug: "ai-tools-hub",
     title: "Svivva AI Tools Hub",
     keyword: "ai tools hub",
-    blurb: "Free AI-powered mini apps — all traffic funnels to svivva.com.",
+    blurb: "Free AI utilities — funnel to Svivva for schema validation, deploy, and rollback.",
   },
   {
     slug: "cyber-security-mini-apps",
     title: "Cyber Security Mini Apps",
     keyword: "cybersecurity tools",
-    blurb: "Security scanners, password tools, and hardening utilities on Svivva.",
+    blurb: "Security scanners and hardening tools — Clutety for device protection, Svivva for AI backends.",
   },
   {
     slug: "seo-pack",
     title: "Svivva SEO Pack",
     keyword: "seo tools",
-    blurb: "SEO auditing, keyword research, and optimization tools powered by Svivva.",
+    blurb: "SEO helpers plus Orbit autopilot for indexing and growth pages on Svivva.",
   },
 ];
 
@@ -39,7 +40,7 @@ export async function ensureOrbitHubPages(): Promise<string[]> {
 
     if (row?.published) continue;
 
-    const content = `<h1>${hub.title}</h1><p>${hub.blurb}</p><p><a href="${BASE}">Explore Svivva &rarr;</a></p><p><a href="${BASE}/tools">All tools &rarr;</a></p>`;
+    const content = buildHubPageHtml(hub.slug);
 
     if (row) {
       await db
