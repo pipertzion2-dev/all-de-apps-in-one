@@ -49,12 +49,12 @@ export function SvivvaArtifact() {
         drag to rotate &nbsp;·&nbsp; tap a face to explore
       </p>
 
-      {/* ── Cube — canvas renders 1.5× and overflows, z-index behind text ────── */}
+      {/* ── Cube — canvas is 1.6× larger and overflows this container ────────── */}
       <div
         style={{
           position: "relative",
-          width: "min(480px, 88vw)",
-          height: "min(480px, 88vw)",
+          width: "min(460px, 86vw)",
+          height: "min(460px, 86vw)",
           overflow: "visible",
           zIndex: 10,
         }}

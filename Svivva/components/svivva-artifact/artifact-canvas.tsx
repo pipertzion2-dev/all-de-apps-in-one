@@ -29,54 +29,57 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     const el = mountRef.current;
     if (!el) return;
 
-    const containerW = el.clientWidth || 480;
-    const containerH = el.clientHeight || 480;
-    // Render 1.5× the container so rotating corners never hit the canvas boundary
-    const W = Math.round(containerW * 1.5);
-    const H = Math.round(containerH * 1.5);
+    // Render at 1.6× container so rotating cube corners never reach the buffer edge.
+    // The canvas element overflows the container (overflow:visible) safely.
+    const cW = el.clientWidth || 520;
+    const cH = el.clientHeight || 520;
+    const SCALE = 1.6;
+    const W = Math.round(cW * SCALE);
+    const H = Math.round(cH * SCALE);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
-    // Canvas is larger than container; center it so the extra spills out equally on all sides
+    // Centre the oversized canvas; parent overflow:visible lets it spill out
     Object.assign(renderer.domElement.style, {
       position: "absolute",
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
+      width: W + "px",
+      height: H + "px",
       pointerEvents: "auto",
     });
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
+    // FOV=42 + z=5.5: bounding sphere of 2-unit cube (r≈1.73) fits with 20% margin
+    const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
     camera.position.set(0, 0, 5.5);
 
-    // Lighting for 3D depth — makes faces pop out with specular highlights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    keyLight.position.set(5, 6, 7);
-    scene.add(keyLight);
-    const fillLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+    // Very high ambient so textures appear at near-original photo brightness
+    scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+    // Soft fill from below-left for subtle shape definition
+    const fillLight = new THREE.DirectionalLight(0xd0e0ff, 0.25);
     fillLight.position.set(-4, -3, 2);
     scene.add(fillLight);
-    // Orbiting point light for the "sticking out" specular pop
-    const orbitLight = new THREE.PointLight(0xffffff, 1.8, 12);
+    // Orbiting point light — creates the premium specular "shine"
+    const orbitLight = new THREE.PointLight(0xffffff, 2.8, 16);
     orbitLight.position.set(3, 3, 4);
     scene.add(orbitLight);
 
-    // MeshStandardMaterial: textures at full color + metalness for depth/sheen
+    // MeshStandardMaterial: emissiveMap = texture so photos are self-illuminating
+    // (full original brightness) while metalness keeps the sheen
     const materials: THREE.MeshStandardMaterial[] = FACE_ORDER.map((fId) => {
       const feature = FEATURES.find((f) => f.id === fId)!;
       const mat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         metalness: 0.18,
-        roughness: 0.38,
+        roughness: 0.22,
         transparent: true,
         opacity: 0,
         side: THREE.FrontSide,
-        envMapIntensity: 1,
       });
 
       new THREE.TextureLoader().load(
@@ -84,6 +87,11 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
           mat.map = tex;
+          // emissiveMap makes the texture self-illuminate — photos appear as bright
+          // as the originals regardless of how much light hits the face
+          mat.emissiveMap = tex;
+          mat.emissive = new THREE.Color(0xffffff);
+          mat.emissiveIntensity = 0.55;
           mat.needsUpdate = true;
         },
         undefined,
@@ -166,8 +174,8 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     cv.addEventListener("pointerup", onUp);
 
     // ── animation ─────────────────────────────────────────────────────────────
-    const OPACITY_ACTIVE = 0.82; // bright + glassy
-    const OPACITY_IDLE = 0.62;
+    const OPACITY_ACTIVE = 0.95; // nearly opaque so graphic is crystal-clear
+    const OPACITY_IDLE = 0.78;
     let fadeT = 0;
     const FADE_FRAMES = 55;
 
@@ -216,13 +224,14 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     };
     animate();
 
-    // Resize — keep 1.5× ratio
+    // Resize — keep 1.6× buffer ratio
     const ro = new ResizeObserver(() => {
-      const w = Math.round(el.clientWidth * 1.5);
-      const h = Math.round(el.clientHeight * 1.5);
+      const w = Math.round(el.clientWidth * SCALE);
+      const h = Math.round(el.clientHeight * SCALE);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      Object.assign(renderer.domElement.style, { width: w + "px", height: h + "px" });
     });
     ro.observe(el);
 
@@ -238,5 +247,10 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     };
   }, []);
 
-  return <div ref={mountRef} className="w-full h-full" style={{ touchAction: "none" }} />;
+  return (
+    <div
+      ref={mountRef}
+      style={{ width: "100%", height: "100%", overflow: "visible", touchAction: "none" }}
+    />
+  );
 }
