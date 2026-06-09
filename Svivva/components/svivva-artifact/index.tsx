@@ -24,16 +24,20 @@ export function SvivvaArtifact() {
   };
 
   return (
-    <section className="w-full flex flex-col items-center gap-0 py-20 px-4">
+    <section className="w-full flex flex-col items-center gap-0 py-20 px-4 overflow-visible">
       {/* ── Instruction line ───────────────────────────────────────────────── */}
       <p className="text-white/30 text-xs tracking-widest uppercase mb-8 select-none">
         drag to rotate &nbsp;·&nbsp; tap a face to explore
       </p>
 
-      {/* ── Cube — no overflow clip so it never gets cut off ─────────────── */}
+      {/* ── Cube — overflow visible, no background, never clipped ─────────── */}
       <div
         className="relative flex items-center justify-center"
-        style={{ width: "min(460px, 90vw)", height: "min(460px, 90vw)" }}
+        style={{
+          width: "min(460px, 90vw)",
+          height: "min(460px, 90vw)",
+          overflow: "visible",
+        }}
       >
         {/* Subtle ambient glow behind the cube */}
         <div
