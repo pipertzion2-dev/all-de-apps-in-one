@@ -43,6 +43,7 @@ import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-pha
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
+import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
@@ -2486,8 +2487,8 @@ export default function LaunchpadPage() {
     };
   }, []);
   const [tab, setTab] = useState<
-    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth"
-  >("growth");
+    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth" | "autopilot"
+  >("autopilot");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -4294,6 +4295,32 @@ export default function LaunchpadPage() {
               <p className="text-[11px] text-muted-foreground leading-tight">Demand scanner</p>
             </button>
             <button
+              onClick={() => setTab("autopilot")}
+              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "autopilot" ? "border-pink-500 bg-pink-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+              data-testid="tab-autopilot"
+            >
+              <div className="flex items-center gap-1.5 w-full">
+                <Wand2
+                  className="w-3.5 h-3.5 flex-shrink-0"
+                  style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
+                />
+                <span
+                  className="text-xs font-bold truncate"
+                  style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
+                >
+                  Autopilot
+                </span>
+                <span
+                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "autopilot" ? "bg-pink-500/20 text-pink-600" : "bg-pink-500/10 text-pink-700"}`}
+                >
+                  NEW
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                Credentials + AI run all
+              </p>
+            </button>
+            <button
               onClick={() => setTab("checklist")}
               className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
               data-testid="tab-checklist"
@@ -4421,6 +4448,9 @@ export default function LaunchpadPage() {
             }}
           />
         )}
+
+        {/* Marketing Autopilot tab */}
+        {tab === "autopilot" && <OrbitMarketingAutopilot />}
 
         {/* Checklist tab */}
         {tab === "checklist" && (

@@ -120,6 +120,24 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
     staleTime: 60_000,
   });
 
+  const { data: workbenchData } = useQuery({
+    queryKey: ["/api/orbit/submission-workbench", "all"],
+    queryFn: async () => {
+      const r = await authFetch("/api/orbit/submission-workbench");
+      return r.json();
+    },
+    staleTime: 30_000,
+  });
+
+  const isManualDone = (id: string): boolean => {
+    if (manualDone[id]) return true;
+    return (workbenchData?.items ?? []).some(
+      (row: { item: { checklistId: string }; status: string }) =>
+        row.item.checklistId === id &&
+        (row.status === "submitted" || row.status === "live"),
+    );
+  };
+
   const dirStats = growthData?.stats ?? { total: 0, submitted: 0, live: 0 };
   const lastGrowthRun = (tasksData?.tasks ?? [])[0]?.runAt;
 
@@ -164,10 +182,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-gsc-sitemap",
           label: "Sitemap submitted in Google Search Console",
-          detail: manualDone["tech-gsc-sitemap"]
+          detail: isManualDone("tech-gsc-sitemap")
             ? "Done ✓"
             : `GSC → Sitemaps → paste ${ORBIT_SITEMAP} → Submit. Without this, Google will not crawl your site.`,
-          status: manualDone["tech-gsc-sitemap"] ? "done" : "missing",
+          status: isManualDone("tech-gsc-sitemap") ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "Open GSC →",
           priority: "high",
@@ -175,11 +193,11 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-schema-jsonld",
           label: "Schema.org JSON-LD added to homepage",
-          detail: manualDone["tech-schema-jsonld"]
+          detail: isManualDone("tech-schema-jsonld")
             ? "Done ✓"
             : "Orbit generated this (svivva-schema step results). Copy the JSON-LD → paste into your homepage <head>. Enables rich results.",
           status: orbitStepDone("svivva-schema")
-            ? manualDone["tech-schema-jsonld"]
+            ? isManualDone("tech-schema-jsonld")
               ? "done"
               : "warn"
             : "missing",
@@ -188,12 +206,12 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "tech-rich-results",
           label: "Rich results test passed",
-          detail: manualDone["tech-rich-results"]
+          detail: isManualDone("tech-rich-results")
             ? "Done ✓"
             : `After adding JSON-LD: test at search.google.com/test/rich-results → paste ${ORBIT_HOST}`,
-          status: manualDone["tech-rich-results"]
+          status: isManualDone("tech-rich-results")
             ? "done"
-            : manualDone["tech-schema-jsonld"]
+            : isManualDone("tech-schema-jsonld")
               ? "warn"
               : "missing",
           link: "https://search.google.com/test/rich-results",
@@ -387,124 +405,126 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "manual-devto",
           label: "Dev.to parasite article published",
-          detail: manualDone["manual-devto"]
+          detail: isManualDone("manual-devto")
             ? "Done ✓"
-            : "Copy article from Orbit parasite results → dev.to/new → publish. DA 94 — ranks within days.",
-          status: manualDone["manual-devto"] ? "done" : "missing",
-          link: "https://dev.to/new",
-          linkLabel: "dev.to →",
+            : "Workbench → Publishing → Dev.to → AI fill → Copy all (or auto-post with API key)",
+          status: isManualDone("manual-devto") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "high",
         },
         {
           id: "manual-medium",
           label: "Medium article published",
-          detail: manualDone["manual-medium"]
+          detail: isManualDone("manual-medium")
             ? "Done ✓"
-            : "Copy from Orbit results → medium.com/new-story → publish. DA 96.",
-          status: manualDone["manual-medium"] ? "done" : "missing",
-          link: "https://medium.com/new-story",
-          linkLabel: "Medium →",
+            : "Workbench has title + body pre-filled — Copy all → medium.com/new-story",
+          status: isManualDone("manual-medium") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "high",
         },
         {
           id: "manual-hashnode",
           label: "Hashnode article published",
-          detail: manualDone["manual-hashnode"]
+          detail: isManualDone("manual-hashnode")
             ? "Done ✓"
-            : "Copy from Orbit results → hashnode.com → publish",
-          status: manualDone["manual-hashnode"] ? "done" : "missing",
-          link: "https://hashnode.com",
-          linkLabel: "Hashnode →",
+            : "Publishing tab in Workbench — AI fill or auto-post with Hashnode key",
+          status: isManualDone("manual-hashnode") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
         },
         {
           id: "manual-reddit-sideproject",
           label: "Reddit r/SideProject post submitted",
-          detail: manualDone["manual-reddit-sideproject"]
+          detail: isManualDone("manual-reddit-sideproject")
             ? "Done ✓"
-            : "Copy post from Orbit community pack → post. Don't cross-post to multiple subs at once — start with r/SideProject.",
-          status: manualDone["manual-reddit-sideproject"] ? "done" : "missing",
-          link: "https://reddit.com/r/SideProject/submit",
-          linkLabel: "r/SideProject →",
+            : "Workbench → Reddit — title/body filled; auto-post with Reddit OAuth or copy-paste",
+          status: isManualDone("manual-reddit-sideproject") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "high",
         },
         {
           id: "manual-showhn",
           label: "Show HN submitted on Hacker News",
-          detail: manualDone["manual-showhn"]
+          detail: isManualDone("manual-showhn")
             ? "Done ✓"
-            : "Submit at news.ycombinator.com/submit — title must start with 'Show HN:'. Best time: 9am–12pm EST weekdays.",
-          status: manualDone["manual-showhn"] ? "done" : "missing",
-          link: "https://news.ycombinator.com/submit",
-          linkLabel: "HN →",
+            : "Workbench → Show HN — title starts with 'Show HN:' (AI ensures this)",
+          status: isManualDone("manual-showhn") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "high",
         },
         {
           id: "manual-producthunt",
           label: "Product Hunt launch submitted",
-          detail: manualDone["manual-producthunt"]
+          detail: isManualDone("manual-producthunt")
             ? "Done ✓"
-            : "Biggest single-day traffic spike possible. Copy copy from Orbit social pack → submit at 12:01am PST for full day of votes.",
-          status: manualDone["manual-producthunt"] ? "done" : "missing",
-          link: "https://www.producthunt.com/posts/new",
-          linkLabel: "Product Hunt →",
+            : "Workbench → PH launch kit: tagline, description, first comment — all pre-written",
+          status: isManualDone("manual-producthunt") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "high",
         },
         {
           id: "manual-twitter-thread",
           label: "Twitter/X launch thread posted",
-          detail: manualDone["manual-twitter-thread"]
+          detail: isManualDone("manual-twitter-thread")
             ? "Done ✓"
-            : "Post the thread from Orbit social pack. Hook tweet first, then reply with each numbered tweet.",
-          status: manualDone["manual-twitter-thread"] ? "done" : "missing",
-          link: "https://twitter.com/compose/tweet",
-          linkLabel: "Twitter →",
+            : "Workbench thread field — auto-post with Twitter keys or copy tweet-by-tweet",
+          status: isManualDone("manual-twitter-thread") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
         },
         {
           id: "manual-linkedin",
           label: "LinkedIn post published",
-          detail: manualDone["manual-linkedin"]
+          detail: isManualDone("manual-linkedin")
             ? "Done ✓"
-            : "Post LinkedIn copy from Orbit social pack. Best time: Tuesday 8–10am.",
-          status: manualDone["manual-linkedin"] ? "done" : "missing",
-          link: "https://www.linkedin.com/feed/",
-          linkLabel: "LinkedIn →",
+            : "Workbench → LinkedIn — headline + body ready to paste",
+          status: isManualDone("manual-linkedin") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
         },
         {
           id: "manual-indiehackers",
           label: "Indie Hackers product listed",
-          detail: manualDone["manual-indiehackers"]
+          detail: isManualDone("manual-indiehackers")
             ? "Done ✓"
-            : "Add Svivva to indiehackers.com/products — write a milestone post. Great for early traction.",
-          status: manualDone["manual-indiehackers"] ? "done" : "missing",
-          link: "https://www.indiehackers.com/products",
-          linkLabel: "IH →",
+            : "Workbench → IH — tagline, description, milestone post generated",
+          status: isManualDone("manual-indiehackers") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
         },
         {
           id: "manual-newsletters",
           label: "Newsletter pitches sent (TLDR AI, Ben's Bites, etc.)",
-          detail: manualDone["manual-newsletters"]
+          detail: isManualDone("manual-newsletters")
             ? "Done ✓"
-            : "Copy pitch emails from Orbit outreach results → send from your inbox. Reach: 4M+ readers combined.",
-          status: manualDone["manual-newsletters"] ? "done" : "missing",
+            : "Workbench → Newsletter pitch — auto-email with Resend or copy subject/body",
+          status: isManualDone("manual-newsletters") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
           priority: "medium",
         },
         {
           id: "manual-podcasts",
           label: "Podcast pitches sent",
-          detail: manualDone["manual-podcasts"]
+          detail: isManualDone("manual-podcasts")
             ? "Done ✓"
-            : "Copy pitch emails from Orbit outreach results → send. AI/tech shows always need guests.",
-          status: manualDone["manual-podcasts"] ? "done" : "missing",
-          link: "/dashboard/growth",
-          linkLabel: "Generate more →",
+            : "Workbench → Podcast pitch — recipient + email body pre-filled",
+          status: isManualDone("manual-podcasts") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Workbench →",
         },
         {
           id: "manual-gsc-indexing",
           label: "Key pages requested for Google indexing",
-          detail: manualDone["manual-gsc-indexing"]
+          detail: isManualDone("manual-gsc-indexing")
             ? "Done ✓"
             : "GSC → URL Inspection → paste each URL → Request Indexing. Do: /, /clutety, /blog, /tools, and 5-10 SEO pages.",
-          status: manualDone["manual-gsc-indexing"] ? "done" : "missing",
+          status: isManualDone("manual-gsc-indexing") ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "GSC →",
           priority: "high",
@@ -518,10 +538,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-producthunt",
           label: "Product Hunt listing",
-          detail: manualDone["dir-producthunt"]
+          detail: isManualDone("dir-producthunt")
             ? "Done ✓"
             : "Submit Svivva to Product Hunt (separate from the launch — this is just getting listed)",
-          status: manualDone["dir-producthunt"] ? "done" : "missing",
+          status: isManualDone("dir-producthunt") ? "done" : "missing",
           link: "https://www.producthunt.com/posts/new",
           linkLabel: "Submit →",
           priority: "high",
@@ -529,68 +549,68 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "dir-futurepedia",
           label: "Futurepedia submitted (500K/mo visitors)",
-          detail: manualDone["dir-futurepedia"]
+          detail: isManualDone("dir-futurepedia")
             ? "Done ✓"
-            : "Use Growth Engine to track and open the submit link",
-          status: manualDone["dir-futurepedia"] ? "done" : "missing",
-          link: "/dashboard/growth",
-          linkLabel: "Growth Engine →",
+            : "Autopilot → Submission Workbench → AI fill → Copy all → paste on Futurepedia form",
+          status: isManualDone("dir-futurepedia") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "high",
         },
         {
           id: "dir-taaft",
           label: "There's An AI For That (2M/mo visitors)",
-          detail: manualDone["dir-taaft"]
+          detail: isManualDone("dir-taaft")
             ? "Done ✓"
-            : "Highest-traffic AI directory. Open via Growth Engine.",
-          status: manualDone["dir-taaft"] ? "done" : "missing",
-          link: "/dashboard/growth",
-          linkLabel: "Growth Engine →",
+            : "Use Submission Workbench — AI pre-fills every TAAFT field in Orbit",
+          status: isManualDone("dir-taaft") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "high",
         },
         {
           id: "dir-g2",
           label: "G2 listing created (8M/mo visitors)",
-          detail: manualDone["dir-g2"]
+          detail: isManualDone("dir-g2")
             ? "Done ✓"
-            : "Biggest SaaS review site. Requires a few reviews to rank but huge traffic.",
-          status: manualDone["dir-g2"] ? "done" : "missing",
-          link: "https://sell.g2.com",
-          linkLabel: "G2 →",
+            : "G2 fields pre-filled in Workbench — copy-paste into sell.g2.com",
+          status: isManualDone("dir-g2") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "high",
         },
         {
           id: "dir-alternativeto",
           label: "AlternativeTo listed as Zapier alternative",
-          detail: manualDone["dir-alternativeto"]
+          detail: isManualDone("dir-alternativeto")
             ? "Done ✓"
-            : "List Svivva AND mark it as alternative to Zapier, Make, n8n. Captures high-intent searches.",
-          status: manualDone["dir-alternativeto"] ? "done" : "missing",
-          link: "https://alternativeto.net/add-app/",
-          linkLabel: "AlternativeTo →",
+            : "Workbench includes 'Alternatives to' field pre-filled with Zapier, Make, n8n",
+          status: isManualDone("dir-alternativeto") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "high",
         },
         {
           id: "dir-crunchbase",
           label: "Crunchbase company page created",
-          detail: manualDone["dir-crunchbase"]
+          detail: isManualDone("dir-crunchbase")
             ? "Done ✓"
-            : "Essential for startup credibility. High-DA backlink. Free to create.",
-          status: manualDone["dir-crunchbase"] ? "done" : "missing",
-          link: "https://www.crunchbase.com/add-new",
-          linkLabel: "Crunchbase →",
+            : "Company fields generated in Workbench — paste into Crunchbase add-new",
+          status: isManualDone("dir-crunchbase") ? "done" : "missing",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "medium",
         },
         {
           id: "dir-growth-engine-overall",
-          label: `Growth Engine: ${dirStats.submitted}/${dirStats.total} directories submitted`,
+          label: `Directories: ${dirStats.submitted}/${dirStats.total} submitted`,
           detail:
             dirStats.submitted === 0
-              ? "Open Growth Engine to start tracking directory submissions"
-              : `${dirStats.live} live listings confirmed. ${dirStats.total - dirStats.submitted} directories remaining.`,
+              ? "Autopilot → Submission Workbench → AI fill all directories"
+              : `${dirStats.live} live listings. ${dirStats.total - dirStats.submitted} remaining in Workbench.`,
           status: dirStats.submitted === 0 ? "missing" : dirStats.live > 10 ? "done" : "warn",
-          link: "/dashboard/growth",
-          linkLabel: "Open Growth Engine →",
+          link: "/dashboard/launchpad",
+          linkLabel: "Autopilot workbench →",
           priority: "high",
         },
       ],
@@ -602,10 +622,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-email-list",
           label: "Email list set up (Substack or Beehiiv)",
-          detail: manualDone["acc-email-list"]
+          detail: isManualDone("acc-email-list")
             ? "Done ✓"
             : "Critical long-term asset. Create a free Beehiiv or Substack newsletter → link from your homepage. Even 100 subscribers compounds over months.",
-          status: manualDone["acc-email-list"] ? "done" : "missing",
+          status: isManualDone("acc-email-list") ? "done" : "missing",
           link: "https://www.beehiiv.com",
           linkLabel: "Beehiiv →",
           priority: "high",
@@ -613,30 +633,30 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-twitter",
           label: "Twitter/X account active",
-          detail: manualDone["acc-twitter"]
+          detail: isManualDone("acc-twitter")
             ? "Done ✓"
             : "Consistent presence matters more than follower count. Post once/day using Growth Engine content.",
-          status: manualDone["acc-twitter"] ? "done" : "missing",
+          status: isManualDone("acc-twitter") ? "done" : "missing",
           priority: "medium",
         },
         {
           id: "acc-linkedin",
           label: "LinkedIn company page created",
-          detail: manualDone["acc-linkedin"]
+          detail: isManualDone("acc-linkedin")
             ? "Done ✓"
             : `Create company page → link from ${ORBIT_SITE} → adds credibility and a dofollow backlink.`,
-          status: manualDone["acc-linkedin"] ? "done" : "missing",
+          status: isManualDone("acc-linkedin") ? "done" : "missing",
           link: "https://www.linkedin.com/company/setup/new/",
           linkLabel: "LinkedIn →",
         },
         {
           id: "acc-powered-by",
           label: "'Powered by Svivva' widgets added to mini apps",
-          detail: manualDone["acc-powered-by"]
+          detail: isManualDone("acc-powered-by")
             ? "Done ✓"
             : "Run 'Powered by Svivva Widget' step in Tools Repl tab → copy HTML to each mini app. Each mini app becomes a traffic referral channel.",
           status: orbitStepDone("mini-embed")
-            ? manualDone["acc-powered-by"]
+            ? isManualDone("acc-powered-by")
               ? "done"
               : "warn"
             : "missing",
@@ -647,10 +667,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-badge",
           label: "Developer 'Built with Svivva' badge deployed",
-          detail: manualDone["acc-badge"]
+          detail: isManualDone("acc-badge")
             ? "Done ✓"
             : `Share ${ORBIT_SITE}/badge with users — each embed = a backlink + brand impression. Add the badge to your own GitHub repos too.`,
-          status: manualDone["acc-badge"] ? "done" : "missing",
+          status: isManualDone("acc-badge") ? "done" : "missing",
           link: "/badge",
           linkLabel: "Badge page →",
           priority: "medium",
@@ -658,10 +678,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "acc-free-pr",
           label: "Press release submitted to PR sites",
-          detail: manualDone["acc-free-pr"]
+          detail: isManualDone("acc-free-pr")
             ? "Done ✓"
             : "Use Growth Engine → AI Copy Engine → 'Press Release' → submit to PRLog, OpenPR, PR.com. All free, all indexed by Google within 24h.",
-          status: manualDone["acc-free-pr"] ? "done" : "missing",
+          status: isManualDone("acc-free-pr") ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Generate PR →",
           priority: "medium",
@@ -691,10 +711,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         {
           id: "auto-content-velocity",
           label: "Publishing new SEO content weekly",
-          detail: manualDone["auto-content-velocity"]
+          detail: isManualDone("auto-content-velocity")
             ? "Done ✓"
             : "Use Growth Engine → AI Copy Engine to generate a new blog outline or AEO piece weekly. Google rewards publishing frequency.",
-          status: manualDone["auto-content-velocity"] ? "done" : "missing",
+          status: isManualDone("auto-content-velocity") ? "done" : "missing",
           link: "/dashboard/growth",
           linkLabel: "Generate content →",
           priority: "medium",
@@ -714,7 +734,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
       t.id.startsWith("dir-") ||
       t.id === "auto-content-velocity"
     )
-      return manualDone[t.id];
+      return isManualDone(t.id);
     return false;
   }).length;
 
@@ -722,7 +742,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
     .filter((t) => {
       if (t.priority !== "high") return false;
       if (t.status === "auto" || t.status === "done") return false;
-      if (manualDone[t.id]) return false;
+      if (isManualDone(t.id)) return false;
       return true;
     })
     .slice(0, 3);
@@ -812,7 +832,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         const isOpen = expanded === group.title;
         const groupDone = group.tasks.filter((t) => {
           if (t.status === "auto" || t.status === "done") return true;
-          return manualDone[t.id];
+          return isManualDone(t.id);
         }).length;
 
         return (
@@ -859,7 +879,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
                       task.id,
                     );
                   const effectiveStatus: TaskStatus =
-                    isManualCheckable && manualDone[task.id] ? "done" : task.status;
+                    isManualCheckable && isManualDone(task.id) ? "done" : task.status;
 
                   return (
                     <div
@@ -872,7 +892,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
                           className="mt-0.5 flex-shrink-0 focus:outline-none"
                           data-testid={`checkbox-${task.id}`}
                         >
-                          {manualDone[task.id] ? (
+                          {isManualDone(task.id) ? (
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                           ) : (
                             <Circle className="w-3.5 h-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
