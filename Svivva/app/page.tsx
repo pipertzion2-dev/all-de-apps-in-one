@@ -41,6 +41,17 @@ import {
   TrendingUp,
   Lock,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const SvivvaArtifact = dynamic(
+  () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
+  { ssr: false },
+);
+const FeatureSection = dynamic(
+  () => import("@/components/svivva-artifact").then((m) => m.FeatureSection),
+  { ssr: false },
+);
+import { ARTIFACT_FEATURES } from "@/components/svivva-artifact";
 const features = [
   {
     icon: Shield,
@@ -929,6 +940,18 @@ export default function LandingPage() {
           </div>
         </section>
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
+
+        {/* ── Svivva Artifact ───────────────────────────────────────────────── */}
+        <div className="bg-background">
+          <SvivvaArtifact />
+        </div>
+
+        {/* ── Artwork-driven Feature Sections ───────────────────────────────── */}
+        <div id="feature-world" className="bg-background">
+          {ARTIFACT_FEATURES.map((f, i) => (
+            <FeatureSection key={f.id} feature={f} index={i} reverse={i % 2 === 1} />
+          ))}
+        </div>
 
         <section
           id="features"
