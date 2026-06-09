@@ -29,19 +29,24 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     const el = mountRef.current;
     if (!el) return;
 
-    const W = el.clientWidth || 460;
-    const H = el.clientHeight || 460;
+    const containerW = el.clientWidth || 480;
+    const containerH = el.clientHeight || 480;
+    // Render 1.5× the container so rotating corners never hit the canvas boundary
+    const W = Math.round(containerW * 1.5);
+    const H = Math.round(containerH * 1.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
-    // Make the canvas overflow its container so rotating corners are never clipped
-    renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.top = "50%";
-    renderer.domElement.style.left = "50%";
-    renderer.domElement.style.transform = "translate(-50%, -50%)";
-    renderer.domElement.style.pointerEvents = "auto";
+    // Canvas is larger than container; center it so the extra spills out equally on all sides
+    Object.assign(renderer.domElement.style, {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      pointerEvents: "auto",
+    });
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -211,10 +216,10 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     };
     animate();
 
-    // Resize
+    // Resize — keep 1.5× ratio
     const ro = new ResizeObserver(() => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
+      const w = Math.round(el.clientWidth * 1.5);
+      const h = Math.round(el.clientHeight * 1.5);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);

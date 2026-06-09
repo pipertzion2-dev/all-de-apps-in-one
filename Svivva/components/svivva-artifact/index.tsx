@@ -26,39 +26,37 @@ export function SvivvaArtifact() {
   return (
     <section className="w-full flex flex-col items-center gap-0 py-20 px-4 overflow-visible">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="text-center mb-10 select-none">
-        <p
-          className="text-[10px] uppercase tracking-[0.35em] mb-3 font-light"
-          style={{ color: "rgba(255,255,255,0.28)" }}
-        >
+      <div className="text-center mb-10 select-none relative z-20">
+        <p className="text-[10px] uppercase tracking-[0.35em] mb-3 font-light text-muted-foreground">
           Interactive Discovery
         </p>
         <h2
-          className="text-3xl md:text-4xl font-light tracking-tight"
-          style={{ color: "rgba(255,255,255,0.92)", letterSpacing: "-0.01em" }}
+          className="text-3xl md:text-4xl font-light tracking-tight text-foreground"
+          style={{ letterSpacing: "-0.01em" }}
         >
           Six Worlds. One Platform.
         </h2>
         <p
-          className="mt-3 text-sm font-light"
-          style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}
+          className="mt-3 text-sm font-light text-muted-foreground"
+          style={{ letterSpacing: "0.04em" }}
         >
           Every face is a feature. Rotate to explore.
         </p>
       </div>
 
       {/* ── Instruction line ───────────────────────────────────────────────── */}
-      <p className="text-white/20 text-[10px] tracking-widest uppercase mb-6 select-none">
+      <p className="text-muted-foreground/50 text-[10px] tracking-widest uppercase mb-6 select-none relative z-20">
         drag to rotate &nbsp;·&nbsp; tap a face to explore
       </p>
 
-      {/* ── Cube — canvas is larger than the cube so rotating corners never clip */}
+      {/* ── Cube — canvas renders 1.5× and overflows, z-index behind text ────── */}
       <div
-        className="relative"
         style={{
-          width: "min(520px, 92vw)",
-          height: "min(520px, 92vw)",
+          position: "relative",
+          width: "min(480px, 88vw)",
+          height: "min(480px, 88vw)",
           overflow: "visible",
+          zIndex: 10,
         }}
       >
         {/* Subtle ambient glow behind the cube */}
@@ -85,7 +83,7 @@ export function SvivvaArtifact() {
 
       {/* ── Feature reveal card — appears on tap ───────────────────────────── */}
       <div
-        className="mt-8 w-full"
+        className="mt-8 w-full relative z-20"
         style={{
           maxWidth: "min(460px, 90vw)",
           minHeight: "4.5rem",
@@ -129,7 +127,7 @@ export function SvivvaArtifact() {
       </div>
 
       {/* ── 6 dot indicators — no text, just coloured dots ─────────────────── */}
-      <div className="flex gap-5 mt-8">
+      <div className="flex gap-5 mt-8 relative z-20">
         {FEATURES.map((f) => (
           <button
             key={f.id}
