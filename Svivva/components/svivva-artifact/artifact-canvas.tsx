@@ -10,16 +10,14 @@ type Props = {
   onSelect: (id: FeatureId) => void;
 };
 
-// BoxGeometry face order: +x, -x, +y, -y, +z, -z  →  map to features
+// BoxGeometry face order: +x, -x, +y, -y, +z, -z
 const FACE_ORDER: FeatureId[] = ["api", "security", "play", "hardware", "seeds", "orbit"];
 
 export function ArtifactCanvas({ active, onSelect }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<FeatureId>(active);
   const onSelectRef = useRef(onSelect);
-  const cleanupRef = useRef<(() => void) | null>(null);
 
-  // Keep refs current without re-mounting the scene
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
@@ -31,9 +29,8 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     const el = mountRef.current;
     if (!el) return;
 
-    // ── renderer ──────────────────────────────────────────────────────────────
-    const W = el.clientWidth || 420;
-    const H = el.clientHeight || 420;
+    const W = el.clientWidth || 460;
+    const H = el.clientHeight || 460;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -42,26 +39,14 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(38, W / H, 0.1, 100);
-    camera.position.set(0, 0, 4.6);
+    const camera = new THREE.PerspectiveCamera(36, W / H, 0.1, 100);
+    camera.position.set(0, 0, 4.4);
 
-    // ── lighting ──────────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1);
-    key.position.set(4, 5, 6);
-    scene.add(key);
-    const fill = new THREE.DirectionalLight(0xaabbff, 0.35);
-    fill.position.set(-4, -3, -3);
-    scene.add(fill);
-
-    // ── 6 face materials ──────────────────────────────────────────────────────
-    // BoxGeometry face order: +x, -x, +y, -y, +z, -z
-    const materials: THREE.MeshStandardMaterial[] = FACE_ORDER.map((fId) => {
+    // Use MeshBasicMaterial — no lighting dimming, artwork shows at full photo brightness
+    const materials: THREE.MeshBasicMaterial[] = FACE_ORDER.map((fId) => {
       const feature = FEATURES.find((f) => f.id === fId)!;
-      const mat = new THREE.MeshStandardMaterial({
+      const mat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        metalness: 0.08,
-        roughness: 0.5,
         transparent: true,
         opacity: 0,
         side: THREE.FrontSide,
@@ -76,38 +61,38 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         },
         undefined,
         () => {
-          // fallback: tinted solid face so it's always visible
+          // fallback: accent-coloured face
           mat.color.set(new THREE.Color(feature.accentColor));
-          mat.opacity = 0.6;
+          mat.opacity = 0.7;
           mat.needsUpdate = true;
         },
       );
       return mat;
     });
 
-    // ── box ───────────────────────────────────────────────────────────────────
+    // Box mesh
     const box = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), materials);
     scene.add(box);
 
-    // ── edge glow ─────────────────────────────────────────────────────────────
+    // Glowing edges
     const edges = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(2.01, 2.01, 2.01)),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 }),
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(2.02, 2.02, 2.02)),
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 }),
     );
     scene.add(edges);
 
-    // ── drag state ────────────────────────────────────────────────────────────
+    // ── interaction ───────────────────────────────────────────────────────────
     let isDragging = false;
     let lastX = 0;
     let lastY = 0;
     let velX = 0;
     let velY = 0;
-    let targetRotY = 0.5;
-    let targetRotX = -0.25;
+    let targetRotY = 0.55;
+    let targetRotX = -0.28;
     let pointerMoved = false;
 
-    const canvas = renderer.domElement;
-    canvas.style.cursor = "grab";
+    const cv = renderer.domElement;
+    cv.style.cursor = "grab";
 
     const onDown = (e: PointerEvent) => {
       isDragging = true;
@@ -115,16 +100,16 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       lastX = e.clientX;
       lastY = e.clientY;
       velX = velY = 0;
-      canvas.setPointerCapture(e.pointerId);
-      canvas.style.cursor = "grabbing";
+      cv.setPointerCapture(e.pointerId);
+      cv.style.cursor = "grabbing";
     };
     const onMove = (e: PointerEvent) => {
       if (!isDragging) return;
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
       if (Math.abs(dx) > 2 || Math.abs(dy) > 2) pointerMoved = true;
-      velX = dx * 0.014;
-      velY = dy * 0.014;
+      velX = dx * 0.015;
+      velY = dy * 0.015;
       targetRotY += dx * 0.009;
       targetRotX += dy * 0.009;
       lastX = e.clientX;
@@ -132,10 +117,9 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     };
     const onUp = (e: PointerEvent) => {
       isDragging = false;
-      canvas.style.cursor = "grab";
+      cv.style.cursor = "grab";
       if (pointerMoved) return;
-      // tap / click — detect which face is closest to screen center
-      const rect = canvas.getBoundingClientRect();
+      const rect = cv.getBoundingClientRect();
       const mouse = new THREE.Vector2(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
         -((e.clientY - rect.top) / rect.height) * 2 + 1,
@@ -151,21 +135,21 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       }
     };
 
-    canvas.addEventListener("pointerdown", onDown);
-    canvas.addEventListener("pointermove", onMove);
-    canvas.addEventListener("pointerup", onUp);
+    cv.addEventListener("pointerdown", onDown);
+    cv.addEventListener("pointermove", onMove);
+    cv.addEventListener("pointerup", onUp);
 
     // ── animation ─────────────────────────────────────────────────────────────
-    const OPACITY_ACTIVE = 0.78;
-    const OPACITY_IDLE = 0.52;
+    const OPACITY_ACTIVE = 0.82; // bright + glassy
+    const OPACITY_IDLE = 0.62;
     let fadeT = 0;
-    const FADE_FRAMES = 50;
+    const FADE_FRAMES = 55;
 
     let rafId = 0;
     const animate = () => {
       rafId = requestAnimationFrame(animate);
 
-      // Fade-in from zero
+      // Fade in
       if (fadeT < FADE_FRAMES) {
         fadeT++;
         const prog = fadeT / FADE_FRAMES;
@@ -181,7 +165,7 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         targetRotY += velX;
         targetRotX += velY;
         if (Math.abs(velX) < 0.0015 && Math.abs(velY) < 0.0015) {
-          targetRotY += 0.004; // gentle auto-rotate
+          targetRotY += 0.004;
         }
       }
 
@@ -189,44 +173,40 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       box.rotation.x += (targetRotX - box.rotation.x) * 0.085;
       edges.rotation.copy(box.rotation);
 
-      // Active face highlight — lerp opacity
-      const cur = activeRef.current;
-      const activeIdx = FACE_ORDER.indexOf(cur);
-      materials.forEach((m, i) => {
-        const target =
-          fadeT >= FADE_FRAMES ? (i === activeIdx ? OPACITY_ACTIVE : OPACITY_IDLE) : m.opacity;
-        m.opacity += (target - m.opacity) * 0.08;
-      });
+      // Active face highlight
+      if (fadeT >= FADE_FRAMES) {
+        const activeIdx = FACE_ORDER.indexOf(activeRef.current);
+        materials.forEach((m, i) => {
+          const target = i === activeIdx ? OPACITY_ACTIVE : OPACITY_IDLE;
+          m.opacity += (target - m.opacity) * 0.08;
+        });
+      }
 
       renderer.render(scene, camera);
     };
     animate();
 
-    // ── resize ────────────────────────────────────────────────────────────────
-    const onResize = () => {
+    // Resize
+    const ro = new ResizeObserver(() => {
       const w = el.clientWidth;
       const h = el.clientHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-    };
-    const ro = new ResizeObserver(onResize);
+    });
     ro.observe(el);
 
-    // ── cleanup ───────────────────────────────────────────────────────────────
-    const cleanup = () => {
+    return () => {
       cancelAnimationFrame(rafId);
       ro.disconnect();
-      canvas.removeEventListener("pointerdown", onDown);
-      canvas.removeEventListener("pointermove", onMove);
-      canvas.removeEventListener("pointerup", onUp);
+      cv.removeEventListener("pointerdown", onDown);
+      cv.removeEventListener("pointermove", onMove);
+      cv.removeEventListener("pointerup", onUp);
       materials.forEach((m) => m.dispose());
       renderer.dispose();
-      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (cv.parentNode) cv.parentNode.removeChild(cv);
     };
-    cleanupRef.current = cleanup;
-    return cleanup;
-  }, []); // mount once — active/onSelect handled via refs
+  }, []);
 
   return <div ref={mountRef} className="w-full h-full" style={{ touchAction: "none" }} />;
 }

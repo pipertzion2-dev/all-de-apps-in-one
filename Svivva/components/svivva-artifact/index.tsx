@@ -1,130 +1,133 @@
 "use client";
 
 import { useState, Suspense, lazy } from "react";
+import Link from "next/link";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES } from "./feature-defs";
-import { FeatureArtworkLayer } from "./feature-artwork-layer";
 
-// Re-export for consumers
+// Re-exports consumed by app/page.tsx
 export { FEATURES as ARTIFACT_FEATURES } from "./feature-defs";
 export { FeatureSection } from "./feature-section";
 export type { FeatureDef, FeatureId } from "./feature-defs";
 
-// Lazy-load the WebGL canvas so it doesn't block SSR
 const ArtifactCanvas = lazy(() =>
   import("./artifact-canvas").then((m) => ({ default: m.ArtifactCanvas })),
 );
 
 export function SvivvaArtifact() {
-  const [active, setActive] = useState<FeatureId>("play");
-  const feature = FEATURES.find((f) => f.id === active)!;
+  const [active, setActive] = useState<FeatureId | null>(null);
+  const feature = active ? (FEATURES.find((f) => f.id === active) ?? null) : null;
+
+  const handleSelect = (id: FeatureId) => {
+    // tapping the same face again dismisses the card
+    setActive((prev) => (prev === id ? null : id));
+  };
 
   return (
-    <section className="w-full py-24 px-4 flex flex-col items-center gap-16">
-      {/* ─── Heading ─── */}
-      <div className="text-center max-w-2xl">
-        <p className="uppercase tracking-[0.25em] text-xs text-white/30 mb-3">Six Worlds</p>
-        <h2 className="text-3xl md:text-5xl font-light text-white/90 tracking-tight">
-          The Svivva Artifact
-        </h2>
-        <p className="mt-4 text-white/45 text-sm leading-relaxed">
-          Drag · rotate · explore every feature
-        </p>
+    <section className="w-full flex flex-col items-center gap-0 py-20 px-4">
+      {/* ── Instruction line ───────────────────────────────────────────────── */}
+      <p className="text-white/30 text-xs tracking-widest uppercase mb-8 select-none">
+        drag to rotate &nbsp;·&nbsp; tap a face to explore
+      </p>
+
+      {/* ── Cube — no overflow clip so it never gets cut off ─────────────── */}
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: "min(460px, 90vw)", height: "min(460px, 90vw)" }}
+      >
+        {/* Subtle ambient glow behind the cube */}
+        <div
+          className="absolute inset-[-18%] rounded-full pointer-events-none"
+          style={{
+            background: feature
+              ? `radial-gradient(circle, ${feature.accentColor}22 0%, transparent 70%)`
+              : "radial-gradient(circle, #ffffff0a 0%, transparent 70%)",
+            transition: "background 0.6s ease",
+          }}
+        />
+
+        <Suspense
+          fallback={
+            <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
+              loading…
+            </div>
+          }
+        >
+          <ArtifactCanvas active={active ?? "play"} onSelect={handleSelect} />
+        </Suspense>
       </div>
 
-      {/* ─── Main layout ─── */}
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[1fr_440px_1fr] gap-10 items-center">
-        {/* LEFT — artwork */}
-        <div className="w-full max-w-sm mx-auto lg:mx-0">
-          <FeatureArtworkLayer feature={feature} visible />
-        </div>
-
-        {/* CENTRE — artifact cube */}
-        <div className="flex flex-col items-center gap-8">
+      {/* ── Feature reveal card — appears on tap ───────────────────────────── */}
+      <div
+        className="mt-8 w-full"
+        style={{
+          maxWidth: "min(460px, 90vw)",
+          minHeight: "4.5rem",
+        }}
+      >
+        {feature ? (
           <div
-            className="w-full aspect-square max-w-[400px] rounded-2xl overflow-hidden"
+            key={feature.id}
+            className="rounded-2xl border px-6 py-5 flex flex-col gap-3"
             style={{
-              background: "radial-gradient(circle at 50% 50%, #ffffff08 0%, transparent 70%)",
+              borderColor: `${feature.accentColor}40`,
+              background: `${feature.accentColor}0d`,
+              animation: "artifactReveal 0.3s ease forwards",
             }}
           >
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center text-white/20 text-sm">
-                  Loading Artifact…
-                </div>
-              }
+            <h3
+              className="text-lg font-light tracking-tight"
+              style={{ color: "rgba(255,255,255,0.92)" }}
             >
-              <ArtifactCanvas active={active} onSelect={setActive} />
-            </Suspense>
-          </div>
-
-          {/* Feature indicators */}
-          <div className="flex gap-3 flex-wrap justify-center">
-            {FEATURES.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setActive(f.id)}
-                className="group relative flex flex-col items-center gap-1.5 transition-all"
-                aria-label={f.name}
-              >
-                <div
-                  className="w-2 h-2 rounded-full border transition-all duration-300"
-                  style={{
-                    background: active === f.id ? f.accentColor : "transparent",
-                    borderColor: active === f.id ? f.accentColor : "rgba(255,255,255,0.2)",
-                    boxShadow: active === f.id ? `0 0 10px ${f.accentColor}` : "none",
-                    transform: active === f.id ? "scale(1.6)" : "scale(1)",
-                  }}
-                />
-                <span
-                  className="text-[10px] uppercase tracking-widest transition-all duration-300"
-                  style={{ color: active === f.id ? f.accentColor : "rgba(255,255,255,0.25)" }}
-                >
-                  {f.id}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT — feature preview */}
-        <div
-          className="flex flex-col gap-6 text-left max-w-sm mx-auto lg:mx-0"
-          key={active}
-          style={{ animation: "svivvaFadeSlideIn 0.4s ease forwards" }}
-        >
-          <div>
-            <p
-              className="text-xs uppercase tracking-[0.22em] font-light mb-2"
-              style={{ color: feature.accentColor }}
-            >
-              {feature.artworkTitle}
-            </p>
-            <h3 className="text-2xl md:text-3xl font-light text-white/90 leading-tight">
               {feature.name}
             </h3>
-            <p className="mt-1 text-white/30 text-sm italic">{feature.tagline}</p>
+            <p className="text-white/45 text-sm leading-relaxed">{feature.description}</p>
+            <Link
+              href={feature.cta.href}
+              className="self-start inline-flex items-center gap-2 text-sm font-light px-5 py-2 rounded-full border transition-all duration-200 hover:scale-105 active:scale-95 mt-1"
+              style={{
+                color: feature.accentColor,
+                borderColor: `${feature.accentColor}55`,
+                background: `${feature.accentColor}14`,
+              }}
+            >
+              {feature.cta.label}
+              <span className="opacity-50 text-xs">→</span>
+            </Link>
           </div>
-          <p className="text-white/55 leading-relaxed text-sm">{feature.description}</p>
-          <a
-            href={feature.cta.href}
-            className="self-start inline-flex items-center gap-2 text-sm font-light px-6 py-2.5 rounded-full border transition-all duration-300 hover:scale-105 active:scale-95"
-            style={{
-              color: feature.accentColor,
-              borderColor: `${feature.accentColor}60`,
-              background: `${feature.accentColor}10`,
-            }}
+        ) : (
+          <p className="text-center text-white/18 text-xs tracking-widest select-none">
+            tap any face
+          </p>
+        )}
+      </div>
+
+      {/* ── 6 dot indicators — no text, just coloured dots ─────────────────── */}
+      <div className="flex gap-5 mt-8">
+        {FEATURES.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => handleSelect(f.id)}
+            aria-label={f.name}
+            className="group flex flex-col items-center gap-2 transition-all"
           >
-            {feature.cta.label}
-            <span className="text-xs opacity-60">→</span>
-          </a>
-        </div>
+            <div
+              className="rounded-full transition-all duration-300"
+              style={{
+                width: active === f.id ? 10 : 7,
+                height: active === f.id ? 10 : 7,
+                background: active === f.id ? f.accentColor : "rgba(255,255,255,0.18)",
+                boxShadow: active === f.id ? `0 0 10px 2px ${f.accentColor}80` : "none",
+              }}
+            />
+          </button>
+        ))}
       </div>
 
       <style>{`
-        @keyframes svivvaFadeSlideIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes artifactReveal {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </section>
