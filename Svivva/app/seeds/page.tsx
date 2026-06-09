@@ -1,6 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
@@ -606,7 +614,8 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <FeatureThreeBg variant="seeds" />
       <nav className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex-shrink-0 z-50">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

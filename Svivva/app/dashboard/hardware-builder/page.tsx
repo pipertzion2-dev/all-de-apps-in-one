@@ -1,6 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1078,8 +1086,9 @@ export default function HardwareBuilderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
+    <div className="min-h-screen bg-background relative">
+      <FeatureThreeBg variant="hardware" />
+      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 relative z-10">
         <div className="flex items-center gap-2 mb-6 sm:mb-8">
           <Badge>Physical</Badge>
           <h1 className="text-xl sm:text-2xl font-bold">Hardware Builder</h1>

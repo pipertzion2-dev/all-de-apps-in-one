@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { Shield, Rss, Scan } from "lucide-react";
+import dynamic from "next/dynamic";
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeedShield } from "@/components/clutety/feed-shield";
 import { LockScanner } from "@/components/clutety/lock-scanner";
@@ -10,7 +18,8 @@ export default function SecurityDashboardPage() {
   const [tab, setTab] = useState("feeds");
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 max-w-6xl mx-auto w-full">
+    <div className="flex flex-col gap-6 p-4 md:p-6 max-w-6xl mx-auto w-full relative">
+      <FeatureThreeBg variant="security" />
       <div>
         <div className="flex items-center gap-2 text-primary mb-1">
           <Shield className="w-5 h-5" />

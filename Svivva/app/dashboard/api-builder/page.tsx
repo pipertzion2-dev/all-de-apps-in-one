@@ -2,6 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -184,7 +192,8 @@ export default function APIBuilderPage() {
   const selectedCount = analysis?.suggestedAPIs.filter((api) => api.selected).length || 0;
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto relative">
+      <FeatureThreeBg variant="api" />
       {/* Header */}
       <div className="text-center space-y-3 sm:space-y-4">
         <div className="flex items-center justify-center gap-2">

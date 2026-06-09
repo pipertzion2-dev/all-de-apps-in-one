@@ -25,8 +25,30 @@ export function SvivvaArtifact() {
 
   return (
     <section className="w-full flex flex-col items-center gap-0 py-20 px-4 overflow-visible">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="text-center mb-10 select-none">
+        <p
+          className="text-[10px] uppercase tracking-[0.35em] mb-3 font-light"
+          style={{ color: "rgba(255,255,255,0.28)" }}
+        >
+          Interactive Discovery
+        </p>
+        <h2
+          className="text-3xl md:text-4xl font-light tracking-tight"
+          style={{ color: "rgba(255,255,255,0.92)", letterSpacing: "-0.01em" }}
+        >
+          Six Worlds. One Platform.
+        </h2>
+        <p
+          className="mt-3 text-sm font-light"
+          style={{ color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}
+        >
+          Every face is a feature. Rotate to explore.
+        </p>
+      </div>
+
       {/* ── Instruction line ───────────────────────────────────────────────── */}
-      <p className="text-white/30 text-xs tracking-widest uppercase mb-8 select-none">
+      <p className="text-white/20 text-[10px] tracking-widest uppercase mb-6 select-none">
         drag to rotate &nbsp;·&nbsp; tap a face to explore
       </p>
 

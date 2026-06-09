@@ -370,6 +370,15 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
   ],
 };
 
+import dynamic from "next/dynamic";
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
+
 export default function SvivvaPlayPage() {
   const [mode, setMode] = useState<PlayMode>("composition");
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -2831,9 +2840,10 @@ export default function SvivvaPlayPage() {
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col text-gray-900 bg-white"
+      className="min-h-[100dvh] flex flex-col text-gray-900 bg-white relative"
       style={{ colorScheme: "light" }}
     >
+      <FeatureThreeBg variant="play" />
       {playBetaBanner}
       <style>{`
         .holo-gradient {

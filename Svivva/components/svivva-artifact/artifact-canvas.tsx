@@ -45,18 +45,33 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    // Pull camera further back — cube stays smaller relative to canvas, no clipping
     const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
     camera.position.set(0, 0, 5.5);
 
-    // Use MeshBasicMaterial — no lighting dimming, artwork shows at full photo brightness
-    const materials: THREE.MeshBasicMaterial[] = FACE_ORDER.map((fId) => {
+    // Lighting for 3D depth — makes faces pop out with specular highlights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(5, 6, 7);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+    fillLight.position.set(-4, -3, 2);
+    scene.add(fillLight);
+    // Orbiting point light for the "sticking out" specular pop
+    const orbitLight = new THREE.PointLight(0xffffff, 1.8, 12);
+    orbitLight.position.set(3, 3, 4);
+    scene.add(orbitLight);
+
+    // MeshStandardMaterial: textures at full color + metalness for depth/sheen
+    const materials: THREE.MeshStandardMaterial[] = FACE_ORDER.map((fId) => {
       const feature = FEATURES.find((f) => f.id === fId)!;
-      const mat = new THREE.MeshBasicMaterial({
+      const mat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
+        metalness: 0.18,
+        roughness: 0.38,
         transparent: true,
         opacity: 0,
         side: THREE.FrontSide,
+        envMapIntensity: 1,
       });
 
       new THREE.TextureLoader().load(
@@ -68,7 +83,6 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         },
         undefined,
         () => {
-          // fallback: accent-coloured face
           mat.color.set(new THREE.Color(feature.accentColor));
           mat.opacity = 0.7;
           mat.needsUpdate = true;
@@ -77,14 +91,14 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       return mat;
     });
 
-    // Box mesh
-    const box = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), materials);
+    // Slightly thicker box so side bevels are visible when rotating
+    const box = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2, 1, 1, 1), materials);
     scene.add(box);
 
-    // Glowing edges
+    // Glowing edges — brighter for 3D definition
     const edges = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(2.02, 2.02, 2.02)),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 }),
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 }),
     );
     scene.add(edges);
 
@@ -179,6 +193,10 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       box.rotation.y += (targetRotY - box.rotation.y) * 0.085;
       box.rotation.x += (targetRotX - box.rotation.x) * 0.085;
       edges.rotation.copy(box.rotation);
+
+      // Orbit the point light slowly for dynamic specular pop
+      const t = Date.now() * 0.0006;
+      orbitLight.position.set(Math.cos(t) * 4, Math.sin(t * 0.7) * 3, Math.sin(t) * 4 + 3);
 
       // Active face highlight
       if (fadeT >= FADE_FRAMES) {
