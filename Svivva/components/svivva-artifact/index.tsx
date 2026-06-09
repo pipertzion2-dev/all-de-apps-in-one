@@ -30,12 +30,12 @@ export function SvivvaArtifact() {
         drag to rotate &nbsp;·&nbsp; tap a face to explore
       </p>
 
-      {/* ── Cube — overflow visible, no background, never clipped ─────────── */}
+      {/* ── Cube — canvas is larger than the cube so rotating corners never clip */}
       <div
-        className="relative flex items-center justify-center"
+        className="relative"
         style={{
-          width: "min(460px, 90vw)",
-          height: "min(460px, 90vw)",
+          width: "min(520px, 92vw)",
+          height: "min(520px, 92vw)",
           overflow: "visible",
         }}
       >

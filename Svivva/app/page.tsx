@@ -937,7 +937,7 @@ export default function LandingPage() {
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
         {/* ── Svivva Artifact ───────────────────────────────────────────────── */}
-        <div className="relative overflow-visible">
+        <div style={{ position: "relative", overflow: "visible" }}>
           <SvivvaArtifact />
         </div>
 

@@ -36,11 +36,18 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
+    // Make the canvas overflow its container so rotating corners are never clipped
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = "50%";
+    renderer.domElement.style.left = "50%";
+    renderer.domElement.style.transform = "translate(-50%, -50%)";
+    renderer.domElement.style.pointerEvents = "auto";
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, W / H, 0.1, 100);
-    camera.position.set(0, 0, 4.4);
+    // Pull camera further back — cube stays smaller relative to canvas, no clipping
+    const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
+    camera.position.set(0, 0, 5.5);
 
     // Use MeshBasicMaterial — no lighting dimming, artwork shows at full photo brightness
     const materials: THREE.MeshBasicMaterial[] = FACE_ORDER.map((fId) => {
