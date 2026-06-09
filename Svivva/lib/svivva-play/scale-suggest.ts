@@ -43,10 +43,7 @@ export function suggestCompositionScale(input: {
 }): ScaleSuggestion {
   const analysisKey = normalizeKeyLabel(input.analysisKey || "C major");
   const analysisRoot = parseRootNote(parseRootFromKeyLabel(analysisKey));
-  const notes = [
-    ...(input.melodyneNotes ?? []),
-    ...(input.audioNotes ?? []),
-  ];
+  const notes = [...(input.melodyneNotes ?? []), ...(input.audioNotes ?? [])];
   const chroma = notes.length >= 8 ? buildChromaFromNotes(notes) : null;
 
   const chordMode = inferKeyModeFromChords(input.chords ?? []);
@@ -105,7 +102,7 @@ export function suggestCompositionScale(input: {
       ? "minor"
       : best.scaleName === "major" || best.scaleName === "ionian"
         ? "major"
-        : chordMode ?? analysisMode;
+        : (chordMode ?? analysisMode);
   const keyLabel = `${rootName} ${mode}`;
   const confidence = Math.min(98, Math.round(52 + best.score * 40 + (notes.length >= 12 ? 12 : 0)));
 

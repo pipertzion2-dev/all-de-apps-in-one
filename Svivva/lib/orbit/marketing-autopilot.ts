@@ -125,15 +125,15 @@ export async function runMarketingAutopilot(opts?: {
         credStatus.google.indexNow ? "done" : "failed",
         credStatus.google.indexNow ? "IndexNow key configured" : "Run IndexNow setup first",
       ),
-      task(
-        "tech-indexnow-submitted",
-        idx.indexNow.ok ? "done" : "failed",
-        idx.indexNow.message,
-      ),
+      task("tech-indexnow-submitted", idx.indexNow.ok ? "done" : "failed", idx.indexNow.message),
       task("tech-sitemap", "done", `Sitemap: ${getSiteUrl()}/sitemap.xml`),
       task(
         "tech-gsc-sitemap",
-        idx.googleSitemap.ok ? "done" : credStatus.google.serviceAccount ? "failed" : "needs_credentials",
+        idx.googleSitemap.ok
+          ? "done"
+          : credStatus.google.serviceAccount
+            ? "failed"
+            : "needs_credentials",
         idx.googleSitemap.ok
           ? "Google sitemap submitted via API"
           : credStatus.google.serviceAccount
@@ -142,12 +142,20 @@ export async function runMarketingAutopilot(opts?: {
       ),
       task(
         "manual-gsc-indexing",
-        idx.googleIndexing.submitted > 0 ? "done" : idx.googleSitemap.ok ? "prepared" : "needs_credentials",
+        idx.googleIndexing.submitted > 0
+          ? "done"
+          : idx.googleSitemap.ok
+            ? "prepared"
+            : "needs_credentials",
         idx.googleIndexing.submitted > 0
           ? `Google Indexing API: ${idx.googleIndexing.submitted} URLs`
           : "Sitemap submitted; URL inspection is optional for generic pages",
       ),
-      task("auto-sitemap-pings", idx.indexNow.ok ? "done" : "failed", "IndexNow + Bing ping executed"),
+      task(
+        "auto-sitemap-pings",
+        idx.indexNow.ok ? "done" : "failed",
+        "IndexNow + Bing ping executed",
+      ),
     );
 
     const c = traffic.marketing.counts;
@@ -160,11 +168,7 @@ export async function runMarketingAutopilot(opts?: {
       task("content-usecases", "done", `${c.usecasePages ?? 0} use-case pages`),
       task("content-templates", "done", `${c.templatePages ?? 0} template pages`),
       task("content-paa", "done", `${c.paaPages ?? 0} PAA pages`),
-      task(
-        "auto-content-velocity",
-        "done",
-        `Tool SEO pages: ${c.seedMarketing}`,
-      ),
+      task("auto-content-velocity", "done", `Tool SEO pages: ${c.seedMarketing}`),
       task("auto-growth-tasks", "done", "Growth content gap-fill completed"),
     );
   }
@@ -174,8 +178,16 @@ export async function runMarketingAutopilot(opts?: {
   await persistContent("schema-jsonld", "Organization + WebSite schema", content.schemaJsonLd);
   tasks.push(
     task("tech-schema-jsonld", "done", "Schema.org JSON-LD generated and saved"),
-    task("tech-rich-results", "prepared", "Test at search.google.com/test/rich-results with homepage URL"),
-    task("content-parasite", "done", "Parasite articles generated (Dev.to, Hashnode, Medium, etc.)"),
+    task(
+      "tech-rich-results",
+      "prepared",
+      "Test at search.google.com/test/rich-results with homepage URL",
+    ),
+    task(
+      "content-parasite",
+      "done",
+      "Parasite articles generated (Dev.to, Hashnode, Medium, etc.)",
+    ),
     task("content-social-pack", "done", "Social launch pack generated"),
     task("content-community", "done", "Reddit + Show HN + PH copy generated"),
     task("content-outreach", "done", "Newsletter + podcast pitches generated"),
@@ -197,7 +209,11 @@ export async function runMarketingAutopilot(opts?: {
       );
     } else {
       tasks.push(
-        task("manual-devto", "needs_credentials", "Article saved — add Dev.to API key to auto-publish"),
+        task(
+          "manual-devto",
+          "needs_credentials",
+          "Article saved — add Dev.to API key to auto-publish",
+        ),
       );
     }
   }
@@ -293,7 +309,11 @@ export async function runMarketingAutopilot(opts?: {
   }
 
   const redditPosts: { id: string; sub: string; post?: { title: string; body: string } }[] = [
-    { id: "manual-reddit-sideproject", sub: "SideProject", post: content.social.reddit_sideprojects },
+    {
+      id: "manual-reddit-sideproject",
+      sub: "SideProject",
+      post: content.social.reddit_sideprojects,
+    },
     { id: "content-community", sub: "webdev", post: content.social.reddit_webdev },
   ];
 
@@ -318,9 +338,7 @@ export async function runMarketingAutopilot(opts?: {
         );
       }
     } else if (rp.id === "manual-reddit-sideproject") {
-      tasks.push(
-        task(rp.id, "needs_credentials", "Post saved — add Reddit OAuth credentials"),
-      );
+      tasks.push(task(rp.id, "needs_credentials", "Post saved — add Reddit OAuth credentials"));
     }
   }
 
@@ -350,13 +368,7 @@ export async function runMarketingAutopilot(opts?: {
         "PH launch kit ready — no public API; use producthunt.com/posts/new",
       ),
     );
-    tasks.push(
-      task(
-        "dir-producthunt",
-        "prepared",
-        "Product Hunt listing copy prepared",
-      ),
-    );
+    tasks.push(task("dir-producthunt", "prepared", "Product Hunt listing copy prepared"));
   }
 
   const pitch = content.outreach.newsletters[0];
@@ -392,10 +404,7 @@ export async function runMarketingAutopilot(opts?: {
   const pod = content.outreach.podcasts[0];
   if (pod) {
     await persistContent("outreach-podcast", pod.subject, pod.pitch);
-    if (
-      hasCreds(creds, ["resendApiKey", "outreachFromEmail"]) &&
-      creds.podcastPitchEmail?.trim()
-    ) {
+    if (hasCreds(creds, ["resendApiKey", "outreachFromEmail"]) && creds.podcastPitchEmail?.trim()) {
       const r = await sendResendEmail(creds, {
         to: creds.podcastPitchEmail,
         subject: pod.subject,
@@ -420,11 +429,7 @@ export async function runMarketingAutopilot(opts?: {
   }
 
   tasks.push(
-    task(
-      "manual-indiehackers",
-      "prepared",
-      "Share launch story at indiehackers.com/post",
-    ),
+    task("manual-indiehackers", "prepared", "Share launch story at indiehackers.com/post"),
   );
 
   // Directories — prepare listing copy (no auto-submit APIs)

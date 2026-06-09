@@ -2,11 +2,7 @@ import { normalizeKeyLabel } from "./analysis-utils";
 import { buildInstantPlayAnalysis, type PlayAnalysisView } from "./instant-analysis";
 import { buildHarmonicSession, type HarmonicSession } from "./harmonic-session";
 import { parseMidiFile } from "./midi-file-parse";
-import {
-  formatMegabytes,
-  getMaxLocalFileBytes,
-  isLocalFileTooLarge,
-} from "./upload-limits";
+import { formatMegabytes, getMaxLocalFileBytes, isLocalFileTooLarge } from "./upload-limits";
 import { isWavFile } from "./wav-utils";
 
 export interface ImportAnalysisResult {

@@ -20,16 +20,16 @@ async function lookupScaleWithAi(
 ): Promise<ScaleLookupResult["resolved"]> {
   if (!isAnyAiProviderAvailable()) return null;
 
-    const completion = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            'You are a music-theory scale database (V-1 JAWN style). Return JSON: {"scaleId":"snake_case","relativeSemitoneSteps":[0,2,...],"displayName":"Name","confidence":0.9,"alternates":[{"name":"...","intervals":[...]}],"reason":"..."}.',
-        },
+  const completion = await openai.chat.completions.create({
+    model: DEFAULT_MODEL,
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content:
+          'You are a music-theory scale database (V-1 JAWN style). Return JSON: {"scaleId":"snake_case","relativeSemitoneSteps":[0,2,...],"displayName":"Name","confidence":0.9,"alternates":[{"name":"...","intervals":[...]}],"reason":"..."}.',
+      },
       { role: "user", content: `Scale query: "${query}"` },
     ],
   });
@@ -69,10 +69,8 @@ export async function POST(request: NextRequest) {
     const keyRoot = parseRootFromKeyLabel(body.key ?? "C major");
     let result = lookupScaleLocal(query, keyRoot);
 
-    if (!result.resolved && (body.useAi !== false)) {
-      const ollamaHit = getOllamaApiBase()
-        ? await lookupScaleWithOllama(query, keyRoot)
-        : null;
+    if (!result.resolved && body.useAi !== false) {
+      const ollamaHit = getOllamaApiBase() ? await lookupScaleWithOllama(query, keyRoot) : null;
       if (ollamaHit?.resolved) {
         result = {
           query,

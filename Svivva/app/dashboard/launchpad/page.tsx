@@ -64,7 +64,7 @@ interface Step {
   id: string;
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: React.FC<{ className?: string; style?: React.CSSProperties }>;
   estimate?: string;
   needsTools?: boolean;
   auto?: string[]; // what runs automatically
@@ -456,8 +456,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       title: "Index Everything (Google + Bing)",
       icon: Zap,
       estimate: "~30s",
-      description:
-        "IndexNow + Bing + GSC sitemap API for all mini-app SEO pages, hubs, and /tools",
+      description: "IndexNow + Bing + GSC sitemap API for all mini-app SEO pages, hubs, and /tools",
       auto: [
         "All tool + hub URLs via IndexNow (Bing, Yandex, Yahoo, DuckDuckGo)",
         "GSC sitemap registration when service account is saved",

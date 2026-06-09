@@ -90,13 +90,7 @@ export function composeWithChordProgression(options: {
         const chord = chordAtTime(chords, tSec);
         return {
           ...n,
-          note: softHarmonicNudge(
-            n.note,
-            chord,
-            scalePcs,
-            vi === 0 ? "melody" : "hocket",
-            anchor,
-          ),
+          note: softHarmonicNudge(n.note, chord, scalePcs, vi === 0 ? "melody" : "hocket", anchor),
         };
       }),
     }));
@@ -108,9 +102,7 @@ export function composeWithChordProgression(options: {
     const notes = voice.notes.map((n) => {
       const tSec = n.startBeat * beatSec;
       const chord = chordAtTime(chords, tSec);
-      const nearbyGuide = guideNotes.filter(
-        (gn) => Math.abs(gn.startSec - tSec) < beatSec * 0.45,
-      );
+      const nearbyGuide = guideNotes.filter((gn) => Math.abs(gn.startSec - tSec) < beatSec * 0.45);
       if (nearbyGuide.length > 0 && vi > 0) {
         const guide = nearbyGuide[vi % nearbyGuide.length]!;
         return { ...n, note: softHarmonicNudge(guide.midi, chord, scalePcs, role, anchor) };

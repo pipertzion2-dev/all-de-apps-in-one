@@ -92,5 +92,9 @@ export function buildPlayExportPackFiles(options: {
     "Monophonic stems include inter-note glides; chord/pad stems use per-note ornaments only.",
   ].join("\n");
 
-  return { readme, sessionJson: sessionJson ? JSON.stringify(sessionJson, null, 2) : undefined, files };
+  return {
+    readme,
+    sessionJson: sessionJson ? JSON.stringify(sessionJson, null, 2) : undefined,
+    files,
+  };
 }

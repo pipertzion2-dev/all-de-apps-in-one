@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  prepareMeendPreviewEvents,
-  stemHasOverlappingNotes,
-} from "./scale-key-guard";
+import { prepareMeendPreviewEvents, stemHasOverlappingNotes } from "./scale-key-guard";
 
 describe("meend polyphony", () => {
   it("detects simultaneous chord notes", () => {

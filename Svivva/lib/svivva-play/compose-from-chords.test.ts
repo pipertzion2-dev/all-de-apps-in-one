@@ -39,7 +39,12 @@ describe("composeWithChordProgression", () => {
 
   it("keeps hocket notes in the resolved session scale", () => {
     const chords = [{ t0: 0, t1: 6, symbol: "A", confidence: 80, pitchClasses: [] }];
-    const { resolution: scale, scaleInfo } = resolveCompositionScale("A major", "major", null, chords);
+    const { resolution: scale, scaleInfo } = resolveCompositionScale(
+      "A major",
+      "major",
+      null,
+      chords,
+    );
     const voices = composeWithChordProgression({
       durationSec: 6,
       bpm: 120,

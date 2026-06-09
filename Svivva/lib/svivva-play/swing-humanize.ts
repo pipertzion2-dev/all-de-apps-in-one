@@ -12,7 +12,12 @@ export type SwingOptions = {
   gridBeats?: number;
 };
 
-function swingOffsetBeats(sixteenthIndex: number, gridBeats: number, ratio: number, amount: number): number {
+function swingOffsetBeats(
+  sixteenthIndex: number,
+  gridBeats: number,
+  ratio: number,
+  amount: number,
+): number {
   if (amount <= 0) return 0;
   const offbeat = sixteenthIndex % 2 === 1;
   if (!offbeat) return 0;

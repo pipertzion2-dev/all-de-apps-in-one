@@ -70,9 +70,7 @@ describe("composeHocket", () => {
     expect(parts).toHaveLength(8);
     const totalNotes = parts.reduce((sum, p) => sum + p.notes.length, 0);
     expect(totalNotes).toBeGreaterThan(40);
-    const uniquePcs = new Set(
-      parts.flatMap((p) => p.notes.map((n) => ((n.note % 12) + 12) % 12)),
-    );
+    const uniquePcs = new Set(parts.flatMap((p) => p.notes.map((n) => ((n.note % 12) + 12) % 12)));
     expect(uniquePcs.size).toBeGreaterThanOrEqual(4);
   });
 });

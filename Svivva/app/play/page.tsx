@@ -57,7 +57,10 @@ import {
   resolveCompositionScale,
   stabilizeHarmonicTimeline,
 } from "@/lib/svivva-play/scale-key-guard";
-import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "@/lib/svivva-play/generate-helpers";
+import {
+  applyMeendToStems,
+  applyMeendToOrchestralMelodyStems,
+} from "@/lib/svivva-play/generate-helpers";
 import { applyPlayDynamicsToStems } from "@/lib/svivva-play/play-dynamics";
 import {
   buildMeendAccentPlaybacks,
@@ -71,10 +74,7 @@ import {
 } from "@/lib/svivva-play/indian-raga-scale";
 import { applySwingToStems } from "@/lib/svivva-play/swing-humanize";
 import type { HocketGrooveStyle } from "@/lib/svivva-play/hocket-groove-v2";
-import {
-  suggestCompositionScale,
-  type ScaleSuggestion,
-} from "@/lib/svivva-play/scale-suggest";
+import { suggestCompositionScale, type ScaleSuggestion } from "@/lib/svivva-play/scale-suggest";
 import { buildStemPackZipBlobClient } from "@/lib/svivva-play/stem-pack-client";
 import { prepareStemsForMidiExport } from "@/lib/svivva-play/stem-export-prep";
 import {
@@ -141,11 +141,7 @@ function stemTimelineDurationSec(stems: { midiEvents: unknown[] }[], bpm: number
   return (maxBeat * 60) / bpm + 0.5;
 }
 
-function resolvePlaybackDurationSec(
-  engineDur: number,
-  importDur: number,
-  stemDur: number,
-): number {
+function resolvePlaybackDurationSec(engineDur: number, importDur: number, stemDur: number): number {
   const timeline = Math.max(engineDur, stemDur);
   if (importDur > 0) {
     // Hear full generated MIDI even when import analysis window is shorter
@@ -438,8 +434,7 @@ export default function SvivvaPlayPage() {
   const [crateState, setCrateState] = useState<"closed" | "opening" | "open">("closed");
   const [betaAcknowledged, setBetaAcknowledged] = useState(
     () =>
-      typeof window !== "undefined" &&
-      window.localStorage.getItem("svivva-play-beta-ack") === "1",
+      typeof window !== "undefined" && window.localStorage.getItem("svivva-play-beta-ack") === "1",
   );
 
   const [seed, setSeed] = useState(Math.floor(Math.random() * 999999));
@@ -526,13 +521,7 @@ export default function SvivvaPlayPage() {
         : null,
       chords: chordSegments,
     });
-  }, [
-    manualKey,
-    effectiveAnalysis?.key,
-    effectiveAnalysis?.chords,
-    transcription,
-    audioAnchorKey,
-  ]);
+  }, [manualKey, effectiveAnalysis?.key, effectiveAnalysis?.chords, transcription, audioAnchorKey]);
   const generationScaleLookup = useMemo(() => {
     const chordSegments =
       effectiveAnalysis?.chords?.map((c) => ({
@@ -587,15 +576,15 @@ export default function SvivvaPlayPage() {
     setReichScale(aiScaleSuggestion.scaleName);
     setManualKey(aiScaleSuggestion.keyLabel);
     setScaleSuggestionApplied(true);
-    setWarningMsg(`Scale set to ${aiScaleSuggestion.keyLabel} · ${aiScaleSuggestion.scaleName.replace(/_/g, " ")} (${aiScaleSuggestion.confidence}% match).`);
+    setWarningMsg(
+      `Scale set to ${aiScaleSuggestion.keyLabel} · ${aiScaleSuggestion.scaleName.replace(/_/g, " ")} (${aiScaleSuggestion.confidence}% match).`,
+    );
   }, [aiScaleSuggestion]);
 
   const applyScaleLookupMatch = useCallback((match: ScaleLookupMatch) => {
     setReichScale(match.scaleId);
     setScaleSuggestionApplied(true);
-    setWarningMsg(
-      `Scale set to ${match.label} (${match.source}, ${match.confidence}% match).`,
-    );
+    setWarningMsg(`Scale set to ${match.label} (${match.source}, ${match.confidence}% match).`);
   }, []);
 
   const runScaleLookup = useCallback(async () => {
@@ -724,7 +713,14 @@ export default function SvivvaPlayPage() {
     } else {
       setPlaybackDuration(resolvePlaybackDurationSec(0, importDur, stemDur));
     }
-  }, [resolveImportDurationSec, engineReady, stems, manualTempo, effectiveAnalysis?.bpm, analysis?.bpm]);
+  }, [
+    resolveImportDurationSec,
+    engineReady,
+    stems,
+    manualTempo,
+    effectiveAnalysis?.bpm,
+    analysis?.bpm,
+  ]);
 
   useEffect(() => {
     syncPlaybackDuration();
@@ -1088,9 +1084,7 @@ export default function SvivvaPlayPage() {
           meend,
           patternLength,
           ensembleSize: 13,
-          reichScale: isMinorKeyLabel(manualKey ?? generationKeyLabel)
-            ? "natural_minor"
-            : "major",
+          reichScale: isMinorKeyLabel(manualKey ?? generationKeyLabel) ? "natural_minor" : "major",
         };
       default:
         return {
@@ -1467,7 +1461,10 @@ export default function SvivvaPlayPage() {
         const blob = await res.blob();
         const magic = await sniffBlobMagic(blob, 4);
         if (magic !== "MThd") {
-          const peek = await res.clone().text().catch(() => "");
+          const peek = await res
+            .clone()
+            .text()
+            .catch(() => "");
           console.warn("Stem MIDI download invalid file:", { magic, peek: peek.slice(0, 200) });
           setErrorMsg("Stem export failed — server returned a non-MIDI file.");
           return;
@@ -1510,7 +1507,10 @@ export default function SvivvaPlayPage() {
       const blob = await res.blob();
       const magic = await sniffBlobMagic(blob, 2);
       if (magic !== "PK") {
-        const peek = await res.clone().text().catch(() => "");
+        const peek = await res
+          .clone()
+          .text()
+          .catch(() => "");
         console.warn("Melodyne export invalid zip:", { magic, peek: peek.slice(0, 200) });
         setErrorMsg("Melodyne export failed — server returned a non-zip file.");
         return;
@@ -1766,9 +1766,7 @@ export default function SvivvaPlayPage() {
       const anySoloed = currentStems.some((s) => s.soloed);
       const accentStates = accents.map((accent) => {
         const sourceName = meendAccentSourceName(accent.name);
-        const source = sourceName
-          ? currentStems.find((s) => s.name === sourceName)
-          : undefined;
+        const source = sourceName ? currentStems.find((s) => s.name === sourceName) : undefined;
         return {
           name: accent.name,
           soloed: false,
@@ -1782,11 +1780,7 @@ export default function SvivvaPlayPage() {
   );
 
   const loadStemsIntoEngine = useCallback(
-    async (
-      currentStems: StemData[],
-      bpm: number,
-      opts?: { skipWarmUp?: boolean },
-    ) => {
+    async (currentStems: StemData[], bpm: number, opts?: { skipWarmUp?: boolean }) => {
       const loadGen = ++engineLoadGenRef.current;
       setIsPlaying(false);
       if (animFrameRef.current) {
@@ -1860,14 +1854,7 @@ export default function SvivvaPlayPage() {
     if (!hasNotes) {
       setErrorMsg("Generated stems have no MIDI notes. Try generating again.");
     }
-  }, [
-    stems,
-    effectiveAnalysis?.bpm,
-    analysis?.bpm,
-    manualTempo,
-    mode,
-    resolveImportDurationSec,
-  ]);
+  }, [stems, effectiveAnalysis?.bpm, analysis?.bpm, manualTempo, mode, resolveImportDurationSec]);
 
   useEffect(() => {
     if (!meend || stems.length === 0) return;
@@ -1924,11 +1911,7 @@ export default function SvivvaPlayPage() {
   const startPositionTracking = useCallback(() => {
     const update = () => {
       const engine = getSoundEngine();
-      const cap = Math.max(
-        importDurationSecRef.current,
-        engine.getDuration(),
-        playbackDuration,
-      );
+      const cap = Math.max(importDurationSecRef.current, engine.getDuration(), playbackDuration);
       let pos = engine.getPosition();
       if (cap > 0 && pos >= cap - 0.02) {
         engine.pause();
@@ -1994,8 +1977,7 @@ export default function SvivvaPlayPage() {
     const playbackKey = stemsPlaybackKey(stems, tempo);
     setEngineLoading(true);
     try {
-      const needsReload =
-        engineStemsKeyRef.current !== playbackKey || !engine.hasStems();
+      const needsReload = engineStemsKeyRef.current !== playbackKey || !engine.hasStems();
       if (needsReload) {
         await loadStemsIntoEngine(stems, tempo);
         engineStemsKeyRef.current = playbackKey;
@@ -2562,8 +2544,8 @@ export default function SvivvaPlayPage() {
               </div>
             </div>
             <p className="text-[9px] text-gray-500 leading-relaxed">
-              Three orchestral presets only. Stems map to Ableton Orchestral — assign Violin,
-              Viola, Cello, Contrabass, Harp, Flute, Oboe, Timpani per track name.
+              Three orchestral presets only. Stems map to Ableton Orchestral — assign Violin, Viola,
+              Cello, Contrabass, Harp, Flute, Oboe, Timpani per track name.
             </p>
             <CheckboxOption
               label="Indian Meend — off by default (Violin 1, Solo Violin, Flute, Oboe only)"
@@ -3312,8 +3294,8 @@ export default function SvivvaPlayPage() {
                       <p className="text-sm text-gray-400">
                         Building harmonic session (pitch map + chords)…
                         <span className="block text-[11px] text-gray-500 mt-1">
-                          Verify key and BPM under Manual Overrides — auto-detect without
-                          Melodyne is not production-accurate.
+                          Verify key and BPM under Manual Overrides — auto-detect without Melodyne
+                          is not production-accurate.
                         </span>
                       </p>
                     </div>
@@ -3484,7 +3466,9 @@ export default function SvivvaPlayPage() {
                             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                               Manual Overrides
                             </h3>
-                            <span className="text-[9px] text-gray-500">Recommended without Melodyne</span>
+                            <span className="text-[9px] text-gray-500">
+                              Recommended without Melodyne
+                            </span>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="flex flex-col gap-1.5">
@@ -4092,9 +4076,12 @@ export default function SvivvaPlayPage() {
                                   )}
                                 </button>
                               </div>
-                              {scaleLookupResult?.alternates && scaleLookupResult.alternates.length > 0 ? (
+                              {scaleLookupResult?.alternates &&
+                              scaleLookupResult.alternates.length > 0 ? (
                                 <div className="flex flex-wrap gap-1 mb-2">
-                                  <span className="text-[9px] text-gray-500 w-full">Alternates:</span>
+                                  <span className="text-[9px] text-gray-500 w-full">
+                                    Alternates:
+                                  </span>
                                   {scaleLookupResult.alternates.map((alt) => (
                                     <button
                                       key={alt.scaleId}
@@ -4115,9 +4102,12 @@ export default function SvivvaPlayPage() {
                                   ))}
                                 </div>
                               ) : null}
-                              {scaleLookupResult?.suggestions.length && !scaleLookupResult.resolved ? (
+                              {scaleLookupResult?.suggestions.length &&
+                              !scaleLookupResult.resolved ? (
                                 <div className="flex flex-wrap gap-1 mb-2">
-                                  <span className="text-[9px] text-amber-500/90 w-full">Did you mean:</span>
+                                  <span className="text-[9px] text-amber-500/90 w-full">
+                                    Did you mean:
+                                  </span>
                                   {scaleLookupResult.suggestions.slice(0, 5).map((s) => (
                                     <button
                                       key={s.scaleId}
@@ -4179,8 +4169,8 @@ export default function SvivvaPlayPage() {
                                 </>
                               ) : (
                                 <p className="text-[10px] text-gray-500">
-                                  Import audio (and Melodyne .mid if you have it) to unlock
-                                  AI scale lookup.
+                                  Import audio (and Melodyne .mid if you have it) to unlock AI scale
+                                  lookup.
                                 </p>
                               )}
                             </div>
@@ -4246,9 +4236,9 @@ export default function SvivvaPlayPage() {
                                 Add‑ons integrated (clean)
                               </h4>
                               <p className="text-[9px] text-gray-400">
-                                Turn on <span className="text-gray-300">Indian Meend</span> for
-                                raga scales and V-1-style pitch slides (preview matches MIDI export).
-                                In Ableton set each instrument Pitch Bend Range to 12 semitones.
+                                Turn on <span className="text-gray-300">Indian Meend</span> for raga
+                                scales and V-1-style pitch slides (preview matches MIDI export). In
+                                Ableton set each instrument Pitch Bend Range to 12 semitones.
                               </p>
                             </div>
                           </div>
@@ -5167,9 +5157,7 @@ export default function SvivvaPlayPage() {
                   boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
                   border:
                     "2px solid " +
-                    (stems.length > 0 || transcription?.melodyneNotes?.length
-                      ? "#5BA8A0"
-                      : "#555"),
+                    (stems.length > 0 || transcription?.melodyneNotes?.length ? "#5BA8A0" : "#555"),
                 }}
                 data-testid="button-export-stem-pack"
               >

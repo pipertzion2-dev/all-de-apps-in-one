@@ -5,13 +5,14 @@ import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { type ArtworkFeature } from "./feature-data";
 
 // ─── Scan-line overlay (Svivva Play) ──────────────────────────────────
-function ScanLineOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
+function ScanLineOverlay({
+  scrollYProgress,
+}: {
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "200%"]);
   return (
-    <motion.div
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-      style={{ y }}
-    >
+    <motion.div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ y }}>
       {Array.from({ length: 18 }).map((_, i) => (
         <div
           key={i}
@@ -55,17 +56,14 @@ function WebPulseOverlay({ hovered }: { hovered: boolean }) {
         const angle = (i / lineCount) * Math.PI * 2;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
-        ctx.lineTo(
-          cx + Math.cos(angle) * maxR,
-          cy + Math.sin(angle) * maxR,
-        );
+        ctx.lineTo(cx + Math.cos(angle) * maxR, cy + Math.sin(angle) * maxR);
         ctx.strokeStyle = `rgba(217,119,6,${0.12 + 0.06 * Math.sin(t + i)})`;
         ctx.lineWidth = 0.5;
         ctx.stroke();
       }
       // Ripple rings
       for (let ring = 0; ring < 4; ring++) {
-        const r = ((t * 60 + ring * 80) % maxR);
+        const r = (t * 60 + ring * 80) % maxR;
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(217,119,6,${0.15 * (1 - r / maxR)})`;
@@ -88,7 +86,11 @@ function WebPulseOverlay({ hovered }: { hovered: boolean }) {
 }
 
 // ─── Diamond refraction overlay (Hardware) ───────────────────────────
-function DiamondOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
+function DiamondOverlay({
+  scrollYProgress,
+}: {
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
   const rotate = useTransform(scrollYProgress, [0, 1], [0, 45]);
   const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1.15]);
   return (
@@ -113,7 +115,11 @@ function DiamondOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeo
 }
 
 // ─── Filigree border overlay (Security) ──────────────────────────────
-function FiligreeOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
+function FiligreeOverlay({
+  scrollYProgress,
+}: {
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.7, 0.4]);
   return (
     <motion.div
@@ -128,25 +134,41 @@ function FiligreeOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<type
 }
 
 // ─── Packaging panel overlay (API Builder) ───────────────────────────
-function PackagingOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
+function PackagingOverlay({
+  scrollYProgress,
+}: {
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
   const x1 = useTransform(scrollYProgress, [0, 1], ["-100%", "0%"]);
   const x2 = useTransform(scrollYProgress, [0, 1], ["100%", "0%"]);
   return (
     <>
       <motion.div
         className="pointer-events-none absolute left-0 top-0 bottom-0 w-1/4"
-        style={{ x: x1, background: "rgba(190,24,93,0.05)", borderRight: "1px solid rgba(190,24,93,0.15)" }}
+        style={{
+          x: x1,
+          background: "rgba(190,24,93,0.05)",
+          borderRight: "1px solid rgba(190,24,93,0.15)",
+        }}
       />
       <motion.div
         className="pointer-events-none absolute right-0 top-0 bottom-0 w-1/4"
-        style={{ x: x2, background: "rgba(190,24,93,0.05)", borderLeft: "1px solid rgba(190,24,93,0.15)" }}
+        style={{
+          x: x2,
+          background: "rgba(190,24,93,0.05)",
+          borderLeft: "1px solid rgba(190,24,93,0.15)",
+        }}
       />
     </>
   );
 }
 
 // ─── Staff-line overlay (Seeds) ───────────────────────────────────────
-function StaffLineOverlay({ scrollYProgress }: { scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"] }) {
+function StaffLineOverlay({
+  scrollYProgress,
+}: {
+  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
   const scaleX = useTransform(scrollYProgress, [0, 1], [0.4, 1.2]);
   return (
     <motion.div
@@ -185,12 +207,18 @@ export function FeatureSection({
 
   const renderOverlay = () => {
     switch (feature.id) {
-      case "play":    return <ScanLineOverlay scrollYProgress={scrollYProgress} />;
-      case "orbit":   return <WebPulseOverlay hovered={hovered} />;
-      case "hardware":return <DiamondOverlay scrollYProgress={scrollYProgress} />;
-      case "security":return <FiligreeOverlay scrollYProgress={scrollYProgress} />;
-      case "api":     return <PackagingOverlay scrollYProgress={scrollYProgress} />;
-      case "seeds":   return <StaffLineOverlay scrollYProgress={scrollYProgress} />;
+      case "play":
+        return <ScanLineOverlay scrollYProgress={scrollYProgress} />;
+      case "orbit":
+        return <WebPulseOverlay hovered={hovered} />;
+      case "hardware":
+        return <DiamondOverlay scrollYProgress={scrollYProgress} />;
+      case "security":
+        return <FiligreeOverlay scrollYProgress={scrollYProgress} />;
+      case "api":
+        return <PackagingOverlay scrollYProgress={scrollYProgress} />;
+      case "seeds":
+        return <StaffLineOverlay scrollYProgress={scrollYProgress} />;
     }
   };
 
@@ -295,7 +323,10 @@ export function FeatureSection({
           {/* Signature interaction label */}
           <div
             className="mb-6 px-4 py-3 rounded-lg border text-xs font-mono text-white/40 leading-relaxed"
-            style={{ borderColor: `rgba(${feature.accentColorRgb},0.2)`, background: `rgba(${feature.accentColorRgb},0.05)` }}
+            style={{
+              borderColor: `rgba(${feature.accentColorRgb},0.2)`,
+              background: `rgba(${feature.accentColorRgb},0.05)`,
+            }}
           >
             ✦ {feature.signature}
           </div>
@@ -329,7 +360,12 @@ export function FeatureSection({
           >
             {feature.cta}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
             </svg>
           </a>
         </motion.div>

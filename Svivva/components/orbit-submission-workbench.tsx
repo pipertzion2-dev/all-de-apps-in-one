@@ -79,13 +79,7 @@ function FieldInput({
   );
 }
 
-function SubmissionCard({
-  state,
-  onRefresh,
-}: {
-  state: ItemState;
-  onRefresh: () => void;
-}) {
+function SubmissionCard({ state, onRefresh }: { state: ItemState; onRefresh: () => void }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(state.status === "pending");
   const [fields, setFields] = useState(state.fields);
@@ -125,7 +119,8 @@ function SubmissionCard({
       toast({ title: "AI filled all fields", duration: 2500 });
       onRefresh();
     },
-    onError: (e) => toast({ title: "AI fill failed", description: String(e), variant: "destructive" }),
+    onError: (e) =>
+      toast({ title: "AI fill failed", description: String(e), variant: "destructive" }),
   });
 
   const statusMutation = useMutation({
@@ -174,7 +169,11 @@ function SubmissionCard({
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-muted/30"
       >
-        {open ? <ChevronUp className="w-3.5 h-3.5 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 shrink-0" />}
+        {open ? (
+          <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+        ) : (
+          <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+        )}
         <span className="text-xs font-bold flex-1 truncate">{item.label}</span>
         {item.estimatedVisitors && (
           <span className="text-[9px] text-muted-foreground shrink-0">
@@ -189,7 +188,9 @@ function SubmissionCard({
       {open && (
         <div className="border-t border-border px-3 py-3 space-y-3">
           {item.tip && (
-            <p className="text-[10px] text-teal-700 dark:text-teal-400 leading-snug">💡 {item.tip}</p>
+            <p className="text-[10px] text-teal-700 dark:text-teal-400 leading-snug">
+              💡 {item.tip}
+            </p>
           )}
 
           <div className="flex flex-wrap gap-1.5">
@@ -254,9 +255,7 @@ function SubmissionCard({
                   value={fields[field.key] || ""}
                   onChange={(v) => setFields((prev) => ({ ...prev, [field.key]: v }))}
                 />
-                {field.hint && (
-                  <p className="text-[9px] text-muted-foreground">{field.hint}</p>
-                )}
+                {field.hint && <p className="text-[9px] text-muted-foreground">{field.hint}</p>}
               </div>
             ))}
           </div>
@@ -363,7 +362,8 @@ export function OrbitSubmissionWorkbench({ defaultKind = "directory" }: { defaul
           <div>
             <p className="text-sm font-bold">Submission Workbench</p>
             <p className="text-[11px] text-muted-foreground">
-              AI fills every field in Orbit — copy-paste into each site&apos;s form. No hunting links.
+              AI fills every field in Orbit — copy-paste into each site&apos;s form. No hunting
+              links.
             </p>
           </div>
         </div>
@@ -385,7 +385,9 @@ export function OrbitSubmissionWorkbench({ defaultKind = "directory" }: { defaul
 
       {stats && (
         <div className="flex gap-2 text-[10px]">
-          <Badge variant="outline">{stats.submitted}/{stats.total} submitted</Badge>
+          <Badge variant="outline">
+            {stats.submitted}/{stats.total} submitted
+          </Badge>
           <Badge variant="outline" className="bg-emerald-500/10">
             {stats.live} live
           </Badge>
@@ -424,8 +426,8 @@ export function OrbitSubmissionWorkbench({ defaultKind = "directory" }: { defaul
 
       <p className="text-[10px] text-muted-foreground leading-relaxed">
         Workflow: <strong>AI fill</strong> → review fields → <strong>Copy all</strong> →{" "}
-        <strong>Open form</strong> → paste → <strong>Mark submitted</strong>. Items with API keys
-        in Autopilot (Dev.to, Twitter, etc.) can also auto-post on a full autopilot run.
+        <strong>Open form</strong> → paste → <strong>Mark submitted</strong>. Items with API keys in
+        Autopilot (Dev.to, Twitter, etc.) can also auto-post on a full autopilot run.
       </p>
     </div>
   );

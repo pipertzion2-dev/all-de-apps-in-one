@@ -19,5 +19,9 @@ export async function buildStemPackZipBlobClient(options: {
     zip.file(f.name, f.data, { binary: true });
   }
 
-  return zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+  return zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }

@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
-    return NextResponse.json({ ok: result.ok, ...result });
+    return NextResponse.json({ ...result, ok: result.ok });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

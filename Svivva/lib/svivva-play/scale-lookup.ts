@@ -104,10 +104,15 @@ function catalogEntries(): { id: string; label: string }[] {
   return [...ids].map((id) => ({ id, label: id.replace(/_/g, " ") }));
 }
 
-function matchFromCatalog(scaleId: string, source: ScaleLookupMatch["source"], confidence: number): ScaleLookupMatch {
+function matchFromCatalog(
+  scaleId: string,
+  source: ScaleLookupMatch["source"],
+  confidence: number,
+): ScaleLookupMatch {
   const id = normalizeScaleId(scaleId);
-  const steps =
-    EXTENDED_BUILTIN_SCALES[id] ?? getDynamicScaleSteps(id) ?? chromaFromTonal(id) ?? [0, 2, 4, 5, 7, 9, 11];
+  const steps = EXTENDED_BUILTIN_SCALES[id] ??
+    getDynamicScaleSteps(id) ??
+    chromaFromTonal(id) ?? [0, 2, 4, 5, 7, 9, 11];
   registerDynamicScale(id, steps);
   return {
     scaleId: id,
@@ -136,7 +141,11 @@ function fuzzySearch(query: string, limit = 8): ScaleLookupMatch[] {
   for (const entry of entries) {
     const label = entry.label.toLowerCase();
     const id = entry.id.toLowerCase();
-    const dist = Math.min(levenshtein(q, label), levenshtein(q, id), levenshtein(q.replace(/\s/g, "_"), id));
+    const dist = Math.min(
+      levenshtein(q, label),
+      levenshtein(q, id),
+      levenshtein(q.replace(/\s/g, "_"), id),
+    );
     if (dist <= Math.max(3, Math.floor(q.length * 0.45))) {
       scored.push({ entry, dist });
     }

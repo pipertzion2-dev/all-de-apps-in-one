@@ -290,7 +290,8 @@ function pitchClassesForSymbol(symbol: string): number[] {
   const isSus4 = s.includes("sus4");
   const isSus2 = s.includes("sus2");
   const hasMaj7 = s.includes("maj7") || s.includes("∆7") || s.includes("△7");
-  const hasDom7 = !hasMaj7 && (s.includes("7") || s.includes("9") || s.includes("11") || s.includes("13"));
+  const hasDom7 =
+    !hasMaj7 && (s.includes("7") || s.includes("9") || s.includes("11") || s.includes("13"));
   const has9 = s.includes("9") || s.includes("add9");
   const has11 = s.includes("11") || s.includes("add11") || s.includes("sus");
   const has13 = s.includes("13");
@@ -317,7 +318,7 @@ function pitchClassesForSymbol(symbol: string): number[] {
   if (has11) intervals.push(5);
   if (has13) intervals.push(9);
 
-  const unique = [...new Set(intervals.map((p) => ((rootPc + p) % 12)))];
+  const unique = [...new Set(intervals.map((p) => (rootPc + p) % 12))];
   return unique.sort((a, b) => a - b);
 }
 
@@ -375,7 +376,10 @@ function buildPassingChordEvent(
   const targetRoot = NOTE_NAMES[rootMatch[1]] ?? 0;
   // Secondary dominant: V7 of the target
   const secDomRoot = (targetRoot + 7) % 12; // dominant is a 5th above target
-  const name = Object.keys(NOTE_NAMES).find((k) => NOTE_NAMES[k] === secDomRoot && !k.includes("b") && k.length <= 2) ?? "C";
+  const name =
+    Object.keys(NOTE_NAMES).find(
+      (k) => NOTE_NAMES[k] === secDomRoot && !k.includes("b") && k.length <= 2,
+    ) ?? "C";
   const voicing = buildRealChordVoicing(`${name}7`, 0);
   const beatSec = 60 / bpm;
   const events: ChordMidiEvent[] = voicing.slice(1).map((note) => ({
@@ -453,7 +457,13 @@ export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
       prevUpperVoicing = upperVoicing;
 
       // Upper comping events
-      const events = generateCompEvents(upperVoicing, chord.startBeat, Math.max(1, Math.round(span / 4)), bpm, localPattern);
+      const events = generateCompEvents(
+        upperVoicing,
+        chord.startBeat,
+        Math.max(1, Math.round(span / 4)),
+        bpm,
+        localPattern,
+      );
       chordEvents.push(...events);
 
       // Secondary dominant passing chord: only on non-first appearances,
@@ -531,7 +541,13 @@ export function generateNeoSoulChords(opts: ChordEngineOptions): ChordStem[] {
         const sectionIdx = Math.floor(startBeat / 16);
         const localPattern: CompPattern = PATTERN_CYCLE[sectionIdx % PATTERN_CYCLE.length]!;
 
-        const upperEvents = generateCompEvents(upperVoicing, startBeat, barsPerChord, bpm, localPattern);
+        const upperEvents = generateCompEvents(
+          upperVoicing,
+          startBeat,
+          barsPerChord,
+          bpm,
+          localPattern,
+        );
         chordEvents.push(...upperEvents);
 
         // Secondary dominant before resolution on repeats

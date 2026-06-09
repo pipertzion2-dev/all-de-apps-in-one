@@ -120,9 +120,7 @@ export async function buildHarmonicSession(options: {
   } = options;
 
   const [audioTx, melodyneParsed] = await Promise.all([
-    skipAudioPitchTrack
-      ? probeAudioFile(audioFile)
-      : transcribeAudioFile(audioFile, bpm, key),
+    skipAudioPitchTrack ? probeAudioFile(audioFile) : transcribeAudioFile(audioFile, bpm, key),
     melodyneFile
       ? melodyneFile.arrayBuffer().then((buf) => parseMidiFile(buf))
       : Promise.resolve(null),

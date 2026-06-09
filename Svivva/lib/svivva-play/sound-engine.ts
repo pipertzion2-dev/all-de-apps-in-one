@@ -1,21 +1,20 @@
 "use client";
 
 import * as Tone from "tone";
-import { MEEND_PREVIEW, resolveInstrumentPreset, resolveOrchestralPercussionPreset, type InstrumentPreset } from "./instruments";
 import {
-  buildMeendLegatoTimeline,
-  type MeendTimelineEvent,
-} from "./meend-preview-audio";
+  MEEND_PREVIEW,
+  resolveInstrumentPreset,
+  resolveOrchestralPercussionPreset,
+  type InstrumentPreset,
+} from "./instruments";
+import { buildMeendLegatoTimeline, type MeendTimelineEvent } from "./meend-preview-audio";
 import {
   isMeendAccentStem,
   MEEND_ACCENT_GAIN_DB,
   meendAccentSourceName,
 } from "./meend-showcase-stem";
 import { isOrchestralMeendStem } from "./orchestral-compose";
-import {
-  buildMeendStemExpression,
-  stemHasOverlappingNotes,
-} from "./scale-key-guard";
+import { buildMeendStemExpression, stemHasOverlappingNotes } from "./scale-key-guard";
 
 export interface MidiEvent {
   note: number;
@@ -351,10 +350,12 @@ export class SvivvaSoundEngine {
       /cymbal|triangle|cabasa|timpani|percussion/.test(hint) ||
       /cymbal|triangle|cabasa|timpani/.test(name)
     ) {
-      if (/triangle/.test(hint) || /triangle/.test(name)) return resolveOrchestralPercussionPreset(45);
+      if (/triangle/.test(hint) || /triangle/.test(name))
+        return resolveOrchestralPercussionPreset(45);
       if (/cabasa/.test(hint) || /cabasa/.test(name)) return resolveOrchestralPercussionPreset(47);
       if (/cymbal/.test(hint) || /cymbal/.test(name)) return resolveOrchestralPercussionPreset(43);
-      if (/timpani/.test(hint) || /timpani/.test(name)) return resolveInstrumentPreset("timpani", "percussion");
+      if (/timpani/.test(hint) || /timpani/.test(name))
+        return resolveInstrumentPreset("timpani", "percussion");
       const firstNote = stem.midiEvents?.[0]?.note ?? 43;
       return resolveOrchestralPercussionPreset(firstNote);
     }
@@ -488,8 +489,7 @@ export class SvivvaSoundEngine {
             ? !stem.expression.monophonic
             : stemHasOverlappingNotes(sortedEvents);
         const isMeendAccent = isMeendAccentStem(stem.name);
-        const wantsMeend =
-          forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
+        const wantsMeend = forceMeend || pitchBends.length > 0 || Boolean(stem.expression?.meend);
         const isOrchMeend =
           Boolean(stem.expression?.meend) && isOrchestralMeendStem(stem.name) && !isMeendAccent;
         const useMeendMono =
@@ -515,7 +515,8 @@ export class SvivvaSoundEngine {
 
         const panner = new Tone.Panner(stem.pan / 100);
         const previewGainDb = isMeendAccent
-          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) + (isOrchestralMeendStem(meendAccentSourceName(stem.name) ?? "") ? 10 : 8)
+          ? (stem.gainDb ?? MEEND_ACCENT_GAIN_DB) +
+            (isOrchestralMeendStem(meendAccentSourceName(stem.name) ?? "") ? 10 : 8)
           : isOrchMeend
             ? this.previewGainDb(stem.role, stem.gainDb || 0, true) + 8
             : this.previewGainDb(stem.role, stem.gainDb || 0, forceMeend);
@@ -532,12 +533,14 @@ export class SvivvaSoundEngine {
           chain[chain.length - 1].toDestination();
         }
 
-        let timeline: MeendTimelineEvent[] | {
-          time: number;
-          note: string;
-          duration: number;
-          velocity: number;
-        }[] = [];
+        let timeline:
+          | MeendTimelineEvent[]
+          | {
+              time: number;
+              note: string;
+              duration: number;
+              velocity: number;
+            }[] = [];
 
         if (useLegatoMeend) {
           const legatoTimeline = buildMeendLegatoTimeline(
@@ -573,37 +576,36 @@ export class SvivvaSoundEngine {
         }
 
         const legatoActive = useLegatoMeend;
-        const part = new Tone.Part((time, value: MeendTimelineEvent | { note: string; duration: number; velocity: number }) => {
-          try {
-            if (!synth) return;
-            if (legatoActive && "type" in value) {
-              const ev = value as MeendTimelineEvent;
-              if (!(synth instanceof Tone.MonoSynth)) return;
-              if (ev.type === "attack") {
-                synth.detune.value = 0;
-                synth.triggerAttack(ev.note, time, ev.velocity);
-              } else if (ev.type === "tailBend" || ev.type === "bend") {
-                synth.detune.rampTo(ev.cents, ev.glide, time);
-              } else if (ev.type === "release") {
-                synth.detune.rampTo(0, 0.05, time);
-                synth.triggerRelease(time);
+        const part = new Tone.Part(
+          (
+            time,
+            value: MeendTimelineEvent | { note: string; duration: number; velocity: number },
+          ) => {
+            try {
+              if (!synth) return;
+              if (legatoActive && "type" in value) {
+                const ev = value as MeendTimelineEvent;
+                if (!(synth instanceof Tone.MonoSynth)) return;
+                if (ev.type === "attack") {
+                  synth.detune.value = 0;
+                  synth.triggerAttack(ev.note, time, ev.velocity);
+                } else if (ev.type === "tailBend" || ev.type === "bend") {
+                  synth.detune.rampTo(ev.cents, ev.glide, time);
+                } else if (ev.type === "release") {
+                  synth.detune.rampTo(0, 0.05, time);
+                  synth.triggerRelease(time);
+                }
+                return;
               }
-              return;
+              if ("note" in value && "duration" in value) {
+                this.triggerNoteAt(synth, value.note, value.duration, time, value.velocity, false);
+              }
+            } catch (e) {
+              console.error("Part event error:", e);
             }
-            if ("note" in value && "duration" in value) {
-              this.triggerNoteAt(
-                synth,
-                value.note,
-                value.duration,
-                time,
-                value.velocity,
-                false,
-              );
-            }
-          } catch (e) {
-            console.error("Part event error:", e);
-          }
-        }, timeline as MeendTimelineEvent[]);
+          },
+          timeline as MeendTimelineEvent[],
+        );
 
         if (timeline.length === 0) {
           console.warn(`Skipping stem "${stem.name}" — empty playback timeline`);
@@ -773,9 +775,7 @@ export class SvivvaSoundEngine {
         const synth = this.createSynth(preset);
         const panner = new Tone.Panner(stem.pan / 100);
         const vol = new Tone.Volume(stem.gainDb || 0);
-        const effects = this.createEffectsChain(
-          preset.fx?.filter((fx) => fx.type !== "reverb"),
-        );
+        const effects = this.createEffectsChain(preset.fx?.filter((fx) => fx.type !== "reverb"));
 
         const chain: Tone.ToneAudioNode[] = [synth as any, ...effects, panner, vol];
         for (let i = 0; i < chain.length - 1; i++) {

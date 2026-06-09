@@ -431,7 +431,12 @@ export function constrainMidiEvent(
       note = Math.max(36, Math.min(84, note));
     }
     return { ...evt, note, startBeat, duration };
-  } else if (roleNorm.includes("hocket") || roleNorm === "melody" || roleNorm === "lead" || roleNorm === "solo") {
+  } else if (
+    roleNorm.includes("hocket") ||
+    roleNorm === "melody" ||
+    roleNorm === "lead" ||
+    roleNorm === "solo"
+  ) {
     note = snapNoteToScale(note, scale);
   } else {
     note = snapNoteToScale(note, scale);
@@ -584,9 +589,7 @@ export function resolveCompositionKey(options: {
     return locked;
   }
 
-  const anchor = options.audioAnchorKey?.trim()
-    ? normalizeKeyLabel(options.audioAnchorKey)
-    : null;
+  const anchor = options.audioAnchorKey?.trim() ? normalizeKeyLabel(options.audioAnchorKey) : null;
   const anchorScale = anchor ? parseScaleFromKey(anchor) : null;
 
   // Audio anchor wins when chord read disagrees (Eb/Bb/F misread as C major, etc.)

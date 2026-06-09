@@ -42,9 +42,7 @@ async function loadItemState(item: SubmissionItemDef) {
   const [row] = await db
     .select()
     .from(growthSubmissions)
-    .where(
-      and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)),
-    )
+    .where(and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)))
     .limit(1);
 
   const payload = parseNotes(row?.notes ?? null);
@@ -110,16 +108,11 @@ async function saveFields(item: SubmissionItemDef, fields: Record<string, string
   const [existing] = await db
     .select({ id: growthSubmissions.id })
     .from(growthSubmissions)
-    .where(
-      and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)),
-    )
+    .where(and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)))
     .limit(1);
 
   if (existing) {
-    await db
-      .update(growthSubmissions)
-      .set({ notes })
-      .where(eq(growthSubmissions.id, existing.id));
+    await db.update(growthSubmissions).set({ notes }).where(eq(growthSubmissions.id, existing.id));
   } else {
     await db.insert(growthSubmissions).values({
       directoryId: key,
@@ -193,9 +186,7 @@ export async function POST(req: NextRequest) {
 
   if (action === "ai_fill_all") {
     const kind = body.kind as "directory" | "publish" | "account" | undefined;
-    const targets = kind
-      ? SUBMISSION_ITEMS.filter((i) => i.kind === kind)
-      : SUBMISSION_ITEMS;
+    const targets = kind ? SUBMISSION_ITEMS.filter((i) => i.kind === kind) : SUBMISSION_ITEMS;
     const results: { id: string; ok: boolean }[] = [];
     for (const item of targets) {
       try {
@@ -219,9 +210,7 @@ export async function POST(req: NextRequest) {
     const [existing] = await db
       .select({ id: growthSubmissions.id, notes: growthSubmissions.notes })
       .from(growthSubmissions)
-      .where(
-        and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)),
-      )
+      .where(and(eq(growthSubmissions.directoryId, key), eq(growthSubmissions.product, PRODUCT)))
       .limit(1);
 
     if (existing) {

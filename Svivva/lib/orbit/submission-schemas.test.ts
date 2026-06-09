@@ -16,7 +16,10 @@ describe("submission-schemas", () => {
 
   it("formats clipboard text with labels", () => {
     const item = SUBMISSION_ITEMS[0];
-    const text = formatFieldsForClipboard(item, { productName: "Svivva", websiteUrl: "https://svivva.com" });
+    const text = formatFieldsForClipboard(item, {
+      productName: "Svivva",
+      websiteUrl: "https://svivva.com",
+    });
     expect(text).toContain("Svivva");
     expect(text).toContain(item.submitUrl);
   });

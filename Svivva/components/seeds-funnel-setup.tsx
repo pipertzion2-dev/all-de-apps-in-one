@@ -155,7 +155,7 @@ function SocialCard({
   content,
   color,
 }: {
-  icon: React.ElementType;
+  icon: React.FC<{ className?: string }>;
   platform: string;
   content: string;
   color: string;
@@ -164,7 +164,9 @@ function SocialCard({
     <div className="border border-border rounded-lg p-3 space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Icon className="w-3.5 h-3.5" style={{ color }} />
+          <span style={{ color, display: "flex" }}>
+            <Icon className="w-3.5 h-3.5" />
+          </span>
           <span className="text-xs font-medium">{platform}</span>
         </div>
         <CopyButton text={content} />

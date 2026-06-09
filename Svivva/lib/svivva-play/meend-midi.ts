@@ -58,11 +58,7 @@ function sigmoidBend(t: number): number {
 }
 
 /** Gamak — oscillating pitch in the middle of the note (V-1: 40%–70% of beat). */
-function addGamakBends(
-  e: MeendNoteEvent,
-  out: MeendPitchBend[],
-  peakSemitones = 0.45,
-): void {
+function addGamakBends(e: MeendNoteEvent, out: MeendPitchBend[], peakSemitones = 0.45): void {
   const d = Math.max(0.12, e.duration || 0.25);
   const t0 = e.startBeat;
   const gamakStart = t0 + d * V1_GAMAK_START;
@@ -155,8 +151,7 @@ export function buildMeendStemExpression(
   midiEvents: MeendNoteEvent[];
 } {
   const legato = opts?.legato ?? false;
-  const midiEvents =
-    !polyphonic && legato ? prepareMeendLegatoMidiEvents(events) : events;
+  const midiEvents = !polyphonic && legato ? prepareMeendLegatoMidiEvents(events) : events;
   return {
     meend: true,
     midiEvents,

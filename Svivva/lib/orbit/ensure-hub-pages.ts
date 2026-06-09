@@ -17,7 +17,8 @@ const ORBIT_HUBS: { slug: HubSlug; title: string; keyword: string; blurb: string
     slug: "cyber-security-mini-apps",
     title: "Cyber Security Mini Apps",
     keyword: "cybersecurity tools",
-    blurb: "Security scanners and hardening tools — Clutety for device protection, Svivva for AI backends.",
+    blurb:
+      "Security scanners and hardening tools — Clutety for device protection, Svivva for AI backends.",
   },
   {
     slug: "seo-pack",

@@ -66,10 +66,9 @@ export function applyPlayDynamicsToStems<T extends DynamicStem>(
       const leap = prev ? Math.abs(evt.note - prev.note) : 0;
       const leapSoft = leap > 8 ? -5 : leap > 5 ? -2 : 0;
       const base = evt.velocity > 0 ? evt.velocity : (dyn.floor + dyn.ceiling) / 2;
-      const blended = base * (1 - strength) + (dyn.floor + (dyn.ceiling - dyn.floor) * arc) * strength;
-      const velocity = Math.round(
-        Math.min(118, Math.max(28, blended + downbeat + leapSoft)),
-      );
+      const blended =
+        base * (1 - strength) + (dyn.floor + (dyn.ceiling - dyn.floor) * arc) * strength;
+      const velocity = Math.round(Math.min(118, Math.max(28, blended + downbeat + leapSoft)));
       return { ...evt, velocity };
     });
 

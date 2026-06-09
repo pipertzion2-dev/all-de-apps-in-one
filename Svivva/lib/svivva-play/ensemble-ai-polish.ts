@@ -35,14 +35,13 @@ export function applyEnsembleHumanization<T extends PolishStem>(
   const grid = bpm >= 120 ? 0.083 : 0.125;
 
   return stems.map((stem) => {
-    const isPerc =
-      stem.role === "percussion" ||
-      /cymbal|triangle|cabasa|timpani/i.test(stem.name);
+    const isPerc = stem.role === "percussion" || /cymbal|triangle|cabasa|timpani/i.test(stem.name);
     const events = [...stem.midiEvents]
       .sort((a, b) => a.startBeat - b.startBeat)
       .map((evt, idx) => {
         const barPos = evt.startBeat % 4;
-        const syncopated = barPos > 0.1 && barPos < 3.9 && Math.abs(barPos - Math.round(barPos)) > 0.05;
+        const syncopated =
+          barPos > 0.1 && barPos < 3.9 && Math.abs(barPos - Math.round(barPos)) > 0.05;
         let startBeat = evt.startBeat;
         if (syncopated && !isPerc) {
           const nudge = (rng.next() - 0.5) * grid * 0.6;
@@ -80,9 +79,7 @@ export async function polishEnsembleStemsWithAi<T extends PolishStem>(
     notes: s.midiEvents.length,
     avgVel:
       s.midiEvents.length > 0
-        ? Math.round(
-            s.midiEvents.reduce((a, e) => a + e.velocity, 0) / s.midiEvents.length,
-          )
+        ? Math.round(s.midiEvents.reduce((a, e) => a + e.velocity, 0) / s.midiEvents.length)
         : 0,
   }));
 
@@ -126,8 +123,7 @@ Return:
 
       polished = polished.map((stem) => {
         if (stem.role === "percussion") return stem;
-        const isHigh =
-          /violin|flute|oboe|solo/i.test(stem.name) || stem.role === "melody";
+        const isHigh = /violin|flute|oboe|solo/i.test(stem.name) || stem.role === "melody";
         return {
           ...stem,
           midiEvents: stem.midiEvents.map((evt) => {

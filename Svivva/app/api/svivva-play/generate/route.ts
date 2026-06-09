@@ -11,7 +11,12 @@ import {
   type PipelineSettings,
 } from "@/lib/svivva-play/pipeline";
 import type { Analysis } from "@/lib/svivva-play/schemas";
-import { applyChordEditsToAnalysis, playViewToAnalysis, parseRootFromKeyLabel, isMinorKeyLabel } from "@/lib/svivva-play/analysis-utils";
+import {
+  applyChordEditsToAnalysis,
+  playViewToAnalysis,
+  parseRootFromKeyLabel,
+  isMinorKeyLabel,
+} from "@/lib/svivva-play/analysis-utils";
 import {
   generateDeterministicChordStems,
   generateSmartChordStems,
@@ -53,8 +58,14 @@ import {
   type EnsembleOrchestralPreset,
 } from "@/lib/svivva-play/orchestral-compose";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
-import { pickIndianRagaScaleName, isIndianRagaScaleName } from "@/lib/svivva-play/indian-raga-scale";
-import { buildEnsembleChordTimeline, resolveEnsembleSessionChords } from "@/lib/svivva-play/ensemble-harmony";
+import {
+  pickIndianRagaScaleName,
+  isIndianRagaScaleName,
+} from "@/lib/svivva-play/indian-raga-scale";
+import {
+  buildEnsembleChordTimeline,
+  resolveEnsembleSessionChords,
+} from "@/lib/svivva-play/ensemble-harmony";
 import { polishEnsembleStemsWithAi } from "@/lib/svivva-play/ensemble-ai-polish";
 
 async function loadAnalysisFromSession(sessionId: string): Promise<Analysis | null> {
@@ -413,16 +424,17 @@ export async function POST(request: NextRequest) {
           : ["piano", "vibraphone", "marimba"];
       let stems = voicePartsToStemResults(voices, hints);
       if (settings.meend ?? false) stems = applyMeendToStems(stems);
-      const { scaleInfo } = resolveCompositionScale(
+      const { scaleInfo } = resolveCompositionScale(lockedKey, scaleName, manualKey, sessionChords);
+      let guardedStems = constrainGeneratedStems(
+        stems,
         lockedKey,
-        scaleName,
-        manualKey,
         sessionChords,
+        analysisData.bpm,
+        {
+          anchorMidi: melodicAnchor,
+          scaleInfo,
+        },
       );
-      let guardedStems = constrainGeneratedStems(stems, lockedKey, sessionChords, analysisData.bpm, {
-        anchorMidi: melodicAnchor,
-        scaleInfo,
-      });
       const swingAmt = Math.max(0, Math.min(1, Number(settings.swingAmount ?? 0) / 100));
       if (swingAmt > 0) {
         guardedStems = applySwingToStems(guardedStems, analysisData.bpm, swingAmt);
@@ -446,9 +458,9 @@ export async function POST(request: NextRequest) {
 
     const runOrchestralEnsemble = () => {
       const patternLength = (settings.patternLength as PatternLength | undefined) ?? "extended";
-      const preset = (isEnsembleOrchestralPreset(stylePreset)
-        ? stylePreset
-        : "bjork_lins_orchestral") as EnsembleOrchestralPreset;
+      const preset = (
+        isEnsembleOrchestralPreset(stylePreset) ? stylePreset : "bjork_lins_orchestral"
+      ) as EnsembleOrchestralPreset;
       const composeKey = resolveEnsembleComposeKey({ lockedKey, manualKey });
       const scaleName = ensembleCompositionScaleName(
         composeKey,
@@ -494,8 +506,7 @@ export async function POST(request: NextRequest) {
           key: composeKey,
           bpm: analysisData.bpm,
           harmonyRules: `${presetLabel} — Reich canon · Shaw woodwinds · Lins harmony · Björk lyric (key: ${composeKey}, scale: ${scaleName.replace(/_/g, " ")})`,
-          meendApplicableStems:
-            (settings.meend ?? false) ? orchestralMeendStemNames(stems) : [],
+          meendApplicableStems: (settings.meend ?? false) ? orchestralMeendStemNames(stems) : [],
           composer: preset,
           patternLength,
           abletonInstruments: stems.map((s) => `${s.name} → ${s.instrumentHint}`),

@@ -28,8 +28,8 @@ export default function PlayError({
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-md mx-auto">
         <h1 className="text-xl font-bold mb-2">Svivva Play could not load</h1>
         <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-          This is usually a temporary browser or network issue. Refresh the page, or return home
-          and open Play again.
+          This is usually a temporary browser or network issue. Refresh the page, or return home and
+          open Play again.
         </p>
         <div className="flex flex-col gap-2 w-full">
           <Button type="button" onClick={() => reset()}>

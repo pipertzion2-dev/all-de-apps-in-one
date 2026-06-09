@@ -79,7 +79,10 @@ export async function lookupScaleWithOllama(
           ? (a.intervals as number[]).map((n) => ((Number(n) % 12) + 12) % 12).sort((x, y) => x - y)
           : null;
         if (!steps || steps.length < 3) continue;
-        const id = String(a.name ?? "").trim().toLowerCase().replace(/\s+/g, "_");
+        const id = String(a.name ?? "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "_");
         if (!id) continue;
         alternates.push({ scaleId: id, label: id.replace(/_/g, " "), relativeSteps: steps });
       }

@@ -4,8 +4,9 @@ import type { MarketingPlatformCredentials } from "./marketing-autopilot-types";
 const USER_AGENT = "SvivvaMarketingAutopilot/1.0";
 
 function percentEncode(s: string): string {
-  return encodeURIComponent(s).replace(/[!'()*]/g, (c) =>
-    `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  return encodeURIComponent(s).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
   );
 }
 

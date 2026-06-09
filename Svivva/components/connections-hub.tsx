@@ -123,7 +123,7 @@ function ServiceCard({
   onSave,
   saving,
 }: {
-  icon: React.ElementType;
+  icon: React.FC<{ className?: string }>;
   name: string;
   description: string;
   status: ServiceStatus;

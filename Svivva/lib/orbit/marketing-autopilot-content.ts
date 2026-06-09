@@ -1,8 +1,4 @@
-import {
-  openai,
-  getDefaultModel,
-  isOrbitFreeAIConfigured,
-} from "@/lib/llm/openai";
+import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   generateSocialPack,
@@ -99,7 +95,8 @@ function tplParasite(targetUrl: string): ParasiteArticles {
 
 function tplSocial(): SocialLaunchPack {
   const s = generateSocialPack();
-  const reddit = (sub: string) => s.redditPosts.find((r) => r.subreddit.toLowerCase().includes(sub));
+  const reddit = (sub: string) =>
+    s.redditPosts.find((r) => r.subreddit.toLowerCase().includes(sub));
   return {
     twitter_thread: s.twitterThread,
     linkedin: {
@@ -113,12 +110,13 @@ function tplSocial(): SocialLaunchPack {
     reddit_saas: reddit("saas")
       ? { title: reddit("saas")!.title, body: reddit("saas")!.body }
       : undefined,
-    reddit_sideprojects: reddit("entrepreneur") || reddit("side")
-      ? {
-          title: (reddit("entrepreneur") || reddit("side"))!.title,
-          body: (reddit("entrepreneur") || reddit("side"))!.body,
-        }
-      : undefined,
+    reddit_sideprojects:
+      reddit("entrepreneur") || reddit("side")
+        ? {
+            title: (reddit("entrepreneur") || reddit("side"))!.title,
+            body: (reddit("entrepreneur") || reddit("side"))!.body,
+          }
+        : undefined,
     producthunt: {
       tagline: "AI APIs from natural language",
       description: "Turn prompts into production APIs with schema enforcement and a marketplace.",

@@ -141,7 +141,11 @@ export const ORCHESTRAL_STEM_ROSTER = [
   "Processed Orchestra",
 ] as const;
 
-export { BJORK_LINS_ORCHESTRAL_PRESET, CINEMATIC_ORCHESTRA_PRESET, isEnsembleOrchestralPreset } from "../orchestral-compose";
+export {
+  BJORK_LINS_ORCHESTRAL_PRESET,
+  CINEMATIC_ORCHESTRA_PRESET,
+  isEnsembleOrchestralPreset,
+} from "../orchestral-compose";
 
 export function isBjorkLinsPreset(stylePreset?: string): boolean {
   return stylePreset === "bjork_lins_orchestral";

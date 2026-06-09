@@ -1,5 +1,8 @@
 import { applyMeendToStems, applyMeendToOrchestralMelodyStems } from "./generate-helpers";
-import { buildMeendAccentPlaybacks, buildOrchestralMeendAccentPlaybacks } from "./meend-showcase-stem";
+import {
+  buildMeendAccentPlaybacks,
+  buildOrchestralMeendAccentPlaybacks,
+} from "./meend-showcase-stem";
 import { normalizeMidiEvents } from "./midi-normalize";
 import type { StemExportInput } from "./play-export-pack";
 
@@ -24,8 +27,7 @@ export function prepareStemsForMidiExport(
 ): StemExportInput[] {
   const meend = Boolean(options?.meend);
   const ensembleOrchestral = Boolean(options?.ensembleOrchestral);
-  const includeAccents =
-    options?.includeAccentLayers ?? (meend && !ensembleOrchestral);
+  const includeAccents = options?.includeAccentLayers ?? (meend && !ensembleOrchestral);
   const includeOrchestralAccents = meend && ensembleOrchestral;
 
   let prepared = stems.map((s) => ({
@@ -34,12 +36,8 @@ export function prepareStemsForMidiExport(
   }));
 
   if (meend && prepared.some((s) => s.midiEvents.length > 0)) {
-    const applyMeend = ensembleOrchestral
-      ? applyMeendToOrchestralMelodyStems
-      : applyMeendToStems;
-    prepared = applyMeend(
-      prepared as Parameters<typeof applyMeendToStems>[0],
-    ) as typeof prepared;
+    const applyMeend = ensembleOrchestral ? applyMeendToOrchestralMelodyStems : applyMeendToStems;
+    prepared = applyMeend(prepared as Parameters<typeof applyMeendToStems>[0]) as typeof prepared;
   }
 
   const out: StemExportInput[] = prepared.map((s) => ({

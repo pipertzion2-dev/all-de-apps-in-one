@@ -38,11 +38,7 @@ export const NATIVE_SVIVVA_TOOLS: CuratedNativeTool[] = [
   },
 ];
 
-export const ORBIT_HUB_SLUGS = [
-  "ai-tools-hub",
-  "cyber-security-mini-apps",
-  "seo-pack",
-] as const;
+export const ORBIT_HUB_SLUGS = ["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"] as const;
 
 export type HubSlug = (typeof ORBIT_HUB_SLUGS)[number];
 

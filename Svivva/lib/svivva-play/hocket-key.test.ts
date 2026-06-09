@@ -4,10 +4,7 @@ import { composeHocket, resolveScale } from "./reich-engine";
 import { constrainGeneratedStems } from "./scale-key-guard";
 import { applyMeendToStems } from "./generate-helpers";
 
-function assertAllNotesInScale(
-  parts: { notes: { note: number }[] }[],
-  scalePcs: Set<number>,
-) {
+function assertAllNotesInScale(parts: { notes: { note: number }[] }[], scalePcs: Set<number>) {
   for (const part of parts) {
     for (const n of part.notes) {
       const pc = ((n.note % 12) + 12) % 12;

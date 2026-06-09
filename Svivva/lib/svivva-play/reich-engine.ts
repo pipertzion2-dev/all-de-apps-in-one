@@ -359,9 +359,7 @@ export function composeCounterpoint(opts: {
       i++;
     }
     if (notes.length === 0) {
-      const fallback = clampMidiPreservePc(
-        12 * bo + (scale.pitchClasses[0] ?? scale.rootPc),
-      );
+      const fallback = clampMidiPreservePc(12 * bo + (scale.pitchClasses[0] ?? scale.rootPc));
       notes.push({
         note: fallback,
         velocity: 72,
@@ -400,8 +398,7 @@ export function composeHocket(opts: {
   const { cpCellLen, hkCellLen } = resolvePatternCellLengths(patternLength);
   const rng = new Rng((seed || 0) ^ 0xc0ffee);
   const grooveStyle: HocketGrooveStyle =
-    hocketGroove ??
-    (style === "shaw_interlace" ? "shaw_interlock" : "reich_phase");
+    hocketGroove ?? (style === "shaw_interlace" ? "shaw_interlock" : "reich_phase");
 
   if (grooveStyle === "reich_interlock") {
     const total = sixteenthsForDuration(durationSec, bpm);

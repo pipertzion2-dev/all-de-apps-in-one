@@ -58,18 +58,21 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   {
     key: "twitterApiSecret",
     label: "Twitter/X API secret",
+    hint: "developer.twitter.com → App keys",
     secret: true,
     group: "social",
   },
   {
     key: "twitterAccessToken",
     label: "Twitter/X access token",
+    hint: "developer.twitter.com → App access tokens",
     secret: true,
     group: "social",
   },
   {
     key: "twitterAccessSecret",
     label: "Twitter/X access token secret",
+    hint: "developer.twitter.com → App access tokens",
     secret: true,
     group: "social",
   },
@@ -82,12 +85,14 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   {
     key: "redditClientSecret",
     label: "Reddit client secret",
+    hint: "reddit.com/prefs/apps",
     secret: true,
     group: "social",
   },
   {
     key: "redditRefreshToken",
     label: "Reddit refresh token",
+    hint: "OAuth2 refresh token from Reddit",
     secret: true,
     group: "social",
   },
@@ -107,11 +112,13 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   {
     key: "outreachFromEmail",
     label: "From email (verified in Resend)",
+    hint: "Must be verified in your Resend account",
     group: "email",
   },
   {
     key: "outreachReplyTo",
     label: "Reply-to email",
+    hint: "Where replies should go",
     group: "email",
   },
   {
@@ -123,6 +130,7 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   {
     key: "podcastPitchEmail",
     label: "Podcast pitch recipient",
+    hint: "Email address of the podcast booker",
     group: "email",
   },
 ];

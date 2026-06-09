@@ -41,7 +41,7 @@ function pcToSpelling(pc: number): string {
 function triadSymbol(scalePcs: number[], degree: number): string {
   const rootPc = scalePcs[degree % 7]!;
   const thirdPc = scalePcs[(degree + 2) % 7]!;
-  const isMinorTriad = ((thirdPc - rootPc + 12) % 12) === 3;
+  const isMinorTriad = (thirdPc - rootPc + 12) % 12 === 3;
   const name = pcToSpelling(rootPc);
   return isMinorTriad ? `${name}m` : name;
 }

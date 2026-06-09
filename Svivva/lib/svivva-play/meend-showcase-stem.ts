@@ -40,9 +40,7 @@ type MeendStemLike = {
 
 /** Monophonic hocket / melody lines that can carry meend ornaments. */
 export function pickMeendVoices(stems: MeendStemLike[]): MeendStemLike[] {
-  return stems.filter(
-    (s) => s.midiEvents.length > 0 && !stemHasOverlappingNotes(s.midiEvents),
-  );
+  return stems.filter((s) => s.midiEvents.length > 0 && !stemHasOverlappingNotes(s.midiEvents));
 }
 
 /** Best single-voice line (legacy). */
@@ -53,8 +51,8 @@ export function pickMeendLeadStem(stems: MeendStemLike[]): MeendStemLike | null 
     const r = s.role.toLowerCase();
     return r === "melody" || r === "lead" || r === "solo";
   });
-  return melody ?? voices.reduce((best, s) =>
-    s.midiEvents.length > best.midiEvents.length ? s : best,
+  return (
+    melody ?? voices.reduce((best, s) => (s.midiEvents.length > best.midiEvents.length ? s : best))
   );
 }
 

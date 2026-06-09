@@ -127,7 +127,7 @@ export function addV2HocketRapidFire(
         note: degreeToMidi(scale, (degree + i) % pcs.length, 4 + (v % 2)),
         velocity: Math.round(68 + rng.next() * 18),
         startBeat,
-        duration: Math.max(0.1, tripletDur / beatDur * 0.85),
+        duration: Math.max(0.1, (tripletDur / beatDur) * 0.85),
       });
     }
   }

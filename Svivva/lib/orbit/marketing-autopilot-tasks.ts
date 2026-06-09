@@ -8,14 +8,24 @@ export type AutopilotTaskDef = {
 };
 
 export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
-  { id: "tech-indexnow-key", label: "IndexNow key", group: "Technical Foundation", automatable: "onsite" },
+  {
+    id: "tech-indexnow-key",
+    label: "IndexNow key",
+    group: "Technical Foundation",
+    automatable: "onsite",
+  },
   {
     id: "tech-indexnow-submitted",
     label: "IndexNow submitted",
     group: "Technical Foundation",
     automatable: "onsite",
   },
-  { id: "tech-sitemap", label: "Sitemap live", group: "Technical Foundation", automatable: "onsite" },
+  {
+    id: "tech-sitemap",
+    label: "Sitemap live",
+    group: "Technical Foundation",
+    automatable: "onsite",
+  },
   {
     id: "tech-gsc-sitemap",
     label: "GSC sitemap API",
@@ -35,16 +45,46 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     group: "Technical Foundation",
     automatable: "prepare_only",
   },
-  { id: "content-seo-pages", label: "SEO landing pages", group: "AI Content", automatable: "onsite" },
-  { id: "content-comparisons", label: "Comparison pages", group: "AI Content", automatable: "onsite" },
+  {
+    id: "content-seo-pages",
+    label: "SEO landing pages",
+    group: "AI Content",
+    automatable: "onsite",
+  },
+  {
+    id: "content-comparisons",
+    label: "Comparison pages",
+    group: "AI Content",
+    automatable: "onsite",
+  },
   { id: "content-blog", label: "Blog posts", group: "AI Content", automatable: "onsite" },
   { id: "content-aeo", label: "AEO pages", group: "AI Content", automatable: "onsite" },
-  { id: "content-integrations", label: "Integration pages", group: "AI Content", automatable: "onsite" },
+  {
+    id: "content-integrations",
+    label: "Integration pages",
+    group: "AI Content",
+    automatable: "onsite",
+  },
   { id: "content-usecases", label: "Use-case pages", group: "AI Content", automatable: "onsite" },
-  { id: "content-templates", label: "API template pages", group: "AI Content", automatable: "onsite" },
+  {
+    id: "content-templates",
+    label: "API template pages",
+    group: "AI Content",
+    automatable: "onsite",
+  },
   { id: "content-paa", label: "PAA pages", group: "AI Content", automatable: "onsite" },
-  { id: "content-parasite", label: "Parasite articles generated", group: "AI Content", automatable: "full" },
-  { id: "content-social-pack", label: "Social launch pack", group: "AI Content", automatable: "full" },
+  {
+    id: "content-parasite",
+    label: "Parasite articles generated",
+    group: "AI Content",
+    automatable: "full",
+  },
+  {
+    id: "content-social-pack",
+    label: "Social launch pack",
+    group: "AI Content",
+    automatable: "full",
+  },
   { id: "content-community", label: "Community posts", group: "AI Content", automatable: "full" },
   { id: "content-outreach", label: "Outreach pitches", group: "AI Content", automatable: "full" },
   {
@@ -130,15 +170,45 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     group: "Manual Publishing",
     automatable: "onsite",
   },
-  { id: "dir-futurepedia", label: "Futurepedia listing", group: "Directories", automatable: "prepare_only" },
+  {
+    id: "dir-futurepedia",
+    label: "Futurepedia listing",
+    group: "Directories",
+    automatable: "prepare_only",
+  },
   { id: "dir-taaft", label: "TAAFT listing", group: "Directories", automatable: "prepare_only" },
   { id: "dir-g2", label: "G2 listing", group: "Directories", automatable: "prepare_only" },
-  { id: "dir-alternativeto", label: "AlternativeTo", group: "Directories", automatable: "prepare_only" },
+  {
+    id: "dir-alternativeto",
+    label: "AlternativeTo",
+    group: "Directories",
+    automatable: "prepare_only",
+  },
   { id: "dir-crunchbase", label: "Crunchbase", group: "Directories", automatable: "prepare_only" },
-  { id: "dir-growth-engine-overall", label: "Growth Engine directories", group: "Directories", automatable: "prepare_only" },
-  { id: "auto-sitemap-pings", label: "Weekly sitemap pings", group: "Recurring", automatable: "onsite" },
-  { id: "auto-growth-tasks", label: "Growth Engine cron", group: "Recurring", automatable: "onsite" },
-  { id: "auto-content-velocity", label: "Content velocity", group: "Recurring", automatable: "onsite" },
+  {
+    id: "dir-growth-engine-overall",
+    label: "Growth Engine directories",
+    group: "Directories",
+    automatable: "prepare_only",
+  },
+  {
+    id: "auto-sitemap-pings",
+    label: "Weekly sitemap pings",
+    group: "Recurring",
+    automatable: "onsite",
+  },
+  {
+    id: "auto-growth-tasks",
+    label: "Growth Engine cron",
+    group: "Recurring",
+    automatable: "onsite",
+  },
+  {
+    id: "auto-content-velocity",
+    label: "Content velocity",
+    group: "Recurring",
+    automatable: "onsite",
+  },
 ];
 
 export function taskDefById(id: string): AutopilotTaskDef | undefined {

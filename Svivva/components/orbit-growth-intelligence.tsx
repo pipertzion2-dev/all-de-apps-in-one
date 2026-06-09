@@ -97,7 +97,7 @@ function SectionBlock({
   accent,
 }: {
   title: string;
-  icon: React.ElementType;
+  icon: React.FC<{ className?: string }>;
   items: GrowthOpportunity[];
   accent: string;
 }) {
@@ -108,7 +108,9 @@ function SectionBlock({
         className="px-4 py-2.5 flex items-center gap-2 border-b border-border"
         style={{ background: `${accent}08` }}
       >
-        <Icon className="w-4 h-4" style={{ color: accent }} />
+        <span style={{ color: accent, display: "flex" }}>
+          <Icon className="w-4 h-4" />
+        </span>
         <h3 className="text-sm font-black text-foreground">{title}</h3>
         <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
           {items.length}
@@ -201,7 +203,10 @@ export function OrbitGrowthIntelligence({
       {/* Header */}
       <div
         className="rounded-2xl border-2 p-4 space-y-3"
-        style={{ borderColor: `${BURG}55`, background: `linear-gradient(135deg, ${BURG}12, ${TEAL}10)` }}
+        style={{
+          borderColor: `${BURG}55`,
+          background: `linear-gradient(135deg, ${BURG}12, ${TEAL}10)`,
+        }}
       >
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
           <div className="flex items-start gap-3 flex-1">
@@ -299,16 +304,36 @@ export function OrbitGrowthIntelligence({
       {/* Sections grid */}
       <div className="grid md:grid-cols-2 gap-3">
         <SectionBlock title="Top Pains" icon={Zap} items={report.topPains} accent="#ef4444" />
-        <SectionBlock title="Top Questions" icon={Target} items={report.topQuestions} accent={TEAL} />
+        <SectionBlock
+          title="Top Questions"
+          icon={Target}
+          items={report.topQuestions}
+          accent={TEAL}
+        />
         <SectionBlock
           title="Competitor Weaknesses"
           icon={Activity}
           items={report.topCompetitorWeaknesses}
           accent={BURG}
         />
-        <SectionBlock title="Content Opportunities" icon={BarChart3} items={report.topContent} accent="#8b5cf6" />
-        <SectionBlock title="Free Tool Ideas" icon={Radar} items={report.topTools} accent="#0ea5e9" />
-        <SectionBlock title="Emerging Trends" icon={TrendingUp} items={report.topTrends} accent="#f59e0b" />
+        <SectionBlock
+          title="Content Opportunities"
+          icon={BarChart3}
+          items={report.topContent}
+          accent="#8b5cf6"
+        />
+        <SectionBlock
+          title="Free Tool Ideas"
+          icon={Radar}
+          items={report.topTools}
+          accent="#0ea5e9"
+        />
+        <SectionBlock
+          title="Emerging Trends"
+          icon={TrendingUp}
+          items={report.topTrends}
+          accent="#f59e0b"
+        />
       </div>
     </div>
   );

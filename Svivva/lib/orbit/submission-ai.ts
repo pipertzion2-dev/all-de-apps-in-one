@@ -1,11 +1,11 @@
-import {
-  openai,
-  getDefaultModel,
-  isOrbitFreeAIConfigured,
-} from "@/lib/llm/openai";
+import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
 import { getSvivvaProductProfile } from "@/lib/orbit/product-profile";
 import type { SubmissionItemDef } from "@/lib/orbit/submission-schemas";
-import { generateSocialPack, generateMiniParasite, generateOutreach } from "@/lib/orbit/content-templates";
+import {
+  generateSocialPack,
+  generateMiniParasite,
+  generateOutreach,
+} from "@/lib/orbit/content-templates";
 
 function templateFields(item: SubmissionItemDef): Record<string, string> {
   const p = getSvivvaProductProfile();
@@ -49,7 +49,8 @@ function templateFields(item: SubmissionItemDef): Record<string, string> {
     out.body = `${h?.content || p.description}\n\n${p.url}`;
   } else if (item.id === "pub-reddit") {
     out.subreddit = "SideProject";
-    out.title = social.redditPosts[0]?.title || `I built ${p.name} — natural language to production APIs`;
+    out.title =
+      social.redditPosts[0]?.title || `I built ${p.name} — natural language to production APIs`;
     out.body = social.redditPosts[0]?.body || `${p.description}\n\n${p.toolsHubUrl}`;
   } else if (item.id === "pub-showhn") {
     out.title = `Show HN: ${p.name} – ${p.tagline}`;

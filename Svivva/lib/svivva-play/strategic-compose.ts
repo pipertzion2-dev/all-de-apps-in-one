@@ -101,9 +101,7 @@ function analyzeListening(
     .map((x) => x.i);
 
   const melodyPool =
-    ctx.melodyneMixOnly || ctx.melodyneNotes.length
-      ? ctx.melodyneNotes
-      : ctx.audioNotes;
+    ctx.melodyneMixOnly || ctx.melodyneNotes.length ? ctx.melodyneNotes : ctx.audioNotes;
   const melodicRegister =
     melodyPool.length > 0 ? melodyPool.reduce((s, n) => s + n.midi, 0) / melodyPool.length : 67;
 

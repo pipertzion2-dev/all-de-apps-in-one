@@ -30,8 +30,7 @@ function CubeFace({
   useFrame((_, delta) => {
     if (!matRef.current) return;
     const target = isActive ? 0.95 : hovered ? 0.65 : 0.25;
-    matRef.current.emissiveIntensity +=
-      (target - matRef.current.emissiveIntensity) * delta * 6;
+    matRef.current.emissiveIntensity += (target - matRef.current.emissiveIntensity) * delta * 6;
   });
 
   // Face normal directions for a unit cube
@@ -118,7 +117,7 @@ function OrbitParticles({ activeFeature }: { activeFeature: ArtworkFeature }) {
       const idx = i * 3;
       const angle = (i / count) * Math.PI * 2 + t * 0.2;
       const radius = 0.85 + 0.4 * Math.sin(phases[i] + t * 0.5);
-      const height = (Math.sin(phases[i] + t * 0.3) * 0.4);
+      const height = Math.sin(phases[i] + t * 0.3) * 0.4;
       pos.setXYZ(i, Math.cos(angle) * radius, height, Math.sin(angle) * radius);
     }
     pos.needsUpdate = true;
@@ -267,13 +266,7 @@ function SceneLights({ activeFeature }: { activeFeature: ArtworkFeature }) {
 }
 
 // ─── Feature preview panel ────────────────────────────────────────────
-function FeaturePreview({
-  feature,
-  onClose,
-}: {
-  feature: ArtworkFeature;
-  onClose: () => void;
-}) {
+function FeaturePreview({ feature, onClose }: { feature: ArtworkFeature; onClose: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.96 }}
@@ -331,7 +324,12 @@ function FeaturePreview({
           >
             {feature.cta}
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
             </svg>
           </a>
         </div>
@@ -379,9 +377,7 @@ export function SvivvaArtifact() {
         >
           The Svivva Artifact
         </span>
-        <h2 className="text-3xl md:text-4xl font-bold text-white">
-          Explore Every Dimension
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-white">Explore Every Dimension</h2>
         <p className="text-white/50 mt-2 text-sm max-w-xs mx-auto">
           Drag · rotate · flick · tap a face to discover
         </p>
@@ -453,14 +449,8 @@ export function SvivvaArtifact() {
               style={{
                 width: i === activeIndex ? 32 : 8,
                 height: 8,
-                background:
-                  i === activeIndex
-                    ? f.accentColor
-                    : "rgba(255,255,255,0.2)",
-                boxShadow:
-                  i === activeIndex
-                    ? `0 0 12px rgba(${f.accentColorRgb},0.6)`
-                    : "none",
+                background: i === activeIndex ? f.accentColor : "rgba(255,255,255,0.2)",
+                boxShadow: i === activeIndex ? `0 0 12px rgba(${f.accentColorRgb},0.6)` : "none",
               }}
             />
             {i === activeIndex && (

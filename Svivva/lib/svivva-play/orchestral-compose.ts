@@ -100,7 +100,14 @@ export const ABLETON_ORCHESTRAL_STEMS: Omit<
   { name: "Viola", hint: "viola", role: "harmony", register: "mid", baseOctave: 3, pan: -15 },
   { name: "Cello", hint: "cello", role: "harmony", register: "mid", baseOctave: 2, pan: 15 },
   { name: "Contrabass", hint: "contrabass", role: "bass", register: "low", baseOctave: 1, pan: 35 },
-  { name: "Solo Violin", hint: "solo violin", role: "melody", register: "high", baseOctave: 3, pan: -70 },
+  {
+    name: "Solo Violin",
+    hint: "solo violin",
+    role: "melody",
+    register: "high",
+    baseOctave: 3,
+    pan: -70,
+  },
   { name: "Harp", hint: "harp", role: "harmony", register: "mid", baseOctave: 3, pan: 25 },
   { name: "Flute", hint: "flute", role: "melody", register: "high", baseOctave: 3, pan: 45 },
   { name: "Oboe", hint: "oboe", role: "melody", register: "mid", baseOctave: 3, pan: 50 },
@@ -589,7 +596,7 @@ function chordToneAtIndex(
   const scaleSet = new Set(relativeSteps(scale.pitchClasses, scale.rootPc));
   const consonant = chordPcs.filter((pc) => scaleSet.has(((pc % 12) + 12) % 12));
   const pool = consonant.length ? consonant : chordPcs;
-  const pc = ((pool[index % pool.length] ?? pool[0] ?? scale.rootPc) % 12 + 12) % 12;
+  const pc = (((pool[index % pool.length] ?? pool[0] ?? scale.rootPc) % 12) + 12) % 12;
   return clampForVoice(12 * (baseOctave + 1) + pc, role);
 }
 
@@ -685,9 +692,7 @@ function buildHarpArpeggios(
   const scaleSet = new Set(scale.pitchClasses);
   const notes: MidiNote[] = [];
   for (const chord of chords) {
-    const pcs = chordSegmentPitchClasses(chord).filter((pc) =>
-      scaleSet.has(((pc % 12) + 12) % 12),
-    );
+    const pcs = chordSegmentPitchClasses(chord).filter((pc) => scaleSet.has(((pc % 12) + 12) % 12));
     const pool = pcs.length ? pcs : scale.pitchClasses;
     const startBeat = chord.t0 / beatSec;
     const endBeat = chord.t1 / beatSec;
@@ -808,11 +813,7 @@ function composeStemLine(
   let prevPitch: number | null = null;
   const overlap = MEEND_MELODY_ROLES.includes(profile.voiceRole) ? 0.04 : feel.legatoOverlap;
 
-  for (
-    let beat = profile.canonEntryBeats;
-    beat < totalBeats - 0.25;
-    beat += step
-  ) {
+  for (let beat = profile.canonEntryBeats; beat < totalBeats - 0.25; beat += step) {
     if (rng.next() < profile.restChance) continue;
 
     const event = theme[themeIdx % theme.length]!;
@@ -849,10 +850,7 @@ function composeStemLine(
 
     notes.push({
       note: clampForVoice(pitch, profile.voiceRole),
-      velocity: Math.min(
-        118,
-        profile.velBase + (event.accent ? 6 : 0) + rng.int(-3, 5),
-      ),
+      velocity: Math.min(118, profile.velBase + (event.accent ? 6 : 0) + rng.int(-3, 5)),
       startBeat: beat,
       duration: dur + overlap,
     });

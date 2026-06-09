@@ -57,9 +57,7 @@ describe("composeOrchestralEnsemble", () => {
     expect(v1.notes.length).toBeLessThan(40);
     expect(v1.notes.every((n) => n.duration >= 0.85)).toBe(true);
     expect(new Set(v1.notes.map((n) => n.note)).size).toBeGreaterThan(2);
-    expect(v2.notes.map((n) => n.note).join(",")).not.toBe(
-      v1.notes.map((n) => n.note).join(","),
-    );
+    expect(v2.notes.map((n) => n.note).join(",")).not.toBe(v1.notes.map((n) => n.note).join(","));
   });
 
   it("includes timpani and separate percussion stems", () => {

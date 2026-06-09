@@ -42,7 +42,8 @@ type AutopilotData = {
 };
 
 function statusColor(s: string) {
-  if (s === "posted" || s === "done") return "text-emerald-600 bg-emerald-500/10 border-emerald-500/20";
+  if (s === "posted" || s === "done")
+    return "text-emerald-600 bg-emerald-500/10 border-emerald-500/20";
   if (s === "prepared") return "text-amber-600 bg-amber-500/10 border-amber-500/20";
   if (s === "failed") return "text-red-600 bg-red-500/10 border-red-500/20";
   if (s === "needs_credentials") return "text-violet-600 bg-violet-500/10 border-violet-500/20";
@@ -137,7 +138,9 @@ export function OrbitMarketingAutopilot() {
   }, [tasks]);
 
   const googleOk =
-    data?.status.google.serviceAccount && data?.status.google.siteUrl && data?.status.google.indexNow;
+    data?.status.google.serviceAccount &&
+    data?.status.google.siteUrl &&
+    data?.status.google.indexNow;
 
   const busy = runMutation.isPending || saveMutation.isPending;
 
@@ -146,7 +149,10 @@ export function OrbitMarketingAutopilot() {
       {/* Hero */}
       <div
         className="rounded-2xl border-2 p-5 space-y-3"
-        style={{ borderColor: `${PINK}40`, background: `linear-gradient(135deg, ${PINK}08, ${TEAL}08)` }}
+        style={{
+          borderColor: `${PINK}40`,
+          background: `linear-gradient(135deg, ${PINK}08, ${TEAL}08)`,
+        }}
       >
         <div className="flex items-start gap-3">
           <div
@@ -266,9 +272,7 @@ export function OrbitMarketingAutopilot() {
                       <div key={field.key} className="space-y-1">
                         <label className="text-[11px] font-semibold flex items-center gap-1.5">
                           {field.label}
-                          {configured && (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          )}
+                          {configured && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                         </label>
                         <Input
                           type={field.secret ? "password" : "text"}
@@ -335,7 +339,10 @@ export function OrbitMarketingAutopilot() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold">{t.label}</span>
-                          <Badge variant="outline" className={`text-[9px] ${statusColor(t.status)}`}>
+                          <Badge
+                            variant="outline"
+                            className={`text-[9px] ${statusColor(t.status)}`}
+                          >
                             {t.status.replace("_", " ")}
                           </Badge>
                         </div>

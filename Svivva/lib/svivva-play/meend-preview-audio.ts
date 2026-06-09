@@ -11,11 +11,7 @@ export type MeendTimelineEvent =
   | { type: "bend"; time: number; cents: number; glide: number }
   | { type: "release"; time: number };
 
-import {
-  V1_GAMAK_FRAC,
-  V1_GAMAK_START,
-  V1_MEEND_TAIL_START,
-} from "./meend-midi";
+import { V1_GAMAK_FRAC, V1_GAMAK_START, V1_MEEND_TAIL_START } from "./meend-midi";
 
 /** Gamak depth — clear under a full mix without clipping. */
 export const MEEND_PREVIEW_GAMAK_CENTS = 75;
@@ -90,14 +86,9 @@ export function buildMeendLegatoTimeline(
   }
 
   const last = sorted[sorted.length - 1]!;
-  const releaseBeat =
-    last.startBeat + Math.max(last.duration || 0.25, 0.35) + 0.2;
+  const releaseBeat = last.startBeat + Math.max(last.duration || 0.25, 0.35) + 0.2;
   timeline.push({ type: "release", time: beatToSeconds(releaseBeat) });
 
-  timeline.sort(
-    (a, b) =>
-      a.time - b.time ||
-      EVENT_ORDER[a.type] - EVENT_ORDER[b.type],
-  );
+  timeline.sort((a, b) => a.time - b.time || EVENT_ORDER[a.type] - EVENT_ORDER[b.type]);
   return timeline;
 }

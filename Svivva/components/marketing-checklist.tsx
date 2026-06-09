@@ -133,8 +133,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
     if (manualDone[id]) return true;
     return (workbenchData?.items ?? []).some(
       (row: { item: { checklistId: string }; status: string }) =>
-        row.item.checklistId === id &&
-        (row.status === "submitted" || row.status === "live"),
+        row.item.checklistId === id && (row.status === "submitted" || row.status === "live"),
     );
   };
 

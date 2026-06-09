@@ -1,9 +1,6 @@
 import Midi from "jsmidgen";
 import { normalizeMidiEvents } from "./midi-normalize";
-import {
-  MEEND_MIDI_BEND_RANGE_SEMITONES,
-  meendPitchbendForEvents,
-} from "./meend-midi";
+import { MEEND_MIDI_BEND_RANGE_SEMITONES, meendPitchbendForEvents } from "./meend-midi";
 import { stemHasOverlappingNotes } from "./scale-key-guard";
 
 export { stemMidiFilename } from "./midi-filenames";
@@ -69,11 +66,7 @@ function expandTimelineToAtomicEvents(timeline: TimelineEntry[]): AtomicMidiEven
       atoms.push({ tick: item.tick, kind: "bend", value: item.value });
     }
   }
-  atoms.sort(
-    (a, b) =>
-      a.tick - b.tick ||
-      ATOMIC_KIND_ORDER[a.kind] - ATOMIC_KIND_ORDER[b.kind],
-  );
+  atoms.sort((a, b) => a.tick - b.tick || ATOMIC_KIND_ORDER[a.kind] - ATOMIC_KIND_ORDER[b.kind]);
   return atoms;
 }
 
@@ -111,10 +104,7 @@ function buildStemTimeline(
 
   for (const evt of exportNotes) {
     const startTick = Math.round(evt.startBeat * TICKS_PER_BEAT);
-    const durationTick = Math.max(
-      TICKS_PER_BEAT / 4,
-      Math.round(evt.duration * TICKS_PER_BEAT),
-    );
+    const durationTick = Math.max(TICKS_PER_BEAT / 4, Math.round(evt.duration * TICKS_PER_BEAT));
     timeline.push({
       kind: "note",
       tick: startTick,
@@ -142,7 +132,10 @@ function buildStemTimeline(
   return timeline;
 }
 
-function writeTimelineToTrack(track: InstanceType<typeof Midi.Track>, timeline: TimelineEntry[]): void {
+function writeTimelineToTrack(
+  track: InstanceType<typeof Midi.Track>,
+  timeline: TimelineEntry[],
+): void {
   const channel = 0;
   let currentTick = 0;
 
