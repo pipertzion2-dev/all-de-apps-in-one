@@ -35,8 +35,10 @@ import {
   Wand2,
   Info,
   Radar,
+  TrendingUp,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
+import { OrbitGrowthIntelligence } from "@/components/orbit-growth-intelligence";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
@@ -333,6 +335,23 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       manual: [
         "Request indexing in GSC for each question page",
         "These pages work on autopilot — Google and AI engines surface them for matching queries",
+      ],
+    },
+    {
+      id: "svivva-growth-intelligence",
+      title: "Growth Intelligence Daily Report",
+      icon: TrendingUp,
+      estimate: "~5s",
+      description:
+        "8-system demand scanner — pains, questions, competitor weaknesses, content/tool/trend opportunities scored ≥80/100. Open the Growth Intel tab for the full dashboard.",
+      auto: [
+        "Pain Miner · Competitor Radar · Question Engine · Content Arbitrage",
+        "Community Gap · Free Tool Discovery · Trend Detector · GEO Optimization",
+        "P0 priority queue saved to growth_tasks",
+      ],
+      manual: [
+        "Open the Growth Intel tab to review ranked opportunities",
+        "Execute top P0 items (calculator, comparisons, llms.txt) from the queue",
       ],
     },
   ];
@@ -2461,7 +2480,9 @@ export default function LaunchpadPage() {
       cancelled = true;
     };
   }, []);
-  const [tab, setTab] = useState<"svivva" | "mini" | "index22" | "deploy" | "checklist">("index22");
+  const [tab, setTab] = useState<
+    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth"
+  >("growth");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -4242,7 +4263,31 @@ export default function LaunchpadPage() {
           <p className="text-[11px] text-muted-foreground px-1 font-medium uppercase tracking-wide">
             What to do:
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <button
+              onClick={() => setTab("growth")}
+              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "growth" ? "border-violet-500 bg-violet-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+              data-testid="tab-growth-intel"
+            >
+              <div className="flex items-center gap-1.5 w-full">
+                <TrendingUp
+                  className="w-3.5 h-3.5 flex-shrink-0"
+                  style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
+                />
+                <span
+                  className="text-xs font-bold truncate"
+                  style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
+                >
+                  Growth Intel
+                </span>
+                <span
+                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "growth" ? "bg-violet-500/20 text-violet-600" : "bg-green-500/15 text-green-700"}`}
+                >
+                  LIVE
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-tight">Demand scanner</p>
+            </button>
             <button
               onClick={() => setTab("checklist")}
               className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
@@ -4361,6 +4406,17 @@ export default function LaunchpadPage() {
           </div>
         </div>
 
+        {/* Growth Intelligence tab */}
+        {tab === "growth" && (
+          <OrbitGrowthIntelligence
+            onReportReady={(summary) => {
+              if (statuses["svivva-growth-intelligence"] !== "done") {
+                setStep("svivva-growth-intelligence", "done", summary);
+              }
+            }}
+          />
+        )}
+
         {/* Checklist tab */}
         {tab === "checklist" && (
           <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
@@ -4423,7 +4479,7 @@ export default function LaunchpadPage() {
         )}
 
         {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
-        {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && (
+        {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && tab !== "growth" && (
           <LaunchStation
             launchActive={launchActive}
             launchDone={launchDone}
@@ -4439,8 +4495,8 @@ export default function LaunchpadPage() {
           />
         )}
 
-        {/* Progress + Run All — only for svivva/mini tabs */}
-        {tab !== "deploy" && tab !== "checklist" && (
+        {/* Progress + Run All — only for svivva/mini/index22 tabs */}
+        {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && steps.length > 0 && (
           <div className="flex items-center gap-3">
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between text-xs">
@@ -4496,9 +4552,8 @@ export default function LaunchpadPage() {
           />
         )}
 
-        {/* Step cards — only for svivva/mini tabs */}
-        {tab !== "deploy" &&
-          tab !== "checklist" &&
+        {/* Step cards — svivva / mini / index22 */}
+        {(tab === "svivva" || tab === "mini" || tab === "index22") &&
           steps.map((step, idx) => (
             <StepCard
               key={step.id}
@@ -4514,7 +4569,7 @@ export default function LaunchpadPage() {
           ))}
 
         {/* Completion */}
-        {tab !== "deploy" && tab !== "checklist" && allTabDone && (
+        {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && allTabDone && (
           <div
             className="rounded-2xl p-6 text-center space-y-2"
             style={{

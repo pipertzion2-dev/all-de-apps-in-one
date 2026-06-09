@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
+import { seoLandingPages, blogPosts, seedCredentials, growthTasks } from "@/lib/schema";
 import { eq, sql, inArray, desc, isNotNull } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import {
@@ -16,6 +16,10 @@ import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import {
+  buildGrowthIntelligenceReport,
+  formatGrowthIntelSummary,
+} from "@/lib/orbit/growth-intelligence";
 import {
   getDefaultSubdomainCnameTargets,
   getPyracryptMiniAppsBaseUrl,
@@ -5036,6 +5040,32 @@ Return JSON:
           ...paaCreated.map((c) => `• ${c.title}`),
         ].join("\n"),
         details: { created: paaCreated.length, skipped: paaSkipped.length },
+      });
+    }
+
+    // ── STEP: Growth Intelligence daily report ────────────────────────────────
+    if (stepId === "svivva-growth-intelligence") {
+      const report = buildGrowthIntelligenceReport();
+      const summary = formatGrowthIntelSummary(report);
+      try {
+        await db.insert(growthTasks).values({
+          taskType: "growth_intelligence_daily",
+          product: "orbit",
+          status: "completed",
+          details: { report, summary },
+        });
+      } catch {
+        /* non-fatal if DB unavailable */
+      }
+      return NextResponse.json({
+        summary,
+        details: {
+          version: report.version,
+          opportunities: report.stats.aboveThreshold,
+          p0Count: report.stats.p0Count,
+          avgScore: report.stats.avgScore,
+          systemsActive: report.systemsActive.length,
+        },
       });
     }
 
