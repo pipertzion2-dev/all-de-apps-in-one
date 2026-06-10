@@ -6,6 +6,15 @@ import { users } from "@/lib/schema";
 import { setSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/session";
 
+export async function GET(request: NextRequest) {
+  const redirect = request.nextUrl.searchParams.get("redirect");
+  const loginUrl = new URL("/login", request.url);
+  if (redirect?.startsWith("/")) {
+    loginUrl.searchParams.set("redirect", redirect);
+  }
+  return NextResponse.redirect(loginUrl);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();

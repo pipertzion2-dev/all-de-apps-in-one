@@ -13,6 +13,7 @@ const FeatureThreeBg = dynamic(
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeedShield } from "@/components/clutety/feed-shield";
 import { LockScanner } from "@/components/clutety/lock-scanner";
+import SecurityPQCConstructor from "@/components/security-pqc-constructor";
 
 export default function SecurityDashboardPage() {
   const [tab, setTab] = useState("feeds");
@@ -33,7 +34,7 @@ export default function SecurityDashboardPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="feeds" className="gap-2">
             <Rss className="w-4 h-4" />
             Feed Shield
@@ -41,6 +42,10 @@ export default function SecurityDashboardPage() {
           <TabsTrigger value="scan" className="gap-2">
             <Scan className="w-4 h-4" />
             Threat Scanner
+          </TabsTrigger>
+          <TabsTrigger value="pqc" className="gap-2">
+            <Shield className="w-4 h-4" />
+            PQC Proofs
           </TabsTrigger>
         </TabsList>
 
@@ -53,6 +58,10 @@ export default function SecurityDashboardPage() {
           className="mt-4 rounded-xl border bg-card overflow-hidden min-h-[640px]"
         >
           <LockScanner />
+        </TabsContent>
+
+        <TabsContent value="pqc" className="mt-4">
+          <SecurityPQCConstructor />
         </TabsContent>
       </Tabs>
     </div>

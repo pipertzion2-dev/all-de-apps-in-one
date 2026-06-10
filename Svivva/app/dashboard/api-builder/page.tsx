@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import ApiEmergentDiscovery from "@/components/api-emergent-discovery";
 import {
   Sparkles,
   Building2,
@@ -208,6 +209,8 @@ export default function APIBuilderPage() {
           Build a complete branded API product suite for your business.
         </p>
       </div>
+
+      <ApiEmergentDiscovery />
 
       {/* Progress */}
       <div className="space-y-2">

@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitGrowthIntelligence } from "@/components/orbit-growth-intelligence";
+import OrbitCausalAttribution from "@/components/orbit-causal-attribution";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
@@ -2495,7 +2496,14 @@ export default function LaunchpadPage() {
     };
   }, []);
   const [tab, setTab] = useState<
-    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth" | "autopilot"
+    | "svivva"
+    | "mini"
+    | "index22"
+    | "deploy"
+    | "checklist"
+    | "growth"
+    | "autopilot"
+    | "causal"
   >("autopilot");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
@@ -4304,6 +4312,30 @@ export default function LaunchpadPage() {
               <p className="text-[11px] text-muted-foreground leading-tight">Demand scanner</p>
             </button>
             <button
+              onClick={() => setTab("causal")}
+              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "causal" ? "border-orange-500 bg-orange-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+              data-testid="tab-causal-attribution"
+            >
+              <div className="flex items-center gap-1.5 w-full">
+                <Target
+                  className="w-3.5 h-3.5 flex-shrink-0"
+                  style={{ color: tab === "causal" ? "#f97316" : undefined }}
+                />
+                <span
+                  className="text-xs font-bold truncate"
+                  style={{ color: tab === "causal" ? "#f97316" : undefined }}
+                >
+                  Causal ROI
+                </span>
+                <span
+                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "causal" ? "bg-orange-500/20 text-orange-600" : "bg-orange-500/10 text-orange-700"}`}
+                >
+                  AI
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-tight">True channel ROI</p>
+            </button>
+            <button
               onClick={() => setTab("autopilot")}
               className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "autopilot" ? "border-pink-500 bg-pink-500/10" : "border-border bg-card hover:bg-muted/30"}`}
               data-testid="tab-autopilot"
@@ -4457,6 +4489,8 @@ export default function LaunchpadPage() {
             }}
           />
         )}
+
+        {tab === "causal" && <OrbitCausalAttribution />}
 
         {/* Marketing Autopilot tab */}
         {tab === "autopilot" && <OrbitMarketingAutopilot />}

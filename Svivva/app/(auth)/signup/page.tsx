@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -9,6 +9,13 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [redirectTo, setRedirectTo] = useState("/dashboard");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get("redirect");
+    if (r && r.startsWith("/")) setRedirectTo(r);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +35,7 @@ export default function SignupPage() {
         return;
       }
 
-      window.location.href = `/dashboard${data.token ? `?session_token=${data.token}` : ""}`;
+      window.location.href = `${redirectTo}${data.token ? `?session_token=${data.token}` : ""}`;
     } catch {
       setError("Network error — please try again.");
     } finally {

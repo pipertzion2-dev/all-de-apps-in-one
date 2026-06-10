@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,7 +71,7 @@ const defaultPlans = [
   },
 ];
 
-export default function BillingPage() {
+function BillingPageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -359,5 +359,15 @@ export default function BillingPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense
+      fallback={<div className="p-6 text-sm text-muted-foreground">Loading billing...</div>}
+    >
+      <BillingPageContent />
+    </Suspense>
   );
 }

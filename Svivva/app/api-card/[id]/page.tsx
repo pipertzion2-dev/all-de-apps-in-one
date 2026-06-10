@@ -135,7 +135,7 @@ export default async function ApiCardPage({ params }: PageProps) {
           <span style={{ color: "#94a3b8", fontSize: 13 }}>API Card</span>
         </Link>
         <Link
-          href="/api/auth/login"
+          href="/login"
           style={{
             padding: "6px 14px",
             borderRadius: 8,
@@ -361,7 +361,7 @@ export default async function ApiCardPage({ params }: PageProps) {
             one-click deploy.
           </p>
           <Link
-            href="/api/auth/login"
+            href="/signup"
             style={{
               display: "inline-flex",
               alignItems: "center",

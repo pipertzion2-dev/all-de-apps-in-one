@@ -174,7 +174,7 @@ export default function LandingPage() {
   const handleStartBuilding = () => {
     const destination =
       mode === "digital" ? "/dashboard/api-builder" : "/dashboard/hardware-builder";
-    window.location.href = `/api/auth/login?redirect=${encodeURIComponent(destination)}`;
+    window.location.href = `/signup?redirect=${encodeURIComponent(destination)}`;
   };
 
   const virtualScrollRef = useRef(0);
@@ -522,7 +522,7 @@ export default function LandingPage() {
                 <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                 <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
               </Link>
-              <a href="/api/auth/login" className="hidden md:block">
+              <a href="/login" className="hidden md:block">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -532,7 +532,7 @@ export default function LandingPage() {
                   Sign In
                 </Button>
               </a>
-              <a href="/api/auth/login">
+              <a href="/signup">
                 <Button
                   size="sm"
                   className="bg-[#5BA8A0] text-xs px-2.5 sm:px-3 whitespace-nowrap"
@@ -781,7 +781,7 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-12 text-center">
-              <a href="/api/auth/login">
+              <a href="/signup">
                 <Button size="lg" className="gap-2 bg-[#5BA8A0]" data-testid="button-platforms-cta">
                   {mode === "digital" ? "Start Building APIs" : "Start Manufacturing"}
                   <ArrowRight className="w-4 h-4" />
@@ -1793,10 +1793,7 @@ export default function LandingPage() {
             </div>
             <p className="text-center text-sm text-muted-foreground mt-8">
               Want to explore first?{" "}
-              <a
-                href="/api/auth/login"
-                className="underline hover:text-foreground transition-colors"
-              >
+              <a href="/signup" className="underline hover:text-foreground transition-colors">
                 Start free
               </a>{" "}
               — no credit card required.
@@ -1848,13 +1845,13 @@ export default function LandingPage() {
                   : "Join thousands of creators turning ideas into manufactured products with AI-powered tools."}
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <a href="/api/auth/login">
+                <a href="/signup">
                   <Button size="lg" className="bg-[#5BA8A0] gap-2" data-testid="button-cta-start">
                     {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </a>
-                <a href="/api/auth/login">
+                <a href="/login">
                   <Button
                     size="lg"
                     variant="outline"

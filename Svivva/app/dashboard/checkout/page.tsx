@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { loadStripe, Stripe as StripeType } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -189,7 +189,7 @@ function CheckoutForm({ tier, onSuccess }: { tier: string; onSuccess: () => void
   );
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tierParam = searchParams.get("tier") || "pro";
@@ -645,5 +645,15 @@ export default function CheckoutPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={<div className="p-6 text-sm text-muted-foreground">Loading checkout...</div>}
+    >
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

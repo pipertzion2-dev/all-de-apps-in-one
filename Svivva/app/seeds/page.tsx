@@ -24,6 +24,7 @@ import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/l
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";
 import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
+import SeedsInvariantCompiler from "@/components/seeds-invariant-compiler";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
 import { ReferralWidget } from "@/components/referral-widget";
@@ -709,6 +710,8 @@ export default function SeedsPage() {
               </Button>
             )}
           </div>
+
+          <SeedsInvariantCompiler />
 
           {/* Marketing funnel shortcut banner */}
           <a

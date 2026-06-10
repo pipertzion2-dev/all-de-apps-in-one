@@ -43,6 +43,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
 
 interface BuildStep {
   id: string;
@@ -1093,6 +1094,24 @@ export default function HardwareBuilderPage() {
           <Badge>Physical</Badge>
           <h1 className="text-xl sm:text-2xl font-bold">Hardware Builder</h1>
         </div>
+
+        <Card className="border-[#5BA8A0]/30">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Merge className="w-5 h-5 text-[#5BA8A0]" />
+              <div>
+                <CardTitle className="text-lg">Schematic Hybridizer</CardTitle>
+                <CardDescription>
+                  Cross-domain AI analysis — discover novel hybrid architectures from any two
+                  hardware schematics
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <HardwareSchematicHybridizer />
+          </CardContent>
+        </Card>
 
         <Card className="border-primary/30">
           <CardHeader className="pb-4">
