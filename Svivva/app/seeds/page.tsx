@@ -617,7 +617,7 @@ export default function SeedsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
       <FeatureThreeBg variant="seeds" />
-      <nav className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex-shrink-0 z-50">
+      <nav className="relative z-10 h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -662,8 +662,8 @@ export default function SeedsPage() {
         </div>
       </nav>
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <main className="relative z-10 flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
@@ -826,7 +826,7 @@ export default function SeedsPage() {
             </div>
 
             {/* Orbit CTA banner */}
-            <Link href="/orbit">
+            <Link href="/dashboard/launchpad">
               <div
                 className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
                 style={{
@@ -871,7 +871,7 @@ export default function SeedsPage() {
             </Link>
 
             {/* Connections Hub */}
-            <div className="rounded-2xl border-2 border-border bg-card p-4" id="seeds-marketing">
+            <div className="rounded-2xl border-2 border-border bg-card p-4" id="seeds-connections">
               <ConnectionsHub />
             </div>
 

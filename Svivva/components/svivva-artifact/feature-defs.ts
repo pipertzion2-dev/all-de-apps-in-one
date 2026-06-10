@@ -53,7 +53,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "8-system growth intelligence. Pain miner, competitor radar, content engine, and 50+ mini apps compounding organic traffic while you sleep.",
     cta: { label: "Open Orbit", href: "/dashboard/launchpad" },
-    accentColor: "#3d8a82",
+    accentColor: "#c06010",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",
   },

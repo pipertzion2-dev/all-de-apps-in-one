@@ -120,7 +120,7 @@ function HealthMatrix({ matrix, appNames }: HealthMatrixProps) {
       <table className="text-xs w-full">
         <thead>
           <tr>
-            <th className="text-left text-white/30 font-normal pb-2 pr-4 min-w-28">App</th>
+            <th className="text-left text-muted-foreground/70 font-normal pb-2 pr-4 min-w-28">App</th>
             {types.map((t) => (
               <th
                 key={t}
@@ -134,8 +134,8 @@ function HealthMatrix({ matrix, appNames }: HealthMatrixProps) {
         </thead>
         <tbody>
           {appNames.map((app) => (
-            <tr key={app} className="border-t border-white/5">
-              <td className="py-2 pr-4 text-white/60 font-medium truncate max-w-xs">{app}</td>
+            <tr key={app} className="border-t border-border/60">
+              <td className="py-2 pr-4 text-muted-foreground font-medium truncate max-w-xs">{app}</td>
               {types.map((t) => {
                 const val = matrix[app]?.[t];
                 return (
@@ -184,24 +184,24 @@ function ViolationCard({
         onClick={() => result.verdict !== "HOLDS" && setOpen((o) => !o)}
       >
         <span className="w-2 h-2 rounded-full shrink-0" style={{ background: style.dot }} />
-        <span className="flex-1 font-mono text-xs text-white/80">{result.invariantId}</span>
+        <span className="flex-1 font-mono text-xs text-foreground">{result.invariantId}</span>
         <span className="text-xs font-semibold" style={{ color: style.text }}>
           {result.verdict}
         </span>
         {result.verdict !== "HOLDS" && (
-          <span className="text-white/30 text-xs ml-2">{open ? "▲" : "▼"}</span>
+          <span className="text-muted-foreground/70 text-xs ml-2">{open ? "▲" : "▼"}</span>
         )}
-        <span className="ml-auto text-xs text-white/30">
+        <span className="ml-auto text-xs text-muted-foreground/70">
           {(result.confidence * 100).toFixed(0)}% conf.
         </span>
       </button>
 
       {open && result.verdict !== "HOLDS" && (
-        <div className="px-4 pb-4 space-y-3 border-t border-white/10 pt-3">
+        <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
           {invariant && (
             <div className="space-y-1">
-              <div className="text-xs text-white/30">Invariant</div>
-              <div className="font-mono text-xs text-white/60 bg-black/30 rounded px-3 py-2 leading-relaxed">
+              <div className="text-xs text-muted-foreground/70">Invariant</div>
+              <div className="font-mono text-xs text-muted-foreground bg-background rounded px-3 py-2 leading-relaxed">
                 {invariant.formalSpec}
               </div>
             </div>
@@ -209,24 +209,24 @@ function ViolationCard({
           {result.counterexample && (
             <div className="space-y-1">
               <div className="text-xs text-red-400">Counterexample</div>
-              <div className="text-sm text-white/60 leading-relaxed">{result.counterexample}</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">{result.counterexample}</div>
             </div>
           )}
           {result.violationType && (
             <div className="space-y-1">
-              <div className="text-xs text-white/30">Violation Type</div>
-              <div className="text-sm text-white/60">{result.violationType}</div>
+              <div className="text-xs text-muted-foreground/70">Violation Type</div>
+              <div className="text-sm text-muted-foreground">{result.violationType}</div>
             </div>
           )}
           {result.fixSuggestion && (
             <div className="space-y-1">
               <div className="text-xs text-emerald-400">Fix Suggestion</div>
-              <div className="text-sm text-white/60 leading-relaxed">{result.fixSuggestion}</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">{result.fixSuggestion}</div>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <div className="text-xs text-white/30">Severity</div>
-            <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="text-xs text-muted-foreground/70">Severity</div>
+            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
               <div
                 className="h-full rounded-full"
                 style={{
@@ -240,7 +240,7 @@ function ViolationCard({
                 }}
               />
             </div>
-            <span className="text-xs text-white/50 font-mono">
+            <span className="text-xs text-muted-foreground font-mono">
               {result.severityScore.toFixed(1)}/10
             </span>
           </div>
@@ -328,30 +328,30 @@ export default function SeedsInvariantCompiler() {
   const appNames = apps.filter((a) => a.name.trim()).map((a) => a.name);
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-[#0d0d1a] text-white overflow-hidden">
-      <div className="w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8">
+    <div className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card text-foreground overflow-hidden shadow-sm">
+      <div className="w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Header */}
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-lg">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#5BA8A0] to-[#6B2C4A] flex items-center justify-center text-lg text-white">
               ⊢
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Behavioral Invariant Compiler</h1>
+            <h2 className="text-xl font-bold tracking-tight">Behavioral Invariant Compiler</h2>
           </div>
-          <p className="text-sm text-white/40 pl-11">
+          <p className="text-sm text-muted-foreground pl-11">
             Extract formal invariants from specs using abstract interpretation · verify apps ·
             generate TLA+
           </p>
         </div>
 
         {/* Spec Input */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3">
-          <label className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+        <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+          <label className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
             Original Specification
           </label>
           <textarea
             rows={7}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30 resize-none font-mono leading-relaxed"
+            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50 resize-none font-mono leading-relaxed"
             placeholder="Paste your natural-language specification here. E.g.: 'Users must provide explicit consent before any personal data is stored. The system must respond to all requests within 500ms under normal load. No user can access another user's private data…'"
             value={spec}
             onChange={(e) => setSpec(e.target.value)}
@@ -361,30 +361,30 @@ export default function SeedsInvariantCompiler() {
         {/* Apps */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+            <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
               Generated Apps to Verify
             </h2>
             <button
               type="button"
               onClick={addApp}
-              className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+              className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/40 transition-all"
             >
               + Add App
             </button>
           </div>
 
           {apps.map((app, i) => (
-            <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+            <div key={i} className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30"
+                    className="bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="App name"
                     value={app.name}
                     onChange={(e) => updateApp(i, { name: e.target.value })}
                   />
                   <input
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30"
+                    className="bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Brief description"
                     value={app.description}
                     onChange={(e) => updateApp(i, { description: e.target.value })}
@@ -394,7 +394,7 @@ export default function SeedsInvariantCompiler() {
                   <button
                     type="button"
                     onClick={() => removeApp(i)}
-                    className="text-white/20 hover:text-red-400 transition-colors text-lg leading-none"
+                    className="text-muted-foreground/50 hover:text-red-400 transition-colors text-lg leading-none"
                   >
                     ×
                   </button>
@@ -403,7 +403,7 @@ export default function SeedsInvariantCompiler() {
 
               {/* Features */}
               <div className="space-y-2">
-                <div className="text-xs text-white/30">Features</div>
+                <div className="text-xs text-muted-foreground/70">Features</div>
                 <div className="flex flex-wrap gap-1.5">
                   {app.features.map((f, fi) => (
                     <span
@@ -424,7 +424,7 @@ export default function SeedsInvariantCompiler() {
                 </div>
                 <div className="flex gap-2">
                   <input
-                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
+                    className="flex-1 bg-muted/40 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Add a feature…"
                     value={newFeatureText[i] ?? ""}
                     onChange={(e) =>
@@ -440,7 +440,7 @@ export default function SeedsInvariantCompiler() {
                   <button
                     type="button"
                     onClick={() => addFeature(i)}
-                    className="px-3 py-1.5 text-xs border border-white/10 rounded-lg text-white/40 hover:text-white hover:border-white/30 transition-all"
+                    className="px-3 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/40 transition-all"
                   >
                     Add
                   </button>
@@ -451,8 +451,8 @@ export default function SeedsInvariantCompiler() {
         </div>
 
         {/* Invariant Types */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3">
-          <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+        <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+          <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
             Invariant Types to Extract
           </h2>
           <div className="flex flex-wrap gap-3">
@@ -482,7 +482,7 @@ export default function SeedsInvariantCompiler() {
                     <div className="text-sm font-semibold" style={{ color: cfg.color }}>
                       {cfg.label}
                     </div>
-                    <div className="text-xs text-white/30 mt-0.5">{cfg.description}</div>
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">{cfg.description}</div>
                   </div>
                 </label>
               );
@@ -516,29 +516,29 @@ export default function SeedsInvariantCompiler() {
           <div className="space-y-6">
             {/* Summary bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-cyan-400">
                   {result.extractedInvariants.length}
                 </div>
-                <div className="text-xs text-white/30">Invariants</div>
+                <div className="text-xs text-muted-foreground/70">Invariants</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-red-400">
                   {result.criticalViolations.length}
                 </div>
-                <div className="text-xs text-white/30">Critical Violations</div>
+                <div className="text-xs text-muted-foreground/70">Critical Violations</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-emerald-400">
                   {(result.specCoverageScore * 100).toFixed(0)}%
                 </div>
-                <div className="text-xs text-white/30">Spec Coverage</div>
+                <div className="text-xs text-muted-foreground/70">Spec Coverage</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-amber-400">
                   {result.verificationResults.filter((v) => v.verdict === "VIOLATED").length}
                 </div>
-                <div className="text-xs text-white/30">Violations Found</div>
+                <div className="text-xs text-muted-foreground/70">Violations Found</div>
               </div>
             </div>
 
@@ -558,8 +558,8 @@ export default function SeedsInvariantCompiler() {
             )}
 
             {/* Extracted Invariants */}
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3">
-              <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+            <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+              <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                 Extracted Invariants
               </h2>
               <div className="space-y-3">
@@ -568,10 +568,10 @@ export default function SeedsInvariantCompiler() {
                   return (
                     <div
                       key={inv.id}
-                      className="rounded-lg border border-white/10 bg-black/20 p-4 space-y-2"
+                      className="rounded-lg border border-border bg-black/20 p-4 space-y-2"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-white/80">{inv.id}</span>
+                        <span className="font-mono text-xs font-bold text-foreground">{inv.id}</span>
                         <span
                           className="px-2 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: typeCfg.color + "20", color: typeCfg.color }}
@@ -587,13 +587,13 @@ export default function SeedsInvariantCompiler() {
                         >
                           {inv.criticalityLevel}
                         </span>
-                        <span className="text-xs text-white/30">{inv.category}</span>
+                        <span className="text-xs text-muted-foreground/70">{inv.category}</span>
                       </div>
-                      <p className="text-sm text-white/70">{inv.naturalLanguage}</p>
-                      <div className="font-mono text-xs text-cyan-300 bg-black/30 rounded px-3 py-2 leading-relaxed break-all">
+                      <p className="text-sm text-foreground/70">{inv.naturalLanguage}</p>
+                      <div className="font-mono text-xs text-cyan-300 bg-background rounded px-3 py-2 leading-relaxed break-all">
                         {inv.formalSpec}
                       </div>
-                      <p className="text-xs text-white/30 italic">{inv.sourceClause}</p>
+                      <p className="text-xs text-muted-foreground/70 italic">{inv.sourceClause}</p>
                     </div>
                   );
                 })}
@@ -602,14 +602,14 @@ export default function SeedsInvariantCompiler() {
 
             {/* Verification Matrix */}
             {appNames.length > 0 && (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
-                <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+              <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-4">
+                <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                   Verification Matrix
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="text-xs w-full">
                     <thead>
-                      <tr className="text-white/30 border-b border-white/10">
+                      <tr className="text-muted-foreground/70 border-b border-border">
                         <th className="text-left font-normal pb-2 pr-4 min-w-24">Invariant</th>
                         {appNames.map((name) => (
                           <th
@@ -623,8 +623,8 @@ export default function SeedsInvariantCompiler() {
                     </thead>
                     <tbody>
                       {result.extractedInvariants.map((inv) => (
-                        <tr key={inv.id} className="border-b border-white/5">
-                          <td className="py-2 pr-4 font-mono text-white/50">{inv.id}</td>
+                        <tr key={inv.id} className="border-b border-border/60">
+                          <td className="py-2 pr-4 font-mono text-muted-foreground">{inv.id}</td>
                           {appNames.map((name) => {
                             const vr = result.verificationResults.find(
                               (v) => v.appName === name && v.invariantId === inv.id,
@@ -662,9 +662,9 @@ export default function SeedsInvariantCompiler() {
               return (
                 <div
                   key={name}
-                  className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3"
+                  className="rounded-xl border border-border bg-muted/40 p-5 space-y-3"
                 >
-                  <h3 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+                  <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                     Violations · {name}
                   </h3>
                   <div className="space-y-2">
@@ -682,12 +682,12 @@ export default function SeedsInvariantCompiler() {
 
             {/* Health Matrix Heatmap */}
             {Object.keys(result.overallHealthMatrix).length > 0 && (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3">
-                <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+              <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+                <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                   Health Matrix
                 </h2>
                 <HealthMatrix matrix={result.overallHealthMatrix} appNames={appNames} />
-                <div className="flex gap-4 text-xs text-white/30 pt-1">
+                <div className="flex gap-4 text-xs text-muted-foreground/70 pt-1">
                   {[
                     { label: "≥90%", color: "rgba(52,211,153,0.35)" },
                     { label: "≥75%", color: "rgba(52,211,153,0.2)" },
@@ -712,7 +712,7 @@ export default function SeedsInvariantCompiler() {
                 </h2>
                 <ol className="space-y-2">
                   {result.recommendedAppOrder.map((name, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm text-white/70">
+                    <li key={i} className="flex items-center gap-3 text-sm text-foreground/70">
                       <span
                         className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                         style={{
@@ -731,8 +731,8 @@ export default function SeedsInvariantCompiler() {
 
             {/* TLA+ Spec Fragment */}
             {result.tlaSpecFragment && (
-              <div className="rounded-xl border border-white/10 bg-black/40 p-5 space-y-3">
-                <h2 className="text-xs uppercase tracking-widest text-white/40 font-semibold">
+              <div className="rounded-xl border border-border bg-black/40 p-5 space-y-3">
+                <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                   TLA+ Specification Fragment
                 </h2>
                 <pre className="font-mono text-xs text-cyan-300 leading-relaxed overflow-x-auto whitespace-pre-wrap break-all">
