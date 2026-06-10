@@ -1,14 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import dynamic from "next/dynamic";
-const FeatureThreeBg = dynamic(
-  () =>
-    import("@/components/feature-three-background").then((m) => ({
-      default: m.FeatureThreeBackground,
-    })),
-  { ssr: false },
-);
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
@@ -54,6 +46,7 @@ import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
+import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
@@ -3379,8 +3372,7 @@ export default function LaunchpadPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <FeatureThreeBg variant="orbit" />
+    <div className="min-h-screen bg-background relative z-0">
       {devLanUrl && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div className="rounded-xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-950 dark:text-amber-100 space-y-1.5">
@@ -4490,7 +4482,17 @@ export default function LaunchpadPage() {
 
         {/* Checklist tab — visual mission control + detailed list */}
         {tab === "checklist" && (
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-8 relative z-10">
+            <OrbitAdminMissionBoard
+              stepStatuses={statuses}
+              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+              svivvaTotal={SVIVVA_STEPS.length}
+              svivvaDone={svivvaDone}
+              miniTotal={miniSteps.length}
+              miniDone={miniDone}
+              index22Total={INDEX22_STEPS.length}
+              index22Done={index22Done}
+            />
             <OrbitMarketingVision
               orbitStatus={orbitStatus as Record<string, unknown> | undefined}
               stepStatuses={statuses}

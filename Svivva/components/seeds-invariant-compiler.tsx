@@ -120,7 +120,9 @@ function HealthMatrix({ matrix, appNames }: HealthMatrixProps) {
       <table className="text-xs w-full">
         <thead>
           <tr>
-            <th className="text-left text-muted-foreground/70 font-normal pb-2 pr-4 min-w-28">App</th>
+            <th className="text-left text-muted-foreground/70 font-normal pb-2 pr-4 min-w-28">
+              App
+            </th>
             {types.map((t) => (
               <th
                 key={t}
@@ -135,7 +137,9 @@ function HealthMatrix({ matrix, appNames }: HealthMatrixProps) {
         <tbody>
           {appNames.map((app) => (
             <tr key={app} className="border-t border-border/60">
-              <td className="py-2 pr-4 text-muted-foreground font-medium truncate max-w-xs">{app}</td>
+              <td className="py-2 pr-4 text-muted-foreground font-medium truncate max-w-xs">
+                {app}
+              </td>
               {types.map((t) => {
                 const val = matrix[app]?.[t];
                 return (
@@ -209,7 +213,9 @@ function ViolationCard({
           {result.counterexample && (
             <div className="space-y-1">
               <div className="text-xs text-red-400">Counterexample</div>
-              <div className="text-sm text-muted-foreground leading-relaxed">{result.counterexample}</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                {result.counterexample}
+              </div>
             </div>
           )}
           {result.violationType && (
@@ -221,7 +227,9 @@ function ViolationCard({
           {result.fixSuggestion && (
             <div className="space-y-1">
               <div className="text-xs text-emerald-400">Fix Suggestion</div>
-              <div className="text-sm text-muted-foreground leading-relaxed">{result.fixSuggestion}</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                {result.fixSuggestion}
+              </div>
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -571,7 +579,9 @@ export default function SeedsInvariantCompiler() {
                       className="rounded-lg border border-border bg-black/20 p-4 space-y-2"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-foreground">{inv.id}</span>
+                        <span className="font-mono text-xs font-bold text-foreground">
+                          {inv.id}
+                        </span>
                         <span
                           className="px-2 py-0.5 rounded-full text-xs font-semibold"
                           style={{ background: typeCfg.color + "20", color: typeCfg.color }}
