@@ -18,128 +18,151 @@ type Props = { variant: FeatureVariant };
 // Scene builders — one per feature
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── play: scan-line equalizer bars + vertical sweep ─────────────────────────
 function buildPlay(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
   const COLOR = new THREE.Color("#7c5cbf");
-  const lines: THREE.Line[] = [];
-  const COUNT = 12;
+  const BRIGHT = new THREE.Color("#b08fe8");
+  const BAR_COUNT = 22;
 
-  for (let i = 0; i < COUNT; i++) {
-    const pts: THREE.Vector3[] = [];
-    const segments = 120;
-    for (let s = 0; s <= segments; s++) pts.push(new THREE.Vector3(0, 0, 0));
-    const geo = new THREE.BufferGeometry().setFromPoints(pts);
-    const mat = new THREE.LineBasicMaterial({
-      color: COLOR,
+  type Bar = { mesh: THREE.Mesh; baseY: number };
+  const bars: Bar[] = [];
+
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const geo = new THREE.PlaneGeometry(20, 0.048 + Math.random() * 0.02);
+    const mat = new THREE.MeshBasicMaterial({
+      color: i % 5 === 0 ? BRIGHT : COLOR,
       transparent: true,
-      opacity: 0.06 + (i / COUNT) * 0.1,
+      opacity: 0.04 + (i / BAR_COUNT) * 0.1,
+      side: THREE.DoubleSide,
     });
-    const line = new THREE.Line(geo, mat);
-    scene.add(line);
-    lines.push(line);
+    const m = new THREE.Mesh(geo, mat);
+    const baseY = -5.5 + (i / (BAR_COUNT - 1)) * 11;
+    m.position.set(0, baseY, -3 - Math.random() * 0.5);
+    scene.add(m);
+    bars.push({ mesh: m, baseY });
   }
 
-  // Vertical scan plane
-  const scanGeo = new THREE.PlaneGeometry(0.006, 20);
-  const scanMat = new THREE.MeshBasicMaterial({
-    color: COLOR,
-    transparent: true,
-    opacity: 0.18,
-  });
-  const scan = new THREE.Mesh(scanGeo, scanMat);
+  // Vertical scan plane sweeping across
+  const scan = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.007, 14),
+    new THREE.MeshBasicMaterial({ color: BRIGHT, transparent: true, opacity: 0.28 }),
+  );
   scene.add(scan);
 
+  // Glowing peak spheres that ride the audio peak
+  const peakSpheres: THREE.Mesh[] = [];
+  for (let i = 0; i < 5; i++) {
+    const s = new THREE.Mesh(
+      new THREE.SphereGeometry(0.04, 8, 6),
+      new THREE.MeshBasicMaterial({ color: BRIGHT, transparent: true, opacity: 0.5 }),
+    );
+    scene.add(s);
+    peakSpheres.push(s);
+  }
+
   return (t: number) => {
-    lines.forEach((line, i) => {
-      const geo = line.geometry as THREE.BufferGeometry;
-      const pos = geo.attributes.position as THREE.BufferAttribute;
-      const segments = pos.count - 1;
-      const amp = 0.6 + i * 0.25 + mouse.y * 0.5;
-      const freq = 0.04 + i * 0.008;
-      const speed = 0.8 + i * 0.15;
-      const yBase = -4 + (i / (lines.length - 1)) * 8;
-      for (let s = 0; s <= segments; s++) {
-        const x = -10 + (s / segments) * 20;
-        const y = yBase + Math.sin(x * freq + t * speed + i * 0.6) * amp;
-        pos.setXYZ(s, x, y, -2);
-      }
-      pos.needsUpdate = true;
+    // "Audio peak" follows mouse y — which bar region is boosted
+    const peakY = mouse.y * 4.5;
+
+    bars.forEach(({ mesh, baseY }, i) => {
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      const proximity = Math.exp(-0.35 * (baseY - peakY) ** 2);
+      const amp =
+        (0.25 + proximity * 0.9) * Math.sin(i * 0.42 + t * (1.4 + i * 0.04) + mouse.x * 1.8);
+      mesh.position.y = baseY + amp;
+      mat.opacity = 0.02 + Math.abs(amp) * 0.07 + proximity * 0.07;
     });
 
-    // Scan line sweeps horizontally
-    scan.position.x = ((t * 1.2) % 22) - 11;
-    scan.material.opacity = 0.12 + 0.06 * Math.sin(t * 3);
+    // Peak spheres sit at the tips of the 5 most-displaced bars near peakY
+    const sorted = [...bars]
+      .map((b, i) => ({ i, dist: Math.abs(b.baseY - peakY) }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 5);
+    sorted.forEach(({ i }, pi) => {
+      const b = bars[i];
+      peakSpheres[pi].position.set(mouse.x * 8, b.mesh.position.y, b.mesh.position.z + 0.05);
+      (peakSpheres[pi].material as THREE.MeshBasicMaterial).opacity =
+        0.3 + 0.2 * Math.sin(t * 3 + pi);
+    });
+
+    scan.position.x = ((t * 1.4) % 22) - 11;
+    (scan.material as THREE.MeshBasicMaterial).opacity = 0.15 + 0.08 * Math.sin(t * 2.5);
   };
 }
 
+// ── seeds: branching node tree like a cassette reel unwinding ────────────────
 function buildSeeds(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
   const COLOR = new THREE.Color("#5BA8A0");
-  const NODE_COUNT = 28;
-
-  // Node spheres
-  const nodeGeo = new THREE.SphereGeometry(0.04, 6, 6);
-  const nodeMat = new THREE.MeshBasicMaterial({
-    color: COLOR,
-    transparent: true,
-    opacity: 0.55,
-  });
+  const NODE_COUNT = 60;
 
   type NodeData = {
     mesh: THREE.Mesh;
     ox: number;
     oy: number;
-    oz: number;
     phase: number;
     speed: number;
+    depth: number;
   };
   const nodes: NodeData[] = [];
+
+  const nodeGeo = new THREE.SphereGeometry(0.04, 6, 4);
+
   for (let i = 0; i < NODE_COUNT; i++) {
-    const angle = (i / NODE_COUNT) * Math.PI * 2;
-    const r = 1.5 + Math.random() * 4;
-    const mesh = new THREE.Mesh(nodeGeo, nodeMat.clone());
+    const depth = i < 4 ? 0 : Math.floor(1 + Math.random() * 3);
+    const angle = (i / NODE_COUNT) * Math.PI * (4 + depth * 0.8) + depth * 0.4;
+    const r = depth * 1.6 + 0.4 + Math.random() * 0.9;
+    const mat = new THREE.MeshBasicMaterial({
+      color: COLOR,
+      transparent: true,
+      opacity: 0.3 + (depth === 0 ? 0.3 : 0.1),
+    });
+    const m = new THREE.Mesh(nodeGeo, mat);
     const ox = Math.cos(angle) * r;
-    const oy = (Math.random() - 0.5) * 8;
-    const oz = -3 - Math.random() * 3;
-    mesh.position.set(ox, oy, oz);
-    scene.add(mesh);
+    const oy = (Math.random() - 0.5) * (2 + depth * 1.8);
+    m.position.set(ox, oy, -3 - Math.random() * 2);
+    scene.add(m);
     nodes.push({
-      mesh,
+      mesh: m,
       ox,
       oy,
-      oz,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.3 + Math.random() * 0.4,
+      speed: 0.2 + Math.random() * 0.3,
+      depth,
     });
   }
 
-  // Line connections
-  const linePositions = new Float32Array(NODE_COUNT * NODE_COUNT * 6);
+  // Line connections between depth-adjacent nodes
+  const maxLines = NODE_COUNT * 4;
+  const linePositions = new Float32Array(maxLines * 6);
   const lineGeo = new THREE.BufferGeometry();
   lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-  const lineMat = new THREE.LineBasicMaterial({
-    color: COLOR,
-    transparent: true,
-    opacity: 0.12,
-  });
-  const lineObj = new THREE.LineSegments(lineGeo, lineMat);
+  const lineObj = new THREE.LineSegments(
+    lineGeo,
+    new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.14 }),
+  );
   scene.add(lineObj);
 
   return (t: number) => {
     nodes.forEach((n) => {
-      n.mesh.position.x = n.ox + mouse.x * 0.8 + Math.sin(t * n.speed + n.phase) * 0.3;
-      n.mesh.position.y = n.oy + mouse.y * 0.6 + Math.cos(t * n.speed * 0.7 + n.phase) * 0.2;
+      n.mesh.position.x =
+        n.ox + mouse.x * (0.4 + n.depth * 0.25) + Math.sin(t * n.speed + n.phase) * 0.25;
+      n.mesh.position.y =
+        n.oy + mouse.y * (0.3 + n.depth * 0.18) + Math.cos(t * n.speed * 0.8 + n.phase) * 0.18;
     });
 
     let vi = 0;
     const pos = lineGeo.attributes.position as THREE.BufferAttribute;
     for (let a = 0; a < nodes.length; a++) {
       for (let b = a + 1; b < nodes.length; b++) {
-        const da = nodes[a].mesh.position;
-        const db = nodes[b].mesh.position;
-        const dist = da.distanceTo(db);
-        if (dist < 3.5 && vi + 5 < linePositions.length) {
-          pos.setXYZ(vi / 3, da.x, da.y, da.z);
-          pos.setXYZ(vi / 3 + 1, db.x, db.y, db.z);
-          vi += 6;
+        if (Math.abs(nodes[a].depth - nodes[b].depth) <= 1) {
+          const da = nodes[a].mesh.position;
+          const db = nodes[b].mesh.position;
+          const dist = da.distanceTo(db);
+          if (dist < 3.2 && vi + 5 < maxLines * 6) {
+            pos.setXYZ(vi / 3, da.x, da.y, da.z);
+            pos.setXYZ(vi / 3 + 1, db.x, db.y, db.z);
+            vi += 6;
+          }
         }
       }
     }
@@ -149,162 +172,212 @@ function buildSeeds(scene: THREE.Scene, mouse: { x: number; y: number }): (t: nu
   };
 }
 
+// ── orbit: botanical web + pulsing connections + eye ellipses ────────────────
 function buildOrbit(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
-  const COLOR = new THREE.Color("#3d8a82");
-  const PARTICLE_COUNT = 220;
+  const COLOR = new THREE.Color("#c06010");
+  const NODE_COUNT = 80;
 
-  // Particles
-  const positions = new Float32Array(PARTICLE_COUNT * 3);
-  const phases = new Float32Array(PARTICLE_COUNT);
-  const radii = new Float32Array(PARTICLE_COUNT);
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
+  type NodeData = {
+    mesh: THREE.Mesh;
+    angle: number;
+    r: number;
+    oy: number;
+    phase: number;
+  };
+  const nodes: NodeData[] = [];
+
+  const nodeGeo = new THREE.IcosahedronGeometry(0.045, 0);
+  const nodeMat = new THREE.MeshBasicMaterial({ color: COLOR, transparent: true, opacity: 0.45 });
+
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const m = new THREE.Mesh(nodeGeo, nodeMat.clone());
     const angle = Math.random() * Math.PI * 2;
-    const r = 1 + Math.random() * 6;
-    positions[i * 3] = Math.cos(angle) * r;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
-    positions[i * 3 + 2] = -3 + Math.random() * 2;
-    phases[i] = Math.random() * Math.PI * 2;
-    radii[i] = r;
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  const mat = new THREE.PointsMaterial({
-    color: COLOR,
-    size: 0.04,
-    transparent: true,
-    opacity: 0.5,
-  });
-  const particles = new THREE.Points(geo, mat);
-  scene.add(particles);
-
-  // Orbital rings
-  for (let ri = 0; ri < 3; ri++) {
-    const r = 2.5 + ri * 2;
-    const ringGeo = new THREE.RingGeometry(r - 0.005, r + 0.005, 80);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: COLOR,
-      transparent: true,
-      opacity: 0.06 + ri * 0.03,
-      side: THREE.DoubleSide,
+    const r = 0.5 + Math.random() * 6;
+    const oy = (Math.random() - 0.5) * 9;
+    m.position.set(Math.cos(angle) * r, oy, -3);
+    scene.add(m);
+    nodes.push({
+      mesh: m,
+      angle: angle + Math.random() * 0.3,
+      r,
+      oy,
+      phase: Math.random() * Math.PI * 2,
     });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2 + ri * 0.3;
-    ring.rotation.y = ri * 0.5;
-    ring.position.z = -3;
-    scene.add(ring);
   }
 
-  // Web connections
-  const webPositions = new Float32Array(1000 * 6);
+  // Web connection lines (capped for performance)
+  const MAX_SEGS = 240;
+  const webPos = new Float32Array(MAX_SEGS * 6);
   const webGeo = new THREE.BufferGeometry();
-  webGeo.setAttribute("position", new THREE.BufferAttribute(webPositions, 3));
+  webGeo.setAttribute("position", new THREE.BufferAttribute(webPos, 3));
   scene.add(
     new THREE.LineSegments(
       webGeo,
-      new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.08 }),
+      new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.1 }),
     ),
   );
 
-  return (t: number) => {
-    const pos = geo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const angle = phases[i] + t * (0.15 / radii[i]);
-      pos.setXYZ(
-        i,
-        Math.cos(angle) * radii[i] + mouse.x * 0.5,
-        Math.sin(phases[i] * 2 + t * 0.2) * radii[i] * 0.4 + mouse.y * 0.4,
-        -3,
-      );
-    }
-    pos.needsUpdate = true;
-  };
-}
-
-function buildSecurity(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
-  const COLOR = new THREE.Color("#6B2C4A");
-  const ACCENT = new THREE.Color("#c47fa0");
-
-  // Corner diamond clusters
-  const diamondGeo = new THREE.OctahedronGeometry(0.12, 0);
-  const positions = [
-    [-7, 5],
-    [7, 5],
-    [-7, -5],
-    [7, -5],
-    [0, 5.5],
-    [0, -5.5],
-    [-7.5, 0],
-    [7.5, 0],
-  ];
-  const diamonds: THREE.Mesh[] = [];
-  positions.forEach(([x, y], i) => {
-    const mat = new THREE.MeshStandardMaterial({
-      color: i % 2 === 0 ? COLOR : ACCENT,
-      metalness: 0.8,
-      roughness: 0.1,
+  // Eye-like ring ellipses
+  type EyeData = { mesh: THREE.Mesh; life: number; maxLife: number };
+  const eyes: EyeData[] = [];
+  for (let i = 0; i < 6; i++) {
+    const geo = new THREE.RingGeometry(0.28, 0.32, 36);
+    geo.scale(1, 0.38, 1); // squash to ellipse
+    const mat = new THREE.MeshBasicMaterial({
+      color: COLOR,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0,
+      side: THREE.DoubleSide,
     });
-    const m = new THREE.Mesh(diamondGeo, mat);
-    m.position.set(x, y, -2);
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set((Math.random() - 0.5) * 13, (Math.random() - 0.5) * 8, -2.5);
     scene.add(m);
-    diamonds.push(m);
-  });
-
-  // Ornamental border lines
-  const borderPts = [
-    new THREE.Vector3(-8, 5.5, -2),
-    new THREE.Vector3(8, 5.5, -2),
-    new THREE.Vector3(8, 5.5, -2),
-    new THREE.Vector3(8, -5.5, -2),
-    new THREE.Vector3(8, -5.5, -2),
-    new THREE.Vector3(-8, -5.5, -2),
-    new THREE.Vector3(-8, -5.5, -2),
-    new THREE.Vector3(-8, 5.5, -2),
-  ];
-  const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPts);
-  scene.add(
-    new THREE.LineSegments(
-      borderGeo,
-      new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.15 }),
-    ),
-  );
-
-  // Animated trace line (as a single-segment line that progresses)
-  const tracePts = [new THREE.Vector3(-8, 5.5, -1.9), new THREE.Vector3(-8, 5.5, -1.9)];
-  const traceGeo = new THREE.BufferGeometry().setFromPoints(tracePts);
-  const traceMat = new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.6 });
-  scene.add(new THREE.Line(traceGeo, traceMat));
-
-  // Light for diamonds
-  const light = new THREE.PointLight(0xffd0e8, 2, 15);
-  light.position.set(0, 0, 3);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    eyes.push({
+      mesh: m,
+      life: Math.floor(Math.random() * 180),
+      maxLife: 180 + Math.floor(Math.random() * 120),
+    });
+  }
 
   return (t: number) => {
-    diamonds.forEach((d, i) => {
-      d.rotation.y = t * (0.4 + i * 0.1) + mouse.x * 0.5;
-      d.rotation.x = t * (0.3 + i * 0.07) + mouse.y * 0.3;
-      const scale = 1 + 0.15 * Math.sin(t * 1.2 + i);
-      d.scale.setScalar(scale);
+    nodes.forEach((n) => {
+      const speed = 0.09 / (n.r + 0.5);
+      const a = n.angle + t * speed;
+      n.mesh.position.x = Math.cos(a) * n.r + mouse.x * 0.7;
+      n.mesh.position.y = n.oy + Math.sin(n.phase + t * 0.22) * n.r * 0.28 + mouse.y * 0.45;
     });
-    light.position.x = mouse.x * 4;
-    light.position.y = mouse.y * 3;
+
+    const pos = webGeo.attributes.position as THREE.BufferAttribute;
+    let vi = 0;
+    for (let a = 0; a < nodes.length && vi < MAX_SEGS - 1; a++) {
+      for (let b = a + 1; b < nodes.length && vi < MAX_SEGS - 1; b++) {
+        const da = nodes[a].mesh.position;
+        const db = nodes[b].mesh.position;
+        if (da.distanceTo(db) < 2.2) {
+          pos.setXYZ(vi, da.x, da.y, da.z);
+          pos.setXYZ(vi + 1, db.x, db.y, db.z);
+          vi += 2;
+        }
+      }
+    }
+    for (let i = vi; i < pos.count; i++) pos.setXYZ(i, 0, 0, 0);
+    pos.needsUpdate = true;
+    webGeo.setDrawRange(0, vi);
+
+    eyes.forEach((eye) => {
+      eye.life++;
+      if (eye.life > eye.maxLife) {
+        eye.life = 0;
+        eye.maxLife = 180 + Math.floor(Math.random() * 120);
+        eye.mesh.position.set((Math.random() - 0.5) * 13, (Math.random() - 0.5) * 8, -2.5);
+      }
+      const prog = eye.life / eye.maxLife;
+      const mat = eye.mesh.material as THREE.MeshBasicMaterial;
+      mat.opacity = Math.sin(prog * Math.PI) * 0.28;
+      const sc = 0.6 + prog * 0.7 + Math.sin(t * 0.7 + eye.life) * 0.04;
+      eye.mesh.scale.setScalar(sc);
+    });
   };
 }
 
-function buildApi(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
-  const COLOR = new THREE.Color("#9b4d6e");
+// ── security: crystal lattice with edge glow + scroll compression ────────────
+function buildSecurity(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
+  const COLOR = new THREE.Color("#4a90d9");
+  const EDGE_COLOR = new THREE.Color("#a0c8ff");
 
-  // Grid of panels
-  const COLS = 8;
-  const ROWS = 5;
-  const panels: { mesh: THREE.Mesh; baseX: number; baseY: number }[] = [];
+  const COLS = 4;
+  const ROWS = 4;
+  type CrystalData = { mesh: THREE.Mesh; bx: number; by: number; phase: number };
+  const crystals: CrystalData[] = [];
+
+  const crystalGeo = new THREE.OctahedronGeometry(0.3, 0);
+
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      const mat = new THREE.MeshStandardMaterial({
+        color: COLOR,
+        metalness: 0.75,
+        roughness: 0.08,
+        transparent: true,
+        opacity: 0.3 + Math.random() * 0.12,
+      });
+      const m = new THREE.Mesh(crystalGeo, mat);
+      const bx = (x - COLS / 2 + 0.5) * 4.2;
+      const by = (y - ROWS / 2 + 0.5) * 3.2;
+      m.position.set(bx, by, -3);
+      scene.add(m);
+
+      // Wireframe edge overlay for edge-glow effect
+      const edgeMat = new THREE.MeshBasicMaterial({
+        color: EDGE_COLOR,
+        transparent: true,
+        opacity: 0.55,
+        wireframe: true,
+      });
+      const edgeMesh = new THREE.Mesh(crystalGeo, edgeMat);
+      m.add(edgeMesh); // child follows parent transform
+
+      crystals.push({ mesh: m, bx, by, phase: (x * COLS + y) * 0.52 });
+    }
+  }
+
+  // Connecting grid lines
+  const gridPts: THREE.Vector3[] = [];
+  crystals.forEach((c) => {
+    crystals.forEach((d) => {
+      if (c !== d && Math.abs(c.bx - d.bx) + Math.abs(c.by - d.by) < 5) {
+        gridPts.push(new THREE.Vector3(c.bx, c.by, -3));
+        gridPts.push(new THREE.Vector3(d.bx, d.by, -3));
+      }
+    });
+  });
+  if (gridPts.length > 0) {
+    const gridGeo = new THREE.BufferGeometry().setFromPoints(gridPts);
+    scene.add(
+      new THREE.LineSegments(
+        gridGeo,
+        new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0.07 }),
+      ),
+    );
+  }
+
+  const light = new THREE.PointLight(0x90c8ff, 3.5, 22);
+  light.position.set(0, 0, 4);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+  let scrollScale = 1.0;
+
+  return (t: number) => {
+    // Use mouse.y as a scroll-like proxy to compress/expand the grid
+    scrollScale += (1.0 + mouse.y * 0.45 - scrollScale) * 0.025;
+
+    crystals.forEach(({ mesh, bx, by, phase }) => {
+      const bob = Math.sin(t * 0.85 + phase) * 0.18;
+      mesh.position.x = bx + mouse.x * 0.6;
+      mesh.position.y = by * scrollScale + mouse.y * 0.25 + bob;
+      mesh.rotation.y = t * 0.28 + phase;
+      mesh.rotation.x = t * 0.18 + phase * 0.4;
+    });
+
+    light.position.set(mouse.x * 7, mouse.y * 5, 3);
+  };
+}
+
+// ── api: floating wireframe panels that snap into grid from off-screen ────────
+function buildApi(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
+  const COLOR = new THREE.Color("#e85d04");
+
+  const COLS = 7;
+  const ROWS = 4;
+  type PanelData = { mesh: THREE.Mesh; bx: number; by: number; bz: number; delay: number };
+  const panels: PanelData[] = [];
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const geo = new THREE.PlaneGeometry(1.6, 1.0);
+      const w = 1.7 + Math.random() * 0.5;
+      const h = 0.85 + Math.random() * 0.3;
+      const geo = new THREE.PlaneGeometry(w, h);
       const mat = new THREE.MeshBasicMaterial({
         color: COLOR,
         transparent: true,
@@ -312,93 +385,103 @@ function buildApi(scene: THREE.Scene, mouse: { x: number; y: number }): (t: numb
         wireframe: true,
       });
       const m = new THREE.Mesh(geo, mat);
-      const bx = (c - COLS / 2 + 0.5) * 1.8;
-      const by = (r - ROWS / 2 + 0.5) * 1.2;
-      m.position.set(bx, by, -4);
+      const bx = (c - COLS / 2 + 0.5) * 2.1;
+      const by = (r - ROWS / 2 + 0.5) * 1.35;
+      const bz = -3.5 - Math.random() * 0.8;
+      m.position.set(bx, by + 18, bz); // start above viewport
       scene.add(m);
-      panels.push({ mesh: m, baseX: bx, baseY: by });
+      panels.push({ mesh: m, bx, by, bz, delay: (r * COLS + c) * 0.12 });
     }
   }
 
-  // Light sweep plane
-  const sweepGeo = new THREE.PlaneGeometry(0.04, 20);
-  const sweepMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.12,
-  });
-  const sweep = new THREE.Mesh(sweepGeo, sweepMat);
+  // Horizontal sweep light
+  const sweep = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.007, 16),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 }),
+  );
   scene.add(sweep);
 
   return (t: number) => {
-    panels.forEach(({ mesh, baseX, baseY }, i) => {
+    panels.forEach(({ mesh, bx, by, bz, delay }) => {
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      const wave = Math.sin(t * 0.8 + i * 0.3 + mouse.x) * 0.25;
-      mesh.position.z = -4 + wave;
-      mesh.rotation.y = mouse.x * 0.1 + Math.sin(t * 0.3 + i * 0.2) * 0.05;
-      mat.opacity = 0.04 + 0.08 * Math.abs(Math.sin(t * 0.5 + i * 0.4));
-      // Panel closest to mouse lights up
-      const dx = mouse.x * 9 - baseX;
-      const dy = mouse.y * 5 - baseY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      mat.opacity += Math.max(0, 0.15 - dist * 0.06);
+      const progress = Math.max(0, Math.min(1, (t - delay) / 0.9));
+      // Cubic ease-out snaps panels into place
+      const ease = 1 - Math.pow(1 - progress, 3);
+      mesh.position.x = bx + mouse.x * 0.35;
+      mesh.position.y = by + (1 - ease) * 14;
+      mesh.position.z = bz + Math.sin(t * 0.45 + delay) * 0.18;
+      mesh.rotation.y = mouse.x * 0.07 + Math.sin(t * 0.28 + delay) * 0.04;
+      const base = ease * (0.05 + 0.05 * Math.abs(Math.sin(t * 0.55 + delay)));
+      // Highlight panels near cursor
+      const dx = mouse.x * 9 - bx;
+      const dy = mouse.y * 5 - by;
+      mat.opacity = base + Math.max(0, 0.14 - Math.sqrt(dx * dx + dy * dy) * 0.045);
     });
-    sweep.position.x = ((t * 1.8) % 16) - 8;
+    sweep.position.x = ((t * 2.2) % 18) - 9;
   };
 }
 
+// ── hardware: diamond tetrahedra field with depth parallax ───────────────────
 function buildHardware(scene: THREE.Scene, mouse: { x: number; y: number }): (t: number) => void {
-  const COLOR = new THREE.Color("#b5547a");
-  const SILVER = new THREE.Color("#d0c8d8");
-  const COUNT = 22;
+  const COLOR = new THREE.Color("#c9a84c");
+  const SILVER = new THREE.Color("#e8e0c8");
+  const COUNT = 38;
 
-  const light1 = new THREE.PointLight(0xffd8ee, 3, 18);
+  const light1 = new THREE.PointLight(0xffe8a0, 3, 22);
   light1.position.set(4, 4, 4);
   scene.add(light1);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.28));
+
+  const diamondGeo = new THREE.TetrahedronGeometry(1, 0);
 
   type GemData = {
     mesh: THREE.Mesh;
     ox: number;
     oy: number;
+    oz: number;
     phase: number;
     speed: number;
+    depth: number;
   };
   const gems: GemData[] = [];
-  const gemGeo = new THREE.OctahedronGeometry(1, 0);
 
   for (let i = 0; i < COUNT; i++) {
-    const size = 0.08 + Math.random() * 0.28;
+    const size = 0.07 + Math.random() * 0.28;
     const mat = new THREE.MeshStandardMaterial({
       color: i % 3 === 0 ? SILVER : COLOR,
       metalness: 0.9,
-      roughness: 0.05,
+      roughness: 0.04,
       transparent: true,
-      opacity: 0.55 + Math.random() * 0.3,
+      opacity: 0.5 + Math.random() * 0.32,
     });
-    const m = new THREE.Mesh(gemGeo, mat);
+    const m = new THREE.Mesh(diamondGeo, mat);
     m.scale.setScalar(size);
-    const ox = (Math.random() - 0.5) * 16;
-    const oy = (Math.random() - 0.5) * 10;
-    m.position.set(ox, oy, -2 - Math.random() * 2);
+    const ox = (Math.random() - 0.5) * 17;
+    const oy = (Math.random() - 0.5) * 11;
+    const oz = -2 - Math.random() * 3.5;
+    m.position.set(ox, oy, oz);
     scene.add(m);
     gems.push({
       mesh: m,
       ox,
       oy,
+      oz,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.2 + Math.random() * 0.4,
+      speed: 0.18 + Math.random() * 0.45,
+      depth: -oz, // positive depth value (2–5.5)
     });
   }
 
   return (t: number) => {
     gems.forEach((g) => {
+      // Nearer gems move more with mouse (parallax)
+      const parallax = 3.5 / g.depth;
       g.mesh.rotation.y = t * g.speed + g.phase;
-      g.mesh.rotation.x = t * g.speed * 0.7;
-      g.mesh.position.x = g.ox + mouse.x * 1.2 + Math.sin(t * g.speed + g.phase) * 0.2;
-      g.mesh.position.y = g.oy + mouse.y * 0.8 + Math.cos(t * g.speed * 0.8 + g.phase) * 0.15;
+      g.mesh.rotation.x = t * g.speed * 0.65;
+      g.mesh.position.x = g.ox + mouse.x * parallax * 1.8 + Math.sin(t * g.speed + g.phase) * 0.12;
+      g.mesh.position.y = g.oy + mouse.y * parallax + Math.cos(t * g.speed * 0.75 + g.phase) * 0.1;
     });
-    light1.position.set(mouse.x * 5, mouse.y * 4, 4);
+    light1.position.set(mouse.x * 7, mouse.y * 5, 3.5);
   };
 }
 
@@ -426,7 +509,6 @@ export function FeatureThreeBackground({ variant }: Props) {
     const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
     camera.position.z = 8;
 
-    // Shared mouse tracker
     const mouse = { x: 0, y: 0 };
     const onMouseMove = (e: MouseEvent) => {
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -434,8 +516,7 @@ export function FeatureThreeBackground({ variant }: Props) {
     };
     window.addEventListener("mousemove", onMouseMove, { passive: true });
 
-    // Build scene for this variant
-    const sceneBuilders = {
+    const sceneBuilders: Record<FeatureVariant, typeof buildPlay> = {
       play: buildPlay,
       seeds: buildSeeds,
       orbit: buildOrbit,
@@ -454,7 +535,6 @@ export function FeatureThreeBackground({ variant }: Props) {
     };
     animate();
 
-    // Resize
     const onResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;

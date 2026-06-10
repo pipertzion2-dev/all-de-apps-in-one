@@ -84,8 +84,7 @@ export default function StripeSetupPage() {
           {stripeStatus === "connected" && (
             <div className="space-y-4">
               <p className="text-sm text-foreground">
-                API keys are configured (secret + publishable, or Replit connector). Billing and
-                Elements can load.
+                API keys are configured (secret + publishable). Billing and Elements can load.
               </p>
               {envKeysComplete === true && webhookOk === false && (
                 <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
@@ -124,8 +123,7 @@ export default function StripeSetupPage() {
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Set <strong>STRIPE_SECRET_KEY</strong> and <strong>STRIPE_PUBLISHABLE_KEY</strong>{" "}
-                (or <strong>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</strong>) in your deployment
-                environment, use the Replit Stripe connector on Replit, or paste the same keys under{" "}
+                in your deployment environment, or paste the same keys under{" "}
                 <Link href="/dashboard/settings/runtime-keys" className="text-primary underline">
                   Settings → Runtime keys
                 </Link>{" "}
@@ -217,9 +215,8 @@ export default function StripeSetupPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>
-            <strong className="text-foreground">Prices</strong> load from the Replit{" "}
-            <code className="text-xs">stripe.*</code> DB mirror when present; otherwise from the
-            Stripe API (same products as in your Stripe Dashboard).
+            <strong className="text-foreground">Prices</strong> load from the Stripe API using the
+            keys you configured (same products as in your Stripe Dashboard).
           </p>
           <p>
             <strong className="text-foreground">Checkout</strong> uses Stripe Checkout or the

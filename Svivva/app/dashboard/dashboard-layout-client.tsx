@@ -244,7 +244,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
       }
       const sessionToken = params.get("session_token");
       if (sessionToken) {
-        trackSignup("replit_oidc");
+        trackSignup("email_signup");
       }
     }
   }, []);
@@ -297,14 +297,15 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              For the best experience, please open this app in a new browser tab using the button in
-              the top-right corner of the preview.
-            </p>
-            <a href={loginHref} className="block">
+            <a href="/login" className="block">
               <Button className="w-full gap-2" data-testid="button-login">
                 <LogIn className="w-4 h-4" />
-                Sign In with Replit
+                Sign In
+              </Button>
+            </a>
+            <a href="/signup" className="block">
+              <Button variant="outline" className="w-full gap-2">
+                Create Account
               </Button>
             </a>
             <Link href="/" className="block">

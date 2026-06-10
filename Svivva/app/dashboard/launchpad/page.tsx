@@ -52,6 +52,7 @@ import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
+import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
@@ -4460,9 +4461,20 @@ export default function LaunchpadPage() {
         {/* Marketing Autopilot tab */}
         {tab === "autopilot" && <OrbitMarketingAutopilot />}
 
-        {/* Checklist tab */}
+        {/* Checklist tab — visual mission control + detailed list */}
         {tab === "checklist" && (
-          <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
+          <div className="flex flex-col gap-8">
+            <OrbitMarketingVision
+              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+              stepStatuses={statuses}
+            />
+            <div className="border-t border-white/8 pt-6">
+              <p className="text-xs text-white/25 uppercase tracking-widest mb-4">
+                Detailed checklist
+              </p>
+              <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
+            </div>
+          </div>
         )}
 
         {tab === "index22" && (

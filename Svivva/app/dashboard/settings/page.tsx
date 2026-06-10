@@ -84,7 +84,7 @@ export default function SettingsPage() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Profile information is managed through your Replit account.
+            Update your name and profile details here.
           </p>
         </CardContent>
       </Card>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium">Two-Factor Authentication</h4>
-              <p className="text-sm text-muted-foreground">Managed through your Replit account</p>
+              <p className="text-sm text-muted-foreground">Coming soon</p>
             </div>
             <Button variant="outline" disabled data-testid="button-2fa">
               Manage
