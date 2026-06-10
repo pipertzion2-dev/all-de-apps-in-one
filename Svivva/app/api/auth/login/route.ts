@@ -1,36 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLoginUrl } from "@/lib/auth/session";
+import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
+import { setSession } from "@/lib/auth/session";
+import type { SessionUser } from "@/lib/auth/session";
 
-/** Hostname used for app-level redirects (error pages, etc.) — can be the custom domain. */
-function getAppHostname(request: NextRequest): string {
-  // Custom domain always wins (set NEXT_PUBLIC_SITE_URL=https://svivva.com in production)
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    try {
-      return new URL(process.env.NEXT_PUBLIC_SITE_URL).host;
-    } catch {}
-  }
-  return (
-    request.headers.get("x-forwarded-host") ||
-    request.headers.get("host") ||
-    request.nextUrl.hostname
-  );
-}
-
-export async function GET(request: NextRequest) {
-  const appHostname = getAppHostname(request);
-  const redirectAfter = request.nextUrl.searchParams.get("redirect") || undefined;
-
+export async function POST(request: NextRequest) {
   try {
-    const loginUrl = await getLoginUrl(appHostname, redirectAfter);
-    return NextResponse.redirect(loginUrl);
+    const { email, password } = await request.json();
+
+    if (!email || !password) {
+      return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email.toLowerCase().trim()))
+      .limit(1);
+
+    if (!user || !user.passwordHash) {
+      return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+    }
+
+    const sessionUser: SessionUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.name?.split(" ")[0] || null,
+      lastName: user.name?.split(" ").slice(1).join(" ") || null,
+      profileImageUrl: user.avatarUrl,
+    };
+
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const token = await setSession(sessionUser, expiresAt);
+
+    return NextResponse.json({ ok: true, token });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error("Login error:", msg);
-    return NextResponse.redirect(
-      new URL(
-        `/login?error=auth_failed&detail=${encodeURIComponent(msg.slice(0, 120))}`,
-        `https://${appHostname}`,
-      ),
-    );
+    console.error("Login error:", error);
+    return NextResponse.json({ error: "Sign-in failed. Please try again." }, { status: 500 });
   }
 }

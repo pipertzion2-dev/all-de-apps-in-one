@@ -23,8 +23,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const VERCEL_ENV = `NEXT_PUBLIC_SITE_URL=https://svivva.com
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 NEXTAUTH_SECRET=generate-a-strong-random-secret
-ISSUER_URL=your-auth-issuer-url
-OIDC_CLIENT_ID=your-auth-client-id
 ADMIN_USER_ID=your-admin-user-id
 ORBIT_INTERNAL_SECRET=generate-a-strong-random-secret
 CRON_SECRET=generate-a-strong-random-secret
