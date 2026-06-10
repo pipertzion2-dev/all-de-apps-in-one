@@ -334,7 +334,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full bg-background">
         <Sidebar>
           <SidebarHeader className="p-4">
             <div className="flex items-center gap-2">
@@ -479,7 +479,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden bg-background w-full min-w-0">
           <header className="flex items-center justify-between gap-4 h-14 px-4 border-b border-white/10 backdrop-blur-xl bg-background/80">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
 
@@ -518,7 +518,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </div>
           </header>
           <CommandPalette />
-          <main className="flex-1 overflow-auto p-4 sm:p-6">
+          <main className="flex-1 overflow-auto p-4 sm:p-6 bg-background w-full min-h-0">
             {children}
             <TutorialProvider pathname={pathname} />
           </main>

@@ -245,10 +245,10 @@ export default function LandingPage() {
   const halfH = vpHeight / 2;
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="min-h-screen w-full bg-background overflow-x-hidden">
       {!flipComplete && (
         <div
-          className="fixed inset-0"
+          className="fixed inset-0 bg-background"
           style={{
             zIndex: 60,
             pointerEvents: "none",
@@ -937,7 +937,7 @@ export default function LandingPage() {
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
         {/* ── Svivva Artifact ───────────────────────────────────────────────── */}
-        <div style={{ position: "relative", overflow: "visible" }}>
+        <div className="relative w-full overflow-hidden bg-background">
           <SvivvaArtifact />
         </div>
 

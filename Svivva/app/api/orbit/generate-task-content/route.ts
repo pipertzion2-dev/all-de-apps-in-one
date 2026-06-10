@@ -4,18 +4,21 @@ import { getSvivvaProductProfile } from "@/lib/orbit/product-profile";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { generateText } from "@/lib/orbit/ai-client";
 
-const PROMPTS: Record<string, (p: ReturnType<typeof getSvivvaProductProfile>, site: string) => string> = {
-  "showhn": (p) =>
+const PROMPTS: Record<
+  string,
+  (p: ReturnType<typeof getSvivvaProductProfile>, site: string) => string
+> = {
+  showhn: (p) =>
     `Write a Show HN post for ${p.name} — "${p.tagline}". Format: title then body (3-5 paragraphs). Be direct, honest, and founder-to-founder. Explain what it does, the problem it solves, how it was built, and invite feedback. No hype. Max 400 words.`,
 
-  "producthunt": (p) =>
+  producthunt: (p) =>
     `Write a Product Hunt launch for ${p.name}.
 Output exactly:
 TAGLINE: (max 60 chars, punchy benefit-led)
 DESCRIPTION: (200-300 words, benefits-first, 3 short paragraphs)
 FIRST_COMMENT: (friendly founder intro, 80-100 words)`,
 
-  "indiehackers": (p) =>
+  indiehackers: (p) =>
     `Write an Indie Hackers product page pitch for ${p.name} — "${p.tagline}".
 Include: what it does, who it's for, how it makes money, the story behind it. Tone: honest, builder-to-builder. 200-250 words.`,
 

@@ -14,6 +14,20 @@ export type FeatureVariant = "play" | "seeds" | "orbit" | "security" | "api" | "
 
 type Props = { variant: FeatureVariant };
 
+/** Fills viewport edges when the WebGL canvas is transparent — avoids bare black gutters. */
+const AMBIENT_BG: Record<FeatureVariant, string> = {
+  play: "radial-gradient(ellipse 120% 80% at 50% 40%, rgba(124,92,191,0.22) 0%, transparent 55%), hsl(var(--background))",
+  seeds:
+    "radial-gradient(ellipse 120% 80% at 30% 50%, rgba(91,168,160,0.2) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 80% 30%, rgba(107,44,74,0.15) 0%, transparent 50%), hsl(var(--background))",
+  orbit:
+    "radial-gradient(ellipse 130% 90% at 50% 35%, rgba(91,168,160,0.18) 0%, transparent 55%), radial-gradient(ellipse 90% 70% at 75% 70%, rgba(107,44,74,0.14) 0%, transparent 50%), hsl(var(--background))",
+  security:
+    "radial-gradient(ellipse 120% 80% at 40% 45%, rgba(139,92,246,0.18) 0%, transparent 55%), hsl(var(--background))",
+  api: "radial-gradient(ellipse 120% 80% at 60% 40%, rgba(56,189,248,0.16) 0%, transparent 55%), hsl(var(--background))",
+  hardware:
+    "radial-gradient(ellipse 120% 80% at 50% 45%, rgba(91,168,160,0.2) 0%, transparent 55%), hsl(var(--background))",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Scene builders — one per feature
 // ─────────────────────────────────────────────────────────────────────────────
@@ -557,12 +571,8 @@ export function FeatureThreeBackground({ variant }: Props) {
   return (
     <div
       ref={mountRef}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: "none",
-      }}
+      className="fixed inset-0 z-0 pointer-events-none w-full min-h-full"
+      style={{ background: AMBIENT_BG[variant] }}
     />
   );
 }

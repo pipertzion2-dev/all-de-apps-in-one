@@ -263,8 +263,8 @@ export default function SecurityPQCConstructor() {
   const pqScoreColor = pqScore >= 7 ? "#22c55e" : pqScore >= 4 ? "#f59e0b" : "#ef4444";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="w-full rounded-2xl border border-border bg-slate-950 text-slate-100 p-4 sm:p-6 space-y-8 overflow-hidden">
+      <div className="w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-purple-400 tracking-tight">
             Post-Quantum Cryptographic Constructor

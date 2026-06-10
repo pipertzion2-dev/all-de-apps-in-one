@@ -2496,14 +2496,7 @@ export default function LaunchpadPage() {
     };
   }, []);
   const [tab, setTab] = useState<
-    | "svivva"
-    | "mini"
-    | "index22"
-    | "deploy"
-    | "checklist"
-    | "growth"
-    | "autopilot"
-    | "causal"
+    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth" | "autopilot" | "causal"
   >("autopilot");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});

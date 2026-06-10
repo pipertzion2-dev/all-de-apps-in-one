@@ -328,8 +328,8 @@ export default function SeedsInvariantCompiler() {
   const appNames = apps.filter((a) => a.name.trim()).map((a) => a.name);
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a] text-white">
-      <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
+    <div className="w-full rounded-2xl border border-white/10 bg-[#0d0d1a] text-white overflow-hidden">
+      <div className="w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8">
         {/* Header */}
         <div className="space-y-1">
           <div className="flex items-center gap-3">

@@ -79,12 +79,31 @@
 }
 
 @layer base {
+  html,
+  body {
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background: hsl(var(--background));
+  }
+
+  html {
+    min-width: 320px;
+  }
+
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Zc", sans-serif;
+  }
+
+  body > div,
+  body > main {
+    min-height: 100dvh;
+    width: 100%;
+    background: hsl(var(--background));
   }
   @media (max-width: 640px) {
     input,

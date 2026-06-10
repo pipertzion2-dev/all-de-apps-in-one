@@ -92,7 +92,7 @@ const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="min-h-full w-full">
       <head>
         <link
           rel="preload"
@@ -253,7 +253,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Script>
         )}
       </head>
-      <body>
+      <body className="min-h-full w-full">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
