@@ -2501,7 +2501,7 @@ export default function LaunchpadPage() {
   }, []);
   const [tab, setTab] = useState<
     "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth" | "autopilot" | "causal"
-  >("autopilot");
+  >("checklist");
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -3266,42 +3266,6 @@ export default function LaunchpadPage() {
     });
   };
 
-  if (meLoading)
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  if (!isAdmin)
-    return (
-      <div className="py-16 px-4">
-        <AdminCodeForm
-          title="Orbit admin"
-          description="Enter the 6-digit admin code to unlock Orbit and all admin pages."
-          onSuccess={() => window.location.reload()}
-        />
-      </div>
-    );
-
-  const steps =
-    tab === "svivva"
-      ? SVIVVA_STEPS
-      : tab === "mini"
-        ? miniSteps
-        : tab === "index22"
-          ? INDEX22_STEPS
-          : [];
-  const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
-  const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
-  const index22Done = INDEX22_STEPS.filter((s) => statuses[s.id] === "done").length;
-  const totalDone = svivvaDone + miniDone + index22Done;
-  const totalSteps = SVIVVA_STEPS.length + miniSteps.length + INDEX22_STEPS.length;
-  const tabDone =
-    tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : tab === "index22" ? index22Done : 0;
-  const allTabDone = steps.length > 0 && tabDone === steps.length;
-  const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
-  const overallPct = Math.round((totalDone / totalSteps) * 100);
-
   const [checkedManual, setCheckedManual] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -3389,6 +3353,50 @@ export default function LaunchpadPage() {
     }
   }, []);
 
+  if (meLoading)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  if (!isAdmin)
+    return (
+      <div className="min-h-screen relative">
+        <FeatureThreeBg variant="orbit" />
+        <div className="relative z-10 py-16 px-4">
+          <AdminCodeForm
+            title="Orbit admin"
+            description="Enter the 6-digit admin code to unlock Orbit and all admin pages."
+            onSuccess={() => window.location.reload()}
+          />
+        </div>
+      </div>
+    );
+
+  const steps =
+    tab === "svivva"
+      ? SVIVVA_STEPS
+      : tab === "mini"
+        ? miniSteps
+        : tab === "index22"
+          ? INDEX22_STEPS
+          : [];
+  const svivvaDone = SVIVVA_STEPS.filter((s) => statuses[s.id] === "done").length;
+  const miniDone = miniSteps.filter((s) => statuses[s.id] === "done").length;
+  const index22Done = INDEX22_STEPS.filter((s) => statuses[s.id] === "done").length;
+  const totalDone = svivvaDone + miniDone + index22Done;
+  const totalSteps = SVIVVA_STEPS.length + miniSteps.length + INDEX22_STEPS.length;
+  const tabDone =
+    tab === "svivva" ? svivvaDone : tab === "mini" ? miniDone : tab === "index22" ? index22Done : 0;
+  const allTabDone = steps.length > 0 && tabDone === steps.length;
+  const pendingCount = steps.filter((s) => (statuses[s.id] || "pending") !== "done").length;
+  const overallPct = Math.round((totalDone / totalSteps) * 100);
+
+  const liveBuild =
+    orbitStatus?.deploymentCommit?.slice(0, 7) ||
+    me?.vercelCommit?.slice(0, 7) ||
+    null;
+
   return (
     <div className="min-h-screen relative z-0">
       <FeatureThreeBg variant="orbit" />
@@ -3418,8 +3426,8 @@ export default function LaunchpadPage() {
       )}
       {/* ── Header ── */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${BURG} 0%, #3d1538 40%, #1a3040 100%)` }}
+        className="relative overflow-hidden bg-background/40 backdrop-blur-sm"
+        style={{ background: `linear-gradient(135deg, ${BURG}cc 0%, #3d1538cc 40%, #1a3040cc 100%)` }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
@@ -3440,6 +3448,11 @@ export default function LaunchpadPage() {
                   <span className="text-[11px] bg-white/10 border border-white/20 text-white/80 px-2 py-0.5 rounded-full">
                     Admin Only
                   </span>
+                  {liveBuild ? (
+                    <span className="text-[10px] font-mono bg-teal-500/20 border border-teal-400/30 text-teal-100 px-2 py-0.5 rounded-full">
+                      build {liveBuild}
+                    </span>
+                  ) : null}
                 </div>
                 <p className="text-white/50 text-xs">
                   Svivva + your deployed apps — maximum real traffic
