@@ -2,7 +2,7 @@
 
 /**
  * FeatureThreeBackground — scroll-reactive Three.js motifs from each cube-face graphic.
- * Renders inside the page shell (not document.body) so it cannot leak across routes.
+ * Fixed to the viewport (not document height) and scoped to the active page only.
  */
 
 import { useEffect, useRef } from "react";
@@ -17,15 +17,10 @@ type Props = { variant: FeatureVariant };
 function ambientGradient(accent: string, secondary?: string): string {
   const sec = secondary ?? accent;
   return [
-    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}22 0%, transparent 55%)`,
-    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}14 0%, transparent 50%)`,
+    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}18 0%, transparent 55%)`,
+    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}10 0%, transparent 50%)`,
     "transparent",
   ].join(", ");
-}
-
-/** Remove legacy body-portal layers from older builds that could cover the whole site. */
-function removeStaleBodyLayers() {
-  document.querySelectorAll("body > [data-svivva-feature-bg]").forEach((el) => el.remove());
 }
 
 export function FeatureThreeBackground({ variant }: Props) {
@@ -35,22 +30,18 @@ export function FeatureThreeBackground({ variant }: Props) {
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#5BA8A0" : undefined;
 
   useEffect(() => {
-    removeStaleBodyLayers();
-  }, []);
-
-  useEffect(() => {
     const el = mountRef.current;
     if (!el) return;
 
-    const W = el.clientWidth || window.innerWidth;
-    const H = el.clientHeight || window.innerHeight;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
     const canvas = renderer.domElement;
-    canvas.className = "absolute inset-0 w-full h-full";
+    canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
     el.appendChild(canvas);
 
@@ -94,21 +85,17 @@ export function FeatureThreeBackground({ variant }: Props) {
     animate();
 
     const onResize = () => {
-      const w = el.clientWidth || window.innerWidth;
-      const h = el.clientHeight || window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
     window.addEventListener("resize", onResize, { passive: true });
 
-    const ro = new ResizeObserver(onResize);
-    ro.observe(el);
-
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
-      ro.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
@@ -121,16 +108,8 @@ export function FeatureThreeBackground({ variant }: Props) {
       ref={mountRef}
       aria-hidden
       data-svivva-feature-bg={variant}
-      className="absolute inset-0 -z-10 pointer-events-none overflow-hidden"
+      className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[100svh] overflow-hidden"
       style={{ background: ambientGradient(feature.accentColor, secondary) }}
-    >
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 0%, transparent 88%, hsl(var(--background) / 0.2) 100%)",
-        }}
-      />
-    </div>
+    />
   );
 }

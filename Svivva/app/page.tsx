@@ -153,7 +153,14 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(false);
+  const [flipComplete, setFlipComplete] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return sessionStorage.getItem("svivva:introSeen") === "1";
+    } catch {
+      return false;
+    }
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const lastProgressRef = useRef(0);
@@ -202,6 +209,9 @@ export default function LandingPage() {
         setFlipProgress(progress);
         if (progress >= 1) {
           setFlipComplete(true);
+          try {
+            sessionStorage.setItem("svivva:introSeen", "1");
+          } catch {}
           document.body.style.overflow = "";
           window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
         }
@@ -223,6 +233,9 @@ export default function LandingPage() {
         setFlipProgress(progress);
         if (progress >= 1) {
           setFlipComplete(true);
+          try {
+            sessionStorage.setItem("svivva:introSeen", "1");
+          } catch {}
           document.body.style.overflow = "";
           window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
         }
@@ -446,6 +459,19 @@ export default function LandingPage() {
               </svg>
             </div>
           )}
+          <button
+            type="button"
+            className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
+            onClick={() => {
+              setFlipComplete(true);
+              try {
+                sessionStorage.setItem("svivva:introSeen", "1");
+              } catch {}
+              document.body.style.overflow = "";
+            }}
+          >
+            Skip intro
+          </button>
         </div>
       )}
 

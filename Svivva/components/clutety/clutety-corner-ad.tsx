@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   CLUTETY_COMING_SOON_PATH,
   CLUTETY_CORNER_LOGO_PATH,
@@ -9,7 +10,7 @@ import {
 } from "@/lib/clutety/config";
 
 const STORAGE_KEY = "svivva:clutetyCornerAd:dismissed:v4";
-const LOGO_SRC = `${CLUTETY_CORNER_LOGO_PATH}?v=6`;
+const LOGO_SRC = `${CLUTETY_CORNER_LOGO_PATH}?v=7`;
 
 function isInternalHref(href: string): boolean {
   return href.startsWith("/") && !href.startsWith("//");
@@ -17,6 +18,7 @@ function isInternalHref(href: string): boolean {
 
 export function ClutetyCornerAd() {
   const [dismissed, setDismissed] = useState(true);
+  const pathname = usePathname();
   const href = getClutetyPromoHref();
   const internal = isInternalHref(href);
 
@@ -30,32 +32,40 @@ export function ClutetyCornerAd() {
 
   const canShow = useMemo(() => {
     if (dismissed) return false;
-    if (typeof window === "undefined") return false;
-    const p = window.location.pathname || "";
-    if (p.startsWith("/dashboard/security")) return false;
-    if (p.startsWith(CLUTETY_COMING_SOON_PATH)) return false;
+    if (!pathname) return false;
+    if (pathname === "/") return false;
+    if (pathname.startsWith("/dashboard/security")) return false;
+    if (pathname.startsWith(CLUTETY_COMING_SOON_PATH)) return false;
+    if (pathname.startsWith("/dashboard/orbit")) return false;
+    if (pathname.startsWith("/dashboard/launchpad")) return false;
     return true;
-  }, [dismissed]);
+  }, [dismissed, pathname]);
 
   if (!canShow) return null;
 
   const logo = (
-    // Official Clutety glitch wordmark — black keyed out of source asset
     <img
       src={LOGO_SRC}
       alt="Clutety — coming soon"
-      width={140}
-      height={48}
-      className="h-9 w-auto max-w-[140px] object-contain opacity-95 group-hover:opacity-100 transition-opacity"
-      style={{ display: "block", background: "transparent", mixBlendMode: "screen" }}
+      width={128}
+      height={40}
+      className="h-8 w-auto max-w-[128px] object-contain drop-shadow-md"
+      style={{ display: "block" }}
       decoding="async"
     />
   );
 
-  const linkClass = "group block p-0 m-0 border-0 bg-transparent shadow-none outline-none ring-0";
+  const linkClass =
+    "group block rounded-lg bg-background/80 backdrop-blur-sm border border-border/40 p-1.5 shadow-lg hover:bg-background/95 transition-colors";
 
   return (
-    <div className="fixed right-4 bottom-4 z-[60] flex flex-col items-end gap-1 pointer-events-none">
+    <div
+      className="fixed z-40 flex flex-col items-end gap-1 pointer-events-none"
+      style={{
+        right: "max(1rem, env(safe-area-inset-right))",
+        bottom: "max(1rem, env(safe-area-inset-bottom))",
+      }}
+    >
       <button
         type="button"
         onClick={() => {
@@ -64,7 +74,7 @@ export function ClutetyCornerAd() {
           } catch {}
           setDismissed(true);
         }}
-        className="pointer-events-auto text-[10px] text-foreground/40 hover:text-foreground/70 px-1"
+        className="pointer-events-auto text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded bg-background/70"
         aria-label="Dismiss Clutety promo"
       >
         ✕
