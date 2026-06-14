@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, projects, usageLogs, seoLandingPages } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { count } from "drizzle-orm";
 
 export async function GET() {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const [[{ totalUsers }], [{ totalProjects }], [{ totalApiCalls }], [{ totalSeoPages }]] =
       await Promise.all([

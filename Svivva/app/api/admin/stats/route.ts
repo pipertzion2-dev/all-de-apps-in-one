@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { users, projects, usageLogs } from "@/lib/schema";
 import { sql, desc } from "drizzle-orm";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) {
+  if (!(await hasAdminAccess())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

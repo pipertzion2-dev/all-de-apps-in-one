@@ -1,14 +1,12 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 
 /**
  * Determines if an orbit admin API request should be allowed.
  * Checks in order:
  * 1. x-internal-secret header matches ORBIT_INTERNAL_SECRET (cron/internal calls)
- * 2. Valid user session + isAdmin check (authenticated admin user)
- *
- * Production never falls back to open access when ADMIN_USER_ID is unset.
+ * 2. Admin passcode cookie (272727 via /api/auth/admin-code)
  */
 export async function isOrbitAdminAllowed(req?: NextRequest): Promise<boolean> {
   if (req) {
@@ -18,9 +16,10 @@ export async function isOrbitAdminAllowed(req?: NextRequest): Promise<boolean> {
     }
   }
 
+  if (await hasAdminAccess()) return true;
+
   try {
-    const user = await getCurrentUser();
-    if (user && isAdmin(user)) return true;
+    await getCurrentUser();
   } catch {
     /* no session */
   }

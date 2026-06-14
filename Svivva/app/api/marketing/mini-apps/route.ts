@@ -4,7 +4,7 @@ import { seoLandingPages, seedCredentials } from "@/lib/schema";
 import { eq, like, inArray } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
@@ -40,7 +40,7 @@ export async function GET() {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const pages = await db
       .select({
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
     const { action } = body;

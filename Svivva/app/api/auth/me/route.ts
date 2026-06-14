@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ user: null, isAdmin: false });
-  const admin = isAdmin(user);
+  const admin = await hasAdminAccess();
+  if (!user && !admin) return NextResponse.json({ user: null, isAdmin: false });
   return NextResponse.json({
-    user: { id: user.id, email: user.email, firstName: user.firstName },
+    user: user
+      ? { id: user.id, email: user.email, firstName: user.firstName }
+      : null,
     isAdmin: admin,
     ...(admin
       ? {
-          /** Set automatically on Vercel — use to confirm GitHub changes reached production. */
           vercelCommit: process.env.VERCEL_GIT_COMMIT_SHA || null,
           nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL?.trim() || null,
         }

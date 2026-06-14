@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { growthContent } from "@/lib/schema";
 import { desc, eq } from "drizzle-orm";
@@ -258,7 +258,7 @@ Keep the whole thing under 500 words. Write like a founder talking to early user
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { product, contentType } = await req.json();
 
@@ -308,7 +308,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const product = req.nextUrl.searchParams.get("product");
   const rows = await db

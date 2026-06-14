@@ -57,6 +57,7 @@ import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
+import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
@@ -2526,7 +2527,7 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  // Admin gate — site owner only (ADMIN_USER_ID or ADMIN_EMAIL in production)
+  // Admin passcode cookie (272727 via Settings or Orbit)
   const { data: me, isLoading: meLoading } = useQuery<{
     isAdmin: boolean;
     vercelCommit?: string | null;
@@ -3273,17 +3274,12 @@ export default function LaunchpadPage() {
     );
   if (!isAdmin)
     return (
-      <div className="max-w-lg mx-auto px-4 py-16 text-center space-y-4">
-        <Rocket className="w-10 h-10 mx-auto text-muted-foreground" />
-        <h1 className="text-xl font-bold">Orbit is admin-only</h1>
-        <p className="text-sm text-muted-foreground">
-          Sign in with the site owner account. In production, set{" "}
-          <code className="text-xs bg-muted px-1 rounded">ADMIN_USER_ID</code> or{" "}
-          <code className="text-xs bg-muted px-1 rounded">ADMIN_EMAIL</code> on Vercel.
-        </p>
-        <Link href="/dashboard">
-          <Button variant="outline">Back to Dashboard</Button>
-        </Link>
+      <div className="py-16 px-4">
+        <AdminCodeForm
+          title="Orbit admin"
+          description="Enter the 6-digit admin code to unlock Orbit and all admin pages."
+          onSuccess={() => window.location.reload()}
+        />
       </div>
     );
 

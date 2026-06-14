@@ -1,16 +1,17 @@
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { forbidden, unauthorized } from "@/lib/http-response";
 
 export async function requireAdminUser() {
+  if (await hasAdminAccess()) {
+    const user = await getCurrentUser();
+    return { user, error: null };
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return { user: null, error: unauthorized() };
   }
 
-  if (!isAdmin(user)) {
-    return { user: null, error: forbidden() };
-  }
-
-  return { user, error: null };
+  return { user: null, error: forbidden() };
 }

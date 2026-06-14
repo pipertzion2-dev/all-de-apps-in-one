@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { User, Shield, Trash2, KeyRound } from "lucide-react";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
+import { AdminCodeForm } from "@/components/admin-code-form";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -88,6 +89,10 @@ export default function SettingsPage() {
           </p>
         </CardContent>
       </Card>
+
+      {!me?.isAdmin && (
+        <AdminCodeForm description="Enter the 6-digit admin code to unlock Orbit, Marketing AI, and admin tools." />
+      )}
 
       {me?.isAdmin && (
         <>

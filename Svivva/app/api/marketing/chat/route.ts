@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getPrimaryAdminUserId, isAdmin } from "@/lib/auth/admin";
+import { getPrimaryAdminUserId, hasAdminAccess } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { message, history = [], context = {} } = await req.json();
     if (!message?.trim()) return NextResponse.json({ error: "Message required" }, { status: 400 });

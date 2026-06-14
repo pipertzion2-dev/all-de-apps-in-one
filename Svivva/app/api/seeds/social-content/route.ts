@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isAdmin } from "@/lib/auth/admin";
+import { hasAdminAccess } from "@/lib/auth/admin";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isAdmin(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { appName, appUrl, description } = await req.json();
     if (!appName) return NextResponse.json({ error: "appName required" }, { status: 400 });
