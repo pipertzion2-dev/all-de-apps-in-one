@@ -628,7 +628,7 @@ export default function SeedsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
       <FeatureThreeBg variant="seeds" />
-      <nav className="relative z-20 h-12 border-b border-border/50 bg-background flex-shrink-0">
+      <nav className="relative z-20 h-12 border-b border-border/50 bg-background/70 backdrop-blur-md flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -673,7 +673,7 @@ export default function SeedsPage() {
         </div>
       </nav>
 
-      <main className="relative z-20 flex-1 overflow-y-auto bg-background">
+      <main className="relative z-20 flex-1 overflow-y-auto bg-transparent">
         <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * FeatureThreeBackground — scroll-reactive Three.js motifs from each cube-face graphic.
- * Fixed to the viewport (not document height) and scoped to the active page only.
+ * FeatureThreeBackground — Pyracrypt-grade fly-through Three.js motifs per feature theme.
+ * Fixed viewport background; no artwork texture planes.
  */
 
 import { useEffect, useRef } from "react";
@@ -14,20 +14,9 @@ export type FeatureVariant = FeatureId;
 
 type Props = { variant: FeatureVariant };
 
-function ambientGradient(accent: string, secondary?: string): string {
-  const sec = secondary ?? accent;
-  return [
-    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}18 0%, transparent 55%)`,
-    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}10 0%, transparent 50%)`,
-    "transparent",
-  ].join(", ");
-}
-
 export function FeatureThreeBackground({ variant }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
-  const secondary =
-    variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#5BA8A0" : undefined;
 
   useEffect(() => {
     const el = mountRef.current;
@@ -40,10 +29,11 @@ export function FeatureThreeBackground({ variant }: Props) {
       antialias: true,
       alpha: true,
       premultipliedAlpha: false,
+      powerPreference: "high-performance",
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(0x04060f, 0);
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
@@ -52,11 +42,12 @@ export function FeatureThreeBackground({ variant }: Props) {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 120);
-    camera.position.z = 9;
+    const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 200);
+    camera.position.set(0, 1.5, 14);
+    camera.lookAt(0, 0, -60);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 0.75);
     key.position.set(4, 6, 8);
     scene.add(key);
 
@@ -81,10 +72,11 @@ export function FeatureThreeBackground({ variant }: Props) {
     const start = Date.now();
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      tick((Date.now() - start) / 1000);
-      camera.position.x = mouse.x * 0.55;
-      camera.position.y = mouse.y * 0.35;
-      camera.lookAt(0, 0, 0);
+      const t = (Date.now() - start) / 1000;
+      tick(t);
+      camera.position.x = mouse.x * 0.6 + Math.sin(t * 0.35) * 0.9;
+      camera.position.y = 1.5 + mouse.y * 0.3 + Math.sin(t * 0.22) * 0.45;
+      camera.lookAt(camera.position.x * 0.15, 0, -60);
       renderer.render(scene, camera);
     };
     animate();
@@ -113,8 +105,10 @@ export function FeatureThreeBackground({ variant }: Props) {
       ref={mountRef}
       aria-hidden
       data-svivva-feature-bg={variant}
-      className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[100svh] overflow-hidden"
-      style={{ background: ambientGradient(feature.accentColor, secondary) }}
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      style={{
+        background: `radial-gradient(ellipse 80% 60% at 50% 40%, ${feature.accentColor}12 0%, #04060f 70%)`,
+      }}
     />
   );
 }
