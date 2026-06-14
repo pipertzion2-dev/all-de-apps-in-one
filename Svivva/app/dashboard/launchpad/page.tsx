@@ -3380,7 +3380,7 @@ export default function LaunchpadPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative z-0">
+    <div className="min-h-screen relative z-0">
       <FeatureThreeBg variant="orbit" />
       {devLanUrl && (
         <div className="max-w-2xl mx-auto px-4 pt-4">

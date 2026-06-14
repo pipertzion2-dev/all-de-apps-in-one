@@ -1087,7 +1087,7 @@ export default function HardwareBuilderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       <FeatureThreeBg variant="hardware" />
       <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 relative z-10">
         <div className="flex items-center gap-2 mb-6 sm:mb-8">

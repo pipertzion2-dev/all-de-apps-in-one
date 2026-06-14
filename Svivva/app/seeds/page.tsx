@@ -615,7 +615,7 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative">
+    <div className="min-h-screen flex flex-col relative">
       <FeatureThreeBg variant="seeds" />
       <nav className="relative z-10 h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">

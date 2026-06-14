@@ -3,6 +3,7 @@ import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { ARTWORK_MANIFESTS } from "@/lib/artwork-atlas";
 import {
   addSceneFloaters,
+  createRegionPlane,
   loadArtworkTexture,
   tickFloaters,
 } from "@/lib/artwork-three";
@@ -135,21 +136,71 @@ export async function buildFeaturePageScene(
     }
 
     case "seeds": {
-      const baseScales = floaters.map((f) => ({
-        x: (f.object as THREE.Sprite).scale.x,
-        y: (f.object as THREE.Sprite).scale.y,
-      }));
-      updaters.push((_t, scroll) => {
-        floaters.forEach((f, i) => {
-          const grow = 0.85 + scroll * 0.35;
-          f.object.scale.set(
-            (baseScales[i].x / 0.85) * grow,
-            (baseScales[i].y / 0.85) * grow,
-            1,
-          );
-          f.object.position.z = f.oz - scroll * 1.5;
+      const quadPanels: THREE.Mesh[] = [];
+      const quads = [
+        { u: 0.03, v: 0.14, w: 0.44, h: 0.36, x: -4.8, y: 2.6, z: -2.5, rz: -0.12 },
+        { u: 0.54, v: 0.14, w: 0.42, h: 0.36, x: 4.6, y: 2.2, z: -3.2, rz: 0.1 },
+        { u: 0.03, v: 0.54, w: 0.44, h: 0.36, x: -4.2, y: -2.4, z: -2.8, rz: 0.08 },
+        { u: 0.54, v: 0.54, w: 0.42, h: 0.36, x: 5, y: -2.1, z: -3.5, rz: -0.14 },
+      ];
+      quads.forEach((q) => {
+        const plane = createRegionPlane(tex, q, 5.2, 4.2, 0.94);
+        plane.position.set(q.x, q.y, q.z);
+        plane.rotation.z = q.rz;
+        scene.add(plane);
+        quadPanels.push(plane);
+      });
+
+      const staffLines: THREE.Line[] = [];
+      const staffBaseY: number[] = [];
+      const staffMat = new THREE.LineBasicMaterial({
+        color: 0x9b6b8a,
+        transparent: true,
+        opacity: 0.65,
+        depthWrite: false,
+      });
+      for (let s = 0; s < 5; s++) {
+        const y = 5.2 - s * 0.28;
+        const top = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-11, y, -1.5),
+            new THREE.Vector3(11, y, -1.5),
+          ]),
+          staffMat.clone(),
+        );
+        const bot = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-11, -y, -1.8),
+            new THREE.Vector3(11, -y, -1.8),
+          ]),
+          staffMat.clone(),
+        );
+        scene.add(top, bot);
+        staffLines.push(top, bot);
+        staffBaseY.push(y, -y);
+      }
+
+      const headerBanner = createRegionPlane(tex, { id: "header", u: 0, v: 0, w: 1, h: 0.12 }, 14, 1.4, 0.88);
+      headerBanner.position.set(0, 5.8, -2);
+      scene.add(headerBanner);
+
+      updaters.push((t, scroll) => {
+        quadPanels.forEach((plane, i) => {
+          const spread = 1 + scroll * 0.45;
+          const base = quads[i];
+          plane.position.x = base.x * spread + Math.sin(t * 0.35 + i) * 0.25;
+          plane.position.y = base.y + scroll * (i % 2 === 0 ? -1.2 : 1.2);
+          plane.rotation.y = Math.sin(t * 0.25 + i) * 0.18 + scroll * 0.35 * (i % 2 ? 1 : -1);
+          (plane.material as THREE.MeshBasicMaterial).opacity = 0.72 + scroll * 0.22;
+        });
+        staffLines.forEach((line, i) => {
+          line.position.y = staffBaseY[i] + Math.sin(t * 0.4 + i) * 0.08;
+          (line.material as THREE.LineBasicMaterial).opacity = 0.45 + scroll * 0.35;
+        });
+        headerBanner.position.y = 5.8 - scroll * 2.5;
+        floaters.forEach((f) => {
           ((f.object as THREE.Sprite).material as THREE.SpriteMaterial).opacity =
-            0.55 + scroll * 0.3;
+            0.78 + scroll * 0.15;
         });
       });
       break;

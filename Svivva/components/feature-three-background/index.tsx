@@ -2,7 +2,7 @@
 
 /**
  * FeatureThreeBackground — scroll-reactive Three.js motifs from each cube-face graphic.
- * Artwork crops + signature 3D elements (e.g. security filigree wire, play waveforms).
+ * Fixed at z-0 (never negative z — that hides the canvas behind parent bg-background).
  */
 
 import { useEffect, useRef } from "react";
@@ -17,9 +17,9 @@ type Props = { variant: FeatureVariant };
 function ambientGradient(accent: string, secondary?: string): string {
   const sec = secondary ?? accent;
   return [
-    `radial-gradient(ellipse 110% 70% at 18% 22%, ${accent}22 0%, transparent 52%)`,
-    `radial-gradient(ellipse 90% 60% at 82% 78%, ${sec}14 0%, transparent 48%)`,
-    "hsl(var(--background))",
+    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}28 0%, transparent 55%)`,
+    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}18 0%, transparent 50%)`,
+    "hsl(var(--background) / 0.72)",
   ].join(", ");
 }
 
@@ -37,14 +37,23 @@ export function FeatureThreeBackground({ variant }: Props) {
     const H = window.innerHeight;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
-    el.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.className = "absolute inset-0 w-full h-full";
+    el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
-    camera.position.z = 10;
+    scene.fog = new THREE.FogExp2(0x0a0a0c, 0.028);
+
+    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 120);
+    camera.position.z = 9;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 0.85);
+    key.position.set(4, 6, 8);
+    scene.add(key);
 
     const mouse = { x: 0, y: 0 };
     const onMouseMove = (e: MouseEvent) => {
@@ -64,8 +73,8 @@ export function FeatureThreeBackground({ variant }: Props) {
     const animate = () => {
       rafId = requestAnimationFrame(animate);
       tick((Date.now() - start) / 1000);
-      camera.position.x = mouse.x * 0.35;
-      camera.position.y = mouse.y * 0.25;
+      camera.position.x = mouse.x * 0.55;
+      camera.position.y = mouse.y * 0.35;
       camera.lookAt(0, 0, 0);
       renderer.render(scene, camera);
     };
@@ -86,9 +95,7 @@ export function FeatureThreeBackground({ variant }: Props) {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
-      if (renderer.domElement.parentNode) {
-        renderer.domElement.parentNode.removeChild(renderer.domElement);
-      }
+      canvas.remove();
     };
   }, [variant]);
 
@@ -96,14 +103,14 @@ export function FeatureThreeBackground({ variant }: Props) {
     <div
       ref={mountRef}
       aria-hidden
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+      className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
       style={{ background: ambientGradient(feature.accentColor, secondary) }}
     >
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none z-[2]"
         style={{
           background:
-            "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 14%, transparent 86%, hsl(var(--background)) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.35) 0%, transparent 18%, transparent 82%, hsl(var(--background) / 0.45) 100%)",
         }}
       />
     </div>

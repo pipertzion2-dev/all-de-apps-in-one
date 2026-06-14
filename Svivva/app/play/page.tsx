@@ -2841,7 +2841,7 @@ export default function SvivvaPlayPage() {
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col text-gray-900 bg-white relative"
+      className="min-h-[100dvh] flex flex-col text-gray-900 relative"
       style={{ colorScheme: "light" }}
     >
       <FeatureThreeBg variant="play" />
