@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
-import type { ArtworkCrop } from "@/lib/artwork-atlas";
 import type { GraphicPalette } from "@/lib/artwork-palettes";
-import { createPatternInset } from "@/lib/artwork-three";
 
 function lineMat(color: number, opacity = 0.65): THREE.LineBasicMaterial {
   return new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
@@ -80,14 +78,12 @@ export function buildStaffLines(color: number, width = 12): THREE.Group {
   return g;
 }
 
-/** Collage panel — framed 3D quad with graphic crop pattern + interior motif. */
+/** Collage panel — pure procedural 3D frame + interior motif (no artwork textures). */
 export function buildCollagePanel(
   variant: "gold" | "purple" | "grain" | "courtyard",
   frameColor: number,
   innerColor: number,
   palette: GraphicPalette,
-  texture?: THREE.Texture,
-  crop?: ArtworkCrop,
 ): THREE.Group {
   const g = new THREE.Group();
   const w = 2.8;
@@ -100,10 +96,6 @@ export function buildCollagePanel(
 
   const inner = new THREE.Group();
   inner.position.z = 0.08;
-
-  if (texture && crop) {
-    inner.add(createPatternInset(texture, crop, w * 0.86, h * 0.86, palette.patternOpacity));
-  }
 
   switch (variant) {
     case "gold": {
@@ -407,98 +399,163 @@ export function buildSwimmers(color: number): THREE.Group {
   return g;
 }
 
-type ElementFactory = (
+/** Seeds sprout cluster — branching filament + seed core (SETTLE DOWN motif). */
+export function buildSeedSprout(
+  stemColor: number,
+  budColor: number,
+  motif: "gold" | "purple" | "grain" | "courtyard",
   palette: GraphicPalette,
-  texture?: THREE.Texture,
-  crop?: ArtworkCrop,
-) => THREE.Group;
+): THREE.Group {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.32, 0), wireMat(stemColor, 0.78)));
+
+  for (let b = 0; b < 6; b++) {
+    const ang = (b / 6) * Math.PI * 2 + 0.2;
+    const pts: THREE.Vector3[] = [];
+    for (let s = 0; s <= 24; s++) {
+      const f = s / 24;
+      const wobble = Math.sin(f * 6 + b) * 0.12 * f;
+      pts.push(
+        new THREE.Vector3(
+          Math.cos(ang) * f * 1.1 - Math.sin(ang) * wobble,
+          Math.sin(ang) * f * 1.1 + Math.cos(ang) * wobble,
+          Math.sin(f * 5) * 0.12,
+        ),
+      );
+    }
+    g.add(
+      new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        lineMat(b % 2 ? budColor : stemColor, palette.lineOpacity + 0.1),
+      ),
+    );
+  }
+
+  const accent = new THREE.Group();
+  accent.position.z = 0.1;
+  switch (motif) {
+    case "gold":
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI;
+        accent.add(new THREE.LineSegments(floatGeo([0, 0, 0, Math.cos(a) * 0.7, Math.sin(a) * 0.55, 0]), lineMat(budColor, 0.45)));
+      }
+      break;
+    case "purple": {
+      const oval: THREE.Vector3[] = [];
+      for (let i = 0; i <= 24; i++) {
+        const a = (i / 24) * Math.PI * 2;
+        oval.push(new THREE.Vector3(Math.cos(a) * 0.45, Math.sin(a) * 0.6, 0));
+      }
+      accent.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(oval), lineMat(budColor, 0.5)));
+      break;
+    }
+    case "grain":
+      for (let i = 0; i < 10; i++) {
+        const y = -0.5 + i * 0.1;
+        accent.add(new THREE.LineSegments(floatGeo([-0.6, y, 0, 0.6, y, 0]), lineMat(budColor, 0.35)));
+      }
+      break;
+    case "courtyard":
+      for (let i = 0; i <= 4; i++) {
+        const f = i / 4;
+        const spread = 0.25 + f * 0.55;
+        accent.add(new THREE.LineSegments(floatGeo([-spread, -0.4, -f * 0.3, spread, -0.4, -f * 0.3]), lineMat(budColor, 0.4)));
+      }
+      break;
+  }
+  g.add(accent);
+  return g;
+}
+
+export type SeedBranch = {
+  line: THREE.Line;
+  angle: number;
+  spread: number;
+  phase: number;
+};
+
+export function createSeedBranchField(palette: GraphicPalette): SeedBranch[] {
+  const branches: SeedBranch[] = [];
+  const segments = 64;
+  for (let b = 0; b < 14; b++) {
+    const positions = new Float32Array(segments * 3);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const line = new THREE.Line(
+      geo,
+      lineMat(b % 3 === 0 ? palette.secondary : palette.primary, palette.lineOpacity * 0.85),
+    );
+    branches.push({
+      line,
+      angle: (b / 14) * Math.PI * 2,
+      spread: 0.45 + (b % 5) * 0.12,
+      phase: b,
+    });
+  }
+  return branches;
+}
+
+export function animateSeedBranches(branches: SeedBranch[], t: number, scroll: number) {
+  const grow = 5 + scroll * 16;
+  branches.forEach((br, b) => {
+    const pos = br.line.geometry.attributes.position as THREE.BufferAttribute;
+    const ang = br.angle + Math.sin(t * 0.28 + br.phase) * 0.1;
+    for (let s = 0; s < pos.count; s++) {
+      const f = s / (pos.count - 1);
+      const wobble = Math.sin(f * 7 + t + b) * br.spread * f;
+      const rad = f * grow;
+      pos.setX(s, Math.cos(ang) * rad - Math.sin(ang) * wobble);
+      pos.setY(s, Math.sin(ang) * rad + Math.cos(ang) * wobble);
+      pos.setZ(s, Math.sin(f * 3 + t * 0.4) * 0.25 * f);
+    }
+    pos.needsUpdate = true;
+  });
+}
+
+type ElementFactory = (palette: GraphicPalette) => THREE.Group;
 
 const PLAY_BUILDERS: Record<string, ElementFactory> = {
   "note-1": (p) => buildMusicNote(p.primary, 1.1),
   "note-2": (p) => buildMusicNote(p.highlight, 0.95),
   "text-stack": (p) => buildTextStack(p.secondary, p.tertiary),
-  guitar: (p, tex, crop) => {
-    const g = buildGuitarSilhouette(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2.4, 3.2, p.patternOpacity));
-    return g;
-  },
+  guitar: (p) => buildGuitarSilhouette(p.primary),
 };
 
 const SEEDS_BUILDERS: Record<string, ElementFactory> = {
-  "quad-tl": (p, tex, crop) => buildCollagePanel("gold", p.primary, p.tertiary, p, tex, crop),
-  "quad-tr": (p, tex, crop) => buildCollagePanel("purple", p.secondary, p.highlight, p, tex, crop),
-  "quad-bl": (p, tex, crop) => buildCollagePanel("grain", p.primary, 0x8b7355, p, tex, crop),
-  "quad-br": (p, tex, crop) => buildCollagePanel("courtyard", p.primary, p.wire, p, tex, crop),
+  "quad-tl": (p) => buildSeedSprout(p.primary, p.tertiary, "gold", p),
+  "quad-tr": (p) => buildSeedSprout(p.primary, p.highlight, "purple", p),
+  "quad-bl": (p) => buildSeedSprout(p.primary, 0x8b7355, "grain", p),
+  "quad-br": (p) => buildSeedSprout(p.primary, p.wire, "courtyard", p),
 };
 
 const ORBIT_BUILDERS: Record<string, ElementFactory> = {
   "star-1": (p) => buildStar(p.secondary, 1.1),
   "star-2": (p) => buildStar(p.tertiary, 0.9),
-  face: (p, tex, crop) => {
-    const g = buildGlitchFace(p.wire, p.secondary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2.8, 2.6, p.patternOpacity));
-    return g;
-  },
+  face: (p) => buildGlitchFace(p.wire, p.secondary),
   rose: (p) => buildRose(p.highlight),
-  moss: (p, tex, crop) => {
-    const g = buildMossWeb(p.wire, p.secondary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 3.2, 2, p.patternOpacity * 0.85));
-    return g;
-  },
+  moss: (p) => buildMossWeb(p.wire, p.secondary),
 };
 
 const SECURITY_BUILDERS: Record<string, ElementFactory> = {
   "crystal-top": (p) => buildCrystalVessel(p.primary, 1.1),
   "crystal-bot": (p) => buildCrystalVessel(p.secondary, 0.95),
-  frame: (p, tex, crop) => {
-    const g = buildFiligreeFrame(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 3.4, 1.6, p.patternOpacity));
-    return g;
-  },
+  frame: (p) => buildFiligreeFrame(p.primary),
   heart: (p) => buildHeartWire(p.primary),
 };
 
 const API_BUILDERS: Record<string, ElementFactory> = {
-  "flower-1": (p, tex, crop) => {
-    const g = buildFlower(p.primary, 9);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2.2, 2.2, p.patternOpacity));
-    return g;
-  },
-  "flower-2": (p, tex, crop) => {
-    const g = buildFlower(p.secondary, 7);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 1.8, 1.8, p.patternOpacity));
-    return g;
-  },
-  paper: (p, tex, crop) => {
-    const g = buildHangingPaper(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2, 1.4, p.patternOpacity));
-    return g;
-  },
-  fold: (p, tex, crop) => {
-    const g = buildJewelCasePanel(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2, 1.4, p.patternOpacity));
-    return g;
-  },
+  "flower-1": (p) => buildFlower(p.primary, 9),
+  "flower-2": (p) => buildFlower(p.secondary, 7),
+  paper: (p) => buildHangingPaper(p.primary),
+  fold: (p) => buildJewelCasePanel(p.primary),
 };
 
 const HARDWARE_BUILDERS: Record<string, ElementFactory> = {
-  "hand-cube": (p, tex, crop) => {
-    const g = buildDiamondFist(p.primary, 1.2);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2.4, 2.6, p.patternOpacity));
-    return g;
-  },
+  "hand-cube": (p) => buildDiamondFist(p.primary, 1.2),
   "green-cube": (p) => buildColoredCube(p.secondary, 0.9),
   "red-cube": (p) => buildColoredCube(p.tertiary, 0.85),
-  figures: (p, tex, crop) => {
-    const g = buildVintageFrame(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 1.8, 2.4, p.patternOpacity));
-    return g;
-  },
-  swim: (p, tex, crop) => {
-    const g = buildSwimmers(p.primary);
-    if (tex && crop) g.add(createPatternInset(tex, crop, 2.8, 1.2, p.patternOpacity * 0.8));
-    return g;
-  },
+  figures: (p) => buildVintageFrame(p.primary),
+  swim: (p) => buildSwimmers(p.primary),
 };
 
 const BUILDERS: Record<FeatureId, Record<string, ElementFactory>> = {
@@ -514,12 +571,10 @@ export function buildGraphicElement(
   variant: FeatureId,
   elementId: string,
   palette: GraphicPalette,
-  texture?: THREE.Texture,
-  crop?: ArtworkCrop,
 ): THREE.Group | null {
   const factory = BUILDERS[variant]?.[elementId];
   if (!factory) return null;
-  return factory(palette, texture, crop);
+  return factory(palette);
 }
 
 /** Signature backdrop layers — muted so UI cards stay readable. */
@@ -543,8 +598,11 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, pal
       break;
     }
     case "seeds": {
-      const staff = buildStaffLines(palette.primary, 18);
-      staff.position.set(0, 5.5, -6);
+      const branches = createSeedBranchField(palette);
+      branches.forEach((br) => scene.add(br.line));
+      scene.userData.seedBranches = branches;
+      const staff = buildStaffLines(palette.primary, 20);
+      staff.position.set(0, 6, -8);
       scene.add(staff);
       scene.userData.staff = staff;
       break;

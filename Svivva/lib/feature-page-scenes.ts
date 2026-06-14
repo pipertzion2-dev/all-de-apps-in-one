@@ -2,11 +2,12 @@ import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { ARTWORK_MANIFESTS } from "@/lib/artwork-atlas";
 import { getGraphicPalette } from "@/lib/artwork-palettes";
-import { loadArtworkTexture } from "@/lib/artwork-three";
 import {
   addSignatureBackdrop,
+  animateSeedBranches,
   buildGraphicElement,
   floatGeo,
+  type SeedBranch,
 } from "@/lib/feature-graphic-builders";
 
 export type SceneTick = (t: number) => void;
@@ -67,6 +68,8 @@ function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll
       break;
     }
     case "seeds": {
+      const branches = scene.userData.seedBranches as SeedBranch[] | undefined;
+      if (branches) animateSeedBranches(branches, t, scroll);
       const staff = scene.userData.staff as THREE.Group | undefined;
       if (staff) staff.scale.x = 0.5 + scroll * 0.7 + Math.sin(t * 0.4) * 0.04;
       break;
@@ -144,39 +147,36 @@ export function buildFeaturePageScene(
 ): Promise<SceneTick> {
   const manifest = ARTWORK_MANIFESTS[variant];
   const palette = getGraphicPalette(variant);
+  const motifs: PlacedMotif[] = [];
 
-  return loadArtworkTexture(manifest.src).then((texture) => {
-    const motifs: PlacedMotif[] = [];
+  for (const el of manifest.sceneElements) {
+    const group = buildGraphicElement(variant, el.id, palette);
+    if (!group) continue;
 
-    for (const el of manifest.sceneElements) {
-      const group = buildGraphicElement(variant, el.id, palette, texture, el);
-      if (!group) continue;
+    const scale = el.scale * 0.22;
+    group.scale.setScalar(scale);
+    group.position.set(el.x, el.y, el.z);
+    scene.add(group);
 
-      const scale = el.scale * 0.3;
-      group.scale.setScalar(scale);
-      group.position.set(el.x, el.y, el.z);
-      scene.add(group);
+    motifs.push({
+      object: group,
+      ox: el.x,
+      oy: el.y,
+      oz: el.z,
+      parallax: (el.parallax ?? 0.8) * 0.65,
+      phase: el.phase ?? 0,
+      rotZ: el.rotZ ?? 0,
+      bob: 0.06 + (el.parallax ?? 0.8) * 0.06,
+      scale,
+    });
+  }
 
-      motifs.push({
-        object: group,
-        ox: el.x,
-        oy: el.y,
-        oz: el.z,
-        parallax: (el.parallax ?? 0.8) * 0.65,
-        phase: el.phase ?? 0,
-        rotZ: el.rotZ ?? 0,
-        bob: 0.06 + (el.parallax ?? 0.8) * 0.06,
-        scale,
-      });
-    }
+  addSignatureBackdrop(variant, scene, palette);
 
-    addSignatureBackdrop(variant, scene, palette);
-
-    return (t: number) => {
-      const scroll = scrollNorm();
-      tickMotifs(motifs, mouse, t, scroll);
-      tickSignature(variant, scene, t, scroll);
-      tickElementInternals(motifs, variant, t, scroll);
-    };
+  return Promise.resolve((t: number) => {
+    const scroll = scrollNorm();
+    tickMotifs(motifs, mouse, t, scroll);
+    tickSignature(variant, scene, t, scroll);
+    tickElementInternals(motifs, variant, t, scroll);
   });
 }
