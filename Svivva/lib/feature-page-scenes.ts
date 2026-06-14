@@ -7,7 +7,7 @@ import {
   tickFloaters,
 } from "@/lib/artwork-three";
 
-export type SceneTick = (t: number, scroll: number) => void;
+export type SceneTick = (t: number) => void;
 
 function scrollNorm(): number {
   const max = document.body.scrollHeight - window.innerHeight;
