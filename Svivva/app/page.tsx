@@ -475,6 +475,9 @@ export default function LandingPage() {
                 sessionStorage.setItem("svivva:introSeen", "1");
               } catch {}
               document.body.style.overflow = "";
+              document
+                .querySelectorAll("body > canvas, body > div[aria-hidden].fixed")
+                .forEach((el) => el.remove());
             }}
           >
             Skip intro
@@ -482,7 +485,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <nav
           className="fixed top-0 left-0 right-0 z-50 h-14 sm:h-16 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
@@ -561,10 +564,10 @@ export default function LandingPage() {
 
         <section
           id="svivva-seeds"
-          className="pt-16 sm:pt-20 pb-12 sm:pb-16 relative z-40 bg-gradient-to-b from-[#5BA8A0]/10 via-background to-background border-b border-[#5BA8A0]/20"
+          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-40 isolate bg-gradient-to-b from-[#5BA8A0]/15 via-[#5BA8A0]/5 to-background border-b border-[#5BA8A0]/25"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="rounded-2xl border border-[#5BA8A0]/40 bg-card p-6 sm:p-10 shadow-md">
+            <div className="rounded-2xl border border-[#5BA8A0]/50 bg-[#5BA8A0]/10 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5BA8A0]/10">
               <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/50">
                   <Image
@@ -622,9 +625,9 @@ export default function LandingPage() {
         </section>
 
         <section
-          className={`relative z-0 min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
+          className={`relative z-0 py-14 sm:py-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
         >
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
               {mode === "digital" ? (
                 <>
