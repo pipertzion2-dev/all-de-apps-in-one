@@ -48,6 +48,15 @@ import {
   TrendingUp,
   ArrowRight,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const FeatureThreeBg = dynamic(
+  () =>
+    import("@/components/feature-three-background").then((m) => ({
+      default: m.FeatureThreeBackground,
+    })),
+  { ssr: false },
+);
 
 interface SeedSession {
   id: string;
@@ -618,6 +627,7 @@ export default function SeedsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
+      <FeatureThreeBg variant="seeds" />
       <nav className="relative z-20 h-12 border-b border-border/50 bg-background flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

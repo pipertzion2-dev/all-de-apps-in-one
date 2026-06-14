@@ -47,6 +47,7 @@ export function FeatureThreeBackground({ variant }: Props) {
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
+    canvas.style.zIndex = "0";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
