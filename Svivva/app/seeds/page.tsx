@@ -24,6 +24,7 @@ import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/l
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
+import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
 import SeedsInvariantCompiler from "@/components/seeds-invariant-compiler";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
