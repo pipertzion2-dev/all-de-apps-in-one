@@ -222,8 +222,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   });
   const userIsAdmin = meData?.isAdmin ?? false;
   const { isPro } = usePlan();
-  const isOwnerDashboardBypass = pathname.startsWith("/dashboard");
-  const effectiveIsAdmin = userIsAdmin || isOwnerDashboardBypass;
+  const effectiveIsAdmin = userIsAdmin;
   const effectiveIsPro = isPro || effectiveIsAdmin;
 
   const baseMenuGroups = mode === "digital" ? digitalMenuGroups : physicalMenuGroups;
@@ -252,12 +251,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  // Allow Orbit admin (launchpad) and settings pages to bypass auth
-  // — these have their own internal auth via isOrbitAdminAllowed() on API routes
-  const isOrbitAdmin =
-    pathname === "/dashboard/launchpad" || pathname.startsWith("/dashboard/settings");
-
-  if (isLoading && !isOrbitAdmin && !isOwnerDashboardBypass) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="space-y-4 text-center">
@@ -269,7 +263,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated && !isOrbitAdmin && !isOwnerDashboardBypass) {
+  if (!isAuthenticated) {
     // Capture current path so after login we return here (e.g. /dashboard/launchpad)
     const returnTo = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
     const loginHref = `/api/auth/login?redirect=${encodeURIComponent(returnTo)}`;
@@ -320,11 +314,6 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
         </Card>
       </div>
     );
-  }
-
-  // Orbit admin renders without the sidebar/dashboard chrome
-  if (isOrbitAdmin && !isAuthenticated) {
-    return <div className="min-h-screen bg-background">{children}</div>;
   }
 
   const style = {

@@ -1,11 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
+import { isCronSecretAuthorized, isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isProd = process.env.NODE_ENV === "production";
+  const privileged =
+    isCronSecretAuthorized(req) ||
+    (await isOrbitAdminAllowed(req));
+
+  if (isProd && !privileged) {
+    return NextResponse.json(
+      {
+        status: "ok",
+        timestamp: new Date().toISOString(),
+      },
+      { status: 200 },
+    );
+  }
+
   const health: {
     status: "ok" | "error";
     timestamp: string;
@@ -69,7 +85,6 @@ export async function GET() {
 
   const statusCode = health.status === "ok" ? 200 : 503;
 
-  // Legacy + UI: Stripe settings page expects `stripe.connected` (see /dashboard/settings/stripe)
   const stripeConnected = health.environment.hasStripe;
   return NextResponse.json(
     {
@@ -77,7 +92,6 @@ export async function GET() {
       stripe: {
         connected: stripeConnected,
         webhookConfigured: health.environment.hasStripeWebhook,
-        /** publishable + secret env vars (not Replit connector) */
         envKeysComplete: hasCompleteStripeEnvKeys(),
       },
     },

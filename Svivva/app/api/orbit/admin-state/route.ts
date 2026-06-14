@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 
 // Ensure the column exists (idempotent)
 let columnEnsured = false;
@@ -18,7 +19,10 @@ async function ensureColumn() {
 }
 
 /** GET — load saved orbit admin state */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   try {
     await ensureColumn();
     const userId = await resolveOrbitInternalUserId();
@@ -41,6 +45,9 @@ export async function GET() {
 
 /** POST — save orbit admin state */
 export async function POST(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   try {
     await ensureColumn();
     const body = await req.json();

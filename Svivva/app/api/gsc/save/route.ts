@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
   // Google: real Webmasters v3 API via service-account JWT (the legacy ?ping= endpoint was
   // retired June 2023). Bing: legacy ping endpoint still alive.
   if (action === "submit_sitemap") {
+    const isInternal = internalSecret && internalSecret === process.env.ORBIT_INTERNAL_SECRET;
+    if (!isInternal && !(await isOrbitAdminAllowed(req))) return forbidden();
+
     try {
       const sitemapUrl = getSitemapUrl();
 

@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
+
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["drizzle-orm", "pg"],
@@ -11,6 +13,10 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS,
+      },
       {
         source: "/fonts/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
