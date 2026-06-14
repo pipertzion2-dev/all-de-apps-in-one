@@ -738,17 +738,13 @@ export default function LandingPage() {
         </section>
 
         <div
-          className="relative h-32 sm:h-48 -mt-1"
-          style={{
-            background:
-              "linear-gradient(to bottom, hsl(var(--background)) 0%, rgba(0,0,0,0.95) 100%)",
-          }}
+          className="relative h-16 sm:h-24 bg-gradient-to-b from-background to-muted/20"
           aria-hidden="true"
         />
 
         <section
           id="platforms"
-          className="py-16 sm:py-24 relative overflow-hidden bg-black/95 -mt-1"
+          className="py-16 sm:py-24 relative overflow-hidden bg-muted/20 border-y border-border/30"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-4 mb-16">
@@ -856,7 +852,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 sm:py-20 relative overflow-hidden bg-background border-y border-border/30">
+        <section className="py-16 sm:py-20 relative z-10 overflow-hidden bg-background border-y border-border/30">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div
               className="relative rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-sm"

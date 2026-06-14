@@ -108,7 +108,7 @@ export function FeatureThreeBackground({ variant }: Props) {
       ref={mountRef}
       aria-hidden
       data-svivva-feature-bg={variant}
-      className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[100svh] overflow-hidden"
+      className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[100svh] overflow-hidden"
       style={{ background: ambientGradient(feature.accentColor, secondary) }}
     />
   );
