@@ -2534,7 +2534,7 @@ export default function LaunchpadPage() {
     nextPublicSiteUrl?: string | null;
   }>({
     queryKey: ["/api/auth/me"],
-    queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
+    queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
   const isAdmin = me?.isAdmin ?? false;
 

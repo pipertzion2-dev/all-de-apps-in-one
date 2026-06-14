@@ -29,6 +29,7 @@ export function AdminCodeForm({
       const res = await fetch("/api/auth/admin-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ code }),
       });
       if (!res.ok) {

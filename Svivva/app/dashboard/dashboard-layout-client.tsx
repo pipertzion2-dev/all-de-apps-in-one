@@ -220,6 +220,8 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const { mode, toggleMode } = usePlatform();
   const pathname = usePathname();
+  const isOrbitAdminRoute =
+    pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/dashboard/launchpad");
   const featureThreeBg =
     pathname.startsWith("/dashboard/security") ||
     pathname.startsWith("/dashboard/api-builder") ||
@@ -230,8 +232,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
 
   const { data: meData } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/auth/me"],
-    queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
-    enabled: isAuthenticated,
+    queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
   const userIsAdmin = meData?.isAdmin ?? false;
   const { isPro } = usePlan();
@@ -276,11 +277,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated) {
-    // Capture current path so after login we return here (e.g. /dashboard/launchpad)
-    const returnTo = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
-    const loginHref = `/api/auth/login?redirect=${encodeURIComponent(returnTo)}`;
-
+  if (!isAuthenticated && !isOrbitAdminRoute) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Card className="w-full max-w-md mx-4">
@@ -307,6 +304,12 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Link href="/dashboard/orbit" className="block">
+              <Button variant="secondary" className="w-full gap-2" data-testid="button-orbit-admin">
+                <Rocket className="w-4 h-4" />
+                Orbit Admin (no account needed)
+              </Button>
+            </Link>
             <a href="/login" className="block">
               <Button className="w-full gap-2" data-testid="button-login">
                 <LogIn className="w-4 h-4" />
@@ -325,6 +328,31 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </Link>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && isOrbitAdminRoute) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex items-center justify-between px-4 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src={svivvaLogo}
+              alt="Svivva"
+              width={100}
+              height={32}
+              className="h-6 w-auto object-contain"
+            />
+            <span className="text-xs font-bold text-muted-foreground">Orbit Admin</span>
+          </Link>
+          <Link href="/login">
+            <Button variant="outline" size="sm">
+              Sign in
+            </Button>
+          </Link>
+        </header>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     );
   }
