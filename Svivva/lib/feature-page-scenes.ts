@@ -2,158 +2,173 @@ import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { ARTWORK_MANIFESTS } from "@/lib/artwork-atlas";
 import {
-  CORRIDOR,
-  TILE_BUILDERS,
+  addSignatureBackdrop,
+  buildGraphicElement,
   floatGeo,
-  lineMat,
-} from "@/lib/feature-scene-primitives";
+} from "@/lib/feature-graphic-builders";
 
 export type SceneTick = (t: number) => void;
+
+export type PlacedMotif = {
+  object: THREE.Group;
+  ox: number;
+  oy: number;
+  oz: number;
+  parallax: number;
+  phase: number;
+  rotZ: number;
+  bob: number;
+  scale: number;
+};
 
 function scrollNorm(): number {
   const max = document.body.scrollHeight - window.innerHeight;
   return max > 0 ? Math.min(1, window.scrollY / max) : 0;
 }
 
-function animateSeedsTile(tile: THREE.Group, t: number, scroll: number) {
-  tile.children.forEach((child) => {
-    if (!(child instanceof THREE.Line) || child.userData.angle == null) return;
-    const { angle, spread, phase } = child.userData as { angle: number; spread: number; phase: number };
-    const pos = child.geometry.attributes.position as THREE.BufferAttribute;
-    const grow = 10 + scroll * 18;
-    const ang = angle + Math.sin(t * 0.3 + phase) * 0.15;
-    for (let s = 0; s < pos.count; s++) {
-      const f = s / (pos.count - 1);
-      const wobble = Math.sin(f * 6 + t + phase) * spread * f;
-      const rad = f * grow;
-      pos.setX(s, Math.cos(ang) * rad - Math.sin(ang) * wobble);
-      pos.setY(s, Math.sin(ang) * rad + Math.cos(ang) * wobble);
-      pos.setZ(s, -14 + f * 8 + Math.sin(f * 4 + t) * 0.4);
-    }
-    pos.needsUpdate = true;
+function tickMotifs(
+  motifs: PlacedMotif[],
+  mouse: { x: number; y: number },
+  t: number,
+  scroll: number,
+) {
+  motifs.forEach((m) => {
+    const sway = Math.sin(t * 0.85 + m.phase) * m.bob;
+    const scrollLift = scroll * m.parallax * 2.5;
+    m.object.position.x = m.ox + mouse.x * m.parallax * 1.8 + sway * 0.35;
+    m.object.position.y = m.oy + mouse.y * m.parallax * 1.2 + Math.cos(t * 0.65 + m.phase) * m.bob - scrollLift;
+    m.object.position.z = m.oz + Math.sin(t * 0.45 + m.phase) * 0.2 + scroll * 0.8;
+    m.object.rotation.y = Math.sin(t * 0.3 + m.phase) * 0.12 + scroll * 0.4;
+    m.object.rotation.z = m.rotZ + Math.sin(t * 0.35 + m.phase) * 0.05;
   });
 }
 
-function animatePlayTile(tile: THREE.Group, t: number) {
-  tile.children.forEach((child) => {
-    if (child instanceof THREE.Line && child.userData.band != null) {
-      const { band, wall, y } = child.userData as { band: number; wall: number; y: number };
-      const pos = child.geometry.attributes.position as THREE.BufferAttribute;
-      for (let s = 0; s < pos.count; s++) {
-        const f = s / (pos.count - 1);
-        const x = -8 + f * 16;
-        pos.setX(s, wall);
-        pos.setY(s, y + Math.sin(x * 0.6 + t * 2.2 + band * 0.4) * 0.8);
-        pos.setZ(s, -f * CORRIDOR.TILE_LEN);
+function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll: number) {
+  switch (variant) {
+    case "play": {
+      const lines = scene.userData.waveLines as THREE.Line[] | undefined;
+      lines?.forEach((line, i) => {
+        const pos = line.geometry.attributes.position as THREE.BufferAttribute;
+        for (let s = 0; s < pos.count; s++) {
+          const x = (s / (pos.count - 1) - 0.5) * 28;
+          pos.setX(s, x);
+          pos.setY(
+            s,
+            Math.sin(x * 0.45 + t * 2.2 + i * 0.2 + scroll * 8) * (0.5 + scroll * 1.2),
+          );
+        }
+        pos.needsUpdate = true;
+      });
+      break;
+    }
+    case "seeds": {
+      const staff = scene.userData.staff as THREE.Group | undefined;
+      if (staff) staff.scale.x = 0.5 + scroll * 0.8 + Math.sin(t * 0.4) * 0.05;
+      break;
+    }
+    case "security": {
+      const bob = scene.userData.bobWire as THREE.Group | undefined;
+      bob?.children.forEach((strand, i) => {
+        if (strand instanceof THREE.Group) {
+          strand.position.z = -i * 2 - scroll * 6 + Math.sin(t * 0.5 + i) * 0.3;
+          strand.rotation.y = t * 0.15 + scroll * 0.5;
+        }
+      });
+      break;
+    }
+    case "api": {
+      const sweep = scene.userData.packSweep as THREE.LineSegments | undefined;
+      if (sweep) sweep.position.y = -4 + scroll * 10 + Math.sin(t * 0.6) * 0.5;
+      break;
+    }
+    case "orbit": {
+      const web = scene.userData.orbitWeb as THREE.LineSegments | undefined;
+      const nodes = web?.userData.orbitNodes as number[][] | undefined;
+      if (web && nodes) {
+        const thresh = 10 - scroll * 3;
+        const positions: number[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i][0] - nodes[j][0];
+            const dy = nodes[i][1] - nodes[j][1];
+            if (Math.sqrt(dx * dx + dy * dy) < thresh) {
+              positions.push(...nodes[i], ...nodes[j]);
+            }
+          }
+        }
+        web.geometry.dispose();
+        web.geometry = floatGeo(positions);
+        (web.material as THREE.LineBasicMaterial).opacity = 0.15 + scroll * 0.35 + Math.sin(t * 1.5) * 0.08;
       }
-      pos.needsUpdate = true;
+      break;
     }
-    if (child instanceof THREE.Group && child.userData.phase != null) {
-      child.rotation.y = t * 0.5 + child.userData.phase;
-      child.position.y += Math.sin(t * 1.2 + child.userData.phase) * 0.004;
-    }
-  });
-}
-
-function animateOrbitTile(tile: THREE.Group, t: number, scroll: number) {
-  const nodes: THREE.Mesh[] = [];
-  let web: THREE.LineSegments | undefined;
-
-  tile.children.forEach((child) => {
-    if (child instanceof THREE.Mesh && child.userData.ring != null) {
-      const { ring, a, i } = child.userData as { ring: number; a: number; i: number };
-      const speed = 0.15 + (i % 4) * 0.04 + scroll * 0.3;
-      const ang = a + t * speed;
-      child.position.x = Math.cos(ang) * ring;
-      child.position.y = Math.sin(ang) * ring * 0.5;
-      nodes.push(child);
-    }
-    if (child instanceof THREE.LineSegments && child.userData.isWeb) {
-      web = child;
-    }
-  });
-
-  if (web && nodes.length > 1) {
-    const positions: number[] = [];
-    for (let a = 0; a < nodes.length; a++) {
-      for (let b = a + 1; b < nodes.length; b++) {
-        if ((a + b) % 2 !== 0) continue;
-        positions.push(
-          nodes[a].position.x, nodes[a].position.y, nodes[a].position.z,
-          nodes[b].position.x, nodes[b].position.y, nodes[b].position.z,
-        );
-      }
-    }
-    web.geometry.dispose();
-    web.geometry = floatGeo(positions);
   }
 }
 
-function animateApiTile(tile: THREE.Group, t: number, scroll: number) {
-  tile.children.forEach((child) => {
-    if (!(child instanceof THREE.Group) || child.userData.index == null) return;
-    const i = child.userData.index as number;
-    child.rotation.y = t * 0.2 * (i % 2 ? 1 : -1) + scroll * 0.8;
-    child.children.forEach((part) => {
-      if (part instanceof THREE.LineSegments && part.userData.isLid) {
-        part.rotation.x = -scroll * Math.PI * 0.5;
+function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, t: number, scroll: number) {
+  if (variant === "api") {
+    motifs.forEach((m) => {
+      m.object.children.forEach((child) => {
+        if (child instanceof THREE.Group && child.userData.isLid) {
+          child.rotation.x = -scroll * Math.PI * 0.45 + Math.sin(t * 0.4) * 0.08;
+        }
+      });
+    });
+  }
+  if (variant === "hardware") {
+    motifs.forEach((m) => {
+      if (m.object.children[0] instanceof THREE.Mesh) {
+        m.object.rotation.x = t * 0.35 + scroll * 2;
+        m.object.rotation.y = t * 0.5;
       }
     });
-  });
+  }
+  if (variant === "orbit") {
+    motifs.forEach((m) => {
+      if (m.object.children.length > 3) {
+        m.object.rotation.z = t * 0.08;
+      }
+    });
+  }
 }
-
-function animateHardwareTile(tile: THREE.Group, t: number, scroll: number) {
-  tile.children.forEach((child) => {
-    if (child instanceof THREE.Mesh && child.userData.i != null) {
-      const i = child.userData.i as number;
-      child.rotation.x = t * (0.4 + i * 0.1) + scroll * 2;
-      child.rotation.y = t * (0.55 + i * 0.08);
-    }
-  });
-}
-
-const TILE_ANIMATORS: Partial<Record<FeatureId, (tile: THREE.Group, t: number, scroll: number) => void>> = {
-  seeds: animateSeedsTile,
-  play: (tile, t) => animatePlayTile(tile, t),
-  orbit: animateOrbitTile,
-  api: animateApiTile,
-  hardware: animateHardwareTile,
-};
 
 export function buildFeaturePageScene(
   variant: FeatureId,
   scene: THREE.Scene,
-  _mouse: { x: number; y: number },
+  mouse: { x: number; y: number },
 ): Promise<SceneTick> {
   const manifest = ARTWORK_MANIFESTS[variant];
   const accentHex = new THREE.Color(manifest.accentColor).getHex();
-  const secondary =
-    variant === "seeds" ? 0x6b2c4a : variant === "orbit" ? 0xe8a040 : accentHex;
+  const motifs: PlacedMotif[] = [];
 
-  scene.fog = new THREE.Fog(0x04060f, 45, 150);
+  for (const el of manifest.sceneElements) {
+    const group = buildGraphicElement(variant, el.id, accentHex);
+    if (!group) continue;
 
-  const builder = TILE_BUILDERS[variant];
-  const tiles: THREE.Group[] = [];
+    const scale = el.scale * 0.32;
+    group.scale.setScalar(scale);
+    group.position.set(el.x, el.y, el.z);
+    scene.add(group);
 
-  for (let i = 0; i < CORRIDOR.TILES_N; i++) {
-    const tile = builder(accentHex, secondary);
-    tile.position.z = -i * CORRIDOR.TILE_LEN;
-    scene.add(tile);
-    tiles.push(tile);
+    motifs.push({
+      object: group,
+      ox: el.x,
+      oy: el.y,
+      oz: el.z,
+      parallax: el.parallax ?? 0.8,
+      phase: el.phase ?? 0,
+      rotZ: el.rotZ ?? 0,
+      bob: 0.1 + (el.parallax ?? 0.8) * 0.1,
+      scale,
+    });
   }
 
-  const animateTile = TILE_ANIMATORS[variant];
+  addSignatureBackdrop(variant, scene, accentHex);
 
   return Promise.resolve((t: number) => {
     const scroll = scrollNorm();
-    const speed = CORRIDOR.BASE_SPEED + scroll * 0.1;
-
-    for (const tile of tiles) {
-      tile.position.z += speed;
-      if (tile.position.z > 14) {
-        tile.position.z -= CORRIDOR.TILES_N * CORRIDOR.TILE_LEN;
-      }
-      animateTile?.(tile, t, scroll);
-    }
+    tickMotifs(motifs, mouse, t, scroll);
+    tickSignature(variant, scene, t, scroll);
+    tickElementInternals(motifs, variant, t, scroll);
   });
 }

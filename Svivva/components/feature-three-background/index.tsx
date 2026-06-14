@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * FeatureThreeBackground — Pyracrypt-grade fly-through Three.js motifs per feature theme.
- * Fixed viewport background; no artwork texture planes.
+ * FeatureThreeBackground — interactive 3D replicas of each cube-face graphic's elements.
+ * Positions from artwork-atlas sceneElements; geometry from feature-graphic-builders.
  */
 
 import { useEffect, useRef } from "react";
@@ -17,6 +17,8 @@ type Props = { variant: FeatureVariant };
 export function FeatureThreeBackground({ variant }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
+  const secondary =
+    variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#5BA8A0" : undefined;
 
   useEffect(() => {
     const el = mountRef.current;
@@ -33,7 +35,7 @@ export function FeatureThreeBackground({ variant }: Props) {
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
-    renderer.setClearColor(0x04060f, 0);
+    renderer.setClearColor(0x000000, 0);
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
@@ -42,12 +44,11 @@ export function FeatureThreeBackground({ variant }: Props) {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 200);
-    camera.position.set(0, 1.5, 14);
-    camera.lookAt(0, 0, -60);
+    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 120);
+    camera.position.z = 11;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const key = new THREE.DirectionalLight(0xffffff, 0.75);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const key = new THREE.DirectionalLight(0xffffff, 0.85);
     key.position.set(4, 6, 8);
     scene.add(key);
 
@@ -72,11 +73,10 @@ export function FeatureThreeBackground({ variant }: Props) {
     const start = Date.now();
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const t = (Date.now() - start) / 1000;
-      tick(t);
-      camera.position.x = mouse.x * 0.6 + Math.sin(t * 0.35) * 0.9;
-      camera.position.y = 1.5 + mouse.y * 0.3 + Math.sin(t * 0.22) * 0.45;
-      camera.lookAt(camera.position.x * 0.15, 0, -60);
+      tick((Date.now() - start) / 1000);
+      camera.position.x = mouse.x * 0.7;
+      camera.position.y = mouse.y * 0.45;
+      camera.lookAt(mouse.x * 0.3, mouse.y * 0.2, 0);
       renderer.render(scene, camera);
     };
     animate();
@@ -107,7 +107,11 @@ export function FeatureThreeBackground({ variant }: Props) {
       data-svivva-feature-bg={variant}
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{
-        background: `radial-gradient(ellipse 80% 60% at 50% 40%, ${feature.accentColor}12 0%, #04060f 70%)`,
+        background: [
+          `radial-gradient(ellipse 100% 70% at 20% 25%, ${feature.accentColor}16 0%, transparent 55%)`,
+          secondary ? `radial-gradient(ellipse 80% 60% at 80% 70%, ${secondary}10 0%, transparent 50%)` : "",
+          "transparent",
+        ].join(", "),
       }}
     />
   );
