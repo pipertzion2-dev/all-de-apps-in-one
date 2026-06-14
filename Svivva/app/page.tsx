@@ -38,7 +38,6 @@ import {
   Settings2,
   Music,
   Sprout,
-  TrendingUp,
   Lock,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -787,84 +786,57 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 sm:py-20 relative z-10 overflow-hidden bg-background border-y border-border/30">
+        <section className="py-16 sm:py-20 relative z-10 bg-muted/15 border-y border-border/30">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div
-              className="relative rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-sm"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(91,168,160,0.06) 0%, rgba(107,44,74,0.05) 50%, transparent 100%)",
-              }}
-            >
-              <div className="absolute inset-0 opacity-20">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 20% 50%, rgba(91,168,160,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(107,44,74,0.3) 0%, transparent 50%)",
-                  }}
+            <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/30">
+                <Image
+                  src={seedsLogo}
+                  alt="Svivva Seeds"
+                  fill
+                  sizes="128px"
+                  className="object-cover"
                 />
               </div>
-              <div className="relative flex flex-col md:flex-row items-center gap-6 sm:gap-8 p-6 sm:p-10">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-white/10">
-                  <Image
-                    src={seedsLogo}
-                    alt="Svivva Seeds"
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                  />
+              <div className="flex-1 text-center md:text-left space-y-3">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
+                    Svivva Seeds
+                  </span>
+                  <Badge variant="secondary" className="text-[10px]">
+                    Pro & Enterprise
+                  </Badge>
                 </div>
-                <div className="flex-1 text-center md:text-left space-y-3">
-                  <div className="flex items-center justify-center md:justify-start gap-2">
-                    <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                      Svivva Seeds
+                <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+                  Generate multiple production-ready applications from a single structured
+                  document. One spec in, entire product suites out — frontend, backend, database,
+                  auth, and deployment configs all built in parallel.
+                </p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                  {[
+                    "Multi-app generation",
+                    "Parallel builds",
+                    "Full-stack output",
+                    "Auto documentation",
+                  ].map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] px-2 py-1 rounded-full bg-muted/60 border border-border/60 text-muted-foreground"
+                    >
+                      {tag}
                     </span>
-                    <Badge variant="secondary" className="text-[10px]">
-                      Pro & Enterprise
-                    </Badge>
-                  </div>
-                  <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                    Generate multiple production-ready applications from a single structured
-                    document. One spec in, entire product suites out — frontend, backend, database,
-                    auth, and deployment configs all built in parallel.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
-                    {[
-                      "Multi-app generation",
-                      "Parallel builds",
-                      "Full-stack output",
-                      "Auto documentation",
-                    ].map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-muted-foreground"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="pt-2 flex flex-wrap gap-2">
-                    <Link href="/seeds">
-                      <Button
-                        size="sm"
-                        className="gap-2 bg-[#5BA8A0]"
-                        data-testid="button-seeds-cta"
-                      >
-                        Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
-                    <Link href="/seeds#seeds-marketing">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-2 border-white/20 text-white hover:bg-white/10"
-                        data-testid="button-seeds-marketing-cta"
-                      >
-                        <TrendingUp className="w-3.5 h-3.5" /> Seeds Marketing
-                      </Button>
-                    </Link>
-                  </div>
+                  ))}
+                </div>
+                <div className="pt-2">
+                  <Link href="/seeds">
+                    <Button
+                      size="sm"
+                      className="gap-2 bg-[#5BA8A0]"
+                      data-testid="button-seeds-cta"
+                    >
+                      Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
