@@ -1,8 +1,7 @@
 "use client";
 
 /**
- * FeatureThreeBackground — interactive 3D replicas of each cube-face graphic's elements.
- * Positions from artwork-atlas sceneElements; geometry from feature-graphic-builders.
+ * FeatureThreeBackground — graphic-faithful 3D motifs, toned to sit behind UI without clashing.
  */
 
 import { useEffect, useRef } from "react";
@@ -17,8 +16,6 @@ type Props = { variant: FeatureVariant };
 export function FeatureThreeBackground({ variant }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
-  const secondary =
-    variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#5BA8A0" : undefined;
 
   useEffect(() => {
     const el = mountRef.current;
@@ -44,11 +41,11 @@ export function FeatureThreeBackground({ variant }: Props) {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 120);
-    camera.position.z = 11;
+    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 120);
+    camera.position.z = 12;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const key = new THREE.DirectionalLight(0xffffff, 0.85);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    const key = new THREE.DirectionalLight(0xffffff, 0.5);
     key.position.set(4, 6, 8);
     scene.add(key);
 
@@ -74,9 +71,9 @@ export function FeatureThreeBackground({ variant }: Props) {
     const animate = () => {
       rafId = requestAnimationFrame(animate);
       tick((Date.now() - start) / 1000);
-      camera.position.x = mouse.x * 0.7;
-      camera.position.y = mouse.y * 0.45;
-      camera.lookAt(mouse.x * 0.3, mouse.y * 0.2, 0);
+      camera.position.x = mouse.x * 0.45;
+      camera.position.y = mouse.y * 0.28;
+      camera.lookAt(mouse.x * 0.2, mouse.y * 0.15, 0);
       renderer.render(scene, camera);
     };
     animate();
@@ -100,19 +97,35 @@ export function FeatureThreeBackground({ variant }: Props) {
     };
   }, [variant]);
 
+  const accent = feature.accentColor;
+  const secondary =
+    variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
+
   return (
-    <div
-      ref={mountRef}
-      aria-hidden
-      data-svivva-feature-bg={variant}
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      style={{
-        background: [
-          `radial-gradient(ellipse 100% 70% at 20% 25%, ${feature.accentColor}16 0%, transparent 55%)`,
-          secondary ? `radial-gradient(ellipse 80% 60% at 80% 70%, ${secondary}10 0%, transparent 50%)` : "",
-          "transparent",
-        ].join(", "),
-      }}
-    />
+    <>
+      <div
+        ref={mountRef}
+        aria-hidden
+        data-svivva-feature-bg={variant}
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+        style={{
+          background: [
+            `radial-gradient(ellipse 90% 65% at 25% 30%, ${accent}08 0%, transparent 60%)`,
+            secondary ? `radial-gradient(ellipse 70% 55% at 75% 65%, ${secondary}06 0%, transparent 55%)` : "",
+          ]
+            .filter(Boolean)
+            .join(", "),
+        }}
+      />
+      {/* Vignette — keeps Three.js behind readable UI panels */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 22%, transparent 72%, hsl(var(--background) / 0.65) 100%)",
+        }}
+      />
+    </>
   );
 }

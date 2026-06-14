@@ -674,7 +674,7 @@ export default function SeedsPage() {
       </nav>
 
       <main className="relative z-20 flex-1 overflow-y-auto bg-transparent">
-        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative [&_.border]:bg-card/92 [&_.border]:backdrop-blur-md">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">

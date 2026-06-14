@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
+import type { ArtworkCrop } from "@/lib/artwork-atlas";
+import type { GraphicPalette } from "@/lib/artwork-palettes";
+import { createPatternInset } from "@/lib/artwork-three";
 
 function lineMat(color: number, opacity = 0.65): THREE.LineBasicMaterial {
   return new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false });
@@ -77,20 +80,30 @@ export function buildStaffLines(color: number, width = 12): THREE.Group {
   return g;
 }
 
-/** Collage panel — framed 3D quad with interior motif (not a photo crop). */
+/** Collage panel — framed 3D quad with graphic crop pattern + interior motif. */
 export function buildCollagePanel(
   variant: "gold" | "purple" | "grain" | "courtyard",
   frameColor: number,
   innerColor: number,
+  palette: GraphicPalette,
+  texture?: THREE.Texture,
+  crop?: ArtworkCrop,
 ): THREE.Group {
   const g = new THREE.Group();
   const w = 2.8;
   const h = 2.2;
-  const frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, 0.12)), lineMat(frameColor, 0.8));
+  const frame = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, 0.12)),
+    lineMat(frameColor, palette.lineOpacity + 0.15),
+  );
   g.add(frame);
 
   const inner = new THREE.Group();
   inner.position.z = 0.08;
+
+  if (texture && crop) {
+    inner.add(createPatternInset(texture, crop, w * 0.86, h * 0.86, palette.patternOpacity));
+  }
 
   switch (variant) {
     case "gold": {
@@ -394,51 +407,101 @@ export function buildSwimmers(color: number): THREE.Group {
   return g;
 }
 
-const PLAY_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "note-1": (a) => buildMusicNote(a, 1.1),
-  "note-2": (a) => buildMusicNote(0xc48fd4, 0.95),
-  "text-stack": () => buildTextStack(0x5ba8a0, 0xd782b2),
-  guitar: (a) => buildGuitarSilhouette(a),
+type ElementFactory = (
+  palette: GraphicPalette,
+  texture?: THREE.Texture,
+  crop?: ArtworkCrop,
+) => THREE.Group;
+
+const PLAY_BUILDERS: Record<string, ElementFactory> = {
+  "note-1": (p) => buildMusicNote(p.primary, 1.1),
+  "note-2": (p) => buildMusicNote(p.highlight, 0.95),
+  "text-stack": (p) => buildTextStack(p.secondary, p.tertiary),
+  guitar: (p, tex, crop) => {
+    const g = buildGuitarSilhouette(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2.4, 3.2, p.patternOpacity));
+    return g;
+  },
 };
 
-const SEEDS_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "quad-tl": (a) => buildCollagePanel("gold", a, 0xd4a85a),
-  "quad-tr": () => buildCollagePanel("purple", 0x6b2c4a, 0x9b7fd4),
-  "quad-bl": (a) => buildCollagePanel("grain", a, 0x8b7355),
-  "quad-br": (a) => buildCollagePanel("courtyard", a, 0x5a9e6a),
+const SEEDS_BUILDERS: Record<string, ElementFactory> = {
+  "quad-tl": (p, tex, crop) => buildCollagePanel("gold", p.primary, p.tertiary, p, tex, crop),
+  "quad-tr": (p, tex, crop) => buildCollagePanel("purple", p.secondary, p.highlight, p, tex, crop),
+  "quad-bl": (p, tex, crop) => buildCollagePanel("grain", p.primary, 0x8b7355, p, tex, crop),
+  "quad-br": (p, tex, crop) => buildCollagePanel("courtyard", p.primary, p.wire, p, tex, crop),
 };
 
-const ORBIT_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "star-1": (a) => buildStar(a, 1.1),
-  "star-2": (a) => buildStar(0xe8a040, 0.9),
-  face: () => buildGlitchFace(0x5ba8a0, 0xc06010),
-  rose: () => buildRose(0x5b8fd4),
-  moss: () => buildMossWeb(0x5ba8a0, 0xc06010),
+const ORBIT_BUILDERS: Record<string, ElementFactory> = {
+  "star-1": (p) => buildStar(p.secondary, 1.1),
+  "star-2": (p) => buildStar(p.tertiary, 0.9),
+  face: (p, tex, crop) => {
+    const g = buildGlitchFace(p.wire, p.secondary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2.8, 2.6, p.patternOpacity));
+    return g;
+  },
+  rose: (p) => buildRose(p.highlight),
+  moss: (p, tex, crop) => {
+    const g = buildMossWeb(p.wire, p.secondary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 3.2, 2, p.patternOpacity * 0.85));
+    return g;
+  },
 };
 
-const SECURITY_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "crystal-top": (a) => buildCrystalVessel(a, 1.1),
-  "crystal-bot": (a) => buildCrystalVessel(0x8a5a9e, 0.95),
-  frame: (a) => buildFiligreeFrame(a),
-  heart: (a) => buildHeartWire(a),
+const SECURITY_BUILDERS: Record<string, ElementFactory> = {
+  "crystal-top": (p) => buildCrystalVessel(p.primary, 1.1),
+  "crystal-bot": (p) => buildCrystalVessel(p.secondary, 0.95),
+  frame: (p, tex, crop) => {
+    const g = buildFiligreeFrame(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 3.4, 1.6, p.patternOpacity));
+    return g;
+  },
+  heart: (p) => buildHeartWire(p.primary),
 };
 
-const API_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "flower-1": (a) => buildFlower(a, 9),
-  "flower-2": (a) => buildFlower(0xd782b2, 7),
-  paper: (a) => buildHangingPaper(a),
-  fold: (a) => buildJewelCasePanel(a),
+const API_BUILDERS: Record<string, ElementFactory> = {
+  "flower-1": (p, tex, crop) => {
+    const g = buildFlower(p.primary, 9);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2.2, 2.2, p.patternOpacity));
+    return g;
+  },
+  "flower-2": (p, tex, crop) => {
+    const g = buildFlower(p.secondary, 7);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 1.8, 1.8, p.patternOpacity));
+    return g;
+  },
+  paper: (p, tex, crop) => {
+    const g = buildHangingPaper(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2, 1.4, p.patternOpacity));
+    return g;
+  },
+  fold: (p, tex, crop) => {
+    const g = buildJewelCasePanel(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2, 1.4, p.patternOpacity));
+    return g;
+  },
 };
 
-const HARDWARE_BUILDERS: Record<string, (a: number) => THREE.Group> = {
-  "hand-cube": (a) => buildDiamondFist(a, 1.2),
-  "green-cube": () => buildColoredCube(0x5a9e6a, 0.9),
-  "red-cube": () => buildColoredCube(0xc04040, 0.85),
-  figures: (a) => buildVintageFrame(a),
-  swim: (a) => buildSwimmers(a),
+const HARDWARE_BUILDERS: Record<string, ElementFactory> = {
+  "hand-cube": (p, tex, crop) => {
+    const g = buildDiamondFist(p.primary, 1.2);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2.4, 2.6, p.patternOpacity));
+    return g;
+  },
+  "green-cube": (p) => buildColoredCube(p.secondary, 0.9),
+  "red-cube": (p) => buildColoredCube(p.tertiary, 0.85),
+  figures: (p, tex, crop) => {
+    const g = buildVintageFrame(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 1.8, 2.4, p.patternOpacity));
+    return g;
+  },
+  swim: (p, tex, crop) => {
+    const g = buildSwimmers(p.primary);
+    if (tex && crop) g.add(createPatternInset(tex, crop, 2.8, 1.2, p.patternOpacity * 0.8));
+    return g;
+  },
 };
 
-const BUILDERS: Record<FeatureId, Record<string, (a: number) => THREE.Group>> = {
+const BUILDERS: Record<FeatureId, Record<string, ElementFactory>> = {
   play: PLAY_BUILDERS,
   seeds: SEEDS_BUILDERS,
   orbit: ORBIT_BUILDERS,
@@ -447,14 +510,21 @@ const BUILDERS: Record<FeatureId, Record<string, (a: number) => THREE.Group>> = 
   hardware: HARDWARE_BUILDERS,
 };
 
-export function buildGraphicElement(variant: FeatureId, elementId: string, accentHex: number): THREE.Group | null {
+export function buildGraphicElement(
+  variant: FeatureId,
+  elementId: string,
+  palette: GraphicPalette,
+  texture?: THREE.Texture,
+  crop?: ArtworkCrop,
+): THREE.Group | null {
   const factory = BUILDERS[variant]?.[elementId];
   if (!factory) return null;
-  return factory(accentHex);
+  return factory(palette, texture, crop);
 }
 
-/** Signature backdrop layers unique to each graphic composition. */
-export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, accentHex: number) {
+/** Signature backdrop layers — muted so UI cards stay readable. */
+export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, palette: GraphicPalette) {
+  const op = palette.lineOpacity;
   switch (variant) {
     case "play": {
       const lines: THREE.Line[] = [];
@@ -462,7 +532,7 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, acc
         const pos = new Float32Array(96 * 3);
         const geo = new THREE.BufferGeometry();
         geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        const line = new THREE.Line(geo, lineMat(accentHex, 0.12 + (i / 24) * 0.28));
+        const line = new THREE.Line(geo, lineMat(palette.wire, op * 0.35 + (i / 24) * 0.12));
         line.position.y = (i - 12) * 0.45;
         line.position.z = -8;
         line.userData.isWave = true;
@@ -473,7 +543,7 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, acc
       break;
     }
     case "seeds": {
-      const staff = buildStaffLines(accentHex, 18);
+      const staff = buildStaffLines(palette.primary, 18);
       staff.position.set(0, 5.5, -6);
       scene.add(staff);
       scene.userData.staff = staff;
@@ -489,12 +559,12 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, acc
       ];
       const dotGeo = new THREE.BufferGeometry();
       dotGeo.setAttribute("position", new THREE.Float32BufferAttribute(nodes.flat(), 3));
-      const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: accentHex, size: 0.5, transparent: true, opacity: 0.7 }));
-      scene.add(dots);
-      const web = new THREE.LineSegments(
-        new THREE.BufferGeometry(),
-        lineMat(accentHex, 0.25),
+      const dots = new THREE.Points(
+        dotGeo,
+        new THREE.PointsMaterial({ color: palette.secondary, size: 0.45, transparent: true, opacity: op * 0.9 }),
       );
+      scene.add(dots);
+      const web = new THREE.LineSegments(new THREE.BufferGeometry(), lineMat(palette.secondary, op * 0.55));
       web.userData.isOrbitWeb = true;
       web.userData.orbitNodes = nodes;
       scene.add(web);
@@ -505,7 +575,7 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, acc
       const wireGroup = new THREE.Group();
       wireGroup.position.z = -7;
       [-2.5, 0, 2.5].forEach((y, i) => {
-        const strand = buildBarbedWireStrand(20, y, 0x5ba8a0, 0x9b3a5e, "x");
+        const strand = buildBarbedWireStrand(20, y, palette.wire, palette.highlight, "x");
         strand.position.z = -i * 2;
         strand.userData.isBobWire = true;
         wireGroup.add(strand);
@@ -515,7 +585,7 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, acc
       break;
     }
     case "api": {
-      const sweep = new THREE.LineSegments(floatGeo([-12, 0, -5, 12, 0, -5]), lineMat(0xd782b2, 0.35));
+      const sweep = new THREE.LineSegments(floatGeo([-12, 0, -5, 12, 0, -5]), lineMat(palette.secondary, op * 0.65));
       sweep.userData.isSweep = true;
       scene.add(sweep);
       scene.userData.packSweep = sweep;

@@ -152,14 +152,7 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return sessionStorage.getItem("svivva:introSeen") === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [flipComplete, setFlipComplete] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const lastProgressRef = useRef(0);
@@ -175,14 +168,6 @@ export default function LandingPage() {
       .then((r) => r.json())
       .then((d) => setStats(d))
       .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem("svivva:introSeen") === "1") {
-        setFlipComplete(true);
-      }
-    } catch {}
   }, []);
 
   useEffect(() => {

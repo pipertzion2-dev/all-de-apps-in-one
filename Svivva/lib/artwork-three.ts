@@ -43,6 +43,19 @@ export function createRegionPlane(
   return new THREE.Mesh(new THREE.PlaneGeometry(width, height), mat);
 }
 
+/** Inset pattern plane — graphic crop as subtle interior texture (not a floating sprite). */
+export function createPatternInset(
+  base: THREE.Texture,
+  crop: ArtworkCrop,
+  width: number,
+  height: number,
+  opacity = 0.24,
+): THREE.Mesh {
+  const mesh = createRegionPlane(base, crop, width, height, opacity);
+  mesh.position.z = 0.02;
+  return mesh;
+}
+
 export function createRegionSprite(
   base: THREE.Texture,
   crop: ArtworkCrop,

@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { ARTWORK_MANIFESTS } from "@/lib/artwork-atlas";
+import { getGraphicPalette } from "@/lib/artwork-palettes";
+import { loadArtworkTexture } from "@/lib/artwork-three";
 import {
   addSignatureBackdrop,
   buildGraphicElement,
@@ -34,16 +36,19 @@ function tickMotifs(
 ) {
   motifs.forEach((m) => {
     const sway = Math.sin(t * 0.85 + m.phase) * m.bob;
-    const scrollLift = scroll * m.parallax * 2.5;
-    m.object.position.x = m.ox + mouse.x * m.parallax * 1.8 + sway * 0.35;
-    m.object.position.y = m.oy + mouse.y * m.parallax * 1.2 + Math.cos(t * 0.65 + m.phase) * m.bob - scrollLift;
-    m.object.position.z = m.oz + Math.sin(t * 0.45 + m.phase) * 0.2 + scroll * 0.8;
-    m.object.rotation.y = Math.sin(t * 0.3 + m.phase) * 0.12 + scroll * 0.4;
-    m.object.rotation.z = m.rotZ + Math.sin(t * 0.35 + m.phase) * 0.05;
+    const scrollLift = scroll * m.parallax * 2;
+    m.object.position.x = m.ox + mouse.x * m.parallax * 1.2 + sway * 0.25;
+    m.object.position.y = m.oy + mouse.y * m.parallax * 0.9 + Math.cos(t * 0.65 + m.phase) * m.bob - scrollLift;
+    m.object.position.z = m.oz + Math.sin(t * 0.45 + m.phase) * 0.15 + scroll * 0.5;
+    m.object.rotation.y = Math.sin(t * 0.3 + m.phase) * 0.1 + scroll * 0.25;
+    m.object.rotation.z = m.rotZ + Math.sin(t * 0.35 + m.phase) * 0.04;
   });
 }
 
 function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll: number) {
+  const palette = getGraphicPalette(variant);
+  const op = palette.lineOpacity;
+
   switch (variant) {
     case "play": {
       const lines = scene.userData.waveLines as THREE.Line[] | undefined;
@@ -54,7 +59,7 @@ function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll
           pos.setX(s, x);
           pos.setY(
             s,
-            Math.sin(x * 0.45 + t * 2.2 + i * 0.2 + scroll * 8) * (0.5 + scroll * 1.2),
+            Math.sin(x * 0.45 + t * 2.2 + i * 0.2 + scroll * 8) * (0.4 + scroll * 0.9),
           );
         }
         pos.needsUpdate = true;
@@ -63,22 +68,22 @@ function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll
     }
     case "seeds": {
       const staff = scene.userData.staff as THREE.Group | undefined;
-      if (staff) staff.scale.x = 0.5 + scroll * 0.8 + Math.sin(t * 0.4) * 0.05;
+      if (staff) staff.scale.x = 0.5 + scroll * 0.7 + Math.sin(t * 0.4) * 0.04;
       break;
     }
     case "security": {
       const bob = scene.userData.bobWire as THREE.Group | undefined;
       bob?.children.forEach((strand, i) => {
         if (strand instanceof THREE.Group) {
-          strand.position.z = -i * 2 - scroll * 6 + Math.sin(t * 0.5 + i) * 0.3;
-          strand.rotation.y = t * 0.15 + scroll * 0.5;
+          strand.position.z = -i * 2 - scroll * 5 + Math.sin(t * 0.5 + i) * 0.25;
+          strand.rotation.y = t * 0.12 + scroll * 0.35;
         }
       });
       break;
     }
     case "api": {
       const sweep = scene.userData.packSweep as THREE.LineSegments | undefined;
-      if (sweep) sweep.position.y = -4 + scroll * 10 + Math.sin(t * 0.6) * 0.5;
+      if (sweep) sweep.position.y = -4 + scroll * 8 + Math.sin(t * 0.6) * 0.4;
       break;
     }
     case "orbit": {
@@ -98,7 +103,7 @@ function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll
         }
         web.geometry.dispose();
         web.geometry = floatGeo(positions);
-        (web.material as THREE.LineBasicMaterial).opacity = 0.15 + scroll * 0.35 + Math.sin(t * 1.5) * 0.08;
+        (web.material as THREE.LineBasicMaterial).opacity = op * 0.45 + scroll * 0.2 + Math.sin(t * 1.5) * 0.05;
       }
       break;
     }
@@ -110,7 +115,7 @@ function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, t: numb
     motifs.forEach((m) => {
       m.object.children.forEach((child) => {
         if (child instanceof THREE.Group && child.userData.isLid) {
-          child.rotation.x = -scroll * Math.PI * 0.45 + Math.sin(t * 0.4) * 0.08;
+          child.rotation.x = -scroll * Math.PI * 0.4 + Math.sin(t * 0.4) * 0.06;
         }
       });
     });
@@ -118,15 +123,15 @@ function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, t: numb
   if (variant === "hardware") {
     motifs.forEach((m) => {
       if (m.object.children[0] instanceof THREE.Mesh) {
-        m.object.rotation.x = t * 0.35 + scroll * 2;
-        m.object.rotation.y = t * 0.5;
+        m.object.rotation.x = t * 0.3 + scroll * 1.5;
+        m.object.rotation.y = t * 0.4;
       }
     });
   }
   if (variant === "orbit") {
     motifs.forEach((m) => {
       if (m.object.children.length > 3) {
-        m.object.rotation.z = t * 0.08;
+        m.object.rotation.z = t * 0.06;
       }
     });
   }
@@ -138,37 +143,40 @@ export function buildFeaturePageScene(
   mouse: { x: number; y: number },
 ): Promise<SceneTick> {
   const manifest = ARTWORK_MANIFESTS[variant];
-  const accentHex = new THREE.Color(manifest.accentColor).getHex();
-  const motifs: PlacedMotif[] = [];
+  const palette = getGraphicPalette(variant);
 
-  for (const el of manifest.sceneElements) {
-    const group = buildGraphicElement(variant, el.id, accentHex);
-    if (!group) continue;
+  return loadArtworkTexture(manifest.src).then((texture) => {
+    const motifs: PlacedMotif[] = [];
 
-    const scale = el.scale * 0.32;
-    group.scale.setScalar(scale);
-    group.position.set(el.x, el.y, el.z);
-    scene.add(group);
+    for (const el of manifest.sceneElements) {
+      const group = buildGraphicElement(variant, el.id, palette, texture, el);
+      if (!group) continue;
 
-    motifs.push({
-      object: group,
-      ox: el.x,
-      oy: el.y,
-      oz: el.z,
-      parallax: el.parallax ?? 0.8,
-      phase: el.phase ?? 0,
-      rotZ: el.rotZ ?? 0,
-      bob: 0.1 + (el.parallax ?? 0.8) * 0.1,
-      scale,
-    });
-  }
+      const scale = el.scale * 0.3;
+      group.scale.setScalar(scale);
+      group.position.set(el.x, el.y, el.z);
+      scene.add(group);
 
-  addSignatureBackdrop(variant, scene, accentHex);
+      motifs.push({
+        object: group,
+        ox: el.x,
+        oy: el.y,
+        oz: el.z,
+        parallax: (el.parallax ?? 0.8) * 0.65,
+        phase: el.phase ?? 0,
+        rotZ: el.rotZ ?? 0,
+        bob: 0.06 + (el.parallax ?? 0.8) * 0.06,
+        scale,
+      });
+    }
 
-  return Promise.resolve((t: number) => {
-    const scroll = scrollNorm();
-    tickMotifs(motifs, mouse, t, scroll);
-    tickSignature(variant, scene, t, scroll);
-    tickElementInternals(motifs, variant, t, scroll);
+    addSignatureBackdrop(variant, scene, palette);
+
+    return (t: number) => {
+      const scroll = scrollNorm();
+      tickMotifs(motifs, mouse, t, scroll);
+      tickSignature(variant, scene, t, scroll);
+      tickElementInternals(motifs, variant, t, scroll);
+    };
   });
 }
