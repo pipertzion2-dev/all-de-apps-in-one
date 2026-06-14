@@ -153,7 +153,7 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(false);
+  const [flipComplete, setFlipComplete] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const lastProgressRef = useRef(0);
@@ -248,7 +248,7 @@ export default function LandingPage() {
     <div ref={containerRef} className="min-h-screen w-full bg-background overflow-x-hidden">
       {!flipComplete && (
         <div
-          className="fixed inset-0 bg-background"
+          className="fixed inset-0"
           style={{
             zIndex: 60,
             pointerEvents: "none",
