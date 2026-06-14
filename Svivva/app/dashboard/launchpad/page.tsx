@@ -3479,7 +3479,7 @@ export default function LaunchpadPage() {
                           <>
                             {" "}
                             · <span className="text-white/80">NEXT_PUBLIC_SITE_URL</span>{" "}
-                            {me.nextPublicSiteUrl}
+                            {me?.nextPublicSiteUrl}
                           </>
                         ) : null}
                       </p>
