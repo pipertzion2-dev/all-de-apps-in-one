@@ -152,7 +152,7 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(true);
+  const [flipComplete, setFlipComplete] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const lastProgressRef = useRef(0);
@@ -168,6 +168,14 @@ export default function LandingPage() {
       .then((r) => r.json())
       .then((d) => setStats(d))
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("svivva:introSeen") === "1") {
+        setFlipComplete(true);
+      }
+    } catch {}
   }, []);
 
   const handleStartBuilding = () => {
@@ -544,6 +552,99 @@ export default function LandingPage() {
           </div>
         </nav>
 
+        <section className="relative pt-16 sm:pt-20 pb-6 sm:pb-8 border-b border-border/40 bg-gradient-to-r from-[#5BA8A0]/12 via-background to-[#6B2C4A]/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="rounded-2xl border border-[#5BA8A0]/25 bg-background/95 backdrop-blur-sm p-5 sm:p-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              <div className="space-y-2 max-w-2xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5BA8A0]">
+                  Svivva Command Center
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Orbit Admin — operations &amp; growth control
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Open the admin mission board for deployment checklists, traffic funnel diagnostics,
+                  and Orbit mission control. No account required — use the admin passcode at the gate.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                <Link href="/dashboard/orbit">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto gap-2 bg-[#5BA8A0] hover:bg-[#4d968f]"
+                    data-testid="button-orbit-admin-hero"
+                  >
+                    Enter Orbit Admin
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="svivva-seeds"
+          className="py-12 sm:py-16 relative z-30 isolate bg-background border-b border-border/30"
+        >
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="rounded-2xl border border-[#5BA8A0]/30 bg-background p-6 sm:p-10 shadow-sm">
+              <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/40">
+                  <Image
+                    src={seedsLogo}
+                    alt="Svivva Seeds"
+                    fill
+                    sizes="128px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex-1 text-center md:text-left space-y-3">
+                  <div className="flex items-center justify-center md:justify-start gap-2">
+                    <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
+                      Svivva Seeds
+                    </span>
+                    <Badge variant="secondary" className="text-[10px]">
+                      Pro & Enterprise
+                    </Badge>
+                  </div>
+                  <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+                    Generate multiple production-ready applications from a single structured
+                    document. One spec in, entire product suites out — frontend, backend, database,
+                    auth, and deployment configs all built in parallel.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                    {[
+                      "Multi-app generation",
+                      "Parallel builds",
+                      "Full-stack output",
+                      "Auto documentation",
+                    ].map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] px-2 py-1 rounded-full bg-[#5BA8A0]/10 border border-[#5BA8A0]/25 text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="pt-2">
+                    <Link href="/seeds">
+                      <Button
+                        size="sm"
+                        className="gap-2 bg-[#5BA8A0]"
+                        data-testid="button-seeds-cta"
+                      >
+                        Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section
           className={`relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
         >
@@ -678,7 +779,7 @@ export default function LandingPage() {
 
         <section
           id="platforms"
-          className="py-16 sm:py-24 relative overflow-hidden bg-muted/20 border-y border-border/30"
+          className="py-16 sm:py-24 relative z-10 overflow-visible bg-muted/20 border-y border-border/30"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-4 mb-16">
@@ -786,64 +887,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 sm:py-20 relative z-10 bg-muted/15 border-y border-border/30">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/30">
-                <Image
-                  src={seedsLogo}
-                  alt="Svivva Seeds"
-                  fill
-                  sizes="128px"
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex-1 text-center md:text-left space-y-3">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                    Svivva Seeds
-                  </span>
-                  <Badge variant="secondary" className="text-[10px]">
-                    Pro & Enterprise
-                  </Badge>
-                </div>
-                <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                  Generate multiple production-ready applications from a single structured
-                  document. One spec in, entire product suites out — frontend, backend, database,
-                  auth, and deployment configs all built in parallel.
-                </p>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
-                  {[
-                    "Multi-app generation",
-                    "Parallel builds",
-                    "Full-stack output",
-                    "Auto documentation",
-                  ].map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] px-2 py-1 rounded-full bg-muted/60 border border-border/60 text-muted-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="pt-2">
-                  <Link href="/seeds">
-                    <Button
-                      size="sm"
-                      className="gap-2 bg-[#5BA8A0]"
-                      data-testid="button-seeds-cta"
-                    >
-                      Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="relative h-16 sm:h-24 bg-background" aria-hidden="true" />
+        <div
+          className="relative h-16 sm:h-24 bg-gradient-to-b from-background to-muted/20"
+          aria-hidden="true"
+        />
 
         {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
         <section className="py-8 border-y border-border/40 bg-background/60 backdrop-blur-sm">
