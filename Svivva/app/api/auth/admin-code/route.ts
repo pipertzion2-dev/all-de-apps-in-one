@@ -13,7 +13,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Incorrect code" }, { status: 401 });
     }
     const response = NextResponse.json({ success: true });
-    response.cookies.set(adminAccessCookieName(), adminAccessCookieValue(), adminAccessCookieOptions());
+    response.cookies.set(
+      adminAccessCookieName(),
+      adminAccessCookieValue(),
+      adminAccessCookieOptions(),
+    );
     return response;
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

@@ -138,10 +138,10 @@ export async function buildFeaturePageScene(
     case "seeds": {
       const quadPanels: THREE.Mesh[] = [];
       const quads = [
-        { u: 0.03, v: 0.14, w: 0.44, h: 0.36, x: -4.8, y: 2.6, z: -2.5, rz: -0.12 },
-        { u: 0.54, v: 0.14, w: 0.42, h: 0.36, x: 4.6, y: 2.2, z: -3.2, rz: 0.1 },
-        { u: 0.03, v: 0.54, w: 0.44, h: 0.36, x: -4.2, y: -2.4, z: -2.8, rz: 0.08 },
-        { u: 0.54, v: 0.54, w: 0.42, h: 0.36, x: 5, y: -2.1, z: -3.5, rz: -0.14 },
+        { id: "tl", u: 0.03, v: 0.14, w: 0.44, h: 0.36, x: -4.8, y: 2.6, z: -2.5, rz: -0.12 },
+        { id: "tr", u: 0.54, v: 0.14, w: 0.42, h: 0.36, x: 4.6, y: 2.2, z: -3.2, rz: 0.1 },
+        { id: "bl", u: 0.03, v: 0.54, w: 0.44, h: 0.36, x: -4.2, y: -2.4, z: -2.8, rz: 0.08 },
+        { id: "br", u: 0.54, v: 0.54, w: 0.42, h: 0.36, x: 5, y: -2.1, z: -3.5, rz: -0.14 },
       ];
       quads.forEach((q) => {
         const plane = createRegionPlane(tex, q, 5.8, 4.6, 0.96);
