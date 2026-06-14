@@ -153,14 +153,7 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return sessionStorage.getItem("svivva:introSeen") === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [flipComplete, setFlipComplete] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const lastProgressRef = useRef(0);
@@ -540,6 +533,16 @@ export default function LandingPage() {
             </Link>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <Link href="/dashboard/orbit">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-[#5BA8A0]/40 text-[#5BA8A0] hover:bg-[#5BA8A0]/10 whitespace-nowrap"
+                  data-testid="button-orbit-admin-nav"
+                >
+                  Orbit Admin
+                </Button>
+              </Link>
               <Link
                 href="/play"
                 className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
@@ -570,6 +573,42 @@ export default function LandingPage() {
             </div>
           </div>
         </nav>
+
+        <section className="relative pt-20 sm:pt-24 pb-6 sm:pb-8 border-b border-border/40 bg-gradient-to-r from-[#5BA8A0]/12 via-background to-[#6B2C4A]/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="rounded-2xl border border-[#5BA8A0]/25 bg-card/80 backdrop-blur-sm p-5 sm:p-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              <div className="space-y-2 max-w-2xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5BA8A0]">
+                  Svivva Command Center
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Orbit Admin — operations &amp; growth control
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Open the admin mission board for deployment checklists, traffic funnel diagnostics,
+                  and Orbit mission control. No account required — use the admin passcode at the gate.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                <Link href="/dashboard/orbit">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto gap-2 bg-[#5BA8A0] hover:bg-[#4d968f]"
+                    data-testid="button-orbit-admin-hero"
+                  >
+                    Enter Orbit Admin
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard/launchpad">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    Launchpad
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section
           className={`relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
@@ -817,13 +856,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 sm:py-20 relative overflow-hidden bg-black/95 -mt-1">
+        <section className="py-16 sm:py-20 relative overflow-hidden bg-background border-y border-border/30">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div
-              className="relative rounded-2xl overflow-hidden border border-white/10"
+              className="relative rounded-2xl overflow-hidden border border-border/50 bg-card/60 backdrop-blur-sm"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(91,168,160,0.08) 0%, rgba(107,44,74,0.08) 50%, rgba(91,168,160,0.05) 100%)",
+                  "linear-gradient(135deg, rgba(91,168,160,0.06) 0%, rgba(107,44,74,0.05) 50%, transparent 100%)",
               }}
             >
               <div className="absolute inset-0 opacity-20">
@@ -901,14 +940,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <div
-          className="relative h-32 sm:h-48 -mt-1"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, hsl(var(--background)) 100%)",
-          }}
-          aria-hidden="true"
-        />
+        <div className="relative h-16 sm:h-24 bg-background" aria-hidden="true" />
 
         {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
         <section className="py-8 border-y border-border/40 bg-background/60 backdrop-blur-sm">
