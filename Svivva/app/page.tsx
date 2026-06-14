@@ -178,6 +178,13 @@ export default function LandingPage() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    if (!flipComplete) return;
+    document
+      .querySelectorAll("body > canvas, body > div[aria-hidden].fixed")
+      .forEach((el) => el.remove());
+  }, [flipComplete]);
+
   const handleStartBuilding = () => {
     const destination =
       mode === "digital" ? "/dashboard/api-builder" : "/dashboard/hardware-builder";
@@ -552,45 +559,14 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        <section className="relative pt-16 sm:pt-20 pb-6 sm:pb-8 border-b border-border/40 bg-gradient-to-r from-[#5BA8A0]/12 via-background to-[#6B2C4A]/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="rounded-2xl border border-[#5BA8A0]/25 bg-background/95 backdrop-blur-sm p-5 sm:p-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-              <div className="space-y-2 max-w-2xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5BA8A0]">
-                  Svivva Command Center
-                </p>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  Orbit Admin — operations &amp; growth control
-                </h1>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Open the admin mission board for deployment checklists, traffic funnel diagnostics,
-                  and Orbit mission control. No account required — use the admin passcode at the gate.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                <Link href="/dashboard/orbit">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto gap-2 bg-[#5BA8A0] hover:bg-[#4d968f]"
-                    data-testid="button-orbit-admin-hero"
-                  >
-                    Enter Orbit Admin
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section
           id="svivva-seeds"
-          className="py-12 sm:py-16 relative z-30 isolate bg-background border-b border-border/30"
+          className="pt-16 sm:pt-20 pb-12 sm:pb-16 relative z-40 bg-gradient-to-b from-[#5BA8A0]/10 via-background to-background border-b border-[#5BA8A0]/20"
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="rounded-2xl border border-[#5BA8A0]/30 bg-background p-6 sm:p-10 shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
+            <div className="rounded-2xl border border-[#5BA8A0]/40 bg-card p-6 sm:p-10 shadow-md">
               <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/40">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/50">
                   <Image
                     src={seedsLogo}
                     alt="Svivva Seeds"
@@ -608,7 +584,7 @@ export default function LandingPage() {
                       Pro & Enterprise
                     </Badge>
                   </div>
-                  <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+                  <p className="text-sm sm:text-base text-foreground/80 max-w-lg">
                     Generate multiple production-ready applications from a single structured
                     document. One spec in, entire product suites out — frontend, backend, database,
                     auth, and deployment configs all built in parallel.
@@ -622,7 +598,7 @@ export default function LandingPage() {
                     ].map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] px-2 py-1 rounded-full bg-[#5BA8A0]/10 border border-[#5BA8A0]/25 text-muted-foreground"
+                        className="text-[10px] px-2 py-1 rounded-full bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 text-foreground/70"
                       >
                         {tag}
                       </span>
@@ -646,7 +622,7 @@ export default function LandingPage() {
         </section>
 
         <section
-          className={`relative min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
+          className={`relative z-0 min-h-screen flex items-center justify-center pt-16 sm:pt-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5BA8A0]/10" : "bg-gradient-to-br from-background via-[#6B2C4A]/5 to-background"}`}
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
