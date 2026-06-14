@@ -99,10 +99,15 @@
     font-family: "Zc", sans-serif;
   }
 
-  body > div,
+  body > div:not([data-svivva-feature-bg]),
   body > main {
     min-height: 100dvh;
     width: 100%;
+  }
+
+  /* Opaque app shells only — avoid painting full-viewport layers behind WebGL */
+  body > div.min-h-screen,
+  body > main {
     background: hsl(var(--background));
   }
   @media (max-width: 640px) {

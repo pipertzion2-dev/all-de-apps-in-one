@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
@@ -48,15 +48,6 @@ import {
   TrendingUp,
   ArrowRight,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-
-const FeatureThreeBg = dynamic(
-  () =>
-    import("@/components/feature-three-background").then((m) => ({
-      default: m.FeatureThreeBackground,
-    })),
-  { ssr: false },
-);
 
 interface SeedSession {
   id: string;
@@ -489,6 +480,15 @@ export default function SeedsPage() {
   const [multiPrompt, setMultiPrompt] = useState("");
   const [promptBarOpen, setPromptBarOpen] = useState(false);
 
+  // WebGL backgrounds can leak an opaque black compositor layer over this page.
+  useEffect(() => {
+    document
+      .querySelectorAll(
+        "body > canvas, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
+      )
+      .forEach((el) => el.remove());
+  }, []);
+
   const toggleSeedSelect = (id: string) => {
     setSelectedSeeds((prev) => {
       const next = new Set(prev);
@@ -617,9 +617,8 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="min-h-screen flex flex-col relative isolate overflow-x-hidden">
-      <FeatureThreeBg variant="seeds" />
-      <nav className="relative z-10 h-12 border-b border-border/50 backdrop-blur-xl bg-background/55 flex-shrink-0">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      <nav className="relative z-20 h-12 border-b border-border/50 bg-background flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -664,7 +663,7 @@ export default function SeedsPage() {
         </div>
       </nav>
 
-      <main className="relative z-10 flex-1 overflow-y-auto">
+      <main className="relative z-20 flex-1 overflow-y-auto bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">

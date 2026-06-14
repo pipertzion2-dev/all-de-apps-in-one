@@ -36,7 +36,11 @@ export function FeatureThreeBackground({ variant }: Props) {
     const W = window.innerWidth;
     const H = window.innerHeight;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      premultipliedAlpha: false,
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
@@ -108,7 +112,7 @@ export function FeatureThreeBackground({ variant }: Props) {
       ref={mountRef}
       aria-hidden
       data-svivva-feature-bg={variant}
-      className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[100svh] overflow-hidden"
+      className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[100svh] overflow-hidden"
       style={{ background: ambientGradient(feature.accentColor, secondary) }}
     />
   );
