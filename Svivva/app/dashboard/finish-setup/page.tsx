@@ -272,7 +272,14 @@ export default function FinishSetupPage() {
           title="Run Orbit Traffic Autopilot"
           detail="Checks connections, app health, sitemap/robots, and unpublishes broken AI/tool pages."
           ok={health?.status === "ok"}
-          href="/dashboard/launchpad"
+          href="/dashboard/orbit"
+        />
+        <SetupStep
+          number={5}
+          title="Prepare Svivva iOS (coming soon)"
+          detail="Same Svivva account will sync Seeds, Play, Orbit status, and mini-app links to the native iOS app."
+          ok={false}
+          href="/dashboard/orbit"
         />
       </div>
 
@@ -311,7 +318,7 @@ export default function FinishSetupPage() {
           variant="outline"
           className="h-auto justify-start gap-3 rounded-2xl p-4"
         >
-          <Link href="/dashboard/launchpad">
+          <Link href="/dashboard/orbit">
             <Rocket className="h-5 w-5" />
             <span className="text-left">
               <span className="block font-black">Orbit</span>

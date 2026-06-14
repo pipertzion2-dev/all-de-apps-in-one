@@ -107,7 +107,7 @@ export function tickFloaters(
     f.object.position.z = f.oz + Math.sin(t * 0.5 + f.phase) * 0.15;
     f.object.rotation.z = f.rotZ + Math.sin(t * 0.4 + f.phase) * 0.06;
     const mat = (f.object as THREE.Sprite).material as THREE.SpriteMaterial;
-    mat.opacity = 0.72 + 0.12 * Math.sin(t * 1.1 + f.phase) + Math.abs(mouse.x) * 0.06;
+    mat.opacity = 0.82 + 0.1 * Math.sin(t * 1.1 + f.phase) + Math.abs(mouse.x) * 0.08;
   });
 }
 

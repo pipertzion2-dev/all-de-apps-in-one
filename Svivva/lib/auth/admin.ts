@@ -9,6 +9,15 @@ function parseAdminUserIds(): string[] {
     .filter(Boolean);
 }
 
+function parseAdminEmails(): string[] {
+  const raw = process.env.ADMIN_EMAIL?.trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 /** Production builds must not treat every account as site admin when `ADMIN_USER_ID` is missing. */
 function allowOpenAdminWhenAdminUserIdUnset(): boolean {
   return process.env.NODE_ENV !== "production";
@@ -17,6 +26,7 @@ function allowOpenAdminWhenAdminUserIdUnset(): boolean {
 /**
  * Site owner / operator (Orbit, Growth, marketing secrets, GSC, etc.).
  * Set `ADMIN_USER_ID` to your auth provider user id (e.g. Replit OIDC `sub`). Comma-separated allows multiple owners.
+ * Optionally set `ADMIN_EMAIL` (comma-separated) to grant admin by email when ids differ across providers.
  *
  * - If `ADMIN_USER_ID` is set: only those ids are admins.
  * - If unset in **development**: any signed-in user is treated as admin (local convenience).
@@ -25,9 +35,12 @@ function allowOpenAdminWhenAdminUserIdUnset(): boolean {
 export function isAdmin(user: SessionUser | null): boolean {
   if (!user) return false;
   const adminIds = parseAdminUserIds();
-  if (adminIds.length > 0) {
-    return adminIds.includes(user.id);
+  const adminEmails = parseAdminEmails();
+  if (adminIds.length > 0 && adminIds.includes(user.id)) return true;
+  if (adminEmails.length > 0 && user.email && adminEmails.includes(user.email.toLowerCase())) {
+    return true;
   }
+  if (adminIds.length > 0 || adminEmails.length > 0) return false;
   return allowOpenAdminWhenAdminUserIdUnset();
 }
 

@@ -116,6 +116,13 @@ const digitalMenuGroups: MenuGroup[] = [
         icon: Sparkles,
       },
       {
+        title: "Marketing AI",
+        desc: "Traffic autopilot",
+        href: "/dashboard/marketing",
+        icon: Sparkles,
+        adminOnly: true,
+      },
+      {
         title: "Growth Engine",
         desc: "Auto-marketing",
         href: "/dashboard/growth",
@@ -152,8 +159,8 @@ const digitalMenuGroups: MenuGroup[] = [
       },
       {
         title: "Orbit",
-        desc: "Admin",
-        href: "/dashboard/launchpad",
+        desc: "Admin command center",
+        href: "/dashboard/orbit",
         icon: Rocket,
         adminOnly: true,
       },
@@ -217,7 +224,8 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     pathname.startsWith("/dashboard/security") ||
     pathname.startsWith("/dashboard/api-builder") ||
     pathname.startsWith("/dashboard/hardware-builder") ||
-    pathname.startsWith("/dashboard/launchpad");
+    pathname.startsWith("/dashboard/launchpad") ||
+    pathname.startsWith("/dashboard/orbit");
   const [authError, setAuthError] = useState<string | null>(null);
 
   const { data: meData } = useQuery<{ isAdmin: boolean }>({

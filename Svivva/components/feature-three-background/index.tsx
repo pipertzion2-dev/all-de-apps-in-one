@@ -2,10 +2,11 @@
 
 /**
  * FeatureThreeBackground — scroll-reactive Three.js motifs from each cube-face graphic.
- * Fixed at z-0 (never negative z — that hides the canvas behind parent bg-background).
+ * Portaled to document.body so parent bg-background never hides the WebGL canvas.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { FEATURES, type FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { buildFeaturePageScene } from "@/lib/feature-page-scenes";
@@ -17,17 +18,22 @@ type Props = { variant: FeatureVariant };
 function ambientGradient(accent: string, secondary?: string): string {
   const sec = secondary ?? accent;
   return [
-    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}28 0%, transparent 55%)`,
-    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}18 0%, transparent 50%)`,
-    "hsl(var(--background) / 0.72)",
+    `radial-gradient(ellipse 120% 80% at 15% 20%, ${accent}32 0%, transparent 55%)`,
+    `radial-gradient(ellipse 100% 70% at 85% 75%, ${sec}20 0%, transparent 50%)`,
+    "hsl(var(--background) / 0.55)",
   ].join(", ");
 }
 
 export function FeatureThreeBackground({ variant }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#5BA8A0" : undefined;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const el = mountRef.current;
@@ -42,16 +48,17 @@ export function FeatureThreeBackground({ variant }: Props) {
     renderer.setClearColor(0x000000, 0);
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 w-full h-full";
+    canvas.style.zIndex = "0";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0a0c, 0.028);
+    scene.fog = new THREE.FogExp2(0x0a0a0c, 0.022);
 
     const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 120);
     camera.position.z = 9;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const key = new THREE.DirectionalLight(0xffffff, 0.85);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    const key = new THREE.DirectionalLight(0xffffff, 0.9);
     key.position.set(4, 6, 8);
     scene.add(key);
 
@@ -64,9 +71,13 @@ export function FeatureThreeBackground({ variant }: Props) {
 
     let tick: (t: number) => void = () => {};
     let cancelled = false;
-    buildFeaturePageScene(variant, scene, mouse).then((fn) => {
-      if (!cancelled) tick = fn;
-    });
+    buildFeaturePageScene(variant, scene, mouse)
+      .then((fn) => {
+        if (!cancelled) tick = fn;
+      })
+      .catch((err) => {
+        console.warn("[FeatureThreeBackground] scene build failed:", err);
+      });
 
     let rafId = 0;
     const start = Date.now();
@@ -99,20 +110,24 @@ export function FeatureThreeBackground({ variant }: Props) {
     };
   }, [variant]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       ref={mountRef}
       aria-hidden
-      className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
-      style={{ background: ambientGradient(feature.accentColor, secondary) }}
+      className="fixed inset-0 pointer-events-none overflow-hidden"
+      style={{ zIndex: 0, background: ambientGradient(feature.accentColor, secondary) }}
     >
       <div
-        className="absolute inset-0 pointer-events-none z-[2]"
+        className="absolute inset-0 pointer-events-none"
         style={{
+          zIndex: 2,
           background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.35) 0%, transparent 18%, transparent 82%, hsl(var(--background) / 0.45) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.25) 0%, transparent 16%, transparent 84%, hsl(var(--background) / 0.35) 100%)",
         }}
       />
-    </div>
+    </div>,
+    document.body,
   );
 }

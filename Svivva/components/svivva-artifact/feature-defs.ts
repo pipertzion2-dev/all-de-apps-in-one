@@ -52,7 +52,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Watching every market, always",
     description:
       "8-system growth intelligence. Pain miner, competitor radar, content engine, and 50+ mini apps compounding organic traffic while you sleep.",
-    cta: { label: "Open Orbit", href: "/dashboard/launchpad" },
+    cta: { label: "Open Orbit", href: "/dashboard/orbit" },
     accentColor: "#c06010",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",

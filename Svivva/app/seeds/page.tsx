@@ -23,7 +23,7 @@ import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/lib/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";
-import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
+import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import SeedsInvariantCompiler from "@/components/seeds-invariant-compiler";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
@@ -617,7 +617,7 @@ export default function SeedsPage() {
   return (
     <div className="min-h-screen flex flex-col relative">
       <FeatureThreeBg variant="seeds" />
-      <nav className="relative z-10 h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex-shrink-0">
+      <nav className="relative z-10 h-12 border-b border-border/50 backdrop-blur-xl bg-background/55 flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -825,8 +825,10 @@ export default function SeedsPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
+            <OrbitTrafficFunnelDiagram />
+
             {/* Orbit CTA banner */}
-            <Link href="/dashboard/launchpad">
+            <Link href="/dashboard/orbit">
               <div
                 className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
                 style={{

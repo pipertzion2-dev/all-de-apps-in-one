@@ -55,6 +55,8 @@ import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
+import { OrbitMissionControl } from "@/components/orbit-mission-control";
+import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
@@ -2524,18 +2526,16 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  // Bypass auth check for admin access - treat all users as admin temporarily
-  const isAdmin = true;
-  const isLoading = false;
-
-  const me = {
-    isAdmin: true,
-    vercelCommit: null,
-    nextPublicSiteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com",
-  };
-  const meLoading = false;
-
-  // Force deployment refresh
+  // Admin gate — site owner only (ADMIN_USER_ID or ADMIN_EMAIL in production)
+  const { data: me, isLoading: meLoading } = useQuery<{
+    isAdmin: boolean;
+    vercelCommit?: string | null;
+    nextPublicSiteUrl?: string | null;
+  }>({
+    queryKey: ["/api/auth/me"],
+    queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
+  });
+  const isAdmin = me?.isAdmin ?? false;
 
   const { data: creds } = useQuery<{
     godaddyDomain: string | null;
@@ -3265,13 +3265,27 @@ export default function LaunchpadPage() {
     });
   };
 
-  // if (meLoading)
-  //   return (
-  //     <div className="flex items-center justify-center min-h-[60vh]">
-  //       <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-  //     </div>
-  //   );
-  // if (!me?.isAdmin) return null;
+  if (meLoading)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  if (!isAdmin)
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center space-y-4">
+        <Rocket className="w-10 h-10 mx-auto text-muted-foreground" />
+        <h1 className="text-xl font-bold">Orbit is admin-only</h1>
+        <p className="text-sm text-muted-foreground">
+          Sign in with the site owner account. In production, set{" "}
+          <code className="text-xs bg-muted px-1 rounded">ADMIN_USER_ID</code> or{" "}
+          <code className="text-xs bg-muted px-1 rounded">ADMIN_EMAIL</code> on Vercel.
+        </p>
+        <Link href="/dashboard">
+          <Button variant="outline">Back to Dashboard</Button>
+        </Link>
+      </div>
+    );
 
   const steps =
     tab === "svivva"
@@ -3539,7 +3553,8 @@ export default function LaunchpadPage() {
       </div>
 
       {/* ── Content ── */}
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-10 space-y-4">
+      <div className="max-w-2xl mx-auto px-4 pt-4 pb-10 space-y-4 relative z-10">
+        <OrbitTrafficFunnelDiagram compact />
         {/* ── GOLD RUN EVERYTHING — Primary action ── */}
         <div
           className="rounded-2xl border-2 overflow-hidden"
@@ -4492,6 +4507,11 @@ export default function LaunchpadPage() {
         {/* Checklist tab — visual mission control + detailed list */}
         {tab === "checklist" && (
           <div className="flex flex-col gap-8 relative z-10">
+            <OrbitTrafficFunnelDiagram />
+            <OrbitMissionControl
+              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+              stepStatuses={statuses}
+            />
             <OrbitAdminMissionBoard
               stepStatuses={statuses}
               orbitStatus={orbitStatus as Record<string, unknown> | undefined}

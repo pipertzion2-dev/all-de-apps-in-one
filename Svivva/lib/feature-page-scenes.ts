@@ -144,7 +144,7 @@ export async function buildFeaturePageScene(
         { u: 0.54, v: 0.54, w: 0.42, h: 0.36, x: 5, y: -2.1, z: -3.5, rz: -0.14 },
       ];
       quads.forEach((q) => {
-        const plane = createRegionPlane(tex, q, 5.2, 4.2, 0.94);
+        const plane = createRegionPlane(tex, q, 5.8, 4.6, 0.96);
         plane.position.set(q.x, q.y, q.z);
         plane.rotation.z = q.rz;
         scene.add(plane);
