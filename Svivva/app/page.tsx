@@ -498,7 +498,7 @@ export default function LandingPage() {
 
       <div className="bg-background">
         <nav
-          className="fixed top-0 left-0 right-0 z-50 h-14 sm:h-16 border-b border-white/10 backdrop-blur-xl bg-background/80"
+          className="fixed top-0 left-0 right-0 z-[60] h-14 sm:h-16 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
         >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
@@ -575,7 +575,7 @@ export default function LandingPage() {
 
         <section
           id="svivva-seeds"
-          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-50 bg-[#5BA8A0]/25 border-b border-[#5BA8A0]/40"
+          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-0 bg-[#5BA8A0]/25 border-b border-[#5BA8A0]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
             <div className="rounded-2xl border-2 border-[#5BA8A0]/70 bg-[#1e3332] p-6 sm:p-10 shadow-xl shadow-black/20">

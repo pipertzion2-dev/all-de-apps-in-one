@@ -6,10 +6,9 @@ import { usePathname } from "next/navigation";
 function purgeLeakedLayers() {
   document
     .querySelectorAll(
-      'body > div[aria-hidden].fixed, body > [data-svivva-feature-bg]',
+      "body > canvas, body > div.fixed.inset-0, body > div[aria-hidden].fixed, body > [data-svivva-feature-bg]",
     )
     .forEach((el) => el.remove());
-  document.querySelectorAll("body > canvas").forEach((el) => el.remove());
 }
 
 /**
