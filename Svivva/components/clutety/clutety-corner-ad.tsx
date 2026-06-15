@@ -38,6 +38,7 @@ export function ClutetyCornerAd() {
     if (pathname.startsWith(CLUTETY_COMING_SOON_PATH)) return false;
     if (pathname.startsWith("/dashboard/orbit")) return false;
     if (pathname.startsWith("/dashboard/launchpad")) return false;
+    if (pathname.startsWith("/seeds")) return false;
     return true;
   }, [dismissed, pathname]);
 
@@ -63,7 +64,7 @@ export function ClutetyCornerAd() {
       className="fixed z-40 flex flex-col items-end gap-1 pointer-events-none"
       style={{
         right: "max(1rem, env(safe-area-inset-right))",
-        bottom: "max(1rem, env(safe-area-inset-bottom))",
+        top: "max(3.75rem, calc(3rem + env(safe-area-inset-top)))",
       }}
     >
       <button

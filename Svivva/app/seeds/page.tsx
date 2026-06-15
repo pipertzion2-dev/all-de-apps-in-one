@@ -648,6 +648,17 @@ export default function SeedsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/dashboard/orbit">
+              <Button
+                size="sm"
+                className="text-xs font-bold text-white gap-1.5 shadow-sm"
+                style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
+                data-testid="button-seeds-orbit-admin"
+              >
+                <Rocket className="w-3.5 h-3.5" />
+                Orbit Admin
+              </Button>
+            </Link>
             <Link href="/dashboard">
               <Button
                 variant="outline"
