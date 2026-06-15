@@ -372,6 +372,8 @@ const STYLE_PRESETS: Record<PlayMode, { id: string; label: string; desc: string 
 };
 
 import dynamic from "next/dynamic";
+import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
+import { FeatureSignInBanner } from "@/components/feature-sign-in-banner";
 const FeatureThreeBg = dynamic(
   () =>
     import("@/components/feature-three-background").then((m) => ({
@@ -2845,7 +2847,11 @@ export default function SvivvaPlayPage() {
       style={{ colorScheme: "light" }}
       data-feature-page
     >
+      <FeatureScrollToTop />
       <FeatureThreeBg variant="play" dramatic scope="page" />
+      <div className="relative z-20 px-4 pt-4 max-w-6xl mx-auto">
+        <FeatureSignInBanner featureName="Svivva Play" accentColor="#7c5cbf" />
+      </div>
       {playBetaBanner}
       <style>{`
         .holo-gradient {

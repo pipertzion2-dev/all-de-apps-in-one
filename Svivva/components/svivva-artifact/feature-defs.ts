@@ -1,3 +1,5 @@
+import { FEATURE_PUBLIC_PATHS } from "@/lib/feature-routes";
+
 export type FeatureId = "play" | "seeds" | "orbit" | "security" | "api" | "hardware";
 
 export type FeatureDef = {
@@ -24,7 +26,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Захватывает дыхание",
     description:
       "AI music composition that breathes. Hocket voices, Meend expression, real-time sitar and vibraphone — the interface hears you.",
-    cta: { label: "Open Svivva Play", href: "/play" },
+    cta: { label: "Open Svivva Play", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#7c5cbf",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",
@@ -38,7 +40,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Gemeinsam — together, we build",
     description:
       "One structured spec in. Full-stack app suites out — frontend, backend, database, auth, and deploys built side by side in parallel.",
-    cta: { label: "Explore Seeds", href: "/seeds" },
+    cta: { label: "Explore Seeds", href: FEATURE_PUBLIC_PATHS.seeds },
     accentColor: "#5BA8A0",
     motif: "branching",
     signatureMotion: "nodes branch outward from centre",
@@ -52,7 +54,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Watching every market, always",
     description:
       "8-system growth intelligence. Pain miner, competitor radar, content engine, and 50+ mini apps compounding organic traffic while you sleep.",
-    cta: { label: "Open Orbit", href: "/dashboard/orbit" },
+    cta: { label: "Open Orbit", href: FEATURE_PUBLIC_PATHS.orbit },
     accentColor: "#c06010",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",
@@ -66,7 +68,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Für immer dein — forever yours",
     description:
       "Feed Shield blocks harmful content. Threat Scanner analyzes files. Your data stays sealed inside an ornate, unbreakable vault.",
-    cta: { label: "Security Center", href: "/dashboard/security" },
+    cta: { label: "Security Center", href: FEATURE_PUBLIC_PATHS.security },
     accentColor: "#6B2C4A",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
@@ -80,7 +82,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Prompt → packaged endpoint",
     description:
       "Write the prompt. Get a production API with schema enforcement, 200 auto-generated evals, versioning, and rollback. Zero YAML.",
-    cta: { label: "Start Building", href: "/dashboard/api-builder" },
+    cta: { label: "Start Building", href: FEATURE_PUBLIC_PATHS.api },
     accentColor: "#9b4d6e",
     motif: "packaging",
     signatureMotion: "panels fold and assemble",
@@ -94,7 +96,7 @@ export const FEATURES: FeatureDef[] = [
     tagline: "Physical. Real. Tangible.",
     description:
       "From concept to manufactured product. AI-powered schematics, material sourcing, supplier network, real-time cost tracking.",
-    cta: { label: "Hardware Builder", href: "/dashboard/hardware-builder" },
+    cta: { label: "Hardware Builder", href: FEATURE_PUBLIC_PATHS.hardware },
     accentColor: "#b5547a",
     motif: "crystal",
     signatureMotion: "diamonds rotate and refract light",

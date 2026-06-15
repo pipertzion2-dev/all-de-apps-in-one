@@ -52,6 +52,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
 import { TutorialProvider } from "@/components/tutorial-system";
 import { CommandPalette, SearchTrigger } from "@/components/command-palette";
 
@@ -219,9 +220,8 @@ const physicalMenuGroups: MenuGroup[] = [
 export function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const { mode, toggleMode } = usePlatform();
-  const pathname = usePathname();
-  const isOrbitAdminRoute =
-    pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/dashboard/launchpad");
+  const pathname = usePathname() || "";
+  const isPublicFeatureRoute = isPublicFeaturePath(pathname);
   const featureThreeBg =
     pathname.startsWith("/dashboard/security") ||
     pathname.startsWith("/dashboard/api-builder") ||
@@ -277,7 +277,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated && !isOrbitAdminRoute) {
+  if (!isAuthenticated && !isPublicFeatureRoute) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Card className="w-full max-w-md mx-4">
@@ -332,7 +332,11 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated && isOrbitAdminRoute) {
+  if (!isAuthenticated && isPublicFeatureRoute) {
+    const featureTitle = featureTitleFromPath(pathname);
+    const loginHref = `/login?redirect=${encodeURIComponent(pathname)}`;
+    const signupHref = `/signup?redirect=${encodeURIComponent(pathname)}`;
+
     return (
       <div className="min-h-0 bg-background flex flex-col">
         <header className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex items-center justify-between px-4 flex-shrink-0">
@@ -344,13 +348,20 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
               height={32}
               className="h-6 w-auto object-contain"
             />
-            <span className="text-xs font-bold text-muted-foreground">Orbit Admin</span>
+            <span className="text-xs font-bold text-muted-foreground">{featureTitle}</span>
           </Link>
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              Sign in
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={signupHref}>
+              <Button variant="ghost" size="sm" className="text-xs">
+                Get started
+              </Button>
+            </Link>
+            <Link href={loginHref}>
+              <Button variant="outline" size="sm">
+                Sign in
+              </Button>
+            </Link>
+          </div>
         </header>
         <main className="flex-1 overflow-auto">{children}</main>
       </div>

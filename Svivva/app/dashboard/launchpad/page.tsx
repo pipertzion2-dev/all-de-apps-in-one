@@ -10,6 +10,8 @@ const FeatureThreeBg = dynamic(
   { ssr: false },
 );
 import { useRouter } from "next/navigation";
+import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
+import { FeatureSignInBanner } from "@/components/feature-sign-in-banner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -3399,7 +3401,11 @@ export default function LaunchpadPage() {
 
   return (
     <div className="relative z-0 bg-background overflow-x-hidden" data-feature-page>
+      <FeatureScrollToTop />
       <FeatureThreeBg variant="orbit" scope="page" />
+      <div className="relative z-10 px-4 sm:px-6 pt-4 pb-2 max-w-2xl mx-auto">
+        <FeatureSignInBanner featureName="Orbit Admin" accentColor="#c06010" />
+      </div>
       {devLanUrl && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div className="rounded-xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-950 dark:text-amber-100 space-y-1.5">
