@@ -134,18 +134,6 @@ export function FeatureScrollBand({
       aria-hidden
     >
       <div ref={mountRef} className="absolute inset-0" />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-16"
-        style={{
-          background: "linear-gradient(to bottom, hsl(var(--background) / 0.55), transparent)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
-        style={{
-          background: "linear-gradient(to top, hsl(var(--background) / 0.35), transparent)",
-        }}
-      />
     </div>
   );
 }

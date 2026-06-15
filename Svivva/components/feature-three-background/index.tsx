@@ -23,7 +23,7 @@ function measureCanvas(scope: "page" | "fixed", el: HTMLElement) {
   if (scope === "page" && pageShell) {
     return {
       w: pageShell.clientWidth || window.innerWidth,
-      h: Math.max(pageShell.scrollHeight, window.innerHeight),
+      h: pageShell.clientHeight || window.innerHeight,
       pageShell,
     };
   }
@@ -110,9 +110,6 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       w = m.w;
       h = m.h;
       pageShell = m.pageShell;
-      if (scope === "page" && pageShell) {
-        shell.style.height = `${h}px`;
-      }
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -157,7 +154,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
-  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-x-0 top-0 w-full";
+  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-0";
 
   return (
     <div

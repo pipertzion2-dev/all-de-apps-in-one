@@ -10,15 +10,16 @@ export type AdvancedMeshScene = {
 function glass(color: number, opts?: { transmission?: number; metalness?: number; emissive?: number }) {
   return new THREE.MeshPhysicalMaterial({
     color,
-    metalness: opts?.metalness ?? 0.42,
-    roughness: 0.16,
-    transmission: opts?.transmission ?? 0.52,
-    thickness: 1.1,
+    metalness: opts?.metalness ?? 0.48,
+    roughness: 0.12,
+    transmission: opts?.transmission ?? 0.58,
+    thickness: 1.4,
     transparent: true,
-    opacity: 0.92,
-    clearcoat: 0.72,
-    clearcoatRoughness: 0.08,
-    emissive: new THREE.Color(color).multiplyScalar(opts?.emissive ?? 0.14),
+    opacity: 0.95,
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.06,
+    emissive: new THREE.Color(color).multiplyScalar(opts?.emissive ?? 0.28),
+    emissiveIntensity: 1.2,
   });
 }
 
@@ -40,7 +41,7 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
   const meshes: THREE.Mesh[] = [];
 
-  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(0.72, 1), glass(p.tertiary, { emissive: 0.22 }));
+  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 2), glass(p.tertiary, { emissive: 0.35 }));
   group.add(core);
   meshes.push(core);
 
@@ -53,7 +54,7 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   const colors = [p.primary, p.highlight, p.secondary, p.wire];
 
   positions.forEach(([x, y, z], i) => {
-    const pod = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 2), glass(colors[i], { transmission: 0.48 }));
+    const pod = new THREE.Mesh(new THREE.IcosahedronGeometry(0.72, 2), glass(colors[i], { transmission: 0.52 }));
     pod.position.set(x, y, z);
     group.add(pod);
     meshes.push(pod);
