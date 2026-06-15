@@ -29,8 +29,8 @@ export const GRAPHIC_PALETTES: Record<FeatureId, GraphicPalette> = {
     tertiary: 0xd4a85a,
     highlight: 0x9b7fd4,
     wire: 0x5a9e6a,
-    lineOpacity: 0.46,
-    patternOpacity: 0.2,
+    lineOpacity: 0.78,
+    patternOpacity: 0.28,
   },
   orbit: {
     primary: 0x3d8a82,

@@ -61,31 +61,75 @@ function buildWaveRibbon(palette: GraphicPalette): THREE.Group {
   return g;
 }
 
-/** Seeds — radiating branch crown (SETTLE DOWN filaments). */
+/** Seeds — radiating branch crown + music staff (SETTLE DOWN filaments). */
 function buildBranchCrown(palette: GraphicPalette): THREE.Group {
   const g = new THREE.Group();
-  for (let b = 0; b < 16; b++) {
-    const ang = (b / 16) * Math.PI * 2;
+
+  for (let line = 0; line < 5; line++) {
+    const y = 2.2 - line * 0.55;
     const pts: THREE.Vector3[] = [];
-    for (let s = 0; s <= 32; s++) {
-      const f = s / 32;
-      const wobble = Math.sin(f * 8 + b) * 0.15 * f;
-      pts.push(
-        new THREE.Vector3(
-          Math.cos(ang) * f * 3.2 - Math.sin(ang) * wobble,
-          Math.sin(ang) * f * 3.2 + Math.cos(ang) * wobble,
-          Math.sin(f * 4) * 0.12,
-        ),
-      );
+    for (let i = 0; i <= 48; i++) {
+      const x = (i / 48 - 0.5) * 16;
+      pts.push(new THREE.Vector3(x, y, 0.15));
     }
     g.add(
       new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(pts),
-        lineMat(b % 3 === 0 ? palette.secondary : palette.primary, 0.55 + (b % 4) * 0.06),
+        lineMat(line % 2 === 0 ? palette.primary : palette.highlight, 0.72),
       ),
     );
   }
-  g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.35, 0), lineMat(palette.tertiary, 0.85)));
+
+  for (let b = 0; b < 24; b++) {
+    const ang = (b / 24) * Math.PI * 2;
+    const pts: THREE.Vector3[] = [];
+    for (let s = 0; s <= 40; s++) {
+      const f = s / 40;
+      const wobble = Math.sin(f * 9 + b * 0.7) * 0.22 * f;
+      const r = f * 4.8;
+      pts.push(
+        new THREE.Vector3(
+          Math.cos(ang) * r - Math.sin(ang) * wobble,
+          Math.sin(ang) * r * 0.85 + Math.cos(ang) * wobble - 0.4,
+          Math.sin(f * 5 + b) * 0.18,
+        ),
+      );
+    }
+    const col = b % 3 === 0 ? palette.secondary : b % 3 === 1 ? palette.primary : palette.tertiary;
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat(col, 0.82 + (b % 4) * 0.04)));
+  }
+
+  for (let ring = 0; ring < 3; ring++) {
+    const pts: THREE.Vector3[] = [];
+    const r = 1.2 + ring * 0.55;
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.7 - 0.2, ring * 0.12));
+    }
+    g.add(
+      new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        lineMat(ring === 1 ? palette.tertiary : palette.wire, 0.7),
+      ),
+    );
+  }
+
+  const core = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.55, 1),
+    lineMat(palette.tertiary, 0.95),
+  );
+  g.add(core);
+
+  for (let s = 0; s < 8; s++) {
+    const a = (s / 8) * Math.PI * 2;
+    g.add(
+      new THREE.LineSegments(
+        floatGeo([0, -0.1, 0.2, Math.cos(a) * 1.1, Math.sin(a) * 0.9 - 0.1, 0.2]),
+        lineMat(palette.highlight, 0.65),
+      ),
+    );
+  }
+
   return g;
 }
 

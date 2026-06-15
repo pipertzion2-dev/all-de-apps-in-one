@@ -45,8 +45,8 @@ export function FeatureScrollBand({ variant, accentColor, className = "", height
     const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 140);
     camera.position.set(0, 0.5, 9);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const key = new THREE.DirectionalLight(0xffffff, 0.7);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+    const key = new THREE.DirectionalLight(0xffffff, 0.85);
     key.position.set(2, 4, 6);
     scene.add(key);
 
@@ -98,8 +98,8 @@ export function FeatureScrollBand({ variant, accentColor, className = "", height
       className={`relative w-full overflow-hidden rounded-xl border border-border/40 ${className}`}
       style={{
         height,
-        background: `linear-gradient(180deg, ${accentColor}08 0%, hsl(var(--background)) 50%, ${accentColor}06 100%)`,
-        boxShadow: `inset 0 1px 0 ${accentColor}25, 0 8px 32px -8px ${accentColor}30`,
+        background: `linear-gradient(180deg, ${accentColor}14 0%, transparent 42%, ${accentColor}10 100%)`,
+        boxShadow: `inset 0 1px 0 ${accentColor}40, 0 12px 40px -10px ${accentColor}45`,
       }}
     >
       <div ref={mountRef} className="absolute inset-0" />

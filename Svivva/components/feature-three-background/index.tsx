@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * FeatureThreeBackground — graphic-faithful 3D motifs, toned to sit behind UI without clashing.
+ * FeatureThreeBackground — graphic-faithful 3D motifs behind feature pages.
  */
 
 import { useEffect, useRef } from "react";
@@ -11,9 +11,13 @@ import { buildFeaturePageScene } from "@/lib/feature-page-scenes";
 
 export type FeatureVariant = FeatureId;
 
-type Props = { variant: FeatureVariant };
+type Props = {
+  variant: FeatureVariant;
+  /** Brighter lines + fixed viewport layer (default on feature routes). */
+  dramatic?: boolean;
+};
 
-export function FeatureThreeBackground({ variant }: Props) {
+export function FeatureThreeBackground({ variant, dramatic = true }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
 
@@ -36,18 +40,23 @@ export function FeatureThreeBackground({ variant }: Props) {
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
-    canvas.style.zIndex = "0";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 180);
+    camera.position.set(0, 0.4, dramatic ? 6.5 : 10);
 
-    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 160);
-    camera.position.set(0, 0.8, 10);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-    const key = new THREE.DirectionalLight(0xffffff, 0.5);
+    scene.add(new THREE.AmbientLight(0xffffff, dramatic ? 0.85 : 0.45));
+    const key = new THREE.DirectionalLight(0xffffff, dramatic ? 0.9 : 0.5);
     key.position.set(4, 6, 8);
     scene.add(key);
+    const accentLight = new THREE.PointLight(
+      new THREE.Color(feature.accentColor).getHex(),
+      dramatic ? 1.4 : 0.6,
+      40,
+    );
+    accentLight.position.set(-3, 2, 6);
+    scene.add(accentLight);
 
     const mouse = { x: 0, y: 0 };
     const onMouseMove = (e: MouseEvent) => {
@@ -59,6 +68,7 @@ export function FeatureThreeBackground({ variant }: Props) {
     let tick: (t: number, scroll?: number) => void = () => {};
     let cancelled = false;
     const sceneRoot = new THREE.Group();
+    if (dramatic) sceneRoot.scale.setScalar(variant === "seeds" ? 1.35 : 1.15);
     scene.add(sceneRoot);
 
     buildFeaturePageScene(variant, sceneRoot, mouse)
@@ -70,9 +80,6 @@ export function FeatureThreeBackground({ variant }: Props) {
       });
 
     const scrollRef = { current: 0 };
-    const onScroll = () => {
-      scrollRef.current = scrollNorm();
-    };
     const scrollNorm = () => {
       const main = document.querySelector<HTMLElement>("main.overflow-y-auto");
       if (main && main.scrollHeight > main.clientHeight + 40) {
@@ -81,6 +88,9 @@ export function FeatureThreeBackground({ variant }: Props) {
       }
       const max = document.body.scrollHeight - window.innerHeight;
       return max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    };
+    const onScroll = () => {
+      scrollRef.current = scrollNorm();
     };
     window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     onScroll();
@@ -92,12 +102,13 @@ export function FeatureThreeBackground({ variant }: Props) {
       const t = (Date.now() - start) / 1000;
       const scroll = scrollRef.current;
       tick(t, scroll);
-      sceneRoot.rotation.y = scroll * Math.PI * 0.65 + Math.sin(t * 0.12) * 0.04;
-      sceneRoot.rotation.x = -0.1 + scroll * 0.22;
-      camera.position.z = 10 - scroll * 5.5;
-      camera.position.y = 0.8 + scroll * 1.2 + mouse.y * 0.22;
-      camera.position.x = mouse.x * 0.5 + Math.sin(t * 0.18 + scroll * 2) * 0.3;
-      camera.lookAt(mouse.x * 0.15, scroll * 0.35 + mouse.y * 0.1, -6);
+      sceneRoot.rotation.y = scroll * Math.PI * 0.85 + Math.sin(t * 0.14) * 0.06;
+      sceneRoot.rotation.x = -0.08 + scroll * 0.28;
+      const fly = dramatic ? 7 : 5.5;
+      camera.position.z = (dramatic ? 6.5 : 10) - scroll * fly;
+      camera.position.y = 0.4 + scroll * 1.6 + mouse.y * 0.28;
+      camera.position.x = mouse.x * 0.65 + Math.sin(t * 0.2 + scroll * 2.2) * 0.45;
+      camera.lookAt(mouse.x * 0.2, scroll * 0.45 + mouse.y * 0.12, -5);
       renderer.render(scene, camera);
     };
     animate();
@@ -120,37 +131,38 @@ export function FeatureThreeBackground({ variant }: Props) {
       renderer.dispose();
       canvas.remove();
     };
-  }, [variant]);
+  }, [variant, dramatic, feature.accentColor]);
 
   const accent = feature.accentColor;
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
   return (
-    <>
+    <div
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      aria-hidden
+      data-svivva-feature-bg={variant}
+    >
       <div
         ref={mountRef}
-        aria-hidden
-        data-svivva-feature-bg={variant}
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        className="absolute inset-0"
         style={{
           background: [
-            `radial-gradient(ellipse 90% 65% at 25% 30%, ${accent}08 0%, transparent 60%)`,
-            secondary ? `radial-gradient(ellipse 70% 55% at 75% 65%, ${secondary}06 0%, transparent 55%)` : "",
+            `radial-gradient(ellipse 100% 80% at 30% 25%, ${accent}18 0%, transparent 55%)`,
+            secondary ? `radial-gradient(ellipse 80% 70% at 70% 60%, ${secondary}14 0%, transparent 50%)` : "",
+            `radial-gradient(ellipse 60% 50% at 50% 50%, ${accent}08 0%, transparent 70%)`,
           ]
             .filter(Boolean)
             .join(", "),
         }}
       />
-      {/* Vignette — keeps Three.js behind readable UI panels */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
+        className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.12) 0%, transparent 20%, transparent 78%, hsl(var(--background) / 0.22) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.05) 0%, transparent 25%, transparent 72%, hsl(var(--background) / 0.18) 100%)",
         }}
       />
-    </>
+    </div>
   );
 }

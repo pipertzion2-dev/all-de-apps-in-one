@@ -57,6 +57,10 @@ const FeatureThreeBg = dynamic(
     })),
   { ssr: false },
 );
+const FeaturePageHero = dynamic(
+  () => import("@/components/feature-page-hero").then((m) => m.FeaturePageHero),
+  { ssr: false },
+);
 
 interface SeedSession {
   id: string;
@@ -626,9 +630,9 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative">
-      <FeatureThreeBg variant="seeds" />
-      <nav className="relative z-20 h-12 border-b border-border/50 bg-background/70 backdrop-blur-md flex-shrink-0">
+    <div className="min-h-screen flex flex-col bg-transparent relative">
+      <FeatureThreeBg variant="seeds" dramatic />
+      <nav className="relative z-30 h-12 border-b border-border/40 bg-background/35 backdrop-blur-md flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -685,32 +689,13 @@ export default function SeedsPage() {
       </nav>
 
       <main className="relative z-20 flex-1 overflow-y-auto bg-transparent">
-        <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 relative [&_.border]:bg-card/92 [&_.border]:backdrop-blur-md">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                <Image
-                  src={seedsLogo}
-                  alt="Svivva Seeds"
-                  fill
-                  sizes="56px"
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <h1
-                  className="text-2xl font-bold flex items-center gap-2"
-                  data-testid="text-seeds-title"
-                >
-                  Svivva Seeds
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Upload a structured PDF blueprint and generate multiple production-ready
-                  applications simultaneously.
-                </p>
-              </div>
-            </div>
-            {allSeeds.length > 1 && (
+        <FeaturePageHero
+          variant="seeds"
+          subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."
+        />
+        <div className="max-w-5xl mx-auto px-4 pb-8 space-y-8 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50">
+          {allSeeds.length > 1 && (
+            <div className="flex justify-end">
               <Button
                 variant={selectionMode ? "default" : "outline"}
                 size="sm"
@@ -730,8 +715,8 @@ export default function SeedsPage() {
                 <Wand2 className="w-3.5 h-3.5" />
                 {selectionMode ? "Cancel" : "Multi-Edit"}
               </Button>
-            )}
-          </div>
+            </div>
+          )}
 
           <SeedsInvariantCompiler />
 
