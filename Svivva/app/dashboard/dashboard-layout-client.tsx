@@ -334,7 +334,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
 
   if (!isAuthenticated && isOrbitAdminRoute) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-0 bg-background flex flex-col">
         <header className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex items-center justify-between px-4 flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
             <Image
@@ -553,7 +553,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           </header>
           <CommandPalette />
           <main
-            className={`flex-1 overflow-auto p-4 sm:p-6 w-full min-h-0 ${featureThreeBg ? "bg-transparent" : "bg-background"}`}
+            className={`flex-1 overflow-auto w-full min-h-0 ${featureThreeBg ? "bg-transparent p-0" : "bg-background p-4 sm:p-6"}`}
           >
             {children}
             <TutorialProvider pathname={pathname} />

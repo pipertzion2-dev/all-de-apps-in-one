@@ -20,14 +20,12 @@ type Props = {
 
 function measureCanvas(scope: "page" | "fixed", el: HTMLElement) {
   const pageShell = el.closest("[data-feature-page]") as HTMLElement | null;
-  if (scope === "page" && pageShell) {
-    return {
-      w: pageShell.clientWidth || window.innerWidth,
-      h: pageShell.clientHeight || window.innerHeight,
-      pageShell,
-    };
-  }
-  return { w: window.innerWidth, h: window.innerHeight, pageShell: null };
+  // Viewport-sized layer only — never stretch canvas to document height (causes trailing black void).
+  return {
+    w: window.innerWidth,
+    h: window.innerHeight,
+    pageShell: scope === "page" ? pageShell : null,
+  };
 }
 
 export function FeatureThreeBackground({ variant, dramatic = true, scope = "page" }: Props) {
@@ -122,21 +120,20 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       const t = (Date.now() - start) / 1000;
       const scroll = scrollRef.current;
       tick(t, scroll);
-      sceneRoot.rotation.y = scroll * Math.PI * 0.85 + Math.sin(t * 0.14) * 0.06;
-      sceneRoot.rotation.x = -0.08 + scroll * 0.28;
-      const fly = dramatic ? 7 : 5.5;
-      camera.position.z = (dramatic ? 6.5 : 10) - scroll * fly;
-      camera.position.y = 0.4 + scroll * 1.6 + mouse.y * 0.28;
-      camera.position.x = mouse.x * 0.65 + Math.sin(t * 0.2 + scroll * 2.2) * 0.45;
-      camera.lookAt(mouse.x * 0.2, scroll * 0.45 + mouse.y * 0.12, -5);
+      sceneRoot.rotation.y = scroll * Math.PI * 0.35 + Math.sin(t * 0.14) * 0.04;
+      sceneRoot.rotation.x = -0.06 + scroll * 0.12;
+      const fly = dramatic ? 2.8 : 2;
+      const baseZ = dramatic ? 6.5 : 10;
+      camera.position.z = Math.max(baseZ - 1.2, baseZ - scroll * fly);
+      camera.position.y = 0.4 + scroll * 0.45 + mouse.y * 0.18;
+      camera.position.x = mouse.x * 0.35 + Math.sin(t * 0.2 + scroll * 1.2) * 0.18;
+      camera.lookAt(mouse.x * 0.12, scroll * 0.18 + mouse.y * 0.08, -4);
       renderer.render(scene, camera);
     };
     animate();
 
     resize();
     window.addEventListener("resize", resize, { passive: true });
-    const ro = pageShell ? new ResizeObserver(resize) : null;
-    ro?.observe(pageShell!);
 
     return () => {
       cancelled = true;
@@ -144,7 +141,6 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", resize);
-      ro?.disconnect();
       renderer.dispose();
       canvas.remove();
     };
@@ -154,7 +150,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
-  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-0";
+  const positionClass = "fixed inset-0";
 
   return (
     <div

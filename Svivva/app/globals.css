@@ -105,6 +105,20 @@
     width: 100%;
   }
 
+  [data-feature-page] {
+    position: relative;
+    isolation: isolate;
+    min-height: 0;
+  }
+
+  [data-feature-page] > [data-svivva-feature-bg] {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    pointer-events: none;
+  }
+
   /* Opaque app shells only — avoid painting full-viewport layers behind WebGL */
   body > div.min-h-screen,
   body > main {

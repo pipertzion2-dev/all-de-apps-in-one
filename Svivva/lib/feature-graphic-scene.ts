@@ -224,8 +224,8 @@ export function buildCubeGraphicScene(
     tickMotifs(motifs, mouse, t, scroll);
     tickSignature(variant, root, t, scroll);
     tickElementInternals(motifs, variant, scroll, t);
-    root.rotation.y = scroll * 0.35 + mouse.x * 0.08;
-    root.rotation.x = -0.04 + scroll * 0.1 + mouse.y * 0.04;
+    root.rotation.y = scroll * 0.22 + mouse.x * 0.06;
+    root.rotation.x = -0.04 + scroll * 0.06 + mouse.y * 0.03;
   };
 
   return { root, tick };

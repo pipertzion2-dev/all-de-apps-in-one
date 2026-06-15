@@ -39,7 +39,7 @@ export function FeaturePageShell({
       data-feature-page
     >
       <FeatureThreeBg variant={variant} dramatic scope="page" />
-      <div className="relative z-10">
+      <div className="relative z-10 px-4 sm:px-6 pb-6">
         {showHero ? <FeaturePageHero variant={variant} subtitle={subtitle} /> : null}
         {children}
       </div>
