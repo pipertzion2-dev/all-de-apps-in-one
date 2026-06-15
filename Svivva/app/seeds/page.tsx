@@ -630,8 +630,8 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent relative">
-      <FeatureThreeBg variant="seeds" dramatic />
+    <div className="relative min-h-screen bg-background">
+      <FeatureThreeBg variant="seeds" dramatic scope="page" />
       <nav className="relative z-30 h-12 border-b border-border/40 bg-background/35 backdrop-blur-md flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -688,12 +688,12 @@ export default function SeedsPage() {
         </div>
       </nav>
 
-      <main className="relative z-20 flex-1 overflow-y-auto bg-transparent">
+      <main className="relative z-20 bg-transparent pb-2" data-feature-scroll>
         <FeaturePageHero
           variant="seeds"
           subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."
         />
-        <div className="max-w-5xl mx-auto px-4 pb-8 space-y-8 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50">
+        <div className="max-w-5xl mx-auto px-4 pb-4 space-y-8 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50">
           {allSeeds.length > 1 && (
             <div className="flex justify-end">
               <Button
@@ -1169,7 +1169,7 @@ function SeedsAdminFooter() {
   if (!data?.isAdmin) return null;
 
   return (
-    <div className="mt-12 mb-8 px-4">
+    <div className="mt-8 mb-2 px-4">
       <div className="max-w-5xl mx-auto border-t border-border/50 pt-6">
         <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
           Admin tools

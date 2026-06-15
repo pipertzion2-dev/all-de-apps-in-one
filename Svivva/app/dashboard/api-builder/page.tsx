@@ -194,7 +194,7 @@ export default function APIBuilderPage() {
 
   return (
     <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto relative">
-      <FeatureThreeBg variant="api" />
+      <FeatureThreeBg variant="api" scope="page" />
       <div className="relative z-10 space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="text-center space-y-3 sm:space-y-4">

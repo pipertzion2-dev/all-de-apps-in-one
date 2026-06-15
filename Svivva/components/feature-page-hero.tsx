@@ -38,8 +38,8 @@ export function FeaturePageHero({ variant, subtitle }: Props) {
   const [headA, headB] = PAGE_HEADLINE[variant];
 
   return (
-    <section className="relative px-4 pt-6 pb-10 sm:pt-10 sm:pb-14 overflow-hidden">
-      <div className="max-w-5xl mx-auto space-y-8 sm:space-y-10">
+    <section className="relative pt-6 pb-6 sm:pt-8 sm:pb-8 overflow-hidden">
+      <div className="max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
           {stats.map((label) => (
             <div key={label} className="space-y-1">
@@ -55,29 +55,31 @@ export function FeaturePageHero({ variant, subtitle }: Props) {
             </div>
           ))}
         </div>
+      </div>
 
-        <FeatureScrollBand variant={variant} accentColor={feature.accentColor} height={360} />
+      <div className="my-8 sm:my-10">
+        <FeatureScrollBand variant={variant} accentColor={feature.accentColor} height={520} />
+      </div>
 
-        <div className="text-center sm:text-left space-y-4 max-w-3xl">
-          <p
-            className="text-[10px] uppercase tracking-[0.35em] font-mono"
-            style={{ color: feature.accentColor }}
-          >
-            — {feature.artworkTitle} —
-          </p>
-          <h1
-            className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
-            data-testid={variant === "seeds" ? "text-seeds-title" : undefined}
-          >
-            <span className="text-foreground">{headA}</span>
-            <br />
-            <span style={{ color: feature.accentColor }}>{headB}</span>
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground font-mono leading-relaxed max-w-2xl">
-            {subtitle ?? feature.description}
-          </p>
-          <p className="text-xs italic text-muted-foreground/80">{feature.tagline}</p>
-        </div>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-4 text-center sm:text-left">
+        <p
+          className="text-[10px] uppercase tracking-[0.35em] font-mono"
+          style={{ color: feature.accentColor }}
+        >
+          — {feature.artworkTitle} —
+        </p>
+        <h1
+          className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
+          data-testid={variant === "seeds" ? "text-seeds-title" : undefined}
+        >
+          <span className="text-foreground">{headA}</span>
+          <br />
+          <span style={{ color: feature.accentColor }}>{headB}</span>
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground font-mono leading-relaxed max-w-2xl">
+          {subtitle ?? feature.description}
+        </p>
+        <p className="text-xs italic text-muted-foreground/80">{feature.tagline}</p>
       </div>
     </section>
   );

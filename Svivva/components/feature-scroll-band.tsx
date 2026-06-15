@@ -4,23 +4,25 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { getGraphicPalette } from "@/lib/artwork-palettes";
-import { buildImmersiveScrollScene } from "@/lib/feature-immersive-scroll";
+import { buildGraphicScrollHeroScene } from "@/lib/feature-scroll-hero-scene";
+import { elementScrollProgress } from "@/lib/feature-scroll-progress";
 
 type Props = {
   variant: FeatureId;
   accentColor: string;
   className?: string;
   height?: number;
+  /** Edge-to-edge immersive band (default). Set false for inset homepage sections. */
+  immersive?: boolean;
 };
 
-function bandScrollProgress(el: HTMLElement): number {
-  const rect = el.getBoundingClientRect();
-  const vh = window.innerHeight;
-  const travel = rect.height + vh;
-  return Math.max(0, Math.min(1, (vh * 0.75 - rect.top) / travel));
-}
-
-export function FeatureScrollBand({ variant, accentColor, className = "", height = 280 }: Props) {
+export function FeatureScrollBand({
+  variant,
+  accentColor,
+  className = "",
+  height = 480,
+  immersive = true,
+}: Props) {
   const shellRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
 
@@ -38,33 +40,51 @@ export function FeatureScrollBand({ variant, accentColor, className = "", height
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
     const canvas = renderer.domElement;
-    canvas.style.cssText = "display:block;width:100%;height:100%";
+    canvas.style.cssText = "display:block;width:100%;height:100%;touch-action:none";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 140);
-    camera.position.set(0, 0.5, 9);
+    const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 160);
+    camera.position.set(0, 0.35, 11);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-    const key = new THREE.DirectionalLight(0xffffff, 0.85);
-    key.position.set(2, 4, 6);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const key = new THREE.DirectionalLight(0xffffff, 1.05);
+    key.position.set(3, 5, 8);
     scene.add(key);
+    const accentLight = new THREE.PointLight(new THREE.Color(accentColor).getHex(), 1.6, 48);
+    accentLight.position.set(-2, 1.5, 6);
+    scene.add(accentLight);
 
-    const immersive = buildImmersiveScrollScene(variant, palette);
-    scene.add(immersive.root);
+    const heroScene = buildGraphicScrollHeroScene(variant, palette);
+    heroScene.root.scale.setScalar(variant === "seeds" ? 1.08 : 0.95);
+    scene.add(heroScene.root);
+
+    const mouse = { x: 0, y: 0 };
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = shell.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    };
+    shell.addEventListener("pointermove", onPointerMove, { passive: true });
 
     let raf = 0;
     const start = Date.now();
     const animate = () => {
       raf = requestAnimationFrame(animate);
       const t = (Date.now() - start) / 1000;
-      const scroll = bandScrollProgress(shell);
-      immersive.tick(t, scroll);
+      const bandScroll = elementScrollProgress(shell);
+      const pageScroll =
+        typeof window !== "undefined"
+          ? Math.min(1, window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1))
+          : 0;
+      const scroll = Math.max(bandScroll, pageScroll * 0.35);
 
-      camera.position.x = Math.sin(t * 0.2 + scroll * 1.2) * 0.6;
-      camera.position.y = 0.4 + Math.sin(t * 0.15) * 0.15 + scroll * 0.3;
-      camera.position.z = 9 - scroll * 3.5;
-      camera.lookAt(0, scroll * 0.2, -4);
+      heroScene.tick(t, scroll, mouse);
+
+      camera.position.x = mouse.x * 0.9 + Math.sin(t * 0.22 + scroll * 2.4) * 0.55;
+      camera.position.y = 0.35 + mouse.y * 0.35 + scroll * 0.55 + Math.sin(t * 0.18) * 0.12;
+      camera.position.z = 11 - scroll * 6.5;
+      camera.lookAt(mouse.x * 0.25, scroll * 0.35 + mouse.y * 0.15, -3 - scroll * 2);
       renderer.render(scene, camera);
     };
     animate();
@@ -79,44 +99,48 @@ export function FeatureScrollBand({ variant, accentColor, className = "", height
     ro.observe(el);
 
     const onScroll = () => {
-      /* scroll read inside animate via bandScrollProgress */
+      /* progress sampled each frame */
     };
     window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    shell.closest("main")?.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll, { capture: true });
+      shell.removeEventListener("pointermove", onPointerMove);
+      shell.closest("main")?.removeEventListener("scroll", onScroll);
       ro.disconnect();
       renderer.dispose();
       canvas.remove();
     };
-  }, [variant, height]);
+  }, [variant, height, accentColor]);
 
   return (
     <div
       ref={shellRef}
-      className={`relative w-full overflow-hidden rounded-xl border border-border/40 ${className}`}
+      className={`relative w-full overflow-hidden ${immersive ? "rounded-none border-0" : "rounded-xl border border-border/30"} ${className}`}
       style={{
         height,
-        background: `linear-gradient(180deg, ${accentColor}14 0%, transparent 42%, ${accentColor}10 100%)`,
-        boxShadow: `inset 0 1px 0 ${accentColor}40, 0 12px 40px -10px ${accentColor}45`,
+        background: immersive
+          ? `radial-gradient(ellipse 90% 70% at 50% 45%, ${accentColor}22 0%, transparent 62%), radial-gradient(ellipse 60% 40% at 20% 80%, ${accentColor}12 0%, transparent 55%)`
+          : `linear-gradient(180deg, ${accentColor}12 0%, transparent 50%, ${accentColor}08 100%)`,
       }}
+      data-feature-scroll-band={variant}
+      aria-hidden
     >
       <div ref={mountRef} className="absolute inset-0" />
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-12"
-        style={{ background: "linear-gradient(to bottom, hsl(var(--background) / 0.7), transparent)" }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-16"
+        style={{
+          background: "linear-gradient(to bottom, hsl(var(--background) / 0.55), transparent)",
+        }}
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-12"
-        style={{ background: "linear-gradient(to top, hsl(var(--background) / 0.7), transparent)" }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
+        style={{
+          background: "linear-gradient(to top, hsl(var(--background) / 0.35), transparent)",
+        }}
       />
-      <p
-        className="absolute bottom-2 right-3 text-[9px] uppercase tracking-[0.25em] font-mono opacity-40"
-        style={{ color: accentColor }}
-      >
-        scroll · 3d
-      </p>
     </div>
   );
 }

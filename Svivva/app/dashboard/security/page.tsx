@@ -20,7 +20,7 @@ export default function SecurityDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 max-w-6xl mx-auto w-full relative">
-      <FeatureThreeBg variant="security" />
+      <FeatureThreeBg variant="security" scope="page" />
       <div className="relative z-10 flex flex-col gap-6">
         <div>
           <div className="flex items-center gap-2 text-primary mb-1">

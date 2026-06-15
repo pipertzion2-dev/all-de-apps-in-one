@@ -87,7 +87,7 @@ export function FeatureSection({ feature, index, reverse }: Props) {
         </div>
 
         {/* Scroll-driven 3D band */}
-        <FeatureScrollBand variant={feature.id} accentColor={feature.accentColor} height={300} />
+        <FeatureScrollBand variant={feature.id} accentColor={feature.accentColor} height={380} immersive={false} />
 
         <div
           className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start ${reverse ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1" : ""}`}

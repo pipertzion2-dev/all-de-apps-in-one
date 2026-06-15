@@ -8,16 +8,19 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { FEATURES, type FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { buildFeaturePageScene } from "@/lib/feature-page-scenes";
+import { pageScrollProgress } from "@/lib/feature-scroll-progress";
 
 export type FeatureVariant = FeatureId;
 
 type Props = {
   variant: FeatureVariant;
-  /** Brighter lines + fixed viewport layer (default on feature routes). */
+  /** Brighter lines + full-page layer (default on feature routes). */
   dramatic?: boolean;
+  /** `page` = grows with content; `fixed` = viewport-locked. */
+  scope?: "page" | "fixed";
 };
 
-export function FeatureThreeBackground({ variant, dramatic = true }: Props) {
+export function FeatureThreeBackground({ variant, dramatic = true, scope = "page" }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
 
@@ -80,17 +83,8 @@ export function FeatureThreeBackground({ variant, dramatic = true }: Props) {
       });
 
     const scrollRef = { current: 0 };
-    const scrollNorm = () => {
-      const main = document.querySelector<HTMLElement>("main.overflow-y-auto");
-      if (main && main.scrollHeight > main.clientHeight + 40) {
-        const max = main.scrollHeight - main.clientHeight;
-        return max > 0 ? Math.min(1, main.scrollTop / max) : 0;
-      }
-      const max = document.body.scrollHeight - window.innerHeight;
-      return max > 0 ? Math.min(1, window.scrollY / max) : 0;
-    };
     const onScroll = () => {
-      scrollRef.current = scrollNorm();
+      scrollRef.current = pageScrollProgress();
     };
     window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     onScroll();
@@ -131,15 +125,17 @@ export function FeatureThreeBackground({ variant, dramatic = true }: Props) {
       renderer.dispose();
       canvas.remove();
     };
-  }, [variant, dramatic, feature.accentColor]);
+  }, [variant, dramatic, feature.accentColor, scope]);
 
   const accent = feature.accentColor;
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
+  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-0 min-h-full w-full";
+
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      className={`pointer-events-none z-0 overflow-hidden ${positionClass}`}
       aria-hidden
       data-svivva-feature-bg={variant}
     >
@@ -160,7 +156,7 @@ export function FeatureThreeBackground({ variant, dramatic = true }: Props) {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.05) 0%, transparent 25%, transparent 72%, hsl(var(--background) / 0.18) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.04) 0%, transparent 22%, transparent 88%, hsl(var(--background) / 0.08) 100%)",
         }}
       />
     </div>

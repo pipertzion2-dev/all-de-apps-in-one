@@ -25,14 +25,10 @@ export type PlacedMotif = {
   scale: number;
 };
 
+import { pageScrollProgress } from "@/lib/feature-scroll-progress";
+
 function scrollNorm(): number {
-  const main = document.querySelector<HTMLElement>("main.overflow-y-auto");
-  if (main && main.scrollHeight > main.clientHeight + 40) {
-    const max = main.scrollHeight - main.clientHeight;
-    return max > 0 ? Math.min(1, main.scrollTop / max) : 0;
-  }
-  const max = document.body.scrollHeight - window.innerHeight;
-  return max > 0 ? Math.min(1, window.scrollY / max) : 0;
+  return pageScrollProgress();
 }
 
 function tickMotifs(

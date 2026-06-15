@@ -3362,7 +3362,7 @@ export default function LaunchpadPage() {
   if (!isAdmin)
     return (
       <div className="min-h-screen relative">
-        <FeatureThreeBg variant="orbit" />
+        <FeatureThreeBg variant="orbit" scope="page" />
         <div className="relative z-10 py-16 px-4">
           <AdminCodeForm
             title="Orbit admin"
@@ -3399,7 +3399,7 @@ export default function LaunchpadPage() {
 
   return (
     <div className="min-h-screen relative z-0">
-      <FeatureThreeBg variant="orbit" />
+      <FeatureThreeBg variant="orbit" scope="page" />
       {devLanUrl && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div className="rounded-xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-950 dark:text-amber-100 space-y-1.5">
