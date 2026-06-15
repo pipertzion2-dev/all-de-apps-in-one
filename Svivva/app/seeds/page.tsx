@@ -50,7 +50,6 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
-import { FeatureSignInBanner } from "@/components/feature-sign-in-banner";
 
 const FeatureThreeBg = dynamic(
   () =>
@@ -695,9 +694,6 @@ export default function SeedsPage() {
       </nav>
 
       <main className="relative z-20 bg-transparent pb-0" data-feature-scroll>
-        <div className="pt-4 pb-2 max-w-6xl mx-auto px-4">
-          <FeatureSignInBanner featureName="Svivva Seeds" accentColor="#5BA8A0" />
-        </div>
         <FeaturePageHero
           variant="seeds"
           subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."

@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import ApiEmergentDiscovery from "@/components/api-emergent-discovery";
-import { useFeatureAuthGate } from "@/hooks/use-feature-auth-gate";
 import {
   Sparkles,
   Building2,
@@ -61,7 +60,6 @@ interface BusinessAnalysis {
 
 export default function APIBuilderPage() {
   const searchParams = useSearchParams();
-  const { requireAuth } = useFeatureAuthGate();
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingBrand, setIsGeneratingBrand] = useState(false);
@@ -92,7 +90,6 @@ export default function APIBuilderPage() {
   const displayStep = step >= 5 ? totalSteps : step;
 
   const analyzeAndSuggest = async () => {
-    if (!requireAuth()) return;
     setIsAnalyzing(true);
 
     try {
@@ -159,7 +156,6 @@ export default function APIBuilderPage() {
   };
 
   const createBundle = async () => {
-    if (!requireAuth()) return;
     setIsCreating(true);
 
     try {

@@ -38,7 +38,6 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
-import { useFeatureAuthGate } from "@/hooks/use-feature-auth-gate";
 
 interface BuildStep {
   id: string;
@@ -120,7 +119,6 @@ function saveHardwareProduct(product: SavedHardwareProduct) {
 }
 
 export default function HardwareBuilderPage() {
-  const { requireAuth } = useFeatureAuthGate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [steps, setSteps] = useState<BuildStep[]>(buildSteps);
@@ -257,7 +255,6 @@ export default function HardwareBuilderPage() {
   };
 
   const handleGenerateSketch = useCallback(async () => {
-    if (!requireAuth()) return;
     const text = sketchPrompt.trim();
     if (!text) return;
     setSketchGenerating(true);
@@ -287,7 +284,7 @@ export default function HardwareBuilderPage() {
     } finally {
       setSketchGenerating(false);
     }
-  }, [sketchPrompt, productName, productCategory, materials, requireAuth]);
+  }, [sketchPrompt, productName, productCategory, materials]);
 
   const handleDownloadSketch = useCallback(() => {
     if (!sketchImageSrc) return;
@@ -298,7 +295,6 @@ export default function HardwareBuilderPage() {
   }, [sketchImageSrc, productName]);
 
   const handleFindManufacturers = useCallback(async () => {
-    if (!requireAuth()) return;
     setSourcingLoading(true);
     try {
       const r = await fetch("/api/hardware/manufacturers", {
@@ -330,11 +326,9 @@ export default function HardwareBuilderPage() {
     manufacturingMethod,
     budgetRange,
     requirements,
-    requireAuth,
   ]);
 
   const handleHybridize = useCallback(async () => {
-    if (!requireAuth()) return;
     if (!systemAName.trim() || !systemBName.trim()) return;
     setHybridLoading(true);
     try {
@@ -359,10 +353,9 @@ export default function HardwareBuilderPage() {
     } finally {
       setHybridLoading(false);
     }
-  }, [systemAName, systemADesc, systemBName, systemBDesc, materials, requirements, requireAuth]);
+  }, [systemAName, systemADesc, systemBName, systemBDesc, materials, requirements]);
 
   const handleDownloadBlueprint = useCallback(async () => {
-    if (!requireAuth()) return;
     setPdfGenerating(true);
     try {
       const r = await fetch("/api/hardware/blueprint", {

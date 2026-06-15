@@ -11,6 +11,7 @@ import {
   type SeedBranch,
 } from "@/lib/feature-graphic-builders";
 import { buildImmersiveScrollScene } from "@/lib/feature-immersive-scroll";
+import { buildLivingMeshLayer } from "@/lib/feature-living-mesh";
 
 export type GraphicSceneMode = "hero" | "page";
 
@@ -195,6 +196,11 @@ export function buildCubeGraphicScene(
 
   addSignatureBackdrop(variant, root, palette);
 
+  const living = buildLivingMeshLayer(variant, palette, mode);
+  living.group.position.z = mode === "hero" ? -0.6 : -0.9;
+  living.group.scale.setScalar(mode === "hero" ? 0.95 : 1.05);
+  root.add(living.group);
+
   const { hero } = buildImmersiveScrollScene(variant, palette);
   hero.scale.setScalar(mode === "hero" ? 0.52 : 0.68);
   hero.position.set(0, variant === "seeds" ? -0.35 : 0, mode === "hero" ? -1.4 : -2);
@@ -221,6 +227,7 @@ export function buildCubeGraphicScene(
     }
     hero.rotation.y = scroll * 0.22 + t * 0.04;
     hero.rotation.x = scroll * 0.08 + Math.sin(t * 0.2) * 0.03;
+    living.tick(t, scroll, mouseIn);
     tickMotifs(motifs, mouse, t, scroll);
     tickSignature(variant, root, t, scroll);
     tickElementInternals(motifs, variant, scroll, t);
