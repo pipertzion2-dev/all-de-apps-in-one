@@ -132,7 +132,7 @@ export function FeatureThreeBackground({ variant }: Props) {
         ref={mountRef}
         aria-hidden
         data-svivva-feature-bg={variant}
-        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         style={{
           background: [
             `radial-gradient(ellipse 90% 65% at 25% 30%, ${accent}08 0%, transparent 60%)`,
@@ -145,10 +145,10 @@ export function FeatureThreeBackground({ variant }: Props) {
       {/* Vignette — keeps Three.js behind readable UI panels */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0"
+        className="pointer-events-none absolute inset-0 z-0"
         style={{
           background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.28) 0%, transparent 18%, transparent 75%, hsl(var(--background) / 0.55) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.12) 0%, transparent 20%, transparent 78%, hsl(var(--background) / 0.22) 100%)",
         }}
       />
     </>

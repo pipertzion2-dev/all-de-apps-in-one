@@ -176,10 +176,18 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
+    document
+      .querySelectorAll(
+        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
+      )
+      .forEach((el) => el.remove());
+  }, []);
+
+  useEffect(() => {
     if (!flipComplete) return;
     document
       .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0",
+        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
       )
       .forEach((el) => el.remove());
   }, [flipComplete]);
@@ -565,10 +573,10 @@ export default function LandingPage() {
 
         <section
           id="svivva-seeds"
-          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-0 bg-[#5BA8A0]/25 border-b border-[#5BA8A0]/40"
+          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5BA8A0]/40 via-[#5BA8A0]/25 to-background border-b border-[#5BA8A0]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="rounded-2xl border-2 border-[#5BA8A0]/70 bg-[#1e3332] p-6 sm:p-10 shadow-xl shadow-black/20">
+            <div className="rounded-2xl border-2 border-[#5BA8A0]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5BA8A0]/10">
               <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5BA8A0]/50">
                   <Image
@@ -588,7 +596,7 @@ export default function LandingPage() {
                       Pro & Enterprise
                     </Badge>
                   </div>
-                  <p className="text-sm sm:text-base text-white/90 max-w-lg">
+                  <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
                     Generate multiple production-ready applications from a single structured
                     document. One spec in, entire product suites out — frontend, backend, database,
                     auth, and deployment configs all built in parallel.
@@ -602,7 +610,7 @@ export default function LandingPage() {
                     ].map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] px-2 py-1 rounded-full bg-[#5BA8A0]/25 border border-[#5BA8A0]/50 text-white/80"
+                        className="text-[10px] px-2 py-1 rounded-full bg-[#5BA8A0]/15 border border-[#5BA8A0]/40 text-foreground/80"
                       >
                         {tag}
                       </span>
