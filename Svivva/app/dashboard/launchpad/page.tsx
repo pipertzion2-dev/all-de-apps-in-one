@@ -3361,7 +3361,7 @@ export default function LaunchpadPage() {
     );
   if (!isAdmin)
     return (
-      <div className="min-h-screen relative">
+      <div className="min-h-screen relative bg-background overflow-x-hidden" data-feature-page>
         <FeatureThreeBg variant="orbit" scope="page" />
         <div className="relative z-10 py-16 px-4">
           <AdminCodeForm
@@ -3398,7 +3398,7 @@ export default function LaunchpadPage() {
     null;
 
   return (
-    <div className="min-h-screen relative z-0">
+    <div className="min-h-screen relative z-0 bg-background overflow-x-hidden" data-feature-page>
       <FeatureThreeBg variant="orbit" scope="page" />
       {devLanUrl && (
         <div className="max-w-2xl mx-auto px-4 pt-4">

@@ -630,7 +630,10 @@ export default function SeedsPage() {
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
   return (
-    <div className="relative bg-background overflow-x-hidden" data-feature-page>
+    <div
+      className="relative bg-background overflow-x-hidden"
+      data-feature-page
+    >
       <FeatureThreeBg variant="seeds" dramatic scope="page" />
       <nav className="relative z-30 h-12 border-b border-border/40 bg-background/35 backdrop-blur-md flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
@@ -1035,8 +1038,8 @@ export default function SeedsPage() {
         <SeedsAdminFooter />
       </main>
 
-      {selectionMode && selectedSeeds.size > 0 && (
-        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl shadow-lg">
+      {selectionMode && selectedSeeds.size > 0 ? (
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-xl shadow-lg">
           <div className="max-w-5xl mx-auto px-4 py-3">
             {!promptBarOpen ? (
               <div className="flex items-center justify-between gap-4">
@@ -1151,7 +1154,7 @@ export default function SeedsPage() {
             )}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

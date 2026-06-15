@@ -2841,10 +2841,11 @@ export default function SvivvaPlayPage() {
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col text-gray-900 relative"
+      className="min-h-[100dvh] flex flex-col text-gray-900 relative bg-background overflow-x-hidden"
       style={{ colorScheme: "light" }}
+      data-feature-page
     >
-      <FeatureThreeBg variant="play" />
+      <FeatureThreeBg variant="play" dramatic scope="page" />
       {playBetaBanner}
       <style>{`
         .holo-gradient {

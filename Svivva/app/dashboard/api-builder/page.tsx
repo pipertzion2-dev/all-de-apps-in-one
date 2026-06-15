@@ -3,13 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-const FeatureThreeBg = dynamic(
-  () =>
-    import("@/components/feature-three-background").then((m) => ({
-      default: m.FeatureThreeBackground,
-    })),
-  { ssr: false },
-);
+import { FeaturePageShell } from "@/components/feature-page-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -193,24 +187,12 @@ export default function APIBuilderPage() {
   const selectedCount = analysis?.suggestedAPIs.filter((api) => api.selected).length || 0;
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto relative">
-      <FeatureThreeBg variant="api" scope="page" />
-      <div className="relative z-10 space-y-5 sm:space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#5BA8A0] to-[#D782B2] flex items-center justify-center">
-              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-builder-title">
-            Combo API Builder
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
-            Build a complete branded API product suite for your business.
-          </p>
-        </div>
-
+    <FeaturePageShell
+      variant="api"
+      subtitle="Build a complete branded API product suite for your business."
+      className="pb-6"
+    >
+      <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto px-4 pb-4">
         <ApiEmergentDiscovery />
 
         {/* Progress */}
@@ -752,6 +734,6 @@ export default function APIBuilderPage() {
           </Card>
         )}
       </div>
-    </div>
+    </FeaturePageShell>
   );
 }

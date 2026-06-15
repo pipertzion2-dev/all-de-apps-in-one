@@ -2,13 +2,7 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-const FeatureThreeBg = dynamic(
-  () =>
-    import("@/components/feature-three-background").then((m) => ({
-      default: m.FeatureThreeBackground,
-    })),
-  { ssr: false },
-);
+import { FeaturePageShell } from "@/components/feature-page-shell";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1087,14 +1081,12 @@ export default function HardwareBuilderPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
-      <FeatureThreeBg variant="hardware" scope="page" />
-      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 relative z-10">
-        <div className="flex items-center gap-2 mb-6 sm:mb-8">
-          <Badge>Physical</Badge>
-          <h1 className="text-xl sm:text-2xl font-bold">Hardware Builder</h1>
-        </div>
-
+    <FeaturePageShell
+      variant="hardware"
+      subtitle="AI schematics, supplier matching, and tangible product workflows."
+      className="pb-4"
+    >
+      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 pb-4 relative z-10">
         <Card className="border-[#5BA8A0]/30">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
@@ -1222,6 +1214,6 @@ export default function HardwareBuilderPage() {
           )}
         </div>
       </div>
-    </div>
+    </FeaturePageShell>
   );
 }
