@@ -6,12 +6,10 @@ import {
   addSignatureBackdrop,
   animateSeedBranches,
   buildGraphicElement,
-  buildStaffLines,
   floatGeo,
   type SeedBranch,
 } from "@/lib/feature-graphic-builders";
 import { buildImmersiveScrollScene } from "@/lib/feature-immersive-scroll";
-import { buildLivingMeshLayer } from "@/lib/feature-living-mesh";
 
 export type GraphicSceneMode = "hero" | "page";
 
@@ -31,36 +29,36 @@ type PlacedMotif = {
   bob: number;
 };
 
-/** Face-faithful 2×2 / poster layouts mirroring the homepage cube crops. */
+/** Face-faithful layouts mirroring the homepage cube crops. */
 const FACE_LAYOUT: Partial<Record<FeatureId, Record<string, THREE.Vector3>>> = {
   seeds: {
-    "quad-tl": new THREE.Vector3(-2.55, 1.85, 0.15),
-    "quad-tr": new THREE.Vector3(2.55, 1.85, 0.1),
-    "quad-bl": new THREE.Vector3(-2.55, -1.85, 0.12),
-    "quad-br": new THREE.Vector3(2.55, -1.85, 0.18),
+    "quad-tl": new THREE.Vector3(-2.55, 1.85, 0.4),
+    "quad-tr": new THREE.Vector3(2.55, 1.85, 0.35),
+    "quad-bl": new THREE.Vector3(-2.55, -1.85, 0.38),
+    "quad-br": new THREE.Vector3(2.55, -1.85, 0.42),
   },
   api: {
-    "flower-2": new THREE.Vector3(-3.2, 2.1, -0.2),
-    "flower-1": new THREE.Vector3(3.0, -1.6, -0.35),
-    paper: new THREE.Vector3(-1.2, -2.4, 0.1),
-    fold: new THREE.Vector3(1.5, 0.5, 0.2),
+    "flower-2": new THREE.Vector3(-2.8, 1.8, 0.2),
+    "flower-1": new THREE.Vector3(2.6, -1.4, 0.15),
+    paper: new THREE.Vector3(-1.0, -2.0, 0.25),
+    fold: new THREE.Vector3(1.2, 0.4, 0.3),
   },
   hardware: {
-    "red-cube": new THREE.Vector3(-3.0, 1.5, -0.1),
-    "green-cube": new THREE.Vector3(3.2, 2.0, 0.05),
-    "hand-cube": new THREE.Vector3(2.8, -1.4, -0.25),
-    figures: new THREE.Vector3(-2.5, -1.8, 0.15),
-    swim: new THREE.Vector3(0, -2.6, 0.2),
+    "red-cube": new THREE.Vector3(-2.6, 1.3, 0.2),
+    "green-cube": new THREE.Vector3(2.8, 1.6, 0.25),
+    "hand-cube": new THREE.Vector3(2.4, -1.2, 0.15),
+    figures: new THREE.Vector3(-2.2, -1.6, 0.3),
+    swim: new THREE.Vector3(0, -2.2, 0.35),
   },
 };
 
 function tickMotifs(motifs: PlacedMotif[], mouse: { x: number; y: number }, t: number, scroll: number) {
   motifs.forEach((m) => {
-    const sway = Math.sin(t * 0.55 + m.phase) * m.bob;
-    m.object.position.x = m.ox + mouse.x * m.parallax * 0.35 + sway * 0.15;
-    m.object.position.y = m.oy + mouse.y * m.parallax * 0.28 + Math.cos(t * 0.45 + m.phase) * m.bob * 0.5;
-    m.object.position.z = m.oz + scroll * m.parallax * 0.45;
-    m.object.rotation.y = scroll * 0.18 + Math.sin(t * 0.25 + m.phase) * 0.04;
+    const sway = Math.sin(t * 0.45 + m.phase) * m.bob;
+    m.object.position.x = m.ox + mouse.x * m.parallax * 0.25 + sway * 0.1;
+    m.object.position.y = m.oy + mouse.y * m.parallax * 0.2 + Math.cos(t * 0.4 + m.phase) * m.bob * 0.35;
+    m.object.position.z = m.oz + scroll * m.parallax * 0.25;
+    m.object.rotation.y = scroll * 0.12 + Math.sin(t * 0.2 + m.phase) * 0.03;
     m.object.rotation.z = m.rotZ;
   });
 }
@@ -85,8 +83,6 @@ function tickSignature(variant: FeatureId, scene: THREE.Object3D, t: number, scr
     case "seeds": {
       const branches = scene.userData.seedBranches as SeedBranch[] | undefined;
       if (branches) animateSeedBranches(branches, t, scroll);
-      const staff = scene.userData.staff as THREE.Group | undefined;
-      if (staff) staff.position.y = 2.8 - scroll * 0.4;
       break;
     }
     case "security": {
@@ -138,15 +134,16 @@ function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, scroll:
   if (variant === "hardware") {
     motifs.forEach((m) => {
       if (m.object.children[0] instanceof THREE.Mesh) {
-        m.object.rotation.x = t * 0.15 + scroll * 0.6;
-        m.object.rotation.y = t * 0.12;
+        m.object.rotation.x = t * 0.12 + scroll * 0.4;
+        m.object.rotation.y = t * 0.1;
       }
     });
   }
 }
 
 /**
- * Single cohesive scene built from the same artwork-atlas + graphic builders as the homepage cube.
+ * Cohesive scene: atlas wire motifs (foreground) + signature backdrop + conceptual hero/depth.
+ * Each feature gets an app-specific metaphor — not a shared random tunnel.
  */
 export function buildCubeGraphicScene(
   variant: FeatureId,
@@ -157,8 +154,13 @@ export function buildCubeGraphicScene(
   const root = new THREE.Group();
   const motifs: PlacedMotif[] = [];
   const faceLayout = FACE_LAYOUT[variant];
-  const spread = mode === "hero" ? 0.62 : 1;
-  const scaleMul = mode === "hero" ? 0.42 : 0.34;
+  const spread = mode === "hero" ? 0.58 : 0.88;
+  const scaleMul = mode === "hero" ? 0.38 : 0.32;
+
+  const immersive = buildImmersiveScrollScene(variant, palette);
+  immersive.root.scale.setScalar(mode === "hero" ? 0.88 : 1);
+  immersive.root.position.z = mode === "hero" ? -0.5 : -1.2;
+  root.add(immersive.root);
 
   for (const el of manifest.sceneElements) {
     const group = buildGraphicElement(variant, el.id, palette);
@@ -168,9 +170,9 @@ export function buildCubeGraphicScene(
     const scale = el.scale * scaleMul;
     group.scale.setScalar(scale);
 
-    const ox = facePos ? facePos.x * spread : el.x * spread;
-    const oy = facePos ? facePos.y * spread : el.y * spread;
-    const oz = facePos ? facePos.z : el.z * spread;
+    const ox = facePos ? facePos.x * spread : el.x * spread * 0.55;
+    const oy = facePos ? facePos.y * spread : el.y * spread * 0.55;
+    const oz = facePos ? facePos.z : 0.6 + el.z * spread * 0.15;
     group.position.set(ox, oy, oz);
     root.add(group);
 
@@ -179,44 +181,14 @@ export function buildCubeGraphicScene(
       ox,
       oy,
       oz,
-      parallax: (el.parallax ?? 0.7) * 0.4,
+      parallax: (el.parallax ?? 0.7) * 0.3,
       phase: el.phase ?? 0,
       rotZ: el.rotZ ?? 0,
-      bob: 0.03,
+      bob: 0.025,
     });
   }
 
-  if (variant === "seeds") {
-    const staff = buildStaffLines(palette.primary, mode === "hero" ? 10 : 16);
-    staff.position.set(0, mode === "hero" ? 2.8 : 4.5, 0.25);
-    staff.scale.setScalar(mode === "hero" ? 0.55 : 0.45);
-    root.add(staff);
-    root.userData.staff = staff;
-  }
-
   addSignatureBackdrop(variant, root, palette);
-
-  const living = buildLivingMeshLayer(variant, palette, mode);
-  living.group.position.z = mode === "hero" ? -0.6 : -0.9;
-  living.group.scale.setScalar(mode === "hero" ? 0.95 : 1.05);
-  root.add(living.group);
-
-  const { hero } = buildImmersiveScrollScene(variant, palette);
-  hero.scale.setScalar(mode === "hero" ? 0.52 : 0.68);
-  hero.position.set(0, variant === "seeds" ? -0.35 : 0, mode === "hero" ? -1.4 : -2);
-  root.add(hero);
-
-  const frame = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.PlaneGeometry(mode === "hero" ? 7.2 : 14, mode === "hero" ? 5.4 : 10)),
-    new THREE.LineBasicMaterial({
-      color: palette.primary,
-      transparent: true,
-      opacity: mode === "hero" ? 0.22 : 0.12,
-      depthWrite: false,
-    }),
-  );
-  frame.position.z = -0.8;
-  root.add(frame);
 
   const mouse = { x: 0, y: 0 };
 
@@ -225,14 +197,12 @@ export function buildCubeGraphicScene(
       mouse.x = mouseIn.x;
       mouse.y = mouseIn.y;
     }
-    hero.rotation.y = scroll * 0.22 + t * 0.04;
-    hero.rotation.x = scroll * 0.08 + Math.sin(t * 0.2) * 0.03;
-    living.tick(t, scroll, mouseIn);
+    immersive.tick(t, scroll);
     tickMotifs(motifs, mouse, t, scroll);
     tickSignature(variant, root, t, scroll);
     tickElementInternals(motifs, variant, scroll, t);
-    root.rotation.y = scroll * 0.22 + mouse.x * 0.06;
-    root.rotation.x = -0.04 + scroll * 0.06 + mouse.y * 0.03;
+    root.rotation.y = scroll * 0.15 + mouse.x * 0.04;
+    root.rotation.x = mouse.y * 0.02;
   };
 
   return { root, tick };
