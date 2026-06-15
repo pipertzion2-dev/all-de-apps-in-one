@@ -14,22 +14,33 @@ export type FeatureVariant = FeatureId;
 
 type Props = {
   variant: FeatureVariant;
-  /** Brighter lines + full-page layer (default on feature routes). */
   dramatic?: boolean;
-  /** `page` = grows with content; `fixed` = viewport-locked. */
   scope?: "page" | "fixed";
 };
 
+function measureCanvas(scope: "page" | "fixed", el: HTMLElement) {
+  const pageShell = el.closest("[data-feature-page]") as HTMLElement | null;
+  if (scope === "page" && pageShell) {
+    return {
+      w: pageShell.clientWidth || window.innerWidth,
+      h: Math.max(pageShell.scrollHeight, window.innerHeight),
+      pageShell,
+    };
+  }
+  return { w: window.innerWidth, h: window.innerHeight, pageShell: null };
+}
+
 export function FeatureThreeBackground({ variant, dramatic = true, scope = "page" }: Props) {
+  const shellRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
 
   useEffect(() => {
     const el = mountRef.current;
-    if (!el) return;
+    const shell = shellRef.current;
+    if (!el || !shell) return;
 
-    const W = window.innerWidth;
-    const H = window.innerHeight;
+    let { w, h, pageShell } = measureCanvas(scope, shell);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -38,25 +49,30 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       powerPreference: "high-performance",
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W, H);
+    renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = dramatic ? 1.15 : 1.0;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 180);
+    const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 180);
     camera.position.set(0, 0.4, dramatic ? 6.5 : 10);
 
-    scene.add(new THREE.AmbientLight(0xffffff, dramatic ? 0.85 : 0.45));
-    const key = new THREE.DirectionalLight(0xffffff, dramatic ? 0.9 : 0.5);
+    scene.add(new THREE.AmbientLight(0xffffff, dramatic ? 0.75 : 0.45));
+    const key = new THREE.DirectionalLight(0xffffff, dramatic ? 1.0 : 0.55);
     key.position.set(4, 6, 8);
     scene.add(key);
+    const rim = new THREE.DirectionalLight(new THREE.Color(feature.accentColor).getHex(), dramatic ? 0.55 : 0.3);
+    rim.position.set(-5, 2, -4);
+    scene.add(rim);
     const accentLight = new THREE.PointLight(
       new THREE.Color(feature.accentColor).getHex(),
-      dramatic ? 1.4 : 0.6,
-      40,
+      dramatic ? 1.6 : 0.65,
+      48,
     );
     accentLight.position.set(-3, 2, 6);
     scene.add(accentLight);
@@ -89,6 +105,19 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     onScroll();
 
+    const resize = () => {
+      const m = measureCanvas(scope, shell);
+      w = m.w;
+      h = m.h;
+      pageShell = m.pageShell;
+      if (scope === "page" && pageShell) {
+        shell.style.height = `${h}px`;
+      }
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+
     let rafId = 0;
     const start = Date.now();
     const animate = () => {
@@ -107,21 +136,18 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     };
     animate();
 
-    const onResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener("resize", onResize, { passive: true });
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    const ro = pageShell ? new ResizeObserver(resize) : null;
+    ro?.observe(pageShell!);
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", resize);
+      ro?.disconnect();
       renderer.dispose();
       canvas.remove();
     };
@@ -131,10 +157,11 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   const secondary =
     variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
-  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-0 min-h-full w-full";
+  const positionClass = scope === "fixed" ? "fixed inset-0" : "absolute inset-x-0 top-0 w-full";
 
   return (
     <div
+      ref={shellRef}
       className={`pointer-events-none z-0 overflow-hidden ${positionClass}`}
       aria-hidden
       data-svivva-feature-bg={variant}
@@ -150,13 +177,6 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
           ]
             .filter(Boolean)
             .join(", "),
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.04) 0%, transparent 22%, transparent 88%, hsl(var(--background) / 0.08) 100%)",
         }}
       />
     </div>

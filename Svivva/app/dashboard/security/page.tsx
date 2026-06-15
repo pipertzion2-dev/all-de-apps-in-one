@@ -19,7 +19,7 @@ export default function SecurityDashboardPage() {
   const [tab, setTab] = useState("feeds");
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 max-w-6xl mx-auto w-full relative">
+    <div className="flex flex-col gap-6 p-4 md:p-6 max-w-6xl mx-auto w-full relative" data-feature-page>
       <FeatureThreeBg variant="security" scope="page" />
       <div className="relative z-10 flex flex-col gap-6">
         <div>

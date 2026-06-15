@@ -39,6 +39,8 @@ export function FeatureScrollBand({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     const canvas = renderer.domElement;
     canvas.style.cssText = "display:block;width:100%;height:100%;touch-action:none";
     el.appendChild(canvas);
@@ -47,10 +49,13 @@ export function FeatureScrollBand({
     const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 160);
     camera.position.set(0, 0.35, 11);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const key = new THREE.DirectionalLight(0xffffff, 1.05);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const key = new THREE.DirectionalLight(0xffffff, 1.15);
     key.position.set(3, 5, 8);
     scene.add(key);
+    const rim = new THREE.DirectionalLight(new THREE.Color(accentColor).getHex(), 0.65);
+    rim.position.set(-4, 1, -3);
+    scene.add(rim);
     const accentLight = new THREE.PointLight(new THREE.Color(accentColor).getHex(), 1.6, 48);
     accentLight.position.set(-2, 1.5, 6);
     scene.add(accentLight);

@@ -4,11 +4,9 @@ import { ARTWORK_MANIFESTS } from "@/lib/artwork-atlas";
 import { getGraphicPalette } from "@/lib/artwork-palettes";
 import {
   addSignatureBackdrop,
-  animateSeedBranches,
   buildGraphicElement,
-  floatGeo,
-  type SeedBranch,
 } from "@/lib/feature-graphic-builders";
+import { buildAdvancedGraphicCluster } from "@/lib/feature-advanced-mesh";
 import { buildImmersiveScrollScene, type ImmersiveScrollScene } from "@/lib/feature-immersive-scroll";
 
 export type SceneTick = (t: number, scrollOverride?: number) => void;
@@ -46,73 +44,6 @@ function tickMotifs(
     m.object.rotation.y = Math.sin(t * 0.3 + m.phase) * 0.1 + scroll * 0.25;
     m.object.rotation.z = m.rotZ + Math.sin(t * 0.35 + m.phase) * 0.04;
   });
-}
-
-function tickSignature(variant: FeatureId, scene: THREE.Object3D, t: number, scroll: number) {
-  const palette = getGraphicPalette(variant);
-  const op = palette.lineOpacity;
-
-  switch (variant) {
-    case "play": {
-      const lines = scene.userData.waveLines as THREE.Line[] | undefined;
-      lines?.forEach((line, i) => {
-        const pos = line.geometry.attributes.position as THREE.BufferAttribute;
-        for (let s = 0; s < pos.count; s++) {
-          const x = (s / (pos.count - 1) - 0.5) * 28;
-          pos.setX(s, x);
-          pos.setY(
-            s,
-            Math.sin(x * 0.45 + t * 2.2 + i * 0.2 + scroll * 8) * (0.4 + scroll * 0.9),
-          );
-        }
-        pos.needsUpdate = true;
-      });
-      break;
-    }
-    case "seeds": {
-      const branches = scene.userData.seedBranches as SeedBranch[] | undefined;
-      if (branches) animateSeedBranches(branches, t, scroll);
-      const staff = scene.userData.staff as THREE.Group | undefined;
-      if (staff) staff.scale.x = 0.5 + scroll * 0.7 + Math.sin(t * 0.4) * 0.04;
-      break;
-    }
-    case "security": {
-      const rings = scene.userData.securityRings as THREE.LineLoop[] | undefined;
-      rings?.forEach((ring, r) => {
-        const dir = r % 2 === 0 ? 1 : -1;
-        ring.rotation.z = dir * (t * 0.08 + scroll * Math.PI * 0.4);
-        (ring.material as THREE.LineBasicMaterial).opacity =
-          (palette.lineOpacity * (0.5 - r * 0.1)) * (0.65 + scroll * 0.35);
-      });
-      break;
-    }
-    case "api": {
-      const sweep = scene.userData.packSweep as THREE.LineSegments | undefined;
-      if (sweep) sweep.position.y = -4 + scroll * 8 + Math.sin(t * 0.6) * 0.4;
-      break;
-    }
-    case "orbit": {
-      const web = scene.userData.orbitWeb as THREE.LineSegments | undefined;
-      const nodes = web?.userData.orbitNodes as number[][] | undefined;
-      if (web && nodes) {
-        const thresh = 10 - scroll * 3;
-        const positions: number[] = [];
-        for (let i = 0; i < nodes.length; i++) {
-          for (let j = i + 1; j < nodes.length; j++) {
-            const dx = nodes[i][0] - nodes[j][0];
-            const dy = nodes[i][1] - nodes[j][1];
-            if (Math.sqrt(dx * dx + dy * dy) < thresh) {
-              positions.push(...nodes[i], ...nodes[j]);
-            }
-          }
-        }
-        web.geometry.dispose();
-        web.geometry = floatGeo(positions);
-        (web.material as THREE.LineBasicMaterial).opacity = op * 0.45 + scroll * 0.2 + Math.sin(t * 1.5) * 0.05;
-      }
-      break;
-    }
-  }
 }
 
 function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, t: number, scroll: number) {
@@ -175,15 +106,21 @@ export function buildFeaturePageScene(
 
   addSignatureBackdrop(variant, scene, palette);
 
+  const advanced = buildAdvancedGraphicCluster(variant, palette);
+  advanced.group.position.z = -2;
+  advanced.group.scale.setScalar(variant === "seeds" ? 1.25 : 1.05);
+  scene.add(advanced.group);
+
   const immersive: ImmersiveScrollScene = buildImmersiveScrollScene(variant, palette);
-  immersive.root.position.z = -6;
+  immersive.root.position.z = -8;
   scene.add(immersive.root);
 
   return Promise.resolve((t: number, scrollOverride?: number) => {
     const scroll = scrollOverride ?? scrollNorm();
     immersive.tick(t, scroll);
+    advanced.tick(t, scroll, mouse);
     tickMotifs(motifs, mouse, t, scroll);
-    tickSignature(variant, scene, t, scroll);
     tickElementInternals(motifs, variant, t, scroll);
+    advanced.group.rotation.y = scroll * Math.PI * 0.5 + t * 0.05;
   });
 }
