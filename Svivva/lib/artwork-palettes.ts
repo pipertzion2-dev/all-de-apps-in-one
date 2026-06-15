@@ -20,7 +20,7 @@ export const GRAPHIC_PALETTES: Record<FeatureId, GraphicPalette> = {
     tertiary: 0xd782b2,
     highlight: 0xc48fd4,
     wire: 0x9b7fd4,
-    lineOpacity: 0.38,
+    lineOpacity: 0.48,
     patternOpacity: 0.22,
   },
   seeds: {
@@ -29,7 +29,7 @@ export const GRAPHIC_PALETTES: Record<FeatureId, GraphicPalette> = {
     tertiary: 0xd4a85a,
     highlight: 0x9b7fd4,
     wire: 0x5a9e6a,
-    lineOpacity: 0.36,
+    lineOpacity: 0.46,
     patternOpacity: 0.2,
   },
   orbit: {
@@ -38,7 +38,7 @@ export const GRAPHIC_PALETTES: Record<FeatureId, GraphicPalette> = {
     tertiary: 0xe8a040,
     highlight: 0x5b8fd4,
     wire: 0x5ba8a0,
-    lineOpacity: 0.34,
+    lineOpacity: 0.44,
     patternOpacity: 0.18,
   },
   security: {
@@ -47,7 +47,7 @@ export const GRAPHIC_PALETTES: Record<FeatureId, GraphicPalette> = {
     tertiary: 0x7b4d9a,
     highlight: 0x9b3a5e,
     wire: 0x5ba8a0,
-    lineOpacity: 0.4,
+    lineOpacity: 0.5,
     patternOpacity: 0.2,
   },
   api: {

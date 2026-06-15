@@ -41,8 +41,8 @@ export function FeatureThreeBackground({ variant }: Props) {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 120);
-    camera.position.z = 12;
+    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 160);
+    camera.position.set(0, 0.8, 10);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.45));
     const key = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -56,9 +56,12 @@ export function FeatureThreeBackground({ variant }: Props) {
     };
     window.addEventListener("mousemove", onMouseMove, { passive: true });
 
-    let tick: (t: number) => void = () => {};
+    let tick: (t: number, scroll?: number) => void = () => {};
     let cancelled = false;
-    buildFeaturePageScene(variant, scene, mouse)
+    const sceneRoot = new THREE.Group();
+    scene.add(sceneRoot);
+
+    buildFeaturePageScene(variant, sceneRoot, mouse)
       .then((fn) => {
         if (!cancelled) tick = fn;
       })
@@ -66,14 +69,35 @@ export function FeatureThreeBackground({ variant }: Props) {
         console.warn("[FeatureThreeBackground] scene build failed:", err);
       });
 
+    const scrollRef = { current: 0 };
+    const onScroll = () => {
+      scrollRef.current = scrollNorm();
+    };
+    const scrollNorm = () => {
+      const main = document.querySelector<HTMLElement>("main.overflow-y-auto");
+      if (main && main.scrollHeight > main.clientHeight + 40) {
+        const max = main.scrollHeight - main.clientHeight;
+        return max > 0 ? Math.min(1, main.scrollTop / max) : 0;
+      }
+      const max = document.body.scrollHeight - window.innerHeight;
+      return max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    onScroll();
+
     let rafId = 0;
     const start = Date.now();
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      tick((Date.now() - start) / 1000);
-      camera.position.x = mouse.x * 0.45;
-      camera.position.y = mouse.y * 0.28;
-      camera.lookAt(mouse.x * 0.2, mouse.y * 0.15, 0);
+      const t = (Date.now() - start) / 1000;
+      const scroll = scrollRef.current;
+      tick(t, scroll);
+      sceneRoot.rotation.y = scroll * Math.PI * 0.65 + Math.sin(t * 0.12) * 0.04;
+      sceneRoot.rotation.x = -0.1 + scroll * 0.22;
+      camera.position.z = 10 - scroll * 5.5;
+      camera.position.y = 0.8 + scroll * 1.2 + mouse.y * 0.22;
+      camera.position.x = mouse.x * 0.5 + Math.sin(t * 0.18 + scroll * 2) * 0.3;
+      camera.lookAt(mouse.x * 0.15, scroll * 0.35 + mouse.y * 0.1, -6);
       renderer.render(scene, camera);
     };
     animate();
@@ -90,6 +114,7 @@ export function FeatureThreeBackground({ variant }: Props) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
@@ -123,7 +148,7 @@ export function FeatureThreeBackground({ variant }: Props) {
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 22%, transparent 72%, hsl(var(--background) / 0.65) 100%)",
+            "linear-gradient(to bottom, hsl(var(--background) / 0.28) 0%, transparent 18%, transparent 75%, hsl(var(--background) / 0.55) 100%)",
         }}
       />
     </>

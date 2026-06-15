@@ -24,7 +24,7 @@ export function SvivvaArtifact() {
   };
 
   return (
-    <section className="w-full flex flex-col items-center gap-0 py-20 px-4 overflow-hidden">
+    <section className="w-full flex flex-col items-center gap-0 pt-16 pb-20 px-4 overflow-visible">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="text-center mb-10 select-none relative z-20">
         <p className="text-[10px] uppercase tracking-[0.35em] mb-3 font-light text-muted-foreground">
@@ -53,9 +53,9 @@ export function SvivvaArtifact() {
       <div
         style={{
           position: "relative",
-          width: "min(460px, 86vw)",
-          height: "min(460px, 86vw)",
-          overflow: "hidden",
+          width: "min(500px, 90vw)",
+          height: "min(500px, 90vw)",
+          overflow: "visible",
           zIndex: 10,
         }}
       >

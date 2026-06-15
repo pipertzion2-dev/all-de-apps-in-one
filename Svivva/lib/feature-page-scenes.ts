@@ -9,8 +9,9 @@ import {
   floatGeo,
   type SeedBranch,
 } from "@/lib/feature-graphic-builders";
+import { buildImmersiveScrollScene, type ImmersiveScrollScene } from "@/lib/feature-immersive-scroll";
 
-export type SceneTick = (t: number) => void;
+export type SceneTick = (t: number, scrollOverride?: number) => void;
 
 export type PlacedMotif = {
   object: THREE.Group;
@@ -25,6 +26,11 @@ export type PlacedMotif = {
 };
 
 function scrollNorm(): number {
+  const main = document.querySelector<HTMLElement>("main.overflow-y-auto");
+  if (main && main.scrollHeight > main.clientHeight + 40) {
+    const max = main.scrollHeight - main.clientHeight;
+    return max > 0 ? Math.min(1, main.scrollTop / max) : 0;
+  }
   const max = document.body.scrollHeight - window.innerHeight;
   return max > 0 ? Math.min(1, window.scrollY / max) : 0;
 }
@@ -46,7 +52,7 @@ function tickMotifs(
   });
 }
 
-function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll: number) {
+function tickSignature(variant: FeatureId, scene: THREE.Object3D, t: number, scroll: number) {
   const palette = getGraphicPalette(variant);
   const op = palette.lineOpacity;
 
@@ -75,12 +81,12 @@ function tickSignature(variant: FeatureId, scene: THREE.Scene, t: number, scroll
       break;
     }
     case "security": {
-      const bob = scene.userData.bobWire as THREE.Group | undefined;
-      bob?.children.forEach((strand, i) => {
-        if (strand instanceof THREE.Group) {
-          strand.position.z = -i * 2 - scroll * 5 + Math.sin(t * 0.5 + i) * 0.25;
-          strand.rotation.y = t * 0.12 + scroll * 0.35;
-        }
+      const rings = scene.userData.securityRings as THREE.LineLoop[] | undefined;
+      rings?.forEach((ring, r) => {
+        const dir = r % 2 === 0 ? 1 : -1;
+        ring.rotation.z = dir * (t * 0.08 + scroll * Math.PI * 0.4);
+        (ring.material as THREE.LineBasicMaterial).opacity =
+          (palette.lineOpacity * (0.5 - r * 0.1)) * (0.65 + scroll * 0.35);
       });
       break;
     }
@@ -142,7 +148,7 @@ function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, t: numb
 
 export function buildFeaturePageScene(
   variant: FeatureId,
-  scene: THREE.Scene,
+  scene: THREE.Object3D,
   mouse: { x: number; y: number },
 ): Promise<SceneTick> {
   const manifest = ARTWORK_MANIFESTS[variant];
@@ -153,7 +159,7 @@ export function buildFeaturePageScene(
     const group = buildGraphicElement(variant, el.id, palette);
     if (!group) continue;
 
-    const scale = el.scale * 0.22;
+    const scale = el.scale * 0.28;
     group.scale.setScalar(scale);
     group.position.set(el.x, el.y, el.z);
     scene.add(group);
@@ -173,8 +179,13 @@ export function buildFeaturePageScene(
 
   addSignatureBackdrop(variant, scene, palette);
 
-  return Promise.resolve((t: number) => {
-    const scroll = scrollNorm();
+  const immersive: ImmersiveScrollScene = buildImmersiveScrollScene(variant, palette);
+  immersive.root.position.z = -6;
+  scene.add(immersive.root);
+
+  return Promise.resolve((t: number, scrollOverride?: number) => {
+    const scroll = scrollOverride ?? scrollNorm();
+    immersive.tick(t, scroll);
     tickMotifs(motifs, mouse, t, scroll);
     tickSignature(variant, scene, t, scroll);
     tickElementInternals(motifs, variant, t, scroll);

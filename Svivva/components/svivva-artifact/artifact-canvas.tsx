@@ -36,10 +36,10 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
     const el = mountRef.current;
     if (!el) return;
 
-    // Render at 1.6× container so rotating cube corners never reach the buffer edge.
+    // Render at 1.85× container so rotating cube corners are never clipped.
     const cW = el.clientWidth || 520;
     const cH = el.clientHeight || 520;
-    const SCALE = 1.6;
+    const SCALE = 1.85;
     const W = Math.round(cW * SCALE);
     const H = Math.round(cH * SCALE);
 

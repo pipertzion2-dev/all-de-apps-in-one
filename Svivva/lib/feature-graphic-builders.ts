@@ -578,7 +578,7 @@ export function buildGraphicElement(
 }
 
 /** Signature backdrop layers — muted so UI cards stay readable. */
-export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, palette: GraphicPalette) {
+export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Object3D, palette: GraphicPalette) {
   const op = palette.lineOpacity;
   switch (variant) {
     case "play": {
@@ -630,16 +630,25 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Scene, pal
       break;
     }
     case "security": {
-      const wireGroup = new THREE.Group();
-      wireGroup.position.z = -7;
-      [-2.5, 0, 2.5].forEach((y, i) => {
-        const strand = buildBarbedWireStrand(20, y, palette.wire, palette.highlight, "x");
-        strand.position.z = -i * 2;
-        strand.userData.isBobWire = true;
-        wireGroup.add(strand);
-      });
-      scene.add(wireGroup);
-      scene.userData.bobWire = wireGroup;
+      const rings: THREE.LineLoop[] = [];
+      for (let r = 0; r < 3; r++) {
+        const radius = 3.5 + r * 2.2;
+        const teeth = 20 + r * 6;
+        const positions = new Float32Array((teeth + 1) * 3);
+        for (let i = 0; i <= teeth; i++) {
+          const a = (i / teeth) * Math.PI * 2;
+          const rr = radius + (i % 2 === 0 ? 0.35 : 0);
+          positions[i * 3] = Math.cos(a) * rr;
+          positions[i * 3 + 1] = Math.sin(a) * rr;
+          positions[i * 3 + 2] = -6;
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const loop = new THREE.LineLoop(geo, lineMat(palette.primary, op * (0.5 - r * 0.1)));
+        scene.add(loop);
+        rings.push(loop);
+      }
+      scene.userData.securityRings = rings;
       break;
     }
     case "api": {
