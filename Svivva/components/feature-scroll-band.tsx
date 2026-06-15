@@ -86,10 +86,10 @@ export function FeatureScrollBand({
 
       heroScene.tick(t, scroll, mouse);
 
-      camera.position.x = mouse.x * 0.9 + Math.sin(t * 0.22 + scroll * 2.4) * 0.55;
-      camera.position.y = 0.35 + mouse.y * 0.35 + scroll * 0.55 + Math.sin(t * 0.18) * 0.12;
-      camera.position.z = 11 - scroll * 6.5;
-      camera.lookAt(mouse.x * 0.25, scroll * 0.35 + mouse.y * 0.15, -3 - scroll * 2);
+      camera.position.x = mouse.x * 0.35;
+      camera.position.y = 0.2 + mouse.y * 0.18 + scroll * 0.28;
+      camera.position.z = 10.5 - scroll * 4.5;
+      camera.lookAt(0, scroll * 0.12, 0);
       renderer.render(scene, camera);
     };
     animate();
