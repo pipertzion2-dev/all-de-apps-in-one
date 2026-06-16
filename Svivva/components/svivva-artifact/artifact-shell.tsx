@@ -14,6 +14,9 @@ const ArtifactCanvas = lazy(() =>
   import("./artifact-canvas").then((m) => ({ default: m.ArtifactCanvas })),
 );
 
+/** Canvas renders at 1.85× the box; pull up following sections without clipping the cube. */
+const CUBE_SCROLL_BLEED = "calc(-0.425 * min(500px, 90vw))";
+
 export function SvivvaArtifact() {
   const router = useRouter();
 
@@ -27,7 +30,8 @@ export function SvivvaArtifact() {
   return (
     <section
       data-svivva-artifact
-      className="w-full flex flex-col items-center gap-0 pt-16 pb-12 px-4 overflow-hidden"
+      className="w-full flex flex-col items-center gap-0 pt-16 pb-20 px-4 overflow-visible"
+      style={{ marginBottom: CUBE_SCROLL_BLEED }}
     >
       <div className="text-center mb-10 select-none relative z-20">
         <p
@@ -55,12 +59,11 @@ export function SvivvaArtifact() {
       </p>
 
       <div
-        data-svivva-artifact-cube
         style={{
           position: "relative",
           width: "min(500px, 90vw)",
           height: "min(500px, 90vw)",
-          overflow: "hidden",
+          overflow: "visible",
           zIndex: 10,
         }}
       >

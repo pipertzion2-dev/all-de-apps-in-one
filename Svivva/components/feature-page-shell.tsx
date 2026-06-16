@@ -42,7 +42,7 @@ export function FeaturePageShell({
     >
       <FeatureScrollToTop />
       <FeatureThreeBg variant={variant} dramatic scope="page" />
-      <div className="relative z-10 px-4 sm:px-6 pb-6">
+      <div className="relative z-10 px-4 sm:px-6 pb-0">
         {showHero ? <FeaturePageHero variant={variant} subtitle={subtitle} /> : null}
         {children}
       </div>
