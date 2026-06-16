@@ -27,8 +27,11 @@ export function SvivvaArtifact() {
   return (
     <section className="w-full flex flex-col items-center gap-0 pt-16 pb-20 px-4 overflow-visible">
       <div className="text-center mb-10 select-none relative z-20">
-        <p className="text-[10px] uppercase tracking-[0.35em] mb-3 font-light text-muted-foreground">
-          Interactive Discovery
+        <p
+          className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
+          style={{ color: "#5BA8A0", letterSpacing: "0.28em" }}
+        >
+          Svivva6
         </p>
         <h2
           className="text-3xl md:text-4xl font-light tracking-tight text-foreground"

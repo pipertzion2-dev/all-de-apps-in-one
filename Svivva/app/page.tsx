@@ -932,7 +932,7 @@ export default function LandingPage() {
         </section>
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
-        {/* ── Svivva Artifact ───────────────────────────────────────────────── */}
+        {/* ── Svivva6 artifact cube ─────────────────────────────────────────── */}
         <div className="relative w-full overflow-visible bg-background pt-4">
           <SvivvaArtifact />
         </div>
