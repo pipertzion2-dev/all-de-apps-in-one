@@ -30,15 +30,17 @@ const PAGE_HEADLINE: Record<FeatureId, [string, string]> = {
 type Props = {
   variant: FeatureId;
   subtitle?: string;
+  /** Skip the large scroll-band canvas — use when the page already has a full-viewport bloom background. */
+  compact?: boolean;
 };
 
-export function FeaturePageHero({ variant, subtitle }: Props) {
+export function FeaturePageHero({ variant, subtitle, compact = false }: Props) {
   const feature = FEATURES.find((f) => f.id === variant) ?? FEATURES[0];
   const stats = PAGE_STATS[variant];
   const [headA, headB] = PAGE_HEADLINE[variant];
 
   return (
-    <section className="relative pt-6 pb-6 sm:pt-8 sm:pb-8 overflow-hidden">
+    <section className={`relative overflow-hidden ${compact ? "pt-4 pb-2 sm:pt-5 sm:pb-3" : "pt-6 pb-6 sm:pt-8 sm:pb-8"}`}>
       <div className="max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
           {stats.map((label) => (
@@ -57,11 +59,13 @@ export function FeaturePageHero({ variant, subtitle }: Props) {
         </div>
       </div>
 
-      <div className="my-8 sm:my-10">
-        <FeatureScrollBand variant={variant} accentColor={feature.accentColor} height={520} />
-      </div>
+      {!compact ? (
+        <div className="my-8 sm:my-10">
+          <FeatureScrollBand variant={variant} accentColor={feature.accentColor} height={520} />
+        </div>
+      ) : null}
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-4 text-center sm:text-left">
+      <div className={`max-w-3xl mx-auto px-4 sm:px-6 space-y-3 text-center sm:text-left ${compact ? "mt-4 sm:mt-5" : ""}`}>
         <h1
           className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
           data-testid={variant === "seeds" ? "text-seeds-title" : undefined}

@@ -122,10 +122,10 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       tick(t, scroll);
       sceneRoot.rotation.y = scroll * Math.PI * 0.35 + Math.sin(t * 0.14) * 0.04;
       sceneRoot.rotation.x = -0.06 + scroll * 0.12;
-      const fly = dramatic ? 2.8 : 2;
+      const fly = variant === "seeds" ? 1.4 : dramatic ? 2.8 : 2;
       const baseZ = dramatic ? 6.5 : 10;
       camera.position.z = Math.max(baseZ - 1.2, baseZ - scroll * fly);
-      camera.position.y = 0.4 + scroll * 0.45 + mouse.y * 0.18;
+      camera.position.y = 0.4 + (variant === "seeds" ? scroll * 0.2 : scroll * 0.45) + mouse.y * 0.18;
       camera.position.x = mouse.x * 0.35 + Math.sin(t * 0.2 + scroll * 1.2) * 0.18;
       camera.lookAt(mouse.x * 0.12, scroll * 0.18 + mouse.y * 0.08, -4);
       renderer.render(scene, camera);

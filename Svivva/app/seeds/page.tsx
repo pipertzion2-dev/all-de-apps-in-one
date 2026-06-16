@@ -634,6 +634,7 @@ export default function SeedsPage() {
     <div
       className="relative bg-background overflow-x-hidden"
       data-feature-page
+      data-seeds-page
     >
       <FeatureScrollToTop />
       <FeatureThreeBg variant="seeds" dramatic scope="page" />
@@ -693,12 +694,16 @@ export default function SeedsPage() {
         </div>
       </nav>
 
-      <main className="relative z-20 bg-transparent pb-0" data-feature-scroll>
+      <main className="relative z-20 bg-transparent pb-0 min-h-0" data-feature-scroll>
         <FeaturePageHero
           variant="seeds"
+          compact
           subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."
         />
-        <div className="max-w-5xl mx-auto px-4 pb-2 space-y-8 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50">
+        <div
+          data-seeds-content
+          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
+        >
           {allSeeds.length > 1 && (
             <div className="flex justify-end">
               <Button
@@ -1035,9 +1040,8 @@ export default function SeedsPage() {
               </div>
             );
           })}
+          <SeedsAdminFooter />
         </div>
-
-        <SeedsAdminFooter />
       </main>
 
       {selectionMode && selectedSeeds.size > 0 ? (
@@ -1174,8 +1178,7 @@ function SeedsAdminFooter() {
   if (!data?.isAdmin) return null;
 
   return (
-    <div className="mt-6 mb-0 px-4">
-      <div className="max-w-5xl mx-auto border-t border-border/50 pt-6">
+    <div className="mt-6 mb-0 pt-6 border-t border-border/50">
         <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
           Admin tools
         </p>
@@ -1267,7 +1270,6 @@ function SeedsAdminFooter() {
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 }
