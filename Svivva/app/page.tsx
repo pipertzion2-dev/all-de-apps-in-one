@@ -41,14 +41,8 @@ import {
   Lock,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { FEATURES as ARTIFACT_FEATURES } from "@/components/svivva-artifact/feature-defs";
-
 const SvivvaArtifact = dynamic(
   () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
-  { ssr: false },
-);
-const FeatureSection = dynamic(
-  () => import("@/components/svivva-artifact").then((m) => m.FeatureSection),
   { ssr: false },
 );
 const features = [
@@ -935,21 +929,6 @@ export default function LandingPage() {
         {/* ── Svivva6 artifact cube ─────────────────────────────────────────── */}
         <div className="relative w-full overflow-visible bg-background pt-4">
           <SvivvaArtifact />
-        </div>
-
-        {/* ── Six feature worlds — scroll-driven Three.js per graphic ─────── */}
-        <div className="relative w-full bg-background border-y border-border/30">
-          <div className="text-center py-12 px-4">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2">
-              Scroll to explore
-            </p>
-            <h2 className="text-2xl md:text-3xl font-light text-foreground tracking-tight">
-              Each feature has its own world
-            </h2>
-          </div>
-          {ARTIFACT_FEATURES.map((feature, i) => (
-            <FeatureSection key={feature.id} feature={feature} index={i} reverse={i % 2 === 1} />
-          ))}
         </div>
 
         <section
