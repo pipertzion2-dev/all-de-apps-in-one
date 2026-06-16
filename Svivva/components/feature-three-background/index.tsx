@@ -50,7 +50,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = dramatic ? 1.45 : 1.15;
+    renderer.toneMappingExposure = dramatic ? 1.25 : 1.05;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
@@ -85,7 +85,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     let tick: (t: number, scroll?: number) => void = () => {};
     let cancelled = false;
     const sceneRoot = new THREE.Group();
-    if (dramatic) sceneRoot.scale.setScalar(variant === "seeds" ? 1.35 : 1.15);
+    if (dramatic) sceneRoot.scale.setScalar(1.05);
     scene.add(sceneRoot);
 
     buildFeaturePageScene(variant, sceneRoot, mouse)
@@ -120,14 +120,14 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
       const t = (Date.now() - start) / 1000;
       const scroll = scrollRef.current;
       tick(t, scroll);
-      sceneRoot.rotation.y = scroll * Math.PI * 0.35 + Math.sin(t * 0.14) * 0.04;
-      sceneRoot.rotation.x = -0.06 + scroll * 0.12;
-      const fly = variant === "seeds" ? 1.4 : dramatic ? 2.8 : 2;
-      const baseZ = dramatic ? 6.5 : 10;
-      camera.position.z = Math.max(baseZ - 1.2, baseZ - scroll * fly);
-      camera.position.y = 0.4 + (variant === "seeds" ? scroll * 0.2 : scroll * 0.45) + mouse.y * 0.18;
-      camera.position.x = mouse.x * 0.35 + Math.sin(t * 0.2 + scroll * 1.2) * 0.18;
-      camera.lookAt(mouse.x * 0.12, scroll * 0.18 + mouse.y * 0.08, -4);
+      sceneRoot.rotation.y = scroll * Math.PI * 0.2 + Math.sin(t * 0.14) * 0.03;
+      sceneRoot.rotation.x = -0.04 + scroll * 0.08;
+      const fly = dramatic ? 1.4 : 1;
+      const baseZ = dramatic ? 7.5 : 10;
+      camera.position.z = Math.max(baseZ - 0.8, baseZ - scroll * fly);
+      camera.position.y = 0.25 + scroll * 0.15 + mouse.y * 0.12;
+      camera.position.x = mouse.x * 0.22 + Math.sin(t * 0.2 + scroll * 0.8) * 0.1;
+      camera.lookAt(mouse.x * 0.08, scroll * 0.1 + mouse.y * 0.05, -6);
       renderer.render(scene, camera);
     };
     animate();

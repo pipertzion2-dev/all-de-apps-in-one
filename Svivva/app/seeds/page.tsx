@@ -51,13 +51,6 @@ import {
 import dynamic from "next/dynamic";
 import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
 
-const FeatureThreeBg = dynamic(
-  () =>
-    import("@/components/feature-three-background").then((m) => ({
-      default: m.FeatureThreeBackground,
-    })),
-  { ssr: false },
-);
 const FeaturePageHero = dynamic(
   () => import("@/components/feature-page-hero").then((m) => m.FeaturePageHero),
   { ssr: false },
@@ -638,7 +631,6 @@ export default function SeedsPage() {
       data-page-shell
     >
       <FeatureScrollToTop />
-      <FeatureThreeBg variant="seeds" dramatic scope="page" />
       <nav className="relative z-30 h-12 border-b border-border/40 bg-background/35 backdrop-blur-md flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -698,7 +690,6 @@ export default function SeedsPage() {
       <main className="relative z-20 bg-transparent pb-0 min-h-0" data-feature-scroll>
         <FeaturePageHero
           variant="seeds"
-          compact
           subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."
         />
         <div
