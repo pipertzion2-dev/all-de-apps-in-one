@@ -62,12 +62,6 @@ export function FeaturePageHero({ variant, subtitle }: Props) {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-4 text-center sm:text-left">
-        <p
-          className="text-[10px] uppercase tracking-[0.35em] font-mono"
-          style={{ color: feature.accentColor }}
-        >
-          — {feature.artworkTitle} —
-        </p>
         <h1
           className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
           data-testid={variant === "seeds" ? "text-seeds-title" : undefined}

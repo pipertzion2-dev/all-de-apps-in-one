@@ -20,7 +20,7 @@ export function FeatureArtworkLayer({ feature, visible }: Props) {
       <div className="relative w-full aspect-square overflow-hidden rounded-2xl">
         <Image
           src={feature.artworkSrc}
-          alt={feature.artworkTitle}
+          alt={feature.name}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover"

@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { FeatureDef, FeatureId } from "./feature-defs";
-import { FeatureScrollBand } from "@/components/feature-scroll-band";
 
 type Props = {
   feature: FeatureDef;
@@ -69,7 +68,7 @@ export function FeatureSection({ feature, index, reverse }: Props) {
       />
 
       <div className="max-w-5xl mx-auto space-y-10">
-        {/* Stats bar — Pyracrypt-style */}
+        {/* Stats bar */}
         <div className="grid grid-cols-3 gap-4 text-center">
           {stats.map((label) => (
             <div key={label} className="space-y-1">
@@ -86,19 +85,10 @@ export function FeatureSection({ feature, index, reverse }: Props) {
           ))}
         </div>
 
-        {/* Scroll-driven 3D band */}
-        <FeatureScrollBand variant={feature.id} accentColor={feature.accentColor} height={380} immersive={false} />
-
         <div
           className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start ${reverse ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1" : ""}`}
         >
           <div className="space-y-5">
-            <p
-              className="text-[10px] uppercase tracking-[0.35em] font-mono"
-              style={{ color: feature.accentColor }}
-            >
-              — {feature.artworkTitle} —
-            </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.1]">
               <span className="text-foreground">{headA}</span>
               <br />
@@ -118,12 +108,10 @@ export function FeatureSection({ feature, index, reverse }: Props) {
               className="text-[10px] uppercase tracking-[0.25em] font-bold font-mono"
               style={{ color: feature.accentColor }}
             >
-              I {feature.motif} motif
+              {feature.motif} motif
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {feature.signatureMotion} — procedural geometry derived from the{" "}
-              <strong className="text-foreground font-medium">{feature.artworkTitle}</strong> graphic,
-              animated as you scroll.
+              {feature.signatureMotion} — layered 3D blooms and camo depth that react as you scroll.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               <span
