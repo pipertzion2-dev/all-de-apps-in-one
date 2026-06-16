@@ -652,6 +652,15 @@ export default function SeedsPage() {
     compilerActive,
   ]);
 
+  const seedVisuals = useMemo(
+    () =>
+      allSeeds.map((s) => ({
+        status: s.status,
+        buildProgress: s.buildProgress ?? 0,
+      })),
+    [allSeeds],
+  );
+
   return (
     <div
       className="relative min-h-0 bg-transparent overflow-x-hidden"
@@ -660,7 +669,7 @@ export default function SeedsPage() {
       data-page-shell
     >
       <FeatureScrollToTop />
-      <SeedsImmersiveScene state={workflowState} />
+      <SeedsImmersiveScene state={workflowState} seeds={seedVisuals} />
       <nav className="relative z-30 h-12 border-b border-border/30 bg-background/20 backdrop-blur-xl flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

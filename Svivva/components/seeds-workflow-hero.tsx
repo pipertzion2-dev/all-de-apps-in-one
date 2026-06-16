@@ -16,12 +16,12 @@ type Props = {
 };
 
 const PHASE_HINT: Record<SeedsWorkflowState["phase"], string> = {
-  idle: "Background: empty workspace — upload a PDF to branch deploy tiles",
-  uploading: "Parsing spec into the monolith…",
-  parsed: `${0} apps branched from your spec — verify, then build`,
-  verifying: "Invariant proofs running across the deploy graph",
-  building: "Data streams active — apps compiling in parallel",
-  complete: "All deploy tiles live — ship or market",
+  idle: "Pipeline idle — upload a PDF spec to start branching",
+  uploading: "Spec ingesting into the parse core…",
+  parsed: `${0} seed pods branched — run invariant verify next`,
+  verifying: "Proof gate active — checks flowing to each branch",
+  building: "Build energy filling each seed pod in parallel",
+  complete: "All pods complete — ready to ship",
 };
 
 function stepStatus(step: SeedsWorkflowStep, state: SeedsWorkflowState): "done" | "active" | "pending" {
@@ -54,7 +54,7 @@ export function SeedsWorkflowHero({ state, onUploadClick, uploading }: Props) {
     state.phase === "parsed"
       ? `${state.seedCount} app${state.seedCount === 1 ? "" : "s"} branched from your spec — verify, then build`
       : state.phase === "building"
-        ? `Building ${state.buildingCount} deploy tile${state.buildingCount === 1 ? "" : "s"}…`
+        ? `Filling ${state.buildingCount} seed pod${state.buildingCount === 1 ? "" : "s"}…`
         : PHASE_HINT[state.phase];
 
   return (

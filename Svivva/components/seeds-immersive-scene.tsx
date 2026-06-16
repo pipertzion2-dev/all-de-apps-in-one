@@ -2,20 +2,26 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { buildSeedsReplitScene } from "@/lib/seeds-replit-scene";
+import {
+  buildSeedsPipelineScene,
+  type SeedPodVisual,
+} from "@/lib/seeds-pipeline-scene";
 import { pageScrollProgress } from "@/lib/feature-scroll-progress";
 import type { SeedsWorkflowState } from "@/lib/seeds-workflow-state";
 
 type Props = {
   state: SeedsWorkflowState;
+  seeds: SeedPodVisual[];
 };
 
-/** Full-page Replit-style workspace — spec monolith + deploy tiles across the entire viewport. */
-export function SeedsImmersiveScene({ state }: Props) {
+/** Full-page spec pipeline — PDF → parse → verify → branched seed pods. */
+export function SeedsImmersiveScene({ state, seeds }: Props) {
   const shellRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef(state);
+  const seedsRef = useRef(seeds);
   stateRef.current = state;
+  seedsRef.current = seeds;
 
   useEffect(() => {
     const el = mountRef.current;
@@ -35,37 +41,30 @@ export function SeedsImmersiveScene({ state }: Props) {
     renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.28;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full pointer-events-none";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x05080c, 0.045);
+    scene.fog = new THREE.FogExp2(0x060a10, 0.038);
 
-    const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 200);
-    camera.position.set(0, 1.2, 11);
+    const camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 120);
+    camera.position.set(0, 0.4, 13);
 
-    scene.add(new THREE.AmbientLight(0x8aa4b8, 0.45));
-    const key = new THREE.DirectionalLight(0xffffff, 0.85);
-    key.position.set(5, 8, 10);
+    scene.add(new THREE.AmbientLight(0x8aa4b8, 0.42));
+    const key = new THREE.DirectionalLight(0xffffff, 0.8);
+    key.position.set(4, 6, 10);
     scene.add(key);
-    const tealLight = new THREE.PointLight(0x5ba8a0, 1.4, 40);
-    tealLight.position.set(-4, 3, 6);
+    const tealLight = new THREE.PointLight(0x5ba8a0, 1.2, 35);
+    tealLight.position.set(-3, 2, 5);
     scene.add(tealLight);
-    const burgLight = new THREE.PointLight(0x6b2c4a, 0.9, 35);
-    burgLight.position.set(5, 1, 2);
+    const burgLight = new THREE.PointLight(0x6b2c4a, 0.75, 30);
+    burgLight.position.set(4, 0, 3);
     scene.add(burgLight);
 
-    const replitScene = buildSeedsReplitScene();
-    scene.add(replitScene.root);
-
-    const mouse = { x: 0, y: 0 };
-    const onMouseMove = (e: MouseEvent) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -((e.clientY / window.innerHeight) * 2 - 1);
-    };
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    const pipeline = buildSeedsPipelineScene();
+    scene.add(pipeline.root);
 
     const scrollRef = { current: 0 };
     const onScroll = () => {
@@ -80,14 +79,12 @@ export function SeedsImmersiveScene({ state }: Props) {
       raf = requestAnimationFrame(animate);
       const t = (Date.now() - start) / 1000;
       const scroll = scrollRef.current;
-      const s = stateRef.current;
 
-      replitScene.tick(t, s, mouse, scroll);
+      pipeline.tick(t, stateRef.current, seedsRef.current, scroll);
 
-      camera.position.x = mouse.x * 0.55 + Math.sin(t * 0.12) * 0.08;
-      camera.position.y = 1.1 + mouse.y * 0.35 - scroll * 1.8;
-      camera.position.z = 10.5 - scroll * 2.5;
-      camera.lookAt(mouse.x * 0.4, scroll * -0.5, -2);
+      camera.position.z = 13 - scroll * 1.6;
+      camera.position.y = 0.35 - scroll * 0.35;
+      camera.lookAt(0.5, scroll * -0.2, 0);
       renderer.render(scene, camera);
     };
     animate();
@@ -103,7 +100,6 @@ export function SeedsImmersiveScene({ state }: Props) {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("resize", resize);
       renderer.dispose();
@@ -123,9 +119,9 @@ export function SeedsImmersiveScene({ state }: Props) {
         className="absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 120% 80% at 50% 20%, rgba(91,168,160,0.12) 0%, transparent 55%)",
-            "radial-gradient(ellipse 80% 60% at 80% 70%, rgba(107,44,74,0.1) 0%, transparent 50%)",
-            "linear-gradient(180deg, rgba(5,8,12,0.2) 0%, rgba(5,8,12,0.65) 100%)",
+            "radial-gradient(ellipse 100% 70% at 35% 45%, rgba(91,168,160,0.1) 0%, transparent 55%)",
+            "radial-gradient(ellipse 70% 50% at 75% 55%, rgba(107,44,74,0.08) 0%, transparent 50%)",
+            "linear-gradient(180deg, rgba(6,10,16,0.15) 0%, rgba(6,10,16,0.6) 100%)",
           ].join(", "),
         }}
       />
