@@ -155,7 +155,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   return (
     <div
       ref={shellRef}
-      className={`pointer-events-none z-0 overflow-hidden bg-background ${positionClass}`}
+      className={`pointer-events-none z-0 overflow-hidden bg-transparent ${positionClass}`}
       aria-hidden
       data-svivva-feature-bg={variant}
     >

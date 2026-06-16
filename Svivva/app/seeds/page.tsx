@@ -703,7 +703,7 @@ export default function SeedsPage() {
         />
         <div
           data-seeds-content
-          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-card/72 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
+          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-card/50 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
         >
           {allSeeds.length > 1 && (
             <div className="flex justify-end">
