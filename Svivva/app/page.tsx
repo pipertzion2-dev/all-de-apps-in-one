@@ -266,7 +266,11 @@ export default function LandingPage() {
   const halfH = vpHeight / 2;
 
   return (
-    <div ref={containerRef} className="min-h-screen w-full bg-background overflow-x-hidden">
+    <div
+      ref={containerRef}
+      data-landing-page
+      className="w-full bg-background overflow-x-hidden"
+    >
       {!flipComplete && (
         <div
           className="fixed inset-0"
@@ -927,7 +931,7 @@ export default function LandingPage() {
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
         {/* ── Svivva6 artifact cube ─────────────────────────────────────────── */}
-        <div className="relative w-full overflow-visible bg-background pt-4">
+        <div className="relative w-full overflow-hidden bg-background pt-4">
           <SvivvaArtifact />
         </div>
 
@@ -1861,7 +1865,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <footer className="border-t border-white/10 py-8 sm:py-12">
+        <footer className="border-t border-white/10 py-8 sm:py-12 pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="space-y-4 col-span-2 md:col-span-1">

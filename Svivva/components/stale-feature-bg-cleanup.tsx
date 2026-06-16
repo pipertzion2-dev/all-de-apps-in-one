@@ -9,6 +9,11 @@ function purgeLeakedLayers() {
       "body > canvas, body > div.fixed.inset-0, body > div[aria-hidden].fixed, body > [data-svivva-feature-bg]",
     )
     .forEach((el) => el.remove());
+
+  document.querySelectorAll("body > canvas").forEach((node) => {
+    const canvas = node as HTMLCanvasElement;
+    if (canvas.height > window.innerHeight * 1.25) canvas.remove();
+  });
 }
 
 /**

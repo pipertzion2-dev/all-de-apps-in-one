@@ -36,8 +36,9 @@ export function FeaturePageShell({
 }: Props) {
   return (
     <div
-      className={`relative bg-background overflow-x-hidden ${className}`}
+      className={`relative min-h-0 bg-background overflow-x-hidden ${className}`}
       data-feature-page
+      data-page-shell
     >
       <FeatureScrollToTop />
       <FeatureThreeBg variant={variant} dramatic scope="page" />

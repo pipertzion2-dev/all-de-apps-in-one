@@ -25,7 +25,10 @@ export function SvivvaArtifact() {
   };
 
   return (
-    <section className="w-full flex flex-col items-center gap-0 pt-16 pb-20 px-4 overflow-visible">
+    <section
+      data-svivva-artifact
+      className="w-full flex flex-col items-center gap-0 pt-16 pb-12 px-4 overflow-hidden"
+    >
       <div className="text-center mb-10 select-none relative z-20">
         <p
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
@@ -52,11 +55,12 @@ export function SvivvaArtifact() {
       </p>
 
       <div
+        data-svivva-artifact-cube
         style={{
           position: "relative",
           width: "min(500px, 90vw)",
           height: "min(500px, 90vw)",
-          overflow: "visible",
+          overflow: "hidden",
           zIndex: 10,
         }}
       >

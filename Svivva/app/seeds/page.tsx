@@ -632,9 +632,10 @@ export default function SeedsPage() {
 
   return (
     <div
-      className="relative bg-background overflow-x-hidden"
+      className="relative min-h-0 bg-background overflow-x-hidden"
       data-feature-page
       data-seeds-page
+      data-page-shell
     >
       <FeatureScrollToTop />
       <FeatureThreeBg variant="seeds" dramatic scope="page" />
