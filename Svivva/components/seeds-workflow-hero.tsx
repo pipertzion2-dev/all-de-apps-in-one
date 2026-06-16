@@ -1,25 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Upload, ShieldCheck, Layers, Loader2, ChevronRight } from "lucide-react";
+import { Upload, ShieldCheck, Layers, Loader2 } from "lucide-react";
 import {
   SEEDS_WORKFLOW_STEPS,
   type SeedsWorkflowState,
   type SeedsWorkflowStep,
 } from "@/lib/seeds-workflow-state";
 
-const SeedsInteractiveCanvas = dynamic(
-  () => import("@/components/seeds-interactive-canvas").then((m) => m.SeedsInteractiveCanvas),
-  { ssr: false },
-);
-
 type Props = {
   state: SeedsWorkflowState;
   onUploadClick: () => void;
   uploading: boolean;
-  onPodClick?: (podIndex: number) => void;
+};
+
+const PHASE_HINT: Record<SeedsWorkflowState["phase"], string> = {
+  idle: "Background: empty workspace — upload a PDF to branch deploy tiles",
+  uploading: "Parsing spec into the monolith…",
+  parsed: `${0} apps branched from your spec — verify, then build`,
+  verifying: "Invariant proofs running across the deploy graph",
+  building: "Data streams active — apps compiling in parallel",
+  complete: "All deploy tiles live — ship or market",
 };
 
 function stepStatus(step: SeedsWorkflowStep, state: SeedsWorkflowState): "done" | "active" | "pending" {
@@ -38,29 +40,27 @@ function stepStatus(step: SeedsWorkflowStep, state: SeedsWorkflowState): "done" 
             ? 0
             : -1;
 
-  if (state.activeStep === step) return "active";
   if (stepIdx < phaseIdx) return "done";
   if (stepIdx === phaseIdx) return "active";
   return "pending";
 }
 
-export function SeedsWorkflowHero({ state, onUploadClick, uploading, onPodClick }: Props) {
-  const [focusedStep, setFocusedStep] = useState<SeedsWorkflowStep>("upload");
-  const displayState = { ...state, activeStep: focusedStep };
-
+export function SeedsWorkflowHero({ state, onUploadClick, uploading }: Props) {
   const scrollTo = (target: string) => {
     document.querySelector(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleStep = (step: (typeof SEEDS_WORKFLOW_STEPS)[number]) => {
-    setFocusedStep(step.id);
-    scrollTo(step.scrollTarget);
-  };
+  const hint =
+    state.phase === "parsed"
+      ? `${state.seedCount} app${state.seedCount === 1 ? "" : "s"} branched from your spec — verify, then build`
+      : state.phase === "building"
+        ? `Building ${state.buildingCount} deploy tile${state.buildingCount === 1 ? "" : "s"}…`
+        : PHASE_HINT[state.phase];
 
   return (
-    <section className="relative pt-5 pb-6 sm:pt-6 sm:pb-8" data-seeds-workflow-hero>
-      <div className="max-w-5xl mx-auto px-4 space-y-5">
-        <div className="text-center sm:text-left space-y-2">
+    <section className="relative pt-6 pb-4 sm:pt-8 sm:pb-5" data-seeds-workflow-hero>
+      <div className="max-w-5xl mx-auto px-4 space-y-4">
+        <div className="space-y-2">
           <h1
             className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]"
             data-testid="text-seeds-title"
@@ -68,109 +68,74 @@ export function SeedsWorkflowHero({ state, onUploadClick, uploading, onPodClick 
             <span className="text-foreground">ONE SPEC.</span>{" "}
             <span className="seeds-holo-text">MANY APPS.</span>
           </h1>
-          <p className="text-sm text-muted-foreground font-mono max-w-xl">
-            The cluster mirrors your pipeline — upload branches into pods, verify locks the spec, build
-            deploys each app.
-          </p>
+          <p className="text-sm text-muted-foreground font-mono max-w-2xl">{hint}</p>
         </div>
 
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,1.1fr)] gap-4 lg:gap-6 items-stretch">
-          <div className="flex flex-col gap-2 order-2 lg:order-1">
-            {SEEDS_WORKFLOW_STEPS.map((step, i) => {
-              const status = stepStatus(step.id, { ...displayState, activeStep: focusedStep });
-              const isActive = focusedStep === step.id;
-              return (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => handleStep(step)}
-                  className={`group text-left rounded-xl border px-4 py-3 transition-all ${
-                    isActive
-                      ? "border-[#5BA8A0]/60 bg-[#5BA8A0]/10 shadow-sm"
-                      : "border-border/50 bg-card/30 hover:border-[#5BA8A0]/35 hover:bg-card/50"
+        <div className="flex flex-wrap items-center gap-2">
+          {SEEDS_WORKFLOW_STEPS.map((step, i) => {
+            const status = stepStatus(step.id, state);
+            return (
+              <button
+                key={step.id}
+                type="button"
+                onClick={() => scrollTo(step.scrollTarget)}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  status === "active"
+                    ? "border-[#5BA8A0]/70 bg-[#5BA8A0]/15 text-foreground"
+                    : status === "done"
+                      ? "border-[#5BA8A0]/40 bg-[#5BA8A0]/08 text-[#5BA8A0]"
+                      : "border-border/50 bg-background/25 text-muted-foreground hover:border-[#5BA8A0]/35"
+                }`}
+                data-testid={`seeds-workflow-step-${step.id}`}
+              >
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                    status === "done"
+                      ? "bg-[#5BA8A0] text-white"
+                      : status === "active"
+                        ? "bg-[#6B2C4A] text-white"
+                        : "bg-muted text-muted-foreground"
                   }`}
-                  data-testid={`seeds-workflow-step-${step.id}`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
-                        status === "done"
-                          ? "bg-[#5BA8A0] text-white"
-                          : status === "active"
-                            ? "bg-[#6B2C4A] text-white"
-                            : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {status === "done" ? "✓" : i + 1}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-sm text-foreground">{step.label}</p>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{step.detail}</p>
-                      {step.id === "upload" && state.seedCount > 0 && (
-                        <p className="text-[10px] font-mono text-[#5BA8A0] mt-1">
-                          {state.seedCount} seed{state.seedCount === 1 ? "" : "s"} parsed
-                        </p>
-                      )}
-                      {step.id === "build" && state.builtCount > 0 && (
-                        <p className="text-[10px] font-mono text-green-500 mt-1">
-                          {state.builtCount} built
-                          {state.buildingCount > 0 ? ` · ${state.buildingCount} in progress` : ""}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+                  {status === "done" ? "✓" : i + 1}
+                </span>
+                {step.label}
+              </button>
+            );
+          })}
 
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                size="sm"
-                className="gap-2 bg-[#5BA8A0] flex-1 sm:flex-none"
-                onClick={onUploadClick}
-                disabled={uploading}
-                data-testid="button-hero-upload-pdf"
-              >
-                {uploading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
-                {uploading ? "Parsing…" : "Upload PDF"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-2 flex-1 sm:flex-none"
-                onClick={() => handleStep(SEEDS_WORKFLOW_STEPS[1])}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Verify
-              </Button>
-              {state.seedCount > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-2 flex-1 sm:flex-none"
-                  onClick={() => handleStep(SEEDS_WORKFLOW_STEPS[2])}
-                >
-                  <Layers className="w-4 h-4" />
-                  View seeds
-                </Button>
-              )}
-            </div>
-          </div>
+          <div className="w-px h-6 bg-border/60 mx-1 hidden sm:block" />
 
-          <div className="order-1 lg:order-2 min-h-[280px] sm:min-h-[340px] lg:min-h-[380px]">
-            <SeedsInteractiveCanvas
-              state={displayState}
-              onPodClick={onPodClick}
-              className="h-full min-h-[280px] sm:min-h-[340px] lg:min-h-[380px]"
-            />
-          </div>
+          <Button
+            size="sm"
+            className="gap-2 bg-[#5BA8A0] h-8"
+            onClick={onUploadClick}
+            disabled={uploading}
+            data-testid="button-hero-upload-pdf"
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {uploading ? "Parsing…" : "Upload PDF"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2 h-8"
+            onClick={() => scrollTo(SEEDS_WORKFLOW_STEPS[1].scrollTarget)}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Verify
+          </Button>
+          {state.seedCount > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2 h-8"
+              onClick={() => scrollTo(SEEDS_WORKFLOW_STEPS[2].scrollTarget)}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              {state.seedCount} seed{state.seedCount === 1 ? "" : "s"}
+            </Button>
+          )}
         </div>
       </div>
     </section>

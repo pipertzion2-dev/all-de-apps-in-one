@@ -56,6 +56,10 @@ const SeedsWorkflowHero = dynamic(
   () => import("@/components/seeds-workflow-hero").then((m) => m.SeedsWorkflowHero),
   { ssr: false },
 );
+const SeedsImmersiveScene = dynamic(
+  () => import("@/components/seeds-immersive-scene").then((m) => m.SeedsImmersiveScene),
+  { ssr: false },
+);
 
 interface SeedSession {
   id: string;
@@ -490,12 +494,10 @@ export default function SeedsPage() {
   const [promptBarOpen, setPromptBarOpen] = useState(false);
   const [compilerActive, setCompilerActive] = useState(false);
 
-  // WebGL backgrounds can leak an opaque black compositor layer over this page.
+  // Purge leaked WebGL layers attached outside the Seeds page shell.
   useEffect(() => {
     document
-      .querySelectorAll(
-        "body > canvas, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
+      .querySelectorAll("body > canvas, body > [data-svivva-feature-bg]")
       .forEach((el) => el.remove());
   }, []);
 
@@ -650,15 +652,6 @@ export default function SeedsPage() {
     compilerActive,
   ]);
 
-  const handlePodClick = (podIndex: number) => {
-    const seed = allSeeds[podIndex];
-    if (seed) {
-      document.getElementById(`seed-card-${seed.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    document.getElementById("seeds-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
     <div
       className="relative min-h-0 bg-transparent overflow-x-hidden"
@@ -667,7 +660,8 @@ export default function SeedsPage() {
       data-page-shell
     >
       <FeatureScrollToTop />
-      <nav className="relative z-30 h-12 border-b border-border/40 bg-background/35 backdrop-blur-md flex-shrink-0">
+      <SeedsImmersiveScene state={workflowState} />
+      <nav className="relative z-30 h-12 border-b border-border/30 bg-background/20 backdrop-blur-xl flex-shrink-0">
         <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
@@ -728,11 +722,10 @@ export default function SeedsPage() {
           state={workflowState}
           uploading={uploading || uploadMutation.isPending}
           onUploadClick={() => fileInputRef.current?.click()}
-          onPodClick={handlePodClick}
         />
         <div
           data-seeds-content
-          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-card/40 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
+          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-background/20 [&_.border]:backdrop-blur-xl [&_.border]:border-border/40 [&_.rounded-2xl]:bg-background/15"
           data-feature-content
         >
           {allSeeds.length > 1 && (

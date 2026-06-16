@@ -32,7 +32,7 @@ export function deriveSeedsWorkflowState(input: SeedsWorkflowInput): SeedsWorkfl
   else if (input.seedCount > 0 && input.builtCount === input.seedCount) phase = "complete";
   else if (input.seedCount > 0) phase = "parsed";
 
-  const activePods = Math.min(4, Math.max(0, input.seedCount));
+  const activePods = Math.min(8, Math.max(0, input.seedCount));
 
   return { ...input, phase, activePods };
 }
