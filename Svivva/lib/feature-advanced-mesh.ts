@@ -39,62 +39,125 @@ function tubeAlong(curve: THREE.Curve<THREE.Vector3>, color: number, radius = 0.
 
 function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
-  const meshes: THREE.Mesh[] = [];
+  const panels: THREE.Group[] = [];
 
-  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 2), glass(p.tertiary, { emissive: 0.35 }));
+  // Music staff — solid thin bars (SETTLE DOWN header)
+  for (let s = 0; s < 5; s++) {
+    const staff = new THREE.Mesh(
+      new THREE.BoxGeometry(13.5, 0.035, 0.025),
+      metal(s % 2 === 0 ? p.primary : p.highlight, 0.28),
+    );
+    staff.position.set(0, 2.35 - s * 0.52, -1.8);
+    group.add(staff);
+  }
+
+  // Central spec core — glass dodecahedron seed
+  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(1.05, 2), glass(p.tertiary, { emissive: 0.42, transmission: 0.62 }));
+  core.position.set(0, 0.1, 0.4);
   group.add(core);
-  meshes.push(core);
 
-  const positions = [
-    [-2.4, 1.6, -0.5],
-    [2.2, 1.4, -0.8],
-    [-2.1, -1.5, -0.3],
-    [2.4, -1.3, -0.6],
+  const innerCore = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.42, 1),
+    glass(p.highlight, { emissive: 0.55, transmission: 0.35, metalness: 0.65 }),
+  );
+  innerCore.position.set(0, 0.1, 0.4);
+  group.add(innerCore);
+
+  // Four satellite seed pods
+  const positions: [number, number, number][] = [
+    [-2.55, 1.55, -0.35],
+    [2.45, 1.35, -0.55],
+    [-2.35, -1.45, -0.2],
+    [2.55, -1.25, -0.45],
   ];
   const colors = [p.primary, p.highlight, p.secondary, p.wire];
+  const motifs: Array<"gold" | "purple" | "grain" | "courtyard"> = ["gold", "purple", "grain", "courtyard"];
 
   positions.forEach(([x, y, z], i) => {
-    const pod = new THREE.Mesh(new THREE.IcosahedronGeometry(0.72, 2), glass(colors[i], { transmission: 0.52 }));
-    pod.position.set(x, y, z);
-    group.add(pod);
-    meshes.push(pod);
+    const podGroup = new THREE.Group();
+
+    const pod = new THREE.Mesh(new THREE.IcosahedronGeometry(0.78, 2), glass(colors[i], { transmission: 0.55, emissive: 0.32 }));
+    podGroup.add(pod);
+
+    const bud = new THREE.Mesh(
+      new THREE.SphereGeometry(0.22, 14, 12),
+      glass(p.tertiary, { transmission: 0.48, emissive: 0.38 }),
+    );
+    bud.position.set(0, 0.35, 0.12);
+    podGroup.add(bud);
 
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0, 0.2),
-      new THREE.Vector3(x * 0.35, y * 0.35, 0.1),
-      new THREE.Vector3(x * 0.75, y * 0.75, -0.1),
+      new THREE.Vector3(0, 0.1, 0.25),
+      new THREE.Vector3(x * 0.3, y * 0.3 + 0.1, 0.05),
+      new THREE.Vector3(x * 0.7, y * 0.7, -0.05),
       new THREE.Vector3(x, y, z),
     ]);
-    const stem = tubeAlong(curve, p.primary, 0.045, 48);
+    const stem = tubeAlong(curve, p.primary, 0.052, 52);
     group.add(stem);
-    meshes.push(stem);
+
+    // Collage frame panel behind each pod
+    const frameGroup = new THREE.Group();
+    const frameBody = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 1.65, 0.1),
+      glass(colors[i], { transmission: 0.42, metalness: 0.52 }),
+    );
+    frameGroup.add(frameBody);
+
+    const frameRim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.55, 0.04, 8, 24),
+      metal(p.highlight, 0.15),
+    );
+    frameRim.position.z = 0.08;
+    if (motifs[i] === "purple") frameRim.scale.set(1, 1.35, 1);
+    frameGroup.add(frameRim);
+
+    const accent =
+      motifs[i] === "grain"
+        ? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.04), metal(p.secondary, 0.2))
+        : new THREE.Mesh(new THREE.OctahedronGeometry(0.28, 0), glass(p.wire, { transmission: 0.5 }));
+    accent.position.set(0, motifs[i] === "courtyard" ? -0.35 : 0, 0.1);
+    frameGroup.add(accent);
+
+    frameGroup.position.set(x * 0.55, y * 0.55, z - 1.1);
+    frameGroup.rotation.z = Math.atan2(y, x) * 0.15;
+    group.add(frameGroup);
+    panels.push(frameGroup);
+
+    podGroup.position.set(x, y, z);
+    group.add(podGroup);
   });
 
-  const particleGeo = new THREE.SphereGeometry(0.08, 8, 8);
-  const particleMat = glass(p.secondary, { transmission: 0.65, emissive: 0.18 });
-  const count = 36;
+  // Orbiting spec particles
+  const particleGeo = new THREE.SphereGeometry(0.09, 10, 10);
+  const particleMat = glass(p.secondary, { transmission: 0.68, emissive: 0.22 });
+  const count = 42;
   const inst = new THREE.InstancedMesh(particleGeo, particleMat, count);
   const dummy = new THREE.Object3D();
   for (let i = 0; i < count; i++) {
     const a = (i / count) * Math.PI * 2;
-    const r = 1.2 + (i % 5) * 0.35;
-    dummy.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.7, (i % 3) * 0.2 - 0.2);
-    dummy.scale.setScalar(0.6 + (i % 4) * 0.15);
+    const r = 1.35 + (i % 5) * 0.38;
+    dummy.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.72, (i % 3) * 0.22 - 0.15);
+    dummy.scale.setScalar(0.65 + (i % 4) * 0.14);
     dummy.updateMatrix();
     inst.setMatrixAt(i, dummy.matrix);
   }
   inst.instanceMatrix.needsUpdate = true;
   group.add(inst);
 
-  const tick = (t: number, scroll: number) => {
-    core.rotation.y = t * 0.35 + scroll * 1.2;
-    core.rotation.x = Math.sin(t * 0.4) * 0.15;
-    meshes.forEach((m, i) => {
-      if (i === 0) return;
-      m.rotation.y = t * 0.25 + i * 0.4 + scroll * 0.8;
-      m.position.z += Math.sin(t * 0.8 + i) * 0.0008;
+  const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
+    const mx = mouse?.x ?? 0;
+    const my = mouse?.y ?? 0;
+    core.rotation.y = t * 0.35 + scroll * 1.2 + mx * 0.15;
+    core.rotation.x = Math.sin(t * 0.4) * 0.15 + my * 0.08;
+    innerCore.rotation.y = -t * 0.5 - scroll * 0.8;
+    innerCore.scale.setScalar(1 + Math.sin(t * 0.7) * 0.06 + scroll * 0.08);
+    panels.forEach((panel, i) => {
+      panel.rotation.y = Math.sin(t * 0.25 + i) * 0.08 + scroll * 0.2;
+      panel.position.z += Math.sin(t * 0.5 + i * 1.2) * 0.002;
     });
-    inst.rotation.z = t * 0.08 + scroll * 0.4;
+    inst.rotation.z = t * 0.1 + scroll * 0.45;
+    group.rotation.y = mx * 0.04;
+    group.rotation.x = my * 0.03;
   };
 
   return { group, tick };

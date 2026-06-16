@@ -40,7 +40,7 @@ export function FeatureScrollBand({
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.55;
+    renderer.toneMappingExposure = 1.65;
     const canvas = renderer.domElement;
     canvas.style.cssText = "display:block;width:100%;height:100%;touch-action:none";
     el.appendChild(canvas);

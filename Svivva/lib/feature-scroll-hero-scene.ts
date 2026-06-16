@@ -1,14 +1,14 @@
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import type { GraphicPalette } from "@/lib/artwork-palettes";
-import { buildCubeGraphicScene } from "@/lib/feature-graphic-scene";
+import { buildAdvancedHeroScene } from "@/lib/feature-advanced-hero-scene";
 
 export type ScrollHeroScene = {
   root: import("three").Group;
   tick: (t: number, scroll: number, mouse: { x: number; y: number }) => void;
 };
 
-/** Hero scroll band — graphic-faithful motifs + immersive depth (Pyracrypt-style). */
-export function buildGraphicScrollHeroScene(variant: FeatureId, _palette: GraphicPalette): ScrollHeroScene {
-  const graphic = buildCubeGraphicScene(variant, "hero");
-  return { root: graphic.root, tick: graphic.tick };
+/** Hero scroll band — advanced glass/metal meshes + bloom petals (not wireframe lines). */
+export function buildGraphicScrollHeroScene(variant: FeatureId, palette: GraphicPalette): ScrollHeroScene {
+  const hero = buildAdvancedHeroScene(variant, palette);
+  return { root: hero.root, tick: hero.tick };
 }

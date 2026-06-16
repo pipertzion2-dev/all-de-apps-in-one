@@ -50,7 +50,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = dramatic ? 1.25 : 1.05;
+    renderer.toneMappingExposure = dramatic ? 1.38 : 1.12;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
