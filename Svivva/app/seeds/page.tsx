@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
@@ -50,9 +50,10 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
+import { deriveSeedsWorkflowState } from "@/lib/seeds-workflow-state";
 
-const FeaturePageHero = dynamic(
-  () => import("@/components/feature-page-hero").then((m) => m.FeaturePageHero),
+const SeedsWorkflowHero = dynamic(
+  () => import("@/components/seeds-workflow-hero").then((m) => m.SeedsWorkflowHero),
   { ssr: false },
 );
 
@@ -134,7 +135,8 @@ function SeedCard({
 
   return (
     <Card
-      className={`transition-all duration-300 ${selected ? "ring-2 ring-[#5BA8A0] bg-[#5BA8A0]/5" : ""}`}
+      id={`seed-card-${seed.id}`}
+      className={`transition-all duration-300 scroll-mt-28 ${selected ? "ring-2 ring-[#5BA8A0] bg-[#5BA8A0]/5" : ""}`}
       data-testid={`card-seed-${seed.id}`}
     >
       <CardContent className="p-5 space-y-4">
@@ -486,6 +488,7 @@ export default function SeedsPage() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [multiPrompt, setMultiPrompt] = useState("");
   const [promptBarOpen, setPromptBarOpen] = useState(false);
+  const [compilerActive, setCompilerActive] = useState(false);
 
   // WebGL backgrounds can leak an opaque black compositor layer over this page.
   useEffect(() => {
@@ -623,6 +626,39 @@ export default function SeedsPage() {
   const allSeeds = data?.seeds || [];
   const marketingPagesBySeed = data?.marketingPagesBySeed || {};
 
+  const workflowState = useMemo(() => {
+    const building = allSeeds.filter((s) => s.status === "building" || s.status === "queued");
+    const builtCount = allSeeds.filter((s) => s.status === "complete").length;
+    const avgBuildProgress =
+      allSeeds.length > 0
+        ? allSeeds.reduce((sum, s) => sum + (s.buildProgress ?? 0), 0) / allSeeds.length / 100
+        : 0;
+
+    return deriveSeedsWorkflowState({
+      uploading: uploading || uploadMutation.isPending,
+      seedCount: allSeeds.length,
+      builtCount,
+      buildingCount: building.length,
+      avgBuildProgress,
+      compiling: compilerActive,
+      activeStep: "upload",
+    });
+  }, [
+    allSeeds,
+    uploading,
+    uploadMutation.isPending,
+    compilerActive,
+  ]);
+
+  const handlePodClick = (podIndex: number) => {
+    const seed = allSeeds[podIndex];
+    if (seed) {
+      document.getElementById(`seed-card-${seed.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    document.getElementById("seeds-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div
       className="relative min-h-0 bg-transparent overflow-x-hidden"
@@ -688,9 +724,11 @@ export default function SeedsPage() {
       </nav>
 
       <main className="relative z-20 bg-transparent pb-0 min-h-0" data-feature-scroll>
-        <FeaturePageHero
-          variant="seeds"
-          subtitle="Upload a structured PDF blueprint and generate multiple production-ready applications simultaneously."
+        <SeedsWorkflowHero
+          state={workflowState}
+          uploading={uploading || uploadMutation.isPending}
+          onUploadClick={() => fileInputRef.current?.click()}
+          onPodClick={handlePodClick}
         />
         <div
           data-seeds-content
@@ -721,7 +759,7 @@ export default function SeedsPage() {
             </div>
           )}
 
-          <SeedsInvariantCompiler />
+          <SeedsInvariantCompiler onCompilingChange={setCompilerActive} />
 
           {/* Marketing funnel shortcut banner */}
           <a
@@ -754,7 +792,10 @@ export default function SeedsPage() {
             </div>
           </a>
 
-          <Card className="border-dashed border-2 border-border/70 hover:border-[#5BA8A0]/50 transition-colors">
+          <Card
+            id="seeds-upload"
+            className="border-dashed border-2 border-border/70 hover:border-[#5BA8A0]/50 transition-colors scroll-mt-24"
+          >
             <CardContent className="p-8 text-center space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-[#5BA8A0]/10 flex items-center justify-center mx-auto">
                 <Upload className="w-8 h-8 text-[#5BA8A0]" />
@@ -939,6 +980,7 @@ export default function SeedsPage() {
             </Card>
           )}
 
+          <div id="seeds-list" className="space-y-6 scroll-mt-24">
           {sessions.map((session) => {
             const sessionSeeds = allSeeds.filter((s) => s.sessionId === session.id);
             const allParsed = sessionSeeds.every((s) => s.status === "parsed");
@@ -1033,6 +1075,7 @@ export default function SeedsPage() {
               </div>
             );
           })}
+          </div>
           <SeedsAdminFooter />
         </div>
       </main>

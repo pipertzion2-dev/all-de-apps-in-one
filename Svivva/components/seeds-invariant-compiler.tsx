@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -260,7 +260,11 @@ function ViolationCard({
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export default function SeedsInvariantCompiler() {
+export default function SeedsInvariantCompiler({
+  onCompilingChange,
+}: {
+  onCompilingChange?: (compiling: boolean) => void;
+} = {}) {
   const [spec, setSpec] = useState("");
   const [apps, setApps] = useState<GeneratedApp[]>([{ name: "", description: "", features: [] }]);
   const [selectedTypes, setSelectedTypes] = useState<Set<InvariantType>>(
@@ -270,6 +274,10 @@ export default function SeedsInvariantCompiler() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompilerResult | null>(null);
+
+  useEffect(() => {
+    onCompilingChange?.(loading);
+  }, [loading, onCompilingChange]);
 
   const toggleType = (t: InvariantType) => {
     setSelectedTypes((prev) => {
@@ -336,7 +344,10 @@ export default function SeedsInvariantCompiler() {
   const appNames = apps.filter((a) => a.name.trim()).map((a) => a.name);
 
   return (
-    <div className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card/40 backdrop-blur-md text-foreground overflow-hidden shadow-sm">
+    <div
+      id="seeds-invariant-compiler"
+      className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card/40 backdrop-blur-md text-foreground overflow-hidden shadow-sm scroll-mt-24"
+    >
       <div className="w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Header */}
         <div className="space-y-1">

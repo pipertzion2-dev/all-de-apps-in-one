@@ -64,6 +64,7 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   group.add(innerCore);
 
   // Four satellite seed pods
+  const podGroups: THREE.Group[] = [];
   const positions: [number, number, number][] = [
     [-2.55, 1.55, -0.35],
     [2.45, 1.35, -0.55],
@@ -124,7 +125,9 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
     panels.push(frameGroup);
 
     podGroup.position.set(x, y, z);
+    podGroup.userData.podIndex = i;
     group.add(podGroup);
+    podGroups.push(podGroup);
   });
 
   // Orbiting spec particles
@@ -143,6 +146,8 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   }
   inst.instanceMatrix.needsUpdate = true;
   group.add(inst);
+
+  group.userData.seedsRefs = { core, innerCore, pods: podGroups, panels };
 
   const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
     const mx = mouse?.x ?? 0;
