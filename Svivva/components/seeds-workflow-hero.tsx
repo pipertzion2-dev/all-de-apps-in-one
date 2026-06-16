@@ -16,12 +16,12 @@ type Props = {
 };
 
 const PHASE_HINT: Record<SeedsWorkflowState["phase"], string> = {
-  idle: "Pipeline idle — upload a PDF spec to start branching",
-  uploading: "Spec ingesting into the parse core…",
-  parsed: `${0} seed pods branched — run invariant verify next`,
-  verifying: "Proof gate active — checks flowing to each branch",
-  building: "Build energy filling each seed pod in parallel",
-  complete: "All pods complete — ready to ship",
+  idle: "Spec tree dormant — upload PDF to grow the trunk",
+  uploading: "Ingesting spec pages into the parse core",
+  parsed: `${0} branches ready on the canopy — verify invariants`,
+  verifying: "Proof gate active — checks climbing the trunk",
+  building: "Seed pods filling on each branch in parallel",
+  complete: "Canopy complete — every pod bloomed",
 };
 
 function stepStatus(step: SeedsWorkflowStep, state: SeedsWorkflowState): "done" | "active" | "pending" {

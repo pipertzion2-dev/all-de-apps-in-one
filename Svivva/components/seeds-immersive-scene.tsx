@@ -14,7 +14,7 @@ type Props = {
   seeds: SeedPodVisual[];
 };
 
-/** Full-page spec pipeline — PDF → parse → verify → branched seed pods. */
+/** Full-page layered spec tree — PDF root, trunk stations, branched seed pods. */
 export function SeedsImmersiveScene({ state, seeds }: Props) {
   const shellRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
@@ -41,26 +41,29 @@ export function SeedsImmersiveScene({ state, seeds }: Props) {
     renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.28;
+    renderer.toneMappingExposure = 1.42;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full pointer-events-none";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x060a10, 0.038);
+    scene.fog = new THREE.FogExp2(0x060a10, 0.032);
 
-    const camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 120);
-    camera.position.set(0, 0.4, 13);
+    const camera = new THREE.PerspectiveCamera(44, w / h, 0.1, 120);
+    camera.position.set(0.15, 0.25, 11.5);
 
-    scene.add(new THREE.AmbientLight(0x8aa4b8, 0.42));
-    const key = new THREE.DirectionalLight(0xffffff, 0.8);
-    key.position.set(4, 6, 10);
+    scene.add(new THREE.AmbientLight(0x8aa4b8, 0.48));
+    const key = new THREE.DirectionalLight(0xffffff, 0.88);
+    key.position.set(4, 8, 10);
     scene.add(key);
-    const tealLight = new THREE.PointLight(0x5ba8a0, 1.2, 35);
-    tealLight.position.set(-3, 2, 5);
+    const fill = new THREE.DirectionalLight(0x5ba8a0, 0.35);
+    fill.position.set(-5, 2, 4);
+    scene.add(fill);
+    const tealLight = new THREE.PointLight(0x5ba8a0, 1.35, 38);
+    tealLight.position.set(-2, 1, 5);
     scene.add(tealLight);
-    const burgLight = new THREE.PointLight(0x6b2c4a, 0.75, 30);
-    burgLight.position.set(4, 0, 3);
+    const burgLight = new THREE.PointLight(0x6b2c4a, 0.85, 32);
+    burgLight.position.set(3, -0.5, 3);
     scene.add(burgLight);
 
     const pipeline = buildSeedsPipelineScene();
@@ -82,9 +85,9 @@ export function SeedsImmersiveScene({ state, seeds }: Props) {
 
       pipeline.tick(t, stateRef.current, seedsRef.current, scroll);
 
-      camera.position.z = 13 - scroll * 1.6;
-      camera.position.y = 0.35 - scroll * 0.35;
-      camera.lookAt(0.5, scroll * -0.2, 0);
+      camera.position.z = 11.5 - scroll * 1.4;
+      camera.position.y = 0.2 - scroll * 0.45;
+      camera.lookAt(0, 0.15 - scroll * 0.25, 0);
       renderer.render(scene, camera);
     };
     animate();
@@ -119,9 +122,10 @@ export function SeedsImmersiveScene({ state, seeds }: Props) {
         className="absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 100% 70% at 35% 45%, rgba(91,168,160,0.1) 0%, transparent 55%)",
-            "radial-gradient(ellipse 70% 50% at 75% 55%, rgba(107,44,74,0.08) 0%, transparent 50%)",
-            "linear-gradient(180deg, rgba(6,10,16,0.15) 0%, rgba(6,10,16,0.6) 100%)",
+            "radial-gradient(ellipse 90% 75% at 50% 42%, rgba(91,168,160,0.11) 0%, transparent 58%)",
+            "radial-gradient(ellipse 65% 55% at 72% 62%, rgba(107,44,74,0.09) 0%, transparent 52%)",
+            "radial-gradient(ellipse 50% 40% at 28% 68%, rgba(212,168,90,0.06) 0%, transparent 48%)",
+            "linear-gradient(180deg, rgba(6,10,16,0.12) 0%, rgba(6,10,16,0.62) 100%)",
           ].join(", "),
         }}
       />
