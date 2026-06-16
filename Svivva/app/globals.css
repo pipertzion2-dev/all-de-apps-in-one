@@ -152,6 +152,17 @@
     background: hsl(var(--background));
   }
 
+  /* Radix ToastProvider injects a "Notifications (F8)" region into the DOM.
+     In some browsers this can accidentally contribute ~1 viewport of scroll height.
+     Pin it to the viewport so it never affects document flow. */
+  [aria-label="Notifications (F8)"] {
+    position: fixed;
+    inset: 0;
+    height: 0;
+    width: 0;
+    pointer-events: none;
+  }
+
   @media (max-width: 640px) {
     input,
     textarea,
