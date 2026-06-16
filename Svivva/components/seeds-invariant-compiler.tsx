@@ -336,7 +336,7 @@ export default function SeedsInvariantCompiler() {
   const appNames = apps.filter((a) => a.name.trim()).map((a) => a.name);
 
   return (
-    <div className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card text-foreground overflow-hidden shadow-sm">
+    <div className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card/40 backdrop-blur-md text-foreground overflow-hidden shadow-sm">
       <div className="w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Header */}
         <div className="space-y-1">
@@ -353,13 +353,13 @@ export default function SeedsInvariantCompiler() {
         </div>
 
         {/* Spec Input */}
-        <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+        <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-3">
           <label className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
             Original Specification
           </label>
           <textarea
             rows={7}
-            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50 resize-none font-mono leading-relaxed"
+            className="w-full bg-background/35 backdrop-blur-sm border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50 resize-none font-mono leading-relaxed"
             placeholder="Paste your natural-language specification here. E.g.: 'Users must provide explicit consent before any personal data is stored. The system must respond to all requests within 500ms under normal load. No user can access another user's private data…'"
             value={spec}
             onChange={(e) => setSpec(e.target.value)}
@@ -382,17 +382,17 @@ export default function SeedsInvariantCompiler() {
           </div>
 
           {apps.map((app, i) => (
-            <div key={i} className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
+            <div key={i} className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
-                    className="bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
+                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="App name"
                     value={app.name}
                     onChange={(e) => updateApp(i, { name: e.target.value })}
                   />
                   <input
-                    className="bg-muted/40 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
+                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Brief description"
                     value={app.description}
                     onChange={(e) => updateApp(i, { description: e.target.value })}
@@ -432,7 +432,7 @@ export default function SeedsInvariantCompiler() {
                 </div>
                 <div className="flex gap-2">
                   <input
-                    className="flex-1 bg-muted/40 border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
+                    className="flex-1 bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Add a feature…"
                     value={newFeatureText[i] ?? ""}
                     onChange={(e) =>
@@ -459,7 +459,7 @@ export default function SeedsInvariantCompiler() {
         </div>
 
         {/* Invariant Types */}
-        <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+        <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-3">
           <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
             Invariant Types to Extract
           </h2>
@@ -524,25 +524,25 @@ export default function SeedsInvariantCompiler() {
           <div className="space-y-6">
             {/* Summary bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-cyan-400">
                   {result.extractedInvariants.length}
                 </div>
                 <div className="text-xs text-muted-foreground/70">Invariants</div>
               </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-red-400">
                   {result.criticalViolations.length}
                 </div>
                 <div className="text-xs text-muted-foreground/70">Critical Violations</div>
               </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-emerald-400">
                   {(result.specCoverageScore * 100).toFixed(0)}%
                 </div>
                 <div className="text-xs text-muted-foreground/70">Spec Coverage</div>
               </div>
-              <div className="rounded-xl border border-border bg-muted/40 p-3 text-center space-y-1">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-3 text-center space-y-1">
                 <div className="text-2xl font-bold text-amber-400">
                   {result.verificationResults.filter((v) => v.verdict === "VIOLATED").length}
                 </div>
@@ -566,7 +566,7 @@ export default function SeedsInvariantCompiler() {
             )}
 
             {/* Extracted Invariants */}
-            <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+            <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-3">
               <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                 Extracted Invariants
               </h2>
@@ -612,7 +612,7 @@ export default function SeedsInvariantCompiler() {
 
             {/* Verification Matrix */}
             {appNames.length > 0 && (
-              <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-4">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-4">
                 <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                   Verification Matrix
                 </h2>
@@ -672,7 +672,7 @@ export default function SeedsInvariantCompiler() {
               return (
                 <div
                   key={name}
-                  className="rounded-xl border border-border bg-muted/40 p-5 space-y-3"
+                  className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-3"
                 >
                   <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                     Violations · {name}
@@ -692,7 +692,7 @@ export default function SeedsInvariantCompiler() {
 
             {/* Health Matrix Heatmap */}
             {Object.keys(result.overallHealthMatrix).length > 0 && (
-              <div className="rounded-xl border border-border bg-muted/40 p-5 space-y-3">
+              <div className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-5 space-y-3">
                 <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                   Health Matrix
                 </h2>

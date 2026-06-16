@@ -2842,7 +2842,7 @@ export default function SvivvaPlayPage() {
 
   return (
     <div
-      className="flex flex-col text-gray-900 relative bg-background overflow-x-hidden"
+      className="flex flex-col text-gray-900 relative bg-transparent overflow-x-hidden"
       style={{ colorScheme: "light" }}
       data-feature-page
     >

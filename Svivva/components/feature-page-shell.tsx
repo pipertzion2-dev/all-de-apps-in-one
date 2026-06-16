@@ -36,13 +36,16 @@ export function FeaturePageShell({
 }: Props) {
   return (
     <div
-      className={`relative min-h-0 bg-background overflow-x-hidden ${className}`}
+      className={`relative min-h-0 bg-transparent overflow-x-hidden ${className}`}
       data-feature-page
       data-page-shell
     >
       <FeatureScrollToTop />
       <FeatureThreeBg variant={variant} dramatic scope="page" />
-      <div className="relative z-10 px-4 sm:px-6 pb-0">
+      <div
+        className="relative z-10 px-4 sm:px-6 pb-0 [&_.border]:bg-card/40 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
+        data-feature-content
+      >
         {showHero ? <FeaturePageHero variant={variant} subtitle={subtitle} /> : null}
         {children}
       </div>

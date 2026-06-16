@@ -3362,7 +3362,7 @@ export default function LaunchpadPage() {
     );
   if (!isAdmin)
     return (
-      <div className="relative bg-background overflow-x-hidden" data-feature-page>
+      <div className="relative bg-transparent overflow-x-hidden" data-feature-page>
         <FeatureThreeBg variant="orbit" scope="page" />
         <div className="relative z-10 py-16 px-4">
           <AdminCodeForm
@@ -3399,7 +3399,7 @@ export default function LaunchpadPage() {
     null;
 
   return (
-    <div className="relative z-0 bg-background overflow-x-hidden" data-feature-page>
+    <div className="relative z-0 bg-transparent overflow-x-hidden" data-feature-page>
       <FeatureScrollToTop />
       <FeatureThreeBg variant="orbit" scope="page" />
       {devLanUrl && (
