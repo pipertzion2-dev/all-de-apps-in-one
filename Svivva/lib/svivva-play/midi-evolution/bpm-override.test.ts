@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { clampBpm, rescaleEventsToBpm, resolveGlobalBpm } from "./bpm-override";
+import {
+  averageDetectedBpm,
+  clampBpm,
+  rescaleEventsToBpm,
+  resolveInputBpm,
+} from "./bpm-override";
 import type { NormalizedMidiEvent } from "../midi-normalize";
 
 describe("bpm override", () => {
@@ -9,18 +14,22 @@ describe("bpm override", () => {
     expect(clampBpm(92.4)).toBe(92);
   });
 
-  it("prefers manual bpm over detected average", () => {
-    const { globalBpm, detectedBpm } = resolveGlobalBpm([120, 60], 90);
-    expect(detectedBpm).toBe(90);
-    expect(globalBpm).toBe(90);
+  it("always resolves input bpm (defaults when missing)", () => {
+    expect(resolveInputBpm(undefined)).toBe(120);
+    expect(resolveInputBpm(null)).toBe(120);
+    expect(resolveInputBpm(88)).toBe(88);
   });
 
-  it("rescales beats when overriding tempo", () => {
+  it("averages file tempo markers for reference only", () => {
+    expect(averageDetectedBpm([120, 60])).toBe(90);
+  });
+
+  it("rescales beats while preserving seconds", () => {
     const events: NormalizedMidiEvent[] = [
       { note: 60, startBeat: 4, duration: 1, velocity: 80, channel: 0 },
     ];
     const rescaled = rescaleEventsToBpm(events, 120, 60);
-    expect(rescaled[0]!.startBeat).toBe(8);
-    expect(rescaled[0]!.duration).toBe(2);
+    expect(rescaled[0]!.startBeat).toBe(2);
+    expect(rescaled[0]!.duration).toBe(0.5);
   });
 });

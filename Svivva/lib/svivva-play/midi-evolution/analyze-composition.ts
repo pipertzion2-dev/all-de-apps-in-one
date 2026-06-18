@@ -10,7 +10,7 @@ import type {
 } from "./types";
 import { inferTrackRole, midiEventsToNotes, notesToMidiEvents } from "./note-bridge";
 import { buildMotifGenealogy } from "./motif-genealogy";
-import { applyGlobalBpmToTracks, clampBpm, resolveGlobalBpm } from "./bpm-override";
+import { averageDetectedBpm, resolveInputBpm } from "./bpm-override";
 
 function slugId(name: string, index: number): string {
   const base = name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9]+/g, "_").toLowerCase();
@@ -73,29 +73,29 @@ export function analyzeGlobalComposition(
   files: { filename: string; buffer: ArrayBuffer }[],
   options?: { manualBpm?: number | null },
 ): { tracks: ImportedMidiTrack[]; memory: CompositionMemory; phrases: PhraseRecord[] } {
+  const inputBpm = resolveInputBpm(options?.manualBpm);
+
   const parsedFiles = files.map((f) => ({
     filename: f.filename,
     parsed: parseMidiFile(f.buffer),
   }));
 
+  const detectedBpm = averageDetectedBpm(parsedFiles.map(({ parsed }) => parsed.detectedBpm));
+
   const tracks: ImportedMidiTrack[] = parsedFiles.map(({ filename, parsed }, i) => {
-    const events = notesToMidiEvents(parsed.notes, parsed.bpm);
+    const events = notesToMidiEvents(parsed.notes, inputBpm);
     const id = slugId(filename, i);
     return {
       id,
       filename,
-      bpm: parsed.bpm,
+      bpm: inputBpm,
       durationSec: parsed.durationSec,
       events,
       role: inferTrackRole(events),
     };
   });
 
-  const { globalBpm, detectedBpm } = resolveGlobalBpm(
-    parsedFiles.map(({ parsed }) => parsed.detectedBpm),
-    options?.manualBpm,
-  );
-  applyGlobalBpmToTracks(tracks, globalBpm);
+  const globalBpm = inputBpm;
 
   const allNotes = tracks.flatMap((t) => midiEventsToNotes(t.events, t.bpm));
   const keyGuess = resolveHarmonicKey({
@@ -142,10 +142,7 @@ export function analyzeGlobalComposition(
     })),
     globalBpm,
     detectedBpm,
-    manualBpm:
-      options?.manualBpm != null && options.manualBpm > 0
-        ? clampBpm(options.manualBpm)
-        : undefined,
+    manualBpm: inputBpm,
     key: keyGuess.key,
     motifs,
     rhythms,

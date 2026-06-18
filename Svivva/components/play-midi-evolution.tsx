@@ -91,9 +91,8 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   const [preset, setPreset] = useState<StylePresetId>("glasper");
   const [stevieSlides, setStevieSlides] = useState(false);
   const [meendLevel, setMeendLevel] = useState<MeendLevel>("off");
-  const [useAutoTempo, setUseAutoTempo] = useState(true);
-  const [manualBpm, setManualBpm] = useState(120);
-  const [detectedBpm, setDetectedBpm] = useState<number | null>(null);
+  const [inputBpm, setInputBpm] = useState(120);
+  const [fileTempoMarker, setFileTempoMarker] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,15 +113,11 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
     setForensics(null);
     setPart(null);
     setReport(null);
-    setDetectedBpm(null);
-    setUseAutoTempo(true);
+    setFileTempoMarker(null);
     setError(null);
   }, []);
 
-  const tempoPayload = useCallback(
-    () => (useAutoTempo ? {} : { manualBpm }),
-    [manualBpm, useAutoTempo],
-  );
+  const tempoPayload = useCallback(() => ({ manualBpm: inputBpm }), [inputBpm]);
 
   const postEvolution = useCallback(
     async (body: Record<string, unknown>) => {
@@ -164,9 +159,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         const data = await postEvolution(body);
         if (data.memory) {
           setMemory(data.memory);
-          const detected = data.memory.detectedBpm ?? data.memory.globalBpm;
-          setDetectedBpm(detected);
-          if (useAutoTempo) setManualBpm(detected);
+          if (data.memory.detectedBpm != null) setFileTempoMarker(data.memory.detectedBpm);
         }
         if (data.forensics) setForensics(data.forensics);
         if (data.part) setPart(data.part);
@@ -183,7 +176,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         setLoading(false);
       }
     },
-    [files, filenames, manualBpm, memory, meendLevel, part, postEvolution, preset, prompt, stevieSlides, tempoPayload, useAutoTempo],
+    [files, filenames, inputBpm, memory, meendLevel, part, postEvolution, preset, prompt, stevieSlides, tempoPayload],
   );
 
   const runForensics = () => void callApi("forensics");
@@ -207,9 +200,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         if (analyzed?.memory) {
           mem = analyzed.memory;
           setMemory(analyzed.memory);
-          const detected = analyzed.memory.detectedBpm ?? analyzed.memory.globalBpm;
-          setDetectedBpm(detected);
-          if (useAutoTempo) setManualBpm(detected);
+          if (analyzed.memory.detectedBpm != null) setFileTempoMarker(analyzed.memory.detectedBpm);
           setForensics(analyzed.forensics ?? null);
           setSuggestedSection(analyzed.suggestedSection ?? sectionId);
         }
@@ -232,8 +223,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
       });
       if (data?.memory) {
         setMemory(data.memory);
-        const detected = data.memory.detectedBpm ?? data.memory.globalBpm;
-        setDetectedBpm(detected);
+        if (data.memory.detectedBpm != null) setFileTempoMarker(data.memory.detectedBpm);
       }
       if (data?.part) setPart(data.part);
       if (data?.report) setReport(data.report);
@@ -322,47 +312,38 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         )}
       </div>
 
-      {/* Tempo */}
+      {/* Tempo — always user input; MIDI notes parsed in seconds from file */}
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Tempo</p>
-          {detectedBpm != null && (
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+            Project tempo (required)
+          </p>
+          {fileTempoMarker != null && (
             <span className="text-[10px] text-gray-500">
-              Detected from MIDI: <strong className="text-gray-700">{detectedBpm} BPM</strong>
+              File tempo marker: <strong className="text-gray-600">{fileTempoMarker} BPM</strong>{" "}
+              (reference only)
             </span>
           )}
         </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={useAutoTempo}
-            onChange={(e) => {
-              setUseAutoTempo(e.target.checked);
-              if (e.target.checked && detectedBpm != null) setManualBpm(detectedBpm);
-            }}
-            className="rounded border-gray-300"
-          />
-          Use detected tempo
-        </label>
         <div className="flex items-center gap-2">
           <input
             type="number"
             min={20}
             max={400}
             step={1}
-            disabled={useAutoTempo || !files.length}
-            value={manualBpm}
-            onChange={(e) => setManualBpm(Math.max(20, Math.min(400, Number(e.target.value) || 120)))}
-            className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm disabled:opacity-50"
-            aria-label="Manual BPM"
+            value={inputBpm}
+            onChange={(e) =>
+              setInputBpm(Math.max(20, Math.min(400, Number(e.target.value) || 120)))
+            }
+            className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            aria-label="Project BPM"
           />
-          <span className="text-sm text-gray-600">BPM (manual override)</span>
+          <span className="text-sm text-gray-600">BPM — used for analysis, generation & export</span>
         </div>
-        {!useAutoTempo && (
-          <p className="text-[10px] text-amber-700">
-            Beat grid rescales to your BPM — note timing in seconds stays the same.
-          </p>
-        )}
+        <p className="text-[10px] text-gray-500">
+          Note pitches and timing are read from the MIDI file; beat grid always follows your BPM
+          input.
+        </p>
       </div>
 
       {/* Expression row */}
@@ -573,11 +554,10 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               </span>
               <span>
                 <strong className="text-gray-800">BPM</strong> {memory.globalBpm}
-                {memory.manualBpm ? " (manual)" : memory.detectedBpm ? " (detected)" : ""}
               </span>
-              {memory.detectedBpm != null && memory.manualBpm != null && (
+              {memory.detectedBpm != null && memory.detectedBpm !== memory.globalBpm && (
                 <span>
-                  <strong className="text-gray-800">Detected</strong> {memory.detectedBpm}
+                  <strong className="text-gray-800">File marker</strong> {memory.detectedBpm}
                 </span>
               )}
               <span>

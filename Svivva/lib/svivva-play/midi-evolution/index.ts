@@ -10,7 +10,7 @@ import {
 } from "./export-pack";
 import { generateLongFormSection, suggestNextSection } from "./generate-long-form-section";
 import { buildPerFileOutputs } from "./per-file-export";
-import { clampBpm } from "./bpm-override";
+import { resolveInputBpm } from "./bpm-override";
 import { LONG_FORM_SECTIONS, type LongFormSectionId } from "./long-form-sections";
 import { transformComposition } from "./transform-engine";
 import type {
@@ -64,18 +64,15 @@ function decodeFiles(files: EvolutionRequest["files"]): { filename: string; buff
   });
 }
 
-function resolveManualBpm(req: EvolutionRequest): number | undefined {
-  const raw = req.manualBpm ?? req.memory?.manualBpm;
-  if (raw == null || raw <= 0) return undefined;
-  return clampBpm(raw);
+function resolveManualBpm(req: EvolutionRequest): number {
+  return resolveInputBpm(req.manualBpm ?? req.memory?.manualBpm);
 }
 
 function analyzeDecoded(
   decoded: { filename: string; buffer: ArrayBuffer }[],
   req: EvolutionRequest,
 ) {
-  const manualBpm = resolveManualBpm(req);
-  return analyzeGlobalComposition(decoded, manualBpm != null ? { manualBpm } : undefined);
+  return analyzeGlobalComposition(decoded, { manualBpm: resolveManualBpm(req) });
 }
 
 function resolveSourceEvents(
