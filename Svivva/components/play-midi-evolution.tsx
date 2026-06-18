@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import {
+  collectMidiUploads,
+  estimateUploadBytes,
+  MIDI_UPLOAD_SOFT_LIMIT_BYTES,
+} from "@/lib/svivva-play/midi-evolution/extract-midi-upload";
 import type {
   CompositionMemory,
   GeneratedPart,
@@ -53,14 +58,6 @@ const STEPS = [
   { n: 3 as Step, label: "Generate", hint: "Next section B–J" },
 ];
 
-async function fileToBase64(file: File): Promise<UploadedFile> {
-  const buffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
-  return { filename: file.name, base64: btoa(binary) };
-}
-
 function downloadZip(base64: string, filename: string) {
   const bin = atob(base64);
   const bytes = new Uint8Array(bin.length);
@@ -95,6 +92,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   const [fileTempoMarker, setFileTempoMarker] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadHint, setUploadHint] = useState<string | null>(null);
 
   const completedSections = memory?.completedSections ?? [];
   const step: Step = !files.length ? 1 : !memory ? 2 : 3;
@@ -107,20 +105,35 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
   const handleFiles = useCallback(async (list: FileList | null) => {
     if (!list?.length) return;
-    const picked = [...list].filter((f) => /\.mid(i)?$/i.test(f.name));
-    if (!picked.length) {
-      setError("Please upload .mid or .midi files.");
-      return;
-    }
-    const encoded = await Promise.all(picked.map(fileToBase64));
-    setFiles(encoded);
-    setFilenames(encoded.map((f) => f.filename));
-    setMemory(null);
-    setForensics(null);
-    setPart(null);
-    setReport(null);
-    setFileTempoMarker(null);
+    setLoading(true);
     setError(null);
+    setUploadHint(null);
+    try {
+      const encoded = await collectMidiUploads(list);
+      if (!encoded.length) {
+        setError(
+          "No MIDI found. Upload .mid / .midi files, or a .zip containing MIDI stems (e.g. Bass.mid, Melody.mid).",
+        );
+        return;
+      }
+      const bytes = estimateUploadBytes(encoded);
+      if (bytes > MIDI_UPLOAD_SOFT_LIMIT_BYTES) {
+        setUploadHint(
+          `Loaded ${encoded.length} file(s) (~${(bytes / 1_000_000).toFixed(1)}MB). Large packs may fail on upload — split into smaller zips if you see errors.`,
+        );
+      }
+      setFiles(encoded);
+      setFilenames(encoded.map((f) => f.filename));
+      setMemory(null);
+      setForensics(null);
+      setPart(null);
+      setReport(null);
+      setFileTempoMarker(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not read upload");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const tempoPayload = useCallback(() => ({ manualBpm: inputBpm }), [inputBpm]);
@@ -133,7 +146,12 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Request failed");
+      if (!res.ok) {
+        if (res.status === 413) {
+          throw new Error("Upload too large for the server. Split your zip into smaller stem packs.");
+        }
+        throw new Error(data.error || "Request failed");
+      }
       return data;
     },
     [],
@@ -293,17 +311,22 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         <input
           ref={inputRef}
           type="file"
-          accept=".mid,.midi,audio/midi"
+          accept=".mid,.midi,.zip,audio/midi,application/zip"
           multiple
           className="hidden"
           onChange={(e) => void handleFiles(e.target.files)}
         />
         <p className="text-sm font-medium text-gray-800">
-          {filenames.length ? `${filenames.length} file(s) loaded` : "Drop or click to upload MIDI"}
+          {filenames.length
+            ? `${filenames.length} MIDI file(s) loaded`
+            : "Drop or click to upload MIDI or a .zip stem pack"}
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Multiple files analyzed together as one composition (sections, motifs, merged ideas).
+          .mid / .midi files or a .zip with multiple stems — analyzed together as one composition.
         </p>
+        {uploadHint && (
+          <p className="text-xs text-amber-700 mt-2">{uploadHint}</p>
+        )}
         {filenames.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {filenames.map((n) => (

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { runMidiEvolution, type EvolutionRequest } from "@/lib/svivva-play/midi-evolution";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export async function POST(request: NextRequest) {
   try {
