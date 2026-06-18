@@ -102,8 +102,7 @@ import {
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
 import { SvivvaPlayStagePanel } from "@/components/svivva-play-stage-panel";
-import PlayPsychoacousticGenome from "@/components/play-psychoacoustic-genome";
-import PlayMidiEvolution from "@/components/play-midi-evolution";
+import PlayCreativeTools, { scrollToMidiEvolution } from "@/components/play-creative-tools";
 import type { PlayStageModel } from "@/components/svivva-play-stage-3d";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
@@ -2960,6 +2959,15 @@ export default function SvivvaPlayPage() {
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <Button
+              onClick={() => scrollToMidiEvolution()}
+              variant="outline"
+              size="sm"
+              className="gap-1 border-[#A05068]/40 text-[#A05068] text-[10px] sm:text-xs hover:bg-[#A05068]/5"
+              data-testid="button-midi-evolution"
+            >
+              MIDI Evolution
+            </Button>
+            <Button
               onClick={() => setShowGuidedBuilder(true)}
               variant="outline"
               size="sm"
@@ -2985,10 +2993,13 @@ export default function SvivvaPlayPage() {
 
       <main className="flex-1 p-3 sm:p-4 md:p-6">
         <div className="max-w-[1400px] mx-auto">
-          <div className="mb-6 space-y-6">
-            <PlayPsychoacousticGenome />
-            <PlayMidiEvolution />
+          <div className="mb-6">
+            <PlayCreativeTools />
           </div>
+
+          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mb-3 px-1">
+            Studio — import &amp; generate stems
+          </p>
 
           <div
             className="rounded-xl flex flex-col overflow-hidden"

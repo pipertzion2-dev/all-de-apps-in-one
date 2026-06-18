@@ -207,6 +207,7 @@ export function sectionSpecToTransformOptions(spec: LongFormSectionSpec): {
   meendLevel: MeendLevel;
   preserveRhythm: boolean;
   preservePhraseLength: boolean;
+  preservePhraseExactly: boolean;
   sectionId: LongFormSectionId;
   rhythmicPreserve: number;
   motifTransform: MotifTransformMode;
@@ -223,6 +224,7 @@ export function sectionSpecToTransformOptions(spec: LongFormSectionSpec): {
     meendLevel: spec.meendLevel,
     preserveRhythm: true,
     preservePhraseLength: true,
+    preservePhraseExactly: true,
     sectionId: spec.id,
     rhythmicPreserve: spec.rhythmicPreserve,
     motifTransform: spec.motifTransform,

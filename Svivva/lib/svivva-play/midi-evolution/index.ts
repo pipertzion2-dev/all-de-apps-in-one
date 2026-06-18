@@ -114,6 +114,11 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
 
   if (req.action === "generate-section") {
     if (!req.sectionId) throw new Error("sectionId required (B–J)");
+    const decoded = decodeFiles(req.files);
+    if (!memory.motifs.length && decoded.length) {
+      const analyzed = analyzeGlobalComposition(decoded);
+      memory = analyzed.memory;
+    }
     const sourceEvents = resolveSourceEvents(req, memory);
     if (!sourceEvents.length) throw new Error("Upload MIDI files for section generation");
     const { part, memory: updated } = generateLongFormSection(

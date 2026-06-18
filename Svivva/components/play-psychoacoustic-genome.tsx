@@ -335,7 +335,7 @@ function TrackPanel({ label, accent, track, onChange }: TrackPanelProps) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export default function PlayPsychoacousticGenome() {
+export default function PlayPsychoacousticGenome({ embedded = false }: { embedded?: boolean }) {
   const [trackA, setTrackA] = useState<TrackInput>(emptyTrack());
   const [trackB, setTrackB] = useState<TrackInput>(emptyTrack());
   const [hybridizationPoint, setHybridizationPoint] = useState<HybridizationPoint>("tonal");
@@ -373,20 +373,30 @@ export default function PlayPsychoacousticGenome() {
   }, [trackA, trackB, hybridizationPoint, targetEmotion, outputFormat, canSubmit]);
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-[#0d0d1a] text-white overflow-hidden">
-      <div className="w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8">
-        {/* Header */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-lg">
-              🧬
+    <div
+      className={
+        embedded
+          ? "w-full px-4 sm:px-5 py-5 sm:py-6 space-y-6 bg-white text-gray-900"
+          : "w-full rounded-2xl border border-white/10 bg-[#0d0d1a] text-white overflow-hidden"
+      }
+    >
+      <div className={embedded ? "w-full space-y-6" : "w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8"}>
+        {!embedded && (
+          <>
+            {/* Header */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-lg">
+                  🧬
+                </div>
+                <h1 className="text-2xl font-bold tracking-tight">Psychoacoustic Genome Engine</h1>
+              </div>
+              <p className="text-sm text-white/40 pl-11">
+                Hybridize two musical genomes using ASA stream analysis &amp; Fletcher-Munson contours
+              </p>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Psychoacoustic Genome Engine</h1>
-          </div>
-          <p className="text-sm text-white/40 pl-11">
-            Hybridize two musical genomes using ASA stream analysis &amp; Fletcher-Munson contours
-          </p>
-        </div>
+          </>
+        )}
 
         {/* Track Panels */}
         <div className="flex gap-4 flex-col md:flex-row">
