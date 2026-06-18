@@ -75,10 +75,21 @@ function analyzeDecoded(
   return analyzeGlobalComposition(decoded, { manualBpm: resolveManualBpm(req) });
 }
 
-function resolveSourceEvents(
+function refreshMemoryFromFiles(
   req: EvolutionRequest,
   memory: CompositionMemory,
+): { memory: CompositionMemory; tracks?: import("./types").ImportedMidiTrack[] } {
+  const decoded = decodeFiles(req.files);
+  if (!decoded.length) return { memory };
+  const analyzed = analyzeDecoded(decoded, req);
+  return { memory: analyzed.memory, tracks: analyzed.tracks };
+}
+
+function resolveSourceEvents(
+  req: EvolutionRequest,
+  tracks?: import("./types").ImportedMidiTrack[],
 ): NormalizedMidiEvent[] {
+  if (tracks?.length) return mergeTracksToEvents(tracks);
   const decoded = decodeFiles(req.files);
   if (decoded.length) {
     return mergeTracksToEvents(analyzeDecoded(decoded, req).tracks);
@@ -110,6 +121,10 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
     memory = analyzeDecoded(decoded, req).memory;
   }
 
+  const refreshed = refreshMemoryFromFiles(req, memory);
+  memory = refreshed.memory;
+  const refreshedTracks = refreshed.tracks;
+
   const preset = req.preset ?? "custom";
   const prompt = req.prompt ?? "";
   const aiPlan = await interpretEvolutionPrompt(prompt, preset);
@@ -128,14 +143,8 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
 
   if (req.action === "generate-section") {
     if (!req.sectionId) throw new Error("sectionId required (B–J)");
-    const decoded = decodeFiles(req.files);
-    let tracks: import("./types").ImportedMidiTrack[] | undefined;
-    if (decoded.length) {
-      const analyzed = analyzeDecoded(decoded, req);
-      memory = analyzed.memory;
-      tracks = analyzed.tracks;
-    }
-    const sourceEvents = resolveSourceEvents(req, memory);
+    const tracks = refreshedTracks;
+    const sourceEvents = resolveSourceEvents(req, tracks);
     if (!sourceEvents.length) throw new Error("Upload MIDI files for section generation");
     const { part, memory: updated } = generateLongFormSection(
       sourceEvents,
@@ -187,10 +196,9 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
 
   if (req.action === "export") {
     if (!req.lastPart) throw new Error("lastPart required for export");
-    const decoded = decodeFiles(req.files);
     let tracks: import("./types").ImportedMidiTrack[];
-    if (decoded.length) {
-      tracks = analyzeDecoded(decoded, req).tracks;
+    if (refreshedTracks?.length) {
+      tracks = refreshedTracks;
     } else if (req.lastPart.fileOutputs?.length) {
       tracks = req.lastPart.fileOutputs.map((f) => ({
         id: f.sourceFileId,
@@ -215,7 +223,7 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
     };
   }
 
-  const sourceEvents = resolveSourceEvents(req, memory);
+  const sourceEvents = resolveSourceEvents(req, refreshedTracks);
   if (!sourceEvents.length) {
     throw new Error("Upload MIDI files or run a prior transform before evolving");
   }
@@ -226,11 +234,9 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
     options,
     sourceFilename,
   );
-  const decodedForTransform = decodeFiles(req.files);
-  if (decodedForTransform.length) {
-    const { tracks } = analyzeDecoded(decodedForTransform, req);
+  if (refreshedTracks?.length) {
     const fileOutputs = buildPerFileOutputs(
-      tracks,
+      refreshedTracks,
       updated,
       options,
       undefined,

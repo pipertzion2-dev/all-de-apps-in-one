@@ -98,6 +98,12 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
   const completedSections = memory?.completedSections ?? [];
   const step: Step = !files.length ? 1 : !memory ? 2 : 3;
+  const exportFileCount =
+    part?.fileOutputs && part.fileOutputs.length > 0
+      ? part.fileOutputs.length
+      : filenames.length > 0
+        ? filenames.length
+        : 1;
 
   const handleFiles = useCallback(async (list: FileList | null) => {
     if (!list?.length) return;
@@ -332,9 +338,16 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             max={400}
             step={1}
             value={inputBpm}
-            onChange={(e) =>
-              setInputBpm(Math.max(20, Math.min(400, Number(e.target.value) || 120)))
-            }
+            onChange={(e) => {
+              const next = Math.max(20, Math.min(400, Number(e.target.value) || 120));
+              setInputBpm(next);
+              if (memory && memory.globalBpm !== next) {
+                setMemory(null);
+                setForensics(null);
+                setPart(null);
+                setReport(null);
+              }
+            }}
             className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
             aria-label="Project BPM"
           />
@@ -533,8 +546,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           onClick={() => void callApi("export")}
           className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
         >
-          Export MIDI pack ({(part?.fileOutputs?.length ?? filenames.length) || 1} file
-        {((part?.fileOutputs?.length ?? filenames.length) || 1) === 1 ? "" : "s"})
+          Export MIDI pack ({exportFileCount} file{exportFileCount === 1 ? "" : "s"})
         </button>
       </div>
 
