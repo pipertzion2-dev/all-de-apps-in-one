@@ -103,6 +103,7 @@ import {
 } from "@/lib/svivva-play/reich-engine";
 import { SvivvaPlayStagePanel } from "@/components/svivva-play-stage-panel";
 import PlayPsychoacousticGenome from "@/components/play-psychoacoustic-genome";
+import PlayMidiEvolution from "@/components/play-midi-evolution";
 import type { PlayStageModel } from "@/components/svivva-play-stage-3d";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
@@ -2984,8 +2985,9 @@ export default function SvivvaPlayPage() {
 
       <main className="flex-1 p-3 sm:p-4 md:p-6">
         <div className="max-w-[1400px] mx-auto">
-          <div className="mb-6">
+          <div className="mb-6 space-y-6">
             <PlayPsychoacousticGenome />
+            <PlayMidiEvolution />
           </div>
 
           <div
