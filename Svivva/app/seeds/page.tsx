@@ -670,52 +670,57 @@ export default function SeedsPage() {
     >
       <FeatureScrollToTop />
       <SeedsImmersiveScene state={workflowState} seeds={seedVisuals} />
-      <nav className="relative z-30 h-12 border-b border-border/30 bg-background/20 backdrop-blur-xl flex-shrink-0">
-        <div className="h-full max-w-6xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2" data-testid="link-seeds-home">
+      <nav className="relative z-30 border-b border-border/30 bg-background/20 backdrop-blur-xl flex-shrink-0">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-0 sm:h-12 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/" className="flex shrink-0 items-center" data-testid="link-seeds-home">
               <Image
                 src={svivvaLogo}
                 alt="Svivva"
                 width={100}
                 height={32}
-                className="h-5 sm:h-6 w-auto object-contain"
+                className="h-4 w-auto object-contain sm:h-6"
               />
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="relative w-6 h-6 rounded overflow-hidden">
-                <Image src={seedsLogo} alt="Seeds" fill sizes="24px" className="object-cover" />
+            <div className="h-4 w-px bg-border/50 shrink-0" aria-hidden />
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded sm:h-6 sm:w-6">
+                <Image src={seedsLogo} alt="" fill sizes="24px" className="object-cover" />
               </div>
-              <span className="seeds-holo-text text-sm font-bold tracking-wide">Seeds</span>
+              <span className="seeds-holo-text truncate text-xs font-bold tracking-wide sm:text-sm">
+                Seeds
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link href="/dashboard/orbit">
               <Button
                 size="sm"
-                className="h-7 px-2 text-[10px] font-bold text-white gap-1 shadow-sm sm:h-8 sm:px-3 sm:text-xs sm:gap-1.5"
+                className="h-8 gap-1 px-2 text-[10px] font-bold text-white shadow-sm sm:h-8 sm:px-3 sm:text-xs sm:gap-1.5"
                 style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
                 data-testid="button-seeds-orbit-admin"
+                aria-label="Orbit Admin"
               >
-                <Rocket className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                Orbit Admin
+                <Rocket className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <span className="hidden min-[400px]:inline sm:inline">Orbit</span>
+                <span className="hidden sm:inline"> Admin</span>
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="hidden md:inline-flex">
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs"
+                className="h-8 text-xs"
                 data-testid="button-seeds-back-dashboard"
               >
                 Dashboard
               </Button>
             </Link>
-            <Link href="/play">
+            <Link href="/play" className="hidden sm:inline-flex">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs seeds-holo-text"
+                className="h-8 px-2 text-xs seeds-holo-text sm:px-3"
                 data-testid="button-seeds-to-play"
               >
                 &#9835; Play
@@ -734,7 +739,7 @@ export default function SeedsPage() {
         />
         <div
           data-seeds-content
-          className="max-w-5xl mx-auto px-4 pb-0 space-y-6 relative [&_.border]:bg-background/20 [&_.border]:backdrop-blur-xl [&_.border]:border-border/40 [&_.rounded-2xl]:bg-background/15"
+          className="relative mx-auto max-w-5xl space-y-6 px-3 pb-0 sm:px-4 [&_.rounded-2xl]:bg-background/15 [&_.border]:border-border/40 [&_.border]:bg-background/20 [&_.border]:backdrop-blur-xl"
           data-feature-content
         >
           {allSeeds.length > 1 && (
