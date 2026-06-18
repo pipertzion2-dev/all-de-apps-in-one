@@ -10,6 +10,7 @@ import type {
 } from "./types";
 import { inferTrackRole, midiEventsToNotes, notesToMidiEvents } from "./note-bridge";
 import { buildMotifGenealogy } from "./motif-genealogy";
+import { applyGlobalBpmToTracks, clampBpm, resolveGlobalBpm } from "./bpm-override";
 
 function slugId(name: string, index: number): string {
   const base = name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9]+/g, "_").toLowerCase();
@@ -70,14 +71,19 @@ function harmonicCentersFromTracks(tracks: ImportedMidiTrack[], bpm: number): Ha
 /** Build a global composition graph from multiple MIDI files (not independent analysis). */
 export function analyzeGlobalComposition(
   files: { filename: string; buffer: ArrayBuffer }[],
+  options?: { manualBpm?: number | null },
 ): { tracks: ImportedMidiTrack[]; memory: CompositionMemory; phrases: PhraseRecord[] } {
-  const tracks: ImportedMidiTrack[] = files.map((f, i) => {
-    const parsed = parseMidiFile(f.buffer);
+  const parsedFiles = files.map((f) => ({
+    filename: f.filename,
+    parsed: parseMidiFile(f.buffer),
+  }));
+
+  const tracks: ImportedMidiTrack[] = parsedFiles.map(({ filename, parsed }, i) => {
     const events = notesToMidiEvents(parsed.notes, parsed.bpm);
-    const id = slugId(f.filename, i);
+    const id = slugId(filename, i);
     return {
       id,
-      filename: f.filename,
+      filename,
       bpm: parsed.bpm,
       durationSec: parsed.durationSec,
       events,
@@ -85,9 +91,11 @@ export function analyzeGlobalComposition(
     };
   });
 
-  const globalBpm = Math.round(
-    tracks.reduce((s, t) => s + t.bpm, 0) / Math.max(1, tracks.length),
+  const { globalBpm, detectedBpm } = resolveGlobalBpm(
+    parsedFiles.map(({ parsed }) => parsed.detectedBpm),
+    options?.manualBpm,
   );
+  applyGlobalBpmToTracks(tracks, globalBpm);
 
   const allNotes = tracks.flatMap((t) => midiEventsToNotes(t.events, t.bpm));
   const keyGuess = resolveHarmonicKey({
@@ -133,6 +141,11 @@ export function analyzeGlobalComposition(
       durationSec: t.durationSec,
     })),
     globalBpm,
+    detectedBpm,
+    manualBpm:
+      options?.manualBpm != null && options.manualBpm > 0
+        ? clampBpm(options.manualBpm)
+        : undefined,
     key: keyGuess.key,
     motifs,
     rhythms,

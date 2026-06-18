@@ -91,6 +91,9 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   const [preset, setPreset] = useState<StylePresetId>("glasper");
   const [stevieSlides, setStevieSlides] = useState(false);
   const [meendLevel, setMeendLevel] = useState<MeendLevel>("off");
+  const [useAutoTempo, setUseAutoTempo] = useState(true);
+  const [manualBpm, setManualBpm] = useState(120);
+  const [detectedBpm, setDetectedBpm] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,8 +114,15 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
     setForensics(null);
     setPart(null);
     setReport(null);
+    setDetectedBpm(null);
+    setUseAutoTempo(true);
     setError(null);
   }, []);
+
+  const tempoPayload = useCallback(
+    () => (useAutoTempo ? {} : { manualBpm }),
+    [manualBpm, useAutoTempo],
+  );
 
   const postEvolution = useCallback(
     async (body: Record<string, unknown>) => {
@@ -147,11 +157,17 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           sourceFilename: filenames[0],
           appendAfterLast: true,
           files,
+          ...tempoPayload(),
         };
         if (extra?.sectionId) body.sectionId = extra.sectionId;
 
         const data = await postEvolution(body);
-        if (data.memory) setMemory(data.memory);
+        if (data.memory) {
+          setMemory(data.memory);
+          const detected = data.memory.detectedBpm ?? data.memory.globalBpm;
+          setDetectedBpm(detected);
+          if (useAutoTempo) setManualBpm(detected);
+        }
         if (data.forensics) setForensics(data.forensics);
         if (data.part) setPart(data.part);
         if (data.report) setReport(data.report);
@@ -167,7 +183,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         setLoading(false);
       }
     },
-    [files, filenames, memory, meendLevel, part, postEvolution, preset, prompt, stevieSlides],
+    [files, filenames, manualBpm, memory, meendLevel, part, postEvolution, preset, prompt, stevieSlides, tempoPayload, useAutoTempo],
   );
 
   const runForensics = () => void callApi("forensics");
@@ -186,10 +202,14 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           stevieSlides,
           meendLevel,
           sourceFilename: filenames[0],
+          ...tempoPayload(),
         });
         if (analyzed?.memory) {
           mem = analyzed.memory;
           setMemory(analyzed.memory);
+          const detected = analyzed.memory.detectedBpm ?? analyzed.memory.globalBpm;
+          setDetectedBpm(detected);
+          if (useAutoTempo) setManualBpm(detected);
           setForensics(analyzed.forensics ?? null);
           setSuggestedSection(analyzed.suggestedSection ?? sectionId);
         }
@@ -208,8 +228,13 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         meendLevel,
         sourceFilename: filenames[0],
         appendAfterLast: true,
+        ...tempoPayload(),
       });
-      if (data?.memory) setMemory(data.memory);
+      if (data?.memory) {
+        setMemory(data.memory);
+        const detected = data.memory.detectedBpm ?? data.memory.globalBpm;
+        setDetectedBpm(detected);
+      }
       if (data?.part) setPart(data.part);
       if (data?.report) setReport(data.report);
       if (data?.suggestedSection) setSuggestedSection(data.suggestedSection);
@@ -294,6 +319,49 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+
+      {/* Tempo */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Tempo</p>
+          {detectedBpm != null && (
+            <span className="text-[10px] text-gray-500">
+              Detected from MIDI: <strong className="text-gray-700">{detectedBpm} BPM</strong>
+            </span>
+          )}
+        </div>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={useAutoTempo}
+            onChange={(e) => {
+              setUseAutoTempo(e.target.checked);
+              if (e.target.checked && detectedBpm != null) setManualBpm(detectedBpm);
+            }}
+            className="rounded border-gray-300"
+          />
+          Use detected tempo
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={20}
+            max={400}
+            step={1}
+            disabled={useAutoTempo || !files.length}
+            value={manualBpm}
+            onChange={(e) => setManualBpm(Math.max(20, Math.min(400, Number(e.target.value) || 120)))}
+            className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm disabled:opacity-50"
+            aria-label="Manual BPM"
+          />
+          <span className="text-sm text-gray-600">BPM (manual override)</span>
+        </div>
+        {!useAutoTempo && (
+          <p className="text-[10px] text-amber-700">
+            Beat grid rescales to your BPM — note timing in seconds stays the same.
+          </p>
         )}
       </div>
 
@@ -484,7 +552,8 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           onClick={() => void callApi("export")}
           className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
         >
-          Export MIDI pack
+          Export MIDI pack ({(part?.fileOutputs?.length ?? filenames.length) || 1} file
+        {((part?.fileOutputs?.length ?? filenames.length) || 1) === 1 ? "" : "s"})
         </button>
       </div>
 
@@ -504,7 +573,13 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               </span>
               <span>
                 <strong className="text-gray-800">BPM</strong> {memory.globalBpm}
+                {memory.manualBpm ? " (manual)" : memory.detectedBpm ? " (detected)" : ""}
               </span>
+              {memory.detectedBpm != null && memory.manualBpm != null && (
+                <span>
+                  <strong className="text-gray-800">Detected</strong> {memory.detectedBpm}
+                </span>
+              )}
               <span>
                 <strong className="text-gray-800">Motifs</strong> {memory.motifs.length}
               </span>
@@ -517,11 +592,21 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           {part && (
             <div className="p-3 bg-[#A05068]/5">
               <p className="font-medium text-gray-900">{part.label}</p>
-              <p className="text-xs text-gray-500 mt-1">{part.filename}</p>
               <p className="text-xs text-gray-600 mt-1">
                 Velocity & phrasing preserved · pitches reharmonized
                 {part.pitchBends?.length ? " · meend/slides applied" : ""}
               </p>
+              {part.fileOutputs?.length ? (
+                <ul className="mt-2 space-y-1">
+                  {part.fileOutputs.map((f) => (
+                    <li key={f.sourceFileId} className="text-[10px] font-mono text-gray-600">
+                      {f.sourceFilename} → {f.exportFilename}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-500 mt-1">{part.filename}</p>
+              )}
             </div>
           )}
           {report?.newHarmonicCenters?.length ? (

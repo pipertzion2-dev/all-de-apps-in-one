@@ -7,12 +7,14 @@ import type {
   CompositionMemory,
   EvolutionExportPack,
   GeneratedPart,
+  ImportedMidiTrack,
+  PerFileMidiOutput,
   TransformationReport,
 } from "./types";
-
-function stemBaseName(filename: string): string {
-  return filename.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9]+/g, "_");
-}
+import type { TransformOptions } from "./types";
+import { fileOutputsFromMemoryAndTracks } from "./per-file-export";
+import { sectionSpecToTransformOptions } from "./long-form-sections";
+import { LONG_FORM_SECTIONS } from "./long-form-sections";
 
 export function buildTransformationReport(
   memory: CompositionMemory,
@@ -51,46 +53,64 @@ export function buildTransformationReport(
   };
 }
 
+function resolveExportOptions(part: GeneratedPart): TransformOptions {
+  if (part.sectionId && LONG_FORM_SECTIONS[part.sectionId as keyof typeof LONG_FORM_SECTIONS]) {
+    const spec = LONG_FORM_SECTIONS[part.sectionId as keyof typeof LONG_FORM_SECTIONS];
+    return sectionSpecToTransformOptions(spec);
+  }
+  return {
+    prompt: part.prompt,
+    preset: part.preset,
+    preserveRhythm: true,
+    preservePhraseLength: true,
+    preservePhraseExactly: true,
+  };
+}
+
+function midiBytesForFileOutput(output: PerFileMidiOutput, exportBpm: number): Uint8Array {
+  const stemName = output.sourceFilename.replace(/\.[^.]+$/, "");
+  return buildMidiFileBytes(
+    [
+      {
+        name: stemName,
+        midiEvents: output.transformedEvents,
+        expression: output.pitchBends?.length
+          ? { meend: true, pitchbend: output.pitchBends }
+          : undefined,
+      },
+    ],
+    exportBpm,
+  );
+}
+
 export function buildEvolutionExportPack(
   memory: CompositionMemory,
   part: GeneratedPart,
   report: TransformationReport,
-  sourceFilename: string,
-  originalEvents?: GeneratedPart["events"],
+  tracks: ImportedMidiTrack[],
 ): EvolutionExportPack {
-  const bpm = memory.globalBpm;
-  const originalBase = stemBaseName(sourceFilename);
-  const originalMidi = buildMidiFileBytes(
-    [{ name: "Original", midiEvents: originalEvents ?? part.events }],
-    bpm,
-  );
+  const options = resolveExportOptions(part);
+  const fileOutputs = fileOutputsFromMemoryAndTracks(memory, tracks, part, options);
 
-  const transformedMidi = buildMidiFileBytes(
-    [
-      {
-        name: part.label,
-        midiEvents: part.events,
-        expression: part.pitchBends?.length
-          ? { meend: true, pitchbend: part.pitchBends }
-          : undefined,
-      },
-      { name: "Bass", midiEvents: part.bassEvents },
-      { name: "Harmony", midiEvents: part.harmonyEvents },
-      { name: "Melody", midiEvents: part.melodyEvents },
-    ],
-    bpm,
-  );
+  const midiFiles = fileOutputs.map((output) => ({
+    filename: output.exportFilename,
+    data: midiBytesForFileOutput(output, memory.globalBpm),
+  }));
 
-  const suffix = part.filename.replace(/\.mid$/i, "").replace(/^.*_/, "");
-  const transformedName = `${originalBase}_${suffix}.mid`;
+  const enrichedReport: TransformationReport = {
+    ...report,
+    exportedFiles: fileOutputs.map((f) => ({
+      source: f.sourceFilename,
+      export: f.exportFilename,
+      noteCount: f.transformedEvents.length,
+      bpm: f.bpm,
+    })),
+  };
 
   return {
     memory,
-    report,
-    midiFiles: [
-      { filename: `${originalBase}_Original.mid`, data: originalMidi },
-      { filename: transformedName, data: transformedMidi },
-    ],
+    report: enrichedReport,
+    midiFiles,
   };
 }
 
@@ -103,6 +123,11 @@ export async function buildEvolutionZipBuffer(pack: EvolutionExportPack): Promis
 
   archive.append(JSON.stringify(pack.memory, null, 2), { name: "CompositionMemory.json" });
   archive.append(JSON.stringify(pack.report, null, 2), { name: "TransformationReport.json" });
+  archive.append(
+    fileListReadme(pack.report, pack.midiFiles.map((f) => f.filename)),
+    { name: "README.txt" },
+  );
+
   for (const f of pack.midiFiles) {
     archive.append(Buffer.from(f.data), { name: f.filename });
   }
@@ -111,4 +136,25 @@ export async function buildEvolutionZipBuffer(pack: EvolutionExportPack): Promis
   await archive.finalize();
   await finished(passthrough);
   return Buffer.concat(chunks);
+}
+
+function fileListReadme(report: TransformationReport, filenames: string[]): string {
+  const lines = [
+    "Svivva MIDI Evolution Export",
+    "============================",
+    "",
+    `Section: ${report.sectionId ?? "—"} ${report.sectionTitle ?? ""}`.trim(),
+    `Files exported: ${filenames.length}`,
+    "",
+    "Each file matches an uploaded MIDI — same note timing & velocity, repitched harmony.",
+    "",
+    ...filenames.map((n) => `- ${n}`),
+  ];
+  if (report.exportedFiles?.length) {
+    lines.push("", "Source → export mapping:");
+    for (const m of report.exportedFiles) {
+      lines.push(`  ${m.source} → ${m.export}`);
+    }
+  }
+  return lines.join("\n");
 }

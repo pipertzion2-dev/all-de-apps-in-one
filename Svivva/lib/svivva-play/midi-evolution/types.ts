@@ -59,6 +59,8 @@ export type CompositionMemory = {
   updatedAt: string;
   sourceFiles: { id: string; filename: string; bpm: number; durationSec: number }[];
   globalBpm: number;
+  detectedBpm?: number;
+  manualBpm?: number;
   key: string;
   motifs: MotifRecord[];
   rhythms: { id: string; pattern: number[]; motifId?: string }[];
@@ -94,6 +96,16 @@ export type TransformOptions = {
   bassStrategy?: import("./style-presets").StylePreset["bassStrategy"];
 };
 
+export type PerFileMidiOutput = {
+  sourceFileId: string;
+  sourceFilename: string;
+  bpm: number;
+  originalEvents: NormalizedMidiEvent[];
+  transformedEvents: NormalizedMidiEvent[];
+  exportFilename: string;
+  pitchBends?: { beat: number; value: number }[];
+};
+
 export type GeneratedPart = {
   id: string;
   label: string;
@@ -109,6 +121,8 @@ export type GeneratedPart = {
   filename: string;
   sectionId?: import("./long-form-sections").LongFormSectionId;
   sectionTitle?: string;
+  /** One evolved MIDI per uploaded source file (for clean export). */
+  fileOutputs?: PerFileMidiOutput[];
 };
 
 export type TransformationReport = {
@@ -129,6 +143,7 @@ export type TransformationReport = {
   intentSummary?: string;
   aiProvider?: string;
   aiModel?: string;
+  exportedFiles?: { source: string; export: string; noteCount: number; bpm: number }[];
 };
 
 export type EvolutionExportPack = {

@@ -9,6 +9,8 @@ import {
   buildTransformationReport,
 } from "./export-pack";
 import { generateLongFormSection, suggestNextSection } from "./generate-long-form-section";
+import { buildPerFileOutputs } from "./per-file-export";
+import { clampBpm } from "./bpm-override";
 import { LONG_FORM_SECTIONS, type LongFormSectionId } from "./long-form-sections";
 import { transformComposition } from "./transform-engine";
 import type {
@@ -26,6 +28,7 @@ export type EvolutionRequest = {
   preset?: StylePresetId;
   stevieSlides?: boolean;
   meendLevel?: MeendLevel;
+  manualBpm?: number | null;
   memory?: CompositionMemory;
   lastPart?: GeneratedPart;
   sourceFilename?: string;
@@ -61,13 +64,27 @@ function decodeFiles(files: EvolutionRequest["files"]): { filename: string; buff
   });
 }
 
+function resolveManualBpm(req: EvolutionRequest): number | undefined {
+  const raw = req.manualBpm ?? req.memory?.manualBpm;
+  if (raw == null || raw <= 0) return undefined;
+  return clampBpm(raw);
+}
+
+function analyzeDecoded(
+  decoded: { filename: string; buffer: ArrayBuffer }[],
+  req: EvolutionRequest,
+) {
+  const manualBpm = resolveManualBpm(req);
+  return analyzeGlobalComposition(decoded, manualBpm != null ? { manualBpm } : undefined);
+}
+
 function resolveSourceEvents(
   req: EvolutionRequest,
   memory: CompositionMemory,
 ): NormalizedMidiEvent[] {
   const decoded = decodeFiles(req.files);
   if (decoded.length) {
-    return mergeTracksToEvents(analyzeGlobalComposition(decoded).tracks);
+    return mergeTracksToEvents(analyzeDecoded(decoded, req).tracks);
   }
   if (req.lastPart?.originalEvents?.length) return req.lastPart.originalEvents;
   if (req.lastPart?.events?.length) return req.lastPart.events;
@@ -78,7 +95,7 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
   if (req.action === "analyze" || req.action === "forensics") {
     const decoded = decodeFiles(req.files);
     if (!decoded.length) throw new Error("At least one MIDI file required");
-    const { memory, tracks, phrases } = analyzeGlobalComposition(decoded);
+    const { memory, tracks, phrases } = analyzeDecoded(decoded, req);
     const forensics = runCompositionalForensics(tracks, memory, phrases);
     return {
       memory,
@@ -93,7 +110,7 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
   if (!memory) {
     const decoded = decodeFiles(req.files);
     if (!decoded.length) throw new Error("Composition memory or MIDI files required");
-    memory = analyzeGlobalComposition(decoded).memory;
+    memory = analyzeDecoded(decoded, req).memory;
   }
 
   const preset = req.preset ?? "custom";
@@ -115,9 +132,11 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
   if (req.action === "generate-section") {
     if (!req.sectionId) throw new Error("sectionId required (B–J)");
     const decoded = decodeFiles(req.files);
-    if (!memory.motifs.length && decoded.length) {
-      const analyzed = analyzeGlobalComposition(decoded);
+    let tracks: import("./types").ImportedMidiTrack[] | undefined;
+    if (decoded.length) {
+      const analyzed = analyzeDecoded(decoded, req);
       memory = analyzed.memory;
+      tracks = analyzed.tracks;
     }
     const sourceEvents = resolveSourceEvents(req, memory);
     if (!sourceEvents.length) throw new Error("Upload MIDI files for section generation");
@@ -128,6 +147,7 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
       sourceFilename,
       req.appendAfterLast !== false ? req.lastPart : null,
       { meendLevel: req.meendLevel, stevieSlides: req.stevieSlides },
+      tracks,
     );
     const report = buildTransformationReport(updated, part, aiPlan);
     return {
@@ -170,19 +190,29 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
 
   if (req.action === "export") {
     if (!req.lastPart) throw new Error("lastPart required for export");
+    const decoded = decodeFiles(req.files);
+    let tracks: import("./types").ImportedMidiTrack[];
+    if (decoded.length) {
+      tracks = analyzeDecoded(decoded, req).tracks;
+    } else if (req.lastPart.fileOutputs?.length) {
+      tracks = req.lastPart.fileOutputs.map((f) => ({
+        id: f.sourceFileId,
+        filename: f.sourceFilename,
+        bpm: f.bpm,
+        durationSec: 0,
+        events: f.originalEvents,
+        role: "mixed" as const,
+      }));
+    } else {
+      throw new Error("Re-upload MIDI files or regenerate the section before export");
+    }
     const report = buildTransformationReport(memory, req.lastPart, aiPlan);
-    const pack = buildEvolutionExportPack(
-      memory,
-      req.lastPart,
-      report,
-      sourceFilename,
-      req.lastPart.originalEvents,
-    );
+    const pack = buildEvolutionExportPack(memory, req.lastPart, report, tracks);
     const zip = await buildEvolutionZipBuffer(pack);
     return {
       memory,
       part: req.lastPart,
-      report,
+      report: pack.report,
       zipBase64: zip.toString("base64"),
       suggestedSection: suggestNextSection(memory),
     };
@@ -199,6 +229,20 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
     options,
     sourceFilename,
   );
+  const decodedForTransform = decodeFiles(req.files);
+  if (decodedForTransform.length) {
+    const { tracks } = analyzeDecoded(decodedForTransform, req);
+    const fileOutputs = buildPerFileOutputs(
+      tracks,
+      updated,
+      options,
+      undefined,
+      part.label,
+    );
+    part.fileOutputs = fileOutputs;
+    part.events = fileOutputs.flatMap((f) => f.transformedEvents);
+    if (fileOutputs.length === 1) part.filename = fileOutputs[0]!.exportFilename;
+  }
   const report = buildTransformationReport(updated, part, aiPlan);
   return {
     memory: updated,
