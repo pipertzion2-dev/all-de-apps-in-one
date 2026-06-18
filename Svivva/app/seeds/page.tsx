@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
+import { OrbitAdminAccessButton } from "@/components/orbit-admin-access-button";
 import SeedsInvariantCompiler from "@/components/seeds-invariant-compiler";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
@@ -693,19 +694,7 @@ export default function SeedsPage() {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link href="/dashboard/orbit">
-              <Button
-                size="sm"
-                className="h-8 gap-1 px-2 text-[10px] font-bold text-white shadow-sm sm:h-8 sm:px-3 sm:text-xs sm:gap-1.5"
-                style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
-                data-testid="button-seeds-orbit-admin"
-                aria-label="Orbit Admin"
-              >
-                <Rocket className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-                <span className="hidden min-[400px]:inline sm:inline">Orbit</span>
-                <span className="hidden sm:inline"> Admin</span>
-              </Button>
-            </Link>
+            <OrbitAdminAccessButton data-testid="button-seeds-orbit-admin" />
             <Link href="/dashboard" className="hidden md:inline-flex">
               <Button
                 variant="outline"
