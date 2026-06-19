@@ -20,14 +20,22 @@ export function buildFeaturePageScene(
   scene.add(bloom.root);
 
   const cluster = buildAdvancedGraphicCluster(variant, palette);
-  cluster.group.position.set(0, 0, -7);
-  cluster.group.scale.setScalar(0.55);
+  // Play gets a closer, fuller view so the vibraphone bars and notes are legible
+  const clusterZ = variant === "play" ? -5 : -7;
+  const clusterScale = variant === "play" ? 0.62 : 0.55;
+  cluster.group.position.set(0, variant === "play" ? -0.3 : 0, clusterZ);
+  cluster.group.scale.setScalar(clusterScale);
   scene.add(cluster.group);
 
   return Promise.resolve((t: number, scrollOverride?: number) => {
     const scroll = scrollOverride ?? pageScrollProgress();
     bloom.tick(t, scroll * 0.6, mouse);
     cluster.tick(t, scroll * 0.4, mouse);
-    cluster.group.rotation.y = scroll * 0.25 + mouse.x * 0.06;
+    cluster.group.rotation.y =
+      scroll * (variant === "play" ? 0.1 : 0.25) + mouse.x * (variant === "play" ? 0.04 : 0.06);
+    // Play cluster: slight horizontal drift with mouse for immersion
+    if (variant === "play") {
+      cluster.group.position.x = mouse.x * 0.3;
+    }
   });
 }

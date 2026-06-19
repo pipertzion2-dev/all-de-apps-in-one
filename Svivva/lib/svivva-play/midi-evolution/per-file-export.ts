@@ -24,7 +24,13 @@ export function buildPerFileOutputs(
       bpm: memory.globalBpm,
       originalEvents: track.events,
       transformedEvents: events,
-      exportFilename: evolutionExportFilename(track.filename, sectionId, fallbackLabel),
+      exportFilename: evolutionExportFilename(
+        track.filename,
+        sectionId,
+        fallbackLabel,
+        memory.globalBpm,
+        memory.key,
+      ),
       pitchBends: pitchBends.length ? pitchBends : undefined,
     };
   });

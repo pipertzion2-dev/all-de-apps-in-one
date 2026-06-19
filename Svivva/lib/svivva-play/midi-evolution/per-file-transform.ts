@@ -73,19 +73,44 @@ export function repitchSourceFileEvents(
 }
 
 /** `MySong.mid` + section J → `MySong_Section-J.mid` (preserves original basename). */
+// Mapping from section id to its short name for filenames
+const SECTION_SHORT: Record<string, string> = {
+  B: "Shadow-Portal",
+  C: "Fractured-Mirror",
+  D: "Floating-City",
+  E: "Abyss",
+  F: "Indian-Horizon",
+  G: "Glasper-Dimension",
+  H: "Derrick-Hodge",
+  I: "Cosmic-Tension",
+  J: "Revelation",
+};
+
+/**
+ * Produce a DAW-friendly filename that sorts and identifies instantly.
+ * Format: Sec-{id}_{Section-Name}_{stem}_{bpm}bpm_{key}.mid
+ * e.g.  Sec-G_Glasper-Dimension_Bass_92bpm_Ebm.mid
+ */
 export function evolutionExportFilename(
   sourceFilename: string,
   sectionId?: string,
   fallbackLabel?: string,
+  bpm?: number,
+  key?: string,
 ): string {
   const baseName = sourceFilename.replace(/^.*[/\\]/, "");
   const match = baseName.match(/^(.+?)(\.[^.]+)?$/);
-  const base = match?.[1] ?? baseName;
+  const stem = (match?.[1] ?? baseName).replace(/[^a-zA-Z0-9_-]/g, "-");
   const ext = match?.[2] ?? ".mid";
-  const tag = sectionId
-    ? `_Section-${sectionId}`
+
+  const sectionTag = sectionId
+    ? `Sec-${sectionId}_${SECTION_SHORT[sectionId] ?? sectionId}`
     : fallbackLabel
-      ? `_${fallbackLabel.replace(/[^a-zA-Z0-9-_]+/g, "-")}`
-      : "_Evolved";
-  return `${base}${tag}${ext}`;
+      ? fallbackLabel.replace(/[^a-zA-Z0-9-_]+/g, "-")
+      : "Evolved";
+
+  const bpmTag = bpm ? `_${Math.round(bpm)}bpm` : "";
+  const keyTag = key ? `_${key.replace(/[^a-zA-Z0-9#b]/g, "")}` : "";
+
+  return `${sectionTag}_${stem}${bpmTag}${keyTag}${ext}`;
 }

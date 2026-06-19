@@ -16,9 +16,15 @@ function makeNotes(midiSeq: number[]): TranscribedNote[] {
 }
 
 describe("evolution export filenames", () => {
-  it("keeps original basename and adds section tag", () => {
-    expect(evolutionExportFilename("Bass Line.mid", "J")).toBe("Bass Line_Section-J.mid");
-    expect(evolutionExportFilename("parts/Lead.mid", "B")).toBe("Lead_Section-B.mid");
+  it("produces DAW-friendly names with section name, stem, bpm, and key", () => {
+    expect(evolutionExportFilename("Bass Line.mid", "J", undefined, 120, "Cm")).toBe(
+      "Sec-J_Revelation_Bass-Line_120bpm_Cm.mid",
+    );
+    expect(evolutionExportFilename("parts/Lead.mid", "B", undefined, 92, "Eb")).toBe(
+      "Sec-B_Shadow-Portal_Lead_92bpm_Eb.mid",
+    );
+    // Without optional bpm/key
+    expect(evolutionExportFilename("Bass.mid", "G")).toBe("Sec-G_Glasper-Dimension_Bass.mid");
   });
 });
 
@@ -75,8 +81,8 @@ describe("per-file export pack", () => {
     };
     const fileOutputs = buildPerFileOutputs(tracks, memory, options, "G");
     expect(fileOutputs).toHaveLength(2);
-    expect(fileOutputs[0]!.exportFilename).toBe("Bass_Section-G.mid");
-    expect(fileOutputs[1]!.exportFilename).toBe("Melody_Section-G.mid");
+    expect(fileOutputs[0]!.exportFilename).toBe("Sec-G_Glasper-Dimension_Bass_120bpm_C.mid");
+    expect(fileOutputs[1]!.exportFilename).toBe("Sec-G_Glasper-Dimension_Melody_120bpm_C.mid");
     expect(fileOutputs[0]!.transformedEvents).toHaveLength(eventsA.length);
 
     const part = {
@@ -114,8 +120,8 @@ describe("per-file export pack", () => {
 
     expect(pack.midiFiles).toHaveLength(2);
     expect(pack.midiFiles.map((f) => f.filename)).toEqual([
-      "Bass_Section-G.mid",
-      "Melody_Section-G.mid",
+      "Sec-G_Glasper-Dimension_Bass_120bpm_C.mid",
+      "Sec-G_Glasper-Dimension_Melody_120bpm_C.mid",
     ]);
     expect(pack.midiFiles.every((f) => f.data.length > 20)).toBe(true);
   });
