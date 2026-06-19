@@ -166,155 +166,320 @@ function buildVariant(root: THREE.Group, variant: FeatureId, parts: BloomPart[])
   addMotes(root, palette, 28);
 
   if (variant === "play") {
-    for (let i = 0; i < 9; i++) {
-      addBloomCluster(
-        root,
-        new THREE.Vector3((i - 4) * 1.35, Math.sin(i * 0.9) * 0.5, -4 - i * 0.55),
-        palette,
-        {
-          petalCount: 6,
-          shape: "curved",
-          scale: 0.9,
-          openAngle: 0.35,
-          petalWidth: 0.22,
-          petalLength: 0.75,
-        },
-        parts,
+    // Orchestra seating chart: melodic (curved), rhythmic (pointed), harmonic (star) clusters
+    // at varying depths suggesting front-to-back ensemble staging
+    const PLAY_CONFIGS: Array<{ shape: PetalShape; count: number; row: number; yOff: number }> = [
+      { shape: "curved", count: 5, row: 0, yOff: 0.2 }, // melodic voices
+      { shape: "star", count: 4, row: 1, yOff: -0.15 }, // harmonic layers
+      { shape: "teardrop", count: 3, row: 2, yOff: 0.35 }, // percussion contour
+    ];
+    PLAY_CONFIGS.forEach(({ shape, count, row, yOff }) => {
+      for (let i = 0; i < count; i++) {
+        addBloomCluster(
+          root,
+          new THREE.Vector3(
+            (i - (count - 1) / 2) * (1.4 + row * 0.3),
+            Math.sin(i * 0.9 + row) * 0.55 + yOff,
+            -4.5 - row * 1.4 - i * 0.22,
+          ),
+          palette,
+          {
+            petalCount: shape === "curved" ? 6 : shape === "star" ? 8 : 5,
+            shape,
+            scale: 0.88 - row * 0.06,
+            openAngle: 0.32 + row * 0.04,
+            petalWidth: 0.22,
+            petalLength: 0.72 - row * 0.06,
+            layers: row === 1 ? 2 : 1,
+          },
+          parts,
+        );
+      }
+    });
+    // Grand staff lines behind everything
+    for (let s = 0; s < 5; s++) {
+      const staffMat = createAccentPhysical(
+        s % 2 === 0 ? palette.primary : palette.highlight,
+        0.55,
       );
+      const staffLine = new THREE.Mesh(new THREE.BoxGeometry(14, 0.03, 0.02), staffMat);
+      staffLine.position.set(0, 1.6 - s * 0.55, -8.5);
+      root.add(staffLine);
     }
   } else if (variant === "seeds") {
-    for (let b = 0; b < 12; b++) {
-      const ang = (b / 12) * Math.PI * 2;
+    // Living blueprint: inner ring of organic growths + outer ring of architectural panels
+    for (let b = 0; b < 8; b++) {
+      const ang = (b / 8) * Math.PI * 2;
       const g = new THREE.Group();
       addBloomCluster(
         g,
         new THREE.Vector3(0, 0, 0),
         palette,
         {
-          petalCount: b % 2 === 0 ? 5 : 7,
-          shape: b % 3 === 0 ? "teardrop" : "rounded",
-          scale: 0.75,
-          openAngle: 0.42,
+          petalCount: b % 2 === 0 ? 7 : 5,
+          shape: b % 4 === 0 ? "teardrop" : b % 4 === 2 ? "crystal" : "rounded",
+          scale: 0.78,
+          openAngle: 0.44,
           petalWidth: 0.28,
-          petalLength: 0.65,
+          petalLength: 0.68,
           layers: 2,
         },
         parts,
       );
-      g.position.set(Math.cos(ang) * 2.2, Math.sin(ang) * 1.6 - 0.5, -5 - b * 0.35);
+      g.position.set(Math.cos(ang) * 2.0, Math.sin(ang) * 1.45 - 0.3, -5 - b * 0.3);
       g.rotation.z = ang + Math.PI / 2;
       root.add(g);
     }
-  } else if (variant === "orbit") {
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * Math.PI * 2;
+    // Outer architectural panel ring (farther, larger)
+    for (let b = 0; b < 6; b++) {
+      const ang = (b / 6) * Math.PI * 2 + Math.PI / 6;
+      const g2 = new THREE.Group();
       addBloomCluster(
-        root,
-        new THREE.Vector3(Math.cos(a) * 2.5, Math.sin(a) * 1.2, -5.5 - (i % 4) * 0.6),
+        g2,
+        new THREE.Vector3(0, 0, 0),
         palette,
         {
-          petalCount: 8,
-          shape: "star",
-          scale: 0.65,
-          openAngle: 0.28,
+          petalCount: 4,
+          shape: "panel",
+          scale: 0.62,
+          openAngle: 0.22,
+          petalWidth: 0.42,
+          petalLength: 0.52,
+        },
+        parts,
+      );
+      g2.position.set(Math.cos(ang) * 3.8, Math.sin(ang) * 2.4 - 0.4, -7.5 - b * 0.4);
+      g2.rotation.z = ang;
+      root.add(g2);
+    }
+    // Rising vertical rods (architecture columns growing upward)
+    for (let r = 0; r < 5; r++) {
+      const rod = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, 2.5 + r * 0.5, 8),
+        createAccentPhysical(r % 2 === 0 ? palette.wire : palette.primary, 0.58),
+      );
+      rod.position.set(-2 + r * 1.0, -0.5, -7.2 - r * 0.3);
+      rod.userData.rodIndex = r;
+      root.add(rod);
+    }
+  } else if (variant === "orbit") {
+    // Planetary orbit system: 3 rings at different inclinations + signal node clusters
+    const ORBIT_RINGS = [
+      { r: 2.5, incline: Math.PI / 2.2, speed: 0.12 },
+      { r: 3.6, incline: Math.PI / 3.5, speed: 0.08 },
+      { r: 4.8, incline: Math.PI / 2.8, speed: 0.055 },
+    ];
+    ORBIT_RINGS.forEach(({ r, incline }, i) => {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(r, 0.035 + i * 0.01, 10, 56),
+        createAccentPhysical(
+          i === 0 ? palette.tertiary : i === 1 ? palette.secondary : palette.primary,
+          0.58,
+        ),
+      );
+      ring.position.z = -6 - i * 0.5;
+      ring.rotation.x = incline;
+      ring.userData.ringIndex = i;
+      root.add(ring);
+    });
+    // Satellite node clusters orbiting the rings — panel shapes (like radar screens)
+    for (let i = 0; i < 12; i++) {
+      const tier = i % 3;
+      const a = (i / 4) * Math.PI * 2 + tier * (Math.PI / 6);
+      const r = ORBIT_RINGS[tier]!.r;
+      addBloomCluster(
+        root,
+        new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.42, -6 - tier * 0.5),
+        palette,
+        {
+          petalCount: i % 3 === 0 ? 8 : 5,
+          shape: i % 3 === 0 ? "star" : i % 3 === 1 ? "panel" : "rounded",
+          scale: 0.52 + tier * 0.04,
+          openAngle: 0.25,
           petalWidth: 0.16,
-          petalLength: 0.5,
+          petalLength: 0.44,
         },
         parts,
       );
     }
-    [2.8, 3.8, 4.6].forEach((r, i) => {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(r, 0.04, 8, 48),
-        createAccentPhysical(i % 2 ? palette.tertiary : palette.secondary, 0.62),
+    // Growth trajectory guide lines (faint arcs in background)
+    for (let g = 0; g < 3; g++) {
+      const arc = new THREE.Mesh(
+        new THREE.TorusGeometry(1.2 + g * 0.8, 0.012, 6, 24, Math.PI * 0.65),
+        createAccentPhysical(palette.highlight, 0.38),
       );
-      ring.position.z = -6;
-      ring.rotation.x = Math.PI / 2.2;
-      ring.userData.ringIndex = i;
-      root.add(ring);
-    });
+      arc.position.set(-0.5, -1.0 + g * 0.5, -8 - g * 0.4);
+      arc.rotation.z = Math.PI / 4 + g * 0.2;
+      root.add(arc);
+    }
   } else if (variant === "security") {
-    for (let i = 0; i < 3; i++) {
+    // Ornate seal: concentric layered blooms + crystal lattice cage + cipher rings
+    for (let i = 0; i < 4; i++) {
       addBloomCluster(
         root,
-        new THREE.Vector3(0, 0, -5 - i * 1.2),
+        new THREE.Vector3(Math.sin(i * 0.6) * 0.4, Math.cos(i * 0.8) * 0.3, -5 - i * 1.0),
         palette,
         {
-          petalCount: 12,
-          shape: "layered",
-          scale: 1.05 - i * 0.12,
-          openAngle: 0.32,
-          petalWidth: 0.3,
+          petalCount: i % 2 === 0 ? 12 : 8,
+          shape: i % 2 === 0 ? "layered" : "crystal",
+          scale: 1.08 - i * 0.1,
+          openAngle: 0.3 + i * 0.02,
+          petalWidth: 0.28 + i * 0.02,
           petalLength: 0.42,
           layers: 3,
         },
         parts,
       );
     }
-    for (let i = 0; i < 14; i++) {
-      const barb = new THREE.Mesh(
-        new THREE.TorusGeometry(0.35, 0.025, 6, 16),
-        createAccentPhysical(palette.highlight, 0.78),
+    // Cipher rings (hexagonal locking rings at various tilts)
+    [
+      [3.2, Math.PI / 2, 0],
+      [4.2, Math.PI / 2.6, 0.4],
+      [2.1, Math.PI / 1.8, -0.3],
+    ].forEach(([r, rx, rz], i) => {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(r as number, 0.038, 6, 36),
+        createAccentPhysical(i % 2 === 0 ? palette.secondary : palette.highlight, 0.72),
       );
-      barb.position.set((i - 7) * 0.85, Math.sin(i * 0.8) * 0.4, -9 - i * 0.45);
-      barb.rotation.set(Math.PI / 2, i * 0.4, 0);
-      barb.userData.barbIndex = i;
-      root.add(barb);
+      ring.position.z = -7.5 - i * 0.6;
+      ring.rotation.x = rx as number;
+      ring.rotation.z = rz as number;
+      ring.userData.barbIndex = i + 20; // reuse barb animation
+      root.add(ring);
+    });
+    // Crystal spike field in background
+    for (let i = 0; i < 18; i++) {
+      const mat = createBloomLayerMaterial(paletteColors(palette), 0.14);
+      const spike = new THREE.Mesh(new THREE.OctahedronGeometry(0.18 + (i % 3) * 0.06, 0), mat);
+      spike.position.set(
+        ((i % 6) - 2.5) * 1.1,
+        Math.sin(i * 0.9) * 0.7,
+        -9 - Math.floor(i / 6) * 0.8,
+      );
+      spike.scale.y = 1.6 + (i % 3) * 0.4;
+      spike.userData.gemPhase = i;
+      root.add(spike);
+      parts.push({ mesh: spike, material: mat, phase: i, baseBloom: 0.16 });
     }
   } else if (variant === "api") {
-    for (let i = 0; i < 5; i++) {
-      const c = new THREE.Group();
-      c.position.set((i - 2) * 1.1, 0, -4 - i * 1.1);
-      c.add(
-        new THREE.Mesh(
-          new THREE.BoxGeometry(1.8, 1.2, 0.14),
-          createAccentPhysical(i % 2 ? palette.primary : palette.secondary, 0.65),
-        ),
+    // API manifest: structured grid of endpoint panels + connector manifold
+    const GRID_ROWS = 3;
+    const GRID_COLS = 4;
+    for (let row = 0; row < GRID_ROWS; row++) {
+      for (let col = 0; col < GRID_COLS; col++) {
+        const panelGroup = new THREE.Group();
+        const mat = createBloomLayerMaterial(paletteColors(palette), 0.12);
+        const card = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.85, 0.08), mat);
+        panelGroup.add(card);
+        parts.push({ mesh: card, material: mat, phase: row * GRID_COLS + col, baseBloom: 0.2 });
+
+        // Method gem on card
+        const gemMat = createBloomLayerMaterial(paletteColors(palette), 0.18);
+        const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), gemMat);
+        gem.position.set(-0.5, 0.22, 0.08);
+        gem.userData.gemPhase = row + col;
+        panelGroup.add(gem);
+        parts.push({ mesh: gem, material: gemMat, phase: row + col + 8, baseBloom: 0.22 });
+
+        panelGroup.position.set(
+          (col - 1.5) * 1.85,
+          (row - 1) * 1.15,
+          -5.5 - row * 0.9 - col * 0.22,
+        );
+        root.add(panelGroup);
+      }
+    }
+    // Horizontal manifold connector between columns
+    for (let row = 0; row < GRID_ROWS; row++) {
+      const manifold = new THREE.Mesh(
+        new THREE.BoxGeometry(6.5, 0.025, 0.025),
+        createAccentPhysical(palette.wire, 0.55),
       );
-      const lidMat = createBloomLayerMaterial(paletteColors(palette), 0.11);
-      const lid = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 0.1), lidMat);
-      lid.position.set(0, 0.85, 0.02);
-      lid.userData.isLid = true;
-      c.add(lid);
-      parts.push({ mesh: lid, material: lidMat, phase: i, baseBloom: 0.25 });
+      manifold.position.set(0, (row - 1) * 1.15, -5.5 - row * 0.9);
+      root.add(manifold);
+    }
+    // Bloom clusters erupting between rows (routing hubs)
+    for (let i = 0; i < 4; i++) {
       addBloomCluster(
-        c,
-        new THREE.Vector3(0, 0.15, 0.12),
+        root,
+        new THREE.Vector3((i - 1.5) * 1.85, 0, -7.2 - i * 0.4),
         palette,
         {
           petalCount: 5,
           shape: "panel",
-          scale: 0.55,
-          openAngle: 0.2,
-          petalWidth: 0.35,
-          petalLength: 0.4,
+          scale: 0.48,
+          openAngle: 0.18,
+          petalWidth: 0.38,
+          petalLength: 0.38,
         },
         parts,
       );
-      root.add(c);
     }
   } else {
-    for (let row = 0; row < 4; row++) {
+    // hardware — PCB component landscape: IC grid, bloom solder joints, trace lines
+    for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 5; col++) {
+        const idx = row * 5 + col;
+        const shape: PetalShape =
+          idx % 5 === 0
+            ? "crystal"
+            : idx % 5 === 2
+              ? "panel"
+              : idx % 3 === 0
+                ? "rounded"
+                : "teardrop";
         const mat = createBloomLayerMaterial(paletteColors(palette), 0.13);
-        const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), mat);
-        gem.position.set((col - 2) * 1.25, (row - 1.5) * 0.95, -5 - row * 0.85);
-        gem.userData.gemPhase = row + col;
-        root.add(gem);
-        parts.push({ mesh: gem, material: mat, phase: row + col, baseBloom: 0.18 });
+        const comp = new THREE.Mesh(
+          shape === "crystal"
+            ? new THREE.OctahedronGeometry(0.28, 0)
+            : shape === "panel"
+              ? new THREE.BoxGeometry(0.75, 0.44, 0.1)
+              : new THREE.SphereGeometry(0.2, 10, 8),
+          mat,
+        );
+        comp.position.set((col - 2) * 1.32, (row - 1) * 1.05, -5 - row * 0.9);
+        comp.userData.gemPhase = idx;
+        root.add(comp);
+        parts.push({ mesh: comp, material: mat, phase: idx, baseBloom: 0.18 });
+
+        // Bloom cluster at each component site
+        addBloomCluster(
+          root,
+          new THREE.Vector3((col - 2) * 1.32, (row - 1) * 1.05, -5 - row * 0.9 + 0.4),
+          palette,
+          {
+            petalCount: shape === "crystal" ? 8 : 5,
+            shape: shape === "crystal" ? "star" : "rounded",
+            scale: 0.35,
+            openAngle: 0.28,
+            petalWidth: 0.14,
+            petalLength: 0.32,
+          },
+          parts,
+        );
       }
     }
+    // PCB trace lines connecting components
+    for (let t = 0; t < 4; t++) {
+      const trace = new THREE.Mesh(
+        new THREE.BoxGeometry(6.8, 0.022, 0.022),
+        createAccentPhysical(t % 2 === 0 ? palette.secondary : palette.wire, 0.52),
+      );
+      trace.position.set(0, -1 + t * 0.65, -6.2 - t * 0.3);
+      root.add(trace);
+    }
+    // Hybridizer crystal at center
     addBloomCluster(
       root,
-      new THREE.Vector3(0, 0.5, -3),
+      new THREE.Vector3(0, 0.2, -3.5),
       palette,
       {
         petalCount: 10,
         shape: "crystal",
-        scale: 1.2,
-        openAngle: 0.45,
-        petalWidth: 0.38,
-        petalLength: 0.55,
+        scale: 1.1,
+        openAngle: 0.42,
+        petalWidth: 0.35,
+        petalLength: 0.52,
         layers: 2,
       },
       parts,
@@ -343,15 +508,31 @@ export function buildFeatureBloomScene(
     root.rotation.x = -0.04 + scroll * 0.1 + (mouse?.y ?? 0) * 0.04;
     root.children.forEach((ch) => {
       if (ch instanceof THREE.Mesh && ch.userData.barbIndex !== undefined) {
-        ch.position.z = -9 - ch.userData.barbIndex * 0.45 + ((t * 0.5 + scroll * 3) % 6);
-        ch.rotation.y = t * 0.3;
+        // Security cipher rings (barbIndex >= 20) and legacy barbs
+        const bi = ch.userData.barbIndex as number;
+        if (bi >= 20) {
+          ch.rotation.z = t * (0.1 + (bi - 20) * 0.08) * (bi % 2 === 0 ? 1 : -1);
+        } else {
+          ch.position.z = -9 - bi * 0.45 + ((t * 0.5 + scroll * 3) % 6);
+          ch.rotation.y = t * 0.3;
+        }
       }
       if (ch instanceof THREE.Mesh && ch.userData.gemPhase !== undefined) {
         ch.rotation.x = t * 0.22 + scroll * 0.5;
         ch.rotation.y = t * 0.16;
       }
       if (ch instanceof THREE.Mesh && ch.userData.ringIndex !== undefined) {
-        ch.rotation.z = t * (0.15 + ch.userData.ringIndex * 0.05) + scroll * 0.8;
+        const ri = ch.userData.ringIndex as number;
+        ch.rotation.z = t * (0.12 + ri * 0.04) + scroll * 0.7;
+        // Orbit rings also precess slightly
+        if (variant === "orbit") {
+          ch.rotation.y = t * (0.02 + ri * 0.01);
+        }
+      }
+      if (ch instanceof THREE.Mesh && ch.userData.rodIndex !== undefined) {
+        // Seeds architecture rods grow on scroll
+        const ri = ch.userData.rodIndex as number;
+        ch.scale.y = 1 + scroll * 0.4 + Math.sin(t * 0.6 + ri) * 0.04;
       }
     });
   };

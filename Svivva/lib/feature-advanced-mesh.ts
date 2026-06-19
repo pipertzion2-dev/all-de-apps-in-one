@@ -44,140 +44,159 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
   const panels: THREE.Group[] = [];
 
-  // Music staff — solid thin bars (SETTLE DOWN header)
-  for (let s = 0; s < 5; s++) {
-    const staff = new THREE.Mesh(
-      new THREE.BoxGeometry(13.5, 0.035, 0.025),
-      metal(s % 2 === 0 ? p.primary : p.highlight, 0.28),
-    );
-    staff.position.set(0, 2.35 - s * 0.52, -1.8);
-    group.add(staff);
+  // Blueprint grid — faint horizontal + vertical trace lines (architectural drawing)
+  for (let g = 0; g < 6; g++) {
+    const hLine = new THREE.Mesh(new THREE.BoxGeometry(11, 0.018, 0.012), metal(p.wire, 0.42));
+    hLine.position.set(0, 2.6 - g * 0.85, -2.4);
+    group.add(hLine);
+  }
+  for (let g = 0; g < 8; g++) {
+    const vLine = new THREE.Mesh(new THREE.BoxGeometry(0.018, 4.8, 0.012), metal(p.wire, 0.38));
+    vLine.position.set(-3.5 + g * 1.0, 0, -2.4);
+    group.add(vLine);
   }
 
-  // Central spec core — glass dodecahedron seed
+  // Central spec core — glass dodecahedron (the compiled "seed")
   const core = new THREE.Mesh(
-    new THREE.DodecahedronGeometry(1.05, 2),
-    glass(p.tertiary, { emissive: 0.42, transmission: 0.62 }),
+    new THREE.DodecahedronGeometry(0.95, 2),
+    glass(p.tertiary, { emissive: 0.48, transmission: 0.58 }),
   );
   core.position.set(0, 0.1, 0.4);
   group.add(core);
 
   const innerCore = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(0.42, 1),
-    glass(p.highlight, { emissive: 0.55, transmission: 0.35, metalness: 0.65 }),
+    new THREE.IcosahedronGeometry(0.38, 1),
+    glass(p.highlight, { emissive: 0.6, transmission: 0.32, metalness: 0.68 }),
   );
   innerCore.position.set(0, 0.1, 0.4);
   group.add(innerCore);
 
-  // Four satellite seed pods
+  // Stack layer slabs — frontend / backend / database / auth (float above each other)
+  const LAYER_LABELS = ["auth", "database", "backend", "frontend"];
+  const layerSlabs: THREE.Mesh[] = [];
+  LAYER_LABELS.forEach((_, i) => {
+    const slab = new THREE.Mesh(
+      new THREE.BoxGeometry(3.2 - i * 0.3, 0.08, 1.8 - i * 0.15),
+      glass([p.primary, p.secondary, p.tertiary, p.highlight][i], {
+        transmission: 0.52,
+        metalness: 0.45,
+        emissive: 0.22,
+      }),
+    );
+    slab.position.set(-3.8, -1.2 + i * 0.72, -1.5 - i * 0.2);
+    slab.rotation.x = 0.18;
+    layerSlabs.push(slab);
+    group.add(slab);
+    // connector pin on each slab
+    for (let p2 = 0; p2 < 4; p2++) {
+      const pin = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 0.22, 6),
+        metal(p.wire, 0.2),
+      );
+      pin.position.set(-1.4 + p2 * 0.95, 0.15, 0);
+      slab.add(pin);
+    }
+  });
+
+  // Four satellite service pods with technical stems
   const podGroups: THREE.Group[] = [];
   const positions: [number, number, number][] = [
-    [-2.55, 1.55, -0.35],
-    [2.45, 1.35, -0.55],
-    [-2.35, -1.45, -0.2],
-    [2.55, -1.25, -0.45],
+    [-2.45, 1.45, -0.35],
+    [2.35, 1.25, -0.55],
+    [-2.25, -1.35, -0.2],
+    [2.45, -1.15, -0.45],
   ];
   const colors = [p.primary, p.highlight, p.secondary, p.wire];
-  const motifs: Array<"gold" | "purple" | "grain" | "courtyard"> = [
-    "gold",
-    "purple",
-    "grain",
-    "courtyard",
-  ];
 
   positions.forEach(([x, y, z], i) => {
     const podGroup = new THREE.Group();
-
     const pod = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.78, 2),
-      glass(colors[i], { transmission: 0.55, emissive: 0.32 }),
+      new THREE.IcosahedronGeometry(0.72, 2),
+      glass(colors[i], { transmission: 0.5, emissive: 0.3 }),
     );
     podGroup.add(pod);
 
-    const bud = new THREE.Mesh(
-      new THREE.SphereGeometry(0.22, 14, 12),
-      glass(p.tertiary, { transmission: 0.48, emissive: 0.38 }),
+    // Frame panel behind pod (architectural section view)
+    const frame = new THREE.Mesh(
+      new THREE.BoxGeometry(1.9, 1.5, 0.08),
+      glass(colors[i], { transmission: 0.38, metalness: 0.55 }),
     );
-    bud.position.set(0, 0.35, 0.12);
-    podGroup.add(bud);
+    frame.position.set(0, 0, -0.65);
+    podGroup.add(frame);
+    // Corner brackets
+    [
+      [0.7, 0.6],
+      [-0.7, 0.6],
+      [0.7, -0.6],
+      [-0.7, -0.6],
+    ].forEach(([bx, by]) => {
+      const bracket = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.04, 0.04),
+        metal(p.highlight, 0.15),
+      );
+      bracket.position.set(bx, by, -0.61);
+      podGroup.add(bracket);
+    });
 
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0.1, 0.25),
-      new THREE.Vector3(x * 0.3, y * 0.3 + 0.1, 0.05),
-      new THREE.Vector3(x * 0.7, y * 0.7, -0.05),
+      new THREE.Vector3(0, 0.1, 0.3),
+      new THREE.Vector3(x * 0.28, y * 0.28, 0.0),
+      new THREE.Vector3(x * 0.68, y * 0.68, -0.1),
       new THREE.Vector3(x, y, z),
     ]);
-    const stem = tubeAlong(curve, p.primary, 0.052, 52);
-    group.add(stem);
-
-    // Collage frame panel behind each pod
-    const frameGroup = new THREE.Group();
-    const frameBody = new THREE.Mesh(
-      new THREE.BoxGeometry(2.15, 1.65, 0.1),
-      glass(colors[i], { transmission: 0.42, metalness: 0.52 }),
-    );
-    frameGroup.add(frameBody);
-
-    const frameRim = new THREE.Mesh(
-      new THREE.TorusGeometry(0.55, 0.04, 8, 24),
-      metal(p.highlight, 0.15),
-    );
-    frameRim.position.z = 0.08;
-    if (motifs[i] === "purple") frameRim.scale.set(1, 1.35, 1);
-    frameGroup.add(frameRim);
-
-    const accent =
-      motifs[i] === "grain"
-        ? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.04), metal(p.secondary, 0.2))
-        : new THREE.Mesh(
-            new THREE.OctahedronGeometry(0.28, 0),
-            glass(p.wire, { transmission: 0.5 }),
-          );
-    accent.position.set(0, motifs[i] === "courtyard" ? -0.35 : 0, 0.1);
-    frameGroup.add(accent);
-
-    frameGroup.position.set(x * 0.55, y * 0.55, z - 1.1);
-    frameGroup.rotation.z = Math.atan2(y, x) * 0.15;
-    group.add(frameGroup);
-    panels.push(frameGroup);
+    group.add(tubeAlong(curve, p.primary, 0.045, 44));
 
     podGroup.position.set(x, y, z);
     podGroup.userData.podIndex = i;
     group.add(podGroup);
     podGroups.push(podGroup);
+    panels.push(frame as unknown as THREE.Group);
   });
 
-  // Orbiting spec particles
-  const particleGeo = new THREE.SphereGeometry(0.09, 10, 10);
-  const particleMat = glass(p.secondary, { transmission: 0.68, emissive: 0.22 });
-  const count = 42;
-  const inst = new THREE.InstancedMesh(particleGeo, particleMat, count);
-  const dummy = new THREE.Object3D();
-  for (let i = 0; i < count; i++) {
-    const a = (i / count) * Math.PI * 2;
-    const r = 1.35 + (i % 5) * 0.38;
-    dummy.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.72, (i % 3) * 0.22 - 0.15);
-    dummy.scale.setScalar(0.65 + (i % 4) * 0.14);
-    dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
+  // Git-log spiral particles
+  const commitCount = 36;
+  const commits: THREE.Mesh[] = [];
+  for (let i = 0; i < commitCount; i++) {
+    const a = (i / commitCount) * Math.PI * 6;
+    const r = 0.55 + i * 0.05;
+    const commit = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06 + (i % 3) * 0.015, 8, 6),
+      glass(i % 2 === 0 ? p.secondary : p.primary, { transmission: 0.65, emissive: 0.2 }),
+    );
+    commit.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.52, 0.3 - i * 0.04);
+    commit.userData.commitPhase = i;
+    commits.push(commit);
+    group.add(commit);
   }
-  inst.instanceMatrix.needsUpdate = true;
-  group.add(inst);
-
-  group.userData.seedsRefs = { core, innerCore, pods: podGroups, panels };
 
   const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
     const mx = mouse?.x ?? 0;
     const my = mouse?.y ?? 0;
-    core.rotation.y = t * 0.35 + scroll * 1.2 + mx * 0.15;
-    core.rotation.x = Math.sin(t * 0.4) * 0.15 + my * 0.08;
-    innerCore.rotation.y = -t * 0.5 - scroll * 0.8;
-    innerCore.scale.setScalar(1 + Math.sin(t * 0.7) * 0.06 + scroll * 0.08);
-    panels.forEach((panel, i) => {
-      panel.rotation.y = Math.sin(t * 0.25 + i) * 0.08 + scroll * 0.2;
-      panel.position.z += Math.sin(t * 0.5 + i * 1.2) * 0.002;
+    core.rotation.y = t * 0.3 + scroll * 1.0 + mx * 0.12;
+    core.rotation.x = Math.sin(t * 0.38) * 0.14 + my * 0.07;
+    innerCore.rotation.y = -t * 0.45 - scroll * 0.75;
+    innerCore.scale.setScalar(1 + Math.sin(t * 0.65) * 0.055 + scroll * 0.07);
+
+    layerSlabs.forEach((slab, i) => {
+      slab.position.y = -1.2 + i * 0.72 + Math.sin(t * 0.5 + i * 0.8) * 0.04 + scroll * 0.12;
+      slab.rotation.y = Math.sin(t * 0.2 + i * 0.5) * 0.04 + mx * 0.03;
     });
-    inst.rotation.z = t * 0.1 + scroll * 0.45;
+
+    podGroups.forEach((pg, i) => {
+      pg.rotation.y = Math.sin(t * 0.22 + i) * 0.06 + scroll * 0.18;
+      pg.rotation.x = Math.sin(t * 0.18 + i * 0.7) * 0.04;
+    });
+
+    commits.forEach((c) => {
+      const phase = c.userData.commitPhase as number;
+      const a = (phase / commitCount) * Math.PI * 6 + t * 0.12;
+      const r = 0.55 + phase * 0.05;
+      c.position.x = Math.cos(a) * r;
+      c.position.y = Math.sin(a) * r * 0.52;
+      (c.material as THREE.MeshPhysicalMaterial).opacity =
+        0.55 + 0.3 * Math.sin(t * 1.2 + phase * 0.4);
+    });
+
     group.rotation.y = mx * 0.04;
     group.rotation.x = my * 0.03;
   };
@@ -392,34 +411,151 @@ function buildPlayCluster(p: GraphicPalette): AdvancedMeshScene {
 
 function buildSecurityCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
-  const crystals: THREE.Mesh[] = [];
 
-  for (let i = 0; i < 3; i++) {
-    const c = new THREE.Mesh(
-      new THREE.OctahedronGeometry(0.85 - i * 0.15, 0),
-      glass(p.primary, { transmission: 0.62 }),
+  // ── Vault door — circular plate + combination dial rings ──────────────────
+  const vaultPlate = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.85, 1.85, 0.22, 48),
+    glass(p.primary, { transmission: 0.22, metalness: 0.72, emissive: 0.18 }),
+  );
+  vaultPlate.rotation.x = Math.PI / 2;
+  group.add(vaultPlate);
+
+  // Combination dial rings
+  const dialRings: THREE.Mesh[] = [];
+  [1.45, 1.65, 1.8].forEach((r, i) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(r, 0.055, 10, 52),
+      metal(i % 2 === 0 ? p.secondary : p.highlight, 0.12),
     );
-    c.position.set((i - 1) * 1.8, i * 0.3, -i * 0.4);
-    c.scale.y = 1.4;
-    group.add(c);
-    crystals.push(c);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.z = 0.02 + i * 0.04;
+    ring.userData.dialIndex = i;
+    dialRings.push(ring);
+    group.add(ring);
+  });
+
+  // Locking bolt arms (6 radial arms extending from vault center)
+  const boltArms: THREE.Mesh[] = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const bolt = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.18, 0.12), metal(p.tertiary, 0.08));
+    bolt.position.set(Math.cos(angle) * 0.85, Math.sin(angle) * 0.85, 0.16);
+    bolt.rotation.z = angle;
+    bolt.userData.boltIndex = i;
+    boltArms.push(bolt);
+    group.add(bolt);
   }
 
-  for (let r = 0; r < 4; r++) {
-    const torus = new THREE.Mesh(
-      new THREE.TorusGeometry(1.6 + r * 0.45, 0.05, 10, 48),
-      metal(r % 2 ? p.secondary : p.tertiary, 0.18),
+  // Central eye / keyhole
+  const eye = new THREE.Mesh(
+    new THREE.SphereGeometry(0.32, 18, 14),
+    glass(p.highlight, { emissive: 0.68, transmission: 0.38, metalness: 0.55 }),
+  );
+  eye.position.z = 0.22;
+  group.add(eye);
+
+  // Crystal lattice cage — 8 crystal nodes at cube corners around vault
+  const latticeNodes: THREE.Mesh[] = [];
+  const latticeEdges: THREE.Mesh[] = [];
+  const corners: THREE.Vector3[] = [];
+  for (let i = 0; i < 8; i++) {
+    const x = (i & 1 ? 1 : -1) * 2.4;
+    const y = (i & 2 ? 1 : -1) * 2.4;
+    const z = i & 4 ? 0.8 : -2.2;
+    corners.push(new THREE.Vector3(x, y, z));
+    const crystal = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.22, 0),
+      glass(i % 2 === 0 ? p.secondary : p.tertiary, { transmission: 0.58, emissive: 0.32 }),
     );
-    torus.rotation.x = Math.PI / 2 + r * 0.15;
-    group.add(torus);
-    crystals.push(torus);
+    crystal.position.set(x, y, z);
+    crystal.scale.y = 1.35;
+    crystal.userData.crystalIndex = i;
+    latticeNodes.push(crystal);
+    group.add(crystal);
   }
 
-  const tick = (t: number, scroll: number) => {
-    crystals.forEach((m, i) => {
-      m.rotation.y = (i % 2 ? 1 : -1) * (t * 0.15 + scroll * 0.5);
-      m.rotation.z = Math.sin(t * 0.5 + i) * 0.08;
+  // Lattice edges (12 edges of a cube — connect adjacent corners)
+  [
+    [0, 1],
+    [2, 3],
+    [4, 5],
+    [6, 7],
+    [0, 2],
+    [1, 3],
+    [4, 6],
+    [5, 7],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [3, 7],
+  ].forEach(([a, b]) => {
+    const ca = corners[a]!;
+    const cb = corners[b]!;
+    const edge = tubeAlong(new THREE.CatmullRomCurve3([ca, cb]), p.wire, 0.018, 2);
+    latticeEdges.push(edge as THREE.Mesh);
+    group.add(edge);
+  });
+
+  // Orbiting encrypted fragments
+  const fragments: THREE.Mesh[] = [];
+  for (let i = 0; i < 16; i++) {
+    const frag = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.09 + (i % 3) * 0.04, 0),
+      glass(i % 3 === 0 ? p.primary : i % 3 === 1 ? p.secondary : p.highlight, {
+        transmission: 0.7,
+        emissive: 0.25,
+      }),
+    );
+    frag.userData.fragPhase = i;
+    fragments.push(frag);
+    group.add(frag);
+  }
+
+  const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
+    const mx = mouse?.x ?? 0;
+
+    // Dial rings rotate at different speeds (combination lock)
+    dialRings.forEach((ring) => {
+      const idx = ring.userData.dialIndex as number;
+      ring.rotation.z = t * (0.18 + idx * 0.12) * (idx % 2 === 0 ? 1 : -1);
     });
+
+    // Bolt arms extend/retract based on scroll (locking/unlocking)
+    boltArms.forEach((bolt) => {
+      const idx = bolt.userData.boltIndex as number;
+      const angle = (idx / 6) * Math.PI * 2;
+      const extension = 0.85 + scroll * 0.35 + Math.sin(t * 0.4 + idx * 0.5) * 0.05;
+      bolt.position.set(Math.cos(angle) * extension, Math.sin(angle) * extension, 0.16);
+    });
+
+    // Eye pulses
+    const eyePulse = 1 + Math.sin(t * 1.8) * 0.08;
+    eye.scale.setScalar(eyePulse);
+
+    // Crystal nodes breathe
+    latticeNodes.forEach((c) => {
+      const idx = c.userData.crystalIndex as number;
+      c.rotation.y = t * 0.22 * (idx % 2 ? 1 : -1);
+      c.rotation.x = Math.sin(t * 0.35 + idx) * 0.12;
+      c.scale.y = 1.35 + Math.sin(t * 0.8 + idx * 0.6) * 0.08;
+    });
+
+    // Fragments orbit at different radii and elevations
+    fragments.forEach((frag) => {
+      const phase = frag.userData.fragPhase as number;
+      const r = 2.6 + (phase % 5) * 0.4;
+      const a = t * (0.35 + phase * 0.03) + phase * 0.7;
+      frag.position.set(
+        Math.cos(a) * r,
+        Math.sin(a * 0.7) * 1.2 + ((phase % 3) - 1) * 0.8,
+        -1.0 + (phase % 4) * 0.5,
+      );
+      frag.rotation.x = t * 0.5 + phase;
+      frag.rotation.y = t * 0.4;
+    });
+
+    group.rotation.y = mx * 0.05 + Math.sin(t * 0.08) * 0.02;
+    group.rotation.x = (mouse?.y ?? 0) * 0.03;
   };
 
   return { group, tick };
@@ -427,38 +563,163 @@ function buildSecurityCluster(p: GraphicPalette): AdvancedMeshScene {
 
 function buildOrbitCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
-  const nodes: THREE.Mesh[] = [];
-  const nodeCount = 10;
 
-  for (let i = 0; i < nodeCount; i++) {
-    const a = (i / nodeCount) * Math.PI * 2;
-    const r = 2.4 + (i % 3) * 0.4;
-    const node = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.28, 1),
-      glass(i % 2 ? p.secondary : p.tertiary),
+  // ── Central intelligence eye ──────────────────────────────────────────────
+  const eyeCore = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 22, 18),
+    glass(p.primary, { emissive: 0.52, transmission: 0.35, metalness: 0.6 }),
+  );
+  group.add(eyeCore);
+
+  const eyeRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.72, 0.055, 10, 40),
+    metal(p.highlight, 0.18),
+  );
+  eyeRing.rotation.x = Math.PI / 2;
+  group.add(eyeRing);
+
+  // ── Radar sweep arm ───────────────────────────────────────────────────────
+  const radarArm = new THREE.Group();
+  const armBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.04, 0.025), metal(p.secondary, 0.08));
+  armBody.position.x = 1.4;
+  radarArm.add(armBody);
+
+  // Sweep fill — very thin plane (the green radar sweep)
+  const sweepGeo = new THREE.PlaneGeometry(2.8, 0.04);
+  const sweepPlane = new THREE.Mesh(
+    sweepGeo,
+    new THREE.MeshPhysicalMaterial({
+      color: p.tertiary,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
+  );
+  sweepPlane.position.x = 1.4;
+  radarArm.add(sweepPlane);
+  group.add(radarArm);
+
+  // Radar range rings (flat, tilted like a radar dish)
+  const radarRings: THREE.Mesh[] = [];
+  [1.2, 2.1, 3.0, 3.8].forEach((r, i) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(r, 0.018, 8, 44),
+      metal(i % 2 === 0 ? p.tertiary : p.wire, 0.22),
     );
-    node.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.55, (i % 2) * 0.3);
-    group.add(node);
-    nodes.push(node);
+    ring.rotation.x = Math.PI / 2.4;
+    radarRings.push(ring);
+    group.add(ring);
+  });
 
-    for (let j = i + 1; j < nodeCount; j++) {
-      if ((i * 7 + j * 13) % 5 > 1) continue;
-      const a2 = (j / nodeCount) * Math.PI * 2;
-      const r2 = 2.4 + (j % 3) * 0.4;
-      const start = new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r * 0.55, (i % 2) * 0.3);
-      const end = new THREE.Vector3(Math.cos(a2) * r2, Math.sin(a2) * r2 * 0.55, (j % 2) * 0.3);
-      const mid = start.clone().lerp(end, 0.5);
-      mid.z += 0.6;
-      group.add(tubeAlong(new THREE.QuadraticBezierCurve3(start, mid, end), p.wire, 0.025, 24));
+  // ── Multi-altitude growth nodes ───────────────────────────────────────────
+  // Three orbit tiers: inner (close), mid, outer — 8 systems monitored
+  const NODE_CONFIG = [
+    { r: 1.45, count: 3, y: 0.2, color: p.secondary },
+    { r: 2.4, count: 4, y: -0.15, color: p.tertiary },
+    { r: 3.3, count: 1, y: 0.35, color: p.highlight },
+  ];
+  const allNodes: Array<{ mesh: THREE.Mesh; tier: number; phase: number }> = [];
+
+  NODE_CONFIG.forEach(({ r, count, y, color }, tier) => {
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      const node = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(0.2 + tier * 0.05, 1),
+        glass(color, { emissive: 0.38, transmission: 0.45 }),
+      );
+      node.position.set(Math.cos(a) * r, y + Math.sin(a) * r * 0.28, 0.1);
+      node.userData.r = r;
+      node.userData.baseA = a;
+      node.userData.y = y;
+      allNodes.push({ mesh: node, tier, phase: i });
+      group.add(node);
+
+      // Signal tube from central eye to each node
+      const nodePos = node.position.clone();
+      const midPt = nodePos.clone().multiplyScalar(0.5);
+      midPt.z += 0.6;
+      group.add(
+        tubeAlong(
+          new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0, 0), midPt, nodePos),
+          p.wire,
+          0.018,
+          18,
+        ),
+      );
     }
+  });
+
+  // ── Growth trajectory arc rising upward ───────────────────────────────────
+  const growthArc = tubeAlong(
+    new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-2.2, -1.6, 0.2),
+      new THREE.Vector3(-0.8, -0.6, 0.5),
+      new THREE.Vector3(0.6, 0.4, 0.6),
+      new THREE.Vector3(2.0, 1.5, 0.4),
+      new THREE.Vector3(3.2, 2.4, 0.1),
+    ]),
+    p.tertiary,
+    0.048,
+    44,
+  );
+  group.add(growthArc);
+
+  // Data packet spheres flowing along the radar arm
+  const packetCount = 6;
+  const packets: THREE.Mesh[] = [];
+  for (let i = 0; i < packetCount; i++) {
+    const pkt = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06, 8, 6),
+      glass(p.highlight, { emissive: 0.55, transmission: 0.35 }),
+    );
+    pkt.userData.packetPhase = i;
+    packets.push(pkt);
+    group.add(pkt);
   }
 
-  const tick = (t: number, scroll: number) => {
-    nodes.forEach((n, i) => {
-      n.rotation.x = t * 0.4 + i;
-      n.rotation.y = scroll * 0.8 + i * 0.2;
+  const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
+    const mx = mouse?.x ?? 0;
+    const my = mouse?.y ?? 0;
+
+    // Radar sweep rotates
+    radarArm.rotation.z = t * 0.65 + scroll * 0.8;
+
+    // Rings breathe
+    radarRings.forEach((ring, i) => {
+      ring.rotation.z = t * 0.05 * (i % 2 === 0 ? 1 : -1);
     });
-    group.rotation.y = t * 0.06 + scroll * 0.35;
+
+    // Eye core pulses
+    const ep = 1 + Math.sin(t * 1.4) * 0.06;
+    eyeCore.scale.setScalar(ep);
+    eyeRing.rotation.z = t * 0.15;
+
+    // Nodes orbit at their tiers
+    allNodes.forEach(({ mesh, phase }) => {
+      const r = mesh.userData.r as number;
+      const baseA = mesh.userData.baseA as number;
+      const y = mesh.userData.y as number;
+      const speed = 0.18 + phase * 0.04;
+      const a = baseA + t * speed;
+      mesh.position.set(Math.cos(a) * r, y + Math.sin(a) * r * 0.28, 0.1);
+      mesh.rotation.y = t * 0.5;
+    });
+
+    // Data packets trace an oval
+    packets.forEach((pkt) => {
+      const phase = pkt.userData.packetPhase as number;
+      const a = t * 1.4 + phase * ((Math.PI * 2) / packetCount);
+      const r = 2.0;
+      pkt.position.set(
+        Math.cos(a) * r,
+        Math.sin(a) * r * 0.42 + 0.1,
+        0.35 + Math.sin(a * 0.7) * 0.2,
+      );
+    });
+
+    group.rotation.y = mx * 0.05 + t * 0.04;
+    group.rotation.x = my * 0.03;
   };
 
   return { group, tick };
@@ -466,42 +727,150 @@ function buildOrbitCluster(p: GraphicPalette): AdvancedMeshScene {
 
 function buildApiCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
-  const lids: THREE.Mesh[] = [];
 
-  for (let i = 0; i < 4; i++) {
-    const caseGroup = new THREE.Group();
+  // ── Central schema enforcer sphere ────────────────────────────────────────
+  const schema = new THREE.Mesh(
+    new THREE.SphereGeometry(0.52, 20, 16),
+    glass(p.primary, { emissive: 0.5, transmission: 0.38, metalness: 0.58 }),
+  );
+  group.add(schema);
+
+  const schemaRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.68, 0.04, 8, 36),
+    metal(p.highlight, 0.15),
+  );
+  schemaRing.rotation.x = Math.PI / 2;
+  group.add(schemaRing);
+
+  // ── JSON payload blocks — stacked glass slabs at different depths ─────────
+  const METHODS = ["GET", "POST", "PUT", "DELETE"] as const;
+  const METHOD_COLORS = [p.secondary, p.tertiary, p.highlight, p.wire];
+  const METHOD_POSITIONS: [number, number, number][] = [
+    [-2.6, 1.0, 0.2],
+    [2.5, 0.8, -0.1],
+    [-2.3, -0.9, 0.3],
+    [2.4, -1.1, -0.2],
+  ];
+
+  const endpointNodes: THREE.Group[] = [];
+  METHOD_POSITIONS.forEach(([x, y, z], i) => {
+    const endpointGroup = new THREE.Group();
+
+    // Method label block (JSON object body)
     const body = new THREE.Mesh(
-      new THREE.BoxGeometry(1.8, 1.2, 0.35),
-      glass(p.primary, { transmission: 0.4 }),
+      new THREE.BoxGeometry(1.55, 0.9, 0.12),
+      glass(METHOD_COLORS[i]!, { transmission: 0.45, metalness: 0.42, emissive: 0.28 }),
     );
-    const lid = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.12, 0.38), metal(p.secondary));
-    lid.position.y = 0.66;
-    lid.userData.isLid = true;
-    caseGroup.add(body, lid);
-    caseGroup.position.set((i - 1.5) * 2.4, 0, i * 0.12);
-    caseGroup.rotation.y = (i - 1.5) * 0.3;
-    group.add(caseGroup);
-    lids.push(lid);
+    endpointGroup.add(body);
+
+    // Key-value line stubs inside the block
+    for (let line = 0; line < 3; line++) {
+      const lineStub = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5 + (line % 2) * 0.4, 0.025, 0.02),
+        metal(p.wire, 0.35),
+      );
+      lineStub.position.set(-0.25 + (line % 2) * 0.15, 0.2 - line * 0.22, 0.08);
+      endpointGroup.add(lineStub);
+    }
+
+    // Method node gem
+    const gem = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.22, 0),
+      metal(METHOD_COLORS[i]!, 0.05),
+    );
+    gem.position.set(0, 0.65, 0.08);
+    endpointGroup.add(gem);
+
+    endpointGroup.position.set(x, y, z);
+    endpointGroup.userData.methodIndex = i;
+    endpointNodes.push(endpointGroup);
+    group.add(endpointGroup);
+
+    // Bezier routing tube from schema to endpoint
+    const start = new THREE.Vector3(0, 0, 0);
+    const end = new THREE.Vector3(x, y, z);
+    const ctrl = new THREE.Vector3(x * 0.5, y * 0.5 + 0.6, z * 0.3 + 0.8);
+    group.add(tubeAlong(new THREE.QuadraticBezierCurve3(start, ctrl, end), p.wire, 0.022, 22));
+  });
+
+  // ── Bracket geometry — opening/closing brace shapes ───────────────────────
+  const brackets: THREE.Group[] = [];
+  [
+    [-3.2, 0, 0.5],
+    [3.2, 0, 0.5],
+  ].forEach(([bx, , bz], idx) => {
+    const bracketGroup = new THREE.Group();
+    // Main vertical
+    const vert = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.6, 0.04), metal(p.highlight, 0.22));
+    bracketGroup.add(vert);
+    // Top/bottom serifs
+    [-1.3, 1.3].forEach((by) => {
+      const serif = new THREE.Mesh(
+        new THREE.BoxGeometry(0.32, 0.04, 0.04),
+        metal(p.highlight, 0.22),
+      );
+      serif.position.set(idx === 0 ? 0.12 : -0.12, by, 0);
+      bracketGroup.add(serif);
+    });
+    bracketGroup.position.set(bx as number, 0, bz as number);
+    brackets.push(bracketGroup);
+    group.add(bracketGroup);
+  });
+
+  // ── Streaming data packets along routes ───────────────────────────────────
+  const streamPackets: THREE.Mesh[] = [];
+  for (let i = 0; i < 8; i++) {
+    const pkt = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 7, 5),
+      glass(METHOD_COLORS[i % 4]!, { emissive: 0.55, transmission: 0.3 }),
+    );
+    pkt.userData.streamPhase = i;
+    streamPackets.push(pkt);
+    group.add(pkt);
   }
 
-  const flower = new THREE.Mesh(
-    new THREE.LatheGeometry(
-      Array.from({ length: 12 }, (_, i) => {
-        const a = (i / 12) * Math.PI * 2;
-        return new THREE.Vector2(0.35 + Math.sin(a * 5) * 0.12, i * 0.08);
-      }),
-      24,
-    ),
-    glass(p.highlight, { transmission: 0.55 }),
-  );
-  flower.position.set(0, -1.8, 0.5);
-  group.add(flower);
+  const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
+    const mx = mouse?.x ?? 0;
 
-  const tick = (t: number, scroll: number) => {
-    lids.forEach((lid, i) => {
-      lid.rotation.x = -scroll * 1.1 - 0.3 + Math.sin(t * 0.4 + i) * 0.05;
+    schema.rotation.y = t * 0.3;
+    schemaRing.rotation.z = t * 0.18 + scroll * 0.5;
+    const sp = 1 + Math.sin(t * 1.2) * 0.05;
+    schema.scale.setScalar(sp);
+
+    endpointNodes.forEach((eg, i) => {
+      eg.rotation.y = Math.sin(t * 0.28 + i * 0.8) * 0.08 + scroll * 0.12;
+      eg.rotation.x = Math.sin(t * 0.2 + i * 0.6) * 0.05;
+      // Gems spin
+      const gem = eg.children[4];
+      if (gem) {
+        gem.rotation.y = t * 0.6 + i;
+        gem.rotation.x = t * 0.45;
+      }
     });
-    flower.rotation.y = t * 0.25 + scroll * 0.9;
+
+    brackets.forEach((b, idx) => {
+      b.position.x = (idx === 0 ? -3.2 : 3.2) + Math.sin(t * 0.4 + idx) * 0.08;
+    });
+
+    // Packets animate along bezier paths between schema and endpoints
+    streamPackets.forEach((pkt) => {
+      const phase = pkt.userData.streamPhase as number;
+      const targetIdx = phase % 4;
+      const [tx, ty, tz] = METHOD_POSITIONS[targetIdx]!;
+      const progress = (((t * 0.7 + phase * 0.3) % 1) + 1) % 1;
+      const ctrl = new THREE.Vector3(
+        (tx as number) * 0.5,
+        (ty as number) * 0.5 + 0.6,
+        (tz as number) * 0.3 + 0.8,
+      );
+      const start = new THREE.Vector3(0, 0, 0);
+      const end = new THREE.Vector3(tx as number, ty as number, tz as number);
+      const pos = new THREE.QuadraticBezierCurve3(start, ctrl, end).getPoint(progress);
+      pkt.position.copy(pos);
+    });
+
+    group.rotation.y = mx * 0.04 + t * 0.025;
+    group.rotation.x = (mouse?.y ?? 0) * 0.03;
   };
 
   return { group, tick };
@@ -509,37 +878,186 @@ function buildApiCluster(p: GraphicPalette): AdvancedMeshScene {
 
 function buildHardwareCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
-  const gems: THREE.Mesh[] = [];
 
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 5; col++) {
-      const gem = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.38, 0),
-        metal([p.primary, p.secondary, p.tertiary][row], 0.12 + row * 0.05),
+  // ── PCB board plane ───────────────────────────────────────────────────────
+  const board = new THREE.Mesh(
+    new THREE.BoxGeometry(7.2, 5.2, 0.1),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x1a3a2a,
+      metalness: 0.22,
+      roughness: 0.72,
+      transparent: true,
+      opacity: 0.72,
+    }),
+  );
+  board.position.z = -0.35;
+  group.add(board);
+
+  // ── Copper trace lines on PCB ─────────────────────────────────────────────
+  const TRACES: Array<{ x: number; y: number; w: number; h: number }> = [
+    { x: -2.5, y: 1.2, w: 2.4, h: 0.035 },
+    { x: 0.8, y: 1.2, w: 1.6, h: 0.035 },
+    { x: -2.5, y: 0.2, w: 4.0, h: 0.035 },
+    { x: -2.5, y: -0.8, w: 3.2, h: 0.035 },
+    { x: 0.5, y: -0.8, w: 1.8, h: 0.035 },
+    { x: -2.5, y: -1.8, w: 5.0, h: 0.035 },
+    { x: -2.5, y: 1.2, w: 0.035, h: 2.0 },
+    { x: -0.5, y: -0.8, w: 0.035, h: 2.0 },
+    { x: 1.8, y: -1.8, w: 0.035, h: 2.0 },
+    { x: 0.8, y: -1.8, w: 0.035, h: 1.0 },
+  ];
+  TRACES.forEach(({ x, y, w, h }) => {
+    const trace = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.025), metal(p.secondary, 0.05));
+    trace.position.set(x + w / 2, y, -0.28);
+    group.add(trace);
+  });
+
+  // ── IC chip bodies with pin rows ──────────────────────────────────────────
+  const IC_POSITIONS: [number, number, number][] = [
+    [-1.8, 0.8, 0],
+    [1.0, 0.8, 0],
+    [-1.8, -0.5, 0],
+    [1.0, -0.5, 0],
+  ];
+  const icBodies: THREE.Group[] = [];
+  IC_POSITIONS.forEach(([x, y, z], i) => {
+    const icGroup = new THREE.Group();
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(0.88, 0.55, 0.18),
+      metal(i % 2 === 0 ? p.primary : p.tertiary, 0.06),
+    );
+    icGroup.add(body);
+
+    // Pin rows on left + right sides
+    for (let side = 0; side < 2; side++) {
+      for (let pin = 0; pin < 5; pin++) {
+        const pinMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(0.14, 0.025, 0.025),
+          metal(p.highlight, 0.12),
+        );
+        pinMesh.position.set(side === 0 ? -0.58 : 0.58, -0.2 + pin * 0.1, 0);
+        icGroup.add(pinMesh);
+      }
+    }
+    // Orientation notch
+    const notch = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8),
+      metal(p.wire, 0.18),
+    );
+    notch.rotation.x = Math.PI / 2;
+    notch.position.set(-0.28, 0.2, 0.1);
+    icGroup.add(notch);
+
+    icGroup.position.set(x, y, z);
+    icGroup.userData.icIndex = i;
+    icBodies.push(icGroup);
+    group.add(icGroup);
+  });
+
+  // ── Capacitor cylinders ───────────────────────────────────────────────────
+  const caps: THREE.Mesh[] = [];
+  [
+    [-0.2, 1.5, 0],
+    [0.6, 1.5, 0],
+    [-1.0, -1.6, 0],
+    [2.2, 0.2, 0],
+  ].forEach(([cx, cy, cz]) => {
+    const cap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.1, 0.35, 10),
+      metal(p.tertiary, 0.08),
+    );
+    cap.position.set(cx as number, cy as number, (cz as number) + 0.17);
+    caps.push(cap);
+    group.add(cap);
+  });
+
+  // ── Via holes (solder through-holes) ─────────────────────────────────────
+  const VIA_POSITIONS: [number, number][] = [
+    [-2.5, 1.2],
+    [-0.5, 1.2],
+    [2.4, 0.2],
+    [1.8, -0.8],
+    [-2.5, -0.8],
+    [0.5, -1.8],
+    [-0.5, -1.8],
+    [2.4, -1.8],
+  ];
+  VIA_POSITIONS.forEach(([vx, vy]) => {
+    const via = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.04, 0.15, 8),
+      glass(p.highlight, { emissive: 0.35, transmission: 0.4 }),
+    );
+    via.rotation.x = Math.PI / 2;
+    via.position.set(vx, vy, -0.22);
+    group.add(via);
+  });
+
+  // ── Hybridizer core — octahedron rising from center of board ─────────────
+  const hybCore = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.72, 0),
+    glass(p.primary, { emissive: 0.6, transmission: 0.42, metalness: 0.65 }),
+  );
+  hybCore.position.set(-0.2, 0.15, 0.55);
+  hybCore.scale.y = 1.4;
+  group.add(hybCore);
+
+  const hybRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.88, 0.042, 10, 40),
+    metal(p.secondary, 0.12),
+  );
+  hybRing.position.set(-0.2, 0.15, 0.55);
+  hybRing.rotation.x = Math.PI / 2.4;
+  group.add(hybRing);
+
+  // ── Signal arcs between ICs ───────────────────────────────────────────────
+  for (let i = 0; i < IC_POSITIONS.length; i++) {
+    for (let j = i + 1; j < IC_POSITIONS.length; j++) {
+      if ((i * 3 + j * 7) % 3 !== 0) continue;
+      const [ax, ay] = IC_POSITIONS[i]!;
+      const [bx, by] = IC_POSITIONS[j]!;
+      const mid = new THREE.Vector3((ax + bx) / 2, (ay + by) / 2, 0.3);
+      group.add(
+        tubeAlong(
+          new THREE.QuadraticBezierCurve3(
+            new THREE.Vector3(ax, ay, 0.12),
+            mid,
+            new THREE.Vector3(bx, by, 0.12),
+          ),
+          p.wire,
+          0.016,
+          16,
+        ),
       );
-      gem.position.set((col - 2) * 1.1, (row - 1) * 0.95, row * 0.15);
-      gem.rotation.set(col * 0.3, row * 0.4, (col + row) * 0.25);
-      group.add(gem);
-      gems.push(gem);
     }
   }
 
-  const fist = new THREE.Group();
-  for (let i = 0; i < 5; i++) {
-    const knuckle = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 0.35), metal(p.primary, 0.14));
-    knuckle.position.set(i * 0.32 - 0.65, 0.2, Math.sin(i) * 0.08);
-    knuckle.rotation.z = i * 0.12;
-    fist.add(knuckle);
-  }
-  fist.position.set(0, 1.6, -0.5);
-  group.add(fist);
+  const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
+    const mx = mouse?.x ?? 0;
+    const my = mouse?.y ?? 0;
 
-  const tick = (t: number, scroll: number) => {
-    gems.forEach((g, i) => {
-      g.rotation.x = t * 0.35 + scroll * 1.2 + i * 0.1;
-      g.rotation.y = t * 0.28 + i * 0.05;
+    hybCore.rotation.y = t * 0.4;
+    hybCore.rotation.x = Math.sin(t * 0.55) * 0.12;
+    hybCore.scale.y = 1.4 + Math.sin(t * 1.0) * 0.06;
+    hybRing.rotation.z = t * 0.2 + scroll * 0.5;
+
+    icBodies.forEach((ic, i) => {
+      // ICs glow on/off (activity pulses)
+      const body = ic.children[0] as THREE.Mesh;
+      if (body.material instanceof THREE.MeshPhysicalMaterial) {
+        body.material.emissive = new THREE.Color(
+          i % 2 === 0 ? p.primary : p.tertiary,
+        ).multiplyScalar(0.15 + 0.12 * Math.sin(t * 1.5 + i * 1.1));
+      }
     });
-    fist.rotation.y = Math.sin(t * 0.3) * 0.2 + scroll * 0.4;
+
+    caps.forEach((cap, i) => {
+      cap.scale.y = 1 + Math.sin(t * 0.8 + i * 0.9) * 0.08;
+    });
+
+    board.rotation.y = mx * 0.03;
+    board.rotation.x = my * 0.02;
+    group.rotation.y = mx * 0.04;
+    group.rotation.x = my * 0.025;
   };
 
   return { group, tick };
