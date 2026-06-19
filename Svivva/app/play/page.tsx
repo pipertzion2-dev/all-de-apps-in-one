@@ -2771,8 +2771,8 @@ export default function SvivvaPlayPage() {
   if (crateState !== "open") {
     return (
       <div
-        className="h-[100dvh] bg-white flex flex-col overflow-hidden"
-        style={{ colorScheme: "light" }}
+        className="h-[100dvh] bg-[#0c0a14] flex flex-col overflow-hidden"
+        style={{ colorScheme: "dark" }}
       >
         {playBetaBanner}
         {!betaAcknowledged ? (
@@ -2780,10 +2780,10 @@ export default function SvivvaPlayPage() {
             className="flex-1 flex flex-col items-center justify-center px-6 pb-8"
             data-testid="gate-play-beta"
           >
-            <div className="max-w-lg w-full rounded-2xl border-2 border-amber-400 bg-white shadow-lg p-8 text-center">
-              <AlertTriangle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Svivva Play — Beta</h1>
-              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+            <div className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-[#12101e] shadow-none p-8 text-center">
+              <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-white mb-2">Svivva Play — Beta</h1>
+              <p className="text-sm text-white/55 leading-relaxed mb-6">
                 You are entering an experimental studio. Features break, shift, and improve often.
                 If the page fails to load, refresh or try again later. MIDI export is the most
                 reliable output; in-browser preview is best-effort only.
@@ -2842,8 +2842,8 @@ export default function SvivvaPlayPage() {
 
   return (
     <div
-      className="flex flex-col text-gray-900 relative z-10 bg-transparent overflow-x-hidden"
-      style={{ colorScheme: "light" }}
+      className="flex flex-col text-[#e8e4f0] relative z-10 bg-[#0c0a14] overflow-x-hidden"
+      style={{ colorScheme: "dark" }}
       data-feature-page
     >
       <FeatureScrollToTop />
@@ -2936,7 +2936,7 @@ export default function SvivvaPlayPage() {
         />
       )}
 
-      <nav className="h-11 sm:h-12 border-b border-gray-200 flex-shrink-0 z-50 bg-white">
+      <nav className="h-11 sm:h-12 border-b border-white/10 flex-shrink-0 z-50 bg-[#0e0c16]/95 backdrop-blur-sm">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 h-full flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Link href="/">
@@ -2949,7 +2949,7 @@ export default function SvivvaPlayPage() {
               />
             </Link>
             <span className="text-gray-300 hidden sm:inline">/</span>
-            <span className="font-semibold text-gray-900 text-xs sm:text-sm">Play</span>
+            <span className="font-semibold text-white/90 text-xs sm:text-sm">Play</span>
             <Badge className="bg-[#A05068]/10 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">
               MIDI: Professional
             </Badge>
@@ -2971,7 +2971,7 @@ export default function SvivvaPlayPage() {
               onClick={() => setShowGuidedBuilder(true)}
               variant="outline"
               size="sm"
-              className="gap-1 border-gray-300 text-gray-600 text-[10px] sm:text-xs hidden sm:flex hover:bg-gray-50"
+              className="gap-1 border-white/20 text-white/55 text-[10px] sm:text-xs hidden sm:flex hover:bg-white/5"
               data-testid="button-guided-builder"
             >
               <Wand2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -2981,7 +2981,7 @@ export default function SvivvaPlayPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 border-gray-300 text-gray-600 text-[10px] sm:text-xs hover:bg-gray-50"
+                className="gap-1 border-white/20 text-white/55 text-[10px] sm:text-xs hover:bg-white/5"
                 data-testid="button-back-home"
               >
                 Back
@@ -5586,12 +5586,12 @@ function GuidedPromptBuilder({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
+        className="bg-[#0e0c16] border border-white/10 rounded-xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-gray-800">Guided Prompt Builder</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-500">
+          <h2 className="text-sm font-semibold text-white/90">Guided Prompt Builder</h2>
+          <button onClick={onClose} className="text-white/40 hover:text-white/70">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -5600,7 +5600,7 @@ function GuidedPromptBuilder({
           {steps.map((s, i) => (
             <div
               key={i}
-              className={`flex-1 h-1 rounded-full ${i <= step ? "holo-gradient" : "bg-gray-200"}`}
+              className={`flex-1 h-1 rounded-full ${i <= step ? "holo-gradient" : "bg-white/10"}`}
               style={
                 i <= step
                   ? {
@@ -5614,7 +5614,7 @@ function GuidedPromptBuilder({
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs text-white/40 mb-4">
           Step {step + 1}/{steps.length}: {steps[step].desc}
         </p>
 
@@ -5634,7 +5634,7 @@ function GuidedPromptBuilder({
                 <button
                   key={m}
                   onClick={() => setOutcome(m)}
-                  className={`p-2 rounded-lg border text-left text-xs ${outcome === m ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-200"}`}
+                  className={`p-2 rounded-lg border text-left text-xs text-white/80 ${outcome === m ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-outcome-${m}`}
                 >
                   {MODE_CONFIG[m].label}
@@ -5647,7 +5647,7 @@ function GuidedPromptBuilder({
               value={style}
               onChange={(e) => setStyle(e.target.value)}
               placeholder="e.g. 'airy minimalist with marimba textures' or 'neo-soul with extended jazz harmonies'"
-              className="w-full border border-gray-200 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white text-gray-800"
+              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white/5 text-white/85 placeholder:text-white/25"
               data-testid="input-guided-style"
             />
           )}
@@ -5655,7 +5655,7 @@ function GuidedPromptBuilder({
             <div className="space-y-3">
               {INSTRUMENT_PALETTE.map((cat) => (
                 <div key={cat.cat}>
-                  <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+                  <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">
                     {cat.cat}
                   </span>
                   <div className="flex flex-wrap gap-1 mt-1">
@@ -5666,7 +5666,7 @@ function GuidedPromptBuilder({
                         className={`text-[10px] px-2 py-1 rounded border transition-colors ${
                           selectedInstruments.includes(inst)
                             ? "border-[#A05068] bg-[#A05068]/10 holo-text"
-                            : "border-gray-200 text-gray-500 hover:border-gray-400"
+                            : "border-white/10 text-white/45 hover:border-white/30"
                         }`}
                         data-testid={`button-instrument-${inst.replace(/\s/g, "-").toLowerCase()}`}
                       >
@@ -5688,7 +5688,7 @@ function GuidedPromptBuilder({
               value={instruments}
               onChange={(e) => setInstruments(e.target.value)}
               placeholder="Add custom instruments not in the palette, e.g. 'koto, tabla, kalimba'"
-              className="w-full border border-gray-200 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white text-gray-800"
+              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white/5 text-white/85 placeholder:text-white/25"
               data-testid="input-guided-instruments"
             />
           )}
@@ -5698,11 +5698,11 @@ function GuidedPromptBuilder({
                 <button
                   key={h}
                   onClick={() => setHarmonyPolicy(h)}
-                  className={`w-full p-3 rounded-lg border text-left text-xs ${harmonyPolicy === h ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-200"}`}
+                  className={`w-full p-3 rounded-lg border text-left text-xs ${harmonyPolicy === h ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-harmony-${h}`}
                 >
                   <span className="font-medium capitalize">{h}</span>
-                  <span className="text-gray-500 ml-2">
+                  <span className="text-white/40 ml-2">
                     {h === "match" ? "Keep original harmony" : "Allow creative reharmonization"}
                   </span>
                 </button>
@@ -5712,16 +5712,16 @@ function GuidedPromptBuilder({
           {step === 5 && (
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-medium text-gray-500">Scale</label>
+                <label className="text-[10px] font-medium text-white/40">Scale</label>
                 <input
                   value={scale}
                   onChange={(e) => setScale(e.target.value)}
                   placeholder="auto (or e.g. 'D dorian', 'Bb mixolydian')"
-                  className="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white text-gray-800"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-scale"
                 />
               </div>
-              <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-white/50 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={meendEnabled}
@@ -5736,7 +5736,7 @@ function GuidedPromptBuilder({
           {step === 6 && (
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-medium text-gray-500">Build Curve</label>
+                <label className="text-[10px] font-medium text-white/40">Build Curve</label>
                 <div className="grid grid-cols-3 gap-1.5 mt-1">
                   {[
                     { id: "gradual", label: "Gradual Build", desc: "Slow intensity increase" },
@@ -5746,32 +5746,32 @@ function GuidedPromptBuilder({
                     <button
                       key={bc.id}
                       onClick={() => setBuildCurve(bc.id)}
-                      className={`p-2 rounded-lg border text-left ${buildCurve === bc.id ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-200"}`}
+                      className={`p-2 rounded-lg border text-left ${buildCurve === bc.id ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
                       data-testid={`button-guided-build-${bc.id}`}
                     >
-                      <div className="text-[10px] font-medium text-gray-800">{bc.label}</div>
-                      <div className="text-[9px] text-gray-500">{bc.desc}</div>
+                      <div className="text-[10px] font-medium text-white/85">{bc.label}</div>
+                      <div className="text-[9px] text-white/40">{bc.desc}</div>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-medium text-gray-500">Form</label>
+                <label className="text-[10px] font-medium text-white/40">Form</label>
                 <input
                   value={form}
                   onChange={(e) => setForm(e.target.value)}
                   placeholder="AABA, ABAB, through-composed..."
-                  className="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white text-gray-800"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-form"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-medium text-gray-500">Additional Notes</label>
+                <label className="text-[10px] font-medium text-white/40">Additional Notes</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any other instructions..."
-                  className="w-full border border-gray-200 rounded-lg p-2 text-sm resize-none h-16 focus:outline-none focus:border-[#A05068] mt-1 bg-white text-gray-800"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm resize-none h-16 focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-notes"
                 />
               </div>
@@ -5792,23 +5792,23 @@ function GuidedPromptBuilder({
                 <button
                   key={q.id}
                   onClick={() => setRenderQuality(q.id)}
-                  className={`w-full p-3 rounded-lg border text-left text-xs ${renderQuality === q.id ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-200"}`}
+                  className={`w-full p-3 rounded-lg border text-left text-xs ${renderQuality === q.id ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-quality-${q.id}`}
                 >
                   <span className="font-medium">{q.label}</span>
-                  <span className="text-gray-500 ml-2">{q.desc}</span>
+                  <span className="text-white/40 ml-2">{q.desc}</span>
                 </button>
               ))}
             </div>
           )}
           {step === 8 && (
-            <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-800 whitespace-pre-wrap leading-relaxed border border-gray-200">
+            <div className="bg-white/5 rounded-lg p-3 text-xs text-white/75 whitespace-pre-wrap leading-relaxed border border-white/10">
               {buildPrompt()}
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
           <Button
             onClick={() => setStep(Math.max(0, step - 1))}
             variant="outline"
