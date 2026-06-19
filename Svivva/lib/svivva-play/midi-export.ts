@@ -192,6 +192,15 @@ export function buildMidiFileBytes(stems: MidiStemInput[], bpm: number): Uint8Ar
 
     const track = new Midi.Track();
     file.addTrack(track);
+    // Time signature 4/4 at tick 0 — Ableton uses this for bar grid alignment.
+    // Bytes: [numerator=4, log2(denominator)=2, MIDI-clocks-per-beat=24, 32nds-per-quarter=8]
+    track.addEvent(
+      new Midi.MetaEvent({
+        type: 0x58,
+        data: [4, 2, 24, 8],
+      }),
+    );
+
     track.setTempo(bpm);
 
     track.addEvent(

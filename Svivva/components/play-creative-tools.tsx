@@ -50,19 +50,19 @@ export default function PlayCreativeTools() {
   return (
     <section
       id="play-creative-tools"
-      className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+      className="rounded-xl border border-white/10 bg-[#0e0c16] overflow-hidden"
       data-testid="play-creative-tools"
     >
-      <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-4 sm:px-5 py-4">
+      <div className="border-b border-white/8 bg-gradient-to-r from-white/4 to-transparent px-4 sm:px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#A05068]">
               Creative engines
             </p>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mt-0.5">{current.label}</h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xl">{current.description}</p>
+            <h2 className="text-lg sm:text-xl font-bold text-white/90 mt-0.5">{current.label}</h2>
+            <p className="text-xs sm:text-sm text-white/45 mt-1 max-w-xl">{current.description}</p>
           </div>
-          <div className="flex rounded-lg border border-gray-200 bg-gray-100/80 p-1 gap-1 self-start">
+          <div className="flex rounded-lg border border-white/10 bg-white/5 p-1 gap-1 self-start">
             {TOOLS.map((tool) => (
               <button
                 key={tool.id}
@@ -71,8 +71,8 @@ export default function PlayCreativeTools() {
                 data-testid={`tab-${tool.id}`}
                 className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                   active === tool.id
-                    ? "bg-white text-gray-900 shadow-sm ring-1 ring-gray-200"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "bg-white/12 text-white shadow-none"
+                    : "text-white/40 hover:text-white/70"
                 }`}
               >
                 {tool.short}

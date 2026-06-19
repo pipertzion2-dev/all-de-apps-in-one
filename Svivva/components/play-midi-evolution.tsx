@@ -277,7 +277,11 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         if (data.report) setReport(data.report);
         if (data.suggestedSection) setSuggestedSection(data.suggestedSection);
         if (action === "export" && data.zipBase64) {
-          downloadZip(data.zipBase64, `midi-evolution-${Date.now()}.zip`);
+          const secLabel = part?.sectionId
+            ? `Sec-${part.sectionId}`
+            : (part?.label?.replace(/[^a-zA-Z0-9-]/g, "-") ?? "evolved");
+          const bpmLabel = memory ? `_${memory.globalBpm}bpm` : "";
+          downloadZip(data.zipBase64, `svivva-evolution_${secLabel}${bpmLabel}.zip`);
         }
         return data;
       } catch (e) {
@@ -359,15 +363,15 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   };
 
   const shell = embedded
-    ? "px-4 sm:px-5 py-5 sm:py-6 space-y-5 bg-white text-gray-900"
-    : "rounded-2xl border border-gray-200 bg-white shadow-sm px-4 sm:px-6 py-8 space-y-6 text-gray-900";
+    ? "px-4 sm:px-5 py-5 sm:py-6 space-y-5 bg-transparent text-[#e8e4f0]"
+    : "rounded-2xl border border-white/10 bg-[#0e0c16] px-4 sm:px-6 py-8 space-y-6 text-[#e8e4f0]";
 
   return (
     <div className={shell} data-testid="midi-evolution-engine">
       {!embedded && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900">MIDI Evolution Engine</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-xl font-bold text-white/90">MIDI Evolution Engine</h2>
+          <p className="text-sm text-white/45 mt-1">
             Long-form composition evolution — velocity & phrasing preserved, pitches reharmonized.
           </p>
         </div>
@@ -379,25 +383,25 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           <div
             key={s.n}
             className={`rounded-lg border px-3 py-2.5 ${
-              step >= s.n ? "border-[#A05068]/40 bg-[#A05068]/5" : "border-gray-200 bg-gray-50"
+              step >= s.n ? "border-[#A05068]/40 bg-[#A05068]/8" : "border-white/10 bg-white/4"
             }`}
           >
             <p
               className={`text-[10px] font-bold uppercase tracking-wide ${
-                step >= s.n ? "text-[#A05068]" : "text-gray-400"
+                step >= s.n ? "text-[#A05068]" : "text-white/30"
               }`}
             >
               Step {s.n}
             </p>
-            <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5">{s.label}</p>
-            <p className="text-[10px] text-gray-500 hidden sm:block">{s.hint}</p>
+            <p className="text-xs sm:text-sm font-semibold text-white/80 mt-0.5">{s.label}</p>
+            <p className="text-[10px] text-white/40 hidden sm:block">{s.hint}</p>
           </div>
         ))}
       </div>
 
       {/* Upload */}
       <div
-        className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/80 p-4 sm:p-5 cursor-pointer hover:border-[#A05068]/50 hover:bg-[#A05068]/5 transition-colors"
+        className="rounded-lg border-2 border-dashed border-white/15 bg-white/4 p-4 sm:p-5 cursor-pointer hover:border-[#A05068]/50 hover:bg-[#A05068]/5 transition-colors"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
@@ -413,21 +417,21 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           className="hidden"
           onChange={(e) => void handleFiles(e.target.files)}
         />
-        <p className="text-sm font-medium text-gray-800">
+        <p className="text-sm font-medium text-white/80">
           {filenames.length
             ? `${filenames.length} MIDI file(s) loaded`
             : "Drop or click to upload MIDI or a .zip stem pack"}
         </p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-white/40 mt-1">
           .mid / .midi files or a .zip with multiple stems — analyzed together as one composition.
         </p>
-        {uploadHint && <p className="text-xs text-amber-700 mt-2">{uploadHint}</p>}
+        {uploadHint && <p className="text-xs text-amber-400 mt-2">{uploadHint}</p>}
         {filenames.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {filenames.map((n) => (
               <li
                 key={n}
-                className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-gray-200 text-gray-600"
+                className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/6 border border-white/10 text-white/55"
               >
                 {n}
               </li>
@@ -437,14 +441,14 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
       </div>
 
       {/* Tempo — always user input; MIDI notes parsed in seconds from file */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4 space-y-2">
+      <div className="rounded-lg border border-white/10 bg-white/4 p-3 sm:p-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-white/40">
             Project tempo (required)
           </p>
           {fileTempoMarker != null && (
-            <span className="text-[10px] text-gray-500">
-              File tempo marker: <strong className="text-gray-600">{fileTempoMarker} BPM</strong>{" "}
+            <span className="text-[10px] text-white/40">
+              File tempo marker: <strong className="text-white/60">{fileTempoMarker} BPM</strong>{" "}
               (reference only)
             </span>
           )}
@@ -466,27 +470,27 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
                 setReport(null);
               }
             }}
-            className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="w-24 rounded-md border border-white/15 bg-white/6 px-2 py-1.5 text-sm text-white/85"
             aria-label="Project BPM"
           />
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-white/55">
             BPM — used for analysis, generation & export
           </span>
         </div>
-        <p className="text-[10px] text-gray-500">
+        <p className="text-[10px] text-white/35">
           Note pitches and timing are read from the MIDI file; beat grid always follows your BPM
           input.
         </p>
       </div>
 
       {/* Expression row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-lg border border-white/10 bg-white/4 p-3 sm:p-4">
         <div>
-          <label className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+          <label className="text-[10px] font-semibold uppercase tracking-wide text-white/40">
             Meend
           </label>
           <select
-            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-md border border-white/15 bg-white/6 text-white/85 px-2 py-1.5 text-sm"
             value={meendLevel}
             onChange={(e) => setMeendLevel(e.target.value as MeendLevel)}
           >
@@ -497,7 +501,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             ))}
           </select>
         </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700 sm:pt-5">
+        <label className="flex items-center gap-2 text-sm text-white/60 sm:pt-5">
           <input
             type="checkbox"
             checked={stevieSlides}
@@ -515,7 +519,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               className={`flex-1 px-2 py-1.5 rounded-md text-[10px] sm:text-xs font-medium border ${
                 uiMode === mode
                   ? "bg-[#A05068] text-white border-[#A05068]"
-                  : "bg-white text-gray-600 border-gray-300"
+                  : "bg-white/6 text-white/50 border-white/15"
               }`}
             >
               {mode === "long-form" ? "Sections B–J" : "Custom"}
@@ -527,12 +531,12 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
       {uiMode === "long-form" ? (
         <>
           {/* Engine info banner */}
-          <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-gray-50 to-white px-4 py-3 flex items-start gap-3">
+          <div className="rounded-lg border border-white/10 bg-gradient-to-r from-white/5 to-transparent px-4 py-3 flex items-start gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold text-[#A05068] uppercase tracking-wider">
                 Long-Form Multi-MIDI Evolution Engine
               </p>
-              <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+              <p className="text-xs text-white/45 mt-0.5 leading-relaxed">
                 Phases 1–6 (Forensics → Motif Genealogy → Long-Form Memory → Rhythmic DNA → Harmonic
                 Evolution → Sectional Narrative) are embedded. Sections B–J map exactly to Shadow
                 Portal → Revelation.
@@ -556,7 +560,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               type="button"
               disabled={!files.length || loading}
               onClick={runForensics}
-              className="flex-1 py-2.5 rounded-lg text-sm font-semibold border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 disabled:opacity-40"
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold border border-white/15 bg-white/6 text-white/70 hover:bg-white/10 disabled:opacity-40"
             >
               Run forensics only
             </button>
@@ -574,11 +578,14 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           </div>
 
           {forensics && (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
-              <p className="text-gray-700">{forensics.narrativeSummary}</p>
+            <div className="rounded-lg border border-white/10 bg-white/4 p-4 text-sm space-y-2">
+              <p className="text-white/65">{forensics.narrativeSummary}</p>
               <div className="flex flex-wrap gap-2 text-xs">
                 {(["primary", "secondary", "transition", "hidden"] as const).map((k) => (
-                  <span key={k} className="px-2 py-1 rounded bg-white border border-gray-200">
+                  <span
+                    key={k}
+                    className="px-2 py-1 rounded bg-white/6 border border-white/10 text-white/60"
+                  >
                     {k}: {forensics.motifsByKind[k] ?? 0}
                   </span>
                 ))}
@@ -587,7 +594,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           )}
 
           <div>
-            <p className="text-xs font-semibold text-gray-600 mb-2">Or pick a section</p>
+            <p className="text-xs font-semibold text-white/50 mb-2">Or pick a section</p>
             <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-1.5">
               {SECTION_ORDER.map((id) => {
                 const spec = LONG_FORM_SECTIONS[id];
@@ -603,22 +610,22 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
                       active
                         ? "border-[#A05068] bg-[#A05068]/10 ring-1 ring-[#A05068]/30"
                         : done
-                          ? "border-emerald-300 bg-emerald-50"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          ? "border-emerald-400/50 bg-emerald-900/20"
+                          : "border-white/10 bg-white/4 hover:border-white/20"
                     }`}
                   >
-                    <span className="text-xs font-bold text-gray-900">
+                    <span className="text-xs font-bold text-white/80">
                       {id}
                       {done ? " ✓" : ""}
                     </span>
-                    <span className="block text-[9px] text-gray-500 leading-tight mt-0.5 truncate">
+                    <span className="block text-[9px] text-white/40 leading-tight mt-0.5 truncate">
                       {spec.title}
                     </span>
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-white/40 mt-2">
               {LONG_FORM_SECTIONS[selectedSection].title} —{" "}
               {LONG_FORM_SECTIONS[selectedSection].emotion}
             </p>
@@ -646,15 +653,15 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
                   Prompt presets
                 </p>
                 {loadedPresetId && (
-                  <p className="text-[10px] text-gray-500 mt-0.5">
+                  <p className="text-[10px] text-white/40 mt-0.5">
                     Loaded:{" "}
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-white/65">
                       {PROMPT_PRESETS.find((p) => p.id === loadedPresetId)?.label}
                     </span>
                   </p>
                 )}
                 {!loadedPresetId && (
-                  <p className="text-[10px] text-gray-500 mt-0.5">
+                  <p className="text-[10px] text-white/40 mt-0.5">
                     Load the full engine prompt or a targeted section directive
                   </p>
                 )}
@@ -684,7 +691,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
                     className={`text-left rounded-lg border px-3 py-2.5 transition-all hover:shadow-sm ${
                       loadedPresetId === pp.id
                         ? "border-[#A05068]/50 bg-[#A05068]/6 ring-1 ring-[#A05068]/20"
-                        : "border-gray-200 bg-white hover:border-gray-300"
+                        : "border-white/10 bg-white/4 hover:border-white/20"
                     }`}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
@@ -695,8 +702,8 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
                         {pp.tag}
                       </span>
                     </div>
-                    <p className="text-xs font-semibold text-gray-900">{pp.label}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                    <p className="text-xs font-semibold text-white/85">{pp.label}</p>
+                    <p className="text-[10px] text-white/40 mt-0.5 line-clamp-2 leading-snug">
                       {pp.prompt.slice(0, 90)}…
                     </p>
                   </button>
@@ -707,9 +714,9 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-500">Style preset</label>
+              <label className="text-xs text-white/40">Style preset</label>
               <select
-                className="mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-md border border-white/15 bg-white/6 text-white/85 px-2 py-1.5 text-sm"
                 value={preset}
                 onChange={(e) => setPreset(e.target.value as StylePresetId)}
               >
@@ -722,7 +729,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             </div>
           </div>
           <textarea
-            className="w-full min-h-[160px] rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+            className="w-full min-h-[160px] rounded-lg border border-white/15 bg-white/5 text-white/85 placeholder:text-white/25 px-3 py-2 text-sm font-mono"
             placeholder="Paste your full evolution prompt here — or load one above…"
             value={prompt}
             onChange={(e) => {
@@ -732,14 +739,14 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           />
           {prompt.length > 0 && (
             <div className="flex items-center justify-between -mt-3">
-              <p className="text-[10px] text-gray-400">{prompt.length} chars</p>
+              <p className="text-[10px] text-white/30">{prompt.length} chars</p>
               <button
                 type="button"
                 onClick={() => {
                   setPrompt("");
                   setLoadedPresetId(null);
                 }}
-                className="text-[10px] text-gray-400 hover:text-gray-600"
+                className="text-[10px] text-white/30 hover:text-white/60"
               >
                 Clear
               </button>
@@ -750,7 +757,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               type="button"
               disabled={!files.length || loading}
               onClick={runForensics}
-              className="px-4 py-2 rounded-lg text-sm border border-gray-300 disabled:opacity-40"
+              className="px-4 py-2 rounded-lg text-sm border border-white/15 text-white/65 hover:bg-white/6 disabled:opacity-40"
             >
               Forensics
             </button>
@@ -766,7 +773,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               type="button"
               disabled={!part || loading}
               onClick={() => void callApi("continue")}
-              className="px-4 py-2 rounded-lg text-sm border border-gray-300 disabled:opacity-40"
+              className="px-4 py-2 rounded-lg text-sm border border-white/15 text-white/65 hover:bg-white/6 disabled:opacity-40"
             >
               Next part
             </button>
@@ -774,7 +781,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         </>
       )}
 
-      <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100">
+      <div className="flex flex-wrap gap-2 pt-1 border-t border-white/8">
         <button
           type="button"
           disabled={!part || loading}
@@ -785,59 +792,59 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         </button>
       </div>
 
-      {loading && <p className="text-sm text-gray-500 animate-pulse">Processing…</p>}
+      {loading && <p className="text-sm text-white/40 animate-pulse">Processing…</p>}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-400/30 bg-red-900/20 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
       {(memory || part) && (
-        <div className="rounded-lg border border-gray-200 divide-y divide-gray-100 text-sm">
+        <div className="rounded-lg border border-white/10 divide-y divide-white/6 text-sm">
           {memory && (
-            <div className="p-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+            <div className="p-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/50">
               <span>
-                <strong className="text-gray-800">Key</strong> {memory.key}
+                <strong className="text-white/75">Key</strong> {memory.key}
               </span>
               <span>
-                <strong className="text-gray-800">BPM</strong> {memory.globalBpm}
+                <strong className="text-white/75">BPM</strong> {memory.globalBpm}
               </span>
               {memory.detectedBpm != null && memory.detectedBpm !== memory.globalBpm && (
                 <span>
-                  <strong className="text-gray-800">File marker</strong> {memory.detectedBpm}
+                  <strong className="text-white/75">File marker</strong> {memory.detectedBpm}
                 </span>
               )}
               <span>
-                <strong className="text-gray-800">Motifs</strong> {memory.motifs.length}
+                <strong className="text-white/75">Motifs</strong> {memory.motifs.length}
               </span>
               <span>
-                <strong className="text-gray-800">Done</strong>{" "}
+                <strong className="text-white/75">Done</strong>{" "}
                 {completedSections.length ? completedSections.join(", ") : "A only"}
               </span>
             </div>
           )}
           {part && (
             <div className="p-3 bg-[#A05068]/5">
-              <p className="font-medium text-gray-900">{part.label}</p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="font-medium text-white/85">{part.label}</p>
+              <p className="text-xs text-white/50 mt-1">
                 Velocity & phrasing preserved · pitches reharmonized
                 {part.pitchBends?.length ? " · meend/slides applied" : ""}
               </p>
               {part.fileOutputs?.length ? (
                 <ul className="mt-2 space-y-1">
                   {part.fileOutputs.map((f) => (
-                    <li key={f.sourceFileId} className="text-[10px] font-mono text-gray-600">
+                    <li key={f.sourceFileId} className="text-[10px] font-mono text-white/50">
                       {f.sourceFilename} → {f.exportFilename}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-xs text-gray-500 mt-1">{part.filename}</p>
+                <p className="text-xs text-white/40 mt-1">{part.filename}</p>
               )}
             </div>
           )}
           {report?.newHarmonicCenters?.length ? (
-            <div className="p-3 text-xs text-gray-500">
+            <div className="p-3 text-xs text-white/40">
               Harmony: {report.newHarmonicCenters.slice(0, 6).join(" → ")}
             </div>
           ) : null}
