@@ -55,6 +55,8 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
+    // Play is a dense interactive page — keep the 3D ambient rather than prominent
+    canvas.style.opacity = variant === "play" ? "0.55" : "1";
     el.appendChild(canvas);
 
     const scene = new THREE.Scene();
