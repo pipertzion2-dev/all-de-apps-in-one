@@ -6,6 +6,7 @@ import { generateContinuation } from "./continuation";
 import {
   buildEvolutionExportPack,
   buildEvolutionZipBuffer,
+  buildLongFormSuiteZipBuffer,
   buildTransformationReport,
 } from "./export-pack";
 import { generateLongFormSection, suggestNextSection } from "./generate-long-form-section";
@@ -22,7 +23,14 @@ import type {
 } from "./types";
 
 export type EvolutionRequest = {
-  action: "analyze" | "forensics" | "transform" | "continue" | "generate-section" | "export";
+  action:
+    | "analyze"
+    | "forensics"
+    | "transform"
+    | "continue"
+    | "generate-section"
+    | "export"
+    | "export-suite";
   files?: { filename: string; base64: string }[];
   prompt?: string;
   preset?: StylePresetId;
@@ -126,6 +134,24 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
   const refreshed = refreshMemoryFromFiles(req, memory);
   memory = refreshed.memory;
   const refreshedTracks = refreshed.tracks;
+
+  if (req.action === "export-suite") {
+    const tracks = refreshedTracks;
+    if (!tracks?.length) throw new Error("Upload MIDI files to export the 9-version suite");
+    const { zip, memory: suiteMemory } = await buildLongFormSuiteZipBuffer(memory, tracks);
+    return {
+      memory: suiteMemory,
+      zipBase64: zip.toString("base64"),
+      suggestedSection: null,
+      aiPlan: {
+        intentSummary: "Built-in 9-version Glasper suite generated without Ollama or external AI.",
+        harmonicDirection:
+          "Robert Glasper / neo-soul extended harmony with progression across sections B-J.",
+        motifFocus: "preserve timing and motif identity while changing note relationships",
+        provider: "deterministic-suite",
+      },
+    };
+  }
 
   const preset = req.preset ?? "custom";
   const prompt = req.prompt ?? "";

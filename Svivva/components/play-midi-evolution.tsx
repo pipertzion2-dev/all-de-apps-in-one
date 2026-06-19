@@ -263,7 +263,13 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
   const callApi = useCallback(
     async (
-      action: "forensics" | "transform" | "continue" | "generate-section" | "export",
+      action:
+        | "forensics"
+        | "transform"
+        | "continue"
+        | "generate-section"
+        | "export"
+        | "export-suite",
       extra?: { sectionId?: LongFormSectionId },
     ) => {
       setLoading(true);
@@ -299,6 +305,9 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             : (part?.label?.replace(/[^a-zA-Z0-9-]/g, "-") ?? "evolved");
           const bpmLabel = memory ? `_${memory.globalBpm}bpm` : "";
           downloadZip(data.zipBase64, `svivva-evolution_${secLabel}${bpmLabel}.zip`);
+        } else if (action === "export-suite" && data.zipBase64) {
+          const bpmLabel = data.memory?.globalBpm ? `_${data.memory.globalBpm}bpm` : "";
+          downloadZip(data.zipBase64, `svivva-glasper-suite_9-versions${bpmLabel}.zip`);
         }
         return data;
       } catch (e) {
@@ -799,6 +808,14 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
         >
           Export MIDI pack ({exportFileCount} file{exportFileCount === 1 ? "" : "s"})
+        </button>
+        <button
+          type="button"
+          disabled={!files.length || loading}
+          onClick={() => void callApi("export-suite")}
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-[#A05068] text-white hover:bg-[#B45D78] disabled:opacity-40"
+        >
+          Export 9 versions ({files.length * 9} files)
         </button>
       </div>
 

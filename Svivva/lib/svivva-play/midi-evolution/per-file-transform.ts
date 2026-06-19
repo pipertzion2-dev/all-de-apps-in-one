@@ -1,6 +1,6 @@
 import type { NormalizedMidiEvent } from "../midi-normalize";
 import type { CompositionMemory, TransformOptions } from "./types";
-import { pickChordTimeline, reharmonizeMelodyLine } from "./harmony-engine";
+import { pickChordTimeline, reharmonizeMelodyLine, transformBassLine } from "./harmony-engine";
 import { buildEmotionalChordTimeline } from "./harmonic-evolution";
 import { applyMotifTransform, interweaveMotifTraces } from "./motif-transforms";
 import { repitchPreservingPhrase } from "./rhythmic-dna";
@@ -9,6 +9,57 @@ import { resolvePresetFromPrompt } from "./style-presets";
 
 function maxBeat(events: NormalizedMidiEvent[]): number {
   return events.reduce((m, e) => Math.max(m, e.startBeat + e.duration), 0);
+}
+
+function lowRegisterRatio(events: NormalizedMidiEvent[]): number {
+  if (!events.length) return 0;
+  return events.filter((e) => e.note < 55).length / events.length;
+}
+
+function medianNote(events: NormalizedMidiEvent[]): number {
+  if (!events.length) return 60;
+  const notes = events.map((e) => e.note).sort((a, b) => a - b);
+  return notes[Math.floor(notes.length / 2)] ?? 60;
+}
+
+function isBassLikeSource(events: NormalizedMidiEvent[]): boolean {
+  return medianNote(events) < 52 || lowRegisterRatio(events) >= 0.65;
+}
+
+function overlaps(a: NormalizedMidiEvent, b: NormalizedMidiEvent): boolean {
+  return a.startBeat < b.startBeat + b.duration && b.startBeat < a.startBeat + a.duration;
+}
+
+function hasPitchConflict(
+  placed: NormalizedMidiEvent[],
+  event: NormalizedMidiEvent,
+  note: number,
+): boolean {
+  return placed.some(
+    (other) =>
+      (other.channel ?? 0) === (event.channel ?? 0) &&
+      other.note === note &&
+      overlaps(other, event),
+  );
+}
+
+function avoidOverlappingDuplicatePitches(events: NormalizedMidiEvent[]): NormalizedMidiEvent[] {
+  const placed: NormalizedMidiEvent[] = [];
+  const offsets = [0, 12, -12, 7, -7, 5, -5, 2, -2, 1, -1, 3, -3, 4, -4];
+
+  for (const event of [...events].sort((a, b) => a.startBeat - b.startBeat || a.note - b.note)) {
+    let note = event.note;
+    if (hasPitchConflict(placed, event, note)) {
+      const replacement = offsets
+        .map((offset) => event.note + offset)
+        .filter((candidate) => candidate >= 0 && candidate <= 127)
+        .find((candidate) => !hasPitchConflict(placed, event, candidate));
+      note = replacement ?? note;
+    }
+    placed.push({ ...event, note });
+  }
+
+  return placed.sort((a, b) => a.startBeat - b.startBeat || a.note - b.note);
 }
 
 function mergePreset(options: TransformOptions) {
@@ -50,11 +101,14 @@ export function repitchSourceFileEvents(
     working = interweaveMotifTraces(working, memory.motifs, 1);
   }
 
-  const repitched = reharmonizeMelodyLine(working, preset, chordTimeline);
-  const events =
+  const repitched = isBassLikeSource(sourceEvents)
+    ? transformBassLine(working, preset, chordTimeline, 4, options.bassAvoidsRoots)
+    : reharmonizeMelodyLine(working, preset, chordTimeline);
+  const events = avoidOverlappingDuplicatePitches(
     options.preservePhraseExactly !== false
       ? repitchPreservingPhrase(working, repitched)
-      : repitched;
+      : repitched,
+  );
 
   const pitchBends = buildExpressionBends(events, {
     meendLevel: options.meendLevel,
@@ -90,7 +144,7 @@ export function evolutionExportFilename(
   bpm?: number,
   key?: string,
 ): string {
-  const baseName = sourceFilename.replace(/^.*[/\\]/, "");
+  const baseName = sourceFilename.replace(/^.*\//, "").replace(/\\/g, "");
   const match = baseName.match(/^(.+?)(\.[^.]+)?$/);
   const stem = (match?.[1] ?? baseName).replace(/[^a-zA-Z0-9_-]/g, "-");
   const ext = match?.[2] ?? ".mid";
