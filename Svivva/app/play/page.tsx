@@ -2771,8 +2771,8 @@ export default function SvivvaPlayPage() {
   if (crateState !== "open") {
     return (
       <div
-        className="h-[100dvh] bg-[#0c0a14] flex flex-col overflow-hidden"
-        style={{ colorScheme: "dark" }}
+        className="h-[100dvh] bg-white flex flex-col overflow-hidden"
+        style={{ colorScheme: "light" }}
       >
         {playBetaBanner}
         {!betaAcknowledged ? (
@@ -2780,10 +2780,10 @@ export default function SvivvaPlayPage() {
             className="flex-1 flex flex-col items-center justify-center px-6 pb-8"
             data-testid="gate-play-beta"
           >
-            <div className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-[#12101e] shadow-none p-8 text-center">
-              <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-white mb-2">Svivva Play — Beta</h1>
-              <p className="text-sm text-white/55 leading-relaxed mb-6">
+            <div className="max-w-lg w-full rounded-2xl border-2 border-amber-400 bg-white shadow-lg p-8 text-center">
+              <AlertTriangle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Svivva Play — Beta</h1>
+              <p className="text-sm text-gray-600 leading-relaxed mb-6">
                 You are entering an experimental studio. Features break, shift, and improve often.
                 If the page fails to load, refresh or try again later. MIDI export is the most
                 reliable output; in-browser preview is best-effort only.
