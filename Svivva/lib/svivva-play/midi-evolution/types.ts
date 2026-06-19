@@ -56,6 +56,12 @@ export type ImportedMidiTrack = {
   durationSec: number;
   events: NormalizedMidiEvent[];
   role: "bass" | "harmony" | "melody" | "mixed";
+  /** Source SMF division — preserved on export for DAW grid fidelity. */
+  ticksPerBeat?: number;
+  /** Longest track end in beats (includes trailing silence from source). */
+  totalEndBeat?: number;
+  /** Per MTrk layers when the upload is a multi-track MIDI file. */
+  layers?: { name: string; events: NormalizedMidiEvent[] }[];
 };
 
 export type CompositionMemory = {
@@ -109,6 +115,13 @@ export type PerFileMidiOutput = {
   transformedEvents: NormalizedMidiEvent[];
   exportFilename: string;
   pitchBends?: { beat: number; value: number }[];
+  ticksPerBeat?: number;
+  totalEndBeat?: number;
+  layers?: {
+    name: string;
+    events: NormalizedMidiEvent[];
+    pitchBends?: { beat: number; value: number }[];
+  }[];
 };
 
 export type GeneratedPart = {

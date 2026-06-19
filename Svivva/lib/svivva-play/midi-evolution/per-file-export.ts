@@ -17,13 +17,29 @@ export function buildPerFileOutputs(
   fallbackLabel?: string,
 ): PerFileMidiOutput[] {
   return tracks.map((track) => {
-    const { events, pitchBends } = repitchSourceFileEvents(track.events, memory, options);
+    const sourceLayers =
+      track.layers?.length && track.layers.length > 1
+        ? track.layers
+        : [{ name: track.filename.replace(/\.[^.]+$/, ""), events: track.events }];
+
+    const transformedLayers = sourceLayers.map((layer) => {
+      const { events, pitchBends } = repitchSourceFileEvents(layer.events, memory, options);
+      return {
+        name: layer.name,
+        events,
+        pitchBends: pitchBends.length ? pitchBends : undefined,
+      };
+    });
+
+    const transformedEvents = transformedLayers.flatMap((l) => l.events);
+    const pitchBends = transformedLayers.flatMap((l) => l.pitchBends ?? []);
+
     return {
       sourceFileId: track.id,
       sourceFilename: track.filename,
       bpm: memory.globalBpm,
       originalEvents: track.events,
-      transformedEvents: events,
+      transformedEvents,
       exportFilename: evolutionExportFilename(
         track.filename,
         sectionId,
@@ -32,6 +48,9 @@ export function buildPerFileOutputs(
         memory.key,
       ),
       pitchBends: pitchBends.length ? pitchBends : undefined,
+      ticksPerBeat: track.ticksPerBeat,
+      totalEndBeat: track.totalEndBeat,
+      layers: transformedLayers.length > 1 ? transformedLayers : undefined,
     };
   });
 }

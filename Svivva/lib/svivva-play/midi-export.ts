@@ -16,7 +16,14 @@ export type MidiStemInput = {
   expression?: MidiStemExpression;
 };
 
-const TICKS_PER_BEAT = 480;
+export type MidiExportOptions = {
+  /** Match source SMF division (defaults to 480). */
+  ticksPerBeat?: number;
+  /** Pad each track to this beat length (preserves trailing silence from source). */
+  endBeat?: number;
+};
+
+const DEFAULT_TICKS_PER_BEAT = 480;
 
 function midiPitchBendValue(offset: number): number {
   return Math.max(0, Math.min(16383, 8192 + Math.round(offset)));
@@ -37,9 +44,9 @@ function sanitizeMidiTrackName(name: string): string {
 }
 
 type AtomicMidiEvent =
-  | { tick: number; kind: "noteOn"; note: number; velocity: number }
-  | { tick: number; kind: "noteOff"; note: number }
-  | { tick: number; kind: "bend"; value: number };
+  | { tick: number; kind: "noteOn"; note: number; velocity: number; channel: number }
+  | { tick: number; kind: "noteOff"; note: number; channel: number }
+  | { tick: number; kind: "bend"; value: number; channel: number };
 
 const ATOMIC_KIND_ORDER: Record<AtomicMidiEvent["kind"], number> = {
   noteOff: 0,
@@ -56,14 +63,21 @@ function expandTimelineToAtomicEvents(timeline: TimelineEntry[]): AtomicMidiEven
         kind: "noteOn",
         note: item.note,
         velocity: item.velocity,
+        channel: item.channel,
       });
       atoms.push({
         tick: item.tick + item.durationTick,
         kind: "noteOff",
         note: item.note,
+        channel: item.channel,
       });
     } else {
-      atoms.push({ tick: item.tick, kind: "bend", value: item.value });
+      atoms.push({
+        tick: item.tick,
+        kind: "bend",
+        value: item.value,
+        channel: item.channel,
+      });
     }
   }
   atoms.sort((a, b) => a.tick - b.tick || ATOMIC_KIND_ORDER[a.kind] - ATOMIC_KIND_ORDER[b.kind]);
@@ -82,11 +96,19 @@ function addMeendTrackMeta(track: InstanceType<typeof Midi.Track>, stem: MidiSte
 }
 
 type TimelineEntry =
-  | { kind: "note"; tick: number; note: number; durationTick: number; velocity: number }
-  | { kind: "bend"; tick: number; value: number };
+  | {
+      kind: "note";
+      tick: number;
+      note: number;
+      durationTick: number;
+      velocity: number;
+      channel: number;
+    }
+  | { kind: "bend"; tick: number; value: number; channel: number };
 
 function buildStemTimeline(
   events: ReturnType<typeof normalizeMidiEvents>,
+  ticksPerBeat: number,
   expression?: MidiStemExpression,
 ): TimelineEntry[] {
   const timeline: TimelineEntry[] = [];
@@ -96,14 +118,15 @@ function buildStemTimeline(
   const exportNotes = sorted;
 
   for (const evt of exportNotes) {
-    const startTick = Math.round(evt.startBeat * TICKS_PER_BEAT);
-    const durationTick = Math.max(1, Math.round(evt.duration * TICKS_PER_BEAT));
+    const startTick = Math.round(evt.startBeat * ticksPerBeat);
+    const durationTick = Math.max(1, Math.round(evt.duration * ticksPerBeat));
     timeline.push({
       kind: "note",
       tick: startTick,
       note: evt.note,
       durationTick,
       velocity: evt.velocity,
+      channel: evt.channel ?? 0,
     });
   }
 
@@ -113,11 +136,13 @@ function buildStemTimeline(
       interNote: !stemHasOverlappingNotes(exportNotes),
     });
   }
+  const bendChannel = exportNotes[0]?.channel ?? 0;
   for (const pb of pitchBends) {
     timeline.push({
       kind: "bend",
-      tick: Math.round(Math.max(0, pb.beat) * TICKS_PER_BEAT),
+      tick: Math.round(Math.max(0, pb.beat) * ticksPerBeat),
       value: midiPitchBendValue(pb.value),
+      channel: bendChannel,
     });
   }
 
@@ -128,12 +153,14 @@ function buildStemTimeline(
 function writeTimelineToTrack(
   track: InstanceType<typeof Midi.Track>,
   timeline: TimelineEntry[],
+  ticksPerBeat: number,
+  endBeat?: number,
 ): void {
-  const channel = 0;
   let currentTick = 0;
 
   for (const item of expandTimelineToAtomicEvents(timeline)) {
     const delay = Math.max(0, item.tick - currentTick);
+    const channel = item.channel;
     if (item.kind === "noteOn") {
       track.addEvent(
         new Midi.Event({
@@ -168,19 +195,42 @@ function writeTimelineToTrack(
     }
     currentTick = item.tick;
   }
+
+  if (endBeat != null && endBeat > 0) {
+    const endTick = Math.round(endBeat * ticksPerBeat);
+    const trailing = endTick - currentTick;
+    if (trailing > 0) {
+      track.addEvent(
+        new Midi.MetaEvent({
+          type: Midi.MetaEvent.MARKER,
+          data: "",
+          time: trailing,
+        }),
+      );
+    }
+  }
 }
 
-export function buildMidiFile(stems: MidiStemInput[], bpm: number): Buffer {
-  const bytes = buildMidiFileBytes(stems, bpm);
+export function buildMidiFile(
+  stems: MidiStemInput[],
+  bpm: number,
+  options?: MidiExportOptions,
+): Buffer {
+  const bytes = buildMidiFileBytes(stems, bpm, options);
   return Buffer.from(bytes);
 }
 
 /** Browser-safe MIDI bytes (no Node Buffer). */
-export function buildMidiFileBytes(stems: MidiStemInput[], bpm: number): Uint8Array {
-  const file = new Midi.File({ ticks: TICKS_PER_BEAT });
+export function buildMidiFileBytes(
+  stems: MidiStemInput[],
+  bpm: number,
+  options?: MidiExportOptions,
+): Uint8Array {
+  const ticksPerBeat = options?.ticksPerBeat ?? DEFAULT_TICKS_PER_BEAT;
+  const file = new Midi.File({ ticks: ticksPerBeat });
 
   for (const stem of stems) {
-    const events = normalizeMidiEvents(stem.midiEvents);
+    const events = normalizeMidiEvents(stem.midiEvents, ticksPerBeat);
     if (events.length === 0) continue;
 
     const track = new Midi.Track();
@@ -206,8 +256,8 @@ export function buildMidiFileBytes(stems: MidiStemInput[], bpm: number): Uint8Ar
     track.setInstrument(0, 0, 0);
     addMeendTrackMeta(track, stem);
 
-    const timeline = buildStemTimeline(events, stem.expression);
-    writeTimelineToTrack(track, timeline);
+    const timeline = buildStemTimeline(events, ticksPerBeat, stem.expression);
+    writeTimelineToTrack(track, timeline, ticksPerBeat, options?.endBeat);
   }
 
   if (file.tracks.length === 0) {

@@ -3,6 +3,12 @@ import type { NormalizedMidiEvent } from "./midi-normalize";
 
 type TempoPoint = { tick: number; usPerBeat: number };
 
+export type ParsedMidiLayer = {
+  name: string;
+  events: NormalizedMidiEvent[];
+  endBeat: number;
+};
+
 function readVarLen(data: Uint8Array, pos: { i: number }): number {
   let value = 0;
   while (pos.i < data.length) {
@@ -37,12 +43,53 @@ export function tickToSeconds(tick: number, ticksPerBeat: number, tempoMap: Temp
  * instead of building a local map. The local map is still returned so the caller
  * can merge it into the master tempo map.
  */
+function readTrackName(data: Uint8Array): string | undefined {
+  const pos = { i: 0 };
+  let tick = 0;
+  while (pos.i < data.length) {
+    const delta = readVarLen(data, pos);
+    tick += delta;
+    if (pos.i >= data.length) break;
+
+    const status = data[pos.i]!;
+    if (status !== 0xff) {
+      if (status < 0x80) pos.i++;
+      else if (status === 0xf0 || status === 0xf7) {
+        const len = readVarLen(data, pos);
+        pos.i += len;
+      } else if ((status & 0xf0) === 0xc0 || (status & 0xf0) === 0xd0) {
+        pos.i += 2;
+      } else if ((status & 0xf0) >= 0x80 && (status & 0xf0) <= 0xe0) {
+        pos.i += 3;
+      }
+      continue;
+    }
+
+    pos.i++;
+    const meta = data[pos.i++]!;
+    const len = readVarLen(data, pos);
+    if (meta === 0x03 && len > 0) {
+      return String.fromCharCode(...data.subarray(pos.i, pos.i + len))
+        .replace(/\0/g, "")
+        .trim();
+    }
+    if (meta === 0x2f) break;
+    pos.i += len;
+  }
+  return undefined;
+}
+
 function parseTrack(
   data: Uint8Array,
   ticksPerBeat: number,
   initialTempoUs: number,
   externalTempoMap?: TempoPoint[],
-): { notes: TranscribedNote[]; midiEvents: NormalizedMidiEvent[]; tempoMap: TempoPoint[] } {
+): {
+  notes: TranscribedNote[];
+  midiEvents: NormalizedMidiEvent[];
+  tempoMap: TempoPoint[];
+  endTick: number;
+} {
   const notes: TranscribedNote[] = [];
   const midiEvents: NormalizedMidiEvent[] = [];
   const active = new Map<
@@ -168,6 +215,7 @@ function parseTrack(
     notes: notes.sort((a, b) => a.startSec - b.startSec),
     midiEvents: midiEvents.sort((a, b) => a.startBeat - b.startBeat || a.note - b.note),
     tempoMap: localTempoMap,
+    endTick: tick,
   };
 }
 
@@ -207,10 +255,12 @@ function findTrackChunks(data: Uint8Array, startPos: number, nTracks: number) {
 export function parseMidiFile(buffer: ArrayBuffer): {
   notes: TranscribedNote[];
   midiEvents: NormalizedMidiEvent[];
+  layers: ParsedMidiLayer[];
   durationSec: number;
   bpm: number;
   ticksPerBeat: number;
   detectedBpm: number;
+  totalEndBeat: number;
 } {
   const data = new Uint8Array(buffer);
   const sig = String.fromCharCode(...data.subarray(0, 4));
@@ -249,9 +299,11 @@ export function parseMidiFile(buffer: ArrayBuffer): {
   // Pass 2 — parse all notes using the master tempo map for accurate tick→sec.
   const allNotes: TranscribedNote[] = [];
   const allMidiEvents: NormalizedMidiEvent[] = [];
-  for (const chunk of chunks) {
+  const layers: ParsedMidiLayer[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i]!;
     const trackData = data.subarray(chunk.offset, chunk.offset + chunk.length);
-    const { notes, midiEvents } = parseTrack(
+    const { notes, midiEvents, endTick } = parseTrack(
       trackData,
       ticksPerBeat,
       defaultTempoUs,
@@ -259,17 +311,27 @@ export function parseMidiFile(buffer: ArrayBuffer): {
     );
     allNotes.push(...notes);
     allMidiEvents.push(...midiEvents);
+    const trackName = readTrackName(trackData) ?? `Track ${i + 1}`;
+    layers.push({
+      name: trackName,
+      events: midiEvents,
+      endBeat: endTick / ticksPerBeat,
+    });
   }
 
   const durationSec = allNotes.reduce((m, n) => Math.max(m, n.endSec), 0);
   const detectedBpm = bpmFromTempoMap(masterTempoMap);
+  const noteEndBeat = allMidiEvents.reduce((m, e) => Math.max(m, e.startBeat + e.duration), 0);
+  const totalEndBeat = Math.max(noteEndBeat, ...layers.map((l) => l.endBeat), 0);
 
   return {
     notes: allNotes.sort((a, b) => a.startSec - b.startSec),
     midiEvents: allMidiEvents.sort((a, b) => a.startBeat - b.startBeat || a.note - b.note),
+    layers,
     durationSec,
     bpm: detectedBpm,
     detectedBpm,
     ticksPerBeat,
+    totalEndBeat,
   };
 }

@@ -84,6 +84,7 @@ export function analyzeGlobalComposition(
     const events = parsed.midiEvents.length
       ? parsed.midiEvents
       : notesToMidiEvents(parsed.notes, parsed.bpm);
+    const noteLayers = parsed.layers.filter((l) => l.events.length > 0);
     const id = slugId(filename, i);
     return {
       id,
@@ -92,6 +93,12 @@ export function analyzeGlobalComposition(
       durationSec: parsed.durationSec,
       events,
       role: inferTrackRole(events),
+      ticksPerBeat: parsed.ticksPerBeat,
+      totalEndBeat: parsed.totalEndBeat,
+      layers:
+        noteLayers.length > 1
+          ? noteLayers.map((l) => ({ name: l.name, events: l.events }))
+          : undefined,
     };
   });
 

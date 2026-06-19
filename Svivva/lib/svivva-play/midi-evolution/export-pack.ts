@@ -69,18 +69,31 @@ function resolveExportOptions(part: GeneratedPart): TransformOptions {
 
 function midiBytesForFileOutput(output: PerFileMidiOutput, exportBpm: number): Uint8Array {
   const stemName = output.sourceFilename.replace(/\.[^.]+$/, "");
-  return buildMidiFileBytes(
-    [
-      {
-        name: stemName,
-        midiEvents: output.transformedEvents,
-        expression: output.pitchBends?.length
-          ? { meend: true, pitchbend: output.pitchBends }
-          : undefined,
-      },
-    ],
-    exportBpm,
-  );
+  const exportStems =
+    output.layers?.length && output.layers.length > 1
+      ? output.layers.map((layer) => ({
+          name: layer.name,
+          midiEvents: layer.events,
+          expression: layer.pitchBends?.length
+            ? { meend: true, pitchbend: layer.pitchBends }
+            : output.pitchBends?.length
+              ? { meend: true, pitchbend: output.pitchBends }
+              : undefined,
+        }))
+      : [
+          {
+            name: stemName,
+            midiEvents: output.transformedEvents,
+            expression: output.pitchBends?.length
+              ? { meend: true, pitchbend: output.pitchBends }
+              : undefined,
+          },
+        ];
+
+  return buildMidiFileBytes(exportStems, exportBpm, {
+    ticksPerBeat: output.ticksPerBeat,
+    endBeat: output.totalEndBeat,
+  });
 }
 
 export function buildEvolutionExportPack(
