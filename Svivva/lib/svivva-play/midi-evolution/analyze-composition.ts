@@ -1,6 +1,7 @@
 import { parseRootFromKeyLabel } from "../analysis-utils";
 import { chordsFromPolyphonicNotesAgnostic } from "../chords-from-notes";
 import { parseMidiFile } from "../midi-file-parse";
+import { maxContentEndBeat, sessionTimelineStartBeat } from "../midi-beat-align";
 import { resolveHarmonicKey } from "../resolve-harmonic-key";
 import type { CompositionMemory, HarmonicCenter, ImportedMidiTrack, PhraseRecord } from "./types";
 import { inferTrackRole, midiEventsToNotes, notesToMidiEvents } from "./note-bridge";
@@ -94,13 +95,15 @@ export function analyzeGlobalComposition(
       events,
       role: inferTrackRole(events),
       ticksPerBeat: parsed.ticksPerBeat,
-      totalEndBeat: parsed.totalEndBeat,
+      contentEndBeat: maxContentEndBeat(events),
       layers:
         noteLayers.length > 1
           ? noteLayers.map((l) => ({ name: l.name, events: l.events }))
           : undefined,
     };
   });
+
+  const timelineStartBeat = sessionTimelineStartBeat(tracks);
 
   const globalBpm = inputBpm;
 
@@ -147,6 +150,7 @@ export function analyzeGlobalComposition(
     globalBpm,
     detectedBpm,
     manualBpm: inputBpm,
+    timelineStartBeat,
     key: keyGuess.key,
     motifs,
     rhythms,

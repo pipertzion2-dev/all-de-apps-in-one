@@ -153,8 +153,6 @@ function buildStemTimeline(
 function writeTimelineToTrack(
   track: InstanceType<typeof Midi.Track>,
   timeline: TimelineEntry[],
-  ticksPerBeat: number,
-  endBeat?: number,
 ): void {
   let currentTick = 0;
 
@@ -194,20 +192,6 @@ function writeTimelineToTrack(
       );
     }
     currentTick = item.tick;
-  }
-
-  if (endBeat != null && endBeat > 0) {
-    const endTick = Math.round(endBeat * ticksPerBeat);
-    const trailing = endTick - currentTick;
-    if (trailing > 0) {
-      track.addEvent(
-        new Midi.MetaEvent({
-          type: Midi.MetaEvent.MARKER,
-          data: "",
-          time: trailing,
-        }),
-      );
-    }
   }
 }
 
@@ -253,11 +237,12 @@ export function buildMidiFileBytes(
       }),
     );
 
-    track.setInstrument(0, 0, 0);
+    const timeline = buildStemTimeline(events, ticksPerBeat, stem.expression);
+    const programChannel = timeline.find((e) => e.kind === "note")?.channel ?? 0;
+    track.setInstrument(programChannel, 0, 0);
     addMeendTrackMeta(track, stem);
 
-    const timeline = buildStemTimeline(events, ticksPerBeat, stem.expression);
-    writeTimelineToTrack(track, timeline, ticksPerBeat, options?.endBeat);
+    writeTimelineToTrack(track, timeline);
   }
 
   if (file.tracks.length === 0) {

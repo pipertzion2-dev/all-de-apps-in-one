@@ -42,7 +42,7 @@ describe("parseMidiFile beat grid", () => {
         },
       ],
       120,
-      { ticksPerBeat: 960, endBeat: 8 },
+      { ticksPerBeat: 960 },
     );
 
     const parsed = parseMidiFile(
@@ -51,14 +51,14 @@ describe("parseMidiFile beat grid", () => {
 
     expect(parsed.ticksPerBeat).toBe(960);
     expect(parsed.layers.filter((l) => l.events.length > 0)).toHaveLength(2);
-    expect(parsed.totalEndBeat).toBeGreaterThanOrEqual(8);
+    expect(parsed.totalEndBeat).toBeGreaterThanOrEqual(2);
     expect(parsed.midiEvents).toHaveLength(2);
     expect(parsed.midiEvents.map((e) => e.channel).sort()).toEqual([1, 4]);
 
     const roundTrip = buildMidiFileBytes(
       parsed.layers.map((layer) => ({ name: layer.name, midiEvents: layer.events })),
       120,
-      { ticksPerBeat: parsed.ticksPerBeat, endBeat: parsed.totalEndBeat },
+      { ticksPerBeat: parsed.ticksPerBeat },
     );
 
     const reparsed = parseMidiFile(
@@ -67,7 +67,6 @@ describe("parseMidiFile beat grid", () => {
 
     expect(reparsed.ticksPerBeat).toBe(960);
     expect(reparsed.layers.filter((l) => l.events.length > 0)).toHaveLength(2);
-    expect(reparsed.totalEndBeat).toBeCloseTo(parsed.totalEndBeat, 3);
     expect(reparsed.midiEvents.map((e) => e.channel).sort()).toEqual([1, 4]);
   });
 });

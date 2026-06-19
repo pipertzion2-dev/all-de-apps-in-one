@@ -92,7 +92,6 @@ function midiBytesForFileOutput(output: PerFileMidiOutput, exportBpm: number): U
 
   return buildMidiFileBytes(exportStems, exportBpm, {
     ticksPerBeat: output.ticksPerBeat,
-    endBeat: output.totalEndBeat,
   });
 }
 

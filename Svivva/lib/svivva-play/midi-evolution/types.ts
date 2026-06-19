@@ -58,8 +58,8 @@ export type ImportedMidiTrack = {
   role: "bass" | "harmony" | "melody" | "mixed";
   /** Source SMF division — preserved on export for DAW grid fidelity. */
   ticksPerBeat?: number;
-  /** Longest track end in beats (includes trailing silence from source). */
-  totalEndBeat?: number;
+  /** Last note end in beats (content length, not SMF EOF padding). */
+  contentEndBeat?: number;
   /** Per MTrk layers when the upload is a multi-track MIDI file. */
   layers?: { name: string; events: NormalizedMidiEvent[] }[];
 };
@@ -72,6 +72,8 @@ export type CompositionMemory = {
   globalBpm: number;
   detectedBpm?: number;
   manualBpm?: number;
+  /** Beat offset trimmed on export so all stems start at bar 1 together. */
+  timelineStartBeat?: number;
   key: string;
   motifs: MotifRecord[];
   rhythms: { id: string; pattern: number[]; motifId?: string }[];
@@ -116,7 +118,7 @@ export type PerFileMidiOutput = {
   exportFilename: string;
   pitchBends?: { beat: number; value: number }[];
   ticksPerBeat?: number;
-  totalEndBeat?: number;
+  contentEndBeat?: number;
   layers?: {
     name: string;
     events: NormalizedMidiEvent[];
