@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMotifGenealogy, pickMotifFamily } from "./motif-genealogy";
+import { buildHarmonyVoicingWithStrategy } from "./harmony-engine";
 import { transformComposition } from "./transform-engine";
 import { notesToMidiEvents } from "./note-bridge";
 import { repitchPreservingPhrase } from "./rhythmic-dna";
@@ -58,6 +59,16 @@ describe("phrase preservation", () => {
     expect(out[0]!.velocity).toBe(95);
     expect(out[1]!.startBeat).toBe(1.25);
     expect(out[0]!.note).toBe(65);
+  });
+});
+
+describe("advanced harmony parsing", () => {
+  it("understands flat roots and slash chords instead of falling back to C", () => {
+    const dbVoicing = buildHarmonyVoicingWithStrategy("DbMaj9(#11)/Ab", 0, 4, "drop2");
+    const bVoicing = buildHarmonyVoicingWithStrategy("BMaj9(#11)/F#", 0, 4, "drop2");
+
+    expect(dbVoicing.some((e) => e.note % 12 === 1)).toBe(true);
+    expect(bVoicing.some((e) => e.note % 12 === 11)).toBe(true);
   });
 });
 

@@ -2,12 +2,7 @@ import type { NormalizedMidiEvent } from "../midi-normalize";
 import type { CompositionMemory, TransformOptions } from "./types";
 import { pickChordTimeline, reharmonizeMelodyLine } from "./harmony-engine";
 import { buildEmotionalChordTimeline } from "./harmonic-evolution";
-import {
-  applyMotifTransform,
-  evolveFromMotifFamily,
-  interweaveMotifTraces,
-} from "./motif-transforms";
-import { pickMotifFamily } from "./motif-genealogy";
+import { applyMotifTransform, interweaveMotifTraces } from "./motif-transforms";
 import { repitchPreservingPhrase } from "./rhythmic-dna";
 import { buildExpressionBends } from "./expression-bends";
 import { resolvePresetFromPrompt } from "./style-presets";
@@ -48,13 +43,10 @@ export function repitchSourceFileEvents(
 
   let working = [...sourceEvents].sort((a, b) => a.startBeat - b.startBeat || a.note - b.note);
 
-  const family = pickMotifFamily(memory.motifs);
-  working = evolveFromMotifFamily(working, family);
-
   if (options.motifTransform && options.motifTransform !== "inherit") {
     working = applyMotifTransform(working, options.motifTransform, true);
   }
-  if (options.interweaveMotifs) {
+  if (options.interweaveMotifs && preset.id !== "glasper") {
     working = interweaveMotifTraces(working, memory.motifs, 1);
   }
 
