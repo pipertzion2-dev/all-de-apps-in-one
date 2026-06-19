@@ -81,7 +81,9 @@ export function analyzeGlobalComposition(
   const detectedBpm = averageDetectedBpm(parsedFiles.map(({ parsed }) => parsed.detectedBpm));
 
   const tracks: ImportedMidiTrack[] = parsedFiles.map(({ filename, parsed }, i) => {
-    const events = notesToMidiEvents(parsed.notes, inputBpm);
+    const events = parsed.midiEvents.length
+      ? parsed.midiEvents
+      : notesToMidiEvents(parsed.notes, parsed.bpm);
     const id = slugId(filename, i);
     return {
       id,

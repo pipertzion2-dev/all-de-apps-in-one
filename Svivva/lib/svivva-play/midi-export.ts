@@ -93,18 +93,11 @@ function buildStemTimeline(
   const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
   const wantsMeend = Boolean(expression?.meend) || (expression?.pitchbend?.length ?? 0) > 0;
 
-  // Keep short hocket hits discrete in DAWs — legato tie lengths collapse to one note in Ableton.
-  const exportNotes = sorted.map((e, i) => {
-    if (!wantsMeend) return e;
-    const next = sorted[i + 1];
-    const gap = next ? next.startBeat - e.startBeat : e.duration;
-    const maxDur = Math.min(e.duration, gap > 0 ? gap * 0.82 : e.duration, 0.42);
-    return { ...e, duration: Math.max(0.08, maxDur) };
-  });
+  const exportNotes = sorted;
 
   for (const evt of exportNotes) {
     const startTick = Math.round(evt.startBeat * TICKS_PER_BEAT);
-    const durationTick = Math.max(TICKS_PER_BEAT / 4, Math.round(evt.duration * TICKS_PER_BEAT));
+    const durationTick = Math.max(1, Math.round(evt.duration * TICKS_PER_BEAT));
     timeline.push({
       kind: "note",
       tick: startTick,

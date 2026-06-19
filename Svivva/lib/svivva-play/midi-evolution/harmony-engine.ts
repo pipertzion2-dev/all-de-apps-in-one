@@ -164,12 +164,24 @@ function pickGlasperNote(
     const colorBonus = color.has(pitchClass) ? -0.9 : 0;
     const rootPenalty =
       preset.id === "glasper" && avoid.has(pitchClass) && event.note > 48 ? 1.6 : 0;
+    const unchangedPenalty = preset.id === "glasper" && candidate === event.note ? 2.8 : 0;
 
-    const score = distanceScore + contourScore + bigLeapPenalty + colorBonus + rootPenalty;
+    const score =
+      distanceScore + contourScore + bigLeapPenalty + colorBonus + rootPenalty + unchangedPenalty;
     if (score < bestScore) {
       bestScore = score;
       best = candidate;
     }
+  }
+
+  if (preset.id === "glasper" && best === event.note && candidates.some((n) => n !== event.note)) {
+    const colorCandidates = candidates.filter((n) => n !== event.note && color.has(pc(n)));
+    const fallbackCandidates = colorCandidates.length
+      ? colorCandidates
+      : candidates.filter((n) => n !== event.note);
+    best = fallbackCandidates.reduce((closest, candidate) =>
+      Math.abs(candidate - event.note) < Math.abs(closest - event.note) ? candidate : closest,
+    );
   }
 
   return Math.max(0, Math.min(127, best));

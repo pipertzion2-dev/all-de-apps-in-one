@@ -84,6 +84,9 @@ describe("per-file export pack", () => {
     expect(fileOutputs[0]!.exportFilename).toBe("Sec-G_Glasper-Dimension_Bass_120bpm_C.mid");
     expect(fileOutputs[1]!.exportFilename).toBe("Sec-G_Glasper-Dimension_Melody_120bpm_C.mid");
     expect(fileOutputs[0]!.transformedEvents).toHaveLength(eventsA.length);
+    expect(fileOutputs[1]!.transformedEvents.map((e) => e.note)).not.toEqual(
+      eventsB.map((e) => e.note),
+    );
     for (let i = 0; i < eventsA.length; i++) {
       expect(fileOutputs[0]!.transformedEvents[i]!.startBeat).toBe(eventsA[i]!.startBeat);
       expect(fileOutputs[0]!.transformedEvents[i]!.duration).toBe(eventsA[i]!.duration);

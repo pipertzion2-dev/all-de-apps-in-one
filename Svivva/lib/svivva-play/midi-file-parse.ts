@@ -1,4 +1,5 @@
 import type { TranscribedNote } from "./audio-transcription";
+import type { NormalizedMidiEvent } from "./midi-normalize";
 
 type TempoPoint = { tick: number; usPerBeat: number };
 
@@ -41,9 +42,13 @@ function parseTrack(
   ticksPerBeat: number,
   initialTempoUs: number,
   externalTempoMap?: TempoPoint[],
-): { notes: TranscribedNote[]; tempoMap: TempoPoint[] } {
+): { notes: TranscribedNote[]; midiEvents: NormalizedMidiEvent[]; tempoMap: TempoPoint[] } {
   const notes: TranscribedNote[] = [];
-  const active = new Map<number, { startTick: number; velocity: number }>();
+  const midiEvents: NormalizedMidiEvent[] = [];
+  const active = new Map<
+    string,
+    { note: number; channel: number; startTick: number; velocity: number }
+  >();
   const localTempoMap: TempoPoint[] = [{ tick: 0, usPerBeat: initialTempoUs }];
   const pos = { i: 0 };
   let tick = 0;
@@ -71,12 +76,14 @@ function parseTrack(
     const type = status & 0xf0;
 
     if (type === 0x90) {
+      const channel = status & 0x0f;
       const note = data[pos.i++]!;
       const vel = data[pos.i++]!;
+      const key = `${channel}:${note}`;
       if (vel > 0) {
-        active.set(note, { startTick: tick, velocity: vel });
+        active.set(key, { note, channel, startTick: tick, velocity: vel });
       } else {
-        const start = active.get(note);
+        const start = active.get(key);
         if (start) {
           notes.push({
             midi: note,
@@ -85,13 +92,22 @@ function parseTrack(
             velocity: start.velocity,
             cents: 0,
           });
-          active.delete(note);
+          midiEvents.push({
+            note,
+            velocity: start.velocity,
+            startBeat: start.startTick / ticksPerBeat,
+            duration: Math.max(1 / ticksPerBeat, (tick - start.startTick) / ticksPerBeat),
+            channel,
+          });
+          active.delete(key);
         }
       }
     } else if (type === 0x80) {
+      const channel = status & 0x0f;
       const note = data[pos.i++]!;
       pos.i++;
-      const start = active.get(note);
+      const key = `${channel}:${note}`;
+      const start = active.get(key);
       if (start) {
         notes.push({
           midi: note,
@@ -100,7 +116,14 @@ function parseTrack(
           velocity: start.velocity,
           cents: 0,
         });
-        active.delete(note);
+        midiEvents.push({
+          note,
+          velocity: start.velocity,
+          startBeat: start.startTick / ticksPerBeat,
+          duration: Math.max(1 / ticksPerBeat, (tick - start.startTick) / ticksPerBeat),
+          channel,
+        });
+        active.delete(key);
       }
     } else if (status === 0xff) {
       const meta = data[pos.i++]!;
@@ -124,17 +147,28 @@ function parseTrack(
     }
   }
 
-  for (const [note, start] of active) {
+  for (const start of active.values()) {
     notes.push({
-      midi: note,
+      midi: start.note,
       startSec: secFor(start.startTick),
       endSec: secFor(tick),
       velocity: start.velocity,
       cents: 0,
     });
+    midiEvents.push({
+      note: start.note,
+      velocity: start.velocity,
+      startBeat: start.startTick / ticksPerBeat,
+      duration: Math.max(1 / ticksPerBeat, (tick - start.startTick) / ticksPerBeat),
+      channel: start.channel,
+    });
   }
 
-  return { notes: notes.sort((a, b) => a.startSec - b.startSec), tempoMap: localTempoMap };
+  return {
+    notes: notes.sort((a, b) => a.startSec - b.startSec),
+    midiEvents: midiEvents.sort((a, b) => a.startBeat - b.startBeat || a.note - b.note),
+    tempoMap: localTempoMap,
+  };
 }
 
 function bpmFromTempoMap(tempoMap: TempoPoint[]): number {
@@ -172,6 +206,7 @@ function findTrackChunks(data: Uint8Array, startPos: number, nTracks: number) {
  */
 export function parseMidiFile(buffer: ArrayBuffer): {
   notes: TranscribedNote[];
+  midiEvents: NormalizedMidiEvent[];
   durationSec: number;
   bpm: number;
   ticksPerBeat: number;
@@ -213,10 +248,17 @@ export function parseMidiFile(buffer: ArrayBuffer): {
 
   // Pass 2 — parse all notes using the master tempo map for accurate tick→sec.
   const allNotes: TranscribedNote[] = [];
+  const allMidiEvents: NormalizedMidiEvent[] = [];
   for (const chunk of chunks) {
     const trackData = data.subarray(chunk.offset, chunk.offset + chunk.length);
-    const { notes } = parseTrack(trackData, ticksPerBeat, defaultTempoUs, masterTempoMap);
+    const { notes, midiEvents } = parseTrack(
+      trackData,
+      ticksPerBeat,
+      defaultTempoUs,
+      masterTempoMap,
+    );
     allNotes.push(...notes);
+    allMidiEvents.push(...midiEvents);
   }
 
   const durationSec = allNotes.reduce((m, n) => Math.max(m, n.endSec), 0);
@@ -224,6 +266,7 @@ export function parseMidiFile(buffer: ArrayBuffer): {
 
   return {
     notes: allNotes.sort((a, b) => a.startSec - b.startSec),
+    midiEvents: allMidiEvents.sort((a, b) => a.startBeat - b.startBeat || a.note - b.note),
     durationSec,
     bpm: detectedBpm,
     detectedBpm,

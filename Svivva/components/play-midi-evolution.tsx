@@ -176,7 +176,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   const [preset, setPreset] = useState<StylePresetId>("glasper");
   const [stevieSlides, setStevieSlides] = useState(false);
   const [meendLevel, setMeendLevel] = useState<MeendLevel>("off");
-  const [inputBpm, setInputBpm] = useState(120);
+  const [inputBpmText, setInputBpmText] = useState("120");
   const [fileTempoMarker, setFileTempoMarker] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -226,7 +226,24 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
     }
   }, []);
 
-  const tempoPayload = useCallback(() => ({ manualBpm: inputBpm }), [inputBpm]);
+  const commitTempo = useCallback((raw: string) => {
+    const parsed = Number.parseInt(raw, 10);
+    const next = Number.isFinite(parsed) ? Math.max(20, Math.min(400, parsed)) : 120;
+    setInputBpmText(String(next));
+    setMemory((current) => {
+      if (!current || current.globalBpm === next) return current;
+      setForensics(null);
+      setPart(null);
+      setReport(null);
+      return null;
+    });
+    return next;
+  }, []);
+
+  const tempoPayload = useCallback(
+    () => ({ manualBpm: commitTempo(inputBpmText) }),
+    [commitTempo, inputBpmText],
+  );
 
   const postEvolution = useCallback(async (body: Record<string, unknown>) => {
     const res = await fetch("/api/svivva-play/midi-evolution", {
@@ -294,7 +311,6 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
     [
       files,
       filenames,
-      inputBpm,
       memory,
       meendLevel,
       part,
@@ -455,21 +471,15 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         </div>
         <div className="flex items-center gap-2">
           <input
-            type="number"
-            min={20}
-            max={400}
-            step={1}
-            value={inputBpm}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={inputBpmText}
             onChange={(e) => {
-              const next = Math.max(20, Math.min(400, Number(e.target.value) || 120));
-              setInputBpm(next);
-              if (memory && memory.globalBpm !== next) {
-                setMemory(null);
-                setForensics(null);
-                setPart(null);
-                setReport(null);
-              }
+              const next = e.target.value.replace(/[^\d]/g, "").slice(0, 3);
+              setInputBpmText(next);
             }}
+            onBlur={() => commitTempo(inputBpmText)}
             className="w-24 rounded-md border border-white/15 bg-white/6 px-2 py-1.5 text-sm text-white/85"
             aria-label="Project BPM"
           />

@@ -13,8 +13,8 @@ function readVarLen(data: Uint8Array, offset: number): { value: number; next: nu
   return { value, next: i };
 }
 
-function parseSmfEvents(trackData: Uint8Array): { status: number; tick: number }[] {
-  const events: { status: number; tick: number }[] = [];
+function parseSmfEvents(trackData: Uint8Array): { status: number; tick: number; note?: number }[] {
+  const events: { status: number; tick: number; note?: number }[] = [];
   let tick = 0;
   let i = 0;
   let runningStatus = 0;
@@ -47,7 +47,7 @@ function parseSmfEvents(trackData: Uint8Array): { status: number; tick: number }
     }
 
     const hi = status & 0xf0;
-    events.push({ status: hi, tick });
+    events.push({ status: hi, tick, note: trackData[i] });
     if (hi === 0xc0 || hi === 0xd0) {
       i++;
     } else if (hi === 0x80 || hi === 0x90 || hi === 0xa0 || hi === 0xb0 || hi === 0xe0) {
@@ -59,12 +59,12 @@ function parseSmfEvents(trackData: Uint8Array): { status: number; tick: number }
 
 function parseMidiFile(buf: Buffer): {
   ticksPerBeat: number;
-  tracks: { status: number; tick: number }[][];
+  tracks: { status: number; tick: number; note?: number }[][];
 } {
   expect(buf.slice(0, 4).toString("ascii")).toBe("MThd");
   const ticksPerBeat = buf.readUInt16BE(12);
   const trackCount = buf.readUInt16BE(10);
-  const tracks: { status: number; tick: number }[][] = [];
+  const tracks: { status: number; tick: number; note?: number }[][] = [];
   let offset = 14;
   for (let t = 0; t < trackCount; t++) {
     expect(buf.slice(offset, offset + 4).toString("ascii")).toBe("MTrk");
@@ -139,6 +139,23 @@ describe("buildMidiFile meend", () => {
     const noteOns = tracks[0]!.filter((e) => e.status === 0x90);
     expect(noteOns.length).toBe(8);
     expect(new Set(noteOns.map((e) => e.tick)).size).toBe(8);
+  });
+
+  it("preserves short source note lengths exactly in exported ticks", () => {
+    const buf = buildMidiFile(
+      [
+        {
+          name: "Fast Hats",
+          midiEvents: [{ note: 72, velocity: 80, startBeat: 0, duration: 0.0625 }],
+        },
+      ],
+      120,
+    );
+    const { tracks } = parseMidiFile(buf);
+    const noteOn = tracks[0]!.find((e) => e.status === 0x90 && e.note === 72);
+    const noteOff = tracks[0]!.find((e) => e.status === 0x80 && e.note === 72);
+    expect(noteOn?.tick).toBe(0);
+    expect(noteOff?.tick).toBe(30);
   });
 
   it("skips empty stems so multitrack files stay importable", () => {

@@ -15,7 +15,7 @@ function makeNotes(midiSeq: number[]): TranscribedNote[] {
 }
 
 describe("analyzeGlobalComposition input bpm", () => {
-  it("maps beats from user bpm while reading note seconds from file", () => {
+  it("keeps MIDI beat positions stable while applying user BPM metadata", () => {
     const events = notesToMidiEvents(makeNotes([60, 62, 64]), 120);
     const midiBytes = buildMidiFileBytes([{ name: "test", midiEvents: events }], 120);
     const buffer = midiBytes.buffer.slice(
@@ -32,8 +32,7 @@ describe("analyzeGlobalComposition input bpm", () => {
 
     expect(at120.memory.globalBpm).toBe(120);
     expect(at96.memory.globalBpm).toBe(96);
-    expect(at96.tracks[0]!.events[1]!.startBeat).toBeLessThan(
-      at120.tracks[0]!.events[1]!.startBeat,
-    );
+    expect(at96.tracks[0]!.events[1]!.startBeat).toBe(at120.tracks[0]!.events[1]!.startBeat);
+    expect(at96.tracks[0]!.events[1]!.duration).toBe(at120.tracks[0]!.events[1]!.duration);
   });
 });
