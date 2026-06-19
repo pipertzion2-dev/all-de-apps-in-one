@@ -393,7 +393,10 @@ export default function SeedsInvariantCompiler({
           </div>
 
           {apps.map((app, i) => (
-            <div key={i} className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-4 space-y-3">
+            <div
+              key={i}
+              className="rounded-xl border border-border bg-muted/25 backdrop-blur-sm p-4 space-y-3"
+            >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input

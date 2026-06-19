@@ -83,7 +83,11 @@ export default function PlayCreativeTools() {
       </div>
 
       <div className="p-0">
-        {active === "midi-evolution" ? <PlayMidiEvolution embedded /> : <PlayPsychoacousticGenome embedded />}
+        {active === "midi-evolution" ? (
+          <PlayMidiEvolution embedded />
+        ) : (
+          <PlayPsychoacousticGenome embedded />
+        )}
       </div>
     </section>
   );
@@ -91,5 +95,7 @@ export default function PlayCreativeTools() {
 
 export function scrollToMidiEvolution() {
   window.location.hash = "midi-evolution";
-  document.getElementById("play-creative-tools")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById("play-creative-tools")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }

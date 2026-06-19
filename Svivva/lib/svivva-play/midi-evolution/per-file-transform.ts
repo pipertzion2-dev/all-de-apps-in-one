@@ -1,9 +1,6 @@
 import type { NormalizedMidiEvent } from "../midi-normalize";
 import type { CompositionMemory, TransformOptions } from "./types";
-import {
-  pickChordTimeline,
-  reharmonizeMelodyLine,
-} from "./harmony-engine";
+import { pickChordTimeline, reharmonizeMelodyLine } from "./harmony-engine";
 import { buildEmotionalChordTimeline } from "./harmonic-evolution";
 import {
   applyMotifTransform,

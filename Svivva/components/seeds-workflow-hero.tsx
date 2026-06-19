@@ -23,7 +23,10 @@ const PHASE_HINT: Record<SeedsWorkflowState["phase"], string> = {
   complete: "Canopy complete — every pod bloomed",
 };
 
-function stepStatus(step: SeedsWorkflowStep, state: SeedsWorkflowState): "done" | "active" | "pending" {
+function stepStatus(
+  step: SeedsWorkflowStep,
+  state: SeedsWorkflowState,
+): "done" | "active" | "pending" {
   const order: SeedsWorkflowStep[] = ["upload", "verify", "build"];
   const stepIdx = order.indexOf(step);
   const phaseIdx =

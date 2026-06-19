@@ -197,7 +197,15 @@ export const LONG_FORM_SECTIONS: Record<LongFormSectionId, LongFormSectionSpec> 
 };
 
 export const LONG_FORM_SECTION_ORDER: LongFormSectionId[] = [
-  "B", "C", "D", "E", "F", "G", "H", "I", "J",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
 ];
 
 export function sectionSpecToTransformOptions(spec: LongFormSectionSpec): {

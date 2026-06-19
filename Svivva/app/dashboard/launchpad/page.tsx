@@ -3394,9 +3394,7 @@ export default function LaunchpadPage() {
   const overallPct = Math.round((totalDone / totalSteps) * 100);
 
   const liveBuild =
-    orbitStatus?.deploymentCommit?.slice(0, 7) ||
-    me?.vercelCommit?.slice(0, 7) ||
-    null;
+    orbitStatus?.deploymentCommit?.slice(0, 7) || me?.vercelCommit?.slice(0, 7) || null;
 
   return (
     <div className="relative z-0 bg-transparent overflow-x-hidden" data-feature-page>
@@ -3429,7 +3427,9 @@ export default function LaunchpadPage() {
       {/* ── Header ── */}
       <div
         className="relative overflow-hidden bg-background/40 backdrop-blur-sm"
-        style={{ background: `linear-gradient(135deg, ${BURG}cc 0%, #3d1538cc 40%, #1a3040cc 100%)` }}
+        style={{
+          background: `linear-gradient(135deg, ${BURG}cc 0%, #3d1538cc 40%, #1a3040cc 100%)`,
+        }}
       >
         <div
           className="absolute inset-0 pointer-events-none"

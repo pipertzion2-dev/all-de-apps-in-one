@@ -16,7 +16,12 @@ export default function PlayBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 30;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });

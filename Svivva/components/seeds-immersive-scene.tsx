@@ -2,10 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import {
-  buildSeedsPipelineScene,
-  type SeedPodVisual,
-} from "@/lib/seeds-pipeline-scene";
+import { buildSeedsPipelineScene, type SeedPodVisual } from "@/lib/seeds-pipeline-scene";
 import { pageScrollProgress } from "@/lib/feature-scroll-progress";
 import type { SeedsWorkflowState } from "@/lib/seeds-workflow-state";
 

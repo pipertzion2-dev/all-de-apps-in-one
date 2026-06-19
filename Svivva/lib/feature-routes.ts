@@ -10,16 +10,11 @@ export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
   hardware: "/dashboard/hardware-builder",
 };
 
-const PUBLIC_PREFIXES = [
-  ...Object.values(FEATURE_PUBLIC_PATHS),
-  "/dashboard/launchpad",
-];
+const PUBLIC_PREFIXES = [...Object.values(FEATURE_PUBLIC_PATHS), "/dashboard/launchpad"];
 
 /** Dashboard + product routes guests can open from the homepage cube. */
 export function isPublicFeaturePath(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  return PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
 export function featureTitleFromPath(pathname: string): string {

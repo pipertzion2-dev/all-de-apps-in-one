@@ -646,12 +646,7 @@ export default function SeedsPage() {
       compiling: compilerActive,
       activeStep: "upload",
     });
-  }, [
-    allSeeds,
-    uploading,
-    uploadMutation.isPending,
-    compilerActive,
-  ]);
+  }, [allSeeds, uploading, uploadMutation.isPending, compilerActive]);
 
   const seedVisuals = useMemo(
     () =>
@@ -977,100 +972,100 @@ export default function SeedsPage() {
           )}
 
           <div id="seeds-list" className="space-y-6 scroll-mt-24">
-          {sessions.map((session) => {
-            const sessionSeeds = allSeeds.filter((s) => s.sessionId === session.id);
-            const allParsed = sessionSeeds.every((s) => s.status === "parsed");
-            const anyBuilding = sessionSeeds.some(
-              (s) => s.status === "building" || s.status === "queued",
-            );
+            {sessions.map((session) => {
+              const sessionSeeds = allSeeds.filter((s) => s.sessionId === session.id);
+              const allParsed = sessionSeeds.every((s) => s.status === "parsed");
+              const anyBuilding = sessionSeeds.some(
+                (s) => s.status === "building" || s.status === "queued",
+              );
 
-            return (
-              <div key={session.id} className="space-y-4" data-testid={`session-${session.id}`}>
-                <div className="flex items-center justify-between gap-3 pb-2 border-b border-border">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Layers className="w-5 h-5 text-[#5BA8A0] flex-shrink-0" />
-                    <div className="min-w-0">
-                      <h2 className="font-semibold truncate">{session.fileName}</h2>
-                      <p className="text-xs text-muted-foreground">
-                        {session.seedCount} seed{session.seedCount !== 1 ? "s" : ""} detected
-                        {" · "}
-                        {new Date(session.createdAt).toLocaleDateString()}
-                      </p>
+              return (
+                <div key={session.id} className="space-y-4" data-testid={`session-${session.id}`}>
+                  <div className="flex items-center justify-between gap-3 pb-2 border-b border-border">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Layers className="w-5 h-5 text-[#5BA8A0] flex-shrink-0" />
+                      <div className="min-w-0">
+                        <h2 className="font-semibold truncate">{session.fileName}</h2>
+                        <p className="text-xs text-muted-foreground">
+                          {session.seedCount} seed{session.seedCount !== 1 ? "s" : ""} detected
+                          {" · "}
+                          {new Date(session.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {selectionMode && sessionSeeds.length > 1 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1 text-xs"
-                        onClick={() => selectAllInSession(sessionSeeds)}
-                        data-testid={`button-select-all-${session.id}`}
-                      >
-                        {sessionSeeds.every((s) => selectedSeeds.has(s.id)) ? (
-                          <CheckSquare className="w-3.5 h-3.5 text-[#5BA8A0]" />
-                        ) : (
-                          <Square className="w-3.5 h-3.5" />
-                        )}
-                        {sessionSeeds.every((s) => selectedSeeds.has(s.id))
-                          ? "Deselect All"
-                          : "Select All"}
-                      </Button>
-                    )}
-                    {!selectionMode && (
-                      <>
-                        {allParsed && sessionSeeds.length > 1 && (
-                          <Button
-                            size="sm"
-                            className="gap-1 bg-[#5BA8A0]"
-                            onClick={() => buildAllMutation.mutate(session.id)}
-                            disabled={buildAllMutation.isPending || anyBuilding}
-                            data-testid={`button-build-all-${session.id}`}
-                          >
-                            {buildAllMutation.isPending || anyBuilding ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Zap className="w-3.5 h-3.5" />
-                            )}
-                            Build All
-                          </Button>
-                        )}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {selectionMode && sessionSeeds.length > 1 && (
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1 text-xs border-green-500/30 text-green-600 hover:bg-green-500/10"
-                          onClick={() => generatePagesMutation.mutate(session.id)}
-                          disabled={generatePagesMutation.isPending}
-                          data-testid={`button-launch-marketing-${session.id}`}
+                          className="gap-1 text-xs"
+                          onClick={() => selectAllInSession(sessionSeeds)}
+                          data-testid={`button-select-all-${session.id}`}
                         >
-                          {generatePagesMutation.isPending ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          {sessionSeeds.every((s) => selectedSeeds.has(s.id)) ? (
+                            <CheckSquare className="w-3.5 h-3.5 text-[#5BA8A0]" />
                           ) : (
-                            <TrendingUp className="w-3.5 h-3.5" />
+                            <Square className="w-3.5 h-3.5" />
                           )}
-                          {generatePagesMutation.isPending ? "Generating..." : "Launch Marketing"}
+                          {sessionSeeds.every((s) => selectedSeeds.has(s.id))
+                            ? "Deselect All"
+                            : "Select All"}
                         </Button>
-                      </>
-                    )}
+                      )}
+                      {!selectionMode && (
+                        <>
+                          {allParsed && sessionSeeds.length > 1 && (
+                            <Button
+                              size="sm"
+                              className="gap-1 bg-[#5BA8A0]"
+                              onClick={() => buildAllMutation.mutate(session.id)}
+                              disabled={buildAllMutation.isPending || anyBuilding}
+                              data-testid={`button-build-all-${session.id}`}
+                            >
+                              {buildAllMutation.isPending || anyBuilding ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Zap className="w-3.5 h-3.5" />
+                              )}
+                              Build All
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 text-xs border-green-500/30 text-green-600 hover:bg-green-500/10"
+                            onClick={() => generatePagesMutation.mutate(session.id)}
+                            disabled={generatePagesMutation.isPending}
+                            data-testid={`button-launch-marketing-${session.id}`}
+                          >
+                            {generatePagesMutation.isPending ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <TrendingUp className="w-3.5 h-3.5" />
+                            )}
+                            {generatePagesMutation.isPending ? "Generating..." : "Launch Marketing"}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4">
+                    {sessionSeeds.map((seed) => (
+                      <SeedCard
+                        key={seed.id}
+                        seed={seed}
+                        onBuild={(id) => buildMutation.mutate(id)}
+                        selected={selectedSeeds.has(seed.id)}
+                        onToggleSelect={toggleSeedSelect}
+                        selectionMode={selectionMode}
+                        marketingPages={marketingPagesBySeed[seed.id] || []}
+                      />
+                    ))}
                   </div>
                 </div>
-
-                <div className="grid gap-4">
-                  {sessionSeeds.map((seed) => (
-                    <SeedCard
-                      key={seed.id}
-                      seed={seed}
-                      onBuild={(id) => buildMutation.mutate(id)}
-                      selected={selectedSeeds.has(seed.id)}
-                      onToggleSelect={toggleSeedSelect}
-                      selectionMode={selectionMode}
-                      marketingPages={marketingPagesBySeed[seed.id] || []}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
           </div>
           <SeedsAdminFooter />
         </div>
@@ -1211,97 +1206,97 @@ function SeedsAdminFooter() {
 
   return (
     <div className="mt-6 mb-0 pt-6 border-t border-border/50">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
-          Admin tools
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Link
-            href="/dashboard/seo-health"
-            className="group flex items-center justify-between gap-4 p-4 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5 hover:bg-[#5BA8A0]/10 transition-colors"
-            data-testid="link-seo-health"
-          >
-            <div>
-              <div className="font-semibold text-sm">Search Engine Health</div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                Sitemap, IndexNow, meta tags, indexing signals.
-              </div>
+      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+        Admin tools
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Link
+          href="/dashboard/seo-health"
+          className="group flex items-center justify-between gap-4 p-4 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5 hover:bg-[#5BA8A0]/10 transition-colors"
+          data-testid="link-seo-health"
+        >
+          <div>
+            <div className="font-semibold text-sm">Search Engine Health</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Sitemap, IndexNow, meta tags, indexing signals.
             </div>
-            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
-              →
-            </span>
-          </Link>
-          <Link
-            href="/dashboard/gsc-connect"
-            className="group flex items-center justify-between gap-4 p-4 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5 hover:bg-[#5BA8A0]/10 transition-colors"
-            data-testid="link-gsc-connect"
-          >
-            <div>
-              <div className="font-semibold text-sm">Google Search Console</div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                Diagnose and fix your GSC connection.
-              </div>
-            </div>
-            <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
-              →
-            </span>
-          </Link>
-        </div>
-
-        {/* GSC Setup Steps */}
-        <div className="mt-5">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
-            GSC setup — to reach 100% connection health
-          </p>
-          <div className="space-y-2">
-            {[
-              {
-                n: "1",
-                title: "Create a service account in Google Cloud",
-                detail:
-                  "IAM & Admin → Service Accounts → create account → Keys → Add Key → JSON → download",
-                href: "https://console.cloud.google.com/iam-admin/serviceaccounts",
-                cta: "Open Google Cloud Console →",
-              },
-              {
-                n: "2",
-                title: "Add the service account to Search Console",
-                detail: "Settings → Users and permissions → Add user → paste email → set Owner",
-                href: "https://search.google.com/search-console/users",
-                cta: "Open Search Console Users →",
-              },
-              {
-                n: "3",
-                title: "Paste the JSON key in the GSC Connect page",
-                detail:
-                  "Open GSC Connect below, expand Step 3, paste the downloaded JSON → Save & verify",
-                href: "/dashboard/gsc-connect",
-                cta: "Open GSC Connect →",
-              },
-            ].map((step) => (
-              <a
-                key={step.n}
-                href={step.href}
-                target={step.href.startsWith("http") ? "_blank" : undefined}
-                rel={step.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="flex items-start gap-3 p-3 rounded-lg border border-border/40 hover:bg-muted/20 transition-colors group"
-                data-testid={`link-gsc-step-${step.n}`}
-              >
-                <span className="shrink-0 w-5 h-5 rounded-full bg-[#5BA8A0] text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
-                  {step.n}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold">{step.title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                    {step.detail}
-                  </div>
-                  <div className="text-[11px] text-[#5BA8A0] mt-1 group-hover:underline">
-                    {step.cta}
-                  </div>
-                </div>
-              </a>
-            ))}
           </div>
+          <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
+            →
+          </span>
+        </Link>
+        <Link
+          href="/dashboard/gsc-connect"
+          className="group flex items-center justify-between gap-4 p-4 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5 hover:bg-[#5BA8A0]/10 transition-colors"
+          data-testid="link-gsc-connect"
+        >
+          <div>
+            <div className="font-semibold text-sm">Google Search Console</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Diagnose and fix your GSC connection.
+            </div>
+          </div>
+          <span className="text-[#5BA8A0] text-lg group-hover:translate-x-0.5 transition-transform">
+            →
+          </span>
+        </Link>
+      </div>
+
+      {/* GSC Setup Steps */}
+      <div className="mt-5">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold">
+          GSC setup — to reach 100% connection health
+        </p>
+        <div className="space-y-2">
+          {[
+            {
+              n: "1",
+              title: "Create a service account in Google Cloud",
+              detail:
+                "IAM & Admin → Service Accounts → create account → Keys → Add Key → JSON → download",
+              href: "https://console.cloud.google.com/iam-admin/serviceaccounts",
+              cta: "Open Google Cloud Console →",
+            },
+            {
+              n: "2",
+              title: "Add the service account to Search Console",
+              detail: "Settings → Users and permissions → Add user → paste email → set Owner",
+              href: "https://search.google.com/search-console/users",
+              cta: "Open Search Console Users →",
+            },
+            {
+              n: "3",
+              title: "Paste the JSON key in the GSC Connect page",
+              detail:
+                "Open GSC Connect below, expand Step 3, paste the downloaded JSON → Save & verify",
+              href: "/dashboard/gsc-connect",
+              cta: "Open GSC Connect →",
+            },
+          ].map((step) => (
+            <a
+              key={step.n}
+              href={step.href}
+              target={step.href.startsWith("http") ? "_blank" : undefined}
+              rel={step.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="flex items-start gap-3 p-3 rounded-lg border border-border/40 hover:bg-muted/20 transition-colors group"
+              data-testid={`link-gsc-step-${step.n}`}
+            >
+              <span className="shrink-0 w-5 h-5 rounded-full bg-[#5BA8A0] text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+                {step.n}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold">{step.title}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                  {step.detail}
+                </div>
+                <div className="text-[11px] text-[#5BA8A0] mt-1 group-hover:underline">
+                  {step.cta}
+                </div>
+              </div>
+            </a>
+          ))}
         </div>
+      </div>
     </div>
   );
 }

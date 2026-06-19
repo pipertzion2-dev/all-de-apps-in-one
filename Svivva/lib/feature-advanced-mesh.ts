@@ -7,7 +7,10 @@ export type AdvancedMeshScene = {
   tick: (t: number, scroll: number, mouse?: { x: number; y: number }) => void;
 };
 
-function glass(color: number, opts?: { transmission?: number; metalness?: number; emissive?: number }) {
+function glass(
+  color: number,
+  opts?: { transmission?: number; metalness?: number; emissive?: number },
+) {
   return new THREE.MeshPhysicalMaterial({
     color,
     metalness: opts?.metalness ?? 0.48,
@@ -52,7 +55,10 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
   }
 
   // Central spec core — glass dodecahedron seed
-  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(1.05, 2), glass(p.tertiary, { emissive: 0.42, transmission: 0.62 }));
+  const core = new THREE.Mesh(
+    new THREE.DodecahedronGeometry(1.05, 2),
+    glass(p.tertiary, { emissive: 0.42, transmission: 0.62 }),
+  );
   core.position.set(0, 0.1, 0.4);
   group.add(core);
 
@@ -72,12 +78,20 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
     [2.55, -1.25, -0.45],
   ];
   const colors = [p.primary, p.highlight, p.secondary, p.wire];
-  const motifs: Array<"gold" | "purple" | "grain" | "courtyard"> = ["gold", "purple", "grain", "courtyard"];
+  const motifs: Array<"gold" | "purple" | "grain" | "courtyard"> = [
+    "gold",
+    "purple",
+    "grain",
+    "courtyard",
+  ];
 
   positions.forEach(([x, y, z], i) => {
     const podGroup = new THREE.Group();
 
-    const pod = new THREE.Mesh(new THREE.IcosahedronGeometry(0.78, 2), glass(colors[i], { transmission: 0.55, emissive: 0.32 }));
+    const pod = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.78, 2),
+      glass(colors[i], { transmission: 0.55, emissive: 0.32 }),
+    );
     podGroup.add(pod);
 
     const bud = new THREE.Mesh(
@@ -115,7 +129,10 @@ function buildSeedsCluster(p: GraphicPalette): AdvancedMeshScene {
     const accent =
       motifs[i] === "grain"
         ? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.04), metal(p.secondary, 0.2))
-        : new THREE.Mesh(new THREE.OctahedronGeometry(0.28, 0), glass(p.wire, { transmission: 0.5 }));
+        : new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.28, 0),
+            glass(p.wire, { transmission: 0.5 }),
+          );
     accent.position.set(0, motifs[i] === "courtyard" ? -0.35 : 0, 0.1);
     frameGroup.add(accent);
 
@@ -176,7 +193,10 @@ function buildPlayCluster(p: GraphicPalette): AdvancedMeshScene {
     const note = new THREE.Group();
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 20, 16), glass(p.primary));
     head.scale.set(1.2, 0.85, 0.65);
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.1, 10), metal(p.secondary));
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.04, 1.1, 10),
+      metal(p.secondary),
+    );
     stem.position.y = 0.75;
     note.add(head, stem);
     note.position.set((i - 2) * 1.6, Math.sin(i) * 0.4, -i * 0.15);
@@ -212,7 +232,10 @@ function buildSecurityCluster(p: GraphicPalette): AdvancedMeshScene {
   const crystals: THREE.Mesh[] = [];
 
   for (let i = 0; i < 3; i++) {
-    const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.85 - i * 0.15, 0), glass(p.primary, { transmission: 0.62 }));
+    const c = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.85 - i * 0.15, 0),
+      glass(p.primary, { transmission: 0.62 }),
+    );
     c.position.set((i - 1) * 1.8, i * 0.3, -i * 0.4);
     c.scale.y = 1.4;
     group.add(c);
@@ -247,7 +270,10 @@ function buildOrbitCluster(p: GraphicPalette): AdvancedMeshScene {
   for (let i = 0; i < nodeCount; i++) {
     const a = (i / nodeCount) * Math.PI * 2;
     const r = 2.4 + (i % 3) * 0.4;
-    const node = new THREE.Mesh(new THREE.IcosahedronGeometry(0.28, 1), glass(i % 2 ? p.secondary : p.tertiary));
+    const node = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.28, 1),
+      glass(i % 2 ? p.secondary : p.tertiary),
+    );
     node.position.set(Math.cos(a) * r, Math.sin(a) * r * 0.55, (i % 2) * 0.3);
     group.add(node);
     nodes.push(node);
@@ -281,7 +307,10 @@ function buildApiCluster(p: GraphicPalette): AdvancedMeshScene {
 
   for (let i = 0; i < 4; i++) {
     const caseGroup = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 0.35), glass(p.primary, { transmission: 0.4 }));
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 1.2, 0.35),
+      glass(p.primary, { transmission: 0.4 }),
+    );
     const lid = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.12, 0.38), metal(p.secondary));
     lid.position.y = 0.66;
     lid.userData.isLid = true;
@@ -292,13 +321,16 @@ function buildApiCluster(p: GraphicPalette): AdvancedMeshScene {
     lids.push(lid);
   }
 
-  const flower = new THREE.Mesh(new THREE.LatheGeometry(
-    Array.from({ length: 12 }, (_, i) => {
-      const a = (i / 12) * Math.PI * 2;
-      return new THREE.Vector2(0.35 + Math.sin(a * 5) * 0.12, i * 0.08);
-    }),
-    24,
-  ), glass(p.highlight, { transmission: 0.55 }));
+  const flower = new THREE.Mesh(
+    new THREE.LatheGeometry(
+      Array.from({ length: 12 }, (_, i) => {
+        const a = (i / 12) * Math.PI * 2;
+        return new THREE.Vector2(0.35 + Math.sin(a * 5) * 0.12, i * 0.08);
+      }),
+      24,
+    ),
+    glass(p.highlight, { transmission: 0.55 }),
+  );
   flower.position.set(0, -1.8, 0.5);
   group.add(flower);
 
@@ -359,6 +391,9 @@ const BUILDERS: Record<FeatureId, (p: GraphicPalette) => AdvancedMeshScene> = {
   hardware: buildHardwareCluster,
 };
 
-export function buildAdvancedGraphicCluster(variant: FeatureId, palette: GraphicPalette): AdvancedMeshScene {
+export function buildAdvancedGraphicCluster(
+  variant: FeatureId,
+  palette: GraphicPalette,
+): AdvancedMeshScene {
   return BUILDERS[variant](palette);
 }

@@ -7,7 +7,13 @@ function lineMat(color: number, opacity = 0.65): THREE.LineBasicMaterial {
 }
 
 function wireMat(color: number, opacity = 0.55): THREE.MeshBasicMaterial {
-  return new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity, depthWrite: false });
+  return new THREE.MeshBasicMaterial({
+    color,
+    wireframe: true,
+    transparent: true,
+    opacity,
+    depthWrite: false,
+  });
 }
 
 export function floatGeo(pts: number[]): THREE.BufferGeometry {
@@ -21,13 +27,22 @@ export function buildMusicNote(color: number, scale = 1): THREE.Group {
   const g = new THREE.Group();
   const mat = wireMat(color, 0.85);
   g.add(new THREE.Mesh(new THREE.SphereGeometry(0.28 * scale, 12, 12), mat));
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * scale, 0.05 * scale, 1.1 * scale, 6), mat);
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05 * scale, 0.05 * scale, 1.1 * scale, 6),
+    mat,
+  );
   stem.position.set(0.22 * scale, 0.65 * scale, 0);
   g.add(stem);
   const flagPts: THREE.Vector3[] = [];
   for (let i = 0; i <= 20; i++) {
     const f = i / 20;
-    flagPts.push(new THREE.Vector3(0.22 * scale + Math.sin(f * Math.PI) * 0.4 * scale, 1.1 * scale + f * 0.5 * scale, 0));
+    flagPts.push(
+      new THREE.Vector3(
+        0.22 * scale + Math.sin(f * Math.PI) * 0.4 * scale,
+        1.1 * scale + f * 0.5 * scale,
+        0,
+      ),
+    );
   }
   g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(flagPts), lineMat(color, 0.8)));
   return g;
@@ -45,10 +60,19 @@ export function buildGuitarSilhouette(color: number): THREE.Group {
     bodyPts.push(new THREE.Vector3(Math.cos(a) * rx, Math.sin(a) * ry - 0.3, 0));
   }
   g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bodyPts), lineMat(color, 0.7)));
-  const neckPts = [new THREE.Vector3(0, 0.5, 0), new THREE.Vector3(0, 2.8, 0), new THREE.Vector3(0.15, 3.2, 0)];
+  const neckPts = [
+    new THREE.Vector3(0, 0.5, 0),
+    new THREE.Vector3(0, 2.8, 0),
+    new THREE.Vector3(0.15, 3.2, 0),
+  ];
   g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(neckPts), lineMat(color, 0.75)));
   for (let s = 0; s < 6; s++) {
-    g.add(new THREE.LineSegments(floatGeo([-0.2 + s * 0.08, 2.8, 0, 0.2 + s * 0.08, 2.8, 0]), lineMat(color, 0.5)));
+    g.add(
+      new THREE.LineSegments(
+        floatGeo([-0.2 + s * 0.08, 2.8, 0, 0.2 + s * 0.08, 2.8, 0]),
+        lineMat(color, 0.5),
+      ),
+    );
   }
   return g;
 }
@@ -56,7 +80,12 @@ export function buildGuitarSilhouette(color: number): THREE.Group {
 /** Stacked lyric blocks — cyan / magenta layers from Play graphic. */
 export function buildTextStack(cyan: number, magenta: number): THREE.Group {
   const g = new THREE.Group();
-  [[cyan, -0.6], [magenta, 0], [cyan, 0.55], [magenta, 1.1]].forEach(([col, y], i) => {
+  [
+    [cyan, -0.6],
+    [magenta, 0],
+    [cyan, 0.55],
+    [magenta, 1.1],
+  ].forEach(([col, y], i) => {
     const block = new THREE.LineSegments(
       new THREE.EdgesGeometry(new THREE.BoxGeometry(2.4, 0.38, 0.08)),
       lineMat(col as number, 0.55 - i * 0.05),
@@ -73,7 +102,9 @@ export function buildStaffLines(color: number, width = 12): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 5; i++) {
     const y = 1.2 - i * 0.35;
-    g.add(new THREE.LineSegments(floatGeo([-width / 2, y, 0, width / 2, y, 0]), lineMat(color, 0.45)));
+    g.add(
+      new THREE.LineSegments(floatGeo([-width / 2, y, 0, width / 2, y, 0]), lineMat(color, 0.45)),
+    );
   }
   return g;
 }
@@ -101,7 +132,12 @@ export function buildCollagePanel(
     case "gold": {
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * Math.PI;
-        inner.add(new THREE.LineSegments(floatGeo([0, 0, 0, Math.cos(a) * 0.9, Math.sin(a) * 0.7, 0]), lineMat(innerColor, 0.5)));
+        inner.add(
+          new THREE.LineSegments(
+            floatGeo([0, 0, 0, Math.cos(a) * 0.9, Math.sin(a) * 0.7, 0]),
+            lineMat(innerColor, 0.5),
+          ),
+        );
       }
       inner.add(new THREE.Mesh(new THREE.RingGeometry(0.3, 0.55, 16), wireMat(frameColor, 0.4)));
       break;
@@ -112,14 +148,23 @@ export function buildCollagePanel(
         const a = (i / 32) * Math.PI * 2;
         oval.push(new THREE.Vector3(Math.cos(a) * 0.55, Math.sin(a) * 0.75, 0));
       }
-      inner.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(oval), lineMat(innerColor, 0.65)));
-      inner.add(new THREE.LineSegments(floatGeo([-0.5, 0.2, 0, 0.5, -0.2, 0]), lineMat(innerColor, 0.35)));
+      inner.add(
+        new THREE.Line(new THREE.BufferGeometry().setFromPoints(oval), lineMat(innerColor, 0.65)),
+      );
+      inner.add(
+        new THREE.LineSegments(floatGeo([-0.5, 0.2, 0, 0.5, -0.2, 0]), lineMat(innerColor, 0.35)),
+      );
       break;
     }
     case "grain": {
       for (let i = 0; i < 14; i++) {
         const y = -0.8 + i * 0.12;
-        inner.add(new THREE.LineSegments(floatGeo([-1, y, 0, 1, y + Math.sin(i) * 0.04, 0]), lineMat(innerColor, 0.35)));
+        inner.add(
+          new THREE.LineSegments(
+            floatGeo([-1, y, 0, 1, y + Math.sin(i) * 0.04, 0]),
+            lineMat(innerColor, 0.35),
+          ),
+        );
       }
       break;
     }
@@ -130,9 +175,24 @@ export function buildCollagePanel(
         const f = i / 6;
         const z = -f * 0.8;
         const spread = 0.4 + f * 0.9;
-        vp.add(new THREE.LineSegments(floatGeo([-spread, -0.6, z, spread, -0.6, z]), lineMat(innerColor, 0.4)));
-        vp.add(new THREE.LineSegments(floatGeo([-spread * 0.6, 0.4, z, -spread, -0.6, z]), lineMat(innerColor, 0.3)));
-        vp.add(new THREE.LineSegments(floatGeo([spread * 0.6, 0.4, z, spread, -0.6, z]), lineMat(innerColor, 0.3)));
+        vp.add(
+          new THREE.LineSegments(
+            floatGeo([-spread, -0.6, z, spread, -0.6, z]),
+            lineMat(innerColor, 0.4),
+          ),
+        );
+        vp.add(
+          new THREE.LineSegments(
+            floatGeo([-spread * 0.6, 0.4, z, -spread, -0.6, z]),
+            lineMat(innerColor, 0.3),
+          ),
+        );
+        vp.add(
+          new THREE.LineSegments(
+            floatGeo([spread * 0.6, 0.4, z, spread, -0.6, z]),
+            lineMat(innerColor, 0.3),
+          ),
+        );
       }
       inner.add(vp);
       break;
@@ -195,7 +255,12 @@ export function buildRose(color: number): THREE.Group {
         const pa = a + Math.sin(f * Math.PI) * 0.5;
         petalPts.push(new THREE.Vector3(Math.cos(pa) * r * f, Math.sin(pa) * r * f, ring * 0.05));
       }
-      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(petalPts), lineMat(color, 0.55 - ring * 0.06)));
+      g.add(
+        new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(petalPts),
+          lineMat(color, 0.55 - ring * 0.06),
+        ),
+      );
     }
   }
   return g;
@@ -207,11 +272,28 @@ export function buildMossWeb(teal: number, copper: number): THREE.Group {
   for (let i = 0; i < 16; i++) {
     const a = (i / 16) * Math.PI * 2;
     const len = 1.2 + (i % 4) * 0.3;
-    g.add(new THREE.LineSegments(floatGeo([0, 0, 0, Math.cos(a) * len, Math.sin(a) * len * 0.6, 0]), lineMat(i % 2 ? copper : teal, 0.35)));
+    g.add(
+      new THREE.LineSegments(
+        floatGeo([0, 0, 0, Math.cos(a) * len, Math.sin(a) * len * 0.6, 0]),
+        lineMat(i % 2 ? copper : teal, 0.35),
+      ),
+    );
   }
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2 + 0.4;
-    g.add(new THREE.LineSegments(floatGeo([Math.cos(a) * 0.8, Math.sin(a) * 0.5, 0, Math.cos(a + 1) * 1.4, Math.sin(a + 1) * 0.9, 0]), lineMat(teal, 0.25)));
+    g.add(
+      new THREE.LineSegments(
+        floatGeo([
+          Math.cos(a) * 0.8,
+          Math.sin(a) * 0.5,
+          0,
+          Math.cos(a + 1) * 1.4,
+          Math.sin(a + 1) * 0.9,
+          0,
+        ]),
+        lineMat(teal, 0.25),
+      ),
+    );
   }
   return g;
 }
@@ -221,7 +303,10 @@ export function buildCrystalVessel(color: number, size = 1): THREE.Group {
   const g = new THREE.Group();
   g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(size, 1), wireMat(color, 0.75)));
   g.add(new THREE.Mesh(new THREE.OctahedronGeometry(size * 0.55, 0), wireMat(color, 0.45)));
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(size * 0.85, 0.04, 6, 32), wireMat(color, 0.5));
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(size * 0.85, 0.04, 6, 32),
+    wireMat(color, 0.5),
+  );
   ring.rotation.x = Math.PI / 2;
   g.add(ring);
   return g;
@@ -234,7 +319,8 @@ export function buildFiligreeFrame(color: number): THREE.Group {
   for (let i = 0; i <= 64; i++) {
     const t = (i / 64) * Math.PI * 2;
     const x = 1.6 * Math.pow(Math.sin(t), 3);
-    const y = 1.3 * Math.cos(t) - 0.5 * Math.cos(2 * t) - 0.2 * Math.cos(3 * t) - 0.1 * Math.cos(4 * t);
+    const y =
+      1.3 * Math.cos(t) - 0.5 * Math.cos(2 * t) - 0.2 * Math.cos(3 * t) - 0.1 * Math.cos(4 * t);
     heartPts.push(new THREE.Vector3(x, y, 0));
   }
   g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(heartPts), lineMat(color, 0.7)));
@@ -248,7 +334,12 @@ export function buildFiligreeFrame(color: number): THREE.Group {
       const thorn = Math.sin(t * Math.PI * 22) * 0.25 + Math.sin(t * Math.PI * 48) * 0.1;
       thornPts.push(new THREE.Vector3(x, thorn - band * 0.5, band * 0.08));
     }
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(thornPts), lineMat(color, 0.45 - band * 0.06)));
+    g.add(
+      new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(thornPts),
+        lineMat(color, 0.45 - band * 0.06),
+      ),
+    );
   }
   return g;
 }
@@ -259,7 +350,13 @@ export function buildHeartWire(color: number): THREE.Group {
   const pts: THREE.Vector3[] = [];
   for (let i = 0; i <= 40; i++) {
     const t = (i / 40) * Math.PI * 2;
-    pts.push(new THREE.Vector3(1.1 * Math.pow(Math.sin(t), 3), 0.9 * Math.cos(t) - 0.35 * Math.cos(2 * t), 0));
+    pts.push(
+      new THREE.Vector3(
+        1.1 * Math.pow(Math.sin(t), 3),
+        0.9 * Math.cos(t) - 0.35 * Math.cos(2 * t),
+        0,
+      ),
+    );
   }
   g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat(color, 0.8)));
   return g;
@@ -304,7 +401,10 @@ export function buildBarbedWireStrand(
 /** Hanging paper / packaging sheet from API graphic. */
 export function buildHangingPaper(color: number): THREE.Group {
   const g = new THREE.Group();
-  const sheet = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.2, 1.6)), lineMat(color, 0.7));
+  const sheet = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.2, 1.6)),
+    lineMat(color, 0.7),
+  );
   g.add(sheet);
   g.add(new THREE.LineSegments(floatGeo([-0.3, 0.8, 0, 0.3, 0.8, 0]), lineMat(color, 0.5)));
   g.add(new THREE.LineSegments(floatGeo([0, 0.8, 0, 0, 1.2, 0.3]), lineMat(color, 0.4)));
@@ -316,11 +416,19 @@ export function buildHangingPaper(color: number): THREE.Group {
 /** Jewel-case fold panel from API graphic. */
 export function buildJewelCasePanel(color: number): THREE.Group {
   const g = new THREE.Group();
-  const base = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 0.15, 1.4)), lineMat(color, 0.75));
+  const base = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 0.15, 1.4)),
+    lineMat(color, 0.75),
+  );
   base.position.y = -0.5;
   g.add(base);
   const lid = new THREE.Group();
-  lid.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 0.12, 1.4)), lineMat(color, 0.85)));
+  lid.add(
+    new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 0.12, 1.4)),
+      lineMat(color, 0.85),
+    ),
+  );
   lid.position.set(0, -0.42, -0.7);
   lid.userData.isLid = true;
   g.add(lid);
@@ -361,7 +469,12 @@ export function buildDiamondFist(color: number, size = 1): THREE.Group {
 /** Colored cube gem from Hardware graphic. */
 export function buildColoredCube(color: number, size = 0.8): THREE.Group {
   const g = new THREE.Group();
-  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(size, size, size)), lineMat(color, 0.75)));
+  g.add(
+    new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(size, size, size)),
+      lineMat(color, 0.75),
+    ),
+  );
   g.add(new THREE.Mesh(new THREE.OctahedronGeometry(size * 0.35, 0), wireMat(color, 0.5)));
   return g;
 }
@@ -369,7 +482,12 @@ export function buildColoredCube(color: number, size = 0.8): THREE.Group {
 /** Vintage photo frame from Hardware graphic. */
 export function buildVintageFrame(color: number): THREE.Group {
   const g = new THREE.Group();
-  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 2.6, 0.1)), lineMat(color, 0.65)));
+  g.add(
+    new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 2.6, 0.1)),
+      lineMat(color, 0.65),
+    ),
+  );
   for (let i = 0; i < 3; i++) {
     const fig = new THREE.Group();
     fig.add(new THREE.LineSegments(floatGeo([0, 0, 0, 0, 0.8, 0]), lineMat(color, 0.4)));
@@ -383,7 +501,11 @@ export function buildVintageFrame(color: number): THREE.Group {
 /** Swimmer silhouettes from Hardware graphic upper strip. */
 export function buildSwimmers(color: number): THREE.Group {
   const g = new THREE.Group();
-  [[-1.2, 0], [0.3, 0.2], [1.4, -0.1]].forEach(([x, y], i) => {
+  [
+    [-1.2, 0],
+    [0.3, 0.2],
+    [1.4, -0.1],
+  ].forEach(([x, y], i) => {
     const swim = new THREE.Group();
     const body: THREE.Vector3[] = [];
     for (let j = 0; j <= 16; j++) {
@@ -437,7 +559,12 @@ export function buildSeedSprout(
     case "gold":
       for (let i = 0; i < 6; i++) {
         const a = (i / 6) * Math.PI;
-        accent.add(new THREE.LineSegments(floatGeo([0, 0, 0, Math.cos(a) * 0.7, Math.sin(a) * 0.55, 0]), lineMat(budColor, 0.45)));
+        accent.add(
+          new THREE.LineSegments(
+            floatGeo([0, 0, 0, Math.cos(a) * 0.7, Math.sin(a) * 0.55, 0]),
+            lineMat(budColor, 0.45),
+          ),
+        );
       }
       break;
     case "purple": {
@@ -446,20 +573,29 @@ export function buildSeedSprout(
         const a = (i / 24) * Math.PI * 2;
         oval.push(new THREE.Vector3(Math.cos(a) * 0.45, Math.sin(a) * 0.6, 0));
       }
-      accent.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(oval), lineMat(budColor, 0.5)));
+      accent.add(
+        new THREE.Line(new THREE.BufferGeometry().setFromPoints(oval), lineMat(budColor, 0.5)),
+      );
       break;
     }
     case "grain":
       for (let i = 0; i < 10; i++) {
         const y = -0.5 + i * 0.1;
-        accent.add(new THREE.LineSegments(floatGeo([-0.6, y, 0, 0.6, y, 0]), lineMat(budColor, 0.35)));
+        accent.add(
+          new THREE.LineSegments(floatGeo([-0.6, y, 0, 0.6, y, 0]), lineMat(budColor, 0.35)),
+        );
       }
       break;
     case "courtyard":
       for (let i = 0; i <= 4; i++) {
         const f = i / 4;
         const spread = 0.25 + f * 0.55;
-        accent.add(new THREE.LineSegments(floatGeo([-spread, -0.4, -f * 0.3, spread, -0.4, -f * 0.3]), lineMat(budColor, 0.4)));
+        accent.add(
+          new THREE.LineSegments(
+            floatGeo([-spread, -0.4, -f * 0.3, spread, -0.4, -f * 0.3]),
+            lineMat(budColor, 0.4),
+          ),
+        );
       }
       break;
   }
@@ -578,7 +714,11 @@ export function buildGraphicElement(
 }
 
 /** Signature backdrop layers — muted so UI cards stay readable. */
-export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Object3D, palette: GraphicPalette) {
+export function addSignatureBackdrop(
+  variant: FeatureId,
+  scene: THREE.Object3D,
+  palette: GraphicPalette,
+) {
   const op = palette.lineOpacity;
   switch (variant) {
     case "play": {
@@ -619,10 +759,18 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Object3D, 
       dotGeo.setAttribute("position", new THREE.Float32BufferAttribute(nodes.flat(), 3));
       const dots = new THREE.Points(
         dotGeo,
-        new THREE.PointsMaterial({ color: palette.secondary, size: 0.45, transparent: true, opacity: op * 0.9 }),
+        new THREE.PointsMaterial({
+          color: palette.secondary,
+          size: 0.45,
+          transparent: true,
+          opacity: op * 0.9,
+        }),
       );
       scene.add(dots);
-      const web = new THREE.LineSegments(new THREE.BufferGeometry(), lineMat(palette.secondary, op * 0.55));
+      const web = new THREE.LineSegments(
+        new THREE.BufferGeometry(),
+        lineMat(palette.secondary, op * 0.55),
+      );
       web.userData.isOrbitWeb = true;
       web.userData.orbitNodes = nodes;
       scene.add(web);
@@ -652,7 +800,10 @@ export function addSignatureBackdrop(variant: FeatureId, scene: THREE.Object3D, 
       break;
     }
     case "api": {
-      const sweep = new THREE.LineSegments(floatGeo([-12, 0, -5, 12, 0, -5]), lineMat(palette.secondary, op * 0.65));
+      const sweep = new THREE.LineSegments(
+        floatGeo([-12, 0, -5, 12, 0, -5]),
+        lineMat(palette.secondary, op * 0.65),
+      );
       sweep.userData.isSweep = true;
       scene.add(sweep);
       scene.userData.packSweep = sweep;

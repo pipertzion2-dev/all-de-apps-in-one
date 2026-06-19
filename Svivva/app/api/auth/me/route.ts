@@ -7,9 +7,7 @@ export async function GET() {
   const admin = await hasAdminAccess();
   if (!user && !admin) return NextResponse.json({ user: null, isAdmin: false });
   return NextResponse.json({
-    user: user
-      ? { id: user.id, email: user.email, firstName: user.firstName }
-      : null,
+    user: user ? { id: user.id, email: user.email, firstName: user.firstName } : null,
     isAdmin: admin,
     ...(admin
       ? {

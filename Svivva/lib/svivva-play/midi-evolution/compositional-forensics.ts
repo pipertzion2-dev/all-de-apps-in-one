@@ -79,9 +79,7 @@ export function runCompositionalForensics(
     .slice(0, 6)
     .map((m) => `${m.kind}: ${m.intervalPattern.join(",")}`);
 
-  const harmonicTendencies = memory.harmonicCenters
-    .slice(0, 10)
-    .map((h) => h.symbol);
+  const harmonicTendencies = memory.harmonicCenters.slice(0, 10).map((h) => h.symbol);
 
   const relationshipMap = [
     ...memory.motifGenealogy.map((g) => ({

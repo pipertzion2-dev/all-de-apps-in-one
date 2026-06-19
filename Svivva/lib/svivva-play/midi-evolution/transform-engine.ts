@@ -162,8 +162,10 @@ export function transformFromSectionSpec(
   expressionOverrides?: { meendLevel?: TransformOptions["meendLevel"]; stevieSlides?: boolean },
 ) {
   const options = sectionSpecToTransformOptions(spec);
-  if (expressionOverrides?.meendLevel !== undefined) options.meendLevel = expressionOverrides.meendLevel;
-  if (expressionOverrides?.stevieSlides !== undefined) options.stevieSlides = expressionOverrides.stevieSlides;
+  if (expressionOverrides?.meendLevel !== undefined)
+    options.meendLevel = expressionOverrides.meendLevel;
+  if (expressionOverrides?.stevieSlides !== undefined)
+    options.stevieSlides = expressionOverrides.stevieSlides;
   options.preservePhraseExactly = true;
   return transformComposition(sourceEvents, memory, options, baseFilename, {
     id: spec.id,

@@ -16,10 +16,7 @@ export function FeatureSignInBanner({ featureName, accentColor = "#5BA8A0" }: Pr
   if (isLoading || isAuthenticated) return null;
 
   return (
-    <div
-      className="mx-auto max-w-4xl px-4 sm:px-6"
-      data-testid="feature-sign-in-banner"
-    >
+    <div className="mx-auto max-w-4xl px-4 sm:px-6" data-testid="feature-sign-in-banner">
       <div
         className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border px-4 py-3 sm:py-3.5 backdrop-blur-md"
         style={{
@@ -39,7 +36,8 @@ export function FeatureSignInBanner({ featureName, accentColor = "#5BA8A0" }: Pr
               Explore {featureName} — sign in when you&apos;re ready to build
             </p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Browse the workspace and 3D preview free. Create an account to save projects and deploy.
+              Browse the workspace and 3D preview free. Create an account to save projects and
+              deploy.
             </p>
           </div>
         </div>

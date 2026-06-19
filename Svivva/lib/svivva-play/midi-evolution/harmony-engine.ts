@@ -23,7 +23,8 @@ function chordTonesForSymbol(symbol: string): number[] {
   const root = parseSymbolRoot(symbol);
   const s = symbol.toLowerCase();
   const tones = new Set<number>([root, (root + 4) % 12, (root + 7) % 12]);
-  if (/m(?!aj)/.test(s) || symbol.includes("m") && !/maj|m7|M7/.test(symbol)) tones.add((root + 3) % 12);
+  if (/m(?!aj)/.test(s) || (symbol.includes("m") && !/maj|m7|M7/.test(symbol)))
+    tones.add((root + 3) % 12);
   if (/maj7|maj9|#11|13/.test(s)) tones.add((root + 11) % 12);
   if (/9|11|13|add/.test(s)) tones.add((root + 2) % 12);
   if (/11|13|#11/.test(s)) tones.add((root + 5) % 12);
@@ -36,7 +37,11 @@ function chordTonesForSymbol(symbol: string): number[] {
   return [...tones];
 }
 
-function voicingSpread(tonePcs: number[], strategy: StylePreset["voicingStrategy"], octave = 4): number[] {
+function voicingSpread(
+  tonePcs: number[],
+  strategy: StylePreset["voicingStrategy"],
+  octave = 4,
+): number[] {
   const sorted = [...tonePcs].sort((a, b) => a - b);
   if (strategy === "rootless" && sorted.length > 2) sorted.shift();
   if (strategy === "drop2" && sorted.length >= 4) {
@@ -54,7 +59,9 @@ function voicingSpread(tonePcs: number[], strategy: StylePreset["voicingStrategy
     return [0, 7, 2, 9].map((i, idx) => midiFromPc((sorted[0]! + i) % 12, octave + idx));
   }
   if (strategy === "polychord") {
-    return [0, 4, 7, 11, 2, 5].map((i, idx) => midiFromPc((sorted[0]! + i) % 12, octave + Math.floor(idx / 3)));
+    return [0, 4, 7, 11, 2, 5].map((i, idx) =>
+      midiFromPc((sorted[0]! + i) % 12, octave + Math.floor(idx / 3)),
+    );
   }
   return sorted.map((t, i) => midiFromPc(t, octave + Math.floor(i / 3)));
 }
@@ -84,7 +91,9 @@ export function reharmonizeMelodyLine(
 ): NormalizedMidiEvent[] {
   return events.map((e) => {
     const bar = Math.floor(e.startBeat / barLength);
-    const symbol = chordSymbols[bar % chordSymbols.length] ?? preset.chordPalette[bar % preset.chordPalette.length]!;
+    const symbol =
+      chordSymbols[bar % chordSymbols.length] ??
+      preset.chordPalette[bar % preset.chordPalette.length]!;
     const tones = chordTonesForSymbol(symbol);
     const currentPc = pc(e.note);
     if (tones.includes(currentPc)) return { ...e };

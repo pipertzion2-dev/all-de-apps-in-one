@@ -17,7 +17,12 @@ export default function SeedsBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 32;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -41,13 +46,22 @@ export default function SeedsBackground() {
       });
       const line = new THREE.Line(geo, mat);
       scene.add(line);
-      branches.push({ line, angle: (b / branchCount) * Math.PI * 2, spread: 0.6 + Math.random() * 0.6 });
+      branches.push({
+        line,
+        angle: (b / branchCount) * Math.PI * 2,
+        spread: 0.6 + Math.random() * 0.6,
+      });
     }
 
     const nodeGeo = new THREE.BufferGeometry();
     const nodePos = new Float32Array(branchCount * 3);
     nodeGeo.setAttribute("position", new THREE.BufferAttribute(nodePos, 3));
-    const nodeMat = new THREE.PointsMaterial({ color: ACCENT, size: 0.6, transparent: true, opacity: 0.8 });
+    const nodeMat = new THREE.PointsMaterial({
+      color: ACCENT,
+      size: 0.6,
+      transparent: true,
+      opacity: 0.8,
+    });
     const nodes = new THREE.Points(nodeGeo, nodeMat);
     scene.add(nodes);
 
@@ -104,7 +118,15 @@ export default function SeedsBackground() {
     <div
       ref={mountRef}
       aria-hidden
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }

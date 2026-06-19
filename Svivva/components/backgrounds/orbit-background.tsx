@@ -17,7 +17,12 @@ export default function OrbitBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 34;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -37,13 +42,19 @@ export default function OrbitBackground() {
 
     const dotGeo = new THREE.BufferGeometry();
     dotGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
-    const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: ACCENT, size: 0.7, transparent: true, opacity: 0.85 }));
+    const dots = new THREE.Points(
+      dotGeo,
+      new THREE.PointsMaterial({ color: ACCENT, size: 0.7, transparent: true, opacity: 0.85 }),
+    );
     scene.add(dots);
 
     const lineGeo = new THREE.BufferGeometry();
     const maxLines = (count * (count - 1)) / 2;
     lineGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(maxLines * 6), 3));
-    const lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.22 }));
+    const lines = new THREE.LineSegments(
+      lineGeo,
+      new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.22 }),
+    );
     scene.add(lines);
 
     const onScroll = () => {
@@ -84,7 +95,8 @@ export default function OrbitBackground() {
       }
       for (let k = n; k < maxLines * 2; k++) lp.setXYZ(k, 0, 0, 0);
       lp.needsUpdate = true;
-      (lines.material as THREE.LineBasicMaterial).opacity = 0.18 + 0.12 * Math.sin(t * 2) + scroll * 0.1;
+      (lines.material as THREE.LineBasicMaterial).opacity =
+        0.18 + 0.12 * Math.sin(t * 2) + scroll * 0.1;
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
@@ -112,7 +124,15 @@ export default function OrbitBackground() {
     <div
       ref={mountRef}
       aria-hidden
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }

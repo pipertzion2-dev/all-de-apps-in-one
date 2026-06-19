@@ -28,7 +28,9 @@ function buildVaultSeal(palette: GraphicPalette): THREE.Group {
     for (let i = 0; i <= teeth; i++) {
       const a = (i / teeth) * Math.PI * 2 + rot;
       const spike = i % 4 === 0 ? 0.35 : 0;
-      pts.push(new THREE.Vector3(Math.cos(a) * (r + spike), Math.sin(a) * (r + spike * 0.7), idx * 0.08));
+      pts.push(
+        new THREE.Vector3(Math.cos(a) * (r + spike), Math.sin(a) * (r + spike * 0.7), idx * 0.08),
+      );
     }
     const loop = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat);
     loop.userData.isSealRing = true;
@@ -142,7 +144,20 @@ function buildOrbitWebBand(palette: GraphicPalette): THREE.Group {
   nodes.forEach((n, i) => {
     g.add(
       new THREE.LineSegments(
-        floatGeo([n.x - 0.15, n.y, n.z, n.x + 0.15, n.y, n.z, n.x, n.y - 0.15, n.z, n.x, n.y + 0.15, n.z]),
+        floatGeo([
+          n.x - 0.15,
+          n.y,
+          n.z,
+          n.x + 0.15,
+          n.y,
+          n.z,
+          n.x,
+          n.y - 0.15,
+          n.z,
+          n.x,
+          n.y + 0.15,
+          n.z,
+        ]),
         lineMat(i % 2 === 0 ? palette.tertiary : palette.highlight, 0.8),
       ),
     );
@@ -259,7 +274,10 @@ export type ImmersiveScrollScene = {
 };
 
 /** Hero focal motif + app-specific depth field (no shared random tunnel). */
-export function buildImmersiveScrollScene(variant: FeatureId, palette: GraphicPalette): ImmersiveScrollScene {
+export function buildImmersiveScrollScene(
+  variant: FeatureId,
+  palette: GraphicPalette,
+): ImmersiveScrollScene {
   const root = new THREE.Group();
 
   const hero = heroBandFor(variant, palette);
@@ -283,6 +301,9 @@ export function buildImmersiveScrollScene(variant: FeatureId, palette: GraphicPa
   return { root, hero, tick };
 }
 
-export function buildScrollBandScene(variant: FeatureId, palette: GraphicPalette): ImmersiveScrollScene {
+export function buildScrollBandScene(
+  variant: FeatureId,
+  palette: GraphicPalette,
+): ImmersiveScrollScene {
   return buildImmersiveScrollScene(variant, palette);
 }

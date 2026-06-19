@@ -80,7 +80,10 @@ export function FeatureScrollBand({
       const bandScroll = elementScrollProgress(shell);
       const pageScroll =
         typeof window !== "undefined"
-          ? Math.min(1, window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1))
+          ? Math.min(
+              1,
+              window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1),
+            )
           : 0;
       const scroll = Math.max(bandScroll, pageScroll * 0.35);
 

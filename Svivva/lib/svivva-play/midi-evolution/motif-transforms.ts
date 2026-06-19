@@ -7,7 +7,10 @@ function sortedMono(events: NormalizedMidiEvent[]): NormalizedMidiEvent[] {
   return [...events].sort((a, b) => a.startBeat - b.startBeat);
 }
 
-export function invertMotifContour(events: NormalizedMidiEvent[], axis = 60): NormalizedMidiEvent[] {
+export function invertMotifContour(
+  events: NormalizedMidiEvent[],
+  axis = 60,
+): NormalizedMidiEvent[] {
   return events.map((e) => ({
     ...e,
     note: Math.max(36, Math.min(88, axis - (e.note - axis))),
@@ -76,7 +79,9 @@ export function applyMotifTransform(
       case "mirror":
         return mirrorIntervalMotif(events);
       case "fragment":
-        return repitchWithFn(events, (e, i) => (i % 2 === 0 ? e.note : e.note + (i % 3 === 0 ? 2 : -2)));
+        return repitchWithFn(events, (e, i) =>
+          i % 2 === 0 ? e.note : e.note + (i % 3 === 0 ? 2 : -2),
+        );
       case "expand":
         return repitchWithFn(events, (e, i) => e.note + (i % 2 === 0 ? 2 : -1));
       case "compress":
@@ -132,12 +137,7 @@ export function interweaveMotifTraces(
   const hidden = motifs.find((m) => m.kind === "hidden");
 
   const out = mono.map((e, i) => {
-    const motif =
-      i % 5 === 0 && hidden
-        ? hidden
-        : i % 3 === 0 && secondary
-          ? secondary
-          : primary;
+    const motif = i % 5 === 0 && hidden ? hidden : i % 3 === 0 && secondary ? secondary : primary;
     const iv = motif.intervalPattern[i % motif.intervalPattern.length] ?? 0;
     const blend = (i % 7) / 10 < preserveRatio ? 1 : 0.35;
     return { ...e, note: Math.max(36, Math.min(88, Math.round(e.note + iv * blend))) };

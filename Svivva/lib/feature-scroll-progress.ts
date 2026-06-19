@@ -5,7 +5,9 @@ export function pageScrollProgress(): number {
     const max = main.scrollHeight - main.clientHeight;
     return max > 0 ? Math.min(1, main.scrollTop / max) : 0;
   }
-  const max = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) - window.innerHeight;
+  const max =
+    Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) -
+    window.innerHeight;
   return max > 0 ? Math.min(1, window.scrollY / max) : 0;
 }
 

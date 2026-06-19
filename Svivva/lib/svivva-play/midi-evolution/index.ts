@@ -53,7 +53,9 @@ export type EvolutionResponse = {
   };
 };
 
-function decodeFiles(files: EvolutionRequest["files"]): { filename: string; buffer: ArrayBuffer }[] {
+function decodeFiles(
+  files: EvolutionRequest["files"],
+): { filename: string; buffer: ArrayBuffer }[] {
   if (!files?.length) return [];
   return files.map((f) => {
     const bin = Buffer.from(f.base64, "base64");
@@ -138,8 +140,7 @@ export async function runMidiEvolution(req: EvolutionRequest): Promise<Evolution
     preservePhraseExactly: true,
   });
 
-  const sourceFilename =
-    req.sourceFilename ?? memory.sourceFiles[0]?.filename ?? "composition.mid";
+  const sourceFilename = req.sourceFilename ?? memory.sourceFiles[0]?.filename ?? "composition.mid";
 
   if (req.action === "generate-section") {
     if (!req.sectionId) throw new Error("sectionId required (B–J)");

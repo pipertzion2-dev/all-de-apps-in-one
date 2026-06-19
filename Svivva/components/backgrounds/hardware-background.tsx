@@ -17,7 +17,12 @@ export default function HardwareBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 30;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -26,7 +31,13 @@ export default function HardwareBackground() {
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
-    const diamonds: { mesh: THREE.LineSegments; spin: number; ph: number; bx: number; by: number }[] = [];
+    const diamonds: {
+      mesh: THREE.LineSegments;
+      spin: number;
+      ph: number;
+      bx: number;
+      by: number;
+    }[] = [];
     const placements = [
       [-9, 4, 2.6],
       [8, 6, 1.8],
@@ -91,7 +102,15 @@ export default function HardwareBackground() {
     <div
       ref={mountRef}
       aria-hidden
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }

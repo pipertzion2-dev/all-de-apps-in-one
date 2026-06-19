@@ -124,7 +124,10 @@ export async function buildEvolutionZipBuffer(pack: EvolutionExportPack): Promis
   archive.append(JSON.stringify(pack.memory, null, 2), { name: "CompositionMemory.json" });
   archive.append(JSON.stringify(pack.report, null, 2), { name: "TransformationReport.json" });
   archive.append(
-    fileListReadme(pack.report, pack.midiFiles.map((f) => f.filename)),
+    fileListReadme(
+      pack.report,
+      pack.midiFiles.map((f) => f.filename),
+    ),
     { name: "README.txt" },
   );
 

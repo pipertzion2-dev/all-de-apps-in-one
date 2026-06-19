@@ -29,7 +29,8 @@ export const STYLE_PRESETS: Record<StylePresetId, StylePreset> = {
   "derrick-hodge": {
     id: "derrick-hodge",
     label: "Derrick Hodge",
-    description: "Melodic bass narrator — chromatic side slips, delayed resolutions, implied harmony.",
+    description:
+      "Melodic bass narrator — chromatic side slips, delayed resolutions, implied harmony.",
     chordPalette: ["Cm9", "Fm9", "Abmaj7", "Eb13", "G7alt", "Db6/9"],
     voicingStrategy: "drop2",
     bassStrategy: "chromatic_slip",
@@ -77,10 +78,22 @@ export const STYLE_PRESETS: Record<StylePresetId, StylePreset> = {
 };
 
 const PROMPT_HINTS: { pattern: RegExp; preset: StylePresetId; delta: Partial<StylePreset> }[] = [
-  { pattern: /\b(dark|darker|moody)\b/i, preset: "custom", delta: { brightness: 0.3, tension: 0.75 } },
-  { pattern: /\b(bright|brighter|uplift)\b/i, preset: "custom", delta: { brightness: 0.85, tension: 0.35 } },
+  {
+    pattern: /\b(dark|darker|moody)\b/i,
+    preset: "custom",
+    delta: { brightness: 0.3, tension: 0.75 },
+  },
+  {
+    pattern: /\b(bright|brighter|uplift)\b/i,
+    preset: "custom",
+    delta: { brightness: 0.85, tension: 0.35 },
+  },
   { pattern: /\b(cinematic|film|score)\b/i, preset: "glasper", delta: { tension: 0.78 } },
-  { pattern: /\b(fusion|jazz fusion)\b/i, preset: "glasper", delta: { voicingStrategy: "quartal" } },
+  {
+    pattern: /\b(fusion|jazz fusion)\b/i,
+    preset: "glasper",
+    delta: { voicingStrategy: "quartal" },
+  },
   { pattern: /\b(neo\s*soul|neosoul)\b/i, preset: "glasper", delta: {} },
   { pattern: /\b(reharm|reharmon)\b/i, preset: "glasper", delta: { tension: 0.68 } },
   { pattern: /\b(continuation|next part|continue)\b/i, preset: "custom", delta: {} },

@@ -64,7 +64,10 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     const key = new THREE.DirectionalLight(0xffffff, dramatic ? 1.0 : 0.55);
     key.position.set(4, 6, 8);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(new THREE.Color(feature.accentColor).getHex(), dramatic ? 0.55 : 0.3);
+    const rim = new THREE.DirectionalLight(
+      new THREE.Color(feature.accentColor).getHex(),
+      dramatic ? 0.55 : 0.3,
+    );
     rim.position.set(-5, 2, -4);
     scene.add(rim);
     const accentLight = new THREE.PointLight(
@@ -147,8 +150,7 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   }, [variant, dramatic, feature.accentColor, scope]);
 
   const accent = feature.accentColor;
-  const secondary =
-    variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
+  const secondary = variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
 
   const positionClass = "fixed inset-0";
 
@@ -165,7 +167,9 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
         style={{
           background: [
             `radial-gradient(ellipse 100% 80% at 30% 25%, ${accent}18 0%, transparent 55%)`,
-            secondary ? `radial-gradient(ellipse 80% 70% at 70% 60%, ${secondary}14 0%, transparent 50%)` : "",
+            secondary
+              ? `radial-gradient(ellipse 80% 70% at 70% 60%, ${secondary}14 0%, transparent 50%)`
+              : "",
             `radial-gradient(ellipse 60% 50% at 50% 50%, ${accent}08 0%, transparent 70%)`,
           ]
             .filter(Boolean)

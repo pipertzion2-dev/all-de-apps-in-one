@@ -40,21 +40,23 @@ function extractJson(text: string): Record<string, unknown> | null {
 function heuristicPlan(prompt: string, selected: StylePresetId): AiEvolutionPlan {
   const text = prompt.toLowerCase();
   let preset = selected;
-  for (const [id, p] of Object.entries(STYLE_PRESETS) as [StylePresetId, typeof STYLE_PRESETS.glasper][]) {
+  for (const [id, p] of Object.entries(STYLE_PRESETS) as [
+    StylePresetId,
+    typeof STYLE_PRESETS.glasper,
+  ][]) {
     if (id !== "custom" && p.keywords.some((k) => text.includes(k))) {
       preset = selected === "custom" ? id : selected;
       break;
     }
   }
   const stevieSlides = /\b(stevie|slide|legato)\b/i.test(prompt);
-  const meendLevel: AiEvolutionPlan["meendLevel"] =
-    /\b(meend|indian|raga|ornament)\b/i.test(prompt)
-      ? "heavy"
-      : /\b(subtle|light)\b/i.test(prompt)
-        ? "light"
-        : stevieSlides
-          ? "medium"
-          : "off";
+  const meendLevel: AiEvolutionPlan["meendLevel"] = /\b(meend|indian|raga|ornament)\b/i.test(prompt)
+    ? "heavy"
+    : /\b(subtle|light)\b/i.test(prompt)
+      ? "light"
+      : stevieSlides
+        ? "medium"
+        : "off";
 
   return {
     preset,
@@ -67,7 +69,10 @@ function heuristicPlan(prompt: string, selected: StylePresetId): AiEvolutionPlan
   };
 }
 
-async function planWithOllama(prompt: string, selected: StylePresetId): Promise<AiEvolutionPlan | null> {
+async function planWithOllama(
+  prompt: string,
+  selected: StylePresetId,
+): Promise<AiEvolutionPlan | null> {
   const host = getOllamaApiBase() ?? "http://127.0.0.1:11434";
   const model = getOllamaModel();
   try {
@@ -95,9 +100,7 @@ async function planWithOllama(prompt: string, selected: StylePresetId): Promise<
     const presetRaw = String(parsed.preset ?? selected) as StylePresetId;
     const preset = presetRaw in STYLE_PRESETS ? presetRaw : selected;
     const meendRaw = String(parsed.meendLevel ?? "off");
-    const meendLevel = (["off", "light", "medium", "heavy"] as const).includes(
-      meendRaw as "off",
-    )
+    const meendLevel = (["off", "light", "medium", "heavy"] as const).includes(meendRaw as "off")
       ? (meendRaw as AiEvolutionPlan["meendLevel"])
       : "off";
 

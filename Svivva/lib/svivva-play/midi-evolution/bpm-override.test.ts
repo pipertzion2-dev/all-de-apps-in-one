@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  averageDetectedBpm,
-  clampBpm,
-  rescaleEventsToBpm,
-  resolveInputBpm,
-} from "./bpm-override";
+import { averageDetectedBpm, clampBpm, rescaleEventsToBpm, resolveInputBpm } from "./bpm-override";
 import type { NormalizedMidiEvent } from "../midi-normalize";
 
 describe("bpm override", () => {

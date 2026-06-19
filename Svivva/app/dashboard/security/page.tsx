@@ -34,7 +34,10 @@ export default function SecurityDashboardPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="feeds" className="mt-4 rounded-xl border bg-card/80 backdrop-blur-md overflow-hidden">
+          <TabsContent
+            value="feeds"
+            className="mt-4 rounded-xl border bg-card/80 backdrop-blur-md overflow-hidden"
+          >
             <FeedShield />
           </TabsContent>
 

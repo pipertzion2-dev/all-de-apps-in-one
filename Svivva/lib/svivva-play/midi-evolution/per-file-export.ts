@@ -1,5 +1,10 @@
 import type { NormalizedMidiEvent } from "../midi-normalize";
-import type { CompositionMemory, GeneratedPart, ImportedMidiTrack, PerFileMidiOutput } from "./types";
+import type {
+  CompositionMemory,
+  GeneratedPart,
+  ImportedMidiTrack,
+  PerFileMidiOutput,
+} from "./types";
 import type { TransformOptions } from "./types";
 import { evolutionExportFilename, repitchSourceFileEvents } from "./per-file-transform";
 
@@ -56,7 +61,9 @@ export function fileOutputsFromMemoryAndTracks(
   );
 }
 
-export function mergeTracksToEventsFromOutputs(outputs: PerFileMidiOutput[]): NormalizedMidiEvent[] {
+export function mergeTracksToEventsFromOutputs(
+  outputs: PerFileMidiOutput[],
+): NormalizedMidiEvent[] {
   return outputs
     .flatMap((o) => o.transformedEvents)
     .sort((a, b) => a.startBeat - b.startBeat || a.note - b.note);

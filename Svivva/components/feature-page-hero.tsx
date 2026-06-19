@@ -40,7 +40,9 @@ export function FeaturePageHero({ variant, subtitle, compact = false }: Props) {
   const [headA, headB] = PAGE_HEADLINE[variant];
 
   return (
-    <section className={`relative overflow-hidden ${compact ? "pt-4 pb-2 sm:pt-5 sm:pb-3" : "pt-6 pb-6 sm:pt-8 sm:pb-8"}`}>
+    <section
+      className={`relative overflow-hidden ${compact ? "pt-4 pb-2 sm:pt-5 sm:pb-3" : "pt-6 pb-6 sm:pt-8 sm:pb-8"}`}
+    >
       <div className="max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
           {stats.map((label) => (
@@ -65,7 +67,9 @@ export function FeaturePageHero({ variant, subtitle, compact = false }: Props) {
         </div>
       ) : null}
 
-      <div className={`max-w-3xl mx-auto px-4 sm:px-6 space-y-3 text-center sm:text-left ${compact ? "mt-4 sm:mt-5" : ""}`}>
+      <div
+        className={`max-w-3xl mx-auto px-4 sm:px-6 space-y-3 text-center sm:text-left ${compact ? "mt-4 sm:mt-5" : ""}`}
+      >
         <h1
           className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]"
           data-testid={variant === "seeds" ? "text-seeds-title" : undefined}

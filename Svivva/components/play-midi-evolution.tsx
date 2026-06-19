@@ -14,6 +14,94 @@ import type {
   TransformationReport,
 } from "@/lib/svivva-play/midi-evolution/types";
 
+// ─── Prompt presets ───────────────────────────────────────────────────────────
+
+const FULL_ENGINE_PROMPT = `LONG-FORM MULTI-MIDI COMPOSITION EVOLUTION ENGINE
+
+PHASE 1 — COMPOSITIONAL FORENSICS
+Analyze ALL uploaded MIDI files together (not independently).
+Determine: recurring motifs, rhythms, interval structures, phrase lengths, register movements, harmonic tendencies, tension/release points, bass movements, melodic contours.
+Identify: PRIMARY MOTIFS · SECONDARY MOTIFS · TRANSITION MOTIFS · HIDDEN MOTIFS.
+Build a full relationship map between all motifs.
+
+PHASE 2 — MOTIF GENEALOGY
+Treat motifs like family members with parent / child / transformed / fragmented / expanded / compressed variants.
+Every new idea must feel descended from previous material. Never introduce unrelated material.
+
+PHASE 3 — LONG-FORM MEMORY
+The new material must acknowledge earlier motifs, intervals, phrase shapes, rhythmic identities — even when transformed across all uploaded files.
+
+PHASE 4 — RHYTHMIC DNA
+Preserve 70–90% rhythmic identity. Maintain phrase lengths, groove placement, accent locations, syncopation, call-response structures. Replace pitch memory; preserve rhythmic memory.
+
+PHASE 5 — HARMONIC EVOLUTION
+Do not transpose — reinterpret harmonic meaning emotionally.
+Cm9 → AbMaj9(#11) · BbMaj7 → DbMaj9(#11) · Gm11 → BMaj9(#11) · EbMaj7 → F#m11 · AbMaj7 → Emaj13
+
+PHASE 6 — SECTIONAL NARRATIVE (A→J)
+A motif may appear in B, return transformed in D, fragment in F, appear inverted in H, resolve in J.
+Create long-distance motivic relationships.
+
+SECTION B — SHADOW PORTAL: EbmMaj9, BMaj9(#11), Db13sus, F#m11, AbMaj9(#11). Bass avoids roots.
+SECTION C — FRACTURED MIRROR: Inversion. Mirror interval structures. Maintain rhythmic identity.
+SECTION D — FLOATING CITY: Quartal harmony. Stacked fourths. Open voicings. Suspended colors.
+SECTION E — ABYSS: mMaj9, 13(b9), #11, altered suspensions. Darkest harmonic point.
+SECTION F — INDIAN HORIZON: Meend, murki, andolan, kan swar via rapid grace notes and ornamental resolutions.
+SECTION G — GLASPER DIMENSION: Every chord contains 9/11/13. Rootless voicings. Upper structures. Drop-2 and drop-2&4.
+SECTION H — DERRICK HODGE DIMENSION: Bass as melodic narrator using minor-third displacement, chromatic side-slipping, pedal motion.
+SECTION I — COSMIC TENSION: Maximum harmonic density. Every motif simultaneously as original, inverted, fragmented, extended, hidden.
+SECTION J — REVELATION: Resolve motif relationships (not harmonic clichés). Listener recognizes the journey, not the chords.
+
+VOICING RULES: drop-2, drop-2&4, quartal, quintal, upper structure triads, polychords. At least 95% inverted — never root position.
+
+INTERWEAVING RULE (MOST IMPORTANT): Every new section must contain traces of earlier motifs, rhythms, intervals, contour shapes, bass movements — even when transformed. Listener must feel "I've heard this before" without knowing why.
+
+Think like: Robert Glasper · Derrick Hodge · Terrace Martin · modern cinematic jazz composers.`;
+
+type PromptPreset = { id: string; label: string; tag: string; prompt: string; color: string };
+
+const PROMPT_PRESETS: PromptPreset[] = [
+  {
+    id: "full-engine",
+    label: "Full Evolution Engine",
+    tag: "Complete",
+    prompt: FULL_ENGINE_PROMPT,
+    color: "#A05068",
+  },
+  {
+    id: "glasper-mode",
+    label: "Glasper Mode",
+    tag: "Harmonic",
+    prompt:
+      "Generate using Robert Glasper's harmonic language: rootless voicings, upper structure triads, extended 9/11/13 chords on every beat, neo-soul pocket, minimal root movement. Bass pedals under shifting upper harmony. Every chord must contain at least a 9th. Prioritize drop-2 and drop-2&4 voicings. Think 'Black Radio' era.",
+    color: "#6B5CB5",
+  },
+  {
+    id: "indian-horizon",
+    label: "Indian Horizon (Section F)",
+    tag: "Ornament",
+    prompt:
+      "Apply Section F — Indian Horizon transformation. Ornament all melodic material with meend (pitch glides between notes), murki (rapid oscillation), andolan (slow vibrato), and kan swar (grace note approach tones). Implement as rapid grace notes and neighbor-note clusters in MIDI. Maintain original rhythmic DNA; transform pitch articulation only.",
+    color: "#c06010",
+  },
+  {
+    id: "abyss",
+    label: "Abyss (Section E)",
+    tag: "Dark",
+    prompt:
+      "Apply Section E — Abyss. Convert all major sonorities into minor-major sonorities (mMaj9). Use 13(b9) on dominant functions, #11 on all Lydian tendencies, altered suspensions. This is the darkest harmonic point — maximum tension with no resolution. Bass moves by tritone substitution only.",
+    color: "#3a4a6b",
+  },
+  {
+    id: "derrick-hodge",
+    label: "Derrick Hodge Dimension (H)",
+    tag: "Bass",
+    prompt:
+      "Apply Section H — Derrick Hodge Dimension. Bass voice becomes the melodic narrator. Upper harmony remains relatively stable. Bass uses: minor-third displacement (start phrases a minor 3rd below destination), chromatic side-slipping (approach target harmonies from a semitone above or below), pedal motion (hold pedal tones across chord changes). Bass melody should be as singable as the lead melody.",
+    color: "#2d6b4a",
+  },
+];
+
 type LongFormSectionId = "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J";
 
 type ForensicsReport = {
@@ -93,6 +181,8 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadHint, setUploadHint] = useState<string | null>(null);
+  const [showPresets, setShowPresets] = useState(false);
+  const [loadedPresetId, setLoadedPresetId] = useState<string | null>(null);
 
   const completedSections = memory?.completedSections ?? [];
   const step: Step = !files.length ? 1 : !memory ? 2 : 3;
@@ -138,24 +228,21 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
   const tempoPayload = useCallback(() => ({ manualBpm: inputBpm }), [inputBpm]);
 
-  const postEvolution = useCallback(
-    async (body: Record<string, unknown>) => {
-      const res = await fetch("/api/svivva-play/midi-evolution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 413) {
-          throw new Error("Upload too large for the server. Split your zip into smaller stem packs.");
-        }
-        throw new Error(data.error || "Request failed");
+  const postEvolution = useCallback(async (body: Record<string, unknown>) => {
+    const res = await fetch("/api/svivva-play/midi-evolution", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (res.status === 413) {
+        throw new Error("Upload too large for the server. Split your zip into smaller stem packs.");
       }
-      return data;
-    },
-    [],
-  );
+      throw new Error(data.error || "Request failed");
+    }
+    return data;
+  }, []);
 
   const callApi = useCallback(
     async (
@@ -200,7 +287,19 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         setLoading(false);
       }
     },
-    [files, filenames, inputBpm, memory, meendLevel, part, postEvolution, preset, prompt, stevieSlides, tempoPayload],
+    [
+      files,
+      filenames,
+      inputBpm,
+      memory,
+      meendLevel,
+      part,
+      postEvolution,
+      preset,
+      prompt,
+      stevieSlides,
+      tempoPayload,
+    ],
   );
 
   const runForensics = () => void callApi("forensics");
@@ -280,9 +379,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
           <div
             key={s.n}
             className={`rounded-lg border px-3 py-2.5 ${
-              step >= s.n
-                ? "border-[#A05068]/40 bg-[#A05068]/5"
-                : "border-gray-200 bg-gray-50"
+              step >= s.n ? "border-[#A05068]/40 bg-[#A05068]/5" : "border-gray-200 bg-gray-50"
             }`}
           >
             <p
@@ -324,9 +421,7 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         <p className="text-xs text-gray-500 mt-1">
           .mid / .midi files or a .zip with multiple stems — analyzed together as one composition.
         </p>
-        {uploadHint && (
-          <p className="text-xs text-amber-700 mt-2">{uploadHint}</p>
-        )}
+        {uploadHint && <p className="text-xs text-amber-700 mt-2">{uploadHint}</p>}
         {filenames.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {filenames.map((n) => (
@@ -374,7 +469,9 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             className="w-24 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
             aria-label="Project BPM"
           />
-          <span className="text-sm text-gray-600">BPM — used for analysis, generation & export</span>
+          <span className="text-sm text-gray-600">
+            BPM — used for analysis, generation & export
+          </span>
         </div>
         <p className="text-[10px] text-gray-500">
           Note pitches and timing are read from the MIDI file; beat grid always follows your BPM
@@ -429,6 +526,31 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
 
       {uiMode === "long-form" ? (
         <>
+          {/* Engine info banner */}
+          <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-gray-50 to-white px-4 py-3 flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-[#A05068] uppercase tracking-wider">
+                Long-Form Multi-MIDI Evolution Engine
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                Phases 1–6 (Forensics → Motif Genealogy → Long-Form Memory → Rhythmic DNA → Harmonic
+                Evolution → Sectional Narrative) are embedded. Sections B–J map exactly to Shadow
+                Portal → Revelation.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setUiMode("custom");
+                setPrompt(FULL_ENGINE_PROMPT);
+                setLoadedPresetId("full-engine");
+              }}
+              className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1.5 rounded-md border border-[#A05068]/30 text-[#A05068] hover:bg-[#A05068]/5 transition-colors whitespace-nowrap"
+            >
+              Load full prompt →
+            </button>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               type="button"
@@ -497,7 +619,8 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
               })}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              {LONG_FORM_SECTIONS[selectedSection].title} — {LONG_FORM_SECTIONS[selectedSection].emotion}
+              {LONG_FORM_SECTIONS[selectedSection].title} —{" "}
+              {LONG_FORM_SECTIONS[selectedSection].emotion}
             </p>
             <button
               type="button"
@@ -511,6 +634,77 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
         </>
       ) : (
         <>
+          {/* Prompt presets */}
+          <div className="rounded-lg border border-[#A05068]/20 bg-[#A05068]/3">
+            <button
+              type="button"
+              onClick={() => setShowPresets((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left"
+            >
+              <div>
+                <p className="text-xs font-bold text-[#A05068] uppercase tracking-wider">
+                  Prompt presets
+                </p>
+                {loadedPresetId && (
+                  <p className="text-[10px] text-gray-500 mt-0.5">
+                    Loaded:{" "}
+                    <span className="font-semibold text-gray-700">
+                      {PROMPT_PRESETS.find((p) => p.id === loadedPresetId)?.label}
+                    </span>
+                  </p>
+                )}
+                {!loadedPresetId && (
+                  <p className="text-[10px] text-gray-500 mt-0.5">
+                    Load the full engine prompt or a targeted section directive
+                  </p>
+                )}
+              </div>
+              <svg
+                className={`w-4 h-4 text-gray-400 transition-transform ${showPresets ? "rotate-180" : ""}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {showPresets && (
+              <div className="border-t border-[#A05068]/10 px-4 pb-4 pt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {PROMPT_PRESETS.map((pp) => (
+                  <button
+                    key={pp.id}
+                    type="button"
+                    onClick={() => {
+                      setPrompt(pp.prompt);
+                      setLoadedPresetId(pp.id);
+                      setShowPresets(false);
+                    }}
+                    className={`text-left rounded-lg border px-3 py-2.5 transition-all hover:shadow-sm ${
+                      loadedPresetId === pp.id
+                        ? "border-[#A05068]/50 bg-[#A05068]/6 ring-1 ring-[#A05068]/20"
+                        : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white"
+                        style={{ background: pp.color }}
+                      >
+                        {pp.tag}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-gray-900">{pp.label}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                      {pp.prompt.slice(0, 90)}…
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-500">Style preset</label>
@@ -528,11 +722,29 @@ export default function PlayMidiEvolution({ embedded = false }: Props) {
             </div>
           </div>
           <textarea
-            className="w-full min-h-[100px] rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            placeholder="Paste your full evolution prompt here…"
+            className="w-full min-h-[160px] rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+            placeholder="Paste your full evolution prompt here — or load one above…"
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              if (loadedPresetId) setLoadedPresetId(null);
+            }}
           />
+          {prompt.length > 0 && (
+            <div className="flex items-center justify-between -mt-3">
+              <p className="text-[10px] text-gray-400">{prompt.length} chars</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrompt("");
+                  setLoadedPresetId(null);
+                }}
+                className="text-[10px] text-gray-400 hover:text-gray-600"
+              >
+                Clear
+              </button>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

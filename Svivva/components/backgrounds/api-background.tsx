@@ -17,7 +17,12 @@ export default function ApiBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 30;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -37,7 +42,11 @@ export default function ApiBackground() {
         const w = 3;
         const h = 2.4;
         const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, 0.01));
-        const mat = new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.28 });
+        const mat = new THREE.LineBasicMaterial({
+          color: ACCENT,
+          transparent: true,
+          opacity: 0.28,
+        });
         const mesh = new THREE.LineSegments(edges, mat);
         const bx = (c - (cols - 1) / 2) * gw * 0.5;
         const by = (r - (rows - 1) / 2) * gh;
@@ -65,7 +74,8 @@ export default function ApiBackground() {
         const assemble = 0.4 + scroll * 0.6;
         p.mesh.position.x = p.bx * assemble;
         p.mesh.position.y = p.by * assemble;
-        (p.mesh.material as THREE.LineBasicMaterial).opacity = 0.18 + 0.14 * Math.sin(t * 2 + p.ph) + scroll * 0.15;
+        (p.mesh.material as THREE.LineBasicMaterial).opacity =
+          0.18 + 0.14 * Math.sin(t * 2 + p.ph) + scroll * 0.15;
       });
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
@@ -93,7 +103,15 @@ export default function ApiBackground() {
     <div
       ref={mountRef}
       aria-hidden
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }

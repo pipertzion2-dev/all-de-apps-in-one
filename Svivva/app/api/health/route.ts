@@ -8,9 +8,7 @@ import { isCronSecretAuthorized, isOrbitAdminAllowed } from "@/lib/orbit/admin-a
 
 export async function GET(req: NextRequest) {
   const isProd = process.env.NODE_ENV === "production";
-  const privileged =
-    isCronSecretAuthorized(req) ||
-    (await isOrbitAdminAllowed(req));
+  const privileged = isCronSecretAuthorized(req) || (await isOrbitAdminAllowed(req));
 
   if (isProd && !privileged) {
     return NextResponse.json(

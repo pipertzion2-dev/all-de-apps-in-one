@@ -1,14 +1,14 @@
 /** Emotional distant-equivalent reharm map (not mere transposition). */
 export const EMOTIONAL_HARMONIC_MAP: Record<string, string> = {
   Cm9: "AbMaj9(#11)",
-  "Cm11": "AbMaj9(#11)",
+  Cm11: "AbMaj9(#11)",
   BbMaj7: "DbMaj9(#11)",
-  "Bbmaj7": "DbMaj9(#11)",
+  Bbmaj7: "DbMaj9(#11)",
   Gm11: "BMaj9(#11)",
   EbMaj7: "F#m11",
-  "Ebmaj7": "F#m11",
+  Ebmaj7: "F#m11",
   AbMaj7: "Emaj13",
-  "Abmaj7": "Emaj13",
+  Abmaj7: "Emaj13",
   Fmaj9: "Am11",
   Dm9: "BbMaj13",
   Am7: "F#m11",

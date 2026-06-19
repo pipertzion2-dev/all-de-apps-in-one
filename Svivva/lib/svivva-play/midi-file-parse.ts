@@ -97,8 +97,7 @@ function parseTrack(
       const meta = data[pos.i++]!;
       const len = readVarLen(data, pos);
       if (meta === 0x51 && len === 3) {
-        const us =
-          (data[pos.i]! << 16) | (data[pos.i + 1]! << 8) | data[pos.i + 2]!;
+        const us = (data[pos.i]! << 16) | (data[pos.i + 1]! << 8) | data[pos.i + 2]!;
         if (us > 0) tempoMap.push({ tick, usPerBeat: us });
         pos.i += len;
       } else if (meta === 0x2f) {
@@ -152,7 +151,9 @@ export function parseMidiFile(buffer: ArrayBuffer): {
   let pos = 8 + headerLen;
 
   if (division & 0x8000) {
-    throw new Error("SMPTE division MIDI not supported — export as PPQ (ticks per quarter) from your DAW");
+    throw new Error(
+      "SMPTE division MIDI not supported — export as PPQ (ticks per quarter) from your DAW",
+    );
   }
 
   const ticksPerBeat = division > 0 ? division : 480;

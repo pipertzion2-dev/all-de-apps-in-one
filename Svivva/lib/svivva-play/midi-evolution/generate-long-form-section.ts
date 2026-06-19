@@ -38,8 +38,10 @@ export function generateLongFormSection(
 
   if (sourceTracks?.length) {
     const options = sectionSpecToTransformOptions(spec);
-    if (expressionOverrides?.meendLevel !== undefined) options.meendLevel = expressionOverrides.meendLevel;
-    if (expressionOverrides?.stevieSlides !== undefined) options.stevieSlides = expressionOverrides.stevieSlides;
+    if (expressionOverrides?.meendLevel !== undefined)
+      options.meendLevel = expressionOverrides.meendLevel;
+    if (expressionOverrides?.stevieSlides !== undefined)
+      options.stevieSlides = expressionOverrides.stevieSlides;
     const fileOutputs = buildPerFileOutputs(sourceTracks, memory, options, sectionId);
     result.part = attachFileOutputsToPart(result.part, fileOutputs);
   }

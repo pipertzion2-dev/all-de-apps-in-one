@@ -191,7 +191,8 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!(await hasAdminAccess())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await hasAdminAccess()))
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { message, history = [], context = {} } = await req.json();
     if (!message?.trim()) return NextResponse.json({ error: "Message required" }, { status: 400 });

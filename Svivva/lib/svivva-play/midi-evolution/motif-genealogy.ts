@@ -65,7 +65,8 @@ export function buildMotifGenealogy(
         existing.occurrences += 1;
         if (!existing.sourceFileIds.includes(track.id)) existing.sourceFileIds.push(track.id);
       } else {
-        const mean = track.events.reduce((s, e) => s + e.note, 0) / Math.max(1, track.events.length);
+        const mean =
+          track.events.reduce((s, e) => s + e.note, 0) / Math.max(1, track.events.length);
         motifMap.set(key, {
           id: `motif_${motifMap.size + 1}`,
           kind: "hidden",
@@ -143,7 +144,9 @@ export function buildMotifGenealogy(
 
 export function pickMotifFamily(memory: MotifRecord[], seedId?: string): MotifRecord[] {
   if (!memory.length) return [];
-  const root = seedId ? memory.find((m) => m.id === seedId) : memory.find((m) => m.kind === "primary");
+  const root = seedId
+    ? memory.find((m) => m.id === seedId)
+    : memory.find((m) => m.kind === "primary");
   if (!root) return memory.slice(0, 4);
   const family = new Set<string>([root.id, ...root.childIds]);
   return memory.filter((m) => family.has(m.id));

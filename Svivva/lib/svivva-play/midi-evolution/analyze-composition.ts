@@ -2,18 +2,16 @@ import { parseRootFromKeyLabel } from "../analysis-utils";
 import { chordsFromPolyphonicNotesAgnostic } from "../chords-from-notes";
 import { parseMidiFile } from "../midi-file-parse";
 import { resolveHarmonicKey } from "../resolve-harmonic-key";
-import type {
-  CompositionMemory,
-  HarmonicCenter,
-  ImportedMidiTrack,
-  PhraseRecord,
-} from "./types";
+import type { CompositionMemory, HarmonicCenter, ImportedMidiTrack, PhraseRecord } from "./types";
 import { inferTrackRole, midiEventsToNotes, notesToMidiEvents } from "./note-bridge";
 import { buildMotifGenealogy } from "./motif-genealogy";
 import { averageDetectedBpm, resolveInputBpm } from "./bpm-override";
 
 function slugId(name: string, index: number): string {
-  const base = name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9]+/g, "_").toLowerCase();
+  const base = name
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .toLowerCase();
   return `${base || "midi"}_${index}`;
 }
 
@@ -112,10 +110,7 @@ export function analyzeGlobalComposition(
 
   for (const phrase of phrases) {
     phrase.motifIds = motifs
-      .filter((m) =>
-        m.sourceFileIds.includes(phrase.sourceFileId) &&
-        m.occurrences > 0,
-      )
+      .filter((m) => m.sourceFileIds.includes(phrase.sourceFileId) && m.occurrences > 0)
       .slice(0, 3)
       .map((m) => m.id);
   }

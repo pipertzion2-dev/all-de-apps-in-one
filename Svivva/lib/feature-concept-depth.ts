@@ -88,7 +88,12 @@ function seedsDepth(palette: GraphicPalette): ConceptDepth {
     for (let i = 0; i <= 40; i++) {
       pts.push(new THREE.Vector3((i / 40 - 0.5) * 14, y, -8));
     }
-    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat(palette.primary, op * 0.5)));
+    group.add(
+      new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        lineMat(palette.primary, op * 0.5),
+      ),
+    );
   }
 
   for (let b = 0; b < 16; b++) {
@@ -175,19 +180,38 @@ function orbitDepth(palette: GraphicPalette): ConceptDepth {
       }
     }
   }
-  const web = new THREE.LineSegments(floatGeo(webPts), lineMat(palette.secondary, palette.lineOpacity * 0.5));
+  const web = new THREE.LineSegments(
+    floatGeo(webPts),
+    lineMat(palette.secondary, palette.lineOpacity * 0.5),
+  );
   group.add(web);
 
   nodes.forEach((n, i) => {
     const star = new THREE.LineSegments(
-      floatGeo([n.x - 0.12, n.y, n.z, n.x + 0.12, n.y, n.z, n.x, n.y - 0.12, n.z, n.x, n.y + 0.12, n.z]),
+      floatGeo([
+        n.x - 0.12,
+        n.y,
+        n.z,
+        n.x + 0.12,
+        n.y,
+        n.z,
+        n.x,
+        n.y - 0.12,
+        n.z,
+        n.x,
+        n.y + 0.12,
+        n.z,
+      ]),
       lineMat(i % 2 === 0 ? palette.tertiary : palette.highlight, 0.75),
     );
     group.add(star);
   });
 
   const sweep = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -4), new THREE.Vector3(0, 0, -4)]),
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, -4),
+      new THREE.Vector3(0, 0, -4),
+    ]),
     lineMat(palette.wire, 0.7),
   );
   group.add(sweep);

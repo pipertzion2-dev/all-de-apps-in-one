@@ -380,7 +380,9 @@ export default function PlayPsychoacousticGenome({ embedded = false }: { embedde
           : "w-full rounded-2xl border border-white/10 bg-[#0d0d1a] text-white overflow-hidden"
       }
     >
-      <div className={embedded ? "w-full space-y-6" : "w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8"}>
+      <div
+        className={embedded ? "w-full space-y-6" : "w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8"}
+      >
         {!embedded && (
           <>
             {/* Header */}
@@ -392,7 +394,8 @@ export default function PlayPsychoacousticGenome({ embedded = false }: { embedde
                 <h1 className="text-2xl font-bold tracking-tight">Psychoacoustic Genome Engine</h1>
               </div>
               <p className="text-sm text-white/40 pl-11">
-                Hybridize two musical genomes using ASA stream analysis &amp; Fletcher-Munson contours
+                Hybridize two musical genomes using ASA stream analysis &amp; Fletcher-Munson
+                contours
               </p>
             </div>
           </>

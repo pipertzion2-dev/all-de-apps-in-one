@@ -22,7 +22,10 @@ const HERO_SCALE: Record<FeatureId, { cluster: number; bloom: number }> = {
  * Hero scroll band — MeshPhysicalMaterial clusters + shader bloom petals.
  * Solid glass/metal geometry in front, layered petals and camo depth behind.
  */
-export function buildAdvancedHeroScene(variant: FeatureId, palette: GraphicPalette): AdvancedHeroScene {
+export function buildAdvancedHeroScene(
+  variant: FeatureId,
+  palette: GraphicPalette,
+): AdvancedHeroScene {
   const root = new THREE.Group();
   const scales = HERO_SCALE[variant];
 

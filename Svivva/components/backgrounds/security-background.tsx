@@ -17,7 +17,12 @@ export default function SecurityBackground() {
     if (!mount) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      mount.clientWidth / mount.clientHeight,
+      0.1,
+      1000,
+    );
     camera.position.z = 30;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -44,7 +49,11 @@ export default function SecurityBackground() {
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      const mat = new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.3 - r * 0.04 });
+      const mat = new THREE.LineBasicMaterial({
+        color: ACCENT,
+        transparent: true,
+        opacity: 0.3 - r * 0.04,
+      });
       const loop = new THREE.LineLoop(geo, mat);
       group.add(loop);
       rings.push(loop);
@@ -57,7 +66,10 @@ export default function SecurityBackground() {
       shacklePts.push(new THREE.Vector3(Math.cos(a) * 5.5, Math.sin(a) * 5.5 + 7, 0));
     }
     const shackleGeo = new THREE.BufferGeometry().setFromPoints(shacklePts);
-    const shackle = new THREE.Line(shackleGeo, new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.5 }));
+    const shackle = new THREE.Line(
+      shackleGeo,
+      new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.5 }),
+    );
     group.add(shackle);
 
     const onScroll = () => {
@@ -73,8 +85,9 @@ export default function SecurityBackground() {
       rings.forEach((ring, r) => {
         const dir = r % 2 === 0 ? 1 : -1;
         // Rings rotate toward a locked alignment as you scroll
-        ring.rotation.z = dir * (t * 0.1 + scroll * Math.PI) ;
-        (ring.material as THREE.LineBasicMaterial).opacity = (0.3 - r * 0.04) * (0.7 + scroll * 0.5);
+        ring.rotation.z = dir * (t * 0.1 + scroll * Math.PI);
+        (ring.material as THREE.LineBasicMaterial).opacity =
+          (0.3 - r * 0.04) * (0.7 + scroll * 0.5);
       });
       // Shackle drops down and "locks" as scroll approaches 1
       shackle.position.y = -scroll * 1.5;
@@ -106,7 +119,15 @@ export default function SecurityBackground() {
     <div
       ref={mountRef}
       aria-hidden
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }

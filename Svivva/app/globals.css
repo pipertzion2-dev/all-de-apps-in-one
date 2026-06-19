@@ -100,7 +100,10 @@
     font-family: "Zc", sans-serif;
   }
 
-  body > div:not([data-svivva-feature-bg]):not([data-feature-page]):not([data-landing-page]):not([data-page-shell]),
+  body
+    > div:not([data-svivva-feature-bg]):not([data-feature-page]):not([data-landing-page]):not(
+      [data-page-shell]
+    ),
   body > main:not([data-landing-page]) {
     min-height: 100dvh;
     width: 100%;

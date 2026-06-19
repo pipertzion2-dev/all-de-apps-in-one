@@ -15,12 +15,7 @@ export type SeedPodVisual = {
 
 export type SeedsPipelineScene = {
   root: THREE.Group;
-  tick: (
-    t: number,
-    state: SeedsWorkflowState,
-    seeds: SeedPodVisual[],
-    scroll: number,
-  ) => void;
+  tick: (t: number, state: SeedsWorkflowState, seeds: SeedPodVisual[], scroll: number) => void;
 };
 
 const P = GRAPHIC_PALETTES.seeds;
@@ -28,7 +23,12 @@ const MAX_PODS = 8;
 const MOTIFS = ["gold", "purple", "grain", "courtyard"] as const;
 type Motif = (typeof MOTIFS)[number];
 
-type BloomPart = { mesh: THREE.Mesh; material: BloomLayerMaterial; phase: number; baseBloom: number };
+type BloomPart = {
+  mesh: THREE.Mesh;
+  material: BloomLayerMaterial;
+  phase: number;
+  baseBloom: number;
+};
 
 type SeedBranch = {
   group: THREE.Group;
@@ -151,7 +151,12 @@ function buildDepthLayers(): {
   for (let i = 0; i < 5; i++) {
     const veil = new THREE.Mesh(
       new THREE.PlaneGeometry(3.2 + (i % 2) * 0.8, 2.1),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.16, depthWrite: false }),
+      new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        opacity: 0.16,
+        depthWrite: false,
+      }),
     );
     veil.position.set(Math.sin(i * 1.4) * 4.5, Math.cos(i * 1.1) * 2.2, -2 - i * 0.9);
     veil.rotation.set(Math.sin(i) * 0.15, Math.cos(i * 0.7) * 0.25, 0);
@@ -190,7 +195,10 @@ function buildDepthLayers(): {
     for (let p = 0; p < 5; p++) {
       const a = (p / 5) * Math.PI * 2;
       const mat = createBloomLayerMaterial(colors, 0.1);
-      const petal = new THREE.Mesh(new THREE.SphereGeometry(0.14, 6, 4, 0, Math.PI * 2, 0, Math.PI * 0.55), mat);
+      const petal = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 6, 4, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        mat,
+      );
       petal.position.set(Math.cos(a) * 0.12, 0.08, Math.sin(a) * 0.12);
       petal.scale.set(1, 0.35, 1.2);
       g.add(petal);
@@ -311,11 +319,17 @@ function buildTrunkSpine(): {
     rings.push(ring);
   });
 
-  const parseCore = new THREE.Mesh(new THREE.DodecahedronGeometry(0.62, 1), glass(P.tertiary, 0.42, 0.6));
+  const parseCore = new THREE.Mesh(
+    new THREE.DodecahedronGeometry(0.62, 1),
+    glass(P.tertiary, 0.42, 0.6),
+  );
   parseCore.position.y = -1.15;
   group.add(parseCore);
 
-  const innerCore = new THREE.Mesh(new THREE.IcosahedronGeometry(0.28, 0), glass(P.highlight, 0.5, 0.35));
+  const innerCore = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.28, 0),
+    glass(P.highlight, 0.5, 0.35),
+  );
   innerCore.position.y = -1.15;
   group.add(innerCore);
 
@@ -334,7 +348,10 @@ function buildTrunkSpine(): {
   verifyShield.position.y = 0.05;
   group.add(verifyShield);
 
-  const branchHub = new THREE.Mesh(new THREE.OctahedronGeometry(0.34, 0), glass(P.primary, 0.38, 0.45));
+  const branchHub = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.34, 0),
+    glass(P.primary, 0.38, 0.45),
+  );
   branchHub.position.y = 1.55;
   group.add(branchHub);
 
@@ -386,10 +403,7 @@ function buildCollageFrame(motif: Motif, accent: number): THREE.Group {
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.85, 1.35, 0.09), glass(accent, 0.14, 0.44));
   frame.add(body);
 
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(0.48, 0.032, 8, 20),
-    metal(P.highlight, 0.12),
-  );
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.032, 8, 20), metal(P.highlight, 0.12));
   rim.position.z = 0.06;
   if (motif === "purple") rim.scale.set(1, 1.28, 1);
   frame.add(rim);
@@ -430,7 +444,12 @@ function addPodBloom(parent: THREE.Group, parts: BloomPart[]): void {
       petal.scale.set(1, 0.32, 1.15);
       petal.rotation.y = angle;
       parent.add(petal);
-      parts.push({ mesh: petal, material: mat, phase: p + layer * 8, baseBloom: 0.1 + layer * 0.06 });
+      parts.push({
+        mesh: petal,
+        material: mat,
+        phase: p + layer * 8,
+        baseBloom: 0.1 + layer * 0.06,
+      });
     }
   }
 }
@@ -449,7 +468,10 @@ function buildStemTube(curve: THREE.CatmullRomCurve3): THREE.Mesh {
   );
 }
 
-function buildFlowOnCurve(curve: THREE.CatmullRomCurve3): { flow: THREE.Points; flowPos: Float32Array } {
+function buildFlowOnCurve(curve: THREE.CatmullRomCurve3): {
+  flow: THREE.Points;
+  flowPos: Float32Array;
+} {
   const count = 28;
   const flowPos = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
@@ -599,7 +621,8 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
 
     const specLit = phase >= 1 ? 1 : 0.22;
     spec.pages.forEach((page, i) => {
-      (page.material as THREE.MeshPhysicalMaterial).emissiveIntensity = 0.1 + specLit * (0.35 - i * 0.06);
+      (page.material as THREE.MeshPhysicalMaterial).emissiveIntensity =
+        0.1 + specLit * (0.35 - i * 0.06);
     });
     spec.scan.position.y = ((t * 0.85) % 1.8) * 0.95 - 0.85;
     (spec.scan.material as THREE.MeshBasicMaterial).opacity =
@@ -615,7 +638,7 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
     spine.ingestFlow.visible = state.phase === "uploading";
     if (state.phase === "uploading") {
       for (let i = 0; i < 48; i++) {
-        const u = ((t * 0.45 + i * 0.02) % 1);
+        const u = (t * 0.45 + i * 0.02) % 1;
         const pt = spine.ingestCurve.getPoint(u);
         spine.ingestPos[i * 3] = pt.x;
         spine.ingestPos[i * 3 + 1] = pt.y;
@@ -625,8 +648,7 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
     }
 
     spine.rings.forEach((ring, i) => {
-      const lit =
-        (i === 0 && phase >= 1) || (i === 1 && phase >= 3) || (i === 2 && phase >= 2);
+      const lit = (i === 0 && phase >= 1) || (i === 1 && phase >= 3) || (i === 2 && phase >= 2);
       (ring.material as THREE.MeshStandardMaterial).emissiveIntensity = lit
         ? 0.15 + energy * 0.35
         : 0.05;
@@ -679,7 +701,11 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
       branch.stem.visible = active && branch.reveal > 0.02;
       branch.stem.scale.setScalar(Math.max(0.008, branch.reveal));
 
-      const scale = THREE.MathUtils.lerp(branch.group.scale.x, active ? branchRevealTarget : 0.01, active ? 0.05 : 0.1);
+      const scale = THREE.MathUtils.lerp(
+        branch.group.scale.x,
+        active ? branchRevealTarget : 0.01,
+        active ? 0.05 : 0.1,
+      );
       branch.group.scale.setScalar(scale);
       branch.group.visible = scale > 0.03;
 
@@ -711,7 +737,8 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
 
       const innerBars = branch.frame.userData.innerBars as THREE.Mesh[] | undefined;
       innerBars?.forEach((bar, b) => {
-        bar.scale.x = 0.9 + Math.sin(t * 1.5 + i + b) * 0.05 * (seed.status === "building" ? 1.4 : 1);
+        bar.scale.x =
+          0.9 + Math.sin(t * 1.5 + i + b) * 0.05 * (seed.status === "building" ? 1.4 : 1);
       });
 
       const flowing =
@@ -721,7 +748,7 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
       if (branch.flow.visible) {
         const speed = state.phase === "building" ? 1.6 : 0.85;
         for (let p = 0; p < 28; p++) {
-          const u = ((t * speed * 0.22 + p * 0.035 + i * 0.04) % 1);
+          const u = (t * speed * 0.22 + p * 0.035 + i * 0.04) % 1;
           const pt = branch.curve.getPoint(u);
           branch.flowPos[p * 3] = pt.x;
           branch.flowPos[p * 3 + 1] = pt.y;
@@ -755,4 +782,4 @@ export function buildSeedsPipelineScene(): SeedsPipelineScene {
   };
 
   return { root, tick };
-};
+}

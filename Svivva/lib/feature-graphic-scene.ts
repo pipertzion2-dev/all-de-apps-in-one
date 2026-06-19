@@ -52,11 +52,17 @@ const FACE_LAYOUT: Partial<Record<FeatureId, Record<string, THREE.Vector3>>> = {
   },
 };
 
-function tickMotifs(motifs: PlacedMotif[], mouse: { x: number; y: number }, t: number, scroll: number) {
+function tickMotifs(
+  motifs: PlacedMotif[],
+  mouse: { x: number; y: number },
+  t: number,
+  scroll: number,
+) {
   motifs.forEach((m) => {
     const sway = Math.sin(t * 0.45 + m.phase) * m.bob;
     m.object.position.x = m.ox + mouse.x * m.parallax * 0.25 + sway * 0.1;
-    m.object.position.y = m.oy + mouse.y * m.parallax * 0.2 + Math.cos(t * 0.4 + m.phase) * m.bob * 0.35;
+    m.object.position.y =
+      m.oy + mouse.y * m.parallax * 0.2 + Math.cos(t * 0.4 + m.phase) * m.bob * 0.35;
     m.object.position.z = m.oz + scroll * m.parallax * 0.25;
     m.object.rotation.y = scroll * 0.12 + Math.sin(t * 0.2 + m.phase) * 0.03;
     m.object.rotation.z = m.rotZ;
@@ -89,7 +95,8 @@ function tickSignature(variant: FeatureId, scene: THREE.Object3D, t: number, scr
       const rings = scene.userData.securityRings as THREE.LineLoop[] | undefined;
       rings?.forEach((ring, r) => {
         ring.rotation.z = (r % 2 === 0 ? 1 : -1) * (t * 0.06 + scroll * 0.25);
-        (ring.material as THREE.LineBasicMaterial).opacity = op * (0.55 - r * 0.08) * (0.75 + scroll * 0.2);
+        (ring.material as THREE.LineBasicMaterial).opacity =
+          op * (0.55 - r * 0.08) * (0.75 + scroll * 0.2);
       });
       break;
     }
@@ -121,7 +128,12 @@ function tickSignature(variant: FeatureId, scene: THREE.Object3D, t: number, scr
   }
 }
 
-function tickElementInternals(motifs: PlacedMotif[], variant: FeatureId, scroll: number, t: number) {
+function tickElementInternals(
+  motifs: PlacedMotif[],
+  variant: FeatureId,
+  scroll: number,
+  t: number,
+) {
   if (variant === "api") {
     motifs.forEach((m) => {
       m.object.children.forEach((child) => {

@@ -1,6 +1,11 @@
 import type { NormalizedMidiEvent } from "../midi-normalize";
 
-export type StylePresetId = "glasper" | "derrick-hodge" | "stevie-wonder" | "indian-fusion" | "custom";
+export type StylePresetId =
+  | "glasper"
+  | "derrick-hodge"
+  | "stevie-wonder"
+  | "indian-fusion"
+  | "custom";
 
 export type MeendLevel = "off" | "light" | "medium" | "heavy";
 

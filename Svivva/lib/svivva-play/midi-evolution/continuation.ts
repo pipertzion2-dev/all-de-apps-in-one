@@ -11,7 +11,10 @@ function cloneEvents(events: NormalizedMidiEvent[], offsetBeats = 0): Normalized
   }));
 }
 
-function evolveMotifContour(events: NormalizedMidiEvent[], motifIntervals: number[]): NormalizedMidiEvent[] {
+function evolveMotifContour(
+  events: NormalizedMidiEvent[],
+  motifIntervals: number[],
+): NormalizedMidiEvent[] {
   if (!events.length || !motifIntervals.length) return events;
   const sorted = [...events].sort((a, b) => a.startBeat - b.startBeat);
   const out: NormalizedMidiEvent[] = [];
@@ -31,10 +34,7 @@ export function generateContinuation(
   options: TransformOptions,
   baseFilename: string,
 ): ReturnType<typeof transformComposition> {
-  const offset = previousPart.events.reduce(
-    (m, e) => Math.max(m, e.startBeat + e.duration),
-    0,
-  );
+  const offset = previousPart.events.reduce((m, e) => Math.max(m, e.startBeat + e.duration), 0);
   const family = pickMotifFamily(memory.motifs);
   const motifIntervals = family[0]?.intervalPattern ?? [2, -1, 3];
 

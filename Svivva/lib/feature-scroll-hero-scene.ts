@@ -8,7 +8,10 @@ export type ScrollHeroScene = {
 };
 
 /** Hero scroll band — advanced glass/metal meshes + bloom petals (not wireframe lines). */
-export function buildGraphicScrollHeroScene(variant: FeatureId, palette: GraphicPalette): ScrollHeroScene {
+export function buildGraphicScrollHeroScene(
+  variant: FeatureId,
+  palette: GraphicPalette,
+): ScrollHeroScene {
   const hero = buildAdvancedHeroScene(variant, palette);
   return { root: hero.root, tick: hero.tick };
 }

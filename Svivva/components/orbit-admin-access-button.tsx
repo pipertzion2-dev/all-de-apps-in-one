@@ -29,8 +29,7 @@ export function OrbitAdminAccessButton({
 
   const { data: me } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/auth/me"],
-    queryFn: () =>
-      fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
+    queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
 
   const goOrbitAdmin = () => {

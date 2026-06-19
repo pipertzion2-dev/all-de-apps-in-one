@@ -2,8 +2,7 @@
 /**
  * Warn (production) or fail (strict) when critical deploy secrets are missing on Vercel.
  */
-const isProd =
-  process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+const isProd = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
 const strict = process.env.SECURE_DEPLOY_STRICT === "1";
 
 const required = [

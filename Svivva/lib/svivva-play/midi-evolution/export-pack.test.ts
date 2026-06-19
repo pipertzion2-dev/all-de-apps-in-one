@@ -94,18 +94,23 @@ describe("per-file export pack", () => {
       sectionTitle: "Glasper Dimension",
       fileOutputs,
     };
-    const pack = buildEvolutionExportPack(memory, part, {
-      generatedAt: "",
-      prompt: "",
-      preset: "glasper",
-      generationNumber: 1,
-      originalHarmonicCenters: [],
-      newHarmonicCenters: [],
-      motifsTransformed: [],
-      voiceLeadingStrategy: "rootless",
-      bassStrategy: "melodic",
-      ornamentationApplied: [],
-    }, tracks);
+    const pack = buildEvolutionExportPack(
+      memory,
+      part,
+      {
+        generatedAt: "",
+        prompt: "",
+        preset: "glasper",
+        generationNumber: 1,
+        originalHarmonicCenters: [],
+        newHarmonicCenters: [],
+        motifsTransformed: [],
+        voiceLeadingStrategy: "rootless",
+        bassStrategy: "melodic",
+        ornamentationApplied: [],
+      },
+      tracks,
+    );
 
     expect(pack.midiFiles).toHaveLength(2);
     expect(pack.midiFiles.map((f) => f.filename)).toEqual([
