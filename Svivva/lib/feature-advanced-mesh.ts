@@ -878,186 +878,128 @@ function buildApiCluster(p: GraphicPalette): AdvancedMeshScene {
 
 function buildHardwareCluster(p: GraphicPalette): AdvancedMeshScene {
   const group = new THREE.Group();
+  // NOTE: no board plane — a large opaque box would block the page UI.
 
-  // ── PCB board plane ───────────────────────────────────────────────────────
-  const board = new THREE.Mesh(
-    new THREE.BoxGeometry(7.2, 5.2, 0.1),
-    new THREE.MeshPhysicalMaterial({
-      color: 0x1a3a2a,
-      metalness: 0.22,
-      roughness: 0.72,
-      transparent: true,
-      opacity: 0.72,
-    }),
+  // ── Central diamond crystal — the defining icon from DIAMOND FISTS ────────
+  const diamondOuter = new THREE.Mesh(
+    new THREE.OctahedronGeometry(1.0, 0),
+    glass(p.highlight, { emissive: 0.52, transmission: 0.7, metalness: 0.42 }),
   );
-  board.position.z = -0.35;
-  group.add(board);
+  diamondOuter.scale.y = 0.72;
+  group.add(diamondOuter);
 
-  // ── Copper trace lines on PCB ─────────────────────────────────────────────
-  const TRACES: Array<{ x: number; y: number; w: number; h: number }> = [
-    { x: -2.5, y: 1.2, w: 2.4, h: 0.035 },
-    { x: 0.8, y: 1.2, w: 1.6, h: 0.035 },
-    { x: -2.5, y: 0.2, w: 4.0, h: 0.035 },
-    { x: -2.5, y: -0.8, w: 3.2, h: 0.035 },
-    { x: 0.5, y: -0.8, w: 1.8, h: 0.035 },
-    { x: -2.5, y: -1.8, w: 5.0, h: 0.035 },
-    { x: -2.5, y: 1.2, w: 0.035, h: 2.0 },
-    { x: -0.5, y: -0.8, w: 0.035, h: 2.0 },
-    { x: 1.8, y: -1.8, w: 0.035, h: 2.0 },
-    { x: 0.8, y: -1.8, w: 0.035, h: 1.0 },
-  ];
-  TRACES.forEach(({ x, y, w, h }) => {
-    const trace = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.025), metal(p.secondary, 0.05));
-    trace.position.set(x + w / 2, y, -0.28);
-    group.add(trace);
-  });
-
-  // ── IC chip bodies with pin rows ──────────────────────────────────────────
-  const IC_POSITIONS: [number, number, number][] = [
-    [-1.8, 0.8, 0],
-    [1.0, 0.8, 0],
-    [-1.8, -0.5, 0],
-    [1.0, -0.5, 0],
-  ];
-  const icBodies: THREE.Group[] = [];
-  IC_POSITIONS.forEach(([x, y, z], i) => {
-    const icGroup = new THREE.Group();
-    const body = new THREE.Mesh(
-      new THREE.BoxGeometry(0.88, 0.55, 0.18),
-      metal(i % 2 === 0 ? p.primary : p.tertiary, 0.06),
-    );
-    icGroup.add(body);
-
-    // Pin rows on left + right sides
-    for (let side = 0; side < 2; side++) {
-      for (let pin = 0; pin < 5; pin++) {
-        const pinMesh = new THREE.Mesh(
-          new THREE.BoxGeometry(0.14, 0.025, 0.025),
-          metal(p.highlight, 0.12),
-        );
-        pinMesh.position.set(side === 0 ? -0.58 : 0.58, -0.2 + pin * 0.1, 0);
-        icGroup.add(pinMesh);
-      }
-    }
-    // Orientation notch
-    const notch = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8),
-      metal(p.wire, 0.18),
-    );
-    notch.rotation.x = Math.PI / 2;
-    notch.position.set(-0.28, 0.2, 0.1);
-    icGroup.add(notch);
-
-    icGroup.position.set(x, y, z);
-    icGroup.userData.icIndex = i;
-    icBodies.push(icGroup);
-    group.add(icGroup);
-  });
-
-  // ── Capacitor cylinders ───────────────────────────────────────────────────
-  const caps: THREE.Mesh[] = [];
-  [
-    [-0.2, 1.5, 0],
-    [0.6, 1.5, 0],
-    [-1.0, -1.6, 0],
-    [2.2, 0.2, 0],
-  ].forEach(([cx, cy, cz]) => {
-    const cap = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.1, 0.1, 0.35, 10),
-      metal(p.tertiary, 0.08),
-    );
-    cap.position.set(cx as number, cy as number, (cz as number) + 0.17);
-    caps.push(cap);
-    group.add(cap);
-  });
-
-  // ── Via holes (solder through-holes) ─────────────────────────────────────
-  const VIA_POSITIONS: [number, number][] = [
-    [-2.5, 1.2],
-    [-0.5, 1.2],
-    [2.4, 0.2],
-    [1.8, -0.8],
-    [-2.5, -0.8],
-    [0.5, -1.8],
-    [-0.5, -1.8],
-    [2.4, -1.8],
-  ];
-  VIA_POSITIONS.forEach(([vx, vy]) => {
-    const via = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.04, 0.15, 8),
-      glass(p.highlight, { emissive: 0.35, transmission: 0.4 }),
-    );
-    via.rotation.x = Math.PI / 2;
-    via.position.set(vx, vy, -0.22);
-    group.add(via);
-  });
-
-  // ── Hybridizer core — octahedron rising from center of board ─────────────
-  const hybCore = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.72, 0),
-    glass(p.primary, { emissive: 0.6, transmission: 0.42, metalness: 0.65 }),
+  const diamondInner = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.5, 0),
+    glass(p.wire, { emissive: 0.68, transmission: 0.52, metalness: 0.48 }),
   );
-  hybCore.position.set(-0.2, 0.15, 0.55);
-  hybCore.scale.y = 1.4;
-  group.add(hybCore);
+  diamondInner.scale.y = 0.72;
+  group.add(diamondInner);
 
-  const hybRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.88, 0.042, 10, 40),
-    metal(p.secondary, 0.12),
-  );
-  hybRing.position.set(-0.2, 0.15, 0.55);
-  hybRing.rotation.x = Math.PI / 2.4;
-  group.add(hybRing);
+  // Crown + pavilion girdle rings (cut-diamond facet edges)
+  const facetRings: THREE.Mesh[] = [];
+  [0.18, -0.18, 0.42, -0.42].forEach((yOff) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.64 - Math.abs(yOff) * 0.55, 0.025, 6, 24),
+      metal(p.highlight, 0.07),
+    );
+    ring.position.y = yOff * 0.68;
+    ring.rotation.x = Math.PI / 2;
+    facetRings.push(ring);
+    group.add(ring);
+  });
 
-  // ── Signal arcs between ICs ───────────────────────────────────────────────
-  for (let i = 0; i < IC_POSITIONS.length; i++) {
-    for (let j = i + 1; j < IC_POSITIONS.length; j++) {
-      if ((i * 3 + j * 7) % 3 !== 0) continue;
-      const [ax, ay] = IC_POSITIONS[i]!;
-      const [bx, by] = IC_POSITIONS[j]!;
-      const mid = new THREE.Vector3((ax + bx) / 2, (ay + by) / 2, 0.3);
-      group.add(
-        tubeAlong(
-          new THREE.QuadraticBezierCurve3(
-            new THREE.Vector3(ax, ay, 0.12),
-            mid,
-            new THREE.Vector3(bx, by, 0.12),
-          ),
-          p.wire,
-          0.016,
-          16,
-        ),
-      );
-    }
+  // ── Indigo-purple fist knuckle arcs ─────────────────────────────────────
+  const fistMeshes: THREE.Mesh[] = [];
+  [-0.42, -0.2, 0.0, 0.2, 0.42].forEach((angOff, i) => {
+    const knuckle = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 10, 8),
+      glass(p.tertiary, { transmission: 0.32, metalness: 0.52, emissive: 0.2 }),
+    );
+    knuckle.position.set(angOff * 2.6, -1.1 - Math.abs(angOff) * 0.25, 0.1);
+    fistMeshes.push(knuckle);
+    group.add(knuckle);
+    // Finger tube
+    const fingerTube = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1, 0.1, 0.55, 8),
+      glass(p.tertiary, { transmission: 0.28, metalness: 0.55 }),
+    );
+    fingerTube.rotation.z = angOff * 0.5;
+    fingerTube.position.set(angOff * 2.6, -1.48 - Math.abs(angOff) * 0.25, 0.08 + i * 0.02);
+    group.add(fingerTube);
+  });
+
+  // ── Jade-green figure silhouettes (from artwork) ─────────────────────────
+  const figurePositions: [number, number, number][] = [
+    [2.8, 0.2, 0.1],
+    [3.4, -0.6, 0.2],
+    [-3.0, 0.6, -0.1],
+  ];
+  const figureMeshes: THREE.Mesh[] = [];
+  figurePositions.forEach(([fx, fy, fz], i) => {
+    const torso = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.12, 0.48, 3, 8),
+      glass(p.secondary, { emissive: 0.42, transmission: 0.35, metalness: 0.52 }),
+    );
+    torso.position.set(fx, fy, fz);
+    torso.rotation.z = (i - 1) * 0.3;
+    torso.userData.figPhase = i;
+    figureMeshes.push(torso);
+    group.add(torso);
+    // Extended arm
+    const arm = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.05, 0.36, 3, 6),
+      glass(p.secondary, { emissive: 0.32, transmission: 0.42 }),
+    );
+    arm.position.set(fx + 0.28 * (i % 2 === 0 ? 1 : -1), fy + 0.3, fz);
+    arm.rotation.z = (i % 2 === 0 ? 1 : -1) * 0.7;
+    group.add(arm);
+  });
+
+  // ── Wisteria-violet drape strands ─────────────────────────────────────────
+  for (let i = 0; i < 7; i++) {
+    group.add(
+      tubeAlong(
+        new THREE.CatmullRomCurve3([
+          new THREE.Vector3(-1.8 + i * 0.6, 1.8, 0.0),
+          new THREE.Vector3(-1.6 + i * 0.6, 0.8 + Math.sin(i) * 0.3, 0.08),
+          new THREE.Vector3(-1.9 + i * 0.6, -0.4 + Math.cos(i * 0.7) * 0.35, 0.15),
+          new THREE.Vector3(-2.0 + i * 0.6, -1.5, 0.1),
+        ]),
+        p.wire,
+        0.024,
+        18,
+      ),
+    );
   }
 
   const tick = (t: number, scroll: number, mouse?: { x: number; y: number }) => {
     const mx = mouse?.x ?? 0;
     const my = mouse?.y ?? 0;
 
-    hybCore.rotation.y = t * 0.4;
-    hybCore.rotation.x = Math.sin(t * 0.55) * 0.12;
-    hybCore.scale.y = 1.4 + Math.sin(t * 1.0) * 0.06;
-    hybRing.rotation.z = t * 0.2 + scroll * 0.5;
+    diamondOuter.rotation.y = t * 0.32 + scroll * 0.7;
+    diamondOuter.rotation.x = Math.sin(t * 0.38) * 0.14;
+    const dp = 1 + Math.sin(t * 1.1) * 0.04;
+    diamondOuter.scale.set(dp, 0.72 * dp, dp);
 
-    icBodies.forEach((ic, i) => {
-      // ICs glow on/off (activity pulses)
-      const body = ic.children[0] as THREE.Mesh;
-      if (body.material instanceof THREE.MeshPhysicalMaterial) {
-        body.material.emissive = new THREE.Color(
-          i % 2 === 0 ? p.primary : p.tertiary,
-        ).multiplyScalar(0.15 + 0.12 * Math.sin(t * 1.5 + i * 1.1));
-      }
+    diamondInner.rotation.y = -t * 0.5 - scroll * 0.45;
+    diamondInner.rotation.z = t * 0.18;
+
+    facetRings.forEach((ring, i) => {
+      ring.rotation.z = t * (0.12 + i * 0.07) * (i % 2 === 0 ? 1 : -1);
     });
 
-    caps.forEach((cap, i) => {
-      cap.scale.y = 1 + Math.sin(t * 0.8 + i * 0.9) * 0.08;
+    fistMeshes.forEach((k, i) => {
+      k.position.y =
+        -1.1 - Math.abs([-0.42, -0.2, 0, 0.2, 0.42][i]! * 0.25) + Math.sin(t * 0.45 + i) * 0.04;
     });
 
-    board.rotation.y = mx * 0.03;
-    board.rotation.x = my * 0.02;
-    group.rotation.y = mx * 0.04;
-    group.rotation.x = my * 0.025;
+    figureMeshes.forEach((fig, i) => {
+      fig.rotation.z = (i - 1) * 0.3 + Math.sin(t * 0.38 + i * 1.1) * 0.07;
+      fig.position.y = figurePositions[i]![1] + Math.sin(t * 0.5 + i * 0.8) * 0.08 + scroll * 0.04;
+    });
+
+    group.rotation.y = mx * 0.05;
+    group.rotation.x = my * 0.03;
   };
 
   return { group, tick };

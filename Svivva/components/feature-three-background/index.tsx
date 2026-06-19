@@ -50,7 +50,8 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     renderer.setSize(w, h);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = dramatic ? 1.38 : 1.12;
+    // Keep exposure restrained so the 3D never visually overpowers the page UI.
+    renderer.toneMappingExposure = dramatic ? 0.82 : 0.68;
     const canvas = renderer.domElement;
     canvas.className = "absolute inset-0 h-full w-full";
     canvas.style.pointerEvents = "none";
@@ -60,20 +61,21 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
     const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 180);
     camera.position.set(0, 0.4, dramatic ? 6.5 : 10);
 
-    scene.add(new THREE.AmbientLight(0xffffff, dramatic ? 0.75 : 0.45));
-    const key = new THREE.DirectionalLight(0xffffff, dramatic ? 1.0 : 0.55);
+    scene.add(new THREE.AmbientLight(0xffffff, dramatic ? 0.55 : 0.35));
+    const key = new THREE.DirectionalLight(0xffffff, dramatic ? 0.7 : 0.4);
     key.position.set(4, 6, 8);
     scene.add(key);
     const rim = new THREE.DirectionalLight(
       new THREE.Color(feature.accentColor).getHex(),
-      dramatic ? 0.55 : 0.3,
+      dramatic ? 0.38 : 0.22,
     );
     rim.position.set(-5, 2, -4);
     scene.add(rim);
+    // Accent point light — restrained so it adds warmth without washing out UI
     const accentLight = new THREE.PointLight(
       new THREE.Color(feature.accentColor).getHex(),
-      dramatic ? 1.6 : 0.65,
-      48,
+      dramatic ? 0.9 : 0.45,
+      42,
     );
     accentLight.position.set(-3, 2, 6);
     scene.add(accentLight);
@@ -150,7 +152,16 @@ export function FeatureThreeBackground({ variant, dramatic = true, scope = "page
   }, [variant, dramatic, feature.accentColor, scope]);
 
   const accent = feature.accentColor;
-  const secondary = variant === "seeds" ? "#6B2C4A" : variant === "orbit" ? "#c06010" : undefined;
+  // Secondary gradient color sampled from each graphic's second-most-prominent hue
+  const SECONDARY_COLORS: Partial<Record<FeatureVariant, string>> = {
+    play: "#c090a8", // dusty mauve panels
+    seeds: "#b0a044", // warm gold title text
+    orbit: "#4a6a30", // bronze-green foliage
+    security: "#888030", // olive-khaki left band
+    api: "#5c1e2c", // deep wine interior
+    hardware: "#5a3098", // indigo purple fist
+  };
+  const secondary = SECONDARY_COLORS[variant];
 
   const positionClass = "fixed inset-0";
 

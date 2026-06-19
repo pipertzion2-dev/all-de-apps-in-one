@@ -27,7 +27,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "AI music composition that breathes. Hocket voices, Meend expression, real-time sitar and vibraphone — the interface hears you.",
     cta: { label: "Open Svivva Play", href: FEATURE_PUBLIC_PATHS.play },
-    accentColor: "#7c5cbf",
+    accentColor: "#90c4d8",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",
   },
@@ -41,7 +41,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "One structured spec in. Full-stack app suites out — frontend, backend, database, auth, and deploys built side by side in parallel.",
     cta: { label: "Explore Seeds", href: FEATURE_PUBLIC_PATHS.seeds },
-    accentColor: "#5BA8A0",
+    accentColor: "#9085c4",
     motif: "branching",
     signatureMotion: "nodes branch outward from centre",
   },
@@ -55,7 +55,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "8-system growth intelligence. Pain miner, competitor radar, content engine, and 50+ mini apps compounding organic traffic while you sleep.",
     cta: { label: "Open Orbit", href: FEATURE_PUBLIC_PATHS.orbit },
-    accentColor: "#c06010",
+    accentColor: "#b85020",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",
   },
@@ -69,7 +69,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Feed Shield blocks harmful content. Threat Scanner analyzes files. Your data stays sealed inside an ornate, unbreakable vault.",
     cta: { label: "Security Center", href: FEATURE_PUBLIC_PATHS.security },
-    accentColor: "#6B2C4A",
+    accentColor: "#a888bc",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
   },
@@ -83,7 +83,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Write the prompt. Get a production API with schema enforcement, 200 auto-generated evals, versioning, and rollback. Zero YAML.",
     cta: { label: "Start Building", href: FEATURE_PUBLIC_PATHS.api },
-    accentColor: "#9b4d6e",
+    accentColor: "#6880a0",
     motif: "packaging",
     signatureMotion: "panels fold and assemble",
   },
@@ -97,7 +97,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "From concept to manufactured product. AI-powered schematics, material sourcing, supplier network, real-time cost tracking.",
     cta: { label: "Hardware Builder", href: FEATURE_PUBLIC_PATHS.hardware },
-    accentColor: "#b5547a",
+    accentColor: "#d880b0",
     motif: "crystal",
     signatureMotion: "diamonds rotate and refract light",
   },
