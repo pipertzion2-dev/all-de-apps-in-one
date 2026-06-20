@@ -102,7 +102,6 @@ import {
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
 import { SvivvaPlayStagePanel } from "@/components/svivva-play-stage-panel";
-import PlayCreativeTools from "@/components/play-creative-tools";
 import type { PlayStageModel } from "@/components/svivva-play-stage-3d";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
@@ -2953,7 +2952,7 @@ export default function SvivvaPlayPage() {
             <Badge className="bg-[#A05068]/10 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">
               MIDI: Professional
             </Badge>
-            <Badge className="bg-amber-100 text-amber-700 text-[8px] sm:text-[9px] border-amber-200 hidden md:flex">
+            <Badge className="bg-amber-900/25 text-amber-300/90 text-[8px] sm:text-[9px] border-amber-700/35 hidden md:flex">
               Audio: Beta
             </Badge>
           </div>
@@ -2984,21 +2983,11 @@ export default function SvivvaPlayPage() {
 
       <main className="flex-1 p-3 sm:p-4 md:p-6">
         <div className="max-w-[1400px] mx-auto">
-          <div className="mb-6">
-            <PlayCreativeTools />
-          </div>
-
-          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mb-3 px-1">
+          <p className="text-[10px] uppercase tracking-widest text-white/45 font-semibold mb-3 px-1">
             Studio — import &amp; generate stems
           </p>
 
-          <div
-            className="rounded-xl flex flex-col overflow-hidden"
-            style={{
-              background: "linear-gradient(145deg, #2a2a2a, #1e1e1e)",
-              border: "3px solid #3a3a3a",
-            }}
-          >
+          <div className="rounded-xl flex flex-col overflow-hidden border border-white/10 bg-gradient-to-br from-[#16131f] to-[#0f0d16]">
             <div
               className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 flex-shrink-0"
               onDragOver={(e) => {
