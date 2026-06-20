@@ -102,7 +102,7 @@ import {
   type StyleName as ReichStyle,
 } from "@/lib/svivva-play/reich-engine";
 import { SvivvaPlayStagePanel } from "@/components/svivva-play-stage-panel";
-import PlayCreativeTools, { scrollToMidiEvolution } from "@/components/play-creative-tools";
+import PlayCreativeTools from "@/components/play-creative-tools";
 import type { PlayStageModel } from "@/components/svivva-play-stage-3d";
 import type { TranscribedNote } from "@/lib/svivva-play/audio-transcription";
 import { applyOffsetToNotes } from "@/lib/svivva-play/midi-alignment";
@@ -2958,15 +2958,6 @@ export default function SvivvaPlayPage() {
             </Badge>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Button
-              onClick={() => scrollToMidiEvolution()}
-              variant="outline"
-              size="sm"
-              className="gap-1 border-[#A05068]/40 text-[#A05068] text-[10px] sm:text-xs hover:bg-[#A05068]/5"
-              data-testid="button-midi-evolution"
-            >
-              MIDI Evolution
-            </Button>
             <Button
               onClick={() => setShowGuidedBuilder(true)}
               variant="outline"
