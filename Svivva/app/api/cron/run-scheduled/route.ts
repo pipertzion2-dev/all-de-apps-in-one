@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getInternalAppOrigin } from "@/lib/internal-app-origin";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 /**
  * Vercel Cron (GET) — secure with CRON_SECRET (sent as Authorization: Bearer).
@@ -48,6 +49,25 @@ export async function GET(req: NextRequest) {
       signal: AbortSignal.timeout(90_000),
     }).then(async (r) => ({ ok: r.ok, status: r.status, body: await r.json().catch(() => ({})) }));
     out.growth = growth;
+  }
+
+  // Full on-site traffic engine — safe to repeat weekly: fills content gaps and
+  // re-notifies search engines. Does NOT auto-post to social (avoids spam/bans).
+  if (job === "autopilot" || job === "all") {
+    try {
+      const { runFullTrafficAutomation } = await import(
+        "@/lib/orbit/full-traffic-automation"
+      );
+      const result = await runFullTrafficAutomation();
+      out.autopilot = {
+        ok: true,
+        counts: result.marketing.counts,
+        indexNow: result.indexing.indexNow.ok,
+        googleSitemap: result.indexing.googleSitemap.ok,
+      };
+    } catch (e) {
+      out.autopilot = { ok: false, error: String(e instanceof Error ? e.message : e) };
+    }
   }
 
   return NextResponse.json({ success: true, ...out });

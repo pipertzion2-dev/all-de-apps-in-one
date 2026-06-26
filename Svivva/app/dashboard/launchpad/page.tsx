@@ -54,6 +54,7 @@ import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
+import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
@@ -3565,8 +3566,23 @@ export default function LaunchpadPage() {
 
       {/* ── Content ── */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
-        <OrbitTrafficFunnelDiagram compact />
-        {/* ── GOLD RUN EVERYTHING — Primary action ── */}
+        {/* ── PRIMARY MISSION CONTROL ── */}
+        <OrbitOneClickLaunch
+          onComplete={() => void refetchStatus()}
+          orbitStatus={orbitStatus ?? null}
+        />
+
+        {/* ── ADVANCED (collapsed by default) ── */}
+        <details className="group rounded-2xl border border-border/50 bg-card/30 overflow-hidden">
+          <summary className="flex items-center justify-between px-4 py-3 cursor-pointer select-none list-none hover:bg-muted/20 transition-colors">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              Advanced — phased steps, Index 22 &amp; tools
+            </span>
+            <ChevronDown className="w-4 h-4 text-muted-foreground group-open:rotate-180 transition-transform flex-shrink-0" />
+          </summary>
+          <div className="border-t border-border/40 px-4 pb-4 pt-4 space-y-4">
+            <OrbitTrafficFunnelDiagram compact />
+        {/* ── GOLD RUN EVERYTHING — advanced phased run ── */}
         <div
           className="rounded-2xl border-2 overflow-hidden"
           style={{
@@ -3594,13 +3610,13 @@ export default function LaunchpadPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="text-sm font-black text-foreground">
-                  Run Everything (Index 22 + marketing)
+                  Advanced: phased run (Index 22 + marketing)
                 </h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  One press runs <strong>9 Index 22 phases</strong> (audit, sitemaps, internal
-                  links, quality, performance, conversion, analytics, monitoring) then{" "}
-                  <strong>8 marketing batches</strong> (mini hubs, 22 content steps, IndexNow) — all
-                  traffic funnels to <strong>svivva.com</strong>.
+                  Optional. Most of the time use <strong>Autopilot</strong> above. This runs the same
+                  work in visible chunks — <strong>9 Index 22 phases</strong> then{" "}
+                  <strong>8 marketing batches</strong> — for when you want to watch each phase or
+                  retry one batch.
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
                   Orbit uses <strong>free-tier AI only</strong> (set{" "}
@@ -4779,6 +4795,8 @@ export default function LaunchpadPage() {
             ))}
           </div>
         </div>
+          </div>{/* end advanced inner */}
+        </details>{/* end advanced accordion */}
       </div>
     </div>
   );
