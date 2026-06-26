@@ -53,6 +53,11 @@ function isLikelyLocalDevHost(host: string): boolean {
 }
 
 export function getBillingOriginFromRequest(request: NextRequest): string {
+  return getRequestOrigin(request);
+}
+
+/** Origin for OAuth redirects — prefers configured site URL in production. */
+export function getRequestOrigin(request: NextRequest): string {
   const host = request.headers.get("host") || "localhost:5000";
   const protocol = isLikelyLocalDevHost(host) ? "http" : "https";
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();

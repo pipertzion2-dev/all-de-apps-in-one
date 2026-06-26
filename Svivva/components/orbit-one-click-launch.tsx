@@ -779,16 +779,25 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
   const gscOk = indexing.gscConnected && indexing.googleSitemap.ok;
   return (
     <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-xs font-black text-sky-300">Google &amp; search indexing</p>
-        {!indexing.gscConnected && (
+        <div className="flex gap-1.5">
+          {!indexing.gscConnected && (
+            <a
+              href="/api/gsc/oauth/start?return=/dashboard/launchpad"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white"
+              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+            >
+              Connect Google
+            </a>
+          )}
           <a
             href="/dashboard/gsc-connect"
-            className="text-[10px] font-bold text-sky-400 hover:text-sky-300 underline"
+            className="px-2 py-1 rounded-lg text-[10px] font-bold border border-sky-500/40 text-sky-300"
           >
-            Connect GSC →
+            GSC setup
           </a>
-        )}
+        </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <IndexStat
@@ -814,7 +823,8 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
       </div>
       {!indexing.gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
-          Add your Google service account at GSC Connect for full sitemap + Indexing API automation.
+          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. AI picks your Search
+          Console property and runs sitemap + indexing automatically.
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (

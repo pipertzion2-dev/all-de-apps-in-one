@@ -142,7 +142,9 @@ export async function runMarketingAutopilot(opts?: {
   if (!opts?.skipOnSite) {
     const traffic = await runFullTrafficAutomation();
     const idx = traffic.indexing;
-    const gscConnected = credStatus.google.serviceAccount && credStatus.google.siteUrl;
+    const gscConnected =
+      (credStatus.google.serviceAccount || credStatus.google.siteUrl) &&
+      credStatus.google.siteUrl;
 
     indexingSummary = {
       indexNow: {
@@ -170,7 +172,7 @@ export async function runMarketingAutopilot(opts?: {
             : "needs_credentials";
 
     const gscIndexingMessage = !gscConnected
-      ? "Connect Google at /dashboard/gsc-connect (service account + site URL)"
+      ? "Connect Google at /dashboard/gsc-connect — one sign-in, AI sets up indexing"
       : idx.googleIndexing.submitted > 0
         ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
         : idx.googleSitemap.ok

@@ -2,7 +2,8 @@ import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
-import { submitSitemapToGSC, submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
+import { submitSitemapToGSC, submitUrlsToGoogleIndexingApi, submitSitemapWithAccessToken, submitUrlsWithAccessToken } from "@/lib/google-indexing";
+import { getGoogleOAuthAccessTokenForUser, ensureGscOAuthColumns } from "@/lib/google-gsc-oauth";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getSitemapUrl } from "@/lib/site-url";
@@ -32,10 +33,13 @@ export type AutomateManualResult = {
 };
 
 async function getGscCreds(): Promise<{
-  sa: string;
   site: string;
   userId: string;
+  mode: "oauth" | "service_account";
+  accessToken?: string;
+  sa?: string;
 } | null> {
+  await ensureGscOAuthColumns();
   const adminUserId = getPrimaryAdminUserId() || "";
   const [row] = adminUserId
     ? await db
@@ -43,6 +47,7 @@ async function getGscCreds(): Promise<{
           sa: seedCredentials.googleServiceAccountJson,
           site: seedCredentials.googleSiteUrl,
           userId: seedCredentials.userId,
+          oauthRefresh: seedCredentials.googleOauthRefreshToken,
         })
         .from(seedCredentials)
         .where(eq(seedCredentials.userId, adminUserId))
@@ -52,20 +57,36 @@ async function getGscCreds(): Promise<{
           sa: seedCredentials.googleServiceAccountJson,
           site: seedCredentials.googleSiteUrl,
           userId: seedCredentials.userId,
+          oauthRefresh: seedCredentials.googleOauthRefreshToken,
         })
         .from(seedCredentials)
         .where(
           and(
             eq(seedCredentials.googleIndexingEnabled, true),
-            isNotNull(seedCredentials.googleServiceAccountJson),
             isNotNull(seedCredentials.googleSiteUrl),
           ),
         )
         .orderBy(desc(seedCredentials.updatedAt))
         .limit(1);
 
-  if (!row?.sa || !row?.site) return null;
-  return { sa: row.sa, site: row.site, userId: row.userId };
+  if (!row?.site) return null;
+
+  if (row.oauthRefresh?.trim()) {
+    try {
+      const accessToken = await getGoogleOAuthAccessTokenForUser(row.userId);
+      if (accessToken) {
+        return { mode: "oauth", accessToken, site: row.site, userId: row.userId };
+      }
+    } catch {
+      /* fall through to service account */
+    }
+  }
+
+  if (row.sa?.trim()) {
+    return { mode: "service_account", sa: row.sa, site: row.site, userId: row.userId };
+  }
+
+  return null;
 }
 
 /**
@@ -114,7 +135,10 @@ export async function runAutomatableManualActions(opts?: {
 
   if (gsc) {
     googleSitemap.attempted = true;
-    const sm = await submitSitemapToGSC(gsc.sa, gsc.site, sitemapUrl);
+    const sm =
+      gsc.mode === "oauth" && gsc.accessToken
+        ? await submitSitemapWithAccessToken(gsc.accessToken, gsc.site, sitemapUrl)
+        : await submitSitemapToGSC(gsc.sa!, gsc.site, sitemapUrl);
     googleSitemap = { attempted: true, ok: sm.ok, error: sm.error };
     summaryLines.push(
       sm.ok
@@ -134,7 +158,10 @@ export async function runAutomatableManualActions(opts?: {
     for (let b = 0; b < batchCount; b++) {
       const batch = urls.slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH);
       if (!batch.length) break;
-      const gi = await submitUrlsToGoogleIndexingApi(gsc.sa, batch);
+      const gi =
+        gsc.mode === "oauth" && gsc.accessToken
+          ? await submitUrlsWithAccessToken(gsc.accessToken, batch)
+          : await submitUrlsToGoogleIndexingApi(gsc.sa!, batch);
       totalGiSubmitted += gi.submitted;
       totalGiAttempted += batch.length;
       allGiErrors.push(...gi.errors);
@@ -164,7 +191,7 @@ export async function runAutomatableManualActions(opts?: {
     }
   } else {
     summaryLines.push(
-      "· Google (GSC + Indexing API) skipped — add service account + site URL at /dashboard/gsc-connect",
+      "· Google skipped — connect your Google account at /dashboard/gsc-connect (one click)",
     );
   }
 

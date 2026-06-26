@@ -92,12 +92,16 @@ export async function saveLastAutopilotRun(run: unknown): Promise<void> {
 export async function getMarketingCredentialStatus(): Promise<MarketingCredentialStatus> {
   await ensureColumn();
   const adminId = getPrimaryAdminUserId() || "";
+  const { ensureGscOAuthColumns } = await import("@/lib/google-gsc-oauth");
+  await ensureGscOAuthColumns();
+
   const [row] = adminId
     ? await db
         .select({
           sa: seedCredentials.googleServiceAccountJson,
           site: seedCredentials.googleSiteUrl,
           indexnow: seedCredentials.indexnowKey,
+          oauth: seedCredentials.googleOauthRefreshToken,
         })
         .from(seedCredentials)
         .where(eq(seedCredentials.userId, adminId))
@@ -107,6 +111,7 @@ export async function getMarketingCredentialStatus(): Promise<MarketingCredentia
           sa: seedCredentials.googleServiceAccountJson,
           site: seedCredentials.googleSiteUrl,
           indexnow: seedCredentials.indexnowKey,
+          oauth: seedCredentials.googleOauthRefreshToken,
         })
         .from(seedCredentials)
         .limit(1);
@@ -121,7 +126,7 @@ export async function getMarketingCredentialStatus(): Promise<MarketingCredentia
   return {
     configured,
     google: {
-      serviceAccount: !!row?.sa?.trim(),
+      serviceAccount: !!(row?.sa?.trim() || row?.oauth?.trim()),
       siteUrl: !!row?.site?.trim(),
       indexNow: !!row?.indexnow?.trim(),
     },

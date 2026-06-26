@@ -47,13 +47,59 @@ async function getGoogleAccessToken(
   return data.access_token;
 }
 
+export async function submitSitemapToGSC(
+  serviceAccountJson: string,
+  siteUrl: string,
+  sitemapUrl: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const sa: ServiceAccount = JSON.parse(serviceAccountJson);
+    const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/webmasters");
+    return submitSitemapWithAccessToken(token, siteUrl, sitemapUrl);
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
+export async function submitSitemapWithAccessToken(
+  accessToken: string,
+  siteUrl: string,
+  sitemapUrl: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const encodedSite = encodeURIComponent(siteUrl);
+    const encodedSitemap = encodeURIComponent(sitemapUrl);
+    const res = await fetch(
+      `https://www.googleapis.com/webmasters/v3/sites/${encodedSite}/sitemaps/${encodedSitemap}`,
+      {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+      return { ok: false, error: body.error?.message || `HTTP ${res.status}` };
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function submitUrlsToGoogleIndexingApi(
   serviceAccountJson: string,
   urls: string[],
 ): Promise<{ submitted: number; errors: string[] }> {
   const sa: ServiceAccount = JSON.parse(serviceAccountJson);
   const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/indexing");
+  return submitUrlsWithAccessToken(token, urls);
+}
 
+export async function submitUrlsWithAccessToken(
+  accessToken: string,
+  urls: string[],
+): Promise<{ submitted: number; errors: string[] }> {
   const errors: string[] = [];
   let submitted = 0;
   const concurrency = 6;
@@ -62,7 +108,7 @@ export async function submitUrlsToGoogleIndexingApi(
   async function publishOne(url: string): Promise<void> {
     const res = await fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({ url, type: "URL_UPDATED" }),
       signal: AbortSignal.timeout(12_000),
     });
@@ -88,32 +134,4 @@ export async function submitUrlsToGoogleIndexingApi(
   }
 
   return { submitted, errors };
-}
-
-export async function submitSitemapToGSC(
-  serviceAccountJson: string,
-  siteUrl: string,
-  sitemapUrl: string,
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const sa: ServiceAccount = JSON.parse(serviceAccountJson);
-    const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/webmasters");
-    const encodedSite = encodeURIComponent(siteUrl);
-    const encodedSitemap = encodeURIComponent(sitemapUrl);
-    const res = await fetch(
-      `https://www.googleapis.com/webmasters/v3/sites/${encodedSite}/sitemaps/${encodedSitemap}`,
-      {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(10000),
-      },
-    );
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return { ok: false, error: body.error?.message || `HTTP ${res.status}` };
-    }
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: String(e) };
-  }
 }

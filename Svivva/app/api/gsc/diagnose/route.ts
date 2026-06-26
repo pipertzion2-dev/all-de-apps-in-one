@@ -8,6 +8,7 @@ import {
   getGoogleServiceAccountAccessToken,
   GoogleServiceAccount,
 } from "@/lib/google-service-account";
+import { ensureGscOAuthColumns, isGoogleGscOAuthConfigured } from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,8 @@ export async function GET() {
   if (!(await isOrbitAdminAllowed())) return forbidden();
 
   const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+
+  await ensureGscOAuthColumns();
 
   const [creds] = await db
     .select()
@@ -114,7 +117,30 @@ export async function GET() {
     });
   }
 
-  // Step 4 — service account (optional enhancement)
+  // Step 4 — Google account (OAuth — recommended)
+  const oauthEmail = creds?.googleOauthEmail || null;
+  const oauthConnected = !!creds?.googleOauthRefreshToken?.trim();
+  if (oauthConnected) {
+    steps.push({
+      id: "google_oauth",
+      label: "Google account connected",
+      status: "ok",
+      detail: oauthEmail
+        ? `Signed in as ${oauthEmail}. Orbit can submit sitemaps and request indexing automatically.`
+        : "Google OAuth connected. Orbit can submit sitemaps and request indexing automatically.",
+    });
+  } else {
+    steps.push({
+      id: "google_oauth",
+      label: "Google account",
+      status: isGoogleGscOAuthConfigured() ? "fail" : "warn",
+      detail: isGoogleGscOAuthConfigured()
+        ? "Not connected — click Connect with Google (one sign-in, AI configures the rest)."
+        : "OAuth not configured on server — set GOOGLE_GSC_CLIENT_ID + SECRET in Vercel, or use service account below.",
+    });
+  }
+
+  // Step 5 — service account (legacy / optional)
   let sa: GoogleServiceAccount | null = null;
   try {
     const saJson = creds?.googleServiceAccountJson || null;
@@ -131,14 +157,14 @@ export async function GET() {
       );
       steps.push({
         id: "service_account",
-        label: "Service account (optional)",
+        label: "Service account (advanced)",
         status: "ok",
         detail: `Active — ${sa.client_email}. Enables GSC data API access.`,
       });
     } catch (e: any) {
       steps.push({
         id: "service_account",
-        label: "Service account (optional)",
+        label: "Service account (advanced)",
         status: "warn",
         detail: `Saved but auth failed: ${e?.message?.slice(0, 120)}`,
       });
@@ -146,9 +172,9 @@ export async function GET() {
   } else {
     steps.push({
       id: "service_account",
-      label: "Service account (optional)",
+      label: "Service account (advanced)",
       status: "skip",
-      detail: "Not configured. Add one to enable GSC data API features (impressions, clicks).",
+      detail: "Not configured. Use Connect with Google above — easier than service account JSON.",
     });
   }
 
@@ -160,5 +186,8 @@ export async function GET() {
     score: total > 0 ? Math.round((passing / total) * 100) : 0,
     siteUrl: rawUrl,
     serviceAccountEmail: sa?.client_email || null,
+    oauthConnected,
+    oauthEmail,
+    oauthAvailable: isGoogleGscOAuthConfigured(),
   });
 }

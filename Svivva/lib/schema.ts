@@ -1543,6 +1543,8 @@ export const seedCredentials = pgTable("seed_credentials", {
   domainVerified: boolean("domain_verified").default(false),
   indexnowKey: text("indexnow_key"),
   googleServiceAccountJson: text("google_service_account_json"),
+  googleOauthRefreshToken: text("google_oauth_refresh_token"),
+  googleOauthEmail: text("google_oauth_email"),
   googleIndexingEnabled: boolean("google_indexing_enabled").default(false),
   lastIndexnowSubmit: timestamp("last_indexnow_submit"),
   lastGoogleIndexing: timestamp("last_google_indexing"),
