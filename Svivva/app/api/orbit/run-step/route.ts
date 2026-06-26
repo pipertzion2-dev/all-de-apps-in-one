@@ -225,7 +225,7 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
   return tools;
 }
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {

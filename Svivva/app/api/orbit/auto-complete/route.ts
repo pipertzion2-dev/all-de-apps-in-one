@@ -3,7 +3,7 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { fillMarketingGaps } from "@/lib/orbit/fill-marketing-gaps";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST() {
   try {
