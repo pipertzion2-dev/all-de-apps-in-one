@@ -11,7 +11,7 @@ import { maskCredentialsForClient } from "@/lib/orbit/marketing-autopilot-types"
 import { MARKETING_AUTOPILOT_TASKS } from "@/lib/orbit/marketing-autopilot-tasks";
 import type { MarketingPlatformCredentials } from "@/lib/orbit/marketing-autopilot-types";
 
-export const maxDuration = 300;
+export const maxDuration = 120;
 
 const MASK = "••••••••";
 

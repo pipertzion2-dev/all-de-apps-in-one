@@ -57,8 +57,6 @@ import {
 import { isSeoIndexStepId } from "@/lib/orbit/seo-index-phases";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 
-export const maxDuration = 300;
-
 const BASE_URL = getSiteUrl();
 
 // ── AI with template fallback (Gemini / Ollama only — never paid OpenAI) ───
@@ -226,6 +224,8 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
 
   return tools;
 }
+
+export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
   try {
