@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { runFullTrafficAutomation } from "@/lib/orbit/full-traffic-automation";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {

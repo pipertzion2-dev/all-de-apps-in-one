@@ -57,7 +57,7 @@ import {
 import { isSeoIndexStepId } from "@/lib/orbit/seo-index-phases";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const BASE_URL = getSiteUrl();
 
