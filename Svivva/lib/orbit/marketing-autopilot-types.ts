@@ -1,6 +1,8 @@
 /** Marketing Autopilot — credentials, tasks, and run results */
 
 export type MarketingPlatformCredentials = {
+  /** OmniSocials — unified LinkedIn, X, Threads, etc. (omnisocials.com → Settings → API) */
+  omnisocialsApiKey?: string;
   devtoApiKey?: string;
   hashnodeApiKey?: string;
   hashnodePublicationId?: string;
@@ -28,6 +30,13 @@ export type MarketingCredentialField = {
 };
 
 export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
+  {
+    key: "omnisocialsApiKey",
+    label: "OmniSocials API key",
+    hint: "omnisocials.com → connect LinkedIn & X → Settings → API → Create key",
+    secret: true,
+    group: "social",
+  },
   {
     key: "devtoApiKey",
     label: "Dev.to API key",
@@ -150,6 +159,8 @@ export type AutopilotTaskResult = {
   group: string;
   status: AutopilotTaskStatus;
   message: string;
+  /** Ready-to-paste content for manual tasks */
+  copyText?: string;
   url?: string;
   at?: string;
 };

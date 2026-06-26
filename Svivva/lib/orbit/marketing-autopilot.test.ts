@@ -23,6 +23,6 @@ describe("marketing-autopilot", () => {
 
   it("lists credential fields for UI form", () => {
     expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "devtoApiKey")).toBe(true);
-    expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "twitterAccessToken")).toBe(true);
+    expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "omnisocialsApiKey")).toBe(true);
   });
 });

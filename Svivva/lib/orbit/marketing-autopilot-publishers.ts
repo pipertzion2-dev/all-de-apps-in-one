@@ -45,6 +45,95 @@ function oauth1AuthHeader(
 
 export type PublishResult = { ok: boolean; url?: string; error?: string; id?: string };
 
+const OMNISOCIALS_BASE = "https://api.omnisocials.com/v1";
+
+/** List connected social accounts (linkedin, x, etc.) */
+export async function listOmniSocialsAccounts(
+  apiKey: string,
+): Promise<{ ok: boolean; accounts?: { id: string; platform?: string }[]; error?: string }> {
+  try {
+    const res = await fetch(`${OMNISOCIALS_BASE}/accounts`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    const data = (await res.json()) as {
+      data?: { id: string; platform?: string }[];
+      accounts?: { id: string; platform?: string }[];
+      error?: { message?: string };
+    };
+    if (!res.ok) {
+      return { ok: false, error: data.error?.message || `HTTP ${res.status}` };
+    }
+    const accounts = data.data ?? data.accounts ?? [];
+    return { ok: true, accounts };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
+function resolveOmniAccounts(
+  accounts: { id: string; platform?: string }[] | undefined,
+  platforms: string[],
+): string[] {
+  if (!accounts?.length) return platforms;
+  const out: string[] = [];
+  for (const p of platforms) {
+    const match = accounts.find((a) => {
+      const plat = (a.platform ?? a.id).toLowerCase();
+      return plat === p || plat.includes(p) || a.id.toLowerCase().endsWith(`_${p}`);
+    });
+    out.push(match?.id ?? p);
+  }
+  return out;
+}
+
+/** Publish to LinkedIn, X, etc. via OmniSocials create-and-publish */
+export async function publishOmniSocialsPost(
+  apiKey: string,
+  opts: {
+    text: string;
+    platforms: string[];
+    linkUrl?: string;
+    linkTitle?: string;
+    linkDescription?: string;
+  },
+): Promise<PublishResult> {
+  try {
+    const listed = await listOmniSocialsAccounts(apiKey);
+    const accountIds = resolveOmniAccounts(listed.accounts, opts.platforms);
+
+    const body: Record<string, unknown> = {
+      content: { default: opts.text.slice(0, 3000) },
+      accounts: accountIds,
+      publish_now: true,
+      source: "svivva-orbit",
+    };
+    if (opts.linkUrl) {
+      body.link_url = opts.linkUrl;
+      if (opts.linkTitle) body.link_title = opts.linkTitle;
+      if (opts.linkDescription) body.link_description = opts.linkDescription;
+    }
+
+    const res = await fetch(`${OMNISOCIALS_BASE}/posts/create-and-publish`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json()) as {
+      data?: { id?: string; url?: string; status?: string };
+      error?: { message?: string };
+    };
+    if (!res.ok) {
+      return { ok: false, error: data.error?.message || `HTTP ${res.status}` };
+    }
+    return { ok: true, id: data.data?.id, url: data.data?.url };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function publishDevToArticle(
   apiKey: string,
   article: { title: string; content: string; tags?: string[] },

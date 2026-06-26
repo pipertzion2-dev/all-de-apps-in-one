@@ -10,6 +10,8 @@ import {
 import { maskCredentialsForClient } from "@/lib/orbit/marketing-autopilot-types";
 import { MARKETING_AUTOPILOT_TASKS } from "@/lib/orbit/marketing-autopilot-tasks";
 import type { MarketingPlatformCredentials } from "@/lib/orbit/marketing-autopilot-types";
+import { ORBIT_SETUP_PROVIDERS } from "@/lib/orbit/orbit-setup-providers";
+import { isAnyAiProviderAvailable, getActiveAiProvider } from "@/lib/llm/openai";
 
 export const maxDuration = 300;
 
@@ -36,6 +38,11 @@ export async function GET(req: NextRequest) {
       lastRun,
       tasks: MARKETING_AUTOPILOT_TASKS,
       gscConnectUrl: "/dashboard/gsc-connect",
+      setupProviders: ORBIT_SETUP_PROVIDERS,
+      ai: {
+        configured: isAnyAiProviderAvailable(),
+        provider: getActiveAiProvider(),
+      },
     });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

@@ -11,6 +11,7 @@ import { generateMarketingLaunchContent } from "@/lib/orbit/marketing-autopilot-
 import {
   publishDevToArticle,
   publishHashnodeArticle,
+  publishOmniSocialsPost,
   publishRedditPost,
   publishTwitterThread,
   sendResendEmail,
@@ -31,7 +32,7 @@ function task(
   id: string,
   status: AutopilotTaskStatus,
   message: string,
-  url?: string,
+  opts?: { url?: string; copyText?: string },
 ): AutopilotTaskResult {
   const def = taskDefById(id);
   return {
@@ -40,9 +41,30 @@ function task(
     group: def?.group ?? "Other",
     status,
     message,
-    url,
+    url: opts?.url,
+    copyText: opts?.copyText,
     at: now(),
   };
+}
+
+function hasTwitterOAuth(creds: MarketingPlatformCredentials): boolean {
+  return hasCreds(creds, [
+    "twitterApiKey",
+    "twitterApiSecret",
+    "twitterAccessToken",
+    "twitterAccessSecret",
+  ]);
+}
+
+function formatDirectoryCopy(listing: {
+  name: string;
+  title: string;
+  description: string;
+  tags: string;
+}): string {
+  return [`Name: ${listing.name}`, `Title: ${listing.title}`, `Description: ${listing.description}`, `Tags: ${listing.tags}`].join(
+    "\n\n",
+  );
 }
 
 function hasCreds(
@@ -181,7 +203,8 @@ export async function runMarketingAutopilot(opts?: {
     task(
       "tech-rich-results",
       "prepared",
-      "Test at search.google.com/test/rich-results with homepage URL",
+      "Optional: test rich results (30 sec)",
+      { copyText: getSiteUrl() },
     ),
     task(
       "content-parasite",
@@ -204,7 +227,7 @@ export async function runMarketingAutopilot(opts?: {
           "manual-devto",
           r.ok ? "posted" : "failed",
           r.ok ? `Published on Dev.to` : r.error || "Dev.to publish failed",
-          r.url,
+          { url: r.url },
         ),
       );
     } else {
@@ -212,7 +235,8 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-devto",
           "needs_credentials",
-          "Article saved — add Dev.to API key to auto-publish",
+          "Article ready — add Dev.to API key (free) or copy & paste",
+          { copyText: `# ${devto.title}\n\n${devto.content}` },
         ),
       );
     }
@@ -232,7 +256,7 @@ export async function runMarketingAutopilot(opts?: {
           "manual-hashnode",
           r.ok ? "posted" : "failed",
           r.ok ? "Published on Hashnode" : r.error || "Hashnode publish failed",
-          r.url,
+          { url: r.url },
         ),
       );
     } else {
@@ -240,7 +264,8 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-hashnode",
           "needs_credentials",
-          "Article saved — add Hashnode API key + publication ID",
+          "Article ready — add Hashnode key (free) or copy & paste",
+          { copyText: `# ${hashnode.title}\n\n${hashnode.content}` },
         ),
       );
     }
@@ -257,29 +282,45 @@ export async function runMarketingAutopilot(opts?: {
       task(
         "manual-medium",
         "prepared",
-        "Medium has no public write API — copy from Growth Content → medium.com/new",
+        "Copy → open Medium → paste → publish (2 min)",
+        {
+          copyText: `# ${m.title}\n\n${m.subtitle ? `*${m.subtitle}*\n\n` : ""}${m.content}`,
+        },
       ),
     );
   }
 
   const thread = content.social.twitter_thread;
   if (thread?.length) {
-    await persistContent("social-twitter", "Twitter thread", thread.join("\n\n---\n\n"));
-    if (
-      hasCreds(creds, [
-        "twitterApiKey",
-        "twitterApiSecret",
-        "twitterAccessToken",
-        "twitterAccessSecret",
-      ])
-    ) {
+    const threadCopy = thread.join("\n\n---\n\n");
+    await persistContent("social-twitter", "Twitter thread", threadCopy);
+    if (hasTwitterOAuth(creds)) {
       const r = await publishTwitterThread(creds, thread);
       tasks.push(
         task(
           "manual-twitter-thread",
           r.ok ? "posted" : "failed",
           r.ok ? `Posted ${thread.length}-tweet thread` : r.error || "Twitter publish failed",
-          r.url,
+          { url: r.url },
+        ),
+      );
+    } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
+      const site = getSiteUrl();
+      const lead = `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
+      const r = await publishOmniSocialsPost(creds.omnisocialsApiKey!, {
+        text: lead.slice(0, 280),
+        platforms: ["x"],
+        linkUrl: site,
+        linkTitle: "Svivva — free AI tools",
+      });
+      tasks.push(
+        task(
+          "manual-twitter-thread",
+          r.ok ? "posted" : "failed",
+          r.ok
+            ? `Posted to X via OmniSocials${thread.length > 1 ? " (lead tweet + link)" : ""}`
+            : r.error || "OmniSocials X publish failed",
+          { url: r.url, copyText: threadCopy },
         ),
       );
     } else {
@@ -287,25 +328,43 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-twitter-thread",
           "needs_credentials",
-          "Thread saved — add Twitter OAuth 1.0a keys to auto-post",
+          "Thread ready — add OmniSocials key ($10/mo) or copy & paste on X",
+          { copyText: threadCopy },
         ),
       );
     }
   }
 
   if (content.social.linkedin?.body) {
-    await persistContent(
-      "social-linkedin",
-      content.social.linkedin.headline,
-      content.social.linkedin.body,
-    );
-    tasks.push(
-      task(
-        "manual-linkedin",
-        "prepared",
-        "LinkedIn post ready in Growth Content — paste at linkedin.com/post",
-      ),
-    );
+    const li = content.social.linkedin;
+    const liCopy = `${li.headline}\n\n${li.body}${li.cta ? `\n\n${li.cta}` : ""}`;
+    await persistContent("social-linkedin", li.headline, li.body);
+    if (hasCreds(creds, ["omnisocialsApiKey"])) {
+      const r = await publishOmniSocialsPost(creds.omnisocialsApiKey!, {
+        text: liCopy,
+        platforms: ["linkedin"],
+        linkUrl: li.cta || getSiteUrl(),
+        linkTitle: li.headline,
+        linkDescription: li.body.slice(0, 200),
+      });
+      tasks.push(
+        task(
+          "manual-linkedin",
+          r.ok ? "posted" : "failed",
+          r.ok ? "Published on LinkedIn via OmniSocials" : r.error || "LinkedIn publish failed",
+          { url: r.url, copyText: liCopy },
+        ),
+      );
+    } else {
+      tasks.push(
+        task(
+          "manual-linkedin",
+          "needs_credentials",
+          "Post ready — add OmniSocials key ($10/mo) or copy & paste on LinkedIn",
+          { copyText: liCopy },
+        ),
+      );
+    }
   }
 
   const redditPosts: { id: string; sub: string; post?: { title: string; body: string } }[] = [
@@ -328,51 +387,59 @@ export async function runMarketingAutopilot(opts?: {
         body: rp.post.body,
       });
       if (rp.id === "manual-reddit-sideproject") {
+        const redditCopy = `${rp.post.title}\n\n${rp.post.body}`;
         tasks.push(
           task(
             rp.id,
             r.ok ? "posted" : "failed",
             r.ok ? `Posted to r/${sub}` : r.error || "Reddit submit failed",
-            r.url,
+            { url: r.url, copyText: redditCopy },
           ),
         );
       }
     } else if (rp.id === "manual-reddit-sideproject") {
-      tasks.push(task(rp.id, "needs_credentials", "Post saved — add Reddit OAuth credentials"));
+      tasks.push(
+        task(rp.id, "needs_credentials", "Post ready — add Reddit app keys (free) or copy & paste", {
+          copyText: `${rp.post.title}\n\n${rp.post.body}`,
+        }),
+      );
     }
   }
 
   if (content.social.show_hn) {
     const hn = content.social.show_hn;
+    const hnCopy = `Title: ${hn.title}\n\nURL: ${getSiteUrl()}\n\nText:\n${hn.body}`;
     await persistContent("show-hn", hn.title, `${hn.title}\n\n${hn.body}`);
     tasks.push(
-      task(
-        "manual-showhn",
-        "prepared",
-        "Show HN copy ready — submit at news.ycombinator.com/submit",
-      ),
+      task("manual-showhn", "prepared", "Copy → open HN → paste title + URL → submit", {
+        copyText: hnCopy,
+      }),
     );
   }
 
   if (content.social.producthunt) {
     const ph = content.social.producthunt;
+    const phCopy = `TAGLINE:\n${ph.tagline}\n\nDESCRIPTION:\n${ph.description}\n\nFIRST COMMENT:\n${ph.first_comment || "(write after launch)"}`;
     await persistContent(
       "product-hunt",
       ph.tagline,
       `Tagline: ${ph.tagline}\n\nDescription: ${ph.description}\n\nFirst comment:\n${ph.first_comment || ""}`,
     );
     tasks.push(
-      task(
-        "manual-producthunt",
-        "prepared",
-        "PH launch kit ready — no public API; use producthunt.com/posts/new",
-      ),
+      task("manual-producthunt", "prepared", "Copy → open Product Hunt → paste → add screenshots", {
+        copyText: phCopy,
+      }),
     );
-    tasks.push(task("dir-producthunt", "prepared", "Product Hunt listing copy prepared"));
+    tasks.push(
+      task("dir-producthunt", "prepared", "Same listing — use Product Hunt submit page", {
+        copyText: phCopy,
+      }),
+    );
   }
 
   const pitch = content.outreach.newsletters[0];
   if (pitch) {
+    const pitchCopy = `Subject: ${pitch.subject}\n\n${pitch.pitch}`;
     await persistContent("outreach-newsletter", pitch.subject, pitch.pitch);
     if (
       hasCreds(creds, ["resendApiKey", "outreachFromEmail"]) &&
@@ -395,7 +462,8 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-newsletters",
           "needs_credentials",
-          "Pitch saved — add Resend key + recipient email",
+          "Pitch ready — add Resend key or copy & email manually",
+          { copyText: pitchCopy },
         ),
       );
     }
@@ -403,6 +471,7 @@ export async function runMarketingAutopilot(opts?: {
 
   const pod = content.outreach.podcasts[0];
   if (pod) {
+    const podCopy = `Subject: ${pod.subject}\n\n${pod.pitch}`;
     await persistContent("outreach-podcast", pod.subject, pod.pitch);
     if (hasCreds(creds, ["resendApiKey", "outreachFromEmail"]) && creds.podcastPitchEmail?.trim()) {
       const r = await sendResendEmail(creds, {
@@ -422,14 +491,20 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-podcasts",
           "needs_credentials",
-          "Pitch saved — add Resend key + podcast contact email",
+          "Pitch ready — add Resend key or copy & email manually",
+          { copyText: podCopy },
         ),
       );
     }
   }
 
+  const ihSocial = content.social.linkedin?.body
+    ? `${content.social.linkedin.headline}\n\n${content.social.linkedin.body}`
+    : `Check out our free AI tools hub: ${getSiteUrl()}`;
   tasks.push(
-    task("manual-indiehackers", "prepared", "Share launch story at indiehackers.com/post"),
+    task("manual-indiehackers", "prepared", "Copy → open Indie Hackers → paste → publish", {
+      copyText: ihSocial,
+    }),
   );
 
   // Directories — prepare listing copy (no auto-submit APIs)
@@ -459,8 +534,9 @@ export async function runMarketingAutopilot(opts?: {
         taskId,
         "prepared",
         listing
-          ? `Listing copy ready for ${listing.name} — paste at directory submit URL`
+          ? `Copy → open ${listing.name} → paste fields → submit`
           : "Listing copy generated",
+        listing ? { copyText: formatDirectoryCopy(listing) } : undefined,
       ),
     );
   }

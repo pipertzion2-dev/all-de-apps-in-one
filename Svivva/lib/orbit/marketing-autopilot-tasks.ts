@@ -135,6 +135,7 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
       "twitterApiSecret",
       "twitterAccessToken",
       "twitterAccessSecret",
+      "omnisocialsApiKey",
     ],
     automatable: "api",
   },
@@ -142,7 +143,8 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     id: "manual-linkedin",
     label: "LinkedIn post",
     group: "Manual Publishing",
-    automatable: "prepare_only",
+    credentialKeys: ["omnisocialsApiKey"],
+    automatable: "api",
   },
   {
     id: "manual-indiehackers",

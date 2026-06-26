@@ -18,7 +18,6 @@ import {
   Rocket,
   Loader2,
   CheckCircle2,
-  ExternalLink,
   Sparkles,
   Clock,
   AlertTriangle,
@@ -29,7 +28,11 @@ import {
   ChevronUp,
   RefreshCw,
   Zap,
+  CreditCard,
+  Circle,
 } from "lucide-react";
+import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
+import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
@@ -44,6 +47,7 @@ type Task = {
   group: string;
   status: TaskStatus;
   message: string;
+  copyText?: string;
   url?: string;
   at?: string;
 };
@@ -121,15 +125,18 @@ const ACTION_META: ActionMeta[] = [
     id: "manual-twitter-thread",
     icon: "𝕏",
     openUrl: "https://x.com/compose/tweet",
-    credKey: "twitterApiKey",
-    credLabel: "X / Twitter API key",
-    credHint: "developer.twitter.com → Keys and tokens",
+    credKey: "omnisocialsApiKey",
+    credLabel: "OmniSocials API key",
+    credHint: "omnisocials.com → connect X → Settings → API (replaces $100/mo X API)",
     copyLabel: "Copy thread",
   },
   {
     id: "manual-linkedin",
     icon: "💼",
     openUrl: "https://www.linkedin.com/post/new",
+    credKey: "omnisocialsApiKey",
+    credLabel: "OmniSocials API key",
+    credHint: "omnisocials.com → connect LinkedIn → Settings → API",
     copyLabel: "Copy post",
   },
   {
@@ -187,6 +194,24 @@ const ACTION_META: ActionMeta[] = [
     openUrl: "https://sell.g2.com/list-your-product",
     copyLabel: "Copy listing",
   },
+  {
+    id: "dir-alternativeto",
+    icon: "📁",
+    openUrl: "https://alternativeto.net/manage/add-product/",
+    copyLabel: "Copy listing",
+  },
+  {
+    id: "dir-crunchbase",
+    icon: "📁",
+    openUrl: "https://www.crunchbase.com/add-company",
+    copyLabel: "Copy listing",
+  },
+  {
+    id: "tech-rich-results",
+    icon: "🔍",
+    openUrl: "https://search.google.com/test/rich-results",
+    copyLabel: "Copy site URL",
+  },
 ];
 
 function metaFor(id: string): ActionMeta {
@@ -222,21 +247,40 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
   const [credInputs, setCredInputs] = useState<Record<string, string>>({});
   const [savingCred, setSavingCred] = useState<string | null>(null);
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
+  const [setupProviders, setSetupProviders] = useState<OrbitSetupProvider[]>([]);
+  const [aiConfigured, setAiConfigured] = useState(false);
+  const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
+  const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
+  const [showSetup, setShowSetup] = useState(true);
   const phaseTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Load last run silently on mount
+  // Load last run + setup state on mount
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
         const r = await authFetch("/api/orbit/marketing-autopilot");
         if (!r.ok || cancelled) return;
-        const json = (await r.json()) as { lastRun?: RunResult | null };
+        const json = (await r.json()) as {
+          lastRun?: RunResult | null;
+          setupProviders?: OrbitSetupProvider[];
+          ai?: { configured?: boolean };
+          status?: { configured?: Record<string, boolean> };
+        };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
+        if (json.setupProviders) setSetupProviders(json.setupProviders);
+        if (json.ai?.configured) setAiConfigured(true);
+        if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
         // non-blocking
       }
     })();
+    try {
+      const raw = localStorage.getItem("orbit-manual-done");
+      if (raw) setManualDoneIds(new Set(JSON.parse(raw) as string[]));
+    } catch {
+      /* ignore */
+    }
     return () => {
       cancelled = true;
       phaseTimers.current.forEach(clearTimeout);
@@ -281,6 +325,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
         body: JSON.stringify({ action: "save", credentials: { [key]: val } }),
       });
       setSavedCreds((prev) => [...prev, key]);
+      setConfiguredKeys((prev) => ({ ...prev, [key]: true }));
       setCredInputs((prev) => ({ ...prev, [key]: "" }));
     } catch {
       // ignore
@@ -295,10 +340,35 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
     setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2200);
   }
 
+  function copyAndOpen(text: string, id: string, url?: string) {
+    copyText(text, id);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function markTaskDone(taskId: string) {
+    setManualDoneIds((prev) => {
+      const next = new Set(prev);
+      next.add(taskId);
+      try {
+        localStorage.setItem("orbit-manual-done", JSON.stringify([...next]));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  function isProviderReady(p: OrbitSetupProvider): boolean {
+    if (p.envKey === "OPENAI_API_KEY" || p.envKey === "GEMINI_API_KEY") return aiConfigured;
+    if (p.credentialKey) return !!configuredKeys[p.credentialKey] || savedCreds.includes(p.credentialKey);
+    return false;
+  }
+
   // Partition tasks
   const doneTasks = result?.tasks.filter((t) => t.status === "done" || t.status === "posted") ?? [];
   const needsTasks = result?.tasks.filter(
-    (t) => t.status === "prepared" || t.status === "needs_credentials",
+    (t) =>
+      (t.status === "prepared" || t.status === "needs_credentials") && !manualDoneIds.has(t.id),
   ) ?? [];
 
   // Live counts from DB (before first run, shows real current state)
@@ -380,6 +450,77 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                 label={`Last run: ${new Date(result.finishedAt ?? "").toLocaleDateString()}`}
                 ok
               />
+            )}
+          </div>
+        )}
+
+        {/* Setup — pay once, auto forever */}
+        {!running && setupProviders.length > 0 && (
+          <div className="rounded-xl border border-violet-500/25 bg-violet-500/5 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowSetup((v) => !v)}
+              className="w-full flex items-center justify-between px-3 py-2.5 text-left"
+            >
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-violet-400" />
+                <span className="text-xs font-bold text-violet-300">Connect paid APIs (Apple Pay in Safari)</span>
+              </div>
+              {showSetup ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+            </button>
+            {showSetup && (
+              <div className="px-3 pb-3 space-y-2 border-t border-violet-500/15">
+                {setupProviders
+                  .sort((a, b) => a.priority - b.priority)
+                  .map((p) => {
+                    const ready = isProviderReady(p);
+                    return (
+                      <div
+                        key={p.id}
+                        className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 flex flex-col sm:flex-row sm:items-center gap-2"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            {ready ? (
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                            ) : (
+                              <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            )}
+                            <span className="text-[11px] font-bold text-foreground">{p.name}</span>
+                            <span className="text-[10px] text-muted-foreground">{p.priceLabel}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{p.purpose}</p>
+                        </div>
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <a
+                            href={p.payUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white whitespace-nowrap"
+                            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+                          >
+                            Pay & set up
+                          </a>
+                          {p.credentialKey && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const el = document.getElementById(`cred-${p.credentialKey}`);
+                                el?.scrollIntoView({ behavior: "smooth" });
+                              }}
+                              className="px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 text-violet-300"
+                            >
+                              Paste key
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                <p className="text-[9px] text-muted-foreground leading-relaxed pt-1">
+                  Open pay links in Safari on iPhone or Mac for Apple Pay. Keys stay server-side only — never exposed to visitors.
+                </p>
+              </div>
             )}
           </div>
         )}
@@ -501,7 +642,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                 <Zap className="w-4 h-4 text-amber-400" />
                 <span className="text-sm font-black text-amber-400">Finish in {needsTasks.length} taps</span>
                 <span className="text-[10px] text-muted-foreground">
-                  Copy is already written — open, paste, done.
+                  AI wrote everything — tap Copy & Open, paste, then Done.
                 </span>
               </div>
 
@@ -524,7 +665,9 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                       savingCred={savingCred === meta.credKey}
                       copiedId={copiedId}
                       onCopy={(text) => copyText(text, t.id)}
+                      onCopyAndOpen={(text) => copyAndOpen(text, t.id, meta.openUrl)}
                       onSaveCred={() => meta.credKey && saveCred(meta.credKey)}
+                      onMarkDone={() => markTaskDone(t.id)}
                     />
                   );
                 })}
@@ -594,7 +737,9 @@ function ActionCard({
   savingCred,
   copiedId,
   onCopy,
+  onCopyAndOpen,
   onSaveCred,
+  onMarkDone,
 }: {
   task: Task;
   meta: ActionMeta;
@@ -605,76 +750,98 @@ function ActionCard({
   savingCred: boolean;
   copiedId: string | null;
   onCopy: (text: string) => void;
+  onCopyAndOpen: (text: string) => void;
   onSaveCred: () => void;
+  onMarkDone: () => void;
 }) {
   const [showKey, setShowKey] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const isCopied = copiedId === task.id;
+  const pasteText = task.copyText || task.message;
+  const steps = stepsForTask(task.id);
 
   return (
-    <div className="rounded-xl border border-border/50 bg-card/40 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-3 py-2.5">
-        {/* Icon */}
-        <span className="text-base flex-shrink-0">{meta.icon}</span>
+    <div className="rounded-xl border border-border/50 bg-card/40 overflow-hidden" id={meta.credKey ? `cred-${meta.credKey}` : undefined}>
+      <div className="flex items-start gap-2.5 px-3 py-2.5">
+        <span className="text-base flex-shrink-0 mt-0.5">{meta.icon}</span>
 
-        {/* Label + message */}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-foreground truncate">{task.label}</p>
-          <p className="text-[10px] text-muted-foreground leading-tight truncate">{task.message}</p>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div>
+            <p className="text-xs font-bold text-foreground">{task.label}</p>
+            <p className="text-[10px] text-muted-foreground leading-snug">{task.message}</p>
+          </div>
+
+          <ol className="flex flex-wrap gap-x-2 gap-y-0.5">
+            {steps.map((s, i) => (
+              <li key={s} className="text-[9px] text-muted-foreground/90 list-none">
+                <span className="text-amber-500/80 font-bold">{i + 1}.</span> {s}
+                {i < steps.length - 1 && <span className="mx-1 opacity-30">→</span>}
+              </li>
+            ))}
+          </ol>
+
+          {pasteText && pasteText !== task.message && (
+            <button
+              type="button"
+              onClick={() => setShowPreview((v) => !v)}
+              className="text-[9px] text-violet-400 hover:text-violet-300"
+            >
+              {showPreview ? "Hide preview" : "Preview copy"}
+            </button>
+          )}
+          {showPreview && (
+            <pre className="text-[9px] text-muted-foreground bg-black/20 rounded-lg p-2 max-h-24 overflow-y-auto whitespace-pre-wrap border border-border/30">
+              {pasteText.slice(0, 600)}
+              {pasteText.length > 600 ? "…" : ""}
+            </pre>
+          )}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Copy content */}
-          <button
-            type="button"
-            onClick={() => onCopy(task.message)}
-            title={meta.copyLabel ?? "Copy"}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border border-border/60 bg-card/60 hover:bg-card transition-colors"
-          >
-            {isCopied ? (
-              <Check className="w-3 h-3 text-emerald-400" />
-            ) : (
-              <Copy className="w-3 h-3 text-muted-foreground" />
-            )}
-            <span className="hidden sm:inline text-muted-foreground">{isCopied ? "Copied" : "Copy"}</span>
-          </button>
-
-          {/* Open platform */}
-          {meta.openUrl && (
-            <a
-              href={meta.openUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border border-border/60 bg-card/60 hover:bg-card transition-colors text-muted-foreground"
+        <div className="flex flex-col gap-1.5 flex-shrink-0">
+          {meta.openUrl ? (
+            <button
+              type="button"
+              onClick={() => onCopyAndOpen(pasteText)}
+              className="flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-[10px] font-black text-white min-w-[88px]"
+              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
             >
-              <ExternalLink className="w-3 h-3" />
-              <span className="hidden sm:inline">Open</span>
-            </a>
+              {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              Copy & Open
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onCopy(pasteText)}
+              className="flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-[10px] font-bold border border-border/60 bg-card/60"
+            >
+              {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              Copy
+            </button>
           )}
 
-          {/* Add API key toggle */}
+          <button
+            type="button"
+            onClick={onMarkDone}
+            className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+          >
+            <CheckCircle2 className="w-3 h-3" /> Done
+          </button>
+
           {needsKey && !isCredSaved && meta.credKey && (
             <button
               type="button"
               onClick={() => setShowKey((v) => !v)}
-              title="Add API key to auto-post forever"
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 bg-violet-500/10 text-violet-400 hover:bg-violet-500/15 transition-colors"
+              className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 text-violet-400"
             >
-              <KeyRound className="w-3 h-3" />
-              <span className="hidden sm:inline">Add key</span>
+              <KeyRound className="w-3 h-3" /> Key
             </button>
           )}
-
-          {/* Saved indicator */}
           {isCredSaved && (
-            <span className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold text-emerald-400">
-              <CheckCircle2 className="w-3 h-3" /> Auto
-            </span>
+            <span className="text-center text-[9px] font-bold text-emerald-400">Auto ✓</span>
           )}
         </div>
       </div>
 
-      {/* Inline credential input */}
       {showKey && !isCredSaved && meta.credKey && meta.credLabel && (
         <div className="px-3 pb-3 pt-0 border-t border-border/40 bg-violet-500/5">
           <p className="text-[10px] text-muted-foreground mt-2 mb-1.5">
