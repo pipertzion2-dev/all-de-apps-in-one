@@ -165,6 +165,20 @@ export type AutopilotTaskResult = {
   at?: string;
 };
 
+export type MarketingIndexingSummary = {
+  indexNow: { ok: boolean; submitted: number; total: number; message: string };
+  googleSitemap: { attempted: boolean; ok: boolean; error?: string };
+  googleIndexing: {
+    attempted: boolean;
+    submitted: number;
+    batched: number;
+    totalUrls: number;
+    errorsSample: string[];
+  };
+  bingPing: { ok: boolean };
+  gscConnected: boolean;
+};
+
 export type MarketingAutopilotRunResult = {
   ok: boolean;
   startedAt: string;
@@ -179,6 +193,7 @@ export type MarketingAutopilotRunResult = {
     needsCredentials: number;
   };
   contentGenerated: boolean;
+  indexing?: MarketingIndexingSummary;
 };
 
 export type MarketingCredentialStatus = {

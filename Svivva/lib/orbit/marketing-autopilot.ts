@@ -21,6 +21,7 @@ import type {
   AutopilotTaskResult,
   AutopilotTaskStatus,
   MarketingAutopilotRunResult,
+  MarketingIndexingSummary,
   MarketingPlatformCredentials,
 } from "@/lib/orbit/marketing-autopilot-types";
 import { getSiteUrl } from "@/lib/site-url";
@@ -135,11 +136,48 @@ export async function runMarketingAutopilot(opts?: {
   const tasks: AutopilotTaskResult[] = [];
   const creds = await loadMarketingPlatformCredentials();
   const credStatus = await getMarketingCredentialStatus();
+  let indexingSummary: MarketingIndexingSummary | undefined;
 
   // ── Phase 1: On-site + indexing ───────────────────────────────────────────
   if (!opts?.skipOnSite) {
     const traffic = await runFullTrafficAutomation();
     const idx = traffic.indexing;
+    const gscConnected = credStatus.google.serviceAccount && credStatus.google.siteUrl;
+
+    indexingSummary = {
+      indexNow: {
+        ok: idx.indexNow.ok,
+        submitted: idx.indexNow.submittedCount,
+        total: idx.indexNow.totalUrls,
+        message: idx.indexNow.message,
+      },
+      googleSitemap: idx.googleSitemap,
+      googleIndexing: idx.googleIndexing,
+      bingPing: { ok: idx.bingPing.ok },
+      gscConnected: !!gscConnected,
+    };
+
+    const gscIndexingStatus: AutopilotTaskStatus = !gscConnected
+      ? "needs_credentials"
+      : idx.googleIndexing.submitted > 0
+        ? "done"
+        : idx.googleSitemap.ok
+          ? idx.googleIndexing.attempted && idx.googleIndexing.errorsSample.length > 0
+            ? "failed"
+            : "done"
+          : idx.googleSitemap.attempted
+            ? "failed"
+            : "needs_credentials";
+
+    const gscIndexingMessage = !gscConnected
+      ? "Connect Google at /dashboard/gsc-connect (service account + site URL)"
+      : idx.googleIndexing.submitted > 0
+        ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
+        : idx.googleSitemap.ok
+          ? idx.googleIndexing.errorsSample.length > 0
+            ? `Indexing API errors: ${idx.googleIndexing.errorsSample.slice(0, 2).join(" · ")}`
+            : "Sitemap registered — IndexNow + sitemap cover discovery"
+          : idx.googleSitemap.error || "GSC sitemap failed — verify Owner access in Search Console";
 
     tasks.push(
       task(
@@ -164,14 +202,12 @@ export async function runMarketingAutopilot(opts?: {
       ),
       task(
         "manual-gsc-indexing",
-        idx.googleIndexing.submitted > 0
-          ? "done"
-          : idx.googleSitemap.ok
-            ? "prepared"
-            : "needs_credentials",
-        idx.googleIndexing.submitted > 0
-          ? `Google Indexing API: ${idx.googleIndexing.submitted} URLs`
-          : "Sitemap submitted; URL inspection is optional for generic pages",
+        gscIndexingStatus,
+        gscIndexingMessage,
+        {
+          copyText: !gscConnected ? `${getSiteUrl()}/dashboard/gsc-connect` : getSiteUrl(),
+          url: !gscConnected ? "/dashboard/gsc-connect" : undefined,
+        },
       ),
       task(
         "auto-sitemap-pings",
@@ -578,6 +614,7 @@ export async function runMarketingAutopilot(opts?: {
     summary,
     stats,
     contentGenerated: true,
+    indexing: indexingSummary,
   };
 
   await saveLastAutopilotRun(result);

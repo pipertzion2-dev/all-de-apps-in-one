@@ -33,13 +33,18 @@ import {
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
+import {
+  isAutomatedSuccess,
+  partitionAutopilotTasks,
+} from "@/lib/orbit/marketing-task-buckets";
+import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 
 const TEAL = "#5BA8A0";
 const BURG = "#6B2C4A";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type TaskStatus = "posted" | "done" | "prepared" | "failed" | "needs_credentials" | "skipped";
+type TaskStatus = "posted" | "done" | "prepared" | "failed" | "needs_credentials" | "skipped" | "running";
 
 type Task = {
   id: string;
@@ -57,6 +62,7 @@ type RunResult = {
   finishedAt?: string;
   tasks: Task[];
   summary: string;
+  indexing?: MarketingIndexingSummary;
   stats: {
     posted: number;
     prepared: number;
@@ -212,6 +218,12 @@ const ACTION_META: ActionMeta[] = [
     openUrl: "https://search.google.com/test/rich-results",
     copyLabel: "Copy site URL",
   },
+  {
+    id: "manual-gsc-indexing",
+    icon: "🔍",
+    openUrl: "/dashboard/gsc-connect",
+    copyLabel: "Open GSC setup",
+  },
 ];
 
 function metaFor(id: string): ActionMeta {
@@ -221,10 +233,9 @@ function metaFor(id: string): ActionMeta {
 // ─── Running phases ───────────────────────────────────────────────────────────
 
 const PHASES = [
-  { label: "Building search infrastructure (Index 22)" },
-  { label: "Publishing SEO pages, blog, comparisons & AEO" },
-  { label: "Submitting all URLs to Google & Bing via IndexNow" },
-  { label: "Generating & auto-posting launch content" },
+  { label: "Building SEO pages, blog, comparisons & tool pages" },
+  { label: "Submitting URLs to Google (GSC + Indexing API), Bing & IndexNow" },
+  { label: "Generating AI launch copy & auto-posting where APIs allow" },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -294,7 +305,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
     setPhase(0);
     setShowDone(false);
     phaseTimers.current.forEach(clearTimeout);
-    phaseTimers.current = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 7_000));
+    phaseTimers.current = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 9_000));
     try {
       const r = await authFetch("/api/orbit/marketing-autopilot", {
         method: "POST",
@@ -364,23 +375,27 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
     return false;
   }
 
-  // Partition tasks
-  const doneTasks = result?.tasks.filter((t) => t.status === "done" || t.status === "posted") ?? [];
-  const needsTasks = result?.tasks.filter(
+  // Partition: automated (AI + APIs + indexing) vs manual paste-only
+  const partitioned = result ? partitionAutopilotTasks(result.tasks) : { automated: [], manual: [] };
+  const automatedDone = partitioned.automated.filter((t) => isAutomatedSuccess(t.status));
+  const automatedNeedsKey = partitioned.automated.filter(
+    (t) => t.status === "needs_credentials" && !manualDoneIds.has(t.id),
+  );
+  const automatedFailed = partitioned.automated.filter((t) => t.status === "failed");
+  const manualPending = partitioned.manual.filter(
     (t) =>
       (t.status === "prepared" || t.status === "needs_credentials") && !manualDoneIds.has(t.id),
-  ) ?? [];
+  );
 
-  // Live counts from DB (before first run, shows real current state)
+  const hasRun = !!result;
+  const autoCount = automatedDone.length;
+
   const livePages =
     (orbitStatus?.seoPages ?? 0) +
     (orbitStatus?.blogPosts ?? 0) +
     (orbitStatus?.aeoPages ?? 0) +
     (orbitStatus?.comparisons ?? 0) +
     (orbitStatus?.seedMarketing ?? 0);
-
-  const hasRun = !!result;
-  const autoCount = result ? result.stats.done + result.stats.posted : 0;
 
   return (
     <div
@@ -410,17 +425,17 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg font-black text-foreground leading-tight">
               {running
-                ? "Building your traffic…"
+                ? "Running AI marketing…"
                 : hasRun
-                  ? "Marketing funnel active"
-                  : "One-click marketing autopilot"}
+                  ? "AI marketing complete"
+                  : "AI marketing — one button"}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "Orbit is running the full engine. You can leave this page."
+                ? "Orbit is building pages, indexing Google/Bing, writing copy, and auto-posting. Leave this page open."
                 : hasRun
-                  ? "Orbit handles everything it can automatically. A few channels need a quick tap."
-                  : "Press once — Orbit builds all SEO content, submits to Google & Bing, and auto-posts where APIs allow."}
+                  ? "Everything automatable ran below. Manual paste tasks are in their own section."
+                  : "One press: AI builds all on-site SEO, submits to Google & Bing, generates copy, and posts via API."}
             </p>
           </div>
         </div>
@@ -544,7 +559,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
             </>
           ) : (
             <>
-              <Rocket className="w-5 h-5" /> Build all my traffic now
+              <Rocket className="w-5 h-5" /> Run all AI marketing
             </>
           )}
         </button>
@@ -587,39 +602,41 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
       {/* ── Results ── */}
       {result && !running && (
         <div className="border-t border-border/50 divide-y divide-border/40">
-          {/* ── Zone A: Done for you ── */}
-          {doneTasks.length > 0 && (
+          {/* Google & search indexing */}
+          {result.indexing && (
             <div className="px-4 sm:px-5 py-4">
+              <GoogleIndexingCard indexing={result.indexing} />
+            </div>
+          )}
+
+          {/* ── Automated (AI + APIs + indexing) ── */}
+          {(automatedDone.length > 0 || automatedNeedsKey.length > 0 || automatedFailed.length > 0) && (
+            <div className="px-4 sm:px-5 py-4 border-l-4 border-emerald-500/50">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm font-black text-emerald-400">Ran automatically</span>
+                <span className="text-[11px] rounded-full px-2 py-0.5 font-bold bg-emerald-500/15 text-emerald-400">
+                  {automatedDone.length}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <MiniStat value={autoCount} label="automated" color="#34d399" />
+                <MiniStat value={result.stats.posted} label="posted live" color={TEAL} />
+                <MiniStat value={manualPending.length} label="manual left" color="#fbbf24" />
+              </div>
+
               <button
                 type="button"
                 onClick={() => setShowDone((v) => !v)}
-                className="w-full flex items-center justify-between group"
+                className="text-[10px] text-muted-foreground hover:text-foreground mb-2"
               >
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" style={{ color: "#34d399" }} />
-                  <span className="text-sm font-black text-emerald-400">
-                    Done automatically
-                  </span>
-                  <span className="text-[11px] rounded-full px-2 py-0.5 font-bold bg-emerald-500/15 text-emerald-400">
-                    {doneTasks.length}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground group-hover:text-foreground">
-                  <span>{showDone ? "hide" : "see all"}</span>
-                  {showDone ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </div>
+                {showDone ? "Hide details" : `Show all ${automatedDone.length} automated steps`}
               </button>
 
-              {/* Always show quick summary metrics */}
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                <MiniStat value={autoCount} label="automated" color="#34d399" />
-                <MiniStat value={result.stats.posted} label="posted live" color={TEAL} />
-                <MiniStat value={needsTasks.length} label="need a tap" color="#fbbf24" />
-              </div>
-
               {showDone && (
-                <ul className="mt-3 space-y-1.5">
-                  {doneTasks.map((t) => (
+                <ul className="space-y-1.5 mb-3">
+                  {automatedDone.map((t) => (
                     <li key={t.id} className="flex items-start gap-2 text-[11px]">
                       <CheckCircle2 className="w-3 h-3 flex-shrink-0 mt-0.5 text-emerald-500" />
                       <span>
@@ -632,41 +649,83 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                   ))}
                 </ul>
               )}
+
+              {automatedFailed.length > 0 && (
+                <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-2.5 mb-3 space-y-1">
+                  <p className="text-[10px] font-bold text-red-400">Needs attention</p>
+                  {automatedFailed.map((t) => (
+                    <p key={t.id} className="text-[10px] text-muted-foreground">
+                      {t.label}: {t.message}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {automatedNeedsKey.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-violet-400">
+                    Add API keys once — these become automatic forever
+                  </p>
+                  {automatedNeedsKey.map((t) => {
+                    const meta = metaFor(t.id);
+                    const isCredSaved = meta.credKey ? savedCreds.includes(meta.credKey) : false;
+                    return (
+                      <ActionCard
+                        key={t.id}
+                        task={t}
+                        meta={meta}
+                        needsKey={!!meta.credKey}
+                        isCredSaved={isCredSaved}
+                        credValue={credInputs[meta.credKey ?? ""] ?? ""}
+                        onCredChange={(v) =>
+                          setCredInputs((prev) => ({ ...prev, [meta.credKey!]: v }))
+                        }
+                        savingCred={savingCred === meta.credKey}
+                        copiedId={copiedId}
+                        onCopy={(text) => copyText(text, t.id)}
+                        onCopyAndOpen={(text) => copyAndOpen(text, t.id, meta.openUrl)}
+                        onSaveCred={() => meta.credKey && saveCred(meta.credKey)}
+                        onMarkDone={() => markTaskDone(t.id)}
+                        compact
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── Zone B: Needs a tap ── */}
-          {needsTasks.length > 0 && (
-            <div className="px-4 sm:px-5 py-4 space-y-3">
-              <div className="flex items-center gap-2">
+          {/* ── Manual only (no API exists) ── */}
+          {manualPending.length > 0 && (
+            <div className="px-4 sm:px-5 py-4 border-l-4 border-amber-500/50 bg-amber-500/[0.03]">
+              <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-black text-amber-400">Finish in {needsTasks.length} taps</span>
-                <span className="text-[10px] text-muted-foreground">
-                  AI wrote everything — tap Copy & Open, paste, then Done.
+                <span className="text-sm font-black text-amber-400">Manual — paste on these sites</span>
+                <span className="text-[11px] rounded-full px-2 py-0.5 font-bold bg-amber-500/15 text-amber-400">
+                  {manualPending.length}
                 </span>
               </div>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                No public API for these platforms. AI wrote the copy — use Copy &amp; Open, paste, publish, Done.
+              </p>
 
               <div className="space-y-2">
-                {needsTasks.map((t) => {
+                {manualPending.map((t) => {
                   const meta = metaFor(t.id);
-                  const needsKey = t.status === "needs_credentials" && !!meta.credKey;
-                  const isCredSaved = meta.credKey ? savedCreds.includes(meta.credKey) : false;
                   return (
                     <ActionCard
                       key={t.id}
                       task={t}
                       meta={meta}
-                      needsKey={needsKey}
-                      isCredSaved={isCredSaved}
-                      credValue={credInputs[meta.credKey ?? ""] ?? ""}
-                      onCredChange={(v) =>
-                        setCredInputs((prev) => ({ ...prev, [meta.credKey!]: v }))
-                      }
-                      savingCred={savingCred === meta.credKey}
+                      needsKey={false}
+                      isCredSaved={false}
+                      credValue=""
+                      onCredChange={() => {}}
+                      savingCred={false}
                       copiedId={copiedId}
                       onCopy={(text) => copyText(text, t.id)}
                       onCopyAndOpen={(text) => copyAndOpen(text, t.id, meta.openUrl)}
-                      onSaveCred={() => meta.credKey && saveCred(meta.credKey)}
+                      onSaveCred={() => {}}
                       onMarkDone={() => markTaskDone(t.id)}
                     />
                   );
@@ -716,6 +775,66 @@ function StatusPill({
   );
 }
 
+function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }) {
+  const gscOk = indexing.gscConnected && indexing.googleSitemap.ok;
+  return (
+    <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-black text-sky-300">Google &amp; search indexing</p>
+        {!indexing.gscConnected && (
+          <a
+            href="/dashboard/gsc-connect"
+            className="text-[10px] font-bold text-sky-400 hover:text-sky-300 underline"
+          >
+            Connect GSC →
+          </a>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <IndexStat
+          label="IndexNow"
+          ok={indexing.indexNow.ok}
+          detail={`${indexing.indexNow.submitted}/${indexing.indexNow.total}`}
+        />
+        <IndexStat label="Bing ping" ok={indexing.bingPing.ok} detail={indexing.bingPing.ok ? "OK" : "—"} />
+        <IndexStat
+          label="GSC sitemap"
+          ok={gscOk}
+          detail={indexing.gscConnected ? (indexing.googleSitemap.ok ? "Submitted" : "Failed") : "Not connected"}
+        />
+        <IndexStat
+          label="Google Index API"
+          ok={indexing.googleIndexing.submitted > 0}
+          detail={
+            indexing.googleIndexing.attempted
+              ? `${indexing.googleIndexing.submitted} URLs`
+              : "Skipped"
+          }
+        />
+      </div>
+      {!indexing.gscConnected && (
+        <p className="text-[9px] text-muted-foreground leading-relaxed">
+          Add your Google service account at GSC Connect for full sitemap + Indexing API automation.
+        </p>
+      )}
+      {indexing.googleIndexing.errorsSample.length > 0 && (
+        <p className="text-[9px] text-amber-400/90">
+          Sample: {indexing.googleIndexing.errorsSample.slice(0, 2).join(" · ")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function IndexStat({ label, ok, detail }: { label: string; ok: boolean; detail: string }) {
+  return (
+    <div className="rounded-lg border border-border/40 bg-card/40 px-2 py-1.5 text-center">
+      <p className={`text-[9px] font-bold ${ok ? "text-emerald-400" : "text-muted-foreground"}`}>{label}</p>
+      <p className="text-[10px] font-black text-foreground tabular-nums">{detail}</p>
+    </div>
+  );
+}
+
 function MiniStat({ value, label, color }: { value: number; label: string; color: string }) {
   return (
     <div className="rounded-lg border border-border/50 bg-card/50 py-2 text-center">
@@ -740,6 +859,7 @@ function ActionCard({
   onCopyAndOpen,
   onSaveCred,
   onMarkDone,
+  compact,
 }: {
   task: Task;
   meta: ActionMeta;
@@ -753,6 +873,7 @@ function ActionCard({
   onCopyAndOpen: (text: string) => void;
   onSaveCred: () => void;
   onMarkDone: () => void;
+  compact?: boolean;
 }) {
   const [showKey, setShowKey] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -772,12 +893,13 @@ function ActionCard({
           </div>
 
           <ol className="flex flex-wrap gap-x-2 gap-y-0.5">
-            {steps.map((s, i) => (
-              <li key={s} className="text-[9px] text-muted-foreground/90 list-none">
-                <span className="text-amber-500/80 font-bold">{i + 1}.</span> {s}
-                {i < steps.length - 1 && <span className="mx-1 opacity-30">→</span>}
-              </li>
-            ))}
+            {!compact &&
+              steps.map((s, i) => (
+                <li key={s} className="text-[9px] text-muted-foreground/90 list-none">
+                  <span className="text-amber-500/80 font-bold">{i + 1}.</span> {s}
+                  {i < steps.length - 1 && <span className="mx-1 opacity-30">→</span>}
+                </li>
+              ))}
           </ol>
 
           {pasteText && pasteText !== task.message && (
@@ -819,13 +941,15 @@ function ActionCard({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={onMarkDone}
-            className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-          >
-            <CheckCircle2 className="w-3 h-3" /> Done
-          </button>
+          {!compact && (
+            <button
+              type="button"
+              onClick={onMarkDone}
+              className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+            >
+              <CheckCircle2 className="w-3 h-3" /> Done
+            </button>
+          )}
 
           {needsKey && !isCredSaved && meta.credKey && (
             <button

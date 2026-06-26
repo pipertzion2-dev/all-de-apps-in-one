@@ -168,8 +168,8 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
   },
   {
     id: "manual-gsc-indexing",
-    label: "GSC URL indexing",
-    group: "Manual Publishing",
+    label: "Google URL indexing",
+    group: "Technical Foundation",
     automatable: "onsite",
   },
   {

@@ -54,29 +54,39 @@ export async function submitUrlsToGoogleIndexingApi(
   const sa: ServiceAccount = JSON.parse(serviceAccountJson);
   const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/indexing");
 
-  const results = await Promise.allSettled(
-    urls.map((url) =>
-      fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ url, type: "URL_UPDATED" }),
-        signal: AbortSignal.timeout(8000),
-      }),
-    ),
-  );
-
   const errors: string[] = [];
   let submitted = 0;
-  for (const r of results) {
-    if (r.status === "fulfilled" && r.value.ok) {
+  const concurrency = 6;
+  const delayMs = 150;
+
+  async function publishOne(url: string): Promise<void> {
+    const res = await fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ url, type: "URL_UPDATED" }),
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (res.ok) {
       submitted++;
-    } else if (r.status === "rejected") {
-      errors.push(r.reason?.message || "Network error");
-    } else if (r.status === "fulfilled") {
-      const body = await r.value.json().catch(() => ({}));
-      errors.push(body.error?.message || `HTTP ${r.value.status}`);
+      return;
+    }
+    const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    errors.push(body.error?.message || `HTTP ${res.status} for ${url}`);
+  }
+
+  for (let i = 0; i < urls.length; i += concurrency) {
+    const chunk = urls.slice(i, i + concurrency);
+    const results = await Promise.allSettled(chunk.map((url) => publishOne(url)));
+    for (const r of results) {
+      if (r.status === "rejected") {
+        errors.push(r.reason?.message || "Network error");
+      }
+    }
+    if (i + concurrency < urls.length) {
+      await new Promise((r) => setTimeout(r, delayMs));
     }
   }
+
   return { submitted, errors };
 }
 
