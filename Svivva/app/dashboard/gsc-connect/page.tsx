@@ -20,6 +20,14 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
+  ssr: false,
+  loading: () => (
+    <div className="mx-auto rounded-full bg-muted/30 animate-pulse" style={{ width: 220, height: 220 }} />
+  ),
+});
 
 type StepStatus = "ok" | "warn" | "fail" | "skip";
 
@@ -130,6 +138,24 @@ export default function GscConnectPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      {/* Hero: one-press camo orb to connect */}
+      <div className="flex flex-col items-center gap-3 pt-2">
+        <GscConnectOrb
+          connected={connected}
+          available={oauthAvailable}
+          oauthUrl="/api/gsc/oauth/start?return=/dashboard/gsc-connect"
+        />
+        <p className="text-xs text-muted-foreground text-center max-w-xs">
+          {connected
+            ? data?.oauthEmail
+              ? `Signed in as ${data.oauthEmail}`
+              : "Google account linked."
+            : oauthAvailable
+              ? "Press the orb to connect Google Search Console — AI does the rest."
+              : "Connecting will be available shortly."}
+        </p>
+      </div>
+
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Google Search indexing</h1>
         <p className="text-sm text-muted-foreground mt-1">
