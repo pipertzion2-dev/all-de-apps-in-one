@@ -38,6 +38,7 @@ import {
   Zap,
   CreditCard,
   Circle,
+  Activity,
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
@@ -277,19 +278,40 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
     email: null,
   });
 
+  type HealthSnapshot = {
+    totalUrls: number;
+    submitted: number;
+    confirmed: number;
+    stale: number;
+    lastRunAt: string | null;
+    lastScore: number | null;
+  };
+  const [health, setHealth] = useState<HealthSnapshot | null>(null);
+  const [healthChecking, setHealthChecking] = useState(false);
+
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const r = await authFetch("/api/gsc/diagnose");
-        if (!r.ok) return;
-        const d = await r.json();
-        if (!alive) return;
-        setGsc({
-          connected: !!d.oauthConnected,
-          available: d.oauthAvailable !== false,
-          email: d.oauthEmail ?? null,
-        });
+        if (r.ok) {
+          const d = await r.json();
+          if (alive)
+            setGsc({
+              connected: !!d.oauthConnected,
+              available: d.oauthAvailable !== false,
+              email: d.oauthEmail ?? null,
+            });
+        }
+      } catch {
+        /* best-effort */
+      }
+      try {
+        const hr = await authFetch("/api/orbit/index-health");
+        if (hr.ok) {
+          const hd = await hr.json();
+          if (alive && hd.snapshot) setHealth(hd.snapshot as HealthSnapshot);
+        }
       } catch {
         /* best-effort */
       }
@@ -298,6 +320,41 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
       alive = false;
     };
   }, []);
+
+  const runHealthCheck = async () => {
+    setHealthChecking(true);
+    try {
+      const r = await authFetch("/api/orbit/index-health", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resubmit: true }),
+      });
+      if (r.ok) {
+        const d = await r.json();
+        const h = d.health;
+        if (h) {
+          setHealth((prev) => ({
+            totalUrls: h.totalUrls ?? h.sampled ?? prev?.totalUrls ?? 0,
+            submitted: prev?.submitted ?? 0,
+            confirmed: h.indexable ?? prev?.confirmed ?? 0,
+            stale: h.staleUrls ?? prev?.stale ?? 0,
+            lastRunAt: new Date().toISOString(),
+            lastScore: typeof h.score === "number" ? h.score : (prev?.lastScore ?? null),
+          }));
+        }
+        // refresh the fast snapshot for accurate coverage numbers
+        const hr = await authFetch("/api/orbit/index-health");
+        if (hr.ok) {
+          const hd = await hr.json();
+          if (hd.snapshot) setHealth(hd.snapshot as HealthSnapshot);
+        }
+      }
+    } catch {
+      /* best-effort */
+    } finally {
+      setHealthChecking(false);
+    }
+  };
   const phaseTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Load last run + setup state on mount
@@ -493,6 +550,16 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                 : "Google connect will be available shortly."}
           </p>
         </div>
+
+        {/* Live marketing health — always visible, reflects work already done */}
+        <MarketingHealthPanel
+          health={health}
+          livePages={livePages}
+          indexNowDone={!!orbitStatus?.indexNowSubmitted || (health?.submitted ?? 0) > 0}
+          gscConnected={gsc.connected}
+          checking={healthChecking}
+          onCheck={runHealthCheck}
+        />
 
         {/* Live status bar — visible before first run */}
         {!running && (
@@ -802,6 +869,136 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+function MarketingHealthPanel({
+  health,
+  livePages,
+  indexNowDone,
+  gscConnected,
+  checking,
+  onCheck,
+}: {
+  health: {
+    totalUrls: number;
+    submitted: number;
+    confirmed: number;
+    stale: number;
+    lastRunAt: string | null;
+    lastScore: number | null;
+  } | null;
+  livePages: number;
+  indexNowDone: boolean;
+  gscConnected: boolean;
+  checking: boolean;
+  onCheck: () => void;
+}) {
+  const total = health?.totalUrls ?? 0;
+  const submitted = health?.submitted ?? 0;
+  const coverage = total > 0 ? Math.round((submitted / total) * 100) : 0;
+  const score = health?.lastScore;
+  const scoreColor =
+    score == null
+      ? "#6b7280"
+      : score >= 80
+        ? "#34d399"
+        : score >= 50
+          ? "#fbbf24"
+          : "#fb7185";
+  const covColor = coverage >= 80 ? "#34d399" : coverage >= 50 ? "#fbbf24" : "#fb7185";
+
+  return (
+    <div
+      className="rounded-xl border p-3 space-y-2.5"
+      style={{ borderColor: `${TEAL}33`, background: `${TEAL}08` }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-black text-foreground flex items-center gap-1.5">
+          <Activity className="w-3.5 h-3.5" style={{ color: TEAL }} />
+          Marketing health
+        </p>
+        <button
+          type="button"
+          onClick={onCheck}
+          disabled={checking}
+          className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border disabled:opacity-60"
+          style={{ borderColor: `${TEAL}55`, color: TEAL }}
+        >
+          {checking ? (
+            <>
+              <Loader2 className="w-3 h-3 animate-spin" /> Checking…
+            </>
+          ) : (
+            <>
+              <RefreshCw className="w-3 h-3" /> Run health check
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* big metrics */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-lg bg-card/50 border border-border/40 px-2 py-2 text-center">
+          <p className="text-lg font-black tabular-nums" style={{ color: scoreColor }}>
+            {score == null ? "—" : `${score}`}
+          </p>
+          <p className="text-[9px] text-muted-foreground font-semibold">Index score</p>
+        </div>
+        <div className="rounded-lg bg-card/50 border border-border/40 px-2 py-2 text-center">
+          <p className="text-lg font-black tabular-nums" style={{ color: covColor }}>
+            {coverage}%
+          </p>
+          <p className="text-[9px] text-muted-foreground font-semibold">Coverage</p>
+        </div>
+        <div className="rounded-lg bg-card/50 border border-border/40 px-2 py-2 text-center">
+          <p className="text-lg font-black tabular-nums text-foreground">{total || livePages}</p>
+          <p className="text-[9px] text-muted-foreground font-semibold">URLs live</p>
+        </div>
+      </div>
+
+      {/* sub-line */}
+      <p className="text-[10px] text-muted-foreground leading-relaxed">
+        {total > 0 ? (
+          <>
+            <span className="text-foreground font-semibold">{submitted}</span> of {total} submitted
+            {health && health.confirmed > 0 ? (
+              <>
+                {" · "}
+                <span className="text-emerald-400 font-semibold">{health.confirmed}</span> confirmed
+              </>
+            ) : null}
+            {health && health.stale > 0 ? (
+              <>
+                {" · "}
+                <span className="text-amber-400 font-semibold">{health.stale}</span> stale (auto
+                re-submitting)
+              </>
+            ) : null}
+          </>
+        ) : (
+          "Run a health check to crawl your live pages and score indexability."
+        )}
+      </p>
+
+      {/* channel chips */}
+      <div className="flex flex-wrap gap-1.5">
+        <StatusPill icon="📄" label={`${livePages || total} pages live`} ok={(livePages || total) > 0} />
+        <StatusPill icon="🔍" label={indexNowDone ? "IndexNow ✓" : "IndexNow pending"} ok={indexNowDone} />
+        <StatusPill icon="🤖" label="llms.txt ✓ (AI search)" ok teal />
+        <StatusPill
+          icon="🟢"
+          label={gscConnected ? "Google ✓" : "Google: connect ↑"}
+          ok={gscConnected}
+        />
+      </div>
+
+      {health?.lastRunAt && (
+        <p className="text-[9px] text-muted-foreground/70">
+          Last health check: {new Date(health.lastRunAt).toLocaleString()}
+        </p>
+      )}
+    </div>
+  );
+}
 
 function StatusPill({
   icon,
