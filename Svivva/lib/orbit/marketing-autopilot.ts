@@ -25,6 +25,7 @@ import type {
   MarketingPlatformCredentials,
 } from "@/lib/orbit/marketing-autopilot-types";
 import { getSiteUrl } from "@/lib/site-url";
+import { runIndexHealth } from "@/lib/seo/index-health";
 function now(): string {
   return new Date().toISOString();
 }
@@ -146,6 +147,27 @@ export async function runMarketingAutopilot(opts?: {
       (credStatus.google.serviceAccount || credStatus.google.siteUrl) &&
       credStatus.google.siteUrl;
 
+    // Verify the URLs we just pushed are actually live + indexable, and persist
+    // per-URL progress so a week-long crawl is tracked across runs.
+    let health: MarketingIndexingSummary["health"];
+    try {
+      const hr = await runIndexHealth({ sampleLimit: 50 });
+      health = {
+        score: hr.score,
+        sampled: hr.sampled,
+        indexable: hr.indexable,
+        blocked: hr.blocked,
+        coveragePct: hr.coverage.pct,
+        staleUrls: hr.staleUrls,
+        summary: hr.summary,
+        problems: hr.problems
+          .slice(0, 15)
+          .map((p) => ({ url: p.url, httpStatus: p.httpStatus, notes: p.notes })),
+      };
+    } catch {
+      /* health is best-effort */
+    }
+
     indexingSummary = {
       indexNow: {
         ok: idx.indexNow.ok,
@@ -157,6 +179,7 @@ export async function runMarketingAutopilot(opts?: {
       googleIndexing: idx.googleIndexing,
       bingPing: { ok: idx.bingPing.ok },
       gscConnected: !!gscConnected,
+      health,
     };
 
     const gscIndexingStatus: AutopilotTaskStatus = !gscConnected
@@ -215,6 +238,13 @@ export async function runMarketingAutopilot(opts?: {
         "auto-sitemap-pings",
         idx.indexNow.ok ? "done" : "failed",
         "IndexNow + Bing ping executed",
+      ),
+      task(
+        "tech-index-health",
+        health ? (health.score >= 80 ? "done" : health.score >= 50 ? "prepared" : "failed") : "skipped",
+        health
+          ? health.summary
+          : "Index health check skipped (no URLs or check failed)",
       ),
     );
 

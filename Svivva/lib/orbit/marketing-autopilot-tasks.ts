@@ -173,6 +173,12 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     automatable: "onsite",
   },
   {
+    id: "tech-index-health",
+    label: "Index health verified",
+    group: "Technical Foundation",
+    automatable: "onsite",
+  },
+  {
     id: "dir-futurepedia",
     label: "Futurepedia listing",
     group: "Directories",

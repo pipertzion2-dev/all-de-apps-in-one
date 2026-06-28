@@ -22,7 +22,12 @@
     "secrets:for-deploy": "node scripts/gen-deploy-secrets.mjs",
     "stripe:seed": "tsx scripts/seed-products.ts",
     "seo:audit": "tsx scripts/seo-audit.ts",
-    "seo:unpublish-legacy": "tsx scripts/unpublish-legacy-seo-slugs.ts"
+    "seo:unpublish-legacy": "tsx scripts/unpublish-legacy-seo-slugs.ts",
+    "orbit": "node scripts/orbit.mjs",
+    "orbit:status": "node scripts/orbit.mjs status",
+    "orbit:health": "node scripts/orbit.mjs health --resubmit",
+    "orbit:run": "node scripts/orbit.mjs run",
+    "orbit:research": "node scripts/orbit.mjs research"
   },
   "engines": {
     "node": "22.x"

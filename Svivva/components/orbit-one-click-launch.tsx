@@ -821,6 +821,38 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           }
         />
       </div>
+      {indexing.health && (
+        <div className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black text-foreground">
+              Index health{" "}
+              <span
+                className={
+                  indexing.health.score >= 80
+                    ? "text-emerald-400"
+                    : indexing.health.score >= 50
+                      ? "text-amber-400"
+                      : "text-rose-400"
+                }
+              >
+                {indexing.health.score}/100
+              </span>
+            </p>
+            <p className="text-[9px] text-muted-foreground tabular-nums">
+              {indexing.health.coveragePct}% coverage · {indexing.health.staleUrls} stale
+            </p>
+          </div>
+          <p className="text-[9px] text-muted-foreground leading-relaxed">
+            {indexing.health.indexable}/{indexing.health.sampled} sampled URLs live &amp; indexable.
+            Progress is tracked across runs — slow week-long crawls keep getting re-submitted.
+          </p>
+          {indexing.health.problems.length > 0 && (
+            <p className="text-[9px] text-amber-400/90 leading-relaxed">
+              Needs attention: {indexing.health.problems.slice(0, 2).map((p) => `${p.url} (${p.notes})`).join(" · ")}
+            </p>
+          )}
+        </div>
+      )}
       {!indexing.gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
           Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. AI picks your Search

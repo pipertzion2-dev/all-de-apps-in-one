@@ -177,6 +177,17 @@ export type MarketingIndexingSummary = {
   };
   bingPing: { ok: boolean };
   gscConnected: boolean;
+  /** Live verification that submitted URLs are actually reachable + indexable. */
+  health?: {
+    score: number;
+    sampled: number;
+    indexable: number;
+    blocked: number;
+    coveragePct: number;
+    staleUrls: number;
+    summary: string;
+    problems: { url: string; httpStatus: number; notes: string }[];
+  };
 };
 
 export type MarketingAutopilotRunResult = {

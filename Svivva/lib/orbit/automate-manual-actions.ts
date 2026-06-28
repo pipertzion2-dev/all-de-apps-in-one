@@ -7,6 +7,7 @@ import { getGoogleOAuthAccessTokenForUser, ensureGscOAuthColumns } from "@/lib/g
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getSitemapUrl } from "@/lib/site-url";
+import { getIndexingBatch, recordSubmission } from "@/lib/seo/index-health";
 
 /** Google Indexing API daily quota is limited; stay aligned with /api/marketing/google-search. */
 const GOOGLE_INDEXING_BATCH = 200;
@@ -155,8 +156,13 @@ export async function runAutomatableManualActions(opts?: {
     let totalGiAttempted = 0;
     const allGiErrors: string[] = [];
 
+    // Rotate through the site by least-recently-submitted so a slow, week-long
+    // crawl reaches every URL across days instead of re-sending the first 200.
+    let rotating = await getIndexingBatch(batchCount * GOOGLE_INDEXING_BATCH);
+    if (rotating.length === 0) rotating = urls;
+
     for (let b = 0; b < batchCount; b++) {
-      const batch = urls.slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH);
+      const batch = rotating.slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH);
       if (!batch.length) break;
       const gi =
         gsc.mode === "oauth" && gsc.accessToken
@@ -165,6 +171,7 @@ export async function runAutomatableManualActions(opts?: {
       totalGiSubmitted += gi.submitted;
       totalGiAttempted += batch.length;
       allGiErrors.push(...gi.errors);
+      await recordSubmission(batch);
       if (batch.length < GOOGLE_INDEXING_BATCH) break;
       if (b < batchCount - 1) {
         await new Promise((r) => setTimeout(r, 400));
@@ -184,7 +191,7 @@ export async function runAutomatableManualActions(opts?: {
     }
 
     summaryLines.push(
-      `✓ Google Indexing API: ${totalGiSubmitted}/${totalGiAttempted} URL notifications (${urls.length} on site; up to ${batchCount}×${GOOGLE_INDEXING_BATCH} per run)`,
+      `✓ Google Indexing API: ${totalGiSubmitted}/${totalGiAttempted} URL notifications (${urls.length} on site; rotating least-recently-submitted, up to ${batchCount}×${GOOGLE_INDEXING_BATCH} per run)`,
     );
     if (allGiErrors.length) {
       summaryLines.push(`  · Sample errors: ${allGiErrors.slice(0, 3).join(" | ")}`);
