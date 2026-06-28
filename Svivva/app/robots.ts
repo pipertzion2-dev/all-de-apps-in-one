@@ -56,7 +56,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: [getSitemapUrl(), getSecuritySitemapUrl()],
+    sitemap: [getSitemapUrl(), getSecuritySitemapUrl(), `${baseUrl}/llms.txt`],
     host: baseUrl,
   };
 }
