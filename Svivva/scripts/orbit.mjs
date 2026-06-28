@@ -6,7 +6,7 @@
  * Auth: calls production API routes with the x-internal-secret header, so it
  * needs ORBIT_INTERNAL_SECRET (the same value set in Vercel) and the site URL.
  *
- * Config (env or .env.orbit in repo root):
+ * Config (env or .env.orbit in repo root — see scripts/orbit.env.example):
  *   SVIVVA_URL=https://svivva.com            (default https://svivva.com)
  *   ORBIT_INTERNAL_SECRET=...                (required — matches Vercel)
  *
@@ -54,7 +54,7 @@ function die(msg) {
 if (!SECRET) {
   die(
     "ORBIT_INTERNAL_SECRET is not set.\n" +
-      "  Add it to Svivva/.env.orbit (or export it) — must match the value in Vercel.\n" +
+      "  cp scripts/orbit.env.example .env.orbit  then fill it in (must match Vercel).\n" +
       "  Get it: Vercel → Project → Settings → Environment Variables → ORBIT_INTERNAL_SECRET",
   );
 }
