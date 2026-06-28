@@ -152,6 +152,34 @@ async function cmdRun() {
   console.log(`\nDone. posted=${st.posted} prepared=${st.prepared} failed=${st.failed} needsCreds=${st.needsCredentials}`);
 }
 
+async function cmdMiniApps() {
+  header(`Mini-app / tool funnel audit — ${SITE}`);
+  console.log("Checking your tool pages are connected, in the sitemap, live & funneling…\n");
+  const r = await api("/api/orbit/mini-apps-audit", { method: "POST", body: { submit: true } });
+  console.log(`Mini-apps found:   ${r.totalMiniApps}`);
+  console.log(`In sitemap:        ${r.inSitemap}/${r.totalMiniApps}`);
+  console.log(`Sampled live:      ${r.live}/${r.sampled}`);
+  console.log(`Sampled indexable: ${r.indexable}/${r.sampled}`);
+  console.log(`Link to product:   ${r.withFunnelLink}/${r.sampled} (funnel)`);
+  console.log(`IndexNow:          ${r.indexNow?.ok ? "ok" : "skipped"} (${r.indexNow?.submitted || 0}/${r.indexNow?.total || 0} submitted)`);
+  console.log(`\n${r.summary || ""}`);
+  if (r.problems?.length) {
+    console.log(`\n⚠ Pages needing attention (${r.problems.length}):`);
+    for (const p of r.problems.slice(0, 20)) {
+      const flags = [
+        p.inSitemap ? "" : "not-in-sitemap",
+        p.indexable ? "" : `not-indexable(${p.notes})`,
+        p.funnelLink ? "" : "no-funnel-link",
+      ]
+        .filter(Boolean)
+        .join(", ");
+      console.log(`  · ${p.url} — ${flags}`);
+    }
+  } else {
+    console.log("\n✓ All mini-apps are connected, indexable, and funneling to the main product.");
+  }
+}
+
 async function cmdResearch() {
   const count = Number(arg("--count", "12"));
   const focus = arg("--focus");
@@ -193,6 +221,7 @@ const commands = {
   status: cmdStatus,
   health: cmdHealth,
   run: cmdRun,
+  "mini-apps": cmdMiniApps,
   research: cmdResearch,
   ingest: cmdIngest,
 };
@@ -203,6 +232,7 @@ if (!cmd || !commands[cmd]) {
       `  node scripts/orbit.mjs status\n` +
       `  node scripts/orbit.mjs health [--resubmit]\n` +
       `  node scripts/orbit.mjs run\n` +
+      `  node scripts/orbit.mjs mini-apps\n` +
       `  node scripts/orbit.mjs research [--count N] [--focus "topic"]\n` +
       `  node scripts/orbit.mjs ingest <file.json>\n`,
   );
