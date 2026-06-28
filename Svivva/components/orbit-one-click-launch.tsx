@@ -13,7 +13,15 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import nextDynamic from "next/dynamic";
 import { authFetch } from "@/hooks/use-auth";
+
+const GscConnectOrb = nextDynamic(() => import("@/components/gsc-connect-orb"), {
+  ssr: false,
+  loading: () => (
+    <div className="mx-auto rounded-full bg-muted/30 animate-pulse" style={{ width: 150, height: 150 }} />
+  ),
+});
 import {
   Rocket,
   Loader2,
@@ -263,6 +271,33 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [showSetup, setShowSetup] = useState(true);
+  const [gsc, setGsc] = useState<{ connected: boolean; available: boolean; email: string | null }>({
+    connected: false,
+    available: true,
+    email: null,
+  });
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await authFetch("/api/gsc/diagnose");
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!alive) return;
+        setGsc({
+          connected: !!d.oauthConnected,
+          available: d.oauthAvailable !== false,
+          email: d.oauthEmail ?? null,
+        });
+      } catch {
+        /* best-effort */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
   const phaseTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Load last run + setup state on mount
@@ -438,6 +473,25 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
                   : "One press: AI builds all on-site SEO, submits to Google & Bing, generates copy, and posts via API."}
             </p>
           </div>
+        </div>
+
+        {/* One-press Google Search Console connect — camo orb */}
+        <div className="flex flex-col items-center gap-2 py-1">
+          <GscConnectOrb
+            connected={gsc.connected}
+            available={gsc.available}
+            oauthUrl="/api/gsc/oauth/start?return=/dashboard/launchpad"
+            size={170}
+          />
+          <p className="text-[11px] text-center text-muted-foreground max-w-xs">
+            {gsc.connected
+              ? gsc.email
+                ? `Google connected · ${gsc.email}`
+                : "Google Search Console connected."
+              : gsc.available
+                ? "Press the camo orb to connect Google Search Console — AI handles the rest."
+                : "Google connect will be available shortly."}
+          </p>
         </div>
 
         {/* Live status bar — visible before first run */}

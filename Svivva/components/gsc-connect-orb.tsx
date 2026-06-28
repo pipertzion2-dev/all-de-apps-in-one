@@ -9,6 +9,7 @@ type Props = {
   available: boolean;
   oauthUrl: string;
   label?: string;
+  size?: number;
 };
 
 /** Procedural woodland-camo texture drawn to a 2D canvas, mapped onto the sphere. */
@@ -98,7 +99,13 @@ function CamoSphere({ connected, interactive }: { connected: boolean; interactiv
   );
 }
 
-export default function GscConnectOrb({ connected, available, oauthUrl, label }: Props) {
+export default function GscConnectOrb({
+  connected,
+  available,
+  oauthUrl,
+  label,
+  size = 220,
+}: Props) {
   const interactive = !connected && available;
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
@@ -113,7 +120,7 @@ export default function GscConnectOrb({ connected, available, oauthUrl, label }:
       : "Setup required";
 
   return (
-    <div className="relative mx-auto" style={{ width: 220, height: 220 }}>
+    <div className="relative mx-auto" style={{ width: size, height: size }}>
       {/* glow ring */}
       <div
         className="absolute inset-0 rounded-full blur-2xl opacity-50"
