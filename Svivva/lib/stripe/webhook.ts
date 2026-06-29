@@ -42,6 +42,18 @@ export class WebhookHandlers {
         }
         break;
       }
+      case "customer.subscription.updated":
+      case "customer.subscription.created": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = idOf(subscription.customer);
+        if (customerId && (subscription.status === "active" || subscription.status === "trialing")) {
+          await db
+            .update(users)
+            .set({ stripeSubscriptionId: subscription.id })
+            .where(eq(users.stripeCustomerId, customerId));
+        }
+        break;
+      }
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = idOf(subscription.customer);

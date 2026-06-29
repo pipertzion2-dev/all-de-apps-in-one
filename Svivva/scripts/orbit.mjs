@@ -216,11 +216,24 @@ async function cmdIngest() {
   }
 }
 
+async function cmdComplete() {
+  header(`Fill marketing gaps — ${SITE}`);
+  const r = await api("/api/orbit/auto-complete", { method: "POST", body: {} });
+  console.log(r.summary || "Done.");
+  if (r.details?.counts) {
+    const c = r.details.counts;
+    console.log(
+      `\nPages: SEO ${c.seoPages ?? 0} · blog ${c.blogPosts ?? 0} · comparisons ${c.comparisons ?? 0} · tools ${c.seedMarketing ?? 0}`,
+    );
+  }
+}
+
 const cmd = process.argv[2];
 const commands = {
   status: cmdStatus,
   health: cmdHealth,
   run: cmdRun,
+  complete: cmdComplete,
   "mini-apps": cmdMiniApps,
   research: cmdResearch,
   ingest: cmdIngest,
@@ -232,6 +245,7 @@ if (!cmd || !commands[cmd]) {
       `  node scripts/orbit.mjs status\n` +
       `  node scripts/orbit.mjs health [--resubmit]\n` +
       `  node scripts/orbit.mjs run\n` +
+      `  node scripts/orbit.mjs complete\n` +
       `  node scripts/orbit.mjs mini-apps\n` +
       `  node scripts/orbit.mjs research [--count N] [--focus "topic"]\n` +
       `  node scripts/orbit.mjs ingest <file.json>\n`,

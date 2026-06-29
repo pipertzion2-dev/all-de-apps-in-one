@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Check, CreditCard, Sparkles, Loader2 } from "lucide-react";
 import { trackUpgrade } from "@/lib/analytics";
+import { inferBillingTier } from "@/lib/stripe/catalog";
 
 interface Price {
   id: string;
@@ -117,7 +118,7 @@ function BillingPageContent() {
       const updatedPlans = [...defaultPlans];
 
       for (const product of pricesData.products as Product[]) {
-        const tier = product.metadata?.tier;
+        const tier = inferBillingTier(product.name, product.metadata);
         if (tier && product.prices.length > 0) {
           const monthlyPrice =
             product.prices.find((p: Price) => p.recurring?.interval === "month") ||

@@ -3,6 +3,19 @@ import { getUncachableStripeClient } from "./client";
 
 export type BillingTier = "pro" | "enterprise";
 
+/** Infer billing tier from metadata or product name (legacy products often lack metadata.tier). */
+export function inferBillingTier(
+  name: string,
+  metadata?: Stripe.Metadata | null,
+): BillingTier | null {
+  const meta = metadata?.tier;
+  if (meta === "pro" || meta === "enterprise") return meta;
+  const n = name.toLowerCase();
+  if (n.includes("enterprise")) return "enterprise";
+  if (/\b(pro|team)\b/.test(n) || n.includes(" pro") || n.endsWith(" pro")) return "pro";
+  return null;
+}
+
 /** Validate a price for hosted checkout: active price + product with tier metadata. */
 export async function validateCheckoutPrice(
   stripe: Stripe,
@@ -22,8 +35,8 @@ export async function validateCheckoutPrice(
   }
   if (!product.active) return { ok: false, reason: "Product inactive" };
 
-  const tier = product.metadata?.tier;
-  if (tier !== "pro" && tier !== "enterprise") {
+  const tier = inferBillingTier(product.name, product.metadata);
+  if (!tier) {
     return { ok: false, reason: "Product missing metadata.tier (pro | enterprise)" };
   }
   return { ok: true, tier };
@@ -53,11 +66,12 @@ export async function listProductsFromStripeApi(stripe: Stripe) {
       active: true,
       limit: 20,
     });
+    const tier = inferBillingTier(p.name, p.metadata);
     out.push({
       id: p.id,
       name: p.name,
       description: p.description,
-      metadata: p.metadata,
+      metadata: tier ? { ...p.metadata, tier } : p.metadata,
       prices: prices.map((pr) => ({
         id: pr.id,
         unitAmount: pr.unit_amount,
@@ -113,7 +127,9 @@ export async function getSubscriptionPlanFromStripe(
 
   const product = price.product;
   const productObj = typeof product === "object" && product && !product.deleted ? product : null;
-  const tierMeta = productObj?.metadata?.tier;
+  const tierMeta =
+    productObj?.metadata?.tier ||
+    (productObj ? inferBillingTier(productObj.name, productObj.metadata) : null);
 
   let plan: "free" | BillingTier = "free";
   if (sub.status === "active" || sub.status === "trialing") {

@@ -321,6 +321,55 @@ function buildTasks(siteUrl: string): TaskDef[] {
   ];
 }
 
+type OrbitStatusSnapshot = {
+  seoPages?: number;
+  comparisons?: number;
+  blogPosts?: number;
+  aeoPages?: number;
+  seedMarketing?: number;
+  integrationPages?: number;
+  usecasePages?: number;
+  templatePages?: number;
+  paaPages?: number;
+  hubExists?: boolean;
+  indexNowKey?: boolean;
+  indexNowSubmitted?: boolean;
+  stepCompletion?: Record<string, boolean>;
+  preflight?: { indexHealthScore?: number };
+};
+
+/** Live completion from DB counts / indexing — avoids showing 0/31 when work is already done. */
+function orbitAutoDone(taskId: string, os?: OrbitStatusSnapshot): boolean {
+  if (!os) return false;
+  switch (taskId) {
+    case "tech-indexnow":
+      return !!(os.indexNowKey && os.indexNowSubmitted);
+    case "tech-sitemap":
+    case "tech-schema-jsonld":
+      return true;
+    case "tech-gsc-indexing":
+      return (os.preflight?.indexHealthScore ?? 0) >= 80 || !!os.indexNowSubmitted;
+    case "content-seo-pages":
+      return (os.seoPages ?? 0) >= 20;
+    case "content-blog":
+      return (os.blogPosts ?? 0) >= 10;
+    case "content-comparisons":
+      return (os.comparisons ?? 0) >= 8;
+    case "content-aeo":
+      return (os.aeoPages ?? 0) >= 10;
+    case "content-integrations":
+      return (os.integrationPages ?? 0) >= 20;
+    case "content-usecases":
+      return (os.usecasePages ?? 0) >= 15;
+    case "content-paa":
+      return (os.paaPages ?? 0) >= 10;
+    case "acc-poweredby":
+      return (os.seedMarketing ?? 0) >= 20;
+    default:
+      return false;
+  }
+}
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = "orbit_mc_done_v1";
@@ -510,6 +559,7 @@ type FilterType = "all" | "auto" | "manual" | "done";
 export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Props) {
   const siteUrl = getPublicSiteUrl();
   const tasks = buildTasks(siteUrl);
+  const os = orbitStatus as OrbitStatusSnapshot;
 
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState<FilterType>("all");
@@ -535,14 +585,12 @@ export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Pro
   // Compute status for each task
   const getStatus = (task: TaskDef): TaskStatus => {
     if (done[task.id]) return "done";
+    if (orbitAutoDone(task.id, os)) return "done";
     if (task.type === "auto") {
       const step = task.runStep;
-      if (!step) return "auto"; // always-on automation
-      return stepStatuses[step] === "done"
-        ? "done"
-        : stepStatuses[step] === "running"
-          ? "auto"
-          : "pending";
+      if (!step) return "auto";
+      if (stepStatuses[step] === "done" || os.stepCompletion?.[step]) return "done";
+      return stepStatuses[step] === "running" ? "auto" : "pending";
     }
     if (task.type === "credential") return "manual";
     return "manual";

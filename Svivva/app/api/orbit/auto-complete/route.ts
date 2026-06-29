@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { fillMarketingGaps } from "@/lib/orbit/fill-marketing-gaps";
 
 export const maxDuration = 300;
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
