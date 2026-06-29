@@ -1,8 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AdminCodeForm } from "@/components/admin-code-form";
 
 type Props = {
   connected: boolean;
@@ -107,10 +115,35 @@ export default function GscConnectOrb({
   size = 220,
 }: Props) {
   const interactive = !connected && available;
+  const [adminUnlocked, setAdminUnlocked] = useState<boolean | null>(null);
+  const [showUnlock, setShowUnlock] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (alive && d) setAdminUnlocked(!!d.isAdmin);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  /** Gate: admin must be unlocked (passcode cookie) before the OAuth redirect. */
+  const connect = () => {
+    if (!interactive) return;
+    if (adminUnlocked) {
+      window.location.href = oauthUrl;
+    } else {
+      setShowUnlock(true);
+    }
+  };
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    if (interactive) window.location.href = oauthUrl;
+    connect();
   };
 
   const caption = connected
@@ -136,16 +169,12 @@ export default function GscConnectOrb({
           boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
           borderColor: connected ? "rgba(46,150,80,0.6)" : "rgba(91,168,160,0.55)",
         }}
-        onClick={() => {
-          if (interactive) window.location.href = oauthUrl;
-        }}
+        onClick={connect}
         role={interactive ? "button" : undefined}
         aria-label={interactive ? "Connect Google Search Console" : undefined}
         tabIndex={interactive ? 0 : undefined}
         onKeyDown={(e) => {
-          if (interactive && (e.key === "Enter" || e.key === " ")) {
-            window.location.href = oauthUrl;
-          }
+          if (interactive && (e.key === "Enter" || e.key === " ")) connect();
         }}
       >
         <Canvas camera={{ position: [0, 0, 3.4], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }}>
@@ -171,6 +200,28 @@ export default function GscConnectOrb({
           {caption}
         </span>
       </div>
+
+      <Dialog open={showUnlock} onOpenChange={setShowUnlock}>
+        <DialogContent className="max-w-sm border-border/60 bg-background/95 p-0 backdrop-blur-xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Unlock admin to connect Google</DialogTitle>
+            <DialogDescription>
+              Enter the admin passcode, then Google Search Console will connect.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-2">
+            <AdminCodeForm
+              title="Unlock to connect Google"
+              description="Enter the 6-digit admin code, then we'll open Google sign-in."
+              onSuccess={() => {
+                setAdminUnlocked(true);
+                setShowUnlock(false);
+                window.location.href = oauthUrl;
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
