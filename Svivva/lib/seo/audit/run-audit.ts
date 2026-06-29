@@ -271,7 +271,17 @@ export async function runSiteAudit(): Promise<SiteAuditReports> {
     threshold: QUALITY_THRESHOLD,
   };
 
-  const missingCanonical: string[] = ["/tools/[slug]"];
+  const missingCanonical: string[] = [];
+  for (const r of appRoutes) {
+    if (!isCrawlablePublicPath(r.path)) continue;
+    if (r.kind !== "dynamic") continue;
+    if (r.path === "/tools/[slug]") continue; // generateMetadata → buildSeoMetadata
+    if (r.path === "/blog/[slug]") continue;
+    if (r.path === "/(seo)/[slug]") continue;
+    if (r.path === "/lp/[slug]") continue;
+    if (r.path.startsWith("/dashboard")) continue;
+    missingCanonical.push(r.path);
+  }
   const noindexConflicts: CanonicalReport["noindexConflicts"] = [];
   for (const r of appRoutes) {
     if (isNoindexPath(r.path) && sitemapPaths.has(r.path)) {

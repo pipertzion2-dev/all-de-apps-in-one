@@ -9,7 +9,7 @@ const FeatureThreeBg = dynamic(
     })),
   { ssr: false },
 );
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
@@ -2479,6 +2479,8 @@ function PinkManualCoach({
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function LaunchpadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoRunMarketing = searchParams.get("autorun") === "1";
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const orbitUrls = usePublicOrbitUrls();
@@ -3568,6 +3570,7 @@ export default function LaunchpadPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
         {/* ── PRIMARY MISSION CONTROL ── */}
         <OrbitOneClickLaunch
+          autoRun={autoRunMarketing}
           onComplete={() => void refetchStatus()}
           orbitStatus={orbitStatus ?? null}
         />

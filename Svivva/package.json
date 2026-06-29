@@ -27,7 +27,8 @@
     "orbit:status": "node scripts/orbit.mjs status",
     "orbit:health": "node scripts/orbit.mjs health --resubmit",
     "orbit:run": "node scripts/orbit.mjs run",
-    "orbit:research": "node scripts/orbit.mjs research"
+    "orbit:research": "node scripts/orbit.mjs research",
+    "marketing:execute": "node scripts/marketing-execute.mjs"
   },
   "engines": {
     "node": "22.x"

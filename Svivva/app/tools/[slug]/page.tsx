@@ -51,7 +51,7 @@ export async function generateMetadata({
   return buildSeoMetadata({
     title: tool.metaTitle || `${tool.title} | Svivva`,
     description: tool.metaDescription || tool.content.slice(0, 160),
-    path: `/${slug}`,
+    path: tool.published ? `/${slug}` : `/tools/${slug}`,
   });
 }
 

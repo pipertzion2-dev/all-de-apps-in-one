@@ -253,11 +253,13 @@ type Props = {
   onComplete?: () => void;
   /** Live DB status for the live-count bar */
   orbitStatus?: StatusData | null;
+  /** When true, scroll into view and run autopilot once on mount (e.g. ?autorun=1). */
+  autoRun?: boolean;
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
+export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props) {
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState(0);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -356,6 +358,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
     }
   };
   const phaseTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const autoRunStarted = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   // Load last run + setup state on mount
   useEffect(() => {
@@ -416,6 +420,17 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
       setPhase(PHASES.length);
     }
   }
+
+  useEffect(() => {
+    if (!autoRun || autoRunStarted.current) return;
+    autoRunStarted.current = true;
+    rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const timer = setTimeout(() => {
+      void run();
+    }, 900);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when autoRun is enabled
+  }, [autoRun]);
 
   async function saveCred(key: string) {
     const val = credInputs[key];
@@ -491,6 +506,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus }: Props) {
 
   return (
     <div
+      ref={rootRef}
+      id="orbit-one-click"
       className="rounded-2xl border-2 overflow-hidden"
       style={{
         borderColor: running ? TEAL : hasRun ? `${TEAL}55` : `${BURG}55`,
