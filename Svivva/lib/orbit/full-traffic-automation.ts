@@ -5,6 +5,7 @@ import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 import { SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
+import { runTrafficQualityRepair } from "@/lib/orbit/traffic-quality-repair";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
@@ -34,7 +35,11 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
     if (!r.ok) summaryLines.push(`  ⚠ ${phase.title} reported issues — see ${phase.id}`);
   }
 
-  summaryLines.push("", "▸ Phase 0 — Hub pages (autopilot URLs)");
+  summaryLines.push("", "▸ Phase 0 — Traffic quality (thin pages, dup titles, links)");
+  const quality = await runTrafficQualityRepair();
+  summaryLines.push(...quality.summaryLines);
+
+  summaryLines.push("", "▸ Phase 0b — Hub pages (autopilot URLs)");
 
   summaryLines.push(...(await ensureOrbitHubPages()));
 

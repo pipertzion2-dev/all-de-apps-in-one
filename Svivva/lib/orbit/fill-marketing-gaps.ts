@@ -285,26 +285,6 @@ async function ensureAllToolSeoPages(
     }
   }
 
-  let filler = 0;
-  while (seedCount < TARGET_TOOL_SEO_PAGES && filler < 400) {
-    const slug = `svivva-seo-tool-fill-${filler}`;
-    const title = `Svivva Free AI Tool ${filler + 1}`;
-    await tryInsert(
-      {
-        title,
-        metaTitle: title.slice(0, 60),
-        metaDescription: `Free ${title} — powered by Svivva. Traffic to svivva.com.`.slice(0, 155),
-        headline: title,
-        subheadline: "Free online tool",
-        content: `<h1>${title}</h1><p>Use this free tool on <a href="${BASE}">svivva.com</a>.</p>`,
-        slug,
-        keyword: title.toLowerCase(),
-      },
-      `${BASE}/ai-tools-hub`,
-    );
-    filler++;
-  }
-
   return { added, toolCount: tools.length, finalCount: seedCount };
 }
 

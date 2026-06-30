@@ -30,6 +30,7 @@ function runOrbit(args) {
 
 async function runDirectSteps(auth) {
   const steps = [
+    ["POST", "/api/orbit/traffic-quality-repair", {}],
     ["POST", "/api/orbit/auto-complete", {}],
     ...(skipRun ? [] : [["POST", "/api/orbit/marketing-autopilot", { action: "run" }]]),
     ["POST", "/api/orbit/automate-manual", {}],

@@ -86,7 +86,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const gaId = process.env.NEXT_PUBLIC_GA_ID;
+const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-QL8EXZZMS6";
 const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
@@ -110,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 "@type": "Organization",
                 name: "Svivva",
                 url: siteUrl,
-                logo: `${siteUrl}/logo.png`,
+                logo: `${siteUrl}/svivva-logo.png`,
                 description:
                   "From seed to symphony — Svivva is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],

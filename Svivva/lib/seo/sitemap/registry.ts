@@ -4,6 +4,7 @@ import { blogPosts, seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
+import { scorePageContent } from "@/lib/seo/content-quality/score";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
 
@@ -100,6 +101,17 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
       .where(eq(seoLandingPages.published, true));
     for (const page of pages) {
       if (!page.slug || isNonIndexableSlug(page.slug)) continue;
+      if (page.slug.startsWith("svivva-seo-tool-fill-")) continue;
+
+      const quality = scorePageContent({
+        title: page.title,
+        content: page.content || "",
+        howItWorks: page.howItWorks || undefined,
+        whoItsFor: page.whoItsFor || undefined,
+        hasFaq: /\[FAQ_JSON\]/i.test(page.content || ""),
+      });
+      if (!quality.passed) continue;
+
       const isTool =
         page.category === "seed-marketing" || page.category === "seo-landing" || !!page.toolUrl;
       entries.push({
