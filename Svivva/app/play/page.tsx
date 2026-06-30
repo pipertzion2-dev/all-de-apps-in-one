@@ -633,6 +633,19 @@ export default function SvivvaPlayPage() {
   const [stagePlaybackSec, setStagePlaybackSec] = useState(0);
   const [midiFileName, setMidiFileName] = useState("");
 
+  const effectiveAnalysis = useMemo(() => {
+    const base = analysis ?? (mode === "composition" && !audioFile ? FALLBACK_ANALYSIS : null);
+    if (!base) return null;
+    if (!manualKey && transcription?.sources.melodyneMidi && transcription.harmonicKey) {
+      return {
+        ...base,
+        key: normalizeKeyLabel(transcription.harmonicKey),
+        keyConfidence: transcription.harmonicKeyConfidence ?? base.keyConfidence,
+      };
+    }
+    return base;
+  }, [analysis, transcription, manualKey, mode, audioFile]);
+
   const playStageModel = useMemo<PlayStageModel>(() => {
     if (mode === "patch") return "moog";
     if (mode !== "composition") return "notebook";

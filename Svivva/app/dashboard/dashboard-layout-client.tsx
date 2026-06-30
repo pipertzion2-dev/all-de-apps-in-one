@@ -49,6 +49,7 @@ import {
   Search,
   Smartphone,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
@@ -155,6 +156,13 @@ const digitalMenuGroups: MenuGroup[] = [
         desc: "GSC connection",
         href: "/dashboard/gsc-connect",
         icon: Search,
+        adminOnly: true,
+      },
+      {
+        title: "Admin",
+        desc: "Users & revenue",
+        href: "/dashboard/admin",
+        icon: Users,
         adminOnly: true,
       },
       {
