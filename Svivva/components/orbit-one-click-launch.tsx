@@ -274,10 +274,18 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [showSetup, setShowSetup] = useState(true);
-  const [gsc, setGsc] = useState<{ connected: boolean; available: boolean; email: string | null }>({
+  const [gsc, setGsc] = useState<{
+    connected: boolean;
+    available: boolean;
+    email: string | null;
+    propertyOk: boolean;
+    matchedSite: string | null;
+  }>({
     connected: false,
     available: true,
     email: null,
+    propertyOk: false,
+    matchedSite: null,
   });
 
   type HealthSnapshot = {
@@ -303,6 +311,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               connected: !!d.oauthConnected,
               available: d.oauthAvailable !== false,
               email: d.oauthEmail ?? null,
+              propertyOk: !!d.gscPropertyOk,
+              matchedSite: d.gscMatchedSite ?? null,
             });
         }
       } catch {
@@ -560,8 +570,12 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           <p className="text-[11px] text-center text-muted-foreground max-w-xs">
             {gsc.connected
               ? gsc.email
-                ? `Google connected · ${gsc.email}`
-                : "Google Search Console connected."
+                ? gsc.propertyOk
+                  ? `Google connected · ${gsc.email}`
+                  : `Google signed in · add svivva.com in Search Console (Owner)`
+                : gsc.propertyOk
+                  ? "Google Search Console connected."
+                  : "Google connected — verify svivva.com property in Search Console."
               : gsc.available
                 ? "Press the camo orb to connect Google Search Console — AI handles the rest."
                 : "Google connect will be available shortly."}
@@ -573,7 +587,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           health={health}
           livePages={livePages}
           indexNowDone={!!orbitStatus?.indexNowSubmitted || (health?.submitted ?? 0) > 0}
-          gscConnected={gsc.connected}
+          gscConnected={gsc.connected && gsc.propertyOk}
+          gscSignedIn={gsc.connected}
           checking={healthChecking}
           onCheck={runHealthCheck}
         />
@@ -892,6 +907,7 @@ function MarketingHealthPanel({
   livePages,
   indexNowDone,
   gscConnected,
+  gscSignedIn = false,
   checking,
   onCheck,
 }: {
@@ -906,6 +922,7 @@ function MarketingHealthPanel({
   livePages: number;
   indexNowDone: boolean;
   gscConnected: boolean;
+  gscSignedIn?: boolean;
   checking: boolean;
   onCheck: () => void;
 }) {
@@ -1003,7 +1020,13 @@ function MarketingHealthPanel({
         <StatusPill icon="🤖" label="llms.txt ✓ (AI search)" ok teal />
         <StatusPill
           icon="🟢"
-          label={gscConnected ? "Google ✓" : "Google: connect ↑"}
+          label={
+            gscConnected
+              ? "Google ✓"
+              : gscSignedIn
+                ? "Google: verify property"
+                : "Google: connect ↑"
+          }
           ok={gscConnected}
         />
       </div>

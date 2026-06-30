@@ -8,7 +8,13 @@ import {
   getGoogleServiceAccountAccessToken,
   GoogleServiceAccount,
 } from "@/lib/google-service-account";
-import { ensureGscOAuthColumns, isGoogleGscOAuthConfigured } from "@/lib/google-gsc-oauth";
+import {
+  ensureGscOAuthColumns,
+  getGoogleOAuthAccessTokenForUser,
+  isGoogleGscOAuthConfigured,
+  listGscSites,
+  matchGscSiteToCanonical,
+} from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
@@ -181,6 +187,47 @@ export async function GET() {
   const passing = steps.filter((s) => s.status === "ok").length;
   const total = steps.filter((s) => s.status !== "skip").length;
 
+  let gscPropertyOk = false;
+  let gscMatchedSite: string | null = null;
+  let gscSitesSample: string[] = [];
+
+  if (oauthConnected) {
+    try {
+      const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
+      if (accessToken) {
+        const sites = await listGscSites(accessToken);
+        gscSitesSample = sites.slice(0, 8).map((s) => s.siteUrl);
+        const matchedUrl = matchGscSiteToCanonical(sites, canonicalSite);
+        const matched = matchedUrl ? sites.find((s) => s.siteUrl === matchedUrl) : undefined;
+        gscMatchedSite = matchedUrl;
+        const level = matched?.permissionLevel?.toLowerCase() ?? "";
+        gscPropertyOk =
+          !!matched && (level.includes("owner") || level.includes("full"));
+        steps.push({
+          id: "gsc_property",
+          label: "Search Console property",
+          status: gscPropertyOk ? "ok" : matched ? "warn" : "fail",
+          detail: gscPropertyOk
+            ? `Verified: ${gscMatchedSite} (${matched?.permissionLevel})`
+            : matched
+              ? `Found ${gscMatchedSite} but permission is "${matched?.permissionLevel}" — need Owner or Full.`
+              : sites.length
+                ? `No property matches ${canonicalSite}. Add it in Search Console, then reconnect.`
+                : "No Search Console properties on this Google account — add https://svivva.com first.",
+          fix: gscPropertyOk ? undefined : "https://search.google.com/search-console",
+        });
+      }
+    } catch (e: unknown) {
+      steps.push({
+        id: "gsc_property",
+        label: "Search Console property",
+        status: "warn",
+        detail: `Could not list properties: ${e instanceof Error ? e.message : String(e)}`.slice(0, 160),
+        fix: "https://search.google.com/search-console",
+      });
+    }
+  }
+
   return ok({
     steps,
     score: total > 0 ? Math.round((passing / total) * 100) : 0,
@@ -189,5 +236,8 @@ export async function GET() {
     oauthConnected,
     oauthEmail,
     oauthAvailable: isGoogleGscOAuthConfigured(),
+    gscPropertyOk,
+    gscMatchedSite,
+    gscSitesSample,
   });
 }
