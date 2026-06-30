@@ -3,60 +3,30 @@
  * Orbit marketing CLI — run the full marketing engine from your terminal (or an
  * AI agent) without opening svivva.com.
  *
- * Auth: calls production API routes with the x-internal-secret header, so it
- * needs ORBIT_INTERNAL_SECRET (the same value set in Vercel) and the site URL.
+ * Auth (first match wins):
+ *   1. ORBIT_INTERNAL_SECRET in .env.orbit (x-internal-secret header)
+ *   2. Admin passcode cookie via POST /api/auth/admin-code (default 272727)
  *
- * Config (env or .env.orbit in repo root — see scripts/orbit.env.example):
- *   SVIVVA_URL=https://svivva.com            (default https://svivva.com)
- *   ORBIT_INTERNAL_SECRET=...                (required — matches Vercel)
- *
- * Commands:
- *   node scripts/orbit.mjs status                 Credential + index coverage snapshot
- *   node scripts/orbit.mjs health [--resubmit]    Thorough index-health crawl (+ re-ping)
- *   node scripts/orbit.mjs run                     Full marketing autopilot (AI + indexing)
- *   node scripts/orbit.mjs research [--count N] [--focus "topic"]   Keyword/blog research
- *   node scripts/orbit.mjs ingest <file.json>     Publish agent-written content + index it
- *
- * ingest file shape:
- *   { "blogPosts": [{ "title": "...", "content": "# md..." }],
- *     "seoPages":  [{ "keyword": "...", "title": "...", "headline": "...", "content": "..." }] }
+ * Config (env or .env.orbit — see scripts/orbit.env.example):
+ *   SVIVVA_URL=https://svivva.com
+ *   ORBIT_INTERNAL_SECRET=...     (optional if admin code works)
+ *   ORBIT_ADMIN_CODE=272727       (optional override)
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ensureOrbitAuth, loadOrbitEnv, orbitFetch } from "./orbit-api-auth.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 
-function loadDotEnvOrbit() {
-  for (const name of [".env.orbit", ".env"]) {
-    const p = resolve(repoRoot, name);
-    if (!existsSync(p)) continue;
-    for (const line of readFileSync(p, "utf8").split("\n")) {
-      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
-      if (!m) continue;
-      const key = m[1];
-      let val = m[2].replace(/^["']|["']$/g, "");
-      if (!process.env[key] && val) process.env[key] = val;
-    }
-  }
-}
-loadDotEnvOrbit();
+loadOrbitEnv();
 
 const SITE = (process.env.SVIVVA_URL || "https://svivva.com").replace(/\/$/, "");
-const SECRET = process.env.ORBIT_INTERNAL_SECRET || "";
 
 function die(msg) {
   console.error(`\n✖ ${msg}\n`);
   process.exit(1);
-}
-
-if (!SECRET) {
-  die(
-    "ORBIT_INTERNAL_SECRET is not set.\n" +
-      "  cp scripts/orbit.env.example .env.orbit  then fill it in (must match Vercel).\n" +
-      "  Get it: Vercel → Project → Settings → Environment Variables → ORBIT_INTERNAL_SECRET",
-  );
 }
 
 function arg(flag, fallback = undefined) {
@@ -67,22 +37,12 @@ function hasFlag(flag) {
   return process.argv.includes(flag);
 }
 
-async function api(path, { method = "GET", body } = {}) {
-  const res = await fetch(`${SITE}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "x-internal-secret": SECRET,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const text = await res.text();
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    json = { raw: text };
-  }
+let authPromise;
+
+async function api(path, { method = "GET", body, timeoutMs } = {}) {
+  if (!authPromise) authPromise = ensureOrbitAuth(SITE);
+  const auth = await authPromise;
+  const { res, json } = await orbitFetch(auth, path, { method, body, timeoutMs });
   if (!res.ok) {
     die(`${method} ${path} → HTTP ${res.status}\n  ${JSON.stringify(json).slice(0, 500)}`);
   }
