@@ -706,9 +706,9 @@ export async function POST(req: NextRequest) {
         // Discover from all mini app hubs
         const hubs = [
           miniAppsUrl,
-          "https://svivva.com/ai-tools-hub",
-          "https://svivva.com/cyber-security-mini-apps",
-          "https://svivva.com/seo-pack",
+          "https://zzaizzai.com/ai-tools-hub",
+          "https://zzaizzai.com/cyber-security-mini-apps",
+          "https://zzaizzai.com/seo-pack",
         ];
         const uniqueTools = new Map<string, DiscoveredTool>();
         for (const hub of hubs) {
@@ -4528,7 +4528,7 @@ Return JSON:
                   0,
                   155,
                 ),
-              content: `# Svivva + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.\n\n## Why Svivva + ${integ.tool}?\n\nSvivva's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for Svivva\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry Svivva free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://svivva.com)`,
+              content: `# Svivva + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.\n\n## Why Svivva + ${integ.tool}?\n\nSvivva's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for Svivva\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry Svivva free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({
@@ -4654,7 +4654,7 @@ Return JSON:
                   0,
                   155,
                 ),
-              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from Svivva.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with Svivva\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://svivva.com)`,
+              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from Svivva.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with Svivva\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({
@@ -4856,7 +4856,7 @@ Return JSON:
               metaTitle: `${tmpl.name} | Svivva Templates`.slice(0, 60),
               metaDescription:
                 `Build a ${tmpl.name} with Svivva in minutes. No coding required.`.slice(0, 155),
-              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with Svivva in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with Svivva\n\n1. Sign up for Svivva\n2. Describe your API in plain English\n3. Svivva generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://svivva.com)`,
+              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with Svivva in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with Svivva\n\n1. Sign up for Svivva\n2. Describe your API in plain English\n3. Svivva generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({

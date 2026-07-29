@@ -109,7 +109,7 @@ export default function OrbitPage() {
   };
 
   const copyReferralLink = () => {
-    const link = `https://svivva.com?ref=${referralCode}`;
+    const link = `https://zzaizzai.com?ref=${referralCode}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast({ title: "Referral link copied!", duration: 2000 });

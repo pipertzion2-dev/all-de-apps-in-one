@@ -15,7 +15,7 @@ export async function GET() {
     const { user, error } = await requireAdminUser();
     if (error || !user) return error!;
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
     const [toolCount] = await db
       .select({ count: count() })
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
 
     const { action, replitDomain, hostingTarget, googleSiteUrl } = await req.json();
     const cnameTargetHost = (hostingTarget ?? replitDomain) as string | undefined;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
     if (action === "submit-sitemap") {
       const sitemapUrl = `${googleSiteUrl || baseUrl}/sitemap.xml`;

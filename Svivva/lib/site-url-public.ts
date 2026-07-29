@@ -2,7 +2,7 @@
  * Client-safe site URL (uses only NEXT_PUBLIC_SITE_URL).
  * Use in client components for Orbit copy, sitemap links, and instructions.
  */
-const DEFAULT_SITE = "https://svivva.com";
+const DEFAULT_SITE = "https://zzaizzai.com";
 
 function normalizeSiteUrl(raw: string): string {
   const t = raw.trim().replace(/\/$/, "");
@@ -20,7 +20,7 @@ export function getPublicSiteHostname(): string {
   try {
     return new URL(getPublicSiteUrl()).hostname;
   } catch {
-    return "svivva.com";
+    return "zzaizzai.com";
   }
 }
 

@@ -284,7 +284,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
               <span>
                 <strong className="text-foreground">Your mini apps URL</strong> → we generate an SEO
                 landing page for every tool inside it, published at{" "}
-                <strong>{creds?.googleSiteUrl || "svivva.com"}/tool-name</strong>
+                <strong>{creds?.googleSiteUrl || "zzaizzai.com"}/tool-name</strong>
               </span>
             </div>
             <div className="flex items-start gap-2 text-muted-foreground">
@@ -519,7 +519,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
                 <input
                   value={googleUrl}
                   onChange={(e) => setGoogleUrl(e.target.value)}
-                  placeholder="https://svivva.com"
+                  placeholder="https://zzaizzai.com"
                   className="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs bg-white dark:bg-background focus:outline-none"
                   data-testid="input-google-site-url"
                 />
@@ -920,7 +920,7 @@ function GscSetupCard({ siteUrl }: { siteUrl: string }) {
   const [tokenSaving, setTokenSaving] = useState(false);
   const [tokenSaved, setTokenSaved] = useState(false);
   const [tokenError, setTokenError] = useState("");
-  const domain = siteUrl.replace(/\/$/, "") || "https://svivva.com";
+  const domain = siteUrl.replace(/\/$/, "") || "https://zzaizzai.com";
   const sitemapUrl = `${domain}/sitemap.xml`;
 
   const copy = (text: string, key: string) => {
@@ -1356,7 +1356,7 @@ export default function MarketingDashboard() {
     >
       {/* GSC Setup — shown first so every user sees it */}
       <div className="flex-shrink-0 px-4 pt-4 pb-0 max-w-3xl mx-auto w-full">
-        <GscSetupCard siteUrl={infra?.google.siteUrl || "https://svivva.com"} />
+        <GscSetupCard siteUrl={infra?.google.siteUrl || "https://zzaizzai.com"} />
       </div>
 
       {/* Header */}
@@ -1630,7 +1630,7 @@ export default function MarketingDashboard() {
                     ⚠ You must do these manually
                   </p>
                   {[
-                    "Google Search Console → Sitemaps → add https://svivva.com/sitemap.xml (Google ignores IndexNow)",
+                    "Google Search Console → Sitemaps → add https://zzaizzai.com/sitemap.xml (Google ignores IndexNow)",
                     "Google Search Console → URL Inspection → paste each key URL → Request Indexing",
                     "Post social content (Twitter thread, LinkedIn, Reddit) — AI writes it, you paste and post",
                     "Submit directory listings (Product Hunt, G2, Futurepedia) — requires your account on each site",

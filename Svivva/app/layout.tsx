@@ -11,7 +11,7 @@ import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 export async function generateMetadata(): Promise<Metadata> {
   // Verification token resolution order:

@@ -17,7 +17,7 @@ const root = resolve(__dirname, "..");
 const skipRun = process.argv.includes("--skip-run");
 
 loadOrbitEnv();
-const SITE = (process.env.SVIVVA_URL || "https://svivva.com").replace(/\/$/, "");
+const SITE = (process.env.SVIVVA_URL || "https://zzaizzai.com").replace(/\/$/, "");
 
 function runOrbit(args) {
   const r = spawnSync("node", ["scripts/orbit.mjs", ...args], {

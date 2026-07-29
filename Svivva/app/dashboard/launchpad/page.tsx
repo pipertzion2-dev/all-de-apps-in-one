@@ -491,9 +491,9 @@ const CLUTETY_PRESET = getClutetyOrbitPreset();
 /** Every mini-app hub Orbit scans to build svivva.com SEO pages */
 const ORBIT_HUB_URLS = [
   CLUTETY_PRESET.miniAppsUrl,
-  "https://svivva.com/ai-tools-hub",
-  "https://svivva.com/cyber-security-mini-apps",
-  "https://svivva.com/seo-pack",
+  "https://zzaizzai.com/ai-tools-hub",
+  "https://zzaizzai.com/cyber-security-mini-apps",
+  "https://zzaizzai.com/seo-pack",
   CLUTETY_PRESET.sourceUrl,
 ];
 
@@ -899,11 +899,11 @@ function MiniSourceConfig({
           </p>
           <div className="flex flex-wrap gap-1.5">
             {[
-              { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
-              { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
-              { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
-              { name: "Cyber Security Tools", url: "https://svivva.com/cyber-security-mini-apps" },
-              { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
+              { name: "Cyber Security Tools", url: "https://zzaizzai.com/cyber-security-mini-apps" },
+              { name: "AI Tools Hub", url: "https://zzaizzai.com/ai-tools-hub" },
+              { name: "SEO Pack", url: "https://zzaizzai.com/seo-pack" },
+              { name: "Cyber Security Tools", url: "https://zzaizzai.com/cyber-security-mini-apps" },
+              { name: "Marketing Hub", url: "https://zzaizzai.com/marketing-hub" },
             ]
               .filter(
                 (preset) => !entries.some((e) => e.url.trim().replace(/\/$/, "") === preset.url),
@@ -941,15 +941,15 @@ function MiniSourceConfig({
                 const allPresets = [
                   {
                     name: "Cyber Security Tools",
-                    url: "https://svivva.com/cyber-security-mini-apps",
+                    url: "https://zzaizzai.com/cyber-security-mini-apps",
                   },
-                  { name: "AI Tools Hub", url: "https://svivva.com/ai-tools-hub" },
-                  { name: "SEO Pack", url: "https://svivva.com/seo-pack" },
+                  { name: "AI Tools Hub", url: "https://zzaizzai.com/ai-tools-hub" },
+                  { name: "SEO Pack", url: "https://zzaizzai.com/seo-pack" },
                   {
                     name: "Cyber Security Tools",
-                    url: "https://svivva.com/cyber-security-mini-apps",
+                    url: "https://zzaizzai.com/cyber-security-mini-apps",
                   },
-                  { name: "Marketing Hub", url: "https://svivva.com/marketing-hub" },
+                  { name: "Marketing Hub", url: "https://zzaizzai.com/marketing-hub" },
                 ];
                 const existing = entries.filter((e) => e.url.trim());
                 const existingUrls = new Set(existing.map((e) => e.url.trim().replace(/\/$/, "")));
@@ -1686,16 +1686,16 @@ function StepCard({
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
   { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
-  { sub: "security", target: "svivva.com", label: "Cyber security tools hub", color: "#5BA8A0" },
+  { sub: "security", target: "zzaizzai.com", label: "Cyber security tools hub", color: "#5BA8A0" },
   {
     sub: "clutety",
-    target: "svivva.com",
+    target: "zzaizzai.com",
     label: "Legacy alias → /cyber-security-mini-apps",
     color: "#5BA8A0",
   },
   {
     sub: "pyracrypt",
-    target: "svivva.com",
+    target: "zzaizzai.com",
     label: "Pyracrypt legacy alias",
     color: "#5BA8A0",
   },
@@ -3462,7 +3462,7 @@ export default function LaunchpadPage() {
                 <p className="text-white/50 text-xs">
                   Svivva + your deployed apps — maximum real traffic
                 </p>
-                {orbitUrls.host.endsWith("svivva.com") && (
+                {orbitUrls.host.endsWith("zzaizzai.com") && (
                   <div className="mt-2 rounded-lg border border-white/15 bg-black/20 px-2.5 py-2 text-[10px] text-white/70 leading-snug space-y-1.5 max-w-md">
                     <p>
                       <span className="font-semibold text-white/85">Live site</span> updates only
@@ -4060,12 +4060,12 @@ export default function LaunchpadPage() {
               },
               {
                 label: "svivva.com Sitemap",
-                href: "https://svivva.com/sitemap.xml",
+                href: "https://zzaizzai.com/sitemap.xml",
                 color: TEAL,
               },
               {
                 label: "svivva.com/orbit",
-                href: "https://svivva.com/orbit",
+                href: "https://zzaizzai.com/orbit",
                 color: BURG,
               },
               {
@@ -4075,7 +4075,7 @@ export default function LaunchpadPage() {
               },
               {
                 label: "Google PageSpeed",
-                href: "https://pagespeed.web.dev/analysis?url=https://svivva.com",
+                href: "https://pagespeed.web.dev/analysis?url=https://zzaizzai.com",
                 color: "#34a853",
               },
             ].map((link) => (

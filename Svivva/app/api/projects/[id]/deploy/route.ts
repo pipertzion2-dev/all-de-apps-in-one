@@ -73,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .set({ status: "deployed", updatedAt: new Date() })
       .where(eq(projects.id, id));
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://svivva.com";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zzaizzai.com";
     const liveUrl = `${baseUrl}/api/run/${project.slug}`;
     const cardUrl = `${baseUrl}/api-card/${id}`;
 

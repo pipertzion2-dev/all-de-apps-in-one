@@ -18,7 +18,7 @@ describe("submission-schemas", () => {
     const item = SUBMISSION_ITEMS[0];
     const text = formatFieldsForClipboard(item, {
       productName: "Svivva",
-      websiteUrl: "https://svivva.com",
+      websiteUrl: "https://zzaizzai.com",
     });
     expect(text).toContain("Svivva");
     expect(text).toContain(item.submitUrl);

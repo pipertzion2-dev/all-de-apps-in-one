@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
       const siteUrl = body.siteUrl || creds?.googleSiteUrl;
       if (!siteUrl)
         return NextResponse.json(
-          { error: "Site URL required (e.g. https://svivva.com)" },
+          { error: "Site URL required (e.g. https://zzaizzai.com)" },
           { status: 400 },
         );
       const sitemapUrl = `${baseUrl}/sitemap.xml`;

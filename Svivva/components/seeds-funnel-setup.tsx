@@ -759,7 +759,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
     ...apps.map((a) => ({ name: a.name, url: a.url, description: a.description })),
     ...replitApps.map((r) => ({
       name: r.title,
-      url: r.replId ? `https://svivva.com/${r.replId}` : "",
+      url: r.replId ? `https://zzaizzai.com/${r.replId}` : "",
       description: "",
     })),
   ];

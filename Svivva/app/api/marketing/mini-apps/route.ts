@@ -10,7 +10,7 @@ import { submitUrlsToGoogleIndexingApi } from "@/lib/google-indexing";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { randomBytes } from "crypto";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 async function getCredentials() {
   try {

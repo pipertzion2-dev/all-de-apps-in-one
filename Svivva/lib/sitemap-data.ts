@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 export interface SitemapChunk {
   id: number;

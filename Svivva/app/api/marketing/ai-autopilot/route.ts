@@ -7,7 +7,7 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { randomBytes } from "crypto";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 async function indexnowSubmit(urls: string[]): Promise<{ submitted: boolean; count: number }> {
   try {

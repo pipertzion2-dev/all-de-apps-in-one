@@ -31,7 +31,7 @@ export interface SocialPackData {
   showHN: string;
 }
 
-const SITE = "https://svivva.com";
+const SITE = "https://zzaizzai.com";
 const TAG = "Build AI APIs in minutes, not months.";
 
 const SEO_KW = [

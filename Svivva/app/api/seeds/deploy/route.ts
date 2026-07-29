@@ -139,7 +139,7 @@ railway up
 \`\`\`
 
 ---
-Built with [Svivva Seeds](https://svivva.com) — hello@svivva.com
+Built with [Svivva Seeds](https://zzaizzai.com) — hello@svivva.com
 `;
 
     archive.append(readme, { name: `${appSlug}/README.md` });

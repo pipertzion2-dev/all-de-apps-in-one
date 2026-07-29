@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "Documentation",
   description:
     "Guides and reference for Svivva — from first project to production: prompts, schemas, evaluations, versioning, rollback, and Svivva Play.",
-  alternates: { canonical: "https://svivva.com/docs" },
+  alternates: { canonical: "https://zzaizzai.com/docs" },
   openGraph: {
     title: "Svivva documentation",
     description:
       "Guides and reference for shipping with Svivva — prompts, schemas, evaluations, versioning, rollback, and more.",
-    url: "https://svivva.com/docs",
+    url: "https://zzaizzai.com/docs",
   },
 };
 

@@ -109,7 +109,7 @@ export default function UtmPage() {
               type="url"
               value={form.destinationUrl}
               onChange={(e) => setForm({ ...form, destinationUrl: e.target.value })}
-              placeholder="https://svivva.com/pricing"
+              placeholder="https://zzaizzai.com/pricing"
               className={inputClass}
             />
           </div>

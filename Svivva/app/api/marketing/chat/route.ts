@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
 import { sql, like } from "drizzle-orm";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 async function callInternal(path: string, body: object) {
   const res = await fetch(`${BASE_URL}${path}`, {

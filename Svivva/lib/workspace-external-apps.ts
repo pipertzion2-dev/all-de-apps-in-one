@@ -2,7 +2,7 @@
  * All workspace projects for Orbit (Launchpad presets, run-step fallbacks).
  * Prefer NEXT_PUBLIC_*; defaults target the live Svivva site instead of legacy Replit hosts.
  */
-const DEFAULT_SITE = "https://svivva.com";
+const DEFAULT_SITE = "https://zzaizzai.com";
 
 function trimUrl(u: string): string {
   return u.trim().replace(/\/$/, "");
@@ -164,12 +164,12 @@ export function getDefaultSubdomainCnameTargets(): {
   return [
     {
       sub: "apps",
-      target: "svivva.com",
+      target: "zzaizzai.com",
       label: "Mini apps (set NEXT_PUBLIC_AI_TOOLS_HUB_URL)",
     },
     {
       sub: "security",
-      target: "svivva.com",
+      target: "zzaizzai.com",
       label: "Security tools (cyber-security-mini-apps)",
     },
   ];

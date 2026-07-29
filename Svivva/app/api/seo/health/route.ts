@@ -6,7 +6,7 @@ import { eq, isNotNull } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 type Check = {
   id: string;

@@ -45,7 +45,7 @@ export const LEGACY_REDIRECT_PREFIXES = [
   "/clutety-shell",
 ] as const;
 
-/** First path segment from an absolute site URL (e.g. https://svivva.com/foo → foo). */
+/** First path segment from an absolute site URL (e.g. https://zzaizzai.com/foo → foo). */
 export function slugFromPublicUrl(url: string): string | null {
   try {
     const pathname = new URL(url).pathname.replace(/\/$/, "");

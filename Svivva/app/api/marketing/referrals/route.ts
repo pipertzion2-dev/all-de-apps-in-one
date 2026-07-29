@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://svivva.com";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://zzaizzai.com";
     const referral = await createReferral({
       referrerId,
       referrerEmail,

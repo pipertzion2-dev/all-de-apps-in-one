@@ -90,7 +90,7 @@ export default async function ApiCardPage({ params }: PageProps) {
   if (!data) notFound();
 
   const { project, latestVersion, ownerName } = data;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://svivva.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zzaizzai.com";
   const liveEndpoint = `${baseUrl}/api/run/${project.slug}`;
 
   const exampleCurl = `curl -X POST "${liveEndpoint}" \\

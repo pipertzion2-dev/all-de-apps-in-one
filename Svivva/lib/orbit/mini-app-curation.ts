@@ -79,7 +79,7 @@ export function filterToolsForTrafficDiscovery(tools: DiscoverableTool[]): Disco
     if (!url) continue;
     if (BLOCKED_NAME_RE.test(`${tool.name} ${tool.description ?? ""}`)) continue;
 
-    const onSvivva = url.includes("svivva.com");
+    const onSvivva = url.includes("zzaizzai.com");
     const isNative = NATIVE_SVIVVA_TOOLS.some((n) => url.includes(n.path));
     if (!onSvivva && !PREFERRED_NAME_RE.test(tool.name)) continue;
 

@@ -209,7 +209,7 @@ function detectRoutePrefix(bundle: string): string {
   return "/tool";
 }
 
-// Slug-aware deduplication: prefer cross-domain (e.g. svivva.com) URLs over Repl URLs for the same slug
+// Slug-aware deduplication: prefer cross-domain (e.g. zzaizzai.com) URLs over Repl URLs for the same slug
 function dedupeTools(
   tools: { name: string; url: string; description: string }[],
   replHost: string,
@@ -394,7 +394,7 @@ export async function POST(req: NextRequest) {
             console.log(`[discover-tools] JS bundle slugs: ${slugs.length}`);
             if (slugs.length > 0) {
               const routePrefix = detectRoutePrefix(bundle);
-              // For each slug: if we already have a cross-domain URL for it (e.g. svivva.com/slug),
+              // For each slug: if we already have a cross-domain URL for it (e.g. zzaizzai.com/slug),
               // prefer that — only add the Repl URL if no better URL exists yet
               for (const slug of slugs) {
                 const replicUrl = `${replUrl}${routePrefix}/${slug}`;

@@ -27,7 +27,7 @@ export function ReferralWidget({
     if (userId) {
       const code = generateReferralCode(userId);
       setReferralCode(code);
-      setReferralUrl(`https://svivva.com?ref=${code}`);
+      setReferralUrl(`https://zzaizzai.com?ref=${code}`);
       fetchStats();
     }
   }, [userId]);

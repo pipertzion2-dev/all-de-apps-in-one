@@ -213,7 +213,7 @@ export async function GET() {
               ? `Found ${gscMatchedSite} but permission is "${matched?.permissionLevel}" — need Owner or Full.`
               : sites.length
                 ? `No property matches ${canonicalSite}. Add it in Search Console, then reconnect.`
-                : "No Search Console properties on this Google account — add https://svivva.com first.",
+                : "No Search Console properties on this Google account — add https://zzaizzai.com first.",
           fix: gscPropertyOk ? undefined : "https://search.google.com/search-console",
         });
       }

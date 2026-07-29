@@ -58,7 +58,7 @@ export function ExtensionInstallCard() {
         <li>Open YouTube (or any supported site) — blocked people & topics disappear from feeds</li>
       </ol>
       <a
-        href="https://svivva.com/dashboard/security"
+        href="https://zzaizzai.com/dashboard/security"
         target="_blank"
         rel="noopener noreferrer"
         style={{

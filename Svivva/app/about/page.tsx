@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "From seed to symphony — Svivva helps teams turn plain-language intent into shipped product, with validation, evaluations, versioning, and rollback.",
-  alternates: { canonical: "https://svivva.com/about" },
+  alternates: { canonical: "https://zzaizzai.com/about" },
   openGraph: {
     title: "About Svivva",
     description:
       "From seed to symphony — learn how Svivva helps teams ship with guardrails instead of babysitting infrastructure.",
-    url: "https://svivva.com/about",
+    url: "https://zzaizzai.com/about",
   },
 };
 

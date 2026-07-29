@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: "Clutety — embedded in Svivva",
     description:
       "Clutety brings the original cybersecurity UI to Svivva — LED controls, WireBar, and threat analysis.",
-    url: "https://svivva.com/clutety",
+    url: "https://zzaizzai.com/clutety",
     siteName: "Svivva",
     type: "website",
   },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description: "Clutety — original protection UI embedded in Svivva.",
   },
   alternates: {
-    canonical: "https://svivva.com/clutety",
+    canonical: "https://zzaizzai.com/clutety",
   },
 };
 

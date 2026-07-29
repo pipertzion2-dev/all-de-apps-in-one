@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Contact the Svivva team for platform questions, enterprise plans, or partnerships. Email hello@svivva.com.",
-  alternates: { canonical: "https://svivva.com/contact" },
+  alternates: { canonical: "https://zzaizzai.com/contact" },
   openGraph: {
     title: "Contact Svivva",
     description:
       "Get in touch with the Svivva team for platform questions, enterprise plans, or partnership inquiries.",
-    url: "https://svivva.com/contact",
+    url: "https://zzaizzai.com/contact",
   },
 };
 

@@ -42,7 +42,8 @@ async function probeUrl(label: string, url: string): Promise<CheckResult> {
 function isLikelyProductionUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" && parsed.hostname === "svivva.com";
+    const host = parsed.hostname.replace(/^www\./, "");
+    return parsed.protocol === "https:" && host === "zzaizzai.com";
   } catch {
     return false;
   }
@@ -78,8 +79,8 @@ export async function POST() {
       url: siteUrl,
       ok: productionOk,
       action: productionOk
-        ? "svivva.com is the canonical production URL"
-        : "Set NEXT_PUBLIC_SITE_URL=https://svivva.com in Vercel",
+        ? "zzaizzai.com is the canonical production URL"
+        : "Set NEXT_PUBLIC_SITE_URL=https://zzaizzai.com in Vercel",
     });
 
     const stripeKeysOk = hasStripeConfigured();
@@ -158,7 +159,7 @@ export async function POST() {
       actions.push("Open the Stripe card in Orbit and save sk_live_* + pk_live_* keys.");
     if (!stripeWebhookOk && stripeKeysOk)
       actions.push(`Optional: add Stripe webhook URL: ${siteUrl}/api/stripe/webhook.`);
-    if (!productionOk) actions.push("Set Vercel NEXT_PUBLIC_SITE_URL to https://svivva.com.");
+    if (!productionOk) actions.push("Set Vercel NEXT_PUBLIC_SITE_URL to https://zzaizzai.com.");
     if (unpublished.length) {
       actions.push(
         `${unpublished.length} broken/risky indexed tool pages were unpublished so Google stops seeing them.`,

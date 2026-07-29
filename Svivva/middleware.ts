@@ -10,7 +10,7 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
 }
 
 function canonicalSiteUrl(): URL | null {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://svivva.com";
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://zzaizzai.com";
   try {
     return new URL(raw);
   } catch {

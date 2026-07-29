@@ -8,7 +8,7 @@
  *   2. Admin passcode cookie via POST /api/auth/admin-code (default 272727)
  *
  * Config (env or .env.orbit — see scripts/orbit.env.example):
- *   SVIVVA_URL=https://svivva.com
+ *   SVIVVA_URL=https://zzaizzai.com
  *   ORBIT_INTERNAL_SECRET=...     (optional if admin code works)
  *   ORBIT_ADMIN_CODE=272727       (optional override)
  */
@@ -22,7 +22,7 @@ const repoRoot = resolve(__dirname, "..");
 
 loadOrbitEnv();
 
-const SITE = (process.env.SVIVVA_URL || "https://svivva.com").replace(/\/$/, "");
+const SITE = (process.env.SVIVVA_URL || "https://zzaizzai.com").replace(/\/$/, "");
 
 function die(msg) {
   console.error(`\n✖ ${msg}\n`);

@@ -91,7 +91,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     "@type": "WebApplication",
     name: tool.title,
     description: tool.metaDescription || tool.content.slice(0, 160),
-    url: `https://svivva.com/tools/${tool.slug}`,
+    url: `https://zzaizzai.com/tools/${tool.slug}`,
     applicationCategory: tool.category,
     offers: {
       "@type": "Offer",

@@ -1,48 +1,86 @@
-# Connect your domain (without Replit)
+# Connect zzaizzai.com (GoDaddy → Vercel)
 
-## What “connect to Cursor” really means
+## Important
 
-**Your domain cannot point at Cursor.** Cursor is an app on your computer for editing code. It has no public URL and cannot host `yoursite.com`.
+**Your domain cannot point at Cursor.** Cursor is an editor. The public site runs on **Vercel** (or another host). GoDaddy only holds DNS that points at that host.
 
-What you want is:
+| Piece | Role |
+| --- | --- |
+| **Cursor** | Edit code, commit, push |
+| **Vercel** | Hosts the live Next.js app (`Svivva/` root directory) |
+| **GoDaddy** | DNS for `zzaizzai.com` → Vercel |
 
-| Piece                                                         | Role                                                                    |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| **Cursor**                                                    | Edit code on your machine; run Git; sometimes run deploy CLI.           |
-| **A host** (Vercel, Netlify, Cloudflare Pages, Railway, etc.) | Runs the live site and gives you DNS targets for your domain.           |
-| **GoDaddy**                                                   | DNS only: points your domain at **that host**, not at Cursor or Replit. |
+## Your values
 
-So: **leave Replit for hosting**, pick a host, point GoDaddy there. You still use **Cursor** to work on the project every day.
+| What | Value |
+| --- | --- |
+| Domain | `zzaizzai.com` |
+| Host | Vercel |
+| GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
+| App root on Vercel | `Svivva` |
 
----
+## Cutover checklist
 
-## Moving off Replit (domain was on Replit)
+### 1. Vercel — add the domain
 
-1. **Pick where the site will live** (examples):
-   - **Static / frontend** (React, Vite, etc.): **Vercel**, **Netlify**, or **Cloudflare Pages**.
-   - **Full server + DB**: **Railway**, **Render**, **Fly.io**, or keep Replit until you migrate the backend.
+1. Open [vercel.com](https://vercel.com) → your Svivva project → **Settings → Domains**
+2. Add **`zzaizzai.com`** and **`www.zzaizzai.com`**
+3. Copy the DNS records Vercel shows (usually):
+   - Apex `zzaizzai.com`: **A** → `76.76.21.21` (confirm in Vercel UI)
+   - `www`: **CNAME** → `cname.vercel-dns.com` (confirm in Vercel UI)
 
-2. **Put the code on GitHub** (from Cursor: commit + push), or use the host’s “import from Replit” / upload flow if they offer it.
+### 2. GoDaddy — point DNS at Vercel
 
-3. **Deploy on the new host** and add your **custom domain** there. The host will show **new** DNS records (CNAME / A / ALIAS).
+1. GoDaddy → **My Products → Domains → zzaizzai.com → DNS**
+2. Remove old Replit / parking / conflicting **A** / **CNAME** records for `@` and `www`
+3. Add the records Vercel gave you
+4. Wait for DNS (often minutes; can take up to 48h)
 
-4. **In GoDaddy → DNS**: **Remove or replace** the records that pointed at **Replit**. Add the records the **new host** gives you. Only one place should “own” the domain for the app.
+### 3. Vercel — production env
 
-5. **In Replit**: Remove the custom domain from the Repl (optional but avoids confusion) once the new site works.
+Set (or update) these for **Production**:
 
-6. **Secrets**: Copy API keys from **Replit Secrets** into the new host’s **environment variables**.
+```bash
+NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
+```
 
-Fill in when you know them:
+Also update anything that embeds the old domain:
 
-| What                 | Your value         |
-| -------------------- | ------------------ |
-| Your domain          | `________________` |
-| New host             | `________________` |
-| GitHub repo (if any) | `________________` |
+- **Stripe** webhook: `https://zzaizzai.com/api/stripe/webhook`
+- **GSC OAuth** redirect: `https://zzaizzai.com/api/gsc/oauth/callback`
+- **Auth / OIDC** callback URLs if you use them
+- Redeploy after env changes
 
----
+### 4. In-app Marketing → Traffic Setup
+
+1. Sign in as admin → **Dashboard → Marketing** (or Connections Hub)
+2. Set **GoDaddy domain** to `zzaizzai.com`
+3. Paste GoDaddy API key + secret ([developer.godaddy.com/keys](https://developer.godaddy.com/keys))
+4. Set **Google site URL** to `https://zzaizzai.com` (or `sc-domain:zzaizzai.com`)
+5. Reconnect GSC / submit sitemap for the **new** property
+
+### 5. Search Console + Analytics
+
+1. Add `zzaizzai.com` (or domain property) in [Google Search Console](https://search.google.com/search-console)
+2. Verify ownership (DNS TXT or HTML tag → `GOOGLE_SITE_VERIFICATION`)
+3. Submit `https://zzaizzai.com/sitemap.xml`
+4. In GA4, add `zzaizzai.com` as a data stream / allowed domain if needed
+
+### 6. Optional: keep svivva.com
+
+If you still own `svivva.com`, in Vercel add it as a domain and set a **301 redirect** to `zzaizzai.com` so old links and SEO equity move over.
+
+## Verify
+
+```bash
+curl -sI https://zzaizzai.com | head -15
+curl -sL https://zzaizzai.com/sitemap.xml | head -20
+```
+
+You should see Vercel headers and sitemap URLs under `https://zzaizzai.com/...`.
 
 ## Quick problems
 
-- **Domain still opens Replit**: GoDaddy still has old records; wait for DNS propagation after you change them.
-- **“I want it only in Cursor”**: You can run the app **locally** in Cursor (`localhost`), but the **public** domain always needs a **host on the internet**.
+- **Domain still shows parking / old host**: GoDaddy DNS not updated or not propagated yet.
+- **SSL pending on Vercel**: DNS not pointing at Vercel yet — wait until Vercel shows the domain as Valid.
+- **“I want it only in Cursor”**: Local `localhost` is fine for development; the public domain always needs Vercel (or another host).

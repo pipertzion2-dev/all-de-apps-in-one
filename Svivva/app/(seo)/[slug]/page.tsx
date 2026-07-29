@@ -71,7 +71,7 @@ function isMiniApp(page: LandingPage): boolean {
   return !!page.toolUrl?.startsWith("replit:");
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
 function hubLabel(hubPath: string): string {
   if (hubPath === "/ai-tools-hub") return "AI Tools Hub";

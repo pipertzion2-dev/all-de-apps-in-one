@@ -36,9 +36,9 @@ function CopyBlock({ code, label }: { code: string; label: string }) {
 }
 
 export default function BadgePage() {
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://svivva.com";
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://zzaizzai.com";
   const badgeUrl = `${baseUrl}/api/badge`;
-  const siteUrl = "https://svivva.com";
+  const siteUrl = "https://zzaizzai.com";
 
   const badges = [
     {

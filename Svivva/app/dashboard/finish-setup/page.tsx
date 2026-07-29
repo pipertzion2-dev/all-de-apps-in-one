@@ -20,7 +20,7 @@ import { authFetch } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const VERCEL_ENV = `NEXT_PUBLIC_SITE_URL=https://svivva.com
+const VERCEL_ENV = `NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 NEXTAUTH_SECRET=generate-a-strong-random-secret
 ADMIN_USER_ID=your-admin-user-id
@@ -151,7 +151,7 @@ export default function FinishSetupPage() {
   }, []);
 
   const checks = useMemo(() => {
-    const siteOk = health?.siteUrl === "https://svivva.com";
+    const siteOk = health?.siteUrl === "https://zzaizzai.com";
     const dbOk = !!health?.database?.connected;
     const stripeOk = !!(health?.environment?.hasStripe || secrets?.effective?.stripeSecret);
     const webhookOk = !!(
@@ -224,7 +224,7 @@ export default function FinishSetupPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
-            <StatusPill ok={checks.siteOk} label="svivva.com URL" />
+            <StatusPill ok={checks.siteOk} label="zzaizzai.com URL" />
             <StatusPill ok={checks.dbOk} label="Database" />
             <StatusPill ok={checks.stripeOk} label="Stripe keys" />
             <StatusPill ok={checks.webhookOk} label="Stripe webhook" />
@@ -262,7 +262,7 @@ export default function FinishSetupPage() {
         <SetupStep
           number={3}
           title="Connect Stripe"
-          detail="Copy live API keys and add webhook URL https://svivva.com/api/stripe/webhook."
+          detail="Copy live API keys and add webhook URL https://zzaizzai.com/api/stripe/webhook."
           ok={checks.stripeOk && checks.webhookOk}
           href="https://dashboard.stripe.com/apikeys"
           external

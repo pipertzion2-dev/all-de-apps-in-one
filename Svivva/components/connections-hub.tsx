@@ -312,7 +312,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
   });
 
   const BASE_URL =
-    typeof window !== "undefined" ? `https://${window.location.hostname}` : "https://svivva.com";
+    typeof window !== "undefined" ? `https://${window.location.hostname}` : "https://zzaizzai.com";
 
   const connectedCount = [
     true, // IndexNow = always auto
@@ -449,10 +449,10 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
                 </div>
                 <PlainInput
                   label="Your Site URL"
-                  placeholder="https://svivva.com"
+                  placeholder="https://zzaizzai.com"
                   value={googleSiteUrl}
                   onChange={setGoogleSiteUrl}
-                  helpText="The URL you verified in Google Search Console (e.g. https://svivva.com)"
+                  helpText="The URL you verified in Google Search Console (e.g. https://zzaizzai.com)"
                 />
                 {!googleSiteUrl && (
                   <button
@@ -509,7 +509,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
                       key
                     </li>
                     <li>Copy the Key and Secret shown below</li>
-                    <li>Enter your domain name (e.g. svivva.com)</li>
+                    <li>Enter your domain name (e.g. zzaizzai.com)</li>
                   </ol>
                 </div>
                 <SecretInput

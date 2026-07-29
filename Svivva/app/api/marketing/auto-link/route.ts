@@ -7,7 +7,7 @@ import { submitSitemapToGSC } from "@/lib/google-indexing";
 import { ok, serverError } from "@/lib/http-response";
 import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://svivva.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 const GODADDY_API = "https://api.godaddy.com/v1";
 
 function extractDomain(url: string): string | null {

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 /** Canonical public site URL for server-side code (sitemaps, pings, Orbit, APIs). */
-const DEFAULT_SITE = "https://svivva.com";
+const DEFAULT_SITE = "https://zzaizzai.com";
 
 function normalizeSiteUrl(raw: string): string {
   const t = raw.trim().replace(/\/$/, "");
@@ -19,7 +19,7 @@ export function getSiteHostname(): string {
   try {
     return new URL(getSiteUrl()).hostname;
   } catch {
-    return "svivva.com";
+    return "zzaizzai.com";
   }
 }
 

@@ -76,4 +76,4 @@ If `git push` says OAuth cannot update **workflow** files, use SSH or a Personal
 
 ### Custom domain (GoDaddy, etc.)
 
-After the site is live on `*.vercel.app`: Vercel → **Project → Domains** → add your domain → paste the DNS records at your registrar.
+Production domain: **`zzaizzai.com`**. After the site is live on `*.vercel.app`: Vercel → **Project → Domains** → add `zzaizzai.com` + `www` → paste the DNS records at GoDaddy. Set `NEXT_PUBLIC_SITE_URL=https://zzaizzai.com`. Full checklist: **`.cursor/CONNECT.md`** and **`Svivva/docs/DOMAIN_ZZAIZZAI.md`**.

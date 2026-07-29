@@ -17,7 +17,7 @@ for (const name of [".env.orbit", ".env"]) {
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
   }
 }
-const SITE = (process.env.SVIVVA_URL || "https://svivva.com").replace(/\/$/, "");
+const SITE = (process.env.SVIVVA_URL || "https://zzaizzai.com").replace(/\/$/, "");
 const SECRET = process.env.ORBIT_INTERNAL_SECRET;
 if (!SECRET) {
   console.error("Missing ORBIT_INTERNAL_SECRET");
