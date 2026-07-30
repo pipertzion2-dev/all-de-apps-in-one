@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { z } from "zod";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import {
@@ -26,9 +26,9 @@ function toPatchValue(raw: string | undefined): string | null | undefined {
   return t.length === 0 ? null : t;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const row = await getPlatformRuntimeSecretsRow();
@@ -61,9 +61,9 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(request)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const json = await request.json().catch(() => null);

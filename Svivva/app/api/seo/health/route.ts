@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { db } from "@/lib/db";
 import { seedCredentials, blogPosts, seoLandingPages } from "@/lib/schema";
@@ -34,8 +34,8 @@ async function fetchText(
   }
 }
 
-export async function GET() {
-  if (!(await isOrbitAdminAllowed())) {
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

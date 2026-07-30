@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { healOrphanInternalLinks, buildInternalLinkMap } from "@/lib/seo/internal-links/graph";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
-  if (!(await isOrbitAdminAllowed())) {
+export async function POST(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const heal = await healOrphanInternalLinks();

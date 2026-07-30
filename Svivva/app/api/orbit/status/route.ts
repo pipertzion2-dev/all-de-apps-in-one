@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, isNotNull, desc } from "drizzle-orm";
@@ -16,9 +16,9 @@ import {
   computeIndexHealthScore,
 } from "@/lib/orbit/marketing-targets";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const [

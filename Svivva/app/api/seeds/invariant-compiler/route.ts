@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 
@@ -154,7 +154,7 @@ Extract all behavioral invariants from the spec (focusing on the requested types
 
 export async function POST(req: Request) {
   try {
-    if (!(await isOrbitAdminAllowed())) {
+    if (!(await isOrbitAdminAllowed(req))) {
       return NextResponse.json({ error: "Admin access required." }, { status: 401 });
     }
 

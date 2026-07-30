@@ -9,8 +9,8 @@ import { forbidden, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  if (!(await isOrbitAdminAllowed())) return forbidden();
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
   const tasks = await db.select().from(growthTasks).orderBy(desc(growthTasks.runAt)).limit(100);
   return ok({ tasks });

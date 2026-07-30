@@ -17,9 +17,12 @@ export async function hasAdminAccess(): Promise<boolean> {
 
 /** Cookie set by POST /api/auth/admin-code when passcode matches. */
 export function adminAccessCookieOptions() {
+  const onVercel = process.env.VERCEL === "1";
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // HTTPS on Vercel; allow HTTP in local production builds via COOKIE_INSECURE=1
+    secure:
+      onVercel || (process.env.NODE_ENV === "production" && process.env.COOKIE_INSECURE !== "1"),
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 30,
     path: "/",

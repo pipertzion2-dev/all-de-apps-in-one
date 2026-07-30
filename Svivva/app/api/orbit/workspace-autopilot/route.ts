@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seoLandingPages } from "@/lib/schema";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
@@ -61,9 +61,9 @@ function isRiskyIndexedTool(title: string, slug: string): boolean {
   );
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     await hydratePlatformSecrets();

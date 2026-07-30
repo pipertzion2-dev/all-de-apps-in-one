@@ -6,9 +6,9 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { normalizeGodaddyDomain } from "@/lib/godaddy-domain";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
@@ -61,7 +61,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(request)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";

@@ -50,6 +50,8 @@ import {
   Search,
   Smartphone,
   TrendingUp,
+  Calculator,
+  Factory,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
@@ -91,6 +93,18 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/hypothesis",
         icon: FlaskConical,
         proOnly: true,
+      },
+      {
+        title: "Hybridization",
+        desc: "Scientific calculator",
+        href: "/dashboard/hybridization",
+        icon: Calculator,
+      },
+      {
+        title: "Manufacture Studio",
+        desc: "Hardware path",
+        href: "/dashboard/manufacture",
+        icon: Factory,
       },
       {
         title: "Security",
@@ -185,6 +199,19 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Design a product",
         href: "/dashboard/hardware-builder",
         icon: Box,
+      },
+      {
+        title: "Hybridization",
+        desc: "Scientific calculator",
+        href: "/dashboard/hybridization",
+        icon: Calculator,
+        highlight: true,
+      },
+      {
+        title: "Manufacture Studio",
+        desc: "Idea → factory guide",
+        href: "/dashboard/manufacture",
+        icon: Factory,
       },
       {
         title: "Hypothesis Lab",
