@@ -44,6 +44,10 @@ const SvivvaArtifact = dynamic(
   () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
   { ssr: false },
 );
+const ZzaiBouquetScene = dynamic(
+  () => import("@/components/zzai-bouquet-scene").then((m) => m.ZzaiBouquetScene),
+  { ssr: false },
+);
 const features = [
   {
     icon: Shield,
@@ -592,21 +596,24 @@ export default function LandingPage() {
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+              <div className="flex flex-col items-center gap-2">
+                <ZzaiBouquetScene
+                  mode={mode}
+                  size={300}
+                  className={
+                    mode === "digital"
+                      ? "drop-shadow-[0_0_36px_rgba(0,229,255,0.35)]"
+                      : "drop-shadow-[0_0_36px_rgba(255,43,214,0.35)]"
+                  }
+                />
+                <p
+                  className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#00E5FF]/90" : "text-[#FF2BD6]/90"}`}
+                >
+                  SVIVVA
+                </p>
+              </div>
               {mode === "digital" ? (
                 <>
-                  <div className="flex flex-col items-center gap-3">
-                    <Image
-                      src={zzaiLogo}
-                      alt="ZZAI"
-                      width={160}
-                      height={160}
-                      className="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_28px_rgba(0,229,255,0.45)]"
-                      priority
-                    />
-                    <p className="text-xs sm:text-sm font-bold tracking-[0.35em] text-[#00E5FF]/90">
-                      SVIVVA
-                    </p>
-                  </div>
                   <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                     From seed{" "}
                     <span
@@ -666,19 +673,6 @@ export default function LandingPage() {
                 </>
               ) : (
                 <>
-                  <div className="flex flex-col items-center gap-3">
-                    <Image
-                      src={zzaiLogo}
-                      alt="ZZAI"
-                      width={160}
-                      height={160}
-                      className="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_28px_rgba(255,43,214,0.45)]"
-                      priority
-                    />
-                    <p className="text-xs sm:text-sm font-bold tracking-[0.35em] text-[#FF2BD6]/90">
-                      SVIVVA
-                    </p>
-                  </div>
                   <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                     From seed{" "}
                     <span
