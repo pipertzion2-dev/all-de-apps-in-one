@@ -12,8 +12,9 @@ import {
   type ScientificDepth,
   type SchematicInput,
 } from "@/lib/hybridization/scientific-engine";
+import { FLAGSHIP_PRESETS } from "@/lib/hybridization/manufacture-plan";
 
-export const maxDuration = 120;
+export const maxDuration = 180;
 
 const physicalPropertiesSchema = z.object({
   material: z.string().optional(),
@@ -57,6 +58,8 @@ const reqSchema = z
     schematicB: schematicSchema.optional(),
     systemA: looseSystemSchema.optional(),
     systemB: looseSystemSchema.optional(),
+    /** Load a built-in flagship preset (e.g. iphone-17-promax-vc). */
+    presetId: z.string().optional(),
     hybridizationMode: z
       .enum(["complementary", "antagonistic", "emergent", "biomimetic"])
       .optional()
@@ -66,10 +69,12 @@ const reqSchema = z
       .enum(["prototype", "research", "production"])
       .optional()
       .default("prototype"),
-    /** When true, skip LLM and return calculator-only (instant). */
     calculatorOnly: z.boolean().optional().default(false),
+    /** Grand automation: production-depth manufacture plan + richer hybrids. */
+    grand: z.boolean().optional().default(false),
   })
   .superRefine((val, ctx) => {
+    if (val.presetId) return;
     if (!val.schematicA && !val.systemA) {
       ctx.addIssue({ code: "custom", message: "schematicA or systemA required", path: ["schematicA"] });
     }
@@ -78,9 +83,14 @@ const reqSchema = z
     }
   });
 
-const SYSTEM_PROMPT = `You are an elite Cross-Domain Schematic Hybridization Engine with deep expertise in materials science, topology, graph theory, and multi-physics simulation. You specialize in finding non-obvious structural and functional parallels between hardware systems from completely different engineering domains — and synthesizing them into genuinely novel hybrid architectures.
+const SYSTEM_PROMPT = `You are an elite Cross-Domain Schematic Hybridization & Manufacturing Automation Engine.
+You design flagship-grade hardware hybrids at the sophistication of smartphone vapor-chamber cool modules (e.g. iPhone Pro Max class thin two-phase chambers), phononic heatsinks, and SMA interconnects.
 
-CRITICAL: Return only valid JSON. No markdown. No prose outside the JSON structure.`;
+You MUST:
+- Ground every claim in real physics (Fourier, two-phase wick capillary limit, CTE, Maxwell, etc.)
+- Deliver manufacturable detail: BOM hints, process sequence, DFM, suppliers classes, qual tests
+- Prefer emergent properties that neither parent has alone
+- Return ONLY valid JSON — no markdown`;
 
 function buildUserPrompt(
   schematicA: SchematicInput,
@@ -89,29 +99,33 @@ function buildUserPrompt(
   targetApplication: string,
   depth: string,
   calculatorSummary: string,
+  manufacturePlanSummary: string,
+  grand: boolean,
 ): string {
   return `SCHEMATIC A — "${schematicA.name}"
-Domain: ${schematicA.domain}
-Topology: ${schematicA.topology}
-Core Components: ${schematicA.coreComponents.join(", ")}
-Physical Properties: ${JSON.stringify(schematicA.physicalProperties ?? {})}
+Domain: ${schematicA.domain} | Topology: ${schematicA.topology}
+Components: ${schematicA.coreComponents.join(", ")}
+Props: ${JSON.stringify(schematicA.physicalProperties ?? {})}
 Constraints: ${(schematicA.constraints ?? []).join(", ") || "none"}
 
 SCHEMATIC B — "${schematicB.name}"
-Domain: ${schematicB.domain}
-Topology: ${schematicB.topology}
-Core Components: ${schematicB.coreComponents.join(", ")}
-Physical Properties: ${JSON.stringify(schematicB.physicalProperties ?? {})}
+Domain: ${schematicB.domain} | Topology: ${schematicB.topology}
+Components: ${schematicB.coreComponents.join(", ")}
+Props: ${JSON.stringify(schematicB.physicalProperties ?? {})}
 Constraints: ${(schematicB.constraints ?? []).join(", ") || "none"}
 
-HYBRIDIZATION MODE: ${mode}
-TARGET APPLICATION: ${targetApplication}
-SCIENTIFIC DEPTH: ${depth}
+MODE: ${mode}
+TARGET: ${targetApplication}
+DEPTH: ${depth}
+GRAND AUTOMATION: ${grand ? "YES — flagship cool-chamber / production class" : "standard"}
 
-DETERMINISTIC CALCULATOR PRE-SCORE (trust these numbers; elaborate scientifically):
+DETERMINISTIC SCORES:
 ${calculatorSummary}
 
-Generate 3-4 hybrid designs. Return this exact JSON structure:
+AUTOMATED MANUFACTURE PLAN (elaborate; do not contradict):
+${manufacturePlanSummary}
+
+Return JSON:
 {
   "topologicalBridge": "...",
   "domainBridgingPrinciple": "...",
@@ -125,18 +139,19 @@ Generate 3-4 hybrid designs. Return this exact JSON structure:
       "emergentProperties": ["..."],
       "performanceGains": { "metric": "value" },
       "biomimeticAnalogue": "...",
-      "manufacturingPathway": "...",
+      "manufacturingPathway": "step-by-step factory route",
       "challenges": ["..."],
       "noveltyScore": 85,
       "patentLandscape": "...",
-      "estimatedRnDMonths": 18,
-      "trlLevel": 3
+      "estimatedRnDMonths": 12,
+      "trlLevel": 6
     }
   ],
   "optimalHybridIndex": 0,
   "requiredCharacterizationTests": ["..."],
-  "referenceDesigns": ["..."],
-  "nextSteps": ["..."]
+  "referenceDesigns": ["flagship phone VC / published analogues"],
+  "nextSteps": ["actionable"],
+  "manufactureNarrative": "How to build this at scale in plain language"
 }`;
 }
 
@@ -168,21 +183,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data = parsed.data;
+    let data = parsed.data;
+    if (data.presetId) {
+      const preset = FLAGSHIP_PRESETS.find((p) => p.id === data.presetId);
+      if (!preset) {
+        return NextResponse.json({ error: `Unknown presetId: ${data.presetId}` }, { status: 400 });
+      }
+      data = {
+        ...data,
+        systemA: { ...preset.systemA, description: preset.systemA.description },
+        systemB: { ...preset.systemB, description: preset.systemB.description },
+        targetApplication: preset.target,
+        hybridizationMode: preset.mode,
+        scientificDepth: preset.depth,
+        grand: true,
+      };
+    }
+
     const admin = await isOrbitAdminAllowed(req);
     const session = await getSession();
-    // Instant scientific calculator is public; AI synthesis needs sign-in or Orbit admin.
     if (!data.calculatorOnly && !admin && !session) {
       return NextResponse.json(
         { error: "Sign in required for AI synthesis (instant calculator is free)." },
         { status: 401 },
       );
     }
+
     const schematicA = toSchematic(data.schematicA, data.systemA);
     const schematicB = toSchematic(data.schematicB, data.systemB);
     const hybridizationMode = data.hybridizationMode as HybridizationMode;
-    const scientificDepth = data.scientificDepth as ScientificDepth;
+    const scientificDepth = (data.grand ? "production" : data.scientificDepth) as ScientificDepth;
     const targetApplication = data.targetApplication;
+    const grand = !!data.grand || !!data.presetId;
 
     const scientific = runScientificHybridization({
       schematicA,
@@ -190,6 +222,7 @@ export async function POST(req: NextRequest) {
       hybridizationMode,
       targetApplication,
       scientificDepth,
+      grand,
     });
 
     const calculatorPayload = {
@@ -199,10 +232,14 @@ export async function POST(req: NextRequest) {
       hybrids: scientific.automaticHybrids,
       optimalHybridIndex: 0,
       requiredCharacterizationTests: scientific.requiredCharacterizationTests,
-      referenceDesigns: [],
+      referenceDesigns: scientific.grand
+        ? ["Flagship smartphone vapor chamber cool modules", "Published Cu wick / two-phase chamber literature"]
+        : [],
       nextSteps: scientific.nextSteps,
       scientific,
+      manufacturePlan: scientific.manufacturePlan,
       source: "calculator" as const,
+      grand,
     };
 
     if (data.calculatorOnly) {
@@ -210,20 +247,27 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const calculatorSummary = JSON.stringify(scientific.scores);
       const userText = buildUserPrompt(
         schematicA,
         schematicB,
         hybridizationMode,
         targetApplication,
         scientificDepth,
-        calculatorSummary,
+        JSON.stringify(scientific.scores),
+        JSON.stringify({
+          codename: scientific.manufacturePlan.productCodename,
+          class: scientific.manufacturePlan.class,
+          bomCount: scientific.manufacturePlan.bom.length,
+          steps: scientific.manufacturePlan.processFlow.map((s) => s.name),
+          cost: scientific.manufacturePlan.costModel,
+        }),
+        grand,
       );
 
       const resp = await openai.chat.completions.create({
         model: DEFAULT_MODEL,
-        temperature: 0.85,
-        max_tokens: 4096,
+        temperature: grand ? 0.7 : 0.85,
+        max_tokens: grand ? 6000 : 4096,
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
@@ -236,9 +280,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ...calculatorPayload,
         ...ai,
-        // Always keep deterministic scores + interpretation
         scientific,
+        manufacturePlan: scientific.manufacturePlan,
         source: "ai+calculator",
+        grand,
         hybrids:
           Array.isArray(ai.hybrids) && (ai.hybrids as unknown[]).length > 0
             ? ai.hybrids

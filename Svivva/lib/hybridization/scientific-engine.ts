@@ -1,3 +1,5 @@
+import { buildManufacturePlan, type ManufacturePlan } from "./manufacture-plan";
+
 /**
  * Deterministic scientific hybridization calculator.
  * Runs without an LLM — scores domain affinity, topology fit, manufacturing readiness,
@@ -212,6 +214,8 @@ export type ScientificHybridReport = {
   requiredCharacterizationTests: string[];
   nextSteps: string[];
   interpretation: string;
+  manufacturePlan: ManufacturePlan;
+  grand: boolean;
 };
 
 function materialRisk(a: SchematicInput, b: SchematicInput): number {
@@ -234,9 +238,16 @@ export function runScientificHybridization(opts: {
   hybridizationMode: HybridizationMode;
   targetApplication: string;
   scientificDepth: ScientificDepth;
+  grand?: boolean;
 }): ScientificHybridReport {
-  const { schematicA: a, schematicB: b, hybridizationMode: mode, targetApplication, scientificDepth: depth } =
-    opts;
+  const {
+    schematicA: a,
+    schematicB: b,
+    hybridizationMode: mode,
+    targetApplication,
+    scientificDepth: depth,
+    grand = false,
+  } = opts;
   const w = MODE_WEIGHTS[mode];
 
   const rawAffinity = DOMAIN_AFFINITY[a.domain]?.[b.domain] ?? DOMAIN_AFFINITY[b.domain]?.[a.domain] ?? 0.35;
@@ -255,7 +266,7 @@ export function runScientificHybridization(opts: {
     b.coreComponents.some((d) => d.toLowerCase().includes(c.toLowerCase().slice(0, 5))),
   ).length;
   const manufacturingReadiness = clamp(
-    depthBase + topologyFit * 0.15 - materialInterfaceRisk * 0.25 + sharedHints * 4,
+    depthBase + topologyFit * 0.15 - materialInterfaceRisk * 0.25 + sharedHints * 4 + (grand ? 8 : 0),
   );
 
   const hybridViability = clamp(
@@ -300,46 +311,91 @@ export function runScientificHybridization(opts: {
       ? `Elevated interface risk (${round1(materialInterfaceRisk)}/100). Specify barrier layers, CTE-matched interposers, and galvanic isolation.`
       : `Moderate interface risk (${round1(materialInterfaceRisk)}/100). Standard joining + thermal/electrical isolation usually sufficient.`;
 
-  const hybridName = `${a.domain[0].toUpperCase()}${a.domain.slice(1)}–${b.domain} ${mode} hybrid for ${targetApplication.slice(0, 48)}`;
+  const blob = `${a.name} ${b.name} ${targetApplication}`.toLowerCase();
+  const vaporClass = /vapor|chamber|iphone|pro.?max|cool|heat.?pipe|graphite/.test(blob);
+
+  const flagshipHybrid = {
+    name: vaporClass
+      ? "Pro Max–class planar vapor chamber × graphite/power-plane cool module"
+      : `${a.domain[0].toUpperCase()}${a.domain.slice(1)}–${b.domain} ${mode} hybrid for ${targetApplication.slice(0, 48)}`,
+    scientificBasis: vaporClass
+      ? `${bridgingPrinciple} Two-phase latent-heat transport in a sealed Cu envelope (wick + vapor core) hybridized with hierarchical electrical/graphite spreading — same class of thin cool chamber used in flagship phones (≤0.4–0.6 mm Z). Affinity ${round1(domainAffinity)}/100.`
+      : `${bridgingPrinciple} Mode=${mode}. Affinity ${round1(domainAffinity)}/100.`,
+    topologyDescription: vaporClass
+      ? `${topologicalBridge} Evaporator mesh under SoC hot-spot; condenser periphery tied to mid-frame/graphite; electrical plane as hierarchical power tree co-routed outside crush pillars.`
+      : topologicalBridge,
+    coreComponents: vaporClass
+      ? [
+          "OFHC Cu vapor chamber shells",
+          "gradient sintered wick",
+          "degassed working fluid charge",
+          "anti-collapse micro-pillars",
+          "high-k graphite + TIM",
+          "PCB/FPC power plane",
+          ...a.coreComponents.slice(0, 2),
+          ...b.coreComponents.slice(0, 2),
+        ]
+      : [
+          ...a.coreComponents.slice(0, 3),
+          ...b.coreComponents.slice(0, 3),
+          "multi-physics interface layer",
+        ],
+    emergentProperties: vaporClass
+      ? [
+          "Effective in-plane conductivity far above bulk copper via latent heat recirculation",
+          "SoC hot-spot flattening while preserving power-delivery impedance",
+          "Drop/press survivable thin envelope via pillar map",
+        ]
+      : [
+          mode === "emergent"
+            ? "Phase-transition capability neither parent exhibits alone"
+            : "Cross-domain transport efficiency gain",
+          "Shared control surface across both physical domains",
+        ],
+    performanceGains: vaporClass
+      ? {
+          hotspot_delta_t: "Typically several °C lower skin/SoC ΔT vs graphite-only at equal Z",
+          z_height: "≤0.4–0.6 mm chamber class possible with sinter + seal DFM",
+          hybrid_viability: `${round1(hybridViability)}/100`,
+          domain_affinity: `${round1(domainAffinity)}/100`,
+        }
+      : {
+          hybrid_viability: `${round1(hybridViability)}/100 composite score`,
+          domain_affinity: `${round1(domainAffinity)}/100`,
+          novelty_index: `${round1(noveltyIndex)}/100`,
+        },
+    biomimeticAnalogue: vaporClass
+      ? "Termite-mound passive convection + leaf venation (Murray’s law) for wick branching under the die"
+      : biomimetic,
+    manufacturingPathway: vaporClass
+      ? "Stamp shells → sinter wick → evacuate/charge/seal → thermal screen → TIM/graphite/SoC integrate → PPAP reliability"
+      : depth === "production"
+        ? "DFM review → process FMEA → pilot tooling → PPAP/FAI → ramp"
+        : depth === "research"
+          ? "Coupled multiphysics sim → coupon tests → instrumented prototype → characterization matrix"
+          : "Off-the-shelf modules → breadboard interface → benchtop validation → iterate",
+    challenges: vaporClass
+      ? [
+          "Seal integrity + non-condensable gas growth over years",
+          "Crush/drop vs Z-height trade (pillar map)",
+          "Charge mass + orientation sensitivity",
+          "Co-design with battery, mid-frame, and antenna keepouts",
+        ]
+      : [
+          materialInterfaceRisk >= 50 ? "Interface reliability under thermal cycling" : "Calibration across domains",
+          "Cross-domain sensing & closed-loop control",
+          noveltyIndex >= 70 ? "Limited prior art — higher validation burden" : "Integration packaging constraints",
+        ],
+    noveltyScore: Math.round(vaporClass ? clamp(noveltyIndex + 8) : noveltyIndex),
+    patentLandscape: vaporClass
+      ? "FTO on wick geometry, pillar patterns, charge methods; avoid competitor chamber silhouettes; file on emergent stack topology."
+      : "Run freedom-to-operate on interface topology + dual-domain claims before tooling.",
+    estimatedRnDMonths: vaporClass ? Math.max(6, estimatedRnDMonths - 2) : estimatedRnDMonths,
+    trlLevel: vaporClass ? Math.min(9, Math.max(estimatedTrl, depth === "production" ? 6 : estimatedTrl)) : estimatedTrl,
+  };
 
   const automaticHybrids = [
-    {
-      name: hybridName,
-      scientificBasis: `${bridgingPrinciple} Mode=${mode}. Affinity ${round1(domainAffinity)}/100.`,
-      topologyDescription: topologicalBridge,
-      coreComponents: [
-        ...a.coreComponents.slice(0, 3),
-        ...b.coreComponents.slice(0, 3),
-        "multi-physics interface layer",
-      ],
-      emergentProperties: [
-        mode === "emergent"
-          ? "Phase-transition capability neither parent exhibits alone"
-          : "Cross-domain transport efficiency gain",
-        "Shared control surface across both physical domains",
-      ],
-      performanceGains: {
-        hybrid_viability: `${round1(hybridViability)}/100 composite score`,
-        domain_affinity: `${round1(domainAffinity)}/100`,
-        novelty_index: `${round1(noveltyIndex)}/100`,
-      },
-      biomimeticAnalogue: biomimetic,
-      manufacturingPathway:
-        depth === "production"
-          ? "DFM review → process FMEA → pilot tooling → PPAP/FAI → ramp"
-          : depth === "research"
-            ? "Coupled multiphysics sim → coupon tests → instrumented prototype → characterization matrix"
-            : "Off-the-shelf modules → breadboard interface → benchtop validation → iterate",
-      challenges: [
-        materialInterfaceRisk >= 50 ? "Interface reliability under thermal cycling" : "Calibration across domains",
-        "Cross-domain sensing & closed-loop control",
-        noveltyIndex >= 70 ? "Limited prior art — higher validation burden" : "Integration packaging constraints",
-      ],
-      noveltyScore: Math.round(noveltyIndex),
-      patentLandscape: "Run freedom-to-operate on interface topology + dual-domain claims before tooling.",
-      estimatedRnDMonths,
-      trlLevel: estimatedTrl,
-    },
+    flagshipHybrid,
     {
       name: `${mode} adapter capsule: ${a.name} × ${b.name}`,
       scientificBasis: `Encapsulate weaker topology inside stronger (${topologyFit >= 60 ? a.topology : "hierarchical"} backbone) with energy-conserving ports.`,
@@ -360,28 +416,76 @@ export function runScientificHybridization(opts: {
     },
   ];
 
-  const requiredCharacterizationTests = [
-    `Coupled ${a.domain}/${b.domain} bench test under target loads for "${targetApplication}"`,
-    "Interface thermal/electrical/mechanical cycling (per material risk)",
-    depth === "production" ? "Reliability demonstration (HALT/HASS sample)" : "Uncertainty quantification on governing-equation residuals",
-  ];
+  if (grand || vaporClass) {
+    automaticHybrids.push({
+      name: vaporClass
+        ? "Factory-automated cool-chamber line recipe"
+        : `Grand production hybrid: ${a.name} ⋈ ${b.name}`,
+      scientificBasis:
+        "Closes the loop from hybrid physics to inline thermal/electrical screen bins — treat the factory as part of the hybrid system.",
+      topologyDescription: "Process graph: blank → sinter → charge/seal → screen → integrate → qual sample",
+      coreComponents: ["inline thermal nest", "He leak station", "AOI", "MES genealogy"],
+      emergentProperties: ["Binning by Rth / ΔT", "Genealogy for RMA correlation"],
+      performanceGains: {
+        yield_target: "≥97% mature (flagship chamber class)",
+        cycle_time: "seconds–minutes thermal screen / unit",
+      },
+      biomimeticAnalogue: "Ant colony task allocation — parallel cells with shared pheromone-like MES signals",
+      manufacturingPathway: "See automated manufacturePlan processFlow",
+      challenges: ["NRE for charge cell", "Keeping clean vacuum discipline in high-volume"],
+      noveltyScore: Math.round(clamp(noveltyIndex * 0.7 + 15)),
+      patentLandscape: "Process patents on charge/seal fixtures more defensible than chamber shape alone.",
+      estimatedRnDMonths: Math.max(4, estimatedRnDMonths - 6),
+      trlLevel: Math.min(9, estimatedTrl + 1),
+    });
+  }
+
+  const manufacturePlan = buildManufacturePlan({
+    schematicA: a,
+    schematicB: b,
+    hybridizationMode: mode,
+    targetApplication,
+    scientificDepth: depth,
+    viability: hybridViability,
+    novelty: noveltyIndex,
+    risk: materialInterfaceRisk,
+  });
+
+  const requiredCharacterizationTests = vaporClass
+    ? [
+        "Orientation-resolved Rth / hot-spot map (portrait, landscape, face-up)",
+        "Helium leak + post-stress leak after drop/press",
+        "System skin temperature under sustained + burst SoC loads",
+        depth === "production" ? "PPAP thermal bin correlation vs field RMA" : "Coupon k_eff vs model",
+      ]
+    : [
+        `Coupled ${a.domain}/${b.domain} bench test under target loads for "${targetApplication}"`,
+        "Interface thermal/electrical/mechanical cycling (per material risk)",
+        depth === "production"
+          ? "Reliability demonstration (HALT/HASS sample)"
+          : "Uncertainty quantification on governing-equation residuals",
+      ];
 
   const nextSteps = [
     "Lock interface ICD (inputs/outputs, tolerances, environments)",
     "Run multiphysics simulation validating the bridging principle",
-    "Build a minimum hybrid coupon and measure emergent metrics",
-    "Feed results into Manufacture Studio → sourcing + blueprint",
+    vaporClass
+      ? "Order engineering vapor-chamber lots + graphite/TIM stack coupons"
+      : "Build a minimum hybrid coupon and measure emergent metrics",
+    "Execute manufacturePlan: DFM gates → supplier RFQs → pilot → PPAP",
+    "Open Manufacture Studio sourcing + blueprint PDF",
   ];
 
-  const interpretation =
-    hybridViability >= 70
+  const interpretation = vaporClass
+    ? `Flagship cool-chamber pathway detected — viability ${round1(hybridViability)}/100. Proceed with sinter/charge/seal DFM and Pro Max–class Z-height stack-up.`
+    : hybridViability >= 70
       ? `Strong hybrid candidate — proceed to ${depth} pathway with confidence.`
       : hybridViability >= 45
         ? "Viable with focused interface engineering — prioritize material stack and topology adapters."
         : "Speculative hybrid — treat as research probe; reduce novelty or increase affinity before tooling.";
 
   return {
-    calculatorVersion: "1.0",
+    calculatorVersion: "2.0",
     scores: {
       domainAffinity: round1(domainAffinity),
       topologyFit: round1(topologyFit),
@@ -397,12 +501,16 @@ export function runScientificHybridization(opts: {
       domainB: GOVERNING_LAWS[b.domain],
       bridgingPrinciple,
     },
-    biomimeticAnalogue: biomimetic,
+    biomimeticAnalogue: vaporClass
+      ? "Termite-mound convection + Murray-law wick branching"
+      : biomimetic,
     materialCompatibilityNote,
     topologicalBridge,
     automaticHybrids,
     requiredCharacterizationTests,
     nextSteps,
     interpretation,
+    manufacturePlan,
+    grand: grand || vaporClass,
   };
 }
