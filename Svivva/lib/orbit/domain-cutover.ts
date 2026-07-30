@@ -223,34 +223,75 @@ export async function runDomainCutover(
   };
   summaryLines.push(`✓ GoDaddy domain verified: ${domain} (${vbody.status || "ACTIVE"})`);
 
+  // Domain Forwarding / parking overrides A+CNAME — remove it first.
+  const fwdGet = await godaddyFetch(authHeader, `/domains/${domain}/forwarding`);
+  if (fwdGet.ok) {
+    const fwdDel = await godaddyFetch(authHeader, `/domains/${domain}/forwarding`, {
+      method: "DELETE",
+    });
+    summaryLines.push(
+      fwdDel.ok || fwdDel.status === 404
+        ? "✓ Removed GoDaddy domain forwarding/parking"
+        : `⚠ Could not remove forwarding: ${JSON.stringify(fwdDel.body).slice(0, 160)}`,
+    );
+  } else {
+    summaryLines.push("· No GoDaddy forwarding config (or not readable)");
+  }
+
+  // Replace apex A (PUT replaces all A/@ records)
   const aPut = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`, {
     method: "PUT",
     body: JSON.stringify([{ data: apexA, ttl: 600 }]),
   });
+  // Fallback: PATCH typed records if PUT path rejected
+  const aOk =
+    aPut.ok ||
+    (
+      await godaddyFetch(authHeader, `/domains/${domain}/records`, {
+        method: "PATCH",
+        body: JSON.stringify([{ type: "A", name: "@", data: apexA, ttl: 600 }]),
+      })
+    ).ok;
   dns.apexA = {
-    ok: aPut.ok,
-    detail: aPut.ok
-      ? `@ A → ${apexA}`
-      : `A record failed: ${JSON.stringify(aPut.body).slice(0, 200)}`,
+    ok: aOk,
+    detail: aOk ? `@ A → ${apexA}` : `A record failed: ${JSON.stringify(aPut.body).slice(0, 200)}`,
   };
-  summaryLines.push(aPut.ok ? `✓ ${dns.apexA.detail}` : `✖ ${dns.apexA.detail}`);
+  summaryLines.push(aOk ? `✓ ${dns.apexA.detail}` : `✖ ${dns.apexA.detail}`);
 
   const cPut = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`, {
     method: "PUT",
     body: JSON.stringify([{ data: wwwCname, ttl: 600 }]),
   });
+  const cOk =
+    cPut.ok ||
+    (
+      await godaddyFetch(authHeader, `/domains/${domain}/records`, {
+        method: "PATCH",
+        body: JSON.stringify([{ type: "CNAME", name: "www", data: wwwCname, ttl: 600 }]),
+      })
+    ).ok;
   dns.wwwCname = {
-    ok: cPut.ok,
-    detail: cPut.ok
+    ok: cOk,
+    detail: cOk
       ? `www CNAME → ${wwwCname}`
       : `CNAME failed: ${JSON.stringify(cPut.body).slice(0, 200)}`,
   };
-  summaryLines.push(cPut.ok ? `✓ ${dns.wwwCname.detail}` : `✖ ${dns.wwwCname.detail}`);
+  summaryLines.push(cOk ? `✓ ${dns.wwwCname.detail}` : `✖ ${dns.wwwCname.detail}`);
 
   await godaddyFetch(authHeader, `/domains/${domain}/records`, {
     method: "PATCH",
     body: JSON.stringify([{ type: "TXT", name: "_svivva", data: "zzaizzai-cutover", ttl: 600 }]),
   });
+
+  // Read back what GoDaddy currently has for @ and www
+  const listA = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`);
+  const listC = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`);
+  summaryLines.push(
+    `· GoDaddy readback A/@: ${JSON.stringify(listA.body).slice(0, 180)}`,
+  );
+  summaryLines.push(
+    `· GoDaddy readback CNAME/www: ${JSON.stringify(listC.body).slice(0, 180)}`,
+  );
 
   await db
     .insert(seedCredentials)
