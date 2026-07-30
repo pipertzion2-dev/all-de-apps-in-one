@@ -2,23 +2,28 @@
 
 Production canonical URL is **`https://zzaizzai.com`**.
 
-Code defaults (`getSiteUrl()`, sitemaps, Orbit CLI, Stripe return URLs, etc.) use this host when `NEXT_PUBLIC_SITE_URL` is unset. **Always set the env var on Vercel** so deploys stay explicit:
+## Automatic cutover
+
+Once this code is on the live host:
+
+```bash
+cd Svivva
+npm run domain:cutover
+```
+
+Uses GoDaddy keys from Marketing → Traffic Setup to set:
+
+- `@` **A** → `76.76.21.21` (Vercel)
+- `www` **CNAME** → `cname.vercel-dns.com`
+
+Also updates `seed_credentials` + platform site URL. Adds the domain in Vercel when `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` are set.
+
+API: `POST /api/orbit/domain-cutover` `{ "domain": "zzaizzai.com" }`
+
+## Env
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
 ```
 
-## Host vs registrar
-
-- **Vercel** hosts the app (project root directory = `Svivva`).
-- **GoDaddy** only provides DNS for `zzaizzai.com`.
-- **Cursor** does not host the site and cannot be a DNS target.
-
-Full steps: [`.cursor/CONNECT.md`](../../.cursor/CONNECT.md).
-
-## After DNS is live
-
-1. Redeploy so sitemaps/canonicals rebuild with the new host.
-2. Run Orbit: Traffic Setup → GSC connect → IndexNow / sitemap submit.
-3. Update Stripe webhook + GSC OAuth redirect to `zzaizzai.com`.
-4. If keeping `svivva.com`, 301 redirect it to `zzaizzai.com` in Vercel.
+Full DNS + Vercel checklist: [`.cursor/CONNECT.md`](../../.cursor/CONNECT.md).
