@@ -597,7 +597,7 @@ export default function LandingPage() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
               <div className="flex flex-col items-center gap-2">
-                <ZzaiModeToggle size="lg" showLabels={false} />
+                <ZzaiModeToggle size="lg" showLabels={false} variant="cube" />
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#00E5FF]/90" : "text-[#FF2BD6]/90"}`}
                 >
