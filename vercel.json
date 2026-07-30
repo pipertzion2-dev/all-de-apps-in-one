@@ -3,6 +3,7 @@
   "framework": "nextjs",
   "installCommand": "cd Svivva && npm ci --legacy-peer-deps",
   "buildCommand": "npm run vercel-build",
+  "ignoreCommand": "echo 'Skip root project — deploy via svivva-main-app (Root Directory: Svivva). See README.md.' && exit 0",
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",
