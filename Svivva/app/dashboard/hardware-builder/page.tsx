@@ -38,6 +38,8 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
+import { HybridizationCalculatorPanel } from "@/components/hybridization-calculator-panel";
+import Link from "next/link";
 
 interface BuildStep {
   id: string;
@@ -179,27 +181,6 @@ export default function HardwareBuilderPage() {
   } | null>(null);
   const [sourcingLoading, setSourcingLoading] = useState(false);
 
-  const [showHybridizer, setShowHybridizer] = useState(false);
-  const [systemAName, setSystemAName] = useState("");
-  const [systemADesc, setSystemADesc] = useState("");
-  const [systemBName, setSystemBName] = useState("");
-  const [systemBDesc, setSystemBDesc] = useState("");
-  const [hybridResults, setHybridResults] = useState<{
-    hybrids: {
-      title: string;
-      description: string;
-      fromSystemA: string;
-      fromSystemB: string;
-      emergentBehavior: string;
-      noveltyScore: number;
-      feasibility: string;
-      potentialApplications: string[];
-    }[];
-    sharedRepresentation?: string;
-    blendingStrategy?: string;
-  } | null>(null);
-  const [hybridLoading, setHybridLoading] = useState(false);
-
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [expandedManufacturer, setExpandedManufacturer] = useState<number | null>(null);
 
@@ -328,33 +309,6 @@ export default function HardwareBuilderPage() {
     requirements,
   ]);
 
-  const handleHybridize = useCallback(async () => {
-    if (!systemAName.trim() || !systemBName.trim()) return;
-    setHybridLoading(true);
-    try {
-      const r = await fetch("/api/hardware/hybridize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemA: {
-            name: systemAName,
-            description: systemADesc,
-            components: materials,
-            properties: requirements,
-          },
-          systemB: { name: systemBName, description: systemBDesc },
-        }),
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Hybridization failed");
-      setHybridResults(data);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setHybridLoading(false);
-    }
-  }, [systemAName, systemADesc, systemBName, systemBDesc, materials, requirements]);
-
   const handleDownloadBlueprint = useCallback(async () => {
     setPdfGenerating(true);
     try {
@@ -375,7 +329,7 @@ export default function HardwareBuilderPage() {
           materialSuppliers: sourcingResults?.materialSuppliers || [],
           platforms: sourcingResults?.platforms || [],
           recommendation: sourcingResults?.recommendation || "",
-          hybrids: hybridResults?.hybrids || [],
+          hybrids: [],
         }),
       });
       if (!r.ok) throw new Error("PDF generation failed");
@@ -402,7 +356,6 @@ export default function HardwareBuilderPage() {
     manufacturingMethod,
     budgetRange,
     sourcingResults,
-    hybridResults,
   ]);
 
   const toggleRequirement = (req: string) => {
@@ -903,144 +856,25 @@ export default function HardwareBuilderPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#6B2C4A]/30">
+            <Card className="border-[#FF2BD6]/30">
               <CardHeader>
-                <button
-                  onClick={() => setShowHybridizer(!showHybridizer)}
-                  className="flex items-center justify-between w-full text-left"
-                  data-testid="button-toggle-hybridizer"
-                >
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Merge className="w-5 h-5 text-[#6B2C4A]" />
-                      Cross-Domain Hybridizer
-                    </CardTitle>
-                    <CardDescription>
-                      Combine two systems to discover hybrid innovations
-                    </CardDescription>
-                  </div>
-                  {showHybridizer ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
+                <CardTitle className="flex items-center gap-2">
+                  <Merge className="w-5 h-5 text-[#FF2BD6]" />
+                  Scientific Hybridization
+                </CardTitle>
+                <CardDescription>
+                  Instant domain/topology/TRL scoring plus optional AI synthesis — same engine as
+                  the Hybridization Calculator.
+                </CardDescription>
               </CardHeader>
-              {showHybridizer && (
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2 p-3 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5">
-                      <Label className="text-xs font-medium text-[#5BA8A0]">System A</Label>
-                      <Input
-                        placeholder="e.g., Solar Panel Array"
-                        value={systemAName}
-                        onChange={(e) => setSystemAName(e.target.value)}
-                        data-testid="input-system-a-name"
-                      />
-                      <Textarea
-                        placeholder="Describe the system..."
-                        value={systemADesc}
-                        onChange={(e) => setSystemADesc(e.target.value)}
-                        className="min-h-[60px] text-xs"
-                        data-testid="input-system-a-desc"
-                      />
-                    </div>
-                    <div className="space-y-2 p-3 rounded-lg border border-[#6B2C4A]/20 bg-[#6B2C4A]/5">
-                      <Label className="text-xs font-medium text-[#6B2C4A]">System B</Label>
-                      <Input
-                        placeholder="e.g., Water Filtration System"
-                        value={systemBName}
-                        onChange={(e) => setSystemBName(e.target.value)}
-                        data-testid="input-system-b-name"
-                      />
-                      <Textarea
-                        placeholder="Describe the system..."
-                        value={systemBDesc}
-                        onChange={(e) => setSystemBDesc(e.target.value)}
-                        className="min-h-[60px] text-xs"
-                        data-testid="input-system-b-desc"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleHybridize}
-                    disabled={hybridLoading || !systemAName.trim() || !systemBName.trim()}
-                    className="gap-2 w-full"
-                    style={{ background: "#6B2C4A" }}
-                    data-testid="button-hybridize"
-                  >
-                    {hybridLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Generating hybrids...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4" /> Generate Hybrid Systems
-                      </>
-                    )}
+              <CardContent className="space-y-3">
+                <Link href="/dashboard/hybridization">
+                  <Button className="gap-2 w-full sm:w-auto bg-[#00E5FF] text-black hover:bg-[#00C4DB]">
+                    <Zap className="w-4 h-4" /> Open Hybridization Calculator
                   </Button>
-
-                  {hybridResults && (
-                    <div className="space-y-3 mt-2">
-                      {hybridResults.blendingStrategy && (
-                        <p className="text-xs text-muted-foreground italic p-2 rounded bg-muted/30">
-                          {hybridResults.blendingStrategy}
-                        </p>
-                      )}
-                      {hybridResults.hybrids?.map((h, i) => (
-                        <Card key={i} className="border-[#6B2C4A]/20">
-                          <CardContent className="pt-4 pb-4 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-medium text-sm">{h.title}</h4>
-                              <div className="flex items-center gap-2">
-                                {h.feasibility && (
-                                  <Badge variant="outline" className="text-[10px]">
-                                    {h.feasibility}
-                                  </Badge>
-                                )}
-                                <Badge
-                                  className="text-[10px]"
-                                  style={{ background: `hsl(${h.noveltyScore * 1.2}, 60%, 45%)` }}
-                                >
-                                  {h.noveltyScore}% novel
-                                </Badge>
-                              </div>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{h.description}</p>
-                            <div className="grid gap-1 text-xs mt-1">
-                              <p>
-                                <span className="font-medium text-[#5BA8A0]">From A:</span>{" "}
-                                {h.fromSystemA}
-                              </p>
-                              <p>
-                                <span className="font-medium text-[#6B2C4A]">From B:</span>{" "}
-                                {h.fromSystemB}
-                              </p>
-                              <p className="flex items-start gap-1">
-                                <Zap className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
-                                <span>
-                                  <span className="font-medium">Emergent:</span>{" "}
-                                  {h.emergentBehavior}
-                                </span>
-                              </p>
-                            </div>
-                            {h.potentialApplications?.length > 0 && (
-                              <div className="flex gap-1 flex-wrap mt-1">
-                                {h.potentialApplications.map((app, j) => (
-                                  <Badge key={j} variant="secondary" className="text-[10px]">
-                                    {app}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              )}
+                </Link>
+                <HybridizationCalculatorPanel compact />
+              </CardContent>
             </Card>
 
             <Card className="bg-primary/10 border-primary/30">

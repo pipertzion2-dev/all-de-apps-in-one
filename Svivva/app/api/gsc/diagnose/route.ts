@@ -27,8 +27,8 @@ export type DiagStep = {
   fix?: string;
 };
 
-export async function GET() {
-  if (!(await isOrbitAdminAllowed())) return forbidden();
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
   const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 

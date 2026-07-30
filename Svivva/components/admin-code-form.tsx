@@ -38,6 +38,7 @@ export function AdminCodeForm({
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/orbit/status"] });
       onSuccess?.();
     } catch {
       setError("Something went wrong");

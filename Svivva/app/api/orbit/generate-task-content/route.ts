@@ -90,7 +90,7 @@ Output the full self-contained HTML snippet.`,
 };
 
 export async function GET(request: NextRequest) {
-  const allowed = await isOrbitAdminAllowed();
+  const allowed = await isOrbitAdminAllowed(request);
   if (!allowed) return NextResponse.json({ error: "Admin only" }, { status: 403 });
 
   const type = request.nextUrl.searchParams.get("type");

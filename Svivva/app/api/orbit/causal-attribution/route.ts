@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,10 @@ You MUST respond with a valid JSON object matching this exact schema. All numeri
 
 export async function POST(req: NextRequest) {
   try {
+    if (!(await isOrbitAdminAllowed(req))) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { channels, outcomes, confounders, analysisDepth } = body;
 

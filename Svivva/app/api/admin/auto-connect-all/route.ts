@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { db } from "@/lib/db";
@@ -40,9 +40,9 @@ async function fix404Links() {
   return { removed };
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed()))
+    if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const siteUrl = getSiteUrl();

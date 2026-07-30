@@ -32,8 +32,8 @@ async function loadLatestReport(): Promise<GrowthIntelligenceReport | null> {
 }
 
 /** GET — latest saved report, or seeded report if none exists */
-export async function GET() {
-  if (!(await isOrbitAdminAllowed())) return forbidden();
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
   const saved = await loadLatestReport();
   const report = saved ?? buildGrowthIntelligenceReport();

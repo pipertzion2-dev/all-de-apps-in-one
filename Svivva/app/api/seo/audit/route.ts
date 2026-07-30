@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { runSiteAudit } from "@/lib/seo/audit/run-audit";
 import { buildInternalLinkMap } from "@/lib/seo/internal-links/graph";
@@ -8,8 +8,8 @@ import { buildPerformanceReport } from "@/lib/seo/performance/budget";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-export async function GET() {
-  if (!(await isOrbitAdminAllowed())) {
+export async function GET(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

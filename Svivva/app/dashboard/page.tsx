@@ -18,6 +18,8 @@ import {
   HeartPulse,
   Users,
   BarChart2,
+  Calculator,
+  Factory,
 } from "lucide-react";
 
 interface Project {
@@ -464,6 +466,28 @@ function ReturningUserDashboard({
   ];
 
   const physicalCards = [
+    {
+      href: "/dashboard/manufacture",
+      title: "Manufacture Studio",
+      subtitle: "Guided path: idea → hybridize → factory",
+      icon: Factory,
+      color: "#FF2BD6",
+      shapes: [
+        { shape: "cube" as const, size: 22, x: "left-4", y: "top-3", delay: 0, duration: 8 },
+        { shape: "ring" as const, size: 18, x: "right-6", y: "bottom-4", delay: 0.6, duration: 6 },
+      ],
+    },
+    {
+      href: "/dashboard/hybridization",
+      title: "Hybridization Calculator",
+      subtitle: "Scientific automatic cross-domain scoring",
+      icon: Calculator,
+      color: "#00E5FF",
+      shapes: [
+        { shape: "sphere" as const, size: 20, x: "left-6", y: "top-4", delay: 0.2, duration: 5 },
+        { shape: "pyramid" as const, size: 14, x: "right-8", y: "bottom-5", delay: 0.9, duration: 7 },
+      ],
+    },
     {
       href: "/dashboard/hardware-builder",
       title: "Hardware Builder",

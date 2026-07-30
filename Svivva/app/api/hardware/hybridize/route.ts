@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { getSession } from "@/lib/auth/session";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { z } from "zod";
+import {
+  runScientificHybridization,
+  schematicFromLoose,
+  type HybridDomain,
+  type HybridTopology,
+  type HybridizationMode,
+  type ScientificDepth,
+  type SchematicInput,
+} from "@/lib/hybridization/scientific-engine";
+import { FLAGSHIP_PRESETS } from "@/lib/hybridization/manufacture-plan";
+
+export const maxDuration = 180;
 
 const physicalPropertiesSchema = z.object({
   material: z.string().optional(),
@@ -30,132 +43,137 @@ const schematicSchema = z.object({
   imageBase64: z.string().optional(),
 });
 
-const reqSchema = z.object({
-  schematicA: schematicSchema,
-  schematicB: schematicSchema,
-  hybridizationMode: z.enum(["complementary", "antagonistic", "emergent", "biomimetic"]),
-  targetApplication: z.string().min(1).max(500),
-  scientificDepth: z.enum(["prototype", "research", "production"]),
+const looseSystemSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(4000).optional().default(""),
+  components: z.array(z.string()).optional(),
+  properties: z.array(z.string()).optional(),
+  domain: z.string().optional(),
+  topology: z.string().optional(),
 });
 
-const SYSTEM_PROMPT = `You are an elite Cross-Domain Schematic Hybridization Engine with deep expertise in materials science, topology, graph theory, and multi-physics simulation. You specialize in finding non-obvious structural and functional parallels between hardware systems from completely different engineering domains — and synthesizing them into genuinely novel hybrid architectures.
+const reqSchema = z
+  .object({
+    schematicA: schematicSchema.optional(),
+    schematicB: schematicSchema.optional(),
+    systemA: looseSystemSchema.optional(),
+    systemB: looseSystemSchema.optional(),
+    /** Load a built-in flagship preset (e.g. iphone-17-promax-vc). */
+    presetId: z.string().optional(),
+    hybridizationMode: z
+      .enum(["complementary", "antagonistic", "emergent", "biomimetic"])
+      .optional()
+      .default("complementary"),
+    targetApplication: z.string().min(1).max(500).optional().default("general multiphysics product"),
+    scientificDepth: z
+      .enum(["prototype", "research", "production"])
+      .optional()
+      .default("prototype"),
+    calculatorOnly: z.boolean().optional().default(false),
+    /** Grand automation: production-depth manufacture plan + richer hybrids. */
+    grand: z.boolean().optional().default(false),
+  })
+  .superRefine((val, ctx) => {
+    if (val.presetId) return;
+    if (!val.schematicA && !val.systemA) {
+      ctx.addIssue({ code: "custom", message: "schematicA or systemA required", path: ["schematicA"] });
+    }
+    if (!val.schematicB && !val.systemB) {
+      ctx.addIssue({ code: "custom", message: "schematicB or systemB required", path: ["schematicB"] });
+    }
+  });
 
-You think like the engineers who invented:
-- The iPhone Vapor Chamber: Heat pipe evaporator/condenser topology merged with a PCB copper planar substrate → flat two-phase cooling with zero dedicated Z-height, conforming to existing PCB layers
-- Phononic Crystal Heatsinks: Photonic bandgap crystal structures applied to thermal metamaterials → engineered phonon dispersion curves that channel heat flow like photons in fiber optics
-- Bio-Inspired Fractal PCB Power Planes: Murray's law leaf venation network topology + power distribution plane → fractal power delivery with minimal voltage drop, maximum fill factor
-- Shape Memory Alloy Self-Healing Connectors: SMA thermomechanical actuator cycle + electrical contact physics → contacts that re-close after fault-induced opening via Joule heating
-- Magnetocaloric Solid-State Coolers: Magnetic refrigeration Brayton cycle topology + Stirling recuperator → no moving parts, no refrigerant, COP exceeding vapor compression at small scale
+const SYSTEM_PROMPT = `You are an elite Cross-Domain Schematic Hybridization & Manufacturing Automation Engine.
+You design flagship-grade hardware hybrids at the sophistication of smartphone vapor-chamber cool modules (e.g. iPhone Pro Max class thin two-phase chambers), phononic heatsinks, and SMA interconnects.
 
-Your output must demonstrate rigorous scientific reasoning. Every claim must be grounded in real physics. Emergent properties must be genuinely NEW — not just additive combinations. You must perform real topology isomorphism analysis using graph-theoretic concepts.
-
-CRITICAL: Return only valid JSON. No markdown. No prose outside the JSON structure.`;
+You MUST:
+- Ground every claim in real physics (Fourier, two-phase wick capillary limit, CTE, Maxwell, etc.)
+- Deliver manufacturable detail: BOM hints, process sequence, DFM, suppliers classes, qual tests
+- Prefer emergent properties that neither parent has alone
+- Return ONLY valid JSON — no markdown`;
 
 function buildUserPrompt(
-  schematicA: z.infer<typeof schematicSchema>,
-  schematicB: z.infer<typeof schematicSchema>,
+  schematicA: SchematicInput,
+  schematicB: SchematicInput,
   mode: string,
   targetApplication: string,
   depth: string,
+  calculatorSummary: string,
+  manufacturePlanSummary: string,
+  grand: boolean,
 ): string {
-  const propsA = schematicA.physicalProperties ?? {};
-  const propsB = schematicB.physicalProperties ?? {};
-
   return `SCHEMATIC A — "${schematicA.name}"
-Domain: ${schematicA.domain}
-Topology: ${schematicA.topology} graph
-Core Components: ${schematicA.coreComponents.join(", ")}
-Physical Properties: ${JSON.stringify(propsA)}
-Constraints: ${schematicA.constraints.join(", ") || "none specified"}
-Has Image Attachment: ${schematicA.imageBase64 ? "YES — analyze the uploaded schematic image" : "NO"}
+Domain: ${schematicA.domain} | Topology: ${schematicA.topology}
+Components: ${schematicA.coreComponents.join(", ")}
+Props: ${JSON.stringify(schematicA.physicalProperties ?? {})}
+Constraints: ${(schematicA.constraints ?? []).join(", ") || "none"}
 
 SCHEMATIC B — "${schematicB.name}"
-Domain: ${schematicB.domain}
-Topology: ${schematicB.topology} graph
-Core Components: ${schematicB.coreComponents.join(", ")}
-Physical Properties: ${JSON.stringify(propsB)}
-Constraints: ${schematicB.constraints.join(", ") || "none specified"}
-Has Image Attachment: ${schematicB.imageBase64 ? "YES — analyze the uploaded schematic image" : "NO"}
+Domain: ${schematicB.domain} | Topology: ${schematicB.topology}
+Components: ${schematicB.coreComponents.join(", ")}
+Props: ${JSON.stringify(schematicB.physicalProperties ?? {})}
+Constraints: ${(schematicB.constraints ?? []).join(", ") || "none"}
 
-HYBRIDIZATION MODE: ${mode}
-${mode === "complementary" ? "Each system fills the other's weaknesses — find where A's strengths compensate B's limits and vice versa." : ""}
-${mode === "antagonistic" ? "Systems work in opposition to create equilibrium — find where competing forces produce emergent stability." : ""}
-${mode === "emergent" ? "Combination creates a completely new functional domain — find the phase transition point." : ""}
-${mode === "biomimetic" ? "Use biological structural motifs as the merger template — which organism has solved this combined problem?" : ""}
+MODE: ${mode}
+TARGET: ${targetApplication}
+DEPTH: ${depth}
+GRAND AUTOMATION: ${grand ? "YES — flagship cool-chamber / production class" : "standard"}
 
-TARGET APPLICATION: ${targetApplication}
-SCIENTIFIC DEPTH: ${depth}
-${depth === "production" ? "Focus on manufacturing readiness, supply chain feasibility, qualification testing, and IP landscape." : ""}
-${depth === "research" ? "Focus on novel physical mechanisms, experimental characterization, and theoretical models." : ""}
-${depth === "prototype" ? "Focus on proof-of-concept approaches, existing off-the-shelf components, and near-term validation." : ""}
+DETERMINISTIC SCORES:
+${calculatorSummary}
 
-PERFORM THE FOLLOWING ANALYSIS:
+AUTOMATED MANUFACTURE PLAN (elaborate; do not contradict):
+${manufacturePlanSummary}
 
-1. TOPOLOGY ISOMORPHISM: Map both schematics as directed graphs G_A(V,E) and G_B(V,E). Find:
-   - Structural isomorphisms or subgraph isomorphisms
-   - Which nodes in A functionally correspond to nodes in B
-   - Which edges (transport mechanisms) are mathematically equivalent
-   - The algebraic graph invariants (degree sequence, spectral properties) that are shared
-
-2. DOMAIN BRIDGING: Identify the governing equations that are analogous:
-   - Thermal (Fourier's Law: q = -k∇T) ↔ Electrical (Ohm's Law: J = σE) ↔ Fluidic (Darcy: q = -(k/μ)∇P)
-   - All governed by Laplace's equation: ∇²φ = 0
-   - Which physical transport invariants are shared between these two domains?
-
-3. MATERIAL PROPERTY MATRIX: Analyze interface requirements at the hybrid boundary:
-   - Thermal/electrical/mechanical compatibility
-   - CTE mismatch, galvanic compatibility, chemical reactivity
-   - Surface energy and adhesion requirements
-
-4. BIOMIMETIC PATTERN LIBRARY: Which biological structures solve this combined problem?
-   - Lotus leaf (contact angle >160°, self-cleaning), gecko setae (van der Waals adhesion, 10N/cm²),
-   - Mantis shrimp dactyl clubs (helicoidal Bouligand fiber reinforcement, 70 GPa impact resistance),
-   - Boxfish shell (hexagonal geodesic, strength-to-weight), termite mounds (passive convective cooling),
-   - Whale fin tubercles (leading-edge tubercles = vortex generators, 32% drag reduction),
-   - Moth eye (gradient-index anti-reflection nanostructure), nacre (brick-mortar toughness 3000× mineral alone)
-
-5. EMERGENT PROPERTY PREDICTION: What capabilities arise that NEITHER system has?
-   The hybrid must exhibit at least one property that is provably impossible in either parent alone.
-
-Generate 3-4 hybrid designs. Return this exact JSON structure:
-
+Return JSON:
 {
-  "topologicalBridge": "Detailed graph-theoretic analysis of structural parallels — node correspondence table, shared invariants, isomorphism type",
-  "domainBridgingPrinciple": "The governing PDE or physical transport law that unifies both domains mathematically",
-  "materialCompatibilityNote": "Key interface considerations at the hybrid boundary",
+  "topologicalBridge": "...",
+  "domainBridgingPrinciple": "...",
+  "materialCompatibilityNote": "...",
   "hybrids": [
     {
-      "name": "Specific descriptive name for the hybrid design",
-      "scientificBasis": "Detailed physical principles — equations, mechanisms, why this works at a fundamental level",
-      "topologyDescription": "Graph structure of the hybrid — how A's topology was merged with B's",
-      "coreComponents": ["component 1", "component 2", "component 3"],
-      "emergentProperties": ["Property 1 that neither parent has", "Property 2"],
-      "performanceGains": {
-        "metric_name": "X% improvement vs baseline — explain mechanism",
-        "metric_name_2": "quantified value"
-      },
-      "biomimeticAnalogue": "Specific biological structure or organism that uses this same principle, and why",
-      "manufacturingPathway": "Specific fabrication route — processes, equipment, sequence of operations",
-      "challenges": ["Technical challenge 1", "Challenge 2"],
+      "name": "...",
+      "scientificBasis": "...",
+      "topologyDescription": "...",
+      "coreComponents": ["..."],
+      "emergentProperties": ["..."],
+      "performanceGains": { "metric": "value" },
+      "biomimeticAnalogue": "...",
+      "manufacturingPathway": "step-by-step factory route",
+      "challenges": ["..."],
       "noveltyScore": 85,
-      "patentLandscape": "Brief IP space note — key patents, freedom to operate considerations",
-      "estimatedRnDMonths": 18,
-      "trlLevel": 3
+      "patentLandscape": "...",
+      "estimatedRnDMonths": 12,
+      "trlLevel": 6
     }
   ],
   "optimalHybridIndex": 0,
-  "requiredCharacterizationTests": ["Specific test 1", "Test 2", "Test 3"],
-  "referenceDesigns": ["Existing product or publication that approximates this direction"],
-  "nextSteps": ["Specific actionable next step 1", "Step 2", "Step 3"]
+  "requiredCharacterizationTests": ["..."],
+  "referenceDesigns": ["flagship phone VC / published analogues"],
+  "nextSteps": ["actionable"],
+  "manufactureNarrative": "How to build this at scale in plain language"
 }`;
+}
+
+function toSchematic(
+  full?: z.infer<typeof schematicSchema>,
+  loose?: z.infer<typeof looseSystemSchema>,
+): SchematicInput {
+  if (full) {
+    return {
+      name: full.name,
+      domain: full.domain as HybridDomain,
+      topology: full.topology as HybridTopology,
+      coreComponents: full.coreComponents,
+      physicalProperties: full.physicalProperties,
+      constraints: full.constraints,
+    };
+  }
+  return schematicFromLoose(loose!);
 }
 
 export async function POST(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed(req))) {
-      return NextResponse.json({ error: "Admin access required." }, { status: 401 });
-    }
-
     const body = await req.json();
     const parsed = reqSchema.safeParse(body);
     if (!parsed.success) {
@@ -164,67 +182,124 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    const { schematicA, schematicB, hybridizationMode, targetApplication, scientificDepth } =
-      parsed.data;
 
-    const userText = buildUserPrompt(
+    let data = parsed.data;
+    if (data.presetId) {
+      const preset = FLAGSHIP_PRESETS.find((p) => p.id === data.presetId);
+      if (!preset) {
+        return NextResponse.json({ error: `Unknown presetId: ${data.presetId}` }, { status: 400 });
+      }
+      data = {
+        ...data,
+        systemA: { ...preset.systemA, description: preset.systemA.description },
+        systemB: { ...preset.systemB, description: preset.systemB.description },
+        targetApplication: preset.target,
+        hybridizationMode: preset.mode,
+        scientificDepth: preset.depth,
+        grand: true,
+      };
+    }
+
+    const admin = await isOrbitAdminAllowed(req);
+    const session = await getSession();
+    if (!data.calculatorOnly && !admin && !session) {
+      return NextResponse.json(
+        { error: "Sign in required for AI synthesis (instant calculator is free)." },
+        { status: 401 },
+      );
+    }
+
+    const schematicA = toSchematic(data.schematicA, data.systemA);
+    const schematicB = toSchematic(data.schematicB, data.systemB);
+    const hybridizationMode = data.hybridizationMode as HybridizationMode;
+    const scientificDepth = (data.grand ? "production" : data.scientificDepth) as ScientificDepth;
+    const targetApplication = data.targetApplication;
+    const grand = !!data.grand || !!data.presetId;
+
+    const scientific = runScientificHybridization({
       schematicA,
       schematicB,
       hybridizationMode,
       targetApplication,
       scientificDepth,
-    );
-
-    type MessageContent =
-      | string
-      | Array<
-          | { type: "text"; text: string }
-          | { type: "image_url"; image_url: { url: string; detail: "high" } }
-        >;
-
-    const userContent: MessageContent =
-      schematicA.imageBase64 || schematicB.imageBase64
-        ? [
-            { type: "text", text: userText },
-            ...(schematicA.imageBase64
-              ? [
-                  {
-                    type: "image_url" as const,
-                    image_url: {
-                      url: `data:image/jpeg;base64,${schematicA.imageBase64}`,
-                      detail: "high" as const,
-                    },
-                  },
-                ]
-              : []),
-            ...(schematicB.imageBase64
-              ? [
-                  {
-                    type: "image_url" as const,
-                    image_url: {
-                      url: `data:image/jpeg;base64,${schematicB.imageBase64}`,
-                      detail: "high" as const,
-                    },
-                  },
-                ]
-              : []),
-          ]
-        : userText;
-
-    const resp = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      temperature: 0.85,
-      max_tokens: 4096,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userContent },
-      ],
+      grand,
     });
 
-    const raw = resp.choices[0]?.message?.content ?? "{}";
-    const result = JSON.parse(raw);
-    return NextResponse.json(result);
+    const calculatorPayload = {
+      topologicalBridge: scientific.topologicalBridge,
+      domainBridgingPrinciple: scientific.equations.bridgingPrinciple,
+      materialCompatibilityNote: scientific.materialCompatibilityNote,
+      hybrids: scientific.automaticHybrids,
+      optimalHybridIndex: 0,
+      requiredCharacterizationTests: scientific.requiredCharacterizationTests,
+      referenceDesigns: scientific.grand
+        ? ["Flagship smartphone vapor chamber cool modules", "Published Cu wick / two-phase chamber literature"]
+        : [],
+      nextSteps: scientific.nextSteps,
+      scientific,
+      manufacturePlan: scientific.manufacturePlan,
+      source: "calculator" as const,
+      grand,
+    };
+
+    if (data.calculatorOnly) {
+      return NextResponse.json(calculatorPayload);
+    }
+
+    try {
+      const userText = buildUserPrompt(
+        schematicA,
+        schematicB,
+        hybridizationMode,
+        targetApplication,
+        scientificDepth,
+        JSON.stringify(scientific.scores),
+        JSON.stringify({
+          codename: scientific.manufacturePlan.productCodename,
+          class: scientific.manufacturePlan.class,
+          bomCount: scientific.manufacturePlan.bom.length,
+          steps: scientific.manufacturePlan.processFlow.map((s) => s.name),
+          cost: scientific.manufacturePlan.costModel,
+        }),
+        grand,
+      );
+
+      const resp = await openai.chat.completions.create({
+        model: DEFAULT_MODEL,
+        temperature: grand ? 0.7 : 0.85,
+        max_tokens: grand ? 6000 : 4096,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userText },
+        ],
+      });
+
+      const raw = resp.choices[0]?.message?.content ?? "{}";
+      const ai = JSON.parse(raw) as Record<string, unknown>;
+      return NextResponse.json({
+        ...calculatorPayload,
+        ...ai,
+        scientific,
+        manufacturePlan: scientific.manufacturePlan,
+        source: "ai+calculator",
+        grand,
+        hybrids:
+          Array.isArray(ai.hybrids) && (ai.hybrids as unknown[]).length > 0
+            ? ai.hybrids
+            : scientific.automaticHybrids,
+      });
+    } catch (aiErr) {
+      console.warn(
+        "[hybridize] AI unavailable, returning calculator:",
+        aiErr instanceof Error ? aiErr.message : aiErr,
+      );
+      return NextResponse.json({
+        ...calculatorPayload,
+        aiFallback: true,
+        aiError: aiErr instanceof Error ? aiErr.message : "AI unavailable",
+      });
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Hybridization failed";
     return NextResponse.json({ error: message }, { status: 500 });
