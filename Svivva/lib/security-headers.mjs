@@ -1,4 +1,9 @@
 /** Shared security headers for Next.js and Vercel. */
+const GA_SCRIPT = "https://www.googletagmanager.com https://www.google-analytics.com";
+const GA_CONNECT =
+  "https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://www.googletagmanager.com";
+const CLARITY_SCRIPT = "https://www.clarity.ms";
+
 export const SECURITY_HEADERS = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   {
@@ -17,11 +22,11 @@ export const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://va.vercel-scripts.com",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https:",
+      "img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com",
       "font-src 'self' data:",
-      "connect-src 'self' https: wss:",
+      `connect-src 'self' https: wss: ${GA_CONNECT}`,
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
