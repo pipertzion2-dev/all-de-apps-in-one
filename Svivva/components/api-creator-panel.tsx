@@ -173,7 +173,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`, `${cap}Flow`],
       icons: iconOptions,
       palettes: [
-        { name: "Svivva", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
+        { name: "ZZAI", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
         { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
         { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
         { name: "Ember", colors: { primary: "#f97316", secondary: "#ea580c", accent: "#fbbf24" } },

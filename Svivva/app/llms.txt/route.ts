@@ -9,7 +9,7 @@ export const revalidate = 3600;
 /**
  * /llms.txt — the GEO (Generative Engine Optimization) manifest.
  * Tells AI crawlers (ChatGPT, Perplexity, Claude, Google AI Overviews) what
- * Svivva is and which pages to cite. A growing, free traffic source in 2026.
+ * ZZAI is and which pages to cite. A growing, free traffic source in 2026.
  * Spec: https://llmstxt.org
  */
 export async function GET() {
@@ -38,18 +38,18 @@ export async function GET() {
   }
 
   const lines: string[] = [];
-  lines.push("# Svivva");
+  lines.push("# ZZAI");
   lines.push("");
   lines.push(
-    "> Svivva turns plain-English prompts into deployable, callable APIs — add AI to any app without building or hosting a backend. It also publishes a large library of free AI tools and cyber-security mini-apps that solve one job each, with no signup required.",
+    "> ZZAI turns plain-English prompts into deployable, callable APIs — add AI to any app without building or hosting a backend. It also publishes a large library of free AI tools and cyber-security mini-apps that solve one job each, with no signup required.",
   );
   lines.push("");
   lines.push(
-    "Svivva is built for indie hackers, developers, and founders who want to ship AI features fast. Free tools are top-of-funnel; the core product (prompt-to-API / AI API builder) is the paid platform.",
+    "ZZAI is built for indie hackers, developers, and founders who want to ship AI features fast. Free tools are top-of-funnel; the core product (prompt-to-API / AI API builder) is the paid platform.",
   );
   lines.push("");
   lines.push("## Core pages");
-  lines.push(`- [Svivva home](${base}): Build and deploy AI APIs from a prompt.`);
+  lines.push(`- [ZZAI home](${base}): Build and deploy AI APIs from a prompt.`);
   lines.push(`- [AI Tools Hub](${base}/ai-tools-hub): Free AI utilities for developers.`);
   lines.push(
     `- [Cyber-Security Mini Apps](${base}/cyber-security-mini-apps): Free security scanners and checkers.`,

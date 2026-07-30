@@ -188,7 +188,7 @@ async function discoverToolsFromHub(
             (TOOL_ENDINGS.some((e) => slug.endsWith(e)) || slug.includes("-"))
           ) {
             const name = slugToName(slug);
-            tools.push({ name, url: loc, description: `${name} — free online tool on Svivva` });
+            tools.push({ name, url: loc, description: `${name} — free online tool on ZZAI` });
           }
         } catch {
           /* skip */
@@ -288,7 +288,7 @@ async function ensureAllToolSeoPages(
   return { added, toolCount: tools.length, finalCount: seedCount };
 }
 
-/** Publish repair: content, meta, and svivva.com CTAs on all tool SEO pages. */
+/** Publish repair: content, meta, and zzaizzai.com CTAs on all tool SEO pages. */
 async function repairSeedMarketingPageHealth(): Promise<number> {
   const rows = await db
     .select({
@@ -315,10 +315,10 @@ async function repairSeedMarketingPageHealth(): Promise<number> {
       .set({
         published: true,
         content: needsContent
-          ? `<h1>${row.title}</h1><p>Free tool on <a href="${BASE}">svivva.com</a> — build your own AI apps in minutes.</p>`
+          ? `<h1>${row.title}</h1><p>Free tool on <a href="${BASE}">zzaizzai.com</a> — build your own AI apps in minutes.</p>`
           : row.content,
         metaDescription: needsMeta
-          ? `Free ${row.title} on Svivva — try at svivva.com`.slice(0, 155)
+          ? `Free ${row.title} on ZZAI — try at zzaizzai.com`.slice(0, 155)
           : row.metaDescription,
         toolUrl: needsToolUrl ? BASE : row.toolUrl,
       })
@@ -355,7 +355,7 @@ async function insertSeoPage(
       title: page.title,
       content: page.content,
       howItWorks: page.subheadline || page.headline,
-      whoItsFor: "Developers and teams building with AI on Svivva",
+      whoItsFor: "Developers and teams building with AI on ZZAI",
       hasFaq: /\[FAQ_JSON\]/i.test(page.content),
     });
     if (!quality.passed) return false;
@@ -372,7 +372,7 @@ async function insertSeoPage(
       keyword: page.keyword,
       headline: page.headline,
       howItWorks: page.subheadline || page.headline,
-      whoItsFor: "Developers and teams building with AI on Svivva",
+      whoItsFor: "Developers and teams building with AI on ZZAI",
       content: page.content,
       metaTitle: page.metaTitle,
       metaDescription: page.metaDescription,
@@ -389,16 +389,16 @@ async function insertSeoPage(
 function integrationPage(tool: string): SEOPageData {
   const slug = `svivva-${tool.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-integration`;
   return {
-    title: `Svivva + ${tool} Integration`,
-    metaTitle: `Svivva + ${tool} Integration | Setup Guide`.slice(0, 60),
+    title: `ZZAI + ${tool} Integration`,
+    metaTitle: `ZZAI + ${tool} Integration | Setup Guide`.slice(0, 60),
     metaDescription:
-      `Connect Svivva to ${tool}. Build AI workflows in minutes. Traffic to svivva.com.`.slice(
+      `Connect ZZAI to ${tool}. Build AI workflows in minutes. Traffic to zzaizzai.com.`.slice(
         0,
         155,
       ),
-    headline: `Svivva + ${tool}`,
+    headline: `ZZAI + ${tool}`,
     subheadline: `Automate ${tool} with AI APIs.`,
-    content: `<h1>Svivva + ${tool}</h1><p>Connect Svivva AI APIs to ${tool}. All traffic funnels to <a href="${BASE}">svivva.com</a>.</p><p><a href="${BASE}">Start free &rarr;</a></p>`,
+    content: `<h1>ZZAI + ${tool}</h1><p>Connect ZZAI AI APIs to ${tool}. All traffic funnels to <a href="${BASE}">zzaizzai.com</a>.</p><p><a href="${BASE}">Start free &rarr;</a></p>`,
     slug,
     keyword: `svivva ${tool.toLowerCase()} integration`,
   };
@@ -408,12 +408,12 @@ function industryPage(name: string): SEOPageData {
   const slug = `ai-api-for-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return {
     title: `AI API for ${name}`,
-    metaTitle: `AI API for ${name} | Svivva`.slice(0, 60),
+    metaTitle: `AI API for ${name} | ZZAI`.slice(0, 60),
     metaDescription:
-      `Build AI APIs for ${name.toLowerCase()} with Svivva — traffic to svivva.com.`.slice(0, 155),
+      `Build AI APIs for ${name.toLowerCase()} with ZZAI — traffic to zzaizzai.com.`.slice(0, 155),
     headline: `AI API for ${name}`,
     subheadline: `Built in minutes for ${name}.`,
-    content: `<h1>AI API for ${name}</h1><p>Deploy AI on Svivva — <a href="${BASE}">svivva.com</a>.</p>`,
+    content: `<h1>AI API for ${name}</h1><p>Deploy AI on ZZAI — <a href="${BASE}">zzaizzai.com</a>.</p>`,
     slug,
     keyword: `AI API for ${name.toLowerCase()}`,
   };
@@ -423,11 +423,11 @@ function templatePage(name: string): SEOPageData {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return {
     title: `${name} — Build in 11 Minutes`,
-    metaTitle: `${name} | Svivva`.slice(0, 60),
-    metaDescription: `Build ${name.toLowerCase()} with Svivva. Start at svivva.com.`.slice(0, 155),
+    metaTitle: `${name} | ZZAI`.slice(0, 60),
+    metaDescription: `Build ${name.toLowerCase()} with ZZAI. Start at zzaizzai.com.`.slice(0, 155),
     headline: name,
     subheadline: "Production-ready in minutes.",
-    content: `<h1>${name}</h1><p>Build on <a href="${BASE}">svivva.com</a>.</p>`,
+    content: `<h1>${name}</h1><p>Build on <a href="${BASE}">zzaizzai.com</a>.</p>`,
     slug,
     keyword: name.toLowerCase(),
   };
@@ -441,10 +441,10 @@ function aeoPage(query: string, idx: number): SEOPageData {
   return {
     title: query.charAt(0).toUpperCase() + query.slice(1),
     metaTitle: query.slice(0, 60),
-    metaDescription: `Direct answer: ${query}. Built with Svivva at svivva.com.`.slice(0, 155),
+    metaDescription: `Direct answer: ${query}. Built with ZZAI at zzaizzai.com.`.slice(0, 155),
     headline: query,
     subheadline: "Answer optimized for AI search engines.",
-    content: `<h1>${query}</h1><p>Svivva is an AI API builder at <a href="${BASE}">svivva.com</a> — describe your API in English and deploy in minutes.</p><h2>Steps</h2><ol><li>Sign up at svivva.com</li><li>Describe your API</li><li>Deploy and route traffic to your product</li></ol>`,
+    content: `<h1>${query}</h1><p>ZZAI is an AI API builder at <a href="${BASE}">zzaizzai.com</a> — describe your API in English and deploy in minutes.</p><h2>Steps</h2><ol><li>Sign up at zzaizzai.com</li><li>Describe your API</li><li>Deploy and route traffic to your product</li></ol>`,
     slug: `${slug}-${idx}`,
     keyword: query,
   };
@@ -671,7 +671,7 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
   const repaired = await repairSeedMarketingPageHealth();
   if (repaired > 0) {
     steps.push(
-      `✓ Repaired ${repaired} tool SEO pages (content, meta, published, svivva.com links)`,
+      `✓ Repaired ${repaired} tool SEO pages (content, meta, published, zzaizzai.com links)`,
     );
   }
 

@@ -30,7 +30,7 @@ export default function ContactPage() {
     try {
       // Open default email client with pre-filled information
       const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
-      const mailtoLink = `mailto:hello@svivva.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const mailtoLink = `mailto:hello@zzaizzai.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailtoLink;
 
       toast({
@@ -58,7 +58,7 @@ export default function ContactPage() {
     <div className="max-w-2xl space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Contact Us</h1>
-        <p className="text-muted-foreground">Send us a message at hello@svivva.com</p>
+        <p className="text-muted-foreground">Send us a message at hello@zzaizzai.com</p>
       </div>
 
       <Card>
@@ -136,7 +136,7 @@ export default function ContactPage() {
         <CardContent className="pt-6">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
-              Email: hello@svivva.com
+              Email: hello@zzaizzai.com
             </p>
             <p className="text-xs text-blue-800 dark:text-blue-300">
               We typically respond within 24 hours. For urgent matters, please mention that in your

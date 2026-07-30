@@ -120,10 +120,10 @@ function tplSocial(): SocialLaunchPack {
     producthunt: {
       tagline: "AI APIs from natural language",
       description: "Turn prompts into production APIs with schema enforcement and a marketplace.",
-      first_comment: `Built with Svivva — try free tools at ${getSiteUrl()}/ai-tools-hub`,
+      first_comment: `Built with ZZAI — try free tools at ${getSiteUrl()}/ai-tools-hub`,
     },
     show_hn: {
-      title: "Show HN: Svivva — natural language to production AI APIs",
+      title: "Show HN: ZZAI — natural language to production AI APIs",
       body: s.showHN,
     },
   };
@@ -139,7 +139,7 @@ function tplOutreach(): OutreachPack {
     })),
     podcasts: o.podcasts.map((p) => ({
       name: p.name,
-      subject: `Podcast guest pitch — Svivva`,
+      subject: `Podcast guest pitch — ZZAI`,
       pitch: p.pitch,
     })),
   };
@@ -158,7 +158,7 @@ export async function generateMarketingLaunchContent(): Promise<MarketingLaunchC
           {
             role: "system",
             content:
-              "Social media manager for Svivva — AI platform turning natural language into production APIs.",
+              "Social media manager for ZZAI — AI platform turning natural language into production APIs.",
           },
           {
             role: "user",
@@ -206,7 +206,7 @@ export async function generateMarketingLaunchContent(): Promise<MarketingLaunchC
         messages: [
           {
             role: "user",
-            content: `Newsletter and podcast pitches for Svivva (${site}). Return JSON: { newsletters: [{name, subject, pitch}], podcasts: [{name, subject, pitch}] }`,
+            content: `Newsletter and podcast pitches for ZZAI (${site}). Return JSON: { newsletters: [{name, subject, pitch}], podcasts: [{name, subject, pitch}] }`,
           },
         ],
       });

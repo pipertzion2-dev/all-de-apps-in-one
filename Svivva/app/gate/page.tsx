@@ -53,7 +53,7 @@ export default function GatePage() {
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-xs text-center">
         <div className="relative w-20 h-20 mx-auto mb-6">
-          <Image src={svivvaLogo} alt="Svivva" fill sizes="80px" className="object-contain" />
+          <Image src={svivvaLogo} alt="ZZAI" fill sizes="80px" className="object-contain" />
         </div>
 
         <h1 className="text-xl font-semibold text-gray-900 mb-1" data-testid="text-gate-title">

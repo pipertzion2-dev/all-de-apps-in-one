@@ -25,11 +25,11 @@ function getProducts(): Record<ProductKey, ProductInfo> {
   const base = getSiteUrl();
   return {
     svivva: {
-      name: "Svivva",
+      name: "ZZAI",
       tagline: "From seed to symphony",
       url: base,
       description:
-        "From seed to symphony — Svivva is one workspace for teams to describe intent, ship with guardrails, and grow without babysitting infrastructure.",
+        "From seed to symphony — ZZAI is one workspace for teams to describe intent, ship with guardrails, and grow without babysitting infrastructure.",
       audience: "developers, entrepreneurs, SaaS builders, non-technical founders",
       competitors: ["Zapier", "Make (Integromat)", "Bubble", "n8n", "Retool", "Langchain"],
       keywords: [
@@ -42,10 +42,10 @@ function getProducts(): Record<ProductKey, ProductInfo> {
     },
     clutety: {
       name: "Clutety",
-      tagline: "Feed filtering & protection — embedded in Svivva",
+      tagline: "Feed filtering & protection — embedded in ZZAI",
       url: `${base}/clutety`,
       description:
-        "Clutety blocks unwanted content on YouTube and other social feeds, using the Pyracrypt-grade UI embedded in Svivva. Same platform, same domain.",
+        "Clutety blocks unwanted content on YouTube and other social feeds, using the Pyracrypt-grade UI embedded in ZZAI. Same platform, same domain.",
       audience: "parents, creators, privacy-conscious users, mobile-first users",
       competitors: ["YouTube Kids", "BlockSite", "Freedom", "Screen Time"],
       keywords: [
@@ -58,20 +58,20 @@ function getProducts(): Record<ProductKey, ProductInfo> {
     },
     clutter: {
       name: "Clutety",
-      tagline: "Feed filtering & protection — embedded in Svivva",
+      tagline: "Feed filtering & protection — embedded in ZZAI",
       url: `${base}/clutety`,
       description:
-        "Clutety blocks unwanted content on feeds (YouTube, etc.) — embedded in Svivva with the Pyracrypt UI.",
+        "Clutety blocks unwanted content on feeds (YouTube, etc.) — embedded in ZZAI with the Pyracrypt UI.",
       audience: "parents, creators, privacy-conscious users",
       competitors: ["YouTube Kids", "BlockSite", "Freedom"],
       keywords: ["feed filter", "block youtube", "clutety"],
     },
     mini_apps: {
-      name: "Svivva Mini Apps",
-      tagline: "50+ free AI micro-tools built on the Svivva platform",
+      name: "ZZAI Mini Apps",
+      tagline: "50+ free AI micro-tools built on the ZZAI platform",
       url: `${base}/tools`,
       description:
-        "A growing collection of free AI-powered micro-tools for specific use cases — each built in minutes using Svivva's AI API builder.",
+        "A growing collection of free AI-powered micro-tools for specific use cases — each built in minutes using ZZAI's AI API builder.",
       audience: "general public, people searching for free AI tools",
       competitors: ["Free AI tools on various websites", "ChatGPT free tier"],
       keywords: ["free AI tools", "AI micro tools", "AI generator", "free AI app"],
@@ -195,7 +195,7 @@ Competitors: ${p.competitors.join(", ")}
 
 Create comparison content for the TOP 3 competitors:
 For each competitor, write a complete comparison page outline:
-1. PAGE TITLE (e.g., "Svivva vs Zapier: Which is Better for Shipping AI Features in 2026?")
+1. PAGE TITLE (e.g., "ZZAI vs Zapier: Which is Better for Shipping AI Features in 2026?")
 2. SUMMARY (2-3 sentence verdict)
 3. COMPARISON TABLE (5-7 features, who wins each)
 4. WHEN TO CHOOSE ${p.name.toUpperCase()} (3-4 specific use cases)

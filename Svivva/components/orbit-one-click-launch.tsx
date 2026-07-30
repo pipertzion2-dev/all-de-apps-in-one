@@ -572,10 +572,10 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               ? gsc.email
                 ? gsc.propertyOk
                   ? `Google connected · ${gsc.email}`
-                  : `Google signed in · add svivva.com in Search Console (Owner)`
+                  : `Google signed in · add zzaizzai.com in Search Console (Owner)`
                 : gsc.propertyOk
                   ? "Google Search Console connected."
-                  : "Google connected — verify svivva.com property in Search Console."
+                  : "Google connected — verify zzaizzai.com property in Search Console."
               : gsc.available
                 ? "Press the camo orb to connect Google Search Console — AI handles the rest."
                 : "Google connect will be available shortly."}

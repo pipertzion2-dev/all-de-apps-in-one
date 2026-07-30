@@ -289,7 +289,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         },
         {
           id: "content-integrations",
-          label: `Integration pages — Svivva + [Tool] (${orbitStatus?.integrationPages ?? 0}/30)`,
+          label: `Integration pages — ZZAI + [Tool] (${orbitStatus?.integrationPages ?? 0}/30)`,
           detail:
             (orbitStatus?.integrationPages ?? 0) >= 30
               ? "All 30 integration pages live — targeting 'tool + AI API' searches"
@@ -539,7 +539,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           label: "Product Hunt listing",
           detail: isManualDone("dir-producthunt")
             ? "Done ✓"
-            : "Submit Svivva to Product Hunt (separate from the launch — this is just getting listed)",
+            : "Submit ZZAI to Product Hunt (separate from the launch — this is just getting listed)",
           status: isManualDone("dir-producthunt") ? "done" : "missing",
           link: "https://www.producthunt.com/posts/new",
           linkLabel: "Submit →",
@@ -650,10 +650,10 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         },
         {
           id: "acc-powered-by",
-          label: "'Powered by Svivva' widgets added to mini apps",
+          label: "'Powered by ZZAI' widgets added to mini apps",
           detail: isManualDone("acc-powered-by")
             ? "Done ✓"
-            : "Run 'Powered by Svivva Widget' step in Tools Repl tab → copy HTML to each mini app. Each mini app becomes a traffic referral channel.",
+            : "Run 'Powered by ZZAI Widget' step in Tools Repl tab → copy HTML to each mini app. Each mini app becomes a traffic referral channel.",
           status: orbitStepDone("mini-embed")
             ? isManualDone("acc-powered-by")
               ? "done"
@@ -665,7 +665,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
         },
         {
           id: "acc-badge",
-          label: "Developer 'Built with Svivva' badge deployed",
+          label: "Developer 'Built with ZZAI' badge deployed",
           detail: isManualDone("acc-badge")
             ? "Done ✓"
             : `Share ${ORBIT_SITE}/badge with users — each embed = a backlink + brand impression. Add the badge to your own GitHub repos too.`,

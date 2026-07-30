@@ -1,6 +1,6 @@
 # Project Structure and Conventions
 
-This document keeps Svivva maintainable as features grow.
+This document keeps ZZAI maintainable as features grow.
 
 ## Folder Rules
 

@@ -1430,7 +1430,7 @@ export const blogPosts = pgTable("blog_posts", {
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull(),
   content: text("content").notNull(),
-  author: text("author").notNull().default("Svivva Team"),
+  author: text("author").notNull().default("ZZAI Team"),
   category: text("category").notNull().default("general"),
   tags: text("tags").array().notNull().default([]),
   metaTitle: text("meta_title"),

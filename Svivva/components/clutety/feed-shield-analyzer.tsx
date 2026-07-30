@@ -231,7 +231,7 @@ export function FeedShieldAnalyzer({ rules }: Props) {
           checked={deepAnalyze}
           onChange={(e) => setDeepAnalyze(e.target.checked)}
         />
-        Deep transcript analysis (uses AI when configured on Svivva)
+        Deep transcript analysis (uses AI when configured on ZZAI)
       </label>
 
       <button

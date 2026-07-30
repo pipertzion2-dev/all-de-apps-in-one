@@ -31,7 +31,7 @@ export function ProGate({ children, feature = "this feature" }: ProGateProps) {
         <h2 className="text-2xl font-black text-foreground">Pro Feature</h2>
         <p className="text-muted-foreground leading-relaxed">
           <span className="font-semibold text-foreground capitalize">{feature}</span> is available
-          on the Pro plan and above. Upgrade to unlock the full Svivva platform.
+          on the Pro plan and above. Upgrade to unlock the full ZZAI platform.
         </p>
       </div>
 

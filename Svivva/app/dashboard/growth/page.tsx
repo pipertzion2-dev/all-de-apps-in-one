@@ -36,7 +36,7 @@ type DirStatus = "pending" | "submitted" | "live" | "rejected";
 type DirCategory = "ai_tools" | "saas" | "developer" | "pr" | "social" | "security";
 
 const PRODUCTS: { id: Product; label: string; emoji: string }[] = [
-  { id: "svivva", label: "Svivva", emoji: "🌱" },
+  { id: "svivva", label: "ZZAI", emoji: "🌱" },
   { id: "pyracrypt", label: "Pyracrypt", emoji: "🔐" },
   { id: "mini_apps", label: "Mini Apps", emoji: "⚡" },
 ];
@@ -77,7 +77,7 @@ const NOVEL_TACTICS = [
     icon: Brain,
     title: "Answer Engine Optimization",
     badge: "🔥 New",
-    desc: "Structure your content so AI search engines (Perplexity, ChatGPT, Gemini) cite Svivva when users ask how to ship AI products fast. Most competitors don't do this yet.",
+    desc: "Structure your content so AI search engines (Perplexity, ChatGPT, Gemini) cite ZZAI when users ask how to ship AI products fast. Most competitors don't do this yet.",
     action: "aeo_content",
     howTo:
       "Generate AEO content → add it to your website as a dedicated FAQ page → AI engines will cite it within weeks.",
@@ -97,7 +97,7 @@ const NOVEL_TACTICS = [
     icon: Github,
     title: "GitHub SEO Strategy",
     badge: "Passive",
-    desc: "Publish useful code snippets/gists that solve real problems and naturally reference Svivva. GitHub results rank high on Google for developer queries.",
+    desc: "Publish useful code snippets/gists that solve real problems and naturally reference ZZAI. GitHub results rank high on Google for developer queries.",
     action: "github_seo",
     howTo:
       "Generate GitHub content → post as Gists → add to relevant GitHub awesome-lists → get passive developer traffic.",
@@ -145,12 +145,12 @@ const NOVEL_TACTICS = [
   {
     id: "embedded",
     icon: Globe,
-    title: "Embedded Growth (Powered by Svivva)",
+    title: "Embedded Growth (Powered by ZZAI)",
     badge: "Viral Loop",
-    desc: 'Every mini app gets a "Powered by Svivva" footer link. As mini apps grow their own traffic, each one sends link equity and visitors back to Svivva automatically.',
+    desc: 'Every mini app gets a "Powered by ZZAI" footer link. As mini apps grow their own traffic, each one sends link equity and visitors back to ZZAI automatically.',
     action: null,
     howTo:
-      "Add 'Powered by Svivva' badge to all mini app pages with a dofollow link. Deploy more mini apps to expand the network.",
+      "Add 'Powered by ZZAI' badge to all mini app pages with a dofollow link. Deploy more mini apps to expand the network.",
   },
 ];
 
@@ -271,7 +271,7 @@ export default function GrowthPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            Svivva's AI marketing team — directories, content, and novel tactics that run on
+            ZZAI's AI marketing team — directories, content, and novel tactics that run on
             autopilot.
           </p>
         </div>

@@ -134,7 +134,7 @@ const CRED_FIELDS: Record<
     {
       key: "outreachFromEmail",
       label: "From Email",
-      hint: "e.g. hello@svivva.com",
+      hint: "e.g. hello@zzaizzai.com",
     },
   ],
 };
@@ -400,7 +400,7 @@ export function OrbitMarketingVision({ orbitStatus, stepStatuses = {} }: Props) 
     {
       id: "tech-sitemap",
       label: "Sitemap auto-generated",
-      description: "svivva.com/sitemap.xml — always live",
+      description: "zzaizzai.com/sitemap.xml — always live",
       kind: "auto",
       status: "done",
       icon: "🗺️",

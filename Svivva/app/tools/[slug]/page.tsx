@@ -46,10 +46,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const tool = await fetchTool(slug);
   if (!tool) {
-    return { title: "Tool Not Found | Svivva" };
+    return { title: "Tool Not Found | ZZAI" };
   }
   return buildSeoMetadata({
-    title: tool.metaTitle || `${tool.title} | Svivva`,
+    title: tool.metaTitle || `${tool.title} | ZZAI`,
     description: tool.metaDescription || tool.content.slice(0, 160),
     path: tool.published ? `/${slug}` : `/tools/${slug}`,
   });
@@ -111,7 +111,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
+            <Image src={svivvaLogo} alt="ZZAI" width={120} height={36} priority />
           </Link>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -285,9 +285,9 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
               <p className="text-xs font-semibold uppercase tracking-widest text-[#5BA8A0] mb-1">
                 Step 1 complete · Next →
               </p>
-              <h3 className="text-xl font-black text-white">Deploy this as a live API in Svivva</h3>
+              <h3 className="text-xl font-black text-white">Deploy this as a live API in ZZAI</h3>
               <p className="text-white/60 text-sm mt-1">
-                You just explored what this tool does. Svivva lets you build, deploy, and monitor AI
+                You just explored what this tool does. ZZAI lets you build, deploy, and monitor AI
                 APIs like this one — in minutes, no backend required.
               </p>
             </div>
@@ -307,10 +307,10 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
       <footer className="border-t border-white/10">
         <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between gap-4 flex-wrap">
           <Link href="/" data-testid="link-footer-home">
-            <Image src={svivvaLogo} alt="Svivva" width={90} height={28} />
+            <Image src={svivvaLogo} alt="ZZAI" width={90} height={28} />
           </Link>
           <p className="text-xs text-white/40">
-            &copy; {new Date().getFullYear()} Svivva. All rights reserved.
+            &copy; {new Date().getFullYear()} ZZAI. All rights reserved.
           </p>
         </div>
       </footer>

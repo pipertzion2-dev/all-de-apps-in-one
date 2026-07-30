@@ -136,7 +136,7 @@ export function SchematicViewer({
           fontSize="6"
           fontFamily="monospace"
         >
-          SVIVVA CAD
+          ZZAI CAD
         </text>
 
         <g>

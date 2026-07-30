@@ -103,7 +103,7 @@ export default function BlogPostContent({
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -253,7 +253,7 @@ export default function BlogPostContent({
             className="text-2xl md:text-3xl font-bold text-white mb-3"
             data-testid="text-cta-title"
           >
-            From seed to symphony — ship faster with Svivva
+            From seed to symphony — ship faster with ZZAI
           </h2>
           <p className="text-white/80 mb-6">
             Turn prompts into production-ready APIs with schema enforcement, evaluations, and

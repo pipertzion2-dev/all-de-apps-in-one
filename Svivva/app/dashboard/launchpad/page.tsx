@@ -131,7 +131,7 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       icon: Activity,
       estimate: "~3 min",
       description:
-        "Svivva vs n8n, LangChain, Dify, Supabase, Firebase + 15 more — captures high-converting 'X alternative' searches",
+        "ZZAI vs n8n, LangChain, Dify, Supabase, Firebase + 15 more — captures high-converting 'X alternative' searches",
       auto: [
         "Up to 20 comparison pages created (svivva-vs-langchain, svivva-vs-n8n, etc.)",
         "Pages submitted to Bing/Yahoo/Yandex via IndexNow",
@@ -294,7 +294,7 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
       icon: Link2,
       estimate: "~6 min",
       description:
-        "AI-written 'Svivva + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
+        "AI-written 'ZZAI + [Tool]' pages for Notion, Slack, GitHub, Stripe, Supabase, Shopify + 24 more — targets zero-competition 'tool + AI backend' searches",
       auto: [
         `30 integration guide pages created at ${host}/{slug}`,
         "Each covers: how to connect the tool, step-by-step guide, use cases, getting started CTA",
@@ -420,7 +420,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
     },
     {
       id: "mini-embed",
-      title: "Generate 'Powered by Svivva' Widget",
+      title: "Generate 'Powered by ZZAI' Widget",
       icon: Link2,
       estimate: "~20s",
       needsTools: true,
@@ -459,11 +459,11 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       icon: Activity,
       estimate: "~5s",
       description:
-        "Auto-creates apps.svivva.com, security.svivva.com (→ /cyber-security-mini-apps) via GoDaddy API",
+        "Auto-creates apps.zzaizzai.com, security.zzaizzai.com (→ /cyber-security-mini-apps) via GoDaddy API",
       auto: ["GoDaddy DNS CNAME records added for all 3 subdomains (if GoDaddy API key is set)"],
       manual: [
         "Wait 24–48 hours for DNS propagation before the subdomains resolve",
-        "Test after 24h: open apps.svivva.com in a browser — if it loads your hosted app you're done",
+        "Test after 24h: open apps.zzaizzai.com in a browser — if it loads your hosted app you're done",
         "If GoDaddy API failed: go to GoDaddy DNS Manager → add CNAME records manually (details in Results below)",
       ],
     },
@@ -476,7 +476,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
       auto: [
         "All tool + hub URLs via IndexNow (Bing, Yandex, Yahoo, DuckDuckGo)",
         "GSC sitemap registration when service account is saved",
-        "Curated traffic-safe tools only on import (native Svivva utilities prioritized)",
+        "Curated traffic-safe tools only on import (native ZZAI utilities prioritized)",
       ],
       manual: [
         "Connect Google once: /dashboard/gsc-connect (service account as GSC Owner)",
@@ -488,7 +488,7 @@ function makeMiniSteps(orbit: OrbitUrlPack): Step[] {
 
 const CLUTETY_PRESET = getClutetyOrbitPreset();
 
-/** Every mini-app hub Orbit scans to build svivva.com SEO pages */
+/** Every mini-app hub Orbit scans to build zzaizzai.com SEO pages */
 const ORBIT_HUB_URLS = [
   CLUTETY_PRESET.miniAppsUrl,
   "https://zzaizzai.com/ai-tools-hub",
@@ -892,7 +892,7 @@ function MiniSourceConfig({
       </div>
 
       <div className="bg-card p-4 space-y-3">
-        {/* Quick-add presets — known Svivva ecosystem apps */}
+        {/* Quick-add presets — known ZZAI ecosystem apps */}
         <div className="space-y-1.5">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             Quick Add (one-click)
@@ -969,7 +969,7 @@ function MiniSourceConfig({
               className="text-[10px] px-2.5 py-1.5 rounded-lg border-2 border-dashed font-bold transition-colors disabled:opacity-40"
               style={{ borderColor: `${TEAL}60`, color: TEAL }}
             >
-              ⚡ Add All Svivva Apps
+              ⚡ Add All ZZAI Apps
             </button>
           </div>
         </div>
@@ -1685,7 +1685,7 @@ function StepCard({
 
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
-  { sub: "apps", target: "apps.svivva.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
+  { sub: "apps", target: "apps.zzaizzai.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
   { sub: "security", target: "zzaizzai.com", label: "Cyber security tools hub", color: "#5BA8A0" },
   {
     sub: "clutety",
@@ -1769,17 +1769,17 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
     <div className="space-y-3">
       <div className="px-1">
         <p className="text-sm font-bold text-foreground">
-          Deploy Svivva + connect all 3 apps to {publicHost}
+          Deploy ZZAI + connect all 3 apps to {publicHost}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           Follow in order — takes about 15 minutes total.
         </p>
       </div>
 
-      {/* Step 1: Deploy Svivva */}
-      <Section id="deploy" num="1" title="Deploy Svivva (crash-free)" color={BURG}>
+      {/* Step 1: Deploy ZZAI */}
+      <Section id="deploy" num="1" title="Deploy ZZAI (crash-free)" color={BURG}>
         <div className="space-y-2 text-xs text-muted-foreground">
-          <p className="text-foreground font-semibold">Why Svivva crashes and how to prevent it:</p>
+          <p className="text-foreground font-semibold">Why ZZAI crashes and how to prevent it:</p>
           <ul className="space-y-1.5 list-none">
             {[
               "Out-of-memory: The free hosting tier has 512MB RAM. If you have large AI calls, use streaming responses.",
@@ -1801,7 +1801,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
               "Push this repo to GitHub and import it in Vercel (or your host)",
               "Add env vars in the host dashboard: DATABASE_URL, OPENAI_API_KEY, NEXTAUTH_SECRET, NEXT_PUBLIC_SITE_URL",
               "Deploy — wait for the production build to finish",
-              "In the host → Domains, add svivva.com and www as instructed (DNS at GoDaddy)",
+              "In the host → Domains, add zzaizzai.com and www as instructed (DNS at GoDaddy)",
               "TLS is provisioned automatically by the host",
             ].map((s, i) => (
               <div key={i} className="flex items-start gap-2">
@@ -1813,11 +1813,11 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
         </div>
       </Section>
 
-      {/* Step 2: Point svivva.com root */}
-      <Section id="root" num="2" title="Point svivva.com → Svivva (GoDaddy DNS)" color={TEAL}>
+      {/* Step 2: Point zzaizzai.com root */}
+      <Section id="root" num="2" title="Point zzaizzai.com → ZZAI (GoDaddy DNS)" color={TEAL}>
         <div className="space-y-2 text-xs text-muted-foreground">
           <p>
-            In GoDaddy DNS Manager for <strong className="text-foreground">svivva.com</strong>, add:
+            In GoDaddy DNS Manager for <strong className="text-foreground">zzaizzai.com</strong>, add:
           </p>
           <div className="rounded-xl border border-border bg-card overflow-hidden">
             <div className="grid grid-cols-4 gap-0 text-[11px] font-bold text-foreground border-b border-border px-3 py-2 bg-muted/30">
@@ -1858,7 +1858,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
         <div className="space-y-3 text-xs">
           <p className="text-muted-foreground">
             Add these 3 CNAME records in GoDaddy DNS for{" "}
-            <strong className="text-foreground">svivva.com</strong>. You can also run the "Set Up
+            <strong className="text-foreground">zzaizzai.com</strong>. You can also run the "Set Up
             All 3 Subdomains" step above to auto-create them. The CNAME targets are the hosted app
             domains from your deployment dashboard.
           </p>
@@ -1875,8 +1875,8 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
               >
                 <div className="pr-4">
                   <span className="font-mono font-bold text-foreground">{s.sub}</span>
-                  <span className="text-muted-foreground">.svivva.com</span>
-                  <CopyInline text={`${s.sub}.svivva.com`} />
+                  <span className="text-muted-foreground">.zzaizzai.com</span>
+                  <CopyInline text={`${s.sub}.zzaizzai.com`} />
                 </div>
                 <span className="font-mono text-muted-foreground truncate text-[10px]">
                   {s.target}
@@ -1903,13 +1903,13 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
           {[
             {
               label: "Google Search Console",
-              desc: "Add svivva.com as a property → verify via TXT record → submit sitemap.xml. Repeat for each subdomain to track their traffic separately.",
+              desc: "Add zzaizzai.com as a property → verify via TXT record → submit sitemap.xml. Repeat for each subdomain to track their traffic separately.",
               href: "https://search.google.com/search-console",
               cta: "Open →",
             },
             {
               label: "IndexNow (Bing/Yandex)",
-              desc: "Run the IndexNow step in Orbit → instantly pushes all svivva.com pages to Bing, Yandex, Yahoo. Re-run whenever you publish new pages.",
+              desc: "Run the IndexNow step in Orbit → instantly pushes all zzaizzai.com pages to Bing, Yandex, Yahoo. Re-run whenever you publish new pages.",
               href: null,
               cta: null,
             },
@@ -1921,7 +1921,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
             },
             {
               label: "Analytics",
-              desc: "Add Clarity (free) or Plausible to each app for visitor heatmaps. Svivva already has Clarity support — add NEXT_PUBLIC_CLARITY_ID in Secrets.",
+              desc: "Add Clarity (free) or Plausible to each app for visitor heatmaps. ZZAI already has Clarity support — add NEXT_PUBLIC_CLARITY_ID in Secrets.",
               href: "https://clarity.microsoft.com",
               cta: "Get free Clarity →",
             },
@@ -2007,7 +2007,7 @@ function computeManualSmart(
 
   if (stepId === "mini-hub" && orbit?.hubExists && mentionsGscAction) {
     outsideHint =
-      "The /tools hub page is live on svivva.com; GSC indexing is still something only you can confirm in Google.";
+      "The /tools hub page is live on zzaizzai.com; GSC indexing is still something only you can confirm in Google.";
   }
 
   return { dbStepOk, likelyAutoDone, likelyReason, needsOutsideApp, outsideHint };
@@ -2129,7 +2129,7 @@ function OrbitTrafficAutomation({
       </button>
       <p className="text-[10px] text-pink-950/90 dark:text-pink-50/90 leading-snug font-medium">
         Publishes <strong>blog posts, SEO pages, comparisons, 300 tool pages</strong> on{" "}
-        <strong>svivva.com</strong>, then IndexNow + Bing + Google API. Auto-checks this list.
+        <strong>zzaizzai.com</strong>, then IndexNow + Bing + Google API. Auto-checks this list.
       </p>
       <button
         type="button"
@@ -3088,7 +3088,7 @@ export default function LaunchpadPage() {
       toast({
         title: discovered.length ? `${discovered.length} tools discovered` : "Hub scan complete",
         description: discovered.length
-          ? "Orbit will index each tool on svivva.com for traffic."
+          ? "Orbit will index each tool on zzaizzai.com for traffic."
           : "Continuing with server-side discovery during mini-import.",
         duration: 6000,
       });
@@ -3460,14 +3460,14 @@ export default function LaunchpadPage() {
                   ) : null}
                 </div>
                 <p className="text-white/50 text-xs">
-                  Svivva + your deployed apps — maximum real traffic
+                  ZZAI + your deployed apps — maximum real traffic
                 </p>
                 {orbitUrls.host.endsWith("zzaizzai.com") && (
                   <div className="mt-2 rounded-lg border border-white/15 bg-black/20 px-2.5 py-2 text-[10px] text-white/70 leading-snug space-y-1.5 max-w-md">
                     <p>
                       <span className="font-semibold text-white/85">Live site</span> updates only
                       after <span className="text-white/90">Vercel</span> finishes a production
-                      deploy from GitHub — pushing code alone does not change svivva.com until that
+                      deploy from GitHub — pushing code alone does not change zzaizzai.com until that
                       build runs.
                     </p>
                     {orbitStatusPending ? (
@@ -3525,7 +3525,7 @@ export default function LaunchpadPage() {
             </div>
             <div className="flex items-center justify-between text-[11px] text-white/35">
               <span>
-                svivva.com: {svivvaDone}/{SVIVVA_STEPS.length}
+                zzaizzai.com: {svivvaDone}/{SVIVVA_STEPS.length}
               </span>
               <span className="font-semibold" style={{ color: TEAL }}>
                 {overallPct}% complete
@@ -3944,7 +3944,7 @@ export default function LaunchpadPage() {
             <div className="min-w-0 flex-1">
               <h2 className="text-sm font-black text-foreground">Admin Traffic Autopilot</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                One click checks svivva.com, connected apps, sitemap/robots, Stripe readiness, and
+                One click checks zzaizzai.com, connected apps, sitemap/robots, Stripe readiness, and
                 removes broken or risky AI tool pages from indexing.
               </p>
             </div>
@@ -3993,7 +3993,7 @@ export default function LaunchpadPage() {
             <div className="min-w-0 flex-1">
               <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                One click connects all monorepo apps (Svivva, Pyracrypt, AI Tools Hub, Cyber
+                One click connects all monorepo apps (ZZAI, Pyracrypt, AI Tools Hub, Cyber
                 Security, SEO Pack), fixes 404 links, and submits to Bing, Yandex, Yahoo,
                 DuckDuckGo.
               </p>
@@ -4059,12 +4059,12 @@ export default function LaunchpadPage() {
                 color: "#24292f",
               },
               {
-                label: "svivva.com Sitemap",
+                label: "zzaizzai.com Sitemap",
                 href: "https://zzaizzai.com/sitemap.xml",
                 color: TEAL,
               },
               {
-                label: "svivva.com/orbit",
+                label: "zzaizzai.com/orbit",
                 href: "https://zzaizzai.com/orbit",
                 color: BURG,
               },
@@ -4276,7 +4276,7 @@ export default function LaunchpadPage() {
         {/* How this works — mini tab explainer */}
         <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
           <p className="text-xs font-bold text-foreground uppercase tracking-wide">
-            How Your 50 Apps Drive Traffic to Svivva
+            How Your 50 Apps Drive Traffic to ZZAI
           </p>
           <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
             <div className="flex items-start gap-2.5">
@@ -4299,7 +4299,7 @@ export default function LaunchpadPage() {
                 2
               </div>
               <div>
-                <strong className="text-foreground">Orbit builds SEO pages ON svivva.com</strong> —
+                <strong className="text-foreground">Orbit builds SEO pages ON zzaizzai.com</strong> —
                 one page per tool, all ranking on Google, all linking to your real tools.
               </div>
             </div>
@@ -4312,9 +4312,9 @@ export default function LaunchpadPage() {
               </div>
               <div>
                 <strong className="text-foreground">
-                  Orbit generates a "Powered by Svivva" widget
+                  Orbit generates a "Powered by ZZAI" widget
                 </strong>{" "}
-                — paste it into each mini app so tool users click through to svivva.com.
+                — paste it into each mini app so tool users click through to zzaizzai.com.
               </div>
             </div>
           </div>
@@ -4458,7 +4458,7 @@ export default function LaunchpadPage() {
                   className="text-xs font-bold truncate"
                   style={{ color: tab === "svivva" ? BURG : undefined }}
                 >
-                  svivva.com
+                  zzaizzai.com
                 </span>
                 <span
                   className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "svivva" ? "bg-[#6B2C4A]/20 text-[#6B2C4A]" : "bg-muted text-muted-foreground"}`}
@@ -4589,7 +4589,7 @@ export default function LaunchpadPage() {
           <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
             <Globe className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
             <span>
-              These steps build the full SEO &amp; social presence for <strong>svivva.com</strong> —
+              These steps build the full SEO &amp; social presence for <strong>zzaizzai.com</strong> —
               landing pages, comparisons, blog content, social packs, and sitemap submission.
             </span>
           </div>
@@ -4723,7 +4723,7 @@ export default function LaunchpadPage() {
             <p className="text-3xl">🚀</p>
             <p className="font-black text-lg">
               {tab === "svivva"
-                ? "svivva.com is in orbit!"
+                ? "zzaizzai.com is in orbit!"
                 : tab === "mini"
                   ? "Your tools are live on Google!"
                   : tab === "index22"
@@ -4736,7 +4736,7 @@ export default function LaunchpadPage() {
                 : tab === "mini"
                   ? "Your app URLs are connected — Google traffic can flow to your live tools."
                   : tab === "index22"
-                    ? "Run marketing steps on svivva.com and Your tools tabs, or use Run Everything above."
+                    ? "Run marketing steps on zzaizzai.com and Your tools tabs, or use Run Everything above."
                     : "Deployment is ready — your marketing will go live on deploy."}
             </p>
             {tab === "svivva" && (

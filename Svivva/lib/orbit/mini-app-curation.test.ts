@@ -6,7 +6,7 @@ import {
 } from "./mini-app-curation";
 
 describe("mini-app-curation", () => {
-  it("always includes native Svivva tools", () => {
+  it("always includes native ZZAI tools", () => {
     const out = filterToolsForTrafficDiscovery([]);
     expect(out.length).toBeGreaterThanOrEqual(NATIVE_SVIVVA_TOOLS.length);
     expect(nativeToolsAsDiscoverable().every((n) => out.some((t) => t.url === n.url))).toBe(true);

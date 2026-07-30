@@ -133,7 +133,7 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
   },
 };
 
-// Svivva brand colors from reference art
+// ZZAI brand colors from reference art
 const VIVVA_COLORS = {
   teal: new THREE.Color(0x5b7faa), // Steel blue (from ref background)
   tealLight: new THREE.Color(0x6b9b58), // Vivid leaf green

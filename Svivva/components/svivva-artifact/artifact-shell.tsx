@@ -38,7 +38,7 @@ export function SvivvaArtifact() {
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5BA8A0", letterSpacing: "0.28em" }}
         >
-          Svivva6
+          ZZAI6
         </p>
         <h2
           className="text-3xl md:text-4xl font-light tracking-tight text-foreground"

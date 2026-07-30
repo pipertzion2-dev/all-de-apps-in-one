@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { type ArtworkFeature } from "./feature-data";
 
-// ─── Scan-line overlay (Svivva Play) ──────────────────────────────────
+// ─── Scan-line overlay (ZZAI Play) ──────────────────────────────────
 function ScanLineOverlay({
   scrollYProgress,
 }: {

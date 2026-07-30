@@ -70,7 +70,7 @@ export function ExtensionInstallCard() {
           color: TEAL,
         }}
       >
-        Re-sync rules from Svivva <ExternalLink className="w-3 h-3" />
+        Re-sync rules from ZZAI <ExternalLink className="w-3 h-3" />
       </a>
     </section>
   );

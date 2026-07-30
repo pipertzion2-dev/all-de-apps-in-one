@@ -19,7 +19,7 @@ type KeywordIdea = {
   outline: string[];
 };
 
-const PRODUCT_CONTEXT = `Svivva is a platform offering free AI tools and cyber-security mini-apps that
+const PRODUCT_CONTEXT = `ZZAI is a platform offering free AI tools and cyber-security mini-apps that
 funnel traffic to a main SaaS (AI API builder / prompt-to-API). Audience: indie hackers,
 developers, founders, and security-curious builders. Mini-apps are standalone tools that
 drive traffic to the main product.`;
@@ -69,7 +69,7 @@ Existing content (do NOT repeat these — find fresh, non-overlapping opportunit
 ${existing.length ? existing.map((t) => `- ${t}`).join("\n") : "(none yet)"}
 
 Propose ${count} high-traffic, low-competition keyword opportunities that would realistically
-rank and send qualified traffic to Svivva's tools and main SaaS. Favor long-tail, intent-rich
+rank and send qualified traffic to ZZAI's tools and main SaaS. Favor long-tail, intent-rich
 queries and topics that connect the mini-apps to the main product.
 
 Return ONLY a JSON array, each item:

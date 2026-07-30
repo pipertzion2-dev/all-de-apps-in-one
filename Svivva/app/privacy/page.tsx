@@ -9,7 +9,7 @@ export default function PrivacyPage() {
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-foreground">Your Rights</h2>
             <p>
               You may request access to, correction of, or deletion of your personal data at any
-              time by contacting us at hello@svivva.com.
+              time by contacting us at hello@zzaizzai.com.
             </p>
           </section>
         </div>

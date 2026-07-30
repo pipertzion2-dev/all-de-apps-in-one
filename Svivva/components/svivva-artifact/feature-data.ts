@@ -21,8 +21,8 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   {
     id: "play",
     artwork: "/artworks/play.png",
-    artworkAlt: "BREATH_AWAY — Svivva Play",
-    title: "Svivva Play",
+    artworkAlt: "BREATH_AWAY — ZZAI Play",
+    title: "ZZAI Play",
     subtitle: "Takes your breath away",
     description:
       "AI music composition that writes, voices, and performs hocket arrangements — meend, sitar accents, full-ensemble intelligence.",
@@ -36,8 +36,8 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   {
     id: "seeds",
     artwork: "/artworks/seeds.png",
-    artworkAlt: "Settle Down — Svivva Seeds",
-    title: "Svivva Seeds",
+    artworkAlt: "Settle Down — ZZAI Seeds",
+    title: "ZZAI Seeds",
     subtitle: "Together we discover a path",
     description:
       "One structured spec generates an entire product suite — frontend, backend, database, auth, and deployment configs, all built in parallel.",

@@ -50,7 +50,7 @@ export default function LoginPage() {
           className="w-8 h-8 rounded-lg"
           style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
         />
-        <span className="font-bold text-xl text-white tracking-tight">Svivva</span>
+        <span className="font-bold text-xl text-white tracking-tight">ZZAI</span>
       </div>
 
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 flex flex-col gap-5">
@@ -104,7 +104,7 @@ export default function LoginPage() {
       </div>
 
       <p className="text-xs text-white/30">
-        New to Svivva?{" "}
+        New to ZZAI?{" "}
         <Link href="/signup" className="text-[#5BA8A0] hover:underline">
           Create an account
         </Link>

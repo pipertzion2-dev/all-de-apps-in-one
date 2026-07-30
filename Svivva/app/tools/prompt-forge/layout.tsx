@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     "Test and refine prompts with GPT-4o, GPT-4o mini, and GPT-4 Turbo. Free playground — no signup, no API key. See tokens, latency, and cost per run.",
   openGraph: {
     title: "PromptForge",
-    description: "Test prompts with GPT-4o, see token counts and costs, then ship with Svivva.",
+    description: "Test prompts with GPT-4o, see token counts and costs, then ship with ZZAI.",
     type: "website",
   },
   keywords: [

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "You are an SEO expert writing landing pages for Svivva, an AI-powered platform that lets users build production-ready AI APIs from natural language prompts. Generate compelling, SEO-optimized landing page content.",
+            "You are an SEO expert writing landing pages for ZZAI, an AI-powered platform that lets users build production-ready AI APIs from natural language prompts. Generate compelling, SEO-optimized landing page content.",
         },
         {
           role: "user",

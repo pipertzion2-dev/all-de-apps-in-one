@@ -1354,7 +1354,7 @@ export default function HypothesisHardwarePage() {
                 Source Registry
               </CardTitle>
               <CardDescription>
-                Register hardware components, external APIs, and Seeds apps. Your digital Svivva
+                Register hardware components, external APIs, and Seeds apps. Your digital ZZAI
                 APIs are auto-connected.
               </CardDescription>
             </CardHeader>

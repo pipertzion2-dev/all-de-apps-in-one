@@ -1,6 +1,6 @@
 /**
  * Paths and slugs that must not appear in sitemaps or SEO landing resolution.
- * Pyracrypt is a Svivva feature — canonical hub is /cyber-security-mini-apps.
+ * Pyracrypt is a ZZAI feature — canonical hub is /cyber-security-mini-apps.
  */
 /** Canonical hubs — served via (seo)/[slug] and listed in static sitemap; skip duplicate DB rows only. */
 export const HUB_SLUGS = new Set(["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"]);

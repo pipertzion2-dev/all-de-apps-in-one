@@ -545,7 +545,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
                 </button>
                 <p className="text-[11px] text-muted-foreground">
                   In GoDaddy → <strong>My Products</strong> → your domain → <strong>DNS</strong> —
-                  keep managing records there; this connection lets Svivva add CNAMEs via API when
+                  keep managing records there; this connection lets ZZAI add CNAMEs via API when
                   you run Orbit.
                 </p>
               </div>

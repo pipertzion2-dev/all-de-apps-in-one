@@ -6,12 +6,12 @@ import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact the Svivva team for platform questions, enterprise plans, or partnerships. Email hello@svivva.com.",
+    "Contact the ZZAI team for platform questions, enterprise plans, or partnerships. Email hello@zzaizzai.com.",
   alternates: { canonical: "https://zzaizzai.com/contact" },
   openGraph: {
-    title: "Contact Svivva",
+    title: "Contact ZZAI",
     description:
-      "Get in touch with the Svivva team for platform questions, enterprise plans, or partnership inquiries.",
+      "Get in touch with the ZZAI team for platform questions, enterprise plans, or partnership inquiries.",
     url: "https://zzaizzai.com/contact",
   },
 };
@@ -23,7 +23,7 @@ export default function ContactPage() {
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -49,7 +49,7 @@ export default function ContactPage() {
           <div className="border border-border rounded-lg p-6 space-y-3 mt-6">
             <div data-testid="text-contact-email">
               <span className="font-medium text-foreground">For any inquiries:</span>{" "}
-              hello@svivva.com
+              hello@zzaizzai.com
             </div>
           </div>
         </div>

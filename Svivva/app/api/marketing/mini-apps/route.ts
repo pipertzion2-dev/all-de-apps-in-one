@@ -303,7 +303,7 @@ Return JSON with these exact keys:
                 content: `Write a "${app.name} vs ${competitor}" comparison page. ${app.name} is part of ${replTitle} at ${replUrl}. ${app.description}
 
 Return JSON: {
-  "metaTitle": "${app.name} vs ${competitor} (${new Date().getFullYear()}) | Svivva",
+  "metaTitle": "${app.name} vs ${competitor} (${new Date().getFullYear()}) | ZZAI",
   "metaDescription": "max 155 chars comparison summary",
   "headline": "${app.name} vs ${competitor}: Which Is Better?",
   "subheadline": "20-word answer",

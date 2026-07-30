@@ -379,7 +379,7 @@ export async function runMarketingAutopilot(opts?: {
         text: lead.slice(0, 280),
         platforms: ["x"],
         linkUrl: site,
-        linkTitle: "Svivva — free AI tools",
+        linkTitle: "ZZAI — free AI tools",
       });
       tasks.push(
         task(

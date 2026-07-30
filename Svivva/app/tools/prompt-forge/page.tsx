@@ -362,7 +362,7 @@ export default function PromptForgePage() {
               ? "Prompt working — now deploy it as a live API endpoint"
               : "Ready to go beyond testing?"
           }
-          body="Svivva turns your prompt into a production-ready API in one click — with schema validation, auto-repair, model routing, versioning, and analytics. No backend required."
+          body="ZZAI turns your prompt into a production-ready API in one click — with schema validation, auto-repair, model routing, versioning, and analytics. No backend required."
           ctaText="Deploy this prompt — free"
         />
 
@@ -372,7 +372,7 @@ export default function PromptForgePage() {
           {[
             {
               q: "Do I need an API key to use PromptForge?",
-              a: "No — PromptForge is completely free to use. No signup, no API key, no credit card. It's powered by Svivva's infrastructure.",
+              a: "No — PromptForge is completely free to use. No signup, no API key, no credit card. It's powered by ZZAI's infrastructure.",
             },
             {
               q: "Which models are available?",
@@ -384,11 +384,11 @@ export default function PromptForgePage() {
             },
             {
               q: "How do I deploy my prompt to production?",
-              a: "Once you're happy with your prompt, Svivva lets you deploy it as a live API endpoint in one click — with rate limiting, schema validation, and usage analytics built in.",
+              a: "Once you're happy with your prompt, ZZAI lets you deploy it as a live API endpoint in one click — with rate limiting, schema validation, and usage analytics built in.",
             },
             {
               q: "Is there a rate limit?",
-              a: "Free use is limited to 12 requests per minute per IP. For unlimited usage, sign up for Svivva.",
+              a: "Free use is limited to 12 requests per minute per IP. For unlimited usage, sign up for ZZAI.",
             },
           ].map(({ q, a }) => (
             <div key={q} className="rounded-xl border border-border bg-card p-4">
@@ -428,7 +428,7 @@ export default function PromptForgePage() {
         triggerAfterMs={20000}
         savingsLine={
           result?.content
-            ? "Prompt tested — deploy it as a live API on Svivva in one click."
+            ? "Prompt tested — deploy it as a live API on ZZAI in one click."
             : "PromptForge is Step 1. Step 2: deploy your prompt as a live API."
         }
       />

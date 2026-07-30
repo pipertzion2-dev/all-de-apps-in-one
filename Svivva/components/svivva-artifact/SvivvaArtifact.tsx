@@ -375,7 +375,7 @@ export function SvivvaArtifact() {
           className="text-xs tracking-[0.3em] uppercase font-mono mb-3 block"
           style={{ color: activeFeature.accentColor }}
         >
-          The Svivva Artifact
+          The ZZAI Artifact
         </span>
         <h2 className="text-3xl md:text-4xl font-bold text-white">Explore Every Dimension</h2>
         <p className="text-white/50 mt-2 text-sm max-w-xs mx-auto">

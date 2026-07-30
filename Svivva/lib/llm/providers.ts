@@ -9,7 +9,7 @@ export function resetProviderCache(): void {
   cachedOllamaUrl = undefined;
 }
 
-/** True on Vercel production/preview (svivva.com, *.vercel.app). */
+/** True on Vercel production/preview (zzaizzai.com, *.vercel.app). */
 export function isOnVercelRuntime(): boolean {
   return !!(process.env.VERCEL || process.env.VERCEL_ENV);
 }

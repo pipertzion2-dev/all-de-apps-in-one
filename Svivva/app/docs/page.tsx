@@ -6,12 +6,12 @@ import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 export const metadata: Metadata = {
   title: "Documentation",
   description:
-    "Guides and reference for Svivva — from first project to production: prompts, schemas, evaluations, versioning, rollback, and Svivva Play.",
+    "Guides and reference for ZZAI — from first project to production: prompts, schemas, evaluations, versioning, rollback, and ZZAI Play.",
   alternates: { canonical: "https://zzaizzai.com/docs" },
   openGraph: {
-    title: "Svivva documentation",
+    title: "ZZAI documentation",
     description:
-      "Guides and reference for shipping with Svivva — prompts, schemas, evaluations, versioning, rollback, and more.",
+      "Guides and reference for shipping with ZZAI — prompts, schemas, evaluations, versioning, rollback, and more.",
     url: "https://zzaizzai.com/docs",
   },
 };
@@ -23,7 +23,7 @@ export default function DocsPage() {
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -46,7 +46,7 @@ export default function DocsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-2">Getting Started</h2>
             <p>
               Ship your first backend quickly: sign in, describe what it should do in plain
-              language, define your output schema, and deploy. Svivva handles validation,
+              language, define your output schema, and deploy. ZZAI handles validation,
               versioning, and rollback.
             </p>
           </section>
@@ -54,20 +54,20 @@ export default function DocsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-2">API Reference</h2>
             <p>
               Every endpoint you create comes with auto-generated OpenAPI 3.0 specifications. Use
-              them to integrate with any client, or let Svivva generate SDKs for Python and Node.js
+              them to integrate with any client, or let ZZAI generate SDKs for Python and Node.js
               automatically.
             </p>
           </section>
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">Evaluations</h2>
             <p>
-              Svivva automatically generates 50-200 evaluation cases per endpoint, including edge
+              ZZAI automatically generates 50-200 evaluation cases per endpoint, including edge
               cases. Set pass-rate thresholds and enable auto-rollback if quality drops below your
               standards.
             </p>
           </section>
           <section>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Svivva Play</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-2">ZZAI Play</h2>
             <p>
               Our AI music instrument supports 6 modes: Composition, Interpolation, Chord Player,
               Solo Prompt, Patch Creator, and Ensemble. Import audio, describe what you want, and

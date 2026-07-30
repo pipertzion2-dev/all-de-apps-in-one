@@ -89,12 +89,12 @@ export async function POST(
         latencyMs,
         apiName: project.name,
         slug: project.slug,
-        poweredBy: "Svivva — svivva.com",
+        poweredBy: "ZZAI — zzaizzai.com",
         cardUrl: `/api-card/${project.id}`,
       },
       {
         headers: {
-          "X-Powered-By": "Svivva",
+          "X-Powered-By": "ZZAI",
           "X-API-Name": project.name,
           "X-Latency-Ms": String(latencyMs),
           "Access-Control-Allow-Origin": "*",

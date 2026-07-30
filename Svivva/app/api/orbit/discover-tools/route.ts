@@ -251,7 +251,7 @@ function dedupeTools(
 async function fetchSitemapXml(url: string): Promise<string | null> {
   try {
     const r = await fetch(url, {
-      headers: { "User-Agent": "Svivva-Orbit/1.0" },
+      headers: { "User-Agent": "ZZAI-Orbit/1.0" },
       signal: AbortSignal.timeout(22000),
     });
     if (!r.ok) return null;
@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
     // ── Step 1: Fetch homepage ────────────────────────────────────────────────
     try {
       const res = await fetch(replUrl, {
-        headers: { "User-Agent": "Svivva-Orbit/1.0" },
+        headers: { "User-Agent": "ZZAI-Orbit/1.0" },
         signal: AbortSignal.timeout(15000),
       });
       if (res.ok) {
@@ -356,7 +356,7 @@ export async function POST(req: NextRequest) {
     // ── Step 2: Sitemap ───────────────────────────────────────────────────────
     const { locs, crossDomains } = await collectLocsFromSitemap(`${replUrl}/sitemap.xml`);
 
-    // Also pull in cross-domain sitemaps (e.g. when hub Repl points to svivva.com)
+    // Also pull in cross-domain sitemaps (e.g. when hub Repl points to zzaizzai.com)
     const crossLocs: string[] = [];
     for (const crossHost of crossDomains) {
       const { locs: cLocs } = await collectLocsFromSitemap(`https://${crossHost}/sitemap.xml`);
@@ -385,7 +385,7 @@ export async function POST(req: NextRequest) {
       if (bundleUrl) {
         try {
           const res = await fetch(bundleUrl, {
-            headers: { "User-Agent": "Svivva-Orbit/1.0" },
+            headers: { "User-Agent": "ZZAI-Orbit/1.0" },
             signal: AbortSignal.timeout(20000),
           });
           if (res.ok) {

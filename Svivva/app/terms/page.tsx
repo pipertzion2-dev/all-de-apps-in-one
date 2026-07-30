@@ -9,7 +9,7 @@ export default function TermsPage() {
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -32,14 +32,14 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Acceptance of Terms</h2>
             <p>
-              By accessing or using Svivva, you agree to be bound by these Terms of Service. If you
+              By accessing or using ZZAI, you agree to be bound by these Terms of Service. If you
               do not agree, please do not use our platform.
             </p>
           </section>
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Use of Services</h2>
             <p>
-              You may use Svivva to create, deploy, and manage AI-powered APIs in accordance with
+              You may use ZZAI to create, deploy, and manage AI-powered APIs in accordance with
               applicable laws. You are responsible for all activity under your account and for
               ensuring your APIs comply with our acceptable use policies.
             </p>
@@ -47,21 +47,21 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Intellectual Property</h2>
             <p>
-              You retain ownership of the APIs and content you create on Svivva. We retain ownership
+              You retain ownership of the APIs and content you create on ZZAI. We retain ownership
               of the platform, tools, and underlying technology. By publishing APIs on the
-              marketplace, you grant Svivva a license to distribute them per your chosen terms.
+              marketplace, you grant ZZAI a license to distribute them per your chosen terms.
             </p>
           </section>
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Limitation of Liability</h2>
             <p>
-              Svivva is provided "as is" without warranty. We are not liable for any indirect,
+              ZZAI is provided "as is" without warranty. We are not liable for any indirect,
               incidental, or consequential damages arising from your use of the platform.
             </p>
           </section>
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Contact</h2>
-            <p>For questions about these terms, contact us at hello@svivva.com.</p>
+            <p>For questions about these terms, contact us at hello@zzaizzai.com.</p>
           </section>
         </div>
       </main>

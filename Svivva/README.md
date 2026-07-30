@@ -1,14 +1,14 @@
-# Svivva
+# ZZAI
 
-Svivva is the primary product app in this monorepo. It combines a Next.js
+ZZAI is the primary product app in this monorepo. It combines a Next.js
 frontend, API routes, and shared business logic for SEO, growth automation,
-Svivva Play, and marketplace tooling.
+ZZAI Play, and marketplace tooling.
 
 ## Quick Start
 
 1. Install dependencies:
    - `npm install`
-2. Start Postgres (from monorepo root, one folder above `Svivva`):
+2. Start Postgres (from monorepo root, one folder above `ZZAI`):
    - `docker compose up -d postgres`
 3. Copy `.env.example` to `.env` and set secrets (`NEXTAUTH_SECRET`, API keys). `DATABASE_URL` defaults match Docker (`svivva` / `svivva_local_dev`).
 4. Apply the schema:
@@ -42,7 +42,7 @@ On macOS, if the dev server exits with `EADDRINUSE` on port 5000, AirPlay Receiv
 
 See `docs/PROJECT_STRUCTURE.md` for conventions and where new files should go.
 
-### `attached_assets/` (Svivva)
+### `attached_assets/` (ZZAI)
 
 Only **eight** PNGs are kept in git — the ones imported via `@/attached_assets/…` in the app. Everything else was bulk from Replit and is **not** committed (saves hundreds of MB on clone and deploy). `npm run verify` enforces the allowlist via `scripts/verify-attached-assets.mjs`. If you add a new imported image, update that script and **`.vercelignore`** negations together.
 
@@ -52,7 +52,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 
 1. Push this repo to GitHub.
 2. Vercel → **Add New… → Project** → **Import** your repo.
-3. **Root Directory:** set to **`Svivva`** (required — do not leave blank).
+3. **Root Directory:** set to **`ZZAI`** (required — do not leave blank).
 4. Framework should detect **Next.js**. Build uses `vercel.json`: `npm ci` then **`npm run build:vercel`** (`verify` + `next build`).
 5. **Environment variables** (Production — copy names from `.env.example`):
    - **`DATABASE_URL`** — hosted Postgres (e.g. Neon/Vercel Postgres).
@@ -64,7 +64,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 6. **Deploy.** First deploy does **not** run `drizzle-kit push`. Against production Postgres run **`npm run db:push`** once from your machine (with prod `DATABASE_URL` in env), or apply migrations your platform supports.
 7. Optional: **Settings → Domains** add `yourdomain.com`; put the DNS records Vercel shows into GoDaddy (apex **A** / **www** **CNAME**).
 
-Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup.
+Repo layout reminder: this monorepo has other folders; only **`ZZAI`** is configured for this Next+Vercel setup.
 
 ### GitHub Actions deploy (optional)
 
@@ -76,7 +76,7 @@ The repo includes **`.github/workflows/vercel-svivva-production.yml`**. It runs 
 ### Local CLI deploy (optional)
 
 ```bash
-cd Svivva
+cd ZZAI
 npx vercel@53.3.1 login
 npx vercel@53.3.1 link    # creates .vercel/project.json (gitignored)
 npx vercel@53.3.1 deploy --prod

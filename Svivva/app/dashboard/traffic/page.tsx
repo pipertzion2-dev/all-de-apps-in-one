@@ -82,7 +82,7 @@ export default function TrafficPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Traffic & Analytics</h1>
-          <p className="text-muted-foreground text-sm mt-1">Live data from svivva.com</p>
+          <p className="text-muted-foreground text-sm mt-1">Live data from zzaizzai.com</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge
@@ -186,7 +186,7 @@ export default function TrafficPage() {
             <p className="text-sm text-muted-foreground mt-1">
               Property{" "}
               <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{GA_ID}</span> is
-              connected and tracking visitors on svivva.com. Click to view your live charts.
+              connected and tracking visitors on zzaizzai.com. Click to view your live charts.
             </p>
           </div>
           <Button

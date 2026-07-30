@@ -77,7 +77,7 @@ export async function runImportAnalysis(options: {
       onInstantResult?.(buildInstantPlayAnalysis(clientStub, transcription));
     }
   } catch (err) {
-    console.warn("Svivva Play Melodyne sync failed:", err);
+    console.warn("ZZAI Play Melodyne sync failed:", err);
   }
 
   const warning = melodyneFile

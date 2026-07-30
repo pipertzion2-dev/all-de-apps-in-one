@@ -287,7 +287,7 @@ function CheckoutPageContent() {
           </Link>
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={90}
             height={30}
             className="h-7 w-auto object-contain opacity-80"

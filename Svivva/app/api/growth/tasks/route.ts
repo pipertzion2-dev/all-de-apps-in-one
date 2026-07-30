@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const mainSitemap = getSitemapUrl();
   const securitySitemap = getSecuritySitemapUrl();
 
-  // 1. Ping Svivva sitemap (Bing only — Google retired ?ping= in June 2023.
+  // 1. Ping ZZAI sitemap (Bing only — Google retired ?ping= in June 2023.
   //    The real GSC submission happens via the scheduler's submit_sitemap action,
   //    which calls the Webmasters v3 API with a stored service-account.)
   try {
@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
       status: "completed",
       details: { bing: b.status },
     });
-    results.push({ task: "Svivva sitemap ping", status: "ok", detail: `Bing ${b.status}` });
+    results.push({ task: "ZZAI sitemap ping", status: "ok", detail: `Bing ${b.status}` });
   } catch (e: any) {
-    results.push({ task: "Svivva sitemap ping", status: "error", detail: e.message });
+    results.push({ task: "ZZAI sitemap ping", status: "error", detail: e.message });
   }
 
   // 2. Ping security / cyber mini-apps sitemap (Bing only)
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     results.push({ task: "Security tools sitemap ping", status: "error", detail: e.message });
   }
 
-  // 3. IndexNow submission for Svivva
+  // 3. IndexNow submission for ZZAI
   try {
     const r = await fetch(`${appOrigin}/api/indexnow/submit`, {
       method: "POST",

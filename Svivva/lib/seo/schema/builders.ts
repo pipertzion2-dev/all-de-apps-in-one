@@ -8,7 +8,7 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": ORG_ID(),
-    name: "Svivva",
+    name: "ZZAI",
     url: getSiteUrl(),
     logo: absoluteUrl("/svivva-logo.png"),
     sameAs: [] as string[],
@@ -19,7 +19,7 @@ export function websiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Svivva",
+    name: "ZZAI",
     url: getSiteUrl(),
     publisher: { "@id": ORG_ID() },
     potentialAction: {

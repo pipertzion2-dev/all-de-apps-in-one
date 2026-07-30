@@ -7,7 +7,7 @@ Production canonical URL is **`https://zzaizzai.com`**.
 Once this code is on the live host:
 
 ```bash
-cd Svivva
+cd ZZAI
 npm run domain:cutover
 ```
 

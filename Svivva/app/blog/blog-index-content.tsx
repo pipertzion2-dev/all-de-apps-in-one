@@ -60,7 +60,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
         <Link href="/" data-testid="link-logo">
           <Image
             src={svivvaLogo}
-            alt="Svivva"
+            alt="ZZAI"
             width={100}
             height={32}
             className="h-7 w-auto object-contain"
@@ -98,11 +98,11 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
             className="text-4xl md:text-5xl font-bold text-white mb-4"
             data-testid="text-blog-title"
           >
-            Svivva Blog
+            ZZAI Blog
           </h1>
           <p className="text-lg text-white/80 max-w-xl mx-auto" data-testid="text-blog-description">
             Guides, tutorials, and insights on building AI-powered APIs. Learn to ship faster with
-            Svivva.
+            ZZAI.
           </p>
         </div>
       </section>

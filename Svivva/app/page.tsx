@@ -94,7 +94,7 @@ const features = [
     title: "Looks Like a Real API. Is a Real API.",
     description:
       "TypeScript-first SDK, full type safety, auto-generated OpenAPI spec, Python and Node clients. Your users integrate in minutes and never suspect the backend is mostly words.",
-    code: "import { PromptAPI } from 'svivva'",
+    code: "import { PromptAPI } from 'zzai'",
     highlight: "TypeScript-first",
   },
 ];
@@ -140,7 +140,7 @@ const pricingTiers = [
     cta: "Contact Sales",
     popular: false,
     hasSeeds: true,
-    href: "mailto:hello@svivva.com?subject=Enterprise%20Plan%20Inquiry",
+    href: "mailto:hello@zzaizzai.com?subject=Enterprise%20Plan%20Inquiry",
   },
 ];
 
@@ -855,7 +855,7 @@ export default function LandingPage() {
         </section>
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
-        {/* ── Svivva6 artifact cube ─────────────────────────────────────────── */}
+        {/* ── ZZAI6 artifact cube ─────────────────────────────────────────── */}
         <div className="relative w-full overflow-visible bg-background pt-4">
           <SvivvaArtifact />
         </div>
@@ -1251,7 +1251,7 @@ export default function LandingPage() {
                       <div className="flex items-center gap-2 text-xs mb-2">
                         <Badge className="bg-green-500/20 text-green-400 text-[10px]">POST</Badge>
                         <span className="text-gray-300 font-mono text-[10px]">
-                          api.svivva.ai/v1/sentiment
+                          api.zzaizzai.com/v1/sentiment
                         </span>
                       </div>
                       <div className="text-[10px] text-gray-500 font-mono">200 OK • 124ms</div>

@@ -1,6 +1,6 @@
 /**
  * All workspace projects for Orbit (Launchpad presets, run-step fallbacks).
- * Prefer NEXT_PUBLIC_*; defaults target the live Svivva site instead of legacy Replit hosts.
+ * Prefer NEXT_PUBLIC_*; defaults target the live ZZAI site instead of legacy Replit hosts.
  */
 const DEFAULT_SITE = "https://zzaizzai.com";
 
@@ -58,7 +58,7 @@ export function getCyberSecurityMiniAppsUrl(): string {
   return getSecurityToolsHubUrl();
 }
 
-/** Svivva SEO Pack - SEO tools and resources. */
+/** ZZAI SEO Pack - SEO tools and resources. */
 export function getSvivvaSeoPackUrl(): string {
   const env = process.env.NEXT_PUBLIC_SVIVVA_SEO_PACK_URL?.trim();
   if (env) return trimUrl(env);
@@ -84,7 +84,7 @@ export function getAllWorkspaceProjects(): Array<{
 }> {
   return [
     {
-      name: "Svivva",
+      name: "ZZAI",
       url: DEFAULT_SITE,
       category: "main",
       description: "AI-powered app builder — the core platform",
@@ -93,7 +93,7 @@ export function getAllWorkspaceProjects(): Array<{
       name: "Cyber Security Mini Apps",
       url: getCyberSecurityMiniAppsUrl(),
       category: "security-tools",
-      description: "Free security scanners, feed tools & hardening utilities on Svivva",
+      description: "Free security scanners, feed tools & hardening utilities on ZZAI",
     },
     {
       name: "AI Tools Hub",
@@ -102,7 +102,7 @@ export function getAllWorkspaceProjects(): Array<{
       description: "Collection of AI generators and utilities",
     },
     {
-      name: "Svivva SEO Pack",
+      name: "ZZAI SEO Pack",
       url: getSvivvaSeoPackUrl(),
       category: "seo-tools",
       description: "SEO auditing, keyword research & optimization",

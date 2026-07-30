@@ -1,4 +1,4 @@
-/** Clutety / Pyracrypt branding tokens (Svivva-hosted). */
+/** Clutety / Pyracrypt branding tokens (ZZAI-hosted). */
 export const CLUTETY_TEAL = "#5BA8A0";
 export const CLUTETY_BURG = "#6B2C4A";
 

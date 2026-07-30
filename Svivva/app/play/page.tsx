@@ -2761,7 +2761,7 @@ export default function SvivvaPlayPage() {
         <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white mr-2 align-middle">
           BETA
         </span>
-        Svivva Play is in beta — preview audio, meend, swing, and AI tools may change or fail.
+        ZZAI Play is in beta — preview audio, meend, swing, and AI tools may change or fail.
         Exports may differ from what you hear in the browser.
       </p>
     </div>
@@ -2781,7 +2781,7 @@ export default function SvivvaPlayPage() {
           >
             <div className="max-w-lg w-full rounded-2xl border-2 border-amber-400 bg-white shadow-lg p-8 text-center">
               <AlertTriangle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Svivva Play — Beta</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">ZZAI Play — Beta</h1>
               <p className="text-sm text-gray-600 leading-relaxed mb-6">
                 You are entering an experimental studio. Features break, shift, and improve often.
                 If the page fails to load, refresh or try again later. MIDI export is the most
@@ -2793,13 +2793,13 @@ export default function SvivvaPlayPage() {
                 onClick={acknowledgeBeta}
                 data-testid="button-play-beta-ack"
               >
-                I understand — continue to Svivva Play
+                I understand — continue to ZZAI Play
               </Button>
               <Link
                 href="/"
                 className="inline-block mt-4 text-sm text-gray-500 hover:text-gray-800 underline"
               >
-                Back to Svivva home
+                Back to ZZAI home
               </Link>
             </div>
           </div>
@@ -2812,7 +2812,7 @@ export default function SvivvaPlayPage() {
             >
               <Image
                 src={crateState === "opening" ? svivvaCrateOpen : svivvaCrateClosed}
-                alt="Svivva Play"
+                alt="ZZAI Play"
                 width={360}
                 height={360}
                 className={`object-contain transition-opacity duration-500 max-w-[60vw] max-h-[50dvh] w-auto h-auto ${crateState === "opening" ? "animate-pulse" : ""}`}
@@ -2941,7 +2941,7 @@ export default function SvivvaPlayPage() {
             <Link href="/">
               <Image
                 src={svivvaLogo}
-                alt="Svivva"
+                alt="ZZAI"
                 width={100}
                 height={32}
                 className="h-5 w-auto object-contain"

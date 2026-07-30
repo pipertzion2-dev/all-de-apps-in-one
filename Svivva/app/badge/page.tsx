@@ -42,24 +42,24 @@ export default function BadgePage() {
 
   const badges = [
     {
-      label: "Built with Svivva",
-      params: "label=built+with&message=Svivva&color=5BA8A0",
-      desc: "Standard — for projects built using the Svivva platform",
+      label: "Built with ZZAI",
+      params: "label=built+with&message=ZZAI&color=5BA8A0",
+      desc: "Standard — for projects built using the ZZAI platform",
     },
     {
-      label: "Powered by Svivva",
-      params: "label=powered+by&message=Svivva&color=5BA8A0",
-      desc: "For apps and tools that use Svivva as their AI backend",
+      label: "Powered by ZZAI",
+      params: "label=powered+by&message=ZZAI&color=5BA8A0",
+      desc: "For apps and tools that use ZZAI as their AI backend",
     },
     {
-      label: "Ships with Svivva",
-      params: "label=Ships+with&message=Svivva&color=6B2C4A",
-      desc: "Burgundy variant — highlights a product powered on Svivva",
+      label: "Ships with ZZAI",
+      params: "label=Ships+with&message=ZZAI&color=6B2C4A",
+      desc: "Burgundy variant — highlights a product powered on ZZAI",
     },
     {
-      label: "Svivva Certified",
-      params: "label=Svivva&message=certified&color=5BA8A0",
-      desc: "For officially verified Svivva implementations",
+      label: "ZZAI Certified",
+      params: "label=ZZAI&message=certified&color=5BA8A0",
+      desc: "For officially verified ZZAI implementations",
     },
   ];
 
@@ -74,11 +74,11 @@ export default function BadgePage() {
           >
             <span className="text-white text-sm font-bold">S</span>
           </div>
-          <h1 className="text-2xl font-bold">Svivva Badge</h1>
+          <h1 className="text-2xl font-bold">ZZAI Badge</h1>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Add a &ldquo;Built with Svivva&rdquo; badge to your README, website, or app. Shows you
-          ship with Svivva — and gives a small backlink in return.
+          Add a &ldquo;Built with ZZAI&rdquo; badge to your README, website, or app. Shows you
+          ship with ZZAI — and gives a small backlink in return.
         </p>
         <div className="flex items-center gap-2">
           <Badge
@@ -161,7 +161,7 @@ export default function BadgePage() {
       >
         <p className="text-sm font-semibold">From seed to symphony</p>
         <p className="text-xs text-muted-foreground">
-          Svivva turns plain-language intent into production backends with schema checks, tests,
+          ZZAI turns plain-language intent into production backends with schema checks, tests,
           versioning, and rollback — from one workspace.
         </p>
         <Link
@@ -169,7 +169,7 @@ export default function BadgePage() {
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
           style={{ background: TEAL }}
         >
-          Try Svivva free <ExternalLink className="w-3.5 h-3.5" />
+          Try ZZAI free <ExternalLink className="w-3.5 h-3.5" />
         </Link>
       </div>
     </div>

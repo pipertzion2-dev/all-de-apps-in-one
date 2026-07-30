@@ -1026,7 +1026,7 @@ function AppsList({
           <div>
             <p className="text-sm font-semibold text-foreground">Pyracrypt</p>
             <p className="text-xs text-muted-foreground">
-              Connect your separate mini-app workspace to Orbit and generate Svivva marketing pages
+              Connect your separate mini-app workspace to Orbit and generate ZZAI marketing pages
               for it.
             </p>
           </div>

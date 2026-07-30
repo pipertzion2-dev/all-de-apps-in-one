@@ -113,7 +113,7 @@ function buildTasks(siteUrl: string): TaskDef[] {
     {
       id: "content-comparisons",
       label: "20 competitor comparison pages",
-      hint: "Svivva vs Zapier, Make, n8n — captures high-intent traffic",
+      hint: "ZZAI vs Zapier, Make, n8n — captures high-intent traffic",
       type: "auto",
       category: "Content",
       runStep: "svivva-comparisons",
@@ -128,8 +128,8 @@ function buildTasks(siteUrl: string): TaskDef[] {
     },
     {
       id: "content-integrations",
-      label: "30 integration pages (Svivva + Tool)",
-      hint: "Svivva + Notion, Slack, GitHub, Stripe, Supabase…",
+      label: "30 integration pages (ZZAI + Tool)",
+      hint: "ZZAI + Notion, Slack, GitHub, Stripe, Supabase…",
       type: "auto",
       category: "Content",
       runStep: "svivva-integrations",
@@ -312,7 +312,7 @@ function buildTasks(siteUrl: string): TaskDef[] {
     },
     {
       id: "acc-poweredby",
-      label: "'Powered by Svivva' on mini apps",
+      label: "'Powered by ZZAI' on mini apps",
       hint: "Copy-paste badge snippet into your apps",
       type: "manual",
       category: "Presence",

@@ -14,7 +14,7 @@ export default function SecurityDashboardPage() {
   return (
     <FeaturePageShell
       variant="security"
-      subtitle="Feed filtering, local file protection, and threat analysis — built into Svivva."
+      subtitle="Feed filtering, local file protection, and threat analysis — built into ZZAI."
       className="pb-6"
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6 flex flex-col gap-6 pb-4">

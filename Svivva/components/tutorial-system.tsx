@@ -29,7 +29,7 @@ const tutorials: Record<string, TutorialConfig> = {
       {
         title: "Welcome to your Dashboard",
         description:
-          "This is your home base. From here you can see your recent projects and access all of Svivva's tools.",
+          "This is your home base. From here you can see your recent projects and access all of ZZAI's tools.",
       },
       {
         title: "Tool Cards",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Clutety",
-  description: "Pyracrypt has moved to Clutety — embedded in Svivva at /clutety.",
+  description: "Pyracrypt has moved to Clutety — embedded in ZZAI at /clutety.",
   alternates: { canonical: "https://zzaizzai.com/clutety" },
 };
 

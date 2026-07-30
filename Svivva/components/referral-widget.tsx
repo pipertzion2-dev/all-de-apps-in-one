@@ -66,8 +66,8 @@ export function ReferralWidget({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Join Svivva - AI-Powered Development Platform",
-          text: "Check out Svivva - build AI apps faster with our powerful platform. Use my referral link for bonuses!",
+          title: "Join ZZAI - AI-Powered Development Platform",
+          text: "Check out ZZAI - build AI apps faster with our powerful platform. Use my referral link for bonuses!",
           url: referralUrl,
         });
       } catch {

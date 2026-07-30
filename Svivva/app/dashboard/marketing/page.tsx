@@ -344,7 +344,7 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
                 <input
                   value={miniAppsUrl}
                   onChange={(e) => setMiniAppsUrl(e.target.value)}
-                  placeholder="https://apps.svivva.com"
+                  placeholder="https://apps.zzaizzai.com"
                   className="w-full border border-border rounded-lg px-2.5 py-1.5 text-xs bg-white dark:bg-background focus:outline-none"
                   data-testid="input-mini-apps-url"
                 />
@@ -974,7 +974,7 @@ function GscSetupCard({ siteUrl }: { siteUrl: string }) {
       color: "#34a853",
       title: "Verify ownership — paste your token here",
       detail:
-        "In GSC: click 'Add property' → enter svivva.com → choose 'HTML tag' method → copy only the content=\"...\" value → paste it below and save. Svivva will inject the tag into your site automatically.",
+        "In GSC: click 'Add property' → enter zzaizzai.com → choose 'HTML tag' method → copy only the content=\"...\" value → paste it below and save. ZZAI will inject the tag into your site automatically.",
       action: (
         <div className="mt-2 space-y-1.5">
           <p className="text-xs text-muted-foreground">
@@ -1206,7 +1206,7 @@ const SUGGESTIONS = [
   {
     icon: Package,
     label: "Generate 50 pages",
-    prompt: "Generate 50 marketing pages for Svivva Seeds at svivva.com",
+    prompt: "Generate 50 marketing pages for ZZAI Seeds at zzaizzai.com",
   },
   {
     icon: Rocket,
@@ -1235,7 +1235,7 @@ export default function MarketingDashboard() {
     {
       role: "assistant",
       content:
-        "Hi! I'm your Svivva Marketing AI. Connect your apps, GoDaddy, and Google above — then hit Run Pipeline to link everything automatically, or just tell me what you want to do.",
+        "Hi! I'm your ZZAI Marketing AI. Connect your apps, GoDaddy, and Google above — then hit Run Pipeline to link everything automatically, or just tell me what you want to do.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -1441,7 +1441,7 @@ export default function MarketingDashboard() {
               <Rocket className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Svivva Seeds Marketing Funnel</p>
+              <p className="text-sm font-semibold text-foreground">ZZAI Seeds Marketing Funnel</p>
               <p className="text-xs text-muted-foreground truncate">
                 Auto Marketing Funnel panel · App linking · Domain setup · Traffic AI Chat
               </p>
@@ -1552,7 +1552,7 @@ export default function MarketingDashboard() {
               {
                 icon: Package,
                 title: "Generate mini-app pages",
-                desc: '"Generate 50 marketing pages for my app at apps.svivva.com"',
+                desc: '"Generate 50 marketing pages for my app at apps.zzaizzai.com"',
                 detail:
                   "AI discovers 50 tool names for your app and writes a unique SEO page for each one.",
               },
@@ -1612,10 +1612,10 @@ export default function MarketingDashboard() {
                   </p>
                   {[
                     "IndexNow key generation — submits all your URLs to Bing, Yandex, Yahoo, DuckDuckGo instantly",
-                    "SEO landing pages — AI writes and publishes them to svivva.com/{slug} automatically",
-                    "Blog posts — written and published at svivva.com/blog immediately",
+                    "SEO landing pages — AI writes and publishes them to zzaizzai.com/{slug} automatically",
+                    "Blog posts — written and published at zzaizzai.com/blog immediately",
                     "AEO answer pages — published so Perplexity/ChatGPT Search can cite them",
-                    "Tool pages for Pyracrypt — 4 keyword pages per tool, live on svivva.com",
+                    "Tool pages for Pyracrypt — 4 keyword pages per tool, live on zzaizzai.com",
                     "Sitemap — updates itself every time a page is created",
                     "Bing sitemap ping — sent automatically after every submit step",
                   ].map((item) => (
@@ -1636,7 +1636,7 @@ export default function MarketingDashboard() {
                     "Submit directory listings (Product Hunt, G2, Futurepedia) — requires your account on each site",
                     "Publish parasite SEO articles on Dev.to / Medium / Hashnode — AI writes them, you post",
                     "Send PR / newsletter pitches — AI writes the emails, you send from your inbox",
-                    "Add 'Powered by Svivva' widgets to your deployed apps and redeploy",
+                    "Add 'Powered by ZZAI' widgets to your deployed apps and redeploy",
                     "Wait 24–48h after CNAME setup before testing subdomains (DNS propagation)",
                   ].map((item) => (
                     <p key={item} className="text-amber-900 dark:text-amber-200 leading-snug pl-1">

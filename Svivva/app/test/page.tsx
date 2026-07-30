@@ -279,7 +279,7 @@ export default function TestPage() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Svivva System Test</h1>
+          <h1 className="text-3xl font-bold text-primary">ZZAI System Test</h1>
           <p className="text-muted-foreground mt-2">Check if all parts of the app are working</p>
         </div>
 

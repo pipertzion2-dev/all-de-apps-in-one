@@ -8,7 +8,7 @@ export interface ParsedSeeds {
   error?: string;
 }
 
-const PARSE_PDF_PROMPT = `You are the Svivva Seeds PDF Parser. Your job is to analyze the text content of a structured multi-application PDF blueprint and extract each individual application specification.
+const PARSE_PDF_PROMPT = `You are the ZZAI Seeds PDF Parser. Your job is to analyze the text content of a structured multi-application PDF blueprint and extract each individual application specification.
 
 Each app inside the document should follow a structured schema. Look for clear boundaries between apps (headers, delimiters, section breaks, numbered apps).
 
@@ -84,7 +84,7 @@ export async function parsePdfToSeeds(pdfText: string): Promise<ParsedSeeds> {
   }
 }
 
-const EDIT_SEED_PROMPT = `You are the Svivva Seeds Editor. You receive an existing application specification (JSON) and a user instruction describing changes to make. Apply the user's instruction to modify the spec and return the COMPLETE updated spec.
+const EDIT_SEED_PROMPT = `You are the ZZAI Seeds Editor. You receive an existing application specification (JSON) and a user instruction describing changes to make. Apply the user's instruction to modify the spec and return the COMPLETE updated spec.
 
 Rules:
 - Preserve all existing fields unless the user explicitly wants them changed
@@ -157,7 +157,7 @@ export async function applyPromptToSeed(
 function seedMarketingPageSystemPrompt(): string {
   const site = getSiteUrl();
   const host = new URL(site).hostname;
-  return `You are an expert SEO copywriter and growth marketer. Given a software application specification, generate a compelling, SEO-optimized landing page for it. The platform is Svivva (${site}, ${host}) — an AI-powered micro-app factory.
+  return `You are an expert SEO copywriter and growth marketer. Given a software application specification, generate a compelling, SEO-optimized landing page for it. The platform is ZZAI (${site}, ${host}) — an AI-powered micro-app factory.
 
 Return JSON:
 {

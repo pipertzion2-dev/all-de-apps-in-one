@@ -24,7 +24,7 @@ async function probeUrl(label: string, url: string): Promise<CheckResult> {
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: { "User-Agent": "Svivva-Orbit-Autopilot/1.0" },
+      headers: { "User-Agent": "ZZAI-Orbit-Autopilot/1.0" },
       signal: AbortSignal.timeout(12000),
     });
     return {

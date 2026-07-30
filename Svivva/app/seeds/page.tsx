@@ -672,7 +672,7 @@ export default function SeedsPage() {
             <Link href="/" className="flex shrink-0 items-center" data-testid="link-seeds-home">
               <Image
                 src={svivvaLogo}
-                alt="Svivva"
+                alt="ZZAI"
                 width={100}
                 height={32}
                 className="h-4 w-auto object-contain sm:h-6"
