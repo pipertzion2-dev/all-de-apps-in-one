@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ArrowRight,
 } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 
 interface LandingPageData {
   title: string;

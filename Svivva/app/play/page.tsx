@@ -89,7 +89,7 @@ import {
 } from "@/lib/svivva-play/prompts/orchestral-composer";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { HolographicNoise } from "@/components/holographic-noise";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png";
 import svivvaCrateOpen from "@/attached_assets/Svivva_Crate_1770908797554.png";
 import * as ChordKit from "@/lib/svivva-play/chordkit";

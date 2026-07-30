@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckCircle2, ArrowRight, Clock, Users, Wrench, Sparkles } from "lucide-react";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, inArray } from "drizzle-orm";
