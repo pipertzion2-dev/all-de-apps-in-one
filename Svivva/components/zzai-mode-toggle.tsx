@@ -10,11 +10,13 @@ type Props = {
   showLabels?: boolean;
 };
 
-const SIZE_PX = { sm: 56, md: 96, lg: 140 } as const;
+const SIZE_PX = { sm: 56, md: 110, lg: 220 } as const;
 
 /**
- * Clear Three.js logo toggle: Signal (cyan/lily) ↔ Crest (magenta/ZZAI).
- * Two real logo textures on opposite faces of a 3D card — click flips mode.
+ * Clear Three.js dual-logo toggle.
+ * Front face = Signal (Yeoo / blue / lilies)
+ * Back face  = Crest (ZZAI / magenta / cyan wings)
+ * Click the glass card to flip.
  */
 export function ZzaiModeToggle({ size = "md", className = "", showLabels = true }: Props) {
   const { mode, setMode, colors, toggleMode } = usePlatform();
@@ -37,8 +39,8 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
 
     const px = SIZE_PX[size];
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 20);
-    camera.position.set(0, 0, 3.2);
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
+    camera.position.set(0, 0, 3.35);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -49,22 +51,25 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
     renderer.setSize(px, px, false);
     renderer.setClearColor(0x000000, 0);
     host.appendChild(renderer.domElement);
-    renderer.domElement.style.width = "100%";
-    renderer.domElement.style.height = "100%";
-    renderer.domElement.style.display = "block";
-    renderer.domElement.style.cursor = "pointer";
+    Object.assign(renderer.domElement.style, {
+      width: "100%",
+      height: "100%",
+      display: "block",
+      cursor: "pointer",
+    });
     renderer.domElement.setAttribute("aria-hidden", "true");
 
-    const ambient = new THREE.AmbientLight(0xffffff, 1.15);
-    const key = new THREE.DirectionalLight(0xffffff, 1.35);
-    key.position.set(2.2, 2.4, 3.2);
-    const rim = new THREE.DirectionalLight(0x00e5ff, 0.55);
-    rim.position.set(-2.4, -1.2, 1.5);
-    scene.add(ambient, key, rim);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    const key = new THREE.DirectionalLight(0xffffff, 1.4);
+    key.position.set(2.4, 2.6, 3.4);
+    const fill = new THREE.DirectionalLight(0x00e5ff, 0.45);
+    fill.position.set(-2.2, -0.8, 1.8);
+    const backLight = new THREE.DirectionalLight(0xff2bd6, 0.35);
+    backLight.position.set(0, 1.2, -2.4);
+    scene.add(key, fill, backLight);
 
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
-
     const prep = (tex: THREE.Texture) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = maxAniso;
@@ -77,28 +82,46 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
     const card = new THREE.Group();
     scene.add(card);
 
-    const geometry = new THREE.PlaneGeometry(1.55, 1.55, 1, 1);
+    // Glass slab so the toggle reads as a clear 3D object
+    const slabGeo = new THREE.BoxGeometry(1.72, 1.72, 0.08);
+    const slabMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0.05,
+      roughness: 0.08,
+      transmission: 0.72,
+      thickness: 0.4,
+      transparent: true,
+      opacity: 0.35,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+    });
+    const slab = new THREE.Mesh(slabGeo, slabMat);
+    card.add(slab);
+
+    const planeGeo = new THREE.PlaneGeometry(1.52, 1.52);
     let frontMat: THREE.MeshPhysicalMaterial | null = null;
     let backMat: THREE.MeshPhysicalMaterial | null = null;
 
-    const ringGeo = new THREE.TorusGeometry(1.05, 0.028, 16, 96);
-    const ringMat = new THREE.MeshPhysicalMaterial({
+    const rimGeo = new THREE.TorusGeometry(1.08, 0.03, 18, 100);
+    const rimMat = new THREE.MeshPhysicalMaterial({
       color: 0x00e5ff,
-      metalness: 0.85,
-      roughness: 0.22,
+      metalness: 0.9,
+      roughness: 0.18,
       emissive: 0x00e5ff,
-      emissiveIntensity: 0.35,
+      emissiveIntensity: 0.4,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
     });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2.15;
-    card.add(ring);
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    rim.rotation.x = Math.PI / 2.2;
+    card.add(rim);
 
     let disposed = false;
+    // cache-bust so new logos show immediately after deploy
+    const bust = "v2";
     Promise.all([
-      loader.loadAsync("/zzai-logo-signal.png").then(prep),
-      loader.loadAsync("/zzai-logo-crest.png").then(prep),
+      loader.loadAsync(`/zzai-logo-signal.png?${bust}`).then(prep),
+      loader.loadAsync(`/zzai-logo-crest.png?${bust}`).then(prep),
     ])
       .then(([signalTex, crestTex]) => {
         if (disposed) {
@@ -109,53 +132,36 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
         frontMat = new THREE.MeshPhysicalMaterial({
           map: signalTex,
           transparent: true,
-          roughness: 0.35,
-          metalness: 0.15,
-          clearcoat: 0.55,
-          clearcoatRoughness: 0.25,
+          roughness: 0.28,
+          metalness: 0.12,
+          clearcoat: 0.65,
+          clearcoatRoughness: 0.2,
           side: THREE.FrontSide,
         });
         backMat = new THREE.MeshPhysicalMaterial({
           map: crestTex,
           transparent: true,
-          roughness: 0.35,
-          metalness: 0.15,
-          clearcoat: 0.55,
-          clearcoatRoughness: 0.25,
+          roughness: 0.28,
+          metalness: 0.12,
+          clearcoat: 0.65,
+          clearcoatRoughness: 0.2,
           side: THREE.FrontSide,
         });
-        const frontMesh = new THREE.Mesh(geometry, frontMat);
-        const backMesh = new THREE.Mesh(geometry.clone(), backMat);
-        backMesh.rotation.y = Math.PI;
-        card.add(frontMesh, backMesh);
+        const front = new THREE.Mesh(planeGeo, frontMat);
+        front.position.z = 0.05;
+        const back = new THREE.Mesh(planeGeo.clone(), backMat);
+        back.rotation.y = Math.PI;
+        back.position.z = -0.05;
+        card.add(front, back);
       })
       .catch(() => {
-        frontMat = new THREE.MeshPhysicalMaterial({ color: 0x00e5ff, roughness: 0.5 });
-        backMat = new THREE.MeshPhysicalMaterial({ color: 0xff2bd6, roughness: 0.5 });
-        const frontMesh = new THREE.Mesh(geometry, frontMat);
-        const backMesh = new THREE.Mesh(geometry.clone(), backMat);
-        backMesh.rotation.y = Math.PI;
-        card.add(frontMesh, backMesh);
+        frontMat = new THREE.MeshPhysicalMaterial({ color: 0x00e5ff });
+        backMat = new THREE.MeshPhysicalMaterial({ color: 0xff2bd6 });
+        const front = new THREE.Mesh(planeGeo, frontMat);
+        const back = new THREE.Mesh(planeGeo.clone(), backMat);
+        back.rotation.y = Math.PI;
+        card.add(front, back);
       });
-
-    const particles = new THREE.Group();
-    scene.add(particles);
-    const pGeo = new THREE.SphereGeometry(0.018, 8, 8);
-    for (let i = 0; i < 18; i++) {
-      const isCyan = i % 2 === 0;
-      const m = new THREE.Mesh(
-        pGeo,
-        new THREE.MeshBasicMaterial({
-          color: isCyan ? 0x00e5ff : 0xff2bd6,
-          transparent: true,
-          opacity: 0.55,
-        }),
-      );
-      const a = (i / 18) * Math.PI * 2;
-      m.position.set(Math.cos(a) * 1.25, Math.sin(a * 1.7) * 0.35, Math.sin(a) * 1.25);
-      m.userData.phase = a;
-      particles.add(m);
-    }
 
     let raf = 0;
     const clock = new THREE.Clock();
@@ -164,24 +170,22 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
       const t = clock.getElapsedTime();
       const target = flipTargetRef.current;
       let cur = flipCurrentRef.current;
-      const delta = ((target - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
-      cur += delta * 0.12;
+      let delta = target - cur;
+      while (delta > Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      cur += delta * 0.14;
       flipCurrentRef.current = cur;
+
       card.rotation.y = cur;
-      card.rotation.x = Math.sin(t * 0.9) * 0.06;
-      card.position.y = Math.sin(t * 1.4) * 0.04;
+      card.rotation.x = Math.sin(t * 0.85) * 0.08;
+      card.position.y = Math.sin(t * 1.35) * 0.05;
 
       const signalish = Math.cos(cur) > 0;
-      ringMat.color.set(signalish ? 0x00e5ff : 0xff2bd6);
-      ringMat.emissive.set(signalish ? 0x00e5ff : 0xff2bd6);
-      ring.rotation.z = t * 0.55;
-
-      particles.children.forEach((child, i) => {
-        const mesh = child as THREE.Mesh;
-        const phase = mesh.userData.phase as number;
-        mesh.position.y = Math.sin(t * 1.6 + phase) * 0.42;
-        mesh.rotation.y = t + i;
-      });
+      rimMat.color.setHex(signalish ? 0x00e5ff : 0xff2bd6);
+      rimMat.emissive.setHex(signalish ? 0x00e5ff : 0xff2bd6);
+      rim.rotation.z = t * 0.5;
+      fill.intensity = signalish ? 0.55 : 0.2;
+      backLight.intensity = signalish ? 0.2 : 0.55;
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
@@ -195,19 +199,15 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
       disposed = true;
       cancelAnimationFrame(raf);
       renderer.domElement.removeEventListener("click", onClick);
-      geometry.dispose();
-      ringGeo.dispose();
-      ringMat.dispose();
+      planeGeo.dispose();
+      slabGeo.dispose();
+      slabMat.dispose();
+      rimGeo.dispose();
+      rimMat.dispose();
       frontMat?.map?.dispose();
       backMat?.map?.dispose();
       frontMat?.dispose();
       backMat?.dispose();
-      particles.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) {
-          obj.geometry.dispose();
-          (obj.material as THREE.Material).dispose();
-        }
-      });
       renderer.dispose();
       if (renderer.domElement.parentElement === host) host.removeChild(renderer.domElement);
     };
@@ -218,42 +218,52 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
 
   return (
     <div
-      className={`inline-flex items-center gap-2 ${className}`}
+      className={`inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 ${className}`}
       role="group"
-      aria-label="ZZAI mode"
+      aria-label="ZZAI mode toggle"
     >
       <button
         type="button"
         onClick={() => setMode("digital")}
-        className="hidden sm:block text-[10px] font-semibold tracking-[0.14em] uppercase transition-opacity"
-        style={{ color: "#00E5FF", opacity: isSignal ? 1 : 0.35 }}
+        className="order-2 sm:order-1 text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase transition-all"
+        style={{
+          color: "#00E5FF",
+          opacity: isSignal ? 1 : 0.35,
+          textShadow: isSignal ? "0 0 12px rgba(0,229,255,0.55)" : "none",
+        }}
         data-testid="button-platform-toggle-signal"
         title="Signal — Prompt to API"
       >
         Signal
       </button>
 
-      <div
-        ref={hostRef}
-        className="relative rounded-xl overflow-hidden"
+      <button
+        type="button"
+        aria-label={isSignal ? "Flip to Crest" : "Flip to Signal"}
+        onClick={() => toggleMode()}
+        className="order-1 sm:order-2 relative rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E5FF]"
         style={{
           width: px,
           height: px,
-          boxShadow: `0 0 0 1px ${colors.primaryBorder}, 0 0 22px ${colors.primaryBg}`,
-          background: "rgba(0,0,0,0.25)",
+          borderColor: colors.primaryBorder,
+          boxShadow: `0 0 0 1px ${colors.primaryBorder}, 0 0 28px ${colors.primaryBg}, inset 0 0 24px rgba(255,255,255,0.04)`,
+          background:
+            "linear-gradient(160deg, rgba(255,255,255,0.08), rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.65))",
         }}
-        title={
-          isSignal
-            ? "Signal — Prompt to API (click to flip)"
-            : "Crest — Manufacturing (click to flip)"
-        }
-      />
+        title="Click to flip logos — Signal ↔ Crest"
+      >
+        <div ref={hostRef} className="absolute inset-0" />
+      </button>
 
       <button
         type="button"
         onClick={() => setMode("physical")}
-        className="hidden sm:block text-[10px] font-semibold tracking-[0.14em] uppercase transition-opacity"
-        style={{ color: "#FF2BD6", opacity: !isSignal ? 1 : 0.35 }}
+        className="order-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase transition-all"
+        style={{
+          color: "#FF2BD6",
+          opacity: !isSignal ? 1 : 0.35,
+          textShadow: !isSignal ? "0 0 12px rgba(255,43,214,0.55)" : "none",
+        }}
         data-testid="button-platform-toggle-crest"
         title="Crest — Manufacturing"
       >
@@ -261,7 +271,7 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
       </button>
 
       {showLabels && (
-        <span className="sm:hidden pr-1 text-left leading-tight">
+        <span className="order-4 text-center sm:text-left leading-tight sm:ml-1">
           <span className="block text-[11px] font-semibold text-foreground">
             {isSignal ? "Signal" : "Crest"}
           </span>
