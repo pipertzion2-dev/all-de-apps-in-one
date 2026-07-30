@@ -4,9 +4,8 @@ import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import FaqSection from "./faq-section";
 
 import { TrackedCta } from "@/components/tracked-cta";
@@ -169,7 +168,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0a0f14]/95 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
             <Link href="/" data-testid="link-home-logo">
-              <Image src={svivvaLogo} alt="ZZAI" width={110} height={34} priority />
+              <BrandMark size="md" href={false} priority />
             </Link>
             <div className="flex items-center gap-5 flex-wrap text-sm">
               <Link
@@ -418,7 +417,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         <footer className="border-t border-white/10 py-8 px-6">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
             <Link href="/" data-testid="link-footer-home">
-              <Image src={svivvaLogo} alt="ZZAI" width={80} height={24} />
+              <BrandMark size="sm" href={false} />
             </Link>
             <div className="flex items-center gap-6 text-sm text-white/40">
               <Link

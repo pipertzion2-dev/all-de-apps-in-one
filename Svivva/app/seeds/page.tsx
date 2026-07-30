@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/lib/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";
@@ -669,15 +669,7 @@ export default function SeedsPage() {
       <nav className="relative z-30 border-b border-border/30 bg-background/20 backdrop-blur-xl flex-shrink-0">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-0 sm:h-12 flex items-center justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <Link href="/" className="flex shrink-0 items-center" data-testid="link-seeds-home">
-              <Image
-                src={svivvaLogo}
-                alt="ZZAI"
-                width={100}
-                height={32}
-                className="h-4 w-auto object-contain sm:h-6"
-              />
-            </Link>
+            <BrandMark size="sm" testId="link-seeds-home" />
             <div className="h-4 w-px bg-border/50 shrink-0" aria-hidden />
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded sm:h-6 sm:w-6">

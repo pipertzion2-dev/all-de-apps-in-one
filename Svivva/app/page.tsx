@@ -1793,13 +1793,16 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="space-y-4 col-span-2 md:col-span-1">
-                <Image
-                  src={zzaiLogo}
-                  alt="ZZAI"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto object-contain"
-                />
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={zzaiLogo}
+                    alt="ZZAI"
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
+                  />
+                  <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">ZZAI</span>
+                </div>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Product</h4>

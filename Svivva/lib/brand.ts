@@ -8,8 +8,8 @@ export const BRAND = {
   shortDescription:
     "ZZAI turns plain-language intent into shipped product — software, hardware, and go-to-market — with validation, evaluations, and rollback.",
   logoPath: "/zzai-logo.png",
-  /** Legacy path kept for OG/SEO; file is the ZZAI crest. */
-  ogImagePath: "/svivva-logo.png",
+  /** Open Graph / Twitter card image — ZZAI crest. */
+  ogImagePath: "/zzai-logo.png",
 } as const;
 
 export function brandTitle(page?: string): string {

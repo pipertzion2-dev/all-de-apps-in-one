@@ -89,7 +89,7 @@ import {
 } from "@/lib/svivva-play/prompts/orchestral-composer";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { HolographicNoise } from "@/components/holographic-noise";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png";
 import svivvaCrateOpen from "@/attached_assets/Svivva_Crate_1770908797554.png";
 import * as ChordKit from "@/lib/svivva-play/chordkit";
@@ -2938,15 +2938,7 @@ export default function SvivvaPlayPage() {
       <nav className="h-11 sm:h-12 border-b border-white/10 flex-shrink-0 z-50 bg-[#0e0c16]/95 backdrop-blur-sm">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 h-full flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Link href="/">
-              <Image
-                src={svivvaLogo}
-                alt="ZZAI"
-                width={100}
-                height={32}
-                className="h-5 w-auto object-contain"
-              />
-            </Link>
+            <BrandMark size="sm" href="/" />
             <span className="text-gray-300 hidden sm:inline">/</span>
             <span className="font-semibold text-white/90 text-xs sm:text-sm">Play</span>
             <Badge className="bg-[#A05068]/10 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">

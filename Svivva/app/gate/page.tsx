@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Delete } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 
 export default function GatePage() {
   const [code, setCode] = useState("");
@@ -52,8 +51,8 @@ export default function GatePage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-xs text-center">
-        <div className="relative w-20 h-20 mx-auto mb-6">
-          <Image src={svivvaLogo} alt="ZZAI" fill sizes="80px" className="object-contain" />
+        <div className="mx-auto mb-6 flex justify-center">
+          <BrandMark size={80} href={false} />
         </div>
 
         <h1 className="text-xl font-semibold text-gray-900 mb-1" data-testid="text-gate-title">

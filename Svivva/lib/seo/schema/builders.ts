@@ -10,7 +10,7 @@ export function organizationSchema() {
     "@id": ORG_ID(),
     name: "ZZAI",
     url: getSiteUrl(),
-    logo: absoluteUrl("/svivva-logo.png"),
+    logo: absoluteUrl("/zzai-logo.png"),
     sameAs: [] as string[],
   };
 }
@@ -63,7 +63,7 @@ export function articleSchema(input: {
     author: { "@type": "Person", name: input.author },
     datePublished: input.publishedTime,
     dateModified: input.modifiedTime || input.publishedTime,
-    image: input.image ? absoluteUrl(input.image) : absoluteUrl("/svivva-logo.png"),
+    image: input.image ? absoluteUrl(input.image) : absoluteUrl("/zzai-logo.png"),
     mainEntityOfPage: absoluteUrl(input.path),
     publisher: { "@id": ORG_ID() },
   };

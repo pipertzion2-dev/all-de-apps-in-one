@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Search, Wrench } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import { Badge } from "@/components/ui/badge";
 
 interface SeoPage {
@@ -68,7 +67,7 @@ export default function ToolsIndexContent({
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image src={svivvaLogo} alt="ZZAI" width={120} height={36} priority />
+            <BrandMark size="md" href={false} priority />
           </Link>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -198,7 +197,7 @@ export default function ToolsIndexContent({
       <footer className="border-t border-white/10">
         <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between gap-4 flex-wrap">
           <Link href="/" data-testid="link-footer-home">
-            <Image src={svivvaLogo} alt="ZZAI" width={90} height={28} />
+            <BrandMark size="sm" href={false} />
           </Link>
           <p className="text-xs text-white/40">
             &copy; {new Date().getFullYear()} ZZAI. All rights reserved.

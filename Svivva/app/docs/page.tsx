@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 
 export const metadata: Metadata = {
   title: "Documentation",
@@ -20,15 +19,7 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <nav className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <Link href="/" data-testid="link-logo">
-          <Image
-            src={svivvaLogo}
-            alt="ZZAI"
-            width={100}
-            height={32}
-            className="h-7 w-auto object-contain"
-          />
-        </Link>
+        <BrandMark size="sm" testId="link-logo" />
         <Link
           href="/"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"

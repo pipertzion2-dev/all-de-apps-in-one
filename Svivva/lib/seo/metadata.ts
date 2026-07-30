@@ -26,7 +26,7 @@ export function buildSeoMetadata({
   title,
   description,
   path,
-  imagePath = "/svivva-logo.png",
+  imagePath = "/zzai-logo.png",
   noindex = false,
   type = "website",
   publishedTime,

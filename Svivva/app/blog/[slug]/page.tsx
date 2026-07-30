@@ -62,7 +62,7 @@ export async function generateMetadata({
     description: post.metaDescription || post.excerpt,
     path: `/blog/${slug}`,
     type: "article",
-    imagePath: post.ogImage || "/svivva-logo.png",
+    imagePath: post.ogImage || "/zzai-logo.png",
     publishedTime: post.publishedAt?.toISOString(),
     modifiedTime: post.updatedAt?.toISOString(),
     authors: [post.author],
