@@ -22,6 +22,8 @@ const ALLOW = new Set([
   "Svivva_print_2_1769474625495.png",
   "ZZAI_BOUQUET_2.png",
   "ZZAI_OFFICIAL_LOGO.png",
+  "ZZAI_LOGO_SIGNAL.png",
+  "ZZAI_LOGO_CREST.png",
 ]);
 
 const assetsDir = path.join(projectRoot, "attached_assets");
