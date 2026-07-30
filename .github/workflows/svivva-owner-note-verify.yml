@@ -10,6 +10,7 @@ on:
   pull_request:
     paths:
       - "Svivva/**"
+      - ".github/workflows/svivva-owner-note-verify.yml"
 
 permissions:
   contents: read
