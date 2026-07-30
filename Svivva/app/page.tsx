@@ -597,19 +597,11 @@ export default function LandingPage() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
               <div className="flex flex-col items-center gap-2">
-                <ZzaiBouquetScene
-                  mode={mode}
-                  size={300}
-                  className={
-                    mode === "digital"
-                      ? "drop-shadow-[0_0_36px_rgba(0,229,255,0.35)]"
-                      : "drop-shadow-[0_0_36px_rgba(255,43,214,0.35)]"
-                  }
-                />
+                <ZzaiModeToggle size="lg" showLabels={false} />
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#00E5FF]/90" : "text-[#FF2BD6]/90"}`}
                 >
-                  ZZAI
+                  ZZAI · click to flip
                 </p>
               </div>
               {mode === "digital" ? (
