@@ -19,7 +19,18 @@
 | GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
 | App root on Vercel | `Svivva` |
 
-## Cutover checklist
+## One-command cutover (after this code is deployed)
+
+From `Svivva/` (uses GoDaddy keys already saved in the dashboard + admin passcode):
+
+```bash
+npm run domain:cutover
+# or: node scripts/domain-cutover.mjs --domain zzaizzai.com
+```
+
+That sets GoDaddy `@` → Vercel A (`76.76.21.21`) and `www` → `cname.vercel-dns.com`, updates app credentials, and adds the domain in Vercel when `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` are present.
+
+### Manual checklist (if the CLI can’t reach GoDaddy / Vercel)
 
 ### 1. Vercel — add the domain
 

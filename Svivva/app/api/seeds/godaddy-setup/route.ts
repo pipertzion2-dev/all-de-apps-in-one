@@ -1,23 +1,35 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth/session";
-import { hasAdminAccess } from "@/lib/auth/admin";
+import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { runDomainCutover } from "@/lib/orbit/domain-cutover";
 
 const GODADDY_API = "https://api.godaddy.com/v1";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!(await hasAdminAccess()))
+    if (!(await isOrbitAdminAllowed(req))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
+    const body = await req.json().catch(() => ({}));
+
+    // Full GoDaddy → Vercel cutover (preferred)
+    if (body?.action === "vercel-cutover" || body?.vercelCutover === true) {
+      const result = await runDomainCutover({
+        domain: typeof body.domain === "string" ? body.domain : "zzaizzai.com",
+        skipVercel: !!body.skipVercel,
+      });
+      return NextResponse.json(result, { status: result.ok ? 200 : 400 });
+    }
+
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
     const [creds] = await db
       .select()
       .from(seedCredentials)
-      .where(eq(seedCredentials.userId, user.id))
+      .where(eq(seedCredentials.userId, userId))
       .limit(1);
     if (!creds?.godaddyApiKey || !creds?.godaddyApiSecret) {
       return NextResponse.json(
@@ -48,7 +60,6 @@ export async function POST() {
 
     const dnsRecords = [
       { type: "TXT", name: "_svivva", data: "svivva-site-verified", ttl: 600 },
-      { type: "TXT", name: "@", data: "v=spf1 include:replit.com ~all", ttl: 600 },
     ];
 
     const dnsRes = await fetch(`${GODADDY_API}/domains/${creds.godaddyDomain}/records`, {
@@ -76,7 +87,7 @@ export async function POST() {
       nameservers,
       dnsRecordAdded: dnsOk,
       message: dnsOk
-        ? `Domain ${creds.godaddyDomain} verified and DNS records added. Use the Marketing dashboard to add the CNAME pointing to your Replit deployment.`
+        ? `Domain ${creds.godaddyDomain} verified. Run vercel-cutover (POST { \"action\": \"vercel-cutover\" }) to point DNS at Vercel.`
         : `Domain ${creds.godaddyDomain} verified. DNS update may require a moment — try again shortly.`,
     });
   } catch (e) {

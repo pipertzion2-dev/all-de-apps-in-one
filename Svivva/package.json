@@ -28,7 +28,8 @@
     "orbit:health": "node scripts/orbit.mjs health --resubmit",
     "orbit:run": "node scripts/orbit.mjs run",
     "orbit:research": "node scripts/orbit.mjs research",
-    "marketing:execute": "node scripts/marketing-execute.mjs"
+    "marketing:execute": "node scripts/marketing-execute.mjs",
+    "domain:cutover": "node scripts/domain-cutover.mjs"
   },
   "engines": {
     "node": "22.x"
