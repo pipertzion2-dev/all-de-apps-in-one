@@ -238,43 +238,60 @@ export async function runDomainCutover(
     summaryLines.push("· No GoDaddy forwarding config (or not readable)");
   }
 
-  // Replace apex A (PUT replaces all A/@ records)
-  const aPut = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`, {
-    method: "PUT",
-    body: JSON.stringify([{ data: apexA, ttl: 600 }]),
+  // Prefer PATCH (same path that successfully wrote _svivva TXT onto the live zone).
+  // GoDaddy PUT /records/{type}/{name} can return 200 while the authoritative zone stays parked.
+  const aPatch = await godaddyFetch(authHeader, `/domains/${domain}/records`, {
+    method: "PATCH",
+    body: JSON.stringify([{ type: "A", name: "@", data: apexA, ttl: 600 }]),
   });
-  // Fallback: PATCH typed records if PUT path rejected
-  const aOk =
-    aPut.ok ||
-    (
-      await godaddyFetch(authHeader, `/domains/${domain}/records`, {
-        method: "PATCH",
-        body: JSON.stringify([{ type: "A", name: "@", data: apexA, ttl: 600 }]),
-      })
-    ).ok;
+  let aOk = aPatch.ok;
+  if (!aOk) {
+    const aPut = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`, {
+      method: "PUT",
+      body: JSON.stringify([{ data: apexA, ttl: 600 }]),
+    });
+    aOk = aPut.ok;
+  }
+  // Remove common parking A leftovers if still present after write
+  if (aOk) {
+    await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`, {
+      method: "PUT",
+      body: JSON.stringify([{ data: apexA, ttl: 600 }]),
+    });
+  }
   dns.apexA = {
     ok: aOk,
-    detail: aOk ? `@ A → ${apexA}` : `A record failed: ${JSON.stringify(aPut.body).slice(0, 200)}`,
+    detail: aOk ? `@ A → ${apexA}` : `A record failed: ${JSON.stringify(aPatch.body).slice(0, 200)}`,
   };
   summaryLines.push(aOk ? `✓ ${dns.apexA.detail}` : `✖ ${dns.apexA.detail}`);
 
-  const cPut = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`, {
-    method: "PUT",
-    body: JSON.stringify([{ data: wwwCname, ttl: 600 }]),
+  // Delete www→apex parking CNAME then set Vercel target
+  await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`, {
+    method: "DELETE",
   });
-  const cOk =
-    cPut.ok ||
-    (
-      await godaddyFetch(authHeader, `/domains/${domain}/records`, {
-        method: "PATCH",
-        body: JSON.stringify([{ type: "CNAME", name: "www", data: wwwCname, ttl: 600 }]),
-      })
-    ).ok;
+  const cPatch = await godaddyFetch(authHeader, `/domains/${domain}/records`, {
+    method: "PATCH",
+    body: JSON.stringify([{ type: "CNAME", name: "www", data: wwwCname, ttl: 600 }]),
+  });
+  let cOk = cPatch.ok;
+  if (!cOk) {
+    const cPut = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`, {
+      method: "PUT",
+      body: JSON.stringify([{ data: wwwCname, ttl: 600 }]),
+    });
+    cOk = cPut.ok;
+  } else {
+    // Force replace via PUT after PATCH so only Vercel CNAME remains
+    await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`, {
+      method: "PUT",
+      body: JSON.stringify([{ data: wwwCname, ttl: 600 }]),
+    });
+  }
   dns.wwwCname = {
     ok: cOk,
     detail: cOk
       ? `www CNAME → ${wwwCname}`
-      : `CNAME failed: ${JSON.stringify(cPut.body).slice(0, 200)}`,
+      : `CNAME failed: ${JSON.stringify(cPatch.body).slice(0, 200)}`,
   };
   summaryLines.push(cOk ? `✓ ${dns.wwwCname.detail}` : `✖ ${dns.wwwCname.detail}`);
 
@@ -286,12 +303,19 @@ export async function runDomainCutover(
   // Read back what GoDaddy currently has for @ and www
   const listA = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`);
   const listC = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`);
+  const listAll = await godaddyFetch(authHeader, `/domains/${domain}/records`);
   summaryLines.push(
     `· GoDaddy readback A/@: ${JSON.stringify(listA.body).slice(0, 180)}`,
   );
   summaryLines.push(
     `· GoDaddy readback CNAME/www: ${JSON.stringify(listC.body).slice(0, 180)}`,
   );
+  if (listAll.ok && Array.isArray(listAll.body)) {
+    const interesting = (listAll.body as { type?: string; name?: string; data?: string }[])
+      .filter((r) => r.name === "@" || r.name === "www" || r.type === "A" || r.type === "CNAME")
+      .slice(0, 12);
+    summaryLines.push(`· Zone snapshot: ${JSON.stringify(interesting).slice(0, 400)}`);
+  }
 
   await db
     .insert(seedCredentials)
