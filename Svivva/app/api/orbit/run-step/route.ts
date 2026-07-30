@@ -328,7 +328,7 @@ export async function POST(req: NextRequest) {
                 {
                   role: "system",
                   content:
-                    "SEO copywriter for Svivva — an AI API builder SaaS. Write conversion-focused content.",
+                    "SEO copywriter for ZZAI — an AI API builder SaaS. Write conversion-focused content.",
                 },
                 {
                   role: "user",
@@ -346,7 +346,7 @@ export async function POST(req: NextRequest) {
             };
           } else {
             pageData = batchSEOPages(1)[0];
-            pageData.title = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} — Svivva`;
+            pageData.title = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} — ZZAI`;
             pageData.slug = `${slug}-${i}`;
             pageData.keyword = keyword;
           }
@@ -430,7 +430,7 @@ export async function POST(req: NextRequest) {
             .where(eq(seoLandingPages.slug, slug))
             .limit(1);
           if (existing.length) {
-            created.push({ title: `[existing] Svivva vs ${comp}`, url: `${BASE_URL}/${slug}` });
+            created.push({ title: `[existing] ZZAI vs ${comp}`, url: `${BASE_URL}/${slug}` });
             continue;
           }
 
@@ -443,20 +443,20 @@ export async function POST(req: NextRequest) {
                 {
                   role: "system",
                   content:
-                    "Conversion copywriter for Svivva AI API Builder. Write compelling comparison pages.",
+                    "Conversion copywriter for ZZAI AI API Builder. Write compelling comparison pages.",
                 },
                 {
                   role: "user",
-                  content: `Comparison page: "Svivva vs ${comp}". Target: people searching "${comp} alternative". Position Svivva as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
+                  content: `Comparison page: "ZZAI vs ${comp}". Target: people searching "${comp} alternative". Position ZZAI as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
                 },
               ],
             });
             const d = JSON.parse(gen.choices[0].message.content || "{}");
             pageData = {
-              title: d.title || `Svivva vs ${comp}`,
-              metaTitle: d.metaTitle || `Svivva vs ${comp}`,
+              title: d.title || `ZZAI vs ${comp}`,
+              metaTitle: d.metaTitle || `ZZAI vs ${comp}`,
               metaDescription: d.metaDescription || "",
-              headline: d.headline || `Svivva vs ${comp}: Which is Better?`,
+              headline: d.headline || `ZZAI vs ${comp}: Which is Better?`,
               howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
               whoItsFor:
                 d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
@@ -464,32 +464,32 @@ export async function POST(req: NextRequest) {
             };
           } else {
             pageData = batchComparisonPages(1)[0];
-            pageData.title = `Svivva vs ${comp}`;
+            pageData.title = `ZZAI vs ${comp}`;
             pageData.slug = slug;
             pageData.keyword = `svivva vs ${comp.toLowerCase()}`;
           }
 
           await db.insert(seoLandingPages).values({
             slug,
-            title: pageData.title || `Svivva vs ${comp}`,
-            content: pageData.content || `<p>Svivva vs ${comp}</p>`,
+            title: pageData.title || `ZZAI vs ${comp}`,
+            content: pageData.content || `<p>ZZAI vs ${comp}</p>`,
             keyword: pageData.keyword || `svivva vs ${comp.toLowerCase()}`,
-            headline: pageData.headline || `Svivva vs ${comp}`,
+            headline: pageData.headline || `ZZAI vs ${comp}`,
             howItWorks:
               (pageData as any).howItWorks ||
               "Compare features, pricing and use-cases side by side",
             whoItsFor:
               (pageData as any).whoItsFor ||
               `${comp} users looking for a more powerful AI-native alternative`,
-            metaTitle: pageData.metaTitle || `Svivva vs ${comp}`,
-            metaDescription: pageData.metaDescription || `Compare Svivva vs ${comp}`,
+            metaTitle: pageData.metaTitle || `ZZAI vs ${comp}`,
+            metaDescription: pageData.metaDescription || `Compare ZZAI vs ${comp}`,
             category: "seo-landing",
             published: true,
             toolUrl: `${BASE_URL}/${slug}`,
           });
           created.push({ title: pageData.title, url: `${BASE_URL}/${slug}` });
         } catch (e) {
-          created.push({ title: `[error] Svivva vs ${comp}`, url: "" });
+          created.push({ title: `[error] ZZAI vs ${comp}`, url: "" });
         }
       }
 
@@ -549,11 +549,11 @@ export async function POST(req: NextRequest) {
                 {
                   role: "system",
                   content:
-                    "Technical SEO blogger for Svivva. Write detailed, actionable articles that rank well and convert readers.",
+                    "Technical SEO blogger for ZZAI. Write detailed, actionable articles that rank well and convert readers.",
                 },
                 {
                   role: "user",
-                  content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for Svivva at end), metaTitle, metaDescription, tags (3-5 strings) }`,
+                  content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for ZZAI at end), metaTitle, metaDescription, tags (3-5 strings) }`,
                 },
               ],
             });
@@ -616,7 +616,7 @@ export async function POST(req: NextRequest) {
                   {
                     role: "system",
                     content:
-                      "Social media manager for Svivva — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
+                      "Social media manager for ZZAI — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace.",
                   },
                   {
                     role: "user",
@@ -796,7 +796,7 @@ export async function POST(req: NextRequest) {
                 },
                 {
                   role: "user",
-                  content: `Generate 4 SEO landing pages for the app "${appName}" — ${appDesc}. App URL: ${appUrl}. Part of the Svivva AI Tools Hub (50 free AI tools).
+                  content: `Generate 4 SEO landing pages for the app "${appName}" — ${appDesc}. App URL: ${appUrl}. Part of the ZZAI AI Tools Hub (50 free AI tools).
 
 Return JSON with these 4 keys:
 {
@@ -905,7 +905,7 @@ Return JSON with these 4 keys:
           sourceLine,
           chunkLine,
           processedInChunk > 0
-            ? `✓ ${totalPages} new SEO pages live on svivva.com`
+            ? `✓ ${totalPages} new SEO pages live on zzaizzai.com`
             : `✓ ${skippedInChunk} tools already had pages — skipped`,
           processedInChunk > 0
             ? `✓ Each page links directly to the real tool URL on your Repl`
@@ -990,11 +990,11 @@ Return JSON with these 4 keys:
             title: variant.title,
             keyword: `${tool.name} security`,
             headline: variant.headline,
-            howItWorks: `${tool.description || tool.name} connected to Svivva's marketing engine`,
+            howItWorks: `${tool.description || tool.name} connected to ZZAI's marketing engine`,
             whoItsFor: variant.whoItsFor,
             content: `<h1>${variant.headline}</h1><p>${tool.description || tool.name}</p><p><a href="${tool.url}">Open live app</a></p>`,
             metaTitle: variant.title,
-            metaDescription: `${tool.name} security guide on Svivva — part of the cyber mini-apps hub.`,
+            metaDescription: `${tool.name} security guide on ZZAI — part of the cyber mini-apps hub.`,
             category: "seed-marketing",
             published: true,
             toolUrl: sourceUrl || tool.url,
@@ -1010,8 +1010,8 @@ Return JSON with these 4 keys:
       return NextResponse.json({
         summary: [
           `✓ Pyracrypt security pages created for ${passedTools.length} tools`,
-          `✓ ${created.length} landing pages published on svivva.com`,
-          `✓ Security positioning now tied to Svivva marketing`,
+          `✓ ${created.length} landing pages published on zzaizzai.com`,
+          `✓ Security positioning now tied to ZZAI marketing`,
         ].join("\n"),
         details: { tools: passedTools.length, pages: created.length, urls: urls.length },
       });
@@ -1048,7 +1048,7 @@ Return JSON with these 4 keys:
             title: `${tool.name} App Builder`,
             keyword: `${tool.name} app builder`,
             headline: `Build and ship apps around ${tool.name}`,
-            howItWorks: `Svivva turns ${tool.name} into a build-ready product page, API prompt, and launch asset.`,
+            howItWorks: `ZZAI turns ${tool.name} into a build-ready product page, API prompt, and launch asset.`,
             whoItsFor: "Founders and builders shipping security or AI tools",
           },
           {
@@ -1056,15 +1056,15 @@ Return JSON with these 4 keys:
             title: `${tool.name} API Blueprint`,
             keyword: `${tool.name} api`,
             headline: `${tool.name} API blueprint`,
-            howItWorks: `Svivva generates a structured API concept and launch page for ${tool.name}.`,
+            howItWorks: `ZZAI generates a structured API concept and launch page for ${tool.name}.`,
             whoItsFor: "Engineers wiring APIs and product workflows",
           },
           {
             slug: `${baseSlug}-launch`,
             title: `${tool.name} Launch Studio`,
             keyword: `${tool.name} launch studio`,
-            headline: `Launch ${tool.name} with Svivva`,
-            howItWorks: `Svivva creates launch pages, social copy, and app-store-style positioning for ${tool.name}.`,
+            headline: `Launch ${tool.name} with ZZAI`,
+            howItWorks: `ZZAI creates launch pages, social copy, and app-store-style positioning for ${tool.name}.`,
             whoItsFor: "Teams preparing a public launch",
           },
         ];
@@ -1089,7 +1089,7 @@ Return JSON with these 4 keys:
             whoItsFor: page.whoItsFor,
             content: `<h1>${page.headline}</h1><p>${tool.description || tool.name}</p><p><a href="${tool.url}">Open ${tool.name}</a></p>`,
             metaTitle: page.title,
-            metaDescription: `${tool.name} integrated into Svivva app-building features.`,
+            metaDescription: `${tool.name} integrated into ZZAI app-building features.`,
             category: "seed-marketing",
             published: true,
             toolUrl: sourceUrl || tool.url,
@@ -1105,8 +1105,8 @@ Return JSON with these 4 keys:
       return NextResponse.json({
         summary: [
           `✓ App-building pages created for ${passedTools.length} Pyracrypt tools`,
-          `✓ ${outputs.length} Svivva build pages published`,
-          `✓ Pyracrypt now connects to Svivva API/app-building flows`,
+          `✓ ${outputs.length} ZZAI build pages published`,
+          `✓ Pyracrypt now connects to ZZAI API/app-building flows`,
         ].join("\n"),
         details: { tools: passedTools.length, pages: outputs.length, urls: urls.length },
       });
@@ -1155,7 +1155,7 @@ Return JSON with these 4 keys:
           title: `${tool.name} API Security`,
           keyword: `${tool.name} api security`,
           headline: `${tool.name} API security for production`,
-          howItWorks: `Svivva helps protect ${tool.name} with auth, validation, rate limits, and secure launch practices.`,
+          howItWorks: `ZZAI helps protect ${tool.name} with auth, validation, rate limits, and secure launch practices.`,
           whoItsFor: "Founders and developers shipping APIs",
           content: `<h1>${tool.name} API Security</h1><ul><li>Auth checks</li><li>Input validation</li><li>Rate limiting</li><li>Secret handling</li><li>Audit-ready launch checklist</li></ul><p>${tool.description || tool.name}</p><p><a href="${tool.url}">Open tool</a></p>`,
           metaTitle: `${tool.name} API Security`,
@@ -1174,7 +1174,7 @@ Return JSON with these 4 keys:
       return NextResponse.json({
         summary: [
           `✓ API security pages created for ${passedTools.length} Pyracrypt tools`,
-          `✓ Svivva now presents auth, validation, rate-limit, and secret-safe positioning`,
+          `✓ ZZAI now presents auth, validation, rate-limit, and secret-safe positioning`,
           `✓ ${created.length} pages published`,
         ].join("\n"),
         details: { tools: passedTools.length, pages: created.length, urls: urls.length },
@@ -1225,7 +1225,7 @@ Return JSON with these 4 keys:
               },
               {
                 role: "user",
-                content: `I have ${appTitles.length} AI-powered mini apps in the Svivva AI Tools Hub. App names: ${appTitles.join(", ")}.
+                content: `I have ${appTitles.length} AI-powered mini apps in the ZZAI AI Tools Hub. App names: ${appTitles.join(", ")}.
 
 Generate:
 1. A master hub page listing ALL apps
@@ -1235,7 +1235,7 @@ Return JSON:
 {
   "hub": {
     "slug": "ai-tools-hub",
-    "title": "Svivva AI Tools Hub — ${appTitles.length} Free AI Tools",
+    "title": "ZZAI AI Tools Hub — ${appTitles.length} Free AI Tools",
     "metaTitle": "≤60 chars",
     "metaDescription": "≤155 chars",
     "content": "Full HTML: hero H1, subtitle, grid of all apps as <ul>, benefits section, CTA to ${BASE_URL}"
@@ -1295,7 +1295,7 @@ Return JSON:
             title: hubData.hub.title || "AI Tools Hub",
             keyword: "ai tools hub free",
             headline: hubData.hub.title || "50 Free AI Tools in One Place",
-            howItWorks: "Browse and instantly use 50+ free AI-powered tools built with Svivva",
+            howItWorks: "Browse and instantly use 50+ free AI-powered tools built with ZZAI",
             whoItsFor: "Anyone looking for free AI tools — no sign up required",
             content: hubData.hub.content,
             metaTitle: hubData.hub.metaTitle || hubData.hub.title,
@@ -1359,7 +1359,7 @@ Return JSON:
       });
     }
 
-    // ── STEP: mini-embed — Powered by Svivva widget ──────────────────────────
+    // ── STEP: mini-embed — Powered by ZZAI widget ──────────────────────────
     if (stepId === "mini-embed") {
       interface DiscoveredTool {
         name: string;
@@ -1374,20 +1374,20 @@ Return JSON:
         .map((t) => `• ${t.name}`)
         .join("\n");
 
-      const prompt = `You are a conversion copywriter for Svivva (${BASE_URL}), an AI API builder.
+      const prompt = `You are a conversion copywriter for ZZAI (${BASE_URL}), an AI API builder.
 
 A user has ${toolList.length > 0 ? toolList.length : "50"} free AI tools hosted at ${sourceUrl || "their Replit app"}.
 Sample tools: ${toolSample || "AI writing, image generation, code tools, etc."}
 
-Generate a complete "Powered by Svivva" traffic package that these tool pages should embed to send users to ${BASE_URL}. Include:
+Generate a complete "Powered by ZZAI" traffic package that these tool pages should embed to send users to ${BASE_URL}. Include:
 
-1. **Top Banner** — sticky/fixed top banner HTML+CSS. Minimal, clean. Message like "Built with Svivva — the AI API platform" with a CTA button that opens ${BASE_URL}?utm_source=mini-tools&utm_medium=banner&utm_campaign=tools-hub
+1. **Top Banner** — sticky/fixed top banner HTML+CSS. Minimal, clean. Message like "Built with ZZAI — the AI API platform" with a CTA button that opens ${BASE_URL}?utm_source=mini-tools&utm_medium=banner&utm_campaign=tools-hub
 
-2. **Footer Widget** — HTML+CSS footer section. Slightly larger, "Enjoyed this tool? Build your own AI-powered app with Svivva in minutes. No backend required." with CTA → ${BASE_URL}?utm_source=mini-tools&utm_medium=footer
+2. **Footer Widget** — HTML+CSS footer section. Slightly larger, "Enjoyed this tool? Build your own AI-powered app with ZZAI in minutes. No backend required." with CTA → ${BASE_URL}?utm_source=mini-tools&utm_medium=footer
 
 3. **Post-Use CTA** — shown after user completes an action (e.g., after generating content). JavaScript snippet + HTML that shows a modal/toast: "Like this result? Build your own AI tool like this →" with UTM link.
 
-4. **React Component** (for Replit apps using React) — a reusable <PoweredBySvivva /> component that renders a bottom bar with gradient matching Svivva's teal (#5BA8A0) and burgundy (#6B2C4A).
+4. **React Component** (for Replit apps using React) — a reusable <PoweredBySvivva /> component that renders a bottom bar with gradient matching ZZAI's teal (#5BA8A0) and burgundy (#6B2C4A).
 
 5. **Placement Guide** — where to add each snippet for maximum click-through.
 
@@ -1403,7 +1403,7 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
 
       return NextResponse.json({
         summary: [
-          `✓ "Powered by Svivva" widget package generated for ${toolList.length || "your"} mini apps`,
+          `✓ "Powered by ZZAI" widget package generated for ${toolList.length || "your"} mini apps`,
           "",
           `Paste these snippets into each tool to send users directly to ${BASE_URL}:`,
           "",
@@ -1536,9 +1536,9 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
           "DNS propagation: 5–30 minutes.",
           "After propagation, add each subdomain in your hosting provider as a custom domain (TLS is provisioned there).",
           "",
-          "Deploy Svivva itself:",
+          "Deploy ZZAI itself:",
           "1. Deploy this repo to Vercel (or your host) from Git",
-          "2. In the host project → Domains, add svivva.com / www as directed",
+          "2. In the host project → Domains, add zzaizzai.com / www as directed",
           "3. GoDaddy: point www (CNAME) at the hostname your provider gives you",
           "4. The host provisions TLS automatically",
         ].join("\n"),
@@ -1575,11 +1575,11 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
           {
             role: "system",
             content:
-              "Social media growth hacker launching a portfolio of 50 AI-powered tools on Svivva. Write viral, specific, benefit-first copy that drives clicks.",
+              "Social media growth hacker launching a portfolio of 50 AI-powered tools on ZZAI. Write viral, specific, benefit-first copy that drives clicks.",
           },
           {
             role: "user",
-            content: `Launch social pack for the Svivva AI Tools Hub: a collection of ${appCount} free AI tools including: ${appNames}. Hub URL: ${BASE_URL}/ai-tools-hub.
+            content: `Launch social pack for the ZZAI AI Tools Hub: a collection of ${appCount} free AI tools including: ${appNames}. Hub URL: ${BASE_URL}/ai-tools-hub.
 
 Return JSON:
 {
@@ -1899,14 +1899,14 @@ Return JSON:
             role: "user",
             content: `Create directory listing content for a free AI tools hub at ${targetUrl}.
 The collection includes ${passedTools?.length || "50"}+ free tools. ${toolNames ? `Tool names include: ${toolNames}.` : ""}
-These are all free-to-use, no sign-up tools, built with Svivva.
+These are all free-to-use, no sign-up tools, built with ZZAI.
 
 Return JSON:
 {
   "tagline": "≤60 chars, punchy",
   "shortDesc": "≤150 chars",
   "description": "300 chars — what the hub is, free tools, no sign up",
-  "longDesc": "800 chars — full story, specific tool names, who it's for, free access, built with Svivva",
+  "longDesc": "800 chars — full story, specific tool names, who it's for, free access, built with ZZAI",
   "features": ["feature 1","feature 2","feature 3","feature 4","feature 5"],
   "categories": ["AI Tools","Free Tools","Developer Tools","No-Code","Web Apps"],
   "keywords": ["free ai tools","ai tools hub","free online tools","no signup ai tools"],
@@ -2442,7 +2442,7 @@ Return JSON:
 
 Return JSON:
 {
-  "press_release": "Full AP-style press release 400 words: Headline, dateline, lead paragraph, 2 body paragraphs mentioning specific tools, quote, boilerplate (mention built with Svivva), ###",
+  "press_release": "Full AP-style press release 400 words: Headline, dateline, lead paragraph, 2 body paragraphs mentioning specific tools, quote, boilerplate (mention built with ZZAI), ###",
   "newsletter_pitches": {
     "TLDR AI": "2 sentences: hook with specific tool name + why ${toolCount} free tools matters to 1.25M AI readers",
     "The Rundown AI": "2 sentences tailored to daily AI tools audience, specific tool names",
@@ -2575,7 +2575,7 @@ Return JSON:
       { "@type": "Question", "name": "Do I need to sign up or create an account?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
       { "@type": "Question", "name": "How many AI tools are available?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
       { "@type": "Question", "name": "What kinds of tools are available?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
-      { "@type": "Question", "name": "How were these tools built?", "acceptedAnswer": { "@type": "Answer", "text": "Built with Svivva — an AI API builder that turns natural language into production tools. See svivva.com." } }
+      { "@type": "Question", "name": "How were these tools built?", "acceptedAnswer": { "@type": "Answer", "text": "Built with ZZAI — an AI API builder that turns natural language into production tools. See zzaizzai.com." } }
     ]
   },
   "backlinkMagnet": {
@@ -3377,7 +3377,7 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Create directory listing content for Svivva — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
+                    content: `Create directory listing content for ZZAI — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
 
 Return JSON:
 {
@@ -3403,9 +3403,9 @@ Return JSON:
               tagline: "Turn prompts into production APIs",
               shortDesc: "AI-powered API builder with schema enforcement",
               description:
-                "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+                "ZZAI transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
               longDesc:
-                "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+                "ZZAI is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
               features: [
                 "Natural language to API",
                 "JSON schema enforcement",
@@ -3422,7 +3422,7 @@ Return JSON:
               alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
               rhHint: "AI APIs, Developer Tools, No-Code, Automation",
               phHint:
-                "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+                "Built ZZAI after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
             }),
             "directory",
           )
@@ -3430,9 +3430,9 @@ Return JSON:
             tagline: "Turn prompts into production APIs",
             shortDesc: "AI-powered API builder with schema enforcement",
             description:
-              "Svivva transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+              "ZZAI transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
             longDesc:
-              "Svivva is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+              "ZZAI is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
             features: [
               "Natural language to API",
               "JSON schema enforcement",
@@ -3449,13 +3449,13 @@ Return JSON:
             alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
             rhHint: "AI APIs, Developer Tools, No-Code, Automation",
             phHint:
-              "Built Svivva after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+              "Built ZZAI after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
           };
 
       // Save as a reference page in the DB for easy access
       const slug = "svivva-directory-listings";
       const htmlContent = `
-<h1>Svivva — Directory Submission Kit</h1>
+<h1>ZZAI — Directory Submission Kit</h1>
 <p><strong>Tagline:</strong> ${listing.tagline}</p>
 <p><strong>Short description:</strong> ${listing.shortDesc}</p>
 <p><strong>300-char description:</strong> ${listing.description}</p>
@@ -3478,13 +3478,13 @@ Return JSON:
         if (!ex.length) {
           await db.insert(seoLandingPages).values({
             slug,
-            title: "Svivva Directory Submission Kit",
+            title: "ZZAI Directory Submission Kit",
             content: htmlContent,
             keyword: "ai api builder directory",
-            headline: listing.tagline || "Svivva — AI API Builder",
+            headline: listing.tagline || "ZZAI — AI API Builder",
             howItWorks: listing.shortDesc || "",
             whoItsFor: listing.targetAudience || "",
-            metaTitle: "Svivva Directory Listings",
+            metaTitle: "ZZAI Directory Listings",
             metaDescription: listing.description?.slice(0, 155) || "",
             category: "seo-landing",
             published: false,
@@ -3574,14 +3574,14 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Write 5 unique articles about Svivva (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
+                    content: `Write 5 unique articles about ZZAI (AI API builder — turns prompts into production APIs) for 5 different platforms. Each article should be platform-native in tone and style.
 
 Return JSON:
 {
   "devto": {
     "title": "How I Built a Production AI API in 30 Minutes Without Writing a Backend",
     "tags": ["ai", "api", "javascript", "productivity"],
-    "content": "Full markdown article, 700 words, includes code snippets, ends with mention of Svivva as the tool used"
+    "content": "Full markdown article, 700 words, includes code snippets, ends with mention of ZZAI as the tool used"
   },
   "hashnode": {
     "title": "Stop Writing Boilerplate: AI API Generation Is Here",
@@ -3591,15 +3591,15 @@ Return JSON:
   "medium": {
     "title": "I Saved 3 Weeks of Engineering Time with This AI API Builder",
     "subtitle": "And why it's changing how startups ship features",
-    "content": "Full markdown, 700 words, story-driven, ends with Svivva recommendation"
+    "content": "Full markdown, 700 words, story-driven, ends with ZZAI recommendation"
   },
   "hackernoon": {
     "title": "The Problem with AI APIs in 2025 (And What Actually Works)",
-    "content": "Full markdown, 750 words, opinionated take, data/examples, mentions Svivva as one solution"
+    "content": "Full markdown, 750 words, opinionated take, data/examples, mentions ZZAI as one solution"
   },
   "substack": {
     "title": "What I learned building 50 AI APIs in 2 months",
-    "content": "Full markdown, 650 words, personal story, lessons learned, Svivva mention authentic"
+    "content": "Full markdown, 650 words, personal story, lessons learned, ZZAI mention authentic"
   }
 }`,
                   },
@@ -3677,10 +3677,10 @@ Return JSON:
           await db.insert(blogPosts).values({
             id,
             slug,
-            title: article.title || `Svivva on ${platform.name}`,
+            title: article.title || `ZZAI on ${platform.name}`,
             excerpt: `Published on ${platform.name}: ${article.title}`,
             content: article.content,
-            metaTitle: article.title || `Svivva on ${platform.name}`,
+            metaTitle: article.title || `ZZAI on ${platform.name}`,
             metaDescription: article.subtitle || article.title || "",
             category: "parasite-seo",
             published: false, // These are for copy-pasting to external platforms
@@ -3717,7 +3717,7 @@ Return JSON:
           "SUBMISSION GUIDE:",
           platformDetails,
           "",
-          "PRO TIP: Wait 2-3 weeks between posts on each platform. Add 'Originally published at svivva.com' to boost your domain's authority too.",
+          "PRO TIP: Wait 2-3 weeks between posts on each platform. Add 'Originally published at zzaizzai.com' to boost your domain's authority too.",
           parasiteBlogUrls.length > 0
             ? `✓ ${parasiteBlogUrls.length} on-site blog draft URL(s) pinged via IndexNow (Bing/Yandex partners) so copies are discoverable while you publish off-site.`
             : "",
@@ -3765,12 +3765,12 @@ Return JSON:
                 content: `You write Answer Engine Optimized (AEO) content. These pages get cited by Perplexity, ChatGPT Search, Gemini, and other AI search engines because they directly answer specific questions. Rules:
 1. First 150 words = direct, factual answer (no marketing speak, no "great question")
 2. Then provide 3-4 supporting paragraphs with specific data, comparisons, or steps
-3. End with a brief mention of Svivva as a practical tool
+3. End with a brief mention of ZZAI as a practical tool
 4. No fluff, no corporate language — write like a knowledgeable engineer explaining to a peer`,
               },
               {
                 role: "user",
-                content: `Generate AEO pages for these 10 queries that developers and builders search on Perplexity/ChatGPT. Each page targets Svivva's use case (AI API builder).
+                content: `Generate AEO pages for these 10 queries that developers and builders search on Perplexity/ChatGPT. Each page targets ZZAI's use case (AI API builder).
 
 Queries: ${AEO_QUERIES.join(" | ")}
 
@@ -3783,7 +3783,7 @@ Return JSON:
       "title": "Direct answer to the query as an H1 (not a question, but the answer)",
       "metaTitle": "≤60 chars",
       "metaDescription": "≤155 chars, factual and direct",
-      "content": "Full HTML: H1 (the answer stated directly), opening paragraph (direct answer, 80-100 words), H2 sections with supporting data/steps/comparisons, H3 FAQ with 3 related questions and direct answers, closing mention of Svivva with link to ${BASE_URL}"
+      "content": "Full HTML: H1 (the answer stated directly), opening paragraph (direct answer, 80-100 words), H2 sections with supporting data/steps/comparisons, H3 FAQ with 3 related questions and direct answers, closing mention of ZZAI with link to ${BASE_URL}"
     }
   ]
 }`,
@@ -3864,12 +3864,12 @@ Return JSON:
           "• Direct answer in first 150 words (no fluff)",
           "• Factual, citable content (AI engines prefer authoritative tone)",
           "• Structured data with FAQ sections (increases citation probability)",
-          "• Internal links to Svivva for conversion",
+          "• Internal links to ZZAI for conversion",
           "",
           "Pages created:",
           ...created.slice(0, 10).map((u) => `• ${u}`),
           "",
-          "NEXT: Check Perplexity.ai and search your target queries in 2-4 weeks to see if Svivva appears in answers.",
+          "NEXT: Check Perplexity.ai and search your target queries in 2-4 weeks to see if ZZAI appears in answers.",
         ]
           .filter(Boolean)
           .join("\n"),
@@ -3920,7 +3920,7 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Write community launch posts for Svivva (AI API builder) across 8 platforms. Each post must feel native to the platform — not promotional.
+                    content: `Write community launch posts for ZZAI (AI API builder) across 8 platforms. Each post must feel native to the platform — not promotional.
 
 Subreddits and their tones: ${SUBREDDITS.map((s) => `${s.name} (${s.tone})`).join("; ")}
 
@@ -3937,11 +3937,11 @@ Return JSON:
     "r/SaaS": { "title": "...", "body": "SaaS growth angle" }
   },
   "show_hn": {
-    "title": "Show HN: Svivva – Turn prompts into production AI APIs with schema enforcement",
+    "title": "Show HN: ZZAI – Turn prompts into production AI APIs with schema enforcement",
     "body": "HN-style technical description, what it does, tech stack, what makes it different, honest about what doesn't work yet"
   },
   "indie_hackers": {
-    "title": "How I built Svivva: turning natural language into production APIs",
+    "title": "How I built ZZAI: turning natural language into production APIs",
     "body": "IH milestone post — genuine story, revenue numbers if any, lessons learned, what's next"
   },
   "discord_templates": [
@@ -4163,13 +4163,13 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Write outreach content for Svivva (AI API builder — turns natural language prompts into production APIs with schema enforcement, version control, automated evaluations, marketplace).
+                    content: `Write outreach content for ZZAI (AI API builder — turns natural language prompts into production APIs with schema enforcement, version control, automated evaluations, marketplace).
 
 Return JSON:
 {
   "press_release": "Full AP-style press release 400 words: Headline, dateline, lead paragraph (who/what/why now), 2 body paragraphs with specific features and use cases, founder quote, boilerplate, ### end",
   "newsletter_pitches": {
-    "TLDR AI": "2-sentence pitch: hook + what makes Svivva newsworthy for their 1.25M AI readers",
+    "TLDR AI": "2-sentence pitch: hook + what makes ZZAI newsworthy for their 1.25M AI readers",
     "The Rundown AI": "2-sentence pitch tailored to daily AI tools audience",
     "Ben's Bites": "2 sentences, informal tone (Ben's style), hook + link",
     "AI Tool Report": "1 sentence — what is it + why their readers care",
@@ -4181,7 +4181,7 @@ Return JSON:
     "Product Hunt Digest": "2 sentences — new product launch angle"
   },
   "podcast_pitches": {
-    "TWIML AI Podcast": "3-sentence email pitch to Sam: angle (applied ML in production), why Svivva guests work, what topic would be discussed",
+    "TWIML AI Podcast": "3-sentence email pitch to Sam: angle (applied ML in production), why ZZAI guests work, what topic would be discussed",
     "Practical AI": "3-sentence pitch to Daniel/Chris: practical AI angle",
     "The Changelog": "3-sentence pitch: open source/dev tools angle, what makes a great episode",
     "Software Engineering Daily": "3-sentence pitch: engineering angle",
@@ -4211,12 +4211,12 @@ Return JSON:
           await db.insert(blogPosts).values({
             id,
             slug,
-            title: "Svivva Press Release",
+            title: "ZZAI Press Release",
             excerpt: "Official press release for media distribution",
             content: outreach.press_release,
-            metaTitle: "Svivva Press Release",
+            metaTitle: "ZZAI Press Release",
             metaDescription:
-              "Svivva launches AI API builder that turns natural language into production APIs",
+              "ZZAI launches AI API builder that turns natural language into production APIs",
             category: "press",
             published: false,
           });
@@ -4277,41 +4277,41 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Generate Schema.org structured data and technical SEO assets for Svivva (AI API builder, URL: ${BASE_URL}).
+                    content: `Generate Schema.org structured data and technical SEO assets for ZZAI (AI API builder, URL: ${BASE_URL}).
 
 Return JSON:
 {
   "softwareApplication": {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Svivva",
+    "name": "ZZAI",
     "description": "...",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Web",
     "url": "${BASE_URL}",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "127" },
-    "author": { "@type": "Organization", "name": "Svivva" }
+    "author": { "@type": "Organization", "name": "ZZAI" }
   },
   "faqSchema": {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      { "@type": "Question", "name": "What is Svivva?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
-      { "@type": "Question", "name": "How much does Svivva cost?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
-      { "@type": "Question", "name": "Do I need coding skills to use Svivva?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
-      { "@type": "Question", "name": "How is Svivva different from Retool or Bubble?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
-      { "@type": "Question", "name": "What AI models does Svivva support?", "acceptedAnswer": { "@type": "Answer", "text": "..." } }
+      { "@type": "Question", "name": "What is ZZAI?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
+      { "@type": "Question", "name": "How much does ZZAI cost?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
+      { "@type": "Question", "name": "Do I need coding skills to use ZZAI?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
+      { "@type": "Question", "name": "How is ZZAI different from Retool or Bubble?", "acceptedAnswer": { "@type": "Answer", "text": "..." } },
+      { "@type": "Question", "name": "What AI models does ZZAI support?", "acceptedAnswer": { "@type": "Answer", "text": "..." } }
     ]
   },
   "backlinkMagnet": {
     "title": "Top 30 AI API Tools for Developers in 2025 (Ranked & Compared)",
     "slug": "best-ai-api-tools-2025",
-    "description": "A genuinely useful roundup page that includes Svivva + 29 real competitors",
+    "description": "A genuinely useful roundup page that includes ZZAI + 29 real competitors",
     "content": "Full HTML: intro, comparison table with 10 tools, criteria section, FAQ, conclusion"
   },
   "changelog": {
-    "title": "Svivva Changelog — What's New",
+    "title": "ZZAI Changelog — What's New",
     "slug": "changelog",
     "content": "HTML changelog with 5 recent updates"
   },
@@ -4379,15 +4379,14 @@ Return JSON:
           if (!ex.length) {
             await db.insert(seoLandingPages).values({
               slug: "changelog",
-              title: "Svivva Changelog",
+              title: "ZZAI Changelog",
               keyword: "svivva changelog updates",
-              headline: "What's New in Svivva",
-              howItWorks: "Regular updates to Svivva features and improvements",
-              whoItsFor: "Existing Svivva users and developers evaluating the platform",
+              headline: "What's New in ZZAI",
+              howItWorks: "Regular updates to ZZAI features and improvements",
+              whoItsFor: "Existing ZZAI users and developers evaluating the platform",
               content: schemaData.changelog.content,
-              metaTitle: "Svivva Changelog — Latest Updates",
-              metaDescription:
-                "See what's new in Svivva — latest features, improvements, and fixes",
+              metaTitle: "ZZAI Changelog — Latest Updates",
+              metaDescription: "See what's new in ZZAI — latest features, improvements, and fixes",
               category: "seo-landing",
               published: true,
               toolUrl: `${BASE_URL}/changelog`,
@@ -4439,7 +4438,7 @@ Return JSON:
       });
     }
 
-    // ── STEP: Integration Pages ("Svivva + [Tool]") ──────────────────────────
+    // ── STEP: Integration Pages ("ZZAI + [Tool]") ──────────────────────────
     if (stepId === "svivva-integrations") {
       const INTEGRATIONS = [
         { tool: "Notion", slug: "svivva-notion-integration", kw: "notion AI API integration" },
@@ -4508,11 +4507,11 @@ Return JSON:
                 {
                   role: "system",
                   content:
-                    "You are a technical content writer for Svivva — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
+                    "You are a technical content writer for ZZAI — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
                 },
                 {
                   role: "user",
-                  content: `Write an integration guide page for "Svivva + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why Svivva + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for Svivva free trial) }`,
+                  content: `Write an integration guide page for "ZZAI + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why ZZAI + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for ZZAI free trial) }`,
                 },
               ],
             });
@@ -4521,29 +4520,29 @@ Return JSON:
             const templatePages = batchIntegrationPages();
             const template = templatePages[0];
             d = {
-              title: `Svivva + ${integ.tool} Integration`,
-              metaTitle: `Svivva + ${integ.tool} - AI API Builder`.slice(0, 60),
+              title: `ZZAI + ${integ.tool} Integration`,
+              metaTitle: `ZZAI + ${integ.tool} - AI API Builder`.slice(0, 60),
               metaDescription:
-                `Build AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.`.slice(
+                `Build AI-powered ${integ.tool} integrations with ZZAI in minutes. No coding required.`.slice(
                   0,
                   155,
                 ),
-              content: `# Svivva + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with Svivva in minutes. No coding required.\n\n## Why Svivva + ${integ.tool}?\n\nSvivva's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for Svivva\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry Svivva free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://zzaizzai.com)`,
+              content: `# ZZAI + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with ZZAI in minutes. No coding required.\n\n## Why ZZAI + ${integ.tool}?\n\nZZAI's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for ZZAI\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry ZZAI free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: integ.slug,
-            title: d.title || `Svivva + ${integ.tool}`,
-            metaTitle: d.metaTitle || `Svivva + ${integ.tool} Integration`,
+            title: d.title || `ZZAI + ${integ.tool}`,
+            metaTitle: d.metaTitle || `ZZAI + ${integ.tool} Integration`,
             metaDescription:
-              d.metaDescription || `Build AI-powered ${integ.tool} integrations with Svivva.`,
+              d.metaDescription || `Build AI-powered ${integ.tool} integrations with ZZAI.`,
             content: d.content || "",
             category: "integration",
             published: true,
             publishedAt: new Date(),
           } as any);
-          return { title: d.title || `Svivva + ${integ.tool}`, url: `${BASE_URL}/${integ.slug}` };
+          return { title: d.title || `ZZAI + ${integ.tool}`, url: `${BASE_URL}/${integ.slug}` };
         }),
       );
 
@@ -4634,11 +4633,11 @@ Return JSON:
                 {
                   role: "system",
                   content:
-                    "You write industry-specific AI use case pages for Svivva — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
+                    "You write industry-specific AI use case pages for ZZAI — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
                 },
                 {
                   role: "user",
-                  content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with Svivva", CTA) }`,
+                  content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with ZZAI", CTA) }`,
                 },
               ],
             });
@@ -4648,22 +4647,22 @@ Return JSON:
             const template = templatePages[0];
             d = {
               title: `AI API for ${ind.name} - Transform Your Business`,
-              metaTitle: `AI API for ${ind.name} | Svivva`.slice(0, 60),
+              metaTitle: `AI API for ${ind.name} | ZZAI`.slice(0, 60),
               metaDescription:
-                `Build AI-powered ${ind.name} applications with Svivva. Automate workflows and scale without coding.`.slice(
+                `Build AI-powered ${ind.name} applications with ZZAI. Automate workflows and scale without coding.`.slice(
                   0,
                   155,
                 ),
-              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from Svivva.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with Svivva\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://zzaizzai.com)`,
+              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from ZZAI.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with ZZAI\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: ind.slug,
             title: d.title || `AI API for ${ind.name}`,
-            metaTitle: d.metaTitle || `AI API for ${ind.name} | Svivva`,
+            metaTitle: d.metaTitle || `AI API for ${ind.name} | ZZAI`,
             metaDescription:
-              d.metaDescription || `Build AI-powered ${ind.name} applications with Svivva.`,
+              d.metaDescription || `Build AI-powered ${ind.name} applications with ZZAI.`,
             content: d.content || "",
             category: "usecase",
             published: true,
@@ -4839,11 +4838,11 @@ Return JSON:
                 {
                   role: "system",
                   content:
-                    "You write developer-focused API template guide pages for Svivva — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
+                    "You write developer-focused API template guide pages for ZZAI — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
                 },
                 {
                   role: "user",
-                  content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with Svivva", H2 "Common Customizations", CTA to try Svivva free) }`,
+                  content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with ZZAI", H2 "Common Customizations", CTA to try ZZAI free) }`,
                 },
               ],
             });
@@ -4853,18 +4852,18 @@ Return JSON:
             const template = templatePages[0];
             d = {
               title: `${tmpl.name} - Build in Minutes`,
-              metaTitle: `${tmpl.name} | Svivva Templates`.slice(0, 60),
+              metaTitle: `${tmpl.name} | ZZAI Templates`.slice(0, 60),
               metaDescription:
-                `Build a ${tmpl.name} with Svivva in minutes. No coding required.`.slice(0, 155),
-              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with Svivva in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with Svivva\n\n1. Sign up for Svivva\n2. Describe your API in plain English\n3. Svivva generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://zzaizzai.com)`,
+                `Build a ${tmpl.name} with ZZAI in minutes. No coding required.`.slice(0, 155),
+              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with ZZAI in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with ZZAI\n\n1. Sign up for ZZAI\n2. Describe your API in plain English\n3. ZZAI generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://zzaizzai.com)`,
             };
           }
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: tmpl.slug,
             title: d.title || tmpl.name,
-            metaTitle: d.metaTitle || `${tmpl.name} | Svivva Templates`,
-            metaDescription: d.metaDescription || `Build a ${tmpl.name} with Svivva in minutes.`,
+            metaTitle: d.metaTitle || `${tmpl.name} | ZZAI Templates`,
+            metaDescription: d.metaDescription || `Build a ${tmpl.name} with ZZAI in minutes.`,
             content: d.content || "",
             category: "template",
             published: true,
@@ -4952,12 +4951,12 @@ Return JSON:
 1. Start with a direct 2-3 sentence answer in the FIRST paragraph — this is what Google and Perplexity show
 2. Be factual, specific, and cite concrete numbers where possible
 3. Use H2/H3 subheadings for supporting sections
-4. Mention Svivva naturally in the answer as one solution
+4. Mention ZZAI naturally in the answer as one solution
 5. No marketing fluff — write like an expert answering on Quora`,
                 },
                 {
                   role: "user",
-                  content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | Svivva", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention Svivva as a tool that helps) }`,
+                  content: `Write a complete answer page for the question: "${paa.q}". Return JSON: { title (the question), metaTitle (question + " | ZZAI", 60 chars max), metaDescription (direct answer in 155 chars), content (600-800 words markdown: direct answer paragraph, H2 supporting sections, mention ZZAI as a tool that helps) }`,
                 },
               ],
             });

@@ -10,7 +10,7 @@ export async function seedContent() {
       slug: "ai-tools",
       name: "AI Tools",
       description: "Free AI-powered tools for developers and creators",
-      metaTitle: "Free AI Tools | Svivva",
+      metaTitle: "Free AI Tools | ZZAI",
       metaDescription:
         "Discover free AI tools for text generation, code analysis, data processing, and more.",
     },
@@ -18,7 +18,7 @@ export async function seedContent() {
       slug: "developer-tools",
       name: "Developer Tools",
       description: "Essential tools for software developers",
-      metaTitle: "Free Developer Tools | Svivva",
+      metaTitle: "Free Developer Tools | ZZAI",
       metaDescription:
         "Free developer tools for API testing, code formatting, debugging, and productivity.",
     },
@@ -26,7 +26,7 @@ export async function seedContent() {
       slug: "api-tools",
       name: "API Tools",
       description: "Tools for building and testing APIs",
-      metaTitle: "Free API Tools | Svivva",
+      metaTitle: "Free API Tools | ZZAI",
       metaDescription:
         "Free API development tools for testing, documentation, schema validation, and monitoring.",
     },
@@ -34,7 +34,7 @@ export async function seedContent() {
       slug: "productivity",
       name: "Productivity",
       description: "Tools to boost your workflow efficiency",
-      metaTitle: "Free Productivity Tools | Svivva",
+      metaTitle: "Free Productivity Tools | ZZAI",
       metaDescription:
         "Free productivity tools to streamline your development workflow and save time.",
     },
@@ -61,7 +61,7 @@ export async function seedContent() {
         "Students summarizing research papers and study materials. Professionals reviewing lengthy reports and documentation. Content creators researching topics for articles. Anyone who needs to quickly understand long-form content.",
       relatedSlugs: ["ai-paragraph-rewriter", "ai-prompt-generator", "ai-content-detector"],
       category: "ai-tools",
-      metaTitle: "Free AI Text Summarizer - Summarize Articles Instantly | Svivva",
+      metaTitle: "Free AI Text Summarizer - Summarize Articles Instantly | ZZAI",
       metaDescription:
         "Summarize any text instantly with our free AI Text Summarizer. Condense articles, papers, and documents into clear summaries. No signup required.",
       published: true,
@@ -86,7 +86,7 @@ export async function seedContent() {
         "Developers building AI-powered applications. Content creators working with AI writing tools. Business professionals using AI for analysis and reports. Anyone looking to get better results from ChatGPT and other AI models.",
       relatedSlugs: ["ai-text-summarizer", "json-schema-generator", "api-response-validator"],
       category: "ai-tools",
-      metaTitle: "Free AI Prompt Generator - Create Better AI Prompts | Svivva",
+      metaTitle: "Free AI Prompt Generator - Create Better AI Prompts | ZZAI",
       metaDescription:
         "Generate optimized prompts for ChatGPT, Claude, and GPT-4. Free AI Prompt Generator with proven engineering patterns. No signup required.",
       published: true,
@@ -111,7 +111,7 @@ export async function seedContent() {
         "API developers who need schemas for request/response validation. Backend engineers building OpenAPI documentation. Frontend developers creating form validation rules. DevOps teams configuring data pipeline schemas.",
       relatedSlugs: ["api-response-validator", "json-formatter", "ai-prompt-generator"],
       category: "api-tools",
-      metaTitle: "Free JSON Schema Generator - Generate Schema from JSON | Svivva",
+      metaTitle: "Free JSON Schema Generator - Generate Schema from JSON | ZZAI",
       metaDescription:
         "Generate JSON Schema from sample data instantly. Free JSON Schema Generator supporting Draft-07, Ajv, and OpenAPI. No signup required.",
       published: true,
@@ -136,7 +136,7 @@ export async function seedContent() {
         "Developers debugging API responses and JSON data. DevOps engineers working with configuration files. Data analysts processing JSON exports. Anyone who works with JSON data regularly.",
       relatedSlugs: ["json-schema-generator", "api-response-validator", "base64-encoder"],
       category: "developer-tools",
-      metaTitle: "Free JSON Formatter & Validator - Pretty Print JSON Online | Svivva",
+      metaTitle: "Free JSON Formatter & Validator - Pretty Print JSON Online | ZZAI",
       metaDescription:
         "Format, validate, and beautify JSON online. Free JSON Formatter with syntax highlighting and error detection. No signup required.",
       published: true,
@@ -161,7 +161,7 @@ export async function seedContent() {
         "API developers verifying endpoint responses during development. QA engineers building API test suites. Frontend developers validating data from backend services. Teams implementing contract testing between services.",
       relatedSlugs: ["json-schema-generator", "json-formatter", "ai-prompt-generator"],
       category: "api-tools",
-      metaTitle: "Free API Response Validator - Validate API Outputs | Svivva",
+      metaTitle: "Free API Response Validator - Validate API Outputs | ZZAI",
       metaDescription:
         "Validate API responses against JSON schemas. Free API Response Validator with detailed error reports. No signup required.",
       published: true,
@@ -186,7 +186,7 @@ export async function seedContent() {
         "Developers working with API authentication tokens and encoded payloads. DevOps engineers handling certificates and encoded configuration. Frontend developers embedding images as data URIs. Anyone debugging Base64-encoded data in logs or responses.",
       relatedSlugs: ["json-formatter", "jwt-decoder", "url-encoder"],
       category: "developer-tools",
-      metaTitle: "Free Base64 Encoder & Decoder - Encode Decode Online | Svivva",
+      metaTitle: "Free Base64 Encoder & Decoder - Encode Decode Online | ZZAI",
       metaDescription:
         "Encode and decode Base64 online for free. Client-side processing, supports text and files. No signup required.",
       published: true,
@@ -211,7 +211,7 @@ export async function seedContent() {
         "Content marketers creating variations for A/B testing and multi-channel distribution. Students paraphrasing research material for essays and papers. Business professionals adjusting communication tone for different audiences. SEO specialists creating unique content variations.",
       relatedSlugs: ["ai-text-summarizer", "ai-content-detector", "ai-prompt-generator"],
       category: "ai-tools",
-      metaTitle: "Free AI Paragraph Rewriter - Rewrite Text Instantly | Svivva",
+      metaTitle: "Free AI Paragraph Rewriter - Rewrite Text Instantly | ZZAI",
       metaDescription:
         "Rewrite paragraphs with AI to improve clarity and change tone. Free AI Paragraph Rewriter with multiple styles. No signup required.",
       published: true,
@@ -235,7 +235,7 @@ export async function seedContent() {
         "Educators checking student submissions for AI-generated content. Content managers ensuring authentic human-written material. Publishers maintaining editorial standards. Hiring teams reviewing AI-assisted applications.",
       relatedSlugs: ["ai-paragraph-rewriter", "ai-text-summarizer", "ai-prompt-generator"],
       category: "ai-tools",
-      metaTitle: "Free AI Content Detector - Check for AI Generated Text | Svivva",
+      metaTitle: "Free AI Content Detector - Check for AI Generated Text | ZZAI",
       metaDescription:
         "Detect AI-generated text with confidence scoring. Free AI Content Detector for GPT-4, Claude, and more. No signup required.",
       published: true,
@@ -259,7 +259,7 @@ export async function seedContent() {
         "Backend developers debugging authentication flows and token issues. Frontend developers troubleshooting API authorization failures. Security engineers auditing token configurations. DevOps teams diagnosing SSO and OAuth integration problems.",
       relatedSlugs: ["base64-encoder", "api-response-validator", "json-formatter"],
       category: "developer-tools",
-      metaTitle: "Free JWT Decoder - Decode JSON Web Tokens Online | Svivva",
+      metaTitle: "Free JWT Decoder - Decode JSON Web Tokens Online | ZZAI",
       metaDescription:
         "Decode and inspect JWT tokens instantly. Free JWT Decoder showing header, payload, and claims. Client-side processing, no signup required.",
       published: true,
@@ -284,7 +284,7 @@ export async function seedContent() {
         "Web developers building URLs with query parameters and special characters. API developers constructing request URLs programmatically. SEO specialists working with URL structures and redirects. Anyone debugging URL encoding issues in web applications.",
       relatedSlugs: ["base64-encoder", "json-formatter", "jwt-decoder"],
       category: "developer-tools",
-      metaTitle: "Free URL Encoder & Decoder - Encode URLs Online | Svivva",
+      metaTitle: "Free URL Encoder & Decoder - Encode URLs Online | ZZAI",
       metaDescription:
         "Encode and decode URLs online for free. RFC 3986 compliant URL Encoder with unicode support. No signup required.",
       published: true,
@@ -325,7 +325,7 @@ Most AI APIs use REST architecture with JSON payloads, making them compatible wi
 
 ## Building Your Own AI APIs
 
-While consuming third-party AI APIs is straightforward, building your own gives you full control over the model behavior, response format, and costs. Platforms like **Svivva** make this process dramatically faster by converting natural language prompts into production-ready API endpoints with:
+While consuming third-party AI APIs is straightforward, building your own gives you full control over the model behavior, response format, and costs. Platforms like **ZZAI** make this process dramatically faster by converting natural language prompts into production-ready API endpoints with:
 
 - **Schema-enforced JSON responses** ensuring consistent output
 - **Automated evaluation suites** that test your API across diverse scenarios
@@ -344,11 +344,11 @@ While consuming third-party AI APIs is straightforward, building your own gives 
 
 The fastest way to start building AI APIs is with a prompt-to-API platform that handles the infrastructure complexity. Focus on your prompt engineering and let the platform manage schema validation, evaluation, deployment, and scaling.
 
-*Ready to build your first AI API? [Get started with Svivva](/dashboard) and turn your prompts into production APIs in minutes.*`,
-      author: "Svivva Team",
+*Ready to build your first AI API? [Get started with ZZAI](/dashboard) and turn your prompts into production APIs in minutes.*`,
+      author: "ZZAI Team",
       category: "guides",
       tags: ["ai-api", "api-development", "getting-started", "ai"],
-      metaTitle: "What Are AI APIs? Complete Developer Guide 2025 | Svivva",
+      metaTitle: "What Are AI APIs? Complete Developer Guide 2025 | ZZAI",
       metaDescription:
         "Learn what AI APIs are, how they work, and how to build production-ready AI APIs. Complete guide covering concepts, best practices, and deployment.",
       published: true,
@@ -416,13 +416,13 @@ A prompt that works for your test case might fail on real-world data. Test with 
 
 ## Automating Prompt Engineering
 
-Manual prompt iteration is slow. Modern platforms like **Svivva** automate the evaluation process by generating diverse test cases, running automated assessments, and providing instant rollback when a prompt change reduces quality.
+Manual prompt iteration is slow. Modern platforms like **ZZAI** automate the evaluation process by generating diverse test cases, running automated assessments, and providing instant rollback when a prompt change reduces quality.
 
-*Want to apply these techniques at scale? [Start building with Svivva](/dashboard) to turn optimized prompts into production APIs with automated evaluation.*`,
-      author: "Svivva Team",
+*Want to apply these techniques at scale? [Start building with ZZAI](/dashboard) to turn optimized prompts into production APIs with automated evaluation.*`,
+      author: "ZZAI Team",
       category: "tutorials",
       tags: ["prompt-engineering", "ai", "best-practices", "tutorials"],
-      metaTitle: "10 Prompt Engineering Best Practices That Actually Work | Svivva",
+      metaTitle: "10 Prompt Engineering Best Practices That Actually Work | ZZAI",
       metaDescription:
         "Master prompt engineering with 10 proven techniques for consistent, high-quality AI outputs. Learn role assignment, few-shot, chain-of-thought, and more.",
       published: true,
@@ -470,15 +470,15 @@ What happens when validation fails? Instead of returning an error, advanced syst
 
 This self-healing approach ensures your API maintains near-100% availability even when the underlying model produces imperfect output.
 
-## Implementation with Svivva
+## Implementation with ZZAI
 
-Svivva implements schema enforcement at the platform level. When you define an API endpoint, you specify the output schema. Every response is automatically validated and repaired if needed, with zero additional code.
+ZZAI implements schema enforcement at the platform level. When you define an API endpoint, you specify the output schema. Every response is automatically validated and repaired if needed, with zero additional code.
 
-*Build AI APIs with guaranteed response formats. [Try Svivva](/dashboard) — schema enforcement included by default.*`,
-      author: "Svivva Team",
+*Build AI APIs with guaranteed response formats. [Try ZZAI](/dashboard) — schema enforcement included by default.*`,
+      author: "ZZAI Team",
       category: "technical",
       tags: ["json-schema", "validation", "api-development", "reliability"],
-      metaTitle: "JSON Schema Validation for AI APIs - Why It Matters | Svivva",
+      metaTitle: "JSON Schema Validation for AI APIs - Why It Matters | ZZAI",
       metaDescription:
         "Learn why JSON Schema validation prevents production failures in AI APIs. Discover schema enforcement and auto-repair techniques for reliable outputs.",
       published: true,
@@ -534,15 +534,15 @@ When issues are detected in production:
 3. **Set rollback thresholds** — Define automatic rollback triggers before deploying
 4. **Monitor continuously** — Watch error rates and response quality in real-time
 
-## Built-in with Svivva
+## Built-in with ZZAI
 
-Svivva provides automatic version tracking, evaluation pipelines, and instant rollback for every AI API endpoint. Every prompt change creates a versioned snapshot, and automated evaluations protect against quality regression.
+ZZAI provides automatic version tracking, evaluation pipelines, and instant rollback for every AI API endpoint. Every prompt change creates a versioned snapshot, and automated evaluations protect against quality regression.
 
-*Ship AI APIs with confidence. [Start with Svivva](/dashboard) — versioning and rollback built in.*`,
-      author: "Svivva Team",
+*Ship AI APIs with confidence. [Start with ZZAI](/dashboard) — versioning and rollback built in.*`,
+      author: "ZZAI Team",
       category: "technical",
       tags: ["versioning", "rollback", "api-development", "reliability", "devops"],
-      metaTitle: "AI API Versioning & Rollback Strategies | Svivva",
+      metaTitle: "AI API Versioning & Rollback Strategies | ZZAI",
       metaDescription:
         "Learn effective versioning and instant rollback strategies for AI-powered APIs. Automated evaluation, traffic shifting, and rollback triggers.",
       published: true,
@@ -605,15 +605,15 @@ Common pricing models for AI APIs:
 - Update prompts based on user feedback
 - Expand capabilities based on demand
 
-## The Svivva Marketplace
+## The ZZAI Marketplace
 
-Svivva's built-in marketplace lets you publish AI APIs directly from the platform. Your endpoints get automatic documentation, SDK generation, usage analytics, and billing — so you can focus on building great AI products.
+ZZAI's built-in marketplace lets you publish AI APIs directly from the platform. Your endpoints get automatic documentation, SDK generation, usage analytics, and billing — so you can focus on building great AI products.
 
-*Ready to monetize your AI expertise? [Launch on Svivva's Marketplace](/dashboard/marketplace) and start earning from your AI APIs.*`,
-      author: "Svivva Team",
+*Ready to monetize your AI expertise? [Launch on ZZAI's Marketplace](/dashboard/marketplace) and start earning from your AI APIs.*`,
+      author: "ZZAI Team",
       category: "business",
       tags: ["marketplace", "monetization", "api-business", "ai"],
-      metaTitle: "How to Build and Monetize an AI API Marketplace | Svivva",
+      metaTitle: "How to Build and Monetize an AI API Marketplace | ZZAI",
       metaDescription:
         "Step-by-step guide to creating, publishing, and monetizing AI APIs. Learn pricing models, marketing strategies, and marketplace best practices.",
       published: true,

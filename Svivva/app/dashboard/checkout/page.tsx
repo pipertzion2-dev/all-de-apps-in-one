@@ -21,8 +21,7 @@ import {
   Infinity,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 
 const plans: Record<
   string,
@@ -285,13 +284,7 @@ function CheckoutPageContent() {
             <ArrowLeft className="w-4 h-4" />
             Back
           </Link>
-          <Image
-            src={svivvaLogo}
-            alt="Svivva"
-            width={90}
-            height={30}
-            className="h-7 w-auto object-contain opacity-80"
-          />
+          <BrandMark size="sm" href={false} className="opacity-80" />
           <Badge
             variant="outline"
             className="text-xs gap-1"

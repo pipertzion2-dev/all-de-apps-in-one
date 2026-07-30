@@ -56,10 +56,7 @@ export async function GET(req: NextRequest) {
     const tokens = await exchangeGoogleOAuthCode(code, row.codeVerifier, redirectUri);
     if (!tokens.refreshToken) {
       const dest = new URL(returnPath, req.nextUrl.origin);
-      dest.searchParams.set(
-        "gsc_error",
-        "no_refresh_token",
-      );
+      dest.searchParams.set("gsc_error", "no_refresh_token");
       return NextResponse.redirect(dest);
     }
 

@@ -261,7 +261,9 @@ export async function runDomainCutover(
   }
   dns.apexA = {
     ok: aOk,
-    detail: aOk ? `@ A → ${apexA}` : `A record failed: ${JSON.stringify(aPatch.body).slice(0, 200)}`,
+    detail: aOk
+      ? `@ A → ${apexA}`
+      : `A record failed: ${JSON.stringify(aPatch.body).slice(0, 200)}`,
   };
   summaryLines.push(aOk ? `✓ ${dns.apexA.detail}` : `✖ ${dns.apexA.detail}`);
 
@@ -304,12 +306,8 @@ export async function runDomainCutover(
   const listA = await godaddyFetch(authHeader, `/domains/${domain}/records/A/@`);
   const listC = await godaddyFetch(authHeader, `/domains/${domain}/records/CNAME/www`);
   const listAll = await godaddyFetch(authHeader, `/domains/${domain}/records`);
-  summaryLines.push(
-    `· GoDaddy readback A/@: ${JSON.stringify(listA.body).slice(0, 180)}`,
-  );
-  summaryLines.push(
-    `· GoDaddy readback CNAME/www: ${JSON.stringify(listC.body).slice(0, 180)}`,
-  );
+  summaryLines.push(`· GoDaddy readback A/@: ${JSON.stringify(listA.body).slice(0, 180)}`);
+  summaryLines.push(`· GoDaddy readback CNAME/www: ${JSON.stringify(listC.body).slice(0, 180)}`);
   if (listAll.ok && Array.isArray(listAll.body)) {
     const interesting = (listAll.body as { type?: string; name?: string; data?: string }[])
       .filter((r) => r.name === "@" || r.name === "www" || r.type === "A" || r.type === "CNAME")

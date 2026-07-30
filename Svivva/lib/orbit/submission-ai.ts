@@ -109,7 +109,7 @@ export async function generateSubmissionFields(
           {
             role: "system",
             content:
-              "You write platform-native listing and launch copy for Svivva. Be specific, not generic. Return only JSON object with the requested field keys.",
+              "You write platform-native listing and launch copy for ZZAI. Be specific, not generic. Return only JSON object with the requested field keys.",
           },
           {
             role: "user",

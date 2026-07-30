@@ -20,13 +20,13 @@ export const FEATURES: FeatureDef[] = [
   {
     id: "play",
     index: 0,
-    name: "Svivva Play",
+    name: "ZZAI Play",
     artworkTitle: "BREATH AWAY",
     artworkSrc: "/artworks/play.png",
     tagline: "Захватывает дыхание",
     description:
       "AI music composition that breathes. Hocket voices, Meend expression, real-time sitar and vibraphone — the interface hears you.",
-    cta: { label: "Open Svivva Play", href: FEATURE_PUBLIC_PATHS.play },
+    cta: { label: "Open ZZAI Play", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#90c4d8",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",
@@ -34,7 +34,7 @@ export const FEATURES: FeatureDef[] = [
   {
     id: "seeds",
     index: 1,
-    name: "Svivva Seeds",
+    name: "ZZAI Seeds",
     artworkTitle: "SETTLE DOWN",
     artworkSrc: "/artworks/seeds.png",
     tagline: "Gemeinsam — together, we build",

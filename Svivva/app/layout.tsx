@@ -36,30 +36,30 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "From seed to symphony";
+  const title = "ZZAI — From seed to symphony";
   const description =
-    "From seed to symphony — one workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
+    "ZZAI — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
 
   return {
     title: {
       default: title,
-      template: "%s · From seed to symphony",
+      template: "%s · ZZAI",
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: ["Svivva", "From seed to symphony"],
+    keywords: ["ZZAI", "zzaizzai", "From seed to symphony"],
     openGraph: {
       type: "website",
-      siteName: "Svivva",
+      siteName: "ZZAI",
       title,
       description,
       url: siteUrl,
       images: [
         {
-          url: "/svivva-logo.png",
+          url: "/zzai-logo.png",
           width: 1200,
           height: 630,
-          alt: "From seed to symphony",
+          alt: "ZZAI",
         },
       ],
     },
@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/svivva-logo.png"],
+      images: ["/zzai-logo.png"],
     },
     alternates: {
       canonical: siteUrl,
@@ -108,17 +108,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
-                name: "Svivva",
+                name: "ZZAI",
                 url: siteUrl,
-                logo: `${siteUrl}/svivva-logo.png`,
+                logo: `${siteUrl}/zzai-logo.png`,
                 description:
-                  "From seed to symphony — Svivva is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
+                  "From seed to symphony — ZZAI is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                name: "Svivva",
+                name: "ZZAI",
                 url: siteUrl,
                 potentialAction: {
                   "@type": "SearchAction",
@@ -132,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "SoftwareApplication",
-                name: "Svivva",
+                name: "ZZAI",
                 operatingSystem: "Web",
                 applicationCategory: "DeveloperApplication",
                 offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -146,42 +146,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 mainEntity: [
                   {
                     "@type": "Question",
-                    name: "What is Svivva?",
+                    name: "What is ZZAI?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "From seed to symphony: Svivva turns plain-language intent into shipped product — with validation, evaluations, versioning, and rollback so quality does not drift.",
+                      text: "From seed to symphony: ZZAI turns plain-language intent into shipped product — with validation, evaluations, versioning, and rollback so quality does not drift.",
                     },
                   },
                   {
                     "@type": "Question",
-                    name: "How long does it take to ship with Svivva?",
+                    name: "How long does it take to ship with ZZAI?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — Svivva handles validation, rollback, and ops.",
+                      text: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — ZZAI handles validation, rollback, and ops.",
                     },
                   },
                   {
                     "@type": "Question",
-                    name: "Does Svivva work with OpenAI and other AI models?",
+                    name: "Does ZZAI work with OpenAI and other AI models?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Yes. Svivva supports OpenAI (GPT-4o, GPT-4, GPT-3.5), Anthropic Claude, Google Gemini, and other LLMs. You can route between models automatically based on cost or quality thresholds.",
+                      text: "Yes. ZZAI supports OpenAI (GPT-4o, GPT-4, GPT-3.5), Anthropic Claude, Google Gemini, and other LLMs. You can route between models automatically based on cost or quality thresholds.",
                     },
                   },
                   {
                     "@type": "Question",
-                    name: "Do I need to write code to use Svivva?",
+                    name: "Do I need to write code to use ZZAI?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "No. Svivva's core workflow is entirely no-code — describe your API in plain English, set your output schema, and deploy. A TypeScript SDK is available for developers who want programmatic access.",
+                      text: "No. ZZAI's core workflow is entirely no-code — describe your API in plain English, set your output schema, and deploy. A TypeScript SDK is available for developers who want programmatic access.",
                     },
                   },
                   {
                     "@type": "Question",
-                    name: "Is Svivva free to start?",
+                    name: "Is ZZAI free to start?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Yes. Svivva has a free tier with no credit card required. Paid plans start at $49/month and unlock unlimited endpoints, higher request volumes, and team features.",
+                      text: "Yes. ZZAI has a free tier with no credit card required. Paid plans start at $49/month and unlock unlimited endpoints, higher request volumes, and team features.",
                     },
                   },
                   {
@@ -189,7 +189,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     name: "What happens if my endpoint returns bad data?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Svivva validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
+                      text: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
                     },
                   },
                 ],
@@ -197,9 +197,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "HowTo",
-                name: "How to ship with Svivva",
+                name: "How to ship with ZZAI",
                 description:
-                  "Build a production-ready endpoint from a plain-language prompt with Svivva — schema validation, evaluations, and rollback included.",
+                  "Build a production-ready endpoint from a plain-language prompt with ZZAI — schema validation, evaluations, and rollback included.",
                 step: [
                   {
                     "@type": "HowToStep",
@@ -211,13 +211,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     "@type": "HowToStep",
                     position: 2,
                     name: "Define your output schema",
-                    text: "Set the JSON structure you expect back. Svivva will enforce and validate it on every call.",
+                    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
                   },
                   {
                     "@type": "HowToStep",
                     position: 3,
                     name: "Auto-generate evaluations",
-                    text: "Svivva writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
+                    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
                   },
                   {
                     "@type": "HowToStep",

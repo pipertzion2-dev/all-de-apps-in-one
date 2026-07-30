@@ -96,7 +96,7 @@ async function checkUrl(url: string, timeoutMs = 9000): Promise<UrlCheck> {
     const r = await fetch(url, {
       redirect: "follow",
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { "User-Agent": "Svivva-IndexHealth/1.0 (+https://zzaizzai.com)" },
+      headers: { "User-Agent": "ZZAI-IndexHealth/1.0 (+https://zzaizzai.com)" },
       cache: "no-store",
     });
     const xRobots = (r.headers.get("x-robots-tag") || "").toLowerCase();

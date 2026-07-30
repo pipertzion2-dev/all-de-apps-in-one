@@ -293,7 +293,7 @@ export function PyracryptBobwireSection() {
           className="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full mb-6"
           style={{ background: `${TEAL}18`, border: `1px solid ${TEAL}40`, color: TEAL }}
         >
-          <Shield className="w-3.5 h-3.5" /> Integrates with the Svivva platform
+          <Shield className="w-3.5 h-3.5" /> Integrates with the ZZAI platform
         </div>
 
         <div className="flex justify-center mb-4">
@@ -307,7 +307,7 @@ export function PyracryptBobwireSection() {
         </div>
         <p className="text-lg sm:text-xl text-white/60 max-w-xl mx-auto mb-4 leading-relaxed">
           Block unwanted feed content on YouTube and more — same Pyracrypt-grade UI, embedded in
-          Svivva. Nothing leaves your device without your control.
+          ZZAI. Nothing leaves your device without your control.
         </p>
         <p className="text-sm text-white/35 max-w-md mx-auto mb-10">
           Free forever · Pro plans from $19/mo · Zero upload · No sign-up needed

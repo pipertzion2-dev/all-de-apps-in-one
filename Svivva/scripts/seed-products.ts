@@ -7,10 +7,10 @@ async function createProducts() {
 
   const existingProducts = await stripe.products.list({ limit: 100 });
   const proProduct = existingProducts.data.find(
-    (p: any) => p.name === "Svivva Pro" || p.name === "Vivva Pro",
+    (p: any) => p.name === "ZZAI Pro" || p.name === "Vivva Pro",
   );
   const enterpriseProduct = existingProducts.data.find(
-    (p: any) => p.name === "Svivva Enterprise" || p.name === "Vivva Enterprise",
+    (p: any) => p.name === "ZZAI Enterprise" || p.name === "Vivva Enterprise",
   );
 
   // Archive existing products and their prices
@@ -33,9 +33,9 @@ async function createProducts() {
   }
 
   // Create Vivva Pro with $49/month
-  console.log("Creating Svivva Pro product...");
+  console.log("Creating ZZAI Pro product...");
   const newProProduct = await stripe.products.create({
-    name: "Svivva Pro",
+    name: "ZZAI Pro",
     description:
       "For growing teams and projects. 10 projects, 10,000 API calls/month, full eval suite with auto-rollback.",
     metadata: {
@@ -61,14 +61,14 @@ async function createProducts() {
     metadata: { plan: "pro", billing: "yearly" },
   });
 
-  console.log("Created Svivva Pro:", newProProduct.id);
+  console.log("Created ZZAI Pro:", newProProduct.id);
   console.log("  Monthly price ($49):", proMonthlyPrice.id);
   console.log("  Yearly price ($490):", proYearlyPrice.id);
 
   // Create Vivva Enterprise with $299/month
-  console.log("Creating Svivva Enterprise product...");
+  console.log("Creating ZZAI Enterprise product...");
   const newEnterpriseProduct = await stripe.products.create({
-    name: "Svivva Enterprise",
+    name: "ZZAI Enterprise",
     description:
       "For large-scale deployments. Unlimited projects, unlimited API calls, SLA guarantee.",
     metadata: {
@@ -86,7 +86,7 @@ async function createProducts() {
     metadata: { plan: "enterprise", billing: "monthly" },
   });
 
-  console.log("Created Svivva Enterprise:", newEnterpriseProduct.id);
+  console.log("Created ZZAI Enterprise:", newEnterpriseProduct.id);
   console.log("  Monthly price ($299):", enterpriseMonthlyPrice.id);
 
   console.log("\nDone! New pricing is active:");

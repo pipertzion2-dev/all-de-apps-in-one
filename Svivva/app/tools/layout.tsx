@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   description:
     "Free tools for developers and creators — calculators, validators, and playgrounds. Most need no signup.",
   openGraph: {
-    title: "Svivva tools",
+    title: "ZZAI tools",
     description:
-      "Free tools for developers and creators — explore calculators, validators, and playgrounds on Svivva.",
+      "Free tools for developers and creators — explore calculators, validators, and playgrounds on ZZAI.",
     type: "website",
   },
 };

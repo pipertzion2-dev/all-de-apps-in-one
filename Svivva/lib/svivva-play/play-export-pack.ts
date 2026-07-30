@@ -77,7 +77,7 @@ export function buildPlayExportPackFiles(options: {
   }
 
   const readme = [
-    "Svivva Play — full export pack",
+    "ZZAI Play — full export pack",
     `Project: ${projectName}`,
     `Tempo: ${bpm} BPM`,
     "",
@@ -88,7 +88,7 @@ export function buildPlayExportPackFiles(options: {
     "- all_stems_multitrack.mid — all generated parts in one file",
     "",
     `Drag .mid files into Ableton/DAW. Indian Meend = MIDI pitch wheel (±${MEEND_MIDI_BEND_RANGE_SEMITONES} semitone range).`,
-    `In Ableton: select each track instrument → Pitch Bend Range → ${MEEND_MIDI_BEND_RANGE_SEMITONES} semitones (matches Svivva preview).`,
+    `In Ableton: select each track instrument → Pitch Bend Range → ${MEEND_MIDI_BEND_RANGE_SEMITONES} semitones (matches ZZAI preview).`,
     "Monophonic stems include inter-note glides; chord/pad stems use per-note ornaments only.",
   ].join("\n");
 

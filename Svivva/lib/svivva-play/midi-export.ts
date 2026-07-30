@@ -90,7 +90,7 @@ function addMeendTrackMeta(track: InstanceType<typeof Midi.Track>, stem: MidiSte
   track.addEvent(
     new Midi.MetaEvent({
       type: Midi.MetaEvent.MARKER,
-      data: `Svivva Meend: set Pitch Bend Range to ${MEEND_MIDI_BEND_RANGE_SEMITONES} st in Ableton`,
+      data: `ZZAI Meend: set Pitch Bend Range to ${MEEND_MIDI_BEND_RANGE_SEMITONES} st in Ableton`,
     }),
   );
 }

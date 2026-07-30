@@ -7,7 +7,7 @@ import { sitemapUrlsetXml } from "@/lib/seo/sitemap/xml";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-/** Security & cyber mini-app URLs — indexable public funnel pages on Svivva. */
+/** Security & cyber mini-app URLs — indexable public funnel pages on ZZAI. */
 export async function GET() {
   let entries;
   try {

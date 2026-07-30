@@ -40,6 +40,6 @@ export function buildClientSessionExport(options: {
     mode,
     stems,
     quality_note:
-      "Use this JSON with Svivva Play generate, or re-import audio + Melodyne .mid for the same harmonic model.",
+      "Use this JSON with ZZAI Play generate, or re-import audio + Melodyne .mid for the same harmonic model.",
   };
 }

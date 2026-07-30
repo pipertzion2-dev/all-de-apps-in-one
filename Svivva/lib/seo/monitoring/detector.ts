@@ -25,7 +25,7 @@ async function fetchStatus(path: string): Promise<number> {
   try {
     const r = await fetch(`${getSiteUrl().replace(/\/$/, "")}${path}`, {
       signal: AbortSignal.timeout(8000),
-      headers: { "User-Agent": "Svivva-SEO-Monitor/1.0" },
+      headers: { "User-Agent": "ZZAI-SEO-Monitor/1.0" },
       cache: "no-store",
     });
     return r.status;

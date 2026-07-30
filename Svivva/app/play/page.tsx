@@ -89,7 +89,7 @@ import {
 } from "@/lib/svivva-play/prompts/orchestral-composer";
 import type { PatternLength } from "@/lib/svivva-play/pattern-length";
 import { HolographicNoise } from "@/components/holographic-noise";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import svivvaCrateClosed from "@/attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png";
 import svivvaCrateOpen from "@/attached_assets/Svivva_Crate_1770908797554.png";
 import * as ChordKit from "@/lib/svivva-play/chordkit";
@@ -2761,8 +2761,8 @@ export default function SvivvaPlayPage() {
         <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white mr-2 align-middle">
           BETA
         </span>
-        Svivva Play is in beta — preview audio, meend, swing, and AI tools may change or fail.
-        Exports may differ from what you hear in the browser.
+        ZZAI Play is in beta — preview audio, meend, swing, and AI tools may change or fail. Exports
+        may differ from what you hear in the browser.
       </p>
     </div>
   );
@@ -2781,7 +2781,7 @@ export default function SvivvaPlayPage() {
           >
             <div className="max-w-lg w-full rounded-2xl border-2 border-amber-400 bg-white shadow-lg p-8 text-center">
               <AlertTriangle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Svivva Play — Beta</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">ZZAI Play — Beta</h1>
               <p className="text-sm text-gray-600 leading-relaxed mb-6">
                 You are entering an experimental studio. Features break, shift, and improve often.
                 If the page fails to load, refresh or try again later. MIDI export is the most
@@ -2793,13 +2793,13 @@ export default function SvivvaPlayPage() {
                 onClick={acknowledgeBeta}
                 data-testid="button-play-beta-ack"
               >
-                I understand — continue to Svivva Play
+                I understand — continue to ZZAI Play
               </Button>
               <Link
                 href="/"
                 className="inline-block mt-4 text-sm text-gray-500 hover:text-gray-800 underline"
               >
-                Back to Svivva home
+                Back to ZZAI home
               </Link>
             </div>
           </div>
@@ -2812,7 +2812,7 @@ export default function SvivvaPlayPage() {
             >
               <Image
                 src={crateState === "opening" ? svivvaCrateOpen : svivvaCrateClosed}
-                alt="Svivva Play"
+                alt="ZZAI Play"
                 width={360}
                 height={360}
                 className={`object-contain transition-opacity duration-500 max-w-[60vw] max-h-[50dvh] w-auto h-auto ${crateState === "opening" ? "animate-pulse" : ""}`}
@@ -2938,15 +2938,7 @@ export default function SvivvaPlayPage() {
       <nav className="h-11 sm:h-12 border-b border-white/10 flex-shrink-0 z-50 bg-[#0e0c16]/95 backdrop-blur-sm">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 h-full flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Link href="/">
-              <Image
-                src={svivvaLogo}
-                alt="Svivva"
-                width={100}
-                height={32}
-                className="h-5 w-auto object-contain"
-              />
-            </Link>
+            <BrandMark size="sm" href="/" />
             <span className="text-gray-300 hidden sm:inline">/</span>
             <span className="font-semibold text-white/90 text-xs sm:text-sm">Play</span>
             <Badge className="bg-[#A05068]/10 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">

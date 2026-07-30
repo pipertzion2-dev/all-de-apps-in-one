@@ -198,7 +198,7 @@ export default function AiApiCostCalculatorPage() {
               step={0}
               total={2}
               currentLabel="Calculate costs"
-              nextLabel="Optimize with Svivva"
+              nextLabel="Optimize with ZZAI"
             />
           </div>
           <div className="flex items-start gap-4">
@@ -450,7 +450,7 @@ export default function AiApiCostCalculatorPage() {
         <TentpoleBanner
           context="calculated"
           headline={`You could save ${fmt(cheapest.monthly * 0.4)}–${fmt(cheapest.monthly * 0.8)}/month with auto-routing`}
-          body={`At your current usage, Svivva's model router picks the cheapest model that meets your quality bar — cutting costs 40–80% without changing your prompts. Cheapest option right now: ${cheapest.name} at ${fmt(cheapest.monthly)}/mo.`}
+          body={`At your current usage, ZZAI's model router picks the cheapest model that meets your quality bar — cutting costs 40–80% without changing your prompts. Cheapest option right now: ${cheapest.name} at ${fmt(cheapest.monthly)}/mo.`}
           ctaText="Start saving — free"
         />
 
@@ -476,7 +476,7 @@ export default function AiApiCostCalculatorPage() {
             },
             {
               q: "Can I reduce my AI API costs automatically?",
-              a: "Yes — tools like Svivva can route requests to the cheapest model that meets a quality threshold, automatically falling back to premium models only when needed.",
+              a: "Yes — tools like ZZAI can route requests to the cheapest model that meets a quality threshold, automatically falling back to premium models only when needed.",
             },
           ].map(({ q, a }) => (
             <div key={q} className="rounded-xl border border-border bg-card p-4">
@@ -513,7 +513,7 @@ export default function AiApiCostCalculatorPage() {
       <TentpoleStickyBar
         toolName="ai-api-cost-calculator"
         triggerAfterMs={15000}
-        savingsLine={`Your cheapest option is ${cheapest.name} at ${fmt(cheapest.monthly)}/mo — Svivva can route there automatically.`}
+        savingsLine={`Your cheapest option is ${cheapest.name} at ${fmt(cheapest.monthly)}/mo — ZZAI can route there automatically.`}
       />
     </div>
   );

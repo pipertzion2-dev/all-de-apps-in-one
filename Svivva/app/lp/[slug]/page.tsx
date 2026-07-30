@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
@@ -14,7 +13,7 @@ import {
   ChevronDown,
   ArrowRight,
 } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 
 interface LandingPageData {
   title: string;
@@ -30,7 +29,7 @@ interface LandingPageData {
 const pages: Record<string, LandingPageData> = {
   "ai-api-builder": {
     title: "Ship production backends",
-    metaTitle: "Ship production backends from plain English | Svivva",
+    metaTitle: "Ship production backends from plain English | ZZAI",
     metaDescription:
       "From seed to symphony — describe what you need, deploy a guarded endpoint with schema validation and rollback, and grow without babysitting infrastructure. Start free.",
     heroHeadline: "From seed to symphony — ship what you describe",
@@ -42,7 +41,7 @@ const pages: Record<string, LandingPageData> = {
         icon: "code",
         title: "Describe, Don't Code",
         description:
-          "Tell Svivva what your API should do in natural language. Our AI architect designs the schema, validation, and business logic automatically.",
+          "Tell ZZAI what your API should do in natural language. Our AI architect designs the schema, validation, and business logic automatically.",
       },
       {
         icon: "shield",
@@ -66,23 +65,23 @@ const pages: Record<string, LandingPageData> = {
       {
         question: "Do I need backend development experience?",
         answer:
-          "No. Svivva handles all the infrastructure, authentication, and deployment. If you can describe what you need, you can build an API.",
+          "No. ZZAI handles all the infrastructure, authentication, and deployment. If you can describe what you need, you can build an API.",
       },
       {
         question: "What happens if my API gets high traffic?",
         answer:
-          "Svivva auto-scales your endpoints based on demand. Our infrastructure handles traffic spikes automatically with zero downtime.",
+          "ZZAI auto-scales your endpoints based on demand. Our infrastructure handles traffic spikes automatically with zero downtime.",
       },
     ],
   },
   "prompt-to-api": {
     title: "Prompt to API",
-    metaTitle: "Prompt to API - Turn Any AI Prompt Into a Scalable Endpoint | Svivva",
+    metaTitle: "Prompt to API - Turn Any AI Prompt Into a Scalable Endpoint | ZZAI",
     metaDescription:
       "Transform your AI prompts into production-ready API endpoints instantly. Version control, A/B testing, and analytics included. Try free.",
     heroHeadline: "Turn Any AI Prompt Into a Live API Endpoint",
     heroSubheadline:
-      "Stop copy-pasting prompts between tools. Svivva wraps your best prompts in production-grade endpoints with versioning, analytics, and team collaboration — so your AI workflows scale beyond a single user.",
+      "Stop copy-pasting prompts between tools. ZZAI wraps your best prompts in production-grade endpoints with versioning, analytics, and team collaboration — so your AI workflows scale beyond a single user.",
     ctaText: "Create Your API Now",
     benefits: [
       {
@@ -108,7 +107,7 @@ const pages: Record<string, LandingPageData> = {
       {
         question: "Can I use my own OpenAI or Anthropic API keys?",
         answer:
-          "Yes. Bring your own keys for any supported model provider, or use Svivva's shared pool with pay-per-use pricing. Switch between them anytime.",
+          "Yes. Bring your own keys for any supported model provider, or use ZZAI's shared pool with pay-per-use pricing. Switch between them anytime.",
       },
       {
         question: "How does prompt versioning work?",
@@ -124,12 +123,12 @@ const pages: Record<string, LandingPageData> = {
   },
   "ai-app-generator": {
     title: "AI App Generator",
-    metaTitle: "AI App Generator - Full-Stack AI Applications From a Description | Svivva",
+    metaTitle: "AI App Generator - Full-Stack AI Applications From a Description | ZZAI",
     metaDescription:
       "Generate complete AI-powered applications with APIs, databases, and frontends from a single description. Ship your MVP in hours, not weeks.",
     heroHeadline: "Ship Your AI-Powered App Before Lunch",
     heroSubheadline:
-      "Describe your application idea. Svivva generates the complete stack — API endpoints, database schemas, authentication flows, and SDK packages — ready to integrate into any frontend or mobile app.",
+      "Describe your application idea. ZZAI generates the complete stack — API endpoints, database schemas, authentication flows, and SDK packages — ready to integrate into any frontend or mobile app.",
     ctaText: "Start building",
     benefits: [
       {
@@ -165,7 +164,7 @@ const pages: Record<string, LandingPageData> = {
       {
         question: "How do I integrate with my existing app?",
         answer:
-          "Use the auto-generated SDK or call the REST endpoints directly. Svivva APIs work with any language, framework, or platform that supports HTTP.",
+          "Use the auto-generated SDK or call the REST endpoints directly. ZZAI APIs work with any language, framework, or platform that supports HTTP.",
       },
     ],
   },
@@ -221,7 +220,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
-            <Image src={svivvaLogo} alt="Svivva" width={120} height={36} priority />
+            <BrandMark size="md" href={false} priority />
           </Link>
           <Link
             href="/dashboard"
@@ -276,9 +275,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       </section>
 
       <section className="max-w-4xl mx-auto px-6 py-16">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12">
-          Why Teams Choose Svivva
-        </h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12">Why Teams Choose ZZAI</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {page.benefits.map((benefit, i) => {
             const IconComp = iconMap[benefit.icon] || Zap;
@@ -338,10 +335,10 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <footer className="border-t border-white/10 mt-8">
         <div className="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between gap-4 flex-wrap">
           <Link href="/" data-testid="link-footer-home">
-            <Image src={svivvaLogo} alt="Svivva" width={90} height={28} />
+            <BrandMark size="sm" href={false} />
           </Link>
           <p className="text-xs text-white/40">
-            &copy; {new Date().getFullYear()} Svivva. All rights reserved.
+            &copy; {new Date().getFullYear()} ZZAI. All rights reserved.
           </p>
         </div>
       </footer>

@@ -9,22 +9,22 @@ const BASE = getSiteUrl();
 const ORBIT_HUBS: { slug: HubSlug; title: string; keyword: string; blurb: string }[] = [
   {
     slug: "ai-tools-hub",
-    title: "Svivva AI Tools Hub",
+    title: "ZZAI AI Tools Hub",
     keyword: "ai tools hub",
-    blurb: "Free AI utilities — funnel to Svivva for schema validation, deploy, and rollback.",
+    blurb: "Free AI utilities — funnel to ZZAI for schema validation, deploy, and rollback.",
   },
   {
     slug: "cyber-security-mini-apps",
     title: "Cyber Security Mini Apps",
     keyword: "cybersecurity tools",
     blurb:
-      "Security scanners and hardening tools — Clutety for device protection, Svivva for AI backends.",
+      "Security scanners and hardening tools — Clutety for device protection, ZZAI for AI backends.",
   },
   {
     slug: "seo-pack",
-    title: "Svivva SEO Pack",
+    title: "ZZAI SEO Pack",
     keyword: "seo tools",
-    blurb: "SEO helpers plus Orbit autopilot for indexing and growth pages on Svivva.",
+    blurb: "SEO helpers plus Orbit autopilot for indexing and growth pages on ZZAI.",
   },
 ];
 
@@ -52,7 +52,7 @@ export async function ensureOrbitHubPages(): Promise<string[]> {
           headline: hub.title,
           howItWorks: hub.blurb,
           content,
-          metaTitle: `${hub.title} | Svivva`.slice(0, 60),
+          metaTitle: `${hub.title} | ZZAI`.slice(0, 60),
           metaDescription: hub.blurb.slice(0, 155),
           published: true,
           toolUrl: `${BASE}/${hub.slug}`,
@@ -67,9 +67,9 @@ export async function ensureOrbitHubPages(): Promise<string[]> {
           keyword: hub.keyword,
           headline: hub.title,
           howItWorks: hub.blurb,
-          whoItsFor: "Developers and teams using Svivva",
+          whoItsFor: "Developers and teams using ZZAI",
           content,
-          metaTitle: `${hub.title} | Svivva`.slice(0, 60),
+          metaTitle: `${hub.title} | ZZAI`.slice(0, 60),
           metaDescription: hub.blurb.slice(0, 155),
           category: "seed-marketing",
           published: true,

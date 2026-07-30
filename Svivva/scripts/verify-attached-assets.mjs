@@ -20,6 +20,8 @@ const ALLOW = new Set([
   "Svivva_Seeds_6_1771888740460.png",
   "Svivva_official_3_1769474625495.png",
   "Svivva_print_2_1769474625495.png",
+  "ZZAI_BOUQUET_2.png",
+  "ZZAI_OFFICIAL_LOGO.png",
 ]);
 
 const assetsDir = path.join(projectRoot, "attached_assets");
@@ -61,4 +63,4 @@ if (extra.length || missing.length) {
   process.exit(1);
 }
 
-console.log("✓ Svivva/attached_assets matches allowlist (8 files).\n");
+console.log(`✓ Svivva/attached_assets matches allowlist (${ALLOW.size} files).\n`);

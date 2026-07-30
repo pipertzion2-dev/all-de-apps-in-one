@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Visual traffic funnel — mini apps → SEO → Svivva → iOS (coming soon).
+ * Visual traffic funnel — mini apps → SEO → ZZAI → iOS (coming soon).
  * Used on Orbit admin and Seeds marketing sections.
  */
 
@@ -40,7 +40,7 @@ export function OrbitTrafficFunnelDiagram({
     {
       id: "svivva",
       icon: Sparkles,
-      title: "Svivva signup",
+      title: "ZZAI signup",
       desc: "Seeds deploy · API builder · Play",
       color: BURG,
     },
@@ -49,7 +49,7 @@ export function OrbitTrafficFunnelDiagram({
           {
             id: "ios",
             icon: Smartphone,
-            title: "Svivva iOS",
+            title: "ZZAI iOS",
             desc: "Coming soon — same account, native app",
             color: "#a78bfa",
           },
@@ -70,7 +70,7 @@ export function OrbitTrafficFunnelDiagram({
             Orbit traffic funnel
           </p>
           <p className="text-sm font-semibold text-foreground">
-            How free tools become paying Svivva users
+            How free tools become paying ZZAI users
           </p>
         </div>
         <Link
@@ -154,7 +154,7 @@ export function OrbitTrafficFunnelDiagram({
           <p className="text-xs text-muted-foreground leading-relaxed">
             <strong className="text-foreground">Orbit automates every step</strong> — credentials,
             Index 22 SEO, social packs, directory submissions, and mini-app page generation. One
-            admin surface for svivva.com + all connected apps.
+            admin surface for zzaizzai.com + all connected apps.
           </p>
         </div>
       </div>

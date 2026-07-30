@@ -1,5 +1,5 @@
 /**
- * Curated mini-app / tool surface for Orbit — traffic funnels to Svivva + Clutety
+ * Curated mini-app / tool surface for Orbit — traffic funnels to ZZAI + Clutety
  * without shipping full product replacements on free tiers.
  */
 
@@ -16,24 +16,24 @@ export type CuratedNativeTool = {
   hub: "ai-tools-hub" | "cyber-security-mini-apps" | "seo-pack";
 };
 
-/** Verified working utilities on svivva.com (lead magnets → platform signup). */
+/** Verified working utilities on zzaizzai.com (lead magnets → platform signup). */
 export const NATIVE_SVIVVA_TOOLS: CuratedNativeTool[] = [
   {
     path: "/tools/prompt-forge",
     name: "Prompt Forge",
-    description: "Draft API prompts and schemas — upgrade on Svivva for deployment and guardrails.",
+    description: "Draft API prompts and schemas — upgrade on ZZAI for deployment and guardrails.",
     hub: "ai-tools-hub",
   },
   {
     path: "/tools/json-schema-validator",
     name: "JSON Schema Validator",
-    description: "Validate JSON against a schema before you ship an endpoint on Svivva.",
+    description: "Validate JSON against a schema before you ship an endpoint on ZZAI.",
     hub: "ai-tools-hub",
   },
   {
     path: "/tools/ai-api-cost-calculator",
     name: "AI API Cost Calculator",
-    description: "Estimate token spend — Svivva helps cap and monitor production API costs.",
+    description: "Estimate token spend — ZZAI helps cap and monitor production API costs.",
     hub: "ai-tools-hub",
   },
 ];
@@ -88,8 +88,8 @@ export function filterToolsForTrafficDiscovery(tools: DiscoverableTool[]): Disco
 
   const list = Array.from(byUrl.values());
   list.sort((a, b) => {
-    const aNative = a.url.includes("svivva.com/tools/");
-    const bNative = b.url.includes("svivva.com/tools/");
+    const aNative = a.url.includes("zzaizzai.com/tools/");
+    const bNative = b.url.includes("zzaizzai.com/tools/");
     if (aNative !== bNative) return aNative ? -1 : 1;
     const aPref = PREFERRED_NAME_RE.test(a.name) ? 1 : 0;
     const bPref = PREFERRED_NAME_RE.test(b.name) ? 1 : 0;
@@ -110,16 +110,16 @@ export function buildHubPageHtml(hub: HubSlug): string {
 
   const titles: Record<HubSlug, { h1: string; lead: string }> = {
     "ai-tools-hub": {
-      h1: "Svivva AI Tools Hub",
-      lead: "Free utilities that solve one job well — then funnel to Svivva for schema validation, deployment, and rollback.",
+      h1: "ZZAI AI Tools Hub",
+      lead: "Free utilities that solve one job well — then funnel to ZZAI for schema validation, deployment, and rollback.",
     },
     "cyber-security-mini-apps": {
       h1: "Cyber Security Mini Apps (Clutety)",
-      lead: "Security scanners and hardening utilities. Full parental controls and device protection ship with Clutety on iOS — explore Svivva for AI backends.",
+      lead: "Security scanners and hardening utilities. Full parental controls and device protection ship with Clutety on iOS — explore ZZAI for AI backends.",
     },
     "seo-pack": {
-      h1: "Svivva SEO Pack",
-      lead: "Lightweight SEO helpers. Scale programmatic pages and indexing with Orbit on Svivva.",
+      h1: "ZZAI SEO Pack",
+      lead: "Lightweight SEO helpers. Scale programmatic pages and indexing with Orbit on ZZAI.",
     },
   };
 
@@ -129,6 +129,6 @@ export function buildHubPageHtml(hub: HubSlug): string {
 <p>${lead}</p>
 <h2>Featured free tools</h2>
 <ul>${toolList}</ul>
-<p><a href="${siteBase()}">Build on Svivva →</a> · <a href="${siteBase()}/tools">All tools →</a> · <a href="${CLUTETY_LANDING}">Security mini apps →</a></p>
+<p><a href="${siteBase()}">Build on ZZAI →</a> · <a href="${siteBase()}/tools">All tools →</a> · <a href="${CLUTETY_LANDING}">Security mini apps →</a></p>
 <p><a href="${siteBase()}/orbit">Orbit growth autopilot →</a></p>`;
 }

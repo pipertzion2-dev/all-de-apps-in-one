@@ -1,6 +1,6 @@
 "use client";
 
-// Svivva Seeds — "branching" motif from the SETTLE DOWN graphic.
+// ZZAI Seeds — "branching" motif from the SETTLE DOWN graphic.
 // Filaments branch outward from a central seed and grow on scroll.
 
 import { useRef, useEffect } from "react";

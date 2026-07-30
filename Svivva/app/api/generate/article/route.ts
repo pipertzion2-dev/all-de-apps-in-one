@@ -25,11 +25,11 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "You are an SEO content writer for Svivva, an AI-powered platform for building production-ready APIs from prompts. Write comprehensive, helpful blog articles that rank well on Google.",
+            "You are an SEO content writer for ZZAI, an AI-powered platform for building production-ready APIs from prompts. Write comprehensive, helpful blog articles that rank well on Google.",
         },
         {
           role: "user",
-          content: `Write a full blog article for the keyword: "${keyword}". Return JSON with these fields: title, slug (url-friendly), excerpt (1-2 sentences), content (full markdown article with: introduction, step-by-step guide with ## headings, practical examples, a section on how Svivva solves the problem, and a CTA paragraph), metaTitle, metaDescription.`,
+          content: `Write a full blog article for the keyword: "${keyword}". Return JSON with these fields: title, slug (url-friendly), excerpt (1-2 sentences), content (full markdown article with: introduction, step-by-step guide with ## headings, practical examples, a section on how ZZAI solves the problem, and a CTA paragraph), metaTitle, metaDescription.`,
         },
       ],
     });
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         title: generated.title,
         excerpt: generated.excerpt,
         content: generated.content,
-        author: "Svivva Team",
+        author: "ZZAI Team",
         category: "guides",
         tags: ["ai", keywordTag],
         metaTitle: generated.metaTitle,

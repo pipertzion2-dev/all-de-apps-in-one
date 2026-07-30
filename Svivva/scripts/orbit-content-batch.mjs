@@ -25,8 +25,7 @@ if (!SECRET) {
 }
 
 const faq = (items) =>
-  `\n\n## Frequently asked questions\n\n` +
-  items.map(([q, a]) => `### ${q}\n\n${a}`).join("\n\n");
+  `\n\n## Frequently asked questions\n\n` + items.map(([q, a]) => `### ${q}\n\n${a}`).join("\n\n");
 const cta = `\n\n---\n\n**Build it on Svivva.** Turn a prompt into a deployable API and use our [free AI tools](${SITE}/tools) to prototype first — no signup required to start. [Get started →](${SITE})`;
 
 const blogPosts = [
@@ -61,11 +60,22 @@ Run your own model with a framework. Maximum control and privacy, maximum mainte
 Design routes, handlers, model integration, scaling, and monitoring yourself. Right for core, deterministic, high-volume logic — overkill for a single AI feature.
 
 ## How to choose
-Ask one question: is this feature mostly *AI behavior* or mostly *business logic*? AI behavior → options 1–2. Business logic → options 6–7. Most teams mix: prompt-to-API for the AI parts, a normal backend for the plumbing.${faq([
-      ["What's the fastest way to add AI to an app?", "Prompt-to-API is the fastest — you describe the behavior and get a callable endpoint in minutes, with no backend to build or host."],
-      ["Do I need machine learning experience?", "No. Modern approaches let you define behavior with a prompt and call an HTTPS endpoint. If your code can make an API request, you can add AI."],
-      ["How much does it cost to add AI?", "With per-request endpoints you pay for actual usage, so an idle feature costs almost nothing — far cheaper than running an always-on server early on."],
-    ])}${cta}`,
+Ask one question: is this feature mostly *AI behavior* or mostly *business logic*? AI behavior → options 1–2. Business logic → options 6–7. Most teams mix: prompt-to-API for the AI parts, a normal backend for the plumbing.${faq(
+      [
+        [
+          "What's the fastest way to add AI to an app?",
+          "Prompt-to-API is the fastest — you describe the behavior and get a callable endpoint in minutes, with no backend to build or host.",
+        ],
+        [
+          "Do I need machine learning experience?",
+          "No. Modern approaches let you define behavior with a prompt and call an HTTPS endpoint. If your code can make an API request, you can add AI.",
+        ],
+        [
+          "How much does it cost to add AI?",
+          "With per-request endpoints you pay for actual usage, so an idle feature costs almost nothing — far cheaper than running an always-on server early on.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "6 Postman Alternatives for Building and Shipping APIs Faster",
@@ -95,11 +105,22 @@ For automation and CI, a scriptable command-line client beats a GUI. Reproducibl
 Define the spec, and the docs + a test console generate themselves. Good when the API is a product others consume.
 
 ## The honest take
-Keep Postman for deep testing if you like it — but for *getting an endpoint live*, a prompt-to-API builder removes the slowest step. Build the endpoint in minutes, then test it however you prefer.${faq([
-      ["Is there a faster way to build APIs than Postman?", "Postman tests APIs; it doesn't build them. A prompt-to-API builder creates the live endpoint for you, which removes the slowest part of the workflow."],
-      ["Can I still use Postman with these tools?", "Yes. Any endpoint you create has a normal HTTPS URL, so you can test it in Postman, your editor, or the command line."],
-      ["What's the best Postman alternative for AI APIs?", "For AI features specifically, prompt-to-API is the strongest option because you define behavior in a prompt and get a callable endpoint without writing backend code."],
-    ])}${cta}`,
+Keep Postman for deep testing if you like it — but for *getting an endpoint live*, a prompt-to-API builder removes the slowest step. Build the endpoint in minutes, then test it however you prefer.${faq(
+      [
+        [
+          "Is there a faster way to build APIs than Postman?",
+          "Postman tests APIs; it doesn't build them. A prompt-to-API builder creates the live endpoint for you, which removes the slowest part of the workflow.",
+        ],
+        [
+          "Can I still use Postman with these tools?",
+          "Yes. Any endpoint you create has a normal HTTPS URL, so you can test it in Postman, your editor, or the command line.",
+        ],
+        [
+          "What's the best Postman alternative for AI APIs?",
+          "For AI features specifically, prompt-to-API is the strongest option because you define behavior in a prompt and get a callable endpoint without writing backend code.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "Zapier vs a Custom API: Which Should You Use in 2026?",
@@ -133,11 +154,22 @@ Internal ops, glue between SaaS tools, and one-off automations where engineering
 User-facing features, anything high-volume, and logic that needs to be precise, fast, or owned by you.
 
 ## The hybrid that usually wins
-Use Zapier for internal glue and a custom API (built quickly via prompt-to-API) for the features your users actually touch. You don't have to choose one forever.${faq([
-      ["Is a custom API cheaper than Zapier?", "Usually at scale, yes. Zapier charges per task, while a per-request API has predictable costs that stay low for idle features."],
-      ["Can I build a custom API without a backend team?", "Yes — prompt-to-API lets you describe the endpoint and get a live URL without writing or hosting backend code."],
-      ["Should I replace Zapier entirely?", "Often no. Keep Zapier for internal automations and use a custom API for user-facing, high-volume, or latency-sensitive features."],
-    ])}${cta}`,
+Use Zapier for internal glue and a custom API (built quickly via prompt-to-API) for the features your users actually touch. You don't have to choose one forever.${faq(
+      [
+        [
+          "Is a custom API cheaper than Zapier?",
+          "Usually at scale, yes. Zapier charges per task, while a per-request API has predictable costs that stay low for idle features.",
+        ],
+        [
+          "Can I build a custom API without a backend team?",
+          "Yes — prompt-to-API lets you describe the endpoint and get a live URL without writing or hosting backend code.",
+        ],
+        [
+          "Should I replace Zapier entirely?",
+          "Often no. Keep Zapier for internal automations and use a custom API for user-facing, high-volume, or latency-sensitive features.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "How to Turn a ChatGPT Prompt Into a Real API (Step by Step)",
@@ -169,11 +201,22 @@ Any language that can make an HTTP request can now use your prompt.
 Validate inputs, set sensible limits, and handle empty or odd responses gracefully. This is what separates a demo from something you can ship.
 
 ## Step 6: Iterate by editing the prompt
-Need different behavior? Change the prompt, not your app. The endpoint contract stays the same, so your integration never breaks.${faq([
-      ["Can I turn a ChatGPT prompt into an API?", "Yes. With a prompt-to-API builder you publish the prompt as a live HTTPS endpoint that returns structured output on each request."],
-      ["Do I need to write code?", "Only the single request that calls the endpoint. The endpoint itself is defined by your prompt, not by backend code."],
-      ["How do I keep the output consistent?", "Specify the exact output shape (JSON) and rules in the prompt, and validate the response in your app before using it."],
-    ])}${cta}`,
+Need different behavior? Change the prompt, not your app. The endpoint contract stays the same, so your integration never breaks.${faq(
+      [
+        [
+          "Can I turn a ChatGPT prompt into an API?",
+          "Yes. With a prompt-to-API builder you publish the prompt as a live HTTPS endpoint that returns structured output on each request.",
+        ],
+        [
+          "Do I need to write code?",
+          "Only the single request that calls the endpoint. The endpoint itself is defined by your prompt, not by backend code.",
+        ],
+        [
+          "How do I keep the output consistent?",
+          "Specify the exact output shape (JSON) and rules in the prompt, and validate the response in your app before using it.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "Free Cybersecurity Tools Every Indie Developer Should Bookmark (2026)",
@@ -203,11 +246,22 @@ Confirm your DNS, SPF, and DMARC are set so your email lands and your domain isn
 See what your site leaks publicly — exposed endpoints, verbose errors, or stray debug routes.
 
 ## How to actually use these
-Don't run them once. Put a 10-minute security pass on your calendar monthly. Most breaches exploit the boring stuff these tools catch.${faq([
-      ["Are free cybersecurity tools good enough?", "For most indie products, yes — free scanners catch the common, high-impact issues. Pay for deeper tooling only once you have real scale or compliance needs."],
-      ["What should I check first?", "Start with credential/breach checks, security headers, and dependency vulnerabilities — those cover the most common attack paths."],
-      ["How often should I run security checks?", "A short monthly pass is enough for most small teams. Automate dependency scanning in CI so it runs on every change."],
-    ])}${cta}`,
+Don't run them once. Put a 10-minute security pass on your calendar monthly. Most breaches exploit the boring stuff these tools catch.${faq(
+      [
+        [
+          "Are free cybersecurity tools good enough?",
+          "For most indie products, yes — free scanners catch the common, high-impact issues. Pay for deeper tooling only once you have real scale or compliance needs.",
+        ],
+        [
+          "What should I check first?",
+          "Start with credential/breach checks, security headers, and dependency vulnerabilities — those cover the most common attack paths.",
+        ],
+        [
+          "How often should I run security checks?",
+          "A short monthly pass is enough for most small teams. Automate dependency scanning in CI so it runs on every change.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "How to Check If Your Password Was Leaked (Free, No Signup)",
@@ -236,11 +290,22 @@ Use a checker that hashes your input. If a password shows up, treat it as compro
 Use a password manager to generate unique passwords, enable 2FA, and check your email against breaches every few months.
 
 ## The one habit that matters most
-Unique passwords per site. A single reused password is how one leaked database becomes a chain of compromised accounts.${faq([
-      ["Is it safe to check a password in a leak tool?", "Yes, if the tool uses hashing/partial matching so your full password is never sent or stored. Avoid any tool that asks for your password in plain text alongside your username."],
-      ["What should I do if my password was leaked?", "Change it everywhere it's used, enable two-factor authentication, and switch to unique passwords managed by a password manager."],
-      ["How often should I check?", "Every few months, or any time you hear a service you use was breached."],
-    ])}${cta}`,
+Unique passwords per site. A single reused password is how one leaked database becomes a chain of compromised accounts.${faq(
+      [
+        [
+          "Is it safe to check a password in a leak tool?",
+          "Yes, if the tool uses hashing/partial matching so your full password is never sent or stored. Avoid any tool that asks for your password in plain text alongside your username.",
+        ],
+        [
+          "What should I do if my password was leaked?",
+          "Change it everywhere it's used, enable two-factor authentication, and switch to unique passwords managed by a password manager.",
+        ],
+        [
+          "How often should I check?",
+          "Every few months, or any time you hear a service you use was breached.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "Website Security Checklist for Founders: 10 Things to Do This Week",
@@ -283,9 +348,18 @@ Check your team emails against breach datasets and monitor for unusual logins.
 
 ## Make it recurring
 Put a 30-minute security pass on the calendar monthly. Consistency beats intensity.${faq([
-      ["What's the most important website security step?", "Force HTTPS, enable 2FA on critical accounts, and patch known-vulnerable dependencies — those three close the most common attack paths."],
-      ["Do I need to hire a security expert?", "Not to cover the basics. This checklist handles the issues behind most small-company breaches; bring in experts as you scale or handle sensitive data."],
-      ["How long does this take?", "Most founders can complete the core items in a few hours, then maintain them with a short monthly review."],
+      [
+        "What's the most important website security step?",
+        "Force HTTPS, enable 2FA on critical accounts, and patch known-vulnerable dependencies — those three close the most common attack paths.",
+      ],
+      [
+        "Do I need to hire a security expert?",
+        "Not to cover the basics. This checklist handles the issues behind most small-company breaches; bring in experts as you scale or handle sensitive data.",
+      ],
+      [
+        "How long does this take?",
+        "Most founders can complete the core items in a few hours, then maintain them with a short monthly review.",
+      ],
     ])}${cta}`,
   },
   {
@@ -319,11 +393,22 @@ AI models weigh being talked about across the web. Helpful community posts, comp
 Update key pages and dates. Stale content gets cited less. A quarterly refresh of your best pages pays off.
 
 ## The shortcut
-Write genuinely useful, well-structured pages with FAQs and schema, publish an llms.txt, and interlink everything. That's most of GEO — and it helps classic SEO at the same time.${faq([
-      ["What is GEO (Generative Engine Optimization)?", "GEO is optimizing your content to be cited in AI answers from tools like ChatGPT, Perplexity, and Google AI Overviews — the AI-era complement to SEO."],
-      ["How do I get cited by ChatGPT or Perplexity?", "Structure content for extraction (clear headings, tables, FAQs), add JSON-LD schema, publish an llms.txt, and build interlinked topical depth."],
-      ["Does GEO replace SEO?", "No — they reinforce each other. Well-structured, schema-rich content ranks in Google and gets cited by AI engines at the same time."],
-    ])}${cta}`,
+Write genuinely useful, well-structured pages with FAQs and schema, publish an llms.txt, and interlink everything. That's most of GEO — and it helps classic SEO at the same time.${faq(
+      [
+        [
+          "What is GEO (Generative Engine Optimization)?",
+          "GEO is optimizing your content to be cited in AI answers from tools like ChatGPT, Perplexity, and Google AI Overviews — the AI-era complement to SEO.",
+        ],
+        [
+          "How do I get cited by ChatGPT or Perplexity?",
+          "Structure content for extraction (clear headings, tables, FAQs), add JSON-LD schema, publish an llms.txt, and build interlinked topical depth.",
+        ],
+        [
+          "Does GEO replace SEO?",
+          "No — they reinforce each other. Well-structured, schema-rich content ranks in Google and gets cited by AI engines at the same time.",
+        ],
+      ],
+    )}${cta}`,
   },
 ];
 
@@ -407,7 +492,9 @@ async function main() {
   }
   console.log(`Created ${json.created?.length || 0} item(s):`);
   for (const c of json.created || []) console.log(`  · ${c.type}: ${c.url}`);
-  console.log(`\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`);
+  console.log(
+    `\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`,
+  );
   if (json.errors?.length) {
     console.log("\nErrors:");
     for (const e of json.errors) console.log(`  · ${e}`);

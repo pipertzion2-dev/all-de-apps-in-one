@@ -4,9 +4,8 @@ import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 import FaqSection from "./faq-section";
 
 import { TrackedCta } from "@/components/tracked-cta";
@@ -87,11 +86,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const page = await getPage(slug);
-  if (!page) return { title: "Page Not Found | Svivva" };
+  if (!page) return { title: "Page Not Found | ZZAI" };
 
   const description = page.metaDescription || getContentWithoutFaq(page.content).slice(0, 160);
   return buildSeoMetadata({
-    title: page.metaTitle || `${page.title} | Svivva`,
+    title: page.metaTitle || `${page.title} | ZZAI`,
     description,
     path: `/${slug}`,
   });
@@ -126,10 +125,10 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               priceCurrency: "USD",
               availability: "https://schema.org/OnlineOnly",
             },
-            provider: { "@type": "Organization", name: "Svivva", url: BASE_URL },
+            provider: { "@type": "Organization", name: "ZZAI", url: BASE_URL },
           }
         : {
-            publisher: { "@type": "Organization", name: "Svivva", url: BASE_URL },
+            publisher: { "@type": "Organization", name: "ZZAI", url: BASE_URL },
           }),
     },
   ];
@@ -169,7 +168,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0a0f14]/95 backdrop-blur-sm">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
             <Link href="/" data-testid="link-home-logo">
-              <Image src={svivvaLogo} alt="Svivva" width={110} height={34} priority />
+              <BrandMark size="md" href={false} priority />
             </Link>
             <div className="flex items-center gap-5 flex-wrap text-sm">
               <Link
@@ -272,7 +271,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               className="text-2xl md:text-3xl font-bold text-center mb-10"
               data-testid="text-benefits-heading"
             >
-              {miniApp ? `Why Use ${page.headline.split(":")[0]}` : "Why Choose Svivva"}
+              {miniApp ? `Why Use ${page.headline.split(":")[0]}` : "Why Choose ZZAI"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {page.benefits.map((benefit, i) => (
@@ -386,7 +385,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               className="text-2xl md:text-3xl font-bold text-white mb-4"
               data-testid="text-cta-title"
             >
-              {miniApp ? `Try ${page.headline.split(":")[0]} Free` : "Ready to ship with Svivva?"}
+              {miniApp ? `Try ${page.headline.split(":")[0]} Free` : "Ready to ship with ZZAI?"}
             </h2>
             <p className="text-white/80 mb-8 text-lg">
               {miniApp
@@ -407,7 +406,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         <div className="max-w-5xl mx-auto px-6">
           <ConversionFunnel
             variant="bottom"
-            headline={miniApp ? `Try ${page.title} on Svivva` : "Ship your next AI project"}
+            headline={miniApp ? `Try ${page.title} on ZZAI` : "Ship your next AI project"}
             primaryHref="/signup"
             primaryLabel="Start free"
             secondaryHref={hubPath !== "/" ? hubPath : "/tools"}
@@ -418,7 +417,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         <footer className="border-t border-white/10 py-8 px-6">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 flex-wrap">
             <Link href="/" data-testid="link-footer-home">
-              <Image src={svivvaLogo} alt="Svivva" width={80} height={24} />
+              <BrandMark size="sm" href={false} />
             </Link>
             <div className="flex items-center gap-6 text-sm text-white/40">
               <Link
@@ -443,7 +442,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
                 Dashboard
               </Link>
             </div>
-            <p className="text-xs text-white/30">&copy; {new Date().getFullYear()} Svivva</p>
+            <p className="text-xs text-white/30">&copy; {new Date().getFullYear()} ZZAI</p>
           </div>
         </footer>
       </div>

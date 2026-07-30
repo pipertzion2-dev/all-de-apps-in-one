@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const label = req.nextUrl.searchParams.get("label") || "built with";
-  const message = req.nextUrl.searchParams.get("message") || "Svivva";
+  const message = req.nextUrl.searchParams.get("message") || "ZZAI";
   const color = req.nextUrl.searchParams.get("color") || "5BA8A0";
 
   // Classic shields.io style badge SVG

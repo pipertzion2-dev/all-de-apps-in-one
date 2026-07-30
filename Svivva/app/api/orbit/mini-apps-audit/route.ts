@@ -35,7 +35,7 @@ async function checkPage(url: string): Promise<{
     const r = await fetch(url, {
       redirect: "follow",
       signal: AbortSignal.timeout(9000),
-      headers: { "User-Agent": "Svivva-MiniAppAudit/1.0" },
+      headers: { "User-Agent": "ZZAI-MiniAppAudit/1.0" },
       cache: "no-store",
     });
     const xRobots = (r.headers.get("x-robots-tag") || "").toLowerCase();

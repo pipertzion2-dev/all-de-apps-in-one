@@ -270,9 +270,9 @@ export default function JsonSchemaValidatorPage() {
           headline={
             result?.valid
               ? "Schema passed — now enforce this in production automatically"
-              : "Stop validating manually. Svivva does this on every API call."
+              : "Stop validating manually. ZZAI does this on every API call."
           }
-          body="Svivva wraps your AI endpoint with your JSON Schema — every response is validated automatically, and if it fails, the AI self-repairs before your users ever see it. Zero validation failures, no extra code."
+          body="ZZAI wraps your AI endpoint with your JSON Schema — every response is validated automatically, and if it fails, the AI self-repairs before your users ever see it. Zero validation failures, no extra code."
           ctaText="Auto-validate in production — free"
         />
 
@@ -294,7 +294,7 @@ export default function JsonSchemaValidatorPage() {
             },
             {
               q: "How do I validate model responses automatically?",
-              a: "Svivva lets you define a JSON Schema for your AI endpoint — every response is automatically validated, and if it fails, the AI auto-repairs the output before returning it to your users.",
+              a: "ZZAI lets you define a JSON Schema for your AI endpoint — every response is automatically validated, and if it fails, the AI auto-repairs the output before returning it to your users.",
             },
             {
               q: "Can I use additionalProperties: false?",
@@ -335,7 +335,7 @@ export default function JsonSchemaValidatorPage() {
       <TentpoleStickyBar
         toolName="json-schema-validator"
         triggerAfterMs={15000}
-        savingsLine="You're validating manually — Svivva does this automatically on every production API call."
+        savingsLine="You're validating manually — ZZAI does this automatically on every production API call."
       />
     </div>
   );

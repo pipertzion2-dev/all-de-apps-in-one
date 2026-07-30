@@ -469,7 +469,7 @@ export default function MiniAppsGuide() {
                   <input
                     value={appName}
                     onChange={(e) => setAppName(e.target.value)}
-                    placeholder="e.g. Svivva Play"
+                    placeholder="e.g. ZZAI Play"
                     data-testid="input-app-name"
                     className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 bg-background"
                     style={{ "--tw-ring-color": PINK } as any}
@@ -512,7 +512,7 @@ export default function MiniAppsGuide() {
                 <textarea
                   value={appDescription}
                   onChange={(e) => setAppDescription(e.target.value)}
-                  placeholder="e.g. Svivva Play is an AI music production platform with tools for beat making, melody generation, chord progression builder, drum sequencer, audio effects, mastering, collaboration, lyric writing, sample packs, MIDI editor, etc."
+                  placeholder="e.g. ZZAI Play is an AI music production platform with tools for beat making, melody generation, chord progression builder, drum sequencer, audio effects, mastering, collaboration, lyric writing, sample packs, MIDI editor, etc."
                   rows={4}
                   data-testid="input-app-description"
                   className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none resize-none bg-background"

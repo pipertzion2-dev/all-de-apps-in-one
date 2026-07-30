@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Clutety",
-  description: "Redirects to Clutety on Svivva.",
+  description: "Redirects to Clutety on ZZAI.",
   alternates: { canonical: "https://zzaizzai.com/clutety" },
 };
 

@@ -1,13 +1,13 @@
-# Svivva - AI API Builder SaaS
+# ZZAI - AI API Builder SaaS
 
 ## Overview
 
-Svivva is a SaaS platform designed to transform user prompts into production-ready AI APIs. It provides a comprehensive suite of features including schema-enforced JSON responses, automated evaluations, version control with instant rollback, and robust team collaboration tools. The platform also offers an API marketplace, A/B testing capabilities, and cost optimization features, aiming to streamline the development and deployment of AI-powered applications.
+ZZAI is a SaaS platform designed to transform user prompts into production-ready AI APIs. It provides a comprehensive suite of features including schema-enforced JSON responses, automated evaluations, version control with instant rollback, and robust team collaboration tools. The platform also offers an API marketplace, A/B testing capabilities, and cost optimization features, aiming to streamline the development and deployment of AI-powered applications.
 
 ## User Preferences
 
 - Clean, minimal design with Three.js flower background (35-40% opacity)
-- Svivva branding throughout (teal #5BA8A0, burgundy #6B2C4A)
+- ZZAI branding throughout (teal #5BA8A0, burgundy #6B2C4A)
 - Dark mode support
 - Apple-like user-friendly UI: simple, guided, no clutter
 
@@ -55,7 +55,7 @@ Key architectural decisions and features include:
   - **Chaos Mode**: Adversarial stress testing with resilience scoring.
   - **Prompt Breeding**: Genetic evolution of prompts by combining versions.
   - **API Autopsy**: Forensic analysis of API failures to identify root causes.
-- **Svivva Seeds**: Multi-application generation engine that builds multiple production-ready apps from a single structured PDF.
+- **ZZAI Seeds**: Multi-application generation engine that builds multiple production-ready apps from a single structured PDF.
   - PDF ingestion and parsing into separate application build units
   - Parallel build orchestration for concurrent app generation
   - Generates frontend, backend, database, auth, and deployment config per app
@@ -72,7 +72,7 @@ Key architectural decisions and features include:
     - **Momentum strategy:** Time-bound access ensures committed users who become evangelists and provide product feedback
   - Available on Pro and Enterprise tiers only
 - **Hypothesis Lab** (`/dashboard/hypothesis`): AI-powered hypothesis-as-a-service discovery engine implementing all 5 core features:
-  1. **API Registry**: Users register external APIs with endpoint URL, input schema (JSON), sample response — shown alongside Svivva projects as selectable cards with schema/sample badges
+  1. **API Registry**: Users register external APIs with endpoint URL, input schema (JSON), sample response — shown alongside ZZAI projects as selectable cards with schema/sample badges
   2. **Hypothesis Generation Engine**: LLM generates 4-6 hypotheses per session covering correlations, inverse relationships, anomalies, conditional behaviors, and dependencies
   3. **Experiment Engine**: Each hypothesis includes a designed experiment with 3 input scenarios, API call order, and expected behaviors — all visible in expandable detail view
   4. **Insight Validation Engine**: Per-hypothesis validation shows patterns found, contradictions detected, statistical notes, and confidence scores (0-100 with heuristic scale)
@@ -80,7 +80,7 @@ Key architectural decisions and features include:
   - Additional: Remix (edit question + reselect APIs), Insight Feed (clickable, remixable, deletable), Turn into API (prefills API Builder). No DB tables needed.
 - **Hypothesis Lab — Hardware Edition** (`/dashboard/hypothesis-hardware`): Physical-side innovation engine that connects hardware components, digital APIs, Seeds apps, and external data to discover cross-ecosystem innovations for manufacturers. Same 5-core-feature architecture as digital version but with:
   - Hardware context step (product type, materials, industry, constraints)
-  - Source Registry supports 3 types: Hardware Components (sensors, boards, materials), External APIs, and Seeds Apps — plus auto-connects all user's digital Svivva APIs
+  - Source Registry supports 3 types: Hardware Components (sensors, boards, materials), External APIs, and Seeds Apps — plus auto-connects all user's digital ZZAI APIs
   - Categories: material_innovation, process_optimization, iot_integration, cross_domain, supply_chain, hybrid_product
   - Innovation score per hypothesis + cost impact analysis in validation
   - Actions: Build Hardware (routes to Hardware Builder), Turn into API (routes to API Builder), Remix
@@ -93,25 +93,25 @@ Key architectural decisions and features include:
   - Identifies market gaps and competitive insights
   - Supports industry filtering and custom context
   - Stores session history for revisiting past discoveries
-- **Growth Engine** (`/dashboard/growth`): Admin-only AI marketing hub for auto-marketing Svivva, Pyracrypt, and Mini Apps.
+- **Growth Engine** (`/dashboard/growth`): Admin-only AI marketing hub for auto-marketing ZZAI, Pyracrypt, and Mini Apps.
   - **Directory Blitz**: 60+ pre-loaded directories (AI tools, SaaS, developer, PR, social, security) filterable by category. Click to submit and track status (pending/submitted/live) per product. Shows estimated monthly visitors per directory.
   - **AI Copy Engine**: One-click AI content generation across 11 content types: Twitter/X thread, Reddit post, LinkedIn post, ProductHunt launch kit, blog post outline, press release, AEO content (Answer Engine Optimization for Perplexity/ChatGPT), competitor comparison pages, podcast pitches, GitHub SEO content, email newsletter.
-  - **Novel Tactics**: 8 unconventional traffic strategies — AEO, competitor keyword hijacking, GitHub SEO, micro-PR mill, podcast pitch automation, newsletter SEO, content velocity engine, embedded growth ("Powered by Svivva").
+  - **Novel Tactics**: 8 unconventional traffic strategies — AEO, competitor keyword hijacking, GitHub SEO, micro-PR mill, podcast pitch automation, newsletter SEO, content velocity engine, embedded growth ("Powered by ZZAI").
   - **Automation Log**: History of all automated tasks. Manual "Run Weekly Tasks" button.
   - **Weekly scheduler**: `server/index.ts` runs growth tasks every 7 days (sitemap pings, IndexNow) and logs each run to `growth_tasks` table.
   - DB tables: `growth_submissions`, `growth_content`, `growth_tasks`
   - API routes: `/api/growth/directories` (GET/POST), `/api/growth/content` (GET/POST), `/api/growth/tasks` (GET/POST)
 
-- **Orbit** (`/dashboard/launchpad`): Admin-only personal marketing command center for executing the full Svivva + Mini Apps marketing strategy. Two tabs (svivva.com / Mini Apps).
+- **Orbit** (`/dashboard/launchpad`): Admin-only personal marketing command center for executing the full ZZAI + Mini Apps marketing strategy. Two tabs (zzaizzai.com / Mini Apps).
 
-  **svivva.com tab — 12 traffic steps:**
+  **zzaizzai.com tab — 12 traffic steps:**
   1. `svivva-indexnow` — IndexNow key generation + URL submission to Bing/Yandex/Yahoo
   2. `svivva-seo-pages` — 20 AI-written SEO landing pages for high-intent keywords
-  3. `svivva-comparisons` — 8 competitor comparison pages (Svivva vs Bubble, Retool, etc.)
+  3. `svivva-comparisons` — 8 competitor comparison pages (ZZAI vs Bubble, Retool, etc.)
   4. `svivva-blog` — 10 long-form SEO blog articles
   5. `svivva-directories` — 40-directory submission kit (Futurepedia, G2, AlternativeTo, SaaSHub, RapidAPI, etc.) with AI-generated listing content for all fields
   6. `svivva-parasite` — 5 platform-native articles for Dev.to, Hashnode, Medium, HackerNoon, Substack (high-DA parasite SEO — outranks your site instantly)
-  7. `svivva-aeo` — 15 Answer Engine Optimization pages targeting Perplexity, ChatGPT Search, Gemini (direct-answer format so AI engines cite Svivva)
+  7. `svivva-aeo` — 15 Answer Engine Optimization pages targeting Perplexity, ChatGPT Search, Gemini (direct-answer format so AI engines cite ZZAI)
   8. `svivva-communities` — 8 Reddit posts (r/SideProject, r/webdev, r/ChatGPT, r/MachineLearning…) + Show HN + Indie Hackers + Discord templates
   9. `svivva-outreach` — Press release + 10 newsletter pitches (TLDR AI, Ben's Bites, JS Weekly, 4M+ reach) + 8 podcast pitches
   10. `svivva-schema` — FAQ + SoftwareApplication JSON-LD · backlink magnet roundup page · changelog page
@@ -120,11 +120,11 @@ Key architectural decisions and features include:
 
   **Mini Apps tab — 5 steps:** mini-import, mini-hub, mini-cname, mini-social, mini-index
 
-- **Build System**: Unified build interface styled like Svivva Play hardware sampler UI
+- **Build System**: Unified build interface styled like ZZAI Play hardware sampler UI
   - Dark hardware aesthetic (dark backgrounds, holographic gradients, 3D tactile buttons)
   - 4 build modes: API Build, Hardware Build, Seed Build, Quick Deploy
   - Each mode has its own multi-step wizard inside the hardware-style interface
-  - Holographic text animations and gradient accents matching Svivva Play design language
+  - Holographic text animations and gradient accents matching ZZAI Play design language
   - Located at `/dashboard/build`
 
 ## Dashboard Navigation
@@ -206,7 +206,7 @@ User-facing AI marketing toolkit in the Discover section. Authenticated users de
 - **Root-Level SEO Pages**: Dynamic route at `app/(seo)/[slug]/page.tsx` renders published landing pages at root URLs (e.g., `/ai-app-builder`)
 - **Database**: `seo_keywords` table tracks keywords with searchVolume, intent, assignedPage, assignedArticle, status
 
-## Svivva Play (`/play`)
+## ZZAI Play (`/play`)
 
 Music composition and chord exploration tool with hardware-sampler UI aesthetic.
 
@@ -231,7 +231,7 @@ Step 4 (Logical) of the BUILD wizard:
 Embedded Stripe Elements checkout page replacing Stripe's hosted checkout:
 
 - Plan summary sidebar with features, pricing, test card reference
-- Stripe PaymentElement with dark theme matching Svivva branding
+- Stripe PaymentElement with dark theme matching ZZAI branding
 - Three.js blooming flowers decorative banner at top (checkout preset): reference-matching colors (blush pink, chartreuse, sage green, lavender) with holographic "S VIVVA" text on petals via canvas texture + shader overlay
 - Design preview mode: visit `/dashboard/checkout` directly to see layout without triggering payment
 - Live mode: routed from billing page with `?tier=pro&priceId=...` query params

@@ -54,15 +54,15 @@ export async function generateMetadata({
   const post = await getPost(slug);
 
   if (!post) {
-    return { title: "Post Not Found | Svivva Blog" };
+    return { title: "Post Not Found | ZZAI Blog" };
   }
 
   return buildSeoMetadata({
-    title: post.metaTitle || `${post.title} | Svivva Blog`,
+    title: post.metaTitle || `${post.title} | ZZAI Blog`,
     description: post.metaDescription || post.excerpt,
     path: `/blog/${slug}`,
     type: "article",
-    imagePath: post.ogImage || "/svivva-logo.png",
+    imagePath: post.ogImage || "/zzai-logo.png",
     publishedTime: post.publishedAt?.toISOString(),
     modifiedTime: post.updatedAt?.toISOString(),
     authors: [post.author],

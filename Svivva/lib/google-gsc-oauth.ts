@@ -20,8 +20,12 @@ let oauthColumnsEnsured = false;
 export async function ensureGscOAuthColumns(): Promise<void> {
   if (oauthColumnsEnsured) return;
   try {
-    await db.execute(sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS google_oauth_refresh_token TEXT`);
-    await db.execute(sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS google_oauth_email TEXT`);
+    await db.execute(
+      sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS google_oauth_refresh_token TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS google_oauth_email TEXT`,
+    );
     oauthColumnsEnsured = true;
   } catch {
     /* test env */
@@ -103,7 +107,9 @@ export async function exchangeGoogleOAuthCode(
     error_description?: string;
   };
   if (!res.ok || !data.access_token) {
-    throw new Error(data.error_description || data.error || `Token exchange failed (${res.status})`);
+    throw new Error(
+      data.error_description || data.error || `Token exchange failed (${res.status})`,
+    );
   }
 
   let email: string | undefined;
@@ -207,7 +213,10 @@ export async function listGscSites(accessToken: string): Promise<GscSiteEntry[]>
 }
 
 /** Pick the GSC property that matches this deployment (hostname / URL-prefix). */
-export function matchGscSiteToCanonical(sites: GscSiteEntry[], canonicalUrl: string): string | null {
+export function matchGscSiteToCanonical(
+  sites: GscSiteEntry[],
+  canonicalUrl: string,
+): string | null {
   const u = new URL(canonicalUrl);
   const host = u.hostname.replace(/^www\./i, "");
   const prefix = `${canonicalUrl.replace(/\/$/, "")}/`;

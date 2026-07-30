@@ -140,8 +140,8 @@ const faqs = [
     a: "The free plan gives you one scan per day and a basic report. Pro unlocks unlimited scans and all five protection modes. Team adds multi-seat access, API hooks, and Slack alerts. Enterprise adds white-label reports and a dedicated AI engine.",
   },
   {
-    q: "Is this connected to Svivva's AI platform?",
-    a: "Clutety is an independent protection tool within the Svivva ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+    q: "Is this connected to ZZAI's AI platform?",
+    a: "Clutety is an independent protection tool within the ZZAI ecosystem. It uses cryptographic algorithms — not AI — at its core.",
   },
 ];
 
@@ -152,10 +152,10 @@ export default function ClutetyLandingPage() {
       <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#080c14]/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>
-            ← Svivva
+            ← ZZAI
           </Link>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-white/40">Integrates with the Svivva platform</span>
+            <span className="text-xs text-white/40">Integrates with the ZZAI platform</span>
             <a
               href="#pricing"
               className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border"
@@ -186,7 +186,7 @@ export default function ClutetyLandingPage() {
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
             The original Replit-grade UI with WireBar and LED controls — now tuned for feed
-            blocking. Embedded in Svivva. Your rules stay in your browser.
+            blocking. Embedded in ZZAI. Your rules stay in your browser.
           </p>
         </div>
 
@@ -243,7 +243,7 @@ export default function ClutetyLandingPage() {
                 borderTop: "1px solid rgba(255,255,255,0.05)",
               }}
             >
-              <span className="text-[11px] text-white/25">Works with the Svivva platform</span>
+              <span className="text-[11px] text-white/25">Works with the ZZAI platform</span>
               <a
                 href="#pricing"
                 className="flex items-center gap-1.5 text-[11px] font-bold"
@@ -421,7 +421,7 @@ export default function ClutetyLandingPage() {
         </div>
         <div className="mt-8">
           <Link href="/" className="text-sm text-white/30 hover:text-white/60 transition-colors">
-            ← Back to Svivva
+            ← Back to ZZAI
           </Link>
         </div>
       </section>

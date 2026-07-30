@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are an innovation scientist AI specialized in hardware manufacturing and physical product development, running inside Svivva's Hypothesis Lab (Hardware Edition).
+          content: `You are an innovation scientist AI specialized in hardware manufacturing and physical product development, running inside ZZAI's Hypothesis Lab (Hardware Edition).
 
 You think across the full ecosystem: physical products, digital APIs, software services, and data sources. You find connections that hardware manufacturers would never think of on their own.
 

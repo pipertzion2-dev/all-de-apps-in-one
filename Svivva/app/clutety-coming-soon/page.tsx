@@ -11,7 +11,7 @@ import {
 export const metadata: Metadata = {
   title: "Clutety — Coming Soon",
   description:
-    "Clutety for iOS is coming soon. Until then, explore Svivva security tools in your browser.",
+    "Clutety for iOS is coming soon. Until then, explore ZZAI security tools in your browser.",
   robots: { index: true, follow: true },
   alternates: { canonical: CLUTETY_COMING_SOON_PATH },
 };
@@ -47,7 +47,7 @@ export default function ClutetyComingSoonPage() {
             Clutety for iOS
           </h1>
           <p className="text-sm text-white/60 leading-relaxed max-w-sm mx-auto">
-            Native app store launch is in progress. Security tools are already available on Svivva
+            Native app store launch is in progress. Security tools are already available on ZZAI
             while we finish the iOS build.
           </p>
         </div>
@@ -66,12 +66,12 @@ export default function ClutetyComingSoonPage() {
           style={{ background: `linear-gradient(135deg, ${CLUTETY_TEAL}, ${CLUTETY_BURG})` }}
         >
           <Shield className="w-4 h-4" aria-hidden />
-          Try security tools on Svivva
+          Try security tools on ZZAI
           <ArrowRight className="w-4 h-4" aria-hidden />
         </Link>
 
         <Link href="/" className="text-xs text-white/40 hover:text-white/60 transition-colors">
-          Back to Svivva home
+          Back to ZZAI home
         </Link>
       </div>
     </main>

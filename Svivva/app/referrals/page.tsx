@@ -61,7 +61,7 @@ export default function ReferralsPage() {
       <nav className="border-b border-border bg-card/50 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>
-            ← Svivva
+            ← ZZAI
           </Link>
           <Link
             href="/dashboard"
@@ -84,7 +84,7 @@ export default function ReferralsPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
             <span style={{ color: TEAL }}>Earn Money</span>
-            <span className="text-foreground"> by Sharing Svivva</span>
+            <span className="text-foreground"> by Sharing ZZAI</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Build a passive income stream with our multi-level referral program. Earn up to 10%
@@ -137,7 +137,7 @@ export default function ReferralsPage() {
               {
                 step: "2",
                 title: "They Sign Up",
-                desc: "When someone clicks your link and signs up for Svivva, they become your referral",
+                desc: "When someone clicks your link and signs up for ZZAI, they become your referral",
               },
               {
                 step: "3",
@@ -216,11 +216,11 @@ export default function ReferralsPage() {
             <div>
               <h3 className="font-bold text-foreground mb-2">Promote Across All Your Apps</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Your referral link works across all Svivva ecosystem apps:
+                Your referral link works across all ZZAI ecosystem apps:
               </p>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>
-                  • <strong>Svivva</strong> — Main AI development platform
+                  • <strong>ZZAI</strong> — Main AI development platform
                 </li>
                 <li>
                   • <strong>Pyracrypt</strong> — File encryption and security
@@ -232,7 +232,7 @@ export default function ReferralsPage() {
                   • <strong>Cyber Security Mini Apps</strong> — Security tools
                 </li>
                 <li>
-                  • <strong>Svivva SEO Pack</strong> — SEO tools and resources
+                  • <strong>ZZAI SEO Pack</strong> — SEO tools and resources
                 </li>
               </ul>
               <p className="text-sm text-muted-foreground mt-2">

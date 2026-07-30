@@ -250,7 +250,9 @@ async function main() {
   }
   console.log(`Created ${json.created?.length || 0} item(s):`);
   for (const c of json.created || []) console.log(`  · ${c.url}`);
-  console.log(`\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`);
+  console.log(
+    `\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`,
+  );
   if (json.errors?.length) {
     console.log("\nErrors:");
     for (const e of json.errors) console.log(`  · ${e}`);

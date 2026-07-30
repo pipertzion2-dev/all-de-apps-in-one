@@ -59,7 +59,7 @@ export function TentpoleStickyBar({
               {savingsLine || `${toolName} is Step 1.`}
             </p>
             <p className="text-xs text-white/50 truncate">
-              Step 2: Deploy it as a live API in Svivva — free to start.
+              Step 2: Deploy it as a live API in ZZAI — free to start.
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ export function TentpoleStickyBar({
             style={{ background: `linear-gradient(135deg, ${TEAL}, ${BURG})` }}
             data-testid="link-tentpole-sticky-cta"
           >
-            Try Svivva Free
+            Try ZZAI Free
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <button
@@ -97,7 +97,7 @@ interface TentpoleBannerProps {
 export function TentpoleBanner({
   headline,
   body,
-  ctaText = "Try Svivva Free",
+  ctaText = "Try ZZAI Free",
   href = "/dashboard",
   context,
 }: TentpoleBannerProps) {

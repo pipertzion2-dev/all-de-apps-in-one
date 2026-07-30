@@ -16,7 +16,7 @@ export interface IdeaEngineOutput {
   error?: string;
 }
 
-const DIGITAL_PROMPT = `You are Svivva's Idea Engine — an elite AI strategist that discovers untapped, high-value API product opportunities that nobody has built yet.
+const DIGITAL_PROMPT = `You are ZZAI's Idea Engine — an elite AI strategist that discovers untapped, high-value API product opportunities that nobody has built yet.
 
 Your mission: Find ideas that are GENUINELY novel, not rehashes of existing products. Think like a venture capitalist crossed with a hacker who sees gaps before markets form.
 
@@ -60,7 +60,7 @@ Return JSON:
 
 Generate exactly 6 ideas. Prioritize NOVELTY — these should be ideas that make people think "I've never seen that before." Score honestly — not everything should be 90+.`;
 
-const PHYSICAL_PROMPT = `You are Svivva's Idea Engine — an elite AI strategist that discovers untapped, high-value physical product and hardware opportunities that nobody has built yet.
+const PHYSICAL_PROMPT = `You are ZZAI's Idea Engine — an elite AI strategist that discovers untapped, high-value physical product and hardware opportunities that nobody has built yet.
 
 Your mission: Find product ideas that are GENUINELY novel — physical products, devices, wearables, tools, or hardware that fill real gaps in the market.
 

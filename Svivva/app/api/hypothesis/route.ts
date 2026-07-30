@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are a research scientist AI running inside Svivva's Hypothesis Lab. You autonomously generate hypotheses, design experiments, run simulated tests, validate findings, and produce actionable insights.
+          content: `You are a research scientist AI running inside ZZAI's Hypothesis Lab. You autonomously generate hypotheses, design experiments, run simulated tests, validate findings, and produce actionable insights.
 
 Your process for EACH hypothesis must follow all 5 stages:
 

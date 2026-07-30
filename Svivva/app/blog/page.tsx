@@ -9,10 +9,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "Guides and stories from Svivva — shipping with guardrails: prompts, schemas, evaluations, versioning, and what we learn along the way.",
+    "Guides and stories from ZZAI — shipping with guardrails: prompts, schemas, evaluations, versioning, and what we learn along the way.",
   openGraph: {
-    title: "Svivva blog",
-    description: "Guides and stories on shipping with Svivva — from seed to symphony.",
+    title: "ZZAI blog",
+    description: "Guides and stories on shipping with ZZAI — from seed to symphony.",
     type: "website",
   },
 };

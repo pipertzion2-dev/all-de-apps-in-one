@@ -199,7 +199,7 @@ export default function FinishSetupPage() {
           <Smartphone className="h-5 w-5" />
           <span className="text-sm font-bold uppercase tracking-wide">iPhone admin setup</span>
         </div>
-        <h1 className="mt-3 text-3xl font-black leading-tight">Finish Svivva from your phone</h1>
+        <h1 className="mt-3 text-3xl font-black leading-tight">Finish ZZAI from your phone</h1>
         <p className="mt-2 text-sm leading-relaxed text-white/70">
           This page tells you exactly what is missing, gives you copy/paste production variables,
           and links to Orbit, Stripe, Vercel, and runtime keys.
@@ -255,7 +255,7 @@ export default function FinishSetupPage() {
         <SetupStep
           number={2}
           title="Save app runtime keys"
-          detail="After database works, save Stripe/OpenAI/site URL keys directly in Svivva from your iPhone."
+          detail="After database works, save Stripe/OpenAI/site URL keys directly in ZZAI from your iPhone."
           ok={checks.stripeOk && checks.webhookOk && checks.openaiOk}
           href="/dashboard/settings/runtime-keys"
         />
@@ -276,8 +276,8 @@ export default function FinishSetupPage() {
         />
         <SetupStep
           number={5}
-          title="Prepare Svivva iOS (coming soon)"
-          detail="Same Svivva account will sync Seeds, Play, Orbit status, and mini-app links to the native iOS app."
+          title="Prepare ZZAI iOS (coming soon)"
+          detail="Same ZZAI account will sync Seeds, Play, Orbit status, and mini-app links to the native iOS app."
           ok={false}
           href="/dashboard/orbit"
         />

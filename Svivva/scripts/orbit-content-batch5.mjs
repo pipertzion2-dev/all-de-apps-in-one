@@ -27,7 +27,8 @@ const pages = [
     metaDescription:
       "Svivva vs Zapier compared: when to use workflow automation vs prompt-to-API endpoints for AI features and integrations.",
     benefits: ["Clear use-case split", "No wrong-tool guilt", "Ship faster"],
-    howItWorks: "Zapier connects apps; Svivva publishes AI behavior as HTTPS endpoints your app calls.",
+    howItWorks:
+      "Zapier connects apps; Svivva publishes AI behavior as HTTPS endpoints your app calls.",
     whoItsFor: "Teams adding AI features who need both glue and owned APIs.",
     content: `<p>Zapier excels at connecting SaaS tools with triggers and actions. Svivva excels at publishing AI behavior as a callable API. They solve different problems — and many teams use both.</p><h2>Comparison</h2><table><tr><th></th><th>Zapier</th><th>Svivva</th></tr><tr><td>Best for</td><td>Internal automations</td><td>User-facing AI endpoints</td></tr><tr><td>Latency</td><td>Background jobs</td><td>Low-latency HTTPS</td></tr><tr><td>Output</td><td>App actions</td><td>Structured JSON</td></tr></table><h2>FAQ</h2><h3>Can they work together?</h3><p>Yes — Zapier for ops glue, Svivva endpoints for product AI features.</p>`,
   },
@@ -37,7 +38,8 @@ const pages = [
     title: "Svivva vs Make (Integromat) — Comparison",
     headline: "Svivva vs Make",
     subheadline: "Visual automation vs AI API endpoints.",
-    metaDescription: "Svivva vs Make: compare visual workflow automation with prompt-to-API endpoints for shipping AI in your product.",
+    metaDescription:
+      "Svivva vs Make: compare visual workflow automation with prompt-to-API endpoints for shipping AI in your product.",
     benefits: ["Pick the right tool", "Avoid over-automation", "Ship AI fast"],
     howItWorks: "Make wires scenarios; Svivva gives you an endpoint defined by a prompt.",
     whoItsFor: "Founders balancing ops automation and in-app AI.",
@@ -49,7 +51,8 @@ const pages = [
     title: "Svivva vs n8n — Which Fits Your Stack?",
     headline: "Svivva vs n8n",
     subheadline: "Self-hosted workflows vs zero-ops AI APIs.",
-    metaDescription: "Svivva vs n8n compared for developers: workflow automation vs prompt-to-API for production AI features.",
+    metaDescription:
+      "Svivva vs n8n compared for developers: workflow automation vs prompt-to-API for production AI features.",
     benefits: ["Self-host vs zero ops", "Clear split", "Composable stack"],
     howItWorks: "n8n runs your automation graph; Svivva hosts the AI endpoint your app calls.",
     whoItsFor: "Developers who want workflows and AI endpoints without one tool doing everything.",
@@ -61,7 +64,8 @@ const pages = [
     title: "Best Prompt-to-API Tools in 2026 (Compared)",
     headline: "Best Prompt-to-API Tools 2026",
     subheadline: "Ship AI endpoints without building a backend.",
-    metaDescription: "Compare the best prompt-to-API tools in 2026 — speed, structured output, and production readiness for indie hackers and teams.",
+    metaDescription:
+      "Compare the best prompt-to-API tools in 2026 — speed, structured output, and production readiness for indie hackers and teams.",
     benefits: ["Faster shipping", "Structured outputs", "Per-request pricing"],
     howItWorks: "Describe behavior → deploy endpoint → call over HTTPS from any stack.",
     whoItsFor: "Anyone adding AI to an existing product this quarter.",

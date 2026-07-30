@@ -64,9 +64,12 @@ function formatDirectoryCopy(listing: {
   description: string;
   tags: string;
 }): string {
-  return [`Name: ${listing.name}`, `Title: ${listing.title}`, `Description: ${listing.description}`, `Tags: ${listing.tags}`].join(
-    "\n\n",
-  );
+  return [
+    `Name: ${listing.name}`,
+    `Title: ${listing.title}`,
+    `Description: ${listing.description}`,
+    `Tags: ${listing.tags}`,
+  ].join("\n\n");
 }
 
 function hasCreds(
@@ -144,8 +147,7 @@ export async function runMarketingAutopilot(opts?: {
     const traffic = await runFullTrafficAutomation();
     const idx = traffic.indexing;
     const gscConnected =
-      (credStatus.google.serviceAccount || credStatus.google.siteUrl) &&
-      credStatus.google.siteUrl;
+      (credStatus.google.serviceAccount || credStatus.google.siteUrl) && credStatus.google.siteUrl;
 
     // Verify the URLs we just pushed are actually live + indexable, and persist
     // per-URL progress so a week-long crawl is tracked across runs.
@@ -225,15 +227,10 @@ export async function runMarketingAutopilot(opts?: {
             ? idx.googleSitemap.error || "GSC sitemap failed — verify Owner access"
             : "Connect service account at /dashboard/gsc-connect",
       ),
-      task(
-        "manual-gsc-indexing",
-        gscIndexingStatus,
-        gscIndexingMessage,
-        {
-          copyText: !gscConnected ? `${getSiteUrl()}/dashboard/gsc-connect` : getSiteUrl(),
-          url: !gscConnected ? "/dashboard/gsc-connect" : undefined,
-        },
-      ),
+      task("manual-gsc-indexing", gscIndexingStatus, gscIndexingMessage, {
+        copyText: !gscConnected ? `${getSiteUrl()}/dashboard/gsc-connect` : getSiteUrl(),
+        url: !gscConnected ? "/dashboard/gsc-connect" : undefined,
+      }),
       task(
         "auto-sitemap-pings",
         idx.indexNow.ok ? "done" : "failed",
@@ -241,10 +238,14 @@ export async function runMarketingAutopilot(opts?: {
       ),
       task(
         "tech-index-health",
-        health ? (health.score >= 80 ? "done" : health.score >= 50 ? "prepared" : "failed") : "skipped",
         health
-          ? health.summary
-          : "Index health check skipped (no URLs or check failed)",
+          ? health.score >= 80
+            ? "done"
+            : health.score >= 50
+              ? "prepared"
+              : "failed"
+          : "skipped",
+        health ? health.summary : "Index health check skipped (no URLs or check failed)",
       ),
     );
 
@@ -268,12 +269,9 @@ export async function runMarketingAutopilot(opts?: {
   await persistContent("schema-jsonld", "Organization + WebSite schema", content.schemaJsonLd);
   tasks.push(
     task("tech-schema-jsonld", "done", "Schema.org JSON-LD generated and saved"),
-    task(
-      "tech-rich-results",
-      "prepared",
-      "Optional: test rich results (30 sec)",
-      { copyText: getSiteUrl() },
-    ),
+    task("tech-rich-results", "prepared", "Optional: test rich results (30 sec)", {
+      copyText: getSiteUrl(),
+    }),
     task(
       "content-parasite",
       "done",
@@ -347,14 +345,9 @@ export async function runMarketingAutopilot(opts?: {
       `# ${m.title}\n\n${m.subtitle ? `*${m.subtitle}*\n\n` : ""}${m.content}`,
     );
     tasks.push(
-      task(
-        "manual-medium",
-        "prepared",
-        "Copy → open Medium → paste → publish (2 min)",
-        {
-          copyText: `# ${m.title}\n\n${m.subtitle ? `*${m.subtitle}*\n\n` : ""}${m.content}`,
-        },
-      ),
+      task("manual-medium", "prepared", "Copy → open Medium → paste → publish (2 min)", {
+        copyText: `# ${m.title}\n\n${m.subtitle ? `*${m.subtitle}*\n\n` : ""}${m.content}`,
+      }),
     );
   }
 
@@ -374,12 +367,13 @@ export async function runMarketingAutopilot(opts?: {
       );
     } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
       const site = getSiteUrl();
-      const lead = `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
+      const lead =
+        `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
       const r = await publishOmniSocialsPost(creds.omnisocialsApiKey!, {
         text: lead.slice(0, 280),
         platforms: ["x"],
         linkUrl: site,
-        linkTitle: "Svivva — free AI tools",
+        linkTitle: "ZZAI — free AI tools",
       });
       tasks.push(
         task(
@@ -467,9 +461,14 @@ export async function runMarketingAutopilot(opts?: {
       }
     } else if (rp.id === "manual-reddit-sideproject") {
       tasks.push(
-        task(rp.id, "needs_credentials", "Post ready — add Reddit app keys (free) or copy & paste", {
-          copyText: `${rp.post.title}\n\n${rp.post.body}`,
-        }),
+        task(
+          rp.id,
+          "needs_credentials",
+          "Post ready — add Reddit app keys (free) or copy & paste",
+          {
+            copyText: `${rp.post.title}\n\n${rp.post.body}`,
+          },
+        ),
       );
     }
   }
@@ -601,9 +600,7 @@ export async function runMarketingAutopilot(opts?: {
       task(
         taskId,
         "prepared",
-        listing
-          ? `Copy → open ${listing.name} → paste fields → submit`
-          : "Listing copy generated",
+        listing ? `Copy → open ${listing.name} → paste fields → submit` : "Listing copy generated",
         listing ? { copyText: formatDirectoryCopy(listing) } : undefined,
       ),
     );

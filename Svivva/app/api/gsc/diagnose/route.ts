@@ -201,8 +201,7 @@ export async function GET() {
         const matched = matchedUrl ? sites.find((s) => s.siteUrl === matchedUrl) : undefined;
         gscMatchedSite = matchedUrl;
         const level = matched?.permissionLevel?.toLowerCase() ?? "";
-        gscPropertyOk =
-          !!matched && (level.includes("owner") || level.includes("full"));
+        gscPropertyOk = !!matched && (level.includes("owner") || level.includes("full"));
         steps.push({
           id: "gsc_property",
           label: "Search Console property",
@@ -222,7 +221,10 @@ export async function GET() {
         id: "gsc_property",
         label: "Search Console property",
         status: "warn",
-        detail: `Could not list properties: ${e instanceof Error ? e.message : String(e)}`.slice(0, 160),
+        detail: `Could not list properties: ${e instanceof Error ? e.message : String(e)}`.slice(
+          0,
+          160,
+        ),
         fix: "https://search.google.com/search-console",
       });
     }

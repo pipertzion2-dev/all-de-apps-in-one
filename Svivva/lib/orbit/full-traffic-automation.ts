@@ -48,7 +48,7 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
     summaryLines.push(`▸ Internal links: filled relatedSlugs on ${linkHeal.updated} pages`);
   }
 
-  summaryLines.push("", "▸ Phase 1 — Publish all content on svivva.com (DB)");
+  summaryLines.push("", "▸ Phase 1 — Publish all content on zzaizzai.com (DB)");
 
   const marketing = await fillMarketingGaps(userId);
   summaryLines.push(...marketing.steps);

@@ -32,7 +32,7 @@ const defaultPlans = [
     name: "Free",
     price: "$0",
     period: "forever",
-    description: "Perfect for trying out Svivva",
+    description: "Perfect for trying out ZZAI",
     features: ["1 project", "100 API calls/month", "Basic eval suite", "Community support"],
     priceId: null as string | null,
     tier: "free",
@@ -85,7 +85,7 @@ function BillingPageContent() {
     if (success) {
       toast({
         title: "Subscription successful!",
-        description: "Welcome to Svivva Pro. Your new features are now available.",
+        description: "Welcome to ZZAI Pro. Your new features are now available.",
       });
     }
     if (canceled) {
@@ -193,7 +193,7 @@ function BillingPageContent() {
       checkoutMutation.mutate({ priceId: plan.priceId, tier: plan.tier });
     } else if (plan.tier === "enterprise") {
       trackUpgrade("enterprise");
-      window.location.href = "mailto:hello@svivva.com?subject=Enterprise%20Plan%20Inquiry";
+      window.location.href = "mailto:hello@zzaizzai.com?subject=Enterprise%20Plan%20Inquiry";
     }
   };
 

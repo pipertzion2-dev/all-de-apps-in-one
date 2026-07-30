@@ -156,7 +156,7 @@ export async function buildSitemapChunk(id: SitemapChunkId): Promise<MetadataRou
         lastModified: e.lastModified,
         changeFrequency: e.changeFrequency,
         priority: (e.priority ?? 0.5) * 0.9,
-        images: [`${b}/svivva-logo.png`],
+        images: [`${b}/zzai-logo.png`],
       }));
   }
   return all

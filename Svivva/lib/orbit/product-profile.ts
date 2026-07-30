@@ -17,17 +17,17 @@ export type ProductProfile = {
 export function getSvivvaProductProfile(): ProductProfile {
   const base = getSiteUrl();
   return {
-    name: "Svivva",
+    name: "ZZAI",
     tagline: "From seed to symphony — natural language to production AI APIs",
     url: base,
     toolsHubUrl: `${base}/ai-tools-hub`,
     description:
-      "Svivva turns natural language prompts into production-ready AI APIs with schema enforcement, version control, evaluations, and a marketplace. Ship backends in minutes without hiring infrastructure engineers.",
+      "ZZAI turns natural language prompts into production-ready AI APIs with schema enforcement, version control, evaluations, and a marketplace. Ship backends in minutes without hiring infrastructure engineers.",
     shortDescription:
       "Build production AI APIs from plain English. Schema-safe, versioned, and ready to scale.",
     audience: "developers, founders, and teams shipping AI products",
     competitors: ["Zapier", "Make", "n8n", "LangChain", "Retool", "Bubble"],
-    keywords: ["AI API builder", "no-code AI", "GPT API", "AI automation", "AI tools"],
+    keywords: ["ZZAI", "zzaizzai", "AI API builder", "no-code AI", "GPT API", "AI automation"],
     pricing: "Free tier available; paid plans for production scale",
     category: "AI / Developer Tools",
   };

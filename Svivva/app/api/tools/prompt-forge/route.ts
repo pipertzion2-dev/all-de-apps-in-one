@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (!checkRateLimit(ip)) {
     return NextResponse.json(
-      { error: "Rate limit reached — 12 requests/minute. Upgrade to Svivva for unlimited." },
+      { error: "Rate limit reached — 12 requests/minute. Upgrade to ZZAI for unlimited." },
       { status: 429 },
     );
   }

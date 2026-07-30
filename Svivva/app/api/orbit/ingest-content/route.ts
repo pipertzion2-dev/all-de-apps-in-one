@@ -51,7 +51,10 @@ function slugify(s: string): string {
 }
 
 function excerptFrom(content: string, fallback: string): string {
-  const text = content.replace(/[#*_`>\-]/g, "").replace(/\s+/g, " ").trim();
+  const text = content
+    .replace(/[#*_`>\-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   return (text.slice(0, 180) || fallback).trim();
 }
 
@@ -60,7 +63,7 @@ function excerptFrom(content: string, fallback: string): string {
  * publish it, and immediately notify search engines.
  *
  * This is how the Cursor agent (running a strong model like Opus/GPT-5) writes
- * researched articles straight into Svivva without anyone visiting the site.
+ * researched articles straight into ZZAI without anyone visiting the site.
  *
  * Body: { blogPosts?: IngestBlogPost[], seoPages?: IngestSeoPage[] }
  */
@@ -98,7 +101,7 @@ export async function POST(req: NextRequest) {
           title: p.title,
           excerpt: p.excerpt || excerptFrom(p.content, p.title),
           content: p.content,
-          author: p.author || "Svivva Team",
+          author: p.author || "ZZAI Team",
           category: p.category || "general",
           tags: p.tags || [],
           metaTitle: p.metaTitle || p.title,

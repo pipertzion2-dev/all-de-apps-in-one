@@ -24,7 +24,7 @@ async function fetchText(
   try {
     const r = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { "User-Agent": "Svivva-Health-Check/1.0" },
+      headers: { "User-Agent": "ZZAI-Health-Check/1.0" },
       cache: "no-store",
     });
     const text = await r.text();
@@ -207,11 +207,11 @@ export async function GET() {
   // 6. Quick links (informational)
   const liveLinks = [
     {
-      label: "Google: site:svivva.com",
+      label: "Google: site:zzaizzai.com",
       href: `https://www.google.com/search?q=site%3A${encodeURIComponent(new URL(SITE).hostname)}`,
     },
     {
-      label: "Bing: site:svivva.com",
+      label: "Bing: site:zzaizzai.com",
       href: `https://www.bing.com/search?q=site%3A${encodeURIComponent(new URL(SITE).hostname)}`,
     },
     { label: "Google Search Console", href: "https://search.google.com/search-console" },

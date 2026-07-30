@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Clock, Calendar, User, Copy, Check, ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import { BrandMark } from "@/components/brand-mark";
 
 interface BlogPost {
   id: string;
@@ -100,15 +99,7 @@ export default function BlogPostContent({
         className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur px-6 py-4 flex items-center justify-between gap-4"
         data-testid="nav-blog-post"
       >
-        <Link href="/" data-testid="link-logo">
-          <Image
-            src={svivvaLogo}
-            alt="Svivva"
-            width={100}
-            height={32}
-            className="h-7 w-auto object-contain"
-          />
-        </Link>
+        <BrandMark size="sm" testId="link-logo" />
         <div className="flex items-center gap-4 flex-wrap">
           <Link
             href="/blog"
@@ -253,7 +244,7 @@ export default function BlogPostContent({
             className="text-2xl md:text-3xl font-bold text-white mb-3"
             data-testid="text-cta-title"
           >
-            From seed to symphony — ship faster with Svivva
+            From seed to symphony — ship faster with ZZAI
           </h2>
           <p className="text-white/80 mb-6">
             Turn prompts into production-ready APIs with schema enforcement, evaluations, and

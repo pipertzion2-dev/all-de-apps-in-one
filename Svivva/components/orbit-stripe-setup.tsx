@@ -156,7 +156,7 @@ export function OrbitStripeSetup() {
 
       <div className="rounded-lg bg-muted/30 border border-border px-2.5 py-2 space-y-1">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Svivva webhook URL
+          ZZAI webhook URL
         </p>
         <code className="text-[10px] break-all block text-foreground">{webhookUrl}</code>
         <p className="text-[10px] text-muted-foreground">

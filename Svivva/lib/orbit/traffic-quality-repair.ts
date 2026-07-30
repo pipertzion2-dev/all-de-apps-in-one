@@ -13,7 +13,10 @@ const BASE = getSiteUrl().replace(/\/$/, "");
 const FILLER_PREFIX = "svivva-seo-tool-fill-";
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function wordCount(html: string): number {
@@ -30,30 +33,30 @@ export function buildExpandedSeoBody(opts: {
   const { title, keyword, slug } = opts;
   const kw = keyword || title;
   return `<h1>${title}</h1>
-<p><strong>${title}</strong> is a free, browser-based utility on Svivva. Use it instantly — no signup required for basic access. Whether you are prototyping an AI feature, validating an idea, or shipping a small automation, this page explains what the tool does, who it helps, and how it connects to Svivva's prompt-to-API platform at <a href="${BASE}">svivva.com</a>.</p>
+<p><strong>${title}</strong> is a free, browser-based utility on ZZAI. Use it instantly — no signup required for basic access. Whether you are prototyping an AI feature, validating an idea, or shipping a small automation, this page explains what the tool does, who it helps, and how it connects to ZZAI's prompt-to-API platform at <a href="${BASE}">zzaizzai.com</a>.</p>
 
 <h2>What ${title} does</h2>
-<p>This tool focuses on <em>${kw}</em>. It is designed for developers, founders, and operators who need a fast answer without standing up a backend. Run it in the browser, copy the output, and iterate. When you need a production endpoint with schema validation and monitoring, deploy the same behavior as an API on Svivva in minutes.</p>
+<p>This tool focuses on <em>${kw}</em>. It is designed for developers, founders, and operators who need a fast answer without standing up a backend. Run it in the browser, copy the output, and iterate. When you need a production endpoint with schema validation and monitoring, deploy the same behavior as an API on ZZAI in minutes.</p>
 
 <h2>How to use it</h2>
 <ol>
-<li>Open the tool from <a href="${BASE}/tools">Svivva Tools</a> or build a custom version with a plain-English prompt.</li>
+<li>Open the tool from <a href="${BASE}/tools">ZZAI Tools</a> or build a custom version with a plain-English prompt.</li>
 <li>Enter your input — text, JSON, or file depending on the tool.</li>
-<li>Review structured output; adjust prompts on Svivva without redeploying servers.</li>
+<li>Review structured output; adjust prompts on ZZAI without redeploying servers.</li>
 <li>Ship: call your live HTTPS endpoint from any app or workflow.</li>
 </ol>
 
 <h2>Who this is for</h2>
 <p>Indie hackers adding AI to a side project, SaaS teams testing a feature before writing a backend, and security or ops teams running one-off checks. If your job is mostly <strong>AI behavior</strong> (generate, classify, extract, summarize), a prompt-backed API beats maintaining idle servers.</p>
 
-<h2>Why Svivva</h2>
-<p>Svivva turns descriptions into deployable APIs with automated evals, versioning, and rollback. Free tools like this one are the top of the funnel — they solve a real job and show how fast you can go from idea to production. <a href="${BASE}">Start building on Svivva →</a></p>
+<h2>Why ZZAI</h2>
+<p>ZZAI turns descriptions into deployable APIs with automated evals, versioning, and rollback. Free tools like this one are the top of the funnel — they solve a real job and show how fast you can go from idea to production. <a href="${BASE}">Start building on ZZAI →</a></p>
 
 [FAQ_JSON]
 [
-  {"q":"Is ${title} free?","a":"Yes — you can use Svivva's free tools without creating an account for basic access."},
-  {"q":"Do I need a backend?","a":"No. These utilities run in the browser or call Svivva-hosted endpoints so you do not maintain servers."},
-  {"q":"How is this different from ChatGPT?","a":"Svivva gives you a fixed contract (JSON schema), a stable HTTPS URL, and production guardrails — not just a chat window."}
+  {"q":"Is ${title} free?","a":"Yes — you can use ZZAI's free tools without creating an account for basic access."},
+  {"q":"Do I need a backend?","a":"No. These utilities run in the browser or call ZZAI-hosted endpoints so you do not maintain servers."},
+  {"q":"How is this different from ChatGPT?","a":"ZZAI gives you a fixed contract (JSON schema), a stable HTTPS URL, and production guardrails — not just a chat window."}
 ]
 [/FAQ_JSON]
 
@@ -84,10 +87,7 @@ export async function unpublishFillerPages(): Promise<number> {
 }
 
 export async function expandThinPublishedPages(): Promise<{ expanded: number; stillThin: number }> {
-  const rows = await db
-    .select()
-    .from(seoLandingPages)
-    .where(eq(seoLandingPages.published, true));
+  const rows = await db.select().from(seoLandingPages).where(eq(seoLandingPages.published, true));
 
   let expanded = 0;
   let stillThin = 0;
@@ -114,7 +114,7 @@ export async function expandThinPublishedPages(): Promise<{ expanded: number; st
     const uniqueMeta =
       row.metaTitle && !row.metaTitle.includes("|")
         ? `${row.metaTitle} | ${row.slug}`.slice(0, 60)
-        : row.metaTitle || `${row.title} | Svivva`.slice(0, 60);
+        : row.metaTitle || `${row.title} | ZZAI`.slice(0, 60);
 
     await db
       .update(seoLandingPages)
@@ -123,7 +123,7 @@ export async function expandThinPublishedPages(): Promise<{ expanded: number; st
         metaTitle: uniqueMeta,
         metaDescription:
           row.metaDescription?.trim() ||
-          `Free ${row.title} on Svivva — ${stripHtml(body).slice(0, 120)}…`.slice(0, 155),
+          `Free ${row.title} on ZZAI — ${stripHtml(body).slice(0, 120)}…`.slice(0, 155),
         published: true,
         toolUrl: row.toolUrl || `${BASE}/tools`,
       })
@@ -219,7 +219,9 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
   const { expanded: expandedThin, stillThin } = await expandThinPublishedPages();
   summaryLines.push(
     `✓ Expanded ${expandedThin} thin pages to 280+ words with FAQ`,
-    stillThin ? `⚠ ${stillThin} pages still below quality bar` : "✓ All published pages pass quality gate",
+    stillThin
+      ? `⚠ ${stillThin} pages still below quality bar`
+      : "✓ All published pages pass quality gate",
   );
 
   const duplicateTitlesFixed = await fixDuplicateMetaTitles();

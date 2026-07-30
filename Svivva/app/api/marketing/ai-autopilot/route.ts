@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           },
           {
             role: "user",
-            content: `Generate ${count * 3} keyword ideas for "Svivva" — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace. Include a mix of: informational (how-to, what-is), commercial (best, vs, tool), and transactional (buy, pricing, free trial) keywords. Return JSON: { keywords: [{ keyword, intent: "informational|commercial|transactional", searchVolume: "high|medium|low", type: "landing_page|blog_article" }] }`,
+            content: `Generate ${count * 3} keyword ideas for "ZZAI" — an AI platform that turns natural language prompts into production-ready APIs with schema enforcement, version control, A/B testing, and a marketplace. Include a mix of: informational (how-to, what-is), commercial (best, vs, tool), and transactional (buy, pricing, free trial) keywords. Return JSON: { keywords: [{ keyword, intent: "informational|commercial|transactional", searchVolume: "high|medium|low", type: "landing_page|blog_article" }] }`,
           },
         ],
       });
@@ -75,11 +75,11 @@ export async function POST(req: NextRequest) {
           {
             role: "system",
             content:
-              "SEO strategist for an AI API builder SaaS called Svivva. Generate keywords that will bring in developers, product teams, and startup founders looking to build AI-powered features.",
+              "SEO strategist for an AI API builder SaaS called ZZAI. Generate keywords that will bring in developers, product teams, and startup founders looking to build AI-powered features.",
           },
           {
             role: "user",
-            content: `Generate ${numPages + numPosts} unique, untapped keyword ideas for Svivva. Mix commercial and informational. Focus on long-tail keywords with specific intent (e.g. "how to build an AI API without coding", "OpenAI response schema validation", "AI API version control tool"). Return JSON: { seoPages: [string] (${numPages} keywords for landing pages), blogTopics: [string] (${numPosts} topics for blog articles) }`,
+            content: `Generate ${numPages + numPosts} unique, untapped keyword ideas for ZZAI. Mix commercial and informational. Focus on long-tail keywords with specific intent (e.g. "how to build an AI API without coding", "OpenAI response schema validation", "AI API version control tool"). Return JSON: { seoPages: [string] (${numPages} keywords for landing pages), blogTopics: [string] (${numPosts} topics for blog articles) }`,
           },
         ],
       });
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
               {
                 role: "system",
                 content:
-                  "SEO copywriter for Svivva AI API Builder. Write conversion-focused landing page content.",
+                  "SEO copywriter for ZZAI AI API Builder. Write conversion-focused landing page content.",
               },
               {
                 role: "user",
@@ -171,11 +171,11 @@ export async function POST(req: NextRequest) {
               {
                 role: "system",
                 content:
-                  "Technical SEO blogger for Svivva. Write substantive, useful articles that rank on Google and convert readers to Svivva users.",
+                  "Technical SEO blogger for ZZAI. Write substantive, useful articles that rank on Google and convert readers to ZZAI users.",
               },
               {
                 role: "user",
-                content: `Blog article for: "${topic}". Return JSON: { title, excerpt (1-2 sentences), content (markdown article 600-900 words with H2 headings, practical examples, and CTA for Svivva at the end), metaTitle, metaDescription, tags (array of 3-5 strings) }`,
+                content: `Blog article for: "${topic}". Return JSON: { title, excerpt (1-2 sentences), content (markdown article 600-900 words with H2 headings, practical examples, and CTA for ZZAI at the end), metaTitle, metaDescription, tags (array of 3-5 strings) }`,
               },
             ],
           });
@@ -257,11 +257,11 @@ export async function POST(req: NextRequest) {
           {
             role: "system",
             content:
-              "Social media manager for Svivva AI API Builder. Write punchy, engaging posts that drive traffic.",
+              "Social media manager for ZZAI AI API Builder. Write punchy, engaging posts that drive traffic.",
           },
           {
             role: "user",
-            content: `Generate social media posts for these Svivva pages: ${JSON.stringify(allContent)}. Return JSON: { posts: [{ platform: "twitter|linkedin|reddit", title, copy, url, hashtags }] } — one post per piece of content per platform.`,
+            content: `Generate social media posts for these ZZAI pages: ${JSON.stringify(allContent)}. Return JSON: { posts: [{ platform: "twitter|linkedin|reddit", title, copy, url, hashtags }] } — one post per piece of content per platform.`,
           },
         ],
       });

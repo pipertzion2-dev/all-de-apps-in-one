@@ -1225,7 +1225,7 @@ export default function HypothesisPage() {
               <Globe className="w-10 h-10 text-muted-foreground/30 mx-auto" />
               <p className="text-sm text-muted-foreground">No external APIs registered yet</p>
               <p className="text-xs text-muted-foreground/60">
-                Add external API endpoints to discover relationships with your Svivva projects
+                Add external API endpoints to discover relationships with your ZZAI projects
               </p>
             </div>
           )}

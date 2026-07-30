@@ -15,10 +15,10 @@ describe("marketing-autopilot", () => {
   it("masks secret credential fields", () => {
     const masked = maskCredentialsForClient({
       devtoApiKey: "secret-key-123",
-      outreachFromEmail: "hello@svivva.com",
+      outreachFromEmail: "hello@zzaizzai.com",
     });
     expect(masked.devtoApiKey).toBe("••••••••");
-    expect(masked.outreachFromEmail).toBe("hello@svivva.com");
+    expect(masked.outreachFromEmail).toBe("hello@zzaizzai.com");
   });
 
   it("lists credential fields for UI form", () => {

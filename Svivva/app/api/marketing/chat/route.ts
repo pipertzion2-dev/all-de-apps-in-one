@@ -90,7 +90,7 @@ const TOOLS = [
         properties: {
           appName: {
             type: "string",
-            description: "Name of the app. Extract from user message or default to 'Svivva Seeds'.",
+            description: "Name of the app. Extract from user message or default to 'ZZAI Seeds'.",
           },
           appUrl: { type: "string", description: "URL of the app. Extract from user message." },
           replId: {
@@ -210,7 +210,7 @@ export async function POST(req: NextRequest) {
     const messages = [
       {
         role: "system" as const,
-        content: `You are the Svivva Marketing AI — a smart, concise assistant that helps grow traffic for Svivva (an AI SaaS platform). You take action immediately when the user asks. You are friendly but brief.
+        content: `You are the ZZAI Marketing AI — a smart, concise assistant that helps grow traffic for ZZAI (an AI SaaS platform). You take action immediately when the user asks. You are friendly but brief.
 
 Current service connections: ${connStatus}
 
@@ -435,7 +435,7 @@ When the user gives you an app URL or name, extract it accurately. If they say "
           action: "generate-comparison-pages",
           apps: fakeApps,
           replId: args.replId,
-          replTitle: "Svivva Seeds",
+          replTitle: "ZZAI Seeds",
           replUrl: BASE_URL,
           competitors: args.competitors,
         }),

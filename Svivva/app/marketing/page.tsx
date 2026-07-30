@@ -65,7 +65,7 @@ export default function MarketingPage() {
       <nav className="border-b border-border bg-card/50 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="text-sm font-bold" style={{ color: TEAL }}>
-            ← Svivva
+            ← ZZAI
           </Link>
           <Link
             href="/seeds"
@@ -230,7 +230,7 @@ export default function MarketingPage() {
                   • <strong>Directory listings</strong> on security-focused platforms
                 </li>
                 <li>
-                  • <strong>Subdomain setup</strong> (pyracrypt.svivva.com, security.svivva.com)
+                  • <strong>Subdomain setup</strong> (pyracrypt.zzaizzai.com, security.zzaizzai.com)
                 </li>
               </ul>
               <p className="text-sm text-muted-foreground mt-2">

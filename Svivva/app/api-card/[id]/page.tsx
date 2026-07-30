@@ -59,8 +59,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const data = await getProjectCard(id);
   if (!data) return { title: "API not found" };
   return {
-    title: `${data.project.name} — Svivva API`,
-    description: data.project.description || `A live endpoint built with Svivva`,
+    title: `${data.project.name} — ZZAI API`,
+    description: data.project.description || `A live endpoint built with ZZAI`,
   };
 }
 
@@ -98,7 +98,7 @@ export default async function ApiCardPage({ params }: PageProps) {
   -d '{"input": "your prompt here"}'`;
 
   const embedBadge = `<a href="${baseUrl}/api-card/${project.id}" target="_blank" rel="noopener">
-  <img src="${baseUrl}/badge/svivva.svg" alt="Built with Svivva" />
+  <img src="${baseUrl}/badge/svivva.svg" alt="Built with ZZAI" />
 </a>`;
 
   const schemaStr = JSON.stringify(project.outputSchema, null, 2);
@@ -302,7 +302,7 @@ export default async function ApiCardPage({ params }: PageProps) {
         </Section>
 
         {/* Embed badge */}
-        <Section title={`"Powered by Svivva" Badge`}>
+        <Section title={`"Powered by ZZAI" Badge`}>
           <p style={{ color: "#64748b", fontSize: 13, marginBottom: 10 }}>
             Add this to your README or site to let people know how this API was built:
           </p>
@@ -346,7 +346,7 @@ export default async function ApiCardPage({ params }: PageProps) {
               marginBottom: 8,
             }}
           >
-            Svivva
+            ZZAI
           </p>
           <p
             style={{
