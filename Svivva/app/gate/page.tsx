@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Delete } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 
 export default function GatePage() {
   const [code, setCode] = useState("");

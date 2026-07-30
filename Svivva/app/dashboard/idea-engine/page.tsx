@@ -547,7 +547,7 @@ export default function IdeaEnginePage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <Badge variant="secondary" className="text-[10px]">
-                      {session.mode === "digital" ? "Digital" : "Physical"}
+                      {session.mode === "digital" ? "Signal" : "Crest"}
                     </Badge>
                     {session.score !== null && (
                       <span className="text-sm font-bold" style={{ color: accentColor }}>

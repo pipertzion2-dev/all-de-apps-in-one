@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/lib/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Textarea } from "@/components/ui/textarea";

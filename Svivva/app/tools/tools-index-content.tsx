@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, Wrench } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import { Badge } from "@/components/ui/badge";
 
 interface SeoPage {

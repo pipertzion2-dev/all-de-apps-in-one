@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FolderOpen } from "lucide-react";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
+import svivvaLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/server/db";
 import { seoLandingPages, pageCategories } from "@/lib/schema";

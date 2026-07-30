@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { usePlatform } from "@/lib/platform-context";
+import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import { trackSignup } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,9 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import svivvaLogo from "@/attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png";
-import softwareFlowerLogo from "@/attached_assets/Svivva_print_2_1769474625495.png";
-import hardwareFlowerLogo from "@/attached_assets/Svivva_official_3_1769474625495.png";
+import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import {
   LayoutDashboard,
@@ -284,11 +283,11 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-3 mb-4">
               <Image
-                src={svivvaLogo}
-                alt="Svivva"
-                width={120}
-                height={40}
-                className="h-10 w-auto object-contain"
+                src={zzaiLogo}
+                alt="ZZAI"
+                width={48}
+                height={48}
+                className="h-12 w-12 object-contain"
               />
             </div>
             <CardTitle className="text-2xl">Welcome to Svivva</CardTitle>
@@ -342,11 +341,11 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
         <header className="h-12 border-b border-border/50 backdrop-blur-xl bg-background/80 flex items-center justify-between px-4 flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src={svivvaLogo}
-              alt="Svivva"
-              width={100}
-              height={32}
-              className="h-6 w-auto object-contain"
+              src={zzaiLogo}
+              alt="ZZAI"
+              width={36}
+              height={36}
+              className="h-7 w-7 object-contain"
             />
             <span className="text-xs font-bold text-muted-foreground">{featureTitle}</span>
           </Link>
@@ -379,48 +378,16 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
         <Sidebar>
           <SidebarHeader className="p-4">
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleMode}
-                className="relative w-16 h-8 rounded-full bg-card border border-border shadow-sm cursor-pointer overflow-hidden"
-                title={`Switch to ${mode === "digital" ? "Physical" : "Digital"} mode`}
-                data-testid="button-platform-toggle"
-              >
-                <div
-                  className={`absolute top-0.5 bottom-0.5 w-7 rounded-full bg-primary shadow-md transition-[left] duration-300 ease-drawer ${mode === "physical" ? "left-[calc(100%-1.875rem)]" : "left-0.5"}`}
-                />
-                <div className="absolute inset-0 flex items-center px-1">
-                  <div
-                    className={`relative w-6 h-6 rounded-full overflow-hidden z-10 transition-transform duration-300 ${mode === "digital" ? "scale-100" : "scale-75 opacity-50"}`}
-                  >
-                    <Image
-                      src={hardwareFlowerLogo}
-                      alt="Digital"
-                      fill
-                      sizes="24px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div
-                    className={`relative w-6 h-6 rounded-full overflow-hidden z-10 ml-auto transition-transform duration-300 ${mode === "physical" ? "scale-100" : "scale-75 opacity-50"}`}
-                  >
-                    <Image
-                      src={softwareFlowerLogo}
-                      alt="Physical"
-                      fill
-                      sizes="24px"
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              </button>
-              <Link href="/">
+              <ZzaiModeToggle size="sm" />
+              <Link href="/" className="flex items-center gap-2 min-w-0">
                 <Image
-                  src={svivvaLogo}
-                  alt="Svivva"
-                  width={100}
-                  height={32}
-                  className="h-8 w-auto object-contain"
+                  src={zzaiLogo}
+                  alt="ZZAI"
+                  width={36}
+                  height={36}
+                  className="h-9 w-9 object-contain"
                 />
+                <span className="text-xs font-bold tracking-[0.2em] truncate">SVIVVA</span>
               </Link>
             </div>
           </SidebarHeader>
