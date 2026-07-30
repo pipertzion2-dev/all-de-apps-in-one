@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,11 @@ import {
   Zap,
   Info,
 } from "lucide-react";
+
+const HybridizationFieldScene = dynamic(
+  () => import("@/components/hybridization-field-scene").then((m) => m.HybridizationFieldScene),
+  { ssr: false },
+);
 
 type Mode = "complementary" | "antagonistic" | "emergent" | "biomimetic";
 type Depth = "prototype" | "research" | "production";
@@ -146,6 +152,15 @@ export function HybridizationCalculatorPanel({ compact = false }: { compact?: bo
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl">
             Scientific automatic scoring for crossing two hardware systems — domain affinity,
             topology fit, manufacturing readiness, TRL — then optional AI design synthesis.
+          </p>
+        </div>
+      )}
+
+      {!compact && (
+        <div className="space-y-2">
+          <HybridizationFieldScene scores={scores} mode={mode} height={300} />
+          <p className="text-[11px] text-muted-foreground text-center">
+            Dual-domain field — drag to tilt, click to pulse the bridge. Updates live from your scores.
           </p>
         </div>
       )}

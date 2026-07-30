@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +18,11 @@ import {
   Truck,
   Shield,
 } from "lucide-react";
+
+const ManufacturePipelineScene = dynamic(
+  () => import("@/components/manufacture-pipeline-scene").then((m) => m.ManufacturePipelineScene),
+  { ssr: false },
+);
 
 const STEPS = [
   {
@@ -70,6 +77,8 @@ const STEPS = [
 ];
 
 export default function ManufactureStudioPage() {
+  const [activeStep, setActiveStep] = useState(0);
+
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-8">
       <div className="space-y-3">
@@ -83,6 +92,17 @@ export default function ManufactureStudioPage() {
         <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
           One friendly path from idea to factory — every AI manufacturing feature in Svivva, in
           order. No hunting through menus.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <ManufacturePipelineScene
+          activeStep={activeStep}
+          height={280}
+          onStepSelect={setActiveStep}
+        />
+        <p className="text-[11px] text-muted-foreground text-center">
+          Interactive pipeline — click a stage node to focus it, drag to orbit.
         </p>
       </div>
 
@@ -106,16 +126,28 @@ export default function ManufactureStudioPage() {
       </Card>
 
       <div className="space-y-3">
-        {STEPS.map((step) => {
+        {STEPS.map((step, idx) => {
           const Icon = step.icon;
+          const focused = idx === activeStep;
           return (
             <Card
               key={step.n}
-              className={step.highlight ? "border-[#FF2BD6]/35 shadow-[0_0_24px_rgba(255,43,214,0.08)]" : ""}
+              className={
+                focused
+                  ? "border-[#00E5FF]/50 shadow-[0_0_24px_rgba(0,229,255,0.12)]"
+                  : step.highlight
+                    ? "border-[#FF2BD6]/35 shadow-[0_0_24px_rgba(255,43,214,0.08)]"
+                    : ""
+              }
+              onClick={() => setActiveStep(idx)}
             >
               <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 font-bold">
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 font-bold ${
+                      focused ? "bg-[#00E5FF]/20 text-[#00E5FF]" : "bg-muted"
+                    }`}
+                  >
                     {step.n}
                   </div>
                   <div className="min-w-0 space-y-1">
@@ -126,8 +158,11 @@ export default function ManufactureStudioPage() {
                     <p className="text-sm text-muted-foreground">{step.desc}</p>
                   </div>
                 </div>
-                <Link href={step.href} className="sm:shrink-0">
-                  <Button variant={step.highlight ? "default" : "outline"} className="w-full sm:w-auto gap-2">
+                <Link href={step.href} className="sm:shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant={focused || step.highlight ? "default" : "outline"}
+                    className="w-full sm:w-auto gap-2"
+                  >
                     {step.cta} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
