@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = pathname.startsWith(DASH) ? dashboardTitleFromPath(pathname) : "Dashboard";
   return {
     title,
-    description: "Your Svivva workspace — From seed to symphony.",
+    description: "Your ZZAI workspace — From seed to symphony.",
   };
 }
 
