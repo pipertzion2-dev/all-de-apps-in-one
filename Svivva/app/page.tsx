@@ -1102,18 +1102,17 @@ export default function LandingPage() {
                     hold color.
                   </p>
                   <p>
-                    He studies flower color palettes the way most kids study cartoons. He'll spend
-                    an hour noting exactly how a rose shifts from deep burgundy at its center to
-                    soft blush at the tips, or how lavender pairs with sage. When I started
-                    designing Svivva, he was right there next to me. The teal and burgundy you see
-                    throughout the app? His picks. He pointed at a flower and said,{" "}
-                    <em>"that one and that one, Dad."</em>
+                    He studies color the way most kids study cartoons. He'll spend an hour noting
+                    how orchid cyan flares against deep magenta, or how silver metal catches light
+                    next to digital noise. When I started designing Svivva, he was right there next
+                    to me. The cyan and magenta you see throughout the app? His picks — the same
+                    dual energy inside the ZZAI crest.
                   </p>
                   <p>
-                    The Svivva logo — the bouquet of flowers — isn't a designer's creation. He built
-                    it himself from scratch, using things he found around the house. Pipe cleaners,
-                    paper scraps, fabric. He arranged them into a small flower sculpture, handed it
-                    to me, and said that was the logo. He was right.
+                    The ZZAI mark — ornate silver crest, Yeoo-style lettering, glitch texture — is
+                    the brand signal for Svivva. Crest on one side, Signal on the other. Ornate and
+                    digital at once. That duality is the product: Prompt to API, and manufacturing
+                    when you need hardware.
                   </p>
                   <p className="text-foreground/80 font-medium">
                     We're building Svivva to last. Not just as a platform for developers, but as
