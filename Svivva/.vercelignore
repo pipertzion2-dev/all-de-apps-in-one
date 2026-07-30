@@ -18,7 +18,7 @@ tmp
 *.webm
 *.zip
 
-# attached_assets: only the 8 PNGs committed to git are imported via @/attached_assets/…
+# attached_assets: only the PNGs committed to git are imported via @/attached_assets/…
 attached_assets/**
 !attached_assets/SVIVVA_OFFICIAL_LOGO_1769201341308.png
 !attached_assets/Svivva_print_2_1769474625495.png
@@ -28,6 +28,8 @@ attached_assets/**
 !attached_assets/IMG_1493_1770509047497.png
 !attached_assets/CC8F1D0D-DB63-46FD-8F9A-AC9A1FAB40DE_1770908649745.png
 !attached_assets/Svivva_Crate_1770908797554.png
+!attached_assets/ZZAI_OFFICIAL_LOGO.png
+!attached_assets/ZZAI_BOUQUET_2.png
 
 # Repo noise
 *.pdf

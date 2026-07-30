@@ -81,8 +81,10 @@ export function generateComparisonPage(comp: string): SEOPageData {
   return {
     title: `ZZAI vs ${comp}`,
     metaTitle: `ZZAI vs ${comp} | Compare AI API Builders`.slice(0, 60),
-    metaDescription:
-      `Compare ZZAI vs ${comp}. See features and why developers choose ZZAI.`.slice(0, 155),
+    metaDescription: `Compare ZZAI vs ${comp}. See features and why developers choose ZZAI.`.slice(
+      0,
+      155,
+    ),
     headline: `ZZAI vs ${comp}`,
     subheadline: `See why teams switch from ${comp} to ZZAI.`,
     content: `<h1>ZZAI vs ${comp}</h1><p>Choosing the right AI API platform matters.</p><table><tr><th>Feature</th><th>ZZAI</th><th>${comp}</th></tr><tr><td>Natural language to API</td><td>Native</td><td>Limited</td></tr><tr><td>JSON schema enforcement</td><td>Built-in</td><td>Manual</td></tr><tr><td>Version control</td><td>Native</td><td>No</td></tr><tr><td>A/B testing</td><td>Built-in</td><td>External</td></tr></table><p><a href="${SITE}">Try free &rarr;</a></p>`,
@@ -229,8 +231,10 @@ export function generateIntegrationPage(tool: string): SEOPageData {
   return {
     title: `ZZAI + ${tool} Integration`,
     metaTitle: `ZZAI + ${tool} Integration | Setup Guide`.slice(0, 60),
-    metaDescription:
-      `Connect ZZAI to ${tool}. Build AI workflows in minutes. Free to start.`.slice(0, 155),
+    metaDescription: `Connect ZZAI to ${tool}. Build AI workflows in minutes. Free to start.`.slice(
+      0,
+      155,
+    ),
     headline: `ZZAI + ${tool} Integration`,
     subheadline: `Automate ${tool} with AI APIs.`,
     content: `<h1>ZZAI + ${tool}</h1><p>Connect ZZAI AI APIs to ${tool} in minutes.</p><h2>Use Cases</h2><ul><li>Auto-respond with AI-generated replies</li><li>Extract structured data from emails</li><li>Generate content from form submissions</li></ul><p><a href="${SITE}">Create your first AI API &rarr;</a></p>`,

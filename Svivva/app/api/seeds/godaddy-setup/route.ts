@@ -58,9 +58,7 @@ export async function POST(req: NextRequest) {
 
     const domainData = await domainRes.json();
 
-    const dnsRecords = [
-      { type: "TXT", name: "_svivva", data: "svivva-site-verified", ttl: 600 },
-    ];
+    const dnsRecords = [{ type: "TXT", name: "_svivva", data: "svivva-site-verified", ttl: 600 }];
 
     const dnsRes = await fetch(`${GODADDY_API}/domains/${creds.godaddyDomain}/records`, {
       method: "PATCH",

@@ -51,7 +51,10 @@ function slugify(s: string): string {
 }
 
 function excerptFrom(content: string, fallback: string): string {
-  const text = content.replace(/[#*_`>\-]/g, "").replace(/\s+/g, " ").trim();
+  const text = content
+    .replace(/[#*_`>\-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   return (text.slice(0, 180) || fallback).trim();
 }
 

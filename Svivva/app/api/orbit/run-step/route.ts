@@ -4386,8 +4386,7 @@ Return JSON:
               whoItsFor: "Existing ZZAI users and developers evaluating the platform",
               content: schemaData.changelog.content,
               metaTitle: "ZZAI Changelog — Latest Updates",
-              metaDescription:
-                "See what's new in ZZAI — latest features, improvements, and fixes",
+              metaDescription: "See what's new in ZZAI — latest features, improvements, and fixes",
               category: "seo-landing",
               published: true,
               toolUrl: `${BASE_URL}/changelog`,

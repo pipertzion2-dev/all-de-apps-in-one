@@ -37,8 +37,8 @@ export default function DocsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-2">Getting Started</h2>
             <p>
               Ship your first backend quickly: sign in, describe what it should do in plain
-              language, define your output schema, and deploy. ZZAI handles validation,
-              versioning, and rollback.
+              language, define your output schema, and deploy. ZZAI handles validation, versioning,
+              and rollback.
             </p>
           </section>
           <section>

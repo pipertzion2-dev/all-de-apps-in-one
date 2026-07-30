@@ -77,8 +77,8 @@ export default function BadgePage() {
           <h1 className="text-2xl font-bold">ZZAI Badge</h1>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Add a &ldquo;Built with ZZAI&rdquo; badge to your README, website, or app. Shows you
-          ship with ZZAI — and gives a small backlink in return.
+          Add a &ldquo;Built with ZZAI&rdquo; badge to your README, website, or app. Shows you ship
+          with ZZAI — and gives a small backlink in return.
         </p>
         <div className="flex items-center gap-2">
           <Badge

@@ -47,7 +47,12 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-[#0a0f14] flex flex-col items-center justify-center gap-6 p-4">
       <div className="flex items-center gap-3 mb-2">
-        <BrandMark size="md" href={false} showWordmark wordmarkClassName="font-bold text-xl text-white tracking-[0.2em]" />
+        <BrandMark
+          size="md"
+          href={false}
+          showWordmark
+          wordmarkClassName="font-bold text-xl text-white tracking-[0.2em]"
+        />
       </div>
 
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 flex flex-col gap-5">

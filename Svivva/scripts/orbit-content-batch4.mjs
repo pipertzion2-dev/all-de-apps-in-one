@@ -35,7 +35,8 @@ const useCases = [
     intro:
       "Long documents, threads, and transcripts are everywhere — and nobody reads them. A summarization endpoint turns any block of text into a tight, faithful summary your app can show instantly.",
     inEx: '{ "text": "<a 1,200-word support thread>", "length": "3 sentences" }',
-    outEx: '{ "summary": "The customer could not reset their password because the email was going to spam. Support whitelisted the domain and sent a manual reset link. The issue is resolved and a follow-up was scheduled." }',
+    outEx:
+      '{ "summary": "The customer could not reset their password because the email was going to spam. Support whitelisted the domain and sent a manual reset link. The issue is resolved and a follow-up was scheduled." }',
     use: "Summarize support tickets, meeting transcripts, articles, reviews, and PDFs.",
   },
   {
@@ -44,7 +45,8 @@ const useCases = [
     intro:
       "Knowing whether feedback is positive, negative, or mixed lets you route, prioritize, and measure at scale. A sentiment endpoint scores any text in one call.",
     inEx: '{ "text": "Honestly the onboarding was rough but support saved it." }',
-    outEx: '{ "sentiment": "mixed", "score": 0.2, "aspects": { "onboarding": "negative", "support": "positive" } }',
+    outEx:
+      '{ "sentiment": "mixed", "score": 0.2, "aspects": { "onboarding": "negative", "support": "positive" } }',
     use: "Score reviews, tickets, survey responses, and social mentions.",
   },
   {
@@ -53,7 +55,8 @@ const useCases = [
     intro:
       "User-generated content needs a gate. A moderation endpoint flags toxic, unsafe, or off-topic text before it ever reaches your users.",
     inEx: '{ "text": "<user comment>", "policies": ["harassment", "spam"] }',
-    outEx: '{ "allowed": false, "flags": ["harassment"], "severity": "high", "reason": "Targeted insult toward another user." }',
+    outEx:
+      '{ "allowed": false, "flags": ["harassment"], "severity": "high", "reason": "Targeted insult toward another user." }',
     use: "Gate comments, marketplace listings, chat messages, and reviews.",
   },
   {
@@ -89,7 +92,8 @@ const useCases = [
     intro:
       "Pull people, companies, dates, and amounts out of free text. An entity endpoint returns named entities your app can act on.",
     inEx: '{ "text": "Tim Cook met with Acme Corp on March 3 to sign a $4M deal." }',
-    outEx: '{ "people": ["Tim Cook"], "orgs": ["Acme Corp"], "dates": ["March 3"], "amounts": ["$4M"] }',
+    outEx:
+      '{ "people": ["Tim Cook"], "orgs": ["Acme Corp"], "dates": ["March 3"], "amounts": ["$4M"] }',
     use: "Enrich CRM records, index documents, and build search filters.",
   },
   {
@@ -98,7 +102,8 @@ const useCases = [
     intro:
       "Generate on-brand copy on demand — product descriptions, replies, summaries, variations. A generation endpoint returns structured, usable output.",
     inEx: '{ "product": "noise-cancelling headphones", "tone": "punchy", "format": "3 bullet points" }',
-    outEx: '{ "bullets": ["Silence the world with adaptive ANC.", "40-hour battery — a week per charge.", "Memory-foam comfort for all-day wear."] }',
+    outEx:
+      '{ "bullets": ["Silence the world with adaptive ANC.", "40-hour battery — a week per charge.", "Memory-foam comfort for all-day wear."] }',
     use: "Generate product copy, email drafts, social posts, and reply suggestions.",
   },
 ];
@@ -204,9 +209,7 @@ function relatedLinks(currentSlug) {
   ]
     .filter((x) => x.slug !== currentSlug)
     .slice(0, 6);
-  const items = sib
-    .map((s) => `<li><a href="${SITE}/${s.slug}">${s.label}</a></li>`)
-    .join("");
+  const items = sib.map((s) => `<li><a href="${SITE}/${s.slug}">${s.label}</a></li>`).join("");
   return `<h2>Related</h2><ul>${items}<li><a href="${SITE}/ai-api-builder">AI API Builder</a></li><li><a href="${SITE}/tools">All free tools</a></li><li><a href="${SITE}/blog">Guides &amp; articles</a></li></ul>`;
 }
 
@@ -291,7 +294,9 @@ async function main() {
   }
   console.log(`Created ${json.created?.length || 0} page(s):`);
   for (const c of json.created || []) console.log(`  · ${c.url}`);
-  console.log(`\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`);
+  console.log(
+    `\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`,
+  );
   if (json.errors?.length) {
     console.log("\nErrors:");
     for (const e of json.errors) console.log(`  · ${e}`);

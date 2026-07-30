@@ -54,10 +54,7 @@ export async function POST(req: NextRequest) {
       .select({ keyword: seoLandingPages.keyword })
       .from(seoLandingPages)
       .where(eq(seoLandingPages.published, true));
-    existing = [
-      ...posts.map((p) => p.title),
-      ...pages.map((p) => p.keyword),
-    ].slice(0, 120);
+    existing = [...posts.map((p) => p.title), ...pages.map((p) => p.keyword)].slice(0, 120);
   } catch {
     /* db optional */
   }

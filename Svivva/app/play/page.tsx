@@ -2761,8 +2761,8 @@ export default function SvivvaPlayPage() {
         <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white mr-2 align-middle">
           BETA
         </span>
-        ZZAI Play is in beta — preview audio, meend, swing, and AI tools may change or fail.
-        Exports may differ from what you hear in the browser.
+        ZZAI Play is in beta — preview audio, meend, swing, and AI tools may change or fail. Exports
+        may differ from what you hear in the browser.
       </p>
     </div>
   );

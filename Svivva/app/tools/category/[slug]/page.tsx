@@ -61,9 +61,7 @@ export async function generateMetadata({
     openGraph: {
       title: category.metaTitle || `${category.name} Tools | ZZAI`,
       description:
-        category.metaDescription ||
-        category.description ||
-        `Browse ${category.name} tools on ZZAI`,
+        category.metaDescription || category.description || `Browse ${category.name} tools on ZZAI`,
       type: "website",
     },
   };

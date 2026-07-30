@@ -23,8 +23,8 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Acceptance of Terms</h2>
             <p>
-              By accessing or using ZZAI, you agree to be bound by these Terms of Service. If you
-              do not agree, please do not use our platform.
+              By accessing or using ZZAI, you agree to be bound by these Terms of Service. If you do
+              not agree, please do not use our platform.
             </p>
           </section>
           <section className="space-y-2">

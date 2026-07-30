@@ -1098,9 +1098,9 @@ export default function LandingPage() {
                   <p>
                     He studies color the way most kids study cartoons. He'll spend an hour noting
                     how orchid cyan flares against deep magenta, or how silver metal catches light
-                    next to digital noise. When I started designing ZZAI, he was right there next
-                    to me. The cyan and magenta you see throughout the app? His picks — the same
-                    dual energy inside the ZZAI crest.
+                    next to digital noise. When I started designing ZZAI, he was right there next to
+                    me. The cyan and magenta you see throughout the app? His picks — the same dual
+                    energy inside the ZZAI crest.
                   </p>
                   <p>
                     The ZZAI mark — ornate silver crest, Yeoo-style lettering, glitch texture — is
@@ -1801,7 +1801,9 @@ export default function LandingPage() {
                     height={48}
                     className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
                   />
-                  <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">ZZAI</span>
+                  <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
+                    ZZAI
+                  </span>
                 </div>
               </div>
               <div>

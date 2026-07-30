@@ -4,11 +4,7 @@ import { eq } from "drizzle-orm";
 import { generateText } from "@/lib/orbit/ai-client";
 import { isAnyAiProviderAvailable } from "@/lib/llm/openai";
 import { submitSitemapWithAccessToken, submitUrlsWithAccessToken } from "@/lib/google-indexing";
-import {
-  listGscSites,
-  matchGscSiteToCanonical,
-  type GscSiteEntry,
-} from "@/lib/google-gsc-oauth";
+import { listGscSites, matchGscSiteToCanonical, type GscSiteEntry } from "@/lib/google-gsc-oauth";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
 
@@ -23,10 +19,7 @@ export type GscAutoSetupResult = {
   aiUsed: boolean;
 };
 
-async function pickSiteWithAi(
-  sites: GscSiteEntry[],
-  canonical: string,
-): Promise<string | null> {
+async function pickSiteWithAi(sites: GscSiteEntry[], canonical: string): Promise<string | null> {
   if (!isAnyAiProviderAvailable() || sites.length === 0) return null;
   const list = sites.map((s) => `- ${s.siteUrl} (${s.permissionLevel ?? "unknown"})`).join("\n");
   try {
