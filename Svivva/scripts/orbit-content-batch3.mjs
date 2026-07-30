@@ -54,11 +54,22 @@ Build with a lightweight framework and deploy. Maximum flexibility, maximum main
 If you want *discovery* and built-in billing for a public API others pay to use, a marketplace adds value. For internal or product endpoints, skip it and ship directly.
 
 ## The fast path
-For most teams, prompt-to-API gets you a live endpoint in minutes, then you integrate it anywhere. You can always list it on a marketplace later if you want distribution.${faq([
-      ["What's the best RapidAPI alternative for building APIs?", "For building your own endpoints, a prompt-to-API builder is fastest — you define behavior in a prompt and get a live URL without hosting a backend."],
-      ["Is RapidAPI free?", "RapidAPI has free and paid tiers, but it's a marketplace for consuming/listing APIs, not a builder. To create endpoints, pair it with a build tool."],
-      ["Can I monetize an API I build?", "Yes — build and host the endpoint, then list it on a marketplace with billing, or charge directly via your own checkout."],
-    ])}${cta}`,
+For most teams, prompt-to-API gets you a live endpoint in minutes, then you integrate it anywhere. You can always list it on a marketplace later if you want distribution.${faq(
+      [
+        [
+          "What's the best RapidAPI alternative for building APIs?",
+          "For building your own endpoints, a prompt-to-API builder is fastest — you define behavior in a prompt and get a live URL without hosting a backend.",
+        ],
+        [
+          "Is RapidAPI free?",
+          "RapidAPI has free and paid tiers, but it's a marketplace for consuming/listing APIs, not a builder. To create endpoints, pair it with a build tool.",
+        ],
+        [
+          "Can I monetize an API I build?",
+          "Yes — build and host the endpoint, then list it on a marketplace with billing, or charge directly via your own checkout.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "n8n vs a Custom API: Automation or Owning Your Logic?",
@@ -86,11 +97,22 @@ For most teams, prompt-to-API gets you a live endpoint in minutes, then you inte
 - **Custom API**: total control of input, output, and logic.
 
 ## The combo that wins
-Use n8n for internal glue and scheduled jobs; use a custom API (built via prompt-to-API) for the AI features your users touch. They complement each other.${faq([
-      ["Is n8n better than a custom API?", "For internal automation and connecting SaaS tools, n8n is great. For low-latency, user-facing features you own, a custom API is better. Many teams use both."],
-      ["Can I build a custom API as fast as an n8n workflow?", "Yes — prompt-to-API gets you a live endpoint in minutes, comparable to wiring an n8n flow, with full control over the contract."],
-      ["Which is cheaper?", "Self-hosted n8n and per-request custom APIs are both cost-efficient; custom APIs give the most predictable cost for idle, user-facing endpoints."],
-    ])}${cta}`,
+Use n8n for internal glue and scheduled jobs; use a custom API (built via prompt-to-API) for the AI features your users touch. They complement each other.${faq(
+      [
+        [
+          "Is n8n better than a custom API?",
+          "For internal automation and connecting SaaS tools, n8n is great. For low-latency, user-facing features you own, a custom API is better. Many teams use both.",
+        ],
+        [
+          "Can I build a custom API as fast as an n8n workflow?",
+          "Yes — prompt-to-API gets you a live endpoint in minutes, comparable to wiring an n8n flow, with full control over the contract.",
+        ],
+        [
+          "Which is cheaper?",
+          "Self-hosted n8n and per-request custom APIs are both cost-efficient; custom APIs give the most predictable cost for idle, user-facing endpoints.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "How to Add a ChatGPT Chatbot to Your Website (No Backend)",
@@ -126,9 +148,18 @@ Limit message length, rate-limit per visitor, and handle errors gracefully so a 
 
 ## Step 5: Improve by editing the prompt
 Want a friendlier tone or new knowledge? Update the prompt. No redeploy of your site needed.${faq([
-      ["Can I add a ChatGPT chatbot without a backend?", "Yes. Publish your prompt as a prompt-to-API endpoint and call it from a small frontend widget — no server to run."],
-      ["How much code do I need?", "Just a fetch call and a basic chat UI. The bot's behavior lives in the prompt, not in backend code."],
-      ["How do I control what the bot says?", "Define tone, knowledge, and refusals in the system prompt, and add length/rate limits in your widget."],
+      [
+        "Can I add a ChatGPT chatbot without a backend?",
+        "Yes. Publish your prompt as a prompt-to-API endpoint and call it from a small frontend widget — no server to run.",
+      ],
+      [
+        "How much code do I need?",
+        "Just a fetch call and a basic chat UI. The bot's behavior lives in the prompt, not in backend code.",
+      ],
+      [
+        "How do I control what the bot says?",
+        "Define tone, knowledge, and refusals in the system prompt, and add length/rate limits in your widget.",
+      ],
     ])}${cta}`,
   },
   {
@@ -153,11 +184,22 @@ For simple internal ops, a spreadsheet front-end that calls an AI endpoint is of
 For data teams, notebooks that hit an AI endpoint keep everything in one place.
 
 ## The pattern that lasts
-Whatever UI you choose, keep the AI behavior in a prompt-to-API endpoint. If you switch internal-tool platforms later, your AI logic comes with you unchanged.${faq([
-      ["What's a good Retool alternative for AI tools?", "Pair any UI builder with a prompt-to-API endpoint. The endpoint holds your AI logic, so you're not locked into one internal-tools platform."],
-      ["Do I need Retool to call an AI API?", "No. Any tool that can make an HTTP request — including spreadsheets and notebooks — can call a prompt-to-API endpoint."],
-      ["How do I avoid platform lock-in?", "Keep AI behavior in a standalone endpoint rather than embedded in one tool, so you can switch UIs without rebuilding the logic."],
-    ])}${cta}`,
+Whatever UI you choose, keep the AI behavior in a prompt-to-API endpoint. If you switch internal-tool platforms later, your AI logic comes with you unchanged.${faq(
+      [
+        [
+          "What's a good Retool alternative for AI tools?",
+          "Pair any UI builder with a prompt-to-API endpoint. The endpoint holds your AI logic, so you're not locked into one internal-tools platform.",
+        ],
+        [
+          "Do I need Retool to call an AI API?",
+          "No. Any tool that can make an HTTP request — including spreadsheets and notebooks — can call a prompt-to-API endpoint.",
+        ],
+        [
+          "How do I avoid platform lock-in?",
+          "Keep AI behavior in a standalone endpoint rather than embedded in one tool, so you can switch UIs without rebuilding the logic.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "Ship an AI Feature in a Weekend: The Indie Hacker's Guide",
@@ -184,11 +226,22 @@ A simple form that posts to your endpoint and renders the result. Keep it boring
 Add input validation, rate limits, and error states. Deploy. Tell people. Done.
 
 ## Why this works
-The slow part of shipping AI is usually the backend. Removing it turns a two-week project into a weekend one — and a shipped feature you can actually get feedback on.${faq([
-      ["Can I really ship an AI feature in a weekend?", "Yes, if you scope to one task and skip building a backend. A prompt-to-API endpoint plus a simple UI is achievable in a weekend."],
-      ["What AI feature should I build first?", "Pick one narrow task — summarize, classify, extract, or answer. Narrow scope is what makes a weekend ship realistic."],
-      ["What slows most people down?", "Backend setup. Using a prompt-to-API endpoint removes that step so you spend the weekend on the feature, not the plumbing."],
-    ])}${cta}`,
+The slow part of shipping AI is usually the backend. Removing it turns a two-week project into a weekend one — and a shipped feature you can actually get feedback on.${faq(
+      [
+        [
+          "Can I really ship an AI feature in a weekend?",
+          "Yes, if you scope to one task and skip building a backend. A prompt-to-API endpoint plus a simple UI is achievable in a weekend.",
+        ],
+        [
+          "What AI feature should I build first?",
+          "Pick one narrow task — summarize, classify, extract, or answer. Narrow scope is what makes a weekend ship realistic.",
+        ],
+        [
+          "What slows most people down?",
+          "Backend setup. Using a prompt-to-API endpoint removes that step so you spend the weekend on the feature, not the plumbing.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "Free SEO Tools for Founders That Actually Move Rankings",
@@ -217,11 +270,22 @@ The slow part of shipping AI is usually the backend. Removing it turns a two-wee
 ## How to actually win
 Pick your 10 most important pages. Run each through the checks above once a quarter. Fix titles, add FAQ sections and schema, speed them up, and interlink them. Consistency beats one-time blitzes.
 
-Explore Svivva's [free tools](${SITE}/tools) to run several of these checks without signing up.${faq([
-      ["What free SEO tools should founders use first?", "Start with snippet/meta previews, a schema validator, and a page-speed test on your 10 most important pages — those produce the fastest ranking gains."],
-      ["Can I rank without paying for SEO software?", "Yes. Free tools plus disciplined on-page work (titles, FAQs, schema, internal links, speed) cover most of what early-stage SEO needs."],
-      ["How often should I audit SEO?", "A quarterly pass on your top pages is enough for most small teams, plus publishing new content consistently."],
-    ])}${cta}`,
+Explore Svivva's [free tools](${SITE}/tools) to run several of these checks without signing up.${faq(
+      [
+        [
+          "What free SEO tools should founders use first?",
+          "Start with snippet/meta previews, a schema validator, and a page-speed test on your 10 most important pages — those produce the fastest ranking gains.",
+        ],
+        [
+          "Can I rank without paying for SEO software?",
+          "Yes. Free tools plus disciplined on-page work (titles, FAQs, schema, internal links, speed) cover most of what early-stage SEO needs.",
+        ],
+        [
+          "How often should I audit SEO?",
+          "A quarterly pass on your top pages is enough for most small teams, plus publishing new content consistently.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "How AI Search (ChatGPT, Perplexity) Changes SEO in 2026",
@@ -250,11 +314,22 @@ Explore Svivva's [free tools](${SITE}/tools) to run several of these checks with
 5. Interlink related pages into clusters.
 
 ## The reassuring part
-Almost everything that wins AI citations also helps classic SEO. You're not picking between Google and AI search — good structure serves both.${faq([
-      ["Does AI search replace Google SEO?", "No. AI search adds a citation layer on top of classic search. The same well-structured, authoritative content wins in both."],
-      ["How do I get cited by ChatGPT and Perplexity?", "Use clear headings, FAQ sections, comparison tables, and JSON-LD schema, and publish an llms.txt that tells AI crawlers what to prioritize."],
-      ["What should I do first?", "Add FAQ sections and schema to your top pages and publish an llms.txt — those are the highest-leverage, fastest changes."],
-    ])}${cta}`,
+Almost everything that wins AI citations also helps classic SEO. You're not picking between Google and AI search — good structure serves both.${faq(
+      [
+        [
+          "Does AI search replace Google SEO?",
+          "No. AI search adds a citation layer on top of classic search. The same well-structured, authoritative content wins in both.",
+        ],
+        [
+          "How do I get cited by ChatGPT and Perplexity?",
+          "Use clear headings, FAQ sections, comparison tables, and JSON-LD schema, and publish an llms.txt that tells AI crawlers what to prioritize.",
+        ],
+        [
+          "What should I do first?",
+          "Add FAQ sections and schema to your top pages and publish an llms.txt — those are the highest-leverage, fastest changes.",
+        ],
+      ],
+    )}${cta}`,
   },
   {
     title: "How to Build a REST API From a Spreadsheet (No Code)",
@@ -284,11 +359,22 @@ Any tool that makes HTTP requests can now use your spreadsheet data.
 Decide how fresh the data must be and refresh on that cadence. For most ops use cases, near-real-time is plenty.
 
 ## When to graduate to a database
-If the sheet gets large, write-heavy, or multi-user, move the data to a database and point the same endpoints at it. Your consumers won't notice.${faq([
-      ["Can I turn a spreadsheet into an API without code?", "Yes. Use a sheet-to-API connector for simple reads, or a prompt-to-API endpoint to answer natural-language questions over the data."],
-      ["Is a spreadsheet API good enough for production?", "For low-volume, read-mostly ops use cases, yes. Graduate to a database once you have heavy writes or many concurrent users."],
-      ["How do I keep the API data fresh?", "Refresh on a cadence that matches your needs — near-real-time covers most internal use cases."],
-    ])}${cta}`,
+If the sheet gets large, write-heavy, or multi-user, move the data to a database and point the same endpoints at it. Your consumers won't notice.${faq(
+      [
+        [
+          "Can I turn a spreadsheet into an API without code?",
+          "Yes. Use a sheet-to-API connector for simple reads, or a prompt-to-API endpoint to answer natural-language questions over the data.",
+        ],
+        [
+          "Is a spreadsheet API good enough for production?",
+          "For low-volume, read-mostly ops use cases, yes. Graduate to a database once you have heavy writes or many concurrent users.",
+        ],
+        [
+          "How do I keep the API data fresh?",
+          "Refresh on a cadence that matches your needs — near-real-time covers most internal use cases.",
+        ],
+      ],
+    )}${cta}`,
   },
 ];
 
@@ -372,7 +458,9 @@ async function main() {
   }
   console.log(`Created ${json.created?.length || 0} item(s):`);
   for (const c of json.created || []) console.log(`  · ${c.type}: ${c.url}`);
-  console.log(`\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`);
+  console.log(
+    `\nIndexNow: ${json.indexNow?.ok ? "ok" : "skipped"} (${json.indexNow?.submitted || 0} URLs)`,
+  );
   if (json.errors?.length) {
     console.log("\nErrors:");
     for (const e of json.errors) console.log(`  · ${e}`);

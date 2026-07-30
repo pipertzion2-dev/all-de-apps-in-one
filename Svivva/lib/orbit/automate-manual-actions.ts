@@ -2,7 +2,12 @@ import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
-import { submitSitemapToGSC, submitUrlsToGoogleIndexingApi, submitSitemapWithAccessToken, submitUrlsWithAccessToken } from "@/lib/google-indexing";
+import {
+  submitSitemapToGSC,
+  submitUrlsToGoogleIndexingApi,
+  submitSitemapWithAccessToken,
+  submitUrlsWithAccessToken,
+} from "@/lib/google-indexing";
 import { getGoogleOAuthAccessTokenForUser, ensureGscOAuthColumns } from "@/lib/google-gsc-oauth";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";

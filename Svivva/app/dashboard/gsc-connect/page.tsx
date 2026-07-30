@@ -25,7 +25,10 @@ import dynamic from "next/dynamic";
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
   loading: () => (
-    <div className="mx-auto rounded-full bg-muted/30 animate-pulse" style={{ width: 220, height: 220 }} />
+    <div
+      className="mx-auto rounded-full bg-muted/30 animate-pulse"
+      style={{ width: 220, height: 220 }}
+    />
   ),
 });
 
@@ -159,8 +162,8 @@ export default function GscConnectPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Google Search indexing</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Connect your Google account once — Orbit uses AI to pick the right Search Console property,
-          submit your sitemap, and request indexing automatically.
+          Connect your Google account once — Orbit uses AI to pick the right Search Console
+          property, submit your sitemap, and request indexing automatically.
         </p>
       </div>
 
@@ -310,9 +313,7 @@ export default function GscConnectPage() {
             <Button
               size="sm"
               disabled={!saJson.trim() || saveMutation.isPending}
-              onClick={() =>
-                saveMutation.mutate({ action: "save_service_account", json: saJson })
-              }
+              onClick={() => saveMutation.mutate({ action: "save_service_account", json: saJson })}
             >
               Save service account
             </Button>
@@ -326,7 +327,11 @@ export default function GscConnectPage() {
             ← Back to Orbit launchpad
           </Button>
         </Link>
-        <a href="https://search.google.com/search-console/sitemaps" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://search.google.com/search-console/sitemaps"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button variant="ghost" size="sm">
             Open GSC <ExternalLink className="w-3 h-3 ml-1" />
           </Button>

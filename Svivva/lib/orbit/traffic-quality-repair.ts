@@ -13,7 +13,10 @@ const BASE = getSiteUrl().replace(/\/$/, "");
 const FILLER_PREFIX = "svivva-seo-tool-fill-";
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function wordCount(html: string): number {
@@ -84,10 +87,7 @@ export async function unpublishFillerPages(): Promise<number> {
 }
 
 export async function expandThinPublishedPages(): Promise<{ expanded: number; stillThin: number }> {
-  const rows = await db
-    .select()
-    .from(seoLandingPages)
-    .where(eq(seoLandingPages.published, true));
+  const rows = await db.select().from(seoLandingPages).where(eq(seoLandingPages.published, true));
 
   let expanded = 0;
   let stillThin = 0;
@@ -219,7 +219,9 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
   const { expanded: expandedThin, stillThin } = await expandThinPublishedPages();
   summaryLines.push(
     `✓ Expanded ${expandedThin} thin pages to 280+ words with FAQ`,
-    stillThin ? `⚠ ${stillThin} pages still below quality bar` : "✓ All published pages pass quality gate",
+    stillThin
+      ? `⚠ ${stillThin} pages still below quality bar`
+      : "✓ All published pages pass quality gate",
   );
 
   const duplicateTitlesFixed = await fixDuplicateMetaTitles();

@@ -36,7 +36,8 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priceLabel: "$10/mo flat",
     payUrl: "https://www.omnisocials.com/pricing",
     docsUrl: "https://docs.omnisocials.com/introduction",
-    payNote: "Subscribe in Safari (Apple Pay via Stripe). Connect LinkedIn + X in dashboard → Settings → API.",
+    payNote:
+      "Subscribe in Safari (Apple Pay via Stripe). Connect LinkedIn + X in dashboard → Settings → API.",
     credentialKey: "omnisocialsApiKey",
     priority: 2,
   },
@@ -47,7 +48,8 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priceLabel: "Free tier → $20/mo",
     payUrl: "https://resend.com/signup",
     docsUrl: "https://resend.com/docs/api-reference/emails/send-email",
-    payNote: "Sign up in Safari — Apple Pay on paid plans. Paste API key below after verifying your domain.",
+    payNote:
+      "Sign up in Safari — Apple Pay on paid plans. Paste API key below after verifying your domain.",
     credentialKey: "resendApiKey",
     priority: 3,
   },

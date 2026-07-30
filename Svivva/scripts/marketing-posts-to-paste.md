@@ -20,6 +20,7 @@ Every time I wanted to add a small AI feature — summarize this, classify that,
 So I started doing it differently: write the behavior as a prompt with a strict input/output contract, publish it as a plain HTTPS endpoint, and call it from the frontend. No server to maintain. When I want different behavior, I edit the prompt instead of redeploying.
 
 A few things I learned:
+
 - **Structured output is everything.** Force JSON in the prompt and validate it in the app. That's the difference between a demo and something you can ship.
 - **Per-request beats always-on early.** An idle endpoint costs basically nothing, vs paying for a server doing nothing.
 - **Guardrails matter more than the model.** Length limits, rate limits, and graceful error states are what make it survive real users.
@@ -69,6 +70,7 @@ Link: svivva.com
 ## LinkedIn (founder voice)
 
 ### Post 1 — the insight
+
 The slowest part of shipping an AI feature isn't the AI. It's the backend.
 
 Wiring a model, designing routes, deploying a server, monitoring it — that's the weekend gone. The actual feature took an hour.
@@ -80,9 +82,10 @@ If you're adding AI to a product this quarter, ask one question first: is this f
 (Wrote up the 7 realistic ways to add AI in 2026 → svivva.com/blog/best-ways-to-add-ai-to-your-app-2026)
 
 ### Post 2 — the AI-search shift
+
 A growing share of searches now end in an AI answer, not a list of links.
 
-That doesn't kill SEO. It adds a layer: getting *cited* by ChatGPT, Perplexity, and AI Overviews.
+That doesn't kill SEO. It adds a layer: getting _cited_ by ChatGPT, Perplexity, and AI Overviews.
 
 What actually earns citations:
 → FAQ sections with direct answers
@@ -93,6 +96,7 @@ What actually earns citations:
 The reassuring part: almost everything that wins AI citations also helps classic Google rankings. You're not choosing between them.
 
 ### Post 3 — build in public
+
 We just published an llms.txt for our site.
 
 It's the "robots.txt of the AI era" — a plain file that tells ChatGPT, Perplexity, and Claude what your product is and which pages to cite.
@@ -106,6 +110,7 @@ Here's ours if you want a template: svivva.com/llms.txt
 ## X / Twitter threads
 
 ### Thread 1
+
 1/ The slowest part of shipping an AI feature isn't the AI.
 
 It's the backend.
@@ -125,6 +130,7 @@ That's the line between a demo and something you can ship.
 svivva.com/blog/ship-ai-feature-in-a-weekend
 
 ### Thread 2
+
 1/ AI search (ChatGPT, Perplexity) is quietly changing SEO in 2026.
 
 Here's what actually changes — and what doesn't. 🧵

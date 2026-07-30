@@ -57,16 +57,22 @@ function header(t) {
 async function cmdStatus() {
   header(`Orbit status — ${SITE}`);
   const s = await api("/api/orbit/marketing-autopilot");
-  console.log(`AI provider:    ${s.ai?.provider || "?"} (${s.ai?.configured ? "ready" : "NOT configured"})`);
+  console.log(
+    `AI provider:    ${s.ai?.provider || "?"} (${s.ai?.configured ? "ready" : "NOT configured"})`,
+  );
   const configured = Object.entries(s.credentials || {}).map(([k]) => k);
   console.log(`Credentials set: ${configured.length ? configured.join(", ") : "(none)"}`);
   console.log(`GSC connected:   ${s.status?.google?.siteUrl ? "yes" : "no"}`);
 
   const cov = await api("/api/orbit/index-health");
   const c = cov.snapshot || {};
-  console.log(`\nIndex coverage:  ${c.submitted ?? 0}/${c.totalUrls ?? 0} URLs submitted, ${c.confirmed ?? 0} confirmed live`);
+  console.log(
+    `\nIndex coverage:  ${c.submitted ?? 0}/${c.totalUrls ?? 0} URLs submitted, ${c.confirmed ?? 0} confirmed live`,
+  );
   console.log(`Stale URLs:      ${c.stale ?? 0} (need re-submission)`);
-  console.log(`Last health run: ${c.lastRunAt || "never"}${c.lastScore != null ? ` (score ${c.lastScore})` : ""}`);
+  console.log(
+    `Last health run: ${c.lastRunAt || "never"}${c.lastScore != null ? ` (score ${c.lastScore})` : ""}`,
+  );
 }
 
 async function cmdHealth() {
@@ -80,7 +86,9 @@ async function cmdHealth() {
   const h = r.health || {};
   console.log(`Score:        ${h.score}/100`);
   console.log(`Sampled:      ${h.indexable}/${h.sampled} indexable, ${h.blocked} blocked`);
-  console.log(`Coverage:     ${h.coverage?.submitted ?? 0}/${h.coverage?.totalUrls ?? 0} submitted (${h.coverage?.pct ?? 0}%)`);
+  console.log(
+    `Coverage:     ${h.coverage?.submitted ?? 0}/${h.coverage?.totalUrls ?? 0} submitted (${h.coverage?.pct ?? 0}%)`,
+  );
   console.log(`Stale URLs:   ${h.staleUrls}`);
   console.log(`\n${h.summary || ""}`);
   if (h.problems?.length) {
@@ -106,10 +114,14 @@ async function cmdRun() {
   console.log(r.summary || "(no summary)");
   if (r.indexing?.health) {
     const h = r.indexing.health;
-    console.log(`\nIndex health: score ${h.score}/100, ${h.indexable}/${h.sampled} indexable, coverage ${h.coveragePct}%`);
+    console.log(
+      `\nIndex health: score ${h.score}/100, ${h.indexable}/${h.sampled} indexable, coverage ${h.coveragePct}%`,
+    );
   }
   const st = r.stats || {};
-  console.log(`\nDone. posted=${st.posted} prepared=${st.prepared} failed=${st.failed} needsCreds=${st.needsCredentials}`);
+  console.log(
+    `\nDone. posted=${st.posted} prepared=${st.prepared} failed=${st.failed} needsCreds=${st.needsCredentials}`,
+  );
 }
 
 async function cmdMiniApps() {
@@ -121,7 +133,9 @@ async function cmdMiniApps() {
   console.log(`Sampled live:      ${r.live}/${r.sampled}`);
   console.log(`Sampled indexable: ${r.indexable}/${r.sampled}`);
   console.log(`Link to product:   ${r.withFunnelLink}/${r.sampled} (funnel)`);
-  console.log(`IndexNow:          ${r.indexNow?.ok ? "ok" : "skipped"} (${r.indexNow?.submitted || 0}/${r.indexNow?.total || 0} submitted)`);
+  console.log(
+    `IndexNow:          ${r.indexNow?.ok ? "ok" : "skipped"} (${r.indexNow?.submitted || 0}/${r.indexNow?.total || 0} submitted)`,
+  );
   console.log(`\n${r.summary || ""}`);
   if (r.problems?.length) {
     console.log(`\n⚠ Pages needing attention (${r.problems.length}):`);
@@ -150,7 +164,9 @@ async function cmdResearch() {
   });
   console.log(`Model: ${r.model} · ${r.count} ideas\n`);
   for (const idea of r.ideas || []) {
-    console.log(`\x1b[1m${idea.keyword}\x1b[0m  [${idea.intent}/${idea.difficulty}/${idea.contentType}]`);
+    console.log(
+      `\x1b[1m${idea.keyword}\x1b[0m  [${idea.intent}/${idea.difficulty}/${idea.contentType}]`,
+    );
     console.log(`  Title: ${idea.titleSuggestion}`);
     console.log(`  Why:   ${idea.rationale}`);
     if (idea.outline?.length) console.log(`  Outline: ${idea.outline.join(" · ")}`);
@@ -169,7 +185,9 @@ async function cmdIngest() {
   const r = await api("/api/orbit/ingest-content", { method: "POST", body: payload });
   console.log(`Created ${r.created?.length || 0} item(s):`);
   for (const c of r.created || []) console.log(`  · ${c.type}: ${c.url}`);
-  console.log(`IndexNow: ${r.indexNow?.ok ? "ok" : "skipped"} (${r.indexNow?.submitted || 0} URLs)`);
+  console.log(
+    `IndexNow: ${r.indexNow?.ok ? "ok" : "skipped"} (${r.indexNow?.submitted || 0} URLs)`,
+  );
   if (r.errors?.length) {
     console.log(`\n⚠ Errors:`);
     for (const e of r.errors) console.log(`  · ${e}`);

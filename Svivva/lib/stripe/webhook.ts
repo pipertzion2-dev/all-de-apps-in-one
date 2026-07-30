@@ -46,7 +46,10 @@ export class WebhookHandlers {
       case "customer.subscription.created": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = idOf(subscription.customer);
-        if (customerId && (subscription.status === "active" || subscription.status === "trialing")) {
+        if (
+          customerId &&
+          (subscription.status === "active" || subscription.status === "trialing")
+        ) {
           await db
             .update(users)
             .set({ stripeSubscriptionId: subscription.id })

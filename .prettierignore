@@ -38,3 +38,12 @@ PYRACRYPT EXTRA FEATURES ADD ON
 # Vercel / Docker text configs (no stable Prettier parser)
 **/.vercelignore
 **/Dockerfile*
+
+# Bulk vendor / restored dumps (not maintained source)
+AI V-2 -RESTORED
+**/\.venv
+**/.venv
+.cursor
+**/.orbit-agent-cookies.json
+ALL\\ DE\\ APPS\\ IN\\ ONE
+**/ALL\\ DE\\ APPS\\ IN\\ ONE/**

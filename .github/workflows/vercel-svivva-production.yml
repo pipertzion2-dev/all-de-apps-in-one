@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies (Svivva)
         working-directory: Svivva
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Install Vercel CLI
         run: npm install -g vercel@53.3.1

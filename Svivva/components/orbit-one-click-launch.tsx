@@ -19,7 +19,10 @@ import { authFetch } from "@/hooks/use-auth";
 const GscConnectOrb = nextDynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
   loading: () => (
-    <div className="mx-auto rounded-full bg-muted/30 animate-pulse" style={{ width: 150, height: 150 }} />
+    <div
+      className="mx-auto rounded-full bg-muted/30 animate-pulse"
+      style={{ width: 150, height: 150 }}
+    />
   ),
 });
 import {
@@ -42,10 +45,7 @@ import {
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
-import {
-  isAutomatedSuccess,
-  partitionAutopilotTasks,
-} from "@/lib/orbit/marketing-task-buckets";
+import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 
 const TEAL = "#5BA8A0";
@@ -53,7 +53,14 @@ const BURG = "#6B2C4A";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type TaskStatus = "posted" | "done" | "prepared" | "failed" | "needs_credentials" | "skipped" | "running";
+type TaskStatus =
+  | "posted"
+  | "done"
+  | "prepared"
+  | "failed"
+  | "needs_credentials"
+  | "skipped"
+  | "running";
 
 type Task = {
   id: string;
@@ -488,12 +495,15 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
 
   function isProviderReady(p: OrbitSetupProvider): boolean {
     if (p.envKey === "OPENAI_API_KEY" || p.envKey === "GEMINI_API_KEY") return aiConfigured;
-    if (p.credentialKey) return !!configuredKeys[p.credentialKey] || savedCreds.includes(p.credentialKey);
+    if (p.credentialKey)
+      return !!configuredKeys[p.credentialKey] || savedCreds.includes(p.credentialKey);
     return false;
   }
 
   // Partition: automated (AI + APIs + indexing) vs manual paste-only
-  const partitioned = result ? partitionAutopilotTasks(result.tasks) : { automated: [], manual: [] };
+  const partitioned = result
+    ? partitionAutopilotTasks(result.tasks)
+    : { automated: [], manual: [] };
   const automatedDone = partitioned.automated.filter((t) => isAutomatedSuccess(t.status));
   const automatedNeedsKey = partitioned.automated.filter(
     (t) => t.status === "needs_credentials" && !manualDoneIds.has(t.id),
@@ -606,12 +616,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               label={orbitStatus?.indexNowSubmitted ? "IndexNow ✓" : "IndexNow pending"}
               ok={!!orbitStatus?.indexNowSubmitted}
             />
-            <StatusPill
-              icon="🔄"
-              label="Weekly autopilot: ON"
-              ok
-              teal
-            />
+            <StatusPill icon="🔄" label="Weekly autopilot: ON" ok teal />
             {result && (
               <StatusPill
                 icon="⚡"
@@ -632,9 +637,15 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
             >
               <div className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-bold text-violet-300">Connect paid APIs (Apple Pay in Safari)</span>
+                <span className="text-xs font-bold text-violet-300">
+                  Connect paid APIs (Apple Pay in Safari)
+                </span>
               </div>
-              {showSetup ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+              {showSetup ? (
+                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+              )}
             </button>
             {showSetup && (
               <div className="px-3 pb-3 space-y-2 border-t border-violet-500/15">
@@ -655,9 +666,13 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                               <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                             )}
                             <span className="text-[11px] font-bold text-foreground">{p.name}</span>
-                            <span className="text-[10px] text-muted-foreground">{p.priceLabel}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {p.priceLabel}
+                            </span>
                           </div>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{p.purpose}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+                            {p.purpose}
+                          </p>
                         </div>
                         <div className="flex gap-1.5 flex-shrink-0">
                           <a
@@ -686,7 +701,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                     );
                   })}
                 <p className="text-[9px] text-muted-foreground leading-relaxed pt-1">
-                  Open pay links in Safari on iPhone or Mac for Apple Pay. Keys stay server-side only — never exposed to visitors.
+                  Open pay links in Safari on iPhone or Mac for Apple Pay. Keys stay server-side
+                  only — never exposed to visitors.
                 </p>
               </div>
             )}
@@ -730,11 +746,18 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                   {st === "done" ? (
                     <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
                   ) : st === "active" ? (
-                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" style={{ color: TEAL }} />
+                    <Loader2
+                      className="w-4 h-4 animate-spin flex-shrink-0"
+                      style={{ color: TEAL }}
+                    />
                   ) : (
                     <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" />
                   )}
-                  <span className={st === "active" ? "font-semibold text-foreground" : "text-muted-foreground"}>
+                  <span
+                    className={
+                      st === "active" ? "font-semibold text-foreground" : "text-muted-foreground"
+                    }
+                  >
                     {p.label}
                   </span>
                 </div>
@@ -763,7 +786,9 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           )}
 
           {/* ── Automated (AI + APIs + indexing) ── */}
-          {(automatedDone.length > 0 || automatedNeedsKey.length > 0 || automatedFailed.length > 0) && (
+          {(automatedDone.length > 0 ||
+            automatedNeedsKey.length > 0 ||
+            automatedFailed.length > 0) && (
             <div className="px-4 sm:px-5 py-4 border-l-4 border-emerald-500/50">
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -794,9 +819,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                       <CheckCircle2 className="w-3 h-3 flex-shrink-0 mt-0.5 text-emerald-500" />
                       <span>
                         <span className="font-semibold text-foreground">{t.label}</span>
-                        {t.message && (
-                          <span className="text-muted-foreground"> — {t.message}</span>
-                        )}
+                        {t.message && <span className="text-muted-foreground"> — {t.message}</span>}
                       </span>
                     </li>
                   ))}
@@ -853,13 +876,16 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
             <div className="px-4 sm:px-5 py-4 border-l-4 border-amber-500/50 bg-amber-500/[0.03]">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-black text-amber-400">Manual — paste on these sites</span>
+                <span className="text-sm font-black text-amber-400">
+                  Manual — paste on these sites
+                </span>
                 <span className="text-[11px] rounded-full px-2 py-0.5 font-bold bg-amber-500/15 text-amber-400">
                   {manualPending.length}
                 </span>
               </div>
               <p className="text-[10px] text-muted-foreground mb-3">
-                No public API for these platforms. AI wrote the copy — use Copy &amp; Open, paste, publish, Done.
+                No public API for these platforms. AI wrote the copy — use Copy &amp; Open, paste,
+                publish, Done.
               </p>
 
               <div className="space-y-2">
@@ -893,7 +919,10 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       {!running && (
         <div className="px-4 sm:px-5 py-3 border-t border-border/40 flex items-center gap-1.5 text-[10px] text-muted-foreground">
           <Clock className="w-3 h-3 flex-shrink-0" />
-          <span>Weekly cron runs every Monday 8am — re-submits all URLs and fills content gaps automatically.</span>
+          <span>
+            Weekly cron runs every Monday 8am — re-submits all URLs and fills content gaps
+            automatically.
+          </span>
         </div>
       )}
     </div>
@@ -931,13 +960,7 @@ function MarketingHealthPanel({
   const coverage = total > 0 ? Math.round((submitted / total) * 100) : 0;
   const score = health?.lastScore;
   const scoreColor =
-    score == null
-      ? "#6b7280"
-      : score >= 80
-        ? "#34d399"
-        : score >= 50
-          ? "#fbbf24"
-          : "#fb7185";
+    score == null ? "#6b7280" : score >= 80 ? "#34d399" : score >= 50 ? "#fbbf24" : "#fb7185";
   const covColor = coverage >= 80 ? "#34d399" : coverage >= 50 ? "#fbbf24" : "#fb7185";
 
   return (
@@ -1015,8 +1038,16 @@ function MarketingHealthPanel({
 
       {/* channel chips */}
       <div className="flex flex-wrap gap-1.5">
-        <StatusPill icon="📄" label={`${livePages || total} pages live`} ok={(livePages || total) > 0} />
-        <StatusPill icon="🔍" label={indexNowDone ? "IndexNow ✓" : "IndexNow pending"} ok={indexNowDone} />
+        <StatusPill
+          icon="📄"
+          label={`${livePages || total} pages live`}
+          ok={(livePages || total) > 0}
+        />
+        <StatusPill
+          icon="🔍"
+          label={indexNowDone ? "IndexNow ✓" : "IndexNow pending"}
+          ok={indexNowDone}
+        />
         <StatusPill icon="🤖" label="llms.txt ✓ (AI search)" ok teal />
         <StatusPill
           icon="🟢"
@@ -1096,11 +1127,21 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           ok={indexing.indexNow.ok}
           detail={`${indexing.indexNow.submitted}/${indexing.indexNow.total}`}
         />
-        <IndexStat label="Bing ping" ok={indexing.bingPing.ok} detail={indexing.bingPing.ok ? "OK" : "—"} />
+        <IndexStat
+          label="Bing ping"
+          ok={indexing.bingPing.ok}
+          detail={indexing.bingPing.ok ? "OK" : "—"}
+        />
         <IndexStat
           label="GSC sitemap"
           ok={gscOk}
-          detail={indexing.gscConnected ? (indexing.googleSitemap.ok ? "Submitted" : "Failed") : "Not connected"}
+          detail={
+            indexing.gscConnected
+              ? indexing.googleSitemap.ok
+                ? "Submitted"
+                : "Failed"
+              : "Not connected"
+          }
         />
         <IndexStat
           label="Google Index API"
@@ -1139,15 +1180,19 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           </p>
           {indexing.health.problems.length > 0 && (
             <p className="text-[9px] text-amber-400/90 leading-relaxed">
-              Needs attention: {indexing.health.problems.slice(0, 2).map((p) => `${p.url} (${p.notes})`).join(" · ")}
+              Needs attention:{" "}
+              {indexing.health.problems
+                .slice(0, 2)
+                .map((p) => `${p.url} (${p.notes})`)
+                .join(" · ")}
             </p>
           )}
         </div>
       )}
       {!indexing.gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
-          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. AI picks your Search
-          Console property and runs sitemap + indexing automatically.
+          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. AI picks your
+          Search Console property and runs sitemap + indexing automatically.
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (
@@ -1162,7 +1207,9 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
 function IndexStat({ label, ok, detail }: { label: string; ok: boolean; detail: string }) {
   return (
     <div className="rounded-lg border border-border/40 bg-card/40 px-2 py-1.5 text-center">
-      <p className={`text-[9px] font-bold ${ok ? "text-emerald-400" : "text-muted-foreground"}`}>{label}</p>
+      <p className={`text-[9px] font-bold ${ok ? "text-emerald-400" : "text-muted-foreground"}`}>
+        {label}
+      </p>
       <p className="text-[10px] font-black text-foreground tabular-nums">{detail}</p>
     </div>
   );
@@ -1215,7 +1262,10 @@ function ActionCard({
   const steps = stepsForTask(task.id);
 
   return (
-    <div className="rounded-xl border border-border/50 bg-card/40 overflow-hidden" id={meta.credKey ? `cred-${meta.credKey}` : undefined}>
+    <div
+      className="rounded-xl border border-border/50 bg-card/40 overflow-hidden"
+      id={meta.credKey ? `cred-${meta.credKey}` : undefined}
+    >
       <div className="flex items-start gap-2.5 px-3 py-2.5">
         <span className="text-base flex-shrink-0 mt-0.5">{meta.icon}</span>
 
@@ -1269,7 +1319,11 @@ function ActionCard({
               onClick={() => onCopy(pasteText)}
               className="flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-[10px] font-bold border border-border/60 bg-card/60"
             >
-              {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              {isCopied ? (
+                <Check className="w-3 h-3 text-emerald-400" />
+              ) : (
+                <Copy className="w-3 h-3" />
+              )}
               Copy
             </button>
           )}

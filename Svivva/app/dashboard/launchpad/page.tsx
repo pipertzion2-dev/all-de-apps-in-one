@@ -3585,1221 +3585,1249 @@ export default function LaunchpadPage() {
           </summary>
           <div className="border-t border-border/40 px-4 pb-4 pt-4 space-y-4">
             <OrbitTrafficFunnelDiagram compact />
-        {/* ── GOLD RUN EVERYTHING — advanced phased run ── */}
-        <div
-          className="rounded-2xl border-2 overflow-hidden"
-          style={{
-            borderColor: fullAutopilotActive ? `${TEAL}` : "#ca8a04",
-            background: fullAutopilotActive
-              ? `linear-gradient(135deg, ${TEAL}08, ${BURG}05)`
-              : "linear-gradient(135deg, rgba(234,179,8,0.08), rgba(202,138,4,0.05))",
-          }}
-        >
-          <div className="px-4 py-4 space-y-3">
-            <div className="flex items-start gap-3">
-              <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-lg"
-                style={{
-                  background: fullAutopilotActive
-                    ? TEAL
-                    : "linear-gradient(135deg, #ca8a04, #eab308)",
-                }}
-              >
-                {fullAutopilotActive ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <span>🚀</span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-black text-foreground">
-                  Advanced: phased run (Index 22 + marketing)
-                </h2>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Optional. Most of the time use <strong>Autopilot</strong> above. This runs the same
-                  work in visible chunks — <strong>9 Index 22 phases</strong> then{" "}
-                  <strong>8 marketing batches</strong> — for when you want to watch each phase or
-                  retry one batch.
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Orbit uses <strong>free-tier AI only</strong> (set{" "}
-                  <code className="text-[10px]">GEMINI_API_KEY</code> or{" "}
-                  <code className="text-[10px]">OLLAMA_URL</code>) — paid OpenAI keys are{" "}
-                  <strong>not</strong> used here.
-                </p>
-              </div>
-            </div>
-
-            {fullAutopilotStep && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                <Loader2
-                  className="w-3.5 h-3.5 animate-spin flex-shrink-0"
-                  style={{ color: TEAL }}
-                />
-                <p className="text-xs text-foreground font-medium">{fullAutopilotStep}</p>
-              </div>
-            )}
-
-            {orbitStatus?.preflight && (
-              <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Index &amp; AI preflight
-                </p>
-                <p className="text-[11px] text-foreground">
-                  Health score: <strong>{orbitStatus.preflight.indexHealthScore}</strong>/100 · Free
-                  AI ready:{" "}
-                  <strong>{orbitStatus.preflight.orbitFreeAi ? "yes" : "no (templates)"}</strong>
-                </p>
-                {orbitStatus.preflight.warnings?.length ? (
-                  <ul className="text-[10px] text-amber-800 dark:text-amber-200 list-disc pl-4 space-y-0.5">
-                    {orbitStatus.preflight.warnings.slice(0, 4).map((w, wi) => (
-                      <li key={wi}>{w}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-[10px] text-emerald-700 dark:text-emerald-300">
-                    No blocking warnings — you are good to run the next phase.
-                  </p>
-                )}
-              </div>
-            )}
-
-            <button
-              onClick={runFullAutopilot}
-              disabled={fullAutopilotActive || launchActive}
-              className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-black text-base text-white transition-all active:scale-95 disabled:opacity-60"
+            {/* ── GOLD RUN EVERYTHING — advanced phased run ── */}
+            <div
+              className="rounded-2xl border-2 overflow-hidden"
               style={{
-                background:
-                  fullAutopilotActive || launchActive
-                    ? TEAL
-                    : "linear-gradient(135deg, #b45309, #eab308, #fde047, #eab308)",
+                borderColor: fullAutopilotActive ? `${TEAL}` : "#ca8a04",
+                background: fullAutopilotActive
+                  ? `linear-gradient(135deg, ${TEAL}08, ${BURG}05)`
+                  : "linear-gradient(135deg, rgba(234,179,8,0.08), rgba(202,138,4,0.05))",
               }}
             >
-              {fullAutopilotActive ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Running phase…
-                </>
-              ) : (
-                <>
-                  <span className="text-lg">🚀</span>{" "}
-                  {goldPhaseDisplay >= GOLD_PHASES
-                    ? "All phases done — reset to run again"
-                    : goldPhaseDisplay > 0
-                      ? `Continue (${goldPhaseDisplay + 1}/${GOLD_PHASES})`
-                      : "Run Everything — Index 22 + marketing"}
-                </>
-              )}
-            </button>
-
-            <div className="flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                onClick={resetGoldPhases}
-                disabled={fullAutopilotActive || launchActive}
-              >
-                Reset all phases (Index 22 + marketing)
-              </Button>
-            </div>
-
-            <p className="text-[10px] text-center text-muted-foreground">
-              {goldPhaseDisplay >= GOLD_PHASES
-                ? "Index 22 (9) + marketing (8) complete. Reset below to start over."
-                : goldPhaseDisplay < INDEX22_PHASE_COUNT
-                  ? `Next: Index 22 phase ${goldPhaseDisplay + 1}/${INDEX22_PHASE_COUNT}, then marketing batches.`
-                  : `Marketing batch ${goldPhaseDisplay - INDEX22_PHASE_COUNT + 1}/${GOLD_MARKETING_PHASES} · checkmarks sync when each step finishes.`}
-            </p>
-          </div>
-        </div>
-
-        <PinkManualCoach
-          manualTasks={manualTasks}
-          checkedManual={checkedManual}
-          onToggleCheck={toggleManualCheck}
-          onResetChecks={resetManualChecks}
-          orbitFreeAi={!!orbitStatus?.preflight?.orbitFreeAi}
-          totalDone={totalDone}
-          totalSteps={totalSteps}
-          onRefetchOrbit={() => {
-            void refetchStatus();
-          }}
-          onSyncSteps={syncStepCompletionFromAutomation}
-          onAutoCheckKeys={applyAutoCheckKeys}
-        />
-
-        {/* ── INDEX HEALTH DASHBOARD — Car instrument cluster style ── */}
-        {orbitStatus && (
-          <div className="rounded-2xl border-2 border-slate-700/60 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 space-y-4 text-white overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <h2 className="text-xs font-black uppercase tracking-wider text-white/80">
-                  Index Health Dashboard
-                </h2>
-              </div>
-              <span className="text-[10px] text-white/30 font-mono">LIVE</span>
-            </div>
-
-            {/* Main gauges row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {(() => {
-                const totalPages =
-                  orbitStatus.totalPages ??
-                  (orbitStatus.seoPages ?? 0) +
-                    (orbitStatus.comparisons ?? 0) +
-                    (orbitStatus.blogPosts ?? 0) +
-                    (orbitStatus.aeoPages ?? 0) +
-                    (orbitStatus.seedMarketing ?? 0) +
-                    (orbitStatus.integrationPages ?? 0) +
-                    (orbitStatus.usecasePages ?? 0) +
-                    (orbitStatus.templatePages ?? 0) +
-                    (orbitStatus.paaPages ?? 0);
-                const targetPages = orbitStatus.targetPages ?? 300;
-                const pct =
-                  orbitStatus.pagesPercent ??
-                  Math.min(Math.round((totalPages / targetPages) * 100), 100);
-                const healthScore =
-                  orbitStatus.preflight?.indexHealthScore ??
-                  Math.min(100, Math.round(pct * 0.5 + (orbitStatus.indexedPercent ?? 0) * 0.5));
-                const indexedPct = orbitStatus.indexedPercent ?? 0;
-                const toolSeo = orbitStatus.seedMarketing ?? 0;
-                const toolTarget = orbitStatus.targetToolSeoPages ?? 300;
-
-                const gauges = [
-                  {
-                    label: "Total Pages",
-                    value: totalPages,
-                    target: targetPages,
-                    pct,
-                    color: pct >= 100 ? "#4ade80" : pct >= 80 ? "#eab308" : "#ef4444",
-                    unit: `/${targetPages}`,
-                  },
-                  {
-                    label: "Tools SEO",
-                    value: toolSeo,
-                    target: toolTarget,
-                    pct: Math.min(100, Math.round((toolSeo / toolTarget) * 100)),
-                    color:
-                      toolSeo >= toolTarget
-                        ? "#4ade80"
-                        : toolSeo >= toolTarget * 0.85
-                          ? "#eab308"
-                          : "#ef4444",
-                    unit: `/${toolTarget}`,
-                  },
-                  {
-                    label: "Health Score",
-                    value: healthScore,
-                    target: 100,
-                    pct: healthScore,
-                    color:
-                      healthScore >= 90 ? "#4ade80" : healthScore >= 60 ? "#eab308" : "#ef4444",
-                    unit: "%",
-                  },
-                  {
-                    label: "Indexed",
-                    value: indexedPct,
-                    target: 100,
-                    pct: indexedPct,
-                    color: indexedPct >= 100 ? "#4ade80" : indexedPct >= 50 ? "#eab308" : "#ef4444",
-                    unit: "%",
-                  },
-                ];
-
-                return gauges.map((g) => (
-                  <div key={g.label} className="text-center space-y-1.5">
-                    {/* SVG Gauge Arc */}
-                    <div className="relative w-full aspect-square max-w-[90px] mx-auto">
-                      <svg viewBox="0 0 100 60" className="w-full">
-                        {/* Background arc */}
-                        <path
-                          d="M 10 55 A 40 40 0 0 1 90 55"
-                          fill="none"
-                          stroke="rgba(255,255,255,0.1)"
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                        />
-                        {/* Filled arc */}
-                        <path
-                          d="M 10 55 A 40 40 0 0 1 90 55"
-                          fill="none"
-                          stroke={g.color}
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeDasharray={`${(g.pct / 100) * 126} 126`}
-                          className="transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-end justify-center pb-0">
-                        <span className="text-lg font-black" style={{ color: g.color }}>
-                          {g.value}
-                          <span className="text-[9px] text-white/40">{g.unit}</span>
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
-                      {g.label}
+              <div className="px-4 py-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-lg"
+                    style={{
+                      background: fullAutopilotActive
+                        ? TEAL
+                        : "linear-gradient(135deg, #ca8a04, #eab308)",
+                    }}
+                  >
+                    {fullAutopilotActive ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <span>🚀</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm font-black text-foreground">
+                      Advanced: phased run (Index 22 + marketing)
+                    </h2>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Optional. Most of the time use <strong>Autopilot</strong> above. This runs the
+                      same work in visible chunks — <strong>9 Index 22 phases</strong> then{" "}
+                      <strong>8 marketing batches</strong> — for when you want to watch each phase
+                      or retry one batch.
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Orbit uses <strong>free-tier AI only</strong> (set{" "}
+                      <code className="text-[10px]">GEMINI_API_KEY</code> or{" "}
+                      <code className="text-[10px]">OLLAMA_URL</code>) — paid OpenAI keys are{" "}
+                      <strong>not</strong> used here.
                     </p>
                   </div>
-                ));
-              })()}
-            </div>
+                </div>
 
-            {/* Status indicators — mini car dashboard lights */}
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                {
-                  label: "IndexNow",
-                  active: orbitStatus.indexNowKey && orbitStatus.indexNowSubmitted,
-                  warning: orbitStatus.indexNowKey && !orbitStatus.indexNowSubmitted,
-                },
-                { label: "Sitemap", active: true, warning: false },
-                { label: "Hub Page", active: orbitStatus.hubExists, warning: false },
-                {
-                  label: "Search Engines",
-                  active: orbitStatus.indexNowSubmitted,
-                  warning: !orbitStatus.indexNowSubmitted,
-                },
-              ].map((light) => (
-                <div
-                  key={light.label}
-                  className="flex flex-col items-center gap-1 py-2 rounded-lg"
+                {fullAutopilotStep && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                    <Loader2
+                      className="w-3.5 h-3.5 animate-spin flex-shrink-0"
+                      style={{ color: TEAL }}
+                    />
+                    <p className="text-xs text-foreground font-medium">{fullAutopilotStep}</p>
+                  </div>
+                )}
+
+                {orbitStatus?.preflight && (
+                  <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 space-y-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Index &amp; AI preflight
+                    </p>
+                    <p className="text-[11px] text-foreground">
+                      Health score: <strong>{orbitStatus.preflight.indexHealthScore}</strong>/100 ·
+                      Free AI ready:{" "}
+                      <strong>
+                        {orbitStatus.preflight.orbitFreeAi ? "yes" : "no (templates)"}
+                      </strong>
+                    </p>
+                    {orbitStatus.preflight.warnings?.length ? (
+                      <ul className="text-[10px] text-amber-800 dark:text-amber-200 list-disc pl-4 space-y-0.5">
+                        {orbitStatus.preflight.warnings.slice(0, 4).map((w, wi) => (
+                          <li key={wi}>{w}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-[10px] text-emerald-700 dark:text-emerald-300">
+                        No blocking warnings — you are good to run the next phase.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  onClick={runFullAutopilot}
+                  disabled={fullAutopilotActive || launchActive}
+                  className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-black text-base text-white transition-all active:scale-95 disabled:opacity-60"
                   style={{
-                    background: light.active
-                      ? "rgba(74,222,128,0.08)"
-                      : light.warning
-                        ? "rgba(234,179,8,0.08)"
-                        : "rgba(239,68,68,0.08)",
+                    background:
+                      fullAutopilotActive || launchActive
+                        ? TEAL
+                        : "linear-gradient(135deg, #b45309, #eab308, #fde047, #eab308)",
                   }}
                 >
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      background: light.active ? "#4ade80" : light.warning ? "#eab308" : "#ef4444",
-                      boxShadow: `0 0 8px ${light.active ? "#4ade8060" : light.warning ? "#eab30860" : "#ef444460"}`,
-                    }}
-                  />
-                  <span className="text-[9px] font-bold text-white/50">{light.label}</span>
-                </div>
-              ))}
-            </div>
+                  {fullAutopilotActive ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Running phase…
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">🚀</span>{" "}
+                      {goldPhaseDisplay >= GOLD_PHASES
+                        ? "All phases done — reset to run again"
+                        : goldPhaseDisplay > 0
+                          ? `Continue (${goldPhaseDisplay + 1}/${GOLD_PHASES})`
+                          : "Run Everything — Index 22 + marketing"}
+                    </>
+                  )}
+                </button>
 
-            {/* Page breakdown bar */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
-                Page Breakdown
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                {[
-                  { label: "SEO", count: orbitStatus.seoPages ?? 0, color: "#5BA8A0" },
-                  { label: "Blog", count: orbitStatus.blogPosts ?? 0, color: "#8b5cf6" },
-                  { label: "Comparisons", count: orbitStatus.comparisons ?? 0, color: "#eab308" },
-                  { label: "AEO", count: orbitStatus.aeoPages ?? 0, color: "#06b6d4" },
-                  {
-                    label: "Tools SEO",
-                    count: orbitStatus.seedMarketing ?? 0,
-                    color: "#f97316",
-                  },
-                  {
-                    label: "Integrations",
-                    count: orbitStatus.integrationPages ?? 0,
-                    color: "#ec4899",
-                  },
-                  {
-                    label: "Use Cases",
-                    count: orbitStatus.usecasePages ?? 0,
-                    color: "#14b8a6",
-                  },
-                  { label: "Templates", count: orbitStatus.templatePages ?? 0, color: "#a855f7" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
-                    style={{ background: "rgba(255,255,255,0.04)" }}
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={resetGoldPhases}
+                    disabled={fullAutopilotActive || launchActive}
                   >
-                    <div
-                      className="w-1.5 h-6 rounded-full"
-                      style={{
-                        background: `linear-gradient(to top, ${item.color}20, ${item.color})`,
-                      }}
-                    />
-                    <div>
-                      <p className="text-xs font-black text-white">{item.count}</p>
-                      <p className="text-[9px] text-white/40">{item.label}</p>
-                    </div>
-                  </div>
-                ))}
+                    Reset all phases (Index 22 + marketing)
+                  </Button>
+                </div>
+
+                <p className="text-[10px] text-center text-muted-foreground">
+                  {goldPhaseDisplay >= GOLD_PHASES
+                    ? "Index 22 (9) + marketing (8) complete. Reset below to start over."
+                    : goldPhaseDisplay < INDEX22_PHASE_COUNT
+                      ? `Next: Index 22 phase ${goldPhaseDisplay + 1}/${INDEX22_PHASE_COUNT}, then marketing batches.`
+                      : `Marketing batch ${goldPhaseDisplay - INDEX22_PHASE_COUNT + 1}/${GOLD_MARKETING_PHASES} · checkmarks sync when each step finishes.`}
+                </p>
               </div>
             </div>
-          </div>
-        )}
 
-        <div className="rounded-2xl border-2 border-amber-400/40 bg-card p-4 space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center flex-shrink-0">
-              <Zap className="w-5 h-5 text-amber-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-black text-foreground">Admin Traffic Autopilot</h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                One click checks svivva.com, connected apps, sitemap/robots, Stripe readiness, and
-                removes broken or risky AI tool pages from indexing.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              type="button"
-              onClick={runWorkspaceAutopilot}
-              disabled={autopilotActive}
-              className="flex-1 font-bold"
-              data-testid="button-orbit-admin-autopilot"
-            >
-              {autopilotActive ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Checking everything…
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 mr-2" /> Connect + Check Everything
-                </>
-              )}
-            </Button>
-            <Button type="button" variant="outline" asChild>
-              <a
-                href="https://dashboard.stripe.com/apikeys"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Stripe keys <ExternalLink className="w-3 h-3 ml-1" />
-              </a>
-            </Button>
-          </div>
-          {autopilotResult && (
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-              {autopilotResult}
-            </pre>
-          )}
-        </div>
+            <PinkManualCoach
+              manualTasks={manualTasks}
+              checkedManual={checkedManual}
+              onToggleCheck={toggleManualCheck}
+              onResetChecks={resetManualChecks}
+              orbitFreeAi={!!orbitStatus?.preflight?.orbitFreeAi}
+              totalDone={totalDone}
+              totalSteps={totalSteps}
+              onRefetchOrbit={() => {
+                void refetchStatus();
+              }}
+              onSyncSteps={syncStepCompletionFromAutomation}
+              onAutoCheckKeys={applyAutoCheckKeys}
+            />
 
-        {/* Auto-Connect All */}
-        <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-card p-4 space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
-              <Rocket className="w-5 h-5" style={{ color: "#5BA8A0" }} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                One click connects all monorepo apps (Svivva, Pyracrypt, AI Tools Hub, Cyber
-                Security, SEO Pack), fixes 404 links, and submits to Bing, Yandex, Yahoo,
-                DuckDuckGo.
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            onClick={runAutoConnectAll}
-            disabled={autoConnectActive}
-            className="font-bold"
-            style={{ background: "#5BA8A0" }}
-          >
-            {autoConnectActive ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Connecting all apps…
-              </>
-            ) : (
-              <>
-                <Rocket className="w-4 h-4 mr-2" /> Auto-Connect All + Submit to Search Engines
-              </>
-            )}
-          </Button>
-          {autoConnectResult && (
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-              {autoConnectResult}
-            </pre>
-          )}
-        </div>
-
-        {/* ── Quick External Links — one-click access ── */}
-        <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <ExternalLink className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Quick Links (open in new tab)
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {[
-              {
-                label: "Google Search Console",
-                href: "https://search.google.com/search-console",
-                color: "#4285f4",
-              },
-              {
-                label: "Bing Webmaster Tools",
-                href: "https://www.bing.com/webmasters",
-                color: "#008373",
-              },
-              {
-                label: "Vercel Dashboard",
-                href: "https://vercel.com/svivva",
-                color: "#000",
-              },
-              {
-                label: "Stripe Dashboard",
-                href: "https://dashboard.stripe.com",
-                color: "#635bff",
-              },
-              {
-                label: "GitHub Repo",
-                href: "https://github.com/pipertzion2-dev/all-de-apps-in-one",
-                color: "#24292f",
-              },
-              {
-                label: "svivva.com Sitemap",
-                href: "https://svivva.com/sitemap.xml",
-                color: TEAL,
-              },
-              {
-                label: "svivva.com/orbit",
-                href: "https://svivva.com/orbit",
-                color: BURG,
-              },
-              {
-                label: "IndexNow Status",
-                href: "https://www.indexnow.org",
-                color: "#ff6b35",
-              },
-              {
-                label: "Google PageSpeed",
-                href: "https://pagespeed.web.dev/analysis?url=https://svivva.com",
-                color: "#34a853",
-              },
-            ].map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-colors text-foreground min-h-[40px]"
-              >
-                <div
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: link.color }}
-                />
-                <span className="text-[11px] font-medium leading-tight">{link.label}</span>
-                <ExternalLink className="w-2.5 h-2.5 opacity-40 ml-auto flex-shrink-0" />
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Connections Hub */}
-        <div className="rounded-2xl border-2 border-border bg-card p-4">
-          <ConnectionsHub />
-        </div>
-
-        {/* Stripe Setup - Always visible for admin */}
-        <OrbitStripeSetup />
-
-        {/* ── Marketing Status (DB-verified) ── */}
-        {orbitStatus &&
-          (() => {
-            const checks = [
-              {
-                label: "SEO Pages",
-                ok: orbitStatus.seoPages >= 20,
-                detail: `${orbitStatus.seoPages} pages`,
-              },
-              {
-                label: "Competitor Pages",
-                ok: orbitStatus.comparisons >= 8,
-                detail: `${orbitStatus.comparisons}/8`,
-              },
-              {
-                label: "Blog Posts",
-                ok: orbitStatus.blogPosts >= 10,
-                detail: `${orbitStatus.blogPosts} posts`,
-              },
-              {
-                label: "AEO Pages",
-                ok: orbitStatus.aeoPages >= 10,
-                detail: `${orbitStatus.aeoPages}/10`,
-              },
-              {
-                label: "Tools SEO Pages",
-                ok: orbitStatus.seedMarketing >= (orbitStatus.targetToolSeoPages ?? 300),
-                detail: `${(orbitStatus.seedMarketing ?? 0).toLocaleString()}/${orbitStatus.targetToolSeoPages ?? 300} pages`,
-              },
-              {
-                label: "Integration Pages",
-                ok: (orbitStatus.integrationPages ?? 0) >= 20,
-                detail: `${orbitStatus.integrationPages ?? 0}/30`,
-              },
-              {
-                label: "Industry Use Cases",
-                ok: (orbitStatus.usecasePages ?? 0) >= 15,
-                detail: `${orbitStatus.usecasePages ?? 0}/20`,
-              },
-              {
-                label: "API Templates",
-                ok: (orbitStatus.templatePages ?? 0) >= 20,
-                detail: `${orbitStatus.templatePages ?? 0}/25`,
-              },
-              {
-                label: "PAA Pages",
-                ok: (orbitStatus.paaPages ?? 0) >= 10,
-                detail: `${orbitStatus.paaPages ?? 0}/15`,
-              },
-              {
-                label: "Hub Page",
-                ok: orbitStatus.hubExists,
-                detail: orbitStatus.hubExists ? "exists" : "missing",
-              },
-              {
-                label: "IndexNow Key",
-                ok: orbitStatus.indexNowKey,
-                detail: orbitStatus.indexNowKey ? "set up" : "missing",
-              },
-              {
-                label: "IndexNow Submitted",
-                ok: orbitStatus.indexNowSubmitted,
-                detail: orbitStatus.indexNowSubmitted ? "submitted" : "NOT submitted",
-              },
-            ];
-            const doneCount = checks.filter((c) => c.ok).length;
-            const allDone = doneCount === checks.length;
-
-            return (
-              <div
-                className="rounded-2xl border-2 p-4 space-y-3"
-                style={{
-                  borderColor: allDone
-                    ? "#4ade8040"
-                    : !orbitStatus.indexNowSubmitted
-                      ? "#ef444440"
-                      : `${TEAL}40`,
-                  background: allDone
-                    ? "rgba(74,222,128,0.04)"
-                    : !orbitStatus.indexNowSubmitted
-                      ? "rgba(239,68,68,0.04)"
-                      : `rgba(91,168,160,0.04)`,
-                }}
-              >
+            {/* ── INDEX HEALTH DASHBOARD — Car instrument cluster style ── */}
+            {orbitStatus && (
+              <div className="rounded-2xl border-2 border-slate-700/60 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 space-y-4 text-white overflow-hidden">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-black text-foreground uppercase tracking-wide flex items-center gap-2">
-                      <CheckCircle2
-                        className="w-3.5 h-3.5"
-                        style={{ color: allDone ? "#4ade80" : TEAL }}
-                      />
-                      Marketing Status — Verified from DB
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {doneCount}/{checks.length} checks passing
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <h2 className="text-xs font-black uppercase tracking-wider text-white/80">
+                      Index Health Dashboard
+                    </h2>
                   </div>
-                  {!allDone && !completing && (
-                    <button
-                      onClick={handleAutoComplete}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black text-white"
-                      style={{ background: !orbitStatus.indexNowSubmitted ? "#ef4444" : TEAL }}
-                    >
-                      <Zap className="w-3 h-3" />
-                      Complete Now
-                    </button>
-                  )}
-                  {completing && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-muted-foreground bg-muted">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      Running…
-                    </div>
-                  )}
+                  <span className="text-[10px] text-white/30 font-mono">LIVE</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-1.5">
-                  {checks.map((c) => (
-                    <div
-                      key={c.label}
-                      className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 ${c.ok ? "bg-green-500/8" : "bg-red-500/8"}`}
-                    >
-                      {c.ok ? (
-                        <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" />
-                      ) : (
-                        <Circle className="w-3 h-3 text-red-400 flex-shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-semibold text-foreground truncate">
-                          {c.label}
-                        </p>
-                        <p
-                          className={`text-[9px] truncate ${c.ok ? "text-green-400" : "text-red-400"}`}
-                        >
-                          {c.detail}
+                {/* Main gauges row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {(() => {
+                    const totalPages =
+                      orbitStatus.totalPages ??
+                      (orbitStatus.seoPages ?? 0) +
+                        (orbitStatus.comparisons ?? 0) +
+                        (orbitStatus.blogPosts ?? 0) +
+                        (orbitStatus.aeoPages ?? 0) +
+                        (orbitStatus.seedMarketing ?? 0) +
+                        (orbitStatus.integrationPages ?? 0) +
+                        (orbitStatus.usecasePages ?? 0) +
+                        (orbitStatus.templatePages ?? 0) +
+                        (orbitStatus.paaPages ?? 0);
+                    const targetPages = orbitStatus.targetPages ?? 300;
+                    const pct =
+                      orbitStatus.pagesPercent ??
+                      Math.min(Math.round((totalPages / targetPages) * 100), 100);
+                    const healthScore =
+                      orbitStatus.preflight?.indexHealthScore ??
+                      Math.min(
+                        100,
+                        Math.round(pct * 0.5 + (orbitStatus.indexedPercent ?? 0) * 0.5),
+                      );
+                    const indexedPct = orbitStatus.indexedPercent ?? 0;
+                    const toolSeo = orbitStatus.seedMarketing ?? 0;
+                    const toolTarget = orbitStatus.targetToolSeoPages ?? 300;
+
+                    const gauges = [
+                      {
+                        label: "Total Pages",
+                        value: totalPages,
+                        target: targetPages,
+                        pct,
+                        color: pct >= 100 ? "#4ade80" : pct >= 80 ? "#eab308" : "#ef4444",
+                        unit: `/${targetPages}`,
+                      },
+                      {
+                        label: "Tools SEO",
+                        value: toolSeo,
+                        target: toolTarget,
+                        pct: Math.min(100, Math.round((toolSeo / toolTarget) * 100)),
+                        color:
+                          toolSeo >= toolTarget
+                            ? "#4ade80"
+                            : toolSeo >= toolTarget * 0.85
+                              ? "#eab308"
+                              : "#ef4444",
+                        unit: `/${toolTarget}`,
+                      },
+                      {
+                        label: "Health Score",
+                        value: healthScore,
+                        target: 100,
+                        pct: healthScore,
+                        color:
+                          healthScore >= 90 ? "#4ade80" : healthScore >= 60 ? "#eab308" : "#ef4444",
+                        unit: "%",
+                      },
+                      {
+                        label: "Indexed",
+                        value: indexedPct,
+                        target: 100,
+                        pct: indexedPct,
+                        color:
+                          indexedPct >= 100 ? "#4ade80" : indexedPct >= 50 ? "#eab308" : "#ef4444",
+                        unit: "%",
+                      },
+                    ];
+
+                    return gauges.map((g) => (
+                      <div key={g.label} className="text-center space-y-1.5">
+                        {/* SVG Gauge Arc */}
+                        <div className="relative w-full aspect-square max-w-[90px] mx-auto">
+                          <svg viewBox="0 0 100 60" className="w-full">
+                            {/* Background arc */}
+                            <path
+                              d="M 10 55 A 40 40 0 0 1 90 55"
+                              fill="none"
+                              stroke="rgba(255,255,255,0.1)"
+                              strokeWidth="8"
+                              strokeLinecap="round"
+                            />
+                            {/* Filled arc */}
+                            <path
+                              d="M 10 55 A 40 40 0 0 1 90 55"
+                              fill="none"
+                              stroke={g.color}
+                              strokeWidth="8"
+                              strokeLinecap="round"
+                              strokeDasharray={`${(g.pct / 100) * 126} 126`}
+                              className="transition-all duration-1000"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-end justify-center pb-0">
+                            <span className="text-lg font-black" style={{ color: g.color }}>
+                              {g.value}
+                              <span className="text-[9px] text-white/40">{g.unit}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                          {g.label}
                         </p>
                       </div>
+                    ));
+                  })()}
+                </div>
+
+                {/* Status indicators — mini car dashboard lights */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    {
+                      label: "IndexNow",
+                      active: orbitStatus.indexNowKey && orbitStatus.indexNowSubmitted,
+                      warning: orbitStatus.indexNowKey && !orbitStatus.indexNowSubmitted,
+                    },
+                    { label: "Sitemap", active: true, warning: false },
+                    { label: "Hub Page", active: orbitStatus.hubExists, warning: false },
+                    {
+                      label: "Search Engines",
+                      active: orbitStatus.indexNowSubmitted,
+                      warning: !orbitStatus.indexNowSubmitted,
+                    },
+                  ].map((light) => (
+                    <div
+                      key={light.label}
+                      className="flex flex-col items-center gap-1 py-2 rounded-lg"
+                      style={{
+                        background: light.active
+                          ? "rgba(74,222,128,0.08)"
+                          : light.warning
+                            ? "rgba(234,179,8,0.08)"
+                            : "rgba(239,68,68,0.08)",
+                      }}
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          background: light.active
+                            ? "#4ade80"
+                            : light.warning
+                              ? "#eab308"
+                              : "#ef4444",
+                          boxShadow: `0 0 8px ${light.active ? "#4ade8060" : light.warning ? "#eab30860" : "#ef444460"}`,
+                        }}
+                      />
+                      <span className="text-[9px] font-bold text-white/50">{light.label}</span>
                     </div>
                   ))}
                 </div>
 
-                {!orbitStatus.indexNowSubmitted && !completeResult && (
-                  <div className="rounded-xl border border-red-400/20 bg-red-500/5 px-3 py-2 text-[11px]">
-                    <span className="font-bold text-red-400">⚠ IndexNow not submitted</span>
-                    <span className="text-muted-foreground">
-                      {" "}
-                      — {(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages are live but
-                      search engines haven't been notified. Click <strong>Complete Now</strong> to
-                      fix this.
-                    </span>
+                {/* Page breakdown bar */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
+                    Page Breakdown
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    {[
+                      { label: "SEO", count: orbitStatus.seoPages ?? 0, color: "#5BA8A0" },
+                      { label: "Blog", count: orbitStatus.blogPosts ?? 0, color: "#8b5cf6" },
+                      {
+                        label: "Comparisons",
+                        count: orbitStatus.comparisons ?? 0,
+                        color: "#eab308",
+                      },
+                      { label: "AEO", count: orbitStatus.aeoPages ?? 0, color: "#06b6d4" },
+                      {
+                        label: "Tools SEO",
+                        count: orbitStatus.seedMarketing ?? 0,
+                        color: "#f97316",
+                      },
+                      {
+                        label: "Integrations",
+                        count: orbitStatus.integrationPages ?? 0,
+                        color: "#ec4899",
+                      },
+                      {
+                        label: "Use Cases",
+                        count: orbitStatus.usecasePages ?? 0,
+                        color: "#14b8a6",
+                      },
+                      {
+                        label: "Templates",
+                        count: orbitStatus.templatePages ?? 0,
+                        color: "#a855f7",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
+                        style={{ background: "rgba(255,255,255,0.04)" }}
+                      >
+                        <div
+                          className="w-1.5 h-6 rounded-full"
+                          style={{
+                            background: `linear-gradient(to top, ${item.color}20, ${item.color})`,
+                          }}
+                        />
+                        <div>
+                          <p className="text-xs font-black text-white">{item.count}</p>
+                          <p className="text-[9px] text-white/40">{item.label}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-
-                {completeResult && (
-                  <div className="rounded-xl border border-green-400/20 bg-green-500/5 px-3 py-2 text-[10px] text-muted-foreground whitespace-pre-line max-h-40 overflow-y-auto font-mono">
-                    {completeResult}
-                  </div>
-                )}
-
-                {allDone && !completeResult && (
-                  <div className="flex items-center gap-2 rounded-xl border border-green-400/20 bg-green-500/5 px-3 py-2 text-[11px] text-green-400">
-                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-                    All marketing checks passing. Bing/Yandex/Yahoo have been notified of all pages.
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-        {/* How this works — mini tab explainer */}
-        <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
-          <p className="text-xs font-bold text-foreground uppercase tracking-wide">
-            How Your 50 Apps Drive Traffic to Svivva
-          </p>
-          <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
-            <div className="flex items-start gap-2.5">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
-                style={{ background: TEAL }}
-              >
-                1
-              </div>
-              <div>
-                <strong className="text-foreground">Connect your deployed tools app</strong> — Orbit
-                scans your mini apps and learns their names, descriptions and URLs.
-              </div>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
-                style={{ background: BURG }}
-              >
-                2
-              </div>
-              <div>
-                <strong className="text-foreground">Orbit builds SEO pages ON svivva.com</strong> —
-                one page per tool, all ranking on Google, all linking to your real tools.
-              </div>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
-                style={{ background: "#4ade80" }}
-              >
-                3
-              </div>
-              <div>
-                <strong className="text-foreground">
-                  Orbit generates a "Powered by Svivva" widget
-                </strong>{" "}
-                — paste it into each mini app so tool users click through to svivva.com.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="space-y-1">
-          <p className="text-[11px] text-muted-foreground px-1 font-medium uppercase tracking-wide">
-            What to do:
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            <button
-              onClick={() => setTab("growth")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "growth" ? "border-violet-500 bg-violet-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-              data-testid="tab-growth-intel"
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <TrendingUp
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
-                >
-                  Growth Intel
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "growth" ? "bg-violet-500/20 text-violet-600" : "bg-green-500/15 text-green-700"}`}
-                >
-                  LIVE
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">Demand scanner</p>
-            </button>
-            <button
-              onClick={() => setTab("causal")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "causal" ? "border-orange-500 bg-orange-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-              data-testid="tab-causal-attribution"
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Target
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "causal" ? "#f97316" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "causal" ? "#f97316" : undefined }}
-                >
-                  Causal ROI
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "causal" ? "bg-orange-500/20 text-orange-600" : "bg-orange-500/10 text-orange-700"}`}
-                >
-                  AI
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">True channel ROI</p>
-            </button>
-            <button
-              onClick={() => setTab("autopilot")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "autopilot" ? "border-pink-500 bg-pink-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-              data-testid="tab-autopilot"
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Wand2
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
-                >
-                  Autopilot
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "autopilot" ? "bg-pink-500/20 text-pink-600" : "bg-pink-500/10 text-pink-700"}`}
-                >
-                  NEW
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                Credentials + AI run all
-              </p>
-            </button>
-            <button
-              onClick={() => setTab("checklist")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-              data-testid="tab-checklist"
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <ListChecks
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "checklist" ? "#f59e0b" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "checklist" ? "#f59e0b" : undefined }}
-                >
-                  Checklist
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">All tasks status</p>
-            </button>
-            <button
-              onClick={() => setTab("index22")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "index22" ? "border-sky-500 bg-sky-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-              data-testid="tab-index22"
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Radar
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
-                >
-                  Index 22
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "index22" ? "bg-sky-500/20 text-sky-600" : "bg-muted text-muted-foreground"}`}
-                >
-                  {index22Done}/{INDEX22_STEPS.length}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                9-phase search infra
-              </p>
-            </button>
-            <button
-              onClick={() => setTab("svivva")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "svivva" ? "border-[#6B2C4A] bg-[#6B2C4A]/10" : "border-border bg-card hover:bg-muted/30"}`}
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Globe
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "svivva" ? BURG : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "svivva" ? BURG : undefined }}
-                >
-                  svivva.com
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "svivva" ? "bg-[#6B2C4A]/20 text-[#6B2C4A]" : "bg-muted text-muted-foreground"}`}
-                >
-                  {svivvaDone}/{SVIVVA_STEPS.length}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                SEO, social &amp; blog
-              </p>
-            </button>
-            <button
-              onClick={() => setTab("mini")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "mini" ? "border-[#5BA8A0] bg-[#5BA8A0]/10" : "border-border bg-card hover:bg-muted/30"}`}
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Package
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "mini" ? TEAL : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "mini" ? TEAL : undefined }}
-                >
-                  Your tools
-                </span>
-                <span
-                  className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "mini" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
-                >
-                  {miniDone}/{miniSteps.length}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                Connect apps → SEO pages
-              </p>
-            </button>
-            <button
-              onClick={() => setTab("deploy")}
-              className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "deploy" ? "border-green-500 bg-green-500/10" : "border-border bg-card hover:bg-muted/30"}`}
-            >
-              <div className="flex items-center gap-1.5 w-full">
-                <Rocket
-                  className="w-3.5 h-3.5 flex-shrink-0"
-                  style={{ color: tab === "deploy" ? "#16a34a" : undefined }}
-                />
-                <span
-                  className="text-xs font-bold truncate"
-                  style={{ color: tab === "deploy" ? "#16a34a" : undefined }}
-                >
-                  Deploy
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-tight">
-                DNS + subdomains guide
-              </p>
-            </button>
-          </div>
-        </div>
-
-        {/* Growth Intelligence tab */}
-        {tab === "growth" && (
-          <OrbitGrowthIntelligence
-            onReportReady={(summary) => {
-              if (statuses["svivva-growth-intelligence"] !== "done") {
-                setStep("svivva-growth-intelligence", "done", summary);
-              }
-            }}
-          />
-        )}
-
-        {tab === "causal" && <OrbitCausalAttribution />}
-
-        {/* Marketing Autopilot tab */}
-        {tab === "autopilot" && <OrbitMarketingAutopilot />}
-
-        {/* Checklist tab — visual mission control + detailed list */}
-        {tab === "checklist" && (
-          <div className="flex flex-col gap-8 relative z-10">
-            <OrbitTrafficFunnelDiagram />
-            <OrbitMissionControl
-              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
-              stepStatuses={statuses}
-            />
-            <OrbitAdminMissionBoard
-              stepStatuses={statuses}
-              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
-              svivvaTotal={SVIVVA_STEPS.length}
-              svivvaDone={svivvaDone}
-              miniTotal={miniSteps.length}
-              miniDone={miniDone}
-              index22Total={INDEX22_STEPS.length}
-              index22Done={index22Done}
-            />
-            <OrbitMarketingVision
-              orbitStatus={orbitStatus as Record<string, unknown> | undefined}
-              stepStatuses={statuses}
-            />
-            <div className="border-t border-white/8 pt-6">
-              <p className="text-xs text-white/25 uppercase tracking-widest mb-4">
-                Detailed checklist
-              </p>
-              <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
-            </div>
-          </div>
-        )}
-
-        {tab === "index22" && (
-          <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-muted-foreground space-y-2">
-            <div className="flex items-start gap-2">
-              <Radar className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-sky-500" />
-              <span>
-                <strong className="text-foreground">Index 22</strong> — production search
-                infrastructure (audit, sitemaps, internal links, quality gate, performance,
-                conversion, analytics, monitoring). No doorway pages; thin content is rejected.
-              </span>
-            </div>
-            <Link
-              href="/dashboard/seo-health"
-              className="inline-flex items-center gap-1 text-sky-600 font-semibold hover:underline"
-            >
-              Open SEO Health dashboard <ExternalLink className="w-3 h-3" />
-            </Link>
-          </div>
-        )}
-
-        {/* Tab info banner */}
-        {tab === "svivva" && (
-          <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
-            <Globe className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
-            <span>
-              These steps build the full SEO &amp; social presence for <strong>svivva.com</strong> —
-              landing pages, comparisons, blog content, social packs, and sitemap submission.
-            </span>
-          </div>
-        )}
-
-        {tab === "mini" && (
-          <>
-            <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 text-teal-500" />
                 </div>
-                <div className="min-w-0 flex-1 space-y-1">
-                  <h3 className="font-bold text-sm">Connect Your Apps</h3>
+              </div>
+            )}
+
+            <div className="rounded-2xl border-2 border-amber-400/40 bg-card p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-black text-foreground">Admin Traffic Autopilot</h2>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Paste your deployed app URL below to discover tools and generate SEO pages.
+                    One click checks svivva.com, connected apps, sitemap/robots, Stripe readiness,
+                    and removes broken or risky AI tool pages from indexing.
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Enter the URL of your deployed app (e.g., your mini apps or Pyracrypt instance).
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  onClick={runWorkspaceAutopilot}
+                  disabled={autopilotActive}
+                  className="flex-1 font-bold"
+                  data-testid="button-orbit-admin-autopilot"
+                >
+                  {autopilotActive ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Checking everything…
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" /> Connect + Check Everything
+                    </>
+                  )}
+                </Button>
+                <Button type="button" variant="outline" asChild>
+                  <a
+                    href="https://dashboard.stripe.com/apikeys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Stripe keys <ExternalLink className="w-3 h-3 ml-1" />
+                  </a>
+                </Button>
+              </div>
+              {autopilotResult && (
+                <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+                  {autopilotResult}
+                </pre>
+              )}
+            </div>
+
+            {/* Auto-Connect All */}
+            <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-card p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
+                  <Rocket className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    One click connects all monorepo apps (Svivva, Pyracrypt, AI Tools Hub, Cyber
+                    Security, SEO Pack), fixes 404 links, and submits to Bing, Yandex, Yahoo,
+                    DuckDuckGo.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={runAutoConnectAll}
+                disabled={autoConnectActive}
+                className="font-bold"
+                style={{ background: "#5BA8A0" }}
+              >
+                {autoConnectActive ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Connecting all apps…
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="w-4 h-4 mr-2" /> Auto-Connect All + Submit to Search Engines
+                  </>
+                )}
+              </Button>
+              {autoConnectResult && (
+                <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+                  {autoConnectResult}
+                </pre>
+              )}
+            </div>
+
+            {/* ── Quick External Links — one-click access ── */}
+            <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                <p className="text-xs font-bold text-foreground uppercase tracking-wider">
+                  Quick Links (open in new tab)
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  {
+                    label: "Google Search Console",
+                    href: "https://search.google.com/search-console",
+                    color: "#4285f4",
+                  },
+                  {
+                    label: "Bing Webmaster Tools",
+                    href: "https://www.bing.com/webmasters",
+                    color: "#008373",
+                  },
+                  {
+                    label: "Vercel Dashboard",
+                    href: "https://vercel.com/svivva",
+                    color: "#000",
+                  },
+                  {
+                    label: "Stripe Dashboard",
+                    href: "https://dashboard.stripe.com",
+                    color: "#635bff",
+                  },
+                  {
+                    label: "GitHub Repo",
+                    href: "https://github.com/pipertzion2-dev/all-de-apps-in-one",
+                    color: "#24292f",
+                  },
+                  {
+                    label: "svivva.com Sitemap",
+                    href: "https://svivva.com/sitemap.xml",
+                    color: TEAL,
+                  },
+                  {
+                    label: "svivva.com/orbit",
+                    href: "https://svivva.com/orbit",
+                    color: BURG,
+                  },
+                  {
+                    label: "IndexNow Status",
+                    href: "https://www.indexnow.org",
+                    color: "#ff6b35",
+                  },
+                  {
+                    label: "Google PageSpeed",
+                    href: "https://pagespeed.web.dev/analysis?url=https://svivva.com",
+                    color: "#34a853",
+                  },
+                ].map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-colors text-foreground min-h-[40px]"
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: link.color }}
+                    />
+                    <span className="text-[11px] font-medium leading-tight">{link.label}</span>
+                    <ExternalLink className="w-2.5 h-2.5 opacity-40 ml-auto flex-shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Connections Hub */}
+            <div className="rounded-2xl border-2 border-border bg-card p-4">
+              <ConnectionsHub />
+            </div>
+
+            {/* Stripe Setup - Always visible for admin */}
+            <OrbitStripeSetup />
+
+            {/* ── Marketing Status (DB-verified) ── */}
+            {orbitStatus &&
+              (() => {
+                const checks = [
+                  {
+                    label: "SEO Pages",
+                    ok: orbitStatus.seoPages >= 20,
+                    detail: `${orbitStatus.seoPages} pages`,
+                  },
+                  {
+                    label: "Competitor Pages",
+                    ok: orbitStatus.comparisons >= 8,
+                    detail: `${orbitStatus.comparisons}/8`,
+                  },
+                  {
+                    label: "Blog Posts",
+                    ok: orbitStatus.blogPosts >= 10,
+                    detail: `${orbitStatus.blogPosts} posts`,
+                  },
+                  {
+                    label: "AEO Pages",
+                    ok: orbitStatus.aeoPages >= 10,
+                    detail: `${orbitStatus.aeoPages}/10`,
+                  },
+                  {
+                    label: "Tools SEO Pages",
+                    ok: orbitStatus.seedMarketing >= (orbitStatus.targetToolSeoPages ?? 300),
+                    detail: `${(orbitStatus.seedMarketing ?? 0).toLocaleString()}/${orbitStatus.targetToolSeoPages ?? 300} pages`,
+                  },
+                  {
+                    label: "Integration Pages",
+                    ok: (orbitStatus.integrationPages ?? 0) >= 20,
+                    detail: `${orbitStatus.integrationPages ?? 0}/30`,
+                  },
+                  {
+                    label: "Industry Use Cases",
+                    ok: (orbitStatus.usecasePages ?? 0) >= 15,
+                    detail: `${orbitStatus.usecasePages ?? 0}/20`,
+                  },
+                  {
+                    label: "API Templates",
+                    ok: (orbitStatus.templatePages ?? 0) >= 20,
+                    detail: `${orbitStatus.templatePages ?? 0}/25`,
+                  },
+                  {
+                    label: "PAA Pages",
+                    ok: (orbitStatus.paaPages ?? 0) >= 10,
+                    detail: `${orbitStatus.paaPages ?? 0}/15`,
+                  },
+                  {
+                    label: "Hub Page",
+                    ok: orbitStatus.hubExists,
+                    detail: orbitStatus.hubExists ? "exists" : "missing",
+                  },
+                  {
+                    label: "IndexNow Key",
+                    ok: orbitStatus.indexNowKey,
+                    detail: orbitStatus.indexNowKey ? "set up" : "missing",
+                  },
+                  {
+                    label: "IndexNow Submitted",
+                    ok: orbitStatus.indexNowSubmitted,
+                    detail: orbitStatus.indexNowSubmitted ? "submitted" : "NOT submitted",
+                  },
+                ];
+                const doneCount = checks.filter((c) => c.ok).length;
+                const allDone = doneCount === checks.length;
+
+                return (
+                  <div
+                    className="rounded-2xl border-2 p-4 space-y-3"
+                    style={{
+                      borderColor: allDone
+                        ? "#4ade8040"
+                        : !orbitStatus.indexNowSubmitted
+                          ? "#ef444440"
+                          : `${TEAL}40`,
+                      background: allDone
+                        ? "rgba(74,222,128,0.04)"
+                        : !orbitStatus.indexNowSubmitted
+                          ? "rgba(239,68,68,0.04)"
+                          : `rgba(91,168,160,0.04)`,
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-black text-foreground uppercase tracking-wide flex items-center gap-2">
+                          <CheckCircle2
+                            className="w-3.5 h-3.5"
+                            style={{ color: allDone ? "#4ade80" : TEAL }}
+                          />
+                          Marketing Status — Verified from DB
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {doneCount}/{checks.length} checks passing
+                        </p>
+                      </div>
+                      {!allDone && !completing && (
+                        <button
+                          onClick={handleAutoComplete}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black text-white"
+                          style={{ background: !orbitStatus.indexNowSubmitted ? "#ef4444" : TEAL }}
+                        >
+                          <Zap className="w-3 h-3" />
+                          Complete Now
+                        </button>
+                      )}
+                      {completing && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-muted-foreground bg-muted">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Running…
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {checks.map((c) => (
+                        <div
+                          key={c.label}
+                          className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 ${c.ok ? "bg-green-500/8" : "bg-red-500/8"}`}
+                        >
+                          {c.ok ? (
+                            <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-3 h-3 text-red-400 flex-shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-semibold text-foreground truncate">
+                              {c.label}
+                            </p>
+                            <p
+                              className={`text-[9px] truncate ${c.ok ? "text-green-400" : "text-red-400"}`}
+                            >
+                              {c.detail}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {!orbitStatus.indexNowSubmitted && !completeResult && (
+                      <div className="rounded-xl border border-red-400/20 bg-red-500/5 px-3 py-2 text-[11px]">
+                        <span className="font-bold text-red-400">⚠ IndexNow not submitted</span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          — {(orbitStatus.seedMarketing ?? 0).toLocaleString()} pages are live but
+                          search engines haven't been notified. Click <strong>Complete Now</strong>{" "}
+                          to fix this.
+                        </span>
+                      </div>
+                    )}
+
+                    {completeResult && (
+                      <div className="rounded-xl border border-green-400/20 bg-green-500/5 px-3 py-2 text-[10px] text-muted-foreground whitespace-pre-line max-h-40 overflow-y-auto font-mono">
+                        {completeResult}
+                      </div>
+                    )}
+
+                    {allDone && !completeResult && (
+                      <div className="flex items-center gap-2 rounded-xl border border-green-400/20 bg-green-500/5 px-3 py-2 text-[11px] text-green-400">
+                        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                        All marketing checks passing. Bing/Yandex/Yahoo have been notified of all
+                        pages.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+            {/* How this works — mini tab explainer */}
+            <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+              <p className="text-xs font-bold text-foreground uppercase tracking-wide">
+                How Your 50 Apps Drive Traffic to Svivva
               </p>
-            </div>
-          </>
-        )}
-
-        {/* Deploy tab — full guide */}
-        {tab === "deploy" && (
-          <DeployGuide publicHost={orbitUrls.host} publicSite={orbitUrls.site} />
-        )}
-
-        {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
-        {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && tab !== "growth" && (
-          <LaunchStation
-            launchActive={launchActive}
-            launchDone={launchDone}
-            launchProgress={launchProgress}
-            launchCopied={launchCopied}
-            setLaunchCopied={setLaunchCopied}
-            setLaunchDone={setLaunchDone}
-            onLaunch={launchEverything}
-            coreUrls={orbitStatus?.coreUrls ?? []}
-            toolUrls={orbitStatus?.toolUrls ?? []}
-            totalSteps={SVIVVA_STEPS.length + miniSteps.length}
-            sitemapUrl={orbitUrls.sitemap}
-          />
-        )}
-
-        {/* Progress + Run All — only for svivva/mini/index22 tabs */}
-        {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && steps.length > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">
-                  {tabDone} of {steps.length} steps complete
-                </span>
-                <span className="font-bold" style={{ color: TEAL }}>
-                  {Math.round((tabDone / steps.length) * 100)}%
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.round((tabDone / steps.length) * 100)}%`,
-                    background: allTabDone ? "#16a34a" : TEAL,
-                  }}
-                />
+              <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
+                    style={{ background: TEAL }}
+                  >
+                    1
+                  </div>
+                  <div>
+                    <strong className="text-foreground">Connect your deployed tools app</strong> —
+                    Orbit scans your mini apps and learns their names, descriptions and URLs.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
+                    style={{ background: BURG }}
+                  >
+                    2
+                  </div>
+                  <div>
+                    <strong className="text-foreground">
+                      Orbit builds SEO pages ON svivva.com
+                    </strong>{" "}
+                    — one page per tool, all ranking on Google, all linking to your real tools.
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 mt-0.5"
+                    style={{ background: "#4ade80" }}
+                  >
+                    3
+                  </div>
+                  <div>
+                    <strong className="text-foreground">
+                      Orbit generates a "Powered by Svivva" widget
+                    </strong>{" "}
+                    — paste it into each mini app so tool users click through to svivva.com.
+                  </div>
+                </div>
               </div>
             </div>
 
-            {!allTabDone &&
-              (runAllActive ? (
+            {/* Tabs */}
+            <div className="space-y-1">
+              <p className="text-[11px] text-muted-foreground px-1 font-medium uppercase tracking-wide">
+                What to do:
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <button
-                  onClick={stopRunAll}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px]"
-                  style={{ background: "#dc2626" }}
+                  onClick={() => setTab("growth")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "growth" ? "border-violet-500 bg-violet-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-growth-intel"
                 >
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Stop
+                  <div className="flex items-center gap-1.5 w-full">
+                    <TrendingUp
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "growth" ? "#7c3aed" : undefined }}
+                    >
+                      Growth Intel
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "growth" ? "bg-violet-500/20 text-violet-600" : "bg-green-500/15 text-green-700"}`}
+                    >
+                      LIVE
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Demand scanner</p>
                 </button>
-              ) : (
                 <button
-                  onClick={runAll}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px] active:scale-95 transition-transform"
-                  style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
-                  data-testid="btn-run-all"
+                  onClick={() => setTab("causal")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "causal" ? "border-orange-500 bg-orange-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-causal-attribution"
                 >
-                  <ListChecks className="w-3.5 h-3.5" />
-                  Run All <span className="opacity-70 text-xs">({pendingCount})</span>
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Target
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "causal" ? "#f97316" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "causal" ? "#f97316" : undefined }}
+                    >
+                      Causal ROI
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "causal" ? "bg-orange-500/20 text-orange-600" : "bg-orange-500/10 text-orange-700"}`}
+                    >
+                      AI
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    True channel ROI
+                  </p>
                 </button>
-              ))}
-          </div>
-        )}
+                <button
+                  onClick={() => setTab("autopilot")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "autopilot" ? "border-pink-500 bg-pink-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-autopilot"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Wand2
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "autopilot" ? "#db2777" : undefined }}
+                    >
+                      Autopilot
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "autopilot" ? "bg-pink-500/20 text-pink-600" : "bg-pink-500/10 text-pink-700"}`}
+                    >
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Credentials + AI run all
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTab("checklist")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-checklist"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <ListChecks
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "checklist" ? "#f59e0b" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "checklist" ? "#f59e0b" : undefined }}
+                    >
+                      Checklist
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    All tasks status
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTab("index22")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "index22" ? "border-sky-500 bg-sky-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-index22"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Radar
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "index22" ? "#0ea5e9" : undefined }}
+                    >
+                      Index 22
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "index22" ? "bg-sky-500/20 text-sky-600" : "bg-muted text-muted-foreground"}`}
+                    >
+                      {index22Done}/{INDEX22_STEPS.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    9-phase search infra
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTab("svivva")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "svivva" ? "border-[#6B2C4A] bg-[#6B2C4A]/10" : "border-border bg-card hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Globe
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "svivva" ? BURG : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "svivva" ? BURG : undefined }}
+                    >
+                      svivva.com
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "svivva" ? "bg-[#6B2C4A]/20 text-[#6B2C4A]" : "bg-muted text-muted-foreground"}`}
+                    >
+                      {svivvaDone}/{SVIVVA_STEPS.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    SEO, social &amp; blog
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTab("mini")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "mini" ? "border-[#5BA8A0] bg-[#5BA8A0]/10" : "border-border bg-card hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Package
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "mini" ? TEAL : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "mini" ? TEAL : undefined }}
+                    >
+                      Your tools
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "mini" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
+                    >
+                      {miniDone}/{miniSteps.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Connect apps → SEO pages
+                  </p>
+                </button>
+                <button
+                  onClick={() => setTab("deploy")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "deploy" ? "border-green-500 bg-green-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Rocket
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "deploy" ? "#16a34a" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "deploy" ? "#16a34a" : undefined }}
+                    >
+                      Deploy
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    DNS + subdomains guide
+                  </p>
+                </button>
+              </div>
+            </div>
 
-        {/* Mini Source Config (above step 1) */}
-        {tab === "mini" && (
-          <MiniSourceConfig
-            sourceUrl={sourceUrl}
-            setSourceUrl={setSourceUrl}
-            discoveredTools={discoveredTools}
-            setDiscoveredTools={setDiscoveredTools}
-            savedUrl={creds?.miniAppsUrl}
-          />
-        )}
-
-        {/* Step cards — svivva / mini / index22 */}
-        {(tab === "svivva" || tab === "mini" || tab === "index22") &&
-          steps.map((step, idx) => (
-            <StepCard
-              key={step.id}
-              step={step}
-              idx={idx}
-              status={statuses[step.id] || "pending"}
-              result={results[step.id] || ""}
-              onExecute={() => executeStep(step.id)}
-              onReset={() => resetStep(step.id)}
-              isQueued={queuedSteps.has(step.id)}
-              toolCount={step.needsTools ? discoveredTools.length : undefined}
-            />
-          ))}
-
-        {/* Completion */}
-        {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && allTabDone && (
-          <div
-            className="rounded-2xl p-6 text-center space-y-2"
-            style={{
-              background: `linear-gradient(135deg, ${TEAL}15, ${BURG}15)`,
-              border: `2px solid ${TEAL}30`,
-            }}
-          >
-            <p className="text-3xl">🚀</p>
-            <p className="font-black text-lg">
-              {tab === "svivva"
-                ? "svivva.com is in orbit!"
-                : tab === "mini"
-                  ? "Your tools are live on Google!"
-                  : tab === "index22"
-                    ? "Index 22 infrastructure complete!"
-                    : "Deployment configured"}
-            </p>
-            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              {tab === "svivva"
-                ? "Switch to the Your Tools tab to promote your deployed mini apps."
-                : tab === "mini"
-                  ? "Your app URLs are connected — Google traffic can flow to your live tools."
-                  : tab === "index22"
-                    ? "Run marketing steps on svivva.com and Your tools tabs, or use Run Everything above."
-                    : "Deployment is ready — your marketing will go live on deploy."}
-            </p>
-            {tab === "svivva" && (
-              <button
-                onClick={() => setTab("mini")}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
-                style={{ background: TEAL }}
-              >
-                Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            {/* Growth Intelligence tab */}
+            {tab === "growth" && (
+              <OrbitGrowthIntelligence
+                onReportReady={(summary) => {
+                  if (statuses["svivva-growth-intelligence"] !== "done") {
+                    setStep("svivva-growth-intelligence", "done", summary);
+                  }
+                }}
+              />
             )}
-          </div>
-        )}
 
-        {/* Google Indexing Panel — always visible once orbit has run */}
-        {tab !== "deploy" && tab !== "checklist" && (
-          <GoogleIndexPanel
-            coreUrls={orbitStatus?.coreUrls ?? []}
-            toolUrls={orbitStatus?.toolUrls ?? []}
-            sitemapUrl={orbitUrls.sitemap}
-          />
-        )}
+            {tab === "causal" && <OrbitCausalAttribution />}
 
-        {/* Quick links */}
-        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Quick Links
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: "Marketing Hub", href: "/marketing-hub" },
-              { label: "Marketing AI", href: "/dashboard/marketing" },
-              { label: "Cyber Security", href: "/cyber-security-mini-apps" },
-              { label: "AI Tools Hub", href: "/ai-tools-hub" },
-              { label: "Cyber Security", href: "/cyber-security-mini-apps" },
-              { label: "SEO Pack", href: "/seo-pack" },
-              { label: "Seeds Funnel", href: "/seeds#seeds-marketing" },
-              { label: "Referrals", href: "/referrals" },
-              { label: "Orbit (Public)", href: "/orbit" },
-              { label: "Keywords", href: "/dashboard/keywords" },
-              { label: "Blog Content", href: "/dashboard/content" },
-              { label: "View Sitemap", href: "/sitemap.xml", external: true },
-              {
-                label: "Search Console",
-                href: "https://search.google.com/search-console",
-                external: true,
-              },
-            ].map(({ label, href, external }) => (
-              <a
-                key={label}
-                href={href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-colors text-foreground font-medium min-h-[40px]"
+            {/* Marketing Autopilot tab */}
+            {tab === "autopilot" && <OrbitMarketingAutopilot />}
+
+            {/* Checklist tab — visual mission control + detailed list */}
+            {tab === "checklist" && (
+              <div className="flex flex-col gap-8 relative z-10">
+                <OrbitTrafficFunnelDiagram />
+                <OrbitMissionControl
+                  orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+                  stepStatuses={statuses}
+                />
+                <OrbitAdminMissionBoard
+                  stepStatuses={statuses}
+                  orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+                  svivvaTotal={SVIVVA_STEPS.length}
+                  svivvaDone={svivvaDone}
+                  miniTotal={miniSteps.length}
+                  miniDone={miniDone}
+                  index22Total={INDEX22_STEPS.length}
+                  index22Done={index22Done}
+                />
+                <OrbitMarketingVision
+                  orbitStatus={orbitStatus as Record<string, unknown> | undefined}
+                  stepStatuses={statuses}
+                />
+                <div className="border-t border-white/8 pt-6">
+                  <p className="text-xs text-white/25 uppercase tracking-widest mb-4">
+                    Detailed checklist
+                  </p>
+                  <MarketingChecklist orbitStatus={orbitStatus ?? null} stepStatuses={statuses} />
+                </div>
+              </div>
+            )}
+
+            {tab === "index22" && (
+              <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-muted-foreground space-y-2">
+                <div className="flex items-start gap-2">
+                  <Radar className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-sky-500" />
+                  <span>
+                    <strong className="text-foreground">Index 22</strong> — production search
+                    infrastructure (audit, sitemaps, internal links, quality gate, performance,
+                    conversion, analytics, monitoring). No doorway pages; thin content is rejected.
+                  </span>
+                </div>
+                <Link
+                  href="/dashboard/seo-health"
+                  className="inline-flex items-center gap-1 text-sky-600 font-semibold hover:underline"
+                >
+                  Open SEO Health dashboard <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
+            )}
+
+            {/* Tab info banner */}
+            {tab === "svivva" && (
+              <div className="rounded-xl border border-border bg-card px-4 py-3 text-xs text-muted-foreground flex items-start gap-2">
+                <Globe className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
+                <span>
+                  These steps build the full SEO &amp; social presence for{" "}
+                  <strong>svivva.com</strong> — landing pages, comparisons, blog content, social
+                  packs, and sitemap submission.
+                </span>
+              </div>
+            )}
+
+            {tab === "mini" && (
+              <>
+                <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                      <Package className="w-5 h-5 text-teal-500" />
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h3 className="font-bold text-sm">Connect Your Apps</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Paste your deployed app URL below to discover tools and generate SEO pages.
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter the URL of your deployed app (e.g., your mini apps or Pyracrypt instance).
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Deploy tab — full guide */}
+            {tab === "deploy" && (
+              <DeployGuide publicHost={orbitUrls.host} publicSite={orbitUrls.site} />
+            )}
+
+            {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
+            {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && tab !== "growth" && (
+              <LaunchStation
+                launchActive={launchActive}
+                launchDone={launchDone}
+                launchProgress={launchProgress}
+                launchCopied={launchCopied}
+                setLaunchCopied={setLaunchCopied}
+                setLaunchDone={setLaunchDone}
+                onLaunch={launchEverything}
+                coreUrls={orbitStatus?.coreUrls ?? []}
+                toolUrls={orbitStatus?.toolUrls ?? []}
+                totalSteps={SVIVVA_STEPS.length + miniSteps.length}
+                sitemapUrl={orbitUrls.sitemap}
+              />
+            )}
+
+            {/* Progress + Run All — only for svivva/mini/index22 tabs */}
+            {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && steps.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      {tabDone} of {steps.length} steps complete
+                    </span>
+                    <span className="font-bold" style={{ color: TEAL }}>
+                      {Math.round((tabDone / steps.length) * 100)}%
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.round((tabDone / steps.length) * 100)}%`,
+                        background: allTabDone ? "#16a34a" : TEAL,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {!allTabDone &&
+                  (runAllActive ? (
+                    <button
+                      onClick={stopRunAll}
+                      className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px]"
+                      style={{ background: "#dc2626" }}
+                    >
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Stop
+                    </button>
+                  ) : (
+                    <button
+                      onClick={runAll}
+                      className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px] active:scale-95 transition-transform"
+                      style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
+                      data-testid="btn-run-all"
+                    >
+                      <ListChecks className="w-3.5 h-3.5" />
+                      Run All <span className="opacity-70 text-xs">({pendingCount})</span>
+                    </button>
+                  ))}
+              </div>
+            )}
+
+            {/* Mini Source Config (above step 1) */}
+            {tab === "mini" && (
+              <MiniSourceConfig
+                sourceUrl={sourceUrl}
+                setSourceUrl={setSourceUrl}
+                discoveredTools={discoveredTools}
+                setDiscoveredTools={setDiscoveredTools}
+                savedUrl={creds?.miniAppsUrl}
+              />
+            )}
+
+            {/* Step cards — svivva / mini / index22 */}
+            {(tab === "svivva" || tab === "mini" || tab === "index22") &&
+              steps.map((step, idx) => (
+                <StepCard
+                  key={step.id}
+                  step={step}
+                  idx={idx}
+                  status={statuses[step.id] || "pending"}
+                  result={results[step.id] || ""}
+                  onExecute={() => executeStep(step.id)}
+                  onReset={() => resetStep(step.id)}
+                  isQueued={queuedSteps.has(step.id)}
+                  toolCount={step.needsTools ? discoveredTools.length : undefined}
+                />
+              ))}
+
+            {/* Completion */}
+            {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && allTabDone && (
+              <div
+                className="rounded-2xl p-6 text-center space-y-2"
+                style={{
+                  background: `linear-gradient(135deg, ${TEAL}15, ${BURG}15)`,
+                  border: `2px solid ${TEAL}30`,
+                }}
               >
-                {label}
-                {external && <ExternalLink className="w-2.5 h-2.5 opacity-40 ml-auto" />}
-              </a>
-            ))}
+                <p className="text-3xl">🚀</p>
+                <p className="font-black text-lg">
+                  {tab === "svivva"
+                    ? "svivva.com is in orbit!"
+                    : tab === "mini"
+                      ? "Your tools are live on Google!"
+                      : tab === "index22"
+                        ? "Index 22 infrastructure complete!"
+                        : "Deployment configured"}
+                </p>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  {tab === "svivva"
+                    ? "Switch to the Your Tools tab to promote your deployed mini apps."
+                    : tab === "mini"
+                      ? "Your app URLs are connected — Google traffic can flow to your live tools."
+                      : tab === "index22"
+                        ? "Run marketing steps on svivva.com and Your tools tabs, or use Run Everything above."
+                        : "Deployment is ready — your marketing will go live on deploy."}
+                </p>
+                {tab === "svivva" && (
+                  <button
+                    onClick={() => setTab("mini")}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
+                    style={{ background: TEAL }}
+                  >
+                    Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Google Indexing Panel — always visible once orbit has run */}
+            {tab !== "deploy" && tab !== "checklist" && (
+              <GoogleIndexPanel
+                coreUrls={orbitStatus?.coreUrls ?? []}
+                toolUrls={orbitStatus?.toolUrls ?? []}
+                sitemapUrl={orbitUrls.sitemap}
+              />
+            )}
+
+            {/* Quick links */}
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Quick Links
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Marketing Hub", href: "/marketing-hub" },
+                  { label: "Marketing AI", href: "/dashboard/marketing" },
+                  { label: "Cyber Security", href: "/cyber-security-mini-apps" },
+                  { label: "AI Tools Hub", href: "/ai-tools-hub" },
+                  { label: "Cyber Security", href: "/cyber-security-mini-apps" },
+                  { label: "SEO Pack", href: "/seo-pack" },
+                  { label: "Seeds Funnel", href: "/seeds#seeds-marketing" },
+                  { label: "Referrals", href: "/referrals" },
+                  { label: "Orbit (Public)", href: "/orbit" },
+                  { label: "Keywords", href: "/dashboard/keywords" },
+                  { label: "Blog Content", href: "/dashboard/content" },
+                  { label: "View Sitemap", href: "/sitemap.xml", external: true },
+                  {
+                    label: "Search Console",
+                    href: "https://search.google.com/search-console",
+                    external: true,
+                  },
+                ].map(({ label, href, external }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noopener noreferrer" : undefined}
+                    className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 transition-colors text-foreground font-medium min-h-[40px]"
+                  >
+                    {label}
+                    {external && <ExternalLink className="w-2.5 h-2.5 opacity-40 ml-auto" />}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-          </div>{/* end advanced inner */}
-        </details>{/* end advanced accordion */}
+          {/* end advanced inner */}
+        </details>
+        {/* end advanced accordion */}
       </div>
     </div>
   );

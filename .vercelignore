@@ -1,4 +1,4 @@
-# Exclude sibling projects — Vercel only needs Svivva + root config
+# Exclude sibling projects — production deploy uses svivva-main-app with Root Directory = Svivva
 Ai-Tools-Hub/
 CYBER-SECURITY-MINI-APPS-zip/
 Pyracrypt/
@@ -7,6 +7,10 @@ SVIVVA ADD ONS/
 marketing-hub/
 svivva-seo-pack/
 contrib/
+ClutetyMobile/
+clutety-browser-extension/
+AI V-2 -RESTORED/
+ALL\ DE\ APPS\ IN\ ONE/
 .cursor/
 .vscode/
 .github/
@@ -16,3 +20,6 @@ Svivva/.next/
 Svivva/node_modules/
 node_modules/
 .git/
+.next/
+public/
+*.pdf

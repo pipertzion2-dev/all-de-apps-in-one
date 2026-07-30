@@ -55,9 +55,7 @@ export async function GET(req: NextRequest) {
   // re-notifies search engines. Does NOT auto-post to social (avoids spam/bans).
   if (job === "autopilot" || job === "all") {
     try {
-      const { runFullTrafficAutomation } = await import(
-        "@/lib/orbit/full-traffic-automation"
-      );
+      const { runFullTrafficAutomation } = await import("@/lib/orbit/full-traffic-automation");
       const result = await runFullTrafficAutomation();
       out.autopilot = {
         ok: true,
