@@ -47,9 +47,9 @@ export function ThreeAPITraffic() {
     container.appendChild(renderer.domElement);
 
     const colors = {
-      primary: new THREE.Color(0x7ba3ac),
-      secondary: new THREE.Color(0xd782b2),
-      tertiary: new THREE.Color(0x63b3a6),
+      primary: new THREE.Color(0x7b8dac),
+      secondary: new THREE.Color(0xd782b8),
+      tertiary: new THREE.Color(0x639cb3),
     };
 
     const disposables: {

@@ -86,7 +86,7 @@ const PLATFORMS = [
   "Hosted Platform",
   "Other",
 ];
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 function CredInput({
@@ -117,7 +117,7 @@ function CredInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           data-testid={testId}
-          className={`w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0] pr-8 ${mono ? "font-mono text-xs" : ""}`}
+          className={`w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8] pr-8 ${mono ? "font-mono text-xs" : ""}`}
         />
         {secret && (
           <button
@@ -142,7 +142,7 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="text-xs text-[#5BA8A0] hover:underline flex items-center gap-1 flex-shrink-0"
+      className="text-xs text-[#5B8DA8] hover:underline flex items-center gap-1 flex-shrink-0"
     >
       <Copy className="w-3 h-3" /> {copied ? "Copied!" : "Copy"}
     </button>
@@ -243,11 +243,11 @@ function TrafficChat() {
       {/* Chat header */}
       <div
         className="flex items-center gap-2 px-3 py-2.5 border-b border-border"
-        style={{ background: `linear-gradient(135deg, #E91E8C15, #9c27b015)` }}
+        style={{ background: `linear-gradient(135deg, #e91e9a15, #9c27b015)` }}
       >
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: "#E91E8C" }}
+          style={{ background: "#E91E9A" }}
         >
           <Bot className="w-3.5 h-3.5 text-white" />
         </div>
@@ -264,14 +264,14 @@ function TrafficChat() {
             {m.role === "assistant" && (
               <div
                 className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: "#E91E8C" }}
+                style={{ background: "#E91E9A" }}
               >
                 <Bot className="w-3 h-3 text-white" />
               </div>
             )}
             <div
               className={`max-w-[80%] px-3 py-2 rounded-xl text-xs leading-relaxed ${m.role === "user" ? "text-white rounded-tr-none" : "bg-white dark:bg-card border border-border rounded-tl-none"}`}
-              style={m.role === "user" ? { background: "#E91E8C" } : {}}
+              style={m.role === "user" ? { background: "#E91E9A" } : {}}
             >
               {m.content}
               {/* Compact action result */}
@@ -320,12 +320,12 @@ function TrafficChat() {
           <div className="flex gap-2">
             <div
               className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: "#E91E8C" }}
+              style={{ background: "#E91E9A" }}
             >
               <Bot className="w-3 h-3 text-white" />
             </div>
             <div className="bg-white dark:bg-card border border-border rounded-xl rounded-tl-none px-3 py-2 flex items-center gap-1.5">
-              <Loader2 className="w-3 h-3 animate-spin" style={{ color: "#E91E8C" }} />
+              <Loader2 className="w-3 h-3 animate-spin" style={{ color: "#E91E9A" }} />
               <span className="text-xs text-muted-foreground">Working...</span>
             </div>
           </div>
@@ -368,7 +368,7 @@ function TrafficChat() {
           onClick={() => send(input)}
           disabled={!input.trim() || loading}
           className="w-10 h-10 rounded-lg flex items-center justify-center transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 flex-shrink-0"
-          style={{ background: "#E91E8C" }}
+          style={{ background: "#E91E9A" }}
           data-testid="button-traffic-chat-send"
         >
           <Send className="w-4 h-4 text-white" />
@@ -415,7 +415,7 @@ function AddAppPanel({ onDone }: { onDone: () => void }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm flex items-center gap-2">
-          <Plus className="w-4 h-4 text-[#5BA8A0]" /> Add Any App
+          <Plus className="w-4 h-4 text-[#5B8DA8]" /> Add Any App
         </h3>
         <button onClick={onDone} className="text-muted-foreground hover:text-foreground">
           <X className="w-4 h-4" />
@@ -450,7 +450,7 @@ function AddAppPanel({ onDone }: { onDone: () => void }) {
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0]"
+            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8]"
             data-testid="select-platform"
           >
             <option value="">Any platform</option>
@@ -480,7 +480,7 @@ function AddAppPanel({ onDone }: { onDone: () => void }) {
           <select
             value={hosting}
             onChange={(e) => setHosting(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0]"
+            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8]"
             data-testid="select-hosting"
           >
             <option value="">Any host</option>
@@ -511,7 +511,7 @@ function AddAppPanel({ onDone }: { onDone: () => void }) {
       )}
       <Button
         size="sm"
-        className="bg-[#5BA8A0] gap-1.5"
+        className="bg-[#5B8DA8] gap-1.5"
         disabled={!name || !url || addMutation.isPending}
         onClick={() => addMutation.mutate()}
         data-testid="button-add-app"
@@ -626,7 +626,7 @@ function DomainPanel() {
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
-        <Globe className="w-4 h-4 text-[#5BA8A0]" /> Domain Verification — Any Provider
+        <Globe className="w-4 h-4 text-[#5B8DA8]" /> Domain Verification — Any Provider
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <CredInput
@@ -641,7 +641,7 @@ function DomainPanel() {
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0]"
+            className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8]"
             data-testid="select-dns-provider"
           >
             <option value="any">Any / Other</option>
@@ -654,7 +654,7 @@ function DomainPanel() {
       </div>
       <Button
         size="sm"
-        className="bg-[#5BA8A0] gap-1.5"
+        className="bg-[#5B8DA8] gap-1.5"
         disabled={!domain || generateMutation.isPending}
         onClick={() => generateMutation.mutate()}
         data-testid="button-generate-dns"
@@ -670,7 +670,7 @@ function DomainPanel() {
         <div className="space-y-3">
           <div className="bg-muted/40 rounded-lg p-3 space-y-2">
             <p className="text-xs font-medium">
-              Add this TXT record to <span className="text-[#5BA8A0]">{tokenData.domain}</span>:
+              Add this TXT record to <span className="text-[#5B8DA8]">{tokenData.domain}</span>:
             </p>
             <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border font-mono text-xs break-all">
               <span className="flex-1">{tokenData.record}</span>
@@ -690,7 +690,7 @@ function DomainPanel() {
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5 border-[#5BA8A0]/30 text-[#5BA8A0]"
+            className="gap-1.5 border-[#5B8DA8]/30 text-[#5B8DA8]"
             disabled={checkMutation.isPending}
             onClick={() => checkMutation.mutate()}
             data-testid="button-verify-dns"
@@ -834,7 +834,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
       id: "reddit",
       icon: MessageSquare,
       label: "Reddit",
-      color: "#FF4500",
+      color: "#FF7800",
       desc: "Niche subreddits for your use case — authentic community traffic",
       href: "https://reddit.com/r/SideProject/submit",
       cta: "Post →",
@@ -844,7 +844,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
-        <TrendingUp className="w-4 h-4 text-[#5BA8A0]" /> Traffic Channels
+        <TrendingUp className="w-4 h-4 text-[#5B8DA8]" /> Traffic Channels
       </h3>
 
       {/* AI Chat */}
@@ -866,7 +866,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
               <span className="text-xs font-medium truncate">{label}</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
-            <span className="text-xs text-[#5BA8A0] group-hover:underline">{cta}</span>
+            <span className="text-xs text-[#5B8DA8] group-hover:underline">{cta}</span>
           </a>
         ))}
       </div>
@@ -874,7 +874,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
       {/* Social launch pack */}
       <div className="border border-border rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Share2 className="w-4 h-4 text-[#5BA8A0]" />
+          <Share2 className="w-4 h-4 text-[#5B8DA8]" />
           <h4 className="font-semibold text-sm">Auto-Generate Social Launch Pack</h4>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -889,7 +889,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
                 onChange={(e) =>
                   setSelectedApp(allApps.find((a) => a.name === e.target.value) || null)
                 }
-                className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0]"
+                className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8]"
                 data-testid="select-social-app"
               >
                 {allApps.map((a) => (
@@ -901,7 +901,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
             </div>
             <Button
               size="sm"
-              className="bg-[#5BA8A0] gap-1.5"
+              className="bg-[#5B8DA8] gap-1.5"
               disabled={socialMutation.isPending || !selectedApp}
               onClick={() => socialMutation.mutate()}
               data-testid="button-gen-social"
@@ -939,7 +939,7 @@ function TrafficPanel({ apps, replitApps }: { apps: ManualApp[]; replitApps: Imp
                     icon={MessageSquare}
                     platform="Reddit"
                     content={socialContent.reddit}
-                    color="#FF4500"
+                    color="#FF7800"
                   />
                 )}
                 {socialContent.producthunt && (
@@ -999,7 +999,7 @@ function AppsList({
       <div className="flex items-center gap-2 flex-wrap">
         <Button
           size="sm"
-          className="bg-[#5BA8A0] gap-1.5"
+          className="bg-[#5B8DA8] gap-1.5"
           onClick={onAddApp}
           data-testid="button-open-add-app"
         >
@@ -1008,7 +1008,7 @@ function AppsList({
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 border-[#5BA8A0]/30 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
+          className="gap-1.5 border-[#5B8DA8]/30 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
           disabled={importPending}
           onClick={onImportApps}
           data-testid="button-import-apps"
@@ -1021,7 +1021,7 @@ function AppsList({
           {importPending ? "Importing..." : "Import Apps"}
         </Button>
       </div>
-      <div className="rounded-xl border border-[#6B2C4A]/20 bg-[#6B2C4A]/5 p-3 space-y-2">
+      <div className="rounded-xl border border-[#6B2C4E]/20 bg-[#6B2C4E]/5 p-3 space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <p className="text-sm font-semibold text-foreground">Pyracrypt</p>
@@ -1032,7 +1032,7 @@ function AppsList({
           </div>
           <Button
             size="sm"
-            className="bg-[#6B2C4A] gap-1.5"
+            className="bg-[#6B2C4E] gap-1.5"
             onClick={onImportApps}
             disabled={importPending}
             data-testid="button-import-pyracrypt"
@@ -1059,7 +1059,7 @@ function AppsList({
                 onClick={() => setExpandedId(expandedId === `m-${app.id}` ? null : `m-${app.id}`)}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Globe className="w-4 h-4 text-[#5BA8A0] flex-shrink-0" />
+                  <Globe className="w-4 h-4 text-[#5B8DA8] flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{app.name}</p>
                     <p className="text-xs text-muted-foreground truncate">
@@ -1086,7 +1086,7 @@ function AppsList({
                       href={`/${slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline"
+                      className="flex items-center gap-1 text-xs text-[#5B8DA8] hover:underline"
                     >
                       <ArrowRight className="w-2.5 h-2.5" /> /{slug}{" "}
                       <ExternalLink className="w-2.5 h-2.5 opacity-60" />
@@ -1105,7 +1105,7 @@ function AppsList({
                 }
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <Package className="w-4 h-4 text-[#F26207] flex-shrink-0" />
+                  <Package className="w-4 h-4 text-[#F29107] flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{app.title}</p>
                     <p className="text-xs text-muted-foreground">
@@ -1128,7 +1128,7 @@ function AppsList({
                       href={`/${p.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline"
+                      className="flex items-center gap-1 text-xs text-[#5B8DA8] hover:underline"
                     >
                       <ArrowRight className="w-2.5 h-2.5" /> /{p.slug}{" "}
                       <ExternalLink className="w-2.5 h-2.5 opacity-60" />
@@ -1140,7 +1140,7 @@ function AppsList({
                         <Layers className="w-3 h-3" /> Mini-apps
                       </p>
                       {app.subApps.map((sub) => (
-                        <div key={sub.name} className="pl-3 border-l-2 border-[#5BA8A0]/30">
+                        <div key={sub.name} className="pl-3 border-l-2 border-[#5B8DA8]/30">
                           <p className="text-xs font-medium">{sub.name}</p>
                           {sub.pages.map((p) => (
                             <a
@@ -1148,7 +1148,7 @@ function AppsList({
                               href={`/${p.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline"
+                              className="flex items-center gap-1 text-xs text-[#5B8DA8] hover:underline"
                             >
                               <ArrowRight className="w-2.5 h-2.5" /> /{p.slug}{" "}
                               <ExternalLink className="w-2.5 h-2.5 opacity-60" />

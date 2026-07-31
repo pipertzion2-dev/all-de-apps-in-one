@@ -610,7 +610,7 @@ export default function ProjectDetailPage() {
             <Play className="w-4 h-4" />
             Run Tests
           </Button>
-          <Button className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2" data-testid="button-deploy">
+          <Button className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2" data-testid="button-deploy">
             <CheckCircle2 className="w-4 h-4" />
             Deploy
           </Button>
@@ -798,7 +798,7 @@ export default function ProjectDetailPage() {
                     <Button
                       variant="default"
                       size="sm"
-                      className="bg-[#7BA3AC] hover:bg-[#6B939C]"
+                      className="bg-[#7B8DAC] hover:bg-[#6B7D9C]"
                       data-testid="button-manage-training"
                     >
                       Manage Training Data
@@ -874,7 +874,7 @@ export default function ProjectDetailPage() {
                     generate them for you automatically.
                   </p>
                   <Button
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                    className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                     onClick={() => generateTrainingMutation.mutate()}
                     disabled={generateTrainingMutation.isPending}
                     data-testid="button-generate-training"
@@ -979,7 +979,7 @@ export default function ProjectDetailPage() {
                     inputs before real people use it
                   </p>
                   <Button
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                    className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                     onClick={() => generateEvalsMutation.mutate()}
                     disabled={generateEvalsMutation.isPending}
                     data-testid="button-generate-evals"
@@ -1076,7 +1076,7 @@ export default function ProjectDetailPage() {
                   </CardDescription>
                 </div>
                 <Button
-                  className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                  className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                   onClick={() => chaosMutation.mutate()}
                   disabled={chaosMutation.isPending}
                   data-testid="button-run-chaos"
@@ -1280,7 +1280,7 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
               <Button
-                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                 onClick={() => breedMutation.mutate()}
                 disabled={
                   breedMutation.isPending ||
@@ -1420,7 +1420,7 @@ export default function ProjectDetailPage() {
                   />
                 </div>
                 <Button
-                  className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                  className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                   onClick={() => autopsyMutation.mutate()}
                   disabled={autopsyMutation.isPending || !autopsyInput.trim()}
                   data-testid="button-run-autopsy"
@@ -1584,7 +1584,7 @@ export default function ProjectDetailPage() {
                     </CardDescription>
                   </div>
                   <Button
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                    className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                     onClick={() => neuralPromptMutation.mutate()}
                     disabled={neuralPromptMutation.isPending}
                     data-testid="button-optimize-prompt"
@@ -1709,7 +1709,7 @@ export default function ProjectDetailPage() {
                     </CardDescription>
                   </div>
                   <Button
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                    className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                     onClick={() => neuralSchemaMutation.mutate()}
                     disabled={neuralSchemaMutation.isPending}
                     data-testid="button-enhance-schema"
@@ -1963,7 +1963,7 @@ export default function ProjectDetailPage() {
                       </SelectContent>
                     </Select>
                     <Button
-                      className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                      className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                       onClick={() => neuralAugmentMutation.mutate()}
                       disabled={neuralAugmentMutation.isPending}
                       data-testid="button-augment-training"
@@ -2053,7 +2053,7 @@ export default function ProjectDetailPage() {
                     </CardDescription>
                   </div>
                   <Button
-                    className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
+                    className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                     onClick={() => neuralAnomalyMutation.mutate()}
                     disabled={neuralAnomalyMutation.isPending}
                     data-testid="button-detect-anomalies"

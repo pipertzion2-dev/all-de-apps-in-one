@@ -11,7 +11,7 @@ export function SeoBreadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           <li key={i} className="flex items-center gap-1">
             {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40" aria-hidden />}
             {item.href ? (
-              <Link href={item.href} className="hover:text-[#5BA8A0] transition-colors">
+              <Link href={item.href} className="hover:text-[#5B8DA8] transition-colors">
                 {item.label}
               </Link>
             ) : (

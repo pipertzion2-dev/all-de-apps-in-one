@@ -31,10 +31,10 @@ const DISALLOWED_IN_ROBOTS = [
   "/_next",
   "/gate",
   "/play",
-  "/clutety",
-  "/pyracrypt",
-  "/clutter",
-  "/clutety-shell",
+  "/playground",
+  "/test",
+  "/badge",
+  "/api-card",
 ];
 
 function segmentToPath(parts: string[]): string {

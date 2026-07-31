@@ -255,11 +255,11 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
   if (showAskPrompt) {
     return (
       <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-        <Card className="w-80 border-[#5BA8A0]/30 shadow-lg">
+        <Card className="w-80 border-[#5B8DA8]/30 shadow-lg">
           <CardContent className="pt-4 pb-4 px-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#5BA8A0]/10 flex items-center justify-center shrink-0">
-                <GraduationCap className="w-5 h-5 text-[#5BA8A0]" />
+              <div className="w-9 h-9 rounded-lg bg-[#5B8DA8]/10 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5 text-[#5B8DA8]" />
               </div>
               <div className="flex-1 space-y-3">
                 <div>
@@ -273,7 +273,7 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
                     size="sm"
                     onClick={handleAcceptTutorials}
                     className="text-xs h-7 px-3"
-                    style={{ background: "#5BA8A0" }}
+                    style={{ background: "#5B8DA8" }}
                     data-testid="button-accept-tutorials"
                   >
                     Yes, show me
@@ -303,17 +303,17 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
-      <Card className="w-80 border-[#5BA8A0]/30 shadow-lg overflow-hidden">
+      <Card className="w-80 border-[#5B8DA8]/30 shadow-lg overflow-hidden">
         <div className="h-1 bg-muted">
           <div
-            className="h-full bg-[#5BA8A0] transition-all duration-300"
+            className="h-full bg-[#5B8DA8] transition-all duration-300"
             style={{ width: `${((currentStep + 1) / tutorial.steps.length) * 100}%` }}
           />
         </div>
         <CardContent className="pt-3 pb-3 px-4">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-[#5BA8A0]" />
+              <Lightbulb className="w-4 h-4 text-[#5B8DA8]" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                 {tutorial.pageName} · {currentStep + 1}/{tutorial.steps.length}
               </span>
@@ -354,7 +354,7 @@ export function TutorialProvider({ pathname }: { pathname: string }) {
                 size="sm"
                 onClick={handleNext}
                 className="h-7 text-xs px-3"
-                style={{ background: "#5BA8A0" }}
+                style={{ background: "#5B8DA8" }}
                 data-testid="button-tutorial-next"
               >
                 {isLast ? (

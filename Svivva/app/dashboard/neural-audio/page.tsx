@@ -87,7 +87,7 @@ function StatusBadge({ status }: { status: string }) {
     return <Badge className="bg-green-600 text-white no-default-hover-elevate">{status}</Badge>;
   }
   if (s === "active" || s === "running") {
-    return <Badge className="bg-[#5BA8A0] text-white no-default-hover-elevate">{status}</Badge>;
+    return <Badge className="bg-[#5B8DA8] text-white no-default-hover-elevate">{status}</Badge>;
   }
   if (s === "failed" || s === "error") {
     return <Badge variant="destructive">{status}</Badge>;
@@ -356,7 +356,7 @@ export default function NeuralAudioPage() {
               key={tab.id}
               variant={activeTab === tab.id ? "default" : "outline"}
               onClick={() => setActiveTab(tab.id)}
-              className={`gap-2 ${activeTab === tab.id ? "bg-[#5BA8A0] text-white" : ""}`}
+              className={`gap-2 ${activeTab === tab.id ? "bg-[#5B8DA8] text-white" : ""}`}
               data-testid={`tab-${tab.id}`}
             >
               <Icon className="w-4 h-4" />
@@ -377,7 +377,7 @@ export default function NeuralAudioPage() {
             </div>
             <Button
               onClick={() => setShowCreateDataset(!showCreateDataset)}
-              className="gap-2 bg-[#5BA8A0] text-white"
+              className="gap-2 bg-[#5B8DA8] text-white"
               data-testid="button-create-dataset"
             >
               <Plus className="w-4 h-4" />
@@ -435,7 +435,7 @@ export default function NeuralAudioPage() {
                       !datasetForm.description ||
                       !datasetForm.genre
                     }
-                    className="bg-[#5BA8A0] text-white"
+                    className="bg-[#5B8DA8] text-white"
                     data-testid="button-submit-dataset"
                   >
                     {loading.createDataset && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -467,7 +467,7 @@ export default function NeuralAudioPage() {
                 </p>
                 <Button
                   onClick={() => setShowCreateDataset(true)}
-                  className="gap-2 bg-[#5BA8A0] text-white"
+                  className="gap-2 bg-[#5B8DA8] text-white"
                   data-testid="button-create-first-dataset"
                 >
                   <Plus className="w-4 h-4" />
@@ -520,7 +520,7 @@ export default function NeuralAudioPage() {
                             e.stopPropagation();
                             setShowAddItem(showAddItem === ds.id ? null : ds.id);
                           }}
-                          className="gap-1 bg-[#5BA8A0] text-white"
+                          className="gap-1 bg-[#5B8DA8] text-white"
                           data-testid={`button-add-item-${ds.id}`}
                         >
                           <Plus className="w-3 h-3" />
@@ -597,7 +597,7 @@ export default function NeuralAudioPage() {
                               size="sm"
                               onClick={() => handleAddItem(ds.id)}
                               disabled={loading.addItem || !itemForm.fileName}
-                              className="bg-[#5BA8A0] text-white"
+                              className="bg-[#5B8DA8] text-white"
                               data-testid="button-submit-item"
                             >
                               {loading.addItem && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
@@ -689,7 +689,7 @@ export default function NeuralAudioPage() {
             </div>
             <Button
               onClick={() => setShowCreateModel(!showCreateModel)}
-              className="gap-2 bg-[#5BA8A0] text-white"
+              className="gap-2 bg-[#5B8DA8] text-white"
               data-testid="button-create-model"
             >
               <Plus className="w-4 h-4" />
@@ -754,7 +754,7 @@ export default function NeuralAudioPage() {
                   <Button
                     onClick={handleCreateModel}
                     disabled={loading.createModel || !modelForm.name}
-                    className="bg-[#5BA8A0] text-white"
+                    className="bg-[#5B8DA8] text-white"
                     data-testid="button-submit-model"
                   >
                     {loading.createModel && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -786,7 +786,7 @@ export default function NeuralAudioPage() {
                 </p>
                 <Button
                   onClick={() => setShowCreateModel(true)}
-                  className="gap-2 bg-[#5BA8A0] text-white"
+                  className="gap-2 bg-[#5B8DA8] text-white"
                   data-testid="button-create-first-model"
                 >
                   <Plus className="w-4 h-4" />
@@ -836,7 +836,7 @@ export default function NeuralAudioPage() {
             </div>
             <Button
               onClick={() => setShowStartTraining(!showStartTraining)}
-              className="gap-2 bg-[#5BA8A0] text-white"
+              className="gap-2 bg-[#5B8DA8] text-white"
               data-testid="button-start-training"
             >
               <Play className="w-4 h-4" />
@@ -918,7 +918,7 @@ export default function NeuralAudioPage() {
                   <Button
                     onClick={handleStartTraining}
                     disabled={loading.startTraining || !jobForm.modelId || !jobForm.datasetId}
-                    className="bg-[#5BA8A0] text-white"
+                    className="bg-[#5B8DA8] text-white"
                     data-testid="button-submit-training"
                   >
                     {loading.startTraining && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -950,7 +950,7 @@ export default function NeuralAudioPage() {
                 </p>
                 <Button
                   onClick={() => setShowStartTraining(true)}
-                  className="gap-2 bg-[#5BA8A0] text-white"
+                  className="gap-2 bg-[#5B8DA8] text-white"
                   data-testid="button-start-first-training"
                 >
                   <Play className="w-4 h-4" />
@@ -976,7 +976,7 @@ export default function NeuralAudioPage() {
                   <CardContent className="space-y-3">
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className="h-2 rounded-full bg-[#5BA8A0] transition-all"
+                        className="h-2 rounded-full bg-[#5B8DA8] transition-all"
                         style={{ width: `${Math.min(job.progress, 100)}%` }}
                         data-testid={`progress-job-${job.id}`}
                       />
@@ -1014,7 +1014,7 @@ export default function NeuralAudioPage() {
               <Card data-testid="card-guide-requirements">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Database className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+                    <Database className="w-5 h-5" style={{ color: "#5B8DA8" }} />
                     Dataset Requirements
                   </CardTitle>
                 </CardHeader>
@@ -1061,7 +1061,7 @@ export default function NeuralAudioPage() {
               <Card data-testid="card-guide-tips">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+                    <BookOpen className="w-5 h-5" style={{ color: "#5B8DA8" }} />
                     Training Tips
                   </CardTitle>
                 </CardHeader>
@@ -1080,7 +1080,7 @@ export default function NeuralAudioPage() {
               <Card data-testid="card-guide-model-types">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Cpu className="w-5 h-5" style={{ color: "#6B2C4A" }} />
+                    <Cpu className="w-5 h-5" style={{ color: "#6B2C4E" }} />
                     Model Types
                   </CardTitle>
                 </CardHeader>
@@ -1102,7 +1102,7 @@ export default function NeuralAudioPage() {
               <Card data-testid="card-guide-checklist">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Music className="w-5 h-5" style={{ color: "#6B2C4A" }} />
+                    <Music className="w-5 h-5" style={{ color: "#6B2C4E" }} />
                     Quality Checklist
                   </CardTitle>
                 </CardHeader>

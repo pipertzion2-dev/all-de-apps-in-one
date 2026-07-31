@@ -48,8 +48,8 @@ import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

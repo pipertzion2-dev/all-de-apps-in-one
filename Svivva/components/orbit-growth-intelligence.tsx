@@ -17,8 +17,8 @@ import {
 import type { GrowthIntelligenceReport, GrowthOpportunity } from "@/lib/orbit/growth-intelligence";
 import { GROWTH_INTEL_MIN_SCORE } from "@/lib/orbit/growth-intelligence";
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 
 const SYSTEM_LABELS: Record<string, string> = {
   pain_miner: "Pain Miner",

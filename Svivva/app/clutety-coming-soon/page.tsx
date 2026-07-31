@@ -22,7 +22,7 @@ export default function ClutetyComingSoonPage() {
       className="min-h-screen flex flex-col items-center justify-center px-6 py-16 text-center"
       style={{
         background:
-          "radial-gradient(ellipse at 50% 0%, rgba(91,168,160,0.12) 0%, transparent 55%), #0a0a0a",
+          "radial-gradient(ellipse at 50% 0%, rgba(91, 141, 168,0.12) 0%, transparent 55%), #0a0a0a",
       }}
     >
       <div className="max-w-md w-full flex flex-col items-center gap-6">
@@ -32,7 +32,7 @@ export default function ClutetyComingSoonPage() {
           alt="Clutety"
           width={320}
           height={213}
-          className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-[0_4px_24px_rgba(91,168,160,0.35)]"
+          className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-[0_4px_24px_rgba(91, 141, 168,0.35)]"
           style={{ background: "transparent", mixBlendMode: "screen" }}
         />
 

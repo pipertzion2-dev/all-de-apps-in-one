@@ -47,7 +47,7 @@ export function ThreeEvalGrid() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    const passColor = new THREE.Color(0x63b3a6);
+    const passColor = new THREE.Color(0x639cb3);
     const failColor = new THREE.Color(0xe57373);
     const pendingColor = new THREE.Color(0x96a9ab);
 
@@ -92,7 +92,7 @@ export function ThreeEvalGrid() {
       new THREE.BoxGeometry(gridSize * 1.2, 0.1, gridSize * 1.2),
     );
     const edgesMaterial = new THREE.LineBasicMaterial({
-      color: 0x7ba3ac,
+      color: 0x7b8dac,
       transparent: true,
       opacity: 0.3,
     });

@@ -6,7 +6,7 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-const ACCENT = 0x6b2c4a;
+const ACCENT = 0x6b2c4e;
 
 export default function SecurityBackground() {
   const mountRef = useRef<HTMLDivElement>(null);

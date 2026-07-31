@@ -6,7 +6,7 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-const ACCENT = 0xc06010;
+const ACCENT = 0xc08310;
 
 export default function OrbitBackground() {
   const mountRef = useRef<HTMLDivElement>(null);

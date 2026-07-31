@@ -49,11 +49,11 @@ export function ThreeSchemaMesh() {
     container.appendChild(renderer.domElement);
 
     const colors = [
-      new THREE.Color(0x7ba3ac),
-      new THREE.Color(0xd782b2),
-      new THREE.Color(0x63b3a6),
+      new THREE.Color(0x7b8dac),
+      new THREE.Color(0xd782b8),
+      new THREE.Color(0x639cb3),
       new THREE.Color(0x96a9ab),
-      new THREE.Color(0xf3afc4),
+      new THREE.Color(0xf3afc9),
     ];
 
     const disposables: {
@@ -89,7 +89,7 @@ export function ThreeSchemaMesh() {
       cubes.push(cube);
     }
 
-    const gridHelper = new THREE.GridHelper(20, 20, 0x7ba3ac, 0x333333);
+    const gridHelper = new THREE.GridHelper(20, 20, 0x7b8dac, 0x333333);
     const gridMaterial = gridHelper.material as THREE.Material;
     gridMaterial.transparent = true;
     gridMaterial.opacity = 0.1;
@@ -98,7 +98,7 @@ export function ThreeSchemaMesh() {
     scene.add(gridHelper);
 
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x7ba3ac,
+      color: 0x7b8dac,
       transparent: true,
       opacity: 0.2,
     });

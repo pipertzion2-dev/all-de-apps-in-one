@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { getSuggestedGoDaddyDomain } from "@/lib/site-url-public";
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 interface CredsData {
   hasGodaddy: boolean;
@@ -61,7 +61,7 @@ function SecretInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0] pr-9 ${mono ? "font-mono text-xs" : ""}`}
+          className={`w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8] pr-9 ${mono ? "font-mono text-xs" : ""}`}
         />
         <button
           type="button"
@@ -99,7 +99,7 @@ function PlainInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5BA8A0] ${mono ? "font-mono text-xs" : ""}`}
+        className={`w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#5B8DA8] ${mono ? "font-mono text-xs" : ""}`}
       />
       {helpText && <p className="text-[11px] text-muted-foreground">{helpText}</p>}
     </div>
@@ -139,7 +139,7 @@ function ServiceCard({
 
   const statusBg: Record<ServiceStatus, string> = {
     connected: "bg-green-50 dark:bg-green-950/20 border-green-300/60",
-    auto: "bg-[#5BA8A0]/5 border-[#5BA8A0]/30",
+    auto: "bg-[#5B8DA8]/5 border-[#5B8DA8]/30",
     setup: "bg-amber-50 dark:bg-amber-950/15 border-amber-300/60",
     optional: "bg-card border-border",
   };

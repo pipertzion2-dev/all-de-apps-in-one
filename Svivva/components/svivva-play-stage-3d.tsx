@@ -18,7 +18,7 @@ const MODELS: Record<PlayStageModel, string> = {
 export function SvivvaPlayStage3D({
   model,
   className = "",
-  accent = "#A05068",
+  accent = "#A0506D",
 }: {
   model: PlayStageModel;
   className?: string;

@@ -70,7 +70,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5BA8A0]/60 transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5B8DA8]/60 transition-colors"
             />
           </div>
 
@@ -83,7 +83,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5BA8A0]/60 transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5B8DA8]/60 transition-colors"
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5BA8A0]/60 transition-colors"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-[#5B8DA8]/60 transition-colors"
             />
           </div>
 
@@ -113,7 +113,7 @@ export default function SignupPage() {
             type="submit"
             disabled={loading}
             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 mt-1"
-            style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
+            style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
           >
             {loading ? "Creating account…" : "Create account"}
           </button>
@@ -122,7 +122,7 @@ export default function SignupPage() {
 
       <p className="text-xs text-white/30">
         Already have an account?{" "}
-        <Link href="/login" className="text-[#5BA8A0] hover:underline">
+        <Link href="/login" className="text-[#5B8DA8] hover:underline">
           Sign in
         </Link>
       </p>

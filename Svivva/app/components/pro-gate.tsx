@@ -20,11 +20,11 @@ export function ProGate({ children, feature = "this feature" }: ProGateProps) {
       <div
         className="w-16 h-16 rounded-2xl flex items-center justify-center"
         style={{
-          background: "linear-gradient(135deg, rgba(91,168,160,0.15), rgba(107,44,74,0.15))",
-          border: "1px solid rgba(91,168,160,0.3)",
+          background: "linear-gradient(135deg, rgba(91, 141, 168,0.15), rgba(107, 44, 78,0.15))",
+          border: "1px solid rgba(91, 141, 168,0.3)",
         }}
       >
-        <Lock className="w-7 h-7 text-[#5BA8A0]" />
+        <Lock className="w-7 h-7 text-[#5B8DA8]" />
       </div>
 
       <div className="space-y-2 max-w-sm">
@@ -39,7 +39,7 @@ export function ProGate({ children, feature = "this feature" }: ProGateProps) {
         <Link href="/dashboard/billing">
           <button
             className="h-11 px-6 rounded-xl font-bold text-sm text-white flex items-center gap-2 transition-opacity hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
+            style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
             data-testid="button-upgrade-cta"
           >
             <Zap className="w-4 h-4" />
@@ -63,11 +63,11 @@ export function ProGate({ children, feature = "this feature" }: ProGateProps) {
               <div
                 className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: "rgba(91,168,160,0.2)",
-                  border: "1px solid rgba(91,168,160,0.4)",
+                  background: "rgba(91, 141, 168,0.2)",
+                  border: "1px solid rgba(91, 141, 168,0.4)",
                 }}
               >
-                <span className="text-[#5BA8A0] text-[8px] font-bold">✓</span>
+                <span className="text-[#5B8DA8] text-[8px] font-bold">✓</span>
               </div>
               {f}
             </div>

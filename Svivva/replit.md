@@ -7,7 +7,7 @@ ZZAI is a SaaS platform designed to transform user prompts into production-ready
 ## User Preferences
 
 - Clean, minimal design with Three.js flower background (35-40% opacity)
-- ZZAI branding throughout (teal #5BA8A0, burgundy #6B2C4A)
+- ZZAI branding throughout (teal #5B8DA8, burgundy #6B2C4E)
 - Dark mode support
 - Apple-like user-friendly UI: simple, guided, no clutter
 

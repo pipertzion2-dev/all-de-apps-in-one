@@ -127,7 +127,7 @@ export default async function ApiCardPage({ params }: PageProps) {
           style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}
         >
           <span
-            style={{ color: "#5BA8A0", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}
+            style={{ color: "#5B8DA8", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}
           >
             svivva
           </span>
@@ -139,7 +139,7 @@ export default async function ApiCardPage({ params }: PageProps) {
           style={{
             padding: "6px 14px",
             borderRadius: 8,
-            background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)",
+            background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -214,7 +214,7 @@ export default async function ApiCardPage({ params }: PageProps) {
                 padding: "3px 8px",
                 borderRadius: 4,
                 background: "#16213e",
-                color: "#5BA8A0",
+                color: "#5B8DA8",
                 fontWeight: 700,
                 fontSize: 11,
                 fontFamily: "monospace",
@@ -331,8 +331,8 @@ export default async function ApiCardPage({ params }: PageProps) {
             marginTop: 48,
             padding: 24,
             borderRadius: 16,
-            background: "linear-gradient(135deg, rgba(91,168,160,0.1), rgba(107,44,74,0.1))",
-            border: "1px solid rgba(91,168,160,0.2)",
+            background: "linear-gradient(135deg, rgba(91, 141, 168,0.1), rgba(107, 44, 78,0.1))",
+            border: "1px solid rgba(91, 141, 168,0.2)",
             textAlign: "center",
           }}
         >
@@ -341,7 +341,7 @@ export default async function ApiCardPage({ params }: PageProps) {
             style={{
               fontSize: 22,
               fontWeight: 800,
-              color: "#5BA8A0",
+              color: "#5B8DA8",
               letterSpacing: "-0.02em",
               marginBottom: 8,
             }}
@@ -368,7 +368,7 @@ export default async function ApiCardPage({ params }: PageProps) {
               gap: 8,
               padding: "10px 24px",
               borderRadius: 10,
-              background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)",
+              background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)",
               color: "#fff",
               fontSize: 14,
               fontWeight: 600,

@@ -126,7 +126,7 @@ export function ReplitUsernameConnector({
           <button
             onClick={() => setOpen((o) => !o)}
             className="text-xs font-semibold px-2.5 py-0.5 rounded-md text-white shrink-0"
-            style={{ background: "#5BA8A0" }}
+            style={{ background: "#5B8DA8" }}
             data-testid="button-connect-replit"
           >
             Connect →
@@ -184,7 +184,7 @@ export function ReplitUsernameConnector({
             <button
               onClick={() => redirectToLogin()}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-[11px] font-bold"
-              style={{ background: "#6B2C4A" }}
+              style={{ background: "#6B2C4E" }}
               data-testid="button-relogin"
             >
               <LogIn className="w-3.5 h-3.5" /> Log in again
@@ -198,7 +198,7 @@ export function ReplitUsernameConnector({
               onClick={autoConnect}
               disabled={autoConnecting}
               className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-white text-xs font-bold disabled:opacity-60 transition-all active:scale-95"
-              style={{ background: "#F26207" }}
+              style={{ background: "#F29107" }}
               data-testid="button-autoconnect-replit"
             >
               {autoConnecting ? (
@@ -277,7 +277,7 @@ function UsernameForm({
           onChange={(e) => setUsername(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSave()}
           placeholder="your-username"
-          className="flex-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] font-mono outline-none focus:ring-1 focus:ring-[#5BA8A0]"
+          className="flex-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] font-mono outline-none focus:ring-1 focus:ring-[#5B8DA8]"
           data-testid="input-replit-username"
           autoFocus
         />
@@ -285,7 +285,7 @@ function UsernameForm({
           onClick={onSave}
           disabled={saving || !username.trim()}
           className="px-3 py-1.5 rounded-lg text-white text-[11px] font-semibold disabled:opacity-50 shrink-0"
-          style={{ background: "#5BA8A0" }}
+          style={{ background: "#5B8DA8" }}
           data-testid="button-save-replit-username"
         >
           {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}

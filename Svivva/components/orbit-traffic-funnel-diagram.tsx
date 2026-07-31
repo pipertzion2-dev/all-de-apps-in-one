@@ -14,8 +14,8 @@ type Props = {
   className?: string;
 };
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 
 export function OrbitTrafficFunnelDiagram({
   compact = false,

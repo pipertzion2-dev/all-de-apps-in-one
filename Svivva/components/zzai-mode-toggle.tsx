@@ -62,9 +62,9 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
     scene.add(new THREE.AmbientLight(0xffffff, 1.2));
     const key = new THREE.DirectionalLight(0xffffff, 1.4);
     key.position.set(2.4, 2.6, 3.4);
-    const fill = new THREE.DirectionalLight(0x00e5ff, 0.45);
+    const fill = new THREE.DirectionalLight(0x5b8da8, 0.45);
     fill.position.set(-2.2, -0.8, 1.8);
-    const backLight = new THREE.DirectionalLight(0xff2bd6, 0.35);
+    const backLight = new THREE.DirectionalLight(0xd94f9c, 0.35);
     backLight.position.set(0, 1.2, -2.4);
     scene.add(key, fill, backLight);
 
@@ -104,10 +104,10 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
 
     const rimGeo = new THREE.TorusGeometry(1.08, 0.03, 18, 100);
     const rimMat = new THREE.MeshPhysicalMaterial({
-      color: 0x00e5ff,
+      color: 0x5b8da8,
       metalness: 0.9,
       roughness: 0.18,
-      emissive: 0x00e5ff,
+      emissive: 0x5b8da8,
       emissiveIntensity: 0.4,
       transparent: true,
       opacity: 0.9,
@@ -155,8 +155,8 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
         card.add(front, back);
       })
       .catch(() => {
-        frontMat = new THREE.MeshPhysicalMaterial({ color: 0x00e5ff });
-        backMat = new THREE.MeshPhysicalMaterial({ color: 0xff2bd6 });
+        frontMat = new THREE.MeshPhysicalMaterial({ color: 0x5b8da8 });
+        backMat = new THREE.MeshPhysicalMaterial({ color: 0xd94f9c });
         const front = new THREE.Mesh(planeGeo, frontMat);
         const back = new THREE.Mesh(planeGeo.clone(), backMat);
         back.rotation.y = Math.PI;
@@ -181,8 +181,8 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
       card.position.y = Math.sin(t * 1.35) * 0.05;
 
       const signalish = Math.cos(cur) > 0;
-      rimMat.color.setHex(signalish ? 0x00e5ff : 0xff2bd6);
-      rimMat.emissive.setHex(signalish ? 0x00e5ff : 0xff2bd6);
+      rimMat.color.setHex(signalish ? 0x5b8da8 : 0xd94f9c);
+      rimMat.emissive.setHex(signalish ? 0x5b8da8 : 0xd94f9c);
       rim.rotation.z = t * 0.5;
       fill.intensity = signalish ? 0.55 : 0.2;
       backLight.intensity = signalish ? 0.2 : 0.55;
@@ -227,9 +227,9 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
         onClick={() => setMode("digital")}
         className="order-2 sm:order-1 text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase transition-all"
         style={{
-          color: "#00E5FF",
+          color: "#5B8DA8",
           opacity: isSignal ? 1 : 0.35,
-          textShadow: isSignal ? "0 0 12px rgba(0,229,255,0.55)" : "none",
+          textShadow: isSignal ? "0 0 12px rgba(91, 141, 168,0.55)" : "none",
         }}
         data-testid="button-platform-toggle-signal"
         title="Signal — Prompt to API"
@@ -241,7 +241,7 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
         type="button"
         aria-label={isSignal ? "Flip to Crest" : "Flip to Signal"}
         onClick={() => toggleMode()}
-        className="order-1 sm:order-2 relative rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E5FF]"
+        className="order-1 sm:order-2 relative rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
         style={{
           width: px,
           height: px,
@@ -260,9 +260,9 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
         onClick={() => setMode("physical")}
         className="order-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase transition-all"
         style={{
-          color: "#FF2BD6",
+          color: "#D94F9C",
           opacity: !isSignal ? 1 : 0.35,
-          textShadow: !isSignal ? "0 0 12px rgba(255,43,214,0.55)" : "none",
+          textShadow: !isSignal ? "0 0 12px rgba(217, 79, 156,0.55)" : "none",
         }}
         data-testid="button-platform-toggle-crest"
         title="Crest — Manufacturing"

@@ -49,8 +49,8 @@ const plans: Record<
       "Custom training data",
       "Version history",
     ],
-    color: "#5BA8A0",
-    glow: "rgba(91,168,160,0.25)",
+    color: "#5B8DA8",
+    glow: "rgba(91, 141, 168,0.25)",
     badge: "Most Popular",
   },
   enterprise: {
@@ -66,8 +66,8 @@ const plans: Record<
       "Custom integrations",
       "On-premise option",
     ],
-    color: "#6B2C4A",
-    glow: "rgba(107,44,74,0.3)",
+    color: "#6B2C4E",
+    glow: "rgba(107, 44, 78,0.3)",
     badge: "Full Power",
   },
 };
@@ -238,7 +238,7 @@ function CheckoutPageContent() {
       className="min-h-screen relative overflow-hidden"
       style={{
         background:
-          "radial-gradient(ellipse at 20% 50%, rgba(91,168,160,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(107,44,74,0.1) 0%, transparent 60%), hsl(var(--background))",
+          "radial-gradient(ellipse at 20% 50%, rgba(91, 141, 168,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(107, 44, 78,0.1) 0%, transparent 60%), hsl(var(--background))",
       }}
     >
       {/* Ambient glow orbs */}

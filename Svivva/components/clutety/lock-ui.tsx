@@ -29,9 +29,9 @@ export const SCAN_MODES = [
     id: "comply",
     label: "Comply",
     sublabel: "Compliance Frameworks",
-    color: "#6D91B3",
+    color: "#6D72B3",
     deep: "#3e6a9a",
-    glow: "rgba(109,145,179,0.9)",
+    glow: "rgba(109, 114, 179,0.9)",
     cx: 190,
     h: 120,
   },
@@ -39,9 +39,9 @@ export const SCAN_MODES = [
     id: "remediate",
     label: "Remediate",
     sublabel: "Auto-Remediation Engine",
-    color: "#AC81AF",
+    color: "#A981AF",
     deep: "#865a8a",
-    glow: "rgba(172,129,175,0.9)",
+    glow: "rgba(169, 129, 175,0.9)",
     cx: 249,
     h: 110,
   },
@@ -458,7 +458,7 @@ export function LockUI({
             width={divX - bodyL - 16}
             height={((scanStep + 1) / 5) * (bodyH - 48)}
             rx="3"
-            fill="rgba(109,145,179,0.10)"
+            fill="rgba(109, 114, 179,0.10)"
             style={{ transition: "height 0.5s ease" }}
           />
         )}
@@ -507,14 +507,14 @@ export function LockUI({
           {
             label: "AI\nSIMULATE",
             pattern: "lk-squaremaze",
-            accent: "#AC81AF",
+            accent: "#A981AF",
             modeId: "simulate",
             y: bodyTop + 88,
           },
           {
             label: "COMPLY\n& FIX",
             pattern: "lk-rope",
-            accent: "#6D91B3",
+            accent: "#6D72B3",
             modeId: "comply",
             y: bodyTop + 168,
           },
@@ -658,7 +658,7 @@ export function LockUI({
               cy={bodyBot + baseH / 2}
               r="18"
               fill="none"
-              stroke="#6D91B3"
+              stroke="#6D72B3"
               strokeWidth="6"
               style={{ filter: "blur(8px)", opacity: 0.6 }}
             />
@@ -668,26 +668,26 @@ export function LockUI({
             cy={bodyBot + baseH / 2}
             r="9"
             fill={
-              hovered === "keyhole" || keyholePress ? "rgba(109,145,179,0.4)" : "rgba(0,0,0,0.28)"
+              hovered === "keyhole" || keyholePress ? "rgba(109, 114, 179,0.4)" : "rgba(0,0,0,0.28)"
             }
-            stroke={hovered === "keyhole" || keyholePress ? "#6D91B3" : "rgba(0,0,0,0.5)"}
+            stroke={hovered === "keyhole" || keyholePress ? "#6D72B3" : "rgba(0,0,0,0.5)"}
             strokeWidth="1.5"
             style={{
               transition: "all 0.18s",
-              filter: hovered === "keyhole" ? "drop-shadow(0 0 7px #6D91B3)" : "none",
+              filter: hovered === "keyhole" ? "drop-shadow(0 0 7px #6D72B3)" : "none",
             }}
           />
           <circle
             cx="190"
             cy={bodyBot + baseH / 2 - 2.5}
             r="3.5"
-            fill={hovered === "keyhole" || keyholePress ? "#6D91B3" : "rgba(0,0,0,0.45)"}
+            fill={hovered === "keyhole" || keyholePress ? "#6D72B3" : "rgba(0,0,0,0.45)"}
             style={{ transition: "fill 0.18s" }}
           />
           <path
             d="M 187 173 H 193 L 192 176 H 188 Z"
             transform={`translate(0, ${bodyBot + baseH / 2 - 2})`}
-            fill={hovered === "keyhole" || keyholePress ? "#6D91B3" : "rgba(0,0,0,0.40)"}
+            fill={hovered === "keyhole" || keyholePress ? "#6D72B3" : "rgba(0,0,0,0.40)"}
             style={{ transition: "fill 0.18s" }}
           />
         </g>
@@ -699,7 +699,7 @@ export function LockUI({
             y={bodyBot + baseH + 18}
             textAnchor="middle"
             fontSize="7"
-            fill="#6D91B3"
+            fill="#6D72B3"
             fontWeight="800"
             letterSpacing="0.16em"
           >
@@ -712,7 +712,7 @@ export function LockUI({
             y={bodyBot + baseH + 18}
             textAnchor="middle"
             fontSize="7"
-            fill="#6D91B3"
+            fill="#6D72B3"
             fontWeight="800"
             letterSpacing="0.14em"
           >

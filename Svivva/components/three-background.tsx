@@ -47,13 +47,13 @@ export function ThreeBackground() {
 
     // Flower-matched color palette
     const colors = [
-      new THREE.Color(0x3f2a2c), // espresso brown
-      new THREE.Color(0x7a4f3a), // copper
-      new THREE.Color(0x6b3a67), // plum purple
-      new THREE.Color(0x425884), // indigo blue
-      new THREE.Color(0xd782b2), // orchid pink
-      new THREE.Color(0xf3afc4), // blush pink
-      new THREE.Color(0x63b3a6), // mint green
+      new THREE.Color(0x3d3f2a), // espresso brown
+      new THREE.Color(0x747a3a), // copper
+      new THREE.Color(0x6b3a6a), // plum purple
+      new THREE.Color(0x4a4284), // indigo blue
+      new THREE.Color(0xd782b8), // orchid pink
+      new THREE.Color(0xf3afc9), // blush pink
+      new THREE.Color(0x639cb3), // mint green
       new THREE.Color(0x96a9ab), // sage
     ];
 
@@ -63,7 +63,7 @@ export function ThreeBackground() {
       uniforms: {
         uTime: { value: 0 },
         uColor1: { value: new THREE.Color(0x96a9ab) },
-        uColor2: { value: new THREE.Color(0xd782b2) },
+        uColor2: { value: new THREE.Color(0xd782b8) },
       },
       vertexShader: `
         varying vec2 vUv;

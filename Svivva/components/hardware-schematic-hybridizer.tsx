@@ -836,7 +836,7 @@ export function HardwareSchematicHybridizer() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SchematicPanel
           label="Schematic A"
-          accentColor="#5BA8A0"
+          accentColor="#5B8DA8"
           state={schematicA}
           onChange={updateA}
         />
@@ -848,10 +848,10 @@ export function HardwareSchematicHybridizer() {
         />
       </div>
 
-      <Card className="border-[#6B2C4A]/30" style={{ background: "rgba(107,44,74,0.05)" }}>
+      <Card className="border-[#6B2C4E]/30" style={{ background: "rgba(107, 44, 78,0.05)" }}>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#6B2C4A]" />
+            <Zap className="w-4 h-4 text-[#6B2C4E]" />
             Hybridization Controls
           </CardTitle>
         </CardHeader>
@@ -868,8 +868,8 @@ export function HardwareSchematicHybridizer() {
                   title={MODE_DESCRIPTIONS[m]}
                   className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-[11px] font-medium capitalize transition-all ${
                     mode === m
-                      ? "border-[#6B2C4A] bg-[#6B2C4A]/15 text-[#c084a0]"
-                      : "border-border text-muted-foreground hover:border-[#6B2C4A]/40 hover:text-foreground"
+                      ? "border-[#6B2C4E] bg-[#6B2C4E]/15 text-[#c084a0]"
+                      : "border-border text-muted-foreground hover:border-[#6B2C4E]/40 hover:text-foreground"
                   }`}
                 >
                   {m === "complementary" && <Layers className="w-4 h-4" />}
@@ -922,7 +922,7 @@ export function HardwareSchematicHybridizer() {
             disabled={isLoading || !canHybridize}
             className="w-full h-11 text-sm font-semibold gap-2"
             style={{
-              background: canHybridize ? "linear-gradient(135deg, #6B2C4A, #5BA8A0)" : undefined,
+              background: canHybridize ? "linear-gradient(135deg, #6B2C4E, #5B8DA8)" : undefined,
             }}
           >
             {isLoading ? (

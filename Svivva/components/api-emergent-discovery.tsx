@@ -96,7 +96,7 @@ function DependencyGraph({ nodes, edges }: { nodes: GraphNode[]; edges: GraphEdg
       <svg width={layout.width} height={layout.height} className="min-w-[720px]">
         <defs>
           <marker id="api-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="#5BA8A0" opacity="0.8" />
+            <path d="M0,0 L8,4 L0,8 Z" fill="#5B8DA8" opacity="0.8" />
           </marker>
         </defs>
         {edges.slice(0, 24).map((edge, index) => {
@@ -105,9 +105,9 @@ function DependencyGraph({ nodes, edges }: { nodes: GraphNode[]; edges: GraphEdg
           if (!from || !to) return null;
           const stroke =
             edge.type === "data-flow"
-              ? "#5BA8A0"
+              ? "#5B8DA8"
               : edge.type === "semantic"
-                ? "#D782B2"
+                ? "#D782B8"
                 : "#f97316";
           return (
             <line
@@ -133,9 +133,9 @@ function DependencyGraph({ nodes, edges }: { nodes: GraphNode[]; edges: GraphEdg
                 cx={pos.x}
                 cy={pos.y}
                 r={r}
-                fill="#5BA8A0"
+                fill="#5B8DA8"
                 fillOpacity="0.18"
-                stroke="#5BA8A0"
+                stroke="#5B8DA8"
               />
               <text
                 x={pos.x}
@@ -195,10 +195,10 @@ export default function ApiEmergentDiscovery() {
   };
 
   return (
-    <Card className="border-[#e85d04]/30 bg-black/20">
+    <Card className="border-[#E88B04]/30 bg-black/20">
       <CardHeader>
         <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-[#e85d04]/15 p-2 text-[#e85d04]">
+          <div className="rounded-xl bg-[#E88B04]/15 p-2 text-[#E88B04]">
             <Network className="h-5 w-5" />
           </div>
           <div>
@@ -273,7 +273,7 @@ export default function ApiEmergentDiscovery() {
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Genome</p>
-                <p className="mt-2 break-all font-mono text-sm text-[#5BA8A0]">
+                <p className="mt-2 break-all font-mono text-sm text-[#5B8DA8]">
                   {result.apiGenomeFingerprint}
                 </p>
               </div>
@@ -300,11 +300,11 @@ export default function ApiEmergentDiscovery() {
               {result.emergentCompositions?.slice(0, 4).map((composition, index) => (
                 <div
                   key={`${composition.pattern}-${index}`}
-                  className="rounded-xl border border-[#e85d04]/20 bg-[#e85d04]/5 p-4"
+                  className="rounded-xl border border-[#E88B04]/20 bg-[#E88B04]/5 p-4"
                 >
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <p className="font-semibold">{composition.discoveredCapability}</p>
-                    <span className="rounded-full bg-[#e85d04]/15 px-2 py-0.5 text-xs text-[#e85d04]">
+                    <span className="rounded-full bg-[#E88B04]/15 px-2 py-0.5 text-xs text-[#E88B04]">
                       {composition.usabilityScore}/10
                     </span>
                   </div>
@@ -320,7 +320,7 @@ export default function ApiEmergentDiscovery() {
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <div className="mb-3 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-[#D782B2]" />
+                  <Sparkles className="h-4 w-4 text-[#D782B8]" />
                   <p className="font-semibold">Hidden use cases</p>
                 </div>
                 <div className="space-y-3">
@@ -331,7 +331,7 @@ export default function ApiEmergentDiscovery() {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm font-medium">{useCase.useCase}</p>
-                        <span className="text-xs text-[#5BA8A0]">
+                        <span className="text-xs text-[#5B8DA8]">
                           {useCase.noveltyScore}% novel
                         </span>
                       </div>
@@ -345,7 +345,7 @@ export default function ApiEmergentDiscovery() {
 
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <div className="mb-3 flex items-center gap-2">
-                  <GitBranch className="h-4 w-4 text-[#5BA8A0]" />
+                  <GitBranch className="h-4 w-4 text-[#5B8DA8]" />
                   <p className="font-semibold">Recommendations</p>
                 </div>
                 <div className="space-y-2">

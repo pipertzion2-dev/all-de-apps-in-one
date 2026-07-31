@@ -11,7 +11,7 @@ import type {
 } from "@/lib/clutety/feed-shield-types";
 import { PLATFORM_LABELS } from "@/lib/clutety/feed-shield-types";
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 type Props = {
   rules: FeedShieldRules;
@@ -268,8 +268,8 @@ export function FeedShieldAnalyzer({ rules }: Props) {
             marginTop: 14,
             padding: 14,
             borderRadius: 10,
-            background: result.action === "block" ? "rgba(190,80,70,0.12)" : "rgba(91,168,160,0.1)",
-            border: `1px solid ${result.action === "block" ? "rgba(190,80,70,0.35)" : "rgba(91,168,160,0.3)"}`,
+            background: result.action === "block" ? "rgba(190,80,70,0.12)" : "rgba(91, 141, 168,0.1)",
+            border: `1px solid ${result.action === "block" ? "rgba(190,80,70,0.35)" : "rgba(91, 141, 168,0.3)"}`,
           }}
         >
           <p

@@ -53,13 +53,13 @@ export function SeedsImmersiveScene({ state, seeds }: Props) {
     const key = new THREE.DirectionalLight(0xffffff, 0.88);
     key.position.set(4, 8, 10);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x5ba8a0, 0.35);
+    const fill = new THREE.DirectionalLight(0x5b8da8, 0.35);
     fill.position.set(-5, 2, 4);
     scene.add(fill);
-    const tealLight = new THREE.PointLight(0x5ba8a0, 1.35, 38);
+    const tealLight = new THREE.PointLight(0x5b8da8, 1.35, 38);
     tealLight.position.set(-2, 1, 5);
     scene.add(tealLight);
-    const burgLight = new THREE.PointLight(0x6b2c4a, 0.85, 32);
+    const burgLight = new THREE.PointLight(0x6b2c4e, 0.85, 32);
     burgLight.position.set(3, -0.5, 3);
     scene.add(burgLight);
 
@@ -119,8 +119,8 @@ export function SeedsImmersiveScene({ state, seeds }: Props) {
         className="absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 90% 75% at 50% 42%, rgba(91,168,160,0.11) 0%, transparent 58%)",
-            "radial-gradient(ellipse 65% 55% at 72% 62%, rgba(107,44,74,0.09) 0%, transparent 52%)",
+            "radial-gradient(ellipse 90% 75% at 50% 42%, rgba(91, 141, 168,0.11) 0%, transparent 58%)",
+            "radial-gradient(ellipse 65% 55% at 72% 62%, rgba(107, 44, 78,0.09) 0%, transparent 52%)",
             "radial-gradient(ellipse 50% 40% at 28% 68%, rgba(212,168,90,0.06) 0%, transparent 48%)",
             "linear-gradient(180deg, rgba(6,10,16,0.12) 0%, rgba(6,10,16,0.62) 100%)",
           ].join(", "),

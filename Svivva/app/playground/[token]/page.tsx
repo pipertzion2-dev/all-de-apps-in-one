@@ -266,7 +266,7 @@ export default function SharedPlaygroundPage() {
               {canEdit && (
                 <Button
                   className="w-full gap-2 text-white"
-                  style={{ background: "linear-gradient(135deg, #6B3A67, #D782B2, #425884)" }}
+                  style={{ background: "linear-gradient(135deg, #6B3A6A, #D782B8, #4A4284)" }}
                   onClick={handleExecute}
                   disabled={!inputText.trim() || executeMutation.isPending}
                   data-testid="button-execute"

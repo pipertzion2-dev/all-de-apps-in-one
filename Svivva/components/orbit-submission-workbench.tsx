@@ -25,7 +25,7 @@ import {
   type SubmissionItemDef,
 } from "@/lib/orbit/submission-schemas";
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 type ItemState = {
   item: SubmissionItemDef;
@@ -372,7 +372,7 @@ export function OrbitSubmissionWorkbench({ defaultKind = "directory" }: { defaul
           disabled={fillAllMutation.isPending}
           onClick={() => fillAllMutation.mutate()}
           className="gap-1.5 text-white h-8 text-xs"
-          style={{ background: `linear-gradient(135deg, ${TEAL}, #3d8a82)` }}
+          style={{ background: `linear-gradient(135deg, ${TEAL}, #3D6F8A)` }}
         >
           {fillAllMutation.isPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -261,11 +261,11 @@ export default function GrowthPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-6 h-6 text-[#5BA8A0]" />
+            <TrendingUp className="w-6 h-6 text-[#5B8DA8]" />
             <h1 className="text-2xl font-bold tracking-tight">Growth Engine</h1>
             <Badge
               variant="outline"
-              className="text-xs bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30"
+              className="text-xs bg-[#5B8DA8]/10 text-[#5B8DA8] border-[#5B8DA8]/30"
             >
               AI-Powered
             </Badge>
@@ -277,7 +277,7 @@ export default function GrowthPage() {
         </div>
         <Button
           size="sm"
-          className="bg-[#5BA8A0] hover:bg-[#5BA8A0]/90 text-white gap-2"
+          className="bg-[#5B8DA8] hover:bg-[#5B8DA8]/90 text-white gap-2"
           onClick={() => runTasksMutation.mutate()}
           disabled={runTasksMutation.isPending}
           data-testid="btn-run-weekly"
@@ -294,7 +294,7 @@ export default function GrowthPage() {
             key={p.id}
             onClick={() => setProduct(p.id)}
             data-testid={`btn-product-${p.id}`}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${product === p.id ? "bg-[#5BA8A0] text-white border-[#5BA8A0]" : "border-border/60 hover:bg-muted/40"}`}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${product === p.id ? "bg-[#5B8DA8] text-white border-[#5B8DA8]" : "border-border/60 hover:bg-muted/40"}`}
           >
             <span>{p.emoji}</span> {p.label}
           </button>
@@ -355,7 +355,7 @@ export default function GrowthPage() {
                 <button
                   key={cat}
                   onClick={() => setCatFilter(cat)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${catFilter === cat ? "bg-[#5BA8A0] text-white border-[#5BA8A0]" : "border-border/60 hover:bg-muted/40"}`}
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${catFilter === cat ? "bg-[#5B8DA8] text-white border-[#5B8DA8]" : "border-border/60 hover:bg-muted/40"}`}
                 >
                   {cat === "all" ? "All" : CATEGORY_LABELS[cat]}
                 </button>
@@ -395,7 +395,7 @@ export default function GrowthPage() {
                             {(d.estimatedVisitors / 1000).toFixed(0)}K/mo
                           </span>
                         </div>
-                        {d.tip && <p className="text-[11px] text-[#5BA8A0] mt-0.5">💡 {d.tip}</p>}
+                        {d.tip && <p className="text-[11px] text-[#5B8DA8] mt-0.5">💡 {d.tip}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {d.status === "pending" && (
@@ -404,7 +404,7 @@ export default function GrowthPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-7 text-xs gap-1 border-[#5BA8A0]/40 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
+                                className="h-7 text-xs gap-1 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
                                 onClick={() =>
                                   submitDirMutation.mutate({
                                     directoryId: d.id,
@@ -449,7 +449,7 @@ export default function GrowthPage() {
                 key={ct.id}
                 onClick={() => setContentType(ct.id)}
                 data-testid={`btn-content-${ct.id}`}
-                className={`text-left p-3 rounded-lg border text-sm transition-colors ${contentType === ct.id ? "border-[#5BA8A0] bg-[#5BA8A0]/10" : "border-border/50 hover:bg-muted/30"}`}
+                className={`text-left p-3 rounded-lg border text-sm transition-colors ${contentType === ct.id ? "border-[#5B8DA8] bg-[#5B8DA8]/10" : "border-border/50 hover:bg-muted/30"}`}
               >
                 <span className="text-base">{ct.icon}</span>
                 <p className="font-semibold text-xs mt-1">{ct.label}</p>
@@ -459,7 +459,7 @@ export default function GrowthPage() {
           </div>
 
           <Button
-            className="w-full bg-[#5BA8A0] hover:bg-[#5BA8A0]/90 text-white gap-2"
+            className="w-full bg-[#5B8DA8] hover:bg-[#5B8DA8]/90 text-white gap-2"
             onClick={() => generateMutation.mutate({ type: contentType })}
             disabled={generateMutation.isPending}
             data-testid="btn-generate-content"
@@ -475,7 +475,7 @@ export default function GrowthPage() {
           )}
 
           {generatedContent && (
-            <Card className="border-[#5BA8A0]/30 bg-[#5BA8A0]/5">
+            <Card className="border-[#5B8DA8]/30 bg-[#5B8DA8]/5">
               <CardHeader className="pb-2 pt-4 px-5">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm">{generatedContent.title}</CardTitle>
@@ -545,15 +545,15 @@ export default function GrowthPage() {
               <Card key={tactic.id} className="border-border/50">
                 <CardContent className="py-4 px-5">
                   <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-9 h-9 rounded-lg bg-[#5BA8A0]/10 flex items-center justify-center">
-                      <Icon className="w-4.5 h-4.5 text-[#5BA8A0]" />
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-[#5B8DA8]/10 flex items-center justify-center">
+                      <Icon className="w-4.5 h-4.5 text-[#5B8DA8]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-semibold text-sm">{tactic.title}</span>
                         <Badge
                           variant="outline"
-                          className="text-[10px] bg-[#5BA8A0]/10 text-[#5BA8A0] border-[#5BA8A0]/30"
+                          className="text-[10px] bg-[#5B8DA8]/10 text-[#5B8DA8] border-[#5B8DA8]/30"
                         >
                           {tactic.badge}
                         </Badge>
@@ -584,7 +584,7 @@ export default function GrowthPage() {
                         {tactic.action && (
                           <Button
                             size="sm"
-                            className="h-7 text-xs bg-[#5BA8A0] hover:bg-[#5BA8A0]/90 text-white gap-1"
+                            className="h-7 text-xs bg-[#5B8DA8] hover:bg-[#5B8DA8]/90 text-white gap-1"
                             onClick={() => {
                               setContentType(tactic.action!);
                               document

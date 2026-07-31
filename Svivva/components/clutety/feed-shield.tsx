@@ -12,7 +12,7 @@ import {
   saveFeedShieldRules,
 } from "@/lib/clutety/feed-shield-storage";
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 export function FeedShield() {
   const [rules, setRules] = useState<FeedShieldRules>(() => loadFeedShieldRules());
@@ -139,8 +139,8 @@ export function FeedShield() {
             marginBottom: 16,
             padding: "12px 14px",
             borderRadius: 10,
-            background: "rgba(91,168,160,0.12)",
-            border: "1px solid rgba(91,168,160,0.35)",
+            background: "rgba(91, 141, 168,0.12)",
+            border: "1px solid rgba(91, 141, 168,0.35)",
             cursor: "pointer",
           }}
         >
@@ -175,7 +175,7 @@ export function FeedShield() {
                     ? `1px solid ${TEAL}`
                     : "1px solid rgba(255,255,255,0.12)",
                   background: rules.platforms[p]
-                    ? "rgba(91,168,160,0.2)"
+                    ? "rgba(91, 141, 168,0.2)"
                     : "rgba(255,255,255,0.04)",
                   color: rules.platforms[p] ? TEAL : "rgba(255,255,255,0.45)",
                 }}
@@ -450,8 +450,8 @@ export function FeedShield() {
           style={{
             padding: 14,
             borderRadius: 10,
-            background: "rgba(91,168,160,0.08)",
-            border: "1px solid rgba(91,168,160,0.2)",
+            background: "rgba(91, 141, 168,0.08)",
+            border: "1px solid rgba(91, 141, 168,0.2)",
             fontSize: 11,
             color: "rgba(255,255,255,0.55)",
             lineHeight: 1.6,

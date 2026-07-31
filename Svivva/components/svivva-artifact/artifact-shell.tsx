@@ -36,7 +36,7 @@ export function SvivvaArtifact() {
       <div className="text-center mb-10 select-none relative z-20">
         <p
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
-          style={{ color: "#5BA8A0", letterSpacing: "0.28em" }}
+          style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
         >
           ZZAI6
         </p>

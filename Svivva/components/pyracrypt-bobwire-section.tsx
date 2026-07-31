@@ -7,9 +7,9 @@ import Image from "next/image";
 import { Lock, ArrowRight, Shield } from "lucide-react";
 import { CLUTETY_LOGO_PATH } from "@/lib/clutety/config";
 
-const TEAL_N = 0x5ba8a0;
+const TEAL_N = 0x5b8da8;
 const BURG_N = 0x9b3a5e; // brightened burgundy so barbs pop
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 const BG_N = 0x04060f;
 
 // corridor geometry constants

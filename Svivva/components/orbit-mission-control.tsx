@@ -377,8 +377,8 @@ const STORAGE_KEY = "orbit_mc_done_v1";
 const CATEGORY_ORDER = ["Technical", "Content", "Publishing", "Directories", "Presence"];
 
 const CAT_COLORS: Record<string, string> = {
-  Technical: "#5BA8A0",
-  Content: "#7c5cbf",
+  Technical: "#5B8DA8",
+  Content: "#905CBF",
   Publishing: "#e06c75",
   Directories: "#d19a66",
   Presence: "#56b6c2",
@@ -519,7 +519,7 @@ function ActionDrawer({
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg,#5BA8A0,#6B2C4A)" }}
+              style={{ background: "linear-gradient(135deg,#5B8DA8,#6B2C4E)" }}
             >
               Open Platform
               <ExternalLink className="w-3.5 h-3.5" />
@@ -652,8 +652,8 @@ export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Pro
             />
             <defs>
               <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#5BA8A0" />
-                <stop offset="100%" stopColor="#6B2C4A" />
+                <stop offset="0%" stopColor="#5B8DA8" />
+                <stop offset="100%" stopColor="#6B2C4E" />
               </linearGradient>
             </defs>
           </svg>
@@ -675,7 +675,7 @@ export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Pro
               className="h-full rounded-full"
               style={{
                 width: `${pct}%`,
-                background: "linear-gradient(90deg,#5BA8A0,#6B2C4A)",
+                background: "linear-gradient(90deg,#5B8DA8,#6B2C4E)",
                 transition: "width 0.6s ease",
               }}
             />
@@ -777,7 +777,7 @@ export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Pro
                             s === "done"
                               ? "#34d399"
                               : s === "auto"
-                                ? "#5BA8A0"
+                                ? "#5B8DA8"
                                 : s === "manual"
                                   ? "#fbbf24"
                                   : "rgba(255,255,255,0.12)",
@@ -824,7 +824,7 @@ export function OrbitMissionControl({ orbitStatus = {}, stepStatuses = {} }: Pro
                           <button
                             onClick={() => setActiveTask(task)}
                             className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white font-medium transition-all hover:opacity-90"
-                            style={{ background: "linear-gradient(135deg,#5BA8A0,#6B2C4A)" }}
+                            style={{ background: "linear-gradient(135deg,#5B8DA8,#6B2C4E)" }}
                           >
                             Do Now
                           </button>

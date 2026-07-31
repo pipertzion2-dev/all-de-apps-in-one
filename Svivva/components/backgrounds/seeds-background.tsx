@@ -6,7 +6,7 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-const ACCENT = 0x5ba8a0;
+const ACCENT = 0x5b8da8;
 
 export default function SeedsBackground() {
   const mountRef = useRef<HTMLDivElement>(null);

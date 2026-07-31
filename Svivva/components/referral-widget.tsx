@@ -96,10 +96,10 @@ export function ReferralWidget({
 
   if (compact) {
     return (
-      <div className="rounded-xl border border-[#5BA8A0]/30 bg-[#5BA8A0]/5 p-3 space-y-2">
+      <div className="rounded-xl border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 p-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Gift className="w-4 h-4" style={{ color: "#5BA8A0" }} />
+            <Gift className="w-4 h-4" style={{ color: "#5B8DA8" }} />
             <span className="text-xs font-bold">Referral Program</span>
           </div>
           <span className="text-[10px] text-muted-foreground">Earn up to 10%</span>
@@ -117,7 +117,7 @@ export function ReferralWidget({
             size="sm"
             onClick={shareLink}
             className="flex-1 text-xs"
-            style={{ background: "#5BA8A0" }}
+            style={{ background: "#5B8DA8" }}
           >
             <Share2 className="w-3 h-3 mr-1" /> Share
           </Button>
@@ -127,11 +127,11 @@ export function ReferralWidget({
   }
 
   return (
-    <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-gradient-to-br from-[#5BA8A0]/5 to-[#6B2C4A]/5 p-4 space-y-3">
+    <div className="rounded-2xl border-2 border-[#5B8DA8]/40 bg-gradient-to-br from-[#5B8DA8]/5 to-[#6B2C4E]/5 p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center">
-          <Gift className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+        <div className="w-10 h-10 rounded-xl bg-[#5B8DA8]/15 border border-[#5B8DA8]/30 flex items-center justify-center">
+          <Gift className="w-5 h-5" style={{ color: "#5B8DA8" }} />
         </div>
         <div>
           <h3 className="font-bold text-sm">Invite & Earn</h3>
@@ -143,19 +143,19 @@ export function ReferralWidget({
       {!loading && (
         <div className="grid grid-cols-3 gap-2">
           <div className="text-center p-2 rounded-lg bg-background/50">
-            <div className="text-lg font-black" style={{ color: "#5BA8A0" }}>
+            <div className="text-lg font-black" style={{ color: "#5B8DA8" }}>
               {stats.referrals}
             </div>
             <div className="text-[10px] text-muted-foreground">Referrals</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-background/50">
-            <div className="text-lg font-black" style={{ color: "#5BA8A0" }}>
+            <div className="text-lg font-black" style={{ color: "#5B8DA8" }}>
               ${(stats.earnings / 100).toFixed(2)}
             </div>
             <div className="text-[10px] text-muted-foreground">Earned</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-background/50">
-            <div className="text-lg font-black" style={{ color: "#5BA8A0" }}>
+            <div className="text-lg font-black" style={{ color: "#5B8DA8" }}>
               ${(stats.pending / 100).toFixed(2)}
             </div>
             <div className="text-[10px] text-muted-foreground">Pending</div>
@@ -167,19 +167,19 @@ export function ReferralWidget({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Level 1 (Direct)</span>
-          <span className="font-bold" style={{ color: "#5BA8A0" }}>
+          <span className="font-bold" style={{ color: "#5B8DA8" }}>
             10%
           </span>
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Level 2 (Indirect)</span>
-          <span className="font-bold" style={{ color: "#5BA8A0" }}>
+          <span className="font-bold" style={{ color: "#5B8DA8" }}>
             5%
           </span>
         </div>
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Level 3 (Network)</span>
-          <span className="font-bold" style={{ color: "#5BA8A0" }}>
+          <span className="font-bold" style={{ color: "#5B8DA8" }}>
             2%
           </span>
         </div>
@@ -202,7 +202,7 @@ export function ReferralWidget({
           size="sm"
           onClick={shareLink}
           className="w-full font-bold"
-          style={{ background: "#5BA8A0" }}
+          style={{ background: "#5B8DA8" }}
         >
           <Share2 className="w-4 h-4 mr-2" /> Share to Social Media
         </Button>

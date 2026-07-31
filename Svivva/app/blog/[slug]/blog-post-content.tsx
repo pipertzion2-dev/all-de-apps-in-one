@@ -133,7 +133,7 @@ export default function BlogPostContent({
             <Badge
               variant="secondary"
               className="text-xs text-white no-default-active-elevate"
-              style={{ backgroundColor: "#6B2C4A" }}
+              style={{ backgroundColor: "#6B2C4E" }}
               data-testid="badge-post-category"
             >
               {post.category}
@@ -212,7 +212,7 @@ export default function BlogPostContent({
                   <Badge
                     variant="secondary"
                     className="text-xs text-white w-fit mb-3 no-default-active-elevate"
-                    style={{ backgroundColor: "#6B2C4A" }}
+                    style={{ backgroundColor: "#6B2C4E" }}
                   >
                     {rp.category}
                   </Badge>
@@ -220,7 +220,7 @@ export default function BlogPostContent({
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{rp.excerpt}</p>
                   <div
                     className="mt-3 flex items-center gap-1 text-sm font-medium"
-                    style={{ color: "#5BA8A0" }}
+                    style={{ color: "#5B8DA8" }}
                   >
                     Read more <ArrowRight className="h-3 w-3" />
                   </div>
@@ -234,7 +234,7 @@ export default function BlogPostContent({
       <section
         className="py-16 px-6 text-center"
         style={{
-          background: "linear-gradient(135deg, #5BA8A0 0%, #3d8a82 50%, #6B2C4A 100%)",
+          background: "linear-gradient(135deg, #5B8DA8 0%, #3D6F8A 50%, #6B2C4E 100%)",
         }}
         data-testid="section-cta"
       >
@@ -254,7 +254,7 @@ export default function BlogPostContent({
             <Button
               size="lg"
               className="text-white border-[#4a9690]"
-              style={{ backgroundColor: "#5BA8A0", borderColor: "#5BA8A0" }}
+              style={{ backgroundColor: "#5B8DA8", borderColor: "#5B8DA8" }}
               data-testid="button-cta-dashboard"
             >
               Get Started

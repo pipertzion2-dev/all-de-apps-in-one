@@ -14,8 +14,8 @@ const doc = new PDFDocument({
 const output = fs.createWriteStream("svivva-growth-strategy.pdf");
 doc.pipe(output);
 
-const TEAL = "#5BA8A0";
-const BURGUNDY = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURGUNDY = "#6B2C4E";
 const DARK = "#1a1a2e";
 const GRAY = "#555555";
 const LIGHT = "#f8f8f8";

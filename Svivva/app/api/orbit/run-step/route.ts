@@ -1387,7 +1387,7 @@ Generate a complete "Powered by ZZAI" traffic package that these tool pages shou
 
 3. **Post-Use CTA** — shown after user completes an action (e.g., after generating content). JavaScript snippet + HTML that shows a modal/toast: "Like this result? Build your own AI tool like this →" with UTM link.
 
-4. **React Component** (for Replit apps using React) — a reusable <PoweredBySvivva /> component that renders a bottom bar with gradient matching ZZAI's teal (#5BA8A0) and burgundy (#6B2C4A).
+4. **React Component** (for Replit apps using React) — a reusable <PoweredBySvivva /> component that renders a bottom bar with gradient matching ZZAI's teal (#5B8DA8) and burgundy (#6B2C4E).
 
 5. **Placement Guide** — where to add each snippet for maximum click-through.
 

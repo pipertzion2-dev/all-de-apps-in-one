@@ -388,7 +388,7 @@ export default function SvivvaPlayPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const effectiveAnalysis =
+  const earlyAnalysisFallback =
     analysis ??
     ((mode === "composition" || mode === "ensemble") && !audioFile ? FALLBACK_ANALYSIS : null);
   const compositionFallback = mode === "composition" ? FALLBACK_ANALYSIS : null;
@@ -505,7 +505,7 @@ export default function SvivvaPlayPage() {
         confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
         pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
       })) ??
-      effectiveAnalysis?.chords?.map((c) => ({
+      earlyAnalysisFallback?.chords?.map((c) => ({
         t0: c.t0,
         t1: c.t1,
         symbol: c.symbol,
@@ -516,11 +516,11 @@ export default function SvivvaPlayPage() {
 
     return resolveCompositionKey({
       manualKey,
-      analysisKey: effectiveAnalysis?.key ?? "C major",
+      analysisKey: earlyAnalysisFallback?.key ?? "C major",
       audioAnchorKey:
         audioAnchorKey ??
-        (effectiveAnalysis?.key && !effectiveAnalysis.key.startsWith("Detecting")
-          ? normalizeKeyLabel(effectiveAnalysis.key)
+        (earlyAnalysisFallback?.key && !earlyAnalysisFallback.key.startsWith("Detecting")
+          ? normalizeKeyLabel(earlyAnalysisFallback.key)
           : null),
       harmonicContext: transcription
         ? {
@@ -531,10 +531,10 @@ export default function SvivvaPlayPage() {
         : null,
       chords: chordSegments,
     });
-  }, [manualKey, effectiveAnalysis?.key, effectiveAnalysis?.chords, transcription, audioAnchorKey]);
+  }, [manualKey, earlyAnalysisFallback?.key, earlyAnalysisFallback?.chords, transcription, audioAnchorKey]);
   const generationScaleLookup = useMemo(() => {
     const chordSegments =
-      effectiveAnalysis?.chords?.map((c) => ({
+      earlyAnalysisFallback?.chords?.map((c) => ({
         t0: c.t0,
         t1: c.t1,
         symbol: c.symbol,
@@ -553,10 +553,10 @@ export default function SvivvaPlayPage() {
       noteNames: scaleNoteNames(resolution.scaleName, root),
       label: resolution.scaleName.replace(/_/g, " "),
     };
-  }, [generationKeyLabel, reichScale, manualKey, effectiveAnalysis?.chords]);
+  }, [generationKeyLabel, reichScale, manualKey, earlyAnalysisFallback?.chords]);
 
   const aiScaleSuggestion = useMemo((): ScaleSuggestion | null => {
-    if (!effectiveAnalysis) return null;
+    if (!earlyAnalysisFallback) return null;
     const chords =
       transcription?.chords?.map((c) => ({
         t0: c.t0,
@@ -565,7 +565,7 @@ export default function SvivvaPlayPage() {
         confidence: ("confidence" in c ? c.confidence : 55) ?? 55,
         pitchClasses: "pitchClasses" in c ? (c.pitchClasses as number[]) : [],
       })) ??
-      effectiveAnalysis.chords?.map((c) => ({
+      earlyAnalysisFallback.chords?.map((c) => ({
         t0: c.t0,
         t1: c.t1,
         symbol: c.symbol,
@@ -574,12 +574,12 @@ export default function SvivvaPlayPage() {
       })) ??
       [];
     return suggestCompositionScale({
-      analysisKey: manualKey ?? effectiveAnalysis.key,
+      analysisKey: manualKey ?? earlyAnalysisFallback.key,
       chords,
       melodyneNotes: transcription?.melodyneNotes,
       audioNotes: [],
     });
-  }, [effectiveAnalysis, manualKey, transcription]);
+  }, [earlyAnalysisFallback, manualKey, transcription]);
 
   const applyAiScaleSuggestion = useCallback(() => {
     if (!aiScaleSuggestion) return;
@@ -2627,7 +2627,7 @@ export default function SvivvaPlayPage() {
                   <button
                     key={p}
                     onClick={() => setCompingPattern(p)}
-                    className={`text-[10px] px-2 py-1.5 rounded border transition-colors ${compingPattern === p ? "border-[#A05068] bg-[#A05068]/5 holo-text" : "border-gray-700 text-gray-500"}`}
+                    className={`text-[10px] px-2 py-1.5 rounded border transition-colors ${compingPattern === p ? "border-[#A0506D] bg-[#A0506D]/5 holo-text" : "border-gray-700 text-gray-500"}`}
                     data-testid={`button-comping-${p}`}
                   >
                     {p.replace(/_/g, " ")}
@@ -2714,7 +2714,7 @@ export default function SvivvaPlayPage() {
                   <button
                     key={f}
                     onClick={() => setSynthFamily(f)}
-                    className={`text-[10px] px-2 py-1.5 rounded border transition-colors ${synthFamily === f ? "border-[#A05068] bg-[#A05068]/5 holo-text" : "border-gray-700 text-gray-500"}`}
+                    className={`text-[10px] px-2 py-1.5 rounded border transition-colors ${synthFamily === f ? "border-[#A0506D] bg-[#A0506D]/5 holo-text" : "border-gray-700 text-gray-500"}`}
                     data-testid={`button-synth-${f}`}
                   >
                     {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -2874,7 +2874,7 @@ export default function SvivvaPlayPage() {
             radial-gradient(circle at 40% 80%, rgba(255,248,240,0.75) 0%, transparent 1.8%),
             radial-gradient(circle at 10% 60%, rgba(255,255,255,0.7) 0%, transparent 1.2%),
             radial-gradient(circle at 90% 45%, rgba(255,252,248,0.65) 0%, transparent 2%),
-            linear-gradient(135deg, #6B2C4A 0%, #A05068 10%, #8B4578 22%, #C48A8A 34%, #7E5090 46%, #B87888 56%, #6BBFBF 68%, #9E6DA0 78%, #6B2C4A 88%, #A05068 100%);
+            linear-gradient(135deg, #6B2C4E 0%, #A0506D 10%, #8B457D 22%, #C48A8E 34%, #7A5090 46%, #B8788C 56%, #6B99BF 68%, #9B6DA0 78%, #6B2C4E 88%, #A0506D 100%);
           -webkit-background-clip: text;
           background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -2903,15 +2903,15 @@ export default function SvivvaPlayPage() {
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
           <linearGradient id="holo-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6B2C4A" />
-            <stop offset="12%" stopColor="#A05068" />
-            <stop offset="24%" stopColor="#8B4578" />
-            <stop offset="36%" stopColor="#C48A8A" />
-            <stop offset="48%" stopColor="#7E5090" />
-            <stop offset="60%" stopColor="#B87888" />
-            <stop offset="72%" stopColor="#6BBFBF" />
-            <stop offset="84%" stopColor="#6B2C4A" />
-            <stop offset="100%" stopColor="#A05068" />
+            <stop offset="0%" stopColor="#6B2C4E" />
+            <stop offset="12%" stopColor="#A0506D" />
+            <stop offset="24%" stopColor="#8B457D" />
+            <stop offset="36%" stopColor="#C48A8E" />
+            <stop offset="48%" stopColor="#7A5090" />
+            <stop offset="60%" stopColor="#B8788C" />
+            <stop offset="72%" stopColor="#6B99BF" />
+            <stop offset="84%" stopColor="#6B2C4E" />
+            <stop offset="100%" stopColor="#A0506D" />
           </linearGradient>
         </defs>
       </svg>
@@ -2954,7 +2954,7 @@ export default function SvivvaPlayPage() {
             <BrandMark size="sm" href="/" />
             <span className="text-gray-300 hidden sm:inline">/</span>
             <span className="font-semibold text-white/90 text-xs sm:text-sm">Play</span>
-            <Badge className="bg-[#A05068]/10 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">
+            <Badge className="bg-[#A0506D]/10 text-[#B8788C] text-[8px] sm:text-[9px] border-[#A0506D]/30 hidden sm:flex">
               MIDI: Professional
             </Badge>
             <Badge className="bg-amber-900/25 text-amber-300/90 text-[8px] sm:text-[9px] border-amber-700/35 hidden md:flex">
@@ -3004,7 +3004,7 @@ export default function SvivvaPlayPage() {
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex-1 rounded-md px-3 py-1.5 sm:py-2 flex flex-col gap-1 min-w-0 transition-colors ${isDragOver ? "ring-2 ring-[#A05068]/60" : ""}`}
+                  className={`flex-1 rounded-md px-3 py-1.5 sm:py-2 flex flex-col gap-1 min-w-0 transition-colors ${isDragOver ? "ring-2 ring-[#A0506D]/60" : ""}`}
                   style={{
                     background: "linear-gradient(180deg, #111, #0a0a0a)",
                     boxShadow: "inset 2px 2px 6px rgba(0,0,0,0.8)",
@@ -3031,9 +3031,9 @@ export default function SvivvaPlayPage() {
                             <span className="text-gray-500 uppercase tracking-wide flex-shrink-0 w-14">
                               Melodyne
                             </span>
-                            <Piano className="w-3 h-3 text-[#5BA8A0] flex-shrink-0" />
+                            <Piano className="w-3 h-3 text-[#5B8DA8] flex-shrink-0" />
                             <span
-                              className={`font-mono truncate ${midiFileName ? "text-[#5BA8A0]" : "text-gray-600 italic"}`}
+                              className={`font-mono truncate ${midiFileName ? "text-[#5B8DA8]" : "text-gray-600 italic"}`}
                               data-testid="text-melodyne-name"
                             >
                               {midiFileName || "Add .mid — harmonic tracks from Melodyne"}
@@ -3048,7 +3048,7 @@ export default function SvivvaPlayPage() {
                           )}
                           {effectiveAnalysis && (
                             <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
-                              <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] border-[#A05068]/30 py-0">
+                              <Badge className="bg-[#A0506D]/20 text-[#B8788C] text-[8px] border-[#A0506D]/30 py-0">
                                 {manualKey ?? effectiveAnalysis.key}
                               </Badge>
                               <Badge className="bg-gray-700/20 text-gray-300 text-[8px] border-gray-600/30 py-0">
@@ -3098,7 +3098,7 @@ export default function SvivvaPlayPage() {
                           return (
                             <div
                               key={i}
-                              className="flex-1 rounded-[1px] bg-[#A05068]"
+                              className="flex-1 rounded-[1px] bg-[#A0506D]"
                               style={{
                                 height: `${Math.max(8, h * 100)}%`,
                                 opacity: 0.35 + h * 0.55,
@@ -3149,7 +3149,7 @@ export default function SvivvaPlayPage() {
                   <button
                     type="button"
                     onClick={() => void handleDownloadMelodyneMidi()}
-                    className="flex items-center gap-1 px-2 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-semibold text-[#5BA8A0] flex-shrink-0 border border-[#3a5550] hover:bg-[#1e2a28]"
+                    className="flex items-center gap-1 px-2 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-semibold text-[#5B8DA8] flex-shrink-0 border border-[#3a5550] hover:bg-[#1e2a28]"
                     title="Download aligned Melodyne as STEM pack (.zip)"
                     data-testid="button-download-melodyne-midi"
                   >
@@ -3187,7 +3187,7 @@ export default function SvivvaPlayPage() {
                             isComingSoon
                               ? "text-gray-600 cursor-not-allowed opacity-50"
                               : isActive
-                                ? "text-[#B87888]"
+                                ? "text-[#B8788C]"
                                 : "text-gray-500 hover:text-gray-400"
                           }`}
                           disabled={isComingSoon}
@@ -3212,7 +3212,7 @@ export default function SvivvaPlayPage() {
                               className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full holo-gradient"
                               style={{
                                 background:
-                                  "linear-gradient(90deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                  "linear-gradient(90deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                               }}
                             >
                               <HolographicNoise />
@@ -3250,7 +3250,7 @@ export default function SvivvaPlayPage() {
                             value={userPrompt}
                             onChange={(e) => setUserPrompt(e.target.value)}
                             placeholder="Describe what you want to create... e.g. 'ethereal ambient pads with shimmering arpeggios in D minor'"
-                            className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A05068] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
+                            className="w-full border border-gray-700 rounded-lg p-2 sm:p-3 text-xs sm:text-sm resize-none h-16 sm:h-20 focus:outline-none focus:border-[#A0506D] text-center text-gray-200 placeholder:text-gray-600 bg-[#1a1a1a]/50"
                             data-testid="input-prompt-home"
                           />
                         </div>
@@ -3259,7 +3259,7 @@ export default function SvivvaPlayPage() {
                       <button
                         type="button"
                         onClick={handleImportAudio}
-                        className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A05068] text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                        className="mb-3 px-5 py-2.5 rounded-lg border-2 border-dashed border-gray-600 hover:border-[#A0506D] text-xs text-gray-400 hover:text-gray-200 transition-colors"
                         data-testid="button-drop-import"
                       >
                         <Upload className="w-4 h-4 inline mr-2" />
@@ -3301,7 +3301,7 @@ export default function SvivvaPlayPage() {
 
                   {analysisBusy && !effectiveAnalysis && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                      <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
+                      <Loader2 className="w-10 h-10 text-[#B8788C] animate-spin mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">
                         {isTranscribing && melodyneFile
                           ? "Analyzing Audio + Melodyne"
@@ -3341,8 +3341,8 @@ export default function SvivvaPlayPage() {
                     !isGenerating && (
                       <div className="flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto">
                         {isEnriching && (
-                          <div className="mb-3 p-2.5 rounded-lg bg-[#A05068]/10 border border-[#A05068]/25 flex items-center gap-2">
-                            <Loader2 className="w-3.5 h-3.5 text-[#B87888] animate-spin flex-shrink-0" />
+                          <div className="mb-3 p-2.5 rounded-lg bg-[#A0506D]/10 border border-[#A0506D]/25 flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 text-[#B8788C] animate-spin flex-shrink-0" />
                             <p className="text-[11px] text-gray-400">
                               Saving session and refining chords in the background…
                             </p>
@@ -3408,12 +3408,12 @@ export default function SvivvaPlayPage() {
                           {transcription?.sources && (
                             <div className="flex flex-wrap gap-1.5 mb-3">
                               {transcription.sources.audioTranscription && (
-                                <Badge className="bg-[#A05068]/15 text-[#B87888] text-[8px] border-[#A05068]/30">
+                                <Badge className="bg-[#A0506D]/15 text-[#B8788C] text-[8px] border-[#A0506D]/30">
                                   Audio pitch map
                                 </Badge>
                               )}
                               {transcription.sources.melodyneMidi && (
-                                <Badge className="bg-[#5BA8A0]/15 text-[#5BA8A0] text-[8px] border-[#5BA8A0]/30">
+                                <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] text-[8px] border-[#5B8DA8]/30">
                                   Melodyne harmonics
                                 </Badge>
                               )}
@@ -3448,7 +3448,7 @@ export default function SvivvaPlayPage() {
                                     ? `${effectiveAnalysis.keyConfidence}% confidence`
                                     : "estimate — set manually"
                               }
-                              color="#A05068"
+                              color="#A0506D"
                             />
                             <AnalysisCard
                               label="BPM"
@@ -3460,7 +3460,7 @@ export default function SvivvaPlayPage() {
                                     ? "from MIDI"
                                     : "estimate — set manually"
                               }
-                              color="#A05068"
+                              color="#A0506D"
                             />
                             <AnalysisCard
                               label="Time"
@@ -3508,7 +3508,7 @@ export default function SvivvaPlayPage() {
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") e.preventDefault();
                                 }}
-                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                 placeholder={String(effectiveAnalysis.bpm)}
                                 data-testid="input-manual-tempo"
                               />
@@ -3536,7 +3536,7 @@ export default function SvivvaPlayPage() {
                                     e.target.value ? normalizeKeyLabel(e.target.value) : null,
                                   )
                                 }
-                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                 data-testid="select-manual-key"
                               >
                                 <optgroup label="Major Keys">
@@ -3591,7 +3591,7 @@ export default function SvivvaPlayPage() {
                               <select
                                 value={reichScale}
                                 onChange={(e) => setReichScale(e.target.value)}
-                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                className="w-full px-2 py-1.5 text-sm bg-[#1a1a1a] border border-gray-700 rounded text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                 data-testid="select-generation-scale"
                               >
                                 {listScales().map((s) => (
@@ -3601,7 +3601,7 @@ export default function SvivvaPlayPage() {
                                 ))}
                               </select>
                               <div
-                                className="rounded border border-[#A05068]/35 bg-[#0d0d0d] px-2 py-2"
+                                className="rounded border border-[#A0506D]/35 bg-[#0d0d0d] px-2 py-2"
                                 data-testid="scale-lookup-panel"
                               >
                                 <div className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
@@ -3615,14 +3615,14 @@ export default function SvivvaPlayPage() {
                                       if (e.key === "Enter") void runScaleLookup();
                                     }}
                                     placeholder="e.g. brazilian, hungarian minor, raga yaman"
-                                    className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]"
+                                    className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A0506D]"
                                     data-testid="input-scale-lookup"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => void runScaleLookup()}
                                     disabled={scaleLookupBusy || !scaleSearchQuery.trim()}
-                                    className="px-2 rounded border border-[#A05068]/50 text-[#B87888] hover:bg-[#A05068]/10 disabled:opacity-40"
+                                    className="px-2 rounded border border-[#A0506D]/50 text-[#B8788C] hover:bg-[#A0506D]/10 disabled:opacity-40"
                                     data-testid="button-scale-lookup-search"
                                   >
                                     {scaleLookupBusy ? (
@@ -3649,7 +3649,7 @@ export default function SvivvaPlayPage() {
                                           key={s.scaleId}
                                           type="button"
                                           onClick={() => applyScaleLookupMatch(s)}
-                                          className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 hover:border-[#A05068]"
+                                          className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 hover:border-[#A0506D]"
                                         >
                                           {s.label}
                                         </button>
@@ -3661,7 +3661,7 @@ export default function SvivvaPlayPage() {
                                   Active: {parseRootFromKeyLabel(generationKeyLabel)}{" "}
                                   {generationScaleLookup.label}
                                 </div>
-                                <div className="mt-1 font-mono text-[10px] text-[#A05068] tracking-wide">
+                                <div className="mt-1 font-mono text-[10px] text-[#A0506D] tracking-wide">
                                   {generationScaleLookup.noteNames.join(" · ")}
                                 </div>
                               </div>
@@ -3690,7 +3690,7 @@ export default function SvivvaPlayPage() {
                                     key={i}
                                     autoFocus
                                     defaultValue={chord.symbol}
-                                    className="w-16 text-[10px] font-mono px-1.5 py-0.5 border border-[#A05068] rounded text-center focus:outline-none bg-[#1a1a1a] text-gray-200"
+                                    className="w-16 text-[10px] font-mono px-1.5 py-0.5 border border-[#A0506D] rounded text-center focus:outline-none bg-[#1a1a1a] text-gray-200"
                                     onBlur={(e) => {
                                       handleChordEdit(i, e.target.value);
                                       setEditingChord(null);
@@ -3709,9 +3709,9 @@ export default function SvivvaPlayPage() {
                                     onClick={() => showChordEditor && setEditingChord(i)}
                                     className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors ${
                                       chordEdits[i]
-                                        ? "bg-[#A05068]/10 border-[#A05068]/30 holo-text"
+                                        ? "bg-[#A0506D]/10 border-[#A0506D]/30 holo-text"
                                         : showChordEditor
-                                          ? "bg-gray-800 border-gray-700 text-gray-400 hover:border-[#A05068]"
+                                          ? "bg-gray-800 border-gray-700 text-gray-400 hover:border-[#A0506D]"
                                           : "bg-gray-800 border-gray-700 text-gray-400"
                                     }`}
                                     data-testid={`button-chord-${i}`}
@@ -3767,7 +3767,7 @@ export default function SvivvaPlayPage() {
                               <select
                                 value={chordRoot}
                                 onChange={(e) => setChordRoot(e.target.value)}
-                                className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                 data-testid="select-chord-root"
                               >
                                 {[
@@ -3792,7 +3792,7 @@ export default function SvivvaPlayPage() {
                               <select
                                 value={chordTagFilter}
                                 onChange={(e) => setChordTagFilter(e.target.value)}
-                                className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                 data-testid="select-chord-tag"
                               >
                                 <option value="">All Styles</option>
@@ -3815,7 +3815,7 @@ export default function SvivvaPlayPage() {
                                 value={chordSearch}
                                 onChange={(e) => setChordSearch(e.target.value)}
                                 placeholder="Search chords..."
-                                className="flex-1 min-w-[100px] text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]"
+                                className="flex-1 min-w-[100px] text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A0506D]"
                                 data-testid="input-chord-search"
                               />
                             </div>
@@ -3838,7 +3838,7 @@ export default function SvivvaPlayPage() {
                                         setSelectedChordId(dc.chordId);
                                         setChordRoot(ChordKit.rootLabel(dc.rootPc));
                                       }}
-                                      className={`flex flex-col items-center p-2 rounded-lg border transition-colors min-w-[56px] ${selectedChordId === dc.chordId && chordRoot === ChordKit.rootLabel(dc.rootPc) ? "border-[#A05068] bg-[#A05068]/10" : "border-gray-700 hover:border-gray-500"}`}
+                                      className={`flex flex-col items-center p-2 rounded-lg border transition-colors min-w-[56px] ${selectedChordId === dc.chordId && chordRoot === ChordKit.rootLabel(dc.rootPc) ? "border-[#A0506D] bg-[#A0506D]/10" : "border-gray-700 hover:border-gray-500"}`}
                                       data-testid={`button-diatonic-${dc.degree}`}
                                     >
                                       <span className="text-[10px] font-semibold text-gray-300">
@@ -3876,7 +3876,7 @@ export default function SvivvaPlayPage() {
                                         setSelectedChordId(c.id);
                                         setChordInversion(0);
                                       }}
-                                      className={`text-left p-2 rounded-lg border transition-colors ${isSelected ? "border-[#A05068] bg-[#A05068]/10" : "border-gray-700/50 hover:border-gray-500"}`}
+                                      className={`text-left p-2 rounded-lg border transition-colors ${isSelected ? "border-[#A0506D] bg-[#A0506D]/10" : "border-gray-700/50 hover:border-gray-500"}`}
                                       data-testid={`button-chord-pick-${c.id}`}
                                     >
                                       <div className="text-xs font-medium text-gray-200">{sym}</div>
@@ -3905,7 +3905,7 @@ export default function SvivvaPlayPage() {
                                 });
                                 if (!v) return null;
                                 return (
-                                  <div className="mt-3 p-3 rounded-lg bg-[#0d1a1a] border border-[#A05068]/30">
+                                  <div className="mt-3 p-3 rounded-lg bg-[#0d1a1a] border border-[#A0506D]/30">
                                     <div className="flex items-center justify-between mb-2">
                                       <span className="text-sm font-semibold text-gray-200">
                                         {ChordKit.displaySymbol(chordRoot, selectedChordId)}
@@ -3936,7 +3936,7 @@ export default function SvivvaPlayPage() {
                                       {v.notes.map((n, i) => (
                                         <span
                                           key={i}
-                                          className="text-xs font-mono px-1.5 py-0.5 bg-gray-800 rounded text-[#B87888]"
+                                          className="text-xs font-mono px-1.5 py-0.5 bg-gray-800 rounded text-[#B8788C]"
                                         >
                                           {n}
                                         </span>
@@ -3959,7 +3959,7 @@ export default function SvivvaPlayPage() {
                             <div className="grid grid-cols-2 gap-3 mb-3">
                               <button
                                 onClick={() => setReichType("counterpoint")}
-                                className={`p-2.5 rounded-lg border transition-colors text-left ${reichType === "counterpoint" ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-700 hover:border-gray-500"}`}
+                                className={`p-2.5 rounded-lg border transition-colors text-left ${reichType === "counterpoint" ? "border-[#A0506D] bg-[#A0506D]/5" : "border-gray-700 hover:border-gray-500"}`}
                                 data-testid="button-counterpoint-type"
                               >
                                 <div className="text-xs font-medium text-gray-200">
@@ -3971,7 +3971,7 @@ export default function SvivvaPlayPage() {
                               </button>
                               <button
                                 onClick={() => setReichType("hocket")}
-                                className={`p-2.5 rounded-lg border transition-colors text-left ${reichType === "hocket" ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-700 hover:border-gray-500"}`}
+                                className={`p-2.5 rounded-lg border transition-colors text-left ${reichType === "hocket" ? "border-[#A0506D] bg-[#A0506D]/5" : "border-gray-700 hover:border-gray-500"}`}
                                 data-testid="button-hocket-type"
                               >
                                 <div className="text-xs font-medium text-gray-200">Hocketing</div>
@@ -3988,7 +3988,7 @@ export default function SvivvaPlayPage() {
                                 <select
                                   value={reichStyle}
                                   onChange={(e) => setReichStyle(e.target.value as ReichStyle)}
-                                  className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                  className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                   data-testid="select-reich-style"
                                 >
                                   <option value="reich_electric">Electric Counterpoint</option>
@@ -4006,7 +4006,7 @@ export default function SvivvaPlayPage() {
                                     setReichScale(e.target.value);
                                     setScaleSuggestionApplied(false);
                                   }}
-                                  className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                  className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                   data-testid="select-reich-scale"
                                 >
                                   {listScales().map((s) => (
@@ -4028,7 +4028,7 @@ export default function SvivvaPlayPage() {
                                   max={100}
                                   value={swingAmount}
                                   onChange={(e) => setSwingAmount(Number(e.target.value))}
-                                  className="w-full accent-[#5BA8A0]"
+                                  className="w-full accent-[#5B8DA8]"
                                   data-testid="slider-swing"
                                 />
                                 <span className="text-[9px] text-gray-500">
@@ -4047,7 +4047,7 @@ export default function SvivvaPlayPage() {
                                     onChange={(e) =>
                                       setHocketGroove(e.target.value as HocketGrooveStyle)
                                     }
-                                    className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A05068]"
+                                    className="text-xs bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 focus:outline-none focus:border-[#A0506D]"
                                     data-testid="select-hocket-groove"
                                   >
                                     <option value="reich_interlock">Reich v2 interlock</option>
@@ -4061,7 +4061,7 @@ export default function SvivvaPlayPage() {
                               )}
                             </div>
                             <div
-                              className="mb-3 rounded-lg border border-[#A05068]/40 bg-[#1a1018] p-3"
+                              className="mb-3 rounded-lg border border-[#A0506D]/40 bg-[#1a1018] p-3"
                               data-testid="ai-scale-lookup-panel"
                             >
                               <div className="text-[10px] font-semibold text-gray-300 uppercase tracking-wide mb-2">
@@ -4075,14 +4075,14 @@ export default function SvivvaPlayPage() {
                                     if (e.key === "Enter") void runScaleLookup();
                                   }}
                                   placeholder="brazilian, hungarian minor, raga yaman…"
-                                  className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A05068]"
+                                  className="flex-1 text-[10px] bg-[#1a1a1a] border border-gray-700 rounded px-2 py-1.5 text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-[#A0506D]"
                                   data-testid="input-scale-lookup-composition"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => void runScaleLookup()}
                                   disabled={scaleLookupBusy || !scaleSearchQuery.trim()}
-                                  className="px-2 rounded border border-[#A05068]/50 text-[#B87888] hover:bg-[#A05068]/10 disabled:opacity-40"
+                                  className="px-2 rounded border border-[#A0506D]/50 text-[#B8788C] hover:bg-[#A0506D]/10 disabled:opacity-40"
                                   data-testid="button-scale-lookup-search-composition"
                                 >
                                   {scaleLookupBusy ? (
@@ -4111,7 +4111,7 @@ export default function SvivvaPlayPage() {
                                           relativeSteps: alt.relativeSteps,
                                         })
                                       }
-                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A05068]"
+                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A0506D]"
                                     >
                                       {alt.label}
                                     </button>
@@ -4129,7 +4129,7 @@ export default function SvivvaPlayPage() {
                                       key={s.scaleId}
                                       type="button"
                                       onClick={() => applyScaleLookupMatch(s)}
-                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A05068]"
+                                      className="text-[9px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:border-[#A0506D]"
                                     >
                                       {s.label}
                                     </button>
@@ -4138,7 +4138,7 @@ export default function SvivvaPlayPage() {
                               ) : null}
                               <div className="flex items-center justify-between gap-2 mb-2 pt-1 border-t border-gray-800">
                                 <div className="flex items-center gap-1.5">
-                                  <BrainCircuit className="w-3.5 h-3.5 text-[#A05068]" />
+                                  <BrainCircuit className="w-3.5 h-3.5 text-[#A0506D]" />
                                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
                                     From your audio
                                   </span>
@@ -4156,12 +4156,12 @@ export default function SvivvaPlayPage() {
                                   </p>
                                   <div className="text-xs text-gray-200 mb-1">
                                     Suggested:{" "}
-                                    <span className="font-semibold text-[#B87888]">
+                                    <span className="font-semibold text-[#B8788C]">
                                       {aiScaleSuggestion.keyLabel} ·{" "}
                                       {aiScaleSuggestion.scaleName.replace(/_/g, " ")}
                                     </span>
                                   </div>
-                                  <div className="font-mono text-[10px] text-[#A05068] tracking-wide mb-2">
+                                  <div className="font-mono text-[10px] text-[#A0506D] tracking-wide mb-2">
                                     {aiScaleSuggestion.noteNames.join(" · ")}
                                   </div>
                                   <button
@@ -4233,7 +4233,7 @@ export default function SvivvaPlayPage() {
                                 value={Math.round(transcription?.durationSec ?? reichDuration)}
                                 onChange={(e) => setReichDuration(Number(e.target.value))}
                                 disabled={Boolean(transcription?.durationSec && audioFile)}
-                                className="accent-[#A05068] disabled:opacity-50"
+                                className="accent-[#A0506D] disabled:opacity-50"
                                 data-testid="slider-reich-duration"
                               />
                               <span className="text-[9px] text-gray-500">
@@ -4247,8 +4247,8 @@ export default function SvivvaPlayPage() {
                               Use the play stage above for waveform, pitch map, and chord grid.
                               Generate uses transcribed chords when available.
                             </p>
-                            <div className="mb-3 p-3 rounded-lg bg-[#0d0a12] border border-[#A05068]/25">
-                              <h4 className="text-[10px] font-semibold text-[#B87888] uppercase tracking-wider mb-1.5">
+                            <div className="mb-3 p-3 rounded-lg bg-[#0d0a12] border border-[#A0506D]/25">
+                              <h4 className="text-[10px] font-semibold text-[#B8788C] uppercase tracking-wider mb-1.5">
                                 Add‑ons integrated (clean)
                               </h4>
                               <p className="text-[9px] text-gray-400">
@@ -4265,7 +4265,7 @@ export default function SvivvaPlayPage() {
                             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                               Ensemble options
                             </h3>
-                            <div className="flex flex-col gap-1.5 mb-3 p-3 rounded-lg border border-[#A05068]/25 bg-[#0d0a12]">
+                            <div className="flex flex-col gap-1.5 mb-3 p-3 rounded-lg border border-[#A0506D]/25 bg-[#0d0a12]">
                               <CheckboxOption
                                 label="Indian Meend (Violin 1, Solo Violin, Flute, Oboe)"
                                 checked={meend}
@@ -4323,7 +4323,7 @@ export default function SvivvaPlayPage() {
                                   <button
                                     key={preset.id}
                                     onClick={() => setSelectedPreset(preset.id)}
-                                    className={`text-left p-2.5 rounded-lg border transition-colors ${selectedPreset === preset.id ? "border-[#A05068] bg-[#A05068]/5" : "border-gray-700 hover:border-gray-500"}`}
+                                    className={`text-left p-2.5 rounded-lg border transition-colors ${selectedPreset === preset.id ? "border-[#A0506D] bg-[#A0506D]/5" : "border-gray-700 hover:border-gray-500"}`}
                                     data-testid={`button-preset-${preset.id}`}
                                   >
                                     <div className="text-xs font-medium text-gray-200">
@@ -4349,7 +4349,7 @@ export default function SvivvaPlayPage() {
                                 type="checkbox"
                                 checked={useSeed}
                                 onChange={(e) => setUseSeed(e.target.checked)}
-                                className="accent-[#A05068]"
+                                className="accent-[#A0506D]"
                                 data-testid="checkbox-use-seed"
                               />
                               Lock seed
@@ -4360,7 +4360,7 @@ export default function SvivvaPlayPage() {
                               type="number"
                               value={seed}
                               onChange={(e) => setSeed(Number(e.target.value))}
-                              className="flex-1 text-xs font-mono bg-[#1a1a1a]/50 border border-gray-700 rounded px-2 py-1 focus:outline-none focus:border-[#A05068] text-gray-200"
+                              className="flex-1 text-xs font-mono bg-[#1a1a1a]/50 border border-gray-700 rounded px-2 py-1 focus:outline-none focus:border-[#A0506D] text-gray-200"
                               disabled={!useSeed}
                               data-testid="input-seed"
                             />
@@ -4387,7 +4387,7 @@ export default function SvivvaPlayPage() {
                               className="gap-1.5 sm:gap-2 text-white text-xs sm:text-sm holo-gradient"
                               style={{
                                 background:
-                                  "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                  "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                               }}
                               disabled={isGenerating}
                               data-testid="button-generate-composition"
@@ -4403,7 +4403,7 @@ export default function SvivvaPlayPage() {
                                 className="gap-1.5 sm:gap-2 text-white text-xs sm:text-sm holo-gradient"
                                 style={{
                                   background:
-                                    "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                    "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                                 }}
                                 disabled={isGenerating || !analysis}
                                 data-testid="button-generate-chords-preview"
@@ -4429,7 +4429,7 @@ export default function SvivvaPlayPage() {
                                 className="gap-1.5 sm:gap-2 text-white text-xs sm:text-sm holo-gradient"
                                 style={{
                                   background:
-                                    "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                    "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                                 }}
                                 disabled={isGenerating || !analysis}
                                 data-testid="button-generate-preview"
@@ -4473,7 +4473,7 @@ export default function SvivvaPlayPage() {
 
                   {isGenerating && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                      <Loader2 className="w-10 h-10 text-[#B87888] animate-spin mb-4" />
+                      <Loader2 className="w-10 h-10 text-[#B8788C] animate-spin mb-4" />
                       <h3 className="text-lg font-semibold text-gray-200 mb-1">Generating</h3>
                       <p className="text-sm text-gray-400 mb-3">{pipelineStage}</p>
                       <div className="w-64 space-y-1 mb-4">
@@ -4531,7 +4531,7 @@ export default function SvivvaPlayPage() {
                             Generated Stems ({stems.length})
                           </h3>
                           {planInfo?.chordProgression && planInfo.chordProgression.length > 0 ? (
-                            <p className="text-[9px] sm:text-[10px] text-[#5BA8A0] mt-0.5 font-mono tracking-wide">
+                            <p className="text-[9px] sm:text-[10px] text-[#5B8DA8] mt-0.5 font-mono tracking-wide">
                               {planInfo.chordProgression.join(" → ")}
                             </p>
                           ) : (
@@ -4543,7 +4543,7 @@ export default function SvivvaPlayPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                          <Badge className="bg-[#A05068]/20 text-[#B87888] text-[8px] sm:text-[9px] border-[#A05068]/30 hidden sm:flex">
+                          <Badge className="bg-[#A0506D]/20 text-[#B8788C] text-[8px] sm:text-[9px] border-[#A0506D]/30 hidden sm:flex">
                             MIDI: Professional
                           </Badge>
                           <Button
@@ -4577,7 +4577,7 @@ export default function SvivvaPlayPage() {
                                 onClick={() => handleVersionSwitch(vi)}
                                 className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono border transition-colors ${
                                   vi === activeVersion
-                                    ? "bg-[#A05068]/20 border-[#A05068] holo-text"
+                                    ? "bg-[#A0506D]/20 border-[#A0506D] holo-text"
                                     : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
                                 }`}
                                 data-testid={`button-version-${vi}`}
@@ -4590,7 +4590,7 @@ export default function SvivvaPlayPage() {
                       )}
 
                       {mode === "solo" && soloTakes.length > 1 && (
-                        <div className="mb-3 p-2 bg-[#A05068]/10 rounded-lg border border-[#A05068]/30">
+                        <div className="mb-3 p-2 bg-[#A0506D]/10 rounded-lg border border-[#A0506D]/30">
                           <span className="text-[10px] font-semibold holo-text uppercase tracking-wider block mb-1.5">
                             Solo Takes
                           </span>
@@ -4604,7 +4604,7 @@ export default function SvivvaPlayPage() {
                                 }}
                                 className={`flex-1 px-2 py-1.5 rounded text-xs font-medium border transition-colors ${
                                   ti === activeTake
-                                    ? "bg-[#A05068]/20 border-[#A05068] holo-text"
+                                    ? "bg-[#A0506D]/20 border-[#A0506D] holo-text"
                                     : "bg-gray-800 border-gray-700 text-gray-400"
                                 }`}
                                 data-testid={`button-take-${ti}`}
@@ -4630,13 +4630,13 @@ export default function SvivvaPlayPage() {
                               stem.muted
                                 ? "bg-gray-800/30 border-gray-700 opacity-50"
                                 : lockedStems.has(stem.name)
-                                  ? "bg-[#A05068]/10 border-[#A05068]/30"
+                                  ? "bg-[#A0506D]/10 border-[#A0506D]/30"
                                   : "bg-gray-800/20 border-gray-700"
                             }`}
                             data-testid={`stem-${i}`}
                           >
                             <div
-                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${lockedStems.has(stem.name) ? "bg-[#A05068]" : "bg-[#A05068]"}`}
+                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${lockedStems.has(stem.name) ? "bg-[#A0506D]" : "bg-[#A0506D]"}`}
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-[10px] sm:text-xs font-medium text-gray-200 truncate">
@@ -4673,7 +4673,7 @@ export default function SvivvaPlayPage() {
                               <button
                                 onClick={() => void handleDownloadStemMidi(stem, i)}
                                 disabled={!stem.midiEvents?.length}
-                                className="p-0.5 sm:p-1 rounded text-gray-400 hover:text-[#5BA8A0] disabled:opacity-30"
+                                className="p-0.5 sm:p-1 rounded text-gray-400 hover:text-[#5B8DA8] disabled:opacity-30"
                                 title="Download this stem as .mid for your DAW"
                                 data-testid={`button-download-stem-midi-${i}`}
                               >
@@ -4684,7 +4684,7 @@ export default function SvivvaPlayPage() {
                                 disabled={
                                   lockedStems.has(stem.name) || regeneratingStem === stem.name
                                 }
-                                className={`p-0.5 sm:p-1 rounded ${lockedStems.has(stem.name) ? "text-gray-200" : "text-gray-400 hover:text-[#B87888]"}`}
+                                className={`p-0.5 sm:p-1 rounded ${lockedStems.has(stem.name) ? "text-gray-200" : "text-gray-400 hover:text-[#B8788C]"}`}
                                 title="Regenerate this stem"
                                 data-testid={`button-regen-stem-${i}`}
                               >
@@ -4734,7 +4734,7 @@ export default function SvivvaPlayPage() {
                                   setStems(u);
                                   if (engineReady) getSoundEngine().updateMix(stem.name, { pan });
                                 }}
-                                className="w-full accent-[#A05068]"
+                                className="w-full accent-[#A0506D]"
                                 title={`Pan: ${stem.pan}`}
                               />
                             </div>
@@ -4744,7 +4744,7 @@ export default function SvivvaPlayPage() {
                       {planInfo?.meendApplicableStems &&
                         planInfo.meendApplicableStems.length > 0 &&
                         meend && (
-                          <div className="mt-3 p-2 bg-[#A05068]/10 rounded border border-[#A05068]/30">
+                          <div className="mt-3 p-2 bg-[#A0506D]/10 rounded border border-[#A0506D]/30">
                             <p className="text-[10px] holo-text">
                               Meend (continuous pitch bend) applied to:{" "}
                               {planInfo.meendApplicableStems.join(", ")}
@@ -4765,7 +4765,7 @@ export default function SvivvaPlayPage() {
                             {patchResult.synth_family} | {patchResult.mono_poly || "poly"}
                           </p>
                         </div>
-                        <Badge className="bg-[#A05068]/20 holo-text text-[9px] border-[#A05068]/30">
+                        <Badge className="bg-[#A0506D]/20 holo-text text-[9px] border-[#A0506D]/30">
                           Professional
                         </Badge>
                       </div>
@@ -4775,7 +4775,7 @@ export default function SvivvaPlayPage() {
                           <div key={key} className="bg-gray-800/50 rounded-lg p-3 text-center">
                             <div className="w-10 h-10 mx-auto rounded-full border-[2px] border-gray-700 flex items-center justify-center relative mb-1.5">
                               <div
-                                className="absolute w-0.5 h-4 bg-[#A05068] rounded-full origin-bottom"
+                                className="absolute w-0.5 h-4 bg-[#A0506D] rounded-full origin-bottom"
                                 style={{
                                   transform: `rotate(${(val as number) * 270 - 135}deg)`,
                                   bottom: "50%",
@@ -4905,7 +4905,7 @@ export default function SvivvaPlayPage() {
                   </h4>
                   <div className="space-y-1.5 text-[10px]">
                     <div className="flex items-start gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#A05068] mt-1 flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#A0506D] mt-1 flex-shrink-0" />
                       <span className="text-gray-400">
                         <span className="font-medium">Professional:</span> MIDI, analysis, patches
                       </span>
@@ -4952,7 +4952,7 @@ export default function SvivvaPlayPage() {
                         className="text-[7px] text-white ml-auto holo-gradient"
                         style={{
                           background:
-                            "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                            "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                         }}
                       >
                         <HolographicNoise />
@@ -4970,7 +4970,7 @@ export default function SvivvaPlayPage() {
                                 e.target.value === "orchestral" ? "orchestral" : "standard",
                               )
                             }
-                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A05068] mt-0.5 bg-gray-800/50 text-gray-200"
+                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A0506D] mt-0.5 bg-gray-800/50 text-gray-200"
                             data-testid="select-neural-prompt-profile"
                           >
                             <option value="standard">Standard (Suno / Udio)</option>
@@ -4991,7 +4991,7 @@ export default function SvivvaPlayPage() {
                             value={neuralGenre}
                             onChange={(e) => setNeuralGenre(e.target.value)}
                             placeholder="e.g. lo-fi hip hop, ambient"
-                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A05068] mt-0.5 bg-gray-800/50 text-gray-200"
+                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A0506D] mt-0.5 bg-gray-800/50 text-gray-200"
                             data-testid="input-neural-genre"
                           />
                         </div>
@@ -5001,7 +5001,7 @@ export default function SvivvaPlayPage() {
                             value={neuralMood}
                             onChange={(e) => setNeuralMood(e.target.value)}
                             placeholder="e.g. dreamy, energetic"
-                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A05068] mt-0.5 bg-gray-800/50 text-gray-200"
+                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A0506D] mt-0.5 bg-gray-800/50 text-gray-200"
                             data-testid="input-neural-mood"
                           />
                         </div>
@@ -5010,7 +5010,7 @@ export default function SvivvaPlayPage() {
                           <select
                             value={neuralEnergy}
                             onChange={(e) => setNeuralEnergy(e.target.value)}
-                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A05068] mt-0.5 bg-gray-800/50 text-gray-200"
+                            className="w-full border border-gray-600 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#A0506D] mt-0.5 bg-gray-800/50 text-gray-200"
                             data-testid="select-neural-energy"
                           >
                             <option value="low">Low</option>
@@ -5025,7 +5025,7 @@ export default function SvivvaPlayPage() {
                           className="w-full text-[10px] text-white gap-1 holo-gradient"
                           style={{
                             background:
-                              "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                              "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                           }}
                           size="sm"
                           data-testid="button-generate-neural-prompt"
@@ -5058,7 +5058,7 @@ export default function SvivvaPlayPage() {
                                   className="text-[7px] text-white holo-gradient"
                                   style={{
                                     background:
-                                      "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                                      "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                                   }}
                                 >
                                   <HolographicNoise />
@@ -5066,7 +5066,7 @@ export default function SvivvaPlayPage() {
                                 </Badge>
                                 <button
                                   onClick={copyNeuralPrompt}
-                                  className="p-0.5 text-gray-400 hover:text-[#B87888]"
+                                  className="p-0.5 text-gray-400 hover:text-[#B8788C]"
                                   data-testid="button-copy-neural-prompt"
                                 >
                                   {promptCopied ? (
@@ -5168,12 +5168,12 @@ export default function SvivvaPlayPage() {
                 style={{
                   background:
                     stems.length > 0 || transcription?.melodyneNotes?.length
-                      ? "linear-gradient(180deg, #5BA8A0, #4A8890)"
+                      ? "linear-gradient(180deg, #5B8DA8, #4A8890)"
                       : "linear-gradient(180deg, #444, #333)",
                   boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
                   border:
                     "2px solid " +
-                    (stems.length > 0 || transcription?.melodyneNotes?.length ? "#5BA8A0" : "#555"),
+                    (stems.length > 0 || transcription?.melodyneNotes?.length ? "#5B8DA8" : "#555"),
                 }}
                 data-testid="button-export-stem-pack"
               >
@@ -5272,7 +5272,7 @@ export default function SvivvaPlayPage() {
                   className="h-full rounded-full transition-all holo-gradient"
                   style={{
                     background:
-                      "linear-gradient(90deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                      "linear-gradient(90deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                     width:
                       playbackDuration > 0
                         ? `${(Math.min(playbackPos, playbackDuration) / playbackDuration) * 100}%`
@@ -5289,7 +5289,7 @@ export default function SvivvaPlayPage() {
                   min="0"
                   max="100"
                   value={masterVolume}
-                  className="w-14 accent-[#A05068]"
+                  className="w-14 accent-[#A0506D]"
                   onChange={(e) => {
                     const val = Number(e.target.value);
                     setMasterVolume(val);
@@ -5356,7 +5356,7 @@ function SliderControl({
         max="100"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full mt-0.5 accent-[#A05068]"
+        className="w-full mt-0.5 accent-[#A0506D]"
       />
     </div>
   );
@@ -5373,7 +5373,7 @@ function RadioOption({
 }) {
   return (
     <label className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 cursor-pointer">
-      <input type="radio" checked={checked} onChange={onChange} className="accent-[#A05068]" />
+      <input type="radio" checked={checked} onChange={onChange} className="accent-[#A0506D]" />
       {label}
     </label>
   );
@@ -5396,7 +5396,7 @@ function CheckboxOption({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="accent-[#A05068]"
+        className="accent-[#A0506D]"
         data-testid={dataTestId}
       />
       {label}
@@ -5456,7 +5456,7 @@ function MidiCcMappings({ data }: { data: Record<string, number> }) {
 function PipelineStep({ label, done, active }: { label: string; done: boolean; active?: boolean }) {
   return (
     <div
-      className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${active ? "bg-[#A05068]/10 text-[#B87888]" : done ? "text-[#B87888]" : "text-gray-500"}`}
+      className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${active ? "bg-[#A0506D]/10 text-[#B8788C]" : done ? "text-[#B8788C]" : "text-gray-500"}`}
     >
       {active ? (
         <Loader2 className="w-3 h-3 animate-spin" />
@@ -5465,7 +5465,7 @@ function PipelineStep({ label, done, active }: { label: string; done: boolean; a
           className="w-3 h-3 rounded-full flex items-center justify-center holo-gradient"
           style={{
             background:
-              "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+              "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
           }}
         >
           <HolographicNoise />
@@ -5590,7 +5590,7 @@ function GuidedPromptBuilder({
                 i <= step
                   ? {
                       background:
-                        "linear-gradient(90deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                        "linear-gradient(90deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
                     }
                   : undefined
               }
@@ -5619,7 +5619,7 @@ function GuidedPromptBuilder({
                 <button
                   key={m}
                   onClick={() => setOutcome(m)}
-                  className={`p-2 rounded-lg border text-left text-xs text-white/80 ${outcome === m ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
+                  className={`p-2 rounded-lg border text-left text-xs text-white/80 ${outcome === m ? "border-[#A0506D] bg-[#A0506D]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-outcome-${m}`}
                 >
                   {MODE_CONFIG[m].label}
@@ -5632,7 +5632,7 @@ function GuidedPromptBuilder({
               value={style}
               onChange={(e) => setStyle(e.target.value)}
               placeholder="e.g. 'airy minimalist with marimba textures' or 'neo-soul with extended jazz harmonies'"
-              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white/5 text-white/85 placeholder:text-white/25"
+              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A0506D] bg-white/5 text-white/85 placeholder:text-white/25"
               data-testid="input-guided-style"
             />
           )}
@@ -5650,7 +5650,7 @@ function GuidedPromptBuilder({
                         onClick={() => toggleInstrument(inst)}
                         className={`text-[10px] px-2 py-1 rounded border transition-colors ${
                           selectedInstruments.includes(inst)
-                            ? "border-[#A05068] bg-[#A05068]/10 holo-text"
+                            ? "border-[#A0506D] bg-[#A0506D]/10 holo-text"
                             : "border-white/10 text-white/45 hover:border-white/30"
                         }`}
                         data-testid={`button-instrument-${inst.replace(/\s/g, "-").toLowerCase()}`}
@@ -5673,7 +5673,7 @@ function GuidedPromptBuilder({
               value={instruments}
               onChange={(e) => setInstruments(e.target.value)}
               placeholder="Add custom instruments not in the palette, e.g. 'koto, tabla, kalimba'"
-              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A05068] bg-white/5 text-white/85 placeholder:text-white/25"
+              className="w-full border border-white/10 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:border-[#A0506D] bg-white/5 text-white/85 placeholder:text-white/25"
               data-testid="input-guided-instruments"
             />
           )}
@@ -5683,7 +5683,7 @@ function GuidedPromptBuilder({
                 <button
                   key={h}
                   onClick={() => setHarmonyPolicy(h)}
-                  className={`w-full p-3 rounded-lg border text-left text-xs ${harmonyPolicy === h ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
+                  className={`w-full p-3 rounded-lg border text-left text-xs ${harmonyPolicy === h ? "border-[#A0506D] bg-[#A0506D]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-harmony-${h}`}
                 >
                   <span className="font-medium capitalize">{h}</span>
@@ -5702,7 +5702,7 @@ function GuidedPromptBuilder({
                   value={scale}
                   onChange={(e) => setScale(e.target.value)}
                   placeholder="auto (or e.g. 'D dorian', 'Bb mixolydian')"
-                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A0506D] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-scale"
                 />
               </div>
@@ -5711,7 +5711,7 @@ function GuidedPromptBuilder({
                   type="checkbox"
                   checked={meendEnabled}
                   onChange={(e) => setMeendEnabled(e.target.checked)}
-                  className="accent-[#A05068]"
+                  className="accent-[#A0506D]"
                   data-testid="checkbox-guided-meend"
                 />
                 Enable Meend (continuous pitch bend / MPE)
@@ -5731,7 +5731,7 @@ function GuidedPromptBuilder({
                     <button
                       key={bc.id}
                       onClick={() => setBuildCurve(bc.id)}
-                      className={`p-2 rounded-lg border text-left ${buildCurve === bc.id ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
+                      className={`p-2 rounded-lg border text-left ${buildCurve === bc.id ? "border-[#A0506D] bg-[#A0506D]/10" : "border-white/10 hover:border-white/25"}`}
                       data-testid={`button-guided-build-${bc.id}`}
                     >
                       <div className="text-[10px] font-medium text-white/85">{bc.label}</div>
@@ -5746,7 +5746,7 @@ function GuidedPromptBuilder({
                   value={form}
                   onChange={(e) => setForm(e.target.value)}
                   placeholder="AABA, ABAB, through-composed..."
-                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-[#A0506D] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-form"
                 />
               </div>
@@ -5756,7 +5756,7 @@ function GuidedPromptBuilder({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any other instructions..."
-                  className="w-full border border-white/10 rounded-lg p-2 text-sm resize-none h-16 focus:outline-none focus:border-[#A05068] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
+                  className="w-full border border-white/10 rounded-lg p-2 text-sm resize-none h-16 focus:outline-none focus:border-[#A0506D] mt-1 bg-white/5 text-white/85 placeholder:text-white/25"
                   data-testid="input-guided-notes"
                 />
               </div>
@@ -5777,7 +5777,7 @@ function GuidedPromptBuilder({
                 <button
                   key={q.id}
                   onClick={() => setRenderQuality(q.id)}
-                  className={`w-full p-3 rounded-lg border text-left text-xs ${renderQuality === q.id ? "border-[#A05068] bg-[#A05068]/10" : "border-white/10 hover:border-white/25"}`}
+                  className={`w-full p-3 rounded-lg border text-left text-xs ${renderQuality === q.id ? "border-[#A0506D] bg-[#A0506D]/10" : "border-white/10 hover:border-white/25"}`}
                   data-testid={`button-guided-quality-${q.id}`}
                 >
                   <span className="font-medium">{q.label}</span>
@@ -5811,7 +5811,7 @@ function GuidedPromptBuilder({
               className="text-xs text-white gap-1 holo-gradient"
               style={{
                 background:
-                  "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                  "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
               }}
               data-testid="button-guided-next"
             >
@@ -5825,7 +5825,7 @@ function GuidedPromptBuilder({
               className="text-xs text-white gap-1 holo-gradient"
               style={{
                 background:
-                  "linear-gradient(135deg, #4A1E34 0%, #7A3850 10%, #6B2C5A 22%, #9A6878 34%, #5E3870 46%, #8A5868 56%, #4A8E90 68%, #7A4E78 78%, #4A1E34 88%, #7A3850 100%)",
+                  "linear-gradient(135deg, #4A1E37 0%, #7A3854 10%, #6B2C5E 22%, #9A687B 34%, #5A3870 46%, #8A586B 56%, #4A6F90 68%, #794E7A 78%, #4A1E37 88%, #7A3854 100%)",
               }}
               data-testid="button-guided-apply"
             >

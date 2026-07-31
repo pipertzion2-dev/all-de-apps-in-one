@@ -48,7 +48,7 @@ export function BrandMark({
         width={dim}
         height={dim}
         priority={priority}
-        className="object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
+        className="object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
         style={{ width: dim, height: dim }}
       />
       {showWordmark && <span className={wordmarkClassName}>{BRAND.name}</span>}

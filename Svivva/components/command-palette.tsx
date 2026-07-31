@@ -274,7 +274,7 @@ export function CommandPalette() {
                           onMouseEnter={() => setSelectedIndex(globalIdx)}
                           className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2 text-left text-sm transition-colors ${
                             globalIdx === selectedIndex
-                              ? "bg-[#5BA8A0]/10 text-foreground"
+                              ? "bg-[#5B8DA8]/10 text-foreground"
                               : "text-muted-foreground hover:text-foreground"
                           }`}
                           data-testid={`cmd-${cmd.title.toLowerCase().replace(/\s+/g, "-")}`}

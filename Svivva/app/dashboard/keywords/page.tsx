@@ -278,7 +278,7 @@ export default function KeywordPlannerPage() {
 
       {/* Add/Edit Form */}
       {showForm && (
-        <Card className="border-2 border-[#5BA8A0]/30">
+        <Card className="border-2 border-[#5B8DA8]/30">
           <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
             <CardTitle className="text-base">
               {editingId ? "Edit Keyword" : "Add Keyword"}
@@ -462,7 +462,7 @@ export default function KeywordPlannerPage() {
                       onClick={() => generateLandingPage(kw)}
                       disabled={generatingLanding.has(kw.id)}
                       title="Generate landing page"
-                      className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#5BA8A0] hover:bg-[#5BA8A0]/10 transition-colors disabled:opacity-40"
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#5B8DA8] hover:bg-[#5B8DA8]/10 transition-colors disabled:opacity-40"
                       data-testid={`button-generate-landing-${kw.id}`}
                     >
                       {generatingLanding.has(kw.id) ? (
@@ -475,7 +475,7 @@ export default function KeywordPlannerPage() {
                       onClick={() => generateArticle(kw)}
                       disabled={generatingArticle.has(kw.id)}
                       title="Generate article"
-                      className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#5BA8A0] hover:bg-[#5BA8A0]/10 transition-colors disabled:opacity-40"
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#5B8DA8] hover:bg-[#5B8DA8]/10 transition-colors disabled:opacity-40"
                       data-testid={`button-generate-article-${kw.id}`}
                     >
                       {generatingArticle.has(kw.id) ? (
@@ -512,7 +512,7 @@ export default function KeywordPlannerPage() {
                             href={kw.assignedPage}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline truncate max-w-full"
+                            className="inline-flex items-center gap-1 text-xs text-[#5B8DA8] hover:underline truncate max-w-full"
                             data-testid={`link-landing-page-${kw.id}`}
                           >
                             {kw.assignedPage} <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -521,7 +521,7 @@ export default function KeywordPlannerPage() {
                           <button
                             onClick={() => generateLandingPage(kw)}
                             disabled={generatingLanding.has(kw.id)}
-                            className="text-xs text-[#5BA8A0] hover:underline flex items-center gap-1"
+                            className="text-xs text-[#5B8DA8] hover:underline flex items-center gap-1"
                           >
                             {generatingLanding.has(kw.id) ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -539,7 +539,7 @@ export default function KeywordPlannerPage() {
                             href={kw.assignedArticle}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#5BA8A0] hover:underline truncate max-w-full"
+                            className="inline-flex items-center gap-1 text-xs text-[#5B8DA8] hover:underline truncate max-w-full"
                             data-testid={`link-article-${kw.id}`}
                           >
                             {kw.assignedArticle} <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -548,7 +548,7 @@ export default function KeywordPlannerPage() {
                           <button
                             onClick={() => generateArticle(kw)}
                             disabled={generatingArticle.has(kw.id)}
-                            className="text-xs text-[#5BA8A0] hover:underline flex items-center gap-1"
+                            className="text-xs text-[#5B8DA8] hover:underline flex items-center gap-1"
                           >
                             {generatingArticle.has(kw.id) ? (
                               <Loader2 className="w-3 h-3 animate-spin" />

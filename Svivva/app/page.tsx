@@ -366,7 +366,7 @@ export default function LandingPage() {
                           alt="ZZAI"
                           width={44}
                           height={44}
-                          className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
+                          className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
                           priority
                         />
                         <span className="hidden sm:inline text-sm font-bold tracking-[0.2em] text-foreground/90">
@@ -394,21 +394,21 @@ export default function LandingPage() {
                         </span>
                         <Button
                           size="sm"
-                          className="bg-[#00E5FF] text-xs px-2.5 sm:px-3 whitespace-nowrap"
+                          className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
                         >
                           Start Free
                         </Button>
                       </div>
                     </div>
                   </nav>
-                  <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-background to-[#00E5FF]/10">
+                  <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-background to-[#5B8DA8]/10">
                     <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto px-4 sm:px-6">
                       <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                         From seed{" "}
                         <span
                           style={{
                             backgroundImage:
-                              "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                              "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                             WebkitBackgroundClip: "text",
                             WebkitTextFillColor: "transparent",
                             backgroundClip: "text",
@@ -490,7 +490,7 @@ export default function LandingPage() {
                 alt="ZZAI"
                 width={44}
                 height={44}
-                className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
+                className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
               />
               <span className="hidden sm:inline text-sm font-bold tracking-[0.2em] text-foreground/90">
                 ZZAI
@@ -519,7 +519,7 @@ export default function LandingPage() {
               <a href="/signup">
                 <Button
                   size="sm"
-                  className="bg-[#00E5FF] text-xs px-2.5 sm:px-3 whitespace-nowrap"
+                  className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
                   data-testid="button-start-free"
                 >
                   Start Free
@@ -531,12 +531,12 @@ export default function LandingPage() {
 
         <section
           id="svivva-seeds"
-          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#00E5FF]/40 via-[#00E5FF]/25 to-background border-b border-[#00E5FF]/40"
+          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="rounded-2xl border-2 border-[#00E5FF]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#00E5FF]/10">
+            <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
               <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#00E5FF]/50">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5B8DA8]/50">
                   <Image
                     src={seedsLogo}
                     alt="ZZAI Seeds"
@@ -568,7 +568,7 @@ export default function LandingPage() {
                     ].map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] px-2 py-1 rounded-full bg-[#00E5FF]/15 border border-[#00E5FF]/40 text-foreground/80"
+                        className="text-[10px] px-2 py-1 rounded-full bg-[#5B8DA8]/15 border border-[#5B8DA8]/40 text-foreground/80"
                       >
                         {tag}
                       </span>
@@ -578,7 +578,7 @@ export default function LandingPage() {
                     <Link href="/seeds">
                       <Button
                         size="sm"
-                        className="gap-2 bg-[#00E5FF]"
+                        className="gap-2 bg-[#5B8DA8]"
                         data-testid="button-seeds-cta"
                       >
                         Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
@@ -592,14 +592,14 @@ export default function LandingPage() {
         </section>
 
         <section
-          className={`relative z-0 py-14 sm:py-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#00E5FF]/10" : "bg-gradient-to-br from-background via-[#FF2BD6]/5 to-background"}`}
+          className={`relative z-0 py-14 sm:py-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5B8DA8]/10" : "bg-gradient-to-br from-background via-[#D94F9C]/5 to-background"}`}
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
               <div className="flex flex-col items-center gap-2">
                 <ZzaiModeToggle size="lg" showLabels={false} />
                 <p
-                  className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#00E5FF]/90" : "text-[#FF2BD6]/90"}`}
+                  className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
                 >
                   ZZAI · click to flip
                 </p>
@@ -611,7 +611,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #00E5FF, #C77DFF, #39FF14)",
+                          "linear-gradient(to right, #D94F9C, #5B8DA8, #C77DFF, #C5D86A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -629,7 +629,7 @@ export default function LandingPage() {
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                     <Button
                       size="lg"
-                      className="gap-2 bg-[#00E5FF] text-black hover:bg-[#00C4DB]"
+                      className="gap-2 bg-[#5B8DA8] text-black hover:bg-[#4A7D98]"
                       onClick={handleStartBuilding}
                       data-testid="button-hero-start"
                     >
@@ -640,7 +640,7 @@ export default function LandingPage() {
                       <Button
                         size="lg"
                         variant="outline"
-                        className="gap-2 border-[#00E5FF]/40"
+                        className="gap-2 border-[#5B8DA8]/40"
                         data-testid="button-hero-demo"
                       >
                         <Terminal className="w-4 h-4" />
@@ -670,7 +670,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #C77DFF, #00E5FF, #39FF14)",
+                          "linear-gradient(to right, #D94F9C, #C77DFF, #5B8DA8, #C5D86A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -687,7 +687,7 @@ export default function LandingPage() {
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                     <Button
                       size="lg"
-                      className="gap-2 bg-[#FF2BD6] text-white hover:bg-[#E016B8]"
+                      className="gap-2 bg-[#D94F9C] text-white hover:bg-[#E016B8]"
                       onClick={handleStartBuilding}
                       data-testid="button-hero-start"
                     >
@@ -745,7 +745,7 @@ export default function LandingPage() {
                   <span
                     style={{
                       backgroundImage:
-                        "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                        "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -781,7 +781,7 @@ export default function LandingPage() {
 
             <div className="mt-12 text-center">
               <a href="/signup">
-                <Button size="lg" className="gap-2 bg-[#00E5FF]" data-testid="button-platforms-cta">
+                <Button size="lg" className="gap-2 bg-[#5B8DA8]" data-testid="button-platforms-cta">
                   {mode === "digital" ? "Enter Signal — Build APIs" : "Enter Crest — Manufacture"}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -828,7 +828,7 @@ export default function LandingPage() {
                   <span
                     className="text-2xl sm:text-3xl font-black tracking-tight"
                     style={{
-                      background: "linear-gradient(135deg, #00E5FF, #FF2BD6)",
+                      background: "linear-gradient(135deg, #5B8DA8, #D94F9C)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -883,7 +883,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -926,12 +926,12 @@ export default function LandingPage() {
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-[#00E5FF]/15 flex items-center justify-center">
-                          <feature.icon className="w-5 h-5 text-[#00E5FF]" />
+                        <div className="w-10 h-10 rounded-lg bg-[#5B8DA8]/15 flex items-center justify-center">
+                          <feature.icon className="w-5 h-5 text-[#5B8DA8]" />
                         </div>
                         <Badge
                           variant="secondary"
-                          className="text-xs bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20 invisible group-hover:visible"
+                          className="text-xs bg-[#5B8DA8]/10 text-[#5B8DA8] border-[#5B8DA8]/20 invisible group-hover:visible"
                         >
                           {feature.highlight}
                         </Badge>
@@ -941,7 +941,7 @@ export default function LandingPage() {
                         {feature.description}
                       </p>
                       <div className="pt-2">
-                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#00E5FF]">
+                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#5B8DA8]">
                           {feature.code}
                         </code>
                       </div>
@@ -1008,12 +1008,12 @@ export default function LandingPage() {
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-[#FF2BD6]/15 flex items-center justify-center">
-                          <feature.icon className="w-5 h-5 text-[#FF2BD6]" />
+                        <div className="w-10 h-10 rounded-lg bg-[#D94F9C]/15 flex items-center justify-center">
+                          <feature.icon className="w-5 h-5 text-[#D94F9C]" />
                         </div>
                         <Badge
                           variant="secondary"
-                          className="text-xs bg-[#FF2BD6]/10 text-[#FF2BD6] border-[#FF2BD6]/20 invisible group-hover:visible"
+                          className="text-xs bg-[#D94F9C]/10 text-[#D94F9C] border-[#D94F9C]/20 invisible group-hover:visible"
                         >
                           {feature.highlight}
                         </Badge>
@@ -1023,7 +1023,7 @@ export default function LandingPage() {
                         {feature.description}
                       </p>
                       <div className="pt-2">
-                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#FF2BD6]">
+                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#D94F9C]">
                           {feature.code}
                         </code>
                       </div>
@@ -1062,7 +1062,7 @@ export default function LandingPage() {
 
               {/* Text */}
               <div className="order-1 lg:order-2 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#00E5FF]/30 bg-[#00E5FF]/5 text-xs font-medium text-[#00E5FF]">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 text-xs font-medium text-[#5B8DA8]">
                   <span>🌸</span> Founder Story
                 </div>
 
@@ -1070,7 +1070,7 @@ export default function LandingPage() {
                   Built by a father and son,{" "}
                   <span
                     style={{
-                      backgroundImage: "linear-gradient(to right, #FF2BD6, #00E5FF)",
+                      backgroundImage: "linear-gradient(to right, #D94F9C, #5B8DA8)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -1141,7 +1141,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -1176,10 +1176,10 @@ export default function LandingPage() {
 
             {mode === "digital" ? (
               <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#00E5FF]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#00E5FF]/20 bg-[#00E5FF]/10">
-                    <Terminal className="w-5 h-5 text-[#00E5FF]" />
-                    <span className="font-semibold text-[#00E5FF]">1. Your Prompt</span>
+                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/10">
+                    <Terminal className="w-5 h-5 text-[#5B8DA8]" />
+                    <span className="font-semibold text-[#5B8DA8]">1. Your Prompt</span>
                   </div>
                   <div className="p-5 space-y-4">
                     <p className="text-sm text-gray-300">
@@ -1265,10 +1265,10 @@ export default function LandingPage() {
               </div>
             ) : (
               <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#FF2BD6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#FF2BD6]/20 bg-[#FF2BD6]/10">
-                    <Layers className="w-5 h-5 text-[#FF2BD6]" />
-                    <span className="font-semibold text-[#FF2BD6]">1. Your Vision</span>
+                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D94F9C]/20 bg-[#D94F9C]/10">
+                    <Layers className="w-5 h-5 text-[#D94F9C]" />
+                    <span className="font-semibold text-[#D94F9C]">1. Your Vision</span>
                   </div>
                   <div className="p-5 space-y-4">
                     <p className="text-sm text-gray-300">Describe what you want to build:</p>
@@ -1358,7 +1358,7 @@ export default function LandingPage() {
                 <div className="hidden sm:block w-px h-4 bg-white/20" />
                 <div className="flex items-center gap-2">
                   <RefreshCw
-                    className={`w-4 h-4 flex-shrink-0 ${mode === "digital" ? "text-[#00E5FF]" : "text-[#FF2BD6]"}`}
+                    className={`w-4 h-4 flex-shrink-0 ${mode === "digital" ? "text-[#5B8DA8]" : "text-[#D94F9C]"}`}
                   />
                   <span className="text-xs sm:text-sm text-gray-300">
                     {mode === "digital"
@@ -1399,7 +1399,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -1462,7 +1462,7 @@ export default function LandingPage() {
                         <span className="font-mono text-green-400">94.2%</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-white/10">
-                        <div className="w-[94%] h-full rounded-full bg-[#00E5FF]" />
+                        <div className="w-[94%] h-full rounded-full bg-[#5B8DA8]" />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
@@ -1556,7 +1556,7 @@ export default function LandingPage() {
                         <span className="font-mono text-green-400">96.8%</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-white/10">
-                        <div className="w-[97%] h-full rounded-full bg-[#FF2BD6]" />
+                        <div className="w-[97%] h-full rounded-full bg-[#D94F9C]" />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
@@ -1650,7 +1650,7 @@ export default function LandingPage() {
                     data-testid={`card-pricing-${tier.name.toLowerCase()}`}
                   >
                     {tier.popular && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#00E5FF] text-white">
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5B8DA8] text-white">
                         Most Popular
                       </Badge>
                     )}
@@ -1689,7 +1689,7 @@ export default function LandingPage() {
                       </ul>
                       <a href={tier.href} className="block">
                         <Button
-                          className={`w-full ${tier.popular ? "bg-[#00E5FF] text-white" : ""}`}
+                          className={`w-full ${tier.popular ? "bg-[#5B8DA8] text-white" : ""}`}
                           variant={tier.popular ? "default" : "outline"}
                           data-testid={`button-pricing-${tier.name.toLowerCase()}`}
                         >
@@ -1721,7 +1721,7 @@ export default function LandingPage() {
                     <span
                       style={{
                         backgroundImage:
-                          "linear-gradient(to right, #FF2BD6, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -1756,7 +1756,7 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <a href="/signup">
-                  <Button size="lg" className="bg-[#00E5FF] gap-2" data-testid="button-cta-start">
+                  <Button size="lg" className="bg-[#5B8DA8] gap-2" data-testid="button-cta-start">
                     {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
                     <ArrowRight className="w-4 h-4" />
                   </Button>
@@ -1791,7 +1791,7 @@ export default function LandingPage() {
                     alt="ZZAI"
                     width={48}
                     height={48}
-                    className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(0,229,255,0.35)]"
+                    className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
                   />
                   <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
                     ZZAI
@@ -1900,7 +1900,7 @@ export default function LandingPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="gap-2 border-[#00E5FF]/40 text-[#00E5FF] hover:bg-[#00E5FF]/10"
+                      className="gap-2 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
                       data-testid="button-homepage-traffic"
                     >
                       <BarChart3 className="h-3.5 w-3.5" />

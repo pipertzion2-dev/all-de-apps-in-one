@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { CheckCircle2, ArrowRight, Clock, Users, Wrench, Sparkles } from "lucide-react";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { BrandMark } from "@/components/brand-mark";
@@ -63,20 +63,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
   }
 
   if (!tool) {
-    return (
-      <div className="min-h-screen bg-[#0a0f14] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white text-lg mb-4">Tool not found</p>
-          <Link
-            href="/tools"
-            className="text-[#5BA8A0] hover:underline"
-            data-testid="link-back-tools"
-          >
-            Browse all tools
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   const relatedTools = await fetchRelatedTools(tool.relatedSlugs || []);
@@ -130,7 +117,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             <Link
               href="/dashboard"
               data-testid="link-nav-dashboard"
-              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5BA8A0] text-white transition-opacity hover:opacity-90"
+              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5B8DA8] text-white transition-opacity hover:opacity-90"
             >
               Dashboard
             </Link>
@@ -170,7 +157,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="link-launch-tool"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#5BA8A0] text-white font-medium transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#5B8DA8] text-white font-medium transition-opacity hover:opacity-90"
                 >
                   Launch Tool
                   <ArrowRight className="w-4 h-4" />
@@ -195,7 +182,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           <ul className="space-y-4">
             {tool.benefits.slice(0, 3).map((benefit, i) => (
               <li key={i} className="flex items-start gap-3" data-testid={`text-benefit-${i}`}>
-                <CheckCircle2 className="w-5 h-5 text-[#5BA8A0] shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-5 h-5 text-[#5B8DA8] shrink-0 mt-0.5" />
                 <span className="text-white/70 leading-relaxed">{benefit}</span>
               </li>
             ))}
@@ -211,7 +198,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           <ol className="space-y-4">
             {howItWorksSteps.map((step, i) => (
               <li key={i} className="flex items-start gap-4" data-testid={`text-step-${i}`}>
-                <span className="w-8 h-8 rounded-md bg-[#5BA8A0]/20 text-[#5BA8A0] font-bold text-sm flex items-center justify-center shrink-0">
+                <span className="w-8 h-8 rounded-md bg-[#5B8DA8]/20 text-[#5B8DA8] font-bold text-sm flex items-center justify-center shrink-0">
                   {i + 1}
                 </span>
                 <span className="text-white/70 leading-relaxed pt-1">{step}</span>
@@ -229,7 +216,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           <ul className="space-y-3">
             {whoItsForItems.map((item, i) => (
               <li key={i} className="flex items-start gap-3" data-testid={`text-audience-${i}`}>
-                <Users className="w-4 h-4 text-[#5BA8A0] shrink-0 mt-1" />
+                <Users className="w-4 h-4 text-[#5B8DA8] shrink-0 mt-1" />
                 <span className="text-white/70 leading-relaxed">{item}</span>
               </li>
             ))}
@@ -262,26 +249,26 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
         <div
           className="rounded-2xl overflow-hidden relative"
           style={{
-            background: "linear-gradient(135deg, rgba(91,168,160,0.12), rgba(107,44,74,0.12))",
-            border: "1px solid rgba(91,168,160,0.25)",
+            background: "linear-gradient(135deg, rgba(91, 141, 168,0.12), rgba(107, 44, 78,0.12))",
+            border: "1px solid rgba(91, 141, 168,0.25)",
           }}
         >
           <div
             className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: "linear-gradient(to right, #5BA8A0, #6B2C4A)" }}
+            style={{ background: "linear-gradient(to right, #5B8DA8, #6B2C4E)" }}
           />
           <div className="p-8 md:flex md:items-center md:gap-6">
             <div
               className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center mb-5 md:mb-0"
               style={{
-                background: "rgba(91,168,160,0.15)",
-                border: "1px solid rgba(91,168,160,0.3)",
+                background: "rgba(91, 141, 168,0.15)",
+                border: "1px solid rgba(91, 141, 168,0.3)",
               }}
             >
-              <Sparkles className="w-7 h-7 text-[#5BA8A0]" />
+              <Sparkles className="w-7 h-7 text-[#5B8DA8]" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#5BA8A0] mb-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#5B8DA8] mb-1">
                 Step 1 complete · Next →
               </p>
               <h3 className="text-xl font-black text-white">Deploy this as a live API in ZZAI</h3>
@@ -294,7 +281,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
               href="/dashboard"
               data-testid="link-cta-dashboard"
               className="mt-5 md:mt-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white text-sm shrink-0 transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
+              style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
             >
               Start building free
               <ArrowRight className="w-4 h-4" />

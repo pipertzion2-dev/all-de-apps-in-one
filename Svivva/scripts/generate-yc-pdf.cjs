@@ -2,8 +2,8 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 const INK = "#0E1116";
 const PAPER = "#FAFAF7";
 const MIST = "#6E7177";

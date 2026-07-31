@@ -86,19 +86,19 @@ export function SeedsWorkflowHero({ state, onUploadClick, uploading }: Props) {
                   onClick={() => scrollTo(step.scrollTarget)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all sm:gap-2 sm:px-3 sm:py-1.5 sm:text-xs ${
                     status === "active"
-                      ? "border-[#5BA8A0]/70 bg-[#5BA8A0]/15 text-foreground"
+                      ? "border-[#5B8DA8]/70 bg-[#5B8DA8]/15 text-foreground"
                       : status === "done"
-                        ? "border-[#5BA8A0]/40 bg-[#5BA8A0]/08 text-[#5BA8A0]"
-                        : "border-border/50 bg-background/25 text-muted-foreground hover:border-[#5BA8A0]/35"
+                        ? "border-[#5B8DA8]/40 bg-[#5B8DA8]/08 text-[#5B8DA8]"
+                        : "border-border/50 bg-background/25 text-muted-foreground hover:border-[#5B8DA8]/35"
                   }`}
                   data-testid={`seeds-workflow-step-${step.id}`}
                 >
                   <span
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold sm:h-5 sm:w-5 sm:text-[10px] ${
                       status === "done"
-                        ? "bg-[#5BA8A0] text-white"
+                        ? "bg-[#5B8DA8] text-white"
                         : status === "active"
-                          ? "bg-[#6B2C4A] text-white"
+                          ? "bg-[#6B2C4E] text-white"
                           : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -113,7 +113,7 @@ export function SeedsWorkflowHero({ state, onUploadClick, uploading }: Props) {
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <Button
               size="sm"
-              className="h-8 gap-1.5 bg-[#5BA8A0] px-3 text-xs sm:gap-2"
+              className="h-8 gap-1.5 bg-[#5B8DA8] px-3 text-xs sm:gap-2"
               onClick={onUploadClick}
               disabled={uploading}
               data-testid="button-hero-upload-pdf"

@@ -52,7 +52,7 @@ type DiagResult = {
   oauthAvailable?: boolean;
 };
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 function StatusIcon({ status }: { status: StepStatus }) {
   if (status === "ok") return <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />;
@@ -168,7 +168,7 @@ export default function GscConnectPage() {
       </div>
 
       {/* Primary CTA */}
-      <Card className="border-2 border-[#5BA8A0]/40 bg-gradient-to-br from-[#5BA8A0]/10 to-transparent">
+      <Card className="border-2 border-[#5B8DA8]/40 bg-gradient-to-br from-[#5B8DA8]/10 to-transparent">
         <CardContent className="py-6 space-y-4">
           {connected ? (
             <div className="flex items-start gap-3">
@@ -198,7 +198,7 @@ export default function GscConnectPage() {
               <a href="/api/gsc/oauth/start?return=/dashboard/gsc-connect">
                 <Button
                   className="text-white font-bold"
-                  style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4A)` }}
+                  style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
                   data-testid="btn-connect-google"
                 >
                   Connect with Google
@@ -212,7 +212,7 @@ export default function GscConnectPage() {
             )}
             <Button
               variant="outline"
-              className="border-[#5BA8A0]/40 text-[#5BA8A0]"
+              className="border-[#5B8DA8]/40 text-[#5B8DA8]"
               onClick={() => runIndexing.mutate()}
               disabled={runIndexing.isPending || (!connected && !data?.serviceAccountEmail)}
               data-testid="btn-run-indexing"

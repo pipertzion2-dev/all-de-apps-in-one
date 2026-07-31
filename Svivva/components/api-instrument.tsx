@@ -808,7 +808,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
     mainLight.castShadow = true;
     scene.add(mainLight);
 
-    const rimLight = new THREE.PointLight(0x5ba8a0, 0.5);
+    const rimLight = new THREE.PointLight(0x5b8da8, 0.5);
     rimLight.position.set(-3, 2, 2);
     scene.add(rimLight);
 
@@ -893,9 +893,9 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-[#5BA8A0] text-sm font-mono">DEFINE MODE</span>
+                <span className="text-[#5B8DA8] text-sm font-mono">DEFINE MODE</span>
               </div>
-              <Badge variant="outline" className="text-[#5BA8A0] border-[#5BA8A0]/30">
+              <Badge variant="outline" className="text-[#5B8DA8] border-[#5B8DA8]/30">
                 Step {currentQuestionIndex + 1}/{questions.length || 3}
               </Badge>
             </div>
@@ -915,14 +915,14 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         onClick={() => handleAnswerSelect(currentQuestion.id, option.value)}
                         className={`group relative p-4 rounded-lg border-2 transition-all duration-200 text-left hover-elevate ${
                           isSelected
-                            ? "border-[#5BA8A0] bg-[#5BA8A0]/20"
-                            : "border-white/10 bg-white/5 hover:border-[#5BA8A0]/50"
+                            ? "border-[#5B8DA8] bg-[#5B8DA8]/20"
+                            : "border-white/10 bg-white/5 hover:border-[#5B8DA8]/50"
                         }`}
                         data-testid={`option-${option.value}`}
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className={`p-2 rounded-lg ${isSelected ? "bg-[#5BA8A0]" : "bg-white/10 group-hover:bg-[#5BA8A0]/30"}`}
+                            className={`p-2 rounded-lg ${isSelected ? "bg-[#5B8DA8]" : "bg-white/10 group-hover:bg-[#5B8DA8]/30"}`}
                           >
                             <IconComponent className="w-5 h-5 text-white" />
                           </div>
@@ -935,7 +935,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         </div>
                         {isSelected && (
                           <div className="absolute top-2 right-2">
-                            <Check className="w-4 h-4 text-[#5BA8A0]" />
+                            <Check className="w-4 h-4 text-[#5B8DA8]" />
                           </div>
                         )}
                       </button>
@@ -956,7 +956,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 <Button
                   onClick={() => setCurrentQuestionIndex(0)}
                   disabled={!prompt.trim()}
-                  className="mt-4 bg-[#5BA8A0] hover:bg-[#4a9890]"
+                  className="mt-4 bg-[#5B8DA8] hover:bg-[#4A7D98]"
                   data-testid="button-continue"
                 >
                   Continue <ArrowRight className="w-4 h-4 ml-2" />
@@ -971,14 +971,14 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
           <div className="h-full flex flex-col overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#6B3A67] animate-pulse" />
-                <span className="text-[#6B3A67] text-sm font-mono">BRAND MODE</span>
+                <div className="w-2 h-2 rounded-full bg-[#6B3A6A] animate-pulse" />
+                <span className="text-[#6B3A6A] text-sm font-mono">BRAND MODE</span>
               </div>
               {selectedName && selectedIcon && selectedPalette && (
                 <Button
                   size="sm"
                   onClick={handleComplete}
-                  className="bg-[#5BA8A0]"
+                  className="bg-[#5B8DA8]"
                   data-testid="button-finalize"
                 >
                   Finalize Brand
@@ -997,8 +997,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         onClick={() => setSelectedName(name)}
                         className={`p-3 rounded-lg border-2 transition-all text-center font-medium ${
                           selectedName === name
-                            ? "border-[#5BA8A0] bg-[#5BA8A0]/20 text-white"
-                            : "border-white/10 bg-white/5 text-gray-300 hover:border-[#5BA8A0]/50"
+                            ? "border-[#5B8DA8] bg-[#5B8DA8]/20 text-white"
+                            : "border-white/10 bg-white/5 text-gray-300 hover:border-[#5B8DA8]/50"
                         }`}
                         data-testid={`name-${name}`}
                       >
@@ -1021,8 +1021,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                           onClick={() => setSelectedIcon(iconName)}
                           className={`p-3 rounded-lg border-2 transition-all flex items-center justify-center ${
                             selectedIcon === iconName
-                              ? "border-[#5BA8A0] bg-[#5BA8A0]/20"
-                              : "border-white/10 bg-white/5 hover:border-[#5BA8A0]/50"
+                              ? "border-[#5B8DA8] bg-[#5B8DA8]/20"
+                              : "border-white/10 bg-white/5 hover:border-[#5B8DA8]/50"
                           }`}
                           data-testid={`icon-${iconName}`}
                         >
@@ -1044,8 +1044,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                         onClick={() => setSelectedPalette(palette)}
                         className={`p-3 rounded-lg border-2 transition-all ${
                           selectedPalette?.name === palette.name
-                            ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
-                            : "border-white/10 bg-white/5 hover:border-[#5BA8A0]/50"
+                            ? "border-[#5B8DA8] bg-[#5B8DA8]/10"
+                            : "border-white/10 bg-white/5 hover:border-[#5B8DA8]/50"
                         }`}
                         data-testid={`palette-${palette.name}`}
                       >
@@ -1106,8 +1106,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
               className="absolute inset-0 rounded-xl overflow-hidden"
               style={{
                 background: "linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.95) 100%)",
-                boxShadow: "inset 0 0 30px rgba(91, 168, 160, 0.2), 0 0 20px rgba(0,0,0,0.5)",
-                border: "2px solid rgba(91, 168, 160, 0.3)",
+                boxShadow: "inset 0 0 30px rgba(91, 141, 168, 0.2), 0 0 20px rgba(0,0,0,0.5)",
+                border: "2px solid rgba(91, 141, 168, 0.3)",
               }}
             >
               <div
@@ -1122,7 +1122,7 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
                 {isLoading ? (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-12 h-12 border-4 border-[#5BA8A0]/30 border-t-[#5BA8A0] rounded-full animate-spin mx-auto mb-4" />
+                      <div className="w-12 h-12 border-4 border-[#5B8DA8]/30 border-t-[#5B8DA8] rounded-full animate-spin mx-auto mb-4" />
                       <p className="text-gray-400">Generating suggestions...</p>
                     </div>
                   </div>
@@ -1138,11 +1138,11 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
               onClick={() => setMode("define")}
               className={`flex-1 rounded-xl transition-all ${
                 mode === "define"
-                  ? "bg-gradient-to-br from-[#5BA8A0] to-[#4A9790]"
+                  ? "bg-gradient-to-br from-[#5B8DA8] to-[#4A9790]"
                   : "bg-white/5 hover:bg-white/10"
               }`}
               style={{
-                boxShadow: mode === "define" ? "0 0 20px rgba(91, 168, 160, 0.5)" : "none",
+                boxShadow: mode === "define" ? "0 0 20px rgba(91, 141, 168, 0.5)" : "none",
               }}
               data-testid="button-mode-define"
             >
@@ -1213,8 +1213,8 @@ export function ApiInstrument({ projectId, onComplete, initialPrompt = "" }: Api
             className="flex-1 h-16 rounded-lg overflow-hidden relative"
             style={{
               background: `linear-gradient(135deg, 
-                rgba(91, 168, 160, 0.6), 
-                rgba(107, 44, 74, 0.6), 
+                rgba(91, 141, 168, 0.6), 
+                rgba(107, 44, 78, 0.6), 
                 rgba(180, 160, 200, 0.6), 
                 rgba(150, 200, 180, 0.6),
                 rgba(200, 180, 210, 0.6)

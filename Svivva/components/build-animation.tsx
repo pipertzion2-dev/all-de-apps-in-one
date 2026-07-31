@@ -62,7 +62,7 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        const pointLight = new THREE.PointLight(mode === "digital" ? 0x5ba8a0 : 0x6b2c4a, 1, 50);
+        const pointLight = new THREE.PointLight(mode === "digital" ? 0x5b8da8 : 0x6b2c4e, 1, 50);
         pointLight.position.set(-5, 5, 5);
         scene.add(pointLight);
 
@@ -74,8 +74,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
           { text: "Delivery", x: 6, y: -4, z: -2 },
         ];
 
-        const digitalColors = [0x2d5a56, 0x5ba8a0, 0x7bbdb7, 0xa8d5d0, 0xe8f4f3];
-        const physicalColors = [0x4a1c32, 0x6b2c4a, 0x8b4a6b, 0xd4a5c9, 0xf5e8ee];
+        const digitalColors = [0x2d5a56, 0x5b8da8, 0x7bbdb7, 0xa8d5d0, 0xe8f4f3];
+        const physicalColors = [0x4a1c32, 0x6b2c4e, 0x8b4a6b, 0xd4a5c9, 0xf5e8ee];
         const colors = mode === "digital" ? digitalColors : physicalColors;
 
         const loader = new FontLoader();
@@ -183,8 +183,8 @@ export function BuildAnimation({ mode }: BuildAnimationProps) {
     };
   }, [mode]);
 
-  const digitalColors = ["#2D5A56", "#5BA8A0", "#7BBDB7", "#A8D5D0", "#E8F4F3"];
-  const physicalColors = ["#4A1C32", "#6B2C4A", "#8B4A6B", "#D4A5C9", "#F5E8EE"];
+  const digitalColors = ["#2D5A56", "#5B8DA8", "#7BBDB7", "#A8D5D0", "#E8F4F3"];
+  const physicalColors = ["#4A1C32", "#6B2C4E", "#8B4A6B", "#D4A5C9", "#F5E8EE"];
   const colors = mode === "digital" ? digitalColors : physicalColors;
 
   if (!webglSupported) {

@@ -117,7 +117,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
       icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
       palettes: [
-        { name: "ZZAI", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
+        { name: "ZZAI", colors: { primary: "#5B8DA8", secondary: "#4A7D98", accent: "#6B2C4E" } },
         { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
         { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
         { name: "Ember", colors: { primary: "#f97316", secondary: "#ea580c", accent: "#fbbf24" } },
@@ -161,19 +161,19 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "prompt" ? "bg-[#5BA8A0] text-white" : "bg-[#5BA8A0]/20 text-[#5BA8A0]"}`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "prompt" ? "bg-[#5B8DA8] text-white" : "bg-[#5B8DA8]/20 text-[#5B8DA8]"}`}
         >
           {phase !== "prompt" ? <Check className="w-4 h-4" /> : "1"}
         </div>
-        <div className={`h-0.5 flex-1 ${phase !== "prompt" ? "bg-[#5BA8A0]" : "bg-border"}`} />
+        <div className={`h-0.5 flex-1 ${phase !== "prompt" ? "bg-[#5B8DA8]" : "bg-border"}`} />
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "questions" ? "bg-[#5BA8A0] text-white" : phase === "brand" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "questions" ? "bg-[#5B8DA8] text-white" : phase === "brand" ? "bg-[#5B8DA8]/20 text-[#5B8DA8]" : "bg-muted text-muted-foreground"}`}
         >
           {phase === "brand" ? <Check className="w-4 h-4" /> : "2"}
         </div>
-        <div className={`h-0.5 flex-1 ${phase === "brand" ? "bg-[#5BA8A0]" : "bg-border"}`} />
+        <div className={`h-0.5 flex-1 ${phase === "brand" ? "bg-[#5B8DA8]" : "bg-border"}`} />
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "brand" ? "bg-[#5BA8A0] text-white" : "bg-muted text-muted-foreground"}`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${phase === "brand" ? "bg-[#5B8DA8] text-white" : "bg-muted text-muted-foreground"}`}
         >
           3
         </div>
@@ -203,7 +203,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
             <Button
               onClick={() => generateTailoredQuestions(prompt)}
               disabled={prompt.length < 10 || isGenerating}
-              className="bg-[#5BA8A0] hover:bg-[#4a9890]"
+              className="bg-[#5B8DA8] hover:bg-[#4A7D98]"
               data-testid="button-next"
             >
               {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -236,12 +236,12 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                   }
                   className={`p-4 rounded-lg border-2 text-left transition-all ${
                     isSelected
-                      ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
-                      : "border-border hover:border-[#5BA8A0]/50 hover:bg-muted/50"
+                      ? "border-[#5B8DA8] bg-[#5B8DA8]/10"
+                      : "border-border hover:border-[#5B8DA8]/50 hover:bg-muted/50"
                   }`}
                   data-testid={`button-option-${opt.toLowerCase().replace(/\s/g, "-")}`}
                 >
-                  <span className={`font-medium ${isSelected ? "text-[#5BA8A0]" : ""}`}>{opt}</span>
+                  <span className={`font-medium ${isSelected ? "text-[#5B8DA8]" : ""}`}>{opt}</span>
                 </button>
               );
             })}
@@ -253,9 +253,9 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                 key={i}
                 className={`h-1.5 flex-1 rounded-full ${
                   i < currentQuestionIndex
-                    ? "bg-[#5BA8A0]"
+                    ? "bg-[#5B8DA8]"
                     : i === currentQuestionIndex
-                      ? "bg-[#5BA8A0]/50"
+                      ? "bg-[#5B8DA8]/50"
                       : "bg-muted"
                 }`}
               />
@@ -279,7 +279,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                   <Badge
                     key={name}
                     variant={selectedName === name ? "default" : "outline"}
-                    className={`cursor-pointer text-sm py-1.5 px-3 ${selectedName === name ? "bg-[#5BA8A0] hover:bg-[#4a9890]" : ""}`}
+                    className={`cursor-pointer text-sm py-1.5 px-3 ${selectedName === name ? "bg-[#5B8DA8] hover:bg-[#4A7D98]" : ""}`}
                     onClick={() => setSelectedName(name)}
                     data-testid={`badge-name-${name.toLowerCase()}`}
                   >
@@ -298,8 +298,8 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                     onClick={() => setSelectedIcon(icon)}
                     className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all ${
                       selectedIcon === icon
-                        ? "border-[#5BA8A0] bg-[#5BA8A0]/10 text-[#5BA8A0]"
-                        : "border-border hover:border-[#5BA8A0]/50"
+                        ? "border-[#5B8DA8] bg-[#5B8DA8]/10 text-[#5B8DA8]"
+                        : "border-border hover:border-[#5B8DA8]/50"
                     }`}
                     data-testid={`button-icon-${icon.toLowerCase()}`}
                   >
@@ -318,8 +318,8 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
                     onClick={() => setSelectedPalette(palette)}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       selectedPalette?.name === palette.name
-                        ? "border-[#5BA8A0] bg-[#5BA8A0]/5"
-                        : "border-border hover:border-[#5BA8A0]/50"
+                        ? "border-[#5B8DA8] bg-[#5B8DA8]/5"
+                        : "border-border hover:border-[#5B8DA8]/50"
                     }`}
                     data-testid={`button-palette-${palette.name.toLowerCase()}`}
                   >
@@ -343,7 +343,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
           <Button
             onClick={handleCreate}
             disabled={!selectedName || !selectedIcon || !selectedPalette}
-            className="w-full bg-[#5BA8A0] hover:bg-[#4a9890]"
+            className="w-full bg-[#5B8DA8] hover:bg-[#4A7D98]"
             size="lg"
             data-testid="button-create-api"
           >
@@ -354,7 +354,7 @@ export function ApiCreator({ onComplete }: ApiCreatorProps) {
 
       {isGenerating && phase !== "prompt" && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#5BA8A0]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#5B8DA8]" />
         </div>
       )}
     </div>

@@ -3,8 +3,8 @@ import { Gift, Users, TrendingUp, Share2, Copy, ArrowRight, CheckCircle, Zap } f
 import { ReferralWidget } from "@/components/referral-widget";
 import { Button } from "@/components/ui/button";
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 
 const benefits = [
   {
@@ -194,7 +194,7 @@ export default function ReferralsPage() {
             ].map((material) => (
               <div
                 key={material.title}
-                className="rounded-2xl border-2 border-border bg-card p-6 hover:border-[#5BA8A0]/50 transition-colors cursor-pointer"
+                className="rounded-2xl border-2 border-border bg-card p-6 hover:border-[#5B8DA8]/50 transition-colors cursor-pointer"
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"

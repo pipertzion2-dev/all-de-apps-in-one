@@ -191,7 +191,7 @@ export default function TrafficPage() {
           </div>
           <Button
             className="shrink-0 gap-2"
-            style={{ background: "#5BA8A0" }}
+            style={{ background: "#5B8DA8" }}
             onClick={() => window.open(GA_BASE, "_blank")}
             data-testid="button-open-ga-main"
           >

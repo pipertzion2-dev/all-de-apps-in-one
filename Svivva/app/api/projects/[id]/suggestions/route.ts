@@ -60,7 +60,7 @@ const PALETTE_PRESETS = [
   { name: "Forest", colors: { primary: "#22C55E", secondary: "#10B981", accent: "#34D399" } },
   { name: "Lavender", colors: { primary: "#8B5CF6", secondary: "#A78BFA", accent: "#C4B5FD" } },
   { name: "Rose", colors: { primary: "#EC4899", secondary: "#F472B6", accent: "#F9A8D4" } },
-  { name: "Vivva", colors: { primary: "#5BA8A0", secondary: "#6B2C4A", accent: "#7BA3AC" } },
+  { name: "Vivva", colors: { primary: "#5B8DA8", secondary: "#6B2C4E", accent: "#7B8DAC" } },
   { name: "Midnight", colors: { primary: "#3B82F6", secondary: "#1D4ED8", accent: "#60A5FA" } },
   { name: "Earth", colors: { primary: "#78716C", secondary: "#A8A29E", accent: "#D6D3D1" } },
 ];

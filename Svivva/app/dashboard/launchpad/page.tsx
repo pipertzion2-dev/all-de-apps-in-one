@@ -64,8 +64,8 @@ import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 const CHUNK_SIZE = 15;
 
 type StepStatus = "pending" | "running" | "done" | "error";
@@ -992,7 +992,7 @@ function MiniSourceConfig({
                   <div className="flex items-center gap-1.5">
                     <p className="text-[11px] font-semibold text-muted-foreground">App {idx + 1}</p>
                     {st === "scanning" && (
-                      <Loader2 className="w-3 h-3 animate-spin text-[#5BA8A0]" />
+                      <Loader2 className="w-3 h-3 animate-spin text-[#5B8DA8]" />
                     )}
                     {st === "found" && (
                       <span className="text-[10px] font-bold text-green-600">
@@ -1000,7 +1000,7 @@ function MiniSourceConfig({
                       </span>
                     )}
                     {st === "single" && (
-                      <span className="text-[10px] font-bold text-[#5BA8A0]">
+                      <span className="text-[10px] font-bold text-[#5B8DA8]">
                         connected as 1 app
                       </span>
                     )}
@@ -1025,7 +1025,7 @@ function MiniSourceConfig({
                   value={entry.name}
                   onChange={(e) => updateEntry(entry.id, "name", e.target.value)}
                   placeholder="Name (e.g. Pyracrypt, Cyber Tools)"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 disabled:opacity-50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5B8DA8]/40 disabled:opacity-50"
                   disabled={scanning}
                   data-testid={`input-app-name-${idx}`}
                 />
@@ -1034,7 +1034,7 @@ function MiniSourceConfig({
                   value={entry.url}
                   onChange={(e) => updateEntry(entry.id, "url", e.target.value)}
                   placeholder="https://your-app.example.com"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 disabled:opacity-50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5B8DA8]/40 disabled:opacity-50"
                   disabled={scanning}
                   data-testid={`input-app-url-${idx}`}
                 />
@@ -1046,7 +1046,7 @@ function MiniSourceConfig({
         <button
           onClick={addEntry}
           disabled={scanning}
-          className="w-full py-2 rounded-xl border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/60 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40"
+          className="w-full py-2 rounded-xl border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-[#5B8DA8]/60 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40"
           data-testid="button-add-app"
         >
           <span className="text-base leading-none">+</span> Add another App
@@ -1492,13 +1492,13 @@ function StepCard({
 
   const borderCls = {
     pending: "border-border",
-    running: "border-[#5BA8A0]/50",
+    running: "border-[#5B8DA8]/50",
     done: "border-green-400/60",
     error: "border-red-400/60",
   }[status];
   const bgCls = {
     pending: "bg-card",
-    running: "bg-[#5BA8A0]/5",
+    running: "bg-[#5B8DA8]/5",
     done: "bg-green-50 dark:bg-green-950/20",
     error: "bg-red-50 dark:bg-red-950/20",
   }[status];
@@ -1532,7 +1532,7 @@ function StepCard({
         <div className="flex items-start gap-3">
           <div
             className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-black text-sm
-            ${status === "done" ? "bg-green-500" : status === "running" ? "bg-[#5BA8A0]" : status === "error" ? "bg-red-500" : isQueued ? "bg-amber-400" : "bg-muted-foreground/25"}`}
+            ${status === "done" ? "bg-green-500" : status === "running" ? "bg-[#5B8DA8]" : status === "error" ? "bg-red-500" : isQueued ? "bg-amber-400" : "bg-muted-foreground/25"}`}
           >
             {status === "done" ? (
               <CheckCircle2 className="w-4 h-4" />
@@ -1616,8 +1616,8 @@ function StepCard({
 
       {/* Running progress */}
       {status === "running" && result && (
-        <div className="border-t border-[#5BA8A0]/30 bg-[#5BA8A0]/5 px-4 py-2">
-          <p className="text-xs text-[#5BA8A0] font-medium">{result}</p>
+        <div className="border-t border-[#5B8DA8]/30 bg-[#5B8DA8]/5 px-4 py-2">
+          <p className="text-xs text-[#5B8DA8] font-medium">{result}</p>
         </div>
       )}
 
@@ -1691,19 +1691,19 @@ function StepCard({
 
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
-  { sub: "apps", target: "apps.zzaizzai.com", label: "Clutety mini-apps hub", color: "#6B2C4A" },
-  { sub: "security", target: "zzaizzai.com", label: "Cyber security tools hub", color: "#5BA8A0" },
+  { sub: "apps", target: "apps.zzaizzai.com", label: "Clutety mini-apps hub", color: "#6B2C4E" },
+  { sub: "security", target: "zzaizzai.com", label: "Cyber security tools hub", color: "#5B8DA8" },
   {
     sub: "clutety",
     target: "zzaizzai.com",
     label: "Legacy alias → /cyber-security-mini-apps",
-    color: "#5BA8A0",
+    color: "#5B8DA8",
   },
   {
     sub: "pyracrypt",
     target: "zzaizzai.com",
     label: "Pyracrypt legacy alias",
-    color: "#5BA8A0",
+    color: "#5B8DA8",
   },
 ];
 
@@ -1794,7 +1794,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
               "Build errors: Run 'npm run build' in the shell first — fix any TypeScript errors before deploying.",
             ].map((tip, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="mt-0.5 w-4 h-4 rounded-full bg-[#6B2C4A]/20 text-[#6B2C4A] text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                <span className="mt-0.5 w-4 h-4 rounded-full bg-[#6B2C4E]/20 text-[#6B2C4E] text-[10px] font-black flex items-center justify-center flex-shrink-0">
                   {i + 1}
                 </span>
                 <span>{tip}</span>
@@ -1811,7 +1811,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
               "TLS is provisioned automatically by the host",
             ].map((s, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-[#5BA8A0] font-bold flex-shrink-0">{i + 1}.</span>
+                <span className="text-[#5B8DA8] font-bold flex-shrink-0">{i + 1}.</span>
                 <span>{s}</span>
               </div>
             ))}
@@ -1846,7 +1846,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
                 key={i}
                 className="grid grid-cols-4 gap-0 text-[11px] px-3 py-2 border-b last:border-0 border-border"
               >
-                <span className="font-mono font-bold text-[#5BA8A0]">{row.type}</span>
+                <span className="font-mono font-bold text-[#5B8DA8]">{row.type}</span>
                 <span className="font-mono">{row.name}</span>
                 <span className="font-mono truncate text-muted-foreground">{row.value}</span>
                 <span>{row.ttl}</span>
@@ -1895,7 +1895,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
               </div>
             ))}
           </div>
-          <div className="rounded-xl border border-[#5BA8A0]/30 bg-[#5BA8A0]/5 px-3 py-2 text-[11px] text-muted-foreground space-y-1">
+          <div className="rounded-xl border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 px-3 py-2 text-[11px] text-muted-foreground space-y-1">
             <p className="font-semibold text-foreground">After adding CNAMEs:</p>
             <p>1. Wait 5–30 min for DNS to propagate</p>
             <p>2. In each app's deploy settings: Custom Domain → add the subdomain</p>
@@ -1944,7 +1944,7 @@ function DeployGuide({ publicHost, publicSite }: { publicHost: string; publicSit
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] text-[#5BA8A0] hover:underline flex items-center gap-0.5"
+                    className="text-[11px] text-[#5B8DA8] hover:underline flex items-center gap-0.5"
                   >
                     {item.cta}
                     <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
@@ -3445,7 +3445,7 @@ export default function LaunchpadPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse at 20% 60%, rgba(91,168,160,0.2) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%)",
+              "radial-gradient(ellipse at 20% 60%, rgba(91, 141, 168,0.2) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%)",
           }}
         />
         <div className="relative max-w-2xl mx-auto px-4 py-5 sm:py-7">
@@ -3910,7 +3910,7 @@ export default function LaunchpadPage() {
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {[
-                      { label: "SEO", count: orbitStatus.seoPages ?? 0, color: "#5BA8A0" },
+                      { label: "SEO", count: orbitStatus.seoPages ?? 0, color: "#5B8DA8" },
                       { label: "Blog", count: orbitStatus.blogPosts ?? 0, color: "#8b5cf6" },
                       {
                         label: "Comparisons",
@@ -4010,10 +4010,10 @@ export default function LaunchpadPage() {
             </div>
 
             {/* Auto-Connect All */}
-            <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-card p-4 space-y-3">
+            <div className="rounded-2xl border-2 border-[#5B8DA8]/40 bg-card p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
-                  <Rocket className="w-5 h-5" style={{ color: "#5BA8A0" }} />
+                <div className="w-10 h-10 rounded-xl bg-[#5B8DA8]/15 border border-[#5B8DA8]/30 flex items-center justify-center flex-shrink-0">
+                  <Rocket className="w-5 h-5" style={{ color: "#5B8DA8" }} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
@@ -4029,7 +4029,7 @@ export default function LaunchpadPage() {
                 onClick={runAutoConnectAll}
                 disabled={autoConnectActive}
                 className="font-bold"
-                style={{ background: "#5BA8A0" }}
+                style={{ background: "#5B8DA8" }}
               >
                 {autoConnectActive ? (
                   <>
@@ -4211,7 +4211,7 @@ export default function LaunchpadPage() {
                         ? "rgba(74,222,128,0.04)"
                         : !orbitStatus.indexNowSubmitted
                           ? "rgba(239,68,68,0.04)"
-                          : `rgba(91,168,160,0.04)`,
+                          : `rgba(91, 141, 168,0.04)`,
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -4479,7 +4479,7 @@ export default function LaunchpadPage() {
                 </button>
                 <button
                   onClick={() => setTab("svivva")}
-                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "svivva" ? "border-[#6B2C4A] bg-[#6B2C4A]/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "svivva" ? "border-[#6B2C4E] bg-[#6B2C4E]/10" : "border-border bg-card hover:bg-muted/30"}`}
                 >
                   <div className="flex items-center gap-1.5 w-full">
                     <Globe
@@ -4493,7 +4493,7 @@ export default function LaunchpadPage() {
                       zzaizzai.com
                     </span>
                     <span
-                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "svivva" ? "bg-[#6B2C4A]/20 text-[#6B2C4A]" : "bg-muted text-muted-foreground"}`}
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "svivva" ? "bg-[#6B2C4E]/20 text-[#6B2C4E]" : "bg-muted text-muted-foreground"}`}
                     >
                       {svivvaDone}/{SVIVVA_STEPS.length}
                     </span>
@@ -4504,7 +4504,7 @@ export default function LaunchpadPage() {
                 </button>
                 <button
                   onClick={() => setTab("mini")}
-                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "mini" ? "border-[#5BA8A0] bg-[#5BA8A0]/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "mini" ? "border-[#5B8DA8] bg-[#5B8DA8]/10" : "border-border bg-card hover:bg-muted/30"}`}
                 >
                   <div className="flex items-center gap-1.5 w-full">
                     <Package
@@ -4518,7 +4518,7 @@ export default function LaunchpadPage() {
                       Your tools
                     </span>
                     <span
-                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "mini" ? "bg-[#5BA8A0]/20 text-[#5BA8A0]" : "bg-muted text-muted-foreground"}`}
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "mini" ? "bg-[#5B8DA8]/20 text-[#5B8DA8]" : "bg-muted text-muted-foreground"}`}
                     >
                       {miniDone}/{miniSteps.length}
                     </span>

@@ -90,7 +90,7 @@ export function LockScanner() {
               fontWeight: 800,
               letterSpacing: "0.28em",
               textTransform: "uppercase",
-              color: "#6D91B3",
+              color: "#6D72B3",
               marginBottom: 8,
             }}
           >
@@ -187,7 +187,7 @@ export function LockScanner() {
               style={{
                 height: "100%",
                 borderRadius: 2,
-                background: "linear-gradient(to right, #6D91B3, #AC81AF)",
+                background: "linear-gradient(to right, #6D72B3, #A981AF)",
                 width: `${Math.min(100, ((activeStepIndex + 1) / 5) * 100)}%`,
                 transition: "width 0.5s ease",
               }}
@@ -206,7 +206,7 @@ export function LockScanner() {
               padding: 16,
               borderRadius: 10,
               background: "rgba(255,255,255,0.65)",
-              border: "1px solid rgba(109,145,179,0.35)",
+              border: "1px solid rgba(109, 114, 179,0.35)",
               textAlign: "left",
             }}
           >
@@ -216,7 +216,7 @@ export function LockScanner() {
                 fontWeight: 800,
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
-                color: "#6D91B3",
+                color: "#6D72B3",
                 margin: "0 0 8px",
               }}
             >
@@ -252,8 +252,8 @@ export function LockScanner() {
               borderRadius: 8,
               cursor: "pointer",
               background:
-                "linear-gradient(135deg, rgba(109,145,179,0.15) 0%, rgba(172,129,175,0.15) 100%)",
-              border: "1px solid rgba(109,145,179,0.4)",
+                "linear-gradient(135deg, rgba(109, 114, 179,0.15) 0%, rgba(169, 129, 175,0.15) 100%)",
+              border: "1px solid rgba(109, 114, 179,0.4)",
               fontSize: 9,
               fontWeight: 800,
               letterSpacing: "0.2em",

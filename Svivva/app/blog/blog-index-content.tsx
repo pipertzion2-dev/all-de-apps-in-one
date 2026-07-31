@@ -79,7 +79,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
       <section
         className="relative py-20 px-6 text-center"
         style={{
-          background: "linear-gradient(135deg, #5BA8A0 0%, #3d8a82 50%, #6B2C4A 100%)",
+          background: "linear-gradient(135deg, #5B8DA8 0%, #3D6F8A 50%, #6B2C4E 100%)",
         }}
         data-testid="section-hero"
       >
@@ -110,7 +110,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
               className={activeCategory === cat ? "text-white" : ""}
               style={
                 activeCategory === cat
-                  ? { backgroundColor: "#5BA8A0", borderColor: "#5BA8A0" }
+                  ? { backgroundColor: "#5B8DA8", borderColor: "#5B8DA8" }
                   : undefined
               }
             >
@@ -141,7 +141,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
                     <Badge
                       variant="secondary"
                       className="text-xs text-white no-default-active-elevate"
-                      style={{ backgroundColor: "#6B2C4A" }}
+                      style={{ backgroundColor: "#6B2C4E" }}
                       data-testid={`badge-category-${post.slug}`}
                     >
                       {post.category}
@@ -171,7 +171,7 @@ export default function BlogIndexContent({ posts }: { posts: BlogPost[] }) {
                   </div>
                   <div
                     className="mt-3 flex items-center gap-1 text-sm font-medium"
-                    style={{ color: "#5BA8A0" }}
+                    style={{ color: "#5B8DA8" }}
                   >
                     Read more <ArrowRight className="h-3 w-3" />
                   </div>

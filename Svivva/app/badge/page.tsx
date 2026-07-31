@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-const TEAL = "#5BA8A0";
+const TEAL = "#5B8DA8";
 
 function CopyBlock({ code, label }: { code: string; label: string }) {
   const [copied, setCopied] = useState(false);

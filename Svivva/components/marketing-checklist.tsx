@@ -16,8 +16,8 @@ import {
 import Link from "next/link";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 
-const TEAL = "#5BA8A0";
-const BURG = "#6B2C4A";
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
 const MANUAL_STORAGE_KEY = "orbit_manual_v1";
 
 type TaskStatus = "done" | "warn" | "missing" | "auto";
@@ -61,14 +61,14 @@ function statusIcon(s: TaskStatus) {
     return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />;
   if (s === "warn")
     return <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />;
-  if (s === "auto") return <Zap className="w-3.5 h-3.5 text-[#5BA8A0] flex-shrink-0 mt-0.5" />;
+  if (s === "auto") return <Zap className="w-3.5 h-3.5 text-[#5B8DA8] flex-shrink-0 mt-0.5" />;
   return <Circle className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />;
 }
 
 function statusBg(s: TaskStatus) {
   if (s === "done") return "bg-emerald-500/5 border-emerald-500/15";
   if (s === "warn") return "bg-amber-500/5 border-amber-500/20";
-  if (s === "auto") return "bg-[#5BA8A0]/5 border-[#5BA8A0]/15";
+  if (s === "auto") return "bg-[#5B8DA8]/5 border-[#5B8DA8]/15";
   return "bg-muted/20 border-border/40";
 }
 
@@ -781,7 +781,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           <span className="flex items-center gap-1 text-emerald-500">
             <CheckCircle2 className="w-3 h-3" /> Done
           </span>
-          <span className="flex items-center gap-1 text-[#5BA8A0]">
+          <span className="flex items-center gap-1 text-[#5B8DA8]">
             <Zap className="w-3 h-3" /> Automated
           </span>
           <span className="flex items-center gap-1 text-amber-500">
@@ -811,12 +811,12 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
                       href={t.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5"
+                      className="text-[10px] text-[#5B8DA8] hover:underline flex items-center gap-0.5"
                     >
                       {t.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
                     </a>
                   ) : (
-                    <Link href={t.link} className="text-[10px] text-[#5BA8A0] hover:underline">
+                    <Link href={t.link} className="text-[10px] text-[#5B8DA8] hover:underline">
                       {t.linkLabel}
                     </Link>
                   ))}
@@ -852,7 +852,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
                     background:
                       groupDone === group.tasks.length
                         ? "rgba(74,222,128,0.15)"
-                        : "rgba(91,168,160,0.1)",
+                        : "rgba(91, 141, 168,0.1)",
                     color: groupDone === group.tasks.length ? "#4ade80" : TEAL,
                   }}
                 >
@@ -923,14 +923,14 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
                                 href={task.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[10px] text-[#5BA8A0] hover:underline flex items-center gap-0.5"
+                                className="text-[10px] text-[#5B8DA8] hover:underline flex items-center gap-0.5"
                               >
                                 {task.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
                               </a>
                             ) : (
                               <Link
                                 href={task.link}
-                                className="text-[10px] text-[#5BA8A0] hover:underline"
+                                className="text-[10px] text-[#5B8DA8] hover:underline"
                               >
                                 {task.linkLabel}
                               </Link>
@@ -948,7 +948,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
       })}
 
       {/* Growth Engine card */}
-      <div className="rounded-2xl border-2 border-[#5BA8A0]/30 bg-[#5BA8A0]/5 p-4">
+      <div className="rounded-2xl border-2 border-[#5B8DA8]/30 bg-[#5B8DA8]/5 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black text-foreground flex items-center gap-2">

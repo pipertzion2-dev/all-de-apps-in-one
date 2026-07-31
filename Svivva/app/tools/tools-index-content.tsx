@@ -73,7 +73,7 @@ export default function ToolsIndexContent({
             <Link
               href="/tools"
               data-testid="link-nav-tools"
-              className="text-sm font-medium text-[#5BA8A0] transition-opacity hover:opacity-80"
+              className="text-sm font-medium text-[#5B8DA8] transition-opacity hover:opacity-80"
             >
               Tools
             </Link>
@@ -87,7 +87,7 @@ export default function ToolsIndexContent({
             <Link
               href="/dashboard"
               data-testid="link-nav-dashboard"
-              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5BA8A0] text-white transition-opacity hover:opacity-90"
+              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5B8DA8] text-white transition-opacity hover:opacity-90"
             >
               Dashboard
             </Link>
@@ -96,8 +96,8 @@ export default function ToolsIndexContent({
       </nav>
 
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-12 text-center">
-        <div className="w-14 h-14 rounded-md bg-[#5BA8A0]/20 flex items-center justify-center mx-auto mb-6">
-          <Wrench className="w-7 h-7 text-[#5BA8A0]" />
+        <div className="w-14 h-14 rounded-md bg-[#5B8DA8]/20 flex items-center justify-center mx-auto mb-6">
+          <Wrench className="w-7 h-7 text-[#5B8DA8]" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight" data-testid="text-hero-title">
           Free AI &amp; Developer Tools
@@ -120,7 +120,7 @@ export default function ToolsIndexContent({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             data-testid="input-search-tools"
-            className="w-full pl-10 pr-4 py-2.5 rounded-md bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#5BA8A0]/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-md bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#5B8DA8]/50"
           />
         </div>
 
@@ -130,7 +130,7 @@ export default function ToolsIndexContent({
             data-testid="button-category-all"
             className={`text-sm px-4 py-2 rounded-md transition-colors ${
               activeCategory === "all"
-                ? "bg-[#5BA8A0] text-white"
+                ? "bg-[#5B8DA8] text-white"
                 : "bg-white/5 text-white/60 hover:bg-white/10"
             }`}
           >
@@ -143,7 +143,7 @@ export default function ToolsIndexContent({
               data-testid={`button-category-${cat.slug}`}
               className={`text-sm px-4 py-2 rounded-md transition-colors ${
                 activeCategory === cat.slug
-                  ? "bg-[#5BA8A0] text-white"
+                  ? "bg-[#5B8DA8] text-white"
                   : "bg-white/5 text-white/60 hover:bg-white/10"
               }`}
             >
@@ -168,7 +168,7 @@ export default function ToolsIndexContent({
                 className="group rounded-md border border-white/10 bg-white/5 p-6 hover-elevate transition-colors"
               >
                 <div className="flex items-start justify-between gap-2 mb-3 flex-wrap">
-                  <h3 className="text-lg font-semibold group-hover:text-[#5BA8A0] transition-colors">
+                  <h3 className="text-lg font-semibold group-hover:text-[#5B8DA8] transition-colors">
                     {tool.title}
                   </h3>
                   <Badge
@@ -180,7 +180,7 @@ export default function ToolsIndexContent({
                   </Badge>
                 </div>
                 <p
-                  className="text-sm text-[#5BA8A0] mb-2"
+                  className="text-sm text-[#5B8DA8] mb-2"
                   data-testid={`text-keyword-${tool.slug}`}
                 >
                   {tool.keyword}
