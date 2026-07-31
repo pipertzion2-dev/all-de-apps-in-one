@@ -345,6 +345,38 @@ export function ZzaiModeToggle({
 
   const px = SIZE_PX[size];
   const isSignal = mode === "digital";
+  // The "sm" size lives in tight nav/sidebar bars — flanking Signal/Crest
+  // text plus a caption wrapped onto multiple lines there and read as
+  // clutter. Render just the icon in that spot; the mode is still fully
+  // explained via title/aria-label for accessibility.
+  const compact = size === "sm";
+
+  const iconButton = (
+    <button
+      type="button"
+      aria-label={
+        isSignal
+          ? "ZZAI mode: Signal. Click to flip to Crest."
+          : "ZZAI mode: Crest. Click to flip to Signal."
+      }
+      onClick={() => toggleMode()}
+      className="relative rounded-2xl overflow-hidden border bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E5FF]"
+      style={{
+        width: px,
+        height: px,
+        borderColor: colors.primaryBorder,
+        boxShadow: `0 0 0 1px ${colors.primaryBorder}, 0 0 ${compact ? 14 : 28}px ${colors.primaryBg}`,
+        background: "transparent",
+      }}
+      title="Click to flip logos — Signal ↔ Crest"
+    >
+      <div ref={hostRef} className="absolute inset-0" />
+    </button>
+  );
+
+  if (compact) {
+    return <div className={`inline-flex items-center ${className}`}>{iconButton}</div>;
+  }
 
   return (
     <div
@@ -367,23 +399,7 @@ export function ZzaiModeToggle({
         Signal
       </button>
 
-      <button
-        type="button"
-        aria-label={isSignal ? "Flip to Crest" : "Flip to Signal"}
-        onClick={() => toggleMode()}
-        className="order-1 sm:order-2 relative rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E5FF]"
-        style={{
-          width: px,
-          height: px,
-          borderColor: colors.primaryBorder,
-          boxShadow: `0 0 0 1px ${colors.primaryBorder}, 0 0 28px ${colors.primaryBg}, inset 0 0 24px rgba(255,255,255,0.04)`,
-          background:
-            "linear-gradient(160deg, rgba(255,255,255,0.08), rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.65))",
-        }}
-        title="Click to flip logos — Signal ↔ Crest"
-      >
-        <div ref={hostRef} className="absolute inset-0" />
-      </button>
+      <div className="order-1 sm:order-2">{iconButton}</div>
 
       <button
         type="button"
