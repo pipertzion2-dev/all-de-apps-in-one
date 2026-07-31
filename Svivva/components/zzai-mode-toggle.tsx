@@ -93,24 +93,6 @@ export function ZzaiModeToggle({
       tex.needsUpdate = true;
       return tex;
     };
-    // The cube's faces are solid geometry, not a floating card — compositing
-    // the (now transparent) art onto a soft backing here avoids the logo's
-    // cut-out areas turning into literal holes in the box.
-    const toOpaqueFaceTexture = (tex: THREE.Texture) => {
-      const img = tex.image as HTMLImageElement | undefined;
-      if (!img || !img.width) return tex;
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return tex;
-      ctx.fillStyle = "#f4f2ee";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-      const flat = new THREE.CanvasTexture(canvas);
-      return prep(flat);
-    };
-
     const card = new THREE.Group();
     scene.add(card);
 
@@ -162,21 +144,23 @@ export function ZzaiModeToggle({
 
       const bust = "v4";
       Promise.all([
-        loader.loadAsync(`/zzai-logo-signal.png?${bust}`),
-        loader.loadAsync(`/zzai-logo-crest.png?${bust}`),
+        loader.loadAsync(`/zzai-logo-signal.png?${bust}`).then(prep),
+        loader.loadAsync(`/zzai-logo-crest.png?${bust}`).then(prep),
       ])
-        .then(([signalRaw, crestRaw]) => {
+        .then(([signalTex, crestTex]) => {
           if (disposed) {
-            signalRaw.dispose();
-            crestRaw.dispose();
+            signalTex.dispose();
+            crestTex.dispose();
             return;
           }
-          const signalTex = toOpaqueFaceTexture(signalRaw);
-          const crestTex = toOpaqueFaceTexture(crestRaw);
-          signalRaw.dispose();
-          crestRaw.dispose();
+          // Real alpha now — no backing plate. Where the art is transparent,
+          // the face just doesn't draw, so the page shows straight through
+          // instead of a solid-colored patch.
           const front = new THREE.MeshPhysicalMaterial({
             map: signalTex,
+            transparent: true,
+            depthWrite: false,
+            alphaTest: 0.02,
             roughness: 0.5,
             metalness: 0.04,
             clearcoat: 0.3,
@@ -184,6 +168,9 @@ export function ZzaiModeToggle({
           });
           const back = new THREE.MeshPhysicalMaterial({
             map: crestTex,
+            transparent: true,
+            depthWrite: false,
+            alphaTest: 0.02,
             roughness: 0.5,
             metalness: 0.04,
             clearcoat: 0.3,
