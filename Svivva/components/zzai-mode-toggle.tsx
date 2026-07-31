@@ -118,7 +118,7 @@ export function ZzaiModeToggle({ size = "md", className = "", showLabels = true 
 
     let disposed = false;
     // cache-bust so new logos show immediately after deploy
-    const bust = "v2";
+    const bust = "v3";
     Promise.all([
       loader.loadAsync(`/zzai-logo-signal.png?${bust}`).then(prep),
       loader.loadAsync(`/zzai-logo-crest.png?${bust}`).then(prep),
