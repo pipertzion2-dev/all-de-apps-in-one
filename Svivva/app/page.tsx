@@ -359,12 +359,12 @@ export default function LandingPage() {
                 }}
               >
                 <div className="w-full h-full bg-background flex flex-col overflow-hidden">
-                  <nav className="h-14 sm:h-16 border-b border-white/10 backdrop-blur-xl bg-background/80 flex-shrink-0">
+                  <nav className="h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80 flex-shrink-0">
                     <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 relative">
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
                         <ZzaiModeToggle size="sm" />
-                        <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
-                          ZZAI ZZAI
+                        <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
+                          zzai zzai
                         </span>
                       </div>
                       <div className="absolute left-1/2 -translate-x-1/2">
@@ -473,14 +473,14 @@ export default function LandingPage() {
 
       <div className="bg-background">
         <nav
-          className="fixed top-0 left-0 right-0 z-[60] h-14 sm:h-16 border-b border-white/10 backdrop-blur-xl bg-background/80"
+          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
         >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
               <ZzaiModeToggle size="sm" />
-              <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
-                ZZAI ZZAI
+              <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
+                zzai zzai
               </span>
             </div>
 
@@ -1808,16 +1808,16 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="space-y-4 col-span-2 md:col-span-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-2 text-center">
                   <Image
                     src={zzaiLogo}
-                    alt="ZZAI ZZAI"
+                    alt="zzai zzai"
                     width={48}
                     height={48}
                     className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
                   />
                   <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
-                    ZZAI ZZAI
+                    zzai zzai
                   </span>
                 </div>
               </div>
@@ -1916,7 +1916,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-              <p>2026 ZZAI ZZAI. All rights reserved.</p>
+              <p>2026 zzai zzai. All rights reserved.</p>
               <div className="flex items-center gap-6">
                 {userIsAdmin && (
                   <Link href="/dashboard/traffic">

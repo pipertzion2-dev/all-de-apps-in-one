@@ -36,21 +36,21 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "ZZAI ZZAI — From seed to symphony";
+  const title = "zzai zzai — From seed to symphony";
   const description =
-    "ZZAI ZZAI — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
+    "zzai zzai — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
 
   return {
     title: {
       default: title,
-      template: "%s · ZZAI ZZAI",
+      template: "%s · zzai zzai",
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: ["ZZAI ZZAI", "ZZAI", "zzaizzai", "From seed to symphony"],
+    keywords: ["zzai zzai", "zzai", "zzaizzai", "From seed to symphony"],
     openGraph: {
       type: "website",
-      siteName: "ZZAI ZZAI",
+      siteName: "zzai zzai",
       title,
       description,
       url: siteUrl,
@@ -59,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/zzai-logo.png",
           width: 1200,
           height: 630,
-          alt: "ZZAI ZZAI",
+          alt: "zzai zzai",
         },
       ],
     },
@@ -108,17 +108,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
-                name: "ZZAI ZZAI",
+                name: "zzai zzai",
                 url: siteUrl,
                 logo: `${siteUrl}/zzai-logo.png`,
                 description:
-                  "From seed to symphony — ZZAI ZZAI is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
+                  "From seed to symphony — zzai zzai is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                name: "ZZAI ZZAI",
+                name: "zzai zzai",
                 url: siteUrl,
                 potentialAction: {
                   "@type": "SearchAction",
@@ -132,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "SoftwareApplication",
-                name: "ZZAI ZZAI",
+                name: "zzai zzai",
                 operatingSystem: "Web",
                 applicationCategory: "DeveloperApplication",
                 offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
