@@ -1,7 +1,7 @@
 /** Public brand — ZZAI on zzaizzai.com (code folder may still be named Svivva). */
 export const BRAND = {
-  name: "ZZAI",
-  legalName: "ZZAI",
+  name: "ZZAI ZZAI",
+  legalName: "ZZAI ZZAI",
   tagline: "From seed to symphony",
   domain: "zzaizzai.com",
   siteUrl: "https://zzaizzai.com",

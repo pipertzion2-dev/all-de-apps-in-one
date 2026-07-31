@@ -84,7 +84,7 @@ export function getAllWorkspaceProjects(): Array<{
 }> {
   return [
     {
-      name: "ZZAI",
+      name: "ZZAI ZZAI",
       url: DEFAULT_SITE,
       category: "main",
       description: "AI-powered app builder — the core platform",

@@ -52,7 +52,7 @@ export function buildSeoMetadata({
       title,
       description,
       url: canonical,
-      siteName: "ZZAI",
+      siteName: "ZZAI ZZAI",
       locale,
       images: [{ url: image, width: 1200, height: 630, alt: title }],
       ...(publishedTime ? { publishedTime } : {}),
