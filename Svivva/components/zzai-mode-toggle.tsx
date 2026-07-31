@@ -93,6 +93,23 @@ export function ZzaiModeToggle({
       tex.needsUpdate = true;
       return tex;
     };
+    // The cube's faces are solid geometry, not a floating card — compositing
+    // the (now transparent) art onto a soft backing here avoids the logo's
+    // cut-out areas turning into literal holes in the box.
+    const toOpaqueFaceTexture = (tex: THREE.Texture) => {
+      const img = tex.image as HTMLImageElement | undefined;
+      if (!img || !img.width) return tex;
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return tex;
+      ctx.fillStyle = "#f4f2ee";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      const flat = new THREE.CanvasTexture(canvas);
+      return prep(flat);
+    };
 
     const card = new THREE.Group();
     scene.add(card);
@@ -143,17 +160,21 @@ export function ZzaiModeToggle({
       card.add(wire);
       disposables.push(bevelGeo, wire.geometry, wire.material as THREE.Material);
 
-      const bust = "v3";
+      const bust = "v4";
       Promise.all([
-        loader.loadAsync(`/zzai-logo-signal.png?${bust}`).then(prep),
-        loader.loadAsync(`/zzai-logo-crest.png?${bust}`).then(prep),
+        loader.loadAsync(`/zzai-logo-signal.png?${bust}`),
+        loader.loadAsync(`/zzai-logo-crest.png?${bust}`),
       ])
-        .then(([signalTex, crestTex]) => {
+        .then(([signalRaw, crestRaw]) => {
           if (disposed) {
-            signalTex.dispose();
-            crestTex.dispose();
+            signalRaw.dispose();
+            crestRaw.dispose();
             return;
           }
+          const signalTex = toOpaqueFaceTexture(signalRaw);
+          const crestTex = toOpaqueFaceTexture(crestRaw);
+          signalRaw.dispose();
+          crestRaw.dispose();
           const front = new THREE.MeshPhysicalMaterial({
             map: signalTex,
             roughness: 0.5,
@@ -190,23 +211,10 @@ export function ZzaiModeToggle({
       composer.addPass(bloomPass);
       composer.addPass(new OutputPass());
     } else {
-      // Lightweight flat glass card used everywhere else (nav, sidebar).
-      const slabGeo = new THREE.BoxGeometry(1.72, 1.72, 0.08);
-      const slabMat = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        metalness: 0.05,
-        roughness: 0.08,
-        transmission: 0.72,
-        thickness: 0.4,
-        transparent: true,
-        opacity: 0.35,
-        clearcoat: 1,
-        clearcoatRoughness: 0.1,
-      });
-      const slab = new THREE.Mesh(slabGeo, slabMat);
-      card.add(slab);
-      disposables.push(slabGeo, slabMat);
-
+      // Lightweight flat card used everywhere else (nav, sidebar). No solid
+      // backing plate here — the logo art has real transparency now, so a
+      // glass/white backdrop would just show through as a washed-out panel.
+      // Only the glowing rim gives it presence; everything else stays clear.
       const rimGeo = new THREE.TorusGeometry(1.08, 0.03, 18, 100);
       const rim = new THREE.Mesh(rimGeo, edgeMat);
       rim.rotation.x = Math.PI / 2.2;
@@ -216,7 +224,7 @@ export function ZzaiModeToggle({
       const planeGeo = new THREE.PlaneGeometry(1.52, 1.52);
       disposables.push(planeGeo);
 
-      const bust = "v3";
+      const bust = "v4";
       Promise.all([
         loader.loadAsync(`/zzai-logo-signal.png?${bust}`).then(prep),
         loader.loadAsync(`/zzai-logo-crest.png?${bust}`).then(prep),
@@ -230,6 +238,8 @@ export function ZzaiModeToggle({
           frontMat = new THREE.MeshPhysicalMaterial({
             map: signalTex,
             transparent: true,
+            depthWrite: false,
+            alphaTest: 0.02,
             roughness: 0.28,
             metalness: 0.12,
             clearcoat: 0.65,
@@ -239,6 +249,8 @@ export function ZzaiModeToggle({
           backMat = new THREE.MeshPhysicalMaterial({
             map: crestTex,
             transparent: true,
+            depthWrite: false,
+            alphaTest: 0.02,
             roughness: 0.28,
             metalness: 0.12,
             clearcoat: 0.65,

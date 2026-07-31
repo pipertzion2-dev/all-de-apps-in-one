@@ -283,7 +283,7 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
 
     const loader = new THREE.TextureLoader();
     loader.load(
-      "/zzai-bouquet-2.png?v3",
+      "/zzai-bouquet-2.png?v4",
       (tex) => {
         if (disposed) {
           tex.dispose();

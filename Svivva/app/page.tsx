@@ -361,15 +361,7 @@ export default function LandingPage() {
                     <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 relative">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <ZzaiModeToggle size="sm" />
-                        <Image
-                          src={zzaiLogo}
-                          alt="ZZAI ZZAI"
-                          width={44}
-                          height={44}
-                          className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
-                          priority
-                        />
-                        <span className="hidden sm:inline text-sm font-bold tracking-[0.2em] text-foreground/90">
+                        <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
                           ZZAI ZZAI
                         </span>
                       </div>
@@ -485,14 +477,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-shrink-0">
               <ZzaiModeToggle size="sm" />
-              <Image
-                src={zzaiLogo}
-                alt="ZZAI ZZAI"
-                width={44}
-                height={44}
-                className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
-              />
-              <span className="hidden sm:inline text-sm font-bold tracking-[0.2em] text-foreground/90">
+              <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
                 ZZAI ZZAI
               </span>
             </div>
