@@ -38,6 +38,8 @@ import {
   Music,
   Sprout,
   Lock,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 const SvivvaArtifact = dynamic(
@@ -581,12 +583,48 @@ export default function LandingPage() {
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-              <div className="flex flex-col items-center gap-2">
-                <ZzaiModeToggle size="lg" showLabels={false} variant="cube" />
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-3 sm:gap-5">
+                  <button
+                    type="button"
+                    onClick={() => toggleMode()}
+                    aria-label={
+                      mode === "digital" ? "Switch to Crest mode" : "Switch to Signal mode"
+                    }
+                    title="Switch mode"
+                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border transition-colors hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
+                    style={{
+                      borderColor:
+                        mode === "digital" ? "rgba(91, 141, 168, 0.4)" : "rgba(217, 79, 156, 0.4)",
+                      color: mode === "digital" ? "#5B8DA8" : "#D94F9C",
+                    }}
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+
+                  <ZzaiModeToggle size="lg" showLabels={false} variant="cube" />
+
+                  <button
+                    type="button"
+                    onClick={() => toggleMode()}
+                    aria-label={
+                      mode === "digital" ? "Switch to Crest mode" : "Switch to Signal mode"
+                    }
+                    title="Switch mode"
+                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border transition-colors hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
+                    style={{
+                      borderColor:
+                        mode === "digital" ? "rgba(91, 141, 168, 0.4)" : "rgba(217, 79, 156, 0.4)",
+                      color: mode === "digital" ? "#5B8DA8" : "#D94F9C",
+                    }}
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
                 >
-                  ZZAI · click to flip
+                  {mode === "digital" ? "SIGNAL" : "CREST"} · use arrows to switch
                 </p>
               </div>
               {mode === "digital" ? (

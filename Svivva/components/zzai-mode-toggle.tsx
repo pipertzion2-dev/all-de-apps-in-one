@@ -74,14 +74,15 @@ export function ZzaiModeToggle({
     });
     renderer.domElement.setAttribute("aria-hidden", "true");
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    // Neutral white lighting only — no tinted fill/back lights, so the logo
+    // faces read as flat, true-color artwork instead of picking up a
+    // blue/purple side-lighting cast.
+    scene.add(new THREE.AmbientLight(0xffffff, 1.35));
     const key = new THREE.DirectionalLight(0xffffff, 1.4);
     key.position.set(2.4, 2.6, 3.4);
-    const fill = new THREE.DirectionalLight(0x5b8da8, 0.45);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.4);
     fill.position.set(-2.2, -0.8, 1.8);
-    const backLight = new THREE.DirectionalLight(0xd94f9c, 0.35);
-    backLight.position.set(0, 1.2, -2.4);
-    scene.add(key, fill, backLight);
+    scene.add(key, fill);
 
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
@@ -161,20 +162,16 @@ export function ZzaiModeToggle({
             transparent: true,
             depthWrite: false,
             alphaTest: 0.02,
-            roughness: 0.5,
-            metalness: 0.04,
-            clearcoat: 0.3,
-            clearcoatRoughness: 0.35,
+            roughness: 0.85,
+            metalness: 0,
           });
           const back = new THREE.MeshPhysicalMaterial({
             map: crestTex,
             transparent: true,
             depthWrite: false,
             alphaTest: 0.02,
-            roughness: 0.5,
-            metalness: 0.04,
-            clearcoat: 0.3,
-            clearcoatRoughness: 0.35,
+            roughness: 0.85,
+            metalness: 0,
           });
           materials[4].dispose();
           materials[5].dispose();
@@ -227,10 +224,8 @@ export function ZzaiModeToggle({
             transparent: true,
             depthWrite: false,
             alphaTest: 0.02,
-            roughness: 0.28,
-            metalness: 0.12,
-            clearcoat: 0.65,
-            clearcoatRoughness: 0.2,
+            roughness: 0.85,
+            metalness: 0,
             side: THREE.FrontSide,
           });
           backMat = new THREE.MeshPhysicalMaterial({
@@ -238,10 +233,8 @@ export function ZzaiModeToggle({
             transparent: true,
             depthWrite: false,
             alphaTest: 0.02,
-            roughness: 0.28,
-            metalness: 0.12,
-            clearcoat: 0.65,
-            clearcoatRoughness: 0.2,
+            roughness: 0.85,
+            metalness: 0,
             side: THREE.FrontSide,
           });
           const front = new THREE.Mesh(planeGeo, frontMat);
@@ -301,8 +294,6 @@ export function ZzaiModeToggle({
       edgeMat.color.setHex(signalish ? 0x5b8da8 : 0xd94f9c);
       edgeMat.emissive.setHex(signalish ? 0x5b8da8 : 0xd94f9c);
       edgeMat.emissiveIntensity = variant === "cube" ? 0.75 + Math.abs(Math.sin(cur)) * 0.5 : 0.4;
-      fill.intensity = signalish ? 0.55 : 0.2;
-      backLight.intensity = signalish ? 0.2 : 0.55;
 
       if (composer) {
         composer.render();
