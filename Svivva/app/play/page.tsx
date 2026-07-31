@@ -531,7 +531,13 @@ export default function SvivvaPlayPage() {
         : null,
       chords: chordSegments,
     });
-  }, [manualKey, earlyAnalysisFallback?.key, earlyAnalysisFallback?.chords, transcription, audioAnchorKey]);
+  }, [
+    manualKey,
+    earlyAnalysisFallback?.key,
+    earlyAnalysisFallback?.chords,
+    transcription,
+    audioAnchorKey,
+  ]);
   const generationScaleLookup = useMemo(() => {
     const chordSegments =
       earlyAnalysisFallback?.chords?.map((c) => ({

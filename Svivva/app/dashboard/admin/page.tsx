@@ -76,22 +76,23 @@ function formatDate(iso: string) {
 export default function AdminOverviewPage() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery<AdminOverview>({
     queryKey: ["/api/admin/overview"],
-    queryFn: () => fetch("/api/admin/overview", { credentials: "include" }).then((r) => {
-      if (!r.ok) throw new Error("Forbidden or failed to load admin data");
-      return r.json();
-    }),
+    queryFn: () =>
+      fetch("/api/admin/overview", { credentials: "include" }).then((r) => {
+        if (!r.ok) throw new Error("Forbidden or failed to load admin data");
+        return r.json();
+      }),
   });
 
   if (isLoading) {
-    return (
-      <div className="p-6 text-sm text-muted-foreground">Loading admin overview…</div>
-    );
+    return <div className="p-6 text-sm text-muted-foreground">Loading admin overview…</div>;
   }
 
   if (isError || !data) {
     return (
       <div className="p-6 space-y-3">
-        <p className="text-sm text-red-500">Could not load admin overview. Admin access required.</p>
+        <p className="text-sm text-red-500">
+          Could not load admin overview. Admin access required.
+        </p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>
           Retry
         </Button>
@@ -187,7 +188,9 @@ export default function AdminOverviewPage() {
               ) : (
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
               )}
-              <p className="text-lg font-semibold capitalize">{data.marketing.status.replace("_", " ")}</p>
+              <p className="text-lg font-semibold capitalize">
+                {data.marketing.status.replace("_", " ")}
+              </p>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {data.marketing.seoPages} SEO pages · {data.marketing.leads} leads
@@ -203,10 +206,22 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-2">
-              <Stat label="Campaigns" value={`${data.marketing.activeCampaigns} active / ${data.marketing.campaigns}`} />
-              <Stat label="Leads" value={`${data.marketing.leads} (${data.marketing.convertedLeads} converted)`} />
-              <Stat label="Referrals" value={`${data.marketing.referralClicks} clicks · ${data.marketing.referralSignups} signups`} />
-              <Stat label="UTM links" value={`${data.marketing.utmLinks} links · ${data.marketing.utmClicks} clicks`} />
+              <Stat
+                label="Campaigns"
+                value={`${data.marketing.activeCampaigns} active / ${data.marketing.campaigns}`}
+              />
+              <Stat
+                label="Leads"
+                value={`${data.marketing.leads} (${data.marketing.convertedLeads} converted)`}
+              />
+              <Stat
+                label="Referrals"
+                value={`${data.marketing.referralClicks} clicks · ${data.marketing.referralSignups} signups`}
+              />
+              <Stat
+                label="UTM links"
+                value={`${data.marketing.utmLinks} links · ${data.marketing.utmClicks} clicks`}
+              />
             </div>
             <div className="flex flex-wrap gap-2 pt-2 border-t">
               <HealthBadge ok={data.marketing.indexNowConfigured} label="IndexNow" />
@@ -235,7 +250,10 @@ export default function AdminOverviewPage() {
             ) : (
               <ul className="space-y-2 text-sm max-h-64 overflow-y-auto">
                 {data.stripe.recentCharges.map((c) => (
-                  <li key={c.id} className="flex justify-between gap-2 border-b border-border/50 pb-2">
+                  <li
+                    key={c.id}
+                    className="flex justify-between gap-2 border-b border-border/50 pb-2"
+                  >
                     <span className="truncate text-muted-foreground">
                       {c.description || c.id.slice(0, 12)}
                     </span>

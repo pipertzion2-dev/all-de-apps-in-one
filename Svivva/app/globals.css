@@ -215,7 +215,7 @@
     background-clip: text;
   }
   .solid-accent {
-    color: #5B8DA8;
+    color: #5b8da8;
   }
   .gradient-border {
     @apply relative;
@@ -305,7 +305,7 @@
     radial-gradient(circle at 90% 45%, rgba(255, 252, 248, 0.65) 0%, transparent 2%),
     linear-gradient(
       135deg,
-      #6B2C4E 0%,
+      #6b2c4e 0%,
       #a05068 10%,
       #8b4578 22%,
       #c48a8a 34%,
@@ -313,7 +313,7 @@
       #b87888 56%,
       #6bbfbf 68%,
       #9e6da0 78%,
-      #6B2C4E 88%,
+      #6b2c4e 88%,
       #a05068 100%
     );
   -webkit-background-clip: text;
@@ -389,7 +389,7 @@
   border-radius: 10px;
   background: linear-gradient(
     135deg,
-    #6B2C4E 0%,
+    #6b2c4e 0%,
     #a05068 10%,
     #8b4578 22%,
     #c48a8a 34%,
@@ -397,7 +397,7 @@
     #b87888 56%,
     #6bbfbf 68%,
     #9e6da0 78%,
-    #6B2C4E 88%,
+    #6b2c4e 88%,
     #a05068 100%
   );
   background-size: 300% 300%;

@@ -268,7 +268,8 @@ export function FeedShieldAnalyzer({ rules }: Props) {
             marginTop: 14,
             padding: 14,
             borderRadius: 10,
-            background: result.action === "block" ? "rgba(190,80,70,0.12)" : "rgba(91, 141, 168,0.1)",
+            background:
+              result.action === "block" ? "rgba(190,80,70,0.12)" : "rgba(91, 141, 168,0.1)",
             border: `1px solid ${result.action === "block" ? "rgba(190,80,70,0.35)" : "rgba(91, 141, 168,0.3)"}`,
           }}
         >

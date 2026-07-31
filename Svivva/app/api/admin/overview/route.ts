@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { hasAdminAccess } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
-import {
-  users,
-  projects,
-  usageLogs,
-  seoLandingPages,
-  seedCredentials,
-} from "@/lib/schema";
+import { users, projects, usageLogs, seoLandingPages, seedCredentials } from "@/lib/schema";
 import {
   marketingCampaigns,
   marketingLeads,
@@ -57,7 +51,10 @@ export async function GET() {
       db.select({ totalUsers: count() }).from(users),
       db.select({ totalProjects: count() }).from(projects),
       db.select({ totalApiCalls: count() }).from(usageLogs),
-      db.select({ totalSeoPages: count() }).from(seoLandingPages).where(eq(seoLandingPages.published, true)),
+      db
+        .select({ totalSeoPages: count() })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.published, true)),
     ]),
 
     Promise.all([
@@ -76,10 +73,14 @@ export async function GET() {
     Promise.all([
       db.select({ totalReferrals: count() }).from(marketingReferrals),
       db
-        .select({ referralClicks: sql<number>`coalesce(sum(${marketingReferrals.clicks}), 0)::int` })
+        .select({
+          referralClicks: sql<number>`coalesce(sum(${marketingReferrals.clicks}), 0)::int`,
+        })
         .from(marketingReferrals),
       db
-        .select({ referralSignups: sql<number>`coalesce(sum(${marketingReferrals.signups}), 0)::int` })
+        .select({
+          referralSignups: sql<number>`coalesce(sum(${marketingReferrals.signups}), 0)::int`,
+        })
         .from(marketingReferrals),
     ]),
 
@@ -150,7 +151,9 @@ export async function GET() {
       if (row.status === "trialing") trialingCount = row.count;
     }
 
-    const lifetimeCents = Number((lifetimeRow.rows[0] as { total_cents: string })?.total_cents ?? 0);
+    const lifetimeCents = Number(
+      (lifetimeRow.rows[0] as { total_cents: string })?.total_cents ?? 0,
+    );
 
     stripe = {
       lifetimeRevenue: lifetimeCents / 100,
@@ -185,8 +188,7 @@ export async function GET() {
     googleSearchConsole: Boolean(creds?.hasGoogleSa && creds?.googleSiteUrl),
     indexNowConfigured: Boolean(creds?.indexnowKey),
     status:
-      Number(totalSeoPages ?? 0) > 0 &&
-      (Boolean(creds?.indexnowKey) || Boolean(creds?.hasGoogleSa))
+      Number(totalSeoPages ?? 0) > 0 && (Boolean(creds?.indexnowKey) || Boolean(creds?.hasGoogleSa))
         ? "operational"
         : "needs_setup",
   };
