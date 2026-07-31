@@ -30,7 +30,7 @@ export function ConversionFunnel({
       className={`mt-12 rounded-2xl border border-white/10 bg-gradient-to-br ${bg} p-8 text-center`}
       data-seo-funnel={variant}
     >
-      <p className="text-xs uppercase tracking-widest text-[#5B8DA8] mb-2">ZZAI</p>
+      <p className="text-xs uppercase tracking-widest text-[#5B8DA8] mb-2">ZZAI ZZAI</p>
       <h2 className="text-2xl font-semibold text-white mb-3">{headline}</h2>
       <p className="text-white/60 text-sm max-w-lg mx-auto mb-6">
         {variant === "top"

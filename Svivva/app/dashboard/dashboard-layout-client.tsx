@@ -292,13 +292,13 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             <div className="flex justify-center items-center gap-3 mb-4">
               <Image
                 src={zzaiLogo}
-                alt="ZZAI"
+                alt="ZZAI ZZAI"
                 width={48}
                 height={48}
                 className="h-12 w-12 object-contain"
               />
             </div>
-            <CardTitle className="text-2xl">Welcome to ZZAI</CardTitle>
+            <CardTitle className="text-2xl">Welcome to ZZAI ZZAI</CardTitle>
             <CardDescription>
               {authError ? (
                 <span className="text-amber-500 flex items-center justify-center gap-2 mt-2">
@@ -350,7 +350,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           <Link href="/" className="flex items-center gap-2">
             <Image
               src={zzaiLogo}
-              alt="ZZAI"
+              alt="ZZAI ZZAI"
               width={36}
               height={36}
               className="h-7 w-7 object-contain"
@@ -390,12 +390,12 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
               <Link href="/" className="flex items-center gap-2 min-w-0">
                 <Image
                   src={zzaiLogo}
-                  alt="ZZAI"
+                  alt="ZZAI ZZAI"
                   width={36}
                   height={36}
                   className="h-9 w-9 object-contain"
                 />
-                <span className="text-xs font-bold tracking-[0.2em] truncate">ZZAI</span>
+                <span className="text-xs font-bold tracking-[0.2em] truncate">ZZAI ZZAI</span>
               </Link>
             </div>
           </SidebarHeader>
