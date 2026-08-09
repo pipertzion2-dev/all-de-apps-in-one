@@ -65,7 +65,7 @@ export default function GatePage() {
             <div
               key={i}
               className={`w-3 h-3 rounded-full transition-all ${
-                i < code.length ? "bg-[#5B8DA8] scale-110" : "bg-gray-200"
+                i < code.length ? "bg-[#5BA8A0] scale-110" : "bg-gray-200"
               }`}
             />
           ))}
@@ -106,7 +106,7 @@ export default function GatePage() {
           <button
             onClick={handleSubmit}
             disabled={loading || !code}
-            className="h-16 rounded-xl bg-[#5B8DA8] text-white text-sm font-semibold uppercase tracking-wider transition-all active:scale-95 disabled:opacity-40"
+            className="h-16 rounded-xl bg-[#5BA8A0] text-white text-sm font-semibold uppercase tracking-wider transition-all active:scale-95 disabled:opacity-40"
             data-testid="button-gate-submit"
           >
             {loading ? "..." : "Go"}

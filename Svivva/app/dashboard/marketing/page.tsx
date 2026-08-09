@@ -35,8 +35,8 @@ import {
 
 import { getSuggestedGoDaddyDomain } from "@/lib/site-url-public";
 
-const PINK = "#E91E9A";
-const TEAL = "#5B8DA8";
+const PINK = "#E91E8C";
+const TEAL = "#5BA8A0";
 const ORANGE = "#FF5C00";
 const GREEN = "#16a34a";
 const BLUE = "#1a73e8";
@@ -811,7 +811,7 @@ function SocialCard({ action }: { action: any }) {
                         ? "#1DA1F2"
                         : post.platform === "linkedin"
                           ? "#0A66C2"
-                          : "#FF7800",
+                          : "#FF4500",
                   }}
                 />
                 <span className="flex-1 truncate font-medium capitalize">
@@ -1436,7 +1436,7 @@ export default function MarketingDashboard() {
           <div className="flex items-center gap-3 px-4 py-3">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6B2C4E, #5B8DA8)" }}
+              style={{ background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)" }}
             >
               <Rocket className="w-4 h-4 text-white" />
             </div>

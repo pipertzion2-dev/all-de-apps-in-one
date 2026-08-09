@@ -141,7 +141,7 @@ export default function ApiKeysPage() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
+              className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
               data-testid="button-create-key"
             >
               <Plus className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function ApiKeysPage() {
                   />
                 </div>
                 <Button
-                  className="w-full bg-[#7B8DAC] hover:bg-[#6B7D9C]"
+                  className="w-full bg-[#7BA3AC] hover:bg-[#6B939C]"
                   onClick={handleCreateKey}
                   disabled={createKey.isPending}
                   data-testid="button-create-key-submit"

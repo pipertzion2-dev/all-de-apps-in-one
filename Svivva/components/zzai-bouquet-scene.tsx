@@ -181,9 +181,9 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
     scene.add(root);
 
     const ambient = new THREE.AmbientLight(0xffffff, 0.55);
-    const key = new THREE.DirectionalLight(0x5b8da8, 0.8);
+    const key = new THREE.DirectionalLight(0x00e5ff, 0.8);
     key.position.set(2, 3, 4);
-    const fill = new THREE.DirectionalLight(0xd94f9c, 0.45);
+    const fill = new THREE.DirectionalLight(0xff2bd6, 0.45);
     fill.position.set(-3, 1, 2);
     scene.add(ambient, key, fill);
 
@@ -209,7 +209,7 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
 
     // Soft backlight bloom disc
     const glowMat = new THREE.MeshBasicMaterial({
-      color: mode === "digital" ? 0x5b8da8 : 0xd94f9c,
+      color: mode === "digital" ? 0x00e5ff : 0xff2bd6,
       transparent: true,
       opacity: 0.14,
       depthWrite: false,
@@ -225,8 +225,8 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
     const sizes = new Float32Array(COUNT);
     const seeds = new Float32Array(COUNT);
     const palette = [
-      new THREE.Color(0x5b8da8),
-      new THREE.Color(0xd94f9c),
+      new THREE.Color(0x00e5ff),
+      new THREE.Color(0xff2bd6),
       new THREE.Color(0xb8ff3c),
       new THREE.Color(0x7ad7ff),
       new THREE.Color(0xc77dff),
@@ -283,7 +283,7 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
 
     const loader = new THREE.TextureLoader();
     loader.load(
-      "/zzai-bouquet-2.png?v4",
+      "/zzai-bouquet-2.png",
       (tex) => {
         if (disposed) {
           tex.dispose();
@@ -343,8 +343,8 @@ export function ZzaiBouquetScene({ mode = "digital", className = "", size = 280 
 
     const tintDigital = new THREE.Color(0xb8f7ff);
     const tintPhysical = new THREE.Color(0xffd0f5);
-    const glowDigital = new THREE.Color(0x5b8da8);
-    const glowPhysical = new THREE.Color(0xd94f9c);
+    const glowDigital = new THREE.Color(0x00e5ff);
+    const glowPhysical = new THREE.Color(0xff2bd6);
 
     const clock = new THREE.Clock();
     const animate = () => {

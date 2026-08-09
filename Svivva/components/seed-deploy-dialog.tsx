@@ -105,7 +105,7 @@ export function SeedDeployDialog({
     {
       name: "Replit (legacy)",
       icon: Cloud,
-      color: "#F29107",
+      color: "#F26207",
       steps: [
         "Open Replit → New Repl → Import from ZIP",
         "Upload the downloaded ZIP",
@@ -132,7 +132,7 @@ export function SeedDeployDialog({
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, #6B2C4E, #5B8DA8)",
+                background: "linear-gradient(135deg, #6B2C4A, #5BA8A0)",
               }}
             >
               <Rocket className="w-4 h-4 text-white" />
@@ -144,13 +144,13 @@ export function SeedDeployDialog({
         <div className="space-y-5 pt-2">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Download className="w-4 h-4 text-[#5B8DA8]" />
+              <Download className="w-4 h-4 text-[#5BA8A0]" />
               Step 1: Download your project
             </div>
             <Button
               className="w-full gap-2 h-12 text-base"
               style={{
-                background: hasCode ? "linear-gradient(135deg, #5B8DA8, #4A7D98)" : undefined,
+                background: hasCode ? "linear-gradient(135deg, #5BA8A0, #4A9890)" : undefined,
               }}
               disabled={!hasCode || downloading}
               onClick={handleDownloadZip}
@@ -185,7 +185,7 @@ export function SeedDeployDialog({
 
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Globe className="w-4 h-4 text-[#6B2C4E]" />
+              <Globe className="w-4 h-4 text-[#6B2C4A]" />
               Step 2: Pick a platform & deploy
             </div>
 
@@ -193,7 +193,7 @@ export function SeedDeployDialog({
               {deployTargets.map((target) => (
                 <div
                   key={target.name}
-                  className="rounded-xl border border-border p-4 space-y-3 hover:border-[#5B8DA8]/30 transition-colors"
+                  className="rounded-xl border border-border p-4 space-y-3 hover:border-[#5BA8A0]/30 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -224,7 +224,7 @@ export function SeedDeployDialog({
                   <ol className="text-xs text-muted-foreground space-y-1 pl-1">
                     {target.steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-[#5B8DA8] font-bold flex-shrink-0">{i + 1}.</span>
+                        <span className="text-[#5BA8A0] font-bold flex-shrink-0">{i + 1}.</span>
                         {step}
                       </li>
                     ))}
@@ -256,10 +256,10 @@ export function SeedDeployDialog({
 
           <div
             className="rounded-xl p-4 space-y-2"
-            style={{ background: "linear-gradient(135deg, #6b2c4e08, #5b8da808)" }}
+            style={{ background: "linear-gradient(135deg, #6B2C4A08, #5BA8A008)" }}
           >
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Rocket className="w-4 h-4 text-[#6B2C4E]" />
+              <Rocket className="w-4 h-4 text-[#6B2C4A]" />
               Step 3: Connect to marketing
             </div>
             <p className="text-xs text-muted-foreground">

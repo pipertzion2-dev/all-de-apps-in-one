@@ -445,7 +445,7 @@ export function generateWidget(): string {
 <div style="margin-top:48px;padding:24px;background:#f8f9fa;border-radius:12px;text-align:center;font-family:sans-serif;max-width:600px;margin-left:auto;margin-right:auto;">
   <p style="font-size:18px;font-weight:bold;color:#333;margin-bottom:8px;">Enjoyed this tool?</p>
   <p style="font-size:14px;color:#666;margin-bottom:16px;">Build your own AI app with ZZAI in minutes.</p>
-  <a href="${SITE}?utm_source=mini-tools" style="display:inline-block;background:linear-gradient(135deg,#5B8DA8,#6B2C4E);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Build Your AI App &rarr;</a>
+  <a href="${SITE}?utm_source=mini-tools" style="display:inline-block;background:linear-gradient(135deg,#5BA8A0,#6B2C4A);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Build Your AI App &rarr;</a>
 </div>`;
 }
 

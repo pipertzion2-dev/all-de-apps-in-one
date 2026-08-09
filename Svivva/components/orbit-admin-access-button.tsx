@@ -52,13 +52,13 @@ export function OrbitAdminAccessButton({
         variant="outline"
         className={
           className ??
-          "h-8 gap-1 border-[#5B8DA8]/45 bg-background/30 px-2 text-[10px] font-bold text-foreground shadow-sm backdrop-blur-sm hover:bg-[#5B8DA8]/10 sm:gap-1.5 sm:px-3 sm:text-xs"
+          "h-8 gap-1 border-[#5BA8A0]/45 bg-background/30 px-2 text-[10px] font-bold text-foreground shadow-sm backdrop-blur-sm hover:bg-[#5BA8A0]/10 sm:gap-1.5 sm:px-3 sm:text-xs"
         }
         onClick={handleClick}
         data-testid={testId}
         aria-label="Orbit Admin — enter admin code to unlock"
       >
-        <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#5B8DA8] sm:h-4 sm:w-4" />
+        <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#5BA8A0] sm:h-4 sm:w-4" />
         <span className="hidden min-[400px]:inline">Admin</span>
       </Button>
 

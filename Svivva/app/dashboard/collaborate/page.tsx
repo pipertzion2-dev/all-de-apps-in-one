@@ -192,7 +192,7 @@ export default function CollaboratePage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab ? "border-[#5B8DA8] text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab ? "border-[#5BA8A0] text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             data-testid={`tab-${tab}`}
           >
             {tab === "team" && <Users className="w-4 h-4 inline mr-1.5" />}
@@ -208,7 +208,7 @@ export default function CollaboratePage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-[#5B8DA8]" />
+                <UserPlus className="w-4 h-4 text-[#5BA8A0]" />
                 Invite Team Members
               </CardTitle>
               <CardDescription>Add people by email to collaborate on your projects</CardDescription>
@@ -228,7 +228,7 @@ export default function CollaboratePage() {
                 <Button
                   onClick={handleInvite}
                   className="gap-2 shrink-0"
-                  style={{ background: "#5B8DA8" }}
+                  style={{ background: "#5BA8A0" }}
                   data-testid="button-send-invite"
                 >
                   <Send className="w-4 h-4" /> Invite
@@ -327,7 +327,7 @@ export default function CollaboratePage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#5B8DA8]" />
+                <Clock className="w-4 h-4 text-[#5BA8A0]" />
                 Shared Projects
               </CardTitle>
               <CardDescription>Projects your team is working on</CardDescription>
@@ -348,8 +348,8 @@ export default function CollaboratePage() {
                           key={p.id}
                           className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-[#5B8DA8]/10 flex items-center justify-center shrink-0">
-                            <FolderOpen className="w-4 h-4 text-[#5B8DA8]" />
+                          <div className="w-8 h-8 rounded-lg bg-[#5BA8A0]/10 flex items-center justify-center shrink-0">
+                            <FolderOpen className="w-4 h-4 text-[#5BA8A0]" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{p.name}</p>
@@ -436,7 +436,7 @@ export default function CollaboratePage() {
                       onClick={handlePostComment}
                       disabled={!commentText.trim()}
                       className="gap-1.5 text-xs"
-                      style={{ background: "#5B8DA8" }}
+                      style={{ background: "#5BA8A0" }}
                       data-testid="button-post-comment"
                     >
                       <Send className="w-3.5 h-3.5" /> Post

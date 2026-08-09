@@ -230,7 +230,7 @@ function BillingPageContent() {
             </div>
             {currentPlan === "free" && (
               <Button
-                className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
+                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                 data-testid="button-upgrade"
                 onClick={() => handleUpgrade(plans[1])}
                 disabled={checkoutMutation.isPending || !plans[1].priceId}
@@ -255,10 +255,10 @@ function BillingPageContent() {
             return (
               <Card
                 key={plan.name}
-                className={`relative ${plan.popular ? "border-[#5B8DA8] border-2 shadow-lg shadow-[#5B8DA8]/10 mt-3" : ""}`}
+                className={`relative ${plan.popular ? "border-[#5BA8A0] border-2 shadow-lg shadow-[#5BA8A0]/10 mt-3" : ""}`}
               >
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5B8DA8] text-white z-10">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5BA8A0] text-white z-10">
                     Most Popular
                   </Badge>
                 )}
@@ -283,14 +283,14 @@ function BillingPageContent() {
                   <ul className="space-y-2.5">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-[#5B8DA8] mt-0.5 flex-shrink-0" />
+                        <Check className="w-4 h-4 text-[#5BA8A0] mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   <Button
-                    className={`w-full ${plan.popular && !isCurrent ? "bg-[#5B8DA8] hover:bg-[#4A9790]" : ""}`}
+                    className={`w-full ${plan.popular && !isCurrent ? "bg-[#5BA8A0] hover:bg-[#4A9790]" : ""}`}
                     variant={isCurrent ? "outline" : plan.popular ? "default" : "outline"}
                     disabled={
                       isCurrent ||

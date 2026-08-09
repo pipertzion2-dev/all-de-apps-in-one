@@ -13,8 +13,8 @@ import {
 import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { ReferralWidget } from "@/components/referral-widget";
 
-const TEAL = "#5B8DA8";
-const BURG = "#6B2C4E";
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
 
 const features = [
   {
@@ -195,7 +195,7 @@ export default function MarketingPage() {
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-2xl border-2 border-border bg-card p-6 hover:border-[#5B8DA8]/50 transition-colors"
+                  className="rounded-2xl border-2 border-border bg-card p-6 hover:border-[#5BA8A0]/50 transition-colors"
                 >
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
@@ -211,9 +211,9 @@ export default function MarketingPage() {
           </div>
         </div>
 
-        <div className="mt-12 rounded-2xl border-2 border-[#6B2C4E]/40 bg-gradient-to-br from-[#6B2C4E]/5 to-transparent p-6">
+        <div className="mt-12 rounded-2xl border-2 border-[#6B2C4A]/40 bg-gradient-to-br from-[#6B2C4A]/5 to-transparent p-6">
           <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#6B2C4E" }} />
+            <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#6B2C4A" }} />
             <div>
               <h3 className="font-bold text-foreground mb-2">Pyracrypt Security Suite</h3>
               <p className="text-sm text-muted-foreground mb-2">

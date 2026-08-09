@@ -201,7 +201,7 @@ export default function APIBuilderPage() {
             <span className="text-muted-foreground">
               {step >= 5 ? "Complete" : `Step ${displayStep} of ${totalSteps}`}
             </span>
-            <span className="text-[#5B8DA8] font-medium">{Math.round(progress)}%</span>
+            <span className="text-[#5BA8A0] font-medium">{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-2" />
           <div className="flex justify-between">
@@ -213,7 +213,7 @@ export default function APIBuilderPage() {
             ].map(({ full, short }, i) => (
               <div
                 key={full}
-                className={`text-[10px] sm:text-xs ${step > i ? "text-[#5B8DA8]" : step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}
+                className={`text-[10px] sm:text-xs ${step > i ? "text-[#5BA8A0]" : step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}
               >
                 <span className="hidden sm:inline">{full}</span>
                 <span className="sm:hidden">{short}</span>
@@ -224,11 +224,11 @@ export default function APIBuilderPage() {
 
         {/* Step 1: Business Context */}
         {step === 1 && (
-          <Card className="border-[#5B8DA8]/30">
+          <Card className="border-[#5BA8A0]/30">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#5B8DA8]/15 flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-[#5B8DA8]" />
+                <div className="w-10 h-10 rounded-lg bg-[#5BA8A0]/15 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-[#5BA8A0]" />
                 </div>
                 <div>
                   <CardTitle>Tell us about your business</CardTitle>
@@ -275,11 +275,11 @@ export default function APIBuilderPage() {
                 />
               </div>
 
-              <div className="bg-[#5B8DA8]/10 rounded-lg p-4 border border-[#5B8DA8]/20">
+              <div className="bg-[#5BA8A0]/10 rounded-lg p-4 border border-[#5BA8A0]/20">
                 <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-[#5B8DA8] mt-0.5" />
+                  <Lightbulb className="w-5 h-5 text-[#5BA8A0] mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-medium text-[#5B8DA8]">AI-Powered Analysis</p>
+                    <p className="font-medium text-[#5BA8A0]">AI-Powered Analysis</p>
                     <p className="text-muted-foreground">
                       Our AI will analyze your business context to suggest complementary APIs that
                       work together, along with brand identity suggestions to create a market-ready
@@ -293,7 +293,7 @@ export default function APIBuilderPage() {
                 <Button
                   onClick={analyzeAndSuggest}
                   disabled={!companyDescription || !primaryAPIPrompt || isAnalyzing}
-                  className="bg-[#5B8DA8] w-full sm:w-auto"
+                  className="bg-[#5BA8A0] w-full sm:w-auto"
                   data-testid="button-analyze"
                 >
                   {isAnalyzing ? (
@@ -317,11 +317,11 @@ export default function APIBuilderPage() {
         {step === 2 && analysis && (
           <div className="space-y-6">
             {/* Business Analysis Summary */}
-            <Card className="border-[#D782B8]/30 bg-gradient-to-br from-[#D782B8]/5 to-transparent">
+            <Card className="border-[#D782B2]/30 bg-gradient-to-br from-[#D782B2]/5 to-transparent">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#D782B8]/15 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-[#D782B8]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#D782B2]/15 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-[#D782B2]" />
                   </div>
                   <div>
                     <CardTitle>Business Analysis</CardTitle>
@@ -354,12 +354,12 @@ export default function APIBuilderPage() {
             </Card>
 
             {/* Suggested APIs */}
-            <Card className="border-[#5B8DA8]/30">
+            <Card className="border-[#5BA8A0]/30">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#5B8DA8]/15 flex items-center justify-center">
-                      <Layers className="w-5 h-5 text-[#5B8DA8]" />
+                    <div className="w-10 h-10 rounded-lg bg-[#5BA8A0]/15 flex items-center justify-center">
+                      <Layers className="w-5 h-5 text-[#5BA8A0]" />
                     </div>
                     <div>
                       <CardTitle>Suggested API Suite</CardTitle>
@@ -368,7 +368,7 @@ export default function APIBuilderPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge className="bg-[#5B8DA8]/20 text-[#5B8DA8] border-[#5B8DA8]/30">
+                  <Badge className="bg-[#5BA8A0]/20 text-[#5BA8A0] border-[#5BA8A0]/30">
                     {selectedCount} selected
                   </Badge>
                 </div>
@@ -380,15 +380,15 @@ export default function APIBuilderPage() {
                     onClick={() => toggleAPI(index)}
                     className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                       api.selected
-                        ? "border-[#5B8DA8] bg-[#5B8DA8]/10"
-                        : "border-border hover:border-[#5B8DA8]/50"
+                        ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
+                        : "border-border hover:border-[#5BA8A0]/50"
                     }`}
                     data-testid={`card-api-suggestion-${index}`}
                   >
                     <div className="flex items-start gap-4">
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          api.selected ? "border-[#5B8DA8] bg-[#5B8DA8]" : "border-muted-foreground"
+                          api.selected ? "border-[#5BA8A0] bg-[#5BA8A0]" : "border-muted-foreground"
                         }`}
                       >
                         {api.selected && <Check className="w-4 h-4 text-white" />}
@@ -399,14 +399,14 @@ export default function APIBuilderPage() {
                           {index === 0 && (
                             <Badge
                               variant="secondary"
-                              className="text-[10px] bg-[#D782B8]/20 text-[#D782B8]"
+                              className="text-[10px] bg-[#D782B2]/20 text-[#D782B2]"
                             >
                               Primary
                             </Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{api.description}</p>
-                        <p className="text-xs text-[#5B8DA8]">
+                        <p className="text-xs text-[#5BA8A0]">
                           <span className="font-medium">Purpose:</span> {api.purpose}
                         </p>
                       </div>
@@ -429,7 +429,7 @@ export default function APIBuilderPage() {
               <Button
                 onClick={() => setStep(3)}
                 disabled={selectedCount === 0}
-                className="bg-[#5B8DA8] order-1 sm:order-2"
+                className="bg-[#5BA8A0] order-1 sm:order-2"
                 data-testid="button-continue-brand"
               >
                 Continue to Branding
@@ -442,12 +442,12 @@ export default function APIBuilderPage() {
         {/* Step 3: Brand Identity */}
         {step === 3 && analysis && (
           <div className="space-y-6">
-            <Card className="border-[#D782B8]/30">
+            <Card className="border-[#D782B2]/30">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#D782B8]/15 flex items-center justify-center">
-                      <Palette className="w-5 h-5 text-[#D782B8]" />
+                    <div className="w-10 h-10 rounded-lg bg-[#D782B2]/15 flex items-center justify-center">
+                      <Palette className="w-5 h-5 text-[#D782B2]" />
                     </div>
                     <div>
                       <CardTitle>Brand Identity</CardTitle>
@@ -485,8 +485,8 @@ export default function APIBuilderPage() {
                     }}
                     className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedBrand === brand
-                        ? "border-[#D782B8] bg-[#D782B8]/10"
-                        : "border-border hover:border-[#D782B8]/50"
+                        ? "border-[#D782B2] bg-[#D782B2]/10"
+                        : "border-border hover:border-[#D782B2]/50"
                     }`}
                     data-testid={`card-brand-${index}`}
                   >
@@ -494,7 +494,7 @@ export default function APIBuilderPage() {
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                           selectedBrand === brand
-                            ? "border-[#D782B8] bg-[#D782B8]"
+                            ? "border-[#D782B2] bg-[#D782B2]"
                             : "border-muted-foreground"
                         }`}
                       >
@@ -559,7 +559,7 @@ export default function APIBuilderPage() {
               <Button
                 onClick={() => setStep(4)}
                 disabled={!selectedBrand && !customBrandName}
-                className="bg-[#D782B8] order-1 sm:order-2"
+                className="bg-[#D782B2] order-1 sm:order-2"
                 data-testid="button-continue-launch"
               >
                 Review & Launch
@@ -572,10 +572,10 @@ export default function APIBuilderPage() {
         {/* Step 4: Launch Bundle */}
         {step === 4 && analysis && (
           <div className="space-y-6">
-            <Card className="border-[#5B8DA8]/30 bg-gradient-to-br from-[#5B8DA8]/5 via-transparent to-[#D782B8]/5">
+            <Card className="border-[#5BA8A0]/30 bg-gradient-to-br from-[#5BA8A0]/5 via-transparent to-[#D782B2]/5">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#5B8DA8] to-[#D782B8] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#5BA8A0] to-[#D782B2] flex items-center justify-center">
                     <Rocket className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -590,7 +590,7 @@ export default function APIBuilderPage() {
                 {/* Brand Preview */}
                 <div className="bg-card rounded-xl p-6 border">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#5B8DA8] to-[#D782B8] flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#5BA8A0] to-[#D782B2] flex items-center justify-center">
                       <Crown className="w-8 h-8 text-white" />
                     </div>
                     <div>
@@ -619,7 +619,7 @@ export default function APIBuilderPage() {
                 {/* Selected APIs */}
                 <div>
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#5B8DA8]" />
+                    <Layers className="w-4 h-4 text-[#5BA8A0]" />
                     Included APIs ({selectedCount})
                   </h4>
                   <div className="space-y-2">
@@ -630,7 +630,7 @@ export default function APIBuilderPage() {
                           key={index}
                           className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
                         >
-                          <Zap className="w-4 h-4 text-[#5B8DA8]" />
+                          <Zap className="w-4 h-4 text-[#5BA8A0]" />
                           <span className="font-medium">{api.name}</span>
                           <span className="text-sm text-muted-foreground">- {api.purpose}</span>
                         </div>
@@ -639,8 +639,8 @@ export default function APIBuilderPage() {
                 </div>
 
                 {/* What's Included */}
-                <div className="bg-[#5B8DA8]/10 rounded-xl p-4 border border-[#5B8DA8]/20">
-                  <h4 className="font-medium mb-3 text-[#5B8DA8]">What You&apos;ll Get:</h4>
+                <div className="bg-[#5BA8A0]/10 rounded-xl p-4 border border-[#5BA8A0]/20">
+                  <h4 className="font-medium mb-3 text-[#5BA8A0]">What You&apos;ll Get:</h4>
                   <div className="grid md:grid-cols-2 gap-3">
                     {[
                       { icon: Layers, text: `${selectedCount} Production-Ready APIs` },
@@ -649,7 +649,7 @@ export default function APIBuilderPage() {
                       { icon: Star, text: "Marketplace-Ready Listing" },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2 text-sm">
-                        <Check className="w-4 h-4 text-[#5B8DA8]" />
+                        <Check className="w-4 h-4 text-[#5BA8A0]" />
                         <item.icon className="w-4 h-4 text-muted-foreground" />
                         <span>{item.text}</span>
                       </div>
@@ -672,7 +672,7 @@ export default function APIBuilderPage() {
               <Button
                 onClick={createBundle}
                 disabled={isCreating}
-                className="bg-gradient-to-r from-[#5B8DA8] to-[#D782B8] order-1 sm:order-2"
+                className="bg-gradient-to-r from-[#5BA8A0] to-[#D782B2] order-1 sm:order-2"
                 data-testid="button-create-bundle"
               >
                 {isCreating ? (
@@ -693,9 +693,9 @@ export default function APIBuilderPage() {
 
         {/* Step 5: Success */}
         {step === 5 && (
-          <Card className="border-[#5B8DA8]/30 text-center py-12">
+          <Card className="border-[#5BA8A0]/30 text-center py-12">
             <CardContent className="space-y-6">
-              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#5B8DA8] to-[#D782B8] flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#5BA8A0] to-[#D782B2] flex items-center justify-center">
                 <Check className="w-10 h-10 text-white" />
               </div>
               <div>
@@ -714,7 +714,7 @@ export default function APIBuilderPage() {
                   View Dashboard
                 </Button>
                 <Button
-                  className="bg-[#5B8DA8]"
+                  className="bg-[#5BA8A0]"
                   onClick={() => {
                     setStep(1);
                     setCompanyDescription("");

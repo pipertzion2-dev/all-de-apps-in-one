@@ -20,8 +20,8 @@ import {
   Lock,
 } from "lucide-react";
 
-const TEAL = "#5B8DA8";
-const BURG = "#6B2C4E";
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
 
 type Lane = "auto" | "credential" | "manual" | "done";
 
@@ -210,7 +210,7 @@ export function OrbitAdminMissionBoard({
         id: "distribution",
         title: "Distribution",
         icon: Package,
-        color: "#C08310",
+        color: "#c06010",
         items: [
           {
             id: "svivva-directories",

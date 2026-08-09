@@ -82,16 +82,16 @@ This API is part of the "${bundleName}" product suite.`;
       // Create brand if provided
       const brandInfo = brand as BrandInfo;
       if (brandInfo) {
-        const colors = brandInfo.colorScheme || ["#5B8DA8", "#D782B8", "#6B3A6A"];
+        const colors = brandInfo.colorScheme || ["#5BA8A0", "#D782B2", "#6B3A67"];
         await db.insert(projectBrands).values({
           id: nanoid(),
           projectId: project.id,
           brandName: bundleName || brandInfo.name || api.name,
           tagline: brandInfo.tagline || null,
           colorPalette: {
-            primary: colors[0] || "#5B8DA8",
-            secondary: colors[1] || "#D782B8",
-            accent: colors[2] || "#6B3A6A",
+            primary: colors[0] || "#5BA8A0",
+            secondary: colors[1] || "#D782B2",
+            accent: colors[2] || "#6B3A67",
           },
           category: "combo-bundle",
           personality: brandInfo.logoDescription || null,

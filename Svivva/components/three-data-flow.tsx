@@ -48,9 +48,9 @@ export function ThreeDataFlow() {
     container.appendChild(renderer.domElement);
 
     const colors = {
-      prompt: new THREE.Color(0x7b8dac),
-      schema: new THREE.Color(0xd782b8),
-      api: new THREE.Color(0x639cb3),
+      prompt: new THREE.Color(0x7ba3ac),
+      schema: new THREE.Color(0xd782b2),
+      api: new THREE.Color(0x63b3a6),
       particle: new THREE.Color(0x96a9ab),
     };
 

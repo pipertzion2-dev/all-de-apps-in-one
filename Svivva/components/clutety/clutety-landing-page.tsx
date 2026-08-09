@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { ClutetyAppFrame } from "@/components/clutety/clutety-app-frame";
 
-const TEAL = "#5B8DA8";
-const BURG = "#6B2C4E";
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
 const APP_ANCHOR = "#app";
 
 const features = [
@@ -204,7 +204,7 @@ export default function ClutetyLandingPage() {
               background: "rgba(255,255,255,0.03)",
               backdropFilter: "blur(24px)",
               border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: `0 0 0 1px rgba(91, 141, 168,0.2), 0 32px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
+              boxShadow: `0 0 0 1px rgba(91,168,160,0.2), 0 32px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
             }}
           >
             {/* Title bar */}

@@ -173,7 +173,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`, `${cap}Flow`],
       icons: iconOptions,
       palettes: [
-        { name: "ZZAI", colors: { primary: "#5B8DA8", secondary: "#4A7D98", accent: "#6B2C4E" } },
+        { name: "ZZAI", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
         { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
         { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
         { name: "Ember", colors: { primary: "#f97316", secondary: "#ea580c", accent: "#fbbf24" } },
@@ -248,9 +248,9 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                 <div
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     phase === step.key
-                      ? "bg-[#5B8DA8] text-white"
+                      ? "bg-[#5BA8A0] text-white"
                       : arr.findIndex((s) => s.key === phase) > i
-                        ? "bg-[#5B8DA8]/20 text-[#5B8DA8]"
+                        ? "bg-[#5BA8A0]/20 text-[#5BA8A0]"
                         : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -259,7 +259,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                 {i < arr.length - 1 && (
                   <div
                     className={`w-8 h-0.5 mx-1 ${
-                      arr.findIndex((s) => s.key === phase) > i ? "bg-[#5B8DA8]/40" : "bg-muted"
+                      arr.findIndex((s) => s.key === phase) > i ? "bg-[#5BA8A0]/40" : "bg-muted"
                     }`}
                   />
                 )}
@@ -297,7 +297,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                 variant={showTuner ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowTuner(!showTuner)}
-                className={showTuner ? "bg-[#5B8DA8] hover:bg-[#4A7D98]" : ""}
+                className={showTuner ? "bg-[#5BA8A0] hover:bg-[#4a9890]" : ""}
                 data-testid="button-tuner"
               >
                 <Settings2 className="w-4 h-4 mr-1.5" />
@@ -318,7 +318,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                 exit={{ opacity: 0 }}
                 className="flex flex-col items-center justify-center py-16"
               >
-                <Loader2 className="w-8 h-8 animate-spin text-[#5B8DA8] mb-3" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#5BA8A0] mb-3" />
                 <p className="text-muted-foreground">Generating...</p>
               </motion.div>
             ) : phase === "prompt" ? (
@@ -365,10 +365,10 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="p-4 rounded-lg border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 space-y-5">
+                      <div className="p-4 rounded-lg border border-[#5BA8A0]/30 bg-[#5BA8A0]/5 space-y-5">
                         <div className="flex items-center gap-2 mb-2">
-                          <Settings2 className="w-4 h-4 text-[#5B8DA8]" />
-                          <span className="text-sm font-semibold text-[#5B8DA8]">API Tuner</span>
+                          <Settings2 className="w-4 h-4 text-[#5BA8A0]" />
+                          <span className="text-sm font-semibold text-[#5BA8A0]">API Tuner</span>
                         </div>
 
                         {/* Sliders */}
@@ -383,7 +383,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                               onValueChange={setCreativity}
                               max={100}
                               step={5}
-                              className="[&_[role=slider]]:bg-[#5B8DA8]"
+                              className="[&_[role=slider]]:bg-[#5BA8A0]"
                               data-testid="slider-creativity"
                             />
                             <p className="text-xs text-muted-foreground">
@@ -405,7 +405,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                               onValueChange={setDetailLevel}
                               max={100}
                               step={5}
-                              className="[&_[role=slider]]:bg-[#5B8DA8]"
+                              className="[&_[role=slider]]:bg-[#5BA8A0]"
                               data-testid="slider-detail"
                             />
                             <p className="text-xs text-muted-foreground">
@@ -427,7 +427,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                               onValueChange={setStrictness}
                               max={100}
                               step={5}
-                              className="[&_[role=slider]]:bg-[#5B8DA8]"
+                              className="[&_[role=slider]]:bg-[#5BA8A0]"
                               data-testid="slider-strictness"
                             />
                             <p className="text-xs text-muted-foreground">
@@ -478,7 +478,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                 {/* Status */}
                 <div className="flex items-center gap-2 pt-2">
                   <div
-                    className={`w-2 h-2 rounded-full ${canGoNext ? "bg-[#5B8DA8]" : "bg-muted-foreground/30"}`}
+                    className={`w-2 h-2 rounded-full ${canGoNext ? "bg-[#5BA8A0]" : "bg-muted-foreground/30"}`}
                   />
                   <span className="text-sm text-muted-foreground">
                     {canGoNext
@@ -507,18 +507,18 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                         }
                         className={`group relative p-4 rounded-lg border-2 text-left transition-all duration-200 ${
                           isSelected
-                            ? "border-[#5B8DA8] bg-[#5B8DA8]/10"
-                            : "border-border hover:border-[#5B8DA8]/50 hover:bg-muted/50"
+                            ? "border-[#5BA8A0] bg-[#5BA8A0]/10"
+                            : "border-border hover:border-[#5BA8A0]/50 hover:bg-muted/50"
                         }`}
                         data-testid={`button-option-${opt.value}`}
                       >
-                        <div className={`font-semibold mb-1 ${isSelected ? "text-[#5B8DA8]" : ""}`}>
+                        <div className={`font-semibold mb-1 ${isSelected ? "text-[#5BA8A0]" : ""}`}>
                           {opt.label}
                         </div>
                         <div className="text-xs text-muted-foreground">{opt.description}</div>
                         {isSelected && (
                           <div className="absolute top-2 right-2">
-                            <Check className="w-4 h-4 text-[#5B8DA8]" />
+                            <Check className="w-4 h-4 text-[#5BA8A0]" />
                           </div>
                         )}
                       </button>
@@ -533,9 +533,9 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                       key={i}
                       className={`h-1.5 flex-1 rounded-full transition-colors ${
                         i < currentQuestionIndex
-                          ? "bg-[#5B8DA8]"
+                          ? "bg-[#5BA8A0]"
                           : i === currentQuestionIndex
-                            ? "bg-[#5B8DA8]/50"
+                            ? "bg-[#5BA8A0]/50"
                             : "bg-muted"
                       }`}
                     />
@@ -562,8 +562,8 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                         variant={selectedName === name ? "default" : "outline"}
                         className={`cursor-pointer text-sm py-1.5 px-4 transition-all ${
                           selectedName === name
-                            ? "bg-[#5B8DA8] hover:bg-[#4A7D98] border-[#5B8DA8]"
-                            : "hover:border-[#5B8DA8]/50"
+                            ? "bg-[#5BA8A0] hover:bg-[#4a9890] border-[#5BA8A0]"
+                            : "hover:border-[#5BA8A0]/50"
                         }`}
                         onClick={() => setSelectedName(name)}
                         data-testid={`badge-name-${name.toLowerCase()}`}
@@ -586,8 +586,8 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                         onClick={() => setSelectedIcon(icon.name)}
                         className={`w-11 h-11 rounded-lg border-2 flex items-center justify-center transition-all ${
                           selectedIcon === icon.name
-                            ? "border-[#5B8DA8] bg-[#5B8DA8]/10 text-[#5B8DA8]"
-                            : "border-border hover:border-[#5B8DA8]/50 text-muted-foreground hover:text-foreground"
+                            ? "border-[#5BA8A0] bg-[#5BA8A0]/10 text-[#5BA8A0]"
+                            : "border-border hover:border-[#5BA8A0]/50 text-muted-foreground hover:text-foreground"
                         }`}
                         data-testid={`button-icon-${icon.name.toLowerCase()}`}
                       >
@@ -609,8 +609,8 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
                         onClick={() => setSelectedPalette(palette)}
                         className={`p-3 rounded-lg border-2 transition-all ${
                           selectedPalette?.name === palette.name
-                            ? "border-[#5B8DA8] bg-[#5B8DA8]/5"
-                            : "border-border hover:border-[#5B8DA8]/50"
+                            ? "border-[#5BA8A0] bg-[#5BA8A0]/5"
+                            : "border-border hover:border-[#5BA8A0]/50"
                         }`}
                         data-testid={`button-palette-${palette.name.toLowerCase()}`}
                       >
@@ -691,7 +691,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
             <Button
               onClick={() => generateTailoredQuestions(prompt)}
               disabled={!canGoNext || isGenerating}
-              className="bg-[#5B8DA8] hover:bg-[#4A7D98]"
+              className="bg-[#5BA8A0] hover:bg-[#4a9890]"
               data-testid="button-continue"
             >
               Continue
@@ -703,7 +703,7 @@ export function ApiCreatorPanel({ onComplete }: ApiCreatorPanelProps) {
             <Button
               onClick={handleCreate}
               disabled={!canCreate}
-              className="bg-[#5B8DA8] hover:bg-[#4A7D98]"
+              className="bg-[#5BA8A0] hover:bg-[#4a9890]"
               data-testid="button-create-api"
             >
               Create API

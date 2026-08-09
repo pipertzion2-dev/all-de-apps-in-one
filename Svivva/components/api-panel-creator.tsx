@@ -115,7 +115,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
       icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
       palettes: [
-        { name: "ZZAI", colors: { primary: "#5B8DA8", secondary: "#4A7D98", accent: "#6B2C4E" } },
+        { name: "ZZAI", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
         { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
         { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
         { name: "Ember", colors: { primary: "#f97316", secondary: "#ea580c", accent: "#fbbf24" } },
@@ -174,7 +174,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     ctx.fillRect(20, bottomBarY, W - 40, 40);
 
     // Version text
-    ctx.fillStyle = "#5B8DA8";
+    ctx.fillStyle = "#5BA8A0";
     ctx.font = "italic 24px Georgia, serif";
     ctx.fillText("V-1", 35, bottomBarY + 28);
 
@@ -196,7 +196,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       // Cursor
       if (isFocused && cursorVisible && prompt.length < 50) {
         const textWidth = ctx.measureText(prompt || "").width;
-        ctx.fillStyle = "#5B8DA8";
+        ctx.fillStyle = "#5BA8A0";
         ctx.fillRect(45 + textWidth, topBarY + 12, 2, 26);
       }
 
@@ -241,7 +241,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.font = "14px monospace";
         ctx.fillText(`${prompt.length}/10 characters`, 390, mainY + 190);
       } else {
-        ctx.fillStyle = "#5B8DA8";
+        ctx.fillStyle = "#5BA8A0";
         ctx.fillText("Ready to generate your API", 390, mainY + 150);
         ctx.fillStyle = "#666";
         ctx.font = "14px monospace";
@@ -255,7 +255,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const exportBtnW = 90;
       const exportBtnH = 50;
       const canExport = prompt.length >= 10;
-      ctx.fillStyle = canExport ? (hoveredButton === "export" ? "#4A7D98" : "#5B8DA8") : "#ccc";
+      ctx.fillStyle = canExport ? (hoveredButton === "export" ? "#4a9890" : "#5BA8A0") : "#ccc";
       ctx.fillRect(exportBtnX, exportBtnY, exportBtnW, exportBtnH);
       ctx.strokeStyle = "#1a1a1a";
       ctx.lineWidth = 3;
@@ -321,9 +321,9 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         const sel = answers[q.id] === opt;
         const hov = hoveredButton === `opt-${opt}`;
 
-        ctx.fillStyle = sel ? "#5B8DA8" : hov ? "#e8e8e0" : "#f5f5f0";
+        ctx.fillStyle = sel ? "#5BA8A0" : hov ? "#e8e8e0" : "#f5f5f0";
         ctx.fillRect(x, startY, optW, optH);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#1a1a1a";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#1a1a1a";
         ctx.lineWidth = sel ? 4 : 2;
         ctx.strokeRect(x, startY, optW, optH);
 
@@ -347,7 +347,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       tailoredQuestions.forEach((_, i) => {
         const bx = 60 + i * 240;
         ctx.fillStyle =
-          i < currentQuestionIndex ? "#5B8DA8" : i === currentQuestionIndex ? "#5B8DA880" : "#ddd";
+          i < currentQuestionIndex ? "#5BA8A0" : i === currentQuestionIndex ? "#5BA8A080" : "#ddd";
         ctx.fillRect(bx, barY, 220, 8);
         ctx.strokeStyle = "#1a1a1a";
         ctx.lineWidth = 1;
@@ -387,9 +387,9 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         const sel = selectedName === n;
         const hov = hoveredButton === `name-${n}`;
 
-        ctx.fillStyle = sel ? "#5B8DA8" : hov ? "#e8e8e0" : "#f5f5f0";
+        ctx.fillStyle = sel ? "#5BA8A0" : hov ? "#e8e8e0" : "#f5f5f0";
         ctx.fillRect(x, mainY + 40, w, 36);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#1a1a1a";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#1a1a1a";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, mainY + 40, w, 36);
 
@@ -427,9 +427,9 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         const sel = selectedIcon === icon;
         const hov = hoveredButton === `icon-${icon}`;
 
-        ctx.fillStyle = sel ? "#5B8DA8" : hov ? "#e8e8e0" : "#f5f5f0";
+        ctx.fillStyle = sel ? "#5BA8A0" : hov ? "#e8e8e0" : "#f5f5f0";
         ctx.fillRect(x, mainY + 115, 50, 50);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#1a1a1a";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#1a1a1a";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, mainY + 115, 50, 50);
 
@@ -459,9 +459,9 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         const sel = selectedPalette?.name === p.name;
         const hov = hoveredButton === `pal-${p.name}`;
 
-        ctx.fillStyle = sel ? "#5B8DA820" : hov ? "#e8e8e0" : "#f5f5f0";
+        ctx.fillStyle = sel ? "#5BA8A020" : hov ? "#e8e8e0" : "#f5f5f0";
         ctx.fillRect(x, mainY + 205, 160, 90);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#1a1a1a";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#1a1a1a";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, mainY + 205, 160, 90);
 
@@ -471,7 +471,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
         ctx.fillStyle = p.colors.accent;
         ctx.fillRect(x + 85, mainY + 220, 55, 40);
 
-        ctx.fillStyle = sel ? "#5B8DA8" : "#1a1a1a";
+        ctx.fillStyle = sel ? "#5BA8A0" : "#1a1a1a";
         ctx.font = "bold 12px monospace";
         ctx.textAlign = "center";
         ctx.fillText(p.name, x + 80, mainY + 285);
@@ -494,7 +494,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
       const exportBtnH = 50;
       const canCreate = selectedName && selectedIcon && selectedPalette;
 
-      ctx.fillStyle = canCreate ? (hoveredButton === "create" ? "#4A7D98" : "#5B8DA8") : "#ccc";
+      ctx.fillStyle = canCreate ? (hoveredButton === "create" ? "#4a9890" : "#5BA8A0") : "#ccc";
       ctx.fillRect(exportBtnX, exportBtnY, exportBtnW, exportBtnH);
       ctx.strokeStyle = "#1a1a1a";
       ctx.lineWidth = 3;
@@ -527,7 +527,7 @@ export function ApiPanelCreator({ onComplete }: ApiPanelCreatorProps) {
     if (isGenerating) {
       ctx.fillStyle = "rgba(245, 245, 240, 0.9)";
       ctx.fillRect(30, 100, 720, 340);
-      ctx.fillStyle = "#5B8DA8";
+      ctx.fillStyle = "#5BA8A0";
       ctx.font = "bold 20px monospace";
       ctx.textAlign = "center";
       ctx.fillText("Generating...", 390, 280);

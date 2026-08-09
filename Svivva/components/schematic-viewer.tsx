@@ -116,7 +116,7 @@ export function SchematicViewer({
           x={cx}
           y={16}
           textAnchor="middle"
-          fill="#5B8DA8"
+          fill="#5BA8A0"
           fontSize="8"
           fontFamily="monospace"
           fontWeight="bold"
@@ -149,7 +149,7 @@ export function SchematicViewer({
             width={drawW}
             height={drawH}
             fill="none"
-            stroke="#5B8DA8"
+            stroke="#5BA8A0"
             strokeWidth="1.2"
           />
 
@@ -161,7 +161,7 @@ export function SchematicViewer({
                 width={drawW - 16}
                 height={drawH - 8}
                 fill="none"
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.5"
                 strokeDasharray="2,2"
               />
@@ -170,7 +170,7 @@ export function SchematicViewer({
                 cy={cy}
                 r={3}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.8"
               />
               <rect
@@ -179,7 +179,7 @@ export function SchematicViewer({
                 width={20}
                 height={3}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.6"
               />
             </>
@@ -193,7 +193,7 @@ export function SchematicViewer({
                 rx={drawW / 3}
                 ry={10}
                 fill="none"
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.5"
                 strokeDasharray="2,2"
               />
@@ -202,7 +202,7 @@ export function SchematicViewer({
                 cy={cy - drawH / 2 + 5}
                 r={4}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.8"
               />
               <rect
@@ -212,7 +212,7 @@ export function SchematicViewer({
                 height={15}
                 rx={2}
                 fill="none"
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.5"
               />
             </>
@@ -225,7 +225,7 @@ export function SchematicViewer({
                 cy={cy}
                 r={drawW / 2 - 5}
                 fill="none"
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.5"
                 strokeDasharray="2,2"
               />
@@ -236,7 +236,7 @@ export function SchematicViewer({
                 height={20}
                 rx={2}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.8"
               />
               <rect
@@ -246,7 +246,7 @@ export function SchematicViewer({
                 height={20}
                 rx={2}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.8"
               />
             </>
@@ -260,7 +260,7 @@ export function SchematicViewer({
                 width={drawW - 10}
                 height={20}
                 fill="none"
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.5"
                 strokeDasharray="2,2"
               />
@@ -269,7 +269,7 @@ export function SchematicViewer({
                 y1={cy - drawH / 2}
                 x2={cx - drawW / 4}
                 y2={cy + drawH / 2}
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.3"
                 strokeDasharray="4,2"
               />
@@ -278,7 +278,7 @@ export function SchematicViewer({
                 cy={cy - drawH / 4}
                 r={8}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.8"
               />
             </>
@@ -291,7 +291,7 @@ export function SchematicViewer({
                 y1={cy - drawH / 2}
                 x2={cx}
                 y2={cy + drawH / 2}
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.3"
                 strokeDasharray="4,2"
               />
@@ -300,7 +300,7 @@ export function SchematicViewer({
                 y1={cy}
                 x2={cx + drawW / 2}
                 y2={cy}
-                stroke="#3A5A6A"
+                stroke="#3a6a64"
                 strokeWidth="0.3"
                 strokeDasharray="4,2"
               />
@@ -311,7 +311,7 @@ export function SchematicViewer({
                 height={20}
                 rx={3}
                 fill="none"
-                stroke="#6B2C4E"
+                stroke="#6B2C4A"
                 strokeWidth="0.6"
               />
             </>
@@ -402,7 +402,7 @@ export function SchematicViewer({
           <text
             x={15}
             y={svgH - 54}
-            fill="#5B8DA8"
+            fill="#5BA8A0"
             fontSize="5.5"
             fontFamily="monospace"
             fontWeight="bold"
@@ -425,12 +425,12 @@ export function SchematicViewer({
 
         {requirements.includes("Waterproof") && (
           <g>
-            <circle cx={svgW - 30} cy={40} r={8} fill="none" stroke="#5B8DA8" strokeWidth="0.6" />
+            <circle cx={svgW - 30} cy={40} r={8} fill="none" stroke="#5BA8A0" strokeWidth="0.6" />
             <text
               x={svgW - 30}
               y={43}
               textAnchor="middle"
-              fill="#5B8DA8"
+              fill="#5BA8A0"
               fontSize="5"
               fontFamily="monospace"
             >

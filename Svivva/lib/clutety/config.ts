@@ -1,6 +1,6 @@
 /** Clutety / Pyracrypt branding tokens (ZZAI-hosted). */
-export const CLUTETY_TEAL = "#5B8DA8";
-export const CLUTETY_BURG = "#6B2C4E";
+export const CLUTETY_TEAL = "#5BA8A0";
+export const CLUTETY_BURG = "#6B2C4A";
 
 export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
 

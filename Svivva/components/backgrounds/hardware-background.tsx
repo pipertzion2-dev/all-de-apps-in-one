@@ -6,7 +6,7 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-const ACCENT = 0xb55480;
+const ACCENT = 0xb5547a;
 
 export default function HardwareBackground() {
   const mountRef = useRef<HTMLDivElement>(null);

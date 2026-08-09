@@ -160,14 +160,14 @@ export default function GscConnectOrb({
         style={{
           background: connected
             ? "radial-gradient(circle, rgba(46,150,80,0.55), transparent 70%)"
-            : "radial-gradient(circle, rgba(91, 141, 168,0.45), transparent 70%)",
+            : "radial-gradient(circle, rgba(91,168,160,0.45), transparent 70%)",
         }}
       />
       <div
         className="absolute inset-0 rounded-full overflow-hidden ring-2"
         style={{
           boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
-          borderColor: connected ? "rgba(46,150,80,0.6)" : "rgba(91, 141, 168,0.55)",
+          borderColor: connected ? "rgba(46,150,80,0.6)" : "rgba(91,168,160,0.55)",
         }}
         onClick={connect}
         role={interactive ? "button" : undefined}

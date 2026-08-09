@@ -10,7 +10,7 @@ type Props = {
   accentColor?: string;
 };
 
-export function FeatureSignInBanner({ featureName, accentColor = "#5B8DA8" }: Props) {
+export function FeatureSignInBanner({ featureName, accentColor = "#5BA8A0" }: Props) {
   const { isAuthenticated, isLoading, signInHref, signupHref } = useFeatureAuthGate();
 
   if (isLoading || isAuthenticated) return null;

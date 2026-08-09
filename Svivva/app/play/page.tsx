@@ -3037,9 +3037,9 @@ export default function SvivvaPlayPage() {
                             <span className="text-gray-500 uppercase tracking-wide flex-shrink-0 w-14">
                               Melodyne
                             </span>
-                            <Piano className="w-3 h-3 text-[#5B8DA8] flex-shrink-0" />
+                            <Piano className="w-3 h-3 text-[#00E5FF] flex-shrink-0" />
                             <span
-                              className={`font-mono truncate ${midiFileName ? "text-[#5B8DA8]" : "text-gray-600 italic"}`}
+                              className={`font-mono truncate ${midiFileName ? "text-[#00E5FF]" : "text-gray-600 italic"}`}
                               data-testid="text-melodyne-name"
                             >
                               {midiFileName || "Add .mid — harmonic tracks from Melodyne"}
@@ -3155,7 +3155,7 @@ export default function SvivvaPlayPage() {
                   <button
                     type="button"
                     onClick={() => void handleDownloadMelodyneMidi()}
-                    className="flex items-center gap-1 px-2 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-semibold text-[#5B8DA8] flex-shrink-0 border border-[#3a5550] hover:bg-[#1e2a28]"
+                    className="flex items-center gap-1 px-2 py-2 sm:py-2.5 rounded-md text-[10px] sm:text-xs font-semibold text-[#00E5FF] flex-shrink-0 border border-[#3a5550] hover:bg-[#1e2a28]"
                     title="Download aligned Melodyne as STEM pack (.zip)"
                     data-testid="button-download-melodyne-midi"
                   >
@@ -3419,7 +3419,7 @@ export default function SvivvaPlayPage() {
                                 </Badge>
                               )}
                               {transcription.sources.melodyneMidi && (
-                                <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] text-[8px] border-[#5B8DA8]/30">
+                                <Badge className="bg-[#00E5FF]/15 text-[#00E5FF] text-[8px] border-[#00E5FF]/30">
                                   Melodyne harmonics
                                 </Badge>
                               )}
@@ -4034,7 +4034,7 @@ export default function SvivvaPlayPage() {
                                   max={100}
                                   value={swingAmount}
                                   onChange={(e) => setSwingAmount(Number(e.target.value))}
-                                  className="w-full accent-[#5B8DA8]"
+                                  className="w-full accent-[#00E5FF]"
                                   data-testid="slider-swing"
                                 />
                                 <span className="text-[9px] text-gray-500">
@@ -4537,7 +4537,7 @@ export default function SvivvaPlayPage() {
                             Generated Stems ({stems.length})
                           </h3>
                           {planInfo?.chordProgression && planInfo.chordProgression.length > 0 ? (
-                            <p className="text-[9px] sm:text-[10px] text-[#5B8DA8] mt-0.5 font-mono tracking-wide">
+                            <p className="text-[9px] sm:text-[10px] text-[#00E5FF] mt-0.5 font-mono tracking-wide">
                               {planInfo.chordProgression.join(" → ")}
                             </p>
                           ) : (
@@ -4679,7 +4679,7 @@ export default function SvivvaPlayPage() {
                               <button
                                 onClick={() => void handleDownloadStemMidi(stem, i)}
                                 disabled={!stem.midiEvents?.length}
-                                className="p-0.5 sm:p-1 rounded text-gray-400 hover:text-[#5B8DA8] disabled:opacity-30"
+                                className="p-0.5 sm:p-1 rounded text-gray-400 hover:text-[#00E5FF] disabled:opacity-30"
                                 title="Download this stem as .mid for your DAW"
                                 data-testid={`button-download-stem-midi-${i}`}
                               >
@@ -5174,12 +5174,12 @@ export default function SvivvaPlayPage() {
                 style={{
                   background:
                     stems.length > 0 || transcription?.melodyneNotes?.length
-                      ? "linear-gradient(180deg, #5B8DA8, #4A8890)"
+                      ? "linear-gradient(180deg, #00E5FF, #4A8890)"
                       : "linear-gradient(180deg, #444, #333)",
                   boxShadow: "2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
                   border:
                     "2px solid " +
-                    (stems.length > 0 || transcription?.melodyneNotes?.length ? "#5B8DA8" : "#555"),
+                    (stems.length > 0 || transcription?.melodyneNotes?.length ? "#00E5FF" : "#555"),
                 }}
                 data-testid="button-export-stem-pack"
               >

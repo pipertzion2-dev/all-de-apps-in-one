@@ -41,7 +41,7 @@ export type ArtworkManifest = {
 export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   play: {
     src: "/artworks/play.png",
-    accentColor: "#905CBF",
+    accentColor: "#7c5cbf",
     faceElements: [
       {
         id: "note-a",
@@ -185,7 +185,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   },
   seeds: {
     src: "/artworks/seeds.png",
-    accentColor: "#5B8DA8",
+    accentColor: "#5BA8A0",
     faceElements: [
       {
         id: "gold-panel",
@@ -315,7 +315,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   },
   orbit: {
     src: "/artworks/orbit.png",
-    accentColor: "#3D6F8A",
+    accentColor: "#3d8a82",
     faceElements: [
       {
         id: "star-a",
@@ -460,7 +460,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   },
   security: {
     src: "/artworks/security.png",
-    accentColor: "#6B2C4E",
+    accentColor: "#6B2C4A",
     faceElements: [
       {
         id: "sphere-top",
@@ -576,7 +576,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   },
   api: {
     src: "/artworks/api.png",
-    accentColor: "#9B4D73",
+    accentColor: "#9b4d6e",
     faceElements: [
       {
         id: "flower-br",
@@ -694,7 +694,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   },
   hardware: {
     src: "/artworks/hardware.png",
-    accentColor: "#B55480",
+    accentColor: "#b5547a",
     faceElements: [
       {
         id: "cube-main",
