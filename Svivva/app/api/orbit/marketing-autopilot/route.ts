@@ -12,6 +12,8 @@ import { MARKETING_AUTOPILOT_TASKS } from "@/lib/orbit/marketing-autopilot-tasks
 import type { MarketingPlatformCredentials } from "@/lib/orbit/marketing-autopilot-types";
 import { ORBIT_SETUP_PROVIDERS } from "@/lib/orbit/orbit-setup-providers";
 import { isAnyAiProviderAvailable, getActiveAiProvider } from "@/lib/llm/openai";
+import { buildOrbitCompletionSnapshot } from "@/lib/orbit/completion-status";
+import type { AutopilotTaskResult } from "@/lib/orbit/marketing-autopilot-types";
 
 export const maxDuration = 300;
 
@@ -30,12 +32,16 @@ export async function GET(req: NextRequest) {
 
     const creds = await loadMarketingPlatformCredentials();
     const status = await getMarketingCredentialStatus();
-    const lastRun = await loadLastAutopilotRun();
+    const lastRun = (await loadLastAutopilotRun()) as {
+      tasks?: AutopilotTaskResult[];
+    } | null;
+    const completion = lastRun?.tasks?.length ? buildOrbitCompletionSnapshot(lastRun.tasks) : null;
 
     return NextResponse.json({
       credentials: maskCredentialsForClient(creds),
       status,
       lastRun,
+      completion,
       tasks: MARKETING_AUTOPILOT_TASKS,
       gscConnectUrl: "/dashboard/gsc-connect",
       setupProviders: ORBIT_SETUP_PROVIDERS,

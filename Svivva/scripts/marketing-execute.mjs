@@ -94,14 +94,24 @@ Finish in browser: ${SITE}/dashboard/launchpad?autorun=1
   }
 
   const { json: status } = await orbitFetch(auth, "/api/orbit/status");
+  const { json: autopilot } = await orbitFetch(auth, "/api/orbit/marketing-autopilot");
+  const completion = autopilot?.completion;
   console.log(`
 ✓ Agent marketing execute finished.
   Pages: ${status.totalPages}/${status.targetPages} (${status.pagesPercent}%)
   IndexNow: ${status.indexNowSubmitted ? "yes" : "no"}
   Orbit steps: ${Object.values(status.stepCompletion || {}).filter(Boolean).length} complete
+${
+  completion
+    ? `  Completion: ${completion.summaryLine}
+  Blocked keys: ${(completion.blockedLabels || []).join(", ") || "none"}
+  Next action: ${completion.nextAction?.label || "none — automatable work finished"}`
+    : ""
+}
 
-Manual (needs your accounts / API keys):
+Finish remaining in browser (paste packs + free keys):
   → ${SITE}/dashboard/launchpad#orbit-one-click
+  → ${SITE}/dashboard/launchpad#orbit-needs-you
 `);
 }
 
