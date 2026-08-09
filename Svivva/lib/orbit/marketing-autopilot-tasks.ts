@@ -43,7 +43,8 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     id: "tech-rich-results",
     label: "Rich results test",
     group: "Technical Foundation",
-    automatable: "prepare_only",
+    /** Schema JSON-LD ships in root layout — treat as onsite complete; optional browser verify. */
+    automatable: "onsite",
   },
   {
     id: "content-seo-pages",

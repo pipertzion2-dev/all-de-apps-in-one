@@ -26,6 +26,7 @@ import type {
 } from "@/lib/orbit/marketing-autopilot-types";
 import { getSiteUrl } from "@/lib/site-url";
 import { runIndexHealth } from "@/lib/seo/index-health";
+import { formatFieldsForClipboard, getSubmissionItem } from "@/lib/orbit/submission-schemas";
 function now(): string {
   return new Date().toISOString();
 }
@@ -58,17 +59,34 @@ function hasTwitterOAuth(creds: MarketingPlatformCredentials): boolean {
   ]);
 }
 
-function formatDirectoryCopy(listing: {
-  name: string;
-  title: string;
-  description: string;
-  tags: string;
-}): string {
+function formatDirectoryCopy(
+  listing: {
+    name: string;
+    title: string;
+    description: string;
+    tags: string;
+  },
+  taskId?: string,
+): string {
+  const item = taskId ? getSubmissionItem(taskId) : undefined;
+  if (item) {
+    return formatFieldsForClipboard(item, {
+      productName: listing.name,
+      websiteUrl: getSiteUrl(),
+      tagline: listing.title.slice(0, 60),
+      shortDescription: listing.description.slice(0, 260),
+      longDescription: listing.description,
+      tags: listing.tags,
+      pricing: "Freemium",
+      category: "AI Tools, Developer Tools",
+    });
+  }
   return [
     `Name: ${listing.name}`,
-    `Title: ${listing.title}`,
+    `Tagline: ${listing.title}`,
     `Description: ${listing.description}`,
     `Tags: ${listing.tags}`,
+    `Website: ${getSiteUrl()}`,
   ].join("\n\n");
 }
 
@@ -268,10 +286,13 @@ export async function runMarketingAutopilot(opts?: {
   const content = await generateMarketingLaunchContent();
   await persistContent("schema-jsonld", "Organization + WebSite schema", content.schemaJsonLd);
   tasks.push(
-    task("tech-schema-jsonld", "done", "Schema.org JSON-LD generated and saved"),
-    task("tech-rich-results", "prepared", "Optional: test rich results (30 sec)", {
-      copyText: getSiteUrl(),
-    }),
+    task("tech-schema-jsonld", "done", "Schema.org JSON-LD already live in site layout"),
+    task(
+      "tech-rich-results",
+      "done",
+      "Optional verify available — schema already on every page (layout JSON-LD)",
+      { copyText: getSiteUrl(), url: "https://search.google.com/test/rich-results" },
+    ),
     task(
       "content-parasite",
       "done",
@@ -601,7 +622,7 @@ export async function runMarketingAutopilot(opts?: {
         taskId,
         "prepared",
         listing ? `Copy → open ${listing.name} → paste fields → submit` : "Listing copy generated",
-        listing ? { copyText: formatDirectoryCopy(listing) } : undefined,
+        listing ? { copyText: formatDirectoryCopy(listing, taskId) } : undefined,
       ),
     );
   }

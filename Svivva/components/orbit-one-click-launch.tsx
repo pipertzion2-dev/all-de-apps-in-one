@@ -47,6 +47,8 @@ import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
+import { buildOrbitCompletionSnapshot } from "@/lib/orbit/completion-status";
+import type { AutopilotTaskResult } from "@/lib/orbit/marketing-autopilot-types";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -99,6 +101,12 @@ type StatusData = {
 
 // ─── "Needs you" action card metadata ────────────────────────────────────────
 
+type CompanionField = {
+  key: string;
+  label: string;
+  hint?: string;
+};
+
 type ActionMeta = {
   id: string;
   icon: string;
@@ -107,6 +115,7 @@ type ActionMeta = {
   credLabel?: string;
   credHint?: string;
   copyLabel?: string;
+  companionFields?: CompanionField[];
 };
 
 const ACTION_META: ActionMeta[] = [
@@ -127,6 +136,13 @@ const ACTION_META: ActionMeta[] = [
     credLabel: "Hashnode API key",
     credHint: "hashnode.com/settings/developer",
     copyLabel: "Copy article",
+    companionFields: [
+      {
+        key: "hashnodePublicationId",
+        label: "Hashnode publication ID",
+        hint: "From your Hashnode publication dashboard / URL",
+      },
+    ],
   },
   {
     id: "manual-medium",
@@ -180,6 +196,18 @@ const ACTION_META: ActionMeta[] = [
     credLabel: "Resend API key",
     credHint: "resend.com/api-keys",
     copyLabel: "Copy pitch email",
+    companionFields: [
+      {
+        key: "outreachFromEmail",
+        label: "From email (verified in Resend)",
+        hint: "e.g. hello@zzaizzai.com",
+      },
+      {
+        key: "newsletterPitchEmail",
+        label: "Pitch recipient email",
+        hint: "Where Orbit should send the newsletter pitch",
+      },
+    ],
   },
   {
     id: "manual-podcasts",
@@ -281,6 +309,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [showSetup, setShowSetup] = useState(true);
+  const [showPaidSetup, setShowPaidSetup] = useState(false);
+  const needsYouRef = useRef<HTMLDivElement>(null);
   const [gsc, setGsc] = useState<{
     connected: boolean;
     available: boolean;
@@ -429,6 +459,10 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
       setResult(json as RunResult);
       onComplete?.();
+      // After a successful run, focus remaining human work if any.
+      setTimeout(() => {
+        needsYouRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e));
     } finally {
@@ -449,19 +483,39 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when autoRun is enabled
   }, [autoRun]);
 
-  async function saveCred(key: string) {
+  async function saveCred(key: string, companionKeys: string[] = []) {
     const val = credInputs[key];
     if (!val?.trim()) return;
     setSavingCred(key);
     try {
-      await authFetch("/api/orbit/marketing-autopilot", {
+      const credentials: Record<string, string> = { [key]: val.trim() };
+      for (const ck of companionKeys) {
+        const cv = credInputs[ck]?.trim();
+        if (cv) credentials[ck] = cv;
+      }
+      // Save + immediately re-publish remaining API tasks (skip full on-site rebuild).
+      const r = await authFetch("/api/orbit/marketing-autopilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "save", credentials: { [key]: val } }),
+        body: JSON.stringify({
+          action: "save_and_run",
+          skipOnSite: true,
+          credentials,
+        }),
       });
-      setSavedCreds((prev) => [...prev, key]);
-      setConfiguredKeys((prev) => ({ ...prev, [key]: true }));
-      setCredInputs((prev) => ({ ...prev, [key]: "" }));
+      const json = await r.json();
+      if (r.ok && json.tasks) setResult(json as RunResult);
+      setSavedCreds((prev) => [...prev, key, ...companionKeys]);
+      setConfiguredKeys((prev) => {
+        const next = { ...prev, [key]: true };
+        for (const ck of companionKeys) next[ck] = true;
+        return next;
+      });
+      setCredInputs((prev) => {
+        const next = { ...prev, [key]: "" };
+        for (const ck of companionKeys) next[ck] = "";
+        return next;
+      });
     } catch {
       // ignore
     } finally {
@@ -491,6 +545,12 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       }
       return next;
     });
+    // Persist across devices via submission workbench when the item is known.
+    void authFetch("/api/orbit/submission-workbench", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "mark_status", itemId: taskId, status: "submitted" }),
+    }).catch(() => {});
   }
 
   function isProviderReady(p: OrbitSetupProvider): boolean {
@@ -516,6 +576,18 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
 
   const hasRun = !!result;
   const autoCount = automatedDone.length;
+  const completion = result
+    ? buildOrbitCompletionSnapshot(result.tasks as AutopilotTaskResult[], {
+        manualDoneIds,
+      })
+    : null;
+
+  const freeProviders = setupProviders
+    .filter((p) => p.tier === "ai" || p.tier === "free_publish")
+    .sort((a, b) => a.priority - b.priority);
+  const paidProviders = setupProviders
+    .filter((p) => p.tier === "paid_publish")
+    .sort((a, b) => a.priority - b.priority);
 
   const livePages =
     (orbitStatus?.seoPages ?? 0) +
@@ -554,20 +626,77 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg font-black text-foreground leading-tight">
               {running
-                ? "Running AI marketing…"
+                ? "Completing everything Orbit can…"
                 : hasRun
-                  ? "AI marketing complete"
-                  : "AI marketing — one button"}
+                  ? completion?.automatableComplete && completion.manualLeftCount === 0
+                    ? "Orbit completable work finished"
+                    : "Orbit ran — finish the steps that need you"
+                  : "Complete everything Orbit can"}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "Orbit is building pages, indexing Google/Bing, writing copy, and auto-posting. Leave this page open."
+                ? "Building pages, indexing Google/Bing, writing copy, and auto-posting where keys exist. Leave this page open."
                 : hasRun
-                  ? "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press: AI builds all on-site SEO, submits to Google & Bing, generates copy, and posts via API."}
+                  ? completion?.summaryLine ||
+                    "Automated work finished. Paste channels and missing keys are listed below."
+                  : "One press: on-site SEO, Google/Bing indexing, AI copy, and API posts. Then clear blockers + paste packs."}
             </p>
           </div>
         </div>
+
+        {/* Completion snapshot — always clear what remains */}
+        {completion && !running && (
+          <div
+            className="rounded-xl border border-border/50 bg-card/50 px-3 py-2.5 space-y-2"
+            data-testid="orbit-completion-strip"
+          >
+            <div className="flex flex-wrap gap-1.5">
+              <StatusPill icon="✅" label={`${completion.doneCount} done`} ok />
+              <StatusPill
+                icon="🔑"
+                label={
+                  completion.blockedCount > 0
+                    ? `${completion.blockedCount} blocked on keys`
+                    : "No key blockers"
+                }
+                ok={completion.blockedCount === 0}
+              />
+              <StatusPill
+                icon="📋"
+                label={
+                  completion.manualLeftCount > 0
+                    ? `${completion.manualLeftCount} paste left`
+                    : "No paste left"
+                }
+                ok={completion.manualLeftCount === 0}
+              />
+            </div>
+            {completion.nextAction && (
+              <button
+                type="button"
+                onClick={() =>
+                  needsYouRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+                className="w-full text-left rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-2"
+              >
+                <p className="text-[10px] font-bold text-amber-300">Next action</p>
+                <p className="text-xs font-black text-foreground">{completion.nextAction.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {completion.nextAction.message}
+                </p>
+              </button>
+            )}
+            {completion.blockedLabels.length > 0 && (
+              <p className="text-[10px] text-violet-300">
+                Blocked: {completion.blockedLabels.slice(0, 4).join(", ")}
+                {completion.blockedLabels.length > 4
+                  ? ` +${completion.blockedLabels.length - 4}`
+                  : ""}{" "}
+                — free keys unlock most of these
+              </p>
+            )}
+          </div>
+        )}
 
         {/* One-press Google Search Console connect — camo orb */}
         <div className="flex flex-col items-center gap-2 py-1">
@@ -627,18 +756,18 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         )}
 
-        {/* Setup — pay once, auto forever */}
+        {/* Setup — free unlocks first, paid optional */}
         {!running && setupProviders.length > 0 && (
-          <div className="rounded-xl border border-violet-500/25 bg-violet-500/5 overflow-hidden">
+          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 overflow-hidden">
             <button
               type="button"
               onClick={() => setShowSetup((v) => !v)}
               className="w-full flex items-center justify-between px-3 py-2.5 text-left"
             >
               <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-bold text-violet-300">
-                  Connect paid APIs (Apple Pay in Safari)
+                <KeyRound className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-300">
+                  Free unlocks (Gemini + Dev.to / Hashnode / Reddit)
                 </span>
               </div>
               {showSetup ? (
@@ -648,62 +777,134 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               )}
             </button>
             {showSetup && (
-              <div className="px-3 pb-3 space-y-2 border-t border-violet-500/15">
-                {setupProviders
-                  .sort((a, b) => a.priority - b.priority)
-                  .map((p) => {
-                    const ready = isProviderReady(p);
-                    return (
-                      <div
-                        key={p.id}
-                        className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 flex flex-col sm:flex-row sm:items-center gap-2"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            {ready ? (
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                            ) : (
-                              <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                            )}
-                            <span className="text-[11px] font-bold text-foreground">{p.name}</span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {p.priceLabel}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                            {p.purpose}
-                          </p>
-                        </div>
-                        <div className="flex gap-1.5 flex-shrink-0">
-                          <a
-                            href={p.payUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white whitespace-nowrap"
-                            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-                          >
-                            Pay & set up
-                          </a>
-                          {p.credentialKey && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const el = document.getElementById(`cred-${p.credentialKey}`);
-                                el?.scrollIntoView({ behavior: "smooth" });
-                              }}
-                              className="px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 text-violet-300"
-                            >
-                              Paste key
-                            </button>
+              <div className="px-3 pb-3 space-y-2 border-t border-emerald-500/15">
+                {freeProviders.map((p) => {
+                  const ready = isProviderReady(p);
+                  return (
+                    <div
+                      key={p.id}
+                      className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 flex flex-col sm:flex-row sm:items-center gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          {ready ? (
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                           )}
+                          <span className="text-[11px] font-bold text-foreground">{p.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{p.priceLabel}</span>
                         </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+                          {p.purpose}
+                        </p>
                       </div>
-                    );
-                  })}
-                <p className="text-[9px] text-muted-foreground leading-relaxed pt-1">
-                  Open pay links in Safari on iPhone or Mac for Apple Pay. Keys stay server-side
-                  only — never exposed to visitors.
-                </p>
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <a
+                          href={p.payUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white whitespace-nowrap"
+                          style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+                        >
+                          {p.envKey ? "Get key" : "Open"}
+                        </a>
+                        {p.credentialKey && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const el = document.getElementById(`cred-${p.credentialKey}`);
+                              el?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="px-2 py-1.5 rounded-lg text-[10px] font-bold border border-emerald-500/40 text-emerald-300"
+                          >
+                            Paste key
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {paidProviders.length > 0 && (
+                  <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setShowPaidSetup((v) => !v)}
+                      className="w-full flex items-center justify-between px-2.5 py-2 text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-3.5 h-3.5 text-violet-400" />
+                        <span className="text-[11px] font-bold text-violet-300">
+                          Optional paid auto-post (OmniSocials / Resend)
+                        </span>
+                      </div>
+                      {showPaidSetup ? (
+                        <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                      )}
+                    </button>
+                    {showPaidSetup && (
+                      <div className="px-2.5 pb-2 space-y-2 border-t border-violet-500/15">
+                        {paidProviders.map((p) => {
+                          const ready = isProviderReady(p);
+                          return (
+                            <div
+                              key={p.id}
+                              className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 flex flex-col sm:flex-row sm:items-center gap-2"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  {ready ? (
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                  ) : (
+                                    <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                  )}
+                                  <span className="text-[11px] font-bold text-foreground">
+                                    {p.name}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {p.priceLabel}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+                                  {p.purpose}
+                                </p>
+                              </div>
+                              <div className="flex gap-1.5 flex-shrink-0">
+                                <a
+                                  href={p.payUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white whitespace-nowrap"
+                                  style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+                                >
+                                  Pay & set up
+                                </a>
+                                {p.credentialKey && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const el = document.getElementById(`cred-${p.credentialKey}`);
+                                      el?.scrollIntoView({ behavior: "smooth" });
+                                    }}
+                                    className="px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 text-violet-300"
+                                  >
+                                    Paste key
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <p className="text-[9px] text-muted-foreground leading-relaxed">
+                          Open pay links in Safari for Apple Pay. Keys stay server-side only.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -724,11 +925,11 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
             </>
           ) : hasRun ? (
             <>
-              <RefreshCw className="w-5 h-5" /> Run autopilot again
+              <RefreshCw className="w-5 h-5" /> Finish remaining / re-run
             </>
           ) : (
             <>
-              <Rocket className="w-5 h-5" /> Run all AI marketing
+              <Rocket className="w-5 h-5" /> Complete everything Orbit can
             </>
           )}
         </button>
@@ -838,9 +1039,13 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               )}
 
               {automatedNeedsKey.length > 0 && (
-                <div className="space-y-2">
+                <div
+                  ref={manualPending.length === 0 ? needsYouRef : undefined}
+                  id={manualPending.length === 0 ? "orbit-needs-you" : undefined}
+                  className="space-y-2"
+                >
                   <p className="text-[10px] font-bold text-violet-400">
-                    Add API keys once — these become automatic forever
+                    Add free API keys once — save auto-publishes remaining posts
                   </p>
                   {automatedNeedsKey.map((t) => {
                     const meta = metaFor(t.id);
@@ -856,11 +1061,21 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                         onCredChange={(v) =>
                           setCredInputs((prev) => ({ ...prev, [meta.credKey!]: v }))
                         }
+                        companionValues={credInputs}
+                        onCompanionChange={(key, v) =>
+                          setCredInputs((prev) => ({ ...prev, [key]: v }))
+                        }
                         savingCred={savingCred === meta.credKey}
                         copiedId={copiedId}
                         onCopy={(text) => copyText(text, t.id)}
                         onCopyAndOpen={(text) => copyAndOpen(text, t.id, meta.openUrl)}
-                        onSaveCred={() => meta.credKey && saveCred(meta.credKey)}
+                        onSaveCred={() =>
+                          meta.credKey &&
+                          saveCred(
+                            meta.credKey,
+                            (meta.companionFields ?? []).map((c) => c.key),
+                          )
+                        }
                         onMarkDone={() => markTaskDone(t.id)}
                         compact
                       />
@@ -873,11 +1088,15 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
 
           {/* ── Manual only (no API exists) ── */}
           {manualPending.length > 0 && (
-            <div className="px-4 sm:px-5 py-4 border-l-4 border-amber-500/50 bg-amber-500/[0.03]">
+            <div
+              ref={needsYouRef}
+              id="orbit-needs-you"
+              className="px-4 sm:px-5 py-4 border-l-4 border-amber-500/50 bg-amber-500/[0.03]"
+            >
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-amber-400" />
                 <span className="text-sm font-black text-amber-400">
-                  Manual — paste on these sites
+                  Needs you — paste on these sites
                 </span>
                 <span className="text-[11px] rounded-full px-2 py-0.5 font-bold bg-amber-500/15 text-amber-400">
                   {manualPending.length}
@@ -1233,6 +1452,8 @@ function ActionCard({
   isCredSaved,
   credValue,
   onCredChange,
+  companionValues = {},
+  onCompanionChange,
   savingCred,
   copiedId,
   onCopy,
@@ -1247,6 +1468,8 @@ function ActionCard({
   isCredSaved: boolean;
   credValue: string;
   onCredChange: (v: string) => void;
+  companionValues?: Record<string, string>;
+  onCompanionChange?: (key: string, v: string) => void;
   savingCred: boolean;
   copiedId: string | null;
   onCopy: (text: string) => void;
@@ -1354,9 +1577,10 @@ function ActionCard({
       </div>
 
       {showKey && !isCredSaved && meta.credKey && meta.credLabel && (
-        <div className="px-3 pb-3 pt-0 border-t border-border/40 bg-violet-500/5">
-          <p className="text-[10px] text-muted-foreground mt-2 mb-1.5">
-            {meta.credHint ?? `Add your ${meta.credLabel}`} — saved once, auto-posts forever.
+        <div className="px-3 pb-3 pt-0 border-t border-border/40 bg-violet-500/5 space-y-2">
+          <p className="text-[10px] text-muted-foreground mt-2">
+            {meta.credHint ?? `Add your ${meta.credLabel}`} — save runs auto-publish for remaining
+            API tasks.
           </p>
           <div className="flex gap-2">
             <input
@@ -1370,12 +1594,24 @@ function ActionCard({
               type="button"
               disabled={!credValue.trim() || savingCred}
               onClick={onSaveCred}
-              className="h-8 px-3 rounded-lg text-xs font-bold text-white disabled:opacity-50 flex items-center gap-1"
+              className="h-8 px-3 rounded-lg text-xs font-bold text-white disabled:opacity-50 flex items-center gap-1 whitespace-nowrap"
               style={{ background: savingCred ? "#6b7280" : TEAL }}
             >
-              {savingCred ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
+              {savingCred ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save & publish"}
             </button>
           </div>
+          {(meta.companionFields ?? []).map((cf) => (
+            <div key={cf.key} className="space-y-1">
+              <input
+                type="text"
+                placeholder={cf.label}
+                value={companionValues[cf.key] ?? ""}
+                onChange={(e) => onCompanionChange?.(cf.key, e.target.value)}
+                className="w-full h-8 text-xs px-2.5 rounded-lg border border-border/60 bg-card/80 focus:outline-none focus:border-violet-400 text-foreground placeholder:text-muted-foreground/50"
+              />
+              {cf.hint && <p className="text-[9px] text-muted-foreground">{cf.hint}</p>}
+            </div>
+          ))}
         </div>
       )}
     </div>
