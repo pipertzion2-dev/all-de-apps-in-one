@@ -167,14 +167,17 @@ function MoleculeGroup({
   molecule,
   mode,
   showLabels,
+  autoRotate,
 }: {
   molecule: MoleculeSpec;
   mode: ViewMode;
   showLabels: boolean;
+  autoRotate: boolean;
 }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.y += dt * 0.15;
+    if (!ref.current || !autoRotate) return;
+    ref.current.rotation.y += dt * 0.15;
   });
   const byId = useMemo(() => {
     const m = new Map<string, [number, number, number]>();
@@ -206,11 +209,13 @@ export function HybridizationScene({
   molecule,
   mode,
   showLabels,
+  autoRotate = false,
   className,
 }: {
   molecule: MoleculeSpec;
   mode: ViewMode;
   showLabels: boolean;
+  autoRotate?: boolean;
   className?: string;
 }) {
   return (
@@ -225,7 +230,12 @@ export function HybridizationScene({
         <ambientLight intensity={0.55} />
         <directionalLight position={[4, 6, 3]} intensity={1.1} />
         <directionalLight position={[-3, -2, -4]} intensity={0.35} />
-        <MoleculeGroup molecule={molecule} mode={mode} showLabels={showLabels} />
+        <MoleculeGroup
+          molecule={molecule}
+          mode={mode}
+          showLabels={showLabels}
+          autoRotate={autoRotate}
+        />
         <OrbitControls enablePan={false} minDistance={3} maxDistance={9} />
       </Canvas>
     </div>
