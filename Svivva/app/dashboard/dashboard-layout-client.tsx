@@ -98,6 +98,12 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/security",
         icon: Lock,
       },
+      {
+        title: "AP Science",
+        desc: "Hybridization lab",
+        href: "/learn/chemistry/hybridization",
+        icon: FlaskConical,
+      },
     ],
   },
   {

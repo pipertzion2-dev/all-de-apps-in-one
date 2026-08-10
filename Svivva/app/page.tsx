@@ -1850,6 +1850,16 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
+                    <Link href="/learn" className="hover:text-foreground transition-colors">
+                      AP Science Lab
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/lp/ap-science" className="hover:text-foreground transition-colors">
+                      AP Science Landing
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/ai-tools-hub" className="hover:text-foreground transition-colors">
                       AI Tools Hub
                     </Link>

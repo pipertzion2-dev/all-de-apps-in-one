@@ -12,6 +12,29 @@ export const ANALYTICS_EVENTS = {
   conversion: { category: "revenue", params: ["plan", "value"] },
   exit_intent: { category: "conversion", params: ["page_path"] },
   email_capture: { category: "conversion", params: ["source"] },
+  // AP Science learning funnel
+  landing_view: { category: "ap_science", params: ["page_path"] },
+  onboarding_started: { category: "ap_science", params: ["course"] },
+  onboarding_completed: { category: "ap_science", params: ["course", "examWindow", "confidence"] },
+  subject_selected: { category: "ap_science", params: ["course"] },
+  exam_date_selected: { category: "ap_science", params: ["examWindow"] },
+  first_visualization_interaction: {
+    category: "ap_science",
+    params: ["concept_id", "molecule_id"],
+  },
+  first_question_answered: { category: "ap_science", params: ["question_id"] },
+  first_correct_answer: { category: "ap_science", params: ["question_id", "confidence"] },
+  question_incorrect: {
+    category: "ap_science",
+    params: ["question_id", "confidence", "misconception"],
+  },
+  guided_started: { category: "ap_science", params: ["molecule_id"] },
+  guided_prediction: {
+    category: "ap_science",
+    params: ["molecule_id", "step", "correct"],
+  },
+  paywall_viewed: { category: "ap_science", params: ["source"] },
+  first_mastery_gain: { category: "ap_science", params: ["concept_id", "score"] },
 } as const;
 
 export type AnalyticsEventName = keyof typeof ANALYTICS_EVENTS;
@@ -22,9 +45,25 @@ export function buildAnalyticsMap() {
     provider: "ga4",
     events: ANALYTICS_EVENTS,
     funnels: {
-      top: ["page_view", "scroll_depth", "cta_click"],
-      mid: ["email_capture", "tool_use"],
-      bottom: ["signup_start", "signup_complete", "conversion"],
+      top: ["page_view", "scroll_depth", "cta_click", "landing_view"],
+      mid: ["email_capture", "tool_use", "onboarding_started", "first_visualization_interaction"],
+      bottom: [
+        "signup_start",
+        "signup_complete",
+        "first_question_answered",
+        "paywall_viewed",
+        "conversion",
+      ],
+      ap_science: [
+        "landing_view",
+        "onboarding_started",
+        "subject_selected",
+        "first_visualization_interaction",
+        "guided_prediction",
+        "first_question_answered",
+        "first_correct_answer",
+        "paywall_viewed",
+      ],
     },
   };
 }
