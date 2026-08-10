@@ -1711,3 +1711,38 @@ export const referralCampaigns = pgTable("referral_campaigns", {
 });
 
 export * from "./marketing/schema";
+
+// ============================================================================
+// AP SCIENCE LEARNING (concept mastery + attempts)
+// ============================================================================
+export const apConceptMastery = pgTable(
+  "ap_concept_mastery",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    conceptId: text("concept_id").notNull(),
+    subject: text("subject").notNull(),
+    score: integer("score").notNull().default(0),
+    attempts: integer("attempts").notNull().default(0),
+    correct: integer("correct").notNull().default(0),
+    confidenceWrong: integer("confidence_wrong").notNull().default(0),
+    lastMisconception: text("last_misconception"),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.conceptId)],
+);
+
+export const apQuestionAttempts = pgTable("ap_question_attempts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  conceptId: text("concept_id").notNull(),
+  questionId: text("question_id").notNull(),
+  correct: boolean("correct").notNull(),
+  confidence: text("confidence").notNull(),
+  misconception: text("misconception"),
+  usedHint: boolean("used_hint").notNull().default(false),
+  responseMs: integer("response_ms").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
