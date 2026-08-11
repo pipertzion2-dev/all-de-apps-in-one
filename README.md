@@ -28,52 +28,36 @@ npm run format:check # CI-style check
 
 **`Svivva`** also has its own `format` / `format:check`; `npm run verify` there includes Prettier + Vitest + the owner-note scan.
 
-## Deploy Svivva on Vercel (pick one path)
+## Deploy Svivva (Netlify preferred while Vercel is paused)
 
-Do **not** wire both **Path A** and **Path B** at the same time, or every code push can trigger **two** production deploys.
+Production domain: **`zzaizzai.com`**. Full cutover checklist: **`.cursor/CONNECT.md`**.
 
-### Path A — Vercel imports GitHub (simplest)
+### Path N — Netlify (recommended right now)
 
-1. Push this repo to GitHub.
-2. [vercel.com](https://vercel.com) → **Add New Project** → import the repo.
-3. **Root Directory:** **`Svivva`** (required).
-4. Add env vars from **`Svivva/.env.example`** — see **`Svivva/README.md`** for the checklist.
-5. **Deploy.**
+1. [app.netlify.com](https://app.netlify.com) → **Add new site** → import this GitHub repo.
+2. **Base / Package directory:** **`Svivva`** (required). Build uses `Svivva/netlify.toml`.
+3. Add env vars from **`Svivva/.env.example`** (at least `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `NEXTAUTH_SECRET`, `CRON_SECRET`, `ORBIT_INTERNAL_SECRET`, `ADMIN_USER_ID`).
+4. **Deploy**, confirm the `*.netlify.app` URL works, then add **`zzaizzai.com`** + **`www`** under Domain management and update **GoDaddy DNS** to Netlify’s records.
 
-Optional: disable the GitHub Action **Deploy Svivva (Vercel production)** so only Vercel’s Git hook runs  
-(GitHub → **Actions** → workflow → **⋯** → **Disable workflow**).
+Scheduled SEO/growth/autopilot jobs live in **`Svivva/netlify/functions/`** (need `CRON_SECRET`).
+
+### Path A — Vercel imports GitHub
+
+Use when the Vercel team is **Active** again (not `DEPLOYMENT_DISABLED`).
+
+1. [vercel.com](https://vercel.com) → **Add New Project** → import the repo.
+2. **Root Directory:** **`Svivva`** (required).
+3. Add env vars from **`Svivva/.env.example`** — see **`Svivva/README.md`**.
+4. **Deploy.** Do **not** also enable Path B for the same production site.
 
 ### Path B — GitHub Actions (`vercel deploy --prebuilt`)
 
-Use this if you want deploys driven only by Actions (no Vercel↔Git integration).
-
-1. Create a Vercel project (empty is fine) so you have **Organization** and **Project** IDs.
-2. Create a token: [vercel.com/account/tokens](https://vercel.com/account/tokens).
-3. GitHub repo → **Settings → Secrets and variables → Actions → Secrets**:
-   - **`VERCEL_TOKEN`**
-   - **`VERCEL_ORG_ID`** — Vercel → Project → **Settings → General**
-   - **`VERCEL_PROJECT_ID`** — same  
-     Or run `cd Svivva && npx vercel link` locally once and read `.vercel/project.json` (gitignored).
-4. **Variables** tab: **`VERCEL_CI_DEPLOY`** = **`true`**  
-   (Until this is set, pushes skip the deploy job so CI stays green while you configure secrets.)
-5. Push to **`main`** (or **Actions → Deploy Svivva → Run workflow**).
-
-Then **do not** also connect the same repo in Vercel’s **Git** tab for automatic deploys (or disable this workflow).
+Optional CI deploy. Secrets: **`VERCEL_TOKEN`**, **`VERCEL_ORG_ID`**, **`VERCEL_PROJECT_ID`**. Variable: **`VERCEL_CI_DEPLOY=true`**. See **`.github/workflows/vercel-svivva-production.yml`**. Do not run Path A and Path B together.
 
 ### Secrets helper
 
-From **`Svivva`:**
-
 ```bash
-npm run secrets:for-deploy
+cd Svivva && npm run secrets:for-deploy
 ```
 
-Prints random values for `NEXTAUTH_SECRET`, `CRON_SECRET`, and `ORBIT_INTERNAL_SECRET` — paste them into the Vercel env UI.
-
-### Push blocked when adding GitHub Actions?
-
-If `git push` says OAuth cannot update **workflow** files, use SSH or a Personal Access Token that includes the **`workflow`** scope, or push with **GitHub Desktop**. This environment cannot grant that scope for you.
-
-### Custom domain (GoDaddy, etc.)
-
-Production domain: **`zzaizzai.com`**. After the site is live on `*.vercel.app`: Vercel → **Project → Domains** → add `zzaizzai.com` + `www` → paste the DNS records at GoDaddy. Set `NEXT_PUBLIC_SITE_URL=https://zzaizzai.com`. Full checklist: **`.cursor/CONNECT.md`** and **`Svivva/docs/DOMAIN_ZZAIZZAI.md`**.
+Paste into the **Netlify** (or Vercel) env UI.

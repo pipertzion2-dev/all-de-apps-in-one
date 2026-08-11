@@ -2,23 +2,7 @@
 
 Production canonical URL is **`https://zzaizzai.com`**.
 
-## Automatic cutover
-
-Once this code is on the live host:
-
-```bash
-cd ZZAI
-npm run domain:cutover
-```
-
-Uses GoDaddy keys from Marketing → Traffic Setup to set:
-
-- `@` **A** → `76.76.21.21` (Vercel)
-- `www` **CNAME** → `cname.vercel-dns.com`
-
-Also updates `seed_credentials` + platform site URL. Adds the domain in Vercel when `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` are set.
-
-API: `POST /api/orbit/domain-cutover` `{ "domain": "zzaizzai.com" }`
+While Vercel returns **DEPLOYMENT_DISABLED**, point the domain at **Netlify** instead. Step-by-step: [`.cursor/CONNECT.md`](../../.cursor/CONNECT.md).
 
 ## Env
 
@@ -26,4 +10,8 @@ API: `POST /api/orbit/domain-cutover` `{ "domain": "zzaizzai.com" }`
 NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
 ```
 
-Full DNS + Vercel checklist: [`.cursor/CONNECT.md`](../../.cursor/CONNECT.md).
+## Automatic cutover (Vercel DNS helpers)
+
+`npm run domain:cutover` still targets **Vercel** A/CNAME records. Use it only after Vercel is healthy again. For Netlify, set GoDaddy records from the Netlify Domain management UI (documented in CONNECT.md).
+
+API: `POST /api/orbit/domain-cutover` `{ "domain": "zzaizzai.com" }` (Vercel path).
