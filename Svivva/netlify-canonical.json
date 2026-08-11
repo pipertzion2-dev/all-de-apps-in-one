@@ -1,0 +1,13 @@
+{
+  "productionDomain": "zzaizzai.com",
+  "gitRemote": "origin",
+  "githubRepo": "pipertzion2-dev/all-de-apps-in-one",
+  "rootDirectory": "Svivva",
+  "host": {
+    "provider": "netlify",
+    "baseDirectory": "Svivva",
+    "configFile": "Svivva/netlify.toml",
+    "dashboardHint": "https://app.netlify.com"
+  },
+  "notes": "Cursor Origin hosts git; Netlify serves production. Do not dual-point zzaizzai.com at Vercel and Netlify."
+}
