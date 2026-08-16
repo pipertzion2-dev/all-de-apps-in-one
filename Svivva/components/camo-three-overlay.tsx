@@ -222,9 +222,7 @@ export function CamoThreeOverlay({
               : "brightness(1.15) saturate(1.1)",
         }}
       >
-        {flowersActive ? (
-          <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} />
-        ) : null}
+        {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
       </div>
 
       <canvas
