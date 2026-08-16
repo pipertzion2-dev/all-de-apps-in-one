@@ -25,7 +25,15 @@ const sourcesSchema = z.object({
   targetApplication: z.string().min(1).max(500),
   scientificDepth: z.enum(["prototype", "research", "production"]).optional().default("research"),
   surface: z
-    .enum(["hardware", "digital", "hypothesis", "idea-engine", "api-builder", "research"])
+    .enum([
+      "hardware",
+      "digital",
+      "hypothesis",
+      "idea-engine",
+      "api-builder",
+      "research",
+      "poor-man-protection",
+    ])
     .optional()
     .default("research"),
 });

@@ -97,15 +97,15 @@ export default function OrbitPage() {
 
   const handleLaunch = async () => {
     setLaunching(true);
-    // Simulate launch — in production this calls the orbit API
-    await new Promise((r) => setTimeout(r, 2500));
+    // Public marketing demo → hand off to real admin Orbit (requires 272727).
+    await new Promise((r) => setTimeout(r, 600));
     setLaunching(false);
-    setStep("launched");
     toast({
-      title: "Orbit launched!",
-      description: "Your marketing funnel is being built.",
-      duration: 5000,
+      title: "Open Admin Orbit",
+      description: "Sign in with admin code 272727 to run the live marketing funnel.",
+      duration: 4000,
     });
+    window.location.href = "/dashboard/orbit";
   };
 
   const copyReferralLink = () => {
@@ -120,7 +120,7 @@ export default function OrbitPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Admin nav — discrete */}
       <div className="fixed top-4 right-4 z-50">
-        <Link href="/dashboard/launchpad">
+        <Link href="/dashboard/orbit">
           <Button
             variant="outline"
             className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white hover:bg-slate-700"

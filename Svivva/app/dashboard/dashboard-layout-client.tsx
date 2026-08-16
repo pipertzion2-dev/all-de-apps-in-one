@@ -50,6 +50,7 @@ import {
   Smartphone,
   TrendingUp,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
@@ -98,6 +99,13 @@ const digitalMenuGroups: MenuGroup[] = [
         desc: "Feeds & threats",
         href: "/dashboard/security",
         icon: Lock,
+      },
+      {
+        title: "Poor Man Protection",
+        desc: "Sketch prior-art seal",
+        href: "/dashboard/poor-man-protection",
+        icon: ShieldCheck,
+        proOnly: true,
       },
     ],
   },

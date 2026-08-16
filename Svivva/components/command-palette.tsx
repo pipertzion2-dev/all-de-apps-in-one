@@ -18,6 +18,8 @@ import {
   Settings,
   Search,
   Rocket,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 
 interface CommandItem {
@@ -59,6 +61,20 @@ const digitalCommands: CommandItem[] = [
     section: "Build",
   },
   {
+    title: "Poor Man Protection",
+    href: "/dashboard/poor-man-protection",
+    icon: ShieldCheck,
+    keywords: ["patent", "poor man", "protection", "sketch", "coin", "blockchain", "ip"],
+    section: "Build",
+  },
+  {
+    title: "Security",
+    href: "/dashboard/security",
+    icon: Lock,
+    keywords: ["security", "shield", "threat", "cyber", "pqc"],
+    section: "Build",
+  },
+  {
     title: "Idea Engine",
     href: "/dashboard/idea-engine",
     icon: Lightbulb,
@@ -95,7 +111,7 @@ const digitalCommands: CommandItem[] = [
   },
   {
     title: "Orbit",
-    href: "/dashboard/launchpad",
+    href: "/dashboard/orbit",
     icon: Rocket,
     keywords: ["orbit", "admin", "marketing", "seo"],
     section: "Account",

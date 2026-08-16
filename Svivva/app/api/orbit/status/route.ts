@@ -197,6 +197,46 @@ export async function GET() {
       },
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    // Degraded response so Orbit UI can still render instead of a hard blank error.
+    return NextResponse.json(
+      {
+        error: String(e),
+        degraded: true,
+        seoPages: 0,
+        comparisons: 0,
+        blogPosts: 0,
+        aeoPages: 0,
+        seedMarketing: 0,
+        hubExists: false,
+        indexNowKey: false,
+        indexNowSubmitted: false,
+        integrationPages: 0,
+        usecasePages: 0,
+        templatePages: 0,
+        paaPages: 0,
+        totalPages: 0,
+        targetPages: TARGET_TOTAL_MARKETING_PAGES,
+        targetToolSeoPages: TARGET_TOOL_SEO_PAGES,
+        pagesPercent: 0,
+        indexedPercent: 0,
+        indexableUrlCount: 0,
+        stepCompletion: {},
+        coreUrls: [],
+        toolUrls: [],
+        deploymentCommit: process.env.VERCEL_GIT_COMMIT_SHA?.trim() || null,
+        preflight: {
+          orbitFreeAi: !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim()),
+          hasPaidOpenAiKey: !!(
+            getOpenAIApiKey()?.trim() && getOpenAIApiKey()!.trim().startsWith("sk-")
+          ),
+          indexHealthScore: 0,
+          warnings: [
+            "Orbit status could not load full marketing aggregates. Check DATABASE_URL, then retry.",
+            String(e).slice(0, 200),
+          ],
+        },
+      },
+      { status: 200 },
+    );
   }
 }

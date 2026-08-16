@@ -18,6 +18,7 @@ import {
   HeartPulse,
   Users,
   BarChart2,
+  ShieldCheck,
 } from "lucide-react";
 
 interface Project {
@@ -404,6 +405,18 @@ function ReturningUserDashboard({
           delay: 1.2,
           duration: 7,
         },
+      ],
+    },
+    {
+      href: "/dashboard/poor-man-protection",
+      title: "Poor Man Protection",
+      subtitle: "Seal sketches with dual-axis prior-art + coin",
+      icon: ShieldCheck,
+      color: "#5B8DA8",
+      shapes: [
+        { shape: "ring" as const, size: 20, x: "left-5", y: "top-4", delay: 0.2, duration: 6 },
+        { shape: "cube" as const, size: 14, x: "right-6", y: "bottom-4", delay: 0.8, duration: 7 },
+        { shape: "sphere" as const, size: 12, x: "right-14", y: "top-7", delay: 1.1, duration: 5 },
       ],
     },
     {

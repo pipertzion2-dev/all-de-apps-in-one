@@ -50,7 +50,15 @@ export const hybridizationRequestSchema = z.object({
   scientificDepth: z.enum(SCIENTIFIC_DEPTHS).default("research"),
   /** Which product surface requested the run (for logging / adapters). */
   surface: z
-    .enum(["hardware", "digital", "hypothesis", "idea-engine", "api-builder", "research"])
+    .enum([
+      "hardware",
+      "digital",
+      "hypothesis",
+      "idea-engine",
+      "api-builder",
+      "research",
+      "poor-man-protection",
+    ])
     .optional()
     .default("hardware"),
 });

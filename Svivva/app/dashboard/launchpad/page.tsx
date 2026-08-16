@@ -378,8 +378,8 @@ function makeSvivvaSteps(orbit: OrbitUrlPack): Step[] {
 }
 
 function makeFusionSteps(): Step[] {
-  // Fusion steps are planned but not yet implemented in the backend.
-  // Return empty to avoid "Unknown stepId" errors.
+  // Intentionally empty: fusion stepIds are not implemented in /api/orbit/run-step.
+  // Keeping this empty prevents Unknown stepId errors in the Orbit UI.
   return [];
 }
 

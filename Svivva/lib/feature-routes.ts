@@ -10,7 +10,11 @@ export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
   hardware: "/dashboard/hardware-builder",
 };
 
-const PUBLIC_PREFIXES = [...Object.values(FEATURE_PUBLIC_PATHS), "/dashboard/launchpad"];
+const PUBLIC_PREFIXES = [
+  ...Object.values(FEATURE_PUBLIC_PATHS),
+  "/dashboard/launchpad",
+  "/dashboard/poor-man-protection",
+];
 
 /** Dashboard + product routes guests can open from the homepage cube. */
 export function isPublicFeaturePath(pathname: string): boolean {
@@ -24,6 +28,7 @@ export function featureTitleFromPath(pathname: string): string {
     return "Orbit Admin";
   }
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
+  if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
   if (pathname.startsWith("/dashboard/api-builder")) return "AI API Builder";
   if (pathname.startsWith("/dashboard/hardware-builder")) return "Hardware Builder";
   return "zzai zzai";

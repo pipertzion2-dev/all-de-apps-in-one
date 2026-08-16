@@ -52,6 +52,23 @@ export default function SecurityDashboardPage() {
             <SecurityPQCConstructor />
           </TabsContent>
         </Tabs>
+
+        <div className="rounded-xl border border-[#5B8DA8]/25 bg-[#5B8DA8]/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Poor Man Protection</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Seal sketches with dual-axis hybridization, a protection coin, and cyber integrity —
+              then watch threats here.
+            </p>
+          </div>
+          <a
+            href="/dashboard/poor-man-protection"
+            className="inline-flex items-center justify-center h-9 px-4 rounded-lg text-sm font-semibold text-white"
+            style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+          >
+            Open protection
+          </a>
+        </div>
       </div>
     </FeaturePageShell>
   );

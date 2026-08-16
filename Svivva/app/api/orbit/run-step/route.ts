@@ -5107,7 +5107,14 @@ Return JSON:
       });
     }
 
-    return NextResponse.json({ error: "Unknown stepId" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Unknown stepId",
+        stepId: typeof stepId === "string" ? stepId : null,
+        hint: "Use a documented Orbit step id from the launchpad UI (e.g. svivva-indexnow, mini-hub).",
+      },
+      { status: 400 },
+    );
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
