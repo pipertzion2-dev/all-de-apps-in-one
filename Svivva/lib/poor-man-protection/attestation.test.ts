@@ -25,6 +25,16 @@ const sample: ProtectRequest = {
   hybridizationMode: "emergent",
   enableCyberSeal: true,
   mintCoin: true,
+  creatorOath: {
+    fullLegalName: "Test Creator",
+    role: "sole_author",
+    jurisdiction: "United States",
+    swornAt: "2026-08-16T00:00:00.000Z",
+    statement:
+      "I declare I am the sole author of this work and understand this is not a government registration.",
+    acknowledgedNotRegisteredPatent: true,
+    acknowledgedUsCopyrightOffice: true,
+  },
 };
 
 describe("poor-man-protection", () => {
@@ -46,7 +56,7 @@ describe("poor-man-protection", () => {
     expect(coin.supply).toBe(1);
   });
 
-  it("seals a verifiable certificate", () => {
+  it("seals a verifiable certificate (protocol 1.1)", () => {
     const axes = buildScientificAxes(sample);
     const hybrid = scientificHybridFallback(sample, axes);
     const cert = finalizeCertificate({
@@ -63,7 +73,9 @@ describe("poor-man-protection", () => {
         noveltyScore: hybrid.hybrids[0].noveltyScore,
         emergentClaims: hybrid.hybrids[0].emergentProperties,
       },
+      creatorOath: sample.creatorOath,
     });
+    expect(cert.protocol).toBe("ZZAI-Poor-Man-Protection/1.1");
     expect(cert.certificateHash).toHaveLength(64);
     expect(verifyCertificateHash(cert)).toBe(true);
     expect(verifyCertificateHash({ ...cert, title: "tampered" })).toBe(false);

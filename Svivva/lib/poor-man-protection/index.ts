@@ -6,6 +6,7 @@ import {
 import {
   buildScientificAxes,
   createCyberSeal,
+  createTimestampToken,
   finalizeCertificate,
   mintProtectionCoin,
 } from "./attestation";
@@ -26,12 +27,12 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
       {
         name: "Form / composition axis",
         type: "optical-form",
-        description: `${input.formVariable}\n\nWork: ${input.title}\n${input.description}`,
+        description: `${axes.axisA.summary}\n\nWork: ${input.title}\n${input.description}`,
       },
       {
         name: "Color / spectral axis",
         type: "optical-palette",
-        description: `${input.paletteVariable}\n\nPalette: ${(input.palette || [])
+        description: `${axes.axisB.summary}\n\nPalette: ${(input.palette || [])
           .map((p) => `${p.role}:${p.hex}`)
           .join(", ")}`,
       },
@@ -72,12 +73,22 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
   const optimal =
     hybridization.hybrids[hybridization.optimalHybridIndex] || hybridization.hybrids[0];
   const noveltyScore = Number(optimal?.noveltyScore ?? 60);
+  const contentHash = input.contentHash.toLowerCase();
+
+  const baseCustody = [
+    ...(input.custodyLog || []),
+    {
+      at: new Date().toISOString(),
+      event: "certificate_sealed",
+      detail: `SHA-256 ${contentHash.slice(0, 16)}… novelty ${noveltyScore}`,
+    },
+  ];
 
   const certificate = finalizeCertificate({
     createdAt: new Date().toISOString(),
     title: input.title,
     description: input.description,
-    contentHash: input.contentHash.toLowerCase(),
+    contentHash,
     mimeType: input.mimeType || "image/png",
     fileName: input.fileName,
     scientificAxes: axes,
@@ -91,7 +102,11 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
       optimalHybridName: optimal?.name,
     },
     coin: input.mintCoin ? mintProtectionCoin(input, axes, noveltyScore) : undefined,
-    cyberSeal: input.enableCyberSeal ? createCyberSeal(input.contentHash.toLowerCase()) : undefined,
+    cyberSeal: input.enableCyberSeal ? createCyberSeal(contentHash) : undefined,
+    timestampToken: createTimestampToken(contentHash),
+    chronology: input.chronology,
+    creatorOath: input.creatorOath,
+    custodyLog: baseCustody,
   });
 
   return { certificate, hybridization };
@@ -100,3 +115,5 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
 export * from "./types";
 export * from "./attestation";
 export { scientificHybridFallback } from "./scientific-hybrid";
+export { buildCourtEvidencePdf, buildPostalCoverPdf } from "./court-pack";
+export { sendProtectionEmail, buildCertificateEmailHtml } from "./mail";

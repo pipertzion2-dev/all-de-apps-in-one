@@ -15,19 +15,58 @@ export const colorSwatchSchema = z.object({
     .optional(),
 });
 
+export const custodyEventSchema = z.object({
+  at: z.string(),
+  event: z.string().min(1).max(200),
+  detail: z.string().max(1000).optional(),
+});
+
+export const chronologySchema = z.object({
+  conceivedOn: z.string().max(40).optional(),
+  firstFixedOn: z.string().max(40).optional(),
+  iterationNotes: z.string().max(2000).optional(),
+  collaborators: z.string().max(500).optional(),
+  priorDisclosure: z.string().max(1000).optional(),
+  medium: z.string().max(200).optional(),
+});
+
+export const creatorOathSchema = z.object({
+  fullLegalName: z.string().min(2).max(200),
+  role: z.enum(["sole_author", "co_author", "assignee", "agent"]).default("sole_author"),
+  jurisdiction: z.string().min(2).max(120),
+  swornAt: z.string(),
+  statement: z.string().min(20).max(2000),
+  acknowledgedNotRegisteredPatent: z.literal(true),
+  acknowledgedUsCopyrightOffice: z.literal(true),
+});
+
 export const protectRequestSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(4000),
-  /** Form / composition variable (scientific axis A). */
   formVariable: z.string().min(1).max(1000),
-  /** Color / spectral variable (scientific axis B) — free text or structured. */
   paletteVariable: z.string().min(1).max(1000),
+  /** Guided scientific interrogation answers (axis A). */
+  formInterrogation: z
+    .object({
+      silhouette: z.string().max(500).optional(),
+      hierarchy: z.string().max(500).optional(),
+      negativeSpace: z.string().max(500).optional(),
+      distinctiveMarks: z.string().max(500).optional(),
+    })
+    .optional(),
+  /** Guided scientific interrogation answers (axis B). */
+  paletteInterrogation: z
+    .object({
+      emotionalIntent: z.string().max(500).optional(),
+      contrastStrategy: z.string().max(500).optional(),
+      forbiddenColors: z.string().max(500).optional(),
+      lightingContext: z.string().max(500).optional(),
+    })
+    .optional(),
   palette: z.array(colorSwatchSchema).min(1).max(12).optional(),
-  /** SHA-256 hex of the raw sketch bytes (client-computed). */
   contentHash: z.string().regex(/^[a-f0-9]{64}$/i),
   mimeType: z.string().max(100).optional().default("image/png"),
   fileName: z.string().max(260).optional(),
-  /** Optional downsized sketch for hybridization vision (base64, no data: prefix). */
   imageBase64: z.string().max(2_500_000).optional(),
   hybridizationMode: z
     .enum(["complementary", "antagonistic", "emergent", "biomimetic"])
@@ -35,16 +74,28 @@ export const protectRequestSchema = z.object({
     .default("emergent"),
   enableCyberSeal: z.boolean().optional().default(true),
   mintCoin: z.boolean().optional().default(true),
+  chronology: chronologySchema.optional(),
+  creatorOath: creatorOathSchema.optional(),
+  custodyLog: z.array(custodyEventSchema).max(40).optional(),
+  delivery: z
+    .object({
+      emailTo: z.string().email().optional(),
+      counselEmail: z.string().email().optional(),
+      includePostalInstructions: z.boolean().optional().default(true),
+    })
+    .optional(),
 });
 
 export type ColorSwatch = z.infer<typeof colorSwatchSchema>;
 export type ProtectRequest = z.infer<typeof protectRequestSchema>;
+export type CreatorOath = z.infer<typeof creatorOathSchema>;
+export type Chronology = z.infer<typeof chronologySchema>;
+export type CustodyEvent = z.infer<typeof custodyEventSchema>;
 
 export type ProtectionCoin = {
   name: string;
   symbol: string;
   tokenId: string;
-  /** Deterministic mint-ready address (not yet on a public L1 unless exported). */
   contractAddress: string;
   standard: "ZZAI-PMP-721";
   chain: "zzai-protection-ledger";
@@ -84,8 +135,18 @@ export type ScientificAxes = {
   measurableClaims: string[];
 };
 
+/** Independent-style timestamp token (ZZAI-signed; not a QTSP eIDAS stamp). */
+export type TimestampToken = {
+  version: "ZZAI-TST-1";
+  hashedMessage: string;
+  genTime: string;
+  serialNumber: string;
+  policy: string;
+  signature: string;
+};
+
 export type PoorManCertificate = {
-  protocol: "ZZAI-Poor-Man-Protection/1.0";
+  protocol: "ZZAI-Poor-Man-Protection/1.1";
   disclaimer: string;
   createdAt: string;
   title: string;
@@ -105,6 +166,11 @@ export type PoorManCertificate = {
   };
   coin?: ProtectionCoin;
   cyberSeal?: CyberSeal;
+  timestampToken?: TimestampToken;
+  chronology?: Chronology;
+  creatorOath?: CreatorOath;
+  custodyLog?: CustodyEvent[];
   attestationId: string;
   certificateHash: string;
+  verifyUrl?: string;
 };

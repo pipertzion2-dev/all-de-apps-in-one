@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomUUID } from "crypto";
+import { createHash, createHmac, randomUUID, randomBytes } from "crypto";
 import type {
   ColorSwatch,
   CyberSeal,
@@ -6,12 +6,13 @@ import type {
   ProtectionCoin,
   ProtectRequest,
   ScientificAxes,
+  TimestampToken,
 } from "./types";
 
 export const DISCLAIMER =
-  "Poor Man Protection creates a timestamped, cryptographically sealed evidentiary package and mint-ready digital asset metadata. It is not a registered patent, trademark, or copyright filing with any government office. Consult IP counsel for formal protection.";
+  "ZZAI Poor Man Protection creates a timestamped, cryptographically sealed evidentiary package with dual-axis scientific hybridization and mint-ready digital asset metadata. It is NOT a registered patent, trademark, or copyright registration with any government office (including the U.S. Copyright Office). Self-mailing and platform certificates are supporting evidence of anteriority/possession — not a substitute for counsel or formal registration. Courts weigh digital evidence in context (hash integrity, chain of custody, independent timestamps, authorship corroboration).";
 
-/** sRGB hex → approximate CIELAB (D65) for scientific palette claims. */
+/** sRGB hex → approximate CIELAB (D65). */
 export function hexToLab(hex: string): { L: number; a: number; b: number } {
   const h = hex.replace("#", "");
   let r = parseInt(h.slice(0, 2), 16) / 255;
@@ -42,6 +43,11 @@ export function enrichPalette(palette: ColorSwatch[]): ColorSwatch[] {
   }));
 }
 
+function joinInterrogation(parts: Array<string | undefined>, fallback: string): string {
+  const filled = parts.map((p) => p?.trim()).filter(Boolean) as string[];
+  return filled.length ? filled.join(" · ") : fallback;
+}
+
 export function buildScientificAxes(input: ProtectRequest): ScientificAxes {
   const palette = input.palette ? enrichPalette(input.palette) : undefined;
   const dominant = palette?.[0];
@@ -57,9 +63,37 @@ export function buildScientificAxes(input: ProtectRequest): ScientificAxes {
         )
       : null;
 
+  const formSummary = joinInterrogation(
+    [
+      input.formVariable,
+      input.formInterrogation?.silhouette && `Silhouette: ${input.formInterrogation.silhouette}`,
+      input.formInterrogation?.hierarchy && `Hierarchy: ${input.formInterrogation.hierarchy}`,
+      input.formInterrogation?.negativeSpace &&
+        `Negative space: ${input.formInterrogation.negativeSpace}`,
+      input.formInterrogation?.distinctiveMarks &&
+        `Marks: ${input.formInterrogation.distinctiveMarks}`,
+    ],
+    input.formVariable,
+  );
+
+  const paletteSummary = joinInterrogation(
+    [
+      input.paletteVariable,
+      input.paletteInterrogation?.emotionalIntent &&
+        `Intent: ${input.paletteInterrogation.emotionalIntent}`,
+      input.paletteInterrogation?.contrastStrategy &&
+        `Contrast: ${input.paletteInterrogation.contrastStrategy}`,
+      input.paletteInterrogation?.forbiddenColors &&
+        `Forbidden: ${input.paletteInterrogation.forbiddenColors}`,
+      input.paletteInterrogation?.lightingContext &&
+        `Lighting: ${input.paletteInterrogation.lightingContext}`,
+    ],
+    input.paletteVariable,
+  );
+
   const measurableClaims = [
-    `Form axis A locked as: ${input.formVariable.slice(0, 160)}`,
-    `Spectral axis B locked as: ${input.paletteVariable.slice(0, 160)}`,
+    `Form axis A locked as: ${formSummary.slice(0, 220)}`,
+    `Spectral axis B locked as: ${paletteSummary.slice(0, 220)}`,
   ];
   if (palette?.length) {
     measurableClaims.push(
@@ -77,17 +111,17 @@ export function buildScientificAxes(input: ProtectRequest): ScientificAxes {
       name: "form_composition",
       label: "Form / composition",
       domain: "optical",
-      summary: input.formVariable,
+      summary: formSummary,
     },
     axisB: {
       name: "color_spectral",
       label: "Color / spectral signature",
       domain: "optical",
-      summary: input.paletteVariable,
+      summary: paletteSummary,
       palette,
     },
     couplingPrinciple:
-      "Two-variable hybridization: composition geometry (A) couples with spectral palette (B) to define a unique prior-art fingerprint for evidentiary disclosure.",
+      "Two-variable hybridization: composition geometry (A) couples with spectral palette (B) to define a unique prior-art fingerprint for evidentiary disclosure — the coupling itself is the claimed creative signal.",
     measurableClaims,
   };
 }
@@ -130,7 +164,7 @@ export function mintProtectionCoin(
     supply: 1,
     metadataUriHint: `zzai://poor-man-protection/${input.contentHash.slice(0, 16)}`,
     attributes: [
-      { trait_type: "Protocol", value: "ZZAI-Poor-Man-Protection/1.0" },
+      { trait_type: "Protocol", value: "ZZAI-Poor-Man-Protection/1.1" },
       { trait_type: "ContentHash", value: input.contentHash },
       { trait_type: "NoveltyScore", value: String(noveltyScore) },
       { trait_type: "AxisA", value: axes.axisA.label },
@@ -160,10 +194,29 @@ export function createCyberSeal(contentHash: string): CyberSeal {
       "Monitor for copycat uploads with matching content hash",
       "Watch social/feed mentions of the protection coin symbol",
       "Re-seal after any material revision (new hash = new prior art package)",
+      "Retain original binary offline; never alter sealed originals",
     ],
     securityCenterPath: "/dashboard/security",
     threatScannerPath: "/dashboard/security?tab=scan",
     pqcPath: "/dashboard/security?tab=pqc",
+  };
+}
+
+/** ZZAI-signed timestamp token (RFC 3161–inspired fields; not a QTSP qualified stamp). */
+export function createTimestampToken(contentHash: string): TimestampToken {
+  const genTime = new Date().toISOString();
+  const serialNumber = randomBytes(8).toString("hex");
+  const policy = "1.2.840.113549.1.9.16.2.14.zzai-pmp";
+  const secret = process.env.NEXTAUTH_SECRET || process.env.ORBIT_INTERNAL_SECRET || "zzai-pmp";
+  const payload = `ZZAI-TST-1|${contentHash}|${genTime}|${serialNumber}|${policy}`;
+  const signature = createHmac("sha256", secret).update(payload).digest("hex");
+  return {
+    version: "ZZAI-TST-1",
+    hashedMessage: contentHash.toLowerCase(),
+    genTime,
+    serialNumber,
+    policy,
+    signature,
   };
 }
 
@@ -174,20 +227,31 @@ export function finalizeCertificate(
   >,
 ): PoorManCertificate {
   const attestationId = randomUUID();
+  const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://zzaizzai.com";
   const body: PoorManCertificate = {
-    protocol: "ZZAI-Poor-Man-Protection/1.0",
+    protocol: "ZZAI-Poor-Man-Protection/1.1",
     disclaimer: DISCLAIMER,
     attestationId,
     certificateHash: "",
+    verifyUrl: `${site}/protect/verify?id=${attestationId}`,
     ...partial,
   };
   const { certificateHash: _omit, ...forHash } = body;
-  body.certificateHash = createHash("sha256").update(JSON.stringify(forHash)).digest("hex");
+  body.certificateHash = createHash("sha256").update(stableStringify(forHash)).digest("hex");
   return body;
+}
+
+/** Deterministic JSON for hashing (sorted keys). */
+export function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
 }
 
 export function verifyCertificateHash(cert: PoorManCertificate): boolean {
   const { certificateHash, ...rest } = cert;
-  const expected = createHash("sha256").update(JSON.stringify(rest)).digest("hex");
+  const expected = createHash("sha256").update(stableStringify(rest)).digest("hex");
   return expected === certificateHash;
 }

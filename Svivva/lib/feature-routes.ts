@@ -29,6 +29,7 @@ export function featureTitleFromPath(pathname: string): string {
   }
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
   if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
+  if (pathname.startsWith("/protect/verify")) return "Verify Protection";
   if (pathname.startsWith("/dashboard/api-builder")) return "AI API Builder";
   if (pathname.startsWith("/dashboard/hardware-builder")) return "Hardware Builder";
   return "zzai zzai";
