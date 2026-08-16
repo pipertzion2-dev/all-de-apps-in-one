@@ -1,85 +1,81 @@
-# Connect zzaizzai.com (GoDaddy → Vercel)
+# Connect zzaizzai.com (GoDaddy → Netlify)
 
-## Important
-
-**Your domain cannot point at Cursor.** Cursor is an editor. The public site runs on **Vercel** (or another host). GoDaddy only holds DNS that points at that host.
+Vercel is currently returning **402 DEPLOYMENT_DISABLED** for this project. Production cutover target is **Netlify** (config in `Svivva/netlify.toml`). Cursor cannot host the public site.
 
 | Piece | Role |
 | --- | --- |
 | **Cursor** | Edit code, commit, push |
-| **Vercel** | Hosts the live Next.js app (`Svivva/` root directory) |
-| **GoDaddy** | DNS for `zzaizzai.com` → Vercel |
-
-## Your values
+| **Netlify** | Hosts the live Next.js app (`Svivva/` base directory) |
+| **GoDaddy** | DNS for `zzaizzai.com` → Netlify |
 
 | What | Value |
 | --- | --- |
 | Domain | `zzaizzai.com` |
-| Host | Vercel |
+| Host | Netlify |
 | GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
-| App root on Vercel | `Svivva` |
+| App root on Netlify | **Base / Package directory = `Svivva`** |
 
-## One-command cutover (after this code is deployed)
+## 1. Create the Netlify site
 
-From `Svivva/` (uses GoDaddy keys already saved in the dashboard + admin passcode):
-
-```bash
-npm run domain:cutover
-# or: node scripts/domain-cutover.mjs --domain zzaizzai.com
-```
-
-That sets GoDaddy `@` → Vercel A (`76.76.21.21`) and `www` → `cname.vercel-dns.com`, updates app credentials, and adds the domain in Vercel when `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` are present.
-
-### Manual checklist (if the CLI can’t reach GoDaddy / Vercel)
-
-### 1. Vercel — add the domain
-
-1. Open [vercel.com](https://vercel.com) → your Svivva project → **Settings → Domains**
-2. Add **`zzaizzai.com`** and **`www.zzaizzai.com`**
-3. Copy the DNS records Vercel shows (usually):
-   - Apex `zzaizzai.com`: **A** → `76.76.21.21` (confirm in Vercel UI)
-   - `www`: **CNAME** → `cname.vercel-dns.com` (confirm in Vercel UI)
-
-### 2. GoDaddy — point DNS at Vercel
-
-1. GoDaddy → **My Products → Domains → zzaizzai.com → DNS**
-2. Remove old Replit / parking / conflicting **A** / **CNAME** records for `@` and `www`
-3. Add the records Vercel gave you
-4. Wait for DNS (often minutes; can take up to 48h)
-
-### 3. Vercel — production env
-
-Set (or update) these for **Production**:
+1. Open [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import an existing project** → GitHub
+2. Select **`pipertzion2-dev/all-de-apps-in-one`**
+3. Set:
+   - **Base directory:** `Svivva`
+   - **Build command:** `npm run build:vercel` (from `netlify.toml`)
+   - **Publish directory:** `.next`
+4. **Add environment variables** (Site configuration → Environment variables) before or right after the first deploy. Minimum:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
+DATABASE_URL=           # your production Postgres URL
+NEXTAUTH_SECRET=        # long random — npm run secrets:for-deploy in Svivva/
+CRON_SECRET=
+ORBIT_INTERNAL_SECRET=
+ADMIN_USER_ID=          # your owner account id(s)
 ```
 
-Also update anything that embeds the old domain:
+Also copy any keys you already use (Stripe, Gemini/OpenAI, GSC OAuth, etc.) from `Svivva/.env.example`.
+
+5. **Deploy site.** Wait until the deploy is **Published** and open the `*.netlify.app` URL — it should return HTTP 200 (not Vercel’s 402).
+
+### Secrets helper
+
+```bash
+cd Svivva && npm run secrets:for-deploy
+```
+
+## 2. Add the custom domain on Netlify
+
+1. Site → **Domain management** → **Add a domain** → `zzaizzai.com`
+2. Add **`www.zzaizzai.com`** as well (Netlify can redirect www ↔ apex)
+3. Copy the DNS records Netlify shows. Typical external DNS:
+
+| Host | Type | Value |
+| --- | --- | --- |
+| `@` (apex) | **A** | `75.2.60.5` (confirm in Netlify UI) |
+| `www` | **CNAME** | `<your-site>.netlify.app` (confirm in Netlify UI) |
+
+## 3. Point GoDaddy at Netlify
+
+1. GoDaddy → **My Products → Domains → zzaizzai.com → DNS**
+2. Remove Vercel / Replit / parking **A** / **CNAME** records for `@` and `www` (and any old `cname.vercel-dns.com`)
+3. Add the Netlify records from step 2
+4. Wait for DNS (often minutes; up to 48h). Netlify should show the domain as **Netlify DNS** / SSL provisioned when ready.
+
+## 4. After the domain is live
+
+Update anything that still points at the old host:
 
 - **Stripe** webhook: `https://zzaizzai.com/api/stripe/webhook`
 - **GSC OAuth** redirect: `https://zzaizzai.com/api/gsc/oauth/callback`
-- **Auth / OIDC** callback URLs if you use them
-- Redeploy after env changes
+- Auth / OIDC callback URLs if you use them
+- Redeploy on Netlify after env changes
 
-### 4. In-app Marketing → Traffic Setup
+In-app: Dashboard → Marketing / Connections → domain `zzaizzai.com`, reconnect GSC, submit sitemap.
 
-1. Sign in as admin → **Dashboard → Marketing** (or Connections Hub)
-2. Set **GoDaddy domain** to `zzaizzai.com`
-3. Paste GoDaddy API key + secret ([developer.godaddy.com/keys](https://developer.godaddy.com/keys))
-4. Set **Google site URL** to `https://zzaizzai.com` (or `sc-domain:zzaizzai.com`)
-5. Reconnect GSC / submit sitemap for the **new** property
+## 5. Optional: keep Vercel later
 
-### 5. Search Console + Analytics
-
-1. Add `zzaizzai.com` (or domain property) in [Google Search Console](https://search.google.com/search-console)
-2. Verify ownership (DNS TXT or HTML tag → `GOOGLE_SITE_VERIFICATION`)
-3. Submit `https://zzaizzai.com/sitemap.xml`
-4. In GA4, add `zzaizzai.com` as a data stream / allowed domain if needed
-
-### 6. Optional: keep svivva.com
-
-If you still own `svivva.com`, in Vercel add it as a domain and set a **301 redirect** to `zzaizzai.com` so old links and SEO equity move over.
+You can leave the paused Vercel project alone. When Pro is active again you may delete or pause it so you do not run two production hosts. Do **not** point `zzaizzai.com` at both Netlify and Vercel.
 
 ## Verify
 
@@ -88,10 +84,11 @@ curl -sI https://zzaizzai.com | head -15
 curl -sL https://zzaizzai.com/sitemap.xml | head -20
 ```
 
-You should see Vercel headers and sitemap URLs under `https://zzaizzai.com/...`.
+Expect **Netlify** headers (or your site HTML), not `x-vercel-error: DEPLOYMENT_DISABLED`.
 
 ## Quick problems
 
-- **Domain still shows parking / old host**: GoDaddy DNS not updated or not propagated yet.
-- **SSL pending on Vercel**: DNS not pointing at Vercel yet — wait until Vercel shows the domain as Valid.
-- **“I want it only in Cursor”**: Local `localhost` is fine for development; the public domain always needs Vercel (or another host).
+- **Build fails on peer deps:** `Svivva/.npmrc` already sets `legacy-peer-deps=true`.
+- **Domain still 402 / Vercel:** GoDaddy still points at Vercel — fix DNS to Netlify.
+- **SSL pending:** DNS not fully pointing at Netlify yet.
+- **Cron 401:** set `CRON_SECRET` in Netlify env (scheduled functions in `Svivva/netlify/functions/`).
