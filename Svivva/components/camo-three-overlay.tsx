@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { ThreeCRTFlowers } from "./three-crt-flowers";
 
 type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout";
@@ -18,6 +18,9 @@ export function CamoThreeOverlay({
 }: CamoThreeOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Intro stays mounted; section scenes mount only near the viewport so mobile
+  // does not blow past the browser WebGL context limit (context lost).
+  const [flowersActive, setFlowersActive] = useState(isIntro);
 
   const seed = useMemo(() => {
     const presetSeeds: Record<ScenePreset, number> = {
@@ -30,6 +33,28 @@ export function CamoThreeOverlay({
     };
     return presetSeeds[preset];
   }, [preset]);
+
+  useEffect(() => {
+    if (isIntro) {
+      setFlowersActive(true);
+      return;
+    }
+
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setFlowersActive(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setFlowersActive(Boolean(entry?.isIntersecting));
+      },
+      { root: null, rootMargin: "280px 0px", threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isIntro, preset]);
 
   useEffect(() => {
     if (!containerRef.current || !canvasRef.current) return;
@@ -197,7 +222,9 @@ export function CamoThreeOverlay({
               : "brightness(1.15) saturate(1.1)",
         }}
       >
-        <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} />
+        {flowersActive ? (
+          <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} />
+        ) : null}
       </div>
 
       <canvas

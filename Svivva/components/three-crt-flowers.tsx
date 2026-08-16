@@ -899,12 +899,13 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const config = isMediumMobile
       ? {
           ...baseConfig,
+          // Keep blooms visible but light enough that 1–2 active scenes stay stable on phones.
           flowerCount: isCheckoutPreset
-            ? Math.floor(baseConfig.flowerCount * 0.8)
+            ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
             : isSmallMobile
-              ? Math.max(60, Math.floor(baseConfig.flowerCount * 0.9))
-              : Math.max(80, Math.floor(baseConfig.flowerCount * 0.95)),
-          particleCount: Math.floor(baseConfig.particleCount * 0.3),
+              ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
+              : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
+          particleCount: Math.floor(baseConfig.particleCount * 0.2),
           cameraZ: baseConfig.cameraZ * 0.95,
           cameraY: baseConfig.cameraY * 0.9,
           pixelSize: 1,
@@ -926,10 +927,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: false,
-      powerPreference: "high-performance",
+      powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
 
     // Style the canvas to fill container and stay positioned correctly
     renderer.domElement.style.position = "absolute";
@@ -1274,7 +1275,9 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       }
 
       renderTarget.dispose();
+      renderer.forceContextLoss();
       renderer.dispose();
+      rendererRef.current = null;
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
