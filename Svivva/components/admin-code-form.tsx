@@ -13,8 +13,8 @@ type Props = {
 };
 
 export function AdminCodeForm({
-  title = "Admin access",
-  description = "Enter the 6-digit admin code to unlock Orbit and admin pages.",
+  title = "Access code",
+  description = "Enter your access code to unlock Pro (digital + hardware) or admin tools.",
   onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
@@ -38,6 +38,7 @@ export function AdminCodeForm({
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/stripe/subscription"] });
       onSuccess?.();
     } catch {
       setError("Something went wrong");
@@ -57,24 +58,24 @@ export function AdminCodeForm({
         type="password"
         inputMode="numeric"
         maxLength={6}
-        placeholder="••••••"
+        placeholder="•••"
         value={code}
         onChange={(e) => {
           setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
           setError("");
         }}
-        onKeyDown={(e) => e.key === "Enter" && code.length === 6 && void submit()}
+        onKeyDown={(e) => e.key === "Enter" && code.length >= 3 && void submit()}
         className="text-center text-lg tracking-[0.35em] font-mono"
         data-testid="input-admin-code"
       />
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button
         className="w-full"
-        disabled={loading || code.length !== 6}
+        disabled={loading || code.length < 3}
         onClick={() => void submit()}
         data-testid="button-admin-code-submit"
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock admin"}
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlock"}
       </Button>
     </div>
   );

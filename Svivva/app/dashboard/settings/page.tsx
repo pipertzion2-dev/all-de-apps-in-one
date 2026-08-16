@@ -15,7 +15,7 @@ import { AdminCodeForm } from "@/components/admin-code-form";
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const { data: me } = useQuery<{ isAdmin: boolean }>({
+  const { data: me } = useQuery<{ isAdmin: boolean; isMembershipAccess?: boolean }>({
     queryKey: ["/api/auth/me"],
     queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
   });
@@ -90,8 +90,22 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {!me?.isAdmin && (
-        <AdminCodeForm description="Enter the 6-digit admin code to unlock Orbit, Marketing AI, and admin tools." />
+      {!me?.isAdmin && !me?.isMembershipAccess && (
+        <AdminCodeForm description="Enter access code 333 for Pro (digital + hardware), or the admin code for Orbit tools." />
+      )}
+      {me?.isMembershipAccess && !me?.isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5" />
+              Membership access
+            </CardTitle>
+            <CardDescription>
+              Access code unlocked. Pro features are available for digital and hardware without a
+              paid subscription.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       )}
 
       {me?.isAdmin && (

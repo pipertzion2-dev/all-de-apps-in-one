@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Check, CreditCard, Sparkles, Loader2 } from "lucide-react";
 import { trackUpgrade } from "@/lib/analytics";
 import { inferBillingTier } from "@/lib/stripe/catalog";
+import { AdminCodeForm } from "@/components/admin-code-form";
+import { usePlan } from "@/hooks/use-plan";
 
 interface Price {
   id: string;
@@ -77,6 +79,7 @@ function BillingPageContent() {
   const searchParams = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [plans, setPlans] = useState(defaultPlans);
+  const { isPro, isMembershipAccess } = usePlan();
 
   const success = searchParams.get("success");
   const canceled = searchParams.get("canceled");
@@ -139,8 +142,6 @@ function BillingPageContent() {
     }
   }, [pricesData]);
 
-  const currentPlan = subscriptionData?.plan || "free";
-
   const checkoutMutation = useMutation({
     mutationFn: async ({ priceId, tier }: { priceId: string; tier: string }) => {
       return { priceId, tier };
@@ -197,6 +198,7 @@ function BillingPageContent() {
     }
   };
 
+  const currentPlan = isPro ? "pro" : subscriptionData?.plan || "free";
   const currentPlanData = plans.find((p) => p.tier === currentPlan);
 
   return (
@@ -206,11 +208,19 @@ function BillingPageContent() {
         <p className="text-muted-foreground">Manage your subscription and billing</p>
       </div>
 
+      {!isMembershipAccess && !isPro && (
+        <AdminCodeForm
+          title="Have an access code?"
+          description="Enter code 333 to unlock Pro for digital and hardware without a membership."
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Current Plan</CardTitle>
           <CardDescription>
             You're currently on the {currentPlanData?.name || "Free"} plan
+            {isMembershipAccess ? " (access code)" : ""}
           </CardDescription>
         </CardHeader>
         <CardContent>
