@@ -1239,6 +1239,11 @@ export interface IdeaResult {
   lucrativePotential: number;
   nextSteps: string[];
   tags: string[];
+  /** Hybridization Engine fields (scientific protocol). */
+  parentSystems?: string[];
+  domainBridgingPrinciple?: string;
+  emergentProperty?: string;
+  characterizationTest?: string;
 }
 
 export const insertIdeaSessionSchema = createInsertSchema(ideaSessions).omit({

@@ -5,13 +5,19 @@ export const dynamic = "force-dynamic";
 
 const SYSTEM_PROMPT = `You are an expert API architect, information theorist, and software archaeologist specializing in emergent API behavior and topological data analysis.
 
+You MUST apply the ZZAI Hybridization Engine scientific protocol (information/energy domain bridge):
+- Treat endpoint dependency graphs with the same rigor as hardware topology isomorphism
+- Use Shannon mutual information I(A;B) and Kirchhoff-like conservation of information flow as domain bridges (Landauer / information–energy invariants)
+- Emergent compositions must be capabilities impossible from either endpoint alone
+- Flag falsifiable checks (contract tests) for each emergent claim
+
 Given an API specification (OpenAPI/Swagger JSON or natural language) and optional usage logs, you must:
 
 1. **Dependency Graph Construction**: Build a graph of endpoint dependencies based on data flow. An edge from A→B means the output data of A is a required or likely input to B. Compute fan-out (how many endpoints depend on this one) and fan-in (how many endpoints feed into this one) for each node. Assign semantic clusters (auth, data, analytics, etc.).
 
 2. **Information-Theoretic Analysis (Mutual Information)**: For each pair of endpoints (A, B), estimate the mutual information I(A;B) — how much knowing A's behavior (params, responses, state changes) tells you about B's behavior. High mutual information = strong coupling. Express as a value 0.0–1.0.
 
-3. **Emergent Pattern Mining**: Find sequences of 2–4 endpoints that together create capabilities the API wasn't explicitly designed for. These are "emergent compositions" — workflows that fall out of the design space naturally. Score each by usability (1–10) and note security implications.
+3. **Emergent Pattern Mining (Hybridization)**: Find sequences of 2–4 endpoints that together create capabilities the API wasn't explicitly designed for. These are "emergent compositions" — hybrid workflows. For each, name parent endpoints, the bridging principle, and why neither endpoint alone suffices. Score each by usability (1–10) and note security implications.
 
 4. **Semantic Contract Extraction**: For each endpoint, extract its behavioral contract as a formal predicate: preconditions (what must be true before calling), postconditions (what is guaranteed true after), and invariants (what is preserved). Flag semantic drift where observed behavior diverges from the documented contract.
 
@@ -50,7 +56,9 @@ You MUST respond with a valid JSON object matching this exact schema:
       "designerIntended": boolean,
       "implementationNotes": string,
       "usabilityScore": number,
-      "securityConsideration": string
+      "securityConsideration": string,
+      "domainBridgingPrinciple": string,
+      "parentEndpoints": string[]
     }
   ],
   "semanticDrift": [
@@ -75,7 +83,8 @@ You MUST respond with a valid JSON object matching this exact schema:
   "apiGenomeFingerprint": string,
   "complexityScore": number,
   "cohesionScore": number,
-  "recommendations": string[]
+  "recommendations": string[],
+  "hybridizationProtocolVersion": "1.0.0"
 }`;
 
 export async function POST(req: NextRequest) {

@@ -5,6 +5,7 @@ import { projects } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { z } from "zod";
+import { adaptSourcesToSchematics, runHybridization } from "@/lib/hybridization";
 
 const discoverSchema = z.object({
   question: z.string().min(3).max(500),
@@ -108,13 +109,19 @@ export async function POST(req: NextRequest) {
 
 You think across the full ecosystem: physical products, digital APIs, software services, and data sources. You find connections that hardware manufacturers would never think of on their own.
 
+You MUST apply the ZZAI Hybridization Engine scientific protocol for cross_domain and hybrid_product hypotheses:
+- Name two parent systems being hybridized
+- Cite a domain-bridging principle (Fourier↔Ohm↔Darcy / Laplace, wave equation, reaction–diffusion, Landauer/Shannon for digital bridges, or a named biomimetic motif)
+- Require an emergent property impossible in either parent alone
+- Include a falsifiable characterization / manufacturing test
+
 Your process for EACH hypothesis must follow all 5 stages:
 
 STAGE 1 — HYPOTHESIS GENERATION:
 Generate hypotheses about innovative connections between hardware/manufacturing and digital systems. Think about:
 - How digital data can optimize physical product design (e.g., API data → material selection)
 - How hardware sensor data could create new digital services
-- Cross-domain innovations (e.g., weather API data → smart packaging design)
+- Cross-domain innovations via scientific hybridization (e.g., weather API data → smart packaging design)
 - Supply chain optimizations using real-time data feeds
 - IoT connections between physical products and digital ecosystems
 - Material science innovations informed by data analysis
@@ -125,9 +132,9 @@ Categories to generate:
 - material_innovation: New material combinations or applications
 - process_optimization: Manufacturing efficiency improvements
 - iot_integration: Connecting physical products to digital systems
-- cross_domain: Unexpected connections between industries
+- cross_domain: Unexpected connections between industries (use hybridization protocol)
 - supply_chain: Logistics and supply chain insights
-- hybrid_product: Physical-digital product innovations
+- hybrid_product: Physical-digital product innovations (use hybridization protocol)
 
 STAGE 2 — EXPERIMENT DESIGN:
 For each hypothesis, design a concrete experiment:
@@ -199,6 +206,9 @@ Return JSON:
       "confidence": 75,
       "insight": "actionable insight for the manufacturer (2-3 sentences)",
       "sourcesUsed": ["Source Name 1", "Source Name 2"],
+      "parentSystems": ["Parent A", "Parent B"],
+      "domainBridgingPrinciple": "Named scientific bridge (required for cross_domain/hybrid_product)",
+      "emergentProperty": "Capability neither parent has alone",
       "nextSteps": ["Step 1 to prototype this", "Step 2"]
     }
   ]
@@ -208,7 +218,11 @@ Return JSON:
     });
 
     const raw = completion.choices[0].message.content;
-    let data: { summary: string; hypotheses: unknown[] };
+    let data: {
+      summary: string;
+      hypotheses: unknown[];
+      hybridization?: unknown;
+    };
     try {
       const p = JSON.parse(raw || "{}");
       data = {
@@ -217,6 +231,28 @@ Return JSON:
       };
     } catch {
       data = { summary: "Discovery completed but results could not be parsed.", hypotheses: [] };
+    }
+
+    // Run shared scientific Hybridization Engine when ≥2 sources are available
+    try {
+      const adapted = adaptSourcesToSchematics(
+        selectedSources.map((s) => ({
+          name: s.name,
+          type: s.type,
+          description: s.description,
+        })),
+      );
+      if (adapted) {
+        data.hybridization = await runHybridization({
+          ...adapted,
+          hybridizationMode: "emergent",
+          targetApplication: question,
+          scientificDepth: "research",
+          surface: "hypothesis",
+        });
+      }
+    } catch (hybridErr) {
+      console.warn("Hypothesis hybridization pass skipped:", hybridErr);
     }
 
     return NextResponse.json(data);

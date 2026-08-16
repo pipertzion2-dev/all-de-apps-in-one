@@ -1,33 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  adaptLegacySystems,
+  adaptSourcesToSchematics,
   canUseHybridizationEngine,
   hybridizationRequestSchema,
   runHybridization,
 } from "@/lib/hybridization";
 import { z } from "zod";
 
-const legacySchema = z.object({
-  systemA: z.object({
-    name: z.string().min(1),
-    description: z.string().optional().default(""),
-    components: z.array(z.string()).optional(),
-    properties: z.array(z.string()).optional(),
-  }),
-  systemB: z.object({
-    name: z.string().min(1),
-    description: z.string().optional().default(""),
-    components: z.array(z.string()).optional(),
-    properties: z.array(z.string()).optional(),
-  }),
+const sourcesSchema = z.object({
+  sources: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        type: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .min(2)
+    .max(6),
   hybridizationMode: z
     .enum(["complementary", "antagonistic", "emergent", "biomimetic"])
     .optional()
     .default("emergent"),
-  targetApplication: z.string().optional(),
+  targetApplication: z.string().min(1).max(500),
   scientificDepth: z.enum(["prototype", "research", "production"]).optional().default("research"),
+  surface: z
+    .enum(["hardware", "digital", "hypothesis", "idea-engine", "api-builder", "research"])
+    .optional()
+    .default("research"),
 });
 
+/**
+ * Shared hybridization endpoint for Idea Engine, Hypothesis, API Builder, etc.
+ * Accepts either full schematics or free-form source pairs.
+ */
 export async function POST(req: NextRequest) {
   try {
     if (!(await canUseHybridizationEngine(req))) {
@@ -39,39 +45,35 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Legacy Cross-Domain Hybridizer payload → scientific schematics
-    if (body.systemA && body.systemB && !body.schematicA) {
-      const legacy = legacySchema.safeParse(body);
-      if (!legacy.success) {
+    if (body.sources && Array.isArray(body.sources)) {
+      const parsed = sourcesSchema.safeParse(body);
+      if (!parsed.success) {
         return NextResponse.json(
-          { error: "Invalid legacy input.", details: legacy.error.flatten() },
+          { error: "Invalid sources input.", details: parsed.error.flatten() },
           { status: 400 },
         );
       }
-      const adapted = adaptLegacySystems(legacy.data);
+      const adapted = adaptSourcesToSchematics(parsed.data.sources);
+      if (!adapted) {
+        return NextResponse.json({ error: "Need at least two sources." }, { status: 400 });
+      }
       const result = await runHybridization({
         ...adapted,
-        hybridizationMode: legacy.data.hybridizationMode,
-        targetApplication:
-          legacy.data.targetApplication ||
-          `${legacy.data.systemA.name} × ${legacy.data.systemB.name}`,
-        scientificDepth: legacy.data.scientificDepth,
-        surface: "hardware",
+        hybridizationMode: parsed.data.hybridizationMode,
+        targetApplication: parsed.data.targetApplication,
+        scientificDepth: parsed.data.scientificDepth,
+        surface: parsed.data.surface,
       });
       return NextResponse.json(result);
     }
 
-    const parsed = hybridizationRequestSchema.safeParse({
-      ...body,
-      surface: body.surface || "hardware",
-    });
+    const parsed = hybridizationRequestSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input.", details: parsed.error.flatten() },
         { status: 400 },
       );
     }
-
     const result = await runHybridization(parsed.data);
     return NextResponse.json(result);
   } catch (err: unknown) {

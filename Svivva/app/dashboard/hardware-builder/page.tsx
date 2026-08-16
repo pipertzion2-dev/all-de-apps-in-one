@@ -335,6 +335,7 @@ export default function HardwareBuilderPage() {
       const r = await fetch("/api/hardware/hybridize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           systemA: {
             name: systemAName,
@@ -342,7 +343,15 @@ export default function HardwareBuilderPage() {
             components: materials,
             properties: requirements,
           },
-          systemB: { name: systemBName, description: systemBDesc },
+          systemB: {
+            name: systemBName,
+            description: systemBDesc,
+            components: materials.slice(0, 3),
+            properties: requirements.slice(0, 3),
+          },
+          hybridizationMode: "emergent",
+          targetApplication: productName || `${systemAName} × ${systemBName}`,
+          scientificDepth: "research",
         }),
       });
       const data = await r.json();
@@ -353,7 +362,7 @@ export default function HardwareBuilderPage() {
     } finally {
       setHybridLoading(false);
     }
-  }, [systemAName, systemADesc, systemBName, systemBDesc, materials, requirements]);
+  }, [systemAName, systemADesc, systemBName, systemBDesc, materials, requirements, productName]);
 
   const handleDownloadBlueprint = useCallback(async () => {
     setPdfGenerating(true);

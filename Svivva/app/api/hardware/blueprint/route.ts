@@ -52,12 +52,17 @@ const reqSchema = z.object({
   hybrids: z
     .array(
       z.object({
-        title: z.string(),
+        title: z.string().optional(),
+        name: z.string().optional(),
         description: z.string().optional(),
         fromSystemA: z.string().optional(),
         fromSystemB: z.string().optional(),
         emergentBehavior: z.string().optional(),
+        emergentProperties: z.array(z.string()).optional(),
+        scientificBasis: z.string().optional(),
         noveltyScore: z.number().optional(),
+        challenges: z.array(z.string()).optional(),
+        coreComponents: z.array(z.string()).optional(),
       }),
     )
     .optional()
@@ -225,16 +230,23 @@ export async function POST(req: NextRequest) {
     }
 
     if (data.hybrids.length > 0) {
-      sectionTitle(doc, "7. Hybrid Innovation Concepts");
+      sectionTitle(doc, "7. Hybrid Innovation Concepts (Scientific Hybridization Engine)");
       doc.fontSize(10);
       data.hybrids.forEach((h, i) => {
+        const title = h.title || h.name || `Hybrid ${i + 1}`;
+        const emergent =
+          h.emergentBehavior ||
+          (h.emergentProperties && h.emergentProperties.length
+            ? h.emergentProperties.join("; ")
+            : undefined);
         doc
           .font("Helvetica-Bold")
           .fillColor("#6B2C4E")
-          .text(`${i + 1}. ${h.title}${h.noveltyScore ? ` (${h.noveltyScore}% novel)` : ""}`);
+          .text(`${i + 1}. ${title}${h.noveltyScore ? ` (${h.noveltyScore}% novel)` : ""}`);
         doc.font("Helvetica").fillColor("#555555");
+        if (h.scientificBasis) doc.text(`   Science: ${h.scientificBasis}`);
         if (h.description) doc.text(`   ${h.description}`);
-        if (h.emergentBehavior) doc.text(`   Emergent: ${h.emergentBehavior}`);
+        if (emergent) doc.text(`   Emergent: ${emergent}`);
         doc.moveDown(0.3);
       });
     }
