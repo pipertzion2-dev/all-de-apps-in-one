@@ -493,6 +493,16 @@ export default function LandingPage() {
                 <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                 <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
               </Link>
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2.5 text-xs border-[#5B8DA8]/50"
+                  data-testid="button-nav-dashboard"
+                >
+                  Dashboard
+                </Button>
+              </Link>
               <a href="/login" className="hidden md:block">
                 <Button
                   variant="ghost"
@@ -1778,20 +1788,24 @@ export default function LandingPage() {
                   : "Join thousands of creators turning ideas into manufactured products with AI-powered tools."}
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <a href="/signup">
-                  <Button size="lg" className="bg-[#5B8DA8] gap-2" data-testid="button-cta-start">
-                    {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
+                <Link href="/dashboard">
+                  <Button
+                    size="lg"
+                    className="bg-[#5B8DA8] gap-2"
+                    data-testid="button-cta-dashboard"
+                  >
+                    Go to Dashboard
                     <ArrowRight className="w-4 h-4" />
                   </Button>
-                </a>
-                <a href="/login">
+                </Link>
+                <a href="/signup">
                   <Button
                     size="lg"
                     variant="outline"
                     className="gap-2"
-                    data-testid="button-cta-demo"
+                    data-testid="button-cta-start"
                   >
-                    Schedule Demo
+                    {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
                   </Button>
                 </a>
               </div>

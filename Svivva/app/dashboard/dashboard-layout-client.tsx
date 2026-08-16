@@ -55,6 +55,7 @@ import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
 import { TutorialProvider } from "@/components/tutorial-system";
 import { CommandPalette, SearchTrigger } from "@/components/command-palette";
+import { AdminCodeForm } from "@/components/admin-code-form";
 
 type MenuItem = {
   title: string;
@@ -237,14 +238,16 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     pathname.startsWith("/dashboard/orbit");
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const { data: meData } = useQuery<{ isAdmin: boolean }>({
+  const { data: meData } = useQuery<{ isAdmin: boolean; isMembershipAccess?: boolean }>({
     queryKey: ["/api/auth/me"],
     queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
   const userIsAdmin = meData?.isAdmin ?? false;
+  const hasCodeAccess = Boolean(meData?.isAdmin || meData?.isMembershipAccess);
   const { isPro } = usePlan();
   const effectiveIsAdmin = userIsAdmin;
-  const effectiveIsPro = isPro || effectiveIsAdmin;
+  const effectiveIsPro = isPro || effectiveIsAdmin || Boolean(meData?.isMembershipAccess);
+  const canEnterDashboard = isAuthenticated || hasCodeAccess;
 
   const baseMenuGroups = mode === "digital" ? digitalMenuGroups : physicalMenuGroups;
   const menuGroups = useMemo(
@@ -284,7 +287,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated && !isPublicFeatureRoute) {
+  if (!canEnterDashboard && !isPublicFeatureRoute) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Card className="w-full max-w-md mx-4">
@@ -306,11 +309,26 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                   Login interrupted. Please try again.
                 </span>
               ) : (
-                "Sign in to access your dashboard"
+                "Sign in, or enter your access code to open the dashboard"
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <AdminCodeForm
+              title="Access code"
+              description="Enter 333 for Pro access (digital + hardware), or your admin code."
+              onSuccess={() => {
+                window.location.href = "/dashboard";
+              }}
+            />
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
             <Link href="/dashboard/orbit" className="block">
               <Button variant="secondary" className="w-full gap-2" data-testid="button-orbit-admin">
                 <Rocket className="w-4 h-4" />
@@ -339,7 +357,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!isAuthenticated && isPublicFeatureRoute) {
+  if (!canEnterDashboard && isPublicFeatureRoute) {
     const featureTitle = featureTitleFromPath(pathname);
     const loginHref = `/login?redirect=${encodeURIComponent(pathname)}`;
     const signupHref = `/signup?redirect=${encodeURIComponent(pathname)}`;
