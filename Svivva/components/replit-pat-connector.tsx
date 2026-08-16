@@ -93,7 +93,7 @@ export function ReplitPATConnector({
           <button
             onClick={() => setOpen((o) => !o)}
             className="text-xs font-semibold px-2.5 py-0.5 rounded-md text-white shrink-0"
-            style={{ background: "#5B8DA8" }}
+            style={{ background: "#5BA8A0" }}
             data-testid="button-connect-replit"
           >
             Connect →
@@ -140,7 +140,7 @@ export function ReplitPATConnector({
             <button
               onClick={() => setOpen((o) => !o)}
               className="text-xs font-semibold px-3 py-1 rounded-lg text-white shrink-0"
-              style={{ background: "#5B8DA8" }}
+              style={{ background: "#5BA8A0" }}
               data-testid="button-connect-replit"
             >
               {open ? "Cancel" : "Connect Apps →"}
@@ -211,7 +211,7 @@ function PATForm({
           onChange={(e) => setToken(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSave()}
           placeholder="pat_xxxxxxxxxxxx…"
-          className="flex-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] font-mono outline-none focus:ring-1 focus:ring-[#5B8DA8]"
+          className="flex-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] font-mono outline-none focus:ring-1 focus:ring-[#5BA8A0]"
           data-testid="input-replit-pat"
           autoFocus
         />
@@ -219,7 +219,7 @@ function PATForm({
           onClick={onSave}
           disabled={saving || !token.trim()}
           className="px-3 py-1.5 rounded-lg text-white text-[11px] font-semibold disabled:opacity-50 shrink-0"
-          style={{ background: "#5B8DA8" }}
+          style={{ background: "#5BA8A0" }}
           data-testid="button-save-replit-pat"
         >
           {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}

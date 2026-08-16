@@ -65,12 +65,12 @@ const reqSchema = z.object({
 });
 
 function drawLine(doc: PDFKit.PDFDocument, y: number) {
-  doc.moveTo(50, y).lineTo(545, y).strokeColor("#5B8DA8").lineWidth(0.5).stroke();
+  doc.moveTo(50, y).lineTo(545, y).strokeColor("#5BA8A0").lineWidth(0.5).stroke();
 }
 
 function sectionTitle(doc: PDFKit.PDFDocument, title: string) {
   doc.moveDown(0.8);
-  doc.fontSize(14).fillColor("#5B8DA8").text(title, { underline: false });
+  doc.fontSize(14).fillColor("#5BA8A0").text(title, { underline: false });
   doc.moveDown(0.3);
   drawLine(doc, doc.y);
   doc.moveDown(0.4);
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     });
 
     doc.rect(0, 0, doc.page.width, 120).fill("#1a1a2e");
-    doc.fontSize(28).fillColor("#5B8DA8").text("SVIVVA", 50, 35, { align: "left" });
+    doc.fontSize(28).fillColor("#5BA8A0").text("SVIVVA", 50, 35, { align: "left" });
     doc.fontSize(10).fillColor("#ffffff").text("Hardware Builder — Product Blueprint", 50, 70);
     doc
       .fontSize(9)
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
 
     doc.fontSize(22).fillColor("#1a1a2e").text(data.productName, 50, 140);
     if (data.category) {
-      doc.fontSize(11).fillColor("#6B2C4E").text(data.category, 50);
+      doc.fontSize(11).fillColor("#6B2C4A").text(data.category, 50);
     }
     doc.moveDown(0.5);
     if (data.productDescription) {
@@ -230,7 +230,7 @@ export async function POST(req: NextRequest) {
       data.hybrids.forEach((h, i) => {
         doc
           .font("Helvetica-Bold")
-          .fillColor("#6B2C4E")
+          .fillColor("#6B2C4A")
           .text(`${i + 1}. ${h.title}${h.noveltyScore ? ` (${h.noveltyScore}% novel)` : ""}`);
         doc.font("Helvetica").fillColor("#555555");
         if (h.description) doc.text(`   ${h.description}`);

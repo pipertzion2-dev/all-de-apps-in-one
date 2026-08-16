@@ -2,7 +2,7 @@
 
 import { Chrome, ExternalLink } from "lucide-react";
 
-const TEAL = "#5B8DA8";
+const TEAL = "#5BA8A0";
 
 export function ExtensionInstallCard() {
   return (
@@ -11,8 +11,8 @@ export function ExtensionInstallCard() {
         marginBottom: 20,
         padding: 14,
         borderRadius: 10,
-        background: "rgba(91, 141, 168,0.06)",
-        border: "1px solid rgba(91, 141, 168,0.25)",
+        background: "rgba(91,168,160,0.06)",
+        border: "1px solid rgba(91,168,160,0.25)",
       }}
     >
       <p

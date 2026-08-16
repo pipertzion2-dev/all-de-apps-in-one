@@ -179,7 +179,7 @@ function CredentialMiniForm({ group, onSaved }: { group: string; onSaved: () => 
             placeholder={f.hint}
             value={vals[f.key] ?? ""}
             onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white placeholder-white/20 outline-none focus:border-[#5B8DA8]/50 transition-colors"
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white placeholder-white/20 outline-none focus:border-[#5BA8A0]/50 transition-colors"
           />
         </div>
       ))}
@@ -192,7 +192,7 @@ function CredentialMiniForm({ group, onSaved }: { group: string; onSaved: () => 
         onClick={save}
         disabled={saving}
         className="self-start px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50 transition-all"
-        style={{ background: "linear-gradient(135deg,#5B8DA8,#6B2C4E)" }}
+        style={{ background: "linear-gradient(135deg,#5BA8A0,#6B2C4A)" }}
       >
         {saving ? "Saving…" : "Save & Activate"}
       </button>
@@ -215,7 +215,7 @@ function ItemCard({
   const borderColor = isDone
     ? "border-emerald-500/20"
     : item.kind === "auto" || item.status === "running"
-      ? "border-[#5B8DA8]/20"
+      ? "border-[#5BA8A0]/20"
       : item.kind === "credential"
         ? "border-amber-500/20"
         : "border-white/10";
@@ -223,9 +223,9 @@ function ItemCard({
   const badgeBg = isDone
     ? "bg-emerald-500/10 text-emerald-400"
     : item.status === "running"
-      ? "bg-[#5B8DA8]/10 text-[#5B8DA8]"
+      ? "bg-[#5BA8A0]/10 text-[#5BA8A0]"
       : item.kind === "auto"
-        ? "bg-[#5B8DA8]/10 text-[#5B8DA8]"
+        ? "bg-[#5BA8A0]/10 text-[#5BA8A0]"
         : item.kind === "credential"
           ? "bg-amber-500/10 text-amber-400"
           : "bg-white/5 text-white/40";
@@ -293,7 +293,7 @@ function ItemCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-                style={{ background: "linear-gradient(135deg,#5B8DA8,#6B2C4E)" }}
+                style={{ background: "linear-gradient(135deg,#5BA8A0,#6B2C4A)" }}
               >
                 Open Platform
                 <ExternalLink className="w-3 h-3" />
@@ -728,7 +728,7 @@ export function OrbitMarketingVision({ orbitStatus, stepStatuses = {} }: Props) 
                   cy="32"
                   r="26"
                   fill="none"
-                  stroke="#5B8DA8"
+                  stroke="#5BA8A0"
                   strokeWidth="6"
                   strokeLinecap="round"
                   strokeDasharray={`${(pct / 100) * 163.4} 163.4`}
@@ -753,7 +753,7 @@ export function OrbitMarketingVision({ orbitStatus, stepStatuses = {} }: Props) 
               <CheckCircle2 className="w-3.5 h-3.5" />
               {doneCount} done
             </span>
-            <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-[#5B8DA8]/10 text-[#5B8DA8] flex items-center gap-1.5">
+            <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-[#5BA8A0]/10 text-[#5BA8A0] flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" />
               {autoCount} auto-running
             </span>
@@ -784,7 +784,7 @@ export function OrbitMarketingVision({ orbitStatus, stepStatuses = {} }: Props) 
             onClick={() => setFilter(key)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               filter === key
-                ? "bg-[#5B8DA8] text-white"
+                ? "bg-[#5BA8A0] text-white"
                 : "bg-white/5 text-white/50 hover:text-white hover:bg-white/10"
             }`}
           >
@@ -796,7 +796,7 @@ export function OrbitMarketingVision({ orbitStatus, stepStatuses = {} }: Props) 
       {/* ── Legend ────────────────────────────────────────────────────────────── */}
       <div className="flex gap-4 flex-wrap text-xs text-white/35">
         <span className="flex items-center gap-1.5">
-          <Zap className="w-3 h-3 text-[#5B8DA8]" /> Auto-running
+          <Zap className="w-3 h-3 text-[#5BA8A0]" /> Auto-running
         </span>
         <span className="flex items-center gap-1.5">
           <Key className="w-3 h-3 text-amber-400" /> Add API key to activate

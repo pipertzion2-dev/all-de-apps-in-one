@@ -122,8 +122,8 @@ function ScoreBar({ value, label, color }: { value: number; label: string; color
 function IdeaCard({ idea, index, mode }: { idea: IdeaResult; index: number; mode: string }) {
   const [expanded, setExpanded] = useState(false);
   const avgScore = Math.round((idea.novelty + idea.lucrativePotential + idea.feasibility) / 3);
-  const tealColor = "#5B8DA8";
-  const burgundyColor = "#6B2C4E";
+  const tealColor = "#5BA8A0";
+  const burgundyColor = "#6B2C4A";
   const accentColor = mode === "digital" ? tealColor : burgundyColor;
 
   return (
@@ -334,8 +334,8 @@ export default function IdeaEnginePage() {
   const sessions = sessionsData?.sessions || [];
   const activeSession = selectedSession;
   const isGenerating = generateMutation.isPending;
-  const tealColor = "#5B8DA8";
-  const burgundyColor = "#6B2C4E";
+  const tealColor = "#5BA8A0";
+  const burgundyColor = "#6B2C4A";
   const accentColor = mode === "digital" ? tealColor : burgundyColor;
 
   return (

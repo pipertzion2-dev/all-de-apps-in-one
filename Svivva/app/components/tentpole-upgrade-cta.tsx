@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, X, Zap, Sparkles } from "lucide-react";
 
-const TEAL = "#5B8DA8";
-const BURG = "#6B2C4E";
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
 
 interface TentpoleStickyBarProps {
   toolName: string;
@@ -38,7 +38,7 @@ export function TentpoleStickyBar({
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300"
-      style={{ boxShadow: "0 -4px 32px rgba(91, 141, 168,0.15)" }}
+      style={{ boxShadow: "0 -4px 32px rgba(91,168,160,0.15)" }}
     >
       <div
         className="flex items-center justify-between gap-3 px-4 py-3 md:px-8"

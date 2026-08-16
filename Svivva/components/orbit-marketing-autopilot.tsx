@@ -28,7 +28,7 @@ import {
 } from "@/lib/orbit/marketing-autopilot-types";
 import { OrbitSubmissionWorkbench } from "@/components/orbit-submission-workbench";
 
-const TEAL = "#5B8DA8";
+const TEAL = "#5BA8A0";
 const PINK = "#db2777";
 
 type AutopilotData = {

@@ -11,14 +11,14 @@ interface HeroBloomAnimationProps {
 }
 
 const VIVVA_COLORS = {
-  teal: new THREE.Color(0x5b8da8),
+  teal: new THREE.Color(0x5ba8a0),
   tealLight: new THREE.Color(0x8fcfc7),
-  burgundy: new THREE.Color(0x6b2c4e),
+  burgundy: new THREE.Color(0x6b2c4a),
   burgundyLight: new THREE.Color(0x8b4c6a),
   dustyPink: new THREE.Color(0xd4a5a5),
   mint: new THREE.Color(0x98d4bb),
   lavender: new THREE.Color(0xb8a9c9),
-  accent: new THREE.Color(0x7b8dac),
+  accent: new THREE.Color(0x7ba3ac),
   cream: new THREE.Color(0xf5e6d3),
 };
 
@@ -814,7 +814,7 @@ export function HeroBloomAnimation({ onComplete }: HeroBloomAnimationProps) {
               style={{
                 backgroundColor:
                   ["watering", "growing", "blooming"].indexOf(phase) >= i
-                    ? "#7B8DAC"
+                    ? "#7BA3AC"
                     : "rgba(255,255,255,0.15)",
               }}
             />

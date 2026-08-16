@@ -225,7 +225,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
           <Link
             href="/dashboard"
             data-testid="link-nav-cta"
-            className="text-sm font-medium px-4 py-2 rounded-md bg-[#5B8DA8] text-white transition-opacity hover:opacity-90"
+            className="text-sm font-medium px-4 py-2 rounded-md bg-[#5BA8A0] text-white transition-opacity hover:opacity-90"
           >
             Get Started
           </Link>
@@ -249,7 +249,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
           <Link
             href="/dashboard"
             data-testid="link-hero-cta"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-md bg-[#5B8DA8] text-white text-lg font-semibold transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-md bg-[#5BA8A0] text-white text-lg font-semibold transition-opacity hover:opacity-90"
           >
             {page.ctaText}
             <ArrowRight className="w-5 h-5" />
@@ -260,15 +260,15 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
       <section className="max-w-4xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div data-testid="stat-apis-created">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5B8DA8]">10K+</p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">10K+</p>
             <p className="mt-1 text-sm text-white/60">APIs Created</p>
           </div>
           <div data-testid="stat-uptime">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5B8DA8]">99.9%</p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">99.9%</p>
             <p className="mt-1 text-sm text-white/60">Uptime SLA</p>
           </div>
           <div data-testid="stat-latency">
-            <p className="text-3xl sm:text-4xl font-bold text-[#5B8DA8]">50ms</p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#5BA8A0]">50ms</p>
             <p className="mt-1 text-sm text-white/60">Avg Latency</p>
           </div>
         </div>
@@ -285,8 +285,8 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
                 className="rounded-md border border-white/10 bg-white/5 p-6"
                 data-testid={`card-benefit-${i}`}
               >
-                <div className="w-10 h-10 rounded-md bg-[#5B8DA8]/20 flex items-center justify-center mb-4">
-                  <IconComp className="w-5 h-5 text-[#5B8DA8]" />
+                <div className="w-10 h-10 rounded-md bg-[#5BA8A0]/20 flex items-center justify-center mb-4">
+                  <IconComp className="w-5 h-5 text-[#5BA8A0]" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
                 <p className="text-sm text-white/60 leading-relaxed">{benefit.description}</p>
@@ -304,7 +304,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         <Link
           href="/dashboard"
           data-testid="link-mid-cta"
-          className="inline-flex items-center gap-2 px-8 py-4 rounded-md bg-[#5B8DA8] text-white text-lg font-semibold transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-md bg-[#5BA8A0] text-white text-lg font-semibold transition-opacity hover:opacity-90"
         >
           {page.ctaText}
           <ArrowRight className="w-5 h-5" />

@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#5B8DA8";
-const BURG = "#6B2C4E";
+const TEAL = "#5BA8A0";
+const BURG = "#6B2C4A";
 
 const FUNNEL_STEPS = [
   {
@@ -374,10 +374,10 @@ export default function OrbitPage() {
         </div>
 
         {/* ── Referral ── */}
-        <div className="max-w-md mx-auto rounded-2xl border-2 border-[#5B8DA8]/40 bg-gradient-to-br from-[#5B8DA8]/5 to-transparent p-6 mb-10">
+        <div className="max-w-md mx-auto rounded-2xl border-2 border-[#5BA8A0]/40 bg-gradient-to-br from-[#5BA8A0]/5 to-transparent p-6 mb-10">
           <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#5B8DA8]/15 border border-[#5B8DA8]/30 flex items-center justify-center flex-shrink-0">
-              <Gift className="w-5 h-5" style={{ color: "#5B8DA8" }} />
+            <div className="w-10 h-10 rounded-xl bg-[#5BA8A0]/15 border border-[#5BA8A0]/30 flex items-center justify-center flex-shrink-0">
+              <Gift className="w-5 h-5" style={{ color: "#5BA8A0" }} />
             </div>
             <div>
               <h2 className="font-bold text-white mb-1">Referral Program</h2>
@@ -399,7 +399,7 @@ export default function OrbitPage() {
                 onClick={copyReferralLink}
                 disabled={!referralCode}
                 className="flex-1 font-bold"
-                style={{ background: "#5B8DA8" }}
+                style={{ background: "#5BA8A0" }}
               >
                 {copied ? (
                   <CheckCircle className="w-4 h-4 mr-2" />

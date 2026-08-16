@@ -70,7 +70,7 @@ export function SvivvaPlayStagePanel({
         widthPct:
           durationSec > 0 ? Math.max(0.4, ((n.endSec - n.startSec) / durationSec) * 100) : 1,
         lane: maxMidi - Math.min(maxMidi, Math.max(minMidi, n.midi)),
-        color: "rgba(160, 80, 109, 0.85)",
+        color: "rgba(160, 80, 104, 0.85)",
       });
     }
     for (const n of midiNotes) {
@@ -83,7 +83,7 @@ export function SvivvaPlayStagePanel({
         widthPct:
           durationSec > 0 ? Math.max(0.4, ((n.endSec - n.startSec) / durationSec) * 100) : 1,
         lane: maxMidi - Math.min(maxMidi, Math.max(minMidi, n.midi)),
-        color: "rgba(91, 141, 168, 0.9)",
+        color: "rgba(91, 168, 160, 0.9)",
       });
     }
     return items;
@@ -112,9 +112,9 @@ export function SvivvaPlayStagePanel({
               step={10}
               value={Math.round(alignOffsetSec * 1000)}
               onChange={(e) => onAlignOffsetChange?.(Number(e.target.value) / 1000)}
-              className="w-24 accent-[#5B8DA8]"
+              className="w-24 accent-[#5BA8A0]"
             />
-            <span className="font-mono text-[#5B8DA8]">
+            <span className="font-mono text-[#5BA8A0]">
               {(alignOffsetSec * 1000).toFixed(0)} ms · {(alignScore * 100).toFixed(0)}%
             </span>
           </div>
@@ -127,7 +127,7 @@ export function SvivvaPlayStagePanel({
             {waveformPeaks.map((p, i) => (
               <div
                 key={i}
-                className="flex-1 bg-[#A0506D]/60 rounded-[1px]"
+                className="flex-1 bg-[#A05068]/60 rounded-[1px]"
                 style={{ height: `${Math.max(8, p * 100)}%`, alignSelf: "center" }}
               />
             ))}
@@ -181,7 +181,7 @@ export function SvivvaPlayStagePanel({
                 return (
                   <div
                     key={`${c.symbol}-${i}`}
-                    className="absolute bottom-0 text-[7px] text-center text-gray-400 truncate px-0.5 border-t border-[#A0506D]/30"
+                    className="absolute bottom-0 text-[7px] text-center text-gray-400 truncate px-0.5 border-t border-[#A05068]/30"
                     style={{ left: `${left}%`, width: `${w}%` }}
                     title={`${c.symbol} (${c.confidence}%)`}
                   >

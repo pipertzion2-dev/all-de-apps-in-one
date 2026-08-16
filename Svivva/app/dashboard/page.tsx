@@ -245,17 +245,17 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
         <div className="grid gap-6 sm:grid-cols-2 max-w-lg mx-auto">
           <Link href="/dashboard/api-builder" onClick={() => onModeSet("digital")}>
             <Card
-              className="h-full cursor-pointer border-border/40 hover:border-[#5B8DA8]/40 transition-all duration-300 group overflow-hidden"
+              className="h-full cursor-pointer border-border/40 hover:border-[#5BA8A0]/40 transition-all duration-300 group overflow-hidden"
               data-testid="card-choose-software"
             >
               <CardContent className="p-0">
                 <div
                   className="relative h-28 overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #5b8da808, #5b8da803)" }}
+                  style={{ background: "linear-gradient(135deg, #5BA8A008, #5BA8A003)" }}
                 >
                   <FloatingShape
                     shape="cube"
-                    color="#5B8DA8"
+                    color="#5BA8A0"
                     size={28}
                     delay={0}
                     duration={8}
@@ -263,7 +263,7 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
                   />
                   <FloatingShape
                     shape="sphere"
-                    color="#5B8DA8"
+                    color="#5BA8A0"
                     size={18}
                     delay={1}
                     duration={5}
@@ -271,15 +271,15 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
                   />
                   <FloatingShape
                     shape="ring"
-                    color="#5B8DA8"
+                    color="#5BA8A0"
                     size={22}
                     delay={0.5}
                     duration={6}
                     className="top-8 right-12"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-xl bg-[#5B8DA8]/10 border border-[#5B8DA8]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Package className="w-6 h-6 text-[#5B8DA8]" />
+                    <div className="w-12 h-12 rounded-xl bg-[#5BA8A0]/10 border border-[#5BA8A0]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Package className="w-6 h-6 text-[#5BA8A0]" />
                     </div>
                   </div>
                 </div>
@@ -293,17 +293,17 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
 
           <Link href="/dashboard/hardware-builder" onClick={() => onModeSet("physical")}>
             <Card
-              className="h-full cursor-pointer border-border/40 hover:border-[#6B2C4E]/40 transition-all duration-300 group overflow-hidden"
+              className="h-full cursor-pointer border-border/40 hover:border-[#6B2C4A]/40 transition-all duration-300 group overflow-hidden"
               data-testid="card-choose-hardware"
             >
               <CardContent className="p-0">
                 <div
                   className="relative h-28 overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #6b2c4e08, #6b2c4e03)" }}
+                  style={{ background: "linear-gradient(135deg, #6B2C4A08, #6B2C4A03)" }}
                 >
                   <FloatingShape
                     shape="pyramid"
-                    color="#6B2C4E"
+                    color="#6B2C4A"
                     size={24}
                     delay={0.3}
                     duration={7}
@@ -311,7 +311,7 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
                   />
                   <FloatingShape
                     shape="cube"
-                    color="#6B2C4E"
+                    color="#6B2C4A"
                     size={20}
                     delay={0}
                     duration={9}
@@ -319,15 +319,15 @@ function NewUserWelcome({ onModeSet }: { onModeSet: (m: "digital" | "physical") 
                   />
                   <FloatingShape
                     shape="sphere"
-                    color="#6B2C4E"
+                    color="#6B2C4A"
                     size={16}
                     delay={1.5}
                     duration={5}
                     className="top-3 right-10"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-xl bg-[#6B2C4E]/10 border border-[#6B2C4E]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Box className="w-6 h-6 text-[#6B2C4E]" />
+                    <div className="w-12 h-12 rounded-xl bg-[#6B2C4A]/10 border border-[#6B2C4A]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Box className="w-6 h-6 text-[#6B2C4A]" />
                     </div>
                   </div>
                 </div>
@@ -370,7 +370,7 @@ function ReturningUserDashboard({
   isLoading: boolean;
   isAdmin?: boolean;
 }) {
-  const primaryColor = mode === "digital" ? "#5B8DA8" : "#6B2C4E";
+  const primaryColor = mode === "digital" ? "#5BA8A0" : "#6B2C4A";
   const builderHref = mode === "digital" ? "/dashboard/api-builder" : "/dashboard/hardware-builder";
   const builderLabel = mode === "digital" ? "New API" : "New Product";
 
@@ -380,7 +380,7 @@ function ReturningUserDashboard({
       title: "API Builder",
       subtitle: "Describe what you need, AI builds it",
       icon: Package,
-      color: "#5B8DA8",
+      color: "#5BA8A0",
       shapes: [
         { shape: "cube" as const, size: 24, x: "left-4", y: "top-3", delay: 0, duration: 8 },
         { shape: "sphere" as const, size: 14, x: "right-6", y: "bottom-4", delay: 1, duration: 5 },
@@ -469,7 +469,7 @@ function ReturningUserDashboard({
       title: "Hardware Builder",
       subtitle: "Design a physical product with AI",
       icon: Box,
-      color: "#6B2C4E",
+      color: "#6B2C4A",
       shapes: [
         { shape: "cube" as const, size: 26, x: "left-4", y: "top-3", delay: 0, duration: 9 },
         {

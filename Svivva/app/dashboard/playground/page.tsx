@@ -312,7 +312,7 @@ export default function PlaygroundPage() {
           <DialogTrigger asChild>
             <Button
               className="gap-2"
-              style={{ background: "linear-gradient(135deg, #6B3A6A, #D782B8, #4A4284)" }}
+              style={{ background: "linear-gradient(135deg, #6B3A67, #D782B2, #425884)" }}
               data-testid="button-new-playground"
             >
               <Plus className="w-4 h-4" />
@@ -604,7 +604,7 @@ export default function PlaygroundPage() {
 
             <Button
               className="w-full gap-2 text-white"
-              style={{ background: "linear-gradient(135deg, #6B3A6A, #D782B8, #4A4284)" }}
+              style={{ background: "linear-gradient(135deg, #6B3A67, #D782B2, #425884)" }}
               onClick={handleExecute}
               disabled={
                 !(selectedSession?.project?.id || selectedProjectId) ||

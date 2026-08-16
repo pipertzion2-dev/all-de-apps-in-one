@@ -142,7 +142,7 @@ export default function PromptForgePage() {
             />
           </div>
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#5B8DA8] flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#5BA8A0] flex items-center justify-center flex-shrink-0">
               <Wand2 className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -201,9 +201,9 @@ export default function PromptForgePage() {
               />
             </div>
 
-            <div className="rounded-2xl border-2 border-[#5B8DA8]/40 bg-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/5">
-                <span className="text-xs font-semibold text-[#5B8DA8] uppercase tracking-wide">
+            <div className="rounded-2xl border-2 border-[#5BA8A0]/40 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#5BA8A0]/20 bg-[#5BA8A0]/5">
+                <span className="text-xs font-semibold text-[#5BA8A0] uppercase tracking-wide">
                   User Message
                 </span>
                 <span className="text-xs text-muted-foreground">{user.length} chars</span>
@@ -226,7 +226,7 @@ export default function PromptForgePage() {
                 <select
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm focus:outline-none focus:border-[#5B8DA8]"
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm focus:outline-none focus:border-[#5BA8A0]"
                 >
                   {MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -237,7 +237,7 @@ export default function PromptForgePage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Temperature <span className="text-[#5B8DA8] font-bold">{temp}</span>
+                  Temperature <span className="text-[#5BA8A0] font-bold">{temp}</span>
                 </label>
                 <input
                   type="range"
@@ -246,7 +246,7 @@ export default function PromptForgePage() {
                   step={0.1}
                   value={temp}
                   onChange={(e) => setTemp(Number(e.target.value))}
-                  className="w-full mt-2 accent-[#5B8DA8]"
+                  className="w-full mt-2 accent-[#5BA8A0]"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Precise</span>
@@ -260,7 +260,7 @@ export default function PromptForgePage() {
               disabled={!user.trim() || loading}
               data-testid="button-run-prompt"
               className="w-full h-12 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-opacity disabled:opacity-40"
-              style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+              style={{ background: "linear-gradient(135deg, #5BA8A0, #6B2C4A)" }}
             >
               {loading ? (
                 <>
@@ -301,11 +301,11 @@ export default function PromptForgePage() {
                 <div
                   className="w-10 h-10 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "rgba(91, 141, 168,0.15)",
-                    border: "1px solid rgba(91, 141, 168,0.3)",
+                    background: "rgba(91,168,160,0.15)",
+                    border: "1px solid rgba(91,168,160,0.3)",
                   }}
                 >
-                  <Loader2 className="w-5 h-5 animate-spin text-[#5B8DA8]" />
+                  <Loader2 className="w-5 h-5 animate-spin text-[#5BA8A0]" />
                 </div>
                 <p className="text-sm">Calling {MODELS.find((m) => m.id === model)?.label}…</p>
               </div>

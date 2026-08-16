@@ -3,7 +3,7 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-const ACCENT = 0x905cbf;
+const ACCENT = 0x7c5cbf;
 
 export default function PlayBackground() {
   const mountRef = useRef<HTMLDivElement>(null);

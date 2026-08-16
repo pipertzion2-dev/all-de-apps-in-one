@@ -87,7 +87,7 @@ function DeployButton({ project }: { project: Project }) {
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-1 text-[11px] border-[#5B8DA8]/30 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
+              className="w-full gap-1 text-[11px] border-[#5BA8A0]/30 text-[#5BA8A0] hover:bg-[#5BA8A0]/10"
               data-testid={`button-view-card-${project.id}`}
             >
               <Share2 className="w-3 h-3" /> API Card
@@ -111,7 +111,7 @@ function DeployButton({ project }: { project: Project }) {
   return (
     <Button
       size="sm"
-      className="mt-3 w-full gap-1.5 bg-gradient-to-r from-[#5B8DA8] to-[#6B2C4E] text-white text-[11px] hover:opacity-90"
+      className="mt-3 w-full gap-1.5 bg-gradient-to-r from-[#5BA8A0] to-[#6B2C4A] text-white text-[11px] hover:opacity-90"
       onClick={handleDeploy}
       disabled={deploying}
       data-testid={`button-deploy-${project.id}`}
@@ -166,7 +166,7 @@ export default function ProjectsPage() {
         </div>
         <Link href="/dashboard/projects/new">
           <Button
-            className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
+            className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
             data-testid="button-new-project"
           >
             <Plus className="w-4 h-4" />
@@ -183,7 +183,7 @@ export default function ProjectsPage() {
             <p className="text-muted-foreground mb-4">Create your first project to get started</p>
             <Link href="/dashboard/projects/new">
               <Button
-                className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
+                className="bg-[#7BA3AC] hover:bg-[#6B939C] gap-2"
                 data-testid="button-create-first-project"
               >
                 <Plus className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function ProjectsPage() {
                     <Link href={`/api-card/${project.id}`} target="_blank">
                       <Badge
                         variant="outline"
-                        className="gap-1 cursor-pointer hover:bg-muted border-[#5B8DA8]/40 text-[#5B8DA8]"
+                        className="gap-1 cursor-pointer hover:bg-muted border-[#5BA8A0]/40 text-[#5BA8A0]"
                       >
                         <Share2 className="w-3 h-3" /> API Card
                       </Badge>

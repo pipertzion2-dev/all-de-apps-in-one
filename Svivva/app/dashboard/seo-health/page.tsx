@@ -335,7 +335,7 @@ export default function SeoHealthPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="px-0 mt-2 h-auto text-[#5B8DA8] hover:text-[#5B8DA8]/80 hover:bg-transparent"
+                          className="px-0 mt-2 h-auto text-[#5BA8A0] hover:text-[#5BA8A0]/80 hover:bg-transparent"
                           data-testid={`link-${c.id}`}
                         >
                           {c.link.label} →

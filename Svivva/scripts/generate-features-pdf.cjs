@@ -11,8 +11,8 @@ const outputPath = path.join(__dirname, "..", "public", "Svivva_Platform_Feature
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 doc.pipe(fs.createWriteStream(outputPath));
 
-const teal = "#5B8DA8";
-const burgundy = "#6B2C4E";
+const teal = "#5BA8A0";
+const burgundy = "#6B2C4A";
 const dark = "#1a1a1a";
 const gray = "#555555";
 const lightGray = "#888888";

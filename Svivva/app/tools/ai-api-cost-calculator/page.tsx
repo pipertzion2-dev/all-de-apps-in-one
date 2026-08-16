@@ -202,7 +202,7 @@ export default function AiApiCostCalculatorPage() {
             />
           </div>
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#5B8DA8] flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#5BA8A0] flex items-center justify-center flex-shrink-0">
               <Calculator className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -230,7 +230,7 @@ export default function AiApiCostCalculatorPage() {
         {/* Calculator inputs */}
         <div className="rounded-2xl border-2 border-border bg-card p-6 space-y-6">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[#5B8DA8]" /> Configure Your API Usage
+            <Zap className="w-5 h-5 text-[#5BA8A0]" /> Configure Your API Usage
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -238,7 +238,7 @@ export default function AiApiCostCalculatorPage() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">
                 Input tokens per call
-                <span className="ml-2 text-xl font-black text-[#5B8DA8]">
+                <span className="ml-2 text-xl font-black text-[#5BA8A0]">
                   {numFmt(inputTokens)}
                 </span>
               </label>
@@ -249,7 +249,7 @@ export default function AiApiCostCalculatorPage() {
                 step={100}
                 value={inputTokens}
                 onChange={(e) => setInputTokens(Number(e.target.value))}
-                className="w-full accent-[#5B8DA8]"
+                className="w-full accent-[#5BA8A0]"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>100</span>
@@ -265,7 +265,7 @@ export default function AiApiCostCalculatorPage() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">
                 Output tokens per call
-                <span className="ml-2 text-xl font-black text-[#5B8DA8]">
+                <span className="ml-2 text-xl font-black text-[#5BA8A0]">
                   {numFmt(outputTokens)}
                 </span>
               </label>
@@ -276,7 +276,7 @@ export default function AiApiCostCalculatorPage() {
                 step={50}
                 value={outputTokens}
                 onChange={(e) => setOutputTokens(Number(e.target.value))}
-                className="w-full accent-[#5B8DA8]"
+                className="w-full accent-[#5BA8A0]"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>50</span>
@@ -292,7 +292,7 @@ export default function AiApiCostCalculatorPage() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">
                 API calls per day
-                <span className="ml-2 text-xl font-black text-[#5B8DA8]">
+                <span className="ml-2 text-xl font-black text-[#5BA8A0]">
                   {numFmt(callsPerDay)}
                 </span>
               </label>
@@ -303,7 +303,7 @@ export default function AiApiCostCalculatorPage() {
                 step={100}
                 value={callsPerDay}
                 onChange={(e) => setCallsPerDay(Number(e.target.value))}
-                className="w-full accent-[#5B8DA8]"
+                className="w-full accent-[#5BA8A0]"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>10</span>
@@ -354,7 +354,7 @@ export default function AiApiCostCalculatorPage() {
                 <button
                   key={s}
                   onClick={() => setSortBy(s)}
-                  className={`px-2 py-1 rounded-lg capitalize transition-colors ${sortBy === s ? "bg-[#5B8DA8] text-white font-semibold" : "bg-muted/50 hover:bg-muted"}`}
+                  className={`px-2 py-1 rounded-lg capitalize transition-colors ${sortBy === s ? "bg-[#5BA8A0] text-white font-semibold" : "bg-muted/50 hover:bg-muted"}`}
                 >
                   {s}
                 </button>

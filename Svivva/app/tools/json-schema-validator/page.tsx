@@ -117,7 +117,7 @@ export default function JsonSchemaValidatorPage() {
             />
           </div>
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#5B8DA8] flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#5BA8A0] flex items-center justify-center flex-shrink-0">
               <Code2 className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -164,7 +164,7 @@ export default function JsonSchemaValidatorPage() {
               onChange={(e) => setJson(e.target.value)}
               rows={18}
               spellCheck={false}
-              className="w-full rounded-xl border-2 border-border bg-muted/20 px-4 py-3 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B8DA8]/40 focus:border-[#5B8DA8]/60 resize-y"
+              className="w-full rounded-xl border-2 border-border bg-muted/20 px-4 py-3 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 focus:border-[#5BA8A0]/60 resize-y"
               placeholder='{"key": "value"}'
               data-testid="input-json"
             />
@@ -180,7 +180,7 @@ export default function JsonSchemaValidatorPage() {
               onChange={(e) => setSchema(e.target.value)}
               rows={18}
               spellCheck={false}
-              className="w-full rounded-xl border-2 border-border bg-muted/20 px-4 py-3 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B8DA8]/40 focus:border-[#5B8DA8]/60 resize-y"
+              className="w-full rounded-xl border-2 border-border bg-muted/20 px-4 py-3 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-[#5BA8A0]/40 focus:border-[#5BA8A0]/60 resize-y"
               placeholder='{"type": "object"}'
               data-testid="input-schema"
             />
@@ -193,7 +193,7 @@ export default function JsonSchemaValidatorPage() {
             onClick={validate}
             disabled={loading || !json.trim() || !schema.trim()}
             className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-all active:scale-95 disabled:opacity-50"
-            style={{ background: "#5B8DA8" }}
+            style={{ background: "#5BA8A0" }}
             data-testid="btn-validate"
           >
             {loading ? (

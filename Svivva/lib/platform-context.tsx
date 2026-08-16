@@ -28,20 +28,20 @@ interface PlatformColors {
 
 /** Cyan / glitch — ZZAI orchid + signal side of the logo */
 const digitalColors: PlatformColors = {
-  primary: "#5B8DA8",
-  primaryHover: "#4A7D98",
-  primaryBg: "rgba(91, 141, 168, 0.15)",
-  primaryBorder: "rgba(91, 141, 168, 0.35)",
-  accent: "#C5D86A",
+  primary: "#00E5FF",
+  primaryHover: "#00C4DB",
+  primaryBg: "rgba(0, 229, 255, 0.14)",
+  primaryBorder: "rgba(0, 229, 255, 0.4)",
+  accent: "#39FF14",
 };
 
 /** Magenta / ornate — ZZAI crest + matrix side of the logo */
 const physicalColors: PlatformColors = {
-  primary: "#D94F9C",
-  primaryHover: "#C04488",
-  primaryBg: "rgba(217, 79, 156, 0.15)",
-  primaryBorder: "rgba(217, 79, 156, 0.35)",
-  accent: "#7EC8D9",
+  primary: "#FF2BD6",
+  primaryHover: "#E016B8",
+  primaryBg: "rgba(255, 43, 214, 0.14)",
+  primaryBorder: "rgba(255, 43, 214, 0.4)",
+  accent: "#C77DFF",
 };
 
 interface PlatformContextType {

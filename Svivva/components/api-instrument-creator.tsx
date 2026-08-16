@@ -117,7 +117,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       names: [`${cap}AI`, `${cap}Pro`, `Smart${cap}`],
       icons: ["Zap", "Target", "Sparkles", "Rocket", "Brain", "Cpu"],
       palettes: [
-        { name: "ZZAI", colors: { primary: "#5B8DA8", secondary: "#4A7D98", accent: "#6B2C4E" } },
+        { name: "ZZAI", colors: { primary: "#5BA8A0", secondary: "#4a9890", accent: "#6B2C4A" } },
         { name: "Ocean", colors: { primary: "#0ea5e9", secondary: "#0284c7", accent: "#06b6d4" } },
         { name: "Violet", colors: { primary: "#8b5cf6", secondary: "#7c3aed", accent: "#a855f7" } },
       ],
@@ -154,7 +154,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     ctx.fillStyle = "#080810";
     ctx.fillRect(0, 0, 800, 400);
 
-    ctx.strokeStyle = "#5B8DA8";
+    ctx.strokeStyle = "#5BA8A0";
     ctx.lineWidth = 4;
     ctx.strokeRect(2, 2, 796, 396);
 
@@ -166,7 +166,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     buttonsRef.current.clear();
 
     if (phase === "prompt") {
-      ctx.fillStyle = "#5B8DA8";
+      ctx.fillStyle = "#5BA8A0";
       ctx.font = "bold 32px monospace";
       ctx.fillText("DEFINE YOUR API", 40, 60);
 
@@ -176,7 +176,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
       ctx.fillStyle = "#0c0c18";
       ctx.fillRect(40, 120, 600, 60);
-      ctx.strokeStyle = isFocused ? "#5B8DA8" : "#333";
+      ctx.strokeStyle = isFocused ? "#5BA8A0" : "#333";
       ctx.lineWidth = 3;
       ctx.strokeRect(40, 120, 600, 60);
 
@@ -188,7 +188,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
       if (isFocused && cursorVisible) {
         const textWidth = ctx.measureText(prompt || "").width;
-        ctx.fillStyle = "#5B8DA8";
+        ctx.fillStyle = "#5BA8A0";
         ctx.fillRect(55 + Math.min(textWidth, 560), 135, 3, 30);
       }
 
@@ -197,7 +197,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       const btnH = 60;
       const canGo = prompt.length >= 10;
 
-      ctx.fillStyle = canGo ? "#5B8DA8" : "#222";
+      ctx.fillStyle = canGo ? "#5BA8A0" : "#222";
       ctx.fillRect(btnX, 120, btnW, btnH);
       ctx.fillStyle = canGo ? "#080810" : "#555";
       ctx.font = "bold 26px monospace";
@@ -219,7 +219,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
       ctx.font = "14px monospace";
       ctx.fillText(`${prompt.length} characters${prompt.length < 10 ? " (min 10)" : ""}`, 40, 210);
 
-      ctx.fillStyle = prompt.length >= 10 ? "#5B8DA8" : "#6B2C4E";
+      ctx.fillStyle = prompt.length >= 10 ? "#5BA8A0" : "#6B2C4A";
       ctx.beginPath();
       ctx.arc(45, 250, 12, 0, Math.PI * 2);
       ctx.fill();
@@ -231,7 +231,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     if (phase === "questions" && tailoredQuestions[currentQuestionIndex]) {
       const q = tailoredQuestions[currentQuestionIndex];
 
-      ctx.fillStyle = "#5B8DA8";
+      ctx.fillStyle = "#5BA8A0";
       ctx.font = "bold 28px monospace";
       ctx.fillText(q.question, 40, 55);
 
@@ -249,13 +249,13 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         const sel = answers[q.id] === opt;
         const hov = hoveredButton === `opt-${opt}`;
 
-        ctx.fillStyle = sel ? "rgba(91, 141, 168,0.4)" : hov ? "rgba(91, 141, 168,0.2)" : "#0c0c18";
+        ctx.fillStyle = sel ? "rgba(91,168,160,0.4)" : hov ? "rgba(91,168,160,0.2)" : "#0c0c18";
         ctx.fillRect(x, startY, optW, optH);
-        ctx.strokeStyle = sel ? "#5B8DA8" : hov ? "#5B8DA8" : "#333";
+        ctx.strokeStyle = sel ? "#5BA8A0" : hov ? "#5BA8A0" : "#333";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, startY, optW, optH);
 
-        ctx.fillStyle = sel ? "#5B8DA8" : hov ? "#7ac8c0" : "#999";
+        ctx.fillStyle = sel ? "#5BA8A0" : hov ? "#7ac8c0" : "#999";
         ctx.font = "bold 20px monospace";
         ctx.textAlign = "center";
         ctx.fillText(opt, x + optW / 2, startY + 45);
@@ -279,16 +279,16 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         const bx = 40 + i * 100;
         ctx.fillStyle =
           i < currentQuestionIndex
-            ? "#5B8DA8"
+            ? "#5BA8A0"
             : i === currentQuestionIndex
-              ? "rgba(91, 141, 168,0.5)"
+              ? "rgba(91,168,160,0.5)"
               : "#1a1a28";
         ctx.fillRect(bx, barY + 10, 85, 20);
       });
     }
 
     if (phase === "brand" && suggestions) {
-      ctx.fillStyle = "#5B8DA8";
+      ctx.fillStyle = "#5BA8A0";
       ctx.font = "bold 26px monospace";
       ctx.fillText("CHOOSE YOUR BRAND", 40, 45);
 
@@ -302,9 +302,9 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         const sel = selectedName === n;
         const hov = hoveredButton === `name-${n}`;
 
-        ctx.fillStyle = sel ? "#5B8DA8" : hov ? "rgba(91, 141, 168,0.3)" : "#0c0c18";
+        ctx.fillStyle = sel ? "#5BA8A0" : hov ? "rgba(91,168,160,0.3)" : "#0c0c18";
         ctx.fillRect(x, 85, w, 40);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#333";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#333";
         ctx.strokeRect(x, 85, w, 40);
         ctx.fillStyle = sel ? "#080810" : "#999";
         ctx.font = "bold 16px monospace";
@@ -333,13 +333,13 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         const sel = selectedIcon === iconNames[i];
         const hov = hoveredButton === `icon-${iconNames[i]}`;
 
-        ctx.fillStyle = sel ? "rgba(91, 141, 168,0.4)" : hov ? "rgba(91, 141, 168,0.2)" : "#0c0c18";
+        ctx.fillStyle = sel ? "rgba(91,168,160,0.4)" : hov ? "rgba(91,168,160,0.2)" : "#0c0c18";
         ctx.fillRect(x, 160, 50, 50);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#333";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#333";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, 160, 50, 50);
 
-        ctx.fillStyle = sel ? "#5B8DA8" : "#777";
+        ctx.fillStyle = sel ? "#5BA8A0" : "#777";
         ctx.font = "bold 24px monospace";
         ctx.textAlign = "center";
         ctx.fillText(ic, x + 25, 195);
@@ -364,9 +364,9 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
         const sel = selectedPalette?.name === p.name;
         const hov = hoveredButton === `pal-${p.name}`;
 
-        ctx.fillStyle = sel ? "rgba(91, 141, 168,0.2)" : hov ? "rgba(91, 141, 168,0.1)" : "#0c0c18";
+        ctx.fillStyle = sel ? "rgba(91,168,160,0.2)" : hov ? "rgba(91,168,160,0.1)" : "#0c0c18";
         ctx.fillRect(x, 250, 120, 80);
-        ctx.strokeStyle = sel ? "#5B8DA8" : "#333";
+        ctx.strokeStyle = sel ? "#5BA8A0" : "#333";
         ctx.lineWidth = sel ? 3 : 2;
         ctx.strokeRect(x, 250, 120, 80);
 
@@ -393,7 +393,7 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
 
       const btnX = 550;
       const canCreate = selectedName && selectedIcon && selectedPalette;
-      ctx.fillStyle = canCreate ? "#5B8DA8" : "#222";
+      ctx.fillStyle = canCreate ? "#5BA8A0" : "#222";
       ctx.fillRect(btnX, 270, 200, 60);
       ctx.fillStyle = canCreate ? "#080810" : "#555";
       ctx.font = "bold 24px monospace";
@@ -471,11 +471,11 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     mainLight.position.set(2, 8, 6);
     scene.add(mainLight);
 
-    const tealLight = new THREE.PointLight(0x5b8da8, 0.5);
+    const tealLight = new THREE.PointLight(0x5ba8a0, 0.5);
     tealLight.position.set(-6, 4, 6);
     scene.add(tealLight);
 
-    const burgundyLight = new THREE.PointLight(0x6b2c4e, 0.3);
+    const burgundyLight = new THREE.PointLight(0x6b2c4a, 0.3);
     burgundyLight.position.set(6, 3, -4);
     scene.add(burgundyLight);
 
@@ -527,8 +527,8 @@ export function ApiInstrumentCreator({ onComplete }: ApiInstrumentCreatorProps) 
     group.add(screenFrame);
 
     const accentMat = new THREE.MeshStandardMaterial({
-      color: 0x5b8da8,
-      emissive: 0x5b8da8,
+      color: 0x5ba8a0,
+      emissive: 0x5ba8a0,
       emissiveIntensity: 0.4,
     });
     const accentStrip = new THREE.Mesh(new THREE.BoxGeometry(8, 0.1, 0.2), accentMat);

@@ -224,7 +224,7 @@ export function buildGlitchFace(teal: number, copper: number): THREE.Group {
     [0.1, 0.5, 0.7, 0.45, copper],
     [-0.3, -0.2, 1.1, 0.55, teal],
     [0.4, -0.4, 0.6, 0.4, copper],
-    [0, 0.1, 0.5, 0.35, 0x5b8da8],
+    [0, 0.1, 0.5, 0.35, 0x5ba8a0],
   ];
   shards.forEach(([x, y, w, h, col], i) => {
     const shard = new THREE.LineSegments(

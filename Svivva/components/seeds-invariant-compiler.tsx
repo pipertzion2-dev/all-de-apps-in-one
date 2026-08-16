@@ -346,13 +346,13 @@ export default function SeedsInvariantCompiler({
   return (
     <div
       id="seeds-invariant-compiler"
-      className="w-full rounded-2xl border border-[#5B8DA8]/30 bg-card/40 backdrop-blur-md text-foreground overflow-hidden shadow-sm scroll-mt-24"
+      className="w-full rounded-2xl border border-[#5BA8A0]/30 bg-card/40 backdrop-blur-md text-foreground overflow-hidden shadow-sm scroll-mt-24"
     >
       <div className="w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Header */}
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#5B8DA8] to-[#6B2C4E] flex items-center justify-center text-lg text-white">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#5BA8A0] to-[#6B2C4A] flex items-center justify-center text-lg text-white">
               ⊢
             </div>
             <h2 className="text-xl font-bold tracking-tight">Behavioral Invariant Compiler</h2>
@@ -370,7 +370,7 @@ export default function SeedsInvariantCompiler({
           </label>
           <textarea
             rows={7}
-            className="w-full bg-background/35 backdrop-blur-sm border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5B8DA8]/50 resize-none font-mono leading-relaxed"
+            className="w-full bg-background/35 backdrop-blur-sm border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50 resize-none font-mono leading-relaxed"
             placeholder="Paste your natural-language specification here. E.g.: 'Users must provide explicit consent before any personal data is stored. The system must respond to all requests within 500ms under normal load. No user can access another user's private data…'"
             value={spec}
             onChange={(e) => setSpec(e.target.value)}
@@ -386,7 +386,7 @@ export default function SeedsInvariantCompiler({
             <button
               type="button"
               onClick={addApp}
-              className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-[#5B8DA8]/40 transition-all"
+              className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/40 transition-all"
             >
               + Add App
             </button>
@@ -400,13 +400,13 @@ export default function SeedsInvariantCompiler({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
-                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5B8DA8]/50"
+                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="App name"
                     value={app.name}
                     onChange={(e) => updateApp(i, { name: e.target.value })}
                   />
                   <input
-                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5B8DA8]/50"
+                    className="bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Brief description"
                     value={app.description}
                     onChange={(e) => updateApp(i, { description: e.target.value })}
@@ -446,7 +446,7 @@ export default function SeedsInvariantCompiler({
                 </div>
                 <div className="flex gap-2">
                   <input
-                    className="flex-1 bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5B8DA8]/50"
+                    className="flex-1 bg-muted/25 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#5BA8A0]/50"
                     placeholder="Add a feature…"
                     value={newFeatureText[i] ?? ""}
                     onChange={(e) =>
@@ -462,7 +462,7 @@ export default function SeedsInvariantCompiler({
                   <button
                     type="button"
                     onClick={() => addFeature(i)}
-                    className="px-3 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-[#5B8DA8]/40 transition-all"
+                    className="px-3 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-[#5BA8A0]/40 transition-all"
                   >
                     Add
                   </button>

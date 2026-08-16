@@ -736,10 +736,10 @@ export default function HardwareBuilderPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#5B8DA8]/30">
+            <Card className="border-[#5BA8A0]/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Factory className="w-5 h-5 text-[#5B8DA8]" />
+                  <Factory className="w-5 h-5 text-[#5BA8A0]" />
                   Find Manufacturers & Suppliers
                 </CardTitle>
                 <CardDescription>
@@ -768,9 +768,9 @@ export default function HardwareBuilderPage() {
                 {sourcingResults && (
                   <div className="space-y-4 mt-4">
                     {sourcingResults.recommendation && (
-                      <div className="p-3 rounded-lg bg-[#5B8DA8]/10 border border-[#5B8DA8]/20">
+                      <div className="p-3 rounded-lg bg-[#5BA8A0]/10 border border-[#5BA8A0]/20">
                         <p className="text-sm flex items-start gap-2">
-                          <Sparkles className="w-4 h-4 text-[#5B8DA8] shrink-0 mt-0.5" />
+                          <Sparkles className="w-4 h-4 text-[#5BA8A0] shrink-0 mt-0.5" />
                           {sourcingResults.recommendation}
                         </p>
                       </div>
@@ -833,7 +833,7 @@ export default function HardwareBuilderPage() {
                                       href={m.website}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-[#5B8DA8] hover:underline flex items-center gap-1"
+                                      className="text-[#5BA8A0] hover:underline flex items-center gap-1"
                                     >
                                       <Globe className="w-3 h-3" /> {m.website}
                                     </a>
@@ -862,7 +862,7 @@ export default function HardwareBuilderPage() {
                                   href={s.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[#5B8DA8] hover:underline flex items-center gap-1"
+                                  className="text-[#5BA8A0] hover:underline flex items-center gap-1"
                                 >
                                   <Globe className="w-3 h-3" /> Visit
                                 </a>
@@ -888,7 +888,7 @@ export default function HardwareBuilderPage() {
                                   href={p.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[#5B8DA8] hover:underline flex items-center gap-1 mt-1"
+                                  className="text-[#5BA8A0] hover:underline flex items-center gap-1 mt-1"
                                 >
                                   <ExternalLink className="w-3 h-3" /> Open
                                 </a>
@@ -903,7 +903,7 @@ export default function HardwareBuilderPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#6B2C4E]/30">
+            <Card className="border-[#6B2C4A]/30">
               <CardHeader>
                 <button
                   onClick={() => setShowHybridizer(!showHybridizer)}
@@ -912,7 +912,7 @@ export default function HardwareBuilderPage() {
                 >
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <Merge className="w-5 h-5 text-[#6B2C4E]" />
+                      <Merge className="w-5 h-5 text-[#6B2C4A]" />
                       Cross-Domain Hybridizer
                     </CardTitle>
                     <CardDescription>
@@ -929,8 +929,8 @@ export default function HardwareBuilderPage() {
               {showHybridizer && (
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2 p-3 rounded-lg border border-[#5B8DA8]/20 bg-[#5B8DA8]/5">
-                      <Label className="text-xs font-medium text-[#5B8DA8]">System A</Label>
+                    <div className="space-y-2 p-3 rounded-lg border border-[#5BA8A0]/20 bg-[#5BA8A0]/5">
+                      <Label className="text-xs font-medium text-[#5BA8A0]">System A</Label>
                       <Input
                         placeholder="e.g., Solar Panel Array"
                         value={systemAName}
@@ -945,8 +945,8 @@ export default function HardwareBuilderPage() {
                         data-testid="input-system-a-desc"
                       />
                     </div>
-                    <div className="space-y-2 p-3 rounded-lg border border-[#6B2C4E]/20 bg-[#6B2C4E]/5">
-                      <Label className="text-xs font-medium text-[#6B2C4E]">System B</Label>
+                    <div className="space-y-2 p-3 rounded-lg border border-[#6B2C4A]/20 bg-[#6B2C4A]/5">
+                      <Label className="text-xs font-medium text-[#6B2C4A]">System B</Label>
                       <Input
                         placeholder="e.g., Water Filtration System"
                         value={systemBName}
@@ -967,7 +967,7 @@ export default function HardwareBuilderPage() {
                     onClick={handleHybridize}
                     disabled={hybridLoading || !systemAName.trim() || !systemBName.trim()}
                     className="gap-2 w-full"
-                    style={{ background: "#6B2C4E" }}
+                    style={{ background: "#6B2C4A" }}
                     data-testid="button-hybridize"
                   >
                     {hybridLoading ? (
@@ -989,7 +989,7 @@ export default function HardwareBuilderPage() {
                         </p>
                       )}
                       {hybridResults.hybrids?.map((h, i) => (
-                        <Card key={i} className="border-[#6B2C4E]/20">
+                        <Card key={i} className="border-[#6B2C4A]/20">
                           <CardContent className="pt-4 pb-4 space-y-2">
                             <div className="flex items-center justify-between">
                               <h4 className="font-medium text-sm">{h.title}</h4>
@@ -1010,11 +1010,11 @@ export default function HardwareBuilderPage() {
                             <p className="text-xs text-muted-foreground">{h.description}</p>
                             <div className="grid gap-1 text-xs mt-1">
                               <p>
-                                <span className="font-medium text-[#5B8DA8]">From A:</span>{" "}
+                                <span className="font-medium text-[#5BA8A0]">From A:</span>{" "}
                                 {h.fromSystemA}
                               </p>
                               <p>
-                                <span className="font-medium text-[#6B2C4E]">From B:</span>{" "}
+                                <span className="font-medium text-[#6B2C4A]">From B:</span>{" "}
                                 {h.fromSystemB}
                               </p>
                               <p className="flex items-start gap-1">
@@ -1087,10 +1087,10 @@ export default function HardwareBuilderPage() {
       className="pb-4"
     >
       <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 pb-4 relative z-10">
-        <Card className="border-[#5B8DA8]/30">
+        <Card className="border-[#5BA8A0]/30">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Merge className="w-5 h-5 text-[#5B8DA8]" />
+              <Merge className="w-5 h-5 text-[#5BA8A0]" />
               <div>
                 <CardTitle className="text-lg">Schematic Hybridizer</CardTitle>
                 <CardDescription>

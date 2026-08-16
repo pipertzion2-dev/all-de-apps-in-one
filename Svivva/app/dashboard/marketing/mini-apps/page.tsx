@@ -35,7 +35,7 @@ import {
   Package,
 } from "lucide-react";
 
-const PINK = "#E91E9A";
+const PINK = "#E91E8C";
 const STEPS = [
   { id: 1, label: "Your App", icon: Globe },
   { id: 2, label: "50 Mini Apps", icon: List },

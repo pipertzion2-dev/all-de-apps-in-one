@@ -126,8 +126,8 @@ function FiligreeOverlay({
       className="pointer-events-none absolute inset-2 rounded-xl"
       style={{
         opacity,
-        border: "1px solid rgba(107, 44, 78,0.5)",
-        boxShadow: "inset 0 0 30px rgba(107, 44, 78,0.15), 0 0 30px rgba(107, 44, 78,0.1)",
+        border: "1px solid rgba(107,44,74,0.5)",
+        boxShadow: "inset 0 0 30px rgba(107,44,74,0.15), 0 0 30px rgba(107,44,74,0.1)",
       }}
     />
   );
@@ -176,7 +176,7 @@ function StaffLineOverlay({
       style={{ scaleX }}
     >
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="w-full h-px bg-current" style={{ color: "#5B8DA8" }} />
+        <div key={i} className="w-full h-px bg-current" style={{ color: "#5BA8A0" }} />
       ))}
     </motion.div>
   );

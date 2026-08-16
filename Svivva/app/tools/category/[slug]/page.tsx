@@ -82,7 +82,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           <p className="text-white text-lg mb-4">Category not found</p>
           <Link
             href="/tools"
-            className="text-[#5B8DA8] hover:underline"
+            className="text-[#5BA8A0] hover:underline"
             data-testid="link-back-tools"
           >
             Browse all tools
@@ -119,7 +119,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             <Link
               href="/dashboard"
               data-testid="link-nav-dashboard"
-              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5B8DA8] text-white transition-opacity hover:opacity-90"
+              className="text-sm font-medium px-4 py-2 rounded-md bg-[#5BA8A0] text-white transition-opacity hover:opacity-90"
             >
               Dashboard
             </Link>
@@ -128,8 +128,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       </nav>
 
       <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
-        <div className="w-14 h-14 rounded-md bg-[#5B8DA8]/20 flex items-center justify-center mx-auto mb-6">
-          <FolderOpen className="w-7 h-7 text-[#5B8DA8]" />
+        <div className="w-14 h-14 rounded-md bg-[#5BA8A0]/20 flex items-center justify-center mx-auto mb-6">
+          <FolderOpen className="w-7 h-7 text-[#5BA8A0]" />
         </div>
         <h1
           className="text-3xl sm:text-4xl font-bold tracking-tight"
@@ -162,7 +162,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                 className="group rounded-md border border-white/10 bg-white/5 p-6 hover-elevate transition-colors"
               >
                 <div className="flex items-start justify-between gap-2 mb-3 flex-wrap">
-                  <h3 className="text-lg font-semibold group-hover:text-[#5B8DA8] transition-colors">
+                  <h3 className="text-lg font-semibold group-hover:text-[#5BA8A0] transition-colors">
                     {tool.title}
                   </h3>
                   <Badge
@@ -174,7 +174,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                   </Badge>
                 </div>
                 <p
-                  className="text-sm text-[#5B8DA8] mb-2"
+                  className="text-sm text-[#5BA8A0] mb-2"
                   data-testid={`text-keyword-${tool.slug}`}
                 >
                   {tool.keyword}

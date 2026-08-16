@@ -187,7 +187,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               </Link>
               <Link
                 href="/dashboard"
-                className="px-4 py-2 rounded-md bg-[#5B8DA8] text-white font-medium hover:opacity-90 transition-opacity"
+                className="px-4 py-2 rounded-md bg-[#5BA8A0] text-white font-medium hover:opacity-90 transition-opacity"
                 data-testid="link-nav-dashboard"
               >
                 Dashboard
@@ -210,11 +210,11 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
 
         {/* Hero */}
         <section className="relative py-16 md:py-24 px-6 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#5B8DA8]/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#5BA8A0]/10 to-transparent" />
           <div className="relative z-10 max-w-3xl mx-auto">
             {miniApp && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5B8DA8]/20 text-[#5B8DA8] text-xs font-medium mb-5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#5B8DA8]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5BA8A0]/20 text-[#5BA8A0] text-xs font-medium mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#5BA8A0]" />
                 AI-Powered Tool
               </div>
             )}
@@ -236,7 +236,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
               <TrackedCta
                 href="/dashboard"
                 label="start_building_free"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#5B8DA8] text-white font-semibold text-lg hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#5BA8A0] text-white font-semibold text-lg hover:opacity-90 transition-opacity"
                 data-testid="button-hero-cta"
               >
                 Start Building Free <ArrowRight className="w-5 h-5" />
@@ -280,8 +280,8 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
                   className="rounded-lg border border-white/10 bg-white/5 p-6"
                   data-testid={`card-benefit-${i}`}
                 >
-                  <div className="w-8 h-8 rounded-md bg-[#5B8DA8]/20 flex items-center justify-center mb-4">
-                    <Check className="w-4 h-4 text-[#5B8DA8]" />
+                  <div className="w-8 h-8 rounded-md bg-[#5BA8A0]/20 flex items-center justify-center mb-4">
+                    <Check className="w-4 h-4 text-[#5BA8A0]" />
                   </div>
                   <p className="text-white/80 leading-relaxed">{benefit}</p>
                 </div>
@@ -354,14 +354,14 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
                 <Link
                   key={related.slug}
                   href={`/${related.slug}`}
-                  className="group rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#5B8DA8]/40 p-5 transition-all"
+                  className="group rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#5BA8A0]/40 p-5 transition-all"
                   data-testid={`link-related-${related.slug}`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-semibold text-white/90 group-hover:text-white transition-colors text-sm leading-snug">
                       {related.title}
                     </p>
-                    <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-[#5B8DA8] flex-shrink-0 transition-colors mt-0.5" />
+                    <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-[#5BA8A0] flex-shrink-0 transition-colors mt-0.5" />
                   </div>
                   {related.metaDescription && (
                     <p className="text-white/40 text-xs mt-2 leading-relaxed line-clamp-2">
@@ -377,7 +377,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
         {/* CTA */}
         <section
           className="py-16 px-6 text-center mt-8"
-          style={{ background: "linear-gradient(135deg, #5B8DA8 0%, #3D6F8A 50%, #6B2C4E 100%)" }}
+          style={{ background: "linear-gradient(135deg, #5BA8A0 0%, #3d8a82 50%, #6B2C4A 100%)" }}
           data-testid="section-cta"
         >
           <div className="max-w-2xl mx-auto">

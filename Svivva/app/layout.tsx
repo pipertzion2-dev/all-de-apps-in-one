@@ -4,7 +4,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
-import { ClutetyCornerAd } from "@/components/clutety/clutety-corner-ad";
 import { PlatformProvider } from "@/lib/platform-context";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
@@ -36,21 +35,21 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "zzai zzai — From seed to symphony";
+  const title = "ZZAI — From seed to symphony";
   const description =
-    "zzai zzai — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
+    "ZZAI — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
 
   return {
     title: {
       default: title,
-      template: "%s · zzai zzai",
+      template: "%s · ZZAI",
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: ["zzai zzai", "zzai", "zzaizzai", "From seed to symphony"],
+    keywords: ["ZZAI", "zzaizzai", "From seed to symphony"],
     openGraph: {
       type: "website",
-      siteName: "zzai zzai",
+      siteName: "ZZAI",
       title,
       description,
       url: siteUrl,
@@ -59,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/zzai-logo.png",
           width: 1200,
           height: 630,
-          alt: "zzai zzai",
+          alt: "ZZAI",
         },
       ],
     },
@@ -108,17 +107,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
-                name: "zzai zzai",
+                name: "ZZAI",
                 url: siteUrl,
                 logo: `${siteUrl}/zzai-logo.png`,
                 description:
-                  "From seed to symphony — zzai zzai is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
+                  "From seed to symphony — ZZAI is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                name: "zzai zzai",
+                name: "ZZAI",
                 url: siteUrl,
                 potentialAction: {
                   "@type": "SearchAction",
@@ -132,7 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "SoftwareApplication",
-                name: "zzai zzai",
+                name: "ZZAI",
                 operatingSystem: "Web",
                 applicationCategory: "DeveloperApplication",
                 offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -264,7 +263,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PlatformProvider>
             <Providers>{children}</Providers>
             <Toaster />
-            <ClutetyCornerAd />
           </PlatformProvider>
         </ThemeProvider>
       </body>
