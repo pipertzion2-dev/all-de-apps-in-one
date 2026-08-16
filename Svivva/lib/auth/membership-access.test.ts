@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MEMBERSHIP_ACCESS_CODE,
-  verifyMembershipAccessCode,
-} from "./membership-access";
+import { MEMBERSHIP_ACCESS_CODE, verifyMembershipAccessCode } from "./membership-access";
 
 describe("membership access code", () => {
   it("accepts 333", () => {
