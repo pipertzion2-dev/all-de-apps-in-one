@@ -14,7 +14,7 @@ const FEATURE_STATS: Record<FeatureId, [string, string, string]> = {
   play: ["Hocket voices", "Meend bends", "∞ Real-time"],
   seeds: ["PDF → Apps", "Parallel build", "∞ Branches"],
   orbit: ["8 Systems", "50+ Mini-apps", "∞ Traffic"],
-  security: ["Feed Shield", "Threat scan", "∞ Sealed"],
+  security: ["Group patent", "Court pack", "∞ Sealed"],
   api: ["Schema lock", "200 Evals", "∞ Versions"],
   hardware: ["AI Schematics", "Suppliers", "∞ Tangible"],
 };
@@ -23,7 +23,7 @@ const FEATURE_HEADLINE: Record<FeatureId, [string, string]> = {
   play: ["ONE STUDIO.", "INFINITE SOUND."],
   seeds: ["ONE SPEC.", "MANY APPS."],
   orbit: ["ONE ENGINE.", "FULL FUNNEL."],
-  security: ["ONE VAULT.", "COMPLETE COVERAGE."],
+  security: ["ONE SKETCH.", "COURT-READY PACK."],
   api: ["ONE PROMPT.", "PRODUCTION API."],
   hardware: ["ONE CONCEPT.", "REAL PRODUCT."],
 };

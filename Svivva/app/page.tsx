@@ -532,9 +532,14 @@ export default function LandingPage() {
           </div>
         </nav>
 
+        {/* ── ZZAI6 cube — main 6-face navigation ─────────────────────────── */}
+        <div className="relative w-full overflow-visible bg-background">
+          <SvivvaArtifact />
+        </div>
+
         <section
           id="oaas-intro"
-          className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
+          className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
             <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
@@ -894,11 +899,6 @@ export default function LandingPage() {
           </div>
         </section>
         {/* ── End Traction Bar ──────────────────────────────────────────────── */}
-
-        {/* ── ZZAI6 artifact cube ─────────────────────────────────────────── */}
-        <div className="relative w-full overflow-visible bg-background pt-4">
-          <SvivvaArtifact />
-        </div>
 
         <section
           id="features"

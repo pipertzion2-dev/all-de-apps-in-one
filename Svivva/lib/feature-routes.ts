@@ -5,7 +5,7 @@ export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
   play: "/play",
   seeds: "/seeds",
   orbit: "/dashboard/orbit",
-  security: "/dashboard/security",
+  security: "/dashboard/poor-man-protection",
   api: "/dashboard/api-builder",
   hardware: "/dashboard/hardware-builder",
 };
@@ -25,12 +25,12 @@ export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/play")) return "ZZAI Play";
   if (pathname.startsWith("/seeds")) return "ZZAI Seeds";
   if (pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/dashboard/launchpad")) {
-    return "Orbit Admin";
+    return "Marketing Orbit";
   }
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
   if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
   if (pathname.startsWith("/protect/verify")) return "Verify Protection";
-  if (pathname.startsWith("/dashboard/api-builder")) return "AI API Builder";
+  if (pathname.startsWith("/dashboard/api-builder")) return "Digital";
   if (pathname.startsWith("/dashboard/hardware-builder")) return "Hardware Builder";
   return "zzai zzai";
 }
