@@ -150,10 +150,11 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [introDone, setIntroDone] = useState(false);
-  const [introFade, setIntroFade] = useState(0);
+  const [flipProgress, setFlipProgress] = useState(0);
+  const [flipComplete, setFlipComplete] = useState(false);
   const virtualScrollRef = useRef(0);
-  const lastFadeRef = useRef(0);
+  const lastProgressRef = useRef(0);
+  const [vpHeight, setVpHeight] = useState(0);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -176,33 +177,39 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    if (!introDone) return;
+    if (!flipComplete) return;
     document
       .querySelectorAll(
         "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
       )
       .forEach((el) => el.remove());
-  }, [introDone]);
+  }, [flipComplete]);
 
   useEffect(() => {
-    if (introDone) return;
+    const updateHeight = () => setVpHeight(window.innerHeight);
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
+
+  useEffect(() => {
+    if (flipComplete) return;
 
     document.body.style.overflow = "hidden";
 
     const finishIntro = () => {
-      setIntroDone(true);
-      setIntroFade(1);
+      setFlipComplete(true);
       document.body.style.overflow = "";
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
 
-    const fadeZone = window.innerHeight * 0.4;
+    const flipZone = window.innerHeight * 0.7;
     const applyDelta = (delta: number) => {
       virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
-      const progress = Math.min(virtualScrollRef.current / fadeZone, 1);
-      if (Math.abs(progress - lastFadeRef.current) <= 0.001) return;
-      lastFadeRef.current = progress;
-      setIntroFade(progress);
+      const progress = Math.min(virtualScrollRef.current / flipZone, 1);
+      if (Math.abs(progress - lastProgressRef.current) <= 0.001) return;
+      lastProgressRef.current = progress;
+      setFlipProgress(progress);
       if (progress >= 1) finishIntro();
     };
 
@@ -232,7 +239,10 @@ export default function LandingPage() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [introDone]);
+  }, [flipComplete]);
+
+  const cubeAngle = flipProgress * 90;
+  const halfH = vpHeight / 2;
 
   return (
     <div
@@ -240,53 +250,81 @@ export default function LandingPage() {
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
-      {!introDone && (
+      {!flipComplete && (
         <div
           className="fixed inset-0"
           style={{
             zIndex: 70,
             pointerEvents: "none",
             overflow: "hidden",
-            backgroundColor: "#ffffff",
-            opacity: 1 - introFade,
+            backgroundColor: "transparent",
           }}
         >
-          <div className="absolute inset-0" style={{ zIndex: 0, backgroundColor: "transparent" }}>
-            <CamoThreeOverlay preset="hero" className="intro-flowers" isIntro />
-          </div>
           <div
-            className="relative z-[1] w-full h-full overflow-hidden"
             style={{
-              backgroundColor: "#ffffff",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              alignItems: "center",
+              position: "absolute",
+              inset: 0,
+              zIndex: 1,
+              perspective: "3000px",
+              perspectiveOrigin: "center center",
             }}
           >
-            <Image
-              src={introImage}
-              alt="ZZAI"
-              width={1024}
-              height={1024}
-              sizes="100vw"
+            <div
               style={{
                 width: "100%",
-                maxHeight: "100%",
-                height: "auto",
-                objectFit: "contain",
-                objectPosition: "bottom center",
-                display: "block",
+                height: "100%",
+                position: "relative",
+                transformStyle: "preserve-3d",
+                transform: `translateZ(${-halfH}px) rotateX(${cubeAngle}deg)`,
+                willChange: "transform",
               }}
-              priority
-            />
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  backfaceVisibility: "hidden",
+                  transform: `translateZ(${halfH}px)`,
+                  willChange: "transform",
+                }}
+              >
+                <div
+                  className="w-full h-full overflow-hidden"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    src={introImage}
+                    alt="ZZAI"
+                    width={1024}
+                    height={1024}
+                    sizes="100vw"
+                    style={{
+                      width: "100%",
+                      maxHeight: "100%",
+                      height: "auto",
+                      objectFit: "contain",
+                      objectPosition: "bottom center",
+                      display: "block",
+                    }}
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          {introFade < 0.08 && (
+          {flipProgress < 0.08 && (
             <div
               className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
               style={{
                 zIndex: 10,
-                opacity: 1 - introFade * 15,
+                opacity: 1 - flipProgress * 15,
                 animation: "scrollBounce 1.5s ease-in-out 0s infinite",
               }}
             >
@@ -313,8 +351,7 @@ export default function LandingPage() {
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
             onClick={() => {
-              setIntroDone(true);
-              setIntroFade(1);
+              setFlipComplete(true);
               document.body.style.overflow = "";
               window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
               document
@@ -332,7 +369,7 @@ export default function LandingPage() {
       <div className="bg-background">
         <nav
           className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
-          style={{ opacity: introDone ? 1 : 0, pointerEvents: introDone ? "auto" : "none" }}
+          style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
         >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
             <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
