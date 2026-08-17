@@ -1,10 +1,6 @@
 import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
 import { getDefaultModel, openai } from "@/lib/llm/openai";
-import {
-  PLATFORM_FEATURES,
-  getFeature,
-  type PlatformFeature,
-} from "@/lib/platform/feature-graph";
+import { PLATFORM_FEATURES, getFeature, type PlatformFeature } from "@/lib/platform/feature-graph";
 
 export type FeatureSuggestion = {
   featureId: string;
@@ -41,13 +37,18 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
     if (feature.tags.some((t) => t.includes(term) || term.includes(t))) score += 4;
   }
   if (fromId && getFeature(fromId)?.connectsTo.includes(feature.id)) score += 12;
-  if (feature.id === "seeds" && goalTerms.some((t) => ["app", "apps", "suite", "pdf", "seed"].includes(t))) {
+  if (
+    feature.id === "seeds" &&
+    goalTerms.some((t) => ["app", "apps", "suite", "pdf", "seed"].includes(t))
+  ) {
     score += 10;
   }
   if (feature.id === "orchestration") score += 4;
   if (
     feature.id === "orchestration" &&
-    goalTerms.some((t) => ["orchestr", "workflow", "route", "connect", "console", "platform"].includes(t))
+    goalTerms.some((t) =>
+      ["orchestr", "workflow", "route", "connect", "console", "platform"].includes(t),
+    )
   ) {
     score += 8;
   }
@@ -96,10 +97,7 @@ export function suggestFeaturesByKeywords(options: {
     .sort((a, b) => b.score - a.score);
 
   const top = ranked.filter((r) => r.score > 0).slice(0, limit);
-  const picks =
-    top.length >= 2
-      ? top
-      : ranked.slice(0, Math.min(limit, ranked.length));
+  const picks = top.length >= 2 ? top : ranked.slice(0, Math.min(limit, ranked.length));
 
   const suggestions: FeatureSuggestion[] = picks.map(({ feature, score }) => ({
     featureId: feature.id,
@@ -133,10 +131,7 @@ export async function suggestFeatures(options: {
   }
 
   const catalog = PLATFORM_FEATURES.filter((f) => options.includeAdmin || !f.adminOnly)
-    .map(
-      (f) =>
-        `- ${f.id}: ${f.title} — ${f.description} (connects: ${f.connectsTo.join(", ")})`,
-    )
+    .map((f) => `- ${f.id}: ${f.title} — ${f.description} (connects: ${f.connectsTo.join(", ")})`)
     .join("\n");
 
   const prompt = `You route users on the ZZAI mixing-console OS via OaaS (Orchestration as a Service).

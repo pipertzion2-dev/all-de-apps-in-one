@@ -48,14 +48,20 @@ function ChannelStrip({
   isSeeds?: boolean;
 }) {
   const busTint =
-    mainBus === "crest" ? "border-[#D94F9C]/40" : mainBus === "both" ? "border-[#5B8DA8]/50" : "border-[#5B8DA8]/30";
+    mainBus === "crest"
+      ? "border-[#D94F9C]/40"
+      : mainBus === "both"
+        ? "border-[#5B8DA8]/50"
+        : "border-[#5B8DA8]/30";
 
   return (
     <Link
       href={href}
       className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/80 px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
     >
-      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">{channelLabel}</span>
+      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
+        {channelLabel}
+      </span>
       <div className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]" />
       <span className="text-[10px] font-semibold text-center leading-tight flex items-center gap-0.5">
         {isSeeds && <Sprout className="w-3 h-3 text-[#5B8DA8]" />}
@@ -142,7 +148,9 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
               <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
             </div>
             <div className="rounded-lg border border-amber-500/40 bg-card/60 p-3">
-              <p className="font-bold text-amber-600 dark:text-amber-400">{MASTER_BUS.consoleName}</p>
+              <p className="font-bold text-amber-600 dark:text-amber-400">
+                {MASTER_BUS.consoleName}
+              </p>
               <p className="text-muted-foreground mt-1">{MASTER_BUS.description}</p>
               <p className="text-[10px] text-muted-foreground mt-2">
                 Out: {MASTER_BUS.outputs.join(" · ")}

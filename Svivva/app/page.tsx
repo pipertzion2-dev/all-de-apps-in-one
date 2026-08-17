@@ -649,7 +649,8 @@ export default function LandingPage() {
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
                 >
-                  {mode === "digital" ? "SIGNAL BUS" : "CREST BUS"} · main L/R · use arrows to switch
+                  {mode === "digital" ? "SIGNAL BUS" : "CREST BUS"} · main L/R · use arrows to
+                  switch
                 </p>
               </div>
               {mode === "digital" ? (

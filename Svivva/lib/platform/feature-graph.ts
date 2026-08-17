@@ -124,11 +124,19 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     title: "Orchestration as a Service",
     shortTitle: "OaaS",
     href: "/#oaas",
-    description: "Patch bay & routing matrix — AI assigns channel order and bus sends across the desk.",
+    description:
+      "Patch bay & routing matrix — AI assigns channel order and bus sends across the desk.",
     bus: "hybrid",
     channel: 16,
     tags: ["oaas", "orchestration", "patch", "route", "console", "matrix", "scene"],
-    connectsTo: ["seeds", "api-builder", "hybridization", "launch-studio", "channel-intel", "poor-man-protection"],
+    connectsTo: [
+      "seeds",
+      "api-builder",
+      "hybridization",
+      "launch-studio",
+      "channel-intel",
+      "poor-man-protection",
+    ],
     mainBus: "both",
   }),
   feature({
@@ -140,7 +148,14 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     bus: "seed",
     channel: 1,
     tags: ["seed", "pdf", "multi-app", "portfolio", "factory", "suite", "document", "channel"],
-    connectsTo: ["api-builder", "launch-studio", "orbit", "marketing", "channel-intel", "orchestration"],
+    connectsTo: [
+      "api-builder",
+      "launch-studio",
+      "orbit",
+      "marketing",
+      "channel-intel",
+      "orchestration",
+    ],
     mainBus: "signal",
   }),
   feature({
