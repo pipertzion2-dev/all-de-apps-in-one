@@ -40,12 +40,12 @@ export function SvivvaArtifact() {
         >
           Main navigation · 6 faces
         </p>
-        <h2
+        <h1
           className="text-3xl md:text-4xl font-light tracking-tight text-foreground"
           style={{ letterSpacing: "-0.01em" }}
         >
           Six products. One cube.
-        </h2>
+        </h1>
         <p
           className="mt-3 text-sm font-light text-muted-foreground"
           style={{ letterSpacing: "0.04em" }}
