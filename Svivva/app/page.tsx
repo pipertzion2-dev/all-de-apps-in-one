@@ -7,15 +7,12 @@ import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
-import musicNoteIcon from "@/attached_assets/5C21F641-65DD-4255-A832-F60282E2CBF0_1771895543298.png";
-import introImage from "@/attached_assets/IMG_1493_1770509047497.png";
 import {
   Shield,
   Code2,
@@ -30,24 +27,14 @@ import {
   Layers,
   Database,
   RefreshCw,
-  Wrench,
   Box,
   Ruler,
   Palette,
   Settings2,
-  Music,
-  Sprout,
-  Lock,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 const SvivvaArtifact = dynamic(
   () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
-  { ssr: false },
-);
-const ZzaiBouquetScene = dynamic(
-  () => import("@/components/zzai-bouquet-scene").then((m) => m.ZzaiBouquetScene),
   { ssr: false },
 );
 const PlatformFeatureHub = dynamic(
@@ -153,7 +140,7 @@ const pricingTiers = [
 ];
 
 export default function LandingPage() {
-  const { mode, toggleMode } = usePlatform();
+  const { mode } = usePlatform();
   const { data: meData } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/auth/me"],
     queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
@@ -161,12 +148,7 @@ export default function LandingPage() {
   });
   const userIsAdmin = meData?.isAdmin ?? false;
 
-  const [flipProgress, setFlipProgress] = useState(0);
-  const [flipComplete, setFlipComplete] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const lastProgressRef = useRef(0);
-  const [vpHeight, setVpHeight] = useState(0);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -181,100 +163,13 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
+    document.body.style.overflow = "";
     document
       .querySelectorAll(
         "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
       )
       .forEach((el) => el.remove());
   }, []);
-
-  useEffect(() => {
-    if (!flipComplete) return;
-    document
-      .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
-      .forEach((el) => el.remove());
-  }, [flipComplete]);
-
-  const handleStartBuilding = () => {
-    const destination =
-      mode === "digital" ? "/dashboard/api-builder" : "/dashboard/hardware-builder";
-    window.location.href = `/signup?redirect=${encodeURIComponent(destination)}`;
-  };
-
-  const virtualScrollRef = useRef(0);
-
-  useEffect(() => {
-    const updateHeight = () => setVpHeight(window.innerHeight);
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
-
-  useEffect(() => {
-    if (flipComplete) return;
-
-    document.body.style.overflow = "hidden";
-
-    const flipZone = window.innerHeight * 0.7;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + e.deltaY);
-      const progress = Math.min(virtualScrollRef.current / flipZone, 1);
-      if (Math.abs(progress - lastProgressRef.current) > 0.001) {
-        lastProgressRef.current = progress;
-        setFlipProgress(progress);
-        if (progress >= 1) {
-          setFlipComplete(true);
-          try {
-            sessionStorage.setItem("svivva:introSeen", "1");
-          } catch {}
-          document.body.style.overflow = "";
-          window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-        }
-      }
-    };
-
-    let touchStartY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      const delta = touchStartY - e.touches[0].clientY;
-      touchStartY = e.touches[0].clientY;
-      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
-      const progress = Math.min(virtualScrollRef.current / flipZone, 1);
-      if (Math.abs(progress - lastProgressRef.current) > 0.001) {
-        lastProgressRef.current = progress;
-        setFlipProgress(progress);
-        if (progress >= 1) {
-          setFlipComplete(true);
-          try {
-            sessionStorage.setItem("svivva:introSeen", "1");
-          } catch {}
-          document.body.style.overflow = "";
-          window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-        }
-      }
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [flipComplete]);
-
-  const cubeAngle = flipProgress * 90;
-  const halfH = vpHeight / 2;
 
   return (
     <div
@@ -282,206 +177,8 @@ export default function LandingPage() {
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
-      {!flipComplete && (
-        <div
-          className="fixed inset-0"
-          style={{
-            zIndex: 60,
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}
-        >
-          <div className="absolute inset-0" style={{ zIndex: 0, backgroundColor: "transparent" }}>
-            <CamoThreeOverlay preset="hero" className="intro-flowers" isIntro />
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 1,
-              perspective: "3000px",
-              perspectiveOrigin: "center center",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                transformStyle: "preserve-3d",
-                transform: `translateZ(${-halfH}px) rotateX(${cubeAngle}deg)`,
-                willChange: "transform",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  transform: `translateZ(${halfH}px)`,
-                  willChange: "transform",
-                  opacity: flipProgress < 0.3 ? 1 : 1 - (flipProgress - 0.3) * 1.1,
-                }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    backgroundColor: "#ffffff",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                  }}
-                >
-                  <Image
-                    src={introImage}
-                    alt="ZZAI"
-                    width={1024}
-                    height={1024}
-                    sizes="100vw"
-                    style={{
-                      width: "100%",
-                      maxHeight: "100%",
-                      height: "auto",
-                      objectFit: "contain",
-                      objectPosition: "bottom center",
-                      display: "block",
-                    }}
-                    priority
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  transform: `rotateX(-90deg) translateZ(${halfH}px)`,
-                  willChange: "transform",
-                }}
-              >
-                <div className="w-full h-full bg-background flex flex-col overflow-hidden">
-                  <nav className="h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80 flex-shrink-0">
-                    <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 relative">
-                      <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                        <ZzaiModeToggle size="sm" />
-                        <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
-                          zzai zzai
-                        </span>
-                      </div>
-                      <div className="absolute left-1/2 -translate-x-1/2">
-                        <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden">
-                          <Image
-                            src={seedsLogo}
-                            alt="ZZAI Seeds"
-                            fill
-                            sizes="40px"
-                            className="object-cover"
-                            priority
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <span className="flex items-center gap-1 px-2 py-1">
-                          <span className="seeds-holo-text text-base leading-none">&#9835;</span>
-                          <span className="seeds-holo-text text-xs font-bold tracking-wide">
-                            Play
-                          </span>
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
-                        >
-                          Start Free
-                        </Button>
-                      </div>
-                    </div>
-                  </nav>
-                  <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-background to-[#5B8DA8]/10">
-                    <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto px-4 sm:px-6">
-                      <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                        From seed{" "}
-                        <span
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                          }}
-                        >
-                          to symphony.
-                        </span>
-                      </h1>
-                      <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                        Describe your API in plain English. ZZAI writes 100 test cases for it,
-                        deploys it with a real endpoint, and rolls back silently if it ever drifts.
-                        No DevOps. No babysitting.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {flipProgress < 0.08 && (
-            <div
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
-              style={{
-                zIndex: 10,
-                opacity: 1 - flipProgress * 15,
-                animation: "scrollBounce 1.5s ease-in-out 0s infinite",
-              }}
-            >
-              <span
-                className="text-sm font-medium text-gray-500 dark:text-gray-400"
-                style={{ fontFamily: "'Zc', sans-serif" }}
-              >
-                Scroll to enter
-              </span>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="text-gray-500 dark:text-gray-400"
-              >
-                <path d="M10 4v12M5 11l5 5 5-5" />
-              </svg>
-            </div>
-          )}
-          <button
-            type="button"
-            className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
-            onClick={() => {
-              setFlipComplete(true);
-              try {
-                sessionStorage.setItem("svivva:introSeen", "1");
-              } catch {}
-              document.body.style.overflow = "";
-              document
-                .querySelectorAll(
-                  "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0",
-                )
-                .forEach((el) => el.remove());
-            }}
-          >
-            Skip intro
-          </button>
-        </div>
-      )}
-
       <div className="bg-background">
-        <nav
-          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
-          style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
-        >
+        <nav className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
             <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
               <ZzaiModeToggle size="sm" />
@@ -607,177 +304,6 @@ export default function LandingPage() {
         </section>
 
         <PlatformFeatureHub />
-
-        <section
-          className={`relative z-0 py-14 sm:py-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5B8DA8]/10" : "bg-gradient-to-br from-background via-[#D94F9C]/5 to-background"}`}
-        >
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-3 sm:gap-5">
-                  <button
-                    type="button"
-                    onClick={() => toggleMode()}
-                    aria-label={
-                      mode === "digital" ? "Switch to Crest mode" : "Switch to Signal mode"
-                    }
-                    title="Switch mode"
-                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border transition-colors hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
-                    style={{
-                      borderColor:
-                        mode === "digital" ? "rgba(91, 141, 168, 0.4)" : "rgba(217, 79, 156, 0.4)",
-                      color: mode === "digital" ? "#5B8DA8" : "#D94F9C",
-                    }}
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-
-                  <ZzaiModeToggle size="lg" showLabels={false} variant="cube" />
-
-                  <button
-                    type="button"
-                    onClick={() => toggleMode()}
-                    aria-label={
-                      mode === "digital" ? "Switch to Crest mode" : "Switch to Signal mode"
-                    }
-                    title="Switch mode"
-                    className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border transition-colors hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
-                    style={{
-                      borderColor:
-                        mode === "digital" ? "rgba(91, 141, 168, 0.4)" : "rgba(217, 79, 156, 0.4)",
-                      color: mode === "digital" ? "#5B8DA8" : "#D94F9C",
-                    }}
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                </div>
-                <p
-                  className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
-                >
-                  {mode === "digital" ? "SIGNAL BUS" : "CREST BUS"} · main L/R · use arrows to
-                  switch
-                </p>
-              </div>
-              {mode === "digital" ? (
-                <>
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                    From seed{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #5B8DA8, #C77DFF, #C5D86A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      to symphony.
-                    </span>
-                  </h1>
-                  <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    <strong>OaaS</strong> — Orchestration as a Service: a mixing-console OS. Patch{" "}
-                    <strong>CH 01 · Seeds</strong>, APIs, launch, YouTube intel, and IP through
-                    subgroup buses to the <strong>Master bus</strong>.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                    <Button
-                      size="lg"
-                      className="gap-2 bg-[#5B8DA8] text-black hover:bg-[#4A7D98]"
-                      onClick={handleStartBuilding}
-                      data-testid="button-hero-start"
-                    >
-                      Start building
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                    <a href="#how-it-works">
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="gap-2 border-[#5B8DA8]/40"
-                        data-testid="button-hero-demo"
-                      >
-                        <Terminal className="w-4 h-4" />
-                        See how it works
-                      </Button>
-                    </a>
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-muted-foreground pt-4">
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Free tier — no credit card</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>OpenAI, Claude &amp; Gemini support</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Ship with confidence</span>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                    From seed{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #C77DFF, #5B8DA8, #C5D86A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      to symphony.
-                    </span>
-                  </h1>
-                  <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Describe your hardware idea. ZZAI generates the schematics, sources the
-                    components, tracks the budget, and connects you to manufacturers — so the only
-                    thing between you and a real product is a description.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                    <Button
-                      size="lg"
-                      className="gap-2 bg-[#D94F9C] text-white hover:bg-[#E016B8]"
-                      onClick={handleStartBuilding}
-                      data-testid="button-hero-start"
-                    >
-                      Start a project
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                    <a href="#how-it-works">
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="gap-2"
-                        data-testid="button-hero-demo"
-                      >
-                        <Box className="w-4 h-4" />
-                        Browse examples
-                      </Button>
-                    </a>
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-muted-foreground pt-4">
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Full technical specs</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Supplier sourcing built in</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span>Real-time budget tracking</span>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
 
         <div
           className="relative h-16 sm:h-24 bg-gradient-to-b from-background to-muted/20"
