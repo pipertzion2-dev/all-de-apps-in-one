@@ -10,7 +10,7 @@ import {
   placeOnFace,
 } from "@/lib/artwork-three";
 import type { FeatureId } from "./feature-defs";
-import { FEATURES } from "./feature-defs";
+import { FEATURES, type FeatureDef } from "./feature-defs";
 
 type Props = {
   active: FeatureId;
@@ -19,6 +19,62 @@ type Props = {
 
 // BoxGeometry face order: +x, -x, +y, -y, +z, -z
 const FACE_ORDER: FeatureId[] = ["api", "security", "play", "hardware", "seeds", "orbit"];
+
+function paintLabeledFace(feature: FeatureDef, image?: HTMLImageElement): THREE.CanvasTexture {
+  const size = 1024;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }
+
+  ctx.fillStyle = "#0c1014";
+  ctx.fillRect(0, 0, size, size);
+
+  if (image) {
+    ctx.save();
+    ctx.globalAlpha = 0.88;
+    const scale = Math.max(size / image.width, size / image.height);
+    const w = image.width * scale;
+    const h = image.height * scale;
+    ctx.drawImage(image, (size - w) / 2, (size - h) / 2, w, h);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = feature.accentColor;
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(0, 0, size, size);
+    ctx.globalAlpha = 1;
+  }
+
+  const veil = ctx.createLinearGradient(0, size * 0.38, 0, size);
+  veil.addColorStop(0, "rgba(0,0,0,0)");
+  veil.addColorStop(0.42, "rgba(0,0,0,0.45)");
+  veil.addColorStop(1, "rgba(0,0,0,0.88)");
+  ctx.fillStyle = veil;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(0,0,0,0.85)";
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 168px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText(feature.shortLabel.toUpperCase(), size / 2, size * 0.68);
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = feature.accentColor;
+  ctx.font = "600 36px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("TAP TO OPEN", size / 2, size * 0.84);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  tex.needsUpdate = true;
+  return tex;
+}
 
 export function ArtifactCanvas({ active, onSelect }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -84,17 +140,22 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       new THREE.TextureLoader().load(
         feature.artworkSrc,
         (tex) => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          mat.map = tex;
-          mat.emissiveMap = tex;
+          const img = tex.image as HTMLImageElement | undefined;
+          const labeled = paintLabeledFace(feature, img);
+          mat.map = labeled;
+          mat.emissiveMap = labeled;
           mat.emissive = new THREE.Color(0xffffff);
-          mat.emissiveIntensity = 0.55;
+          mat.emissiveIntensity = 0.45;
+          mat.opacity = 0;
           mat.needsUpdate = true;
         },
         undefined,
         () => {
-          mat.color.set(new THREE.Color(feature.accentColor));
-          mat.opacity = 0.7;
+          const labeled = paintLabeledFace(feature);
+          mat.map = labeled;
+          mat.emissiveMap = labeled;
+          mat.emissive = new THREE.Color(0xffffff);
+          mat.emissiveIntensity = 0.4;
           mat.needsUpdate = true;
         },
       );
