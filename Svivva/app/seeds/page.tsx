@@ -858,9 +858,7 @@ export default function SeedsPage() {
                   } from ${youtubeMutation.data.sourceLabel}. Build and deploy below like any other session.`
                 : null
             }
-            errorMessage={
-              youtubeMutation.isError ? (youtubeMutation.error as Error).message : null
-            }
+            errorMessage={youtubeMutation.isError ? (youtubeMutation.error as Error).message : null}
           />
 
           <div className="grid grid-cols-3 gap-4">

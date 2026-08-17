@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ADMIN_DEFAULT_YOUTUBE_CHANNEL,
-  isStarterStoryChannelUrl,
-} from "./youtube-defaults";
+import { ADMIN_DEFAULT_YOUTUBE_CHANNEL, isStarterStoryChannelUrl } from "./youtube-defaults";
 
 describe("youtube-defaults", () => {
   it("recognizes StarterStory channel URLs", () => {

@@ -149,7 +149,10 @@ export function YoutubeTranscribeCard({
         )}
 
         {successMessage && (
-          <p className="text-sm text-muted-foreground text-center" data-testid="text-youtube-success">
+          <p
+            className="text-sm text-muted-foreground text-center"
+            data-testid="text-youtube-success"
+          >
             {successMessage}
           </p>
         )}

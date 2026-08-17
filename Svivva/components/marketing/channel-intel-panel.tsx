@@ -147,7 +147,8 @@ export function ChannelIntelPanel() {
         if (data.ranIngest) {
           toast({
             title: `${ADMIN_DEFAULT_YOUTUBE_HANDLE} is live`,
-            description: "Admin watch auto-started — transcripts loaded and daily refresh scheduled.",
+            description:
+              "Admin watch auto-started — transcripts loaded and daily refresh scheduled.",
           });
         }
       } catch {

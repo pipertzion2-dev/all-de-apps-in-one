@@ -5,10 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  HYBRID_GTM_STRATEGIES,
-  type HybridGtmMotion,
-} from "@/lib/orbit/hybrid-gtm-strategies";
+import { HYBRID_GTM_STRATEGIES, type HybridGtmMotion } from "@/lib/orbit/hybrid-gtm-strategies";
 import { ADMIN_DEFAULT_YOUTUBE_HANDLE } from "@/lib/marketing/youtube-defaults";
 
 const MOTION_LABELS: Record<HybridGtmMotion, string> = {
@@ -44,8 +41,8 @@ export function OrbitHybridGrowthPanel({ compact = false }: Props) {
               Hybrid growth playbook (2026)
             </CardTitle>
             <CardDescription className="mt-1">
-              PLG entry + answer-shaped SEO + {ADMIN_DEFAULT_YOUTUBE_HANDLE} intel — wired into Orbit
-              and admin marketing.
+              PLG entry + answer-shaped SEO + {ADMIN_DEFAULT_YOUTUBE_HANDLE} intel — wired into
+              Orbit and admin marketing.
             </CardDescription>
           </div>
           {!compact && (

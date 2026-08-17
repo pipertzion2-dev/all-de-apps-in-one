@@ -75,8 +75,8 @@ export default function SecurityDashboardPage() {
               <div className="px-4 py-3 border-b border-border/60 bg-muted/20">
                 <p className="text-sm font-semibold">Embedded protection suite</p>
                 <p className="text-xs text-muted-foreground">
-                  Full hypothesis → simulate → remedy pipeline from the legacy Pyracrypt build, hosted
-                  on ZZAI.
+                  Full hypothesis → simulate → remedy pipeline from the legacy Pyracrypt build,
+                  hosted on ZZAI.
                 </p>
               </div>
               <ClutetyAppFrame height="min(78vh, 760px)" />
