@@ -133,20 +133,20 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     spreadZ: 0.75,
   },
   oaas: {
-    flowerCount: 110,
-    particleCount: 60,
-    waterSize: 20,
-    cameraZ: 7.2,
-    cameraY: 3.6,
+    flowerCount: 52,
+    particleCount: 28,
+    waterSize: 16,
+    cameraZ: 8.4,
+    cameraY: 3.7,
     cameraX: 0,
     lookAtY: 0,
-    bloomSpeed: 0.02,
-    crtIntensity: 0.14,
+    bloomSpeed: 0.024,
+    crtIntensity: 0.1,
     pixelSize: 1,
-    scanlineIntensity: 0.007,
-    interactionStrength: 0.55,
-    spreadX: 0.78,
-    spreadZ: 0.82,
+    scanlineIntensity: 0.006,
+    interactionStrength: 0.45,
+    spreadX: 0.72,
+    spreadZ: 0.76,
   },
 };
 
@@ -490,6 +490,70 @@ const CHECKOUT_FLOWER_CONFIGS: FlowerConfig[] = [
     petalWidth: 0.15,
     petalLength: 0.55,
     openAngle: 0.35,
+  },
+];
+
+// Smaller blooms for the OaaS mixing-board section — visible but not viewport-filling.
+const OAAS_FLOWER_CONFIGS: FlowerConfig[] = [
+  {
+    type: "tulip",
+    petalCount: 5,
+    petalShape: "pointed",
+    colors: [VIVVA_COLORS.dustyPink, VIVVA_COLORS.paleRose, VIVVA_COLORS.teal],
+    scale: 0.95,
+    petalWidth: 0.26,
+    petalLength: 0.62,
+    openAngle: 0.6,
+  },
+  {
+    type: "lily",
+    petalCount: 6,
+    petalShape: "curved",
+    colors: [VIVVA_COLORS.mint, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream],
+    scale: 1.0,
+    petalWidth: 0.2,
+    petalLength: 0.68,
+    openAngle: 0.48,
+  },
+  {
+    type: "orchid",
+    petalCount: 5,
+    petalShape: "teardrop",
+    colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.paleRose],
+    scale: 0.9,
+    petalWidth: 0.32,
+    petalLength: 0.55,
+    openAngle: 0.52,
+  },
+  {
+    type: "rose",
+    petalCount: 8,
+    petalShape: "layered",
+    colors: [VIVVA_COLORS.paleRose, VIVVA_COLORS.dustyPink, VIVVA_COLORS.maroon],
+    scale: 0.82,
+    petalWidth: 0.22,
+    petalLength: 0.38,
+    openAngle: 0.38,
+  },
+  {
+    type: "lotus",
+    petalCount: 8,
+    petalShape: "rounded",
+    colors: [VIVVA_COLORS.tealLight, VIVVA_COLORS.mint, VIVVA_COLORS.teal],
+    scale: 0.95,
+    petalWidth: 0.26,
+    petalLength: 0.55,
+    openAngle: 0.42,
+  },
+  {
+    type: "dahlia",
+    petalCount: 10,
+    petalShape: "star",
+    colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.lavender],
+    scale: 0.78,
+    petalWidth: 0.12,
+    petalLength: 0.42,
+    openAngle: 0.32,
   },
 ];
 
@@ -912,28 +976,42 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const isMediumMobile = width < 768;
 
     const isCheckoutPreset = preset === "checkout";
+    const isOaasPreset = preset === "oaas";
 
     const config = isMediumMobile
       ? {
           ...baseConfig,
-          flowerCount: isCheckoutPreset
-            ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
-            : isSmallMobile
-              ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
-              : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
-          particleCount: Math.floor(baseConfig.particleCount * 0.2),
-          // Pull the camera back so whole blooms fit on a phone screen.
-          cameraZ: baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          cameraY: baseConfig.cameraY * 1.15,
+          flowerCount: isOaasPreset
+            ? isSmallMobile
+              ? 26
+              : 34
+            : isCheckoutPreset
+              ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
+              : isSmallMobile
+                ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
+                : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
+          particleCount: isOaasPreset
+            ? Math.floor(baseConfig.particleCount * 0.35)
+            : Math.floor(baseConfig.particleCount * 0.2),
+          cameraZ: isOaasPreset
+            ? baseConfig.cameraZ * (isSmallMobile ? 1.2 : 1.1)
+            : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
+          cameraY: baseConfig.cameraY * (isOaasPreset ? 1.05 : 1.15),
           pixelSize: 1,
-          crtIntensity: isCheckoutPreset ? 0.06 : 0.2,
-          scanlineIntensity: isCheckoutPreset ? 0.003 : 0.012,
-          bloomSpeed: baseConfig.bloomSpeed * 0.85,
-          mobileScaleBoost: isSmallMobile ? 0.28 : 0.36,
+          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset ? 0.12 : 0.2,
+          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset ? 0.005 : 0.012,
+          bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset ? 1.05 : 0.85),
+          mobileScaleBoost: isOaasPreset
+            ? isSmallMobile
+              ? 0.58
+              : 0.68
+            : isSmallMobile
+              ? 0.28
+              : 0.36,
         }
       : {
           ...baseConfig,
-          mobileScaleBoost: Math.max(0.85, scaleFactor),
+          mobileScaleBoost: isOaasPreset ? 0.88 : Math.max(0.85, scaleFactor),
         };
 
     const scene = new THREE.Scene();
@@ -1028,6 +1106,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const spreadZ = config.waterSize * config.spreadZ * 2.0;
 
     const isCheckout = preset === "checkout";
+    const isOaas = preset === "oaas";
     const vivvaTextTex = isCheckout ? createVivvaTextTexture() : null;
 
     const addFlower = (pos: THREE.Vector3, scaleMultiplier: number = 1, flowerIndex: number) => {
@@ -1035,17 +1114,27 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         ? CHECKOUT_FLOWER_CONFIGS
         : isIntro
           ? INTRO_FLOWER_CONFIGS
-          : FLOWER_CONFIGS;
+          : isOaas
+            ? OAAS_FLOWER_CONFIGS
+            : FLOWER_CONFIGS;
       const typeIndex = Math.floor(Math.random() * activeConfigs.length);
       const flowerConfig = activeConfigs[typeIndex];
 
       const sizeVariation = Math.random();
-      const sectionBoost = isIntro ? 1 : isMediumMobile ? 0.72 : 1.4;
+      const sectionBoost = isIntro
+        ? 1
+        : isOaas
+          ? isMediumMobile
+            ? 0.82
+            : 0.9
+          : isMediumMobile
+            ? 0.72
+            : 1.4;
       const baseScale = sizeVariation < 0.2 ? 0.9 + Math.random() * 0.5 : 0.6 + Math.random() * 0.4;
       const mobileBoost = config.mobileScaleBoost ?? 1;
       const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost;
 
-      const flowerNoise = isCheckout ? 0.18 : isIntro ? 0.25 : 0.12;
+      const flowerNoise = isCheckout ? 0.18 : isIntro ? 0.25 : isOaas ? 0.14 : 0.12;
       const flower = createExoticFlower(
         scene,
         pos,
@@ -1055,13 +1144,18 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         flowerNoise,
         vivvaTextTex,
       );
-      const initialGrowth = isMediumMobile
-        ? 0.04 + Math.random() * 0.08
-        : isIntro
-          ? Math.random() < 0.3
-            ? 0.3 + Math.random() * 0.3
-            : 0.6 + Math.random() * 0.4
-          : 0.5 + Math.random() * 0.5;
+      const initialGrowth =
+        isOaas && isMediumMobile
+          ? 0.22 + Math.random() * 0.38
+          : isMediumMobile
+            ? 0.04 + Math.random() * 0.08
+            : isIntro
+              ? Math.random() < 0.3
+                ? 0.3 + Math.random() * 0.3
+                : 0.6 + Math.random() * 0.4
+              : isOaas
+                ? 0.35 + Math.random() * 0.45
+                : 0.5 + Math.random() * 0.5;
       flower.userData = {
         baseY: pos.y,
         growthProgress: initialGrowth,

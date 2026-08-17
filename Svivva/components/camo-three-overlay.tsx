@@ -9,18 +9,24 @@ interface CamoThreeOverlayProps {
   preset?: ScenePreset;
   className?: string;
   isIntro?: boolean;
+  /** Mount flowers immediately instead of waiting for IntersectionObserver. */
+  eagerMount?: boolean;
+  /** Once flowers mount, keep the WebGL scene alive to avoid remount flicker. */
+  keepMounted?: boolean;
 }
 
 export function CamoThreeOverlay({
   preset = "hero",
   className = "",
   isIntro = false,
+  eagerMount = false,
+  keepMounted = false,
 }: CamoThreeOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Intro stays mounted; section scenes mount only near the viewport so mobile
-  // does not blow past the browser WebGL context limit (context lost).
-  const [flowersActive, setFlowersActive] = useState(isIntro);
+  // Intro / eager sections mount immediately; others gate on viewport to protect
+  // mobile WebGL context limits (context lost).
+  const [flowersActive, setFlowersActive] = useState(isIntro || eagerMount);
 
   const seed = useMemo(() => {
     const presetSeeds: Record<ScenePreset, number> = {
@@ -36,7 +42,7 @@ export function CamoThreeOverlay({
   }, [preset]);
 
   useEffect(() => {
-    if (isIntro) {
+    if (isIntro || eagerMount) {
       setFlowersActive(true);
       return;
     }
@@ -49,13 +55,14 @@ export function CamoThreeOverlay({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setFlowersActive(Boolean(entry?.isIntersecting));
+        const visible = Boolean(entry?.isIntersecting);
+        setFlowersActive((prev) => (keepMounted && prev ? true : visible));
       },
       { root: null, rootMargin: "280px 0px", threshold: 0 },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [isIntro, preset]);
+  }, [isIntro, eagerMount, keepMounted, preset]);
 
   useEffect(() => {
     if (!containerRef.current || !canvasRef.current) return;
@@ -85,6 +92,7 @@ export function CamoThreeOverlay({
 
       const isCheckoutCamo = preset === "checkout";
       const isIntroCamo = preset === "hero";
+      const isOaasCamo = preset === "oaas";
 
       const introColors = [
         "rgba(210, 170, 180, 0.38)", // 0: blush pink
@@ -110,11 +118,25 @@ export function CamoThreeOverlay({
         null,
       ];
 
+      // OaaS mixing board: mostly transparent cells so small blooms stay visible.
+      const oaasColors = [
+        null,
+        "rgba(91, 141, 168, 0.16)",
+        null,
+        "rgba(216, 160, 176, 0.12)",
+        null,
+        "rgba(184, 160, 200, 0.10)",
+        null,
+        "rgba(15, 35, 40, 0.28)",
+      ];
+
       const toneCount = isCheckoutCamo
         ? checkoutColors.length
         : isIntroCamo
           ? introColors.length
-          : 3;
+          : isOaasCamo
+            ? oaasColors.length
+            : 3;
       const grid: number[][] = [];
       for (let y = 0; y < rows; y++) {
         grid[y] = [];
@@ -125,7 +147,7 @@ export function CamoThreeOverlay({
           const clusterRand = seededRandom(clusterX, clusterY, 50);
           const combined = rand * 0.35 + clusterRand * 0.65;
 
-          if (isCheckoutCamo || isIntroCamo) {
+          if (isCheckoutCamo || isIntroCamo || isOaasCamo) {
             grid[y][x] = Math.min(Math.floor(combined * toneCount), toneCount - 1);
           } else {
             if (combined < 0.333) {
@@ -179,6 +201,12 @@ export function CamoThreeOverlay({
               ctx.fillStyle = color;
               ctx.fillRect(px, py, blockSize, blockSize);
             }
+          } else if (isOaasCamo) {
+            const color = oaasColors[val];
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(px, py, blockSize, blockSize);
+            }
           } else if (isIntroCamo) {
             const color = introColors[val];
             if (color) {
@@ -207,20 +235,23 @@ export function CamoThreeOverlay({
   }, [seed, preset]);
 
   const isCheckout = preset === "checkout";
+  const isOaas = preset === "oaas";
 
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden w-full h-full ${isCheckout ? "min-h-[200px]" : "min-h-[400px]"} ${className}`}
+      className={`relative overflow-hidden w-full h-full min-h-full ${isCheckout ? "min-h-[200px]" : "min-h-[400px]"} ${className}`}
     >
       <div
-        className={`absolute inset-0 w-full h-full ${isCheckout ? "min-h-[200px]" : "min-h-[400px]"}`}
+        className={`absolute inset-0 w-full h-full min-h-full ${isCheckout ? "min-h-[200px]" : "min-h-[400px]"}`}
         style={{
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
-            : isIntro
-              ? "brightness(1.05) saturate(1.35)"
-              : "brightness(1.15) saturate(1.1)",
+            : isOaas
+              ? "brightness(1.08) saturate(1.25)"
+              : isIntro
+                ? "brightness(1.05) saturate(1.35)"
+                : "brightness(1.15) saturate(1.1)",
         }}
       >
         {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
@@ -228,7 +259,15 @@ export function CamoThreeOverlay({
 
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 w-full h-full pointer-events-none ${isCheckout ? "opacity-30" : isIntro ? "opacity-55 md:opacity-60" : "opacity-60 md:opacity-100"}`}
+        className={`absolute inset-0 w-full h-full pointer-events-none ${
+          isCheckout
+            ? "opacity-30"
+            : isOaas
+              ? "opacity-40 md:opacity-50"
+              : isIntro
+                ? "opacity-55 md:opacity-60"
+                : "opacity-60 md:opacity-100"
+        }`}
       />
     </div>
   );
