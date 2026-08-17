@@ -50,6 +50,10 @@ const ZzaiBouquetScene = dynamic(
   () => import("@/components/zzai-bouquet-scene").then((m) => m.ZzaiBouquetScene),
   { ssr: false },
 );
+const PlatformFeatureHub = dynamic(
+  () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
+  { ssr: false },
+);
 const features = [
   {
     icon: Shield,
@@ -115,7 +119,8 @@ const pricingTiers = [
       "AI material sourcing",
       "Hardware layout preview & optional AI sketches",
       "ZZAI Play — full access",
-      "ZZAI Seeds — multi-app builder",
+      "Mixing-console OS — 16 channels + Master bus",
+      "ZZAI Seeds — multi-app factory",
       "Auto-rollback & versioning",
       "Priority support",
     ],
@@ -134,6 +139,7 @@ const pricingTiers = [
       "Unlimited API requests",
       "Dedicated supplier network",
       "ZZAI Play — full access",
+      "OaaS patch bay — unlimited channel routing",
       "ZZAI Seeds — unlimited builds",
       "SSO & SAML",
       "Custom integrations",
@@ -527,7 +533,7 @@ export default function LandingPage() {
         </nav>
 
         <section
-          id="svivva-seeds"
+          id="oaas-intro"
           className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
@@ -543,25 +549,27 @@ export default function LandingPage() {
                   />
                 </div>
                 <div className="flex-1 text-center md:text-left space-y-3">
-                  <div className="flex items-center justify-center md:justify-start gap-2">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                     <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                      ZZAI Seeds
+                      Orchestration as a Service
                     </span>
+                    <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
                     <Badge variant="secondary" className="text-[10px]">
-                      Pro & Enterprise
+                      Mixing-console OS
                     </Badge>
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                    Generate multiple production-ready applications from a single structured
-                    document. One spec in, entire product suites out — frontend, backend, database,
-                    auth, and deployment configs all built in parallel.
+                    <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI module
+                    is a <strong>channel strip</strong>; subgroup <strong>buses</strong> sum your
+                    signal through <strong>Signal</strong> or <strong>Crest</strong> mains to the{" "}
+                    <strong>Master bus</strong> — deploy, launch, and ship.
                   </p>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                     {[
-                      "Multi-app generation",
-                      "Parallel builds",
-                      "Full-stack output",
-                      "Auto documentation",
+                      "16 channel strips",
+                      "6 subgroup buses",
+                      "Signal · Crest mains",
+                      "Master bus out",
                     ].map((tag) => (
                       <span
                         key={tag}
@@ -571,14 +579,19 @@ export default function LandingPage() {
                       </span>
                     ))}
                   </div>
-                  <div className="pt-2">
-                    <Link href="/seeds">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
+                    <a href="#oaas">
                       <Button
                         size="sm"
                         className="gap-2 bg-[#5B8DA8]"
-                        data-testid="button-seeds-cta"
+                        data-testid="button-oaas-cta"
                       >
-                        Explore Seeds <ArrowRight className="w-3.5 h-3.5" />
+                        Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </a>
+                    <Link href="/seeds">
+                      <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
+                        Open ZZAI Seeds
                       </Button>
                     </Link>
                   </div>
@@ -587,6 +600,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <PlatformFeatureHub />
 
         <section
           className={`relative z-0 py-14 sm:py-20 overflow-visible transition-[background-image,background-color] duration-700 ease-in-out-strong ${mode === "digital" ? "bg-gradient-to-br from-background via-background to-[#5B8DA8]/10" : "bg-gradient-to-br from-background via-[#D94F9C]/5 to-background"}`}
@@ -634,7 +649,8 @@ export default function LandingPage() {
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
                 >
-                  {mode === "digital" ? "SIGNAL" : "CREST"} · use arrows to switch
+                  {mode === "digital" ? "SIGNAL BUS" : "CREST BUS"} · main L/R · use arrows to
+                  switch
                 </p>
               </div>
               {mode === "digital" ? (
@@ -654,10 +670,9 @@ export default function LandingPage() {
                     </span>
                   </h1>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Build and ship production backends, hardware prototypes, or full app suites from
-                    a plain-English description. ZZAI writes the test cases, deploys the endpoint,
-                    validates every response, and auto-rolls back if anything breaks. No DevOps, no
-                    backend code, no babysitting.
+                    <strong>OaaS</strong> — Orchestration as a Service: a mixing-console OS. Patch{" "}
+                    <strong>CH 01 · Seeds</strong>, APIs, launch, YouTube intel, and IP through
+                    subgroup buses to the <strong>Master bus</strong>.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                     <Button
@@ -1852,6 +1867,11 @@ export default function LandingPage() {
                     <Link href="/play" className="hover:text-foreground transition-colors">
                       ZZAI Play
                     </Link>
+                  </li>
+                  <li>
+                    <a href="#oaas" className="hover:text-foreground transition-colors">
+                      OaaS
+                    </a>
                   </li>
                   <li>
                     <Link href="/seeds" className="hover:text-foreground transition-colors">
