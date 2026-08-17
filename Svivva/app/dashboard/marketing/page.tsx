@@ -1462,7 +1462,7 @@ export default function MarketingDashboard() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">YouTube Channel Intel</p>
               <p className="text-xs text-muted-foreground truncate">
-                Ingest a channel (e.g. Starter Story) · auto-transcribe · ask traffic questions
+                Ingest a channel · auto-transcribe · scheduled watches · app-feature ideas
               </p>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />

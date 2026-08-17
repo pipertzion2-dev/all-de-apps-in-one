@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasAdminAccess } from "@/lib/auth/admin";
-import { ingestChannelIntel, MAX_CHANNEL_INTEL_VIDEOS } from "@/lib/marketing/channel-intel";
+import {
+  ingestChannelIntel,
+  MAX_CHANNEL_INTEL_VIDEOS,
+  type ChannelIntelCorpus,
+} from "@/lib/marketing/channel-intel";
+import { getChannelIntelWatchByUrl } from "@/lib/marketing/channel-intel-store";
+import { normalizeChannelVideosUrl } from "@/lib/clutety/youtube-channel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -28,9 +34,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    let previousCorpus: ChannelIntelCorpus | undefined;
+    try {
+      const existing = await getChannelIntelWatchByUrl(
+        normalizeChannelVideosUrl(parsed.data.channelUrl),
+      );
+      previousCorpus = existing?.corpus ?? undefined;
+    } catch {
+      previousCorpus = undefined;
+    }
     const corpus = await ingestChannelIntel({
       channelUrl: parsed.data.channelUrl,
       maxVideos: parsed.data.maxVideos,
+      previousCorpus,
     });
     return NextResponse.json({ corpus });
   } catch (err: unknown) {

@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/run-scheduled?job=autopilot",
       "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/run-scheduled?job=channel-intel",
+      "schedule": "0 9 * * *"
     }
   ]
 }

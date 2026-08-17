@@ -15,7 +15,7 @@
 | What | Value |
 | --- | --- |
 | Domain | `zzaizzai.com` |
-| Host | Vercel |
+| Host | Vercel team **zzai-zzai**, project **all-de-apps-in-one** (`ziontpiper@icloud.com`) — not `svivva-main-app` |
 | GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
 | App root on Vercel | `Svivva` |
 
@@ -34,7 +34,7 @@ That sets GoDaddy `@` → Vercel A (`76.76.21.21`) and `www` → `cname.vercel-d
 
 ### 1. Vercel — add the domain
 
-1. Open [vercel.com](https://vercel.com) → your Svivva project → **Settings → Domains**
+1. Open [vercel.com](https://vercel.com) as **ziontpiper@icloud.com** → team **zzai-zzai** → **all-de-apps-in-one** → **Settings → Domains**
 2. Add **`zzaizzai.com`** and **`www.zzaizzai.com`**
 3. Copy the DNS records Vercel shows (usually):
    - Apex `zzaizzai.com`: **A** → `76.76.21.21` (confirm in Vercel UI)

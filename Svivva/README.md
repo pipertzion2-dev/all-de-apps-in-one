@@ -52,7 +52,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 
 1. Push this repo to GitHub.
 2. Vercel → **Add New… → Project** → **Import** your repo.
-3. **Root Directory:** set to **`ZZAI`** (required — do not leave blank).
+3. **Root Directory:** set to **`Svivva`** (required — do not leave blank).
 4. Framework should detect **Next.js**. Build uses `vercel.json`: `npm ci` then **`npm run build:vercel`** (`verify` + `next build`).
 5. **Environment variables** (Production — copy names from `.env.example`):
    - **`DATABASE_URL`** — hosted Postgres (e.g. Neon/Vercel Postgres).
@@ -64,7 +64,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 6. **Deploy.** First deploy does **not** run `drizzle-kit push`. Against production Postgres run **`npm run db:push`** once from your machine (with prod `DATABASE_URL` in env), or apply migrations your platform supports.
 7. Optional: **Settings → Domains** add `yourdomain.com`; put the DNS records Vercel shows into GoDaddy (apex **A** / **www** **CNAME**).
 
-Repo layout reminder: this monorepo has other folders; only **`ZZAI`** is configured for this Next+Vercel setup.
+Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup. Production is Vercel team **zzai-zzai** / project **all-de-apps-in-one** (`ziontpiper@icloud.com`). Do not use **svivva-main-app**.
 
 ### GitHub Actions deploy (optional)
 

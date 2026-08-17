@@ -3,7 +3,6 @@
   "framework": "nextjs",
   "installCommand": "cd Svivva && npm ci --legacy-peer-deps",
   "buildCommand": "npm run vercel-build",
-  "ignoreCommand": "echo 'Skip root project — deploy via svivva-main-app (Root Directory: Svivva). See README.md.' && exit 0",
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",
@@ -12,6 +11,14 @@
     {
       "path": "/api/cron/run-scheduled?job=growth",
       "schedule": "0 7 * * 0"
+    },
+    {
+      "path": "/api/cron/run-scheduled?job=autopilot",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/run-scheduled?job=channel-intel",
+      "schedule": "0 9 * * *"
     }
   ]
 }
