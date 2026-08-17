@@ -893,6 +893,16 @@ export default function SeedsPage() {
                   {youtubeMutation.isPending ? "Transcribing…" : "Transcribe → Seeds"}
                 </Button>
               </form>
+              <p className="text-xs text-muted-foreground text-center">
+                Want captions only?{" "}
+                <Link
+                  href="/tools/youtube-caption-preview"
+                  className="text-[#5B8DA8] hover:underline"
+                >
+                  Free YouTube Caption Preview
+                </Link>{" "}
+                — no signup.
+              </p>
               {youtubeMutation.isSuccess && (
                 <p
                   className="text-sm text-muted-foreground text-center"

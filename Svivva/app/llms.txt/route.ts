@@ -57,6 +57,24 @@ export async function GET() {
   lines.push(`- [All Tools](${base}/tools): The full free tool directory.`);
   lines.push(`- [Blog](${base}/blog): Guides on APIs, AI, and SEO.`);
   lines.push(`- [Orbit](${base}/orbit): Growth + indexing autopilot.`);
+  lines.push(`- [Seeds](${base}/seeds): PDF or YouTube transcript → many apps.`);
+  lines.push("");
+  lines.push("## Featured free slices (one job each, no signup)");
+  lines.push(
+    `- [YouTube Caption Preview](${base}/tools/youtube-caption-preview): Public captions from a watch URL. Seeds turns captions into apps.`,
+  );
+  lines.push(
+    `- [Channel Blend Preview](${base}/tools/channel-blend-preview): First-order hybrid sketch of two ZZAI channels. Hybrid² Lab lists and fuses blends.`,
+  );
+  lines.push(
+    `- [OaaS Patch Preview](${base}/tools/oaas-patch-preview): Keyword mixing-board patch order. Orchestration as a Service is the full desk.`,
+  );
+  lines.push(
+    `- [ZZAI Face Chooser](${base}/tools/zzai-face-chooser): Pick a job, open one cube face. The homepage cube is the six-face navigator.`,
+  );
+  lines.push(
+    `- [Sketch Hash Stamp](${base}/tools/sketch-hash-stamp): SHA-256 in the browser. Poor Man Protection seals and court-packs.`,
+  );
   lines.push("");
 
   if (posts.length) {

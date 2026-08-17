@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { db } from "@/server/db";
 import { seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { nativeToolsAsIndexCards } from "@/lib/orbit/mini-app-curation";
 import ToolsIndexContent from "./tools-index-content";
 
 export const dynamic = "force-dynamic";
@@ -31,9 +32,32 @@ export default async function ToolsIndexPage() {
     console.error("[tools] DB query failed:", err);
   }
 
+  const natives = nativeToolsAsIndexCards();
+  const nativeSlugs = new Set(natives.map((t) => t.slug));
+  const mergedTools = [
+    ...natives,
+    ...tools
+      .filter((t) => t.slug && !nativeSlugs.has(t.slug))
+      .map((t) => ({
+        id: t.id,
+        slug: t.slug,
+        keyword: t.keyword,
+        title: t.title,
+        headline: t.headline,
+        subheadline: t.subheadline,
+        content: t.content,
+        benefits: t.benefits ?? [],
+        category: t.category,
+        toolUrl: t.toolUrl,
+        metaTitle: t.metaTitle,
+        metaDescription: t.metaDescription,
+        published: t.published,
+      })),
+  ];
+
   return (
     <ToolsIndexContent
-      tools={JSON.parse(JSON.stringify(tools))}
+      tools={JSON.parse(JSON.stringify(mergedTools))}
       categories={JSON.parse(JSON.stringify(categories))}
     />
   );
