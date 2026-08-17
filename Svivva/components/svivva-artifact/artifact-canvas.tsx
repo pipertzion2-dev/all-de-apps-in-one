@@ -20,6 +20,40 @@ type Props = {
 // BoxGeometry face order: +x, -x, +y, -y, +z, -z
 const FACE_ORDER: FeatureId[] = ["api", "security", "play", "hardware", "seeds", "orbit"];
 
+const ZC_FACE_FONT = '"Zc", sans-serif';
+
+let zcFontPromise: Promise<void> | null = null;
+
+function ensureZcFont(): Promise<void> {
+  if (zcFontPromise) return zcFontPromise;
+  zcFontPromise = (async () => {
+    if (typeof document === "undefined") return;
+    try {
+      if (document.fonts.check(`64px ${ZC_FACE_FONT}`)) return;
+      const face = new FontFace("Zc", "url(/fonts/Zc-Regular.ttf)");
+      document.fonts.add(await face.load());
+      await document.fonts.load(`160px ${ZC_FACE_FONT}`);
+    } catch {
+      try {
+        await document.fonts.ready;
+      } catch {
+        /* canvas will fall back to sans-serif */
+      }
+    }
+  })();
+  return zcFontPromise;
+}
+
+function fitZcFaceLabel(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): number {
+  let size = 168;
+  ctx.font = `${size}px ${ZC_FACE_FONT}`;
+  while (ctx.measureText(text).width > maxWidth && size > 64) {
+    size -= 4;
+    ctx.font = `${size}px ${ZC_FACE_FONT}`;
+  }
+  return size;
+}
+
 function paintLabeledFace(feature: FeatureDef, image?: HTMLImageElement): THREE.CanvasTexture {
   const size = 1024;
   const canvas = document.createElement("canvas");
@@ -49,25 +83,40 @@ function paintLabeledFace(feature: FeatureDef, image?: HTMLImageElement): THREE.
     ctx.globalAlpha = 1;
   }
 
-  const veil = ctx.createLinearGradient(0, size * 0.38, 0, size);
-  veil.addColorStop(0, "rgba(0,0,0,0)");
-  veil.addColorStop(0.42, "rgba(0,0,0,0.45)");
-  veil.addColorStop(1, "rgba(0,0,0,0.88)");
-  ctx.fillStyle = veil;
-  ctx.fillRect(0, 0, size, size);
+  const topVeil = ctx.createLinearGradient(0, 0, 0, size * 0.34);
+  topVeil.addColorStop(0, "rgba(0,0,0,0.82)");
+  topVeil.addColorStop(0.55, "rgba(0,0,0,0.48)");
+  topVeil.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = topVeil;
+  ctx.fillRect(0, 0, size, size * 0.36);
 
+  const botVeil = ctx.createLinearGradient(0, size * 0.82, 0, size);
+  botVeil.addColorStop(0, "rgba(0,0,0,0)");
+  botVeil.addColorStop(1, "rgba(0,0,0,0.55)");
+  ctx.fillStyle = botVeil;
+  ctx.fillRect(0, size * 0.82, size, size * 0.18);
+
+  const word = feature.shortLabel;
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.shadowColor = "rgba(0,0,0,0.85)";
-  ctx.shadowBlur = 28;
+  ctx.textBaseline = "top";
+  const fontSize = fitZcFaceLabel(ctx, word, size * 0.9);
+  ctx.font = `${fontSize}px ${ZC_FACE_FONT}`;
+  ctx.lineJoin = "round";
+  ctx.miterLimit = 2;
+  ctx.lineWidth = Math.max(10, fontSize * 0.08);
+  ctx.strokeStyle = "rgba(0,0,0,0.88)";
   ctx.fillStyle = "#ffffff";
-  ctx.font = "700 168px ui-sans-serif, system-ui, sans-serif";
-  ctx.fillText(feature.shortLabel.toUpperCase(), size / 2, size * 0.68);
+  ctx.shadowColor = "rgba(0,0,0,0.9)";
+  ctx.shadowBlur = 22;
+  const labelY = size * 0.045;
+  ctx.strokeText(word, size / 2, labelY);
+  ctx.fillText(word, size / 2, labelY);
 
   ctx.shadowBlur = 0;
-  ctx.fillStyle = feature.accentColor;
-  ctx.font = "600 36px ui-sans-serif, system-ui, sans-serif";
-  ctx.fillText("TAP TO OPEN", size / 2, size * 0.84);
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `36px ${ZC_FACE_FONT}`;
+  ctx.fillText("TAP TO OPEN", size / 2, size * 0.92);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -91,6 +140,8 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
   useEffect(() => {
     const el = mountRef.current;
     if (!el) return;
+
+    let cancelled = false;
 
     // Render at 1.85× container so rotating cube corners are never clipped.
     const cW = el.clientWidth || 520;
@@ -141,22 +192,28 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         feature.artworkSrc,
         (tex) => {
           const img = tex.image as HTMLImageElement | undefined;
-          const labeled = paintLabeledFace(feature, img);
-          mat.map = labeled;
-          mat.emissiveMap = labeled;
-          mat.emissive = new THREE.Color(0xffffff);
-          mat.emissiveIntensity = 0.45;
-          mat.opacity = 0;
-          mat.needsUpdate = true;
+          void ensureZcFont().then(() => {
+            if (cancelled) return;
+            const labeled = paintLabeledFace(feature, img);
+            mat.map = labeled;
+            mat.emissiveMap = labeled;
+            mat.emissive = new THREE.Color(0xffffff);
+            mat.emissiveIntensity = 0.55;
+            mat.opacity = 0;
+            mat.needsUpdate = true;
+          });
         },
         undefined,
         () => {
-          const labeled = paintLabeledFace(feature);
-          mat.map = labeled;
-          mat.emissiveMap = labeled;
-          mat.emissive = new THREE.Color(0xffffff);
-          mat.emissiveIntensity = 0.4;
-          mat.needsUpdate = true;
+          void ensureZcFont().then(() => {
+            if (cancelled) return;
+            const labeled = paintLabeledFace(feature);
+            mat.map = labeled;
+            mat.emissiveMap = labeled;
+            mat.emissive = new THREE.Color(0xffffff);
+            mat.emissiveIntensity = 0.5;
+            mat.needsUpdate = true;
+          });
         },
       );
       return mat;
@@ -212,7 +269,6 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
       loadArtworkTexture(ARTWORK_MANIFESTS[fId].src).then((tex) => ({ fId, tex })),
     );
 
-    let cancelled = false;
     Promise.all(textureLoads).then((loaded) => {
       if (cancelled) return;
       loaded.forEach(({ fId, tex }) => {

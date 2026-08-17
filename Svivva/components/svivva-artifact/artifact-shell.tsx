@@ -56,7 +56,10 @@ export function SvivvaArtifact() {
         </p>
       </div>
 
-      <p className="text-muted-foreground/50 text-[10px] tracking-widest uppercase mb-0 select-none pointer-events-none relative z-[1]">
+      <p
+        className="text-muted-foreground/80 text-sm mb-0 select-none pointer-events-none relative z-[1]"
+        style={{ fontFamily: '"Zc", sans-serif' }}
+      >
         Play · Seeds · Hardware · Digital · Orbit · Protect
       </p>
 
@@ -106,7 +109,10 @@ export function SvivvaArtifact() {
             >
               Face
             </span>
-            <span className="text-sm font-semibold text-foreground group-hover:text-[#5B8DA8]">
+            <span
+              className="text-sm font-normal text-foreground group-hover:text-[#5B8DA8]"
+              style={{ fontFamily: '"Zc", sans-serif' }}
+            >
               {f.shortLabel}
             </span>
             <span className="text-[11px] text-muted-foreground leading-snug">{f.name}</span>
