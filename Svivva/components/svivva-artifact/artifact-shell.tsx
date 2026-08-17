@@ -13,10 +13,9 @@ const ArtifactCanvas = lazy(() =>
   import("./artifact-canvas").then((m) => ({ default: m.ArtifactCanvas })),
 );
 
-/** Canvas renders at 1.85× the box; pull up following sections without clipping the cube. */
+/** Canvas renders at 1.85× the box; reserve that overflow so the next section never slides under the cube. */
 const CUBE_SIZE = "min(520px, 92vw)";
 const CANVAS_OVERFLOW = `calc(0.425 * ${CUBE_SIZE})`;
-const CUBE_SCROLL_BLEED = `calc(-1 * ${CANVAS_OVERFLOW})`;
 
 export function SvivvaArtifact() {
   const router = useRouter();
@@ -32,8 +31,7 @@ export function SvivvaArtifact() {
     <section
       id="nav-cube"
       data-svivva-artifact
-      className="w-full flex flex-col items-center gap-0 pt-24 sm:pt-28 pb-8 px-4 overflow-visible"
-      style={{ marginBottom: CUBE_SCROLL_BLEED }}
+      className="w-full flex flex-col items-center gap-0 pt-24 sm:pt-28 pb-10 sm:pb-12 px-4 overflow-visible relative z-10"
     >
       <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl">
         <p
@@ -71,6 +69,7 @@ export function SvivvaArtifact() {
           overflow: "visible",
           zIndex: 10,
           marginTop: CANVAS_OVERFLOW,
+          marginBottom: CANVAS_OVERFLOW,
         }}
       >
         <div
