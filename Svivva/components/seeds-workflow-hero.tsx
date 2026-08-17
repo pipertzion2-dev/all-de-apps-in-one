@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Upload, ShieldCheck, Layers, Loader2 } from "lucide-react";
+import { Upload, ShieldCheck, Layers, Loader2, Youtube } from "lucide-react";
 import {
   SEEDS_WORKFLOW_STEPS,
   type SeedsWorkflowState,
@@ -15,8 +15,8 @@ type Props = {
 };
 
 const PHASE_HINT: Record<SeedsWorkflowState["phase"], string> = {
-  idle: "Spec tree dormant — upload PDF to grow the trunk",
-  uploading: "Ingesting spec pages into the parse core",
+  idle: "Spec tree dormant — upload a PDF or YouTube transcript to grow the trunk",
+  uploading: "Ingesting spec pages or captions into the parse core",
   parsed: `${0} branches ready on the canopy — verify invariants`,
   verifying: "Proof gate active — checks climbing the trunk",
   building: "Seed pods filling on each branch in parallel",
@@ -124,6 +124,17 @@ export function SeedsWorkflowHero({ state, onUploadClick, uploading }: Props) {
                 <Upload className="h-3.5 w-3.5 shrink-0" />
               )}
               {uploading ? "Parsing…" : "Upload PDF"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5 px-3 text-xs sm:gap-2"
+              onClick={() => scrollTo("#seeds-youtube")}
+              disabled={uploading}
+              data-testid="button-hero-youtube"
+            >
+              <Youtube className="h-3.5 w-3.5 shrink-0" />
+              YouTube
             </Button>
             <Button
               size="sm"

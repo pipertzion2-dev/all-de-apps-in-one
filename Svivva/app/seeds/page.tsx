@@ -14,6 +14,7 @@ import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import { BrandMark } from "@/components/brand-mark";
 import type { SeedAppSpec, SeedEngineeringDocs, SeedMarketingContent } from "@/lib/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import { SeedsFunnelSetup } from "@/components/seeds-funnel-setup";
@@ -23,6 +24,7 @@ import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
 import { ReferralWidget } from "@/components/referral-widget";
 import {
+  Youtube,
   Upload,
   FileText,
   Sprout,
@@ -494,6 +496,7 @@ export default function SeedsPage() {
   const [multiPrompt, setMultiPrompt] = useState("");
   const [promptBarOpen, setPromptBarOpen] = useState(false);
   const [compilerActive, setCompilerActive] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
 
   // Purge leaked WebGL layers attached outside the Seeds page shell.
   useEffect(() => {
@@ -552,6 +555,25 @@ export default function SeedsPage() {
     },
     onError: () => {
       setUploading(false);
+    },
+  });
+
+  const youtubeMutation = useMutation({
+    mutationFn: async (url: string) => {
+      const res = await authFetch("/api/seeds/from-youtube", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error((data as { error?: string }).error || "Failed to transcribe YouTube");
+      }
+      return data as { sessionId: string; seedCount: number; sourceLabel: string };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seeds"] });
+      setYoutubeUrl("");
     },
   });
 
@@ -638,7 +660,7 @@ export default function SeedsPage() {
         : 0;
 
     return deriveSeedsWorkflowState({
-      uploading: uploading || uploadMutation.isPending,
+      uploading: uploading || uploadMutation.isPending || youtubeMutation.isPending,
       seedCount: allSeeds.length,
       builtCount,
       buildingCount: building.length,
@@ -646,7 +668,7 @@ export default function SeedsPage() {
       compiling: compilerActive,
       activeStep: "upload",
     });
-  }, [allSeeds, uploading, uploadMutation.isPending, compilerActive]);
+  }, [allSeeds, uploading, uploadMutation.isPending, youtubeMutation.isPending, compilerActive]);
 
   const seedVisuals = useMemo(
     () =>
@@ -823,11 +845,77 @@ export default function SeedsPage() {
             </CardContent>
           </Card>
 
+          <Card
+            id="seeds-youtube"
+            className="border-dashed border-2 border-border/70 hover:border-[#6B2C4E]/50 transition-colors scroll-mt-24"
+            data-testid="card-youtube-transcript"
+          >
+            <CardContent className="p-8 space-y-4">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#6B2C4E]/10 flex items-center justify-center mx-auto">
+                  <Youtube className="w-8 h-8 text-[#6B2C4E]" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">YouTube transcript</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Paste a video or channel URL. Captions become the same seed specs as a PDF, then
+                    you build and deploy as usual.
+                  </p>
+                </div>
+              </div>
+              <form
+                className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const trimmed = youtubeUrl.trim();
+                  if (trimmed) youtubeMutation.mutate(trimmed);
+                }}
+              >
+                <Input
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=… or /@channel"
+                  className="flex-1"
+                  disabled={youtubeMutation.isPending}
+                  data-testid="input-youtube-url"
+                />
+                <Button
+                  type="submit"
+                  className="gap-2 bg-[#6B2C4E] hover:bg-[#6B2C4E]/90"
+                  disabled={youtubeMutation.isPending || youtubeUrl.trim().length < 8}
+                  data-testid="button-youtube-transcribe"
+                >
+                  {youtubeMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Youtube className="w-4 h-4" />
+                  )}
+                  {youtubeMutation.isPending ? "Transcribing…" : "Transcribe → Seeds"}
+                </Button>
+              </form>
+              {youtubeMutation.isSuccess && (
+                <p
+                  className="text-sm text-muted-foreground text-center"
+                  data-testid="text-youtube-success"
+                >
+                  Parsed {youtubeMutation.data.seedCount} seed
+                  {youtubeMutation.data.seedCount === 1 ? "" : "s"} from{" "}
+                  {youtubeMutation.data.sourceLabel}. Build and deploy below like any other session.
+                </p>
+              )}
+              {youtubeMutation.isError && (
+                <p className="text-sm text-red-500 text-center" data-testid="text-youtube-error">
+                  {(youtubeMutation.error as Error).message}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-[#5B8DA8]">{sessions.length}</div>
-                <div className="text-xs text-muted-foreground mt-1">Uploads</div>
+                <div className="text-xs text-muted-foreground mt-1">Sessions</div>
               </CardContent>
             </Card>
             <Card>
@@ -932,7 +1020,7 @@ export default function SeedsPage() {
                 <div>
                   <h3 className="font-semibold text-lg">No Seeds Yet</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload a structured PDF blueprint to start generating applications.
+                    Upload a PDF blueprint or paste a YouTube URL to start generating applications.
                   </p>
                 </div>
                 <div className="max-w-md mx-auto text-left space-y-2">

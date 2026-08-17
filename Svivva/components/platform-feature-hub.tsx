@@ -25,6 +25,7 @@ import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions
 
 const PRESET_SCENES = [
   "Turn my PDF into multiple apps and launch them",
+  "Transcribe a YouTube video into deployable apps",
   "Get more traffic for my SaaS",
   "Protect sketches as a group patent",
   "Build an API and ship with evals",

@@ -8,9 +8,9 @@ export interface ParsedSeeds {
   error?: string;
 }
 
-const PARSE_PDF_PROMPT = `You are the ZZAI Seeds PDF Parser. Your job is to analyze the text content of a structured multi-application PDF blueprint and extract each individual application specification.
+const PARSE_PDF_PROMPT = `You are the ZZAI Seeds parser. Your job is to analyze a structured multi-application PDF blueprint OR a YouTube transcript briefing and extract each individual application specification.
 
-Each app inside the document should follow a structured schema. Look for clear boundaries between apps (headers, delimiters, section breaks, numbered apps).
+Each app inside the document should follow a structured schema. Look for clear boundaries between apps (headers, delimiters, section breaks, numbered apps, or “App source” transcript sections). When the source is a YouTube transcript, invent concrete, shippable app specs inspired by the products, tactics, and workflows described — do not copy the video as a media player.
 
 For each app found, extract:
 - appName: The application name

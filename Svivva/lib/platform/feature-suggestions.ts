@@ -39,7 +39,9 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
   if (fromId && getFeature(fromId)?.connectsTo.includes(feature.id)) score += 12;
   if (
     feature.id === "seeds" &&
-    goalTerms.some((t) => ["app", "apps", "suite", "pdf", "seed"].includes(t))
+    goalTerms.some((t) =>
+      ["app", "apps", "suite", "pdf", "seed", "youtube", "transcript"].includes(t),
+    )
   ) {
     score += 10;
   }
@@ -158,7 +160,7 @@ Return ONLY JSON:
 
 Rules:
 - Prefer orchestration when they need a full patch route across channels
-- Prefer seeds (CH 01) when they want many apps from PDF upload
+- Prefer seeds (CH 01) when they want many apps from a PDF or YouTube transcript
 - Route Grow bus channels (launch, marketing, channel-intel, orbit) for traffic/SEO
 - Route Protect bus + hybridization FX for IP/patent/sketches
 - End workflows at Master (launch/deploy) when possible

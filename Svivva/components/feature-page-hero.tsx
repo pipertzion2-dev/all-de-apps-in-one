@@ -11,7 +11,7 @@ const FeatureScrollBand = dynamic(
 
 const PAGE_STATS: Record<FeatureId, [string, string, string]> = {
   play: ["Hocket voices", "Meend bends", "∞ Real-time"],
-  seeds: ["PDF → Apps", "Parallel build", "∞ Branches"],
+  seeds: ["PDF / YT → Apps", "Parallel build", "∞ Branches"],
   orbit: ["8 Systems", "50+ Mini-apps", "∞ Traffic"],
   security: ["Group patent", "Court pack", "∞ Sealed"],
   api: ["Schema lock", "200 Evals", "∞ Versions"],
