@@ -408,6 +408,18 @@ function ReturningUserDashboard({
       ],
     },
     {
+      href: "/dashboard/hybrid-lab",
+      title: "Hybrid² Lab",
+      subtitle: "Blend any two channels, then hybridize those blends",
+      icon: FlaskConical,
+      color: "#6B2C4E",
+      shapes: [
+        { shape: "ring" as const, size: 20, x: "left-5", y: "top-4", delay: 0.2, duration: 6 },
+        { shape: "cube" as const, size: 14, x: "right-6", y: "bottom-4", delay: 0.8, duration: 7 },
+        { shape: "sphere" as const, size: 12, x: "right-14", y: "top-7", delay: 1.1, duration: 5 },
+      ],
+    },
+    {
       href: "/dashboard/poor-man-protection",
       title: "Poor Man Protection",
       subtitle: "Seal sketches — or dump a group of images and let ZZAI organize",
@@ -506,6 +518,18 @@ function ReturningUserDashboard({
         { shape: "sphere" as const, size: 20, x: "left-6", y: "top-4", delay: 0.3, duration: 6 },
         { shape: "cube" as const, size: 16, x: "right-8", y: "top-8", delay: 0, duration: 9 },
         { shape: "ring" as const, size: 18, x: "left-14", y: "bottom-3", delay: 1.2, duration: 7 },
+      ],
+    },
+    {
+      href: "/dashboard/hybrid-lab",
+      title: "Hybrid² Lab",
+      subtitle: "Blend any two channels, then hybridize those blends",
+      icon: FlaskConical,
+      color: "#6B2C4E",
+      shapes: [
+        { shape: "ring" as const, size: 20, x: "left-5", y: "top-4", delay: 0.2, duration: 6 },
+        { shape: "cube" as const, size: 14, x: "right-6", y: "bottom-4", delay: 0.8, duration: 7 },
+        { shape: "sphere" as const, size: 12, x: "right-14", y: "top-7", delay: 1.1, duration: 5 },
       ],
     },
     {
