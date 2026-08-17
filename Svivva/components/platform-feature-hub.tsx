@@ -20,6 +20,7 @@ import {
   PATCH_BAY,
   SIGNAL_BUS,
 } from "@/lib/platform/feature-graph";
+import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
 
 const PRESET_SCENES = [
@@ -57,7 +58,7 @@ function ChannelStrip({
   return (
     <Link
       href={href}
-      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/80 px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
+      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/80 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
     >
       <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
         {channelLabel}
@@ -119,12 +120,31 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
       className={
         isCompact
           ? "space-y-4"
-          : "py-14 sm:py-20 border-b border-[#5B8DA8]/20 bg-gradient-to-b from-background via-[#5B8DA8]/5 to-background"
+          : "py-14 sm:py-20 border-b border-[#5B8DA8]/20 bg-gradient-to-b from-background via-[#5B8DA8]/5 to-background relative overflow-hidden min-h-[600px]"
       }
     >
-      <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10"}>
+      {!isCompact && (
+        <>
+          <div className="absolute inset-0 opacity-60 md:opacity-50 pointer-events-none">
+            <CamoThreeOverlay preset="oaas" />
+          </div>
+          <div
+            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            style={{
+              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+            }}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+            }}
+          />
+        </>
+      )}
+      <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"}>
         {!isCompact && (
-          <div className="text-center space-y-3 max-w-3xl mx-auto">
+          <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8">
             <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
               {OAAS_NAME} · {OAAS_FULL_NAME}
             </Badge>
@@ -139,15 +159,15 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
 
         {!isCompact && (
           <div className="grid sm:grid-cols-3 gap-3 text-center text-xs">
-            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/60 p-3">
+            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/80 backdrop-blur-sm p-3">
               <p className="font-bold text-[#5B8DA8]">{SIGNAL_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{SIGNAL_BUS.description}</p>
             </div>
-            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/60 p-3">
+            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/80 backdrop-blur-sm p-3">
               <p className="font-bold text-[#D94F9C]">{CREST_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
             </div>
-            <div className="rounded-lg border border-amber-500/40 bg-card/60 p-3">
+            <div className="rounded-lg border border-amber-500/40 bg-card/80 backdrop-blur-sm p-3">
               <p className="font-bold text-amber-600 dark:text-amber-400">
                 {MASTER_BUS.consoleName}
               </p>

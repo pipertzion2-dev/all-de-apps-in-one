@@ -3,7 +3,7 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { ThreeCRTFlowers } from "./three-crt-flowers";
 
-type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout";
+type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
 
 interface CamoThreeOverlayProps {
   preset?: ScenePreset;
@@ -30,6 +30,7 @@ export function CamoThreeOverlay({
       evals: 389,
       pricing: 512,
       checkout: 640,
+      oaas: 773,
     };
     return presetSeeds[preset];
   }, [preset]);
