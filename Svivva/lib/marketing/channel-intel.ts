@@ -2,9 +2,42 @@ import { fetchYoutubeFull } from "@/lib/clutety/youtube-fetch";
 import { listChannelVideos } from "@/lib/clutety/youtube-channel";
 import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
 import { getDefaultModel, openai } from "@/lib/llm/openai";
+import { getSvivvaProductProfile } from "@/lib/orbit/product-profile";
 
 export const MAX_CHANNEL_INTEL_VIDEOS = 24;
 export const DEFAULT_TRANSCRIPT_CHARS = 8000;
+
+export const CHANNEL_INTEL_PRESET_QUERIES = [
+  "How do I get more traffic for my app?",
+  "What SEO tactics do they recommend for SaaS?",
+  "Reddit and community marketing strategies",
+  "Product Hunt and launch tactics",
+  "Content marketing and YouTube growth",
+] as const;
+
+export type ChannelIntelCadence = "daily" | "every_3_days" | "weekly";
+
+export const CHANNEL_INTEL_CADENCE_MS: Record<ChannelIntelCadence, number> = {
+  daily: 24 * 60 * 60 * 1000,
+  every_3_days: 3 * 24 * 60 * 60 * 1000,
+  weekly: 7 * 24 * 60 * 60 * 1000,
+};
+
+export function computeNextRunAt(cadence: ChannelIntelCadence, from: Date = new Date()): string {
+  return new Date(from.getTime() + CHANNEL_INTEL_CADENCE_MS[cadence]).toISOString();
+}
+
+export function isWatchDue(nextRunAt: string, enabled: boolean, now: Date = new Date()): boolean {
+  if (!enabled) return false;
+  const t = Date.parse(nextRunAt);
+  if (Number.isNaN(t)) return true;
+  return t <= now.getTime();
+}
+
+export function diffNewVideoIds(previousIds: string[], currentIds: string[]): string[] {
+  const seen = new Set(previousIds);
+  return currentIds.filter((id) => !seen.has(id));
+}
 
 export type ChannelIntelVideo = {
   videoId: string;
@@ -46,6 +79,35 @@ export type ChannelIntelAnswer = {
   query: string;
 };
 
+export type ChannelIntelProductSuggestion = {
+  title: string;
+  why: string;
+  how: string;
+};
+
+export type ChannelIntelWatchPublic = {
+  id: string;
+  userId: string | null;
+  channelUrl: string;
+  channelTitle: string;
+  maxVideos: number;
+  cadence: ChannelIntelCadence;
+  watchQueries: string[];
+  suggestAppFeatures: boolean;
+  enabled: boolean;
+  seenVideoIds: string[];
+  lastBriefings: ChannelIntelAnswer[];
+  productSuggestions: ChannelIntelProductSuggestion[];
+  lastNewVideoIds: string[];
+  lastError: string | null;
+  lastRunAt: string | null;
+  nextRunAt: string;
+  createdAt: string;
+  updatedAt: string;
+  videoCount: number;
+  transcriptCount: number;
+};
+
 function canUseAi(): boolean {
   return !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim() || getOpenAIApiKey()?.trim());
 }
@@ -71,16 +133,28 @@ export async function ingestChannelIntel(options: {
   channelUrl: string;
   maxVideos?: number;
   transcriptMaxChars?: number;
+  previousCorpus?: ChannelIntelCorpus | null;
   onProgress?: (done: number, total: number, title: string) => void;
 }): Promise<ChannelIntelCorpus> {
   const maxVideos = Math.min(options.maxVideos ?? 20, MAX_CHANNEL_INTEL_VIDEOS);
   const transcriptMaxChars = options.transcriptMaxChars ?? DEFAULT_TRANSCRIPT_CHARS;
   const listing = await listChannelVideos(options.channelUrl, maxVideos);
   const stubs = listing.videos.slice(0, maxVideos);
+  const previousById = new Map(
+    (options.previousCorpus?.videos ?? []).map((video) => [video.videoId, video]),
+  );
 
   let failed = 0;
   const videos = await mapPool(stubs, 4, async (stub, index) => {
     options.onProgress?.(index, stubs.length, stub.title);
+    const prior = previousById.get(stub.videoId);
+    if (prior?.hasTranscript && prior.transcript.length > 0) {
+      return {
+        ...prior,
+        title: stub.title || prior.title,
+        publishedText: stub.publishedText || prior.publishedText,
+      } satisfies ChannelIntelVideo;
+    }
     try {
       const { metadata, transcript } = await fetchYoutubeFull(stub.videoId);
       const clipped = transcript.slice(0, transcriptMaxChars);
@@ -97,6 +171,7 @@ export async function ingestChannelIntel(options: {
       } satisfies ChannelIntelVideo;
     } catch {
       failed++;
+      if (prior) return prior;
       return {
         videoId: stub.videoId,
         title: stub.title,
@@ -284,5 +359,112 @@ ${context.slice(0, 90000)}`;
       aiUsed: false,
       query: trimmed,
     };
+  }
+}
+
+function parseSuggestionJson(raw: string): ChannelIntelProductSuggestion[] {
+  const match = raw.match(/\[[\s\S]*\]/);
+  if (!match) return [];
+  try {
+    const parsed = JSON.parse(match[0]) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const rec = item as Record<string, unknown>;
+        const title = typeof rec.title === "string" ? rec.title.trim() : "";
+        if (!title) return null;
+        return {
+          title: title.slice(0, 120),
+          why: typeof rec.why === "string" ? rec.why.trim().slice(0, 400) : "",
+          how: typeof rec.how === "string" ? rec.how.trim().slice(0, 400) : "",
+        } satisfies ChannelIntelProductSuggestion;
+      })
+      .filter((item): item is ChannelIntelProductSuggestion => !!item)
+      .slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
+function fallbackProductSuggestions(
+  briefings: ChannelIntelAnswer[],
+): ChannelIntelProductSuggestion[] {
+  const titles = briefings
+    .flatMap((b) => b.answer.split("\n"))
+    .map((line) => line.replace(/^[\s*#\d.)-]+/, "").trim())
+    .filter((line) => line.length > 18 && line.length < 90)
+    .slice(0, 4);
+  if (!titles.length) {
+    return [
+      {
+        title: "Auto-apply traffic tactics from watched channels",
+        why: "The corpus has growth ideas that currently sit in a briefing instead of shipping in ZZAI.",
+        how: "Turn repeated tactics (SEO pages, Reddit posts, launch checklists) into one-click Orbit tasks.",
+      },
+    ];
+  }
+  return titles.map((title) => ({
+    title: `Add: ${title.slice(0, 80)}`,
+    why: "Repeated in the watched YouTube briefings.",
+    how: "Ship a small ZZAI tool or Orbit task that performs this tactic for the signed-in user.",
+  }));
+}
+
+/** Turn channel briefings into concrete ZZAI product ideas. */
+export async function suggestZzaiFeaturesFromIntel(options: {
+  channelTitle: string;
+  briefings: ChannelIntelAnswer[];
+  newVideoTitles?: string[];
+}): Promise<{ suggestions: ChannelIntelProductSuggestion[]; aiUsed: boolean }> {
+  const briefings = options.briefings.filter((b) => b.answer.trim());
+  if (!briefings.length) {
+    return { suggestions: [], aiUsed: false };
+  }
+  if (!canUseAi()) {
+    return { suggestions: fallbackProductSuggestions(briefings), aiUsed: false };
+  }
+
+  const product = getSvivvaProductProfile();
+  const briefingText = briefings
+    .map((b) => `Q: ${b.query}\n${b.answer.slice(0, 4000)}`)
+    .join("\n\n")
+    .slice(0, 24000);
+  const newVideos = (options.newVideoTitles ?? []).slice(0, 12).join("; ");
+
+  const prompt = `You help decide what to ADD to the ZZAI product.
+
+Product: ${product.name} — ${product.tagline}
+${product.description}
+Audience: ${product.audience}
+Site: ${product.url}
+Existing surfaces: Marketing dashboard, Orbit SEO automation, Poor Man Protection (group patents), Channel Intel (YouTube transcripts), Clutety, Play, AI Tools Hub.
+
+Channel watched: ${options.channelTitle}
+${newVideos ? `New videos this run: ${newVideos}` : ""}
+
+Briefings from auto-transcribed videos:
+${briefingText}
+
+Return ONLY a JSON array of 3-6 objects:
+[{"title":"short feature name","why":"why this belongs in ZZAI","how":"smallest shippable version"}]
+
+Rules:
+- Features must be things ZZAI can build (tools, automations, dashboards, generators) — not generic life advice.
+- Prefer ideas that reuse Channel Intel, Orbit, marketing, or patent flows already in the app.
+- Do not suggest rebuilding YouTube.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: getDefaultModel(),
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+    });
+    const raw = completion.choices[0]?.message?.content?.trim() || "";
+    const suggestions = parseSuggestionJson(raw);
+    if (suggestions.length) return { suggestions, aiUsed: true };
+    return { suggestions: fallbackProductSuggestions(briefings), aiUsed: true };
+  } catch {
+    return { suggestions: fallbackProductSuggestions(briefings), aiUsed: false };
   }
 }

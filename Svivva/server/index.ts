@@ -118,6 +118,47 @@ function startGrowthScheduler() {
   }, GROWTH_INITIAL_DELAY_MS);
 }
 
+const CHANNEL_INTEL_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const CHANNEL_INTEL_INITIAL_DELAY_MS = 4 * 60 * 1000;
+
+async function runChannelIntelTasks() {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(INTERNAL_SECRET ? { "x-internal-secret": INTERNAL_SECRET } : {}),
+  };
+  try {
+    const r = await fetch(`${SEO_BASE}/api/marketing/channel-intel/tick`, {
+      method: "POST",
+      headers,
+      body: "{}",
+      signal: AbortSignal.timeout(120_000),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) {
+      log(`[channel-intel] Tick complete — ran ${d.ran ?? 0}, skipped ${d.skipped ?? 0}`, "growth");
+    } else {
+      log(`[channel-intel] Tick failed: ${JSON.stringify(d)}`, "growth");
+    }
+  } catch (e: any) {
+    log(`[channel-intel] Tick error: ${e?.message ?? e}`, "growth");
+  }
+}
+
+function startChannelIntelScheduler() {
+  log(
+    `[channel-intel] Scheduler armed — first run in ${CHANNEL_INTEL_INITIAL_DELAY_MS / 60_000} min, then every 6h`,
+    "growth",
+  );
+  setTimeout(async () => {
+    log("[channel-intel] Running due channel watches…", "growth");
+    await runChannelIntelTasks();
+    setInterval(async () => {
+      log("[channel-intel] Running due channel watches…", "growth");
+      await runChannelIntelTasks();
+    }, CHANNEL_INTEL_INTERVAL_MS);
+  }, CHANNEL_INTEL_INITIAL_DELAY_MS);
+}
+
 log("Starting Next.js development server...");
 
 const nextProcess = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", devPort], {
@@ -133,6 +174,7 @@ const nextProcess = spawn("npx", ["next", "dev", "-H", "0.0.0.0", "-p", devPort]
 
 startSeoScheduler();
 startGrowthScheduler();
+startChannelIntelScheduler();
 
 nextProcess.on("error", (err) => {
   log(`Failed to start Next.js: ${err.message}`, "error");

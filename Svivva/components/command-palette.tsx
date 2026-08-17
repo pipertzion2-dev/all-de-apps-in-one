@@ -129,6 +129,8 @@ const digitalCommands: CommandItem[] = [
       "channel",
       "traffic",
       "marketing research",
+      "watch",
+      "schedule",
     ],
     section: "Account",
     adminOnly: true,

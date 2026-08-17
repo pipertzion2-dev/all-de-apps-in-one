@@ -68,5 +68,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  if (job === "channel-intel" || job === "all") {
+    try {
+      const { runDueChannelIntelWatches } = await import("@/lib/marketing/channel-intel-watch");
+      out.channelIntel = await runDueChannelIntelWatches();
+    } catch (e) {
+      out.channelIntel = { ok: false, error: String(e instanceof Error ? e.message : e) };
+    }
+  }
+
   return NextResponse.json({ success: true, ...out });
 }
