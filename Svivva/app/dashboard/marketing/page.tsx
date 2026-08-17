@@ -31,6 +31,7 @@ import {
   Activity,
   Link2,
   Play,
+  Youtube,
 } from "lucide-react";
 
 import { getSuggestedGoDaddyDomain } from "@/lib/site-url-public";
@@ -1444,6 +1445,24 @@ export default function MarketingDashboard() {
               <p className="text-sm font-semibold text-foreground">ZZAI Seeds Marketing Funnel</p>
               <p className="text-xs text-muted-foreground truncate">
                 Auto Marketing Funnel panel · App linking · Domain setup · Traffic AI Chat
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+          </div>
+        </a>
+
+        <a
+          href="/dashboard/marketing/channel-intel"
+          className="block rounded-xl border border-border bg-white dark:bg-card hover:bg-muted/20 transition-colors overflow-hidden shadow-sm group mt-3"
+        >
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-red-600/90">
+              <Youtube className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">YouTube Channel Intel</p>
+              <p className="text-xs text-muted-foreground truncate">
+                Ingest a channel (e.g. Starter Story) · auto-transcribe · ask traffic questions
               </p>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
