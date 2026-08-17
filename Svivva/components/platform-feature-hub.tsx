@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  HAAS_FULL_NAME,
-  HAAS_NAME,
-  HAAS_TAGLINE,
-  HAAS_TECHNICAL_BLURB,
+  OAAS_FULL_NAME,
+  OAAS_NAME,
+  OAAS_TAGLINE,
+  OAAS_TECHNICAL_BLURB,
   PLATFORM_FEATURES,
 } from "@/lib/platform/feature-graph";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
@@ -68,7 +68,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
 
   return (
     <section
-      id="haas"
+      id="oaas"
       className={
         isCompact
           ? "space-y-4"
@@ -79,14 +79,14 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
         {!isCompact && (
           <div className="text-center space-y-3 max-w-3xl mx-auto">
             <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
-              {HAAS_NAME} · {HAAS_FULL_NAME}
+              {OAAS_NAME} · {OAAS_FULL_NAME}
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2">
               <Network className="w-8 h-8 text-[#5B8DA8]" />
-              Hybridization connects everything.
+              Orchestration connects everything.
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base">{HAAS_TAGLINE}</p>
-            <p className="text-xs sm:text-sm text-[#5B8DA8] font-medium">{HAAS_TECHNICAL_BLURB}</p>
+            <p className="text-muted-foreground text-sm sm:text-base">{OAAS_TAGLINE}</p>
+            <p className="text-xs sm:text-sm text-[#5B8DA8] font-medium">{OAAS_TECHNICAL_BLURB}</p>
           </div>
         )}
 
@@ -97,7 +97,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
               AI-powered feature routing
             </div>
             <p className="text-xs text-muted-foreground">
-              Describe what you want — <strong>HaaS</strong> suggests which ZZAI features to open and
+              Describe what you want — <strong>OaaS</strong> suggests which ZZAI features to open and
               in what order. Often starts with <strong>ZZAI Seeds</strong> when you need many apps
               from one document.
             </p>

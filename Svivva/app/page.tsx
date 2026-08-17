@@ -119,7 +119,7 @@ const pricingTiers = [
       "AI material sourcing",
       "Hardware layout preview & optional AI sketches",
       "ZZAI Play — full access",
-      "HaaS — Hybridization as a Service",
+      "OaaS — Orchestration as a Service",
       "ZZAI Seeds — multi-app factory",
       "Auto-rollback & versioning",
       "Priority support",
@@ -139,7 +139,7 @@ const pricingTiers = [
       "Unlimited API requests",
       "Dedicated supplier network",
       "ZZAI Play — full access",
-      "HaaS — unlimited hybridization",
+      "OaaS — unlimited orchestration",
       "ZZAI Seeds — unlimited builds",
       "SSO & SAML",
       "Custom integrations",
@@ -533,7 +533,7 @@ export default function LandingPage() {
         </nav>
 
         <section
-          id="haas-intro"
+          id="oaas-intro"
           className="pt-16 sm:pt-20 pb-8 sm:pb-10 relative z-30 isolate bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
@@ -551,22 +551,22 @@ export default function LandingPage() {
                 <div className="flex-1 text-center md:text-left space-y-3">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                     <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                      Hybridization as a Service
+                      Orchestration as a Service
                     </span>
-                    <Badge className="text-[10px] bg-[#5B8DA8]">HaaS</Badge>
+                    <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
                     <Badge variant="secondary" className="text-[10px]">
-                      Technical hybrid platform
+                      Mixing-console OS
                     </Badge>
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                    <strong>HaaS</strong> composes ZZAI modules — Seeds, API Builder, Launch Studio,
-                    Channel Intel, and Poor Man Protection — into one hybrid environment. Describe
+                    <strong>OaaS</strong> orchestrates ZZAI modules — Seeds, API Builder, Launch Studio,
+                    Channel Intel, and Poor Man Protection — like channels on a mixing desk. Describe
                     your goal; AI routes you across the feature graph.
                   </p>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                     {[
-                      "HaaS hybrid routing",
-                      "Cross-module fusion",
+                      "OaaS workflow routing",
+                      "Cross-module orchestration",
                       "AI feature paths",
                       "One doc → many apps",
                     ].map((tag) => (
@@ -579,13 +579,13 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                    <a href="#haas">
+                    <a href="#oaas">
                       <Button
                         size="sm"
                         className="gap-2 bg-[#5B8DA8]"
-                        data-testid="button-haas-cta"
+                        data-testid="button-oaas-cta"
                       >
-                        Explore HaaS <ArrowRight className="w-3.5 h-3.5" />
+                        Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
                       </Button>
                     </a>
                     <Link href="/seeds">
@@ -668,9 +668,9 @@ export default function LandingPage() {
                     </span>
                   </h1>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    <strong>HaaS</strong> — Hybridization as a Service: fuse ZZAI Seeds, APIs with
-                    evals and rollback, launch automation, YouTube intel, and IP protection in one
-                    hybrid environment.
+                    <strong>OaaS</strong> — Orchestration as a Service: orchestrate ZZAI Seeds, APIs with
+                    evals and rollback, launch automation, YouTube intel, and IP protection on one
+                    mixing-console OS.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                     <Button
@@ -1867,8 +1867,8 @@ export default function LandingPage() {
                     </Link>
                   </li>
                   <li>
-                    <a href="#haas" className="hover:text-foreground transition-colors">
-                      HaaS
+                    <a href="#oaas" className="hover:text-foreground transition-colors">
+                      OaaS
                     </a>
                   </li>
                   <li>

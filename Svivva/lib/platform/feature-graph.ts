@@ -1,4 +1,4 @@
-/** ZZAI platform feature catalog — HaaS (Hybridization as a Service) routing and AI suggestions. */
+/** ZZAI platform feature catalog — OaaS (Orchestration as a Service) routing and AI suggestions. */
 
 export type PlatformFeatureLayer = "seed" | "build" | "hybrid" | "grow" | "protect" | "play";
 
@@ -17,14 +17,14 @@ export type PlatformFeature = {
 
 export const PLATFORM_FEATURES: PlatformFeature[] = [
   {
-    id: "haas",
-    title: "Hybridization as a Service",
-    shortTitle: "HaaS",
-    href: "/#haas",
+    id: "orchestration",
+    title: "Orchestration as a Service",
+    shortTitle: "OaaS",
+    href: "/#oaas",
     description:
-      "AI-powered hybrid routing across ZZAI — fuse APIs, multi-app seeds, launch, intel, and IP in one technical environment.",
+      "AI-powered orchestration across ZZAI — route APIs, multi-app seeds, launch, intel, and IP like a mixing-console OS.",
     layer: "hybrid",
-    tags: ["haas", "hybridization", "hybrid", "platform", "connect", "fuse", "bridge", "mix"],
+    tags: ["oaas", "orchestration", "orchestrate", "platform", "connect", "route", "workflow", "console"],
     connectsTo: ["seeds", "api-builder", "hybridization", "launch-studio", "channel-intel", "poor-man-protection"],
   },
   {
@@ -36,7 +36,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
       "Multi-app factory: one structured document → many deployable apps with code, docs, and launch pages.",
     layer: "seed",
     tags: ["seed", "pdf", "multi-app", "portfolio", "factory", "suite", "document"],
-    connectsTo: ["api-builder", "launch-studio", "orbit", "marketing", "channel-intel", "haas"],
+    connectsTo: ["api-builder", "launch-studio", "orbit", "marketing", "channel-intel", "orchestration"],
   },
   {
     id: "api-builder",
@@ -194,9 +194,9 @@ export function getConnectedFeatures(id: string): PlatformFeature[] {
   return feature.connectsTo.map((cid) => getFeature(cid)).filter(Boolean) as PlatformFeature[];
 }
 
-export const HAAS_NAME = "HaaS";
-export const HAAS_FULL_NAME = "Hybridization as a Service";
-export const HAAS_TAGLINE =
-  "One hybrid environment. APIs, seeds, launch automation, channel intel, and IP protection — fused by AI routing, not siloed tabs.";
-export const HAAS_TECHNICAL_BLURB =
-  "Cross-domain fusion engine: mix specs, transcripts, patents, and endpoints into emergent workflows with schema-safe outputs.";
+export const OAAS_NAME = "OaaS";
+export const OAAS_FULL_NAME = "Orchestration as a Service";
+export const OAAS_TAGLINE =
+  "One mixing-console OS. APIs, seeds, launch automation, channel intel, and IP protection — orchestrated by AI routing, not siloed tabs.";
+export const OAAS_TECHNICAL_BLURB =
+  "Cross-module orchestration: route specs, transcripts, patents, and endpoints through the ZZAI feature graph with schema-safe outputs.";

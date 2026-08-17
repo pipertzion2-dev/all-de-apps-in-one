@@ -56,10 +56,10 @@ const digitalCommands: CommandItem[] = [
     section: "Build",
   },
   {
-    title: "Hybridization as a Service",
-    href: "/#haas",
+    title: "Orchestration as a Service",
+    href: "/#oaas",
     icon: FlaskConical,
-    keywords: ["haas", "hybrid", "hybridization", "connect", "suggest", "routing", "platform"],
+    keywords: ["oaas", "orchestration", "orchestrate", "connect", "suggest", "routing", "platform", "console"],
     section: "Navigate",
   },
   {

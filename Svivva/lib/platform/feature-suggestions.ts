@@ -44,19 +44,25 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
   if (feature.id === "seeds" && goalTerms.some((t) => ["app", "apps", "suite", "pdf", "seed"].includes(t))) {
     score += 10;
   }
-  if (feature.id === "haas") score += 4;
+  if (feature.id === "orchestration") score += 4;
+  if (
+    feature.id === "orchestration" &&
+    goalTerms.some((t) => ["orchestr", "workflow", "route", "connect", "console", "platform"].includes(t))
+  ) {
+    score += 8;
+  }
   return score;
 }
 
 function fallbackReason(feature: PlatformFeature, goal: string): string {
-  if (feature.id === "haas") {
-    return "HaaS hybridizes your goal across the full ZZAI stack — start here for AI-routed workflows.";
+  if (feature.id === "orchestration") {
+    return "OaaS orchestrates your goal across the full ZZAI stack — start here for AI-routed workflows.";
   }
   if (feature.id === "seeds") {
-    return "ZZAI Seeds: multi-app generation from one document, then hybridize into launch and growth.";
+    return "ZZAI Seeds: multi-app generation from one document, then orchestrate into launch and growth.";
   }
   if (feature.layer === "hybrid") {
-    return `HaaS hybridizes your goal (“${goal.slice(0, 60)}…”) across ZZAI features.`;
+    return `OaaS routes your goal (“${goal.slice(0, 60)}…”) across ZZAI features.`;
   }
   if (feature.layer === "grow") {
     return "Ship traffic and launch workflows after you have something to promote.";
@@ -106,9 +112,9 @@ export function suggestFeaturesByKeywords(options: {
     workflow: buildWorkflow(suggestions),
     aiUsed: false,
     summary:
-      suggestions[0]?.featureId === "haas" || suggestions[0]?.featureId === "seeds"
-        ? "HaaS routes hybrid workflows — fuse generation, launch, intel, and protection in order."
-        : "HaaS keyword routing (add AI keys for richer hybrid paths).",
+      suggestions[0]?.featureId === "orchestration" || suggestions[0]?.featureId === "seeds"
+        ? "OaaS orchestrates workflows — route generation, launch, intel, and protection in order."
+        : "OaaS keyword routing (add AI keys for richer orchestrated paths).",
   };
 }
 
@@ -130,7 +136,7 @@ export async function suggestFeatures(options: {
     )
     .join("\n");
 
-  const prompt = `You route users inside ZZAI via HaaS (Hybridization as a Service) — a technical hybrid environment where APIs, ZZAI Seeds, launch, IP, and YouTube intel fuse.
+  const prompt = `You route users inside ZZAI via OaaS (Orchestration as a Service) — a mixing-console-style OS where APIs, ZZAI Seeds, launch, IP, and YouTube intel are orchestrated across modules.
 
 User goal: ${options.goal.trim()}
 ${options.fromFeatureId ? `Currently on: ${options.fromFeatureId}` : ""}
@@ -146,7 +152,7 @@ Return ONLY JSON:
 }
 
 Rules:
-- Prefer haas when they want connected workflows or hybridization across tools
+- Prefer orchestration when they want connected workflows or cross-module routing
 - Prefer seeds when they want many apps from PDF upload
 - Include grow features (launch-studio, marketing, channel-intel, orbit) for traffic/SEO
 - Include poor-man-protection + hybridization for IP/patent/sketches

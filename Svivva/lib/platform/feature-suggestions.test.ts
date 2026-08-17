@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   getConnectedFeatures,
   getFeature,
-  HAAS_FULL_NAME,
-  HAAS_NAME,
+  OAAS_FULL_NAME,
+  OAAS_NAME,
 } from "./feature-graph";
 import { suggestFeaturesByKeywords } from "./feature-suggestions";
 
 describe("feature-graph", () => {
-  it("exposes HaaS platform constants", () => {
-    expect(HAAS_NAME).toBe("HaaS");
-    expect(HAAS_FULL_NAME).toContain("Hybridization");
+  it("exposes OaaS platform constants", () => {
+    expect(OAAS_NAME).toBe("OaaS");
+    expect(OAAS_FULL_NAME).toContain("Orchestration");
   });
 
   it("exposes ZZAI Seeds as seed-layer module", () => {
@@ -19,10 +19,10 @@ describe("feature-graph", () => {
     expect(getConnectedFeatures("seeds").length).toBeGreaterThan(2);
   });
 
-  it("exposes HaaS as platform hub", () => {
-    const haas = getFeature("haas");
-    expect(haas?.title).toBe("Hybridization as a Service");
-    expect(haas?.shortTitle).toBe("HaaS");
+  it("exposes OaaS as platform hub", () => {
+    const orchestration = getFeature("orchestration");
+    expect(orchestration?.title).toBe("Orchestration as a Service");
+    expect(orchestration?.shortTitle).toBe("OaaS");
   });
 });
 
