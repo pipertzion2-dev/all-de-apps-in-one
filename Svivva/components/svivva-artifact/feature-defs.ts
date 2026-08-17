@@ -41,9 +41,9 @@ export const FEATURES: FeatureDef[] = [
     shortLabel: "Seeds",
     artworkTitle: "SETTLE DOWN",
     artworkSrc: "/artworks/seeds.png",
-    tagline: "One document → many apps",
+    tagline: "PDF or YouTube → many apps",
     description:
-      "ZZAI Seeds — CH 01 on the mixing board. One structured spec in; full-stack app suites out.",
+      "ZZAI Seeds — CH 01 on the mixing board. PDF blueprint or YouTube transcript in; full-stack app suites out.",
     cta: { label: "Open Seeds", href: FEATURE_PUBLIC_PATHS.seeds },
     accentColor: "#9085c4",
     motif: "branching",

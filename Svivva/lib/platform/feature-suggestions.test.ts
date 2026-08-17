@@ -57,6 +57,13 @@ describe("feature-suggestions", () => {
     expect(result.suggestions.some((s) => s.featureId === "launch-studio")).toBe(true);
   });
 
+  it("routes YouTube transcript goals to seeds", () => {
+    const result = suggestFeaturesByKeywords({
+      goal: "transcribe a youtube video into deployable apps",
+    });
+    expect(result.suggestions[0]?.featureId).toBe("seeds");
+  });
+
   it("routes patent goals to protection and hybrid", () => {
     const result = suggestFeaturesByKeywords({
       goal: "group patent sketches court ready",

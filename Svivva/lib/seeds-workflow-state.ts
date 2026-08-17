@@ -46,7 +46,7 @@ export const SEEDS_WORKFLOW_STEPS: {
   {
     id: "upload",
     label: "Upload spec",
-    detail: "PDF blueprint → parsed seeds",
+    detail: "PDF or YouTube transcript → parsed seeds",
     scrollTarget: "#seeds-upload",
   },
   {

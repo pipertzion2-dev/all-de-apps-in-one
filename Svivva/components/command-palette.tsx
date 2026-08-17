@@ -52,7 +52,7 @@ const digitalCommands: CommandItem[] = [
     title: "ZZAI Seeds",
     href: "/seeds",
     icon: Sprout,
-    keywords: ["seeds", "seed", "pdf", "multi-app", "factory", "suite"],
+    keywords: ["seeds", "seed", "pdf", "youtube", "transcript", "multi-app", "factory", "suite"],
     section: "Build",
   },
   {
