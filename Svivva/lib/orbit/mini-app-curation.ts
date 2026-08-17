@@ -3,6 +3,7 @@
  * without shipping full product replacements on free tiers.
  */
 
+import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-apps";
 import { getSiteUrl } from "../site-url";
 
 function siteBase(): string {
@@ -36,7 +37,43 @@ export const NATIVE_SVIVVA_TOOLS: CuratedNativeTool[] = [
     description: "Estimate token spend — ZZAI helps cap and monitor production API costs.",
     hub: "ai-tools-hub",
   },
+  ...FEATURE_MINI_APPS.map((app) => ({
+    path: app.path,
+    name: app.name,
+    description: app.description,
+    hub: app.hub,
+  })),
 ];
+
+export function nativeToolSitemapPaths(): string[] {
+  return NATIVE_SVIVVA_TOOLS.map((t) => t.path);
+}
+
+export function nativeToolsAsIndexCards() {
+  return NATIVE_SVIVVA_TOOLS.map((t) => {
+    const slug = t.path.replace(/^\/tools\//, "");
+    return {
+      id: `native-${slug}`,
+      slug,
+      keyword: t.name,
+      title: t.name,
+      headline: t.name,
+      subheadline: t.description,
+      content: t.description,
+      benefits: [] as string[],
+      category:
+        t.hub === "cyber-security-mini-apps"
+          ? "Security"
+          : t.hub === "seo-pack"
+            ? "SEO"
+            : "AI tools",
+      toolUrl: t.path,
+      metaTitle: t.name,
+      metaDescription: t.description,
+      published: true,
+    };
+  });
+}
 
 export const ORBIT_HUB_SLUGS = ["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"] as const;
 
@@ -50,7 +87,7 @@ const BLOCKED_NAME_RE =
 
 /** Prefer lightweight scanners/calculators for top-of-funnel. */
 const PREFERRED_NAME_RE =
-  /\b(checker|scanner|validator|calculator|generator|analyzer|inspector|encoder|decoder|password|hash|audit|grader|tool)\b/i;
+  /\b(checker|scanner|validator|calculator|generator|analyzer|inspector|encoder|decoder|password|hash|audit|grader|tool|preview|chooser|stamp|caption|blend|patch)\b/i;
 
 export type DiscoverableTool = {
   name: string;

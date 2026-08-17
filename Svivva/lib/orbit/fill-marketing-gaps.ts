@@ -31,6 +31,8 @@ import {
 } from "@/lib/orbit/content-templates";
 import { TARGET_TOTAL_MARKETING_PAGES, TARGET_TOOL_SEO_PAGES } from "@/lib/orbit/marketing-targets";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
+import { nativeToolsAsDiscoverable } from "@/lib/orbit/mini-app-curation";
+import { FEATURE_MINI_APPS, generateFeatureMiniAppSeoPages } from "@/lib/tools/feature-mini-apps";
 
 const BASE = getSiteUrl();
 
@@ -211,9 +213,18 @@ async function discoverAllMiniTools(): Promise<
     getSvivvaSeoPackUrl(),
   ];
   const byUrl = new Map<string, { name: string; url: string; description: string }>();
+  for (const native of nativeToolsAsDiscoverable()) {
+    byUrl.set(native.url, {
+      name: native.name,
+      url: native.url,
+      description: native.description || native.name,
+    });
+  }
   for (const hub of hubs) {
     const found = await discoverToolsFromHub(hub);
-    for (const t of found) byUrl.set(t.url, t);
+    for (const t of found) {
+      if (!byUrl.has(t.url)) byUrl.set(t.url, t);
+    }
   }
   for (const t of generateMiniImportTools()) {
     const url = `${getAiToolsHubUrl()}/${t.slug}`;
@@ -270,6 +281,14 @@ async function ensureAllToolSeoPages(
       newUrls.push(`${BASE}/${p.slug}`);
     }
   };
+
+  for (const app of FEATURE_MINI_APPS) {
+    const toolUrl = `${BASE}${app.path}`;
+    newUrls.push(toolUrl);
+    for (const p of generateFeatureMiniAppSeoPages(app)) {
+      await tryInsert(p, toolUrl);
+    }
+  }
 
   for (const tool of tools) {
     if (seedCount >= TARGET_TOOL_SEO_PAGES) break;

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
+import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
 
@@ -58,6 +59,18 @@ function staticPagesEntries(): SitemapEntry[] {
   }));
 }
 
+function nativeToolEntries(): SitemapEntry[] {
+  const b = base();
+  const now = new Date();
+  return nativeToolSitemapPaths().map((path) => ({
+    url: `${b}${path}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.86,
+    chunk: "tools" as const,
+  }));
+}
+
 function lpEntries(): SitemapEntry[] {
   const b = base();
   const now = new Date();
@@ -72,7 +85,7 @@ function lpEntries(): SitemapEntry[] {
 
 /** Minimal sitemap when DB or runtime fails — keeps GSC from seeing 500 on /sitemap.xml. */
 export function getStaticSitemapFallback(): SitemapEntry[] {
-  return [...staticPagesEntries(), ...lpEntries()];
+  return [...staticPagesEntries(), ...nativeToolEntries(), ...lpEntries()];
 }
 
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {

@@ -33,6 +33,11 @@ const NATIVE_TOOL_SLUGS = new Set([
   "prompt-forge",
   "json-schema-validator",
   "ai-api-cost-calculator",
+  "youtube-caption-preview",
+  "channel-blend-preview",
+  "oaas-patch-preview",
+  "zzai-face-chooser",
+  "sketch-hash-stamp",
 ]);
 
 function toolPageHref(slug: string, published: boolean): string {
