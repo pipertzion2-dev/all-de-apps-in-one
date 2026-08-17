@@ -1,6 +1,8 @@
-/** Clutety / Pyracrypt branding tokens (ZZAI-hosted). */
+/** ZZAI Security branding (embedded suite — formerly standalone Pyracrypt / Clutety). */
 export const CLUTETY_TEAL = "#5B8DA8";
 export const CLUTETY_BURG = "#6B2C4E";
+
+export const ZZAI_SECURITY_DISPLAY_NAME = "ZZAI Security";
 
 export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
 
@@ -19,7 +21,7 @@ export function getClutetyPromoHref(): string {
   return CLUTETY_COMING_SOON_PATH;
 }
 
-/** Same-origin embed path for the original Pyracrypt UI bundle. */
+/** Same-origin embed path for the ZZAI Security suite UI bundle. */
 export const CLUTETY_EMBED_PATH = "/clutety-shell/index.html?skip";
 
 /** Optional external Vite build; otherwise use {@link CLUTETY_EMBED_PATH}. */

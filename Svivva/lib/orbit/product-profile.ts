@@ -22,12 +22,21 @@ export function getSvivvaProductProfile(): ProductProfile {
     url: base,
     toolsHubUrl: `${base}/ai-tools-hub`,
     description:
-      "ZZAI turns natural language prompts into production-ready AI APIs with schema enforcement, version control, evaluations, and a marketplace. Ship backends in minutes without hiring infrastructure engineers.",
+      "ZZAI turns natural language prompts into production-ready AI APIs with schema enforcement, version control, evaluations, and a marketplace. ZZAI Security embeds feed filtering, threat scanning, and the former Pyracrypt suite — plus YouTube-to-seeds and Orbit hybrid growth automation.",
     shortDescription:
-      "Build production AI APIs from plain English. Schema-safe, versioned, and ready to scale.",
+      "Build production AI APIs from plain English. Security, seeds, and marketing on one domain.",
     audience: "developers, founders, and teams shipping AI products",
     competitors: ["Zapier", "Make", "n8n", "LangChain", "Retool", "Bubble"],
-    keywords: ["ZZAI", "zzaizzai", "AI API builder", "no-code AI", "GPT API", "AI automation"],
+    keywords: [
+      "ZZAI",
+      "zzaizzai",
+      "AI API builder",
+      "no-code AI",
+      "GPT API",
+      "AI automation",
+      "ZZAI Security",
+      "SaaS marketing automation",
+    ],
     pricing: "Free tier available; paid plans for production scale",
     category: "AI / Developer Tools",
   };

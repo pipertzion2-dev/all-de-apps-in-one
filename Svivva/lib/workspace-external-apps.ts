@@ -117,7 +117,7 @@ export function getAllWorkspaceProjects(): Array<{
       name: "Security Center",
       url: getSecurityCenterUrl(),
       category: "security-app",
-      description: "Feed Shield & threat scanner for logged-in users",
+      description: "ZZAI Security — Feed Shield, threat scanner, PQC proofs & embedded suite",
     },
   ];
 }
@@ -137,7 +137,7 @@ export function getClutetyOrbitPreset() {
     sourceUrl: getCyberSecurityMiniAppsUrl(),
     miniAppsUrl: getClutetyMiniAppsBaseUrl(),
     description:
-      "Organic funnel: /cyber-security-mini-apps + /ai-tools-hub. Logged-in features at /dashboard/security.",
+      "Organic funnel: /cyber-security-mini-apps + /ai-tools-hub. ZZAI Security at /dashboard/security.",
   };
 }
 

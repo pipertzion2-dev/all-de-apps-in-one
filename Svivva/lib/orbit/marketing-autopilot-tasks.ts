@@ -72,6 +72,13 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     group: "AI Content",
     automatable: "onsite",
   },
+  { id: "content-channel-intel", label: "StarterStory channel intel", group: "AI Content", automatable: "onsite" },
+  {
+    id: "content-hybrid-gtm",
+    label: "Hybrid GTM playbook pages",
+    group: "AI Content",
+    automatable: "onsite",
+  },
   { id: "content-paa", label: "PAA pages", group: "AI Content", automatable: "onsite" },
   {
     id: "content-parasite",
