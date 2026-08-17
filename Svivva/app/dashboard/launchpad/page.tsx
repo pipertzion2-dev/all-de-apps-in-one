@@ -1024,7 +1024,7 @@ function MiniSourceConfig({
                   type="text"
                   value={entry.name}
                   onChange={(e) => updateEntry(entry.id, "name", e.target.value)}
-                  placeholder="Name (e.g. Pyracrypt, Cyber Tools)"
+                  placeholder="Name (e.g. ZZAI Security, Cyber Tools)"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[#5B8DA8]/40 disabled:opacity-50"
                   disabled={scanning}
                   data-testid={`input-app-name-${idx}`}
@@ -1691,7 +1691,7 @@ function StepCard({
 
 // ── Deploy Guide ──────────────────────────────────────────────────────────
 const SUBDOMAINS = [
-  { sub: "apps", target: "apps.zzaizzai.com", label: "Clutety mini-apps hub", color: "#6B2C4E" },
+  { sub: "apps", target: "apps.zzaizzai.com", label: "ZZAI mini-apps hub", color: "#6B2C4E" },
   { sub: "security", target: "zzaizzai.com", label: "Cyber security tools hub", color: "#5B8DA8" },
   {
     sub: "clutety",
@@ -1702,7 +1702,7 @@ const SUBDOMAINS = [
   {
     sub: "pyracrypt",
     target: "zzaizzai.com",
-    label: "Pyracrypt legacy alias",
+    label: "Legacy Pyracrypt → /dashboard/security",
     color: "#5B8DA8",
   },
 ];
@@ -4018,7 +4018,7 @@ export default function LaunchpadPage() {
                 <div className="min-w-0 flex-1">
                   <h2 className="text-sm font-black text-foreground">Auto-Connect All Apps</h2>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    One click connects all monorepo apps (ZZAI, Pyracrypt, AI Tools Hub, Cyber
+                    One click connects all monorepo apps (ZZAI, ZZAI Security, AI Tools Hub, Cyber
                     Security, SEO Pack), fixes 404 links, and submits to Bing, Yandex, Yahoo,
                     DuckDuckGo.
                   </p>
@@ -4643,7 +4643,7 @@ export default function LaunchpadPage() {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Enter the URL of your deployed app (e.g., your mini apps or Pyracrypt instance).
+                    Enter the URL of your deployed app (e.g., your mini apps or ZZAI Security hub).
                   </p>
                 </div>
               </>

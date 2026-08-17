@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowRight, Lock, Shield } from "lucide-react";
-import { CLUTETY_EMBED_PATH, CLUTETY_TEAL } from "@/lib/clutety/config";
+import { CLUTETY_EMBED_PATH, CLUTETY_TEAL, ZZAI_SECURITY_DISPLAY_NAME } from "@/lib/clutety/config";
 
 const TEAL = CLUTETY_TEAL;
 
@@ -11,10 +11,10 @@ type Props = {
   title?: string;
 };
 
-/** Replit-builder live window: original Pyracrypt UI bundle in an iframe. */
+/** Embedded ZZAI Security suite (legacy Pyracrypt / Clutety UI bundle). */
 export function ClutetyAppFrame({
   height = "min(78vh, 720px)",
-  title = "Clutety — Protection Tool",
+  title = `${ZZAI_SECURITY_DISPLAY_NAME} — Protection Suite`,
 }: Props) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
@@ -34,7 +34,7 @@ export function ClutetyAppFrame({
               >
                 <Lock className="w-6 h-6" style={{ color: TEAL }} />
               </div>
-              <p className="text-sm text-white/40">Loading Clutety…</p>
+              <p className="text-sm text-white/40">Loading {ZZAI_SECURITY_DISPLAY_NAME}…</p>
               <div className="flex gap-1">
                 {[0, 1, 2].map((i) => (
                   <div

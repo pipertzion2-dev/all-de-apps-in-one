@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
+import { ensureAdminStarterStoryWatch } from "@/lib/marketing/youtube-defaults";
 
 export const maxDuration = 120;
 
@@ -70,6 +71,14 @@ export async function POST() {
       submitted: indexResult.submittedCount,
       total: indexResult.totalUrls,
     };
+
+    try {
+      results.channelIntel = await ensureAdminStarterStoryWatch({ ingestIfEmpty: true });
+    } catch (e) {
+      results.channelIntel = {
+        error: e instanceof Error ? e.message : "Channel intel bootstrap failed",
+      };
+    }
 
     return NextResponse.json({
       success: true,

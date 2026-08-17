@@ -32,6 +32,12 @@ import {
   type ChannelIntelCorpus,
   type ChannelIntelWatchPublic,
 } from "@/lib/marketing/channel-intel";
+import {
+  ADMIN_DEFAULT_YOUTUBE_CHANNEL,
+  ADMIN_DEFAULT_YOUTUBE_HANDLE,
+  YOUTUBE_QUICK_CHANNELS,
+} from "@/lib/marketing/youtube-defaults";
+import { OrbitHybridGrowthPanel } from "@/components/orbit-hybrid-growth-panel";
 
 const STORAGE_KEY = "zzai-channel-intel-corpus-v1";
 const TEAL = "#5B8DA8";
@@ -82,6 +88,8 @@ export function ChannelIntelPanel() {
   const [suggestFeatures, setSuggestFeatures] = useState(true);
   const [savingWatch, setSavingWatch] = useState(false);
   const [runningWatchId, setRunningWatchId] = useState<string | null>(null);
+  const [bootstrapping, setBootstrapping] = useState(false);
+  const [adminWatchReady, setAdminWatchReady] = useState<boolean | null>(null);
 
   const hydrate = useCallback(() => {
     const stored = loadStoredCorpus();
@@ -104,6 +112,55 @@ export function ChannelIntelPanel() {
     hydrate();
     void loadWatches();
   }, [hydrate, loadWatches]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setBootstrapping(true);
+      try {
+        const res = await authFetch("/api/marketing/channel-intel/bootstrap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingestIfEmpty: true }),
+        });
+        const data = (await res.json()) as {
+          corpus?: ChannelIntelCorpus;
+          ranIngest?: boolean;
+          watch?: ChannelIntelWatchPublic;
+          error?: string;
+        };
+        if (cancelled) return;
+        if (res.status === 403) {
+          setAdminWatchReady(false);
+          return;
+        }
+        if (!res.ok) return;
+        setAdminWatchReady(true);
+        if (data.corpus) {
+          setCorpus(data.corpus);
+          saveCorpus(data.corpus);
+          setChannelUrl(data.corpus.channelUrl);
+        } else {
+          setChannelUrl(ADMIN_DEFAULT_YOUTUBE_CHANNEL);
+        }
+        await loadWatches();
+        if (data.ranIngest) {
+          toast({
+            title: `${ADMIN_DEFAULT_YOUTUBE_HANDLE} is live`,
+            description:
+              "Admin watch auto-started — transcripts loaded and daily refresh scheduled.",
+          });
+        }
+      } catch {
+        /* non-admin or offline */
+      } finally {
+        if (!cancelled) setBootstrapping(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadWatches, toast]);
 
   const activeWatch = useMemo(() => {
     if (!corpus) return null;
@@ -345,9 +402,19 @@ export function ChannelIntelPanel() {
         </h1>
         <p className="text-sm text-muted-foreground max-w-2xl">
           Paste a YouTube channel. ZZAI pulls captions, answers growth questions, then can keep
-          watching on a schedule — including ideas for what to add to this app.
+          watching on a schedule — including ideas for what to add to this app. Admin auto-watches{" "}
+          {ADMIN_DEFAULT_YOUTUBE_HANDLE} on first open.
         </p>
+        {adminWatchReady && (
+          <p className="text-xs text-[#5B8DA8] font-medium">
+            {bootstrapping
+              ? `Bootstrapping ${ADMIN_DEFAULT_YOUTUBE_HANDLE}…`
+              : `Admin: ${ADMIN_DEFAULT_YOUTUBE_HANDLE} watch active · daily refresh`}
+          </p>
+        )}
       </div>
+
+      <OrbitHybridGrowthPanel compact />
 
       {watches.length > 0 && !corpus && (
         <Card className="border-border/60 bg-card/80 backdrop-blur-md">
@@ -386,8 +453,23 @@ export function ChannelIntelPanel() {
           <Input
             value={channelUrl}
             onChange={(e) => setChannelUrl(e.target.value)}
-            placeholder="https://www.youtube.com/@StarterStory"
+            placeholder={`https://www.youtube.com/${ADMIN_DEFAULT_YOUTUBE_HANDLE}`}
           />
+          <div className="flex flex-wrap gap-2">
+            {YOUTUBE_QUICK_CHANNELS.map((chip) => (
+              <Button
+                key={chip.url}
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={ingesting}
+                title={chip.hint}
+                onClick={() => void ingest(chip.url)}
+              >
+                {chip.label}
+              </Button>
+            ))}
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-xs text-muted-foreground flex items-center gap-2">
               Max videos

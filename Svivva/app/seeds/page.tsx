@@ -23,8 +23,8 @@ import SeedsInvariantCompiler from "@/components/seeds-invariant-compiler";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { SeedDeployDialog } from "@/components/seed-deploy-dialog";
 import { ReferralWidget } from "@/components/referral-widget";
+import { YoutubeTranscribeCard } from "@/components/youtube/youtube-transcribe-card";
 import {
-  Youtube,
   Upload,
   FileText,
   Sprout,
@@ -845,81 +845,21 @@ export default function SeedsPage() {
             </CardContent>
           </Card>
 
-          <Card
+          <YoutubeTranscribeCard
             id="seeds-youtube"
-            className="border-dashed border-2 border-border/70 hover:border-[#6B2C4E]/50 transition-colors scroll-mt-24"
-            data-testid="card-youtube-transcript"
-          >
-            <CardContent className="p-8 space-y-4">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-[#6B2C4E]/10 flex items-center justify-center mx-auto">
-                  <Youtube className="w-8 h-8 text-[#6B2C4E]" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">YouTube transcript</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Paste a video or channel URL. Captions become the same seed specs as a PDF, then
-                    you build and deploy as usual.
-                  </p>
-                </div>
-              </div>
-              <form
-                className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const trimmed = youtubeUrl.trim();
-                  if (trimmed) youtubeMutation.mutate(trimmed);
-                }}
-              >
-                <Input
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=… or /@channel"
-                  className="flex-1"
-                  disabled={youtubeMutation.isPending}
-                  data-testid="input-youtube-url"
-                />
-                <Button
-                  type="submit"
-                  className="gap-2 bg-[#6B2C4E] hover:bg-[#6B2C4E]/90"
-                  disabled={youtubeMutation.isPending || youtubeUrl.trim().length < 8}
-                  data-testid="button-youtube-transcribe"
-                >
-                  {youtubeMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Youtube className="w-4 h-4" />
-                  )}
-                  {youtubeMutation.isPending ? "Transcribing…" : "Transcribe → Seeds"}
-                </Button>
-              </form>
-              <p className="text-xs text-muted-foreground text-center">
-                Want captions only?{" "}
-                <Link
-                  href="/tools/youtube-caption-preview"
-                  className="text-[#5B8DA8] hover:underline"
-                >
-                  Free YouTube Caption Preview
-                </Link>{" "}
-                — no signup.
-              </p>
-              {youtubeMutation.isSuccess && (
-                <p
-                  className="text-sm text-muted-foreground text-center"
-                  data-testid="text-youtube-success"
-                >
-                  Parsed {youtubeMutation.data.seedCount} seed
-                  {youtubeMutation.data.seedCount === 1 ? "" : "s"} from{" "}
-                  {youtubeMutation.data.sourceLabel}. Build and deploy below like any other session.
-                </p>
-              )}
-              {youtubeMutation.isError && (
-                <p className="text-sm text-red-500 text-center" data-testid="text-youtube-error">
-                  {(youtubeMutation.error as Error).message}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+            value={youtubeUrl}
+            onChange={setYoutubeUrl}
+            onSubmit={(url) => youtubeMutation.mutate(url)}
+            pending={youtubeMutation.isPending}
+            successMessage={
+              youtubeMutation.isSuccess
+                ? `Parsed ${youtubeMutation.data.seedCount} seed${
+                    youtubeMutation.data.seedCount === 1 ? "" : "s"
+                  } from ${youtubeMutation.data.sourceLabel}. Build and deploy below like any other session.`
+                : null
+            }
+            errorMessage={youtubeMutation.isError ? (youtubeMutation.error as Error).message : null}
+          />
 
           <div className="grid grid-cols-3 gap-4">
             <Card>
