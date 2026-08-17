@@ -13,6 +13,7 @@ import Link from "next/link";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
+import introImage from "@/attached_assets/IMG_1493_1770509047497.png";
 import {
   Shield,
   Code2,
@@ -149,6 +150,10 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [introDone, setIntroDone] = useState(false);
+  const [introFade, setIntroFade] = useState(0);
+  const virtualScrollRef = useRef(0);
+  const lastFadeRef = useRef(0);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -163,7 +168,6 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = "";
     document
       .querySelectorAll(
         "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
@@ -171,14 +175,165 @@ export default function LandingPage() {
       .forEach((el) => el.remove());
   }, []);
 
+  useEffect(() => {
+    if (!introDone) return;
+    document
+      .querySelectorAll(
+        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
+      )
+      .forEach((el) => el.remove());
+  }, [introDone]);
+
+  useEffect(() => {
+    if (introDone) return;
+
+    document.body.style.overflow = "hidden";
+
+    const finishIntro = () => {
+      setIntroDone(true);
+      setIntroFade(1);
+      document.body.style.overflow = "";
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    };
+
+    const fadeZone = window.innerHeight * 0.4;
+    const applyDelta = (delta: number) => {
+      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
+      const progress = Math.min(virtualScrollRef.current / fadeZone, 1);
+      if (Math.abs(progress - lastFadeRef.current) <= 0.001) return;
+      lastFadeRef.current = progress;
+      setIntroFade(progress);
+      if (progress >= 1) finishIntro();
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      applyDelta(e.deltaY);
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const delta = touchStartY - e.touches[0].clientY;
+      touchStartY = e.touches[0].clientY;
+      applyDelta(delta);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [introDone]);
+
   return (
     <div
       ref={containerRef}
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
+      {!introDone && (
+        <div
+          className="fixed inset-0"
+          style={{
+            zIndex: 70,
+            pointerEvents: "none",
+            overflow: "hidden",
+            backgroundColor: "#ffffff",
+            opacity: 1 - introFade,
+          }}
+        >
+          <div className="absolute inset-0" style={{ zIndex: 0, backgroundColor: "transparent" }}>
+            <CamoThreeOverlay preset="hero" className="intro-flowers" isIntro />
+          </div>
+          <div
+            className="relative z-[1] w-full h-full overflow-hidden"
+            style={{
+              backgroundColor: "#ffffff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <Image
+              src={introImage}
+              alt="ZZAI"
+              width={1024}
+              height={1024}
+              sizes="100vw"
+              style={{
+                width: "100%",
+                maxHeight: "100%",
+                height: "auto",
+                objectFit: "contain",
+                objectPosition: "bottom center",
+                display: "block",
+              }}
+              priority
+            />
+          </div>
+          {introFade < 0.08 && (
+            <div
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
+              style={{
+                zIndex: 10,
+                opacity: 1 - introFade * 15,
+                animation: "scrollBounce 1.5s ease-in-out 0s infinite",
+              }}
+            >
+              <span
+                className="text-sm font-medium text-gray-500 dark:text-gray-400"
+                style={{ fontFamily: "'Zc', sans-serif" }}
+              >
+                Scroll to enter
+              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-gray-500 dark:text-gray-400"
+              >
+                <path d="M10 4v12M5 11l5 5 5-5" />
+              </svg>
+            </div>
+          )}
+          <button
+            type="button"
+            className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
+            onClick={() => {
+              setIntroDone(true);
+              setIntroFade(1);
+              document.body.style.overflow = "";
+              window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+              document
+                .querySelectorAll(
+                  "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0",
+                )
+                .forEach((el) => el.remove());
+            }}
+          >
+            Skip intro
+          </button>
+        </div>
+      )}
+
       <div className="bg-background">
-        <nav className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80">
+        <nav
+          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
+          style={{ opacity: introDone ? 1 : 0, pointerEvents: introDone ? "auto" : "none" }}
+        >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
             <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
               <ZzaiModeToggle size="sm" />
