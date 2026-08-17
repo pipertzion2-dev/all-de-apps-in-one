@@ -47,6 +47,22 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
   }
   if (feature.id === "orchestration") score += 4;
   if (
+    feature.id === "hybridization" &&
+    goalTerms.some((t) =>
+      [
+        "hybrid",
+        "hybridize",
+        "blend",
+        "fuse",
+        "marketplace",
+        "laboratory",
+        "hybridization",
+      ].includes(t),
+    )
+  ) {
+    score += 14;
+  }
+  if (
     feature.id === "orchestration" &&
     goalTerms.some((t) =>
       ["orchestr", "workflow", "route", "connect", "console", "platform"].includes(t),
@@ -60,6 +76,9 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
 function fallbackReason(feature: PlatformFeature, goal: string): string {
   if (feature.id === "orchestration") {
     return "Patch bay — OaaS assigns channel order and bus sends across the full desk.";
+  }
+  if (feature.id === "hybridization") {
+    return `${feature.channelLabel}: Hybrid² lab — blend any two channels, list the product, then hybridize those blends.`;
   }
   if (feature.id === "seeds") {
     return `${feature.channelLabel}: unmute Seeds first — multi-app generation, then send to Grow and Master.`;
@@ -162,6 +181,7 @@ Rules:
 - Prefer orchestration when they need a full patch route across channels
 - Prefer seeds (CH 01) when they want many apps from a PDF or YouTube transcript
 - Route Grow bus channels (launch, marketing, channel-intel, orbit) for traffic/SEO
+- Prefer hybridization (CH 06 Hybrid² Lab) when they want to blend channels or fuse two products
 - Route Protect bus + hybridization FX for IP/patent/sketches
 - End workflows at Master (launch/deploy) when possible
 - Max 5 picks in patch order`;

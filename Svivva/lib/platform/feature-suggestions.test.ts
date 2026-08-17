@@ -31,6 +31,12 @@ describe("feature-graph", () => {
     expect(getConnectedFeatures("seeds").length).toBeGreaterThan(2);
   });
 
+  it("sends Hybrid FX to the Hybrid² lab", () => {
+    const hybrid = getFeature("hybridization");
+    expect(hybrid?.href).toBe("/dashboard/hybrid-lab");
+    expect(hybrid?.description.toLowerCase()).toContain("hybridization²");
+  });
+
   it("groups channels by subgroup bus", () => {
     const seedBus = getFeaturesByBus("seed");
     expect(seedBus.every((f) => f.bus === "seed")).toBe(true);
@@ -62,6 +68,13 @@ describe("feature-suggestions", () => {
       goal: "transcribe a youtube video into deployable apps",
     });
     expect(result.suggestions[0]?.featureId).toBe("seeds");
+  });
+
+  it("routes blend-the-channels goals to the Hybrid² lab", () => {
+    const result = suggestFeaturesByKeywords({
+      goal: "blend seeds with play then hybridize those blends",
+    });
+    expect(result.suggestions[0]?.featureId).toBe("hybridization");
   });
 
   it("routes patent goals to protection and hybrid", () => {

@@ -95,6 +95,12 @@ const digitalMenuGroups: MenuGroup[] = [
         proOnly: true,
       },
       {
+        title: "Hybrid² Lab",
+        desc: "Blend channels, then blends",
+        href: "/dashboard/hybrid-lab",
+        icon: FlaskConical,
+      },
+      {
         title: "Security",
         desc: "Feeds & threats",
         href: "/dashboard/security",
@@ -206,6 +212,12 @@ const physicalMenuGroups: MenuGroup[] = [
         title: "Hypothesis Lab",
         desc: "Innovation engine",
         href: "/dashboard/hypothesis-hardware",
+        icon: FlaskConical,
+      },
+      {
+        title: "Hybrid² Lab",
+        desc: "Blend channels, then blends",
+        href: "/dashboard/hybrid-lab",
         icon: FlaskConical,
       },
       {

@@ -58,6 +58,7 @@ export const hybridizationRequestSchema = z.object({
       "api-builder",
       "research",
       "poor-man-protection",
+      "hybrid-lab",
     ])
     .optional()
     .default("hardware"),

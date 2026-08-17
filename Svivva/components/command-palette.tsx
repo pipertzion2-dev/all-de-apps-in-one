@@ -73,6 +73,22 @@ const digitalCommands: CommandItem[] = [
     section: "Navigate",
   },
   {
+    title: "Hybrid² Lab",
+    href: "/dashboard/hybrid-lab",
+    icon: FlaskConical,
+    keywords: [
+      "hybrid",
+      "hybridize",
+      "blend",
+      "fuse",
+      "marketplace",
+      "laboratory",
+      "hybridization",
+      "second",
+    ],
+    section: "Build",
+  },
+  {
     title: "Hypothesis Lab",
     href: "/dashboard/hypothesis",
     icon: FlaskConical,
@@ -175,6 +191,13 @@ const physicalCommands: CommandItem[] = [
     href: "/dashboard/hardware-builder",
     icon: Box,
     keywords: ["build", "create", "hardware", "product", "new"],
+    section: "Build",
+  },
+  {
+    title: "Hybrid² Lab",
+    href: "/dashboard/hybrid-lab",
+    icon: FlaskConical,
+    keywords: ["hybrid", "hybridize", "blend", "marketplace", "laboratory", "fuse"],
     section: "Build",
   },
   {
