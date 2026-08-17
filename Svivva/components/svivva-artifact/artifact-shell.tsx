@@ -15,7 +15,9 @@ const ArtifactCanvas = lazy(() =>
 );
 
 /** Canvas renders at 1.85× the box; pull up following sections without clipping the cube. */
-const CUBE_SCROLL_BLEED = "calc(-0.425 * min(500px, 90vw))";
+const CUBE_SIZE = "min(500px, 90vw)";
+const CANVAS_OVERFLOW = `calc(0.425 * ${CUBE_SIZE})`;
+const CUBE_SCROLL_BLEED = `calc(-1 * ${CANVAS_OVERFLOW})`;
 
 export function SvivvaArtifact() {
   const router = useRouter();
@@ -33,7 +35,7 @@ export function SvivvaArtifact() {
       className="w-full flex flex-col items-center gap-0 pt-16 pb-20 px-4 overflow-visible"
       style={{ marginBottom: CUBE_SCROLL_BLEED }}
     >
-      <div className="text-center mb-10 select-none relative z-20">
+      <div className="text-center mb-4 select-none pointer-events-none relative z-[1]">
         <p
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
@@ -54,17 +56,19 @@ export function SvivvaArtifact() {
         </p>
       </div>
 
-      <p className="text-muted-foreground/50 text-[10px] tracking-widest uppercase mb-6 select-none relative z-20">
+      <p className="text-muted-foreground/50 text-[10px] tracking-widest uppercase mb-0 select-none pointer-events-none relative z-[1]">
         drag to rotate &nbsp;·&nbsp; tap a face to open
       </p>
 
       <div
         style={{
           position: "relative",
-          width: "min(500px, 90vw)",
-          height: "min(500px, 90vw)",
+          width: CUBE_SIZE,
+          height: CUBE_SIZE,
           overflow: "visible",
           zIndex: 10,
+          // Keep the 1.85× WebGL canvas from painting over the caption above.
+          marginTop: CANVAS_OVERFLOW,
         }}
       >
         <div
