@@ -15,7 +15,7 @@ function isWebGLAvailable() {
   }
 }
 
-type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout";
+type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
 
 interface PresetConfig {
   flowerCount: number;
@@ -130,6 +130,22 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     interactionStrength: 0.25,
     spreadX: 0.7,
     spreadZ: 0.75,
+  },
+  oaas: {
+    flowerCount: 110,
+    particleCount: 60,
+    waterSize: 20,
+    cameraZ: 7.2,
+    cameraY: 3.6,
+    cameraX: 0,
+    lookAtY: 0,
+    bloomSpeed: 0.02,
+    crtIntensity: 0.14,
+    pixelSize: 1,
+    scanlineIntensity: 0.007,
+    interactionStrength: 0.55,
+    spreadX: 0.78,
+    spreadZ: 0.82,
   },
 };
 
