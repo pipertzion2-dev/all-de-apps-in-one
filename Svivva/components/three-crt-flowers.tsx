@@ -32,6 +32,7 @@ interface PresetConfig {
   interactionStrength: number;
   spreadX: number;
   spreadZ: number;
+  mobileScaleBoost?: number;
 }
 
 const PRESETS: Record<ScenePreset, PresetConfig> = {
@@ -915,20 +916,20 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const config = isMediumMobile
       ? {
           ...baseConfig,
-          // Keep blooms visible but light enough that 1–2 active scenes stay stable on phones.
           flowerCount: isCheckoutPreset
             ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
             : isSmallMobile
               ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
               : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
           particleCount: Math.floor(baseConfig.particleCount * 0.2),
-          cameraZ: baseConfig.cameraZ * 0.95,
-          cameraY: baseConfig.cameraY * 0.9,
+          // Pull the camera back so whole blooms fit on a phone screen.
+          cameraZ: baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
+          cameraY: baseConfig.cameraY * 1.15,
           pixelSize: 1,
           crtIntensity: isCheckoutPreset ? 0.06 : 0.2,
           scanlineIntensity: isCheckoutPreset ? 0.003 : 0.012,
-          bloomSpeed: baseConfig.bloomSpeed * 1.2,
-          mobileScaleBoost: isSmallMobile ? 0.8 : 0.85,
+          bloomSpeed: baseConfig.bloomSpeed * 0.85,
+          mobileScaleBoost: isSmallMobile ? 0.28 : 0.36,
         }
       : {
           ...baseConfig,
@@ -1039,10 +1040,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       const flowerConfig = activeConfigs[typeIndex];
 
       const sizeVariation = Math.random();
-      const sectionBoost = isIntro ? 1 : 1.4;
+      const sectionBoost = isIntro ? 1 : isMediumMobile ? 0.72 : 1.4;
       const baseScale = sizeVariation < 0.2 ? 0.9 + Math.random() * 0.5 : 0.6 + Math.random() * 0.4;
-      const mobileBoost = (config as any).mobileScaleBoost || 1;
-      const scale = baseScale * Math.max(mobileBoost, 0.6) * scaleMultiplier * sectionBoost;
+      const mobileBoost = config.mobileScaleBoost ?? 1;
+      const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost;
 
       const flowerNoise = isCheckout ? 0.18 : isIntro ? 0.25 : 0.12;
       const flower = createExoticFlower(
@@ -1054,11 +1055,13 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         flowerNoise,
         vivvaTextTex,
       );
-      const initialGrowth = isIntro
-        ? Math.random() < 0.3
-          ? 0.3 + Math.random() * 0.3
-          : 0.6 + Math.random() * 0.4
-        : 0.5 + Math.random() * 0.5;
+      const initialGrowth = isMediumMobile
+        ? 0.04 + Math.random() * 0.08
+        : isIntro
+          ? Math.random() < 0.3
+            ? 0.3 + Math.random() * 0.3
+            : 0.6 + Math.random() * 0.4
+          : 0.5 + Math.random() * 0.5;
       flower.userData = {
         baseY: pos.y,
         growthProgress: initialGrowth,
@@ -1067,7 +1070,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         bloomSpeed: config.bloomSpeed + Math.random() * 0.015,
         rotationOffset: (Math.random() - 0.5) * Math.PI * 0.4,
       };
-      flower.scale.setScalar(initialGrowth * 1.2);
+      flower.scale.setScalar(initialGrowth * (isMediumMobile ? 1 : 1.2));
       flower.rotation.y = Math.random() * Math.PI * 2;
       flowers.push(flower);
     };
