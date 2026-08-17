@@ -29,9 +29,9 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Avoid failing every push until secrets exist: set repo variable VERCEL_CI_DEPLOY=true
-    # (Settings → Secrets and variables → Actions → Variables). Manual runs always execute.
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.VERCEL_CI_DEPLOY == 'true' }}
+    # Run on every push to main (Path B) or manual dispatch. Requires GitHub secrets:
+    # VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@v4
 
