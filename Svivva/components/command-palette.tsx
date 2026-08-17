@@ -20,6 +20,7 @@ import {
   Rocket,
   ShieldCheck,
   Lock,
+  Youtube,
 } from "lucide-react";
 
 interface CommandItem {
@@ -114,6 +115,21 @@ const digitalCommands: CommandItem[] = [
     href: "/dashboard/orbit",
     icon: Rocket,
     keywords: ["orbit", "admin", "marketing", "seo"],
+    section: "Account",
+    adminOnly: true,
+  },
+  {
+    title: "Channel Intel",
+    href: "/dashboard/marketing/channel-intel",
+    icon: Youtube,
+    keywords: [
+      "youtube",
+      "starter story",
+      "transcript",
+      "channel",
+      "traffic",
+      "marketing research",
+    ],
     section: "Account",
     adminOnly: true,
   },
