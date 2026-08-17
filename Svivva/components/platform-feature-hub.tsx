@@ -2,21 +2,27 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Loader2, Sparkles, Sprout, Network } from "lucide-react";
+import { ArrowRight, Loader2, Radio, SlidersHorizontal, Sparkles, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  CREST_BUS,
+  formatPatchRoute,
+  getFeaturesByBus,
+  MASTER_BUS,
+  MIXING_BUSES,
   OAAS_FULL_NAME,
   OAAS_NAME,
   OAAS_TAGLINE,
   OAAS_TECHNICAL_BLURB,
-  PLATFORM_FEATURES,
+  PATCH_BAY,
+  SIGNAL_BUS,
 } from "@/lib/platform/feature-graph";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
 
-const PRESET_GOALS = [
+const PRESET_SCENES = [
   "Turn my PDF into multiple apps and launch them",
   "Get more traffic for my SaaS",
   "Protect sketches as a group patent",
@@ -28,19 +34,54 @@ type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
 };
 
+function ChannelStrip({
+  channelLabel,
+  shortTitle,
+  href,
+  mainBus,
+  isSeeds,
+}: {
+  channelLabel: string;
+  shortTitle: string;
+  href: string;
+  mainBus: "signal" | "crest" | "both";
+  isSeeds?: boolean;
+}) {
+  const busTint =
+    mainBus === "crest" ? "border-[#D94F9C]/40" : mainBus === "both" ? "border-[#5B8DA8]/50" : "border-[#5B8DA8]/30";
+
+  return (
+    <Link
+      href={href}
+      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/80 px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
+    >
+      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">{channelLabel}</span>
+      <div className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]" />
+      <span className="text-[10px] font-semibold text-center leading-tight flex items-center gap-0.5">
+        {isSeeds && <Sprout className="w-3 h-3 text-[#5B8DA8]" />}
+        {shortTitle}
+      </span>
+      <span className="text-[8px] uppercase tracking-widest text-muted-foreground">
+        {mainBus === "both" ? "L/R" : mainBus === "crest" ? "Crest" : "Signal"}
+      </span>
+    </Link>
+  );
+}
+
 export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps) {
-  const [goal, setGoal] = useState(PRESET_GOALS[0]);
+  const [goal, setGoal] = useState(PRESET_SCENES[0]);
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const layers = useMemo(() => {
-    const order = ["seed", "build", "hybrid", "grow", "protect", "play"] as const;
-    return order.map((layer) => ({
-      layer,
-      features: PLATFORM_FEATURES.filter((f) => f.layer === layer && !f.adminOnly),
-    }));
-  }, []);
+  const busChannels = useMemo(
+    () =>
+      MIXING_BUSES.map((bus) => ({
+        bus,
+        channels: getFeaturesByBus(bus.id),
+      })).filter((g) => g.channels.length > 0),
+    [],
+  );
 
   const suggest = useCallback(async () => {
     const trimmed = goal.trim();
@@ -54,7 +95,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
         body: JSON.stringify({ goal: trimmed }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not suggest features");
+      if (!res.ok) throw new Error(data.error || "Could not patch route");
       setResult(data as FeatureSuggestionResult);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Try again");
@@ -82,27 +123,50 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
               {OAAS_NAME} · {OAAS_FULL_NAME}
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2">
-              <Network className="w-8 h-8 text-[#5B8DA8]" />
-              Orchestration connects everything.
+              <SlidersHorizontal className="w-8 h-8 text-[#5B8DA8]" />
+              The mixing board for your stack.
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base">{OAAS_TAGLINE}</p>
             <p className="text-xs sm:text-sm text-[#5B8DA8] font-medium">{OAAS_TECHNICAL_BLURB}</p>
           </div>
         )}
 
+        {!isCompact && (
+          <div className="grid sm:grid-cols-3 gap-3 text-center text-xs">
+            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/60 p-3">
+              <p className="font-bold text-[#5B8DA8]">{SIGNAL_BUS.consoleName}</p>
+              <p className="text-muted-foreground mt-1">{SIGNAL_BUS.description}</p>
+            </div>
+            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/60 p-3">
+              <p className="font-bold text-[#D94F9C]">{CREST_BUS.consoleName}</p>
+              <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
+            </div>
+            <div className="rounded-lg border border-amber-500/40 bg-card/60 p-3">
+              <p className="font-bold text-amber-600 dark:text-amber-400">{MASTER_BUS.consoleName}</p>
+              <p className="text-muted-foreground mt-1">{MASTER_BUS.description}</p>
+              <p className="text-[10px] text-muted-foreground mt-2">
+                Out: {MASTER_BUS.outputs.join(" · ")}
+              </p>
+            </div>
+          </div>
+        )}
+
         <Card className="border-[#5B8DA8]/30 bg-card/90 backdrop-blur-sm">
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
-              <Sparkles className="w-4 h-4 text-[#5B8DA8]" />
-              AI-powered feature routing
+              <Radio className="w-4 h-4 text-[#5B8DA8]" />
+              {PATCH_BAY.label} — AI patch routing
             </div>
             <p className="text-xs text-muted-foreground">
-              Describe what you want — <strong>OaaS</strong> suggests which ZZAI features to open and
-              in what order. Often starts with <strong>ZZAI Seeds</strong> when you need many apps
-              from one document.
+              Describe your mix — <strong>OaaS</strong> patches channel order and bus sends. Often
+              unmutes <strong>CH 01 · Seeds</strong> when you need many apps from one document, then
+              sends to <strong>Master</strong> via Launch.
+            </p>
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+              Scene recall
             </p>
             <div className="flex flex-wrap gap-2">
-              {PRESET_GOALS.map((g) => (
+              {PRESET_SCENES.map((g) => (
                 <Button
                   key={g}
                   type="button"
@@ -119,8 +183,8 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
               <Input
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                placeholder="What do you want to build, launch, or protect?"
-                className="flex-1"
+                placeholder="What channels should be in the mix?"
+                className="flex-1 font-mono text-sm"
               />
               <Button
                 onClick={() => void suggest()}
@@ -132,7 +196,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
                 ) : (
                   <Sparkles className="w-4 h-4" />
                 )}
-                Suggest path
+                Patch route
               </Button>
             </div>
             {error && <p className="text-xs text-destructive">{error}</p>}
@@ -140,12 +204,12 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
               <div className="space-y-3 pt-2 border-t border-border/60">
                 <p className="text-sm">{result.summary}</p>
                 {result.workflow.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Suggested flow: {result.workflow.join(" → ")}
+                  <p className="text-xs font-mono text-muted-foreground">
+                    Patch: {formatPatchRoute(result.workflow)}
                   </p>
                 )}
                 <ul className="space-y-2">
-                  {result.suggestions.map((s) => (
+                  {result.suggestions.map((s, i) => (
                     <li key={s.featureId}>
                       <Link
                         href={s.href}
@@ -153,6 +217,9 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
                       >
                         <div className="min-w-0">
                           <p className="font-medium text-sm group-hover:text-[#5B8DA8]">
+                            <span className="font-mono text-[10px] text-muted-foreground mr-2">
+                              Step {i + 1}
+                            </span>
                             {s.title}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">{s.reason}</p>
@@ -163,7 +230,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
                   ))}
                 </ul>
                 {result.aiUsed && (
-                  <p className="text-[10px] text-muted-foreground">AI-routed workflow</p>
+                  <p className="text-[10px] text-muted-foreground font-mono">AI patch matrix</p>
                 )}
               </div>
             )}
@@ -171,32 +238,48 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
         </Card>
 
         {!isCompact && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {layers.map(({ layer, features }) =>
-              features.length ? (
-                <div
-                  key={layer}
-                  className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-2"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    {layer}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {features.map((f) => (
-                      <li key={f.id}>
-                        <Link
-                          href={f.href}
-                          className="text-sm hover:text-[#5B8DA8] flex items-center gap-1.5"
-                        >
-                          {f.id === "seeds" && <Sprout className="w-3.5 h-3.5" />}
-                          {f.shortTitle}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+          <div className="space-y-6">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
+              Channel strips · subgroup buses
+            </p>
+            {busChannels.map(({ bus, channels }) => (
+              <div key={bus.id} className="space-y-2">
+                <div className="flex flex-wrap items-baseline gap-2 px-1">
+                  <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
+                  <span className="text-[10px] text-muted-foreground">{bus.description}</span>
                 </div>
-              ) : null,
-            )}
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                  {channels.map((f) => (
+                    <ChannelStrip
+                      key={f.id}
+                      channelLabel={f.channelLabel}
+                      shortTitle={f.shortTitle}
+                      href={f.href}
+                      mainBus={f.mainBus}
+                      isSeeds={f.id === "seeds"}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/80 to-amber-500/5 p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                    {MASTER_BUS.consoleName} — {MASTER_BUS.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {MASTER_BUS.outputs.map((out) => (
+                    <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
+                      {out}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

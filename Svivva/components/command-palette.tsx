@@ -59,7 +59,7 @@ const digitalCommands: CommandItem[] = [
     title: "Orchestration as a Service",
     href: "/#oaas",
     icon: FlaskConical,
-    keywords: ["oaas", "orchestration", "orchestrate", "connect", "suggest", "routing", "platform", "console"],
+    keywords: ["oaas", "orchestration", "patch", "mixing", "console", "channel", "bus", "master", "route"],
     section: "Navigate",
   },
   {

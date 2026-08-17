@@ -119,7 +119,7 @@ const pricingTiers = [
       "AI material sourcing",
       "Hardware layout preview & optional AI sketches",
       "ZZAI Play — full access",
-      "OaaS — Orchestration as a Service",
+      "Mixing-console OS — 16 channels + Master bus",
       "ZZAI Seeds — multi-app factory",
       "Auto-rollback & versioning",
       "Priority support",
@@ -139,7 +139,7 @@ const pricingTiers = [
       "Unlimited API requests",
       "Dedicated supplier network",
       "ZZAI Play — full access",
-      "OaaS — unlimited orchestration",
+      "OaaS patch bay — unlimited channel routing",
       "ZZAI Seeds — unlimited builds",
       "SSO & SAML",
       "Custom integrations",
@@ -559,16 +559,17 @@ export default function LandingPage() {
                     </Badge>
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                    <strong>OaaS</strong> orchestrates ZZAI modules — Seeds, API Builder, Launch Studio,
-                    Channel Intel, and Poor Man Protection — like channels on a mixing desk. Describe
-                    your goal; AI routes you across the feature graph.
+                    <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI module
+                    is a <strong>channel strip</strong>; subgroup <strong>buses</strong> sum your
+                    signal through <strong>Signal</strong> or <strong>Crest</strong> mains to the{" "}
+                    <strong>Master bus</strong> — deploy, launch, and ship.
                   </p>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                     {[
-                      "OaaS workflow routing",
-                      "Cross-module orchestration",
-                      "AI feature paths",
-                      "One doc → many apps",
+                      "16 channel strips",
+                      "6 subgroup buses",
+                      "Signal · Crest mains",
+                      "Master bus out",
                     ].map((tag) => (
                       <span
                         key={tag}
@@ -648,7 +649,7 @@ export default function LandingPage() {
                 <p
                   className={`text-xs sm:text-sm font-bold tracking-[0.35em] ${mode === "digital" ? "text-[#5B8DA8]/90" : "text-[#D94F9C]/90"}`}
                 >
-                  {mode === "digital" ? "SIGNAL" : "CREST"} · use arrows to switch
+                  {mode === "digital" ? "SIGNAL BUS" : "CREST BUS"} · main L/R · use arrows to switch
                 </p>
               </div>
               {mode === "digital" ? (
@@ -668,9 +669,9 @@ export default function LandingPage() {
                     </span>
                   </h1>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                    <strong>OaaS</strong> — Orchestration as a Service: orchestrate ZZAI Seeds, APIs with
-                    evals and rollback, launch automation, YouTube intel, and IP protection on one
-                    mixing-console OS.
+                    <strong>OaaS</strong> — Orchestration as a Service: a mixing-console OS. Patch{" "}
+                    <strong>CH 01 · Seeds</strong>, APIs, launch, YouTube intel, and IP through
+                    subgroup buses to the <strong>Master bus</strong>.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                     <Button

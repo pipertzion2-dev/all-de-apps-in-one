@@ -56,18 +56,21 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
 
 function fallbackReason(feature: PlatformFeature, goal: string): string {
   if (feature.id === "orchestration") {
-    return "OaaS orchestrates your goal across the full ZZAI stack — start here for AI-routed workflows.";
+    return "Patch bay — OaaS assigns channel order and bus sends across the full desk.";
   }
   if (feature.id === "seeds") {
-    return "ZZAI Seeds: multi-app generation from one document, then orchestrate into launch and growth.";
+    return `${feature.channelLabel}: unmute Seeds first — multi-app generation, then send to Grow and Master.`;
   }
   if (feature.layer === "hybrid") {
-    return `OaaS routes your goal (“${goal.slice(0, 60)}…”) across ZZAI features.`;
+    return `FX insert on ${feature.channelLabel} — route “${goal.slice(0, 48)}…” through the hybrid bus.`;
   }
   if (feature.layer === "grow") {
-    return "Ship traffic and launch workflows after you have something to promote.";
+    return `${feature.channelLabel} on the Grow bus — send traffic and launch signal toward Master.`;
   }
-  return feature.description;
+  if (feature.layer === "protect") {
+    return `${feature.channelLabel} on the Protect bus — limiter chain before Master out.`;
+  }
+  return `${feature.channelLabel}: ${feature.description}`;
 }
 
 function buildWorkflow(suggestions: FeatureSuggestion[]): string[] {
@@ -113,8 +116,8 @@ export function suggestFeaturesByKeywords(options: {
     aiUsed: false,
     summary:
       suggestions[0]?.featureId === "orchestration" || suggestions[0]?.featureId === "seeds"
-        ? "OaaS orchestrates workflows — route generation, launch, intel, and protection in order."
-        : "OaaS keyword routing (add AI keys for richer orchestrated paths).",
+        ? "Patch route: unmute channels in order, send through subgroup buses, print to Master."
+        : "OaaS patch bay (add AI keys for richer channel routing).",
   };
 }
 
@@ -136,27 +139,35 @@ export async function suggestFeatures(options: {
     )
     .join("\n");
 
-  const prompt = `You route users inside ZZAI via OaaS (Orchestration as a Service) — a mixing-console-style OS where APIs, ZZAI Seeds, launch, IP, and YouTube intel are orchestrated across modules.
+  const prompt = `You route users on the ZZAI mixing-console OS via OaaS (Orchestration as a Service).
+
+Desk layout:
+- Each feature is a CHANNEL STRIP (CH 01 Seeds, CH 02 API Builder, etc.)
+- Subgroup BUSES: Seed, Build, FX/Hybrid, Grow, Protect, Aux
+- Main buses: Signal (digital/API) and Crest (hardware)
+- MASTER BUS: deploy, launch, live endpoints, court packs
+- PATCH BAY (orchestration): AI assigns channel order and bus sends
 
 User goal: ${options.goal.trim()}
-${options.fromFeatureId ? `Currently on: ${options.fromFeatureId}` : ""}
+${options.fromFeatureId ? `Currently on channel: ${options.fromFeatureId}` : ""}
 
-Features:
+Channels:
 ${catalog}
 
 Return ONLY JSON:
 {
-  "summary": "2 sentences",
+  "summary": "2 sentences using mixing-board language (channels, buses, master)",
   "workflow": ["feature id", "..."],
-  "picks": [{"featureId":"...","reason":"one sentence why"}]
+  "picks": [{"featureId":"...","reason":"one sentence why — mention channel or bus"}]
 }
 
 Rules:
-- Prefer orchestration when they want connected workflows or cross-module routing
-- Prefer seeds when they want many apps from PDF upload
-- Include grow features (launch-studio, marketing, channel-intel, orbit) for traffic/SEO
-- Include poor-man-protection + hybridization for IP/patent/sketches
-- Max 5 picks in workflow order`;
+- Prefer orchestration when they need a full patch route across channels
+- Prefer seeds (CH 01) when they want many apps from PDF upload
+- Route Grow bus channels (launch, marketing, channel-intel, orbit) for traffic/SEO
+- Route Protect bus + hybridization FX for IP/patent/sketches
+- End workflows at Master (launch/deploy) when possible
+- Max 5 picks in patch order`;
 
   try {
     const completion = await openai.chat.completions.create({
