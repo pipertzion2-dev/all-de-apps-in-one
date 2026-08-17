@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasAdminAccess } from "@/lib/auth/admin";
-import {
-  ingestChannelIntel,
-  MAX_CHANNEL_INTEL_VIDEOS,
-} from "@/lib/marketing/channel-intel";
+import { ingestChannelIntel, MAX_CHANNEL_INTEL_VIDEOS } from "@/lib/marketing/channel-intel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;

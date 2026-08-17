@@ -45,7 +45,7 @@ export function normalizeChannelVideosUrl(input: string): string {
 
 /** Extract `ytInitialData` JSON embedded in YouTube HTML. */
 export function extractYtInitialData(html: string): unknown | null {
-  const markers = ['var ytInitialData = ', 'window["ytInitialData"] = ', "ytInitialData = "];
+  const markers = ["var ytInitialData = ", 'window["ytInitialData"] = ', "ytInitialData = "];
   for (const marker of markers) {
     const idx = html.indexOf(marker);
     if (idx < 0) continue;
@@ -104,17 +104,15 @@ function collectVideoRenderers(
   const vr = obj.videoRenderer as Record<string, unknown> | undefined;
   if (vr && typeof vr.videoId === "string" && vr.videoId.length === 11) {
     const titleRuns = (vr.title as Record<string, unknown> | undefined)?.runs as
-      | { text?: string }[]
-      | undefined;
+      { text?: string }[] | undefined;
     const title =
       titleRuns?.map((r) => r.text ?? "").join("") ||
       (typeof (vr.title as Record<string, unknown> | undefined)?.simpleText === "string"
         ? ((vr.title as Record<string, unknown>).simpleText as string)
         : "") ||
       vr.videoId;
-    const publishedText = (
-      vr.publishedTimeText as Record<string, unknown> | undefined
-    )?.simpleText as string | undefined;
+    const publishedText = (vr.publishedTimeText as Record<string, unknown> | undefined)
+      ?.simpleText as string | undefined;
     if (!out.has(vr.videoId)) {
       out.set(vr.videoId, {
         videoId: vr.videoId,

@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Copy,
-  Download,
-  Loader2,
-  Search,
-  Sparkles,
-  Youtube,
-} from "lucide-react";
+import { ArrowLeft, Copy, Download, Loader2, Search, Sparkles, Youtube } from "lucide-react";
 import { authFetch } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -288,11 +280,18 @@ export function ChannelIntelPanel() {
             <div>
               <CardTitle className="text-lg">Briefing</CardTitle>
               <CardDescription>
-                {answer.aiUsed ? "AI synthesis" : "Keyword excerpts (add OpenAI/Gemini for full synthesis)"}
+                {answer.aiUsed
+                  ? "AI synthesis"
+                  : "Keyword excerpts (add OpenAI/Gemini for full synthesis)"}
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => void copyAnswer()} className="gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void copyAnswer()}
+                className="gap-1"
+              >
                 <Copy className="w-3.5 h-3.5" /> Copy
               </Button>
               <Button size="sm" variant="outline" onClick={exportMarkdown} className="gap-1">

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  extractYtInitialData,
-  normalizeChannelVideosUrl,
-} from "./youtube-channel";
+import { extractYtInitialData, normalizeChannelVideosUrl } from "./youtube-channel";
 
 describe("youtube-channel", () => {
   it("normalizes @handle URLs to /videos tab", () => {
@@ -15,9 +12,9 @@ describe("youtube-channel", () => {
   });
 
   it("rejects single video URLs", () => {
-    expect(() =>
-      normalizeChannelVideosUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-    ).toThrow(/channel/i);
+    expect(() => normalizeChannelVideosUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toThrow(
+      /channel/i,
+    );
   });
 
   it("extracts ytInitialData JSON from HTML", () => {

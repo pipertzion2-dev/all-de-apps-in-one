@@ -159,7 +159,10 @@ function excerptForTerm(text: string, query: string, maxLen = 320): string {
   }
   if (idx < 0) return text.slice(0, maxLen).trim();
   const start = Math.max(0, idx - 80);
-  return text.slice(start, start + maxLen).replace(/\s+/g, " ").trim();
+  return text
+    .slice(start, start + maxLen)
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function rankVideosForQuery(
@@ -189,10 +192,9 @@ function fallbackAnswer(query: string, sources: ChannelIntelSource[]): string {
   if (!hits.length) {
     return `No strong keyword matches for “${query}” in this corpus. Try broader terms (traffic, SEO, Reddit, Product Hunt, content) or ingest more videos.`;
   }
-  const lines = hits.slice(0, 8).map(
-    (s) =>
-      `• **${s.title}** — ${s.excerpt}${s.excerpt.length >= 300 ? "…" : ""}\n  ${s.url}`,
-  );
+  const lines = hits
+    .slice(0, 8)
+    .map((s) => `• **${s.title}** — ${s.excerpt}${s.excerpt.length >= 300 ? "…" : ""}\n  ${s.url}`);
   return `Keyword matches for “${query}” (no AI configured — showing excerpts only):\n\n${lines.join("\n\n")}`;
 }
 
@@ -202,7 +204,12 @@ export async function queryChannelIntel(
 ): Promise<ChannelIntelAnswer> {
   const trimmed = query.trim();
   if (!trimmed) {
-    return { answer: "Ask a question about tactics in the ingested videos.", sources: [], aiUsed: false, query: "" };
+    return {
+      answer: "Ask a question about tactics in the ingested videos.",
+      sources: [],
+      aiUsed: false,
+      query: "",
+    };
   }
 
   const sources = rankVideosForQuery(corpus, trimmed, 12);
@@ -267,7 +274,8 @@ ${context.slice(0, 90000)}`;
       messages: [{ role: "user", content: prompt }],
       temperature: 0.25,
     });
-    const answer = completion.choices[0]?.message?.content?.trim() || fallbackAnswer(trimmed, sources);
+    const answer =
+      completion.choices[0]?.message?.content?.trim() || fallbackAnswer(trimmed, sources);
     return { answer, sources, aiUsed: true, query: trimmed };
   } catch {
     return {
