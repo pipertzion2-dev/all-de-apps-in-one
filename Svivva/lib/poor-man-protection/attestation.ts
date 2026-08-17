@@ -2,12 +2,14 @@ import { createHash, createHmac, randomUUID, randomBytes } from "crypto";
 import type {
   ColorSwatch,
   CyberSeal,
+  GroupDisclosure,
   PoorManCertificate,
   ProtectionCoin,
   ProtectRequest,
   ScientificAxes,
   TimestampToken,
 } from "./types";
+import { groupMerkleCanonical } from "./group-organize";
 
 export const DISCLAIMER =
   "ZZAI Poor Man Protection creates a timestamped, cryptographically sealed evidentiary package with dual-axis scientific hybridization and mint-ready digital asset metadata. It is NOT a registered patent, trademark, or copyright registration with any government office (including the U.S. Copyright Office). Self-mailing and platform certificates are supporting evidence of anteriority/possession — not a substitute for counsel or formal registration. Courts weigh digital evidence in context (hash integrity, chain of custody, independent timestamps, authorship corroboration).";
@@ -254,4 +256,19 @@ export function verifyCertificateHash(cert: PoorManCertificate): boolean {
   const { certificateHash, ...rest } = cert;
   const expected = createHash("sha256").update(stableStringify(rest)).digest("hex");
   return expected === certificateHash;
+}
+
+export function merkleRootFromCanonical(canonical: string): string {
+  return createHash("sha256").update(canonical, "utf8").digest("hex");
+}
+
+export function assertGroupMerkle(disclosure: GroupDisclosure, contentHash: string): void {
+  const canonical = groupMerkleCanonical(disclosure.sheets.map((s) => s.contentHash));
+  const root = merkleRootFromCanonical(canonical);
+  if (root !== disclosure.merkleRoot.toLowerCase() || root !== contentHash.toLowerCase()) {
+    throw new Error("Group merkle root does not match deposited sheet hashes.");
+  }
+  if (disclosure.figureCount !== disclosure.sheets.length) {
+    throw new Error("Group figure count does not match the sheet schedule.");
+  }
 }

@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertGroupMerkle,
   buildScientificAxes,
   finalizeCertificate,
   hexToLab,
+  merkleRootFromCanonical,
   mintProtectionCoin,
   verifyCertificateHash,
 } from "./attestation";
+import { organizeGroupPatent } from "./group-organize";
 import { scientificHybridFallback } from "./scientific-hybrid";
 import type { ProtectRequest } from "./types";
 
@@ -79,5 +82,45 @@ describe("poor-man-protection", () => {
     expect(cert.certificateHash).toHaveLength(64);
     expect(verifyCertificateHash(cert)).toBe(true);
     expect(verifyCertificateHash({ ...cert, title: "tampered" })).toBe(false);
+  });
+
+  it("rejects a group patent whose merkle root does not match the sheets", () => {
+    const organized = organizeGroupPatent([
+      {
+        fileName: "lock-front.png",
+        contentHash: "b".repeat(64),
+        palette: [{ hex: "#5B8DA8", role: "dominant", weight: 1 }],
+      },
+      {
+        fileName: "lock-side.png",
+        contentHash: "c".repeat(64),
+        palette: [{ hex: "#5B8DA8", role: "dominant", weight: 1 }],
+      },
+    ]);
+    const root = merkleRootFromCanonical(organized.merkleCanonical);
+    expect(() =>
+      assertGroupMerkle(
+        {
+          kind: "group_patent",
+          merkleRoot: root,
+          figureCount: organized.figureCount,
+          familyCount: organized.familyCount,
+          sheets: organized.sheets,
+        },
+        "d".repeat(64),
+      ),
+    ).toThrow(/merkle/i);
+    expect(() =>
+      assertGroupMerkle(
+        {
+          kind: "group_patent",
+          merkleRoot: root,
+          figureCount: organized.figureCount,
+          familyCount: organized.familyCount,
+          sheets: organized.sheets,
+        },
+        root,
+      ),
+    ).not.toThrow();
   });
 });

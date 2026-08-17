@@ -410,7 +410,7 @@ function ReturningUserDashboard({
     {
       href: "/dashboard/poor-man-protection",
       title: "Poor Man Protection",
-      subtitle: "Seal sketches with dual-axis prior-art + coin",
+      subtitle: "Seal sketches — or dump a group of images and let ZZAI organize",
       icon: ShieldCheck,
       color: "#5B8DA8",
       shapes: [

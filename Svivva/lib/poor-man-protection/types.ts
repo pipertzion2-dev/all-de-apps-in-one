@@ -40,6 +40,44 @@ export const creatorOathSchema = z.object({
   acknowledgedUsCopyrightOffice: z.literal(true),
 });
 
+export const GROUP_SHEET_ROLES = [
+  "overview",
+  "elevation",
+  "detail",
+  "iteration",
+  "alternate",
+  "figure",
+] as const;
+
+export const groupSheetSchema = z.object({
+  figure: z.string().min(1).max(40),
+  fileName: z.string().min(1).max(260),
+  contentHash: z.string().regex(/^[a-f0-9]{64}$/i),
+  mimeType: z.string().max(100).optional().default("image/png"),
+  role: z.enum(GROUP_SHEET_ROLES),
+  title: z.string().min(1).max(200),
+  familyKey: z.string().max(120).optional(),
+  lastModified: z.string().max(40).optional(),
+  palette: z.array(colorSwatchSchema).max(12).optional(),
+});
+
+export const groupDisclosureSchema = z.object({
+  kind: z.literal("group_patent"),
+  merkleRoot: z.string().regex(/^[a-f0-9]{64}$/i),
+  figureCount: z.number().int().min(1).max(24),
+  familyCount: z.number().int().min(1).max(24),
+  sheets: z.array(groupSheetSchema).min(1).max(24),
+});
+
+export const groupImageInputSchema = z.object({
+  fileName: z.string().min(1).max(260),
+  contentHash: z.string().regex(/^[a-f0-9]{64}$/i),
+  mimeType: z.string().max(100).optional(),
+  lastModifiedMs: z.number().optional(),
+  byteLength: z.number().optional(),
+  palette: z.array(colorSwatchSchema).max(12).default([]),
+});
+
 export const protectRequestSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(4000),
@@ -77,6 +115,7 @@ export const protectRequestSchema = z.object({
   chronology: chronologySchema.optional(),
   creatorOath: creatorOathSchema.optional(),
   custodyLog: z.array(custodyEventSchema).max(40).optional(),
+  groupDisclosure: groupDisclosureSchema.optional(),
   delivery: z
     .object({
       emailTo: z.string().email().optional(),
@@ -91,6 +130,38 @@ export type ProtectRequest = z.infer<typeof protectRequestSchema>;
 export type CreatorOath = z.infer<typeof creatorOathSchema>;
 export type Chronology = z.infer<typeof chronologySchema>;
 export type CustodyEvent = z.infer<typeof custodyEventSchema>;
+export type GroupSheet = z.infer<typeof groupSheetSchema>;
+export type GroupDisclosure = z.infer<typeof groupDisclosureSchema>;
+export type GroupImageInput = z.infer<typeof groupImageInputSchema>;
+export type GroupSheetRole = (typeof GROUP_SHEET_ROLES)[number];
+
+export type OrganizedGroupPatent = {
+  title: string;
+  description: string;
+  formVariable: string;
+  paletteVariable: string;
+  palette: ColorSwatch[];
+  sheets: GroupSheet[];
+  familyCount: number;
+  figureCount: number;
+  merkleCanonical: string;
+  chronologyHint: {
+    conceivedOn?: string;
+    firstFixedOn?: string;
+    medium: string;
+    iterationNotes: string;
+  };
+  interrogation: {
+    silhouette: string;
+    hierarchy: string;
+    negativeSpace: string;
+    distinctiveMarks: string;
+    emotionalIntent: string;
+    contrastStrategy: string;
+    forbiddenColors: string;
+    lightingContext: string;
+  };
+};
 
 export type ProtectionCoin = {
   name: string;
@@ -170,6 +241,7 @@ export type PoorManCertificate = {
   chronology?: Chronology;
   creatorOath?: CreatorOath;
   custodyLog?: CustodyEvent[];
+  groupDisclosure?: GroupDisclosure;
   attestationId: string;
   certificateHash: string;
   verifyUrl?: string;

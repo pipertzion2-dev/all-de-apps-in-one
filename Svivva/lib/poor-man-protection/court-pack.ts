@@ -72,6 +72,22 @@ export async function buildCourtEvidencePdf(cert: PoorManCertificate): Promise<B
       }
     }
 
+    if (cert.groupDisclosure) {
+      section(doc, "3b. Group patent figure schedule");
+      doc.text(
+        `Kind: group patent · ${cert.groupDisclosure.figureCount} figures · ${cert.groupDisclosure.familyCount} famil${
+          cert.groupDisclosure.familyCount === 1 ? "y" : "ies"
+        }`,
+      );
+      doc.text(`Group merkle root (SHA-256): ${cert.groupDisclosure.merkleRoot}`);
+      doc.moveDown(0.15);
+      for (const sheet of cert.groupDisclosure.sheets) {
+        doc.text(
+          `${sheet.figure} — ${sheet.role} — ${sheet.fileName} — ${sheet.contentHash.slice(0, 16)}…`,
+        );
+      }
+    }
+
     section(doc, "4. Dual-axis scientific claims");
     doc.text(`Axis A — ${cert.scientificAxes.axisA.label}`);
     doc.text(cert.scientificAxes.axisA.summary, { align: "justify" });
@@ -180,6 +196,11 @@ export async function buildPostalCoverPdf(cert: PoorManCertificate): Promise<Buf
     doc.text(`Attestation ID: ${cert.attestationId}`);
     doc.text(`Content SHA-256: ${cert.contentHash}`);
     doc.text(`Certificate SHA-256: ${cert.certificateHash}`);
+    if (cert.groupDisclosure) {
+      doc.text(
+        `Group patent: ${cert.groupDisclosure.figureCount} figures · merkle ${cert.groupDisclosure.merkleRoot}`,
+      );
+    }
     doc.text(`Creator: ${cert.creatorOath?.fullLegalName || "(declare on oath page)"}`);
     doc.moveDown();
     doc.text("Mailing checklist:");

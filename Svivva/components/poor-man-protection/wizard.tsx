@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   ScrollText,
   Fingerprint,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { SealChamberScene } from "@/components/poor-man-protection/seal-chamber-scene";
-import type { ColorSwatch, PoorManCertificate } from "@/lib/poor-man-protection/types";
+import {
+  GroupDeposit,
+  type DepositedGroupImage,
+} from "@/components/poor-man-protection/group-deposit";
+import { MAX_GROUP_SHEETS, organizeGroupPatent } from "@/lib/poor-man-protection/group-organize";
+import type {
+  ColorSwatch,
+  OrganizedGroupPatent,
+  PoorManCertificate,
+} from "@/lib/poor-man-protection/types";
 
 type ProtectResponse = {
   certificate: PoorManCertificate;
@@ -52,9 +62,13 @@ const STEPS = [
 
 const VAULT_KEY = "zzai-poor-man-protection-vault-v1";
 
-async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
+async function sha256Hex(buffer: BufferSource): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", buffer);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function sha256Text(text: string): Promise<string> {
+  return sha256Hex(new TextEncoder().encode(text));
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
@@ -155,6 +169,10 @@ export function PoorManProtectionWizard() {
   const [palette, setPalette] = useState<ColorSwatch[]>([]);
   const [contentHash, setContentHash] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [depositMode, setDepositMode] = useState<"single" | "group">("single");
+  const [groupImages, setGroupImages] = useState<DepositedGroupImage[]>([]);
+  const [organizedGroup, setOrganizedGroup] = useState<OrganizedGroupPatent | null>(null);
+  const [groupMerkle, setGroupMerkle] = useState<string | null>(null);
 
   // Chronology
   const [conceivedOn, setConceivedOn] = useState("");
@@ -244,6 +262,94 @@ export function PoorManProtectionWizard() {
     [previewUrl, title, toast],
   );
 
+  const applyOrganizedGroup = useCallback(
+    async (nextImages: Array<DepositedGroupImage & { palette: ColorSwatch[] }>) => {
+      if (!nextImages.length) {
+        setOrganizedGroup(null);
+        setGroupMerkle(null);
+        return;
+      }
+      const withPalettes = organizeGroupPatent(
+        nextImages.map((img) => ({
+          fileName: img.file.name,
+          contentHash: img.contentHash,
+          mimeType: img.file.type || "image/png",
+          lastModifiedMs: img.file.lastModified,
+          byteLength: img.file.size,
+          palette: img.palette,
+        })),
+      );
+      const merkle = await sha256Text(withPalettes.merkleCanonical);
+      setOrganizedGroup(withPalettes);
+      setGroupMerkle(merkle);
+      setTitle(withPalettes.title);
+      setDescription(withPalettes.description);
+      setPalette(withPalettes.palette);
+      setContentHash(merkle);
+      setFile(nextImages[0]?.file || null);
+      setPreviewUrl(nextImages[0]?.previewUrl || null);
+      setSilhouette(withPalettes.interrogation.silhouette);
+      setHierarchy(withPalettes.interrogation.hierarchy);
+      setNegativeSpace(withPalettes.interrogation.negativeSpace);
+      setDistinctiveMarks(withPalettes.interrogation.distinctiveMarks);
+      setEmotionalIntent(withPalettes.interrogation.emotionalIntent);
+      setContrastStrategy(withPalettes.interrogation.contrastStrategy);
+      setForbiddenColors(withPalettes.interrogation.forbiddenColors);
+      setLightingContext(withPalettes.interrogation.lightingContext);
+      setConceivedOn(withPalettes.chronologyHint.conceivedOn || "");
+      setFirstFixedOn(withPalettes.chronologyHint.firstFixedOn || "");
+      setMedium(withPalettes.chronologyHint.medium);
+      setIterationNotes(withPalettes.chronologyHint.iterationNotes);
+      setCustodyLog((log) =>
+        pushCustody(
+          log,
+          "group_patent_organized",
+          `${withPalettes.figureCount} figures · merkle ${merkle.slice(0, 16)}…`,
+        ),
+      );
+    },
+    [],
+  );
+
+  const onGroupFiles = useCallback(
+    async (files: File[]) => {
+      const picked = files.filter((f) => f.type.startsWith("image/")).slice(0, MAX_GROUP_SHEETS);
+      if (!picked.length) return;
+      setResult(null);
+      setAnalyzing(true);
+      try {
+        const deposited: Array<DepositedGroupImage & { palette: ColorSwatch[] }> = [];
+        for (const f of picked) {
+          const buf = await f.arrayBuffer();
+          deposited.push({
+            file: f,
+            previewUrl: URL.createObjectURL(f),
+            contentHash: await sha256Hex(buf),
+            palette: await extractPalette(f),
+          });
+        }
+        setGroupImages((prev) => {
+          prev.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+          return deposited;
+        });
+        await applyOrganizedGroup(deposited);
+        toast({
+          title: "Group organized",
+          description: `${deposited.length} sheets clustered, numbered, and fingerprinted.`,
+        });
+      } catch {
+        toast({
+          title: "Could not organize group",
+          description: "Try PNG or JPEG images.",
+          variant: "destructive",
+        });
+      } finally {
+        setAnalyzing(false);
+      }
+    },
+    [applyOrganizedGroup, toast],
+  );
+
   const canAdvance = useMemo(() => {
     switch (STEPS[step].id) {
       case "intent":
@@ -255,6 +361,15 @@ export function PoorManProtectionWizard() {
           ackCopyright
         );
       case "deposit":
+        if (depositMode === "group") {
+          return (
+            !!organizedGroup &&
+            !!groupMerkle &&
+            organizedGroup.figureCount >= 2 &&
+            title.trim().length > 0 &&
+            description.trim().length >= 20
+          );
+        }
         return !!file && !!contentHash && title.trim() && description.trim().length >= 20;
       case "chronology":
         return !!firstFixedOn || !!conceivedOn || iterationNotes.trim().length >= 10;
@@ -276,15 +391,18 @@ export function PoorManProtectionWizard() {
     ackPatent,
     conceivedOn,
     contentHash,
+    depositMode,
     description,
     emotionalIntent,
     file,
     firstFixedOn,
+    groupMerkle,
     hierarchy,
     iterationNotes,
     jurisdiction,
     legalName,
     oathText,
+    organizedGroup,
     palette.length,
     result,
     silhouette,
@@ -349,6 +467,19 @@ export function PoorManProtectionWizard() {
             acknowledgedUsCopyrightOffice: true as const,
           },
           custodyLog: log,
+          ...(depositMode === "group" && organizedGroup && groupMerkle
+            ? {
+                mimeType: "application/zzai-group-patent",
+                fileName: `${title.trim().replace(/\s+/g, "-").slice(0, 60)}-group-patent.json`,
+                groupDisclosure: {
+                  kind: "group_patent" as const,
+                  merkleRoot: groupMerkle,
+                  figureCount: organizedGroup.figureCount,
+                  familyCount: organizedGroup.familyCount,
+                  sheets: organizedGroup.sheets,
+                },
+              }
+            : {}),
         }),
       });
       const data = await res.json();
@@ -509,7 +640,9 @@ export function PoorManProtectionWizard() {
                 {STEPS[step].id === "intent" &&
                   "Declare authorship and acknowledge what this package is — and is not."}
                 {STEPS[step].id === "deposit" &&
-                  "Your file never needs to leave this session for hashing; we fingerprint it in-browser."}
+                  (depositMode === "group"
+                    ? "Drop every sketch. ZZAI clusters families, numbers figures, extracts palettes, and writes the disclosure."
+                    : "Your file never needs to leave this session for hashing; we fingerprint it in-browser.")}
                 {STEPS[step].id === "chronology" &&
                   "Courts ask when the work was fixed. Build a creative timeline — this is unique to ZZAI’s interrogation."}
                 {STEPS[step].id === "axisA" &&
@@ -589,63 +722,115 @@ export function PoorManProtectionWizard() {
 
               {STEPS[step].id === "deposit" && (
                 <>
-                  <div
-                    className="relative rounded-xl border border-dashed border-border/70 bg-muted/20 min-h-[160px] flex items-center justify-center overflow-hidden"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const f = e.dataTransfer.files?.[0];
-                      if (f) void onFile(f);
-                    }}
-                  >
-                    {previewUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={previewUrl}
-                        alt="Work preview"
-                        className="max-h-52 object-contain"
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground px-6 py-10 text-center">
-                        Drop your sketch / artwork — we compute SHA-256 and a CIELAB palette in your
-                        browser.
-                      </p>
-                    )}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={depositMode === "single" ? "default" : "outline"}
+                      onClick={() => setDepositMode("single")}
+                    >
+                      Single work
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={depositMode === "group" ? "default" : "outline"}
+                      className="gap-1.5"
+                      onClick={() => setDepositMode("group")}
+                    >
+                      <Layers className="w-3.5 h-3.5" /> Group patent
+                    </Button>
                   </div>
-                  <Input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => void onFile(e.target.files?.[0] || null)}
-                  />
-                  {analyzing && (
-                    <p className="text-xs flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fingerprinting…
-                    </p>
-                  )}
-                  {contentHash && (
-                    <p className="text-[11px] font-mono break-all text-muted-foreground">
-                      SHA-256 {contentHash}
-                    </p>
-                  )}
-                  {palette.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {palette.map((c) => (
-                        <div key={`${c.role}-${c.hex}`} className="flex items-center gap-2 text-xs">
-                          <span
-                            className="w-6 h-6 rounded-md border"
-                            style={{ background: c.hex }}
+
+                  {depositMode === "group" ? (
+                    <>
+                      <GroupDeposit
+                        images={groupImages}
+                        organizing={analyzing}
+                        organized={organizedGroup}
+                        merkleRoot={groupMerkle}
+                        onPick={(files) => void onGroupFiles(files)}
+                      />
+                      <Input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        multiple
+                        onChange={(e) => void onGroupFiles([...(e.target.files || [])])}
+                      />
+                      <p className="text-[11px] text-muted-foreground">
+                        Up to {MAX_GROUP_SHEETS} images. Title, description, chronology, and both
+                        scientific axes are filled from the dump — review on the next steps or
+                        continue straight through.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        className="relative rounded-xl border border-dashed border-border/70 bg-muted/20 min-h-[160px] flex items-center justify-center overflow-hidden"
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) void onFile(f);
+                        }}
+                      >
+                        {previewUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={previewUrl}
+                            alt="Work preview"
+                            className="max-h-52 object-contain"
                           />
-                          {c.role} {c.hex}
+                        ) : (
+                          <p className="text-sm text-muted-foreground px-6 py-10 text-center">
+                            Drop your sketch / artwork — we compute SHA-256 and a CIELAB palette in
+                            your browser.
+                          </p>
+                        )}
+                      </div>
+                      <Input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(e) => void onFile(e.target.files?.[0] || null)}
+                      />
+                      {analyzing && (
+                        <p className="text-xs flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fingerprinting…
+                        </p>
+                      )}
+                      {contentHash && depositMode === "single" && (
+                        <p className="text-[11px] font-mono break-all text-muted-foreground">
+                          SHA-256 {contentHash}
+                        </p>
+                      )}
+                      {palette.length > 0 && depositMode === "single" && (
+                        <div className="flex flex-wrap gap-2">
+                          {palette.map((c) => (
+                            <div
+                              key={`${c.role}-${c.hex}`}
+                              className="flex items-center gap-2 text-xs"
+                            >
+                              <span
+                                className="w-6 h-6 rounded-md border"
+                                style={{ background: c.hex }}
+                              />
+                              {c.role} {c.hex}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
                   )}
                   <div className="space-y-2">
                     <Label>Work title</Label>
                     <Input value={title} onChange={(e) => setTitle(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>What is this work? (be specific — specificity strengthens claims)</Label>
+                    <Label>
+                      {depositMode === "group"
+                        ? "Group disclosure (auto-written — edit if you want)"
+                        : "What is this work? (be specific — specificity strengthens claims)"}
+                    </Label>
                     <Textarea
                       rows={4}
                       value={description}
@@ -658,6 +843,12 @@ export function PoorManProtectionWizard() {
 
               {STEPS[step].id === "chronology" && (
                 <>
+                  {depositMode === "group" && organizedGroup && (
+                    <p className="text-xs text-muted-foreground rounded-lg border border-[#5B8DA8]/20 bg-[#5B8DA8]/5 p-3">
+                      Dates and iteration notes were inferred from the image dump. Edit anything
+                      courts would care about, then continue.
+                    </p>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label>Conceived on</Label>
@@ -855,6 +1046,12 @@ export function PoorManProtectionWizard() {
                       <div className="flex items-center gap-2 text-emerald-500 font-semibold">
                         <CheckCircle2 className="w-5 h-5" /> Sealed · {cert.attestationId}
                       </div>
+                      {cert.groupDisclosure && (
+                        <p className="text-xs text-muted-foreground">
+                          Group patent · {cert.groupDisclosure.figureCount} figures · merkle{" "}
+                          {cert.groupDisclosure.merkleRoot.slice(0, 16)}…
+                        </p>
+                      )}
                       <p className="font-mono text-[11px] break-all text-muted-foreground">
                         cert {cert.certificateHash}
                       </p>

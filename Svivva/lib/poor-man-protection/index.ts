@@ -4,6 +4,7 @@ import {
   type HybridizationResult,
 } from "@/lib/hybridization";
 import {
+  assertGroupMerkle,
   buildScientificAxes,
   createCyberSeal,
   createTimestampToken,
@@ -75,6 +76,10 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
   const noveltyScore = Number(optimal?.noveltyScore ?? 60);
   const contentHash = input.contentHash.toLowerCase();
 
+  if (input.groupDisclosure) {
+    assertGroupMerkle(input.groupDisclosure, contentHash);
+  }
+
   const baseCustody = [
     ...(input.custodyLog || []),
     {
@@ -107,6 +112,7 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
     chronology: input.chronology,
     creatorOath: input.creatorOath,
     custodyLog: baseCustody,
+    groupDisclosure: input.groupDisclosure,
   });
 
   return { certificate, hybridization };
@@ -117,3 +123,10 @@ export * from "./attestation";
 export { scientificHybridFallback } from "./scientific-hybrid";
 export { buildCourtEvidencePdf, buildPostalCoverPdf } from "./court-pack";
 export { sendProtectionEmail, buildCertificateEmailHtml } from "./mail";
+export {
+  organizeGroupPatent,
+  groupMerkleCanonical,
+  familyKeyFromFileName,
+  inferSheetRole,
+  MAX_GROUP_SHEETS,
+} from "./group-organize";
