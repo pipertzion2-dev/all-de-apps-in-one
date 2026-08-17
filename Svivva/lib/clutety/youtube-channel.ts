@@ -104,7 +104,8 @@ function collectVideoRenderers(
   const vr = obj.videoRenderer as Record<string, unknown> | undefined;
   if (vr && typeof vr.videoId === "string" && vr.videoId.length === 11) {
     const titleRuns = (vr.title as Record<string, unknown> | undefined)?.runs as
-      { text?: string }[] | undefined;
+      | { text?: string }[]
+      | undefined;
     const title =
       titleRuns?.map((r) => r.text ?? "").join("") ||
       (typeof (vr.title as Record<string, unknown> | undefined)?.simpleText === "string"

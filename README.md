@@ -30,12 +30,16 @@ npm run format:check # CI-style check
 
 ## Deploy Svivva on Vercel (pick one path)
 
+Production host is Vercel team **`zzai-zzai`**, project **`all-de-apps-in-one`**, account **`ziontpiper@icloud.com`**. Domain: **`zzaizzai.com`**.
+
+Do **not** deploy to **`svivva-main-app`** (a different/old Vercel account). Ignore GitHub checks named `Vercel – svivva-main-app`.
+
 Do **not** wire both **Path A** and **Path B** at the same time, or every code push can trigger **two** production deploys.
 
 ### Path A — Vercel imports GitHub (simplest)
 
 1. Push this repo to GitHub.
-2. [vercel.com](https://vercel.com) → **Add New Project** → import the repo.
+2. Sign in to [vercel.com](https://vercel.com) as **ziontpiper@icloud.com** → team **zzai-zzai** → project **all-de-apps-in-one**.
 3. **Root Directory:** **`Svivva`** (required).
 4. Add env vars from **`Svivva/.env.example`** — see **`Svivva/README.md`** for the checklist.
 5. **Deploy.**
