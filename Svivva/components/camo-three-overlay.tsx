@@ -42,14 +42,26 @@ function paletteColorAt(palette: (string | null)[], t: number): Rgba | null {
   return lerpRgba(c0, c1, frac);
 }
 
+function oaasEdgeFade(py: number, height: number): number {
+  const t = py / Math.max(height, 1);
+  const top = Math.min(1, t / 0.22);
+  const bottom = Math.min(1, (1 - t) / 0.24);
+  const edge = Math.min(top, bottom);
+  return edge * edge * (3 - 2 * edge);
+}
+
 function oaasNoiseAt(
   gx: number,
   gy: number,
   seededRandom: (x: number, y: number, offset?: number) => number,
 ): number {
-  const clusterA = seededRandom(Math.floor(gx / 6 + gy / 8), Math.floor(gy / 6 + gx / 8), 50);
-  const clusterB = seededRandom(Math.floor(gx / 4 - gy / 5), Math.floor(gy / 4 + gx / 5), 70);
-  const fine = seededRandom(gx, gy, 120);
+  const warpX = (seededRandom(Math.floor(gx * 0.55), Math.floor(gy * 0.9), 200) - 0.5) * 2.4;
+  const warpY = (seededRandom(Math.floor(gx * 0.9), Math.floor(gy * 0.55), 210) - 0.5) * 1.6;
+  const wx = gx + warpX;
+  const wy = gy + warpY;
+  const clusterA = seededRandom(Math.floor(wx / 6 + wy / 8), Math.floor(wy / 6 + wx / 8), 50);
+  const clusterB = seededRandom(Math.floor(wx / 4 - wy / 5), Math.floor(wy / 4 + wx / 5), 70);
+  const fine = seededRandom(wx, wy, 120);
   const raw = fine * 0.42 + clusterA * 0.33 + clusterB * 0.25;
   // Smoothstep removes tonal steps that read as horizontal dividers.
   return raw * raw * (3 - 2 * raw);
@@ -68,6 +80,7 @@ function drawOaasCamoSmooth(
 
   for (let py = 0; py < height; py++) {
     const gy = py / blockSize;
+    const edgeFade = oaasEdgeFade(py, height);
     for (let px = 0; px < width; px++) {
       const gx = px / blockSize;
       const tone = oaasNoiseAt(gx, gy, seededRandom);
@@ -78,7 +91,7 @@ function drawOaasCamoSmooth(
         data[idx] = rgba.r;
         data[idx + 1] = rgba.g;
         data[idx + 2] = rgba.b;
-        data[idx + 3] = Math.round(Math.min(1, rgba.a) * 255);
+        data[idx + 3] = Math.round(Math.min(1, rgba.a * edgeFade) * 255);
       }
     }
   }
@@ -206,9 +219,9 @@ export function CamoThreeOverlay({
         null,
         "rgba(175, 150, 185, 0.24)",
         null,
-        "rgba(140, 170, 110, 0.26)",
+        "rgba(140, 170, 110, 0.20)",
         null,
-        "rgba(91, 141, 168, 0.22)",
+        "rgba(91, 141, 168, 0.20)",
         null,
         "rgba(45, 72, 82, 0.22)",
       ];
@@ -331,10 +344,18 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
+              ? "brightness(1.18) saturate(1.38) contrast(1.05)"
               : isIntro
                 ? "brightness(1.05) saturate(1.35)"
                 : "brightness(1.15) saturate(1.1)",
+          ...(isOaas
+            ? {
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+              }
+            : {}),
         }}
       >
         {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
@@ -346,7 +367,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-38 md:opacity-48 blur-[1.2px]"
+              ? "opacity-[0.34] md:opacity-[0.44] blur-[1.6px]"
               : isIntro
                 ? "opacity-55 md:opacity-60"
                 : "opacity-60 md:opacity-100"

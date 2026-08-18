@@ -424,105 +424,121 @@ export default function LandingPage() {
         {/* ── ZZAI6 cube — main 6-face navigation ─────────────────────────── */}
         <div className="relative w-full overflow-visible bg-background">
           <SvivvaArtifact />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-28 z-10"
+            aria-hidden
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, hsl(var(--background) / 0.55) 55%, hsl(var(--background)) 100%)",
+            }}
+          />
         </div>
 
-        <section
-          id="oaas-intro"
-          className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-0 bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/18 to-transparent"
-        >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
-              <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5B8DA8]/50">
-                  <Image
-                    src={seedsLogo}
-                    alt="ZZAI Seeds"
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex-1 text-center md:text-left space-y-3">
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                      Orchestration as a Service
-                    </span>
-                    <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
-                    <Badge variant="secondary" className="text-[10px]">
-                      Mixing-console OS
-                    </Badge>
+        <div id="oaas" className="relative overflow-hidden -mt-6 sm:-mt-8">
+          {/* Single OaaS camo field — intro card + mixing board share one continuous background */}
+          <div className="absolute inset-0 opacity-80 md:opacity-65 pointer-events-none z-0">
+            <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
+          </div>
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-[min(42vh,18rem)] sm:h-64 z-[1]"
+            style={{
+              background:
+                "linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.82) 22%, hsl(var(--background) / 0.38) 52%, hsl(var(--background) / 0.08) 78%, transparent 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[min(46vh,20rem)] sm:h-72 z-[1]"
+            style={{
+              background:
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 24%, hsl(var(--background) / 0.34) 52%, hsl(var(--background) / 0.08) 78%, transparent 100%)",
+            }}
+          />
+
+          <section
+            id="oaas-intro"
+            className="pt-8 sm:pt-10 pb-4 sm:pb-6 relative z-10"
+          >
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-40 sm:h-52 z-0"
+              aria-hidden
+              style={{
+                background:
+                  "radial-gradient(ellipse 120% 80% at 50% 0%, rgba(91,141,168,0.18) 0%, transparent 72%)",
+              }}
+            />
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
+              <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
+                <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5B8DA8]/50">
+                    <Image
+                      src={seedsLogo}
+                      alt="ZZAI Seeds"
+                      fill
+                      sizes="128px"
+                      className="object-cover"
+                    />
                   </div>
-                  <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                    <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI module
-                    is a <strong>channel strip</strong>; subgroup <strong>buses</strong> sum your
-                    signal through <strong>Signal</strong> or <strong>Crest</strong> mains to the{" "}
-                    <strong>Master bus</strong> — deploy, launch, and ship.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
-                    {[
-                      "16 channel strips",
-                      "6 subgroup buses",
-                      "Signal · Crest mains",
-                      "Master bus out",
-                    ].map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[10px] px-2 py-1 rounded-full bg-[#5B8DA8]/15 border border-[#5B8DA8]/40 text-foreground/80"
-                      >
-                        {tag}
+                  <div className="flex-1 text-center md:text-left space-y-3">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                      <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
+                        Orchestration as a Service
                       </span>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                    <a href="#oaas">
-                      <Button
-                        size="sm"
-                        className="gap-2 bg-[#5B8DA8]"
-                        data-testid="button-oaas-cta"
-                      >
-                        Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </a>
-                    <Link href="/seeds">
-                      <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
-                        Open ZZAI Seeds
-                      </Button>
-                    </Link>
+                      <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
+                      <Badge variant="secondary" className="text-[10px]">
+                        Mixing-console OS
+                      </Badge>
+                    </div>
+                    <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+                      <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI module
+                      is a <strong>channel strip</strong>; subgroup <strong>buses</strong> sum your
+                      signal through <strong>Signal</strong> or <strong>Crest</strong> mains to the{" "}
+                      <strong>Master bus</strong> — deploy, launch, and ship.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                      {[
+                        "16 channel strips",
+                        "6 subgroup buses",
+                        "Signal · Crest mains",
+                        "Master bus out",
+                      ].map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[10px] px-2 py-1 rounded-full bg-[#5B8DA8]/15 border border-[#5B8DA8]/40 text-foreground/80"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
+                      <a href="#oaas">
+                        <Button
+                          size="sm"
+                          className="gap-2 bg-[#5B8DA8]"
+                          data-testid="button-oaas-cta"
+                        >
+                          Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </a>
+                      <Link href="/seeds">
+                        <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
+                          Open ZZAI Seeds
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <div className="relative overflow-hidden">
-          {/* Camo + metallic water + flowers — OaaS through transition, stops before BUILD */}
-          <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0">
-            <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
-          </div>
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-36 sm:h-52 z-[1]"
-            style={{
-              background:
-                "linear-gradient(to bottom, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / 0.45) 38%, hsl(var(--background) / 0.12) 72%, transparent 100%)",
-            }}
-          />
-          <div className="relative z-10">
+          <div className="relative z-10 pb-10 sm:pb-14">
             <PlatformFeatureHub hideBackground />
-            <div className="h-16 sm:h-24" aria-hidden />
           </div>
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 sm:h-56 z-[1]"
-            style={{
-              background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.55) 35%, hsl(var(--background) / 0.2) 68%, hsl(var(--background) / 0.04) 92%, transparent 100%)",
-            }}
-          />
         </div>
 
         <section
           id="platforms"
-          className="py-16 sm:py-24 relative z-10 overflow-visible bg-gradient-to-b from-transparent via-background/30 to-muted/20"
+          className="py-16 sm:py-24 relative z-10 overflow-visible -mt-8 sm:-mt-12 pt-20 sm:pt-28 bg-gradient-to-b from-background/90 via-background/50 to-muted/20"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-4 mb-16">
@@ -578,11 +594,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-        <div
-          className="relative h-16 sm:h-24 bg-gradient-to-b from-background to-muted/20"
-          aria-hidden="true"
-        />
 
         {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
         <section className="py-8 border-y border-border/40 bg-background/60 backdrop-blur-sm">
