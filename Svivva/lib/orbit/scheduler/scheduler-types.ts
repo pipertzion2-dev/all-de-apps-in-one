@@ -8,6 +8,7 @@ export type SchedulerProjectResult = {
   analytics?: Record<string, unknown>;
   autopilot?: Record<string, unknown>;
   externalSignals?: Record<string, unknown>;
+  ifm?: Record<string, unknown>;
   error?: string;
 };
 

@@ -65,6 +65,26 @@ export async function runOrbitScheduler(
           });
         }
 
+        const ifmConfig = (meta.ifm || {}) as { enabled?: boolean; lastGeneratedAt?: string };
+        if (ifmConfig.enabled) {
+          const last = ifmConfig.lastGeneratedAt
+            ? new Date(ifmConfig.lastGeneratedAt).getTime()
+            : 0;
+          const weekMs = 7 * 24 * 60 * 60 * 1000;
+          if (Date.now() - last >= weekMs) {
+            const { generateIfmPairings, appendIfmPairings, persistIfmPairingEntities } =
+              await import("../ifm");
+            const pairings = generateIfmPairings({ count: 3 });
+            if (pairings.length) {
+              await appendIfmPairings(project.id, project.userId, pairings);
+              for (const pairing of pairings) {
+                await persistIfmPairingEntities(project.id, pairing);
+              }
+              result.ifm = { generated: pairings.length };
+            }
+          }
+        }
+
         projectResults.push(result);
       } catch (e) {
         result.error = e instanceof Error ? e.message : String(e);

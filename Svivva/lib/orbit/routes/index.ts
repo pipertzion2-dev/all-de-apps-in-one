@@ -26,6 +26,7 @@ export {
 export { runFusionStep, type FusionStepResult } from "./run-fusion-step";
 export { resolveFusionRunStep, FUSION_TASK_RUN_STEPS } from "./fusion-task-map";
 export { buildHybridSceneDestinations } from "./hybrid-route-scenes";
+export { IFM_ROUTE_SCENE, getIfmRouteScene } from "./ifm-route-scenes";
 
 export {
   createOrbitRoute,

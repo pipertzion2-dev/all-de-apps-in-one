@@ -84,6 +84,9 @@ export default function OrbitRoutesPage() {
             )}
             Sync workspace
           </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/dashboard/orbit/ifm">Intent Fusion Matrix</Link>
+          </Button>
           <Button asChild size="sm">
             <Link href="/dashboard/orbit/routes/new">Create route</Link>
           </Button>

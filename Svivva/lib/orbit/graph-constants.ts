@@ -189,6 +189,7 @@ export type OrbitRouteStatus = (typeof ORBIT_ROUTE_STATUSES)[number];
 export const ORBIT_ROUTE_CHANNELS = [
   "ingest",
   "fusion",
+  "ifm",
   "plan",
   "generate",
   "approval",
@@ -234,6 +235,8 @@ export const ORBIT_EVENT_TYPES = [
   "route_step_completed",
   "route_awaiting_approval",
   "fusion_scene_executed",
+  "ifm_pair_generated",
+  "ifm_bridge_planned",
 ] as const;
 export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
 

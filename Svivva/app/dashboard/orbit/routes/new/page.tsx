@@ -115,6 +115,15 @@ export default function NewOrbitRoutePage() {
                         </option>
                       ))}
                   </optgroup>
+                  <optgroup label="Intent Fusion">
+                    {templates
+                      .filter((t) => t.id === "ifm_weekly")
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </optgroup>
                   <optgroup label="Hybrid GTM scenes">
                     {templates
                       .filter((t) => t.id.startsWith("hybrid:"))
