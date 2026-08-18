@@ -127,7 +127,7 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
       {!isCompact && (
         <>
           <div
-            className="absolute inset-x-0 top-0 h-[100svh] md:inset-0 md:h-full pointer-events-none z-0 overflow-hidden"
+            className="absolute inset-x-0 top-0 h-[100svh] md:inset-0 md:h-full pointer-events-none z-0 overflow-hidden select-none"
             aria-hidden
           >
             <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
