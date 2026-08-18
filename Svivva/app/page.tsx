@@ -428,7 +428,7 @@ export default function LandingPage() {
 
         <section
           id="oaas-intro"
-          className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-0 bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/25 to-background border-b border-[#5B8DA8]/40"
+          className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-0 bg-gradient-to-b from-[#5B8DA8]/40 via-[#5B8DA8]/18 to-transparent"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
             <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
@@ -501,9 +501,10 @@ export default function LandingPage() {
             <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
           </div>
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-16 sm:h-24 z-[1]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-28 sm:h-40 z-[1]"
             style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              background:
+                "linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 30%, hsl(var(--background) / 0.35) 62%, hsl(var(--background) / 0.08) 88%, transparent 100%)",
             }}
           />
           <div className="relative z-10">
@@ -511,9 +512,10 @@ export default function LandingPage() {
             <div className="h-16 sm:h-24" aria-hidden />
           </div>
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-28 z-[1]"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-44 z-[1]"
             style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+              background:
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 30%, hsl(var(--background) / 0.35) 62%, hsl(var(--background) / 0.08) 88%, transparent 100%)",
             }}
           />
         </div>
