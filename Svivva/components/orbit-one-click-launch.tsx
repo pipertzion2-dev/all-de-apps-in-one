@@ -45,6 +45,7 @@ import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
+import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -674,29 +675,48 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         )}
 
-        {/* Primary launch button — paid setup lives in Services checklist above */}
-        <button
-          type="button"
-          onClick={run}
-          disabled={running}
-          data-testid="orbit-one-click-launch"
-          className="w-full flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70"
-          style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-        >
-          {running ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" /> Working…
-            </>
-          ) : hasRun ? (
-            <>
-              <RefreshCw className="w-5 h-5" /> Run autopilot again
-            </>
-          ) : (
-            <>
-              <Rocket className="w-5 h-5" /> Run all AI marketing
-            </>
-          )}
-        </button>
+        {/* Primary launch + paid subscribe strip */}
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+          <button
+            type="button"
+            onClick={run}
+            disabled={running}
+            data-testid="orbit-one-click-launch"
+            className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] lg:min-h-0"
+            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Working…
+              </>
+            ) : hasRun ? (
+              <>
+                <RefreshCw className="w-5 h-5" /> Run autopilot again
+              </>
+            ) : (
+              <>
+                <Rocket className="w-5 h-5" /> Run all AI marketing
+              </>
+            )}
+          </button>
+
+          <OrbitSubscribeQuickStrip
+            className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
+            configuredKeys={configuredKeys}
+            aiConfigured={aiConfigured}
+            onPasteKey={(key) => {
+              const el = document.getElementById(`cred-${key}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+              }
+              document.getElementById("orbit-paid-services")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
+          />
+        </div>
 
         {/* Running progress */}
         {running && (
