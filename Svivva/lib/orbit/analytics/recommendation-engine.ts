@@ -193,6 +193,36 @@ export async function generateRecommendationsForProject(
     }
   }
 
+  const trafficDrop = events.filter((e) => e.eventType === "external_traffic_drop");
+  if (trafficDrop.length > 0) {
+    const created = await upsertRecommendation(projectId, {
+      kind: "replan_campaign",
+      priority: "high",
+      title: "Replan after traffic drop",
+      rationale: "External analytics detected a significant session decline. Revisit campaign strategy.",
+      triggerEventId: trafficDrop[0].id,
+      actionPayload: {},
+    });
+    if (created) result.created += 1;
+    else result.skipped += 1;
+  }
+
+  const hasIndexedPages = indexRecords.some((r) => r.status === "indexed");
+  const lowConversion =
+    events.some((e) => e.eventType === "external_page_view") &&
+    !events.some((e) => e.eventType === "external_conversion");
+  if (hasIndexedPages && lowConversion) {
+    const created = await upsertRecommendation(projectId, {
+      kind: "expand_content",
+      priority: "medium",
+      title: "Expand content after indexed pages with low conversions",
+      rationale: "Pages are indexed but external conversion signals are weak. Add conversion-focused assets.",
+      actionPayload: {},
+    });
+    if (created) result.created += 1;
+    else result.skipped += 1;
+  }
+
   const open = await listOpenRecommendations(projectId);
   result.recommendations = open.slice(0, 20).map((r) => ({
     id: r.id,

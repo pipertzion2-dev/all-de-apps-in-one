@@ -28,3 +28,4 @@ export {
 } from "./recommendation-engine";
 export { applyRecommendation } from "./apply-recommendation";
 export { processProjectAnalytics, type ProcessAnalyticsResult } from "./run-analytics-process";
+export { syncExternalSignalsForProject, ingestExternalMetrics } from "./external-signals";

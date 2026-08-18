@@ -213,6 +213,10 @@ export const ORBIT_EVENT_TYPES = [
   "campaign_planned",
   "recommendation_applied",
   "autopilot_run_completed",
+  "external_conversion",
+  "external_page_view",
+  "external_traffic_drop",
+  "scheduler_run_completed",
 ] as const;
 export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
 
@@ -249,6 +253,33 @@ export const DEFAULT_AUTOPILOT_CONFIG: OrbitAutopilotConfig = {
   enabled: false,
   maxActionsPerRun: 5,
   defaultMode: "assisted",
+};
+
+export type OrbitExternalAnalyticsConfig = {
+  /** Rolling 7-day sessions (updated by webhook or metrics sync) */
+  sessions7d?: number;
+  /** Rolling 7-day conversions */
+  conversions7d?: number;
+  /** Previous period sessions for drop detection */
+  previousSessions7d?: number;
+  /** Optional per-project webhook HMAC secret */
+  webhookSecret?: string;
+  /** Optional GA4 property id for future Data API sync */
+  ga4PropertyId?: string;
+  lastSyncedAt?: string;
+};
+
+export type OrbitSchedulerConfig = {
+  enabled?: boolean;
+  /** Run autopilot step for projects with autopilot.enabled */
+  runAutopilot?: boolean;
+  maxProjectsPerRun?: number;
+};
+
+export const DEFAULT_SCHEDULER_CONFIG: OrbitSchedulerConfig = {
+  enabled: true,
+  runAutopilot: true,
+  maxProjectsPerRun: 20,
 };
 
 export type OrbitApprovalPolicy = {

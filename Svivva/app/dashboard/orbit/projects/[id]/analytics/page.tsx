@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Loader2, RefreshCw, Sparkles, X, Bot } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, Sparkles, X, Bot, Activity } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -50,6 +50,14 @@ type AutopilotStatus = {
     recommendationsSkipped: number;
     completedAt: string | null;
   } | null;
+};
+
+type ProjectHealth = {
+  status: "healthy" | "degraded" | "critical";
+  alerts: Array<{ level: string; code: string; message: string }>;
+  indexing: { stuckSubmitted: number; failed: number };
+  distribution: { pending: number; failed: number };
+  externalAnalytics: { hasData: boolean; sessions7d?: number; conversions7d?: number };
 };
 
 export default function OrbitProjectAnalyticsPage() {
@@ -97,6 +105,15 @@ export default function OrbitProjectAnalyticsPage() {
     queryKey: ["orbit-autopilot", projectId],
     queryFn: async () => {
       const r = await authFetch(`/api/orbit/projects/${projectId}/autopilot`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    },
+  });
+
+  const healthQuery = useQuery<{ health: ProjectHealth }>({
+    queryKey: ["orbit-project-health", projectId],
+    queryFn: async () => {
+      const r = await authFetch(`/api/orbit/projects/${projectId}/health`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     },
@@ -184,6 +201,7 @@ export default function OrbitProjectAnalyticsPage() {
   const recommendations = recommendationsQuery.data?.recommendations || [];
   const projectName = projectQuery.data?.project?.name || projectId.slice(0, 8);
   const autopilot = autopilotQuery.data;
+  const health = healthQuery.data?.health;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
@@ -294,6 +312,52 @@ export default function OrbitProjectAnalyticsPage() {
           </Card>
         </div>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Activity className="h-5 w-5" />
+            Operations health
+          </CardTitle>
+          <CardDescription>Indexing, distribution, external signals, and alert status.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {healthQuery.isLoading ? (
+            <Skeleton className="h-20 w-full" />
+          ) : health ? (
+            <div className="space-y-3">
+              <Badge
+                variant={
+                  health.status === "healthy"
+                    ? "secondary"
+                    : health.status === "degraded"
+                      ? "outline"
+                      : "destructive"
+                }
+              >
+                {health.status}
+              </Badge>
+              {health.alerts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No active alerts.</p>
+              ) : (
+                <ul className="space-y-2 text-sm">
+                  {health.alerts.map((a) => (
+                    <li key={a.code} className="rounded-md border px-3 py-2">
+                      <span className="font-medium">{a.code}</span> — {a.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {health.externalAnalytics.hasData ? (
+                <p className="text-xs text-muted-foreground">
+                  External: {health.externalAnalytics.sessions7d ?? 0} sessions /{" "}
+                  {health.externalAnalytics.conversions7d ?? 0} conversions (7d)
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -400,6 +400,29 @@ export const orbitAutopilotRuns = pgTable(
   ],
 );
 
+// ============================================================================
+// ORBIT SCHEDULER RUNS — multi-project production orchestration (Phase 11)
+// ============================================================================
+export const orbitSchedulerRuns = pgTable(
+  "orbit_scheduler_runs",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    status: text("status").notNull().default("completed"),
+    projectsSeen: integer("projects_seen").notNull().default(0),
+    projectsProcessed: integer("projects_processed").notNull().default(0),
+    indexRecheck: jsonb("index_recheck").$type<Record<string, unknown>>().default({}),
+    distribution: jsonb("distribution").$type<Record<string, unknown>>().default({}),
+    projectResults: jsonb("project_results").$type<Array<Record<string, unknown>>>().default([]),
+    errorMessage: text("error_message"),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("idx_orbit_scheduler_runs_created").on(t.createdAt)],
+);
+
 export type OrbitProject = typeof orbitProjects.$inferSelect;
 export type NewOrbitProject = typeof orbitProjects.$inferInsert;
 export type OrbitEntity = typeof orbitEntities.$inferSelect;
@@ -415,3 +438,4 @@ export type OrbitRoute = typeof orbitRoutes.$inferSelect;
 export type OrbitEvent = typeof orbitEvents.$inferSelect;
 export type OrbitRecommendation = typeof orbitRecommendations.$inferSelect;
 export type OrbitAutopilotRun = typeof orbitAutopilotRuns.$inferSelect;
+export type OrbitSchedulerRun = typeof orbitSchedulerRuns.$inferSelect;
