@@ -6,7 +6,7 @@ import { usePlatform } from "@/lib/platform-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
+import { PiggyBankQuickLink } from "@/components/piggy-bank-quick-link";
 import {
   FolderOpen,
   Plus,
@@ -655,7 +655,8 @@ function ReturningUserDashboard({
       </div>
 
       {isAdmin && (
-        <div className="pt-2 border-t border-border/20">
+        <div className="pt-2 border-t border-border/20 flex flex-wrap gap-2">
+          <PiggyBankQuickLink />
           <Link href="/dashboard/traffic">
             <Button
               variant="outline"
