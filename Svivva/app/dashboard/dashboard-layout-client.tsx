@@ -51,6 +51,7 @@ import {
   TrendingUp,
   Users,
   ShieldCheck,
+  PiggyBank,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
@@ -172,6 +173,14 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/gsc-connect",
         icon: Search,
         adminOnly: true,
+      },
+      {
+        title: "Piggy Bank",
+        desc: "Revenue tracker",
+        href: "/dashboard/piggy-bank",
+        icon: PiggyBank,
+        adminOnly: true,
+        highlight: true,
       },
       {
         title: "Admin",

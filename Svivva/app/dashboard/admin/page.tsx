@@ -115,11 +115,6 @@ export default function AdminOverviewPage() {
     : data.piggyBank.available
       ? data.piggyBank.balance
       : null;
-  const revenueSource = data.stripe.available
-    ? "Stripe"
-    : data.piggyBank.available
-      ? "Piggy bank"
-      : null;
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
@@ -131,6 +126,12 @@ export default function AdminOverviewPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="default" size="sm" className="bg-amber-600 hover:bg-amber-700" asChild>
+            <Link href="/dashboard/piggy-bank">
+              <PiggyBank className="h-4 w-4 mr-2" />
+              Piggy Bank
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
             Refresh
@@ -159,23 +160,40 @@ export default function AdminOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className={
+            !data.stripe.available && data.piggyBank.available ? "border-amber-500/40" : ""
+          }
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" /> Lifetime revenue
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {displayRevenue != null ? money(displayRevenue) : "—"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {data.stripe.available
-                ? `${data.stripe.payingCustomers} paying customers · Stripe`
-                : data.piggyBank.available
-                  ? `${data.piggyBank.entryCount} ledger entries · ${revenueSource}`
-                  : "Connect Stripe or use piggy bank below"}
-            </p>
+            {data.piggyBank.available ? (
+              <Link href="/dashboard/piggy-bank" className="group block">
+                <p className="text-3xl font-bold group-hover:text-amber-600 transition-colors">
+                  {displayRevenue != null ? money(displayRevenue) : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 group-hover:text-amber-600/80">
+                  {data.stripe.available
+                    ? `${data.stripe.payingCustomers} paying customers · Stripe`
+                    : `${data.piggyBank.entryCount} ledger entries · Open piggy bank →`}
+                </p>
+              </Link>
+            ) : (
+              <>
+                <p className="text-3xl font-bold">
+                  {displayRevenue != null ? money(displayRevenue) : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {data.stripe.available
+                    ? `${data.stripe.payingCustomers} paying customers · Stripe`
+                    : "Connect Stripe or use piggy bank below"}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 

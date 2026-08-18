@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Lock,
   Youtube,
+  PiggyBank,
 } from "lucide-react";
 
 interface CommandItem {
@@ -143,6 +144,33 @@ const digitalCommands: CommandItem[] = [
     icon: Settings,
     keywords: ["settings", "account", "preferences", "billing"],
     section: "Account",
+  },
+  {
+    title: "Piggy Bank",
+    href: "/dashboard/piggy-bank",
+    icon: PiggyBank,
+    keywords: [
+      "piggy",
+      "bank",
+      "revenue",
+      "money",
+      "earnings",
+      "income",
+      "sales",
+      "stripe",
+      "profit",
+      "ledger",
+    ],
+    section: "Account",
+    adminOnly: true,
+  },
+  {
+    title: "Admin Overview",
+    href: "/dashboard/admin",
+    icon: Users,
+    keywords: ["admin", "users", "overview", "dashboard"],
+    section: "Account",
+    adminOnly: true,
   },
   {
     title: "Orbit",
