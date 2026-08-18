@@ -6,6 +6,7 @@ import { usePlatform } from "@/lib/platform-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 import { PiggyBankQuickLink } from "@/components/piggy-bank-quick-link";
 import {
   FolderOpen,
