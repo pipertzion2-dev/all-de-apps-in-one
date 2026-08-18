@@ -11,6 +11,7 @@ import { generateMarketingLaunchContent } from "@/lib/orbit/marketing-autopilot-
 import {
   publishDevToArticle,
   publishHashnodeArticle,
+  publishAyrsharePost,
   publishOmniSocialsPost,
   publishRedditPost,
   publishTwitterThread,
@@ -366,6 +367,25 @@ export async function runMarketingAutopilot(opts?: {
           { url: r.url },
         ),
       );
+    } else if (hasCreds(creds, ["ayrshareApiKey"])) {
+      const site = getSiteUrl();
+      const lead =
+        `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
+      const r = await publishAyrsharePost(creds.ayrshareApiKey!, {
+        text: lead.slice(0, 280),
+        platforms: ["twitter"],
+        linkUrl: site,
+      });
+      tasks.push(
+        task(
+          "manual-twitter-thread",
+          r.ok ? "posted" : "failed",
+          r.ok
+            ? `Posted to X via Ayrshare${thread.length > 1 ? " (lead tweet + link)" : ""}`
+            : r.error || "Ayrshare X publish failed",
+          { url: r.url, copyText: threadCopy },
+        ),
+      );
     } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
       const site = getSiteUrl();
       const lead =
@@ -391,7 +411,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-twitter-thread",
           "needs_credentials",
-          "Thread ready — add n8n webhook (recommended) or OmniSocials key, or copy & paste on X",
+          "Thread ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on X",
           { copyText: threadCopy },
         ),
       );
@@ -402,7 +422,21 @@ export async function runMarketingAutopilot(opts?: {
     const li = content.social.linkedin;
     const liCopy = `${li.headline}\n\n${li.body}${li.cta ? `\n\n${li.cta}` : ""}`;
     await persistContent("social-linkedin", li.headline, li.body);
-    if (hasCreds(creds, ["omnisocialsApiKey"])) {
+    if (hasCreds(creds, ["ayrshareApiKey"])) {
+      const r = await publishAyrsharePost(creds.ayrshareApiKey!, {
+        text: liCopy,
+        platforms: ["linkedin"],
+        linkUrl: li.cta || getSiteUrl(),
+      });
+      tasks.push(
+        task(
+          "manual-linkedin",
+          r.ok ? "posted" : "failed",
+          r.ok ? "Published on LinkedIn via Ayrshare" : r.error || "Ayrshare LinkedIn publish failed",
+          { url: r.url, copyText: liCopy },
+        ),
+      );
+    } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
       const r = await publishOmniSocialsPost(creds.omnisocialsApiKey!, {
         text: liCopy,
         platforms: ["linkedin"],
@@ -423,7 +457,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-linkedin",
           "needs_credentials",
-          "Post ready — add n8n webhook (recommended) or OmniSocials key, or copy & paste on LinkedIn",
+          "Post ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on LinkedIn",
           { copyText: liCopy },
         ),
       );

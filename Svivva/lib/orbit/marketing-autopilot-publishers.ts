@@ -134,6 +134,59 @@ export async function publishOmniSocialsPost(
   }
 }
 
+const AYRSHARE_POST = "https://api.ayrshare.com/api/post";
+
+/** Multi-platform social via Ayrshare — best direct API for LinkedIn, X, Threads, etc. */
+export async function publishAyrsharePost(
+  apiKey: string,
+  opts: {
+    text: string;
+    platforms: ("linkedin" | "twitter" | "threads" | "bluesky" | "reddit")[];
+    linkUrl?: string;
+  },
+): Promise<PublishResult> {
+  try {
+    let post = opts.text.slice(0, 3000);
+    if (opts.linkUrl && !post.includes(opts.linkUrl)) {
+      post = `${post}\n\n${opts.linkUrl}`.trim();
+    }
+    const res = await fetch(AYRSHARE_POST, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+      },
+      body: JSON.stringify({ post, platforms: opts.platforms }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const data = (await res.json()) as {
+      status?: string;
+      id?: string;
+      postIds?: { platform?: string; postUrl?: string; status?: string }[];
+      posts?: { platform?: string; postUrl?: string; status?: string }[];
+      message?: string;
+      errors?: { message?: string }[];
+    };
+    if (!res.ok) {
+      const err =
+        data.message ||
+        data.errors?.[0]?.message ||
+        (typeof data === "object" ? JSON.stringify(data).slice(0, 200) : `HTTP ${res.status}`);
+      return { ok: false, error: err };
+    }
+    const entries = data.postIds ?? data.posts ?? [];
+    const success = entries.find((p) => p.status === "success") ?? entries[0];
+    return {
+      ok: true,
+      id: data.id ?? success?.platform,
+      url: success?.postUrl,
+    };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function publishDevToArticle(
   apiKey: string,
   article: { title: string; content: string; tags?: string[] },

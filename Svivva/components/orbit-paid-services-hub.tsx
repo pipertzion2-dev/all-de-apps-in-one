@@ -14,10 +14,13 @@ import {
 } from "lucide-react";
 import { authFetch } from "@/hooks/use-auth";
 import {
+  ORBIT_ANALYTICS_SERVICES,
+  ORBIT_BEST_STACK,
   ORBIT_FREE_FALLBACK_SERVICES,
   ORBIT_INDEXING_SERVICES,
   ORBIT_PAID_SERVICES,
   ORBIT_SERVICE_CATEGORY_LABELS,
+  orbitServiceById,
   type OrbitServiceItem,
 } from "@/lib/orbit/orbit-services-catalog";
 
@@ -78,6 +81,11 @@ function ServiceRow({
             >
               {billingBadge(item.billing)}
             </span>
+            {item.bestPick && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-teal-500/15 text-teal-300 border border-teal-500/35">
+                Best pick
+              </span>
+            )}
           </div>
           <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{item.purpose}</p>
           <ol className="mt-1.5 space-y-0.5 list-decimal list-inside">
@@ -226,14 +234,28 @@ export function OrbitPaidServicesHub({
     if (item.id === "gsc-service-account")
       return hasServiceAccount || (gscConnected && gscPropertyOk);
     if (item.id === "indexnow") return indexNowActive;
+    if (item.id === "bing-webmaster") return indexNowActive;
     if (item.envKey === "OPENAI_API_KEY") return aiConfigured;
     if (item.envKey === "GEMINI_API_KEY") return aiConfigured && !configuredKeys.openai;
+    if (item.envKey === "NEXT_PUBLIC_CLARITY_ID") {
+      return !!(
+        typeof process !== "undefined" &&
+        process.env.NEXT_PUBLIC_CLARITY_ID?.trim() &&
+        process.env.NEXT_PUBLIC_CLARITY_ID !== "undefined"
+      );
+    }
     if (item.credentialKey) return !!configuredKeys[item.credentialKey];
     return false;
   };
 
+  const bestStackReady = ORBIT_BEST_STACK.filter((s) => {
+    const item = orbitServiceById(s.id);
+    return item ? isReady(item) : false;
+  }).length;
+
   const paidReadyCount = ORBIT_PAID_SERVICES.filter((s) => isReady(s)).length;
   const indexingReadyCount = ORBIT_INDEXING_SERVICES.filter((s) => isReady(s)).length;
+  const analyticsReadyCount = ORBIT_ANALYTICS_SERVICES.filter((s) => isReady(s)).length;
 
   const paidByCategory = useMemo(() => {
     const groups: Record<string, OrbitServiceItem[]> = {};
@@ -261,11 +283,11 @@ export function OrbitPaidServicesHub({
           <CreditCard className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
           <div>
             <p className="text-sm font-black text-foreground leading-tight">
-              Services checklist — paid &amp; Google indexing
+              Best stack — paid, indexing &amp; analytics
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Google indexing: {indexingReadyCount}/{ORBIT_INDEXING_SERVICES.length} · Paid:{" "}
-              {paidReadyCount}/{ORBIT_PAID_SERVICES.length}
+              Best picks: {bestStackReady}/{ORBIT_BEST_STACK.length} · Google: {indexingReadyCount}/
+              {ORBIT_INDEXING_SERVICES.length} · Paid: {paidReadyCount}/{ORBIT_PAID_SERVICES.length}
               {aiProviderLabel ? ` · AI: ${aiProviderLabel}` : ""}
             </p>
           </div>
@@ -279,6 +301,33 @@ export function OrbitPaidServicesHub({
 
       {expanded && (
         <div className="px-3 pb-3 space-y-3 border-t border-border/40">
+          {/* Best stack roadmap */}
+          <div className="rounded-xl border border-teal-500/35 bg-teal-500/8 p-2.5 space-y-2 pt-3">
+            <p className="text-[11px] font-black text-teal-200">Recommended stack (best results)</p>
+            <ol className="space-y-1.5">
+              {ORBIT_BEST_STACK.map((entry) => {
+                const item = orbitServiceById(entry.id);
+                const ready = item ? isReady(item) : false;
+                return (
+                  <li key={entry.id} className="flex items-start gap-2 text-[10px]">
+                    {ready ? (
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <span className="w-3 h-3 flex-shrink-0 mt-0.5 text-center font-black text-teal-400/80">
+                        {entry.step}
+                      </span>
+                    )}
+                    <span className="text-muted-foreground leading-snug">
+                      <strong className="text-foreground">{item?.name ?? entry.id}</strong>
+                      {" — "}
+                      {entry.why}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
           {/* Google indexing — NOT AI */}
           <div className="rounded-xl border border-sky-500/35 bg-sky-500/8 p-2.5 space-y-2 pt-3">
             <div className="flex items-center gap-2">
@@ -338,6 +387,27 @@ export function OrbitPaidServicesHub({
               </div>
             </div>
           ))}
+
+          {/* Analytics */}
+          <div className="space-y-2">
+            <p className="text-[11px] font-black text-foreground">
+              {ORBIT_SERVICE_CATEGORY_LABELS.analytics}
+            </p>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              {analyticsReadyCount}/{ORBIT_ANALYTICS_SERVICES.length} ready — measure what converts
+              after Orbit drives traffic.
+            </p>
+            <div className="space-y-2">
+              {ORBIT_ANALYTICS_SERVICES.map((item) => (
+                <ServiceRow
+                  key={item.id}
+                  item={item}
+                  ready={isReady(item)}
+                  onPasteKey={onPasteKey}
+                />
+              ))}
+            </div>
+          </div>
 
           {showFreeFallback && (
             <div className="space-y-2 opacity-90">

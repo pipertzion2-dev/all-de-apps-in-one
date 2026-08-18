@@ -5,7 +5,9 @@ export type MarketingPlatformCredentials = {
   n8nWebhookUrl?: string;
   /** Optional header secret for n8n webhook auth (sent as X-Orbit-Secret) */
   n8nWebhookSecret?: string;
-  /** OmniSocials — unified LinkedIn, X, Threads, etc. (omnisocials.com → Settings → API) */
+  /** Ayrshare — best-in-class multi-platform social API (LinkedIn, X, Threads, etc.) */
+  ayrshareApiKey?: string;
+  /** OmniSocials — budget LinkedIn/X API ($10/mo) if you skip Ayrshare */
   omnisocialsApiKey?: string;
   devtoApiKey?: string;
   hashnodeApiKey?: string;
@@ -48,9 +50,16 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
     group: "automation",
   },
   {
+    key: "ayrshareApiKey",
+    label: "Ayrshare API key (best direct social)",
+    hint: "app.ayrshare.com → API Key. Best reach: LinkedIn, X, Threads, Bluesky, Reddit in one call.",
+    secret: true,
+    group: "social",
+  },
+  {
     key: "omnisocialsApiKey",
-    label: "OmniSocials API key (optional — or use n8n)",
-    hint: "Direct LinkedIn/X post without n8n — or wire OmniSocials inside your n8n workflow",
+    label: "OmniSocials API key (budget alternative)",
+    hint: "$10/mo LinkedIn/X — or route social through n8n / Ayrshare instead",
     secret: true,
     group: "social",
   },

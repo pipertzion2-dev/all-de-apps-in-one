@@ -6,6 +6,8 @@ import {
   getDefaultModelForProvider,
   getModelFallbackChain,
   getOrbitActiveAiProvider,
+  getOrbitDefaultModelForProvider,
+  getOrbitModelFallbackChain,
   getOrbitAiProviderLabel,
   isAnyAiProviderAvailable,
   isOrbitAiConfigured,
@@ -60,7 +62,12 @@ export const orbitOpenai = new Proxy({} as OpenAI, {
 
 export function getOrbitDefaultModel(): string {
   getOrbitClientSync();
-  return getDefaultModelForProvider(_orbitProvider);
+  return getOrbitDefaultModelForProvider(_orbitProvider);
+}
+
+export function getOrbitModelChain(): string[] {
+  getOrbitClientSync();
+  return getOrbitModelFallbackChain(_orbitProvider);
 }
 
 export function isOrbitUsingGemini(): boolean {

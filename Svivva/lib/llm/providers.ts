@@ -83,7 +83,7 @@ export function isOrbitAiConfigured(): boolean {
 export function getOrbitAiProviderLabel(provider: AiProvider = getOrbitActiveAiProvider()): string {
   switch (provider) {
     case "openai":
-      return "OpenAI (paid)";
+      return "OpenAI gpt-4o";
     case "gemini":
       return "Google Gemini";
     case "ollama":
@@ -120,6 +120,39 @@ export function getDefaultModelForProvider(provider: AiProvider = getActiveAiPro
       return "llama3.2";
     default:
       return "gpt-4o-mini";
+  }
+}
+
+/** Orbit marketing — stronger default for SEO copy, outreach, and launch packs. */
+export function getOrbitDefaultModelForProvider(
+  provider: AiProvider = getOrbitActiveAiProvider(),
+): string {
+  switch (provider) {
+    case "gemini":
+      return "gemini-2.0-flash";
+    case "replit":
+    case "openai":
+      return "gpt-4o";
+    case "ollama":
+      return "llama3.2";
+    default:
+      return "gpt-4o-mini";
+  }
+}
+
+export function getOrbitModelFallbackChain(
+  provider: AiProvider = getOrbitActiveAiProvider(),
+): string[] {
+  switch (provider) {
+    case "gemini":
+      return ["gemini-2.0-flash", "gemini-1.5-flash"];
+    case "replit":
+    case "openai":
+      return ["gpt-4o", "gpt-4o-mini"];
+    case "ollama":
+      return ["llama3.2", "llama3.1", "mistral"];
+    default:
+      return [];
   }
 }
 
