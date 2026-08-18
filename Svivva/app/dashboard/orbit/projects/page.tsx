@@ -43,9 +43,15 @@ export default function OrbitProjectsPage() {
           <BarChart3 className="h-6 w-6" />
           Orbit projects
         </h1>
-        <p className="text-muted-foreground">
-          View analytics, event timelines, and recommendations per ingested project.
-        </p>
+          <p className="text-muted-foreground">
+            View analytics, event timelines, and recommendations per ingested project.
+          </p>
+          <Link
+            href="/dashboard/orbit/routes"
+            className="mt-2 inline-block text-sm text-primary hover:underline"
+          >
+            Manage OaaS routes →
+          </Link>
       </div>
 
       {isLoading ? (

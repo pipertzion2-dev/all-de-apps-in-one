@@ -19,6 +19,7 @@ export type SchedulerRunResult = {
   indexRecheck: Record<string, unknown>;
   distribution: Record<string, unknown>;
   projectResults: SchedulerProjectResult[];
+  routeResults?: Array<Record<string, unknown>>;
   errorMessage?: string;
 };
 

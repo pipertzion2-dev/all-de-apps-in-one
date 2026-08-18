@@ -92,14 +92,18 @@ export async function runOrbitScheduler(
       });
     }
 
+    const { runActiveOrbitRoutes } = await import("../routes/route-runner");
+    const routeResults = await runActiveOrbitRoutes(5);
+
     return {
       runId: run.id,
-      status: "completed",
+      status: "completed" as const,
       projectsSeen: projects.length,
       projectsProcessed: projectResults.length,
       indexRecheck,
       distribution,
       projectResults,
+      routeResults,
     };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

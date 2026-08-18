@@ -186,6 +186,17 @@ export const ORBIT_ROUTE_STATUSES = [
 ] as const;
 export type OrbitRouteStatus = (typeof ORBIT_ROUTE_STATUSES)[number];
 
+export const ORBIT_ROUTE_CHANNELS = [
+  "ingest",
+  "plan",
+  "generate",
+  "index_submit",
+  "distribute",
+  "analytics",
+  "autopilot",
+] as const;
+export type OrbitRouteChannel = (typeof ORBIT_ROUTE_CHANNELS)[number];
+
 export const ORBIT_EVENT_SOURCES = [
   "internal",
   "distribution",
@@ -217,6 +228,8 @@ export const ORBIT_EVENT_TYPES = [
   "external_page_view",
   "external_traffic_drop",
   "scheduler_run_completed",
+  "route_run_completed",
+  "route_step_completed",
 ] as const;
 export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
 
