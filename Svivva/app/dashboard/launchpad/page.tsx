@@ -47,7 +47,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
-import { OrbitAiSetupGuide } from "@/components/orbit-ai-setup-guide";
+import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitGrowthIntelligence } from "@/components/orbit-growth-intelligence";
 import OrbitCausalAttribution from "@/components/orbit-causal-attribution";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
@@ -3633,8 +3633,9 @@ export default function LaunchpadPage() {
                       or retry one batch.
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Uses your connected LLM (OpenAI or custom gateway via Platform Secrets). See
-                      the setup card above Launch for the 5-step checklist.
+                      Uses your connected LLM (OpenAI via Platform Secrets). See{" "}
+                      <strong>Services checklist</strong> on Launchpad for paid + Google indexing
+                      setup.
                     </p>
                   </div>
                 </div>
@@ -4130,10 +4131,10 @@ export default function LaunchpadPage() {
               </div>
             </div>
 
-            {/* LLM setup — do this before autopilot */}
-            <OrbitAiSetupGuide />
+            {/* Services checklist — Google indexing (free) + paid marketing APIs */}
+            <OrbitPaidServicesHub showFreeFallback />
 
-            {/* Connections Hub */}
+            {/* Connections Hub — domain, GSC URL, GoDaddy (free infra) */}
             <div className="rounded-2xl border-2 border-border bg-card p-4">
               <ConnectionsHub />
             </div>
