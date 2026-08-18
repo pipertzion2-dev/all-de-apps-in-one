@@ -325,6 +325,20 @@ Do these in order for best results:
 
 ---
 
+## 17. IFM & product roadmap pipeline (Orbit)
+
+After Phase 20–22, the IFM loop runs: **pair → bridge → score → compound → roadmap → approve → ship fusion product**.
+
+1. Open `/dashboard/orbit/ifm` and bind an Orbit project ID.
+2. Run **Rescore IFM** → **Compound winners** → **Feed roadmap**.
+3. Toggle **Auto Promote / Auto Approve / Auto Ship** or run **Approve queue** and **Ship products** manually.
+4. Shipped fusion tools live at `/tools/ifm-fusion/{slug}`.
+5. Verify health via project analytics — watch for `ifm_winners_not_on_roadmap`, `approved_roadmap_not_shipped`, and `roadmap_awaiting_approval`.
+
+Weekly scheduler runs promote/approve/ship when the corresponding `metadata.roadmap.auto*` flags are enabled.
+
+---
+
 ## SUMMARY
 
 | Category              | Automated by Gold Button? | You Still Need To                |
