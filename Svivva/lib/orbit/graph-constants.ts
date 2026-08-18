@@ -191,6 +191,8 @@ export const ORBIT_ROUTE_CHANNELS = [
   "fusion",
   "ifm",
   "ifm_compound",
+  "roadmap_promote",
+  "micro_tool_ship",
   "bridge_ship",
   "quality_gate",
   "seo_ops_gate",
@@ -245,6 +247,8 @@ export const ORBIT_EVENT_TYPES = [
   "ifm_pair_scored",
   "ifm_pair_pruned",
   "ifm_winner_compounded",
+  "ifm_roadmap_promoted",
+  "ifm_micro_tool_shipped",
   "quality_gate_passed",
   "quality_gate_failed",
   "seo_ops_gate_passed",
@@ -263,6 +267,7 @@ export const ORBIT_RECOMMENDATION_KINDS = [
   "expand_content",
   "expand_ifm_pair",
   "prune_ifm_pair",
+  "promote_to_roadmap",
 ] as const;
 export type OrbitRecommendationKind = (typeof ORBIT_RECOMMENDATION_KINDS)[number];
 

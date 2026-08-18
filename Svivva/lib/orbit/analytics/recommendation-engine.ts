@@ -10,6 +10,8 @@ import {
 } from "./recommendation-repository";
 import type { RecommendationDraft } from "./event-types";
 import { parseIfmConfig } from "../ifm/ifm-repository";
+import { parseRoadmapConfig } from "../roadmap/roadmap-repository";
+import { isIfmRoadmapCandidate } from "../roadmap/promote-ifm-winner";
 import {
   scoreIfmPairing,
   findIndexForPairing,
@@ -272,6 +274,34 @@ export async function generateRecommendationsForProject(
           priority: "medium",
           title: `Expand winning IFM pair: ${winner.fusionTitle}`,
           rationale: `Pairing scored ${winner.score?.total ?? 0}/100. Generate adjacent hub variants to compound intent fusion.`,
+          actionPayload: {
+            pairingId: winner.id,
+            score: winner.score?.total,
+            slug: winner.slug,
+          },
+        },
+        openRecs,
+      );
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
+
+    const roadmapConfig = parseRoadmapConfig(project.metadata as Record<string, unknown>);
+    const promotedIds = new Set((roadmapConfig.items ?? []).map((i) => i.pairingId));
+    for (const winner of winners.filter((w) => w.status === "winner").slice(0, 2)) {
+      if (promotedIds.has(winner.id)) continue;
+      if (!isIfmRoadmapCandidate(winner, winnerThreshold, false)) continue;
+      const hasTraction =
+        (winner.score?.conversions7d ?? 0) > 0 || (winner.score?.sessions7d ?? 0) >= 10;
+      if (!hasTraction) continue;
+
+      const created = await upsertIfmPairingRecommendation(
+        projectId,
+        {
+          kind: "promote_to_roadmap",
+          priority: "medium",
+          title: `Promote IFM winner to product roadmap: ${winner.fusionTitle}`,
+          rationale: `Winner scored ${winner.score?.total ?? 0}/100 with GA4 traction. Feed into product roadmap and ship micro-tool.`,
           actionPayload: {
             pairingId: winner.id,
             score: winner.score?.total,

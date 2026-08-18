@@ -38,6 +38,7 @@ describe("buildIfmBridgePageDraft", () => {
     const draft = buildIfmBridgePageDraft(samplePairing);
     expect(draft.slug).toBeTruthy();
     expect(draft.content).toContain("FAQPage");
+    expect(draft.content).toContain('id="ifm-micro-tool"');
     expect(draft.category).toBe("ifm-bridge");
     expect(draft.relatedSlugs.length).toBe(2);
   });

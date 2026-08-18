@@ -1,5 +1,6 @@
 import { getSiteUrl } from "@/lib/site-url";
 import type { IfmPairing } from "./ifm-types";
+import { buildIfmMicroToolHtml } from "./micro-tool-generator";
 
 export type IfmBridgePageDraft = {
   slug: string;
@@ -51,6 +52,8 @@ export function buildIfmBridgePageDraft(pairing: IfmPairing): IfmBridgePageDraft
   <li><a href="${pairing.toolA.url}">${pairing.toolA.name}</a> — ${pairing.toolA.description}</li>
   <li><a href="${pairing.toolB.url}">${pairing.toolB.name}</a> — ${pairing.toolB.description}</li>
 </ul>
+
+${buildIfmMicroToolHtml(pairing)}
 
 <h2>Micro-tool concept</h2>
 <p>${pairing.microToolIdea}</p>

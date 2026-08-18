@@ -8,6 +8,8 @@ import { parseExternalAnalyticsConfig } from "../analytics/external-signals";
 import { parseAutopilotConfig } from "../autopilot/autopilot-types";
 import { mergeSchedulerConfig } from "../scheduler/scheduler-types";
 import { parseSeoOpsSnapshot } from "../routes/seo-ops-gate";
+import { parseIfmConfig } from "../ifm/ifm-repository";
+import { parseRoadmapConfig } from "../roadmap/roadmap-repository";
 
 export type ProjectHealthAlert = {
   level: "info" | "warning" | "critical";
@@ -31,6 +33,12 @@ export type ProjectHealthSnapshot = {
     indexHealthScore?: number;
   };
   externalAnalytics: { hasData: boolean; sessions7d?: number; conversions7d?: number };
+  ifm: {
+    enabled: boolean;
+    winners: number;
+    roadmapBacklog: number;
+    staleCompoundDays?: number;
+  };
 };
 
 const MS_DAY = 24 * 60 * 60 * 1000;
@@ -143,6 +151,44 @@ export async function buildProjectHealthSnapshot(
     });
   }
 
+  const ifmConfig = parseIfmConfig(meta);
+  const roadmapConfig = parseRoadmapConfig(meta);
+  const ifmWinners = (ifmConfig.pairings ?? []).filter((p) => p.status === "winner").length;
+  const roadmapBacklog = (roadmapConfig.items ?? []).filter(
+    (i) => i.status === "proposed" || i.status === "approved",
+  ).length;
+
+  if (ifmConfig.enabled && ifmWinners > 0 && roadmapBacklog === 0) {
+    alerts.push({
+      level: "info",
+      code: "ifm_winners_not_on_roadmap",
+      message: `${ifmWinners} IFM winner(s) not yet promoted to product roadmap`,
+    });
+  }
+
+  if (ifmConfig.enabled && ifmConfig.lastCompoundedAt) {
+    const compoundAge = Date.now() - new Date(ifmConfig.lastCompoundedAt).getTime();
+    if (compoundAge > 14 * MS_DAY) {
+      alerts.push({
+        level: "warning",
+        code: "ifm_compound_stale",
+        message: "IFM winner compounding has not run in 14+ days",
+      });
+    }
+  }
+
+  if (
+    ifmConfig.enabled &&
+    parseExternalAnalyticsConfig(meta).ga4PropertyId &&
+    !parseExternalAnalyticsConfig(meta).lastSyncedAt
+  ) {
+    alerts.push({
+      level: "warning",
+      code: "ifm_ga4_not_synced",
+      message: "GA4 property configured but external analytics never synced",
+    });
+  }
+
   let status: ProjectHealthSnapshot["status"] = "healthy";
   if (alerts.some((a) => a.level === "critical")) status = "critical";
   else if (alerts.length > 0) status = "degraded";
@@ -169,6 +215,16 @@ export async function buildProjectHealthSnapshot(
       hasData: external.lastSyncedAt != null,
       sessions7d: external.sessions7d,
       conversions7d: external.conversions7d,
+    },
+    ifm: {
+      enabled: ifmConfig.enabled ?? false,
+      winners: ifmWinners,
+      roadmapBacklog,
+      staleCompoundDays: ifmConfig.lastCompoundedAt
+        ? Math.floor(
+            (Date.now() - new Date(ifmConfig.lastCompoundedAt).getTime()) / MS_DAY,
+          )
+        : undefined,
     },
   };
 }

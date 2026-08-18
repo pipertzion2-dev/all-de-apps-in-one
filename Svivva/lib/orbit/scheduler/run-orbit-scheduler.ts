@@ -129,6 +129,26 @@ export async function runOrbitScheduler(
               winners: compound.winners.length,
             };
           }
+
+          const roadmapConfig = (meta.roadmap || {}) as {
+            autoPromote?: boolean;
+            lastPromotedAt?: string;
+          };
+          const lastPromoted = roadmapConfig.lastPromotedAt
+            ? new Date(roadmapConfig.lastPromotedAt).getTime()
+            : 0;
+          if (roadmapConfig.autoPromote && now - lastPromoted >= weekMs) {
+            const { feedIfmWinnersToRoadmap } = await import("../roadmap/feed-ifm-roadmap");
+            const feed = await feedIfmWinnersToRoadmap(project.id, project.userId, {
+              maxPromote: 3,
+              shipMicroTools: true,
+            });
+            result.ifm = {
+              ...(result.ifm || {}),
+              roadmapPromoted: feed.promoted,
+              microToolsShipped: feed.microToolsShipped,
+            };
+          }
         }
 
         projectResults.push(result);

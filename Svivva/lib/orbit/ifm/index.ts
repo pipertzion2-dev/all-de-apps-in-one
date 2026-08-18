@@ -46,3 +46,10 @@ export {
   pairAnalyticsBoost,
   buildPairAnalyticsMap,
 } from "./ifm-analytics";
+export {
+  buildIfmMicroToolHtml,
+  bridgeContentHasMicroTool,
+  injectMicroToolIntoBridgeContent,
+} from "./micro-tool-generator";
+export { shipIfmMicroToolsForProject } from "./ship-ifm-micro-tools";
+export { runMicroToolShipStep } from "./run-micro-tool-ship-step";

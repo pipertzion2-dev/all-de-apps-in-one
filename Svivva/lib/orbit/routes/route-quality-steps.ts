@@ -1,5 +1,10 @@
 import { getIfmPairingsForProject } from "../ifm/ifm-repository";
 import { shipIfmBridgesForProject } from "../ifm/ship-ifm-bridges";
+import { buildIfmBridgePageDraft } from "../ifm/bridge-page-generator";
+import { bridgeContentHasMicroTool } from "../ifm/micro-tool-generator";
+import { db } from "@/lib/db";
+import { seoLandingPages } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import type { RouteRunContext } from "./route-types";
 import {
   runSeoOpsGate,
@@ -42,6 +47,22 @@ export async function runQualityGateStep(
   const minShipped = Number(config.minShippedBridges) || 0;
   if (generated.length < minShipped) {
     issues.push(`Expected at least ${minShipped} shipped bridges, found ${generated.length}`);
+  }
+
+  if (config.requireMicroTools === true && generated.length > 0) {
+    let withMicroTool = 0;
+    for (const pairing of generated) {
+      const draft = buildIfmBridgePageDraft(pairing);
+      const [page] = await db
+        .select({ content: seoLandingPages.content })
+        .from(seoLandingPages)
+        .where(eq(seoLandingPages.slug, draft.slug))
+        .limit(1);
+      if (page && bridgeContentHasMicroTool(page.content)) withMicroTool += 1;
+    }
+    if (withMicroTool === 0) {
+      issues.push("No IFM bridge pages have embedded micro-tool blocks — run micro_tool_ship");
+    }
   }
 
   const strict = config.strict !== false;

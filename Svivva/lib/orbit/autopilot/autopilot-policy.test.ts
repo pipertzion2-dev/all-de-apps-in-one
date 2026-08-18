@@ -95,4 +95,14 @@ describe("canAutoApplyRecommendation", () => {
       }).ok,
     ).toBe(false);
   });
+
+  it("allows promote_to_roadmap in autonomous medium priority", () => {
+    expect(
+      canAutoApplyRecommendation({
+        kind: "promote_to_roadmap",
+        campaignMode: "autonomous",
+        priority: "medium",
+      }).ok,
+    ).toBe(true);
+  });
 });

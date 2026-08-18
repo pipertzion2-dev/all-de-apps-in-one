@@ -31,6 +31,13 @@ export function canAutoApplyRecommendation(input: {
     return { ok: false, reason: "assisted_blocks_expand_ifm_pair" };
   }
 
+  if (
+    input.kind === "promote_to_roadmap" &&
+    (input.campaignMode !== "autonomous" || input.priority === "low")
+  ) {
+    return { ok: false, reason: "promote_to_roadmap_requires_autonomous_medium_plus" };
+  }
+
   const allowed = AUTOPILOT_KINDS_BY_MODE[input.campaignMode] || [];
   if (!allowed.includes(input.kind)) {
     return { ok: false, reason: `mode_${input.campaignMode}_blocks_${input.kind}` };

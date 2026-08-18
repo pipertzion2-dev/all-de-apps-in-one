@@ -127,6 +127,17 @@ export async function applyRecommendation(
       message = "IFM pairing archived";
       break;
     }
+    case "promote_to_roadmap": {
+      const pairingId = payload.pairingId as string;
+      const { feedIfmWinnersToRoadmap } = await import("../roadmap/feed-ifm-roadmap");
+      result = await feedIfmWinnersToRoadmap(rec.orbitProjectId, userId, {
+        pairingIds: pairingId ? [pairingId] : undefined,
+        maxPromote: 1,
+        shipMicroTools: true,
+      });
+      message = `Promoted ${(result as { promoted: number }).promoted} winner(s) to roadmap`;
+      break;
+    }
     default:
       throw new Error(`Unknown recommendation kind: ${rec.kind}`);
   }

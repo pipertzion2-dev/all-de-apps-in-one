@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors, Layers } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors, Layers, Map } from "lucide-react";
 import { useState } from "react";
 
 type IfmPairing = {
@@ -55,6 +55,22 @@ type CompoundResponse = {
     sessions7d?: number;
     conversions7d?: number;
   }>;
+};
+
+type RoadmapItem = {
+  id: string;
+  fusionTitle: string;
+  score: number;
+  status: string;
+  microToolShipped?: boolean;
+  sessions7d?: number;
+  conversions7d?: number;
+};
+
+type RoadmapResponse = {
+  items: RoadmapItem[];
+  promoted?: number;
+  microToolsShipped?: number;
 };
 
 type PreviewResponse = {
@@ -170,6 +186,33 @@ export default function OrbitIfmPage() {
     },
   });
 
+  const feedRoadmap = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maxPromote: 3, shipMicroTools: true }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data as RoadmapResponse;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] });
+    },
+  });
+
+  const roadmapQuery = useQuery<RoadmapResponse>({
+    queryKey: ["orbit-roadmap", projectId],
+    enabled: Boolean(projectId.trim()),
+    queryFn: async () => {
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    },
+  });
+
   const projectPairingsQuery = useQuery<{ pairings: IfmPairing[] }>({
     queryKey: ["orbit-ifm-project", projectId],
     enabled: Boolean(projectId.trim()),
@@ -281,6 +324,18 @@ export default function OrbitIfmPage() {
               <Layers className="mr-2 h-4 w-4" />
             )}
             Compound winners
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || feedRoadmap.isPending}
+            onClick={() => feedRoadmap.mutate()}
+          >
+            {feedRoadmap.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Map className="mr-2 h-4 w-4" />
+            )}
+            Feed roadmap
           </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/dashboard/orbit/matrix">
@@ -401,6 +456,43 @@ export default function OrbitIfmPage() {
             ) : (
               <p className="text-sm text-muted-foreground">No winners to compound yet — rescore first.</p>
             )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {(feedRoadmap.data || roadmapQuery.data?.items?.length) ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Map className="h-5 w-5" />
+              Product roadmap feed
+            </CardTitle>
+            <CardDescription>
+              IFM winners promoted to the product roadmap with micro-tool shipping.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {feedRoadmap.data ? (
+              <p className="text-sm text-green-600">
+                Promoted {feedRoadmap.data.promoted ?? 0} item(s)
+                {feedRoadmap.data.microToolsShipped != null
+                  ? ` · ${feedRoadmap.data.microToolsShipped} micro-tool(s) shipped`
+                  : ""}
+              </p>
+            ) : null}
+            {(roadmapQuery.data?.items ?? []).slice(0, 10).map((item) => (
+              <div key={item.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                <span>{item.fusionTitle}</span>
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  {item.score}/100
+                  {item.sessions7d != null ? ` · ${item.sessions7d} sessions` : ""}
+                  <Badge variant="outline">{item.status}</Badge>
+                  {item.microToolShipped ? (
+                    <Badge variant="secondary">micro-tool</Badge>
+                  ) : null}
+                </span>
+              </div>
+            ))}
           </CardContent>
         </Card>
       ) : null}
