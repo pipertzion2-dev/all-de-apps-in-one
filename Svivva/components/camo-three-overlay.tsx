@@ -5,6 +5,12 @@ import { ThreeCRTFlowers } from "./three-crt-flowers";
 
 type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
 
+const SECTION_CAMO_PRESETS = new Set<ScenePreset>(["features", "howItWorks", "evals", "pricing"]);
+
+function isSectionCamoPreset(preset: ScenePreset): boolean {
+  return SECTION_CAMO_PRESETS.has(preset);
+}
+
 type Rgba = { r: number; g: number; b: number; a: number };
 
 function parseRgba(color: string): Rgba | null {
@@ -108,6 +114,15 @@ export function CamoThreeOverlay({
   // Intro / eager sections mount immediately; others gate on viewport to protect
   // mobile WebGL context limits (context lost).
   const [flowersActive, setFlowersActive] = useState(isIntro || eagerMount);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobileViewport(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   const seed = useMemo(() => {
     const presetSeeds: Record<ScenePreset, number> = {
@@ -174,6 +189,8 @@ export function CamoThreeOverlay({
       const isCheckoutCamo = preset === "checkout";
       const isIntroCamo = preset === "hero";
       const isOaasCamo = preset === "oaas";
+      const isSectionCamo = isSectionCamoPreset(preset);
+      const useSmoothSectionCamo = isOaasCamo || (isSectionCamo && isMobileViewport);
 
       const introColors = [
         "rgba(210, 170, 180, 0.38)", // 0: blush pink
@@ -213,6 +230,20 @@ export function CamoThreeOverlay({
         "rgba(45, 72, 82, 0.22)",
       ];
 
+      // Section camo: intro-style tints with transparent gaps so blooms read on phones.
+      const sectionCamoColors = [
+        null,
+        "rgba(210, 170, 180, 0.24)",
+        null,
+        "rgba(175, 150, 185, 0.20)",
+        null,
+        "rgba(140, 170, 110, 0.18)",
+        null,
+        "rgba(91, 141, 168, 0.18)",
+        null,
+        "rgba(45, 72, 82, 0.20)",
+      ];
+
       const toneCount = isCheckoutCamo
         ? checkoutColors.length
         : isIntroCamo
@@ -223,8 +254,15 @@ export function CamoThreeOverlay({
 
       ctx.clearRect(0, 0, width, height);
 
-      if (isOaasCamo) {
-        drawOaasCamoSmooth(ctx, width, height, blockSize, oaasColors, seededRandom);
+      if (useSmoothSectionCamo) {
+        drawOaasCamoSmooth(
+          ctx,
+          width,
+          height,
+          blockSize,
+          isOaasCamo ? oaasColors : sectionCamoColors,
+          seededRandom,
+        );
         return;
       }
 
@@ -315,10 +353,12 @@ export function CamoThreeOverlay({
     resizeObserver.observe(container);
 
     return () => resizeObserver.disconnect();
-  }, [seed, preset]);
+  }, [seed, preset, isMobileViewport]);
 
   const isCheckout = preset === "checkout";
   const isOaas = preset === "oaas";
+  const isSectionCamo = isSectionCamoPreset(preset);
+  const useMobileSectionCamo = isSectionCamo && isMobileViewport;
 
   return (
     <div
@@ -332,9 +372,19 @@ export function CamoThreeOverlay({
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
               ? "brightness(1.22) saturate(1.5) contrast(1.08)"
-              : isIntro
-                ? "brightness(1.05) saturate(1.35)"
-                : "brightness(1.15) saturate(1.1)",
+              : useMobileSectionCamo
+                ? "brightness(1.14) saturate(1.28) contrast(1.04)"
+                : isIntro
+                  ? "brightness(1.05) saturate(1.35)"
+                  : "brightness(1.15) saturate(1.1)",
+          ...(isOaas || useMobileSectionCamo
+            ? {
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+              }
+            : {}),
         }}
       >
         {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
@@ -347,9 +397,11 @@ export function CamoThreeOverlay({
             ? "opacity-30"
             : isOaas
               ? "opacity-38 md:opacity-48 blur-[1.2px]"
-              : isIntro
-                ? "opacity-55 md:opacity-60"
-                : "opacity-60 md:opacity-100"
+              : useMobileSectionCamo
+                ? "opacity-[0.36] md:opacity-[0.72] blur-[1.2px] md:blur-0"
+                : isIntro
+                  ? "opacity-55 md:opacity-60"
+                  : "opacity-60 md:opacity-100"
         }`}
       />
     </div>

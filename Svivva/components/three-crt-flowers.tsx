@@ -17,6 +17,12 @@ function isWebGLAvailable() {
 
 type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
 
+const SECTION_CAMO_PRESETS = new Set<ScenePreset>(["features", "howItWorks", "evals", "pricing"]);
+
+function isSectionCamoPreset(preset: ScenePreset): boolean {
+  return SECTION_CAMO_PRESETS.has(preset);
+}
+
 interface PresetConfig {
   flowerCount: number;
   particleCount: number;
@@ -568,7 +574,7 @@ function resolveCameraAspect(
   const containerAspect = containerWidth / Math.max(containerHeight, 1);
   if (!isMediumMobile) return containerAspect;
 
-  if (scenePreset === "oaas") {
+  if (scenePreset === "oaas" || isSectionCamoPreset(scenePreset)) {
     const vw = typeof window !== "undefined" ? window.innerWidth : containerWidth;
     const vh = typeof window !== "undefined" ? window.innerHeight : containerHeight;
     return Math.max(containerAspect, vw / Math.max(vh, 1), 0.62);
@@ -1006,6 +1012,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const isCheckoutPreset = preset === "checkout";
     const isOaasPreset = preset === "oaas";
+    const isSectionCamo = isSectionCamoPreset(preset);
+    const isTightCamoMobile = isMediumMobile && (isOaasPreset || isSectionCamo);
 
     const config = isMediumMobile
       ? {
@@ -1014,27 +1022,41 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
             ? isSmallMobile
               ? 28
               : 36
-            : isCheckoutPreset
-              ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
-              : isSmallMobile
-                ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
-                : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
-          particleCount: isOaasPreset ? 0 : Math.floor(baseConfig.particleCount * 0.2),
-          cameraZ: isOaasPreset
-            ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
-            : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          cameraY: baseConfig.cameraY * (isOaasPreset ? 0.78 : 1.15),
+            : isSectionCamo
+              ? isSmallMobile
+                ? Math.max(22, Math.floor(baseConfig.flowerCount * 0.42))
+                : Math.max(30, Math.floor(baseConfig.flowerCount * 0.48))
+              : isCheckoutPreset
+                ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
+                : isSmallMobile
+                  ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
+                  : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
+          particleCount:
+            isOaasPreset || isSectionCamo ? 0 : Math.floor(baseConfig.particleCount * 0.2),
+          cameraZ:
+            isOaasPreset || isSectionCamo
+              ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
+              : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
+          cameraY: baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
-          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset ? 0.1 : 0.2,
-          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset ? 0.004 : 0.012,
-          bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset ? 0.75 : 0.85),
+          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset || isSectionCamo ? 0.1 : 0.2,
+          scanlineIntensity: isCheckoutPreset
+            ? 0.003
+            : isOaasPreset || isSectionCamo
+              ? 0.004
+              : 0.012,
+          bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset || isSectionCamo ? 0.75 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
               ? 0.96
               : 1.05
-            : isSmallMobile
-              ? 0.28
-              : 0.36,
+            : isSectionCamo
+              ? isSmallMobile
+                ? 0.5
+                : 0.56
+              : isSmallMobile
+                ? 0.28
+                : 0.36,
         }
       : {
           ...baseConfig,
@@ -1043,11 +1065,11 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const cameraAspect = resolveCameraAspect(width, height, preset, isMediumMobile);
     const useCrtPost = true;
-    const sceneLookAtY = isOaasPreset && isMediumMobile ? -0.35 : config.lookAtY;
+    const sceneLookAtY = isTightCamoMobile ? -0.35 : config.lookAtY;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      isOaasPreset && isMediumMobile ? 62 : 55,
+      isTightCamoMobile ? 62 : 55,
       cameraAspect,
       0.1,
       1000,
@@ -1106,10 +1128,9 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     }[] = [];
     disposables.push({ geometry: crtGeometry, material: crtMaterial });
 
-    // Metallic water matching Vivva logo — sized so camo water reads on mobile OaaS
-    const waterSegments = isOaasPreset && isMediumMobile ? 32 : 56;
-    const waterPlaneSize =
-      isOaasPreset && isMediumMobile ? config.waterSize * 1.4 : config.waterSize;
+    // Metallic water matching Vivva logo — sized so camo water reads on mobile sections
+    const waterSegments = isTightCamoMobile ? 32 : 56;
+    const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
     const waterGeometry = new THREE.PlaneGeometry(
       waterPlaneSize,
       waterPlaneSize,
@@ -1135,7 +1156,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = isOaasPreset && isMediumMobile ? -1.05 : -1.4;
+    water.position.y = isTightCamoMobile ? -1.05 : -1.4;
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene
@@ -1145,16 +1166,20 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const gridCols = Math.ceil(Math.sqrt(config.flowerCount * 1.5));
     const gridRows = Math.ceil(config.flowerCount / gridCols);
 
-    // Spread flowers — keep OaaS mobile blooms in the visible frustum
-    const spreadMultX = isOaasPreset && isMediumMobile ? 0.68 : 1.5;
-    const spreadMultZ = isOaasPreset && isMediumMobile ? 0.72 : 2.0;
+    // Spread flowers — keep camo-section mobile blooms in the visible frustum
+    const spreadMultX = isTightCamoMobile ? 0.68 : 1.5;
+    const spreadMultZ = isTightCamoMobile ? 0.72 : 2.0;
     const spreadX = config.waterSize * config.spreadX * spreadMultX;
     const spreadZ = config.waterSize * config.spreadZ * spreadMultZ;
 
     const isCheckout = preset === "checkout";
     const isOaas = preset === "oaas";
     const vivvaTextTex = isCheckout ? createVivvaTextTexture() : null;
-    const rand = isOaas ? createSeededRandom(773) : Math.random;
+    const sectionSeed = PRESETS[preset]?.flowerCount ?? 100;
+    const rand =
+      isOaas || (isSectionCamo && isMediumMobile)
+        ? createSeededRandom(isOaas ? 773 : sectionSeed * 17)
+        : Math.random;
 
     const addFlower = (pos: THREE.Vector3, scaleMultiplier: number = 1, flowerIndex: number) => {
       const activeConfigs = isCheckout
@@ -1164,23 +1189,30 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           : isOaas
             ? OAAS_FLOWER_CONFIGS
             : FLOWER_CONFIGS;
-      const typeIndex = Math.floor((isOaas ? rand() : Math.random()) * activeConfigs.length);
+      const typeIndex = Math.floor(
+        (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) *
+          activeConfigs.length,
+      );
       const flowerConfig = activeConfigs[typeIndex];
 
-      const sizeVariation = isOaas ? rand() : Math.random();
+      const sizeVariation = isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random();
       const sectionBoost = isIntro
         ? 1
         : isOaas
           ? isMediumMobile
             ? 1.08
             : 1.32
-          : isMediumMobile
-            ? 0.72
-            : 1.4;
+          : isSectionCamo && isMediumMobile
+            ? 0.92
+            : isMediumMobile
+              ? 0.72
+              : 1.4;
       const baseScale =
         sizeVariation < 0.2
-          ? 0.9 + (isOaas ? rand() : Math.random()) * 0.5
-          : 0.6 + (isOaas ? rand() : Math.random()) * 0.4;
+          ? 0.9 +
+            (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.5
+          : 0.6 +
+            (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.4;
       const mobileBoost = config.mobileScaleBoost ?? 1;
       const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost;
 
@@ -1195,8 +1227,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         vivvaTextTex,
       );
       const initialGrowth =
-        isOaas && isMediumMobile
-          ? 0.62 + (isOaas ? rand() : Math.random()) * 0.32
+        isTightCamoMobile
+          ? 0.58 + rand() * 0.3
           : isMediumMobile
             ? 0.04 + Math.random() * 0.08
             : isIntro
@@ -1236,8 +1268,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       addFlower(pos, 1, i);
     }
 
-    // Extra edge blooms — skip on OaaS mobile to keep the field stable in view
-    const cornerCount = isOaas && isMediumMobile ? 0 : Math.floor(config.flowerCount * 0.3);
+    // Extra edge blooms — skip on tight camo mobile to keep the field stable in view
+    const cornerCount = isTightCamoMobile ? 0 : Math.floor(config.flowerCount * 0.3);
     const corners = [
       { x: -1, z: -1 },
       { x: 1, z: -1 },
