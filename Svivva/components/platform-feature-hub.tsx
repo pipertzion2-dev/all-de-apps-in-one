@@ -34,6 +34,8 @@ const PRESET_SCENES = [
 
 type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
+  /** When true, flower/camo background is rendered by a parent wrapper (homepage). */
+  hideBackground?: boolean;
 };
 
 function ChannelStrip({
@@ -76,7 +78,7 @@ function ChannelStrip({
   );
 }
 
-export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps) {
+export function PlatformFeatureHub({ variant = "home", hideBackground = false }: PlatformFeatureHubProps) {
   const [goal, setGoal] = useState(PRESET_SCENES[0]);
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,10 +123,12 @@ export function PlatformFeatureHub({ variant = "home" }: PlatformFeatureHubProps
       className={
         isCompact
           ? "space-y-4"
-          : "py-14 sm:py-20 border-b border-[#5B8DA8]/20 bg-gradient-to-b from-background via-[#5B8DA8]/5 to-background relative overflow-hidden min-h-[600px]"
+          : hideBackground
+            ? "py-14 sm:py-20 relative"
+            : "py-14 sm:py-20 border-b border-[#5B8DA8]/20 bg-gradient-to-b from-background via-[#5B8DA8]/5 to-background relative overflow-hidden min-h-[600px]"
       }
     >
-      {!isCompact && (
+      {!isCompact && !hideBackground && (
         <>
           <div
             className="absolute inset-x-0 top-0 h-[100svh] md:inset-0 md:h-full pointer-events-none z-0 overflow-hidden select-none"

@@ -1023,10 +1023,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           cameraZ: isOaasPreset
             ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
             : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          cameraY: baseConfig.cameraY * (isOaasPreset ? 1.0 : 1.15),
+          cameraY: baseConfig.cameraY * (isOaasPreset ? 0.78 : 1.15),
           pixelSize: 1,
-          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset ? 0.08 : 0.2,
-          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset ? 0.003 : 0.012,
+          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset ? 0.1 : 0.2,
+          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset ? 0.004 : 0.012,
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset ? 0.75 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
@@ -1042,7 +1042,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         };
 
     const cameraAspect = resolveCameraAspect(width, height, preset, isMediumMobile);
-    const useCrtPost = !(isOaasPreset && isMediumMobile);
+    const useCrtPost = true;
+    const sceneLookAtY = isOaasPreset && isMediumMobile ? -0.35 : config.lookAtY;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -1052,7 +1053,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       1000,
     );
     camera.position.set(config.cameraX, config.cameraY, config.cameraZ);
-    camera.lookAt(0, config.lookAtY, 0);
+    camera.lookAt(0, sceneLookAtY, 0);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -1105,11 +1106,13 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     }[] = [];
     disposables.push({ geometry: crtGeometry, material: crtMaterial });
 
-    // Metallic water matching Vivva logo
-    const waterSegments = isOaasPreset && isMediumMobile ? 28 : 56;
+    // Metallic water matching Vivva logo — sized so camo water reads on mobile OaaS
+    const waterSegments = isOaasPreset && isMediumMobile ? 32 : 56;
+    const waterPlaneSize =
+      isOaasPreset && isMediumMobile ? config.waterSize * 1.4 : config.waterSize;
     const waterGeometry = new THREE.PlaneGeometry(
-      config.waterSize,
-      config.waterSize,
+      waterPlaneSize,
+      waterPlaneSize,
       waterSegments,
       waterSegments,
     );
@@ -1132,7 +1135,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -1.4;
+    water.position.y = isOaasPreset && isMediumMobile ? -1.05 : -1.4;
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene
@@ -1392,7 +1395,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       // Camera with preset-specific offset
       camera.position.x = config.cameraX + mouseX * 1.5 * config.interactionStrength;
       camera.position.y = config.cameraY + mouseY * 0.35 * config.interactionStrength;
-      camera.lookAt(0, config.lookAtY, 0);
+      camera.lookAt(0, sceneLookAtY, 0);
 
       // Render scene — skip CRT post on OaaS mobile for stability
       if (useCrtPost) {
