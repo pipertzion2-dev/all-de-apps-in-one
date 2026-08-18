@@ -186,6 +186,57 @@ export const ORBIT_ROUTE_STATUSES = [
 ] as const;
 export type OrbitRouteStatus = (typeof ORBIT_ROUTE_STATUSES)[number];
 
+export const ORBIT_EVENT_SOURCES = [
+  "internal",
+  "distribution",
+  "indexing",
+  "content",
+  "policy",
+  "ga4",
+  "webhook",
+] as const;
+export type OrbitEventSource = (typeof ORBIT_EVENT_SOURCES)[number];
+
+export const ORBIT_EVENT_TYPES = [
+  "distribution_succeeded",
+  "distribution_failed",
+  "distribution_manual_ready",
+  "distribution_policy_blocked",
+  "index_submitted",
+  "index_crawl_detected",
+  "index_indexed",
+  "index_failed",
+  "index_not_indexed",
+  "content_validation_passed",
+  "content_validation_failed",
+  "content_generated",
+  "campaign_planned",
+  "recommendation_applied",
+] as const;
+export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
+
+export const ORBIT_RECOMMENDATION_KINDS = [
+  "retry_distribution",
+  "run_distribution",
+  "index_recheck",
+  "regenerate_content",
+  "replan_campaign",
+  "manual_publish_review",
+  "expand_content",
+] as const;
+export type OrbitRecommendationKind = (typeof ORBIT_RECOMMENDATION_KINDS)[number];
+
+export const ORBIT_RECOMMENDATION_STATUSES = [
+  "open",
+  "applied",
+  "dismissed",
+  "expired",
+] as const;
+export type OrbitRecommendationStatus = (typeof ORBIT_RECOMMENDATION_STATUSES)[number];
+
+export const ORBIT_RECOMMENDATION_PRIORITIES = ["high", "medium", "low"] as const;
+export type OrbitRecommendationPriority = (typeof ORBIT_RECOMMENDATION_PRIORITIES)[number];
+
 export type OrbitApprovalPolicy = {
   allowedPlatforms?: OrbitContentPlatform[];
   allowedContentTypes?: string[];

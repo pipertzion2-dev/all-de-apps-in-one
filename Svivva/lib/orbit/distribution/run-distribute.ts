@@ -18,6 +18,12 @@ import {
   statusAfterPublish,
 } from "./distribution-state-machine";
 import type { OrbitDistributionStatus } from "../graph-constants";
+import { emitDistributionOutcome } from "../analytics/emit-outcomes";
+
+async function finishDistributionJob(jobId: string, status: OrbitDistributionStatus) {
+  const job = await getDistributionJobById(jobId);
+  if (job) await emitDistributionOutcome(job);
+}
 
 export async function runDistributionJob(
   jobId: string,
@@ -72,6 +78,7 @@ export async function runDistributionJob(
       publishedUrl: publishResult.externalUrl,
       publishedBy: "orbit-distribution",
     });
+    await finishDistributionJob(jobId, "succeeded");
     return {
       id: jobId,
       status: "succeeded",
@@ -86,6 +93,7 @@ export async function runDistributionJob(
       responsePayload: { publishResult, copyText: publishResult.copyText },
     });
     await updateContentAssetPublishStatus(asset.id, "ready_for_manual");
+    await finishDistributionJob(jobId, "ready_for_manual");
     return {
       id: jobId,
       status: "ready_for_manual",
@@ -104,6 +112,7 @@ export async function runDistributionJob(
       scheduledAt: computeRetryScheduledAt(newRetryCount),
     });
     await updateContentAssetPublishStatus(asset.id, "scheduled");
+    if (retryStatus === "failed") await finishDistributionJob(jobId, "failed");
     return {
       id: jobId,
       status: retryStatus,
@@ -118,6 +127,7 @@ export async function runDistributionJob(
     retryCount: newRetryCount,
   });
   await updateContentAssetPublishStatus(asset.id, "failed");
+  await finishDistributionJob(jobId, "failed");
   return {
     id: jobId,
     status: "failed",

@@ -21,6 +21,7 @@ import {
   createOrbitContentAsset,
   getLatestAssetForPlannedId,
 } from "./content-repository";
+import { emitContentValidationOutcome } from "../analytics/emit-outcomes";
 
 function parseCampaignPlan(
   snapshot: Record<string, unknown> | null | undefined,
@@ -144,6 +145,8 @@ export async function generateCampaignAssets(
         publishStatus,
       });
     }
+
+    await emitContentValidationOutcome(asset);
 
     result.generated += 1;
     result.assets.push({

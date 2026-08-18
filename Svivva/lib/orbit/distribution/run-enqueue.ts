@@ -11,6 +11,7 @@ import { loadMarketingPlatformCredentials } from "../marketing-autopilot-credent
 import { parseAssetPayload } from "./asset-payload-parser";
 import { processDistributionQueue } from "./run-distribute";
 import { checkDistributionPolicyGates } from "./policy-gates";
+import { emitPolicyBlockedEvent } from "../analytics/emit-outcomes";
 
 export class DistributionPolicyError extends Error {
   code: string;
@@ -40,6 +41,13 @@ export async function enqueueAssetDistribution(
 
   const gate = await checkDistributionPolicyGates(campaign, asset);
   if (!gate.ok) {
+    await emitPolicyBlockedEvent({
+      orbitProjectId: asset.orbitProjectId,
+      orbitCampaignId: asset.orbitCampaignId ?? undefined,
+      contentAssetId: asset.id,
+      code: gate.code || "policy_blocked",
+      message: gate.message || "Blocked by policy",
+    });
     throw new DistributionPolicyError(gate.code || "policy_blocked", gate.message || "Blocked by policy");
   }
 

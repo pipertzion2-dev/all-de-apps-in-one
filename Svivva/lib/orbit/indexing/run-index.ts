@@ -18,6 +18,7 @@ import {
 } from "./index-repository";
 import { submitToProviders } from "./index-providers";
 import type { OrbitIndexStatus } from "../graph-constants";
+import { emitIndexStatusChange } from "../analytics/emit-outcomes";
 
 function parseCampaignPlan(
   snapshot: Record<string, unknown> | null | undefined,
@@ -130,6 +131,7 @@ export async function runProjectIndexSubmit(input: RunProjectIndexInput): Promis
       );
       if (!record) continue;
 
+      const previousStatus = record.status;
       const newStatus = statusAfterSubmit(submission.ok);
       await updateIndexRecordStatus(record.id, {
         status: newStatus,
@@ -139,6 +141,18 @@ export async function runProjectIndexSubmit(input: RunProjectIndexInput): Promis
         metadata: { lastSubmission: submission },
       });
       record.status = newStatus;
+      await emitIndexStatusChange(
+        {
+          id: record.id,
+          orbitProjectId: input.projectId,
+          contentAssetId: input.contentAssetId ?? null,
+          url,
+          status: newStatus,
+          provider: submission.provider,
+          failureReason: submission.ok ? null : submission.message,
+        },
+        previousStatus,
+      );
     }
   }
 
