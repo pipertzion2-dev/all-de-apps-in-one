@@ -39,14 +39,12 @@ import {
   ChevronUp,
   RefreshCw,
   Zap,
-  CreditCard,
-  Circle,
   Activity,
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
-import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
+import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -111,6 +109,14 @@ type ActionMeta = {
 
 const ACTION_META: ActionMeta[] = [
   {
+    id: "auto-n8n-webhook",
+    icon: "🔗",
+    openUrl: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/",
+    credKey: "n8nWebhookUrl",
+    credLabel: "n8n webhook URL",
+    credHint: "n8n → Webhook node → Production URL (recommended funnel automation)",
+  },
+  {
     id: "manual-devto",
     icon: "📝",
     openUrl: "https://dev.to/new",
@@ -147,18 +153,18 @@ const ACTION_META: ActionMeta[] = [
     id: "manual-twitter-thread",
     icon: "𝕏",
     openUrl: "https://x.com/compose/tweet",
-    credKey: "omnisocialsApiKey",
-    credLabel: "OmniSocials API key",
-    credHint: "omnisocials.com → connect X → Settings → API (replaces $100/mo X API)",
+    credKey: "ayrshareApiKey",
+    credLabel: "Ayrshare API key",
+    credHint: "app.ayrshare.com → connect X → API key (best) — or OmniSocials / n8n",
     copyLabel: "Copy thread",
   },
   {
     id: "manual-linkedin",
     icon: "💼",
     openUrl: "https://www.linkedin.com/post/new",
-    credKey: "omnisocialsApiKey",
-    credLabel: "OmniSocials API key",
-    credHint: "omnisocials.com → connect LinkedIn → Settings → API",
+    credKey: "ayrshareApiKey",
+    credLabel: "Ayrshare API key",
+    credHint: "app.ayrshare.com → connect LinkedIn → API key (best) — or OmniSocials / n8n",
     copyLabel: "Copy post",
   },
   {
@@ -276,11 +282,10 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [credInputs, setCredInputs] = useState<Record<string, string>>({});
   const [savingCred, setSavingCred] = useState<string | null>(null);
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
-  const [setupProviders, setSetupProviders] = useState<OrbitSetupProvider[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
+  const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
-  const [showSetup, setShowSetup] = useState(true);
   const [gsc, setGsc] = useState<{
     connected: boolean;
     available: boolean;
@@ -387,13 +392,12 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
         if (!r.ok || cancelled) return;
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
-          setupProviders?: OrbitSetupProvider[];
-          ai?: { configured?: boolean };
+          ai?: { configured?: boolean; providerLabel?: string };
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
-        if (json.setupProviders) setSetupProviders(json.setupProviders);
         if (json.ai?.configured) setAiConfigured(true);
+        if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
         // non-blocking
@@ -493,13 +497,6 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
     });
   }
 
-  function isProviderReady(p: OrbitSetupProvider): boolean {
-    if (p.envKey === "OPENAI_API_KEY" || p.envKey === "GEMINI_API_KEY") return aiConfigured;
-    if (p.credentialKey)
-      return !!configuredKeys[p.credentialKey] || savedCreds.includes(p.credentialKey);
-    return false;
-  }
-
   // Partition: automated (AI + APIs + indexing) vs manual paste-only
   const partitioned = result
     ? partitionAutopilotTasks(result.tasks)
@@ -569,6 +566,53 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         </div>
 
+        <OrbitPaidServicesHub
+          defaultExpanded={!aiConfigured}
+          configuredKeys={configuredKeys}
+          aiConfigured={aiConfigured}
+          aiProviderLabel={aiProviderLabel}
+          gscConnected={gsc.connected}
+          gscPropertyOk={gsc.propertyOk}
+          indexNowActive={!!orbitStatus?.indexNowSubmitted}
+          onPasteKey={(key) => {
+            const el = document.getElementById(`cred-${key}`);
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
+
+        {!configuredKeys.n8nWebhookUrl && (
+          <div
+            id="cred-n8nWebhookUrl"
+            className="rounded-xl border border-teal-500/35 bg-teal-500/8 px-3 py-2.5 space-y-2"
+          >
+            <p className="text-[11px] font-bold text-teal-200">n8n webhook (recommended)</p>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              Orbit POSTs your full marketing pack to n8n after each run — wire LinkedIn, email, and
+              CRM in one workflow instead of separate OmniSocials + Resend keys.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                placeholder="https://your-n8n.app/webhook/..."
+                value={credInputs.n8nWebhookUrl ?? ""}
+                onChange={(e) =>
+                  setCredInputs((prev) => ({ ...prev, n8nWebhookUrl: e.target.value }))
+                }
+                className="flex-1 h-8 text-xs px-2.5 rounded-lg border border-border/60 bg-card/80 focus:outline-none focus:border-teal-400 text-foreground placeholder:text-muted-foreground/50"
+              />
+              <button
+                type="button"
+                disabled={!credInputs.n8nWebhookUrl?.trim() || savingCred === "n8nWebhookUrl"}
+                onClick={() => saveCred("n8nWebhookUrl")}
+                className="h-8 px-3 rounded-lg text-xs font-bold text-white disabled:opacity-50"
+                style={{ background: TEAL }}
+              >
+                {savingCred === "n8nWebhookUrl" ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* One-press Google Search Console connect — camo orb */}
         <div className="flex flex-col items-center gap-2 py-1">
           <GscConnectOrb
@@ -617,6 +661,9 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               ok={!!orbitStatus?.indexNowSubmitted}
             />
             <StatusPill icon="🔄" label="Weekly autopilot: ON" ok teal />
+            {aiConfigured && aiProviderLabel ? (
+              <StatusPill icon="🤖" label={`Marketing AI: ${aiProviderLabel}`} ok />
+            ) : null}
             {result && (
               <StatusPill
                 icon="⚡"
@@ -627,89 +674,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         )}
 
-        {/* Setup — pay once, auto forever */}
-        {!running && setupProviders.length > 0 && (
-          <div className="rounded-xl border border-violet-500/25 bg-violet-500/5 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowSetup((v) => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 text-left"
-            >
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-violet-400" />
-                <span className="text-xs font-bold text-violet-300">
-                  Connect paid APIs (Apple Pay in Safari)
-                </span>
-              </div>
-              {showSetup ? (
-                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-              )}
-            </button>
-            {showSetup && (
-              <div className="px-3 pb-3 space-y-2 border-t border-violet-500/15">
-                {setupProviders
-                  .sort((a, b) => a.priority - b.priority)
-                  .map((p) => {
-                    const ready = isProviderReady(p);
-                    return (
-                      <div
-                        key={p.id}
-                        className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 flex flex-col sm:flex-row sm:items-center gap-2"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            {ready ? (
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                            ) : (
-                              <Circle className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                            )}
-                            <span className="text-[11px] font-bold text-foreground">{p.name}</span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {p.priceLabel}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                            {p.purpose}
-                          </p>
-                        </div>
-                        <div className="flex gap-1.5 flex-shrink-0">
-                          <a
-                            href={p.payUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white whitespace-nowrap"
-                            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-                          >
-                            Pay & set up
-                          </a>
-                          {p.credentialKey && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const el = document.getElementById(`cred-${p.credentialKey}`);
-                                el?.scrollIntoView({ behavior: "smooth" });
-                              }}
-                              className="px-2 py-1.5 rounded-lg text-[10px] font-bold border border-violet-500/40 text-violet-300"
-                            >
-                              Paste key
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                <p className="text-[9px] text-muted-foreground leading-relaxed pt-1">
-                  Open pay links in Safari on iPhone or Mac for Apple Pay. Keys stay server-side
-                  only — never exposed to visitors.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Primary launch button */}
+        {/* Primary launch button — paid setup lives in Services checklist above */}
         <button
           type="button"
           onClick={run}
@@ -1191,8 +1156,8 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
       )}
       {!indexing.gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
-          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. AI picks your
-          Search Console property and runs sitemap + indexing automatically.
+          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. Orbit submits
+          your sitemap and requests indexing via Search Console (not via an LLM).
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (

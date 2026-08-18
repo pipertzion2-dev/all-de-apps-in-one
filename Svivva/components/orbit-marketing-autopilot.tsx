@@ -258,7 +258,7 @@ export function OrbitMarketingAutopilot() {
         </button>
         {showCreds && (
           <div className="px-4 pb-4 space-y-4 border-t border-border">
-            {(["publishing", "social", "email"] as const).map((group) => (
+            {(["automation", "publishing", "social", "email"] as const).map((group) => (
               <div key={group} className="space-y-2">
                 <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide">
                   {group}

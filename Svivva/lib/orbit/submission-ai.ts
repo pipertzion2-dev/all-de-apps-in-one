@@ -1,4 +1,5 @@
-import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
+import { isOrbitAiConfigured, orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { getSvivvaProductProfile } from "@/lib/orbit/product-profile";
 import type { SubmissionItemDef } from "@/lib/orbit/submission-schemas";
 import {
@@ -100,10 +101,10 @@ export async function generateSubmissionFields(
   const p = getSvivvaProductProfile();
   const fieldList = item.fields.map((f) => `${f.key}: ${f.label}`).join(", ");
 
-  if (isOrbitFreeAIConfigured()) {
+  if (isOrbitAiConfigured()) {
     try {
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {

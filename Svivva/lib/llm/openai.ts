@@ -1,10 +1,16 @@
 import OpenAI from "openai";
 import {
   buildAiClient,
+  buildOrbitAiClient,
   getActiveAiProvider,
   getDefaultModelForProvider,
   getModelFallbackChain,
+  getOrbitActiveAiProvider,
+  getOrbitDefaultModelForProvider,
+  getOrbitModelFallbackChain,
+  getOrbitAiProviderLabel,
   isAnyAiProviderAvailable,
+  isOrbitAiConfigured,
   probeAndCacheOllama,
   resetProviderCache,
 } from "@/lib/llm/providers";
@@ -13,6 +19,9 @@ export {
   probeAndCacheOllama,
   isAnyAiProviderAvailable,
   getActiveAiProvider,
+  getOrbitActiveAiProvider,
+  getOrbitAiProviderLabel,
+  isOrbitAiConfigured,
   getRuntimeLabel,
   isOnVercelRuntime,
 } from "@/lib/llm/providers";
@@ -23,13 +32,52 @@ let _isOllama = false;
 let _isGemini = false;
 let _provider = getActiveAiProvider();
 
-export function resetOpenAIClientCache() {
-  _client = null;
-  _lastSig = "";
-  _isOllama = false;
-  _isGemini = false;
-  resetProviderCache();
-  _provider = getActiveAiProvider();
+let _orbitClient: OpenAI | null = null;
+let _orbitLastSig = "";
+let _orbitProvider = getOrbitActiveAiProvider();
+let _orbitIsGemini = false;
+let _orbitIsOllama = false;
+
+function getOrbitClientSync(): OpenAI {
+  const sig = `${process.env.AI_INTEGRATIONS_OPENAI_API_KEY ?? ""}\0${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? ""}\0${process.env.OPENAI_API_KEY ?? ""}\0${process.env.GEMINI_API_KEY ?? ""}\0${process.env.OLLAMA_URL ?? ""}\0${process.env.ORBIT_AI_PROVIDER ?? ""}`;
+  if (!_orbitClient || sig !== _orbitLastSig) {
+    const built = buildOrbitAiClient();
+    _orbitClient = built.client;
+    _orbitIsGemini = built.isGemini;
+    _orbitIsOllama = built.isOllama;
+    _orbitProvider = built.provider;
+    _orbitLastSig = sig;
+  }
+  return _orbitClient;
+}
+
+export const orbitOpenai = new Proxy({} as OpenAI, {
+  get(_target, prop) {
+    const client = getOrbitClientSync();
+    const value = Reflect.get(client, prop, client);
+    if (typeof value === "function") return value.bind(client);
+    return value;
+  },
+});
+
+export function getOrbitDefaultModel(): string {
+  getOrbitClientSync();
+  return getOrbitDefaultModelForProvider(_orbitProvider);
+}
+
+export function getOrbitModelChain(): string[] {
+  getOrbitClientSync();
+  return getOrbitModelFallbackChain(_orbitProvider);
+}
+
+export function isOrbitUsingGemini(): boolean {
+  getOrbitClientSync();
+  return _orbitIsGemini;
+}
+
+export function isOrbitUsingOllama(): boolean {
+  getOrbitClientSync();
+  return _orbitIsOllama;
 }
 
 function getClientSync(): OpenAI {
@@ -71,6 +119,20 @@ export const openai = new Proxy({} as OpenAI, {
 
 export const DEFAULT_MODEL = "gpt-4o-mini";
 
+export function resetOpenAIClientCache() {
+  _client = null;
+  _lastSig = "";
+  _isOllama = false;
+  _isGemini = false;
+  _orbitClient = null;
+  _orbitLastSig = "";
+  _orbitIsGemini = false;
+  _orbitIsOllama = false;
+  resetProviderCache();
+  _provider = getActiveAiProvider();
+  _orbitProvider = getOrbitActiveAiProvider();
+}
+
 export function getDefaultModel(): string {
   getClientSync();
   return getDefaultModelForProvider(_provider);
@@ -84,5 +146,5 @@ export function getPlayModelChain(): string[] {
 }
 
 export function isOrbitFreeAIConfigured(): boolean {
-  return isAnyAiProviderAvailable();
+  return isOrbitAiConfigured();
 }

@@ -47,6 +47,54 @@ export function getActiveAiProvider(): AiProvider {
   return "none";
 }
 
+/**
+ * Orbit marketing/admin AI — prefers paid OpenAI when a billing key is set.
+ * Override with ORBIT_AI_PROVIDER=openai|gemini|ollama.
+ */
+export function getOrbitActiveAiProvider(): AiProvider {
+  const forced = process.env.ORBIT_AI_PROVIDER?.trim().toLowerCase();
+  const openaiKey = getOpenAIApiKey()?.trim();
+  const geminiKey = getGeminiApiKey()?.trim();
+  const customBase = getOpenAIBaseUrl()?.trim();
+
+  if (forced === "openai" && openaiKey) return "openai";
+  if (forced === "gemini" && geminiKey) return "gemini";
+  if (forced === "ollama" && !isOnVercelRuntime()) {
+    if (getOllamaUrl()?.trim() || cachedOllamaUrl) return "ollama";
+  }
+
+  // Default: paid OpenAI for Orbit when configured (sk- key or custom gateway base)
+  if (openaiKey && (openaiKey.startsWith("sk-") || customBase)) return "openai";
+  if (geminiKey) return "gemini";
+
+  if (!isOnVercelRuntime()) {
+    if (hasReplitAiIntegration()) return "replit";
+    if (getOllamaUrl()?.trim() || cachedOllamaUrl) return "ollama";
+  }
+
+  if (openaiKey) return "openai";
+  return "none";
+}
+
+export function isOrbitAiConfigured(): boolean {
+  return getOrbitActiveAiProvider() !== "none";
+}
+
+export function getOrbitAiProviderLabel(provider: AiProvider = getOrbitActiveAiProvider()): string {
+  switch (provider) {
+    case "openai":
+      return "OpenAI gpt-4o";
+    case "gemini":
+      return "Google Gemini";
+    case "ollama":
+      return "Ollama (local)";
+    case "replit":
+      return "Replit AI";
+    default:
+      return "none";
+  }
+}
+
 export function isZeroConfigAiAvailable(): boolean {
   return getActiveAiProvider() !== "none" || cachedOllamaUrl != null;
 }
@@ -72,6 +120,39 @@ export function getDefaultModelForProvider(provider: AiProvider = getActiveAiPro
       return "llama3.2";
     default:
       return "gpt-4o-mini";
+  }
+}
+
+/** Orbit marketing — stronger default for SEO copy, outreach, and launch packs. */
+export function getOrbitDefaultModelForProvider(
+  provider: AiProvider = getOrbitActiveAiProvider(),
+): string {
+  switch (provider) {
+    case "gemini":
+      return "gemini-2.0-flash";
+    case "replit":
+    case "openai":
+      return "gpt-4o";
+    case "ollama":
+      return "llama3.2";
+    default:
+      return "gpt-4o-mini";
+  }
+}
+
+export function getOrbitModelFallbackChain(
+  provider: AiProvider = getOrbitActiveAiProvider(),
+): string[] {
+  switch (provider) {
+    case "gemini":
+      return ["gemini-2.0-flash", "gemini-1.5-flash"];
+    case "replit":
+    case "openai":
+      return ["gpt-4o", "gpt-4o-mini"];
+    case "ollama":
+      return ["llama3.2", "llama3.1", "mistral"];
+    default:
+      return [];
   }
 }
 
@@ -133,7 +214,7 @@ export async function probeAndCacheOllama(): Promise<string | null> {
   return null;
 }
 
-export function buildAiClient(): {
+export function buildAiClient(provider: AiProvider = getActiveAiProvider()): {
   client: OpenAI;
   provider: AiProvider;
   isGemini: boolean;
@@ -145,7 +226,42 @@ export function buildAiClient(): {
   const customBase = getOpenAIBaseUrl() ?? "";
   const onVercel = isOnVercelRuntime();
 
-  // 1) Gemini — recommended on Vercel (set GEMINI_API_KEY in project env once)
+  if (provider === "gemini" && geminiKey.length > 10) {
+    const client = new OpenAI({
+      apiKey: geminiKey,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+    return { client, provider: "gemini", isGemini: true, isOllama: false };
+  }
+
+  if (provider === "openai") {
+    if (customBase && openaiKey) {
+      const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
+      return { client, provider: "openai", isGemini: false, isOllama: false };
+    }
+    if (openaiKey) {
+      const client = new OpenAI({ apiKey: openaiKey });
+      return { client, provider: "openai", isGemini: false, isOllama: false };
+    }
+  }
+
+  if (provider === "replit" && !onVercel && hasReplitAiIntegration()) {
+    const client = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL!,
+    });
+    return { client, provider: "replit", isGemini: false, isOllama: false };
+  }
+
+  if (provider === "ollama" && !onVercel && ollamaUrl) {
+    const client = new OpenAI({
+      apiKey: "ollama",
+      baseURL: `${ollamaUrl.replace(/\/$/, "")}/v1`,
+    });
+    return { client, provider: "ollama", isGemini: false, isOllama: true };
+  }
+
+  // Fallback chain when requested provider is unavailable
   if (geminiKey.length > 10) {
     const client = new OpenAI({
       apiKey: geminiKey,
@@ -154,7 +270,6 @@ export function buildAiClient(): {
     return { client, provider: "gemini", isGemini: true, isOllama: false };
   }
 
-  // 2) OpenAI or OpenAI-compatible proxy (Vercel env vars, AI Gateway, etc.)
   if (customBase && openaiKey) {
     const client = new OpenAI({ apiKey: openaiKey, baseURL: customBase });
     return { client, provider: "openai", isGemini: false, isOllama: false };
@@ -165,7 +280,6 @@ export function buildAiClient(): {
     return { client, provider: "openai", isGemini: false, isOllama: false };
   }
 
-  // 3) Replit-managed OpenAI — local Replit only, never on Vercel
   if (!onVercel && hasReplitAiIntegration()) {
     const client = new OpenAI({
       apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY!,
@@ -174,7 +288,6 @@ export function buildAiClient(): {
     return { client, provider: "replit", isGemini: false, isOllama: false };
   }
 
-  // 4) Ollama — local dev / self-hosted only
   if (!onVercel && ollamaUrl) {
     const client = new OpenAI({
       apiKey: "ollama",
@@ -185,4 +298,14 @@ export function buildAiClient(): {
 
   const client = new OpenAI({ apiKey: "unconfigured", baseURL: "http://127.0.0.1:1/v1" });
   return { client, provider: "none", isGemini: false, isOllama: false };
+}
+
+/** Orbit marketing routes — paid OpenAI first when configured. */
+export function buildOrbitAiClient(): {
+  client: OpenAI;
+  provider: AiProvider;
+  isGemini: boolean;
+  isOllama: boolean;
+} {
+  return buildAiClient(getOrbitActiveAiProvider());
 }

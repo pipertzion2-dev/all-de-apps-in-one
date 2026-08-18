@@ -4,7 +4,12 @@ import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, isNotNull, desc } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getSiteUrl, getGoogleSearchConsoleInspectBase } from "@/lib/site-url";
-import { getGeminiApiKey, getOllamaUrl, getOpenAIApiKey } from "@/lib/env";
+import {
+  isOrbitAiConfigured,
+  getOrbitActiveAiProvider,
+  getOrbitAiProviderLabel,
+} from "@/lib/llm/providers";
+import { getOpenAIApiKey } from "@/lib/env";
 import { stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import {
@@ -87,7 +92,8 @@ export async function GET() {
 
     const cred = credRows[0];
 
-    const orbitFreeAi = !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim());
+    const orbitAiConfigured = isOrbitAiConfigured();
+    const orbitAiProvider = getOrbitActiveAiProvider();
     const hasPaidOpenAiKey = !!(
       getOpenAIApiKey()?.trim() && getOpenAIApiKey()!.trim().startsWith("sk-")
     );
@@ -141,9 +147,13 @@ export async function GET() {
       );
     if (toolSeoComplete && !cred?.lastIndexnowSubmit)
       warnings.push("Run Complete Now to submit all 300 tool pages to IndexNow.");
-    if (!orbitFreeAi)
+    if (!orbitAiConfigured)
       warnings.push(
-        "Orbit AI prose is in template mode. Add GEMINI_API_KEY (Google AI Studio, free tier) or OLLAMA_URL for AI-generated copy — paid OpenAI is not used in Orbit.",
+        "Orbit AI prose is in template mode. Add OPENAI_API_KEY (paid, recommended for marketing) in Vercel or Platform Secrets, or GEMINI_API_KEY as a free fallback.",
+      );
+    else if (orbitAiProvider === "openai" && !hasPaidOpenAiKey)
+      warnings.push(
+        "Orbit is using an OpenAI-compatible gateway. Ensure billing/credits are active for reliable marketing runs.",
       );
 
     const BASE = getSiteUrl();
@@ -190,7 +200,10 @@ export async function GET() {
       toolUrls,
       deploymentCommit: process.env.VERCEL_GIT_COMMIT_SHA?.trim() || null,
       preflight: {
-        orbitFreeAi,
+        orbitAiConfigured,
+        orbitAiProvider,
+        orbitAiProviderLabel: getOrbitAiProviderLabel(orbitAiProvider),
+        orbitFreeAi: orbitAiConfigured,
         hasPaidOpenAiKey,
         indexHealthScore,
         warnings,
@@ -225,7 +238,10 @@ export async function GET() {
         toolUrls: [],
         deploymentCommit: process.env.VERCEL_GIT_COMMIT_SHA?.trim() || null,
         preflight: {
-          orbitFreeAi: !!(getGeminiApiKey()?.trim() || getOllamaUrl()?.trim()),
+          orbitAiConfigured: isOrbitAiConfigured(),
+          orbitAiProvider: getOrbitActiveAiProvider(),
+          orbitAiProviderLabel: getOrbitAiProviderLabel(),
+          orbitFreeAi: isOrbitAiConfigured(),
           hasPaidOpenAiKey: !!(
             getOpenAIApiKey()?.trim() && getOpenAIApiKey()!.trim().startsWith("sk-")
           ),

@@ -11,10 +11,12 @@ import { generateMarketingLaunchContent } from "@/lib/orbit/marketing-autopilot-
 import {
   publishDevToArticle,
   publishHashnodeArticle,
+  publishAyrsharePost,
   publishOmniSocialsPost,
   publishRedditPost,
   publishTwitterThread,
   sendResendEmail,
+  dispatchN8nMarketingWebhook,
 } from "@/lib/orbit/marketing-autopilot-publishers";
 import { MARKETING_AUTOPILOT_TASKS, taskDefById } from "@/lib/orbit/marketing-autopilot-tasks";
 import type {
@@ -365,6 +367,25 @@ export async function runMarketingAutopilot(opts?: {
           { url: r.url },
         ),
       );
+    } else if (hasCreds(creds, ["ayrshareApiKey"])) {
+      const site = getSiteUrl();
+      const lead =
+        `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
+      const r = await publishAyrsharePost(creds.ayrshareApiKey!, {
+        text: lead.slice(0, 280),
+        platforms: ["twitter"],
+        linkUrl: site,
+      });
+      tasks.push(
+        task(
+          "manual-twitter-thread",
+          r.ok ? "posted" : "failed",
+          r.ok
+            ? `Posted to X via Ayrshare${thread.length > 1 ? " (lead tweet + link)" : ""}`
+            : r.error || "Ayrshare X publish failed",
+          { url: r.url, copyText: threadCopy },
+        ),
+      );
     } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
       const site = getSiteUrl();
       const lead =
@@ -390,7 +411,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-twitter-thread",
           "needs_credentials",
-          "Thread ready — add OmniSocials key ($10/mo) or copy & paste on X",
+          "Thread ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on X",
           { copyText: threadCopy },
         ),
       );
@@ -401,7 +422,23 @@ export async function runMarketingAutopilot(opts?: {
     const li = content.social.linkedin;
     const liCopy = `${li.headline}\n\n${li.body}${li.cta ? `\n\n${li.cta}` : ""}`;
     await persistContent("social-linkedin", li.headline, li.body);
-    if (hasCreds(creds, ["omnisocialsApiKey"])) {
+    if (hasCreds(creds, ["ayrshareApiKey"])) {
+      const r = await publishAyrsharePost(creds.ayrshareApiKey!, {
+        text: liCopy,
+        platforms: ["linkedin"],
+        linkUrl: li.cta || getSiteUrl(),
+      });
+      tasks.push(
+        task(
+          "manual-linkedin",
+          r.ok ? "posted" : "failed",
+          r.ok
+            ? "Published on LinkedIn via Ayrshare"
+            : r.error || "Ayrshare LinkedIn publish failed",
+          { url: r.url, copyText: liCopy },
+        ),
+      );
+    } else if (hasCreds(creds, ["omnisocialsApiKey"])) {
       const r = await publishOmniSocialsPost(creds.omnisocialsApiKey!, {
         text: liCopy,
         platforms: ["linkedin"],
@@ -422,7 +459,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-linkedin",
           "needs_credentials",
-          "Post ready — add OmniSocials key ($10/mo) or copy & paste on LinkedIn",
+          "Post ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on LinkedIn",
           { copyText: liCopy },
         ),
       );
@@ -529,7 +566,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-newsletters",
           "needs_credentials",
-          "Pitch ready — add Resend key or copy & email manually",
+          "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
           { copyText: pitchCopy },
         ),
       );
@@ -558,7 +595,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-podcasts",
           "needs_credentials",
-          "Pitch ready — add Resend key or copy & email manually",
+          "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
           { copyText: podCopy },
         ),
       );
@@ -614,10 +651,69 @@ export async function runMarketingAutopilot(opts?: {
     ),
   );
 
+  const n8nRoutedIds = new Set([
+    "manual-twitter-thread",
+    "manual-linkedin",
+    "manual-newsletters",
+    "manual-podcasts",
+  ]);
+
+  if (hasCreds(creds, ["n8nWebhookUrl"])) {
+    const finishedAt = now();
+    const preStats = statsFromTasks(tasks);
+    const n8nPayload = {
+      event: "orbit.marketing_autopilot.complete" as const,
+      siteUrl: getSiteUrl(),
+      startedAt,
+      finishedAt,
+      stats: preStats,
+      indexing: indexingSummary,
+      social: content.social,
+      outreach: content.outreach,
+      parasite: content.parasite,
+      directories: content.directories,
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        label: t.label,
+        status: t.status,
+        message: t.message,
+        copyText: t.copyText,
+      })),
+    };
+    const n8n = await dispatchN8nMarketingWebhook(creds, n8nPayload);
+    tasks.push(
+      task(
+        "auto-n8n-webhook",
+        n8n.ok ? "posted" : "failed",
+        n8n.ok
+          ? "Marketing pack sent to your n8n workflow — wire LinkedIn, email, CRM there"
+          : n8n.error || "n8n webhook failed",
+      ),
+    );
+    if (n8n.ok) {
+      for (const t of tasks) {
+        if (t.status === "needs_credentials" && n8nRoutedIds.has(t.id)) {
+          t.status = "prepared";
+          t.message = `Dispatched to n8n — finish publish in your workflow · ${t.message}`;
+        }
+      }
+    }
+  }
+
   // Ensure every defined task has a result
   for (const def of MARKETING_AUTOPILOT_TASKS) {
     if (!tasks.some((t) => t.id === def.id)) {
-      tasks.push(task(def.id, "skipped", "No action needed this run"));
+      if (def.id === "auto-n8n-webhook") {
+        tasks.push(
+          task(
+            def.id,
+            "skipped",
+            "Add n8n webhook URL to route social, email & outreach to your automation graph",
+          ),
+        );
+      } else {
+        tasks.push(task(def.id, "skipped", "No action needed this run"));
+      }
     }
   }
 

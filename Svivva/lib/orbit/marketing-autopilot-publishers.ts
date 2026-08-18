@@ -134,6 +134,59 @@ export async function publishOmniSocialsPost(
   }
 }
 
+const AYRSHARE_POST = "https://api.ayrshare.com/api/post";
+
+/** Multi-platform social via Ayrshare — best direct API for LinkedIn, X, Threads, etc. */
+export async function publishAyrsharePost(
+  apiKey: string,
+  opts: {
+    text: string;
+    platforms: ("linkedin" | "twitter" | "threads" | "bluesky" | "reddit")[];
+    linkUrl?: string;
+  },
+): Promise<PublishResult> {
+  try {
+    let post = opts.text.slice(0, 3000);
+    if (opts.linkUrl && !post.includes(opts.linkUrl)) {
+      post = `${post}\n\n${opts.linkUrl}`.trim();
+    }
+    const res = await fetch(AYRSHARE_POST, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+      },
+      body: JSON.stringify({ post, platforms: opts.platforms }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const data = (await res.json()) as {
+      status?: string;
+      id?: string;
+      postIds?: { platform?: string; postUrl?: string; status?: string }[];
+      posts?: { platform?: string; postUrl?: string; status?: string }[];
+      message?: string;
+      errors?: { message?: string }[];
+    };
+    if (!res.ok) {
+      const err =
+        data.message ||
+        data.errors?.[0]?.message ||
+        (typeof data === "object" ? JSON.stringify(data).slice(0, 200) : `HTTP ${res.status}`);
+      return { ok: false, error: err };
+    }
+    const entries = data.postIds ?? data.posts ?? [];
+    const success = entries.find((p) => p.status === "success") ?? entries[0];
+    return {
+      ok: true,
+      id: data.id ?? success?.platform,
+      url: success?.postUrl,
+    };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 export async function publishDevToArticle(
   apiKey: string,
   article: { title: string; content: string; tags?: string[] },
@@ -347,6 +400,57 @@ export async function sendResendEmail(
     const data = (await res.json()) as { id?: string; message?: string };
     if (!res.ok) return { ok: false, error: data.message || `HTTP ${res.status}` };
     return { ok: true, id: data.id };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
+export type N8nMarketingPayload = {
+  event: "orbit.marketing_autopilot.complete";
+  siteUrl: string;
+  startedAt: string;
+  finishedAt: string;
+  stats: {
+    posted: number;
+    prepared: number;
+    done: number;
+    failed: number;
+    needsCredentials: number;
+  };
+  indexing?: unknown;
+  social: unknown;
+  outreach: unknown;
+  parasite: unknown;
+  directories: unknown;
+  tasks: { id: string; label: string; status: string; message: string; copyText?: string }[];
+};
+
+/** POST full marketing pack to user's n8n workflow webhook. */
+export async function dispatchN8nMarketingWebhook(
+  creds: Pick<MarketingPlatformCredentials, "n8nWebhookUrl" | "n8nWebhookSecret">,
+  payload: N8nMarketingPayload,
+): Promise<PublishResult> {
+  const url = creds.n8nWebhookUrl?.trim();
+  if (!url) return { ok: false, error: "n8n webhook URL not configured" };
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "User-Agent": "SvivvaOrbit/1.0",
+    };
+    const secret = creds.n8nWebhookSecret?.trim();
+    if (secret) headers["X-Orbit-Secret"] = secret;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { ok: false, error: text.slice(0, 200) || `HTTP ${res.status}` };
+    }
+    return { ok: true, id: "n8n-webhook" };
   } catch (e) {
     return { ok: false, error: String(e) };
   }

@@ -1,4 +1,5 @@
-import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
+import { isOrbitAiConfigured, orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   generateSocialPack,
@@ -52,7 +53,7 @@ async function withAiOrFallback<T>(
   fallback: () => T,
   label: string,
 ): Promise<T> {
-  if (isOrbitFreeAIConfigured()) {
+  if (isOrbitAiConfigured()) {
     try {
       return await aiCall();
     } catch (e) {
@@ -151,8 +152,8 @@ export async function generateMarketingLaunchContent(): Promise<MarketingLaunchC
 
   const social = await withAiOrFallback(
     async () => {
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -182,8 +183,8 @@ export async function generateMarketingLaunchContent(): Promise<MarketingLaunchC
 
   const parasite = await withAiOrFallback(
     async () => {
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -200,8 +201,8 @@ export async function generateMarketingLaunchContent(): Promise<MarketingLaunchC
 
   const outreach = await withAiOrFallback(
     async () => {
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {

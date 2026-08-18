@@ -11,7 +11,11 @@ import { maskCredentialsForClient } from "@/lib/orbit/marketing-autopilot-types"
 import { MARKETING_AUTOPILOT_TASKS } from "@/lib/orbit/marketing-autopilot-tasks";
 import type { MarketingPlatformCredentials } from "@/lib/orbit/marketing-autopilot-types";
 import { ORBIT_SETUP_PROVIDERS } from "@/lib/orbit/orbit-setup-providers";
-import { isAnyAiProviderAvailable, getActiveAiProvider } from "@/lib/llm/openai";
+import {
+  isOrbitAiConfigured,
+  getOrbitActiveAiProvider,
+  getOrbitAiProviderLabel,
+} from "@/lib/llm/providers";
 
 export const maxDuration = 300;
 
@@ -40,8 +44,9 @@ export async function GET(req: NextRequest) {
       gscConnectUrl: "/dashboard/gsc-connect",
       setupProviders: ORBIT_SETUP_PROVIDERS,
       ai: {
-        configured: isAnyAiProviderAvailable(),
-        provider: getActiveAiProvider(),
+        configured: isOrbitAiConfigured(),
+        provider: getOrbitActiveAiProvider(),
+        providerLabel: getOrbitAiProviderLabel(),
       },
     });
   } catch (e) {

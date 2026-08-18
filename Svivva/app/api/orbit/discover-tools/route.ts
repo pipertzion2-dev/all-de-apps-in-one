@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { filterToolsForTrafficDiscovery } from "@/lib/orbit/mini-app-curation";
 
 export const maxDuration = 90;
@@ -456,8 +457,8 @@ export async function POST(req: NextRequest) {
       const toEnrich = deduped.slice(0, 100);
       console.log(`[discover-tools] sending ${toEnrich.length} to AI`);
       try {
-        const res = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
+        const res = await orbitOpenai.chat.completions.create({
+          model: getMarketingModel(),
           response_format: { type: "json_object" },
           messages: [
             {
@@ -505,8 +506,8 @@ Return JSON: { "tools": [{ "name": string, "url": string, "description": string 
     // ── Step 7: AI fallback from meta description ─────────────────────────────
     if (metaDescription || pageTitle) {
       try {
-        const res = await openai.chat.completions.create({
-          model: DEFAULT_MODEL,
+        const res = await orbitOpenai.chat.completions.create({
+          model: getMarketingModel(),
           response_format: { type: "json_object" },
           messages: [
             {

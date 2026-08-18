@@ -147,6 +147,7 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
       "twitterApiSecret",
       "twitterAccessToken",
       "twitterAccessSecret",
+      "ayrshareApiKey",
       "omnisocialsApiKey",
     ],
     automatable: "api",
@@ -155,7 +156,7 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     id: "manual-linkedin",
     label: "LinkedIn post",
     group: "Manual Publishing",
-    credentialKeys: ["omnisocialsApiKey"],
+    credentialKeys: ["ayrshareApiKey", "omnisocialsApiKey"],
     automatable: "api",
   },
   {
@@ -228,6 +229,13 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     label: "Content velocity",
     group: "Recurring",
     automatable: "onsite",
+  },
+  {
+    id: "auto-n8n-webhook",
+    label: "n8n marketing webhook",
+    group: "Automation",
+    credentialKeys: ["n8nWebhookUrl"],
+    automatable: "api",
   },
 ];
 

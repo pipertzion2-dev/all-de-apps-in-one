@@ -23,6 +23,12 @@ describe("marketing-autopilot", () => {
 
   it("lists credential fields for UI form", () => {
     expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "devtoApiKey")).toBe(true);
+    expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "ayrshareApiKey")).toBe(true);
     expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "omnisocialsApiKey")).toBe(true);
+    expect(MARKETING_CREDENTIAL_FIELDS.some((f) => f.key === "n8nWebhookUrl")).toBe(true);
+  });
+
+  it("defines n8n webhook autopilot task", () => {
+    expect(MARKETING_AUTOPILOT_TASKS.some((t) => t.id === "auto-n8n-webhook")).toBe(true);
   });
 });

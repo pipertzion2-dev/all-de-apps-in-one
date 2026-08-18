@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
+import { isOrbitAiConfigured, orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 
 function formatFallback(items: string[]): string {
   if (!items.length) return "";
@@ -26,18 +27,18 @@ export async function POST(req: NextRequest) {
     items = [...new Set(raw.map((s) => String(s).trim()).filter(Boolean))];
     const fallback = formatFallback(items);
 
-    if (!isOrbitFreeAIConfigured()) {
+    if (!isOrbitAiConfigured()) {
       return NextResponse.json({
         guide: fallback,
         usedAi: false,
-        hint: "Set GEMINI_API_KEY or OLLAMA_URL for a shorter AI-condensed guide (Gemini or Ollama).",
+        hint: "Add OPENAI_API_KEY (paid) or GEMINI_API_KEY for a shorter AI-condensed guide.",
       });
     }
 
     const userContent = items.map((t) => `• ${t}`).join("\n");
 
-    const completion = await openai.chat.completions.create({
-      model: getDefaultModel(),
+    const completion = await orbitOpenai.chat.completions.create({
+      model: getMarketingModel(),
       messages: [
         {
           role: "system",

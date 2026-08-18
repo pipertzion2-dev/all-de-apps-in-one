@@ -47,6 +47,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
+import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitGrowthIntelligence } from "@/components/orbit-growth-intelligence";
 import OrbitCausalAttribution from "@/components/orbit-causal-attribution";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
@@ -2349,7 +2350,7 @@ function PinkManualCoach({
               ) : (
                 <Wand2 className="w-3.5 h-3.5" />
               )}
-              Condense with AI {orbitFreeAi ? "" : "(set GEMINI_API_KEY or OLLAMA_URL)"}
+              Condense with AI {orbitFreeAi ? "" : "(connect your LLM in Platform Secrets first)"}
             </button>
             <button
               type="button"
@@ -2587,6 +2588,9 @@ export default function LaunchpadPage() {
     /** Present on Vercel production — proves which Git revision is running. */
     deploymentCommit?: string | null;
     preflight?: {
+      orbitAiConfigured?: boolean;
+      orbitAiProvider?: string;
+      orbitAiProviderLabel?: string;
       orbitFreeAi: boolean;
       hasPaidOpenAiKey: boolean;
       indexHealthScore: number;
@@ -3629,10 +3633,9 @@ export default function LaunchpadPage() {
                       or retry one batch.
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Orbit uses <strong>free-tier AI only</strong> (set{" "}
-                      <code className="text-[10px]">GEMINI_API_KEY</code> or{" "}
-                      <code className="text-[10px]">OLLAMA_URL</code>) — paid OpenAI keys are{" "}
-                      <strong>not</strong> used here.
+                      Uses your connected LLM (OpenAI via Platform Secrets). See{" "}
+                      <strong>Services checklist</strong> on Launchpad for paid + Google indexing
+                      setup.
                     </p>
                   </div>
                 </div>
@@ -3654,9 +3657,13 @@ export default function LaunchpadPage() {
                     </p>
                     <p className="text-[11px] text-foreground">
                       Health score: <strong>{orbitStatus.preflight.indexHealthScore}</strong>/100 ·
-                      Free AI ready:{" "}
+                      Marketing AI:{" "}
                       <strong>
-                        {orbitStatus.preflight.orbitFreeAi ? "yes" : "no (templates)"}
+                        {orbitStatus.preflight.orbitAiProviderLabel ||
+                        (orbitStatus.preflight.orbitAiConfigured ??
+                          orbitStatus.preflight.orbitFreeAi)
+                          ? "ready"
+                          : "not connected (templates only)"}
                       </strong>
                     </p>
                     {orbitStatus.preflight.warnings?.length ? (
@@ -3728,7 +3735,9 @@ export default function LaunchpadPage() {
               checkedManual={checkedManual}
               onToggleCheck={toggleManualCheck}
               onResetChecks={resetManualChecks}
-              orbitFreeAi={!!orbitStatus?.preflight?.orbitFreeAi}
+              orbitFreeAi={
+                !!(orbitStatus?.preflight?.orbitAiConfigured ?? orbitStatus?.preflight?.orbitFreeAi)
+              }
               totalDone={totalDone}
               totalSteps={totalSteps}
               onRefetchOrbit={() => {
@@ -4122,7 +4131,10 @@ export default function LaunchpadPage() {
               </div>
             </div>
 
-            {/* Connections Hub */}
+            {/* Services checklist — Google indexing (free) + paid marketing APIs */}
+            <OrbitPaidServicesHub showFreeFallback />
+
+            {/* Connections Hub — domain, GSC URL, GoDaddy (free infra) */}
             <div className="rounded-2xl border-2 border-border bg-card p-4">
               <ConnectionsHub />
             </div>

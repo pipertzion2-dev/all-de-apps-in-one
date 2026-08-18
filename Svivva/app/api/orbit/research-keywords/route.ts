@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { generateJson, getMarketingModel } from "@/lib/orbit/ai-client";
-import { isAnyAiProviderAvailable } from "@/lib/llm/openai";
+import { isOrbitAiConfigured } from "@/lib/llm/providers";
 import { db } from "@/lib/db";
 import { blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -33,9 +33,12 @@ export async function POST(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  if (!isAnyAiProviderAvailable()) {
+  if (!isOrbitAiConfigured()) {
     return NextResponse.json(
-      { error: "No AI provider configured. Add GEMINI_API_KEY or OPENAI_API_KEY." },
+      {
+        error:
+          "No AI provider configured. Add OPENAI_API_KEY (paid) or GEMINI_API_KEY in Vercel / Platform Secrets.",
+      },
       { status: 400 },
     );
   }
