@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai, getDefaultModel, isOrbitFreeAIConfigured } from "@/lib/llm/openai";
+import { isOrbitAiConfigured, orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least one channel is required" }, { status: 400 });
     }
 
-    if (!isOrbitFreeAIConfigured()) {
+    if (!isOrbitAiConfigured()) {
       return NextResponse.json(
         { error: "No AI provider configured. Set OPENAI_API_KEY, GEMINI_API_KEY, or OLLAMA_URL." },
         { status: 503 },
@@ -104,8 +105,8 @@ Analysis Depth: ${analysisDepth || "deep"}
 Apply do-calculus, build the causal DAG, identify confounders and colliders, compute counterfactual impacts, measure transfer entropy, and recommend optimal budget allocation.
 Return ONLY valid JSON matching the exact schema in your system prompt.`;
 
-    const completion = await openai.chat.completions.create({
-      model: getDefaultModel(),
+    const completion = await orbitOpenai.chat.completions.create({
+      model: getMarketingModel(),
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userContent },
@@ -118,7 +119,7 @@ Return ONLY valid JSON matching the exact schema in your system prompt.`;
     const raw = completion.choices[0]?.message?.content ?? "{}";
     const result = JSON.parse(raw);
 
-    return NextResponse.json({ success: true, result, usedModel: getDefaultModel() });
+    return NextResponse.json({ success: true, result, usedModel: getMarketingModel() });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

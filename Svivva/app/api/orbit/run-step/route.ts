@@ -3,13 +3,8 @@ import { db } from "@/lib/db";
 import { seoLandingPages, blogPosts, seedCredentials, growthTasks } from "@/lib/schema";
 import { eq, sql, inArray, desc, isNotNull } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import {
-  openai,
-  getDefaultModel,
-  isUsingGemini,
-  isUsingOllama,
-  isOrbitFreeAIConfigured,
-} from "@/lib/llm/openai";
+import { isOrbitAiConfigured, getOrbitAiProviderLabel, orbitOpenai } from "@/lib/llm/openai";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { randomBytes } from "crypto";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
@@ -59,13 +54,20 @@ import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 
 const BASE_URL = getSiteUrl();
 
-// ── AI with template fallback (Gemini / Ollama only — never paid OpenAI) ───
+function orbitAiSummarySuffix(useAI: boolean): string {
+  if (!useAI) {
+    return "built-in templates — add OPENAI_API_KEY (paid) or GEMINI_API_KEY in Vercel / Platform Secrets";
+  }
+  return getOrbitAiProviderLabel();
+}
+
+// ── AI with template fallback (Orbit provider: paid OpenAI preferred) ───────
 async function generateWithAIOrFallback<T>(
   aiCall: () => Promise<T>,
   fallback: () => T,
   stepName: string,
 ): Promise<T> {
-  if (isOrbitFreeAIConfigured()) {
+  if (isOrbitAiConfigured()) {
     try {
       return await aiCall();
     } catch (e) {
@@ -190,14 +192,14 @@ async function autoDiscoverTools(miniAppsUrl: string): Promise<DiscoveredTool[]>
   if (tools.length > 0) return tools;
 
   // ── 3. AI fallback — generate a realistic list from the app's URL/name ───
-  if (isOrbitFreeAIConfigured()) {
+  if (isOrbitAiConfigured()) {
     try {
       const appLabel = base
         .replace(/https?:\/\//, "")
         .split(".")[0]
         .replace(/-/g, " ");
-      const res = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const res = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: "Return valid JSON only. No markdown." },
@@ -265,7 +267,7 @@ export async function POST(req: NextRequest) {
         "api from natural language",
         "instant api creator",
         "zero-code api development",
-        "openai api wrapper",
+        "orbitOpenai api wrapper",
         "ai powered rest api",
         "prompt engineering tool",
         "ai app generator",
@@ -277,8 +279,8 @@ export async function POST(req: NextRequest) {
         "schema enforced ai output",
         "ai response validator",
         "chatgpt api integration",
-        "openai api tutorial",
-        "how to use openai api",
+        "orbitOpenai api tutorial",
+        "how to use orbitOpenai api",
         "build app with chatgpt",
         "gpt api builder",
         "llm api wrapper",
@@ -288,18 +290,18 @@ export async function POST(req: NextRequest) {
         "claude api builder",
         "gemini api builder",
         "best llm for production",
-        "reduce openai api costs",
-        "openai api alternative",
+        "reduce orbitOpenai api costs",
+        "orbitOpenai api alternative",
         "ai api monitoring",
         "build saas with ai",
         "ai app builder free",
         "llm application builder",
         "deploy ai api",
-        "openai api vs anthropic api",
+        "orbitOpenai api vs anthropic api",
       ];
       const created: { title: string; url: string }[] = [];
       const errors: string[] = [];
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
 
       for (let i = 0; i < SEO_KEYWORDS.length; i++) {
         const keyword = SEO_KEYWORDS[i];
@@ -321,8 +323,8 @@ export async function POST(req: NextRequest) {
 
           let pageData;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -376,7 +378,7 @@ export async function POST(req: NextRequest) {
       const lines = [
         `✓ ${created.filter((c) => !c.title.startsWith("[existing]")).length} new SEO pages created`,
         `✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed`,
-        `✓ Using ${useAI ? "free-tier AI (Gemini/Ollama)" : "built-in templates — set GEMINI_API_KEY or OLLAMA_URL for AI prose"}`,
+        `✓ Using ${useAI ? orbitAiSummarySuffix(true) : orbitAiSummarySuffix(false)}`,
         errors.length ? `⚠ ${errors.length} errors` : "",
         indexResult ? indexResult.message : "",
       ].filter(Boolean);
@@ -416,7 +418,7 @@ export async function POST(req: NextRequest) {
         "FastAPI",
       ];
       const created: { title: string; url: string }[] = [];
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
 
       for (const comp of COMPETITORS) {
         try {
@@ -436,8 +438,8 @@ export async function POST(req: NextRequest) {
 
           let pageData;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -499,7 +501,7 @@ export async function POST(req: NextRequest) {
       if (newUrls.length) await submitIndexNowBatched(newUrls);
       const pageList = created.map((c) => `• ${c.title}`).join("\n");
       return NextResponse.json({
-        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed\n✓ Using ${useAI ? "free-tier AI (Gemini/Ollama)" : "built-in templates"}\n\n${pageList}`,
+        summary: `✓ ${created.filter((c) => !c.title.startsWith("[existing]") && !c.title.startsWith("[error]")).length} comparison pages created\n✓ ${created.filter((c) => c.title.startsWith("[existing]")).length} already existed\n✓ Using ${useAI ? orbitAiSummarySuffix(true) : orbitAiSummarySuffix(false)}\n\n${pageList}`,
         details: { created: created.length },
       });
     }
@@ -519,7 +521,7 @@ export async function POST(req: NextRequest) {
         "From Prompt to Product: Building a Complete AI App in One Day",
       ];
       const created: { title: string; url: string }[] = [];
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
 
       for (let i = 0; i < BLOG_TOPICS.length; i++) {
         const topic = BLOG_TOPICS[i];
@@ -542,8 +544,8 @@ export async function POST(req: NextRequest) {
 
           let blogData;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -606,11 +608,11 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Social pack ────────────────────────────────────────────────────
     if (stepId === "svivva-social") {
-      const social = isOrbitFreeAIConfigured()
+      const social = isOrbitAiConfigured()
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -781,12 +783,12 @@ export async function POST(req: NextRequest) {
           /* continue */
         }
 
-        const useAI = isOrbitFreeAIConfigured();
+        const useAI = isOrbitAiConfigured();
         try {
           let variants;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -1211,11 +1213,11 @@ Return JSON with these 4 keys:
       }
 
       let hubData: { hub?: Record<string, string>; categories?: Record<string, string>[] } = {};
-      const useHubAI = isOrbitFreeAIConfigured();
+      const useHubAI = isOrbitAiConfigured();
       if (useHubAI) {
         try {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
+          const gen = await orbitOpenai.chat.completions.create({
+            model: getMarketingModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -1393,8 +1395,8 @@ Generate a complete "Powered by ZZAI" traffic package that these tool pages shou
 
 Use concise, compelling copy. Every link must use UTM params. Make the widget beautiful but unobtrusive.`;
 
-      const response = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const response = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         messages: [{ role: "user", content: prompt }],
         max_tokens: 3000,
       });
@@ -1568,8 +1570,8 @@ Use concise, compelling copy. Every link must use UTM params. Make the widget be
         .slice(0, 20)
         .join(", ");
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1886,8 +1888,8 @@ Return JSON:
         },
       ];
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1966,8 +1968,8 @@ Return JSON:
 
       const articles = await generateWithAIOrFallback(
         async () => {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
+          const gen = await orbitOpenai.chat.completions.create({
+            model: getMarketingModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -2143,8 +2145,8 @@ Return JSON:
       }[] = [];
       let miniAeoError: string | null = null;
       try {
-        const gen = await openai.chat.completions.create({
-          model: getDefaultModel(),
+        const gen = await orbitOpenai.chat.completions.create({
+          model: getMarketingModel(),
           response_format: { type: "json_object" },
           messages: [
             {
@@ -2254,8 +2256,8 @@ Return JSON:
         .map((t) => t.name)
         .join(", ");
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2427,8 +2429,8 @@ Return JSON:
         { name: "Lenny's Podcast", host: "Lenny Rachitsky", url: "lennyspodcast.com" },
       ];
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -2543,8 +2545,8 @@ Return JSON:
         .map((t) => t.name)
         .join(", ");
 
-      const gen = await openai.chat.completions.create({
-        model: getDefaultModel(),
+      const gen = await orbitOpenai.chat.completions.create({
+        model: getMarketingModel(),
         response_format: { type: "json_object" },
         messages: [
           {
@@ -3363,11 +3365,11 @@ Return JSON:
       ];
 
       // Generate universal listing content via AI or template fallback
-      const listing = isOrbitFreeAIConfigured()
+      const listing = isOrbitAiConfigured()
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -3559,12 +3561,12 @@ Return JSON:
         },
       ];
 
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
       const parasite = useAI
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -3732,15 +3734,15 @@ Return JSON:
       // Strategy: write pages that DIRECTLY answer specific questions, no fluff,
       // factual and citable — AI engines pull from these pages when answering related queries
       const AEO_QUERIES = [
-        "how to use the openai api step by step for beginners",
+        "how to use the orbitOpenai api step by step for beginners",
         "what is the best ai api builder for developers in 2025",
-        "how to reduce openai api costs in production",
+        "how to reduce orbitOpenai api costs in production",
         "gpt-4 vs claude vs gemini which api is cheaper and better",
-        "how to build a chatbot using the openai api",
+        "how to build a chatbot using the orbitOpenai api",
         "what is the cheapest llm api for production apps",
         "how to add an ai backend to an existing rest api",
         "how to build an ai saas app without a backend server",
-        "what is the difference between openai api and langchain",
+        "what is the difference between orbitOpenai api and langchain",
         "how to validate and enforce structured output from ai apis",
       ];
 
@@ -3753,11 +3755,11 @@ Return JSON:
         content: string;
       }[] = [];
       let aeoGenError: string | null = null;
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
       try {
         if (useAI) {
-          const gen = await openai.chat.completions.create({
-            model: getDefaultModel(),
+          const gen = await orbitOpenai.chat.completions.create({
+            model: getMarketingModel(),
             response_format: { type: "json_object" },
             messages: [
               {
@@ -3906,11 +3908,11 @@ Return JSON:
         { name: "r/SaaS", subscribers: "120K", tone: "SaaS founder, growth and pricing strategy" },
       ];
 
-      const community = isOrbitFreeAIConfigured()
+      const community = isOrbitAiConfigured()
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -4149,11 +4151,11 @@ Return JSON:
         },
       ];
 
-      const outreach = isOrbitFreeAIConfigured()
+      const outreach = isOrbitAiConfigured()
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -4263,11 +4265,11 @@ Return JSON:
 
     // ── STEP: Schema.org + Technical SEO Boosts ──────────────────────────────
     if (stepId === "svivva-schema") {
-      const schema = isOrbitFreeAIConfigured()
+      const schema = isOrbitAiConfigured()
         ? await generateWithAIOrFallback(
             async () => {
-              const gen = await openai.chat.completions.create({
-                model: getDefaultModel(),
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
                 response_format: { type: "json_object" },
                 messages: [
                   {
@@ -4410,7 +4412,7 @@ Return JSON:
           `✓ FAQ Schema generated (5 questions — enables FAQ rich results in Google)`,
           `✓ Backlink magnet page created: ${pagesCreated[0] || ""}`,
           `✓ Changelog page created (shows Google you're actively maintained)`,
-          `✓ Using ${isOrbitFreeAIConfigured() ? "free-tier AI (Gemini/Ollama)" : "built-in templates — Orbit does not use paid OpenAI"}`,
+          `✓ Using ${isOrbitAiConfigured() ? orbitAiSummarySuffix(true) : orbitAiSummarySuffix(false)}`,
           "",
           "ADD THIS JSON-LD TO app/layout.tsx <head> (copy the 'jsonLd' field from step results):",
           "Add both softwareApplication + faqSchema in separate <script type='application/ld+json'> tags",
@@ -4495,13 +4497,13 @@ Return JSON:
       const toCreate = INTEGRATIONS.filter((i) => !existingSlugs.has(i.slug));
       const skipped = INTEGRATIONS.filter((i) => existingSlugs.has(i.slug));
 
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
       const results = await Promise.allSettled(
         toCreate.map(async (integ) => {
           let d;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -4621,13 +4623,13 @@ Return JSON:
       const indToCreate = INDUSTRIES.filter((i) => !indExistingSlugs.has(i.slug));
       const indSkipped = INDUSTRIES.filter((i) => indExistingSlugs.has(i.slug));
 
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
       const indResults = await Promise.allSettled(
         indToCreate.map(async (ind) => {
           let d;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -4826,13 +4828,13 @@ Return JSON:
       const tmplToCreate = TEMPLATES.filter((t) => !tmplExistingSlugs.has(t.slug));
       const tmplSkipped = TEMPLATES.filter((t) => tmplExistingSlugs.has(t.slug));
 
-      const useAI = isOrbitFreeAIConfigured();
+      const useAI = isOrbitAiConfigured();
       const tmplResults = await Promise.allSettled(
         TEMPLATES.map(async (tmpl) => {
           let d;
           if (useAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {
@@ -4909,7 +4911,10 @@ Return JSON:
         { q: "What is schema enforcement in AI APIs?", slug: "what-is-schema-enforcement-ai-api" },
         { q: "How long does it take to build an AI API?", slug: "how-long-to-build-ai-api" },
         { q: "Is there a free AI API builder?", slug: "free-ai-api-builder" },
-        { q: "How do I reduce OpenAI API costs in production?", slug: "reduce-openai-api-costs" },
+        {
+          q: "How do I reduce OpenAI API costs in production?",
+          slug: "reduce-orbitOpenai-api-costs",
+        },
         {
           q: "What is the difference between GPT-4 and Claude for APIs?",
           slug: "gpt4-vs-claude-for-api",
@@ -4931,7 +4936,7 @@ Return JSON:
       const paaToCreate = PAA_QUESTIONS.filter((p) => !paaExistingSlugs.has(p.slug));
       const paaSkipped = PAA_QUESTIONS.filter((p) => paaExistingSlugs.has(p.slug));
 
-      const usePaaAI = isOrbitFreeAIConfigured();
+      const usePaaAI = isOrbitAiConfigured();
       const paaResults = await Promise.allSettled(
         paaToCreate.map(async (paa) => {
           let d: {
@@ -4941,8 +4946,8 @@ Return JSON:
             content?: string;
           };
           if (usePaaAI) {
-            const gen = await openai.chat.completions.create({
-              model: getDefaultModel(),
+            const gen = await orbitOpenai.chat.completions.create({
+              model: getMarketingModel(),
               response_format: { type: "json_object" },
               messages: [
                 {

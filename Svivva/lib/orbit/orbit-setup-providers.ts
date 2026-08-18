@@ -21,11 +21,12 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
   {
     id: "openai",
     name: "OpenAI",
-    purpose: "AI writes all launch copy, articles, pitches, and directory listings",
+    purpose: "Paid AI for Orbit marketing — SEO pages, launch copy, outreach, and autopilot",
     priceLabel: "~$5–20 prepaid credits",
     payUrl: "https://platform.openai.com/settings/organization/billing/overview",
     docsUrl: "https://platform.openai.com/api-keys",
-    payNote: "Add payment in Safari — Apple Pay accepted. Then create an API key.",
+    payNote:
+      "Add billing in Safari (Apple Pay accepted), create an sk- API key, then paste in Vercel env or Dashboard → Platform Secrets. Orbit prefers OpenAI when this key is set.",
     envKey: "OPENAI_API_KEY",
     priority: 1,
   },
@@ -60,7 +61,8 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priceLabel: "Free tier",
     payUrl: "https://aistudio.google.com/apikey",
     docsUrl: "https://ai.google.dev/gemini-api/docs",
-    payNote: "No card required. Add GEMINI_API_KEY in Vercel env — Orbit uses it automatically.",
+    payNote:
+      "Free fallback when OpenAI is not configured. Orbit uses Gemini only if no paid OpenAI key is present (unless ORBIT_AI_PROVIDER=gemini).",
     envKey: "GEMINI_API_KEY",
     priority: 4,
   },
