@@ -81,6 +81,14 @@ async function executeRouteStep(
       const { runMicroToolShipStep } = await import("../ifm/run-micro-tool-ship-step");
       return runMicroToolShipStep(ctx, config);
     }
+    case "roadmap_approve": {
+      const { runRoadmapApproveStep } = await import("../roadmap/run-roadmap-approve-step");
+      return runRoadmapApproveStep(ctx, config);
+    }
+    case "roadmap_product_ship": {
+      const { runRoadmapProductShipStep } = await import("../roadmap/run-roadmap-product-ship-step");
+      return runRoadmapProductShipStep(ctx, config);
+    }
     case "bridge_ship": {
       const { runBridgeShipStep } = await import("./route-quality-steps");
       return runBridgeShipStep(ctx, config);

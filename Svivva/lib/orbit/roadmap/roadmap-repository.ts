@@ -83,3 +83,26 @@ export async function updateRoadmapItem(
 
   return updated;
 }
+
+export async function touchRoadmapConfig(
+  projectId: string,
+  userId: string,
+  patch: Partial<OrbitRoadmapConfig>,
+): Promise<OrbitRoadmapConfig> {
+  const project = await getOrbitProjectById(projectId, userId);
+  if (!project) throw new Error("Orbit project not found");
+
+  const meta = (project.metadata || {}) as Record<string, unknown>;
+  const current = parseRoadmapConfig(meta);
+  const next = { ...current, ...patch };
+
+  await db
+    .update(orbitProjects)
+    .set({
+      metadata: { ...meta, roadmap: next },
+      updatedAt: new Date(),
+    })
+    .where(and(eq(orbitProjects.id, projectId), eq(orbitProjects.userId, userId)));
+
+  return next;
+}

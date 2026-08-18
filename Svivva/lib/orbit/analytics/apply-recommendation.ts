@@ -138,6 +138,24 @@ export async function applyRecommendation(
       message = `Promoted ${(result as { promoted: number }).promoted} winner(s) to roadmap`;
       break;
     }
+    case "approve_roadmap_item": {
+      const roadmapItemId = payload.roadmapItemId as string;
+      const { approveRoadmapItems } = await import("../roadmap/roadmap-approval");
+      result = await approveRoadmapItems(rec.orbitProjectId, userId, {
+        itemIds: roadmapItemId ? [roadmapItemId] : undefined,
+      });
+      message = `Approved ${(result as { approved: number }).approved} roadmap item(s)`;
+      break;
+    }
+    case "ship_roadmap_to_product": {
+      const roadmapItemId = payload.roadmapItemId as string;
+      const { shipApprovedRoadmapItems } = await import("../roadmap/ship-fusion-product");
+      result = await shipApprovedRoadmapItems(rec.orbitProjectId, userId, {
+        itemIds: roadmapItemId ? [roadmapItemId] : undefined,
+      });
+      message = `Shipped ${(result as { shipped: number }).shipped} fusion product(s)`;
+      break;
+    }
     default:
       throw new Error(`Unknown recommendation kind: ${rec.kind}`);
   }

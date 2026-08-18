@@ -105,4 +105,14 @@ describe("canAutoApplyRecommendation", () => {
       }).ok,
     ).toBe(true);
   });
+
+  it("allows ship_roadmap_to_product in autonomous medium priority", () => {
+    expect(
+      canAutoApplyRecommendation({
+        kind: "ship_roadmap_to_product",
+        campaignMode: "autonomous",
+        priority: "medium",
+      }).ok,
+    ).toBe(true);
+  });
 });

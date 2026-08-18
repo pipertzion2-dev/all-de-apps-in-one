@@ -314,6 +314,51 @@ export async function generateRecommendationsForProject(
       else result.skipped += 1;
     }
 
+    const roadmapItems = roadmapConfig.items ?? [];
+    for (const item of roadmapItems.filter((i) => i.status === "proposed" && i.microToolShipped).slice(0, 2)) {
+      const created = await upsertIfmPairingRecommendation(
+        projectId,
+        {
+          kind: "approve_roadmap_item",
+          priority: "medium",
+          title: `Approve roadmap item: ${item.fusionTitle}`,
+          rationale: `Micro-tool embedded and score ${item.rescoreTotal ?? item.score}/100. Generate product spec and clear for ship.`,
+          actionPayload: {
+            roadmapItemId: item.id,
+            pairingId: item.pairingId,
+            score: item.rescoreTotal ?? item.score,
+          },
+        },
+        openRecs,
+      );
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
+
+    for (const item of roadmapItems.filter((i) => i.status === "approved" && i.productSpec).slice(0, 2)) {
+      const sessions = item.sessions7d ?? 0;
+      const conversions = item.conversions7d ?? 0;
+      if (conversions <= 0 && sessions < 10) continue;
+
+      const created = await upsertIfmPairingRecommendation(
+        projectId,
+        {
+          kind: "ship_roadmap_to_product",
+          priority: "medium",
+          title: `Ship fusion product: ${item.fusionTitle}`,
+          rationale: `Approved roadmap item with GA4 traction (${sessions} sessions, ${conversions} conversions). Publish /tools/ifm-fusion slice.`,
+          actionPayload: {
+            roadmapItemId: item.id,
+            pairingId: item.pairingId,
+            score: item.rescoreTotal ?? item.score,
+          },
+        },
+        openRecs,
+      );
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
+
     for (const { pairing, score } of scored) {
       if (!isIfmPruneCandidate(pairing, score, pruneThreshold)) continue;
       const created = await upsertIfmPairingRecommendation(

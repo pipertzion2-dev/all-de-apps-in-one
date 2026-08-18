@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors, Layers, Map } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors, Layers, Map, CheckCircle2, Package } from "lucide-react";
 import { useState } from "react";
 
 type IfmPairing = {
@@ -65,12 +65,18 @@ type RoadmapItem = {
   microToolShipped?: boolean;
   sessions7d?: number;
   conversions7d?: number;
+  productUrl?: string;
 };
 
 type RoadmapResponse = {
   items: RoadmapItem[];
   promoted?: number;
   microToolsShipped?: number;
+  roadmap?: {
+    autoPromote?: boolean;
+    autoApprove?: boolean;
+    autoShip?: boolean;
+  };
 };
 
 type PreviewResponse = {
@@ -201,6 +207,66 @@ export default function OrbitIfmPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] });
     },
+  });
+
+  const rescoreRoadmap = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap/rescore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] }),
+  });
+
+  const approveRoadmap = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] }),
+  });
+
+  const shipRoadmap = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap/ship`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] }),
+  });
+
+  const patchRoadmapConfig = useMutation({
+    mutationFn: async (patch: { autoPromote?: boolean; autoApprove?: boolean; autoShip?: boolean }) => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/roadmap`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orbit-roadmap", projectId] }),
   });
 
   const roadmapQuery = useQuery<RoadmapResponse>({
@@ -337,6 +403,42 @@ export default function OrbitIfmPage() {
             )}
             Feed roadmap
           </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || rescoreRoadmap.isPending}
+            onClick={() => rescoreRoadmap.mutate()}
+          >
+            {rescoreRoadmap.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trophy className="mr-2 h-4 w-4" />
+            )}
+            Rescore roadmap
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || approveRoadmap.isPending}
+            onClick={() => approveRoadmap.mutate()}
+          >
+            {approveRoadmap.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+            )}
+            Approve queue
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || shipRoadmap.isPending}
+            onClick={() => shipRoadmap.mutate()}
+          >
+            {shipRoadmap.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Package className="mr-2 h-4 w-4" />
+            )}
+            Ship products
+          </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/dashboard/orbit/matrix">
               <Rocket className="mr-2 h-4 w-4" />
@@ -460,7 +562,7 @@ export default function OrbitIfmPage() {
         </Card>
       ) : null}
 
-      {(feedRoadmap.data || roadmapQuery.data?.items?.length) ? (
+      {projectId.trim() && (roadmapQuery.data?.items?.length || feedRoadmap.data) ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -468,10 +570,29 @@ export default function OrbitIfmPage() {
               Product roadmap feed
             </CardTitle>
             <CardDescription>
-              IFM winners promoted to the product roadmap with micro-tool shipping.
+              Proposed → approved → shipped. Micro-tools embed on promote; approval generates product specs; ship publishes fusion tools.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
+            {roadmapQuery.data?.roadmap ? (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {(["autoPromote", "autoApprove", "autoShip"] as const).map((key) => (
+                  <Button
+                    key={key}
+                    size="sm"
+                    variant={roadmapQuery.data?.roadmap?.[key] ? "default" : "outline"}
+                    disabled={!projectId.trim() || patchRoadmapConfig.isPending}
+                    onClick={() =>
+                      patchRoadmapConfig.mutate({
+                        [key]: !roadmapQuery.data?.roadmap?.[key],
+                      })
+                    }
+                  >
+                    {key.replace("auto", "Auto ")}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
             {feedRoadmap.data ? (
               <p className="text-sm text-green-600">
                 Promoted {feedRoadmap.data.promoted ?? 0} item(s)
@@ -481,14 +602,19 @@ export default function OrbitIfmPage() {
               </p>
             ) : null}
             {(roadmapQuery.data?.items ?? []).slice(0, 10).map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+              <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-sm">
                 <span>{item.fusionTitle}</span>
-                <span className="flex items-center gap-2 text-muted-foreground">
+                <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
                   {item.score}/100
                   {item.sessions7d != null ? ` · ${item.sessions7d} sessions` : ""}
                   <Badge variant="outline">{item.status}</Badge>
                   {item.microToolShipped ? (
                     <Badge variant="secondary">micro-tool</Badge>
+                  ) : null}
+                  {item.productUrl ? (
+                    <Link href={item.productUrl} className="text-[#5B8DA8] hover:underline text-xs">
+                      fusion tool
+                    </Link>
                   ) : null}
                 </span>
               </div>

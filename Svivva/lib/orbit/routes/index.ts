@@ -26,7 +26,7 @@ export {
 export { runFusionStep, type FusionStepResult } from "./run-fusion-step";
 export { resolveFusionRunStep, FUSION_TASK_RUN_STEPS } from "./fusion-task-map";
 export { buildHybridSceneDestinations } from "./hybrid-route-scenes";
-export { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE, IFM_ROADMAP_ROUTE_SCENE, getIfmRouteScene, getIfmCompoundRouteScene, getIfmRoadmapRouteScene } from "./ifm-route-scenes";
+export { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE, IFM_ROADMAP_ROUTE_SCENE, IFM_PRODUCT_SHIP_ROUTE_SCENE, getIfmRouteScene, getIfmCompoundRouteScene, getIfmRoadmapRouteScene, getIfmProductShipRouteScene } from "./ifm-route-scenes";
 export {
   OAAS_GROWTH_MATRIX,
   getSceneMatrix,

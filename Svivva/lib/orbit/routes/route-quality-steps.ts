@@ -65,6 +65,18 @@ export async function runQualityGateStep(
     }
   }
 
+  if (config.requireFusionProducts === true && ctx.projectId) {
+    const { getOrbitProjectById } = await import("../ingest");
+    const { parseRoadmapConfig } = await import("../roadmap/roadmap-repository");
+    const project = await getOrbitProjectById(ctx.projectId, ctx.userId);
+    const shipped = (parseRoadmapConfig(project?.metadata as Record<string, unknown>).items ?? []).filter(
+      (i) => i.status === "shipped" && i.productUrl,
+    );
+    if (shipped.length === 0) {
+      issues.push("No shipped fusion products — run roadmap_product_ship first");
+    }
+  }
+
   const strict = config.strict !== false;
   if (issues.length && strict) {
     throw new Error(issues.join("; "));

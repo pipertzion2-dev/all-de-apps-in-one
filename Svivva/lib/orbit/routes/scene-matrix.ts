@@ -1,5 +1,5 @@
 import { getRouteTemplate, getHybridRouteSceneByStrategy } from "./route-templates";
-import { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE, IFM_ROADMAP_ROUTE_SCENE } from "./ifm-route-scenes";
+import { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE, IFM_ROADMAP_ROUTE_SCENE, IFM_PRODUCT_SHIP_ROUTE_SCENE } from "./ifm-route-scenes";
 import { createOrbitRoute, listOrbitRoutesForProject } from "./route-repository";
 import { runOrbitRoute } from "./route-runner";
 import type { RouteRunResult } from "./route-types";
@@ -35,6 +35,11 @@ export const OAAS_GROWTH_MATRIX: SceneMatrix = {
       id: "roadmap_feed",
       templateId: "ifm_roadmap_weekly",
       label: "IFM roadmap feed",
+    },
+    {
+      id: "product_ship",
+      templateId: "ifm_product_ship_weekly",
+      label: "IFM product ship",
     },
     {
       id: "aeo",
@@ -116,7 +121,9 @@ export async function runSceneMatrixForProject(
                 ? { type: "ifm_compound" }
                 : entry.templateId === IFM_ROADMAP_ROUTE_SCENE.id
                   ? { type: "ifm_roadmap" }
-                  : { type: "core", templateId: entry.templateId },
+                  : entry.templateId === IFM_PRODUCT_SHIP_ROUTE_SCENE.id
+                    ? { type: "ifm_product_ship" }
+                    : { type: "core", templateId: entry.templateId },
         },
       });
       output.routesCreated += 1;

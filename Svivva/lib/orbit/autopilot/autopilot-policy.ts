@@ -38,6 +38,13 @@ export function canAutoApplyRecommendation(input: {
     return { ok: false, reason: "promote_to_roadmap_requires_autonomous_medium_plus" };
   }
 
+  if (
+    (input.kind === "approve_roadmap_item" || input.kind === "ship_roadmap_to_product") &&
+    (input.campaignMode !== "autonomous" || input.priority === "low")
+  ) {
+    return { ok: false, reason: `${input.kind}_requires_autonomous_medium_plus` };
+  }
+
   const allowed = AUTOPILOT_KINDS_BY_MODE[input.campaignMode] || [];
   if (!allowed.includes(input.kind)) {
     return { ok: false, reason: `mode_${input.campaignMode}_blocks_${input.kind}` };

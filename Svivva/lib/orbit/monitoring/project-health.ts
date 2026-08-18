@@ -37,6 +37,9 @@ export type ProjectHealthSnapshot = {
     enabled: boolean;
     winners: number;
     roadmapBacklog: number;
+    roadmapProposed?: number;
+    roadmapApproved?: number;
+    roadmapShipped?: number;
     staleCompoundDays?: number;
   };
 };
@@ -154,9 +157,11 @@ export async function buildProjectHealthSnapshot(
   const ifmConfig = parseIfmConfig(meta);
   const roadmapConfig = parseRoadmapConfig(meta);
   const ifmWinners = (ifmConfig.pairings ?? []).filter((p) => p.status === "winner").length;
-  const roadmapBacklog = (roadmapConfig.items ?? []).filter(
-    (i) => i.status === "proposed" || i.status === "approved",
-  ).length;
+  const roadmapItems = roadmapConfig.items ?? [];
+  const roadmapProposed = roadmapItems.filter((i) => i.status === "proposed").length;
+  const roadmapApproved = roadmapItems.filter((i) => i.status === "approved").length;
+  const roadmapShipped = roadmapItems.filter((i) => i.status === "shipped").length;
+  const roadmapBacklog = roadmapProposed + roadmapApproved;
 
   if (ifmConfig.enabled && ifmWinners > 0 && roadmapBacklog === 0) {
     alerts.push({
@@ -164,6 +169,27 @@ export async function buildProjectHealthSnapshot(
       code: "ifm_winners_not_on_roadmap",
       message: `${ifmWinners} IFM winner(s) not yet promoted to product roadmap`,
     });
+  }
+
+  if (ifmConfig.enabled && roadmapApproved > 0 && roadmapShipped === 0) {
+    alerts.push({
+      level: "info",
+      code: "approved_roadmap_not_shipped",
+      message: `${roadmapApproved} approved roadmap item(s) not yet shipped as fusion products`,
+    });
+  }
+
+  if (ifmConfig.enabled && roadmapProposed > 0) {
+    const awaitingMicro = roadmapItems.filter(
+      (i) => i.status === "proposed" && !i.microToolShipped,
+    ).length;
+    if (awaitingMicro > 0) {
+      alerts.push({
+        level: "info",
+        code: "roadmap_awaiting_approval",
+        message: `${awaitingMicro} roadmap item(s) awaiting micro-tool embed before approval`,
+      });
+    }
   }
 
   if (ifmConfig.enabled && ifmConfig.lastCompoundedAt) {
@@ -220,6 +246,9 @@ export async function buildProjectHealthSnapshot(
       enabled: ifmConfig.enabled ?? false,
       winners: ifmWinners,
       roadmapBacklog,
+      roadmapProposed,
+      roadmapApproved,
+      roadmapShipped,
       staleCompoundDays: ifmConfig.lastCompoundedAt
         ? Math.floor(
             (Date.now() - new Date(ifmConfig.lastCompoundedAt).getTime()) / MS_DAY,

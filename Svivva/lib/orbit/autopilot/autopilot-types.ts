@@ -57,6 +57,8 @@ export const AUTOPILOT_KINDS_BY_MODE: Record<
     "prune_ifm_pair",
     "expand_ifm_pair",
     "promote_to_roadmap",
+    "approve_roadmap_item",
+    "ship_roadmap_to_product",
   ],
 };
 

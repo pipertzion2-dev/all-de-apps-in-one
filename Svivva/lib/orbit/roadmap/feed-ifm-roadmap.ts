@@ -36,7 +36,6 @@ export async function feedIfmWinnersToRoadmap(
       if (roadmapItem) {
         await updateRoadmapItem(projectId, userId, roadmapItem.id, {
           microToolShipped: true,
-          status: "approved",
         });
       }
     }

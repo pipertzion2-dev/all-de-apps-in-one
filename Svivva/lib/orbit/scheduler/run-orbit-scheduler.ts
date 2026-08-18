@@ -133,6 +133,10 @@ export async function runOrbitScheduler(
           const roadmapConfig = (meta.roadmap || {}) as {
             autoPromote?: boolean;
             lastPromotedAt?: string;
+            autoApprove?: boolean;
+            lastApprovedAt?: string;
+            autoShip?: boolean;
+            lastShippedAt?: string;
           };
           const lastPromoted = roadmapConfig.lastPromotedAt
             ? new Date(roadmapConfig.lastPromotedAt).getTime()
@@ -147,6 +151,30 @@ export async function runOrbitScheduler(
               ...(result.ifm || {}),
               roadmapPromoted: feed.promoted,
               microToolsShipped: feed.microToolsShipped,
+            };
+          }
+
+          const lastApproved = roadmapConfig.lastApprovedAt
+            ? new Date(roadmapConfig.lastApprovedAt).getTime()
+            : 0;
+          if (roadmapConfig.autoApprove && now - lastApproved >= weekMs) {
+            const { approveRoadmapItems } = await import("../roadmap/roadmap-approval");
+            const approved = await approveRoadmapItems(project.id, project.userId, {});
+            result.ifm = {
+              ...(result.ifm || {}),
+              roadmapApproved: approved.approved,
+            };
+          }
+
+          const lastShipped = roadmapConfig.lastShippedAt
+            ? new Date(roadmapConfig.lastShippedAt).getTime()
+            : 0;
+          if (roadmapConfig.autoShip && now - lastShipped >= weekMs) {
+            const { shipApprovedRoadmapItems } = await import("../roadmap/ship-fusion-product");
+            const shipped = await shipApprovedRoadmapItems(project.id, project.userId, {});
+            result.ifm = {
+              ...(result.ifm || {}),
+              fusionProductsShipped: shipped.shipped,
             };
           }
         }

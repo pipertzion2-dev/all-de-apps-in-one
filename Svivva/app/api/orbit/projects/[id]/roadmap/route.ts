@@ -81,7 +81,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   const { id: projectId } = await params;
-  let body: { autoPromote?: boolean; promoteScoreThreshold?: number } = {};
+  let body: {
+    autoPromote?: boolean;
+    promoteScoreThreshold?: number;
+    autoApprove?: boolean;
+    approveScoreThreshold?: number;
+    autoShip?: boolean;
+    shipScoreThreshold?: number;
+    approvalMode?: "manual" | "assisted" | "autonomous";
+  } = {};
   try {
     body = await request.json();
   } catch {

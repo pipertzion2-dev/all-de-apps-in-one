@@ -52,8 +52,26 @@ export function getIfmRouteScene(): RouteTemplate {
 export const IFM_ROADMAP_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "roadmap_promote", order: 1, config: { maxPromote: 3 } },
   { channel: "micro_tool_ship", order: 2 },
-  { channel: "analytics", order: 3 },
+  { channel: "roadmap_approve", order: 3 },
+  { channel: "analytics", order: 4 },
 ];
+
+export const IFM_PRODUCT_SHIP_DESTINATIONS: OrbitRouteDestination[] = [
+  { channel: "roadmap_product_ship", order: 1, config: { maxShip: 2 } },
+  { channel: "quality_gate", order: 2, config: { requireFusionProducts: true } },
+  { channel: "seo_ops_gate", order: 3, config: { minIndexHealthScore: 70 } },
+  { channel: "index_submit", order: 4 },
+  { channel: "analytics", order: 5 },
+];
+
+export const IFM_PRODUCT_SHIP_ROUTE_SCENE: RouteTemplate = {
+  id: "ifm_product_ship_weekly",
+  name: "IFM product ship (weekly)",
+  description:
+    "Ship approved roadmap items as fusion mini-apps, run quality + SEO gates, then index",
+  sourceChannel: "url",
+  destinations: IFM_PRODUCT_SHIP_DESTINATIONS,
+};
 
 export const IFM_ROADMAP_ROUTE_SCENE: RouteTemplate = {
   id: "ifm_roadmap_weekly",
@@ -69,4 +87,8 @@ export function getIfmCompoundRouteScene(): RouteTemplate {
 
 export function getIfmRoadmapRouteScene(): RouteTemplate {
   return IFM_ROADMAP_ROUTE_SCENE;
+}
+
+export function getIfmProductShipRouteScene(): RouteTemplate {
+  return IFM_PRODUCT_SHIP_ROUTE_SCENE;
 }

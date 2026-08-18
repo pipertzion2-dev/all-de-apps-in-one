@@ -198,6 +198,32 @@ function buildTasks(siteUrl: string): TaskDef[] {
       generateType: "reddit-post",
     },
 
+    // ── IFM product roadmap ─────────────────────────────────────────────────
+    {
+      id: "ifm-rescore",
+      label: "Rescore IFM pairings",
+      hint: "Refresh winner scores with GA4 + index signals",
+      type: "manual",
+      category: "IFM",
+      link: `${siteUrl}/dashboard/orbit/ifm`,
+    },
+    {
+      id: "ifm-roadmap",
+      label: "Feed IFM winners to product roadmap",
+      hint: "Promote winners, embed micro-tools, queue for approval",
+      type: "manual",
+      category: "IFM",
+      link: `${siteUrl}/dashboard/orbit/ifm`,
+    },
+    {
+      id: "ifm-ship-fusion",
+      label: "Ship approved fusion products",
+      hint: "Publish /tools/ifm-fusion slices from approved roadmap items",
+      type: "manual",
+      category: "IFM",
+      link: `${siteUrl}/dashboard/orbit/ifm`,
+    },
+
     // ── Manual Publishing ─────────────────────────────────────────────────────
     {
       id: "man-showhn",
