@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/run-scheduled?job=channel-intel",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/run-scheduled?job=orbit",
+      "schedule": "0 * * * *"
     }
   ]
 }
