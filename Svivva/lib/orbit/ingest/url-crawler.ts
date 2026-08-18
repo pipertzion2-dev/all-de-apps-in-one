@@ -11,10 +11,7 @@ function extractMetaContent(html: string, attr: string): string {
   const m =
     html.match(re) ||
     html.match(
-      new RegExp(
-        `<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${attr}["']`,
-        "i",
-      ),
+      new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${attr}["']`, "i"),
     );
   return m?.[1]?.trim() || "";
 }
@@ -48,7 +45,10 @@ function extractHeadings(html: string): string[] {
   const re = /<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
-    const text = m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const text = m[1]
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
     if (text.length >= 3 && text.length <= 200) headings.push(text);
   }
   return headings.slice(0, 24);

@@ -60,10 +60,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "sourceRef is required" }, { status: 400 });
   }
 
-  if (
-    (sourceType === "manual" || sourceType === "campaign") &&
-    !body.manual?.name?.trim()
-  ) {
+  if ((sourceType === "manual" || sourceType === "campaign") && !body.manual?.name?.trim()) {
     return NextResponse.json({ error: "manual.name is required" }, { status: 400 });
   }
 
@@ -117,7 +114,10 @@ export async function GET(req: NextRequest) {
   const sourceRef = req.nextUrl.searchParams.get("sourceRef")?.trim();
 
   if (!sourceType || !isSourceType(sourceType) || !sourceRef) {
-    return NextResponse.json({ error: "sourceType and sourceRef query params required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "sourceType and sourceRef query params required" },
+      { status: 400 },
+    );
   }
 
   const existing = await getExistingOrbitIngest(user.id, sourceType, sourceRef);
