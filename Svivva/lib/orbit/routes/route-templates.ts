@@ -4,16 +4,17 @@ import type { OrbitRouteChannel, OrbitRouteDestination } from "../graph-constant
 export const GROWTH_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "plan", order: 1 },
   { channel: "generate", order: 2, config: { templateOnly: true } },
-  { channel: "index_submit", order: 3 },
-  { channel: "distribute", order: 4, config: { processNow: false } },
-  { channel: "analytics", order: 5 },
+  { channel: "approval", order: 3 },
+  { channel: "index_submit", order: 4 },
+  { channel: "distribute", order: 5, config: { processNow: false, failIfUnapproved: true } },
+  { channel: "analytics", order: 6 },
 ];
 
 /** Full pipeline including ingest for new sources. */
 export const FULL_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "ingest", order: 1 },
   ...GROWTH_PIPELINE_DESTINATIONS.map((d) => ({ ...d, order: d.order + 1 })),
-  { channel: "autopilot", order: 7, config: { force: true } },
+  { channel: "autopilot", order: 8, config: { force: true } },
 ];
 
 export type RouteTemplate = {
@@ -61,6 +62,7 @@ export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
     value === "ingest" ||
     value === "plan" ||
     value === "generate" ||
+    value === "approval" ||
     value === "index_submit" ||
     value === "distribute" ||
     value === "analytics" ||

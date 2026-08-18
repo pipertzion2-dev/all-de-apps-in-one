@@ -20,6 +20,7 @@ describe("validateRouteDestinations", () => {
 
   it("accepts valid growth pipeline", () => {
     expect(validateRouteDestinations(GROWTH_PIPELINE_DESTINATIONS).ok).toBe(true);
+    expect(GROWTH_PIPELINE_DESTINATIONS.length).toBe(6);
   });
 });
 
@@ -37,7 +38,7 @@ describe("sortDestinations", () => {
 describe("route templates", () => {
   it("includes growth pipeline template", () => {
     const template = getRouteTemplate("growth_pipeline");
-    expect(template?.destinations.length).toBe(5);
-    expect(template?.destinations[0].channel).toBe("plan");
+    expect(template?.destinations.length).toBe(6);
+    expect(template?.destinations.some((d) => d.channel === "approval")).toBe(true);
   });
 });

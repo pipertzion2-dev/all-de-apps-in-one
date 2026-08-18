@@ -14,7 +14,14 @@ export {
   getOrbitCampaignById,
   updateCampaignStatus,
   updateCampaignApprovalPolicy,
+  updateCampaignSchedule,
 } from "./campaign-repository";
+export {
+  isCampaignInWindow,
+  assertCampaignInWindow,
+  deriveCampaignSchedule,
+  CampaignWindowError,
+} from "./campaign-scheduler";
 export {
   DEFAULT_APPROVAL_POLICY,
   normalizeApprovalPolicy,

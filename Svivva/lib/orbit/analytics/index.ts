@@ -28,4 +28,5 @@ export {
 } from "./recommendation-engine";
 export { applyRecommendation } from "./apply-recommendation";
 export { processProjectAnalytics, type ProcessAnalyticsResult } from "./run-analytics-process";
-export { syncExternalSignalsForProject, ingestExternalMetrics } from "./external-signals";
+export { syncExternalSignalsForProject, ingestExternalMetrics, updateExternalAnalyticsConfig } from "./external-signals";
+export { pullGa4MetricsForProject } from "./ga4-data-api";

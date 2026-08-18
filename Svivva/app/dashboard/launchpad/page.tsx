@@ -58,6 +58,7 @@ import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
+import { OrbitRoutesPanel } from "@/components/orbit/orbit-routes-panel";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
@@ -4580,6 +4581,7 @@ export default function LaunchpadPage() {
                   orbitStatus={orbitStatus as Record<string, unknown> | undefined}
                   stepStatuses={statuses}
                 />
+                <OrbitRoutesPanel />
                 <OrbitAdminMissionBoard
                   stepStatuses={statuses}
                   orbitStatus={orbitStatus as Record<string, unknown> | undefined}

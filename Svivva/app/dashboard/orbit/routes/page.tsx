@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, GitBranch } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, RefreshCw } from "lucide-react";
 
 type OrbitRouteRow = {
   id: string;
@@ -22,12 +22,30 @@ type OrbitRouteRow = {
 };
 
 export default function OrbitRoutesPage() {
+  const qc = useQueryClient();
   const { data, isLoading, error } = useQuery<{ routes: OrbitRouteRow[]; templates?: unknown[] }>({
     queryKey: ["orbit-routes"],
     queryFn: async () => {
       const r = await authFetch("/api/orbit/routes?templates=1");
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
+    },
+  });
+
+  const syncWorkspace = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch("/api/orbit/workspace/sync-routes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ createRoutes: true }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-routes"] });
+      qc.invalidateQueries({ queryKey: ["orbit-routes-panel"] });
     },
   });
 
@@ -52,10 +70,32 @@ export default function OrbitRoutesPage() {
             Patch-bay workflows chaining ingest → plan → generate → index → distribute → analytics.
           </p>
         </div>
-        <Button asChild size="sm">
-          <Link href="/dashboard/orbit/routes/new">Create route</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={syncWorkspace.isPending}
+            onClick={() => syncWorkspace.mutate()}
+          >
+            {syncWorkspace.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Sync workspace
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/dashboard/orbit/routes/new">Create route</Link>
+          </Button>
+        </div>
       </div>
+
+      {syncWorkspace.data ? (
+        <p className="text-sm text-muted-foreground">
+          Synced {syncWorkspace.data.routesCreated ?? 0} route(s) from{" "}
+          {syncWorkspace.data.ingested ?? 0} ingested project(s).
+        </p>
+      ) : null}
 
       {isLoading ? (
         <div className="space-y-3">

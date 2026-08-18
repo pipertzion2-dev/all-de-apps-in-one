@@ -121,6 +121,7 @@ export async function enqueueCampaignDistribution(
       }
     } catch (e) {
       if (e instanceof DistributionPolicyError) {
+        if (input.strict) throw e;
         result.skipped += 1;
         continue;
       }

@@ -36,6 +36,8 @@ export type EnqueueDistributionInput = {
   userId: string;
   assetIds?: string[];
   processNow?: boolean;
+  /** When true, policy blocks throw instead of silently skipping assets. */
+  strict?: boolean;
 };
 
 export type EnqueueDistributionResult = {

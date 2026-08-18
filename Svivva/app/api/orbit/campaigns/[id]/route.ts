@@ -5,7 +5,9 @@ import {
   getOrbitCampaignById,
   updateCampaignApprovalPolicy,
   updateCampaignMode,
+  updateCampaignSchedule,
 } from "@/lib/orbit/campaign/campaign-repository";
+import { deriveCampaignSchedule } from "@/lib/orbit/campaign/campaign-scheduler";
 import {
   normalizeApprovalPolicy,
   validateApprovalPolicy,
@@ -48,11 +50,30 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
   }
 
-  let body: { approvalPolicy?: Partial<OrbitApprovalPolicy>; mode?: OrbitCampaignMode } = {};
+  let body: {
+    approvalPolicy?: Partial<OrbitApprovalPolicy>;
+    mode?: OrbitCampaignMode;
+    startsAt?: string | null;
+    endsAt?: string | null;
+    durationDays?: number;
+  } = {};
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (body.startsAt !== undefined || body.endsAt !== undefined || body.durationDays !== undefined) {
+    const schedule = deriveCampaignSchedule({
+      startsAt: body.startsAt ?? existing.startsAt,
+      endsAt: body.endsAt ?? existing.endsAt,
+      durationDays: body.durationDays,
+    });
+    if (schedule.startsAt && schedule.endsAt && schedule.startsAt >= schedule.endsAt) {
+      return NextResponse.json({ error: "startsAt must be before endsAt" }, { status: 400 });
+    }
+    const campaign = await updateCampaignSchedule(id, user!.id, schedule);
+    return NextResponse.json({ ok: true, campaign });
   }
 
   if (body.mode) {

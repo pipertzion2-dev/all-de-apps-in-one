@@ -50,7 +50,11 @@ export async function runOrbitScheduler(
       };
 
       try {
-        result.externalSignals = await syncExternalSignalsForProject(project.id, project.userId);
+        const { pullGa4MetricsForProject } = await import("../analytics/ga4-data-api");
+        result.externalSignals = {
+          ...(await syncExternalSignalsForProject(project.id, project.userId)),
+          ga4: await pullGa4MetricsForProject(project.id, project.userId),
+        };
         result.analytics = await processProjectAnalytics(project.id, project.userId);
 
         const autopilotConfig = parseAutopilotConfig(meta);

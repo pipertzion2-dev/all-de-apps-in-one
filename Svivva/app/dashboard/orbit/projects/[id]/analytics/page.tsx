@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Loader2, RefreshCw, Sparkles, X, Bot, Activity } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 type AnalyticsSummary = {
   projectId: string;
@@ -65,7 +67,9 @@ export default function OrbitProjectAnalyticsPage() {
   const projectId = String(params.id);
   const qc = useQueryClient();
 
-  const projectQuery = useQuery<{ project: { id: string; name: string } }>({
+  const projectQuery = useQuery<{
+    project: { id: string; name: string; metadata?: Record<string, unknown> };
+  }>({
     queryKey: ["orbit-project", projectId],
     queryFn: async () => {
       const r = await authFetch(`/api/orbit/projects/${projectId}`);
@@ -185,6 +189,48 @@ export default function OrbitProjectAnalyticsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orbit-autopilot", projectId] });
       qc.invalidateQueries({ queryKey: ["orbit-recommendations", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-analytics-summary", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-analytics-timeline", projectId] });
+    },
+  });
+
+  const externalAnalytics = (
+    projectQuery.data?.project?.metadata?.externalAnalytics as
+      | { ga4PropertyId?: string; lastSyncedAt?: string }
+      | undefined
+  );
+  const [ga4Draft, setGa4Draft] = useState<string | null>(null);
+  const ga4PropertyId = ga4Draft ?? externalAnalytics?.ga4PropertyId ?? "";
+
+  const saveGa4Property = useMutation({
+    mutationFn: async (propertyId: string) => {
+      const r = await authFetch(`/api/orbit/projects/${projectId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ga4PropertyId: propertyId }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      setGa4Draft(null);
+      qc.invalidateQueries({ queryKey: ["orbit-project", projectId] });
+    },
+  });
+
+  const syncGa4 = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch(`/api/orbit/projects/${projectId}/analytics/ga4-sync`, {
+        method: "POST",
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || data.reason || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-project-health", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-project", projectId] });
       qc.invalidateQueries({ queryKey: ["orbit-analytics-summary", projectId] });
       qc.invalidateQueries({ queryKey: ["orbit-analytics-timeline", projectId] });
     },
@@ -312,6 +358,64 @@ export default function OrbitProjectAnalyticsPage() {
           </Card>
         </div>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">GA4 external sync</CardTitle>
+          <CardDescription>
+            Pull 7-day sessions and conversions via the Analytics Data API (requires service account in
+            launchpad credentials).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[200px] flex-1 space-y-1">
+              <Label htmlFor="ga4-property-id">GA4 property ID</Label>
+              <Input
+                id="ga4-property-id"
+                placeholder="123456789"
+                value={ga4PropertyId}
+                onChange={(e) => setGa4Draft(e.target.value)}
+              />
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={saveGa4Property.isPending}
+              onClick={() => saveGa4Property.mutate(ga4PropertyId)}
+            >
+              Save
+            </Button>
+            <Button
+              size="sm"
+              disabled={syncGa4.isPending || !ga4PropertyId.trim()}
+              onClick={() => syncGa4.mutate()}
+            >
+              {syncGa4.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Sync now
+            </Button>
+          </div>
+          {externalAnalytics?.lastSyncedAt ? (
+            <p className="text-xs text-muted-foreground">
+              Last synced: {new Date(externalAnalytics.lastSyncedAt).toLocaleString()}
+            </p>
+          ) : null}
+          {syncGa4.data?.skipped ? (
+            <p className="text-sm text-amber-600">
+              Sync skipped: {syncGa4.data.reason || "credentials or property not configured"}
+            </p>
+          ) : syncGa4.data?.ok ? (
+            <p className="text-sm text-green-600">
+              Synced {syncGa4.data.sessions7d ?? 0} sessions / {syncGa4.data.conversions7d ?? 0}{" "}
+              conversions (7d)
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -20,6 +20,8 @@ export type CreateCampaignInput = {
   sourceRef?: string;
   plan: CampaignPlan;
   approvalPolicy?: OrbitApprovalPolicy;
+  startsAt?: Date;
+  endsAt?: Date;
 };
 
 export async function createOrbitCampaign(input: CreateCampaignInput): Promise<OrbitCampaign> {
@@ -38,6 +40,8 @@ export async function createOrbitCampaign(input: CreateCampaignInput): Promise<O
       sourceRef: input.sourceRef,
       planSnapshot: input.plan,
       approvalPolicy: input.approvalPolicy || { requireApprovalForPublish: true },
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
       metadata: {
         plannedAssetCount: input.plan.phases.reduce((n, p) => n + p.assets.length, 0),
         planVersion: input.plan.version,
@@ -120,6 +124,23 @@ export async function updateCampaignMode(
   const [row] = await db
     .update(orbitCampaigns)
     .set({ mode, updatedAt: new Date() })
+    .where(and(eq(orbitCampaigns.id, campaignId), eq(orbitCampaigns.userId, userId)))
+    .returning();
+  return row;
+}
+
+export async function updateCampaignSchedule(
+  campaignId: string,
+  userId: string,
+  schedule: { startsAt?: Date | null; endsAt?: Date | null },
+): Promise<OrbitCampaign | undefined> {
+  const [row] = await db
+    .update(orbitCampaigns)
+    .set({
+      startsAt: schedule.startsAt ?? undefined,
+      endsAt: schedule.endsAt ?? undefined,
+      updatedAt: new Date(),
+    })
     .where(and(eq(orbitCampaigns.id, campaignId), eq(orbitCampaigns.userId, userId)))
     .returning();
   return row;

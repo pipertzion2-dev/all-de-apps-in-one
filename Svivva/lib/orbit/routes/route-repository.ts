@@ -130,3 +130,54 @@ export async function completeRouteRun(
     .returning();
   return row;
 }
+
+type RoutePauseState = {
+  fromOrder: number;
+  runId: string;
+  context: { projectId?: string; campaignId?: string };
+  reason: string;
+};
+
+export function getRoutePauseState(route: {
+  metadata?: Record<string, unknown> | null;
+}): RoutePauseState | null {
+  const raw = route.metadata?.pausedRun;
+  if (!raw || typeof raw !== "object") return null;
+  return raw as RoutePauseState;
+}
+
+export async function saveRoutePauseState(
+  routeId: string,
+  userId: string,
+  pause: RoutePauseState,
+): Promise<OrbitRoute | undefined> {
+  const route = await getOrbitRouteById(routeId, userId);
+  if (!route) return undefined;
+  const meta = (route.metadata || {}) as Record<string, unknown>;
+  const [row] = await db
+    .update(orbitRoutes)
+    .set({
+      status: "paused",
+      metadata: { ...meta, pausedRun: pause },
+      updatedAt: new Date(),
+    })
+    .where(and(eq(orbitRoutes.id, routeId), eq(orbitRoutes.userId, userId)))
+    .returning();
+  return row;
+}
+
+export async function clearRoutePauseState(
+  routeId: string,
+  userId: string,
+): Promise<OrbitRoute | undefined> {
+  const route = await getOrbitRouteById(routeId, userId);
+  if (!route) return undefined;
+  const meta = { ...(route.metadata as Record<string, unknown>) };
+  delete meta.pausedRun;
+  const [row] = await db
+    .update(orbitRoutes)
+    .set({ metadata: meta, updatedAt: new Date() })
+    .where(and(eq(orbitRoutes.id, routeId), eq(orbitRoutes.userId, userId)))
+    .returning();
+  return row;
+}

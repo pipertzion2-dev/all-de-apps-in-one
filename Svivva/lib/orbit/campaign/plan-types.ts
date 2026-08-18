@@ -45,6 +45,9 @@ export type PlanCampaignInput = {
   mode?: "manual" | "assisted" | "autonomous";
   sourceChannel?: string;
   approvalPolicy?: OrbitApprovalPolicy;
+  startsAt?: Date | string;
+  endsAt?: Date | string;
+  durationDays?: number;
   /** Limit planned assets (default 24) */
   maxAssets?: number;
 };

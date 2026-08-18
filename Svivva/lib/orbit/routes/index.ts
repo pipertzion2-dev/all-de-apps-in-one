@@ -27,6 +27,21 @@ export {
   deleteOrbitRoute,
   markRouteRunning,
   completeRouteRun,
+  getRoutePauseState,
+  saveRoutePauseState,
+  clearRoutePauseState,
 } from "./route-repository";
 
+export {
+  computeRouteRetryDelay,
+  shouldRetryStep,
+} from "./route-retry";
+
+export {
+  checkRouteApprovalGate,
+  assertRouteApprovalGate,
+  RouteAwaitingApprovalError,
+} from "./route-approval";
+
 export { runOrbitRoute, runActiveOrbitRoutes } from "./route-runner";
+export type { RunOrbitRouteOptions } from "./route-types";

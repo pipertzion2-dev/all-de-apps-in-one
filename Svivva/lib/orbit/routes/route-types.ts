@@ -32,16 +32,23 @@ export type RouteStepResult = {
   ok: boolean;
   result?: unknown;
   error?: string;
+  skippedReason?: string;
+  attempts?: number;
   durationMs: number;
 };
 
 export type RouteRunResult = {
   routeId: string;
-  status: "completed" | "failed";
+  status: "completed" | "failed" | "paused";
   projectId?: string;
   campaignId?: string;
   steps: RouteStepResult[];
   error?: string;
+  pausedReason?: string;
+};
+
+export type RunOrbitRouteOptions = {
+  resume?: boolean;
 };
 
 export function sortDestinations(destinations: OrbitRouteDestination[]): OrbitRouteDestination[] {

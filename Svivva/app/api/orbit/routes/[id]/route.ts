@@ -51,6 +51,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     sourceRef?: string;
     destinations?: Array<{ channel: string; order: number; config?: Record<string, unknown> }>;
     status?: string;
+    retryPolicy?: { maxAttempts?: number; backoffMs?: number };
   } = {};
 
   try {

@@ -19,6 +19,29 @@ export type ExternalMetricsInput = {
   previousSessions7d?: number;
 };
 
+export async function updateExternalAnalyticsConfig(
+  projectId: string,
+  userId: string,
+  patch: Partial<OrbitExternalAnalyticsConfig>,
+): Promise<OrbitExternalAnalyticsConfig> {
+  const project = await getOrbitProjectById(projectId, userId);
+  if (!project) throw new Error("Orbit project not found");
+
+  const meta = (project.metadata || {}) as Record<string, unknown>;
+  const current = parseExternalAnalyticsConfig(meta);
+  const next: OrbitExternalAnalyticsConfig = { ...current, ...patch };
+
+  await db
+    .update(orbitProjects)
+    .set({
+      metadata: { ...meta, externalAnalytics: next },
+      updatedAt: new Date(),
+    })
+    .where(and(eq(orbitProjects.id, projectId), eq(orbitProjects.userId, userId)));
+
+  return next;
+}
+
 export async function ingestExternalMetrics(
   projectId: string,
   userId: string,

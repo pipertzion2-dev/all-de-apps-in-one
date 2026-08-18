@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
     destinations?: Array<{ channel: string; order: number; config?: Record<string, unknown> }>;
     status?: string;
     templateId?: string;
+    retryPolicy?: { maxAttempts?: number; backoffMs?: number };
   } = {};
 
   try {
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
       sourceRef: body.sourceRef,
       destinations,
       status: status as (typeof ORBIT_ROUTE_STATUSES)[number],
+      retryPolicy: body.retryPolicy,
     });
     return NextResponse.json({ ok: true, route });
   } catch (e) {

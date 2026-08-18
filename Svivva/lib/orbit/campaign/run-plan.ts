@@ -2,6 +2,7 @@ import { getOrbitProjectById, getOrbitGraph } from "@/lib/orbit/ingest";
 import { buildCampaignPlanFromGraph, countPlannedAssets, graphContextFromProject } from "./planner";
 import { createOrbitCampaign } from "./campaign-repository";
 import { normalizeApprovalPolicy } from "./approval-policy";
+import { deriveCampaignSchedule } from "./campaign-scheduler";
 import type { PlanCampaignInput, CampaignPlan } from "./plan-types";
 import type { OrbitCampaign } from "@/lib/orbit/schema";
 
@@ -33,6 +34,12 @@ export async function planCampaignForProject(
   const ctx = graphContextFromProject(project, graph.entities);
   const plan = buildCampaignPlanFromGraph(ctx, input);
 
+  const schedule = deriveCampaignSchedule({
+    startsAt: input.startsAt,
+    endsAt: input.endsAt,
+    durationDays: input.durationDays ?? 30,
+  });
+
   const campaign = await createOrbitCampaign({
     orbitProjectId: projectId,
     userId,
@@ -46,6 +53,8 @@ export async function planCampaignForProject(
     approvalPolicy: input.approvalPolicy
       ? normalizeApprovalPolicy(input.approvalPolicy)
       : undefined,
+    startsAt: schedule.startsAt,
+    endsAt: schedule.endsAt,
   });
 
   return {

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Loader2, Play } from "lucide-react";
+import { ArrowLeft, Loader2, Play, RotateCcw } from "lucide-react";
 
 type RouteDetail = {
   id: string;
@@ -20,7 +20,10 @@ type RouteDetail = {
   status: string;
   destinations: Array<{ channel: string; order: number; config?: Record<string, unknown> }>;
   lastRunAt?: string | null;
-  lastRunResult?: { steps?: Array<{ channel: string; ok: boolean; error?: string }> } | null;
+  lastRunResult?: {
+    steps?: Array<{ channel: string; ok: boolean; error?: string }>;
+    pausedReason?: string;
+  } | null;
   lastError?: string | null;
 };
 
@@ -41,6 +44,19 @@ export default function OrbitRouteDetailPage() {
   const runRoute = useMutation({
     mutationFn: async () => {
       const r = await authFetch(`/api/orbit/routes/${routeId}/run`, { method: "POST" });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-route", routeId] });
+      qc.invalidateQueries({ queryKey: ["orbit-routes"] });
+    },
+  });
+
+  const resumeRoute = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch(`/api/orbit/routes/${routeId}/resume`, { method: "POST" });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
       return data;
@@ -79,15 +95,35 @@ export default function OrbitRouteDetailPage() {
                 <p className="mt-2 text-muted-foreground">{route.description}</p>
               ) : null}
             </div>
-            <Button disabled={runRoute.isPending} onClick={() => runRoute.mutate()}>
-              {runRoute.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <div className="flex flex-wrap gap-2">
+              {route.status === "paused" ? (
+                <Button
+                  disabled={resumeRoute.isPending}
+                  onClick={() => resumeRoute.mutate()}
+                >
+                  {resumeRoute.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                  )}
+                  Resume route
+                </Button>
               ) : (
-                <Play className="mr-2 h-4 w-4" />
+                <Button disabled={runRoute.isPending} onClick={() => runRoute.mutate()}>
+                  {runRoute.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Play className="mr-2 h-4 w-4" />
+                  )}
+                  Run route
+                </Button>
               )}
-              Run route
-            </Button>
+            </div>
           </div>
+
+          {route.status === "paused" && route.lastRunResult?.pausedReason ? (
+            <p className="text-sm text-amber-600">{route.lastRunResult.pausedReason}</p>
+          ) : null}
 
           {route.orbitProjectId ? (
             <p className="text-sm">
@@ -149,14 +185,14 @@ export default function OrbitRouteDetailPage() {
             </Card>
           )}
 
-          {runRoute.data ? (
+          {runRoute.data || resumeRoute.data ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Run result</CardTitle>
               </CardHeader>
               <CardContent>
                 <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
-                  {JSON.stringify(runRoute.data, null, 2)}
+                  {JSON.stringify(runRoute.data || resumeRoute.data, null, 2)}
                 </pre>
               </CardContent>
             </Card>
