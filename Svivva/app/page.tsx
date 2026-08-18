@@ -496,7 +496,7 @@ export default function LandingPage() {
         </section>
 
         <div className="relative overflow-hidden border-b border-[#5B8DA8]/20">
-          {/* Camo + water + flowers — full OaaS scroll through transition spacer */}
+          {/* Camo + metallic water + flowers — OaaS through transition, stops before BUILD */}
           <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0">
             <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
           </div>
