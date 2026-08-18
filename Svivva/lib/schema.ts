@@ -1715,5 +1715,26 @@ export const referralCampaigns = pgTable("referral_campaigns", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// ============================================================================
+// PLATFORM LEDGER (admin piggy bank — revenue tracking without Stripe sync)
+// ============================================================================
+export const platformLedgerEntries = pgTable("platform_ledger_entries", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  /** Positive = money in, negative = money out (cents). */
+  amountCents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("usd"),
+  /** income | expense | adjustment */
+  type: text("type").notNull(),
+  category: text("category"),
+  description: text("description"),
+  /** manual | stripe | referral | marketplace */
+  source: text("source").notNull().default("manual"),
+  /** Stripe charge id, etc. — used to dedupe webhook inserts */
+  externalId: text("external_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export * from "./marketing/schema";
 export * from "./orbit/schema";

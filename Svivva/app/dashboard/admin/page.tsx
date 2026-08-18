@@ -15,7 +15,9 @@ import {
   RefreshCw,
   ExternalLink,
   CreditCard,
+  PiggyBank,
 } from "lucide-react";
+import { AdminPiggyBank } from "@/components/admin-piggy-bank";
 
 interface AdminOverview {
   platform: { totalUsers: number; totalProjects: number; totalApiCalls: number };
@@ -34,6 +36,13 @@ interface AdminOverview {
       created: number;
       description: string | null;
     }[];
+  };
+  piggyBank: {
+    balance: number;
+    totalIncome: number;
+    totalExpenses: number;
+    entryCount: number;
+    available: boolean;
   };
   marketing: {
     campaigns: number;
@@ -101,6 +110,16 @@ export default function AdminOverviewPage() {
   }
 
   const marketingOk = data.marketing.status === "operational";
+  const displayRevenue = data.stripe.available
+    ? data.stripe.lifetimeRevenue
+    : data.piggyBank.available
+      ? data.piggyBank.balance
+      : null;
+  const revenueSource = data.stripe.available
+    ? "Stripe"
+    : data.piggyBank.available
+      ? "Piggy bank"
+      : null;
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
@@ -148,12 +167,14 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {data.stripe.available ? money(data.stripe.lifetimeRevenue) : "—"}
+              {displayRevenue != null ? money(displayRevenue) : "—"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {data.stripe.available
-                ? `${data.stripe.payingCustomers} paying customers`
-                : "Stripe sync not connected"}
+                ? `${data.stripe.payingCustomers} paying customers · Stripe`
+                : data.piggyBank.available
+                  ? `${data.piggyBank.entryCount} ledger entries · ${revenueSource}`
+                  : "Connect Stripe or use piggy bank below"}
             </p>
           </CardContent>
         </Card>
@@ -198,6 +219,18 @@ export default function AdminOverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AdminPiggyBank />
+
+      {!data.stripe.available && data.piggyBank.available && data.piggyBank.entryCount === 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+          <PiggyBank className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <p>
+            Stripe isn&apos;t connected yet. Use the piggy bank above to log payments manually —
+            each sale, refund, or expense — so you always know what the app has made.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
