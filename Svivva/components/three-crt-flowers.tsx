@@ -1019,9 +1019,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
               : isSmallMobile
                 ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
                 : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
-          particleCount: isOaasPreset
-            ? 0
-            : Math.floor(baseConfig.particleCount * 0.2),
+          particleCount: isOaasPreset ? 0 : Math.floor(baseConfig.particleCount * 0.2),
           cameraZ: isOaasPreset
             ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
             : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
@@ -1047,7 +1045,12 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const useCrtPost = !(isOaasPreset && isMediumMobile);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(isOaasPreset && isMediumMobile ? 62 : 55, cameraAspect, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      isOaasPreset && isMediumMobile ? 62 : 55,
+      cameraAspect,
+      0.1,
+      1000,
+    );
     camera.position.set(config.cameraX, config.cameraY, config.cameraZ);
     camera.lookAt(0, config.lookAtY, 0);
 
@@ -1104,7 +1107,12 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     // Metallic water matching Vivva logo
     const waterSegments = isOaasPreset && isMediumMobile ? 28 : 56;
-    const waterGeometry = new THREE.PlaneGeometry(config.waterSize, config.waterSize, waterSegments, waterSegments);
+    const waterGeometry = new THREE.PlaneGeometry(
+      config.waterSize,
+      config.waterSize,
+      waterSegments,
+      waterSegments,
+    );
     const waterMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -1226,8 +1234,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     }
 
     // Extra edge blooms — skip on OaaS mobile to keep the field stable in view
-    const cornerCount =
-      isOaas && isMediumMobile ? 0 : Math.floor(config.flowerCount * 0.3);
+    const cornerCount = isOaas && isMediumMobile ? 0 : Math.floor(config.flowerCount * 0.3);
     const corners = [
       { x: -1, z: -1 },
       { x: 1, z: -1 },
