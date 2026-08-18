@@ -1716,3 +1716,4 @@ export const referralCampaigns = pgTable("referral_campaigns", {
 });
 
 export * from "./marketing/schema";
+export * from "./orbit/schema";
