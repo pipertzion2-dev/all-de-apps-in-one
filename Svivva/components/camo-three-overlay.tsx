@@ -5,6 +5,89 @@ import { ThreeCRTFlowers } from "./three-crt-flowers";
 
 type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
 
+type Rgba = { r: number; g: number; b: number; a: number };
+
+function parseRgba(color: string): Rgba | null {
+  const match = color.match(
+    /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/,
+  );
+  if (!match) return null;
+  return {
+    r: Number(match[1]),
+    g: Number(match[2]),
+    b: Number(match[3]),
+    a: match[4] !== undefined ? Number(match[4]) : 1,
+  };
+}
+
+function rgbaToString(c: Rgba): string {
+  return `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, ${c.a.toFixed(2)})`;
+}
+
+function averageRgbaColors(colors: (string | null)[]): string | null {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let a = 0;
+  let count = 0;
+  for (const color of colors) {
+    if (!color) continue;
+    const parsed = parseRgba(color);
+    if (!parsed) continue;
+    r += parsed.r;
+    g += parsed.g;
+    b += parsed.b;
+    a += parsed.a;
+    count++;
+  }
+  if (count === 0) return null;
+  return rgbaToString({ r: r / count, g: g / count, b: b / count, a: a / count });
+}
+
+function neighborBlendColor(
+  grid: number[][],
+  x: number,
+  y: number,
+  cols: number,
+  rows: number,
+  palette: (string | null)[],
+): string | null {
+  const samples: (string | null)[] = [];
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      samples.push(palette[grid[ny][nx]] ?? null);
+    }
+  }
+  return averageRgbaColors(samples);
+}
+
+function drawSoftCamoCell(
+  ctx: CanvasRenderingContext2D,
+  px: number,
+  py: number,
+  blockSize: number,
+  centerColor: string | null,
+  edgeColor: string | null,
+) {
+  if (!centerColor && !edgeColor) return;
+  const cx = px + blockSize / 2;
+  const cy = py + blockSize / 2;
+  if (!centerColor || !edgeColor || centerColor === edgeColor) {
+    ctx.fillStyle = centerColor ?? edgeColor!;
+    ctx.fillRect(px, py, blockSize, blockSize);
+    return;
+  }
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, blockSize * 0.75);
+  grad.addColorStop(0, centerColor);
+  grad.addColorStop(1, edgeColor);
+  ctx.fillStyle = grad;
+  ctx.fillRect(px, py, blockSize, blockSize);
+}
+
 interface CamoThreeOverlayProps {
   preset?: ScenePreset;
   className?: string;
@@ -205,10 +288,8 @@ export function CamoThreeOverlay({
             }
           } else if (isOaasCamo) {
             const color = oaasColors[val];
-            if (color) {
-              ctx.fillStyle = color;
-              ctx.fillRect(px, py, blockSize, blockSize);
-            }
+            const edge = neighborBlendColor(grid, x, y, cols, rows, oaasColors);
+            drawSoftCamoCell(ctx, px, py, blockSize, color, edge ?? color);
           } else if (isIntroCamo) {
             const color = introColors[val];
             if (color) {
