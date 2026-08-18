@@ -1209,10 +1209,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
               : 1.4;
       const baseScale =
         sizeVariation < 0.2
-          ? 0.9 +
-            (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.5
-          : 0.6 +
-            (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.4;
+          ? 0.9 + (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.5
+          : 0.6 + (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.4;
       const mobileBoost = config.mobileScaleBoost ?? 1;
       const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost;
 
@@ -1226,18 +1224,17 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         flowerNoise,
         vivvaTextTex,
       );
-      const initialGrowth =
-        isTightCamoMobile
-          ? 0.58 + rand() * 0.3
-          : isMediumMobile
-            ? 0.04 + Math.random() * 0.08
-            : isIntro
-              ? Math.random() < 0.3
-                ? 0.3 + Math.random() * 0.3
-                : 0.6 + Math.random() * 0.4
-              : isOaas
-                ? 0.62 + Math.random() * 0.28
-                : 0.5 + Math.random() * 0.5;
+      const initialGrowth = isTightCamoMobile
+        ? 0.58 + rand() * 0.3
+        : isMediumMobile
+          ? 0.04 + Math.random() * 0.08
+          : isIntro
+            ? Math.random() < 0.3
+              ? 0.3 + Math.random() * 0.3
+              : 0.6 + Math.random() * 0.4
+            : isOaas
+              ? 0.62 + Math.random() * 0.28
+              : 0.5 + Math.random() * 0.5;
       flower.userData = {
         baseY: pos.y,
         growthProgress: initialGrowth,
