@@ -24,9 +24,10 @@ export function buildHybridSceneDestinations(strategy: HybridGtmStrategy): Orbit
   const growthTail: OrbitRouteDestination[] = [
     { channel: "generate", order: 3, config: { templateOnly: true } },
     { channel: "approval", order: 4 },
-    { channel: "index_submit", order: 5 },
-    { channel: "distribute", order: 6, config: { processNow: false, failIfUnapproved: true } },
-    { channel: "analytics", order: 7 },
+    { channel: "seo_ops_gate", order: 5, config: { minIndexHealthScore: 70 } },
+    { channel: "index_submit", order: 6 },
+    { channel: "distribute", order: 7, config: { processNow: false, failIfUnapproved: true } },
+    { channel: "analytics", order: 8 },
   ];
 
   return [
@@ -50,7 +51,7 @@ export function buildHybridSceneDestinations(strategy: HybridGtmStrategy): Orbit
     ...growthTail,
     {
       channel: "autopilot",
-      order: 8,
+      order: 9,
       config: { force: false },
     },
   ];

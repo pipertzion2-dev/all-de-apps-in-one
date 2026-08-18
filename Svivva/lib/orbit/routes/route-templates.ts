@@ -13,16 +13,17 @@ export const GROWTH_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "plan", order: 1 },
   { channel: "generate", order: 2, config: { templateOnly: true } },
   { channel: "approval", order: 3 },
-  { channel: "index_submit", order: 4 },
-  { channel: "distribute", order: 5, config: { processNow: false, failIfUnapproved: true } },
-  { channel: "analytics", order: 6 },
+  { channel: "seo_ops_gate", order: 4, config: { minIndexHealthScore: 70 } },
+  { channel: "index_submit", order: 5 },
+  { channel: "distribute", order: 6, config: { processNow: false, failIfUnapproved: true } },
+  { channel: "analytics", order: 7 },
 ];
 
 /** Full pipeline including ingest for new sources. */
 export const FULL_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "ingest", order: 1 },
   ...GROWTH_PIPELINE_DESTINATIONS.map((d) => ({ ...d, order: d.order + 1 })),
-  { channel: "autopilot", order: 8, config: { force: true } },
+  { channel: "autopilot", order: 9, config: { force: true } },
 ];
 
 export type RouteTemplate = {
@@ -80,6 +81,7 @@ export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
     value === "ifm" ||
     value === "bridge_ship" ||
     value === "quality_gate" ||
+    value === "seo_ops_gate" ||
     value === "plan" ||
     value === "generate" ||
     value === "approval" ||

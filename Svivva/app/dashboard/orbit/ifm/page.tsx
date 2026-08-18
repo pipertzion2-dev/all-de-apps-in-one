@@ -86,6 +86,20 @@ export default function OrbitIfmPage() {
     },
   });
 
+  const runSeoOps = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/seo-ops`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+  });
+
   const pairings = previewQuery.data?.pairings || [];
   const families = previewQuery.data?.families || [];
 
@@ -154,6 +168,16 @@ export default function OrbitIfmPage() {
             ) : null}
             Ship bridges
           </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || runSeoOps.isPending}
+            onClick={() => runSeoOps.mutate()}
+          >
+            {runSeoOps.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            SEO ops gate
+          </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/dashboard/orbit/matrix">
               <Rocket className="mr-2 h-4 w-4" />
@@ -219,6 +243,14 @@ export default function OrbitIfmPage() {
         <p className="text-sm text-green-600">
           Shipped {shipForProject.data.shipped} bridge page(s)
           {shipForProject.data.failed ? ` (${shipForProject.data.failed} failed quality gate)` : ""}.
+        </p>
+      ) : null}
+      {runSeoOps.data ? (
+        <p className={runSeoOps.data.ok ? "text-sm text-green-600" : "text-sm text-destructive"}>
+          SEO ops gate: {runSeoOps.data.ok ? "passed" : "failed"}
+          {!runSeoOps.data.ok && runSeoOps.data.issues?.length
+            ? ` — ${runSeoOps.data.issues.slice(0, 2).join("; ")}`
+            : null}
         </p>
       ) : null}
       {createIfmRoute.data?.route?.id ? (

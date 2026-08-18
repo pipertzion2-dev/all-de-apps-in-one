@@ -12,9 +12,10 @@ export const IFM_WEEKLY_DESTINATIONS: OrbitRouteDestination[] = [
   { channel: "generate", order: 4, config: { templateOnly: true } },
   { channel: "approval", order: 5 },
   { channel: "quality_gate", order: 6, config: { requireIfmBridges: true } },
-  { channel: "index_submit", order: 7 },
-  { channel: "distribute", order: 8, config: { processNow: false, failIfUnapproved: true } },
-  { channel: "analytics", order: 9 },
+  { channel: "seo_ops_gate", order: 7, config: { minIndexHealthScore: 70 } },
+  { channel: "index_submit", order: 8 },
+  { channel: "distribute", order: 9, config: { processNow: false, failIfUnapproved: true } },
+  { channel: "analytics", order: 10 },
 ];
 
 export const IFM_ROUTE_SCENE: RouteTemplate = {

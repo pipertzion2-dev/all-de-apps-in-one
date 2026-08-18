@@ -7,6 +7,7 @@ import { getLatestSchedulerRun } from "../scheduler/scheduler-repository";
 import { parseExternalAnalyticsConfig } from "../analytics/external-signals";
 import { parseAutopilotConfig } from "../autopilot/autopilot-types";
 import { mergeSchedulerConfig } from "../scheduler/scheduler-types";
+import { parseSeoOpsSnapshot } from "../routes/seo-ops-gate";
 
 export type ProjectHealthAlert = {
   level: "info" | "warning" | "critical";
@@ -23,6 +24,12 @@ export type ProjectHealthSnapshot = {
   recommendations: { open: number; highPriority: number };
   autopilot: { enabled: boolean; lastRunStatus: string | null };
   scheduler: { enabled: boolean };
+  seoOps: {
+    lastCheckedAt?: string;
+    ok?: boolean;
+    issueCount?: number;
+    indexHealthScore?: number;
+  };
   externalAnalytics: { hasData: boolean; sessions7d?: number; conversions7d?: number };
 };
 
@@ -127,6 +134,15 @@ export async function buildProjectHealthSnapshot(
     });
   }
 
+  const seoOps = parseSeoOpsSnapshot(meta);
+  if (seoOps && !seoOps.ok) {
+    alerts.push({
+      level: "warning",
+      code: "seo_ops_gate_failed",
+      message: seoOps.issues.slice(0, 2).join("; ") || "SEO ops gate failed",
+    });
+  }
+
   let status: ProjectHealthSnapshot["status"] = "healthy";
   if (alerts.some((a) => a.level === "critical")) status = "critical";
   else if (alerts.length > 0) status = "degraded";
@@ -143,6 +159,12 @@ export async function buildProjectHealthSnapshot(
       lastRunStatus: autopilotRun?.status ?? null,
     },
     scheduler: { enabled: schedulerConfig.enabled },
+    seoOps: {
+      lastCheckedAt: seoOps?.checkedAt,
+      ok: seoOps?.ok,
+      issueCount: seoOps?.issues.length,
+      indexHealthScore: seoOps?.checks.indexHealthScore,
+    },
     externalAnalytics: {
       hasData: external.lastSyncedAt != null,
       sessions7d: external.sessions7d,

@@ -1,6 +1,12 @@
 import { getIfmPairingsForProject } from "../ifm/ifm-repository";
 import { shipIfmBridgesForProject } from "../ifm/ship-ifm-bridges";
 import type { RouteRunContext } from "./route-types";
+import {
+  runSeoOpsGate,
+  saveSeoOpsSnapshot,
+  type SeoOpsGateConfig,
+  type SeoOpsGateResult,
+} from "./seo-ops-gate";
 
 export async function runBridgeShipStep(
   ctx: RouteRunContext,
@@ -44,4 +50,32 @@ export async function runQualityGateStep(
   }
 
   return { ok: issues.length === 0, checked: generated.length, issues };
+}
+
+export async function runSeoOpsGateStep(
+  ctx: RouteRunContext,
+  config: Record<string, unknown>,
+): Promise<SeoOpsGateResult> {
+  if (!ctx.projectId) throw new Error("projectId required for seo_ops_gate step");
+
+  const gateConfig: SeoOpsGateConfig = {
+    strict: config.strict !== false,
+    maxCanonicalConflicts: Number(config.maxCanonicalConflicts ?? 0),
+    maxRobotsConflicts: Number(config.maxRobotsConflicts ?? 0),
+    maxMissingCanonical: Number(config.maxMissingCanonical ?? 0),
+    maxDuplicateTitles: Number(config.maxDuplicateTitles ?? 0),
+    maxThinPages: Number(config.maxThinPages ?? 5),
+    minIndexHealthScore: Number(config.minIndexHealthScore ?? 70),
+    indexHealthSample: Number(config.indexHealthSample ?? 30),
+    requireRobotsSitemap: config.requireRobotsSitemap !== false,
+  };
+
+  const result = await runSeoOpsGate(gateConfig);
+  await saveSeoOpsSnapshot(ctx.projectId, ctx.userId, result);
+
+  if (!result.ok && gateConfig.strict !== false) {
+    throw new Error(result.issues.join("; "));
+  }
+
+  return result;
 }

@@ -33,7 +33,14 @@ export {
   runSceneMatrixForProject,
   type SceneMatrix,
 } from "./scene-matrix";
-export { runBridgeShipStep, runQualityGateStep } from "./route-quality-steps";
+export { runBridgeShipStep, runQualityGateStep, runSeoOpsGateStep } from "./route-quality-steps";
+export {
+  runSeoOpsGate,
+  evaluateSeoOpsGate,
+  parseSeoOpsSnapshot,
+  saveSeoOpsSnapshot,
+  type SeoOpsGateResult,
+} from "./seo-ops-gate";
 
 export {
   createOrbitRoute,

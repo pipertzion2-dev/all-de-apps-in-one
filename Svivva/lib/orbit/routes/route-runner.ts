@@ -99,6 +99,38 @@ async function executeRouteStep(
       }
       return result;
     }
+    case "seo_ops_gate": {
+      const { runSeoOpsGateStep } = await import("./route-quality-steps");
+      try {
+        const result = await runSeoOpsGateStep(ctx, config);
+        if (ctx.projectId) {
+          await emitOrbitEvent({
+            orbitProjectId: ctx.projectId,
+            orbitCampaignId: ctx.campaignId,
+            routeId: ctx.routeId,
+            eventType: "seo_ops_gate_passed",
+            source: "internal",
+            idempotencyKey: `seo-ops:${ctx.routeId}:pass:${Date.now()}`,
+            dimensions: { ...result.checks },
+          });
+        }
+        return result;
+      } catch (e) {
+        if (ctx.projectId) {
+          const message = e instanceof Error ? e.message : String(e);
+          await emitOrbitEvent({
+            orbitProjectId: ctx.projectId,
+            orbitCampaignId: ctx.campaignId,
+            routeId: ctx.routeId,
+            eventType: "seo_ops_gate_failed",
+            source: "internal",
+            idempotencyKey: `seo-ops:${ctx.routeId}:fail:${Date.now()}`,
+            dimensions: { error: message },
+          });
+        }
+        throw e;
+      }
+    }
     case "plan": {
       if (!ctx.projectId) throw new Error("projectId required for plan step");
       const { planCampaignForProject } = await import("../campaign/run-plan");

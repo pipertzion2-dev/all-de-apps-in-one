@@ -192,6 +192,7 @@ export const ORBIT_ROUTE_CHANNELS = [
   "ifm",
   "bridge_ship",
   "quality_gate",
+  "seo_ops_gate",
   "plan",
   "generate",
   "approval",
@@ -242,6 +243,8 @@ export const ORBIT_EVENT_TYPES = [
   "ifm_bridge_shipped",
   "quality_gate_passed",
   "quality_gate_failed",
+  "seo_ops_gate_passed",
+  "seo_ops_gate_failed",
   "scene_matrix_completed",
 ] as const;
 export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];

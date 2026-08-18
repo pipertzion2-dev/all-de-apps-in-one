@@ -60,6 +60,12 @@ type ProjectHealth = {
   indexing: { stuckSubmitted: number; failed: number };
   distribution: { pending: number; failed: number };
   externalAnalytics: { hasData: boolean; sessions7d?: number; conversions7d?: number };
+  seoOps?: {
+    lastCheckedAt?: string;
+    ok?: boolean;
+    issueCount?: number;
+    indexHealthScore?: number;
+  };
 };
 
 export default function OrbitProjectAnalyticsPage() {
@@ -456,6 +462,14 @@ export default function OrbitProjectAnalyticsPage() {
                 <p className="text-xs text-muted-foreground">
                   External: {health.externalAnalytics.sessions7d ?? 0} sessions /{" "}
                   {health.externalAnalytics.conversions7d ?? 0} conversions (7d)
+                </p>
+              ) : null}
+              {health.seoOps?.lastCheckedAt ? (
+                <p className="text-xs text-muted-foreground">
+                  SEO ops: {health.seoOps.ok ? "passed" : `${health.seoOps.issueCount ?? 0} issue(s)`}
+                  {health.seoOps.indexHealthScore != null
+                    ? ` · index health ${health.seoOps.indexHealthScore}`
+                    : ""}
                 </p>
               ) : null}
             </div>
