@@ -10,6 +10,7 @@ export {
   emitDistributionOutcome,
   emitIndexStatusChange,
   emitContentValidationOutcome,
+  emitContentGenerated,
   emitPolicyBlockedEvent,
   emitExternalEvent,
 } from "./emit-outcomes";
