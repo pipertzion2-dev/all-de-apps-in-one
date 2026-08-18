@@ -149,10 +149,14 @@ function ArtifactCube({
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const isDragging = useRef(false);
+  const dragCommitted = useRef(false);
+  const pointerStart = useRef({ x: 0, y: 0 });
   const lastPointer = useRef({ x: 0, y: 0 });
   const velocity = useRef({ x: 0, y: 0 });
   const targetRotation = useRef({ x: 0.3, y: 0 });
-  const { gl, camera } = useThree();
+  const { gl } = useThree();
+
+  const DRAG_THRESHOLD = 10;
 
   const faceTargetRotations: [number, number][] = [
     [0, -Math.PI / 2],
@@ -197,14 +201,28 @@ function ArtifactCube({
   });
 
   const onPointerDown = (e: PointerEvent) => {
-    isDragging.current = true;
+    dragCommitted.current = false;
+    isDragging.current = false;
+    pointerStart.current = { x: e.clientX, y: e.clientY };
     lastPointer.current = { x: e.clientX, y: e.clientY };
     velocity.current = { x: 0, y: 0 };
-    gl.domElement.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    if (!isDragging.current || !groupRef.current) return;
+    if (!groupRef.current) return;
+
+    if (!dragCommitted.current) {
+      const totalDx = e.clientX - pointerStart.current.x;
+      const totalDy = e.clientY - pointerStart.current.y;
+      if (Math.abs(totalDx) < DRAG_THRESHOLD && Math.abs(totalDy) < DRAG_THRESHOLD) return;
+      // Vertical gesture = page scroll; only commit drag on horizontal intent.
+      if (Math.abs(totalDy) >= Math.abs(totalDx)) return;
+      dragCommitted.current = true;
+      isDragging.current = true;
+      gl.domElement.setPointerCapture(e.pointerId);
+    }
+
+    if (!isDragging.current) return;
     const dx = (e.clientX - lastPointer.current.x) * 0.005;
     const dy = (e.clientY - lastPointer.current.y) * 0.005;
     groupRef.current.rotation.y += dx;
@@ -213,12 +231,17 @@ function ArtifactCube({
     lastPointer.current = { x: e.clientX, y: e.clientY };
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (e: PointerEvent) => {
     isDragging.current = false;
+    dragCommitted.current = false;
+    if (gl.domElement.hasPointerCapture(e.pointerId)) {
+      gl.domElement.releasePointerCapture(e.pointerId);
+    }
   };
 
   useEffect(() => {
     const canvas = gl.domElement;
+    canvas.style.touchAction = "pan-y";
     canvas.addEventListener("pointerdown", onPointerDown);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerUp);
@@ -379,7 +402,7 @@ export function SvivvaArtifact() {
         </span>
         <h2 className="text-3xl md:text-4xl font-bold text-white">Explore Every Dimension</h2>
         <p className="text-white/50 mt-2 text-sm max-w-xs mx-auto">
-          Drag · rotate · flick · tap a face to discover
+          Swipe sideways to rotate · tap a face to explore
         </p>
       </motion.div>
 
@@ -388,12 +411,12 @@ export function SvivvaArtifact() {
         {/* 3D Cube */}
         <div
           className="relative flex-shrink-0 rounded-3xl overflow-hidden"
-          style={{ width: 320, height: 320 }}
+          style={{ width: 320, height: 320, touchAction: "pan-y" }}
         >
           <Canvas
             camera={{ position: [0, 0, 2.4], fov: 50 }}
             gl={{ antialias: true, alpha: true }}
-            style={{ background: "transparent" }}
+            style={{ background: "transparent", touchAction: "pan-y" }}
           >
             <Suspense fallback={null}>
               <SceneLights activeFeature={activeFeature} />
