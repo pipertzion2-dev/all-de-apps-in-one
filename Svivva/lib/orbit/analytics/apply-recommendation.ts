@@ -101,6 +101,22 @@ export async function applyRecommendation(
       message = "Generated additional template content";
       break;
     }
+    case "expand_ifm_pair": {
+      const pairingId = payload.pairingId as string;
+      if (!pairingId) throw new Error("pairingId required");
+      const { expandIfmPairFromWinner } = await import("../ifm/ifm-performance");
+      result = await expandIfmPairFromWinner(rec.orbitProjectId, userId, pairingId);
+      message = `Expanded IFM pair — ${(result as { created: number }).created} new pairing(s)`;
+      break;
+    }
+    case "prune_ifm_pair": {
+      const pairingId = payload.pairingId as string;
+      if (!pairingId) throw new Error("pairingId required");
+      const { pruneIfmPairing } = await import("../ifm/ifm-performance");
+      result = await pruneIfmPairing(rec.orbitProjectId, userId, pairingId);
+      message = "IFM pairing archived";
+      break;
+    }
     default:
       throw new Error(`Unknown recommendation kind: ${rec.kind}`);
   }

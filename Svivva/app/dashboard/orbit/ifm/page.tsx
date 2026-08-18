@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors } from "lucide-react";
 import { useState } from "react";
 
 type IfmPairing = {
@@ -19,6 +19,24 @@ type IfmPairing = {
   toolA: { name: string; hub: string };
   toolB: { name: string; hub: string };
   status: string;
+  score?: { total: number };
+};
+
+type RescoreResponse = {
+  ok: boolean;
+  scored: number;
+  archived: number;
+  leaderboard: Array<{
+    id: string;
+    fusionTitle: string;
+    slug: string;
+    status: string;
+    score: number;
+    toolA: string;
+    toolB: string;
+  }>;
+  winners: Array<{ id: string; fusionTitle: string; score: number }>;
+  pruneCandidates: Array<{ id: string; fusionTitle: string; score: number }>;
 };
 
 type PreviewResponse = {
@@ -100,6 +118,33 @@ export default function OrbitIfmPage() {
     },
   });
 
+  const rescoreForProject = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/ifm/rescore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autoPrune: false }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data as RescoreResponse;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-ifm-project", projectId] });
+    },
+  });
+
+  const projectPairingsQuery = useQuery<{ pairings: IfmPairing[] }>({
+    queryKey: ["orbit-ifm-project", projectId],
+    enabled: Boolean(projectId.trim()),
+    queryFn: async () => {
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/ifm/generate`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    },
+  });
+
   const pairings = previewQuery.data?.pairings || [];
   const families = previewQuery.data?.families || [];
 
@@ -178,6 +223,18 @@ export default function OrbitIfmPage() {
             ) : null}
             SEO ops gate
           </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || rescoreForProject.isPending}
+            onClick={() => rescoreForProject.mutate()}
+          >
+            {rescoreForProject.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trophy className="mr-2 h-4 w-4" />
+            )}
+            Rescore IFM
+          </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/dashboard/orbit/matrix">
               <Rocket className="mr-2 h-4 w-4" />
@@ -203,6 +260,90 @@ export default function OrbitIfmPage() {
             </Badge>
           ))}
         </div>
+      ) : null}
+
+      {rescoreForProject.data ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Trophy className="h-5 w-5" />
+              Performance leaderboard
+            </CardTitle>
+            <CardDescription>
+              Rescored {rescoreForProject.data.scored} pairing(s) — winners vs prune candidates.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {rescoreForProject.data.winners.length > 0 ? (
+              <div>
+                <p className="mb-2 text-sm font-medium text-green-700">Winners</p>
+                <div className="space-y-2">
+                  {rescoreForProject.data.winners.map((w) => (
+                    <div key={w.id} className="flex items-center justify-between rounded border border-green-200 bg-green-50 px-3 py-2 text-sm">
+                      <span>{w.fusionTitle}</span>
+                      <Badge variant="secondary">{w.score}/100</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {rescoreForProject.data.pruneCandidates.length > 0 ? (
+              <div>
+                <p className="mb-2 flex items-center gap-1 text-sm font-medium text-amber-700">
+                  <Scissors className="h-4 w-4" />
+                  Prune candidates
+                </p>
+                <div className="space-y-2">
+                  {rescoreForProject.data.pruneCandidates.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm">
+                      <span>{p.fusionTitle}</span>
+                      <Badge variant="outline">{p.score}/100</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {rescoreForProject.data.leaderboard.length > 0 ? (
+              <div>
+                <p className="mb-2 text-sm font-medium">Full ranking</p>
+                <div className="space-y-1">
+                  {rescoreForProject.data.leaderboard.slice(0, 10).map((p, i) => (
+                    <div key={p.id} className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>
+                        {i + 1}. {p.fusionTitle}{" "}
+                        <span className="text-xs">({p.toolA} + {p.toolB})</span>
+                      </span>
+                      <span>{p.score}/100 · {p.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {projectId.trim() && projectPairingsQuery.data?.pairings?.length ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Project pairings</CardTitle>
+            <CardDescription>Persisted IFM pairings with latest scores.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[...projectPairingsQuery.data.pairings]
+              .sort((a, b) => (b.score?.total ?? 0) - (a.score?.total ?? 0))
+              .slice(0, 10)
+              .map((p) => (
+                <div key={p.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                  <span>{p.fusionTitle}</span>
+                  <span className="flex items-center gap-2">
+                    {p.score ? <Badge variant="secondary">{p.score.total}/100</Badge> : null}
+                    <Badge variant="outline">{p.status}</Badge>
+                  </span>
+                </div>
+              ))}
+          </CardContent>
+        </Card>
       ) : null}
 
       <Card>

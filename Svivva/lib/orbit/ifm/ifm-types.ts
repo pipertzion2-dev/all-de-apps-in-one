@@ -13,7 +13,16 @@ export type IfmFaqItem = {
   answer: string;
 };
 
-export type IfmPairingStatus = "planned" | "generated" | "indexed" | "archived";
+export type IfmPairingStatus = "planned" | "generated" | "indexed" | "winner" | "archived";
+
+export type IfmPairingScore = {
+  total: number;
+  indexBoost: number;
+  eventBoost: number;
+  analyticsBoost: number;
+  indexStatus?: string;
+  scoredAt: string;
+};
 
 export type IfmPairing = {
   id: string;
@@ -28,13 +37,26 @@ export type IfmPairing = {
   faq: IfmFaqItem[];
   status: IfmPairingStatus;
   createdAt: string;
+  score?: IfmPairingScore;
 };
 
 export type IfmProjectConfig = {
   enabled?: boolean;
   pairCountPerRun?: number;
   lastGeneratedAt?: string;
+  lastScoredAt?: string;
+  autoPrune?: boolean;
+  winnerThreshold?: number;
+  pruneThreshold?: number;
   pairings?: IfmPairing[];
+};
+
+export type IfmPerformanceSummary = {
+  scored: number;
+  winners: IfmPairing[];
+  pruneCandidates: IfmPairing[];
+  archived: number;
+  leaderboard: IfmPairing[];
 };
 
 export type GenerateIfmPairingsInput = {

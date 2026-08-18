@@ -65,13 +65,20 @@ export async function runOrbitScheduler(
           });
         }
 
-        const ifmConfig = (meta.ifm || {}) as { enabled?: boolean; lastGeneratedAt?: string };
+        const ifmConfig = (meta.ifm || {}) as {
+          enabled?: boolean;
+          lastGeneratedAt?: string;
+          lastScoredAt?: string;
+          autoPrune?: boolean;
+        };
         if (ifmConfig.enabled) {
-          const last = ifmConfig.lastGeneratedAt
+          const weekMs = 7 * 24 * 60 * 60 * 1000;
+          const now = Date.now();
+
+          const lastGen = ifmConfig.lastGeneratedAt
             ? new Date(ifmConfig.lastGeneratedAt).getTime()
             : 0;
-          const weekMs = 7 * 24 * 60 * 60 * 1000;
-          if (Date.now() - last >= weekMs) {
+          if (now - lastGen >= weekMs) {
             const { generateIfmPairings, appendIfmPairings, persistIfmPairingEntities } =
               await import("../ifm");
             const pairings = generateIfmPairings({ count: 3 });
@@ -82,6 +89,23 @@ export async function runOrbitScheduler(
               }
               result.ifm = { generated: pairings.length };
             }
+          }
+
+          const lastScored = ifmConfig.lastScoredAt
+            ? new Date(ifmConfig.lastScoredAt).getTime()
+            : 0;
+          if (now - lastScored >= weekMs) {
+            const { rescoreIfmPairingsForProject } = await import("../ifm/ifm-performance");
+            const perf = await rescoreIfmPairingsForProject(project.id, project.userId, {
+              autoPrune: ifmConfig.autoPrune,
+            });
+            result.ifm = {
+              ...(result.ifm || {}),
+              scored: perf.scored,
+              winners: perf.winners.length,
+              pruned: perf.archived,
+              pruneCandidates: perf.pruneCandidates.length,
+            };
           }
         }
 

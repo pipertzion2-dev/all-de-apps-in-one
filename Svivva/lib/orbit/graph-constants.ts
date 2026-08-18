@@ -241,6 +241,8 @@ export const ORBIT_EVENT_TYPES = [
   "ifm_pair_generated",
   "ifm_bridge_planned",
   "ifm_bridge_shipped",
+  "ifm_pair_scored",
+  "ifm_pair_pruned",
   "quality_gate_passed",
   "quality_gate_failed",
   "seo_ops_gate_passed",
@@ -257,6 +259,8 @@ export const ORBIT_RECOMMENDATION_KINDS = [
   "replan_campaign",
   "manual_publish_review",
   "expand_content",
+  "expand_ifm_pair",
+  "prune_ifm_pair",
 ] as const;
 export type OrbitRecommendationKind = (typeof ORBIT_RECOMMENDATION_KINDS)[number];
 

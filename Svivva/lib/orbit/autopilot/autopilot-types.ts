@@ -47,17 +47,19 @@ export const AUTOPILOT_KINDS_BY_MODE: Record<
   readonly OrbitRecommendationKind[]
 > = {
   manual: [],
-  assisted: ["index_recheck", "retry_distribution"],
+  assisted: ["index_recheck", "retry_distribution", "prune_ifm_pair"],
   autonomous: [
     "index_recheck",
     "retry_distribution",
     "run_distribution",
     "regenerate_content",
     "expand_content",
+    "prune_ifm_pair",
   ],
 };
 
 export const AUTOPILOT_NEVER_AUTO: readonly OrbitRecommendationKind[] = [
   "manual_publish_review",
   "replan_campaign",
+  "expand_ifm_pair",
 ];

@@ -9,6 +9,15 @@ import {
   listOpenRecommendations,
 } from "./recommendation-repository";
 import type { RecommendationDraft } from "./event-types";
+import { parseIfmConfig } from "../ifm/ifm-repository";
+import {
+  scoreIfmPairing,
+  findIndexForPairing,
+  isIfmPruneCandidate,
+  resolveIfmThresholds,
+  buildIfmLeaderboard,
+} from "../ifm/ifm-performance";
+import type { OrbitRecommendation } from "../schema";
 
 const MS_DAY = 24 * 60 * 60 * 1000;
 
@@ -37,6 +46,22 @@ async function upsertRecommendation(
     draft.orbitCampaignId,
   );
   if (existing) return false;
+  const row = await createRecommendation(projectId, draft);
+  return Boolean(row.id);
+}
+
+async function upsertIfmPairingRecommendation(
+  projectId: string,
+  draft: RecommendationDraft,
+  openRecs: OrbitRecommendation[],
+): Promise<boolean> {
+  const pairingId = (draft.actionPayload as Record<string, unknown>)?.pairingId;
+  const dup = openRecs.find(
+    (r) =>
+      r.kind === draft.kind &&
+      (r.actionPayload as Record<string, unknown>)?.pairingId === pairingId,
+  );
+  if (dup) return false;
   const row = await createRecommendation(projectId, draft);
   return Boolean(row.id);
 }
@@ -221,6 +246,64 @@ export async function generateRecommendationsForProject(
     });
     if (created) result.created += 1;
     else result.skipped += 1;
+  }
+
+  const ifmConfig = parseIfmConfig(project.metadata as Record<string, unknown>);
+  if (ifmConfig.enabled && (ifmConfig.pairings?.length ?? 0) > 0) {
+    const { winnerThreshold, pruneThreshold } = resolveIfmThresholds(ifmConfig);
+    const pairings = ifmConfig.pairings ?? [];
+    const openRecs = await listOpenRecommendations(projectId);
+
+    const scored = pairings.map((pairing) => {
+      const indexRecord = findIndexForPairing(indexRecords, pairing);
+      const score = scoreIfmPairing({ pairing, indexRecord, events });
+      return { pairing, score };
+    });
+
+    const winners = buildIfmLeaderboard(
+      scored.map(({ pairing, score }) => ({ ...pairing, score })),
+    ).filter((p) => (p.score?.total ?? 0) >= winnerThreshold && p.status !== "archived");
+
+    for (const winner of winners.slice(0, 2)) {
+      const created = await upsertIfmPairingRecommendation(
+        projectId,
+        {
+          kind: "expand_ifm_pair",
+          priority: "medium",
+          title: `Expand winning IFM pair: ${winner.fusionTitle}`,
+          rationale: `Pairing scored ${winner.score?.total ?? 0}/100. Generate adjacent hub variants to compound intent fusion.`,
+          actionPayload: {
+            pairingId: winner.id,
+            score: winner.score?.total,
+            slug: winner.slug,
+          },
+        },
+        openRecs,
+      );
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
+
+    for (const { pairing, score } of scored) {
+      if (!isIfmPruneCandidate(pairing, score, pruneThreshold)) continue;
+      const created = await upsertIfmPairingRecommendation(
+        projectId,
+        {
+          kind: "prune_ifm_pair",
+          priority: "low",
+          title: `Prune underperforming IFM pair: ${pairing.fusionTitle}`,
+          rationale: `Score ${score.total}/100 after 14+ days without index traction. Archive to reduce thin-surface risk.`,
+          actionPayload: {
+            pairingId: pairing.id,
+            score: score.total,
+            slug: pairing.slug,
+          },
+        },
+        openRecs,
+      );
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
   }
 
   const open = await listOpenRecommendations(projectId);
