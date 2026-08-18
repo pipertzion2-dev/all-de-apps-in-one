@@ -26,6 +26,11 @@ if (!process.env.DATABASE_URL?.trim()) {
   } catch (err) {
     console.warn("⚠ Play table migration failed (continuing build):", err?.message ?? err);
   }
+  try {
+    runNodeScript("scripts/piggy-bank-db-migrate.mjs", "Ensuring admin piggy bank table…");
+  } catch (err) {
+    console.warn("⚠ Piggy bank migration failed (continuing build):", err?.message ?? err);
+  }
 }
 
 try {
