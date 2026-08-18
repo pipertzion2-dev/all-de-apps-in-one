@@ -351,3 +351,54 @@ export async function sendResendEmail(
     return { ok: false, error: String(e) };
   }
 }
+
+export type N8nMarketingPayload = {
+  event: "orbit.marketing_autopilot.complete";
+  siteUrl: string;
+  startedAt: string;
+  finishedAt: string;
+  stats: {
+    posted: number;
+    prepared: number;
+    done: number;
+    failed: number;
+    needsCredentials: number;
+  };
+  indexing?: unknown;
+  social: unknown;
+  outreach: unknown;
+  parasite: unknown;
+  directories: unknown;
+  tasks: { id: string; label: string; status: string; message: string; copyText?: string }[];
+};
+
+/** POST full marketing pack to user's n8n workflow webhook. */
+export async function dispatchN8nMarketingWebhook(
+  creds: Pick<MarketingPlatformCredentials, "n8nWebhookUrl" | "n8nWebhookSecret">,
+  payload: N8nMarketingPayload,
+): Promise<PublishResult> {
+  const url = creds.n8nWebhookUrl?.trim();
+  if (!url) return { ok: false, error: "n8n webhook URL not configured" };
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "User-Agent": "SvivvaOrbit/1.0",
+    };
+    const secret = creds.n8nWebhookSecret?.trim();
+    if (secret) headers["X-Orbit-Secret"] = secret;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { ok: false, error: text.slice(0, 200) || `HTTP ${res.status}` };
+    }
+    return { ok: true, id: "n8n-webhook" };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}

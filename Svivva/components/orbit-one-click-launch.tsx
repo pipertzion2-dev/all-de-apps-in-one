@@ -109,6 +109,14 @@ type ActionMeta = {
 
 const ACTION_META: ActionMeta[] = [
   {
+    id: "auto-n8n-webhook",
+    icon: "🔗",
+    openUrl: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/",
+    credKey: "n8nWebhookUrl",
+    credLabel: "n8n webhook URL",
+    credHint: "n8n → Webhook node → Production URL (recommended funnel automation)",
+  },
+  {
     id: "manual-devto",
     icon: "📝",
     openUrl: "https://dev.to/new",
@@ -571,6 +579,39 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
             el?.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
         />
+
+        {!configuredKeys.n8nWebhookUrl && (
+          <div
+            id="cred-n8nWebhookUrl"
+            className="rounded-xl border border-teal-500/35 bg-teal-500/8 px-3 py-2.5 space-y-2"
+          >
+            <p className="text-[11px] font-bold text-teal-200">n8n webhook (recommended)</p>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              Orbit POSTs your full marketing pack to n8n after each run — wire LinkedIn, email, and
+              CRM in one workflow instead of separate OmniSocials + Resend keys.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                placeholder="https://your-n8n.app/webhook/..."
+                value={credInputs.n8nWebhookUrl ?? ""}
+                onChange={(e) =>
+                  setCredInputs((prev) => ({ ...prev, n8nWebhookUrl: e.target.value }))
+                }
+                className="flex-1 h-8 text-xs px-2.5 rounded-lg border border-border/60 bg-card/80 focus:outline-none focus:border-teal-400 text-foreground placeholder:text-muted-foreground/50"
+              />
+              <button
+                type="button"
+                disabled={!credInputs.n8nWebhookUrl?.trim() || savingCred === "n8nWebhookUrl"}
+                onClick={() => saveCred("n8nWebhookUrl")}
+                className="h-8 px-3 rounded-lg text-xs font-bold text-white disabled:opacity-50"
+                style={{ background: TEAL }}
+              >
+                {savingCred === "n8nWebhookUrl" ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* One-press Google Search Console connect — camo orb */}
         <div className="flex flex-col items-center gap-2 py-1">

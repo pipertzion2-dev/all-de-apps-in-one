@@ -1,6 +1,10 @@
 /** Marketing Autopilot — credentials, tasks, and run results */
 
 export type MarketingPlatformCredentials = {
+  /** n8n production webhook — Orbit POSTs the full marketing pack after each autopilot run */
+  n8nWebhookUrl?: string;
+  /** Optional header secret for n8n webhook auth (sent as X-Orbit-Secret) */
+  n8nWebhookSecret?: string;
   /** OmniSocials — unified LinkedIn, X, Threads, etc. (omnisocials.com → Settings → API) */
   omnisocialsApiKey?: string;
   devtoApiKey?: string;
@@ -26,14 +30,27 @@ export type MarketingCredentialField = {
   label: string;
   hint: string;
   secret?: boolean;
-  group: "publishing" | "social" | "email";
+  group: "automation" | "publishing" | "social" | "email";
 };
 
 export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   {
+    key: "n8nWebhookUrl",
+    label: "n8n webhook URL (recommended)",
+    hint: "n8n → Webhook node → Production URL. Orbit sends social, outreach & indexing JSON after each run.",
+    group: "automation",
+  },
+  {
+    key: "n8nWebhookSecret",
+    label: "n8n webhook secret (optional)",
+    hint: "Optional shared secret — sent as X-Orbit-Secret header",
+    secret: true,
+    group: "automation",
+  },
+  {
     key: "omnisocialsApiKey",
-    label: "OmniSocials API key",
-    hint: "omnisocials.com → connect LinkedIn & X → Settings → API → Create key",
+    label: "OmniSocials API key (optional — or use n8n)",
+    hint: "Direct LinkedIn/X post without n8n — or wire OmniSocials inside your n8n workflow",
     secret: true,
     group: "social",
   },
@@ -113,8 +130,8 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   },
   {
     key: "resendApiKey",
-    label: "Resend API key",
-    hint: "resend.com/api-keys — for newsletter/podcast pitches",
+    label: "Resend API key (optional — or use n8n)",
+    hint: "Direct email send — or call Resend from your n8n workflow",
     secret: true,
     group: "email",
   },
@@ -223,7 +240,7 @@ export function maskCredentialsForClient(
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(creds)) {
     if (!v) continue;
-    const secretKeys = ["ApiKey", "Secret", "Token", "Pass"];
+    const secretKeys = ["ApiKey", "Secret", "Token", "Pass", "WebhookSecret"];
     const isSecret = secretKeys.some((s) => k.includes(s));
     out[k] = isSecret ? "••••••••" : v;
   }

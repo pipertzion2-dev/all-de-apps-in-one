@@ -229,6 +229,13 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     group: "Recurring",
     automatable: "onsite",
   },
+  {
+    id: "auto-n8n-webhook",
+    label: "n8n marketing webhook",
+    group: "Automation",
+    credentialKeys: ["n8nWebhookUrl"],
+    automatable: "api",
+  },
 ];
 
 export function taskDefById(id: string): AutopilotTaskDef | undefined {

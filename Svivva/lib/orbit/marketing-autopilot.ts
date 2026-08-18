@@ -15,6 +15,7 @@ import {
   publishRedditPost,
   publishTwitterThread,
   sendResendEmail,
+  dispatchN8nMarketingWebhook,
 } from "@/lib/orbit/marketing-autopilot-publishers";
 import { MARKETING_AUTOPILOT_TASKS, taskDefById } from "@/lib/orbit/marketing-autopilot-tasks";
 import type {
@@ -390,7 +391,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-twitter-thread",
           "needs_credentials",
-          "Thread ready — add OmniSocials key ($10/mo) or copy & paste on X",
+          "Thread ready — add n8n webhook (recommended) or OmniSocials key, or copy & paste on X",
           { copyText: threadCopy },
         ),
       );
@@ -422,7 +423,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-linkedin",
           "needs_credentials",
-          "Post ready — add OmniSocials key ($10/mo) or copy & paste on LinkedIn",
+          "Post ready — add n8n webhook (recommended) or OmniSocials key, or copy & paste on LinkedIn",
           { copyText: liCopy },
         ),
       );
@@ -529,7 +530,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-newsletters",
           "needs_credentials",
-          "Pitch ready — add Resend key or copy & email manually",
+          "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
           { copyText: pitchCopy },
         ),
       );
@@ -558,7 +559,7 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-podcasts",
           "needs_credentials",
-          "Pitch ready — add Resend key or copy & email manually",
+          "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
           { copyText: podCopy },
         ),
       );
@@ -614,10 +615,69 @@ export async function runMarketingAutopilot(opts?: {
     ),
   );
 
+  const n8nRoutedIds = new Set([
+    "manual-twitter-thread",
+    "manual-linkedin",
+    "manual-newsletters",
+    "manual-podcasts",
+  ]);
+
+  if (hasCreds(creds, ["n8nWebhookUrl"])) {
+    const finishedAt = now();
+    const preStats = statsFromTasks(tasks);
+    const n8nPayload = {
+      event: "orbit.marketing_autopilot.complete" as const,
+      siteUrl: getSiteUrl(),
+      startedAt,
+      finishedAt,
+      stats: preStats,
+      indexing: indexingSummary,
+      social: content.social,
+      outreach: content.outreach,
+      parasite: content.parasite,
+      directories: content.directories,
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        label: t.label,
+        status: t.status,
+        message: t.message,
+        copyText: t.copyText,
+      })),
+    };
+    const n8n = await dispatchN8nMarketingWebhook(creds, n8nPayload);
+    tasks.push(
+      task(
+        "auto-n8n-webhook",
+        n8n.ok ? "posted" : "failed",
+        n8n.ok
+          ? "Marketing pack sent to your n8n workflow — wire LinkedIn, email, CRM there"
+          : n8n.error || "n8n webhook failed",
+      ),
+    );
+    if (n8n.ok) {
+      for (const t of tasks) {
+        if (t.status === "needs_credentials" && n8nRoutedIds.has(t.id)) {
+          t.status = "prepared";
+          t.message = `Dispatched to n8n — finish publish in your workflow · ${t.message}`;
+        }
+      }
+    }
+  }
+
   // Ensure every defined task has a result
   for (const def of MARKETING_AUTOPILOT_TASKS) {
     if (!tasks.some((t) => t.id === def.id)) {
-      tasks.push(task(def.id, "skipped", "No action needed this run"));
+      if (def.id === "auto-n8n-webhook") {
+        tasks.push(
+          task(
+            def.id,
+            "skipped",
+            "Add n8n webhook URL to route social, email & outreach to your automation graph",
+          ),
+        );
+      } else {
+        tasks.push(task(def.id, "skipped", "No action needed this run"));
+      }
     }
   }
 

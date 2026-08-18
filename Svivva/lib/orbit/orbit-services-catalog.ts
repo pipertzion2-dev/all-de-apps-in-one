@@ -3,7 +3,12 @@ import type { MarketingPlatformCredentials } from "./marketing-autopilot-types";
 /** How a service is billed — indexing tools are free Google/Bing APIs, not AI. */
 export type OrbitServiceBilling = "paid" | "free" | "free-tier-paid-upgrade";
 
-export type OrbitServiceCategory = "indexing" | "ai-marketing" | "distribution" | "free-fallback";
+export type OrbitServiceCategory =
+  | "indexing"
+  | "automation"
+  | "ai-marketing"
+  | "distribution"
+  | "free-fallback";
 
 export type OrbitServiceItem = {
   id: string;
@@ -79,6 +84,27 @@ export const ORBIT_INDEXING_SERVICES: OrbitServiceItem[] = [
 /** Paid (or paid-upgrade) services for full marketing automation. */
 export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
   {
+    id: "n8n",
+    category: "automation",
+    billing: "free-tier-paid-upgrade",
+    name: "n8n (funnel automation)",
+    priceLabel: "Free self-host · $20/mo cloud",
+    purpose:
+      "Recommended — Orbit POSTs your full marketing pack to an n8n webhook after each run. Wire LinkedIn, email, CRM, and Slack in one graph instead of separate OmniSocials + Resend keys.",
+    steps: [
+      "Create an n8n workflow with a Webhook node → copy the Production URL",
+      "Optional: verify X-Orbit-Secret header in n8n for auth",
+      "Paste webhook URL in Launchpad credentials below",
+      "Add HTTP Request / OmniSocials / Resend nodes to publish from the JSON payload",
+    ],
+    payUrl: "https://n8n.io/pricing",
+    docsUrl: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/",
+    setupLabel: "Paste webhook below",
+    credentialKey: "n8nWebhookUrl",
+    payNote: "Self-host on your VPS for free, or use n8n Cloud.",
+    priority: 0,
+  },
+  {
     id: "openai",
     category: "ai-marketing",
     billing: "paid",
@@ -107,7 +133,7 @@ export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
     name: "OmniSocials",
     priceLabel: "$10/mo",
     purpose:
-      "Auto-post LinkedIn & X from Orbit’s social launch pack (replaces expensive Twitter API).",
+      "Direct auto-post LinkedIn & X — optional if you route social through n8n instead.",
     steps: [
       "Subscribe at omnisocials.com → connect LinkedIn + X",
       "Settings → API → create key",
@@ -125,7 +151,8 @@ export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
     billing: "free-tier-paid-upgrade",
     name: "Resend",
     priceLabel: "Free → $20/mo",
-    purpose: "Auto-send newsletter & podcast pitch emails from Orbit outreach content.",
+    purpose:
+      "Direct email send for newsletter & podcast pitches — optional if you route outreach through n8n.",
     steps: [
       "Sign up at resend.com → verify your sending domain",
       "Create API key → paste in Launchpad credentials",
@@ -156,7 +183,8 @@ export const ORBIT_FREE_FALLBACK_SERVICES: OrbitServiceItem[] = [
 
 export const ORBIT_SERVICE_CATEGORY_LABELS: Record<OrbitServiceCategory, string> = {
   indexing: "Google & search indexing (free — not AI)",
+  automation: "Recommended — n8n funnel automation",
   "ai-marketing": "Paid — AI marketing copy",
-  distribution: "Paid — auto-post & email",
+  distribution: "Paid — auto-post & email (or use n8n)",
   "free-fallback": "Optional free fallback",
 };

@@ -305,11 +305,13 @@ export function OrbitPaidServicesHub({
           </div>
 
           {/* Paid services */}
-          {(["ai-marketing", "distribution"] as const).map((cat) => (
+          {(["automation", "ai-marketing", "distribution"] as const).map((cat) => (
             <div key={cat} className="space-y-2">
               <div className="flex items-center gap-2">
                 {cat === "ai-marketing" ? (
                   <Sparkles className="w-4 h-4 text-violet-400" />
+                ) : cat === "automation" ? (
+                  <CreditCard className="w-4 h-4 text-teal-400" />
                 ) : (
                   <CreditCard className="w-4 h-4 text-violet-400" />
                 )}
@@ -317,6 +319,13 @@ export function OrbitPaidServicesHub({
                   {ORBIT_SERVICE_CATEGORY_LABELS[cat]}
                 </p>
               </div>
+              {cat === "automation" && (
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  Orbit sends a JSON payload to your n8n webhook after each autopilot run — social
+                  posts, outreach pitches, directories, and indexing stats. Wire OmniSocials, Resend,
+                  Slack, or CRM nodes inside n8n instead of pasting keys here.
+                </p>
+              )}
               <div className="space-y-2">
                 {(paidByCategory[cat] ?? []).map((item) => (
                   <ServiceRow

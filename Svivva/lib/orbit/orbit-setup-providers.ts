@@ -19,6 +19,19 @@ export type OrbitSetupProvider = {
 
 export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
   {
+    id: "n8n",
+    name: "n8n",
+    purpose:
+      "Funnel automation — Orbit POSTs social, outreach & indexing JSON to your n8n webhook after each run",
+    priceLabel: "Free self-host · $20/mo cloud",
+    payUrl: "https://n8n.io/pricing",
+    docsUrl: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/",
+    payNote:
+      "Recommended over wiring OmniSocials + Resend separately. Create a Webhook node workflow, paste the Production URL below. Optional X-Orbit-Secret header for auth.",
+    credentialKey: "n8nWebhookUrl",
+    priority: 0,
+  },
+  {
     id: "openai",
     name: "OpenAI",
     purpose: "Paid AI for Orbit marketing — SEO pages, launch copy, outreach, and autopilot",
@@ -80,10 +93,17 @@ export const MANUAL_TASK_STEPS: Record<string, string[]> = {
   ],
   "manual-showhn": ["Copy post", "Open HN submit", "Paste title + URL", "Submit", "Tap Done"],
   "manual-newsletters": [
-    "Add Resend key (or copy pitch)",
+    "Add n8n webhook or Resend key (or copy pitch)",
     "Open your email client",
     "Paste pitch & send",
     "Tap Done",
+  ],
+  "auto-n8n-webhook": [
+    "Create n8n Webhook node workflow",
+    "Copy Production URL",
+    "Paste below & save",
+    "Run autopilot — JSON arrives in n8n",
+    "Wire LinkedIn / email nodes",
   ],
   "dir-futurepedia": ["Copy listing", "Open directory", "Paste fields", "Submit", "Tap Done"],
   "dir-taaft": ["Copy listing", "Open TAAFT", "Paste fields", "Submit", "Tap Done"],
