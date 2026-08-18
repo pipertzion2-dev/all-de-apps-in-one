@@ -91,6 +91,7 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
 
   const certificate = finalizeCertificate({
     createdAt: new Date().toISOString(),
+    patentKind: input.patentKind ?? "physical",
     title: input.title,
     description: input.description,
     contentHash,
@@ -113,6 +114,7 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
     creatorOath: input.creatorOath,
     custodyLog: baseCustody,
     groupDisclosure: input.groupDisclosure,
+    digitalDisclosure: input.digitalDisclosure,
   });
 
   return { certificate, hybridization };
@@ -130,3 +132,11 @@ export {
   inferSheetRole,
   MAX_GROUP_SHEETS,
 } from "./group-organize";
+export {
+  paletteFromContentHash,
+  buildDigitalCanonicalPayload,
+  buildDigitalScientificAxes,
+  DIGITAL_FILE_ACCEPT,
+  INVENTION_TYPE_LABELS,
+} from "./digital-patent";
+export type { DigitalDisclosure, DigitalArtifact } from "./types";

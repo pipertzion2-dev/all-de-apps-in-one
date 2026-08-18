@@ -9,8 +9,8 @@ import {
 } from "./feature-mini-apps";
 
 describe("feature mini-apps", () => {
-  it("ships five one-job slices, not full products", () => {
-    expect(FEATURE_MINI_APPS).toHaveLength(5);
+  it("ships six one-job slices, not full products", () => {
+    expect(FEATURE_MINI_APPS).toHaveLength(6);
     for (const app of FEATURE_MINI_APPS) {
       expect(app.path).toMatch(/^\/tools\//);
       expect(app.sliceNote.length).toBeGreaterThan(20);

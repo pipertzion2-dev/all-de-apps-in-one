@@ -72,8 +72,39 @@ export async function buildCourtEvidencePdf(cert: PoorManCertificate): Promise<B
       }
     }
 
+    if (cert.patentKind === "digital" && cert.digitalDisclosure) {
+      section(doc, "3b. Digital invention disclosure");
+      const d = cert.digitalDisclosure;
+      doc.text(`Kind: digital patent · invention type: ${d.inventionType}`);
+      doc.moveDown(0.15);
+      doc.text(`Problem: ${d.problemStatement}`, { align: "justify" });
+      doc.moveDown(0.15);
+      doc.text(`Novel steps: ${d.novelSteps}`, { align: "justify" });
+      doc.moveDown(0.15);
+      doc.text(`Technical effect: ${d.technicalEffect}`, { align: "justify" });
+      doc.moveDown(0.15);
+      doc.text(`Data structures: ${d.dataStructures}`, { align: "justify" });
+      doc.moveDown(0.15);
+      doc.text(`API / surface: ${d.apiSurface}`, { align: "justify" });
+      doc.moveDown(0.15);
+      doc.text(`User flow: ${d.userFlow}`, { align: "justify" });
+      if (d.sourceExcerpt) {
+        doc.moveDown(0.15);
+        doc.text("Source excerpt:", { align: "justify" });
+        doc.font("Courier").fontSize(8).text(d.sourceExcerpt.slice(0, 4000), { align: "left" });
+        doc.font("Helvetica").fontSize(10);
+      }
+      if (d.artifacts?.length) {
+        doc.moveDown(0.15);
+        doc.text(`Artifact files (${d.artifacts.length}):`);
+        for (const a of d.artifacts) {
+          doc.text(`• ${a.fileName} — SHA-256 ${a.contentHash}`);
+        }
+      }
+    }
+
     if (cert.groupDisclosure) {
-      section(doc, "3b. Group patent figure schedule");
+      section(doc, "3c. Group patent figure schedule");
       doc.text(
         `Kind: group patent · ${cert.groupDisclosure.figureCount} figures · ${cert.groupDisclosure.familyCount} famil${
           cert.groupDisclosure.familyCount === 1 ? "y" : "ies"

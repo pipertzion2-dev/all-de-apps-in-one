@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -38,6 +38,18 @@ import {
   GroupDeposit,
   type DepositedGroupImage,
 } from "@/components/poor-man-protection/group-deposit";
+import {
+  PatentKindSelector,
+  PatentKindIntro,
+  type PatentCategory,
+} from "@/components/poor-man-protection/patent-kind-selector";
+import {
+  DigitalDepositPanel,
+  buildDigitalDisclosureFromState,
+  fingerprintDigitalDeposit,
+  type DigitalDepositState,
+} from "@/components/poor-man-protection/digital-deposit";
+import { paletteFromContentHash } from "@/lib/poor-man-protection/digital-patent";
 import { MAX_GROUP_SHEETS, organizeGroupPatent } from "@/lib/poor-man-protection/group-organize";
 import type {
   ColorSwatch,
@@ -144,10 +156,13 @@ function pushCustody(
   return [...log, { at: new Date().toISOString(), event, detail }];
 }
 
-export function PoorManProtectionWizard() {
+export function PoorManProtectionWizard({ initialCategory }: { initialCategory?: PatentCategory }) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [step, setStep] = useState(0);
+  const [patentCategory, setPatentCategory] = useState<PatentCategory>(
+    initialCategory ?? "physical",
+  );
 
   // Intent & oath
   const [legalName, setLegalName] = useState("");
@@ -170,6 +185,18 @@ export function PoorManProtectionWizard() {
   const [contentHash, setContentHash] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [depositMode, setDepositMode] = useState<"single" | "group">("single");
+  const [digitalDeposit, setDigitalDeposit] = useState<DigitalDepositState>({
+    inventionType: "software",
+    problemStatement: "",
+    novelSteps: "",
+    technicalEffect: "",
+    dataStructures: "",
+    apiSurface: "",
+    userFlow: "",
+    sourceExcerpt: "",
+    artifacts: [],
+    contentHash: null,
+  });
   const [groupImages, setGroupImages] = useState<DepositedGroupImage[]>([]);
   const [organizedGroup, setOrganizedGroup] = useState<OrganizedGroupPatent | null>(null);
   const [groupMerkle, setGroupMerkle] = useState<string | null>(null);
@@ -208,25 +235,94 @@ export function PoorManProtectionWizard() {
   >([]);
 
   const formVariable = useMemo(
-    () =>
-      [silhouette && `Silhouette: ${silhouette}`, hierarchy && `Hierarchy: ${hierarchy}`]
-        .filter(Boolean)
-        .join(" · ") ||
-      "Primary subject composition, silhouette balance, and spatial hierarchy of the sketch",
-    [hierarchy, silhouette],
+    () => {
+      if (patentCategory === "digital") {
+        return [
+          digitalDeposit.problemStatement && `Problem: ${digitalDeposit.problemStatement}`,
+          digitalDeposit.novelSteps && `Steps: ${digitalDeposit.novelSteps}`,
+          digitalDeposit.technicalEffect && `Effect: ${digitalDeposit.technicalEffect}`,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+      }
+      return (
+        [silhouette && `Silhouette: ${silhouette}`, hierarchy && `Hierarchy: ${hierarchy}`]
+          .filter(Boolean)
+          .join(" · ") ||
+        "Primary subject composition, silhouette balance, and spatial hierarchy of the sketch"
+      );
+    },
+    [
+      digitalDeposit.novelSteps,
+      digitalDeposit.problemStatement,
+      digitalDeposit.technicalEffect,
+      hierarchy,
+      patentCategory,
+      silhouette,
+    ],
   );
 
   const paletteVariable = useMemo(
-    () =>
-      [
-        emotionalIntent && `Intent: ${emotionalIntent}`,
-        contrastStrategy && `Contrast: ${contrastStrategy}`,
-        palette.length && `Fingerprint: ${palette.map((c) => `${c.role}=${c.hex}`).join(", ")}`,
-      ]
-        .filter(Boolean)
-        .join(" · ") || "Spectral signature derived from extracted palette",
-    [contrastStrategy, emotionalIntent, palette],
+    () => {
+      if (patentCategory === "digital") {
+        return [
+          digitalDeposit.dataStructures && `Data: ${digitalDeposit.dataStructures}`,
+          digitalDeposit.apiSurface && `API: ${digitalDeposit.apiSurface}`,
+          digitalDeposit.userFlow && `Flow: ${digitalDeposit.userFlow}`,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+      }
+      return (
+        [
+          emotionalIntent && `Intent: ${emotionalIntent}`,
+          contrastStrategy && `Contrast: ${contrastStrategy}`,
+          palette.length && `Fingerprint: ${palette.map((c) => `${c.role}=${c.hex}`).join(", ")}`,
+        ]
+          .filter(Boolean)
+          .join(" · ") || "Spectral signature derived from extracted palette"
+      );
+    },
+    [
+      contrastStrategy,
+      digitalDeposit.apiSurface,
+      digitalDeposit.dataStructures,
+      digitalDeposit.userFlow,
+      emotionalIntent,
+      palette,
+      patentCategory,
+    ],
   );
+
+  useEffect(() => {
+    if (patentCategory !== "digital") return;
+    if (title.trim().length < 3 || description.trim().length < 20) return;
+    if (digitalDeposit.problemStatement.trim().length < 20) return;
+    let cancelled = false;
+    void fingerprintDigitalDeposit(digitalDeposit, title.trim(), description.trim()).then(
+      (hash) => {
+        if (cancelled) return;
+        setContentHash(hash);
+        setPalette(paletteFromContentHash(hash));
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    patentCategory,
+    title,
+    description,
+    digitalDeposit.problemStatement,
+    digitalDeposit.novelSteps,
+    digitalDeposit.technicalEffect,
+    digitalDeposit.dataStructures,
+    digitalDeposit.apiSurface,
+    digitalDeposit.userFlow,
+    digitalDeposit.sourceExcerpt,
+    digitalDeposit.artifacts,
+    digitalDeposit.inventionType,
+  ]);
 
   const onFile = useCallback(
     async (f: File | null) => {
@@ -361,6 +457,19 @@ export function PoorManProtectionWizard() {
           ackCopyright
         );
       case "deposit":
+        if (patentCategory === "digital") {
+          return (
+            !!contentHash &&
+            title.trim().length > 0 &&
+            description.trim().length >= 20 &&
+            digitalDeposit.problemStatement.trim().length >= 20 &&
+            digitalDeposit.novelSteps.trim().length >= 20 &&
+            digitalDeposit.technicalEffect.trim().length >= 10 &&
+            digitalDeposit.dataStructures.trim().length >= 10 &&
+            digitalDeposit.apiSurface.trim().length >= 10 &&
+            digitalDeposit.userFlow.trim().length >= 10
+          );
+        }
         if (depositMode === "group") {
           return (
             !!organizedGroup &&
@@ -374,8 +483,20 @@ export function PoorManProtectionWizard() {
       case "chronology":
         return !!firstFixedOn || !!conceivedOn || iterationNotes.trim().length >= 10;
       case "axisA":
+        if (patentCategory === "digital") {
+          return (
+            digitalDeposit.problemStatement.trim().length >= 20 &&
+            digitalDeposit.novelSteps.trim().length >= 20
+          );
+        }
         return silhouette.trim().length >= 8 && hierarchy.trim().length >= 8;
       case "axisB":
+        if (patentCategory === "digital") {
+          return (
+            digitalDeposit.dataStructures.trim().length >= 10 &&
+            digitalDeposit.apiSurface.trim().length >= 10
+          );
+        }
         return emotionalIntent.trim().length >= 8 && palette.length > 0;
       case "hybrid":
         return true;
@@ -393,6 +514,7 @@ export function PoorManProtectionWizard() {
     contentHash,
     depositMode,
     description,
+    digitalDeposit,
     emotionalIntent,
     file,
     firstFixedOn,
@@ -404,6 +526,7 @@ export function PoorManProtectionWizard() {
     oathText,
     organizedGroup,
     palette.length,
+    patentCategory,
     result,
     silhouette,
     step,
@@ -411,13 +534,15 @@ export function PoorManProtectionWizard() {
   ]);
 
   const runSeal = async () => {
-    if (!file || !contentHash) return;
+    const isDigital = patentCategory === "digital";
+    if (!contentHash) return;
+    if (!isDigital && !file) return;
     setBusy(true);
     setChamberMode("sealing");
     setSealProgress(0.15);
     setResult(null);
     try {
-      const imageBase64 = await fileToDownscaledBase64(file);
+      const imageBase64 = !isDigital && file ? await fileToDownscaledBase64(file) : undefined;
       setSealProgress(0.35);
       const log = pushCustody(
         pushCustody(custodyLog, "hybridization_requested", hybridMode),
@@ -426,26 +551,51 @@ export function PoorManProtectionWizard() {
       );
       setCustodyLog(log);
       setSealProgress(0.55);
+      const digitalDisclosure =
+        isDigital ?
+          buildDigitalDisclosureFromState(digitalDeposit, title.trim(), description.trim())
+        : undefined;
       const res = await fetch("/api/poor-man-protection/protect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          patentKind: isDigital ? "digital" : "physical",
           title: title.trim(),
           description: description.trim(),
           formVariable,
           paletteVariable,
-          formInterrogation: { silhouette, hierarchy, negativeSpace, distinctiveMarks },
-          paletteInterrogation: {
-            emotionalIntent,
-            contrastStrategy,
-            forbiddenColors,
-            lightingContext,
-          },
+          formInterrogation:
+            isDigital ?
+              {
+                silhouette: digitalDeposit.problemStatement,
+                hierarchy: digitalDeposit.novelSteps,
+                negativeSpace: digitalDeposit.technicalEffect,
+                distinctiveMarks: digitalDeposit.sourceExcerpt || undefined,
+              }
+            : { silhouette, hierarchy, negativeSpace, distinctiveMarks },
+          paletteInterrogation:
+            isDigital ?
+              {
+                emotionalIntent: digitalDeposit.dataStructures,
+                contrastStrategy: digitalDeposit.apiSurface,
+                forbiddenColors: digitalDeposit.userFlow,
+                lightingContext: digitalDeposit.inventionType,
+              }
+            : {
+                emotionalIntent,
+                contrastStrategy,
+                forbiddenColors,
+                lightingContext,
+              },
           palette,
           contentHash,
-          mimeType: file.type || "image/png",
-          fileName: file.name,
+          mimeType: isDigital ? "application/zzai-digital-patent" : file?.type || "image/png",
+          fileName:
+            isDigital ?
+              `${title.trim().replace(/\s+/g, "-").slice(0, 60)}-digital-patent.json`
+            : file?.name,
           imageBase64,
+          digitalDisclosure,
           hybridizationMode: hybridMode,
           enableCyberSeal: true,
           mintCoin: true,
@@ -574,18 +724,34 @@ export function PoorManProtectionWizard() {
         <AlertTriangle className="w-5 h-5 text-[#5B8DA8] shrink-0 mt-0.5" />
         <div className="text-sm text-muted-foreground leading-relaxed space-y-1">
           <p>
-            <span className="font-semibold text-foreground">Research-backed stance:</span> “Poor
-            man’s copyright” alone is not a registered right. ZZAI builds a{" "}
-            <span className="text-foreground">multi-channel evidence pack</span> — dual-axis
+            <span className="font-semibold text-foreground">Research-backed stance:</span> A “poor
+            man’s patent” or self-deposit alone is not a registered IP right. ZZAI builds a{" "}
+            <span className="text-foreground">multi-channel evidence pack</span> for{" "}
+            <span className="text-foreground">physical and digital inventions</span> — dual-axis
             hybridization, SHA-256 integrity, chain of custody, timestamp token, email delivery, and
             printable postal deposit — so you have something concrete for counsel and disputes.
           </p>
           <p className="text-xs">
-            Still not a substitute for U.S. Copyright Office registration when you need statutory
-            damages / to sue.
+            Not a substitute for USPTO patent filing, trademark registration, or U.S. Copyright Office
+            registration when you need statutory damages or formal rights.
           </p>
         </div>
       </div>
+
+      <PatentKindSelector
+        value={patentCategory}
+        onChange={(cat) => {
+          setPatentCategory(cat);
+          setResult(null);
+          if (cat === "group") setDepositMode("group");
+          if (cat === "physical") setDepositMode("single");
+          if (cat === "digital") {
+            setDepositMode("single");
+            setMedium("Software / digital invention");
+          }
+        }}
+      />
+      <PatentKindIntro category={patentCategory} />
 
       {/* Progress */}
       <div className="overflow-x-auto pb-1">
@@ -722,6 +888,7 @@ export function PoorManProtectionWizard() {
 
               {STEPS[step].id === "deposit" && (
                 <>
+                  {patentCategory !== "digital" && (
                   <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
@@ -736,13 +903,24 @@ export function PoorManProtectionWizard() {
                       size="sm"
                       variant={depositMode === "group" ? "default" : "outline"}
                       className="gap-1.5"
-                      onClick={() => setDepositMode("group")}
+                      onClick={() => {
+                        setDepositMode("group");
+                        setPatentCategory("group");
+                      }}
                     >
                       <Layers className="w-3.5 h-3.5" /> Group patent
                     </Button>
                   </div>
+                  )}
 
-                  {depositMode === "group" ? (
+                  {patentCategory === "digital" ? (
+                    <>
+                      <DigitalDepositPanel
+                        state={digitalDeposit}
+                        onChange={(patch) => setDigitalDeposit((d) => ({ ...d, ...patch }))}
+                      />
+                    </>
+                  ) : depositMode === "group" ? (
                     <>
                       <GroupDeposit
                         images={groupImages}
@@ -902,9 +1080,27 @@ export function PoorManProtectionWizard() {
               {STEPS[step].id === "axisA" && (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    These questions force measurable form claims — the kind of specificity generic
-                    “upload & hash” tools skip.
+                    {patentCategory === "digital"
+                      ? "Axis A captures the logic and method claims — the measurable algorithmic fingerprint."
+                      : "These questions force measurable form claims — the kind of specificity generic “upload & hash” tools skip."}
                   </p>
+                  {patentCategory === "digital" ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Problem statement (review)</Label>
+                        <Textarea rows={2} value={digitalDeposit.problemStatement} readOnly className="opacity-90" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Novel method steps (review)</Label>
+                        <Textarea rows={3} value={digitalDeposit.novelSteps} onChange={(e) => setDigitalDeposit((d) => ({ ...d, novelSteps: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Technical effect</Label>
+                        <Textarea rows={2} value={digitalDeposit.technicalEffect} onChange={(e) => setDigitalDeposit((d) => ({ ...d, technicalEffect: e.target.value }))} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
                   <div className="space-y-2">
                     <Label>Describe the silhouette / primary shape language</Label>
                     <Textarea
@@ -937,11 +1133,45 @@ export function PoorManProtectionWizard() {
                       onChange={(e) => setDistinctiveMarks(e.target.value)}
                     />
                   </div>
+                    </>
+                  )}
                 </>
               )}
 
               {STEPS[step].id === "axisB" && (
                 <>
+                  <p className="text-sm text-muted-foreground">
+                    {patentCategory === "digital"
+                      ? "Axis B captures data structures, APIs, and user flows — the interface fingerprint."
+                      : "Couple emotion + measured palette."}
+                  </p>
+                  {patentCategory === "digital" ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Data structures & state</Label>
+                        <Textarea rows={2} value={digitalDeposit.dataStructures} onChange={(e) => setDigitalDeposit((d) => ({ ...d, dataStructures: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>API / system surface</Label>
+                        <Textarea rows={2} value={digitalDeposit.apiSurface} onChange={(e) => setDigitalDeposit((d) => ({ ...d, apiSurface: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>User / operator flow</Label>
+                        <Textarea rows={2} value={digitalDeposit.userFlow} onChange={(e) => setDigitalDeposit((d) => ({ ...d, userFlow: e.target.value }))} />
+                      </div>
+                      {palette.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {palette.map((c) => (
+                            <div key={`${c.role}-${c.hex}`} className="flex items-center gap-2 text-xs">
+                              <span className="w-6 h-6 rounded-md border" style={{ background: c.hex }} />
+                              hash-{c.role} {c.hex}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
                   <div className="space-y-2">
                     <Label>Emotional / brand intent of the palette</Label>
                     <Textarea
@@ -974,6 +1204,8 @@ export function PoorManProtectionWizard() {
                       onChange={(e) => setLightingContext(e.target.value)}
                     />
                   </div>
+                    </>
+                  )}
                 </>
               )}
 

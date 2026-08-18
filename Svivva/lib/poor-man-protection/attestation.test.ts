@@ -84,6 +84,25 @@ describe("poor-man-protection", () => {
     expect(verifyCertificateHash({ ...cert, title: "tampered" })).toBe(false);
   });
 
+  it("builds digital scientific axes when patentKind is digital", () => {
+    const axes = buildScientificAxes({
+      ...sample,
+      patentKind: "digital",
+      digitalDisclosure: {
+        kind: "digital_patent",
+        inventionType: "software",
+        problemStatement: "Problem statement long enough for schema.",
+        novelSteps: "Novel steps long enough for the digital schema.",
+        technicalEffect: "Faster sealing",
+        dataStructures: "JSON disclosure object",
+        apiSurface: "REST protect endpoint",
+        userFlow: "Fill form then seal",
+      },
+    });
+    expect(axes.axisA.name).toBe("logic_algorithm");
+    expect(axes.axisB.name).toBe("data_interface");
+  });
+
   it("rejects a group patent whose merkle root does not match the sheets", () => {
     const organized = organizeGroupPatent([
       {
