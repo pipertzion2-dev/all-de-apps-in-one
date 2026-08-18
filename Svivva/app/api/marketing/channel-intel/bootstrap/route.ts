@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasAdminAccess } from "@/lib/auth/admin";
 import { getCurrentUser } from "@/lib/auth/session";
-import { ensureAdminStarterStoryWatch } from "@/lib/marketing/youtube-defaults";
+import { ensureAdminStarterStoryWatch } from "@/lib/marketing/youtube-defaults.server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;

@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
-import { ensureAdminStarterStoryWatch } from "@/lib/marketing/youtube-defaults";
+import { ensureAdminStarterStoryWatch } from "@/lib/marketing/youtube-defaults.server";
 
 export const maxDuration = 120;
 
