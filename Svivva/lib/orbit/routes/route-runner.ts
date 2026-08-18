@@ -69,6 +69,36 @@ async function executeRouteStep(
       const { runIfmStep } = await import("../ifm/run-ifm-step");
       return runIfmStep(ctx, config);
     }
+    case "bridge_ship": {
+      const { runBridgeShipStep } = await import("./route-quality-steps");
+      return runBridgeShipStep(ctx, config);
+    }
+    case "quality_gate": {
+      const { runQualityGateStep } = await import("./route-quality-steps");
+      const result = await runQualityGateStep(ctx, config);
+      if (ctx.projectId && !result.ok) {
+        await emitOrbitEvent({
+          orbitProjectId: ctx.projectId,
+          orbitCampaignId: ctx.campaignId,
+          routeId: ctx.routeId,
+          eventType: "quality_gate_failed",
+          source: "internal",
+          idempotencyKey: `quality:${ctx.routeId}:${Date.now()}`,
+          dimensions: { issues: result.issues },
+        });
+      } else if (ctx.projectId) {
+        await emitOrbitEvent({
+          orbitProjectId: ctx.projectId,
+          orbitCampaignId: ctx.campaignId,
+          routeId: ctx.routeId,
+          eventType: "quality_gate_passed",
+          source: "internal",
+          idempotencyKey: `quality:${ctx.routeId}:pass:${Date.now()}`,
+          dimensions: { checked: result.checked },
+        });
+      }
+      return result;
+    }
     case "plan": {
       if (!ctx.projectId) throw new Error("projectId required for plan step");
       const { planCampaignForProject } = await import("../campaign/run-plan");

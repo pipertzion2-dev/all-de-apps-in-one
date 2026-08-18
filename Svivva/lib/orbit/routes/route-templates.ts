@@ -78,6 +78,8 @@ export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
     value === "ingest" ||
     value === "fusion" ||
     value === "ifm" ||
+    value === "bridge_ship" ||
+    value === "quality_gate" ||
     value === "plan" ||
     value === "generate" ||
     value === "approval" ||

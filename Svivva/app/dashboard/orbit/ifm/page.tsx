@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GitBranch, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket } from "lucide-react";
 import { useState } from "react";
 
 type IfmPairing = {
@@ -65,6 +65,20 @@ export default function OrbitIfmPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ count: previewCount }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+  });
+
+  const shipForProject = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/ifm/ship`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
@@ -130,6 +144,22 @@ export default function OrbitIfmPage() {
             ) : null}
             Save to project
           </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || shipForProject.isPending}
+            onClick={() => shipForProject.mutate()}
+          >
+            {shipForProject.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            Ship bridges
+          </Button>
+          <Button asChild variant="outline" size="default">
+            <Link href="/dashboard/orbit/matrix">
+              <Rocket className="mr-2 h-4 w-4" />
+              Scene matrix
+            </Link>
+          </Button>
           <Button disabled={createIfmRoute.isPending} onClick={() => createIfmRoute.mutate()}>
             {createIfmRoute.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,6 +213,12 @@ export default function OrbitIfmPage() {
       {generateForProject.data ? (
         <p className="text-sm text-green-600">
           Saved {generateForProject.data.created} pairing(s) to project.
+        </p>
+      ) : null}
+      {shipForProject.data ? (
+        <p className="text-sm text-green-600">
+          Shipped {shipForProject.data.shipped} bridge page(s)
+          {shipForProject.data.failed ? ` (${shipForProject.data.failed} failed quality gate)` : ""}.
         </p>
       ) : null}
       {createIfmRoute.data?.route?.id ? (

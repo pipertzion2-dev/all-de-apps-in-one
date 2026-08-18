@@ -106,6 +106,29 @@ export async function persistIfmPairingEntities(
   return { pageEntityId: pageEntity.id, linkCount };
 }
 
+export async function replaceIfmPairings(
+  projectId: string,
+  userId: string,
+  pairings: IfmPairing[],
+): Promise<IfmProjectConfig> {
+  const project = await getOrbitProjectById(projectId, userId);
+  if (!project) throw new Error("Orbit project not found");
+
+  const meta = (project.metadata || {}) as Record<string, unknown>;
+  const current = parseIfmConfig(meta);
+  const next: IfmProjectConfig = { ...current, pairings: pairings.slice(-100) };
+
+  await db
+    .update(orbitProjects)
+    .set({
+      metadata: { ...meta, ifm: next },
+      updatedAt: new Date(),
+    })
+    .where(and(eq(orbitProjects.id, projectId), eq(orbitProjects.userId, userId)));
+
+  return next;
+}
+
 export async function updateIfmProjectConfig(
   projectId: string,
   userId: string,

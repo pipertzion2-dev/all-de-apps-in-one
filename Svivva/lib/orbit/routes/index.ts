@@ -27,6 +27,13 @@ export { runFusionStep, type FusionStepResult } from "./run-fusion-step";
 export { resolveFusionRunStep, FUSION_TASK_RUN_STEPS } from "./fusion-task-map";
 export { buildHybridSceneDestinations } from "./hybrid-route-scenes";
 export { IFM_ROUTE_SCENE, getIfmRouteScene } from "./ifm-route-scenes";
+export {
+  OAAS_GROWTH_MATRIX,
+  getSceneMatrix,
+  runSceneMatrixForProject,
+  type SceneMatrix,
+} from "./scene-matrix";
+export { runBridgeShipStep, runQualityGateStep } from "./route-quality-steps";
 
 export {
   createOrbitRoute,

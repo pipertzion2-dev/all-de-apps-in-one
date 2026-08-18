@@ -87,6 +87,9 @@ export default function OrbitRoutesPage() {
           <Button asChild size="sm" variant="outline">
             <Link href="/dashboard/orbit/ifm">Intent Fusion Matrix</Link>
           </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/dashboard/orbit/matrix">Scene matrix</Link>
+          </Button>
           <Button asChild size="sm">
             <Link href="/dashboard/orbit/routes/new">Create route</Link>
           </Button>
