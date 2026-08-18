@@ -8,6 +8,7 @@ import {
   marketingReferrals,
   marketingUtmLinks,
 } from "@/lib/marketing/schema";
+import { getPiggyBankSummary } from "@/lib/piggy-bank";
 import { sql, desc, eq, count } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -172,6 +173,27 @@ export async function GET() {
     console.warn("[admin/overview] Stripe not available:", e);
   }
 
+  let piggyBank = {
+    balance: 0,
+    totalIncome: 0,
+    totalExpenses: 0,
+    entryCount: 0,
+    available: false,
+  };
+
+  try {
+    const summary = await getPiggyBankSummary();
+    piggyBank = {
+      balance: summary.balanceCents / 100,
+      totalIncome: summary.totalIncomeCents / 100,
+      totalExpenses: summary.totalExpenseCents / 100,
+      entryCount: summary.entryCount,
+      available: true,
+    };
+  } catch (e) {
+    console.warn("[admin/overview] Piggy bank not available:", e);
+  }
+
   const creds = credRows[0];
   const marketingHealth = {
     campaigns: Number(totalCampaigns ?? 0),
@@ -200,6 +222,7 @@ export async function GET() {
       totalApiCalls: Number(totalApiCalls ?? 0),
     },
     stripe,
+    piggyBank,
     marketing: marketingHealth,
     users: allUsers.map((u) => ({
       ...u,

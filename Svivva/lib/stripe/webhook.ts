@@ -2,6 +2,7 @@ import { getUncachableStripeClient } from "./client";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { recordStripeCharge } from "@/lib/piggy-bank";
 import type Stripe from "stripe";
 
 function idOf(
@@ -65,6 +66,22 @@ export class WebhookHandlers {
             .update(users)
             .set({ stripeSubscriptionId: null })
             .where(eq(users.stripeCustomerId, customerId));
+        }
+        break;
+      }
+      case "charge.succeeded": {
+        const charge = event.data.object as Stripe.Charge;
+        if (charge.paid && charge.amount > 0) {
+          try {
+            await recordStripeCharge({
+              chargeId: charge.id,
+              amountCents: charge.amount,
+              currency: charge.currency,
+              description: charge.description ?? charge.metadata?.description ?? null,
+            });
+          } catch (e) {
+            console.warn("[stripe/webhook] piggy bank record failed:", e);
+          }
         }
         break;
       }
