@@ -24,7 +24,43 @@ export type LedgerEntry = {
   createdAt: string;
 };
 
+/** Runtime migration — Vercel build often has no DATABASE_URL; create table on first use. */
+let tableReady: Promise<void> | null = null;
+
+export async function ensurePiggyBankTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = (async () => {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS platform_ledger_entries (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          amount_cents INTEGER NOT NULL,
+          currency TEXT NOT NULL DEFAULT 'usd',
+          type TEXT NOT NULL CHECK (type IN ('income', 'expense', 'adjustment')),
+          category TEXT,
+          description TEXT,
+          source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'stripe', 'referral', 'marketplace')),
+          external_id TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS idx_platform_ledger_created_at
+        ON platform_ledger_entries(created_at DESC)
+      `);
+      await db.execute(sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_platform_ledger_external_id
+        ON platform_ledger_entries(external_id) WHERE external_id IS NOT NULL
+      `);
+    })().catch((err) => {
+      tableReady = null;
+      throw err;
+    });
+  }
+  await tableReady;
+}
+
 export async function getPiggyBankSummary(): Promise<PiggyBankSummary> {
+  await ensurePiggyBankTable();
   const [row] = await db
     .select({
       balanceCents: sql<number>`coalesce(sum(${platformLedgerEntries.amountCents}), 0)::int`,
@@ -43,6 +79,7 @@ export async function getPiggyBankSummary(): Promise<PiggyBankSummary> {
 }
 
 export async function listLedgerEntries(limit = 50): Promise<LedgerEntry[]> {
+  await ensurePiggyBankTable();
   const rows = await db
     .select()
     .from(platformLedgerEntries)
@@ -71,6 +108,7 @@ export async function addLedgerEntry(input: {
   source?: LedgerEntrySource;
   externalId?: string;
 }): Promise<LedgerEntry> {
+  await ensurePiggyBankTable();
   const [row] = await db
     .insert(platformLedgerEntries)
     .values({

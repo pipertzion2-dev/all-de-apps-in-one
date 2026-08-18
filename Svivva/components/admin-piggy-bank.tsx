@@ -105,8 +105,13 @@ export function AdminPiggyBank() {
   if (isError || !data) {
     return (
       <Card>
-        <CardContent className="p-6 text-sm text-red-500">
-          Could not load piggy bank. Run migration 004_piggy_bank.sql if the table is missing.
+        <CardContent className="p-6 space-y-3 text-sm">
+          <p className="text-red-500">
+            Could not load piggy bank. Check DATABASE_URL is set in production.
+          </p>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </CardContent>
       </Card>
     );
