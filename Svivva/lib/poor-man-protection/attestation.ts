@@ -10,6 +10,7 @@ import type {
   TimestampToken,
 } from "./types";
 import { groupMerkleCanonical } from "./group-organize";
+import { buildDigitalScientificAxes } from "./digital-patent";
 
 export const DISCLAIMER =
   "ZZAI Poor Man Protection creates a timestamped, cryptographically sealed evidentiary package with dual-axis scientific hybridization and mint-ready digital asset metadata. It is NOT a registered patent, trademark, or copyright registration with any government office (including the U.S. Copyright Office). Self-mailing and platform certificates are supporting evidence of anteriority/possession — not a substitute for counsel or formal registration. Courts weigh digital evidence in context (hash integrity, chain of custody, independent timestamps, authorship corroboration).";
@@ -51,6 +52,9 @@ function joinInterrogation(parts: Array<string | undefined>, fallback: string): 
 }
 
 export function buildScientificAxes(input: ProtectRequest): ScientificAxes {
+  if (input.patentKind === "digital" && input.digitalDisclosure) {
+    return buildDigitalScientificAxes(input, input.digitalDisclosure);
+  }
   const palette = input.palette ? enrichPalette(input.palette) : undefined;
   const dominant = palette?.[0];
   const accent = palette?.find((p) => p.role === "accent") || palette?.[1];

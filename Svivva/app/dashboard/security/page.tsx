@@ -88,17 +88,25 @@ export default function SecurityDashboardPage() {
           <div>
             <p className="text-sm font-semibold text-foreground">Poor Man Protection</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Seal sketches with dual-axis hybridization, a protection coin, and cyber integrity —
-              then watch threats here.
+              Seal physical sketches and digital inventions with dual-axis hybridization, a protection
+              coin, and cyber integrity — then watch threats here.
             </p>
           </div>
-          <a
-            href="/dashboard/poor-man-protection"
-            className="inline-flex items-center justify-center h-9 px-4 rounded-lg text-sm font-semibold text-white"
-            style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
-          >
-            Open protection
-          </a>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <a
+              href="/tools/poor-mans-patent"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-lg text-sm font-semibold border border-[#5B8DA8]/40 text-[#5B8DA8]"
+            >
+              Public chooser
+            </a>
+            <a
+              href="/dashboard/poor-man-protection"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-lg text-sm font-semibold text-white"
+              style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+            >
+              Open protection
+            </a>
+          </div>
         </div>
       </div>
     </FeaturePageShell>

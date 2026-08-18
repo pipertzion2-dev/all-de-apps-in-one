@@ -1,5 +1,39 @@
 import { z } from "zod";
 
+export const PATENT_KINDS = ["physical", "digital"] as const;
+export type PatentKind = (typeof PATENT_KINDS)[number];
+
+export const digitalArtifactSchema = z.object({
+  fileName: z.string().min(1).max(260),
+  contentHash: z.string().regex(/^[a-f0-9]{64}$/i),
+  mimeType: z.string().max(100).optional(),
+  byteLength: z.number().optional(),
+});
+
+export const digitalDisclosureSchema = z.object({
+  kind: z.literal("digital_patent"),
+  inventionType: z.enum([
+    "software",
+    "algorithm",
+    "saas_ui",
+    "mobile_app",
+    "api",
+    "hardware_firmware",
+    "other",
+  ]),
+  problemStatement: z.string().min(20).max(4000),
+  novelSteps: z.string().min(20).max(4000),
+  technicalEffect: z.string().min(10).max(2000),
+  dataStructures: z.string().min(10).max(2000),
+  apiSurface: z.string().min(10).max(2000),
+  userFlow: z.string().min(10).max(2000),
+  artifacts: z.array(digitalArtifactSchema).max(12).optional(),
+  sourceExcerpt: z.string().max(50_000).optional(),
+});
+
+export type DigitalDisclosure = z.infer<typeof digitalDisclosureSchema>;
+export type DigitalArtifact = z.infer<typeof digitalArtifactSchema>;
+
 export const COLOR_ROLES = ["dominant", "secondary", "accent", "shadow", "highlight"] as const;
 
 export const colorSwatchSchema = z.object({
@@ -79,6 +113,7 @@ export const groupImageInputSchema = z.object({
 });
 
 export const protectRequestSchema = z.object({
+  patentKind: z.enum(PATENT_KINDS).optional().default("physical"),
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(4000),
   formVariable: z.string().min(1).max(1000),
@@ -116,6 +151,7 @@ export const protectRequestSchema = z.object({
   creatorOath: creatorOathSchema.optional(),
   custodyLog: z.array(custodyEventSchema).max(40).optional(),
   groupDisclosure: groupDisclosureSchema.optional(),
+  digitalDisclosure: digitalDisclosureSchema.optional(),
   delivery: z
     .object({
       emailTo: z.string().email().optional(),
@@ -123,7 +159,23 @@ export const protectRequestSchema = z.object({
       includePostalInstructions: z.boolean().optional().default(true),
     })
     .optional(),
-});
+})
+  .superRefine((data, ctx) => {
+    if (data.patentKind === "digital" && !data.digitalDisclosure) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Digital patents require a structured digitalDisclosure payload.",
+        path: ["digitalDisclosure"],
+      });
+    }
+    if (data.patentKind === "digital" && data.digitalDisclosure && !data.palette?.length) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Digital patents require a hash-derived palette for axis B.",
+        path: ["palette"],
+      });
+    }
+  });
 
 export type ColorSwatch = z.infer<typeof colorSwatchSchema>;
 export type ProtectRequest = z.infer<typeof protectRequestSchema>;
@@ -190,13 +242,13 @@ export type CyberSeal = {
 
 export type ScientificAxes = {
   axisA: {
-    name: "form_composition";
+    name: "form_composition" | "logic_algorithm";
     label: string;
     domain: "optical" | "mechanical" | "information";
     summary: string;
   };
   axisB: {
-    name: "color_spectral";
+    name: "color_spectral" | "data_interface";
     label: string;
     domain: "optical" | "information";
     summary: string;
@@ -219,6 +271,7 @@ export type TimestampToken = {
 export type PoorManCertificate = {
   protocol: "ZZAI-Poor-Man-Protection/1.1";
   disclaimer: string;
+  patentKind?: PatentKind;
   createdAt: string;
   title: string;
   description: string;
@@ -242,6 +295,7 @@ export type PoorManCertificate = {
   creatorOath?: CreatorOath;
   custodyLog?: CustodyEvent[];
   groupDisclosure?: GroupDisclosure;
+  digitalDisclosure?: DigitalDisclosure;
   attestationId: string;
   certificateHash: string;
   verifyUrl?: string;

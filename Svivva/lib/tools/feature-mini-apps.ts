@@ -70,12 +70,24 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     path: "/tools/sketch-hash-stamp",
     name: "Sketch Hash Stamp",
     description:
-      "Hash a sketch in the browser. Poor Man Protection seals, timestamps, and builds a court pack.",
+      "Hash a sketch in the browser. Poor Man Protection seals physical and digital inventions with a court pack.",
     hub: "cyber-security-mini-apps",
     parentHref: "/dashboard/poor-man-protection",
     parentLabel: "Poor Man Protection",
     sliceNote: "SHA-256 only — not dual-axis hybridization, coin mint, or court PDF.",
     keyword: "sketch file hash",
+  },
+  {
+    slug: "poor-mans-patent",
+    path: "/tools/poor-mans-patent",
+    name: "Poor Man's Patent",
+    description:
+      "Pick physical sketches, digital software, or a multi-figure group patent — then open the full sealing wizard.",
+    hub: "cyber-security-mini-apps",
+    parentHref: "/dashboard/poor-man-protection",
+    parentLabel: "Poor Man Protection",
+    sliceNote: "Entry chooser only — not the oath, hybridization engine, coin mint, or court PDF.",
+    keyword: "poor mans patent digital physical",
   },
 ];
 

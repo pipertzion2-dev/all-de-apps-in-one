@@ -77,5 +77,19 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  if (job === "orbit" || job === "all") {
+    const orbitScheduler = await fetch(`${origin}/api/orbit/scheduler/run`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({}),
+      signal: AbortSignal.timeout(240_000),
+    }).then(async (r) => ({
+      ok: r.ok,
+      status: r.status,
+      body: await r.json().catch(() => ({})),
+    }));
+    out.orbitScheduler = orbitScheduler;
+  }
+
   return NextResponse.json({ success: true, ...out });
 }
