@@ -78,7 +78,10 @@ function ChannelStrip({
   );
 }
 
-export function PlatformFeatureHub({ variant = "home", hideBackground = false }: PlatformFeatureHubProps) {
+export function PlatformFeatureHub({
+  variant = "home",
+  hideBackground = false,
+}: PlatformFeatureHubProps) {
   const [goal, setGoal] = useState(PRESET_SCENES[0]);
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
   const [loading, setLoading] = useState(false);

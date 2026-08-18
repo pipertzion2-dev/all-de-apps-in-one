@@ -505,8 +505,7 @@ export default function LandingPage() {
           <div
             className="pointer-events-none absolute inset-x-0 top-0 h-20 sm:h-28 z-[1]"
             style={{
-              background:
-                "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div className="relative z-10">
