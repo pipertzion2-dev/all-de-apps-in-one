@@ -213,9 +213,7 @@ export function AdminPiggyBank() {
                   className="flex justify-between gap-3 border-b border-border/50 pb-2 items-start"
                 >
                   <div className="min-w-0">
-                    <p className="truncate">
-                      {entry.description || entry.category || entry.type}
-                    </p>
+                    <p className="truncate">{entry.description || entry.category || entry.type}</p>
                     <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center">
                       <span>{formatDate(entry.createdAt)}</span>
                       <Badge variant="outline" className="text-[10px] px-1 py-0">

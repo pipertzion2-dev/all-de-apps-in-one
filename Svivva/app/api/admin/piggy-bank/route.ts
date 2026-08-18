@@ -74,7 +74,8 @@ export async function POST(request: Request) {
       amountCents: signedCents,
       type: type as LedgerEntryType,
       description,
-      category: category ?? (type === "income" ? "manual" : type === "expense" ? "expense" : "adjustment"),
+      category:
+        category ?? (type === "income" ? "manual" : type === "expense" ? "expense" : "adjustment"),
       currency: currency?.toLowerCase() ?? "usd",
       source: "manual",
     });
