@@ -118,16 +118,16 @@ export function CamoThreeOverlay({
         null,
       ];
 
-      // OaaS mixing board: mostly transparent cells so small blooms stay visible.
+      // OaaS mixing board: light tints only — keep blooms clearly visible behind UI cards.
       const oaasColors = [
         null,
-        "rgba(91, 141, 168, 0.16)",
+        "rgba(91, 141, 168, 0.10)",
         null,
-        "rgba(216, 160, 176, 0.12)",
+        "rgba(216, 160, 176, 0.08)",
         null,
-        "rgba(184, 160, 200, 0.10)",
+        "rgba(184, 160, 200, 0.07)",
         null,
-        "rgba(15, 35, 40, 0.28)",
+        "rgba(15, 35, 40, 0.12)",
       ];
 
       const toneCount = isCheckoutCamo
@@ -248,7 +248,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? "brightness(1.08) saturate(1.25)"
+              ? "brightness(1.18) saturate(1.45) contrast(1.05)"
               : isIntro
                 ? "brightness(1.05) saturate(1.35)"
                 : "brightness(1.15) saturate(1.1)",
@@ -263,7 +263,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-40 md:opacity-50"
+              ? "opacity-20 md:opacity-28"
               : isIntro
                 ? "opacity-55 md:opacity-60"
                 : "opacity-60 md:opacity-100"

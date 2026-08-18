@@ -133,20 +133,21 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     spreadZ: 0.75,
   },
   oaas: {
-    flowerCount: 52,
-    particleCount: 28,
-    waterSize: 16,
-    cameraZ: 8.4,
-    cameraY: 3.7,
+    flowerCount: 96,
+    particleCount: 36,
+    waterSize: 18,
+    cameraZ: 7.6,
+    cameraY: 3.5,
     cameraX: 0,
     lookAtY: 0,
-    bloomSpeed: 0.024,
-    crtIntensity: 0.1,
+    bloomSpeed: 0.028,
+    crtIntensity: 0.08,
     pixelSize: 1,
-    scanlineIntensity: 0.006,
-    interactionStrength: 0.45,
-    spreadX: 0.72,
-    spreadZ: 0.76,
+    scanlineIntensity: 0.004,
+    interactionStrength: 0.5,
+    spreadX: 0.88,
+    spreadZ: 0.92,
+    mobileScaleBoost: 1.05,
   },
 };
 
@@ -493,67 +494,67 @@ const CHECKOUT_FLOWER_CONFIGS: FlowerConfig[] = [
   },
 ];
 
-// Smaller blooms for the OaaS mixing-board section — visible but not viewport-filling.
+// Visible blooms for the OaaS mixing-board section — smaller than hero, still readable.
 const OAAS_FLOWER_CONFIGS: FlowerConfig[] = [
   {
     type: "tulip",
     petalCount: 5,
     petalShape: "pointed",
     colors: [VIVVA_COLORS.dustyPink, VIVVA_COLORS.paleRose, VIVVA_COLORS.teal],
-    scale: 0.95,
-    petalWidth: 0.26,
-    petalLength: 0.62,
-    openAngle: 0.6,
+    scale: 1.12,
+    petalWidth: 0.28,
+    petalLength: 0.68,
+    openAngle: 0.62,
   },
   {
     type: "lily",
     petalCount: 6,
     petalShape: "curved",
     colors: [VIVVA_COLORS.mint, VIVVA_COLORS.tealLight, VIVVA_COLORS.cream],
-    scale: 1.0,
-    petalWidth: 0.2,
-    petalLength: 0.68,
-    openAngle: 0.48,
+    scale: 1.15,
+    petalWidth: 0.22,
+    petalLength: 0.74,
+    openAngle: 0.52,
   },
   {
     type: "orchid",
     petalCount: 5,
     petalShape: "teardrop",
     colors: [VIVVA_COLORS.lavender, VIVVA_COLORS.burgundyLight, VIVVA_COLORS.paleRose],
-    scale: 0.9,
-    petalWidth: 0.32,
-    petalLength: 0.55,
-    openAngle: 0.52,
+    scale: 1.08,
+    petalWidth: 0.34,
+    petalLength: 0.6,
+    openAngle: 0.55,
   },
   {
     type: "rose",
     petalCount: 8,
     petalShape: "layered",
     colors: [VIVVA_COLORS.paleRose, VIVVA_COLORS.dustyPink, VIVVA_COLORS.maroon],
-    scale: 0.82,
-    petalWidth: 0.22,
-    petalLength: 0.38,
-    openAngle: 0.38,
+    scale: 1.0,
+    petalWidth: 0.24,
+    petalLength: 0.42,
+    openAngle: 0.42,
   },
   {
     type: "lotus",
     petalCount: 8,
     petalShape: "rounded",
     colors: [VIVVA_COLORS.tealLight, VIVVA_COLORS.mint, VIVVA_COLORS.teal],
-    scale: 0.95,
-    petalWidth: 0.26,
-    petalLength: 0.55,
-    openAngle: 0.42,
+    scale: 1.1,
+    petalWidth: 0.28,
+    petalLength: 0.6,
+    openAngle: 0.46,
   },
   {
     type: "dahlia",
     petalCount: 10,
     petalShape: "star",
     colors: [VIVVA_COLORS.burgundyLight, VIVVA_COLORS.dustyPink, VIVVA_COLORS.lavender],
-    scale: 0.78,
-    petalWidth: 0.12,
-    petalLength: 0.42,
-    openAngle: 0.32,
+    scale: 0.95,
+    petalWidth: 0.14,
+    petalLength: 0.48,
+    openAngle: 0.36,
   },
 ];
 
@@ -983,8 +984,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           ...baseConfig,
           flowerCount: isOaasPreset
             ? isSmallMobile
-              ? 26
-              : 34
+              ? 42
+              : 56
             : isCheckoutPreset
               ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
               : isSmallMobile
@@ -1003,15 +1004,15 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset ? 1.05 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
-              ? 0.58
-              : 0.68
+              ? 0.78
+              : 0.92
             : isSmallMobile
               ? 0.28
               : 0.36,
         }
       : {
           ...baseConfig,
-          mobileScaleBoost: isOaasPreset ? 0.88 : Math.max(0.85, scaleFactor),
+          mobileScaleBoost: isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
         };
 
     const scene = new THREE.Scene();
@@ -1125,8 +1126,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         ? 1
         : isOaas
           ? isMediumMobile
-            ? 0.82
-            : 0.9
+            ? 1.05
+            : 1.28
           : isMediumMobile
             ? 0.72
             : 1.4;
@@ -1146,7 +1147,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       );
       const initialGrowth =
         isOaas && isMediumMobile
-          ? 0.22 + Math.random() * 0.38
+          ? 0.45 + Math.random() * 0.35
           : isMediumMobile
             ? 0.04 + Math.random() * 0.08
             : isIntro
@@ -1154,7 +1155,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
                 ? 0.3 + Math.random() * 0.3
                 : 0.6 + Math.random() * 0.4
               : isOaas
-                ? 0.35 + Math.random() * 0.45
+                ? 0.62 + Math.random() * 0.28
                 : 0.5 + Math.random() * 0.5;
       flower.userData = {
         baseY: pos.y,
