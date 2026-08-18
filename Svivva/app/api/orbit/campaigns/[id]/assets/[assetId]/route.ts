@@ -9,6 +9,7 @@ import {
   updateContentAssetValidation,
   validationToRecord,
 } from "@/lib/orbit/content";
+import { enqueueAssetDistribution, processDistributionQueue } from "@/lib/orbit/distribution";
 import type { OrbitApprovalStatus } from "@/lib/orbit/graph-constants";
 
 export const dynamic = "force-dynamic";
@@ -56,8 +57,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }
 
-  let body: { action?: "approve" | "reject" | "revalidate"; approvalStatus?: OrbitApprovalStatus } =
-    {};
+  let body: {
+    action?: "approve" | "reject" | "revalidate" | "publish";
+    approvalStatus?: OrbitApprovalStatus;
+    processNow?: boolean;
+  } = {};
   try {
     body = await request.json();
   } catch {
@@ -78,6 +82,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       validationToRecord(validation),
     );
     return NextResponse.json({ asset: updated, validation });
+  }
+
+  if (body.action === "publish") {
+    const job = await enqueueAssetDistribution(assetId, user!.id);
+    if (!job) {
+      return NextResponse.json(
+        { error: "Asset not eligible for distribution — approve and validate first" },
+        { status: 400 },
+      );
+    }
+    let processed = undefined;
+    if (body.processNow !== false) {
+      processed = await processDistributionQueue({ jobIds: [job.id] });
+    }
+    const refreshed = await getOrbitContentAssetById(assetId);
+    return NextResponse.json({ job, processed, asset: refreshed });
   }
 
   const approvalStatus: OrbitApprovalStatus | undefined =

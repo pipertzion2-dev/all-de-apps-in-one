@@ -424,6 +424,7 @@ export function publishStatusForIntent(
 ): string {
   if (!validationPassed) return "draft";
   if (distributionIntent === "manual_ready") return "ready_for_manual";
+  if (distributionIntent === "auto_if_configured") return "scheduled";
   if (distributionIntent === "indexing") return "draft";
   return "draft";
 }

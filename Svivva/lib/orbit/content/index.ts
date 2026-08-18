@@ -23,6 +23,7 @@ export {
   getLatestAssetForPlannedId,
   updateContentAssetValidation,
   updateContentAssetApproval,
+  updateContentAssetPublishStatus,
   createContentAssetVersion,
 } from "./content-repository";
 export type { CreateContentAssetInput } from "./content-repository";

@@ -122,6 +122,25 @@ export async function updateContentAssetApproval(
   return row;
 }
 
+export async function updateContentAssetPublishStatus(
+  assetId: string,
+  publishStatus: string,
+  opts?: { publishedUrl?: string; publishedBy?: string },
+): Promise<OrbitContentAsset | undefined> {
+  const [row] = await db
+    .update(orbitContentAssets)
+    .set({
+      publishStatus,
+      publishedUrl: opts?.publishedUrl,
+      publishedAt: publishStatus === "published" ? new Date() : undefined,
+      publishedBy: opts?.publishedBy,
+      updatedAt: new Date(),
+    })
+    .where(eq(orbitContentAssets.id, assetId))
+    .returning();
+  return row;
+}
+
 export async function createContentAssetVersion(
   parent: OrbitContentAsset,
   updates: Pick<
