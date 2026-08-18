@@ -118,16 +118,18 @@ export function CamoThreeOverlay({
         null,
       ];
 
-      // OaaS mixing board: light tints only — keep blooms clearly visible behind UI cards.
+      // OaaS mixing board: intro-style camo tints with transparent gaps for water + blooms.
       const oaasColors = [
         null,
-        "rgba(91, 141, 168, 0.10)",
+        "rgba(210, 170, 180, 0.28)",
         null,
-        "rgba(216, 160, 176, 0.08)",
+        "rgba(175, 150, 185, 0.24)",
         null,
-        "rgba(184, 160, 200, 0.07)",
+        "rgba(140, 170, 110, 0.26)",
         null,
-        "rgba(15, 35, 40, 0.12)",
+        "rgba(91, 141, 168, 0.22)",
+        null,
+        "rgba(15, 35, 40, 0.30)",
       ];
 
       const toneCount = isCheckoutCamo
@@ -248,7 +250,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? "brightness(1.18) saturate(1.45) contrast(1.05)"
+              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
               : isIntro
                 ? "brightness(1.05) saturate(1.35)"
                 : "brightness(1.15) saturate(1.1)",
@@ -263,7 +265,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-20 md:opacity-28"
+              ? "opacity-38 md:opacity-48"
               : isIntro
                 ? "opacity-55 md:opacity-60"
                 : "opacity-60 md:opacity-100"

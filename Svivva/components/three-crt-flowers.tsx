@@ -1012,8 +1012,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           ...baseConfig,
           flowerCount: isOaasPreset
             ? isSmallMobile
-              ? 22
-              : 28
+              ? 28
+              : 36
             : isCheckoutPreset
               ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
               : isSmallMobile
@@ -1030,8 +1030,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset ? 0.75 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
-              ? 0.88
-              : 0.96
+              ? 0.96
+              : 1.05
             : isSmallMobile
               ? 0.28
               : 0.36,
@@ -1172,8 +1172,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         ? 1
         : isOaas
           ? isMediumMobile
-            ? 0.92
-            : 1.28
+            ? 1.08
+            : 1.32
           : isMediumMobile
             ? 0.72
             : 1.4;

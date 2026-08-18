@@ -61,7 +61,7 @@ function ChannelStrip({
   return (
     <Link
       href={href}
-      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/55 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
+      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/35 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
     >
       <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
         {channelLabel}
@@ -155,7 +155,7 @@ export function PlatformFeatureHub({
       )}
       <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"}>
         {!isCompact && (
-          <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/55 backdrop-blur-md rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
+          <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/35 backdrop-blur-sm rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
             <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
               {OAAS_NAME} · {OAAS_FULL_NAME}
             </Badge>
@@ -170,15 +170,15 @@ export function PlatformFeatureHub({
 
         {!isCompact && (
           <div className="grid sm:grid-cols-3 gap-3 text-center text-xs">
-            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/55 backdrop-blur-sm p-3">
+            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/35 backdrop-blur-sm p-3">
               <p className="font-bold text-[#5B8DA8]">{SIGNAL_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{SIGNAL_BUS.description}</p>
             </div>
-            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/55 backdrop-blur-sm p-3">
+            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/35 backdrop-blur-sm p-3">
               <p className="font-bold text-[#D94F9C]">{CREST_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
             </div>
-            <div className="rounded-lg border border-amber-500/40 bg-card/55 backdrop-blur-sm p-3">
+            <div className="rounded-lg border border-amber-500/40 bg-card/35 backdrop-blur-sm p-3">
               <p className="font-bold text-amber-600 dark:text-amber-400">
                 {MASTER_BUS.consoleName}
               </p>
@@ -190,7 +190,7 @@ export function PlatformFeatureHub({
           </div>
         )}
 
-        <Card className="border-[#5B8DA8]/30 bg-card/65 backdrop-blur-sm">
+        <Card className="border-[#5B8DA8]/30 bg-card/40 backdrop-blur-sm">
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Radio className="w-4 h-4 text-[#5B8DA8]" />
@@ -302,7 +302,7 @@ export function PlatformFeatureHub({
               </div>
             ))}
 
-            <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/55 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
+            <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
