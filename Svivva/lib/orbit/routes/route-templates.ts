@@ -1,4 +1,11 @@
 import type { OrbitRouteChannel, OrbitRouteDestination } from "../graph-constants";
+import {
+  HYBRID_ROUTE_SCENES,
+  getHybridRouteScene,
+  getHybridRouteSceneByStrategy,
+  isHybridRouteSceneId,
+  type HybridRouteScene,
+} from "./hybrid-route-scenes";
 
 /** Default growth pipeline for an existing ingested project. */
 export const GROWTH_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
@@ -54,12 +61,20 @@ export const ROUTE_TEMPLATES: RouteTemplate[] = [
 ];
 
 export function getRouteTemplate(templateId: string): RouteTemplate | undefined {
+  if (isHybridRouteSceneId(templateId)) {
+    return getHybridRouteScene(templateId);
+  }
   return ROUTE_TEMPLATES.find((t) => t.id === templateId);
+}
+
+export function listAllRouteTemplates(): RouteTemplate[] {
+  return [...ROUTE_TEMPLATES, ...HYBRID_ROUTE_SCENES];
 }
 
 export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
   return (
     value === "ingest" ||
+    value === "fusion" ||
     value === "plan" ||
     value === "generate" ||
     value === "approval" ||
@@ -69,3 +84,11 @@ export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
     value === "autopilot"
   );
 }
+
+export {
+  HYBRID_ROUTE_SCENES,
+  getHybridRouteScene,
+  getHybridRouteSceneByStrategy,
+  isHybridRouteSceneId,
+  type HybridRouteScene,
+};

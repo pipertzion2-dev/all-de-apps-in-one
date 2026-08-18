@@ -13,9 +13,19 @@ export {
   GROWTH_PIPELINE_DESTINATIONS,
   FULL_PIPELINE_DESTINATIONS,
   getRouteTemplate,
+  listAllRouteTemplates,
   isOrbitRouteChannel,
+  HYBRID_ROUTE_SCENES,
+  getHybridRouteScene,
+  getHybridRouteSceneByStrategy,
+  isHybridRouteSceneId,
   type RouteTemplate,
+  type HybridRouteScene,
 } from "./route-templates";
+
+export { runFusionStep, type FusionStepResult } from "./run-fusion-step";
+export { resolveFusionRunStep, FUSION_TASK_RUN_STEPS } from "./fusion-task-map";
+export { buildHybridSceneDestinations } from "./hybrid-route-scenes";
 
 export {
   createOrbitRoute,

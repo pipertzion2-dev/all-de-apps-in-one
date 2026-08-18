@@ -5,7 +5,8 @@ import {
   createOrbitRoute,
   listOrbitRoutesForUser,
   getRouteTemplate,
-  ROUTE_TEMPLATES,
+  listAllRouteTemplates,
+  getHybridRouteSceneByStrategy,
   isOrbitRouteChannel,
 } from "@/lib/orbit/routes";
 import { ORBIT_ROUTE_STATUSES } from "@/lib/orbit/graph-constants";
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     })),
-    ...(templates ? { templates: ROUTE_TEMPLATES } : {}),
+    ...(templates ? { templates: listAllRouteTemplates() } : {}),
   });
 }
 
@@ -59,7 +60,9 @@ export async function POST(request: NextRequest) {
     destinations?: Array<{ channel: string; order: number; config?: Record<string, unknown> }>;
     status?: string;
     templateId?: string;
+    hybridStrategyId?: string;
     retryPolicy?: { maxAttempts?: number; backoffMs?: number };
+    metadata?: Record<string, unknown>;
   } = {};
 
   try {
@@ -68,10 +71,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const template = body.templateId ? getRouteTemplate(body.templateId) : undefined;
+  const template = body.templateId
+    ? getRouteTemplate(body.templateId)
+    : body.hybridStrategyId
+      ? getHybridRouteSceneByStrategy(body.hybridStrategyId)
+      : undefined;
   const destinations = body.destinations?.length
     ? body.destinations
     : template?.destinations;
+
+  const sceneMeta =
+    body.hybridStrategyId || (body.templateId && body.templateId.startsWith("hybrid:"))
+      ? {
+          scene: {
+            type: "hybrid",
+            hybridStrategyId:
+              body.hybridStrategyId ||
+              body.templateId?.replace(/^hybrid:/, "") ||
+              undefined,
+          },
+        }
+      : {};
 
   if (!body.name?.trim()) {
     return NextResponse.json({ error: "name is required" }, { status: 400 });
@@ -102,6 +122,7 @@ export async function POST(request: NextRequest) {
       destinations,
       status: status as (typeof ORBIT_ROUTE_STATUSES)[number],
       retryPolicy: body.retryPolicy,
+      metadata: { ...sceneMeta, ...(body.metadata || {}) },
     });
     return NextResponse.json({ ok: true, route });
   } catch (e) {

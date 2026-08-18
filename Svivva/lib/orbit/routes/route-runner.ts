@@ -61,6 +61,10 @@ async function executeRouteStep(
       ctx.projectId = result.projectId;
       return result;
     }
+    case "fusion": {
+      const { runFusionStep } = await import("./run-fusion-step");
+      return runFusionStep(ctx, config);
+    }
     case "plan": {
       if (!ctx.projectId) throw new Error("projectId required for plan step");
       const { planCampaignForProject } = await import("../campaign/run-plan");

@@ -106,11 +106,24 @@ export default function NewOrbitRoutePage() {
                   value={templateId}
                   onChange={(e) => setTemplateId(e.target.value)}
                 >
-                  {templates.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
+                  <optgroup label="Core pipelines">
+                    {templates
+                      .filter((t) => !t.id.startsWith("hybrid:"))
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Hybrid GTM scenes">
+                    {templates
+                      .filter((t) => t.id.startsWith("hybrid:"))
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </optgroup>
                 </select>
                 <p className="text-xs text-muted-foreground">
                   {templates.find((t) => t.id === templateId)?.description}
