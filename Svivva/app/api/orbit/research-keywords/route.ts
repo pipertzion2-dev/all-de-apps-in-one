@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
   }
   if (!isOrbitAiConfigured()) {
     return NextResponse.json(
-      { error: "No AI provider configured. Add OPENAI_API_KEY (paid) or GEMINI_API_KEY in Vercel / Platform Secrets." },
+      {
+        error:
+          "No AI provider configured. Add OPENAI_API_KEY (paid) or GEMINI_API_KEY in Vercel / Platform Secrets.",
+      },
       { status: 400 },
     );
   }

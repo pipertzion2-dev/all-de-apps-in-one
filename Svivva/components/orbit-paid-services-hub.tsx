@@ -371,8 +371,8 @@ export function OrbitPaidServicesHub({
               {cat === "automation" && (
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
                   Orbit sends a JSON payload to your n8n webhook after each autopilot run — social
-                  posts, outreach pitches, directories, and indexing stats. Wire OmniSocials, Resend,
-                  Slack, or CRM nodes inside n8n instead of pasting keys here.
+                  posts, outreach pitches, directories, and indexing stats. Wire OmniSocials,
+                  Resend, Slack, or CRM nodes inside n8n instead of pasting keys here.
                 </p>
               )}
               <div className="space-y-2">

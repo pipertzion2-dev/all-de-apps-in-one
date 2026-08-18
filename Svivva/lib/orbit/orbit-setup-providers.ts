@@ -101,8 +101,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priceLabel: "Free tier",
     payUrl: "https://aistudio.google.com/apikey",
     docsUrl: "https://ai.google.dev/gemini-api/docs",
-    payNote:
-      "Fallback only when OpenAI is not configured (unless ORBIT_AI_PROVIDER=gemini).",
+    payNote: "Fallback only when OpenAI is not configured (unless ORBIT_AI_PROVIDER=gemini).",
     envKey: "GEMINI_API_KEY",
     priority: 10,
   },

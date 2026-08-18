@@ -432,7 +432,9 @@ export async function runMarketingAutopilot(opts?: {
         task(
           "manual-linkedin",
           r.ok ? "posted" : "failed",
-          r.ok ? "Published on LinkedIn via Ayrshare" : r.error || "Ayrshare LinkedIn publish failed",
+          r.ok
+            ? "Published on LinkedIn via Ayrshare"
+            : r.error || "Ayrshare LinkedIn publish failed",
           { url: r.url, copyText: liCopy },
         ),
       );
