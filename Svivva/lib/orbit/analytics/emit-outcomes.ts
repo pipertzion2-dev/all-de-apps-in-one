@@ -98,6 +98,27 @@ export async function emitContentValidationOutcome(
   });
 }
 
+export async function emitContentGenerated(
+  asset: Pick<
+    OrbitContentAsset,
+    "id" | "orbitProjectId" | "orbitCampaignId" | "platform" | "assetType" | "validationStatus"
+  >,
+): Promise<void> {
+  await emitOrbitEvent({
+    orbitProjectId: asset.orbitProjectId,
+    orbitCampaignId: asset.orbitCampaignId ?? undefined,
+    contentAssetId: asset.id,
+    eventType: "content_generated",
+    source: "content",
+    idempotencyKey: `content:${asset.id}:generated:v1`,
+    dimensions: {
+      platform: asset.platform,
+      assetType: asset.assetType,
+      validationStatus: asset.validationStatus,
+    },
+  });
+}
+
 export async function emitPolicyBlockedEvent(input: {
   orbitProjectId: string;
   orbitCampaignId?: string;

@@ -53,6 +53,12 @@ export default function OrbitCampaignsPage() {
           <p className="text-muted-foreground">
             Review content assets and configure approval policies for Orbit growth campaigns.
           </p>
+          <Link
+            href="/dashboard/orbit/projects"
+            className="mt-2 inline-block text-sm text-primary hover:underline"
+          >
+            View project analytics →
+          </Link>
         </div>
       </div>
 

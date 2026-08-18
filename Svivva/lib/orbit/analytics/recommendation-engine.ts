@@ -167,6 +167,30 @@ export async function generateRecommendationsForProject(
       if (created) result.created += 1;
       else result.skipped += 1;
     }
+
+    const campaignFailures = events.filter(
+      (e) => e.orbitCampaignId === campaign.id && e.eventType === "distribution_failed",
+    );
+    const campaignSuccesses = events.filter(
+      (e) => e.orbitCampaignId === campaign.id && e.eventType === "distribution_succeeded",
+    );
+    if (
+      campaign.status === "active" &&
+      campaignFailures.length >= 3 &&
+      campaignSuccesses.length === 0
+    ) {
+      const created = await upsertRecommendation(projectId, {
+        kind: "replan_campaign",
+        priority: "high",
+        title: `Replan ${campaign.name} after repeated failures`,
+        rationale:
+          "Multiple distribution failures with no successes. Generate a fresh campaign plan.",
+        orbitCampaignId: campaign.id,
+        actionPayload: { campaignId: campaign.id, objective: campaign.objective },
+      });
+      if (created) result.created += 1;
+      else result.skipped += 1;
+    }
   }
 
   const open = await listOpenRecommendations(projectId);

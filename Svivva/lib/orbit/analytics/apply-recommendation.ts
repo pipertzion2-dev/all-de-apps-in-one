@@ -3,6 +3,7 @@ import { getRecommendationById, updateRecommendationStatus } from "./recommendat
 import { emitOrbitEvent } from "./event-repository";
 import type { ApplyRecommendationResult } from "./event-types";
 import type { OrbitRecommendationKind } from "../graph-constants";
+import type { PlanCampaignInput } from "../campaign/plan-types";
 
 export async function applyRecommendation(
   recommendationId: string,
@@ -71,8 +72,13 @@ export async function applyRecommendation(
       break;
     }
     case "replan_campaign": {
-      message = "Replan requires manual POST to /api/orbit/projects/[id]/campaigns/plan";
-      result = { hint: message, projectId: rec.orbitProjectId };
+      const { planCampaignForProject } = await import("../campaign/run-plan");
+      result = await planCampaignForProject(rec.orbitProjectId, userId, {
+        objective: (payload.objective as PlanCampaignInput["objective"]) || undefined,
+        mode: "assisted",
+        name: payload.name as string | undefined,
+      });
+      message = "New campaign plan created";
       break;
     }
     case "manual_publish_review": {
