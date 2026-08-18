@@ -190,6 +190,7 @@ export const ORBIT_ROUTE_CHANNELS = [
   "ingest",
   "fusion",
   "ifm",
+  "ifm_compound",
   "bridge_ship",
   "quality_gate",
   "seo_ops_gate",
@@ -243,6 +244,7 @@ export const ORBIT_EVENT_TYPES = [
   "ifm_bridge_shipped",
   "ifm_pair_scored",
   "ifm_pair_pruned",
+  "ifm_winner_compounded",
   "quality_gate_passed",
   "quality_gate_failed",
   "seo_ops_gate_passed",
@@ -297,7 +299,7 @@ export type OrbitExternalAnalyticsConfig = {
   previousSessions7d?: number;
   /** Optional per-project webhook HMAC secret */
   webhookSecret?: string;
-  /** Optional GA4 property id for future Data API sync */
+  /** Optional GA4 property id for Data API sync (project + per-pair IFM attribution) */
   ga4PropertyId?: string;
   lastSyncedAt?: string;
 };

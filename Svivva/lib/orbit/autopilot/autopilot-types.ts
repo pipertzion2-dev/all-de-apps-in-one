@@ -55,11 +55,11 @@ export const AUTOPILOT_KINDS_BY_MODE: Record<
     "regenerate_content",
     "expand_content",
     "prune_ifm_pair",
+    "expand_ifm_pair",
   ],
 };
 
 export const AUTOPILOT_NEVER_AUTO: readonly OrbitRecommendationKind[] = [
   "manual_publish_review",
   "replan_campaign",
-  "expand_ifm_pair",
 ];

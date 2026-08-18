@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors } from "lucide-react";
+import { ArrowLeft, GitBranch, Loader2, Sparkles, Rocket, Trophy, Scissors, Layers } from "lucide-react";
 import { useState } from "react";
 
 type IfmPairing = {
@@ -24,6 +24,7 @@ type IfmPairing = {
 
 type RescoreResponse = {
   ok: boolean;
+  ga4Synced?: boolean;
   scored: number;
   archived: number;
   leaderboard: Array<{
@@ -32,11 +33,28 @@ type RescoreResponse = {
     slug: string;
     status: string;
     score: number;
+    sessions7d?: number;
+    conversions7d?: number;
     toolA: string;
     toolB: string;
   }>;
   winners: Array<{ id: string; fusionTitle: string; score: number }>;
   pruneCandidates: Array<{ id: string; fusionTitle: string; score: number }>;
+};
+
+type CompoundResponse = {
+  ok: boolean;
+  scored: number;
+  expanded: number;
+  shipped: number;
+  expandedPairingIds: string[];
+  winners: Array<{
+    id: string;
+    fusionTitle: string;
+    score: number;
+    sessions7d?: number;
+    conversions7d?: number;
+  }>;
 };
 
 type PreviewResponse = {
@@ -129,6 +147,23 @@ export default function OrbitIfmPage() {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
       return data as RescoreResponse;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-ifm-project", projectId] });
+    },
+  });
+
+  const compoundForProject = useMutation({
+    mutationFn: async () => {
+      if (!projectId.trim()) throw new Error("Project ID required");
+      const r = await authFetch(`/api/orbit/projects/${projectId.trim()}/ifm/compound`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expandCount: 2, shipExpanded: true }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data as CompoundResponse;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orbit-ifm-project", projectId] });
@@ -235,6 +270,18 @@ export default function OrbitIfmPage() {
             )}
             Rescore IFM
           </Button>
+          <Button
+            variant="outline"
+            disabled={!projectId.trim() || compoundForProject.isPending}
+            onClick={() => compoundForProject.mutate()}
+          >
+            {compoundForProject.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Layers className="mr-2 h-4 w-4" />
+            )}
+            Compound winners
+          </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/dashboard/orbit/matrix">
               <Rocket className="mr-2 h-4 w-4" />
@@ -319,6 +366,41 @@ export default function OrbitIfmPage() {
                 </div>
               </div>
             ) : null}
+            {rescoreForProject.data.ga4Synced ? (
+              <p className="text-xs text-muted-foreground">Per-pair GA4 attribution synced.</p>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {compoundForProject.data ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Layers className="h-5 w-5" />
+              Winner compounding
+            </CardTitle>
+            <CardDescription>
+              Expanded {compoundForProject.data.expanded} pairing(s), shipped{" "}
+              {compoundForProject.data.shipped} bridge page(s).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {compoundForProject.data.winners.length > 0 ? (
+              <div className="space-y-2">
+                {compoundForProject.data.winners.map((w) => (
+                  <div key={w.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                    <span>{w.fusionTitle}</span>
+                    <span className="text-muted-foreground">
+                      {w.score}/100
+                      {w.sessions7d != null ? ` · ${w.sessions7d} sessions` : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No winners to compound yet — rescore first.</p>
+            )}
           </CardContent>
         </Card>
       ) : null}

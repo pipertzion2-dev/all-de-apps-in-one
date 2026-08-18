@@ -105,8 +105,18 @@ export async function applyRecommendation(
       const pairingId = payload.pairingId as string;
       if (!pairingId) throw new Error("pairingId required");
       const { expandIfmPairFromWinner } = await import("../ifm/ifm-performance");
-      result = await expandIfmPairFromWinner(rec.orbitProjectId, userId, pairingId);
-      message = `Expanded IFM pair — ${(result as { created: number }).created} new pairing(s)`;
+      const { shipIfmBridgesForProject } = await import("../ifm/ship-ifm-bridges");
+      const expanded = await expandIfmPairFromWinner(rec.orbitProjectId, userId, pairingId);
+      let shipped = 0;
+      if (expanded.created > 0) {
+        const ship = await shipIfmBridgesForProject(rec.orbitProjectId, userId, {
+          pairingIds: expanded.pairings.map((p) => p.id),
+          statusFilter: ["planned"],
+        });
+        shipped = ship.shipped;
+      }
+      result = { ...expanded, shipped };
+      message = `Expanded IFM pair — ${expanded.created} new pairing(s), ${shipped} shipped`;
       break;
     }
     case "prune_ifm_pair": {

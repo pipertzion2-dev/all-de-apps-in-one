@@ -69,6 +69,10 @@ async function executeRouteStep(
       const { runIfmStep } = await import("../ifm/run-ifm-step");
       return runIfmStep(ctx, config);
     }
+    case "ifm_compound": {
+      const { runIfmCompoundStep } = await import("../ifm/run-ifm-compound-step");
+      return runIfmCompoundStep(ctx, config);
+    }
     case "bridge_ship": {
       const { runBridgeShipStep } = await import("./route-quality-steps");
       return runBridgeShipStep(ctx, config);

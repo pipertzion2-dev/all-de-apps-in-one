@@ -5,6 +5,7 @@ export type {
   IfmProjectConfig,
   IfmStepResult,
   IfmPerformanceSummary,
+  IfmCompoundSummary,
   GenerateIfmPairingsInput,
 } from "./ifm-types";
 
@@ -26,6 +27,7 @@ export {
 } from "./ifm-repository";
 
 export { runIfmStep } from "./run-ifm-step";
+export { runIfmCompoundStep } from "./run-ifm-compound-step";
 export { buildIfmBridgePageDraft } from "./bridge-page-generator";
 export { shipIfmBridgesForProject } from "./ship-ifm-bridges";
 export type { ShipIfmBridgesSummary } from "./ship-ifm-bridges";
@@ -38,3 +40,9 @@ export {
   DEFAULT_IFM_WINNER_THRESHOLD,
   DEFAULT_IFM_PRUNE_THRESHOLD,
 } from "./ifm-performance";
+export { compoundIfmWinnersForProject } from "./ifm-compound";
+export {
+  matchGa4PageToPairing,
+  pairAnalyticsBoost,
+  buildPairAnalyticsMap,
+} from "./ifm-analytics";

@@ -101,7 +101,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   const { id: projectId } = await params;
-  let body: { enabled?: boolean; pairCountPerRun?: number } = {};
+  let body: { enabled?: boolean; pairCountPerRun?: number; autoExpand?: boolean; autoPrune?: boolean } = {};
   try {
     body = await request.json();
   } catch {

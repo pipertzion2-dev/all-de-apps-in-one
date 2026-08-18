@@ -23,6 +23,14 @@ export function canAutoApplyRecommendation(input: {
     return { ok: false, reason: "kind_requires_manual_review" };
   }
 
+  if (input.kind === "expand_ifm_pair" && input.priority === "low") {
+    return { ok: false, reason: "expand_ifm_requires_medium_or_high_priority" };
+  }
+
+  if (input.kind === "expand_ifm_pair" && input.campaignMode === "assisted") {
+    return { ok: false, reason: "assisted_blocks_expand_ifm_pair" };
+  }
+
   const allowed = AUTOPILOT_KINDS_BY_MODE[input.campaignMode] || [];
   if (!allowed.includes(input.kind)) {
     return { ok: false, reason: `mode_${input.campaignMode}_blocks_${input.kind}` };

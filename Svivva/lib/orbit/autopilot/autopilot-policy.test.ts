@@ -68,4 +68,31 @@ describe("canAutoApplyRecommendation", () => {
       }).ok,
     ).toBe(false);
   });
+
+  it("allows expand_ifm_pair in autonomous mode for medium priority", () => {
+    expect(
+      canAutoApplyRecommendation({
+        kind: "expand_ifm_pair",
+        campaignMode: "autonomous",
+        priority: "medium",
+      }).ok,
+    ).toBe(true);
+  });
+
+  it("blocks expand_ifm_pair in assisted mode and low priority", () => {
+    expect(
+      canAutoApplyRecommendation({
+        kind: "expand_ifm_pair",
+        campaignMode: "assisted",
+        priority: "medium",
+      }).ok,
+    ).toBe(false);
+    expect(
+      canAutoApplyRecommendation({
+        kind: "expand_ifm_pair",
+        campaignMode: "autonomous",
+        priority: "low",
+      }).ok,
+    ).toBe(false);
+  });
 });

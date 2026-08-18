@@ -20,6 +20,10 @@ export type IfmPairingScore = {
   indexBoost: number;
   eventBoost: number;
   analyticsBoost: number;
+  /** Per-pair GA4 sessions (7d) when property id is configured */
+  sessions7d?: number;
+  /** Per-pair GA4 conversions (7d) */
+  conversions7d?: number;
   indexStatus?: string;
   scoredAt: string;
 };
@@ -45,10 +49,18 @@ export type IfmProjectConfig = {
   pairCountPerRun?: number;
   lastGeneratedAt?: string;
   lastScoredAt?: string;
+  lastCompoundedAt?: string;
   autoPrune?: boolean;
+  autoExpand?: boolean;
   winnerThreshold?: number;
   pruneThreshold?: number;
   pairings?: IfmPairing[];
+};
+
+export type IfmCompoundSummary = IfmPerformanceSummary & {
+  expanded: number;
+  shipped: number;
+  expandedPairingIds: string[];
 };
 
 export type IfmPerformanceSummary = {

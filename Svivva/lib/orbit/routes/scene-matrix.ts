@@ -1,5 +1,5 @@
 import { getRouteTemplate, getHybridRouteSceneByStrategy } from "./route-templates";
-import { IFM_ROUTE_SCENE } from "./ifm-route-scenes";
+import { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE } from "./ifm-route-scenes";
 import { createOrbitRoute, listOrbitRoutesForProject } from "./route-repository";
 import { runOrbitRoute } from "./route-runner";
 import type { RouteRunResult } from "./route-types";
@@ -18,13 +18,19 @@ export type SceneMatrix = {
   scenes: SceneMatrixEntry[];
 };
 
-/** Default OaaS growth matrix — IFM → AEO hybrid → growth pipeline. */
+/** Default OaaS growth matrix — IFM → compound → AEO hybrid → growth pipeline. */
 export const OAAS_GROWTH_MATRIX: SceneMatrix = {
   id: "oaas_growth_matrix",
   name: "OaaS Growth Matrix",
-  description: "Weekly IFM pairings, answer-shaped hybrid scene, then core growth pipeline",
+  description:
+    "Weekly IFM pairings, winner compounding, answer-shaped hybrid scene, then core growth pipeline",
   scenes: [
     { id: "ifm", templateId: "ifm_weekly", label: "Intent Fusion Matrix" },
+    {
+      id: "ifm_compound",
+      templateId: "ifm_compound_weekly",
+      label: "IFM winner compounding",
+    },
     {
       id: "aeo",
       hybridStrategyId: "answer-shaped-aeo",
@@ -101,7 +107,9 @@ export async function runSceneMatrixForProject(
             ? { type: "hybrid", hybridStrategyId: entry.hybridStrategyId }
             : entry.templateId === IFM_ROUTE_SCENE.id
               ? { type: "ifm" }
-              : { type: "core", templateId: entry.templateId },
+              : entry.templateId === IFM_COMPOUND_ROUTE_SCENE.id
+                ? { type: "ifm_compound" }
+                : { type: "core", templateId: entry.templateId },
         },
       });
       output.routesCreated += 1;

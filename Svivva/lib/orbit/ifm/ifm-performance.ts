@@ -15,6 +15,8 @@ import { emitOrbitEvent } from "../analytics/event-repository";
 import type { IfmPairing, IfmPairingScore, IfmPerformanceSummary, IfmProjectConfig } from "./ifm-types";
 import type { OrbitIndexRecord } from "../schema";
 import type { OrbitEvent } from "../schema";
+import type { Ga4PageMetric } from "../analytics/ga4-data-api";
+import { buildPairAnalyticsMap, pairAnalyticsBoost } from "./ifm-analytics";
 
 export const DEFAULT_IFM_WINNER_THRESHOLD = 55;
 export const DEFAULT_IFM_PRUNE_THRESHOLD = 20;
@@ -58,6 +60,7 @@ export function scoreIfmPairing(input: {
   indexRecord?: OrbitIndexRecord;
   events: OrbitEvent[];
   analyticsBoost?: number;
+  pairAnalytics?: { sessions7d: number; conversions7d: number };
   now?: Date;
 }): IfmPairingScore {
   const now = input.now ?? new Date();
@@ -76,7 +79,10 @@ export function scoreIfmPairing(input: {
     }
   }
 
-  const analyticsBoost = input.analyticsBoost ?? 0;
+  const analyticsBoost =
+    input.pairAnalytics != null
+      ? pairAnalyticsBoost(input.pairAnalytics)
+      : (input.analyticsBoost ?? 0);
   const total = Math.min(100, indexBoost + eventBoost + analyticsBoost);
 
   return {
@@ -84,6 +90,8 @@ export function scoreIfmPairing(input: {
     indexBoost,
     eventBoost,
     analyticsBoost,
+    sessions7d: input.pairAnalytics?.sessions7d,
+    conversions7d: input.pairAnalytics?.conversions7d,
     indexStatus: indexStatus === "none" ? undefined : indexStatus,
     scoredAt: now.toISOString(),
   };
@@ -144,7 +152,7 @@ function projectAnalyticsBoost(
 export async function rescoreIfmPairingsForProject(
   projectId: string,
   userId: string,
-  opts: { autoPrune?: boolean } = {},
+  opts: { autoPrune?: boolean; pairAnalyticsPages?: Ga4PageMetric[] } = {},
 ): Promise<IfmPerformanceSummary> {
   const project = await getOrbitProjectById(projectId, userId);
   if (!project) throw new Error("Orbit project not found");
@@ -158,11 +166,15 @@ export async function rescoreIfmPairingsForProject(
   const events = await listEventsForProject(projectId, { limit: 500 });
   const external = parseExternalAnalyticsConfig(meta);
 
+  const pairAnalyticsMap = opts.pairAnalyticsPages?.length
+    ? buildPairAnalyticsMap(pairings, opts.pairAnalyticsPages)
+    : new Map();
+
   const hasIndexed = pairings.some((p) => {
     const rec = findIndexForPairing(indexRecords, p);
     return rec?.status === "indexed";
   });
-  const analyticsBoost = projectAnalyticsBoost(external, hasIndexed);
+  const fallbackAnalyticsBoost = projectAnalyticsBoost(external, hasIndexed);
 
   const now = new Date();
   let archived = 0;
@@ -170,11 +182,16 @@ export async function rescoreIfmPairingsForProject(
 
   for (const pairing of pairings) {
     const indexRecord = findIndexForPairing(indexRecords, pairing);
+    const pairAnalytics = pairAnalyticsMap.get(pairing.id);
     const score = scoreIfmPairing({
       pairing,
       indexRecord,
       events,
-      analyticsBoost: indexRecord?.status === "indexed" ? analyticsBoost : 0,
+      pairAnalytics,
+      analyticsBoost:
+        !pairAnalytics && indexRecord?.status === "indexed"
+          ? fallbackAnalyticsBoost
+          : undefined,
       now,
     });
 

@@ -69,7 +69,9 @@ export async function runOrbitScheduler(
           enabled?: boolean;
           lastGeneratedAt?: string;
           lastScoredAt?: string;
+          lastCompoundedAt?: string;
           autoPrune?: boolean;
+          autoExpand?: boolean;
         };
         if (ifmConfig.enabled) {
           const weekMs = 7 * 24 * 60 * 60 * 1000;
@@ -96,8 +98,11 @@ export async function runOrbitScheduler(
             : 0;
           if (now - lastScored >= weekMs) {
             const { rescoreIfmPairingsForProject } = await import("../ifm/ifm-performance");
+            const { pullGa4IfmPageMetricsForProject } = await import("../analytics/ga4-data-api");
+            const ga4 = await pullGa4IfmPageMetricsForProject(project.id, project.userId);
             const perf = await rescoreIfmPairingsForProject(project.id, project.userId, {
               autoPrune: ifmConfig.autoPrune,
+              pairAnalyticsPages: ga4.ok ? ga4.pages : undefined,
             });
             result.ifm = {
               ...(result.ifm || {}),
@@ -105,6 +110,23 @@ export async function runOrbitScheduler(
               winners: perf.winners.length,
               pruned: perf.archived,
               pruneCandidates: perf.pruneCandidates.length,
+            };
+          }
+
+          const lastCompound = ifmConfig.lastCompoundedAt
+            ? new Date(ifmConfig.lastCompoundedAt).getTime()
+            : 0;
+          if (ifmConfig.autoExpand && now - lastCompound >= weekMs) {
+            const { compoundIfmWinnersForProject } = await import("../ifm/ifm-compound");
+            const compound = await compoundIfmWinnersForProject(project.id, project.userId, {
+              autoPrune: ifmConfig.autoPrune,
+            });
+            result.ifm = {
+              ...(result.ifm || {}),
+              compounded: true,
+              expanded: compound.expanded,
+              shipped: compound.shipped,
+              winners: compound.winners.length,
             };
           }
         }

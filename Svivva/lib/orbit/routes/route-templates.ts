@@ -6,7 +6,7 @@ import {
   isHybridRouteSceneId,
   type HybridRouteScene,
 } from "./hybrid-route-scenes";
-import { IFM_ROUTE_SCENE } from "./ifm-route-scenes";
+import { IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE } from "./ifm-route-scenes";
 
 /** Default growth pipeline for an existing ingested project. */
 export const GROWTH_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
@@ -64,6 +64,7 @@ export const ROUTE_TEMPLATES: RouteTemplate[] = [
 
 export function getRouteTemplate(templateId: string): RouteTemplate | undefined {
   if (templateId === IFM_ROUTE_SCENE.id) return IFM_ROUTE_SCENE;
+  if (templateId === IFM_COMPOUND_ROUTE_SCENE.id) return IFM_COMPOUND_ROUTE_SCENE;
   if (isHybridRouteSceneId(templateId)) {
     return getHybridRouteScene(templateId);
   }
@@ -71,7 +72,7 @@ export function getRouteTemplate(templateId: string): RouteTemplate | undefined 
 }
 
 export function listAllRouteTemplates(): RouteTemplate[] {
-  return [...ROUTE_TEMPLATES, IFM_ROUTE_SCENE, ...HYBRID_ROUTE_SCENES];
+  return [...ROUTE_TEMPLATES, IFM_ROUTE_SCENE, IFM_COMPOUND_ROUTE_SCENE, ...HYBRID_ROUTE_SCENES];
 }
 
 export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
@@ -79,6 +80,7 @@ export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
     value === "ingest" ||
     value === "fusion" ||
     value === "ifm" ||
+    value === "ifm_compound" ||
     value === "bridge_ship" ||
     value === "quality_gate" ||
     value === "seo_ops_gate" ||
