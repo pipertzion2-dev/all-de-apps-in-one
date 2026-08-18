@@ -98,3 +98,16 @@ export async function updateCampaignStatus(
     .returning();
   return row;
 }
+
+export async function updateCampaignApprovalPolicy(
+  campaignId: string,
+  userId: string,
+  approvalPolicy: OrbitApprovalPolicy,
+): Promise<OrbitCampaign | undefined> {
+  const [row] = await db
+    .update(orbitCampaigns)
+    .set({ approvalPolicy, updatedAt: new Date() })
+    .where(and(eq(orbitCampaigns.id, campaignId), eq(orbitCampaigns.userId, userId)))
+    .returning();
+  return row;
+}

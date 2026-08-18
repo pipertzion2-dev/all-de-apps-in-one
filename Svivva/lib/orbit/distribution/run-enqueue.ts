@@ -10,6 +10,15 @@ import { resolveProviderForAsset } from "./distribution-providers";
 import { loadMarketingPlatformCredentials } from "../marketing-autopilot-credentials";
 import { parseAssetPayload } from "./asset-payload-parser";
 import { processDistributionQueue } from "./run-distribute";
+import { checkDistributionPolicyGates } from "./policy-gates";
+
+export class DistributionPolicyError extends Error {
+  code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
 
 export async function enqueueAssetDistribution(
   assetId: string,
@@ -18,13 +27,20 @@ export async function enqueueAssetDistribution(
   const asset = await getOrbitContentAssetById(assetId);
   if (!asset) throw new Error("Content asset not found");
 
-  if (asset.orbitCampaignId) {
-    const campaign = await getOrbitCampaignById(asset.orbitCampaignId, userId);
-    if (!campaign) throw new Error("Campaign not found");
+  if (!asset.orbitCampaignId) {
+    throw new Error("Asset is not linked to a campaign");
   }
+
+  const campaign = await getOrbitCampaignById(asset.orbitCampaignId, userId);
+  if (!campaign) throw new Error("Campaign not found");
 
   if (!isEligibleForDistribution(asset)) {
     return null;
+  }
+
+  const gate = await checkDistributionPolicyGates(campaign, asset);
+  if (!gate.ok) {
+    throw new DistributionPolicyError(gate.code || "policy_blocked", gate.message || "Blocked by policy");
   }
 
   const creds = await loadMarketingPlatformCredentials();
@@ -87,12 +103,20 @@ export async function enqueueCampaignDistribution(
       continue;
     }
 
-    const job = await enqueueAssetDistribution(asset.id, input.userId);
-    if (job) {
-      result.enqueued += 1;
-      result.jobs.push(job);
-    } else {
-      result.skipped += 1;
+    try {
+      const job = await enqueueAssetDistribution(asset.id, input.userId);
+      if (job) {
+        result.enqueued += 1;
+        result.jobs.push(job);
+      } else {
+        result.skipped += 1;
+      }
+    } catch (e) {
+      if (e instanceof DistributionPolicyError) {
+        result.skipped += 1;
+        continue;
+      }
+      throw e;
     }
   }
 

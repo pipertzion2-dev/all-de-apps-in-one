@@ -1,6 +1,7 @@
 import { getOrbitProjectById, getOrbitGraph } from "@/lib/orbit/ingest";
 import { buildCampaignPlanFromGraph, countPlannedAssets, graphContextFromProject } from "./planner";
 import { createOrbitCampaign } from "./campaign-repository";
+import { normalizeApprovalPolicy } from "./approval-policy";
 import type { PlanCampaignInput, CampaignPlan } from "./plan-types";
 import type { OrbitCampaign } from "@/lib/orbit/schema";
 
@@ -42,6 +43,9 @@ export async function planCampaignForProject(
     sourceChannel: input.sourceChannel || project.sourceType,
     sourceRef: input.sourceRef || project.sourceRef || undefined,
     plan,
+    approvalPolicy: input.approvalPolicy
+      ? normalizeApprovalPolicy(input.approvalPolicy)
+      : undefined,
   });
 
   return {

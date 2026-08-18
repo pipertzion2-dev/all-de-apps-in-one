@@ -3,7 +3,11 @@ import { requireUser } from "@/lib/auth/require-user";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getOrbitCampaignById } from "@/lib/orbit/campaign/campaign-repository";
 import { getOrbitContentAssetById } from "@/lib/orbit/content";
-import { enqueueAssetDistribution, processDistributionQueue } from "@/lib/orbit/distribution";
+import {
+  enqueueAssetDistribution,
+  processDistributionQueue,
+  DistributionPolicyError,
+} from "@/lib/orbit/distribution";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -55,6 +59,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ ok: true, job, processed });
   } catch (e) {
+    if (e instanceof DistributionPolicyError) {
+      return NextResponse.json({ error: e.message, code: e.code }, { status: 403 });
+    }
     const message = e instanceof Error ? e.message : String(e);
     return NextResponse.json({ error: message }, { status: 400 });
   }

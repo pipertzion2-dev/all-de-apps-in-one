@@ -54,6 +54,9 @@ export {
 } from "./distribution-providers";
 
 export { enqueueAssetDistribution, enqueueCampaignDistribution } from "./run-enqueue";
+export { DistributionPolicyError } from "./run-enqueue";
+export { checkDistributionPolicyGates } from "./policy-gates";
+export type { PolicyGateResult } from "./policy-gates";
 export {
   runDistributionJob,
   processDistributionQueue,

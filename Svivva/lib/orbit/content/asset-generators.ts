@@ -385,7 +385,7 @@ export function validateAssetContent(input: ValidateAssetInput): ValidationResul
     issues.push({
       code: "platform_not_allowed",
       message: `Platform ${input.platform} not in approval policy`,
-      severity: "warning",
+      severity: "error",
       field: "platform",
     });
   }
@@ -397,9 +397,22 @@ export function validateAssetContent(input: ValidateAssetInput): ValidationResul
     issues.push({
       code: "asset_type_not_allowed",
       message: `Asset type ${input.assetType} not in approval policy`,
-      severity: "warning",
+      severity: "error",
       field: "assetType",
     });
+  }
+
+  if (policy?.requiredDisclaimers?.length) {
+    const lower = input.body.toLowerCase();
+    for (const disclaimer of policy.requiredDisclaimers) {
+      if (disclaimer && !lower.includes(disclaimer.toLowerCase())) {
+        issues.push({
+          code: "missing_disclaimer",
+          message: `Required disclaimer missing: ${disclaimer}`,
+          severity: "error",
+        });
+      }
+    }
   }
 
   const hasErrors = issues.some((i) => i.severity === "error");

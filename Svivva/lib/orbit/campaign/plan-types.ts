@@ -1,4 +1,5 @@
 import type {
+  OrbitApprovalPolicy,
   OrbitCampaignObjective,
   OrbitCampaignPhase,
   OrbitContentPlatform,
@@ -43,6 +44,7 @@ export type PlanCampaignInput = {
   description?: string;
   mode?: "manual" | "assisted" | "autonomous";
   sourceChannel?: string;
+  approvalPolicy?: OrbitApprovalPolicy;
   /** Limit planned assets (default 24) */
   maxAssets?: number;
 };

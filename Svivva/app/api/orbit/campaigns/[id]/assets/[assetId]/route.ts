@@ -9,7 +9,11 @@ import {
   updateContentAssetValidation,
   validationToRecord,
 } from "@/lib/orbit/content";
-import { enqueueAssetDistribution, processDistributionQueue } from "@/lib/orbit/distribution";
+import {
+  enqueueAssetDistribution,
+  processDistributionQueue,
+  DistributionPolicyError,
+} from "@/lib/orbit/distribution";
 import type { OrbitApprovalStatus } from "@/lib/orbit/graph-constants";
 
 export const dynamic = "force-dynamic";
@@ -85,19 +89,26 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   if (body.action === "publish") {
-    const job = await enqueueAssetDistribution(assetId, user!.id);
-    if (!job) {
-      return NextResponse.json(
-        { error: "Asset not eligible for distribution — approve and validate first" },
-        { status: 400 },
-      );
+    try {
+      const job = await enqueueAssetDistribution(assetId, user!.id);
+      if (!job) {
+        return NextResponse.json(
+          { error: "Asset not eligible for distribution — approve and validate first" },
+          { status: 400 },
+        );
+      }
+      let processed = undefined;
+      if (body.processNow !== false) {
+        processed = await processDistributionQueue({ jobIds: [job.id] });
+      }
+      const refreshed = await getOrbitContentAssetById(assetId);
+      return NextResponse.json({ job, processed, asset: refreshed });
+    } catch (e) {
+      if (e instanceof DistributionPolicyError) {
+        return NextResponse.json({ error: e.message, code: e.code }, { status: 403 });
+      }
+      throw e;
     }
-    let processed = undefined;
-    if (body.processNow !== false) {
-      processed = await processDistributionQueue({ jobIds: [job.id] });
-    }
-    const refreshed = await getOrbitContentAssetById(assetId);
-    return NextResponse.json({ job, processed, asset: refreshed });
   }
 
   const approvalStatus: OrbitApprovalStatus | undefined =

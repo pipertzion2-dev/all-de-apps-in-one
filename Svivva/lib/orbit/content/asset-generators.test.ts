@@ -93,6 +93,28 @@ describe("validateAssetContent", () => {
     expect(result.status).toBe("failed");
     expect(result.issues.some((i) => i.code === "blocked_term")).toBe(true);
   });
+
+  it("fails when required disclaimer is missing", () => {
+    const result = validateAssetContent({
+      body: "Launch post without legal text.",
+      platform: "web",
+      assetType: "landing_page",
+      policy: { requiredDisclaimers: ["Not financial advice"] },
+    });
+    expect(result.status).toBe("failed");
+    expect(result.issues.some((i) => i.code === "missing_disclaimer")).toBe(true);
+  });
+
+  it("fails when platform not in allowed list", () => {
+    const result = validateAssetContent({
+      body: "Post body",
+      platform: "x",
+      assetType: "social_post",
+      policy: { allowedPlatforms: ["linkedin"] },
+    });
+    expect(result.status).toBe("failed");
+    expect(result.issues.some((i) => i.code === "platform_not_allowed")).toBe(true);
+  });
 });
 
 describe("plannedAssetsFromInput", () => {

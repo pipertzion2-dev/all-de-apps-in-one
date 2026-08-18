@@ -13,6 +13,15 @@ export {
   listOrbitCampaignsForUser,
   getOrbitCampaignById,
   updateCampaignStatus,
+  updateCampaignApprovalPolicy,
 } from "./campaign-repository";
+export {
+  DEFAULT_APPROVAL_POLICY,
+  normalizeApprovalPolicy,
+  validateApprovalPolicy,
+  isWithinQuietHours,
+  policyRequiresApproval,
+  assetMeetsApprovalRequirement,
+} from "./approval-policy";
 export { planCampaignForProject } from "./run-plan";
 export type { PlanCampaignResult } from "./run-plan";

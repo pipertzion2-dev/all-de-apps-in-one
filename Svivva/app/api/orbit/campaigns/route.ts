@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/require-user";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { listOrbitCampaignsForProject } from "@/lib/orbit/campaign/campaign-repository";
+import {
+  listOrbitCampaignsForProject,
+  listOrbitCampaignsForUser,
+} from "@/lib/orbit/campaign/campaign-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +18,8 @@ export async function GET(request: NextRequest) {
 
   const projectId = request.nextUrl.searchParams.get("projectId");
   if (!projectId) {
-    return NextResponse.json({ error: "projectId query required" }, { status: 400 });
+    const campaigns = await listOrbitCampaignsForUser(user!.id);
+    return NextResponse.json({ campaigns });
   }
 
   const campaigns = await listOrbitCampaignsForProject(projectId, user!.id);
