@@ -47,6 +47,7 @@ import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import type { OrbitSetupProvider } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
+import { OrbitAiSetupGuide } from "@/components/orbit-ai-setup-guide";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -278,6 +279,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
   const [setupProviders, setSetupProviders] = useState<OrbitSetupProvider[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
+  const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [showSetup, setShowSetup] = useState(true);
@@ -388,12 +390,13 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
           setupProviders?: OrbitSetupProvider[];
-          ai?: { configured?: boolean };
+          ai?: { configured?: boolean; providerLabel?: string };
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
         if (json.setupProviders) setSetupProviders(json.setupProviders);
         if (json.ai?.configured) setAiConfigured(true);
+        if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
         // non-blocking
@@ -569,6 +572,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         </div>
 
+        <OrbitAiSetupGuide defaultExpanded={!aiConfigured} />
+
         {/* One-press Google Search Console connect — camo orb */}
         <div className="flex flex-col items-center gap-2 py-1">
           <GscConnectOrb
@@ -617,6 +622,9 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               ok={!!orbitStatus?.indexNowSubmitted}
             />
             <StatusPill icon="🔄" label="Weekly autopilot: ON" ok teal />
+            {aiConfigured && aiProviderLabel ? (
+              <StatusPill icon="🤖" label={`Marketing AI: ${aiProviderLabel}`} ok />
+            ) : null}
             {result && (
               <StatusPill
                 icon="⚡"

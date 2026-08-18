@@ -235,6 +235,11 @@ export default function RuntimeKeysPage() {
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <Label>OpenAI API key</Label>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Powers Orbit marketing autopilot (SEO pages, blog, social copy). Use your own sk-
+                key or any OpenAI-compatible gateway — pair with base URL below if needed. Optional:{" "}
+                <code className="text-[10px]">ORBIT_AI_MODEL=gpt-4o-mini</code> in host env.
+              </p>
               <Input
                 type="password"
                 autoComplete="off"
