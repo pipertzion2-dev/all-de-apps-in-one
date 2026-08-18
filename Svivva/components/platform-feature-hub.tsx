@@ -128,7 +128,7 @@ export function PlatformFeatureHub({
           ? "space-y-4"
           : hideBackground
             ? "py-14 sm:py-20 relative"
-            : "py-14 sm:py-20 border-b border-[#5B8DA8]/20 bg-gradient-to-b from-background via-[#5B8DA8]/5 to-background relative overflow-hidden min-h-[600px]"
+            : "py-14 sm:py-20 relative overflow-hidden min-h-[600px]"
       }
     >
       {!isCompact && !hideBackground && (
