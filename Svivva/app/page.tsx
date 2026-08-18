@@ -421,8 +421,14 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* ── ZZAI6 cube + OaaS — one continuous camo backdrop (no section banding) ── */}
-        <div className="relative overflow-hidden">
+        {/* ── ZZAI6 cube + OaaS — one continuous smooth backdrop ── */}
+        <div
+          className="relative overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(ellipse 120% 70% at 50% 0%, rgba(91,141,168,0.22), transparent 58%), radial-gradient(ellipse 100% 55% at 50% 100%, rgba(140,170,110,0.14), transparent 52%), hsl(var(--background))",
+          }}
+        >
           <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0 min-h-full">
             <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
           </div>
@@ -500,14 +506,6 @@ export default function LandingPage() {
           <div className="relative z-10 pb-8 sm:pb-12">
             <PlatformFeatureHub hideBackground />
           </div>
-
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-56 sm:h-72 z-[1]"
-            style={{
-              background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 22%, hsl(var(--background) / 0.38) 48%, hsl(var(--background) / 0.14) 72%, hsl(var(--background) / 0.03) 88%, transparent 100%)",
-            }}
-          />
         </div>
 
         <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">

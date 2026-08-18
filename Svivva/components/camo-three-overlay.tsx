@@ -53,11 +53,10 @@ function oaasNoiseAt(
   gy: number,
   seededRandom: (x: number, y: number, offset?: number) => number,
 ): number {
-  const clusterA = seededRandom(Math.floor(gx / 6 + gy / 8), Math.floor(gy / 6 + gx / 8), 50);
-  const clusterB = seededRandom(Math.floor(gx / 4 - gy / 5), Math.floor(gy / 4 + gx / 5), 70);
   const fine = seededRandom(gx, gy, 120);
-  const raw = fine * 0.42 + clusterA * 0.33 + clusterB * 0.25;
-  // Smoothstep removes tonal steps that read as horizontal dividers.
+  const medium = seededRandom(gx * 0.37 + gy * 0.11, gy * 0.29 - gx * 0.07, 50);
+  const coarse = seededRandom(gx * 0.13 - gy * 0.09, gy * 0.17 + gx * 0.05, 70);
+  const raw = fine * 0.48 + medium * 0.32 + coarse * 0.2;
   return raw * raw * (3 - 2 * raw);
 }
 
@@ -359,6 +358,7 @@ export function CamoThreeOverlay({
   const isOaas = preset === "oaas";
   const isSectionCamo = isSectionCamoPreset(preset);
   const useMobileSectionCamo = isSectionCamo && isMobileViewport;
+  const hideCamoCanvas = isOaas && isMobileViewport;
 
   return (
     <div
@@ -377,7 +377,7 @@ export function CamoThreeOverlay({
                 : isIntro
                   ? "brightness(1.05) saturate(1.35)"
                   : "brightness(1.15) saturate(1.1)",
-          ...(isOaas || useMobileSectionCamo
+          ...(useMobileSectionCamo && !isOaas
             ? {
                 WebkitMaskImage:
                   "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
@@ -393,15 +393,17 @@ export function CamoThreeOverlay({
       <canvas
         ref={canvasRef}
         className={`absolute inset-0 w-full h-full pointer-events-none ${
-          isCheckout
-            ? "opacity-30"
-            : isOaas
-              ? "opacity-38 md:opacity-48 blur-[1.2px]"
-              : useMobileSectionCamo
-                ? "opacity-[0.36] md:opacity-[0.72] blur-[1.2px] md:blur-0"
-                : isIntro
-                  ? "opacity-55 md:opacity-60"
-                  : "opacity-60 md:opacity-100"
+          hideCamoCanvas
+            ? "hidden"
+            : isCheckout
+              ? "opacity-30"
+              : isOaas
+                ? "opacity-28 md:opacity-40 blur-[2.5px] md:blur-[1.5px]"
+                : useMobileSectionCamo
+                  ? "opacity-[0.36] md:opacity-[0.72] blur-[1.2px] md:blur-0"
+                  : isIntro
+                    ? "opacity-55 md:opacity-60"
+                    : "opacity-60 md:opacity-100"
         }`}
       />
     </div>

@@ -147,9 +147,9 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     cameraX: 0,
     lookAtY: 0,
     bloomSpeed: 0.028,
-    crtIntensity: 0.08,
+    crtIntensity: 0.04,
     pixelSize: 1,
-    scanlineIntensity: 0.004,
+    scanlineIntensity: 0,
     interactionStrength: 0.5,
     spreadX: 0.88,
     spreadZ: 0.92,
@@ -266,10 +266,12 @@ const CRT_FRAGMENT_SHADER = `
     vec4 colorB = texture2D(tDiffuse, pixelatedUv - vec2(aberration, 0.0));
     vec4 color = vec4(colorR.r, colorG.g, colorB.b, 1.0);
     
-    // Scanlines
-    float scanline = sin(uv.y * uResolution.y * 1.2) * 0.5 + 0.5;
-    scanline = pow(scanline, 1.8) * uScanlineIntensity;
-    color.rgb -= scanline * uCrtIntensity;
+    // Scanlines (disabled when intensity is zero — avoids horizontal banding on OaaS mobile)
+    if (uScanlineIntensity > 0.0001) {
+      float scanline = sin(uv.y * uResolution.y * 1.2) * 0.5 + 0.5;
+      scanline = pow(scanline, 1.8) * uScanlineIntensity;
+      color.rgb -= scanline * uCrtIntensity;
+    }
     
     // Subtle vignette
     vec2 vignetteUv = uv * (1.0 - uv.yx);
@@ -1039,12 +1041,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
               : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
           cameraY: baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
-          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset || isSectionCamo ? 0.1 : 0.2,
-          scanlineIntensity: isCheckoutPreset
-            ? 0.003
-            : isOaasPreset || isSectionCamo
-              ? 0.004
-              : 0.012,
+          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset || isSectionCamo ? 0.04 : 0.2,
+          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset || isSectionCamo ? 0 : 0.012,
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset || isSectionCamo ? 0.75 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
