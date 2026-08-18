@@ -495,12 +495,32 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <PlatformFeatureHub />
-
-        <div
-          className="relative h-16 sm:h-24 bg-gradient-to-b from-background to-muted/20"
-          aria-hidden="true"
-        />
+        <div className="relative overflow-hidden border-b border-[#5B8DA8]/20">
+          {/* Sticky camo + water + flowers — spans OaaS through transition, stops before BUILD */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
+            <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+              <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
+            </div>
+          </div>
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-20 sm:h-28 z-[1]"
+            style={{
+              background:
+                "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+            }}
+          />
+          <div className="relative z-10">
+            <PlatformFeatureHub hideBackground />
+            <div className="h-16 sm:h-24" aria-hidden />
+          </div>
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
+            style={{
+              background:
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.9) 40%, transparent 100%)",
+            }}
+          />
+        </div>
 
         <section
           id="platforms"
