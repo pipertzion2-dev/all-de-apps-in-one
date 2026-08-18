@@ -380,9 +380,9 @@ export function CamoThreeOverlay({
           ...(isOaas || useMobileSectionCamo
             ? {
                 WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+                  "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
                 maskImage:
-                  "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 14%, black 28%, black 72%, rgba(0,0,0,0.45) 86%, transparent 100%)",
+                  "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
               }
             : {}),
         }}
