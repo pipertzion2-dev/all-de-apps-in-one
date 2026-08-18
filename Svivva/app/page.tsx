@@ -150,11 +150,14 @@ export default function LandingPage() {
   const userIsAdmin = meData?.isAdmin ?? false;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const introCaptureRef = useRef<HTMLDivElement>(null);
   const [flipProgress, setFlipProgress] = useState(0);
   const [flipComplete, setFlipComplete] = useState(false);
   const virtualScrollRef = useRef(0);
   const lastProgressRef = useRef(0);
-  const [vpHeight, setVpHeight] = useState(0);
+  const [vpHeight, setVpHeight] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight : 0,
+  );
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -195,15 +198,20 @@ export default function LandingPage() {
   useEffect(() => {
     if (flipComplete) return;
 
+    const captureEl = introCaptureRef.current;
+    if (!captureEl) return;
+
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
 
     const finishIntro = () => {
       setFlipComplete(true);
       document.body.style.overflow = "";
+      document.body.style.touchAction = "";
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
 
-    const flipZone = window.innerHeight * 0.7;
+    const flipZone = Math.max(window.innerHeight * 0.55, 280);
     const applyDelta = (delta: number) => {
       virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
       const progress = Math.min(virtualScrollRef.current / flipZone, 1);
@@ -220,29 +228,33 @@ export default function LandingPage() {
 
     let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
+      touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
-      const delta = touchStartY - e.touches[0].clientY;
-      touchStartY = e.touches[0].clientY;
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - y;
+      touchStartY = y;
       applyDelta(delta);
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    captureEl.addEventListener("wheel", handleWheel, { passive: false });
+    captureEl.addEventListener("touchstart", handleTouchStart, { passive: false });
+    captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
+      document.body.style.touchAction = "";
+      captureEl.removeEventListener("wheel", handleWheel);
+      captureEl.removeEventListener("touchstart", handleTouchStart);
+      captureEl.removeEventListener("touchmove", handleTouchMove);
     };
   }, [flipComplete]);
 
   const cubeAngle = flipProgress * 90;
-  const halfH = vpHeight / 2;
+  const flipHeight =
+    vpHeight > 0 ? vpHeight : typeof window !== "undefined" ? window.innerHeight : 800;
+  const halfH = flipHeight / 2;
 
   return (
     <div
@@ -252,10 +264,11 @@ export default function LandingPage() {
     >
       {!flipComplete && (
         <div
+          ref={introCaptureRef}
           className="fixed inset-0"
           style={{
             zIndex: 70,
-            pointerEvents: "none",
+            touchAction: "none",
             overflow: "hidden",
             backgroundColor: "transparent",
           }}
@@ -285,6 +298,7 @@ export default function LandingPage() {
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
                   transform: `translateZ(${halfH}px)`,
                   willChange: "transform",
                 }}
