@@ -371,6 +371,35 @@ export const orbitRecommendations = pgTable(
   ],
 );
 
+// ============================================================================
+// ORBIT AUTOPILOT RUNS — audit log for closed-loop execution (Phase 10)
+// ============================================================================
+export const orbitAutopilotRuns = pgTable(
+  "orbit_autopilot_runs",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orbitProjectId: text("orbit_project_id")
+      .notNull()
+      .references(() => orbitProjects.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(),
+    status: text("status").notNull().default("completed"),
+    recommendationsSeen: integer("recommendations_seen").notNull().default(0),
+    recommendationsApplied: integer("recommendations_applied").notNull().default(0),
+    recommendationsSkipped: integer("recommendations_skipped").notNull().default(0),
+    actions: jsonb("actions").$type<Array<Record<string, unknown>>>().default([]),
+    errorMessage: text("error_message"),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_orbit_autopilot_runs_project").on(t.orbitProjectId),
+    index("idx_orbit_autopilot_runs_created").on(t.createdAt),
+  ],
+);
+
 export type OrbitProject = typeof orbitProjects.$inferSelect;
 export type NewOrbitProject = typeof orbitProjects.$inferInsert;
 export type OrbitEntity = typeof orbitEntities.$inferSelect;
@@ -385,3 +414,4 @@ export type OrbitIndexRecord = typeof orbitIndexRecords.$inferSelect;
 export type OrbitRoute = typeof orbitRoutes.$inferSelect;
 export type OrbitEvent = typeof orbitEvents.$inferSelect;
 export type OrbitRecommendation = typeof orbitRecommendations.$inferSelect;
+export type OrbitAutopilotRun = typeof orbitAutopilotRuns.$inferSelect;

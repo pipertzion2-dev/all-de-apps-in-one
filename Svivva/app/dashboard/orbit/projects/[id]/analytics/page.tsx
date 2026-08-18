@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, Sparkles, X, Bot } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type AnalyticsSummary = {
   projectId: string;
@@ -36,6 +38,18 @@ type Recommendation = {
   title: string;
   rationale: string;
   orbitCampaignId?: string | null;
+};
+
+type AutopilotStatus = {
+  projectId: string;
+  config: { enabled: boolean; maxActionsPerRun: number; defaultMode: string };
+  lastRun: {
+    id: string;
+    status: string;
+    recommendationsApplied: number;
+    recommendationsSkipped: number;
+    completedAt: string | null;
+  } | null;
 };
 
 export default function OrbitProjectAnalyticsPage() {
@@ -79,6 +93,15 @@ export default function OrbitProjectAnalyticsPage() {
     },
   });
 
+  const autopilotQuery = useQuery<AutopilotStatus>({
+    queryKey: ["orbit-autopilot", projectId],
+    queryFn: async () => {
+      const r = await authFetch(`/api/orbit/projects/${projectId}/autopilot`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    },
+  });
+
   const refreshAnalytics = useMutation({
     mutationFn: async () => {
       const r = await authFetch("/api/orbit/analytics/process", {
@@ -115,6 +138,41 @@ export default function OrbitProjectAnalyticsPage() {
     },
   });
 
+  const toggleAutopilot = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const r = await authFetch(`/api/orbit/projects/${projectId}/autopilot`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-autopilot", projectId] });
+    },
+  });
+
+  const runAutopilot = useMutation({
+    mutationFn: async (force?: boolean) => {
+      const r = await authFetch("/api/orbit/analytics/autopilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, force: force ?? false }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orbit-autopilot", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-recommendations", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-analytics-summary", projectId] });
+      qc.invalidateQueries({ queryKey: ["orbit-analytics-timeline", projectId] });
+    },
+  });
+
   const loading =
     projectQuery.isLoading ||
     summaryQuery.isLoading ||
@@ -125,6 +183,7 @@ export default function OrbitProjectAnalyticsPage() {
   const events = timelineQuery.data?.events || [];
   const recommendations = recommendationsQuery.data?.recommendations || [];
   const projectName = projectQuery.data?.project?.name || projectId.slice(0, 8);
+  const autopilot = autopilotQuery.data;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
@@ -235,6 +294,70 @@ export default function OrbitProjectAnalyticsPage() {
           </Card>
         </div>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bot className="h-5 w-5" />
+            Autopilot
+          </CardTitle>
+          <CardDescription>
+            Closed-loop execution: auto-apply safe recommendations for assisted/autonomous
+            campaigns.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {autopilotQuery.isLoading ? (
+            <Skeleton className="h-16 w-full" />
+          ) : autopilot ? (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Switch
+                    id="autopilot-enabled"
+                    checked={autopilot.config.enabled}
+                    disabled={toggleAutopilot.isPending}
+                    onCheckedChange={(checked) => toggleAutopilot.mutate(checked)}
+                  />
+                  <Label htmlFor="autopilot-enabled">
+                    {autopilot.config.enabled ? "Autopilot enabled" : "Autopilot disabled"}
+                  </Label>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={runAutopilot.isPending}
+                    onClick={() => runAutopilot.mutate(true)}
+                  >
+                    {runAutopilot.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Run now
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Default mode: {autopilot.config.defaultMode} · Max actions per run:{" "}
+                {autopilot.config.maxActionsPerRun}
+              </p>
+              {autopilot.lastRun ? (
+                <p className="text-sm">
+                  Last run:{" "}
+                  <Badge variant="outline">{autopilot.lastRun.status}</Badge> — applied{" "}
+                  {autopilot.lastRun.recommendationsApplied}, skipped{" "}
+                  {autopilot.lastRun.recommendationsSkipped}
+                  {autopilot.lastRun.completedAt
+                    ? ` · ${new Date(autopilot.lastRun.completedAt).toLocaleString()}`
+                    : null}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">No autopilot runs yet.</p>
+              )}
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

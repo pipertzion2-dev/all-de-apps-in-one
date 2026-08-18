@@ -212,6 +212,7 @@ export const ORBIT_EVENT_TYPES = [
   "content_generated",
   "campaign_planned",
   "recommendation_applied",
+  "autopilot_run_completed",
 ] as const;
 export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
 
@@ -236,6 +237,19 @@ export type OrbitRecommendationStatus = (typeof ORBIT_RECOMMENDATION_STATUSES)[n
 
 export const ORBIT_RECOMMENDATION_PRIORITIES = ["high", "medium", "low"] as const;
 export type OrbitRecommendationPriority = (typeof ORBIT_RECOMMENDATION_PRIORITIES)[number];
+
+export type OrbitAutopilotConfig = {
+  enabled?: boolean;
+  maxActionsPerRun?: number;
+  /** Fallback when a recommendation has no linked campaign */
+  defaultMode?: OrbitCampaignMode;
+};
+
+export const DEFAULT_AUTOPILOT_CONFIG: OrbitAutopilotConfig = {
+  enabled: false,
+  maxActionsPerRun: 5,
+  defaultMode: "assisted",
+};
 
 export type OrbitApprovalPolicy = {
   allowedPlatforms?: OrbitContentPlatform[];

@@ -4,12 +4,14 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import {
   getOrbitCampaignById,
   updateCampaignApprovalPolicy,
+  updateCampaignMode,
 } from "@/lib/orbit/campaign/campaign-repository";
 import {
   normalizeApprovalPolicy,
   validateApprovalPolicy,
 } from "@/lib/orbit/campaign/approval-policy";
-import type { OrbitApprovalPolicy } from "@/lib/orbit/graph-constants";
+import type { OrbitApprovalPolicy, OrbitCampaignMode } from "@/lib/orbit/graph-constants";
+import { ORBIT_CAMPAIGN_MODES } from "@/lib/orbit/graph-constants";
 
 export const dynamic = "force-dynamic";
 
@@ -46,15 +48,23 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
   }
 
-  let body: { approvalPolicy?: Partial<OrbitApprovalPolicy> } = {};
+  let body: { approvalPolicy?: Partial<OrbitApprovalPolicy>; mode?: OrbitCampaignMode } = {};
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  if (body.mode) {
+    if (!(ORBIT_CAMPAIGN_MODES as readonly string[]).includes(body.mode)) {
+      return NextResponse.json({ error: "Invalid campaign mode" }, { status: 400 });
+    }
+    const campaign = await updateCampaignMode(id, user!.id, body.mode);
+    return NextResponse.json({ ok: true, campaign });
+  }
+
   if (!body.approvalPolicy) {
-    return NextResponse.json({ error: "approvalPolicy required" }, { status: 400 });
+    return NextResponse.json({ error: "approvalPolicy or mode required" }, { status: 400 });
   }
 
   const merged = normalizeApprovalPolicy(
