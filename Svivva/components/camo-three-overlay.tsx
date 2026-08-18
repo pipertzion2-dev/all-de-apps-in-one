@@ -31,22 +31,28 @@ function lerpRgba(a: Rgba | null, b: Rgba | null, t: number): Rgba | null {
   };
 }
 
-function bilinearPaletteColor(
-  palette: (string | null)[],
-  i00: number,
-  i10: number,
-  i01: number,
-  i11: number,
-  fx: number,
-  fy: number,
-): Rgba | null {
-  const c00 = palette[i00] ? parseRgba(palette[i00]!) : null;
-  const c10 = palette[i10] ? parseRgba(palette[i10]!) : null;
-  const c01 = palette[i01] ? parseRgba(palette[i01]!) : null;
-  const c11 = palette[i11] ? parseRgba(palette[i11]!) : null;
-  const top = lerpRgba(c00, c10, fx);
-  const bottom = lerpRgba(c01, c11, fx);
-  return lerpRgba(top, bottom, fy);
+function paletteColorAt(palette: (string | null)[], t: number): Rgba | null {
+  const clamped = Math.max(0, Math.min(1, t));
+  const scaled = clamped * (palette.length - 1);
+  const i0 = Math.floor(scaled);
+  const i1 = Math.min(i0 + 1, palette.length - 1);
+  const frac = scaled - i0;
+  const c0 = palette[i0] ? parseRgba(palette[i0]!) : null;
+  const c1 = palette[i1] ? parseRgba(palette[i1]!) : null;
+  return lerpRgba(c0, c1, frac);
+}
+
+function oaasNoiseAt(
+  gx: number,
+  gy: number,
+  seededRandom: (x: number, y: number, offset?: number) => number,
+): number {
+  const clusterA = seededRandom(Math.floor(gx / 6 + gy / 8), Math.floor(gy / 6 + gx / 8), 50);
+  const clusterB = seededRandom(Math.floor(gx / 4 - gy / 5), Math.floor(gy / 4 + gx / 5), 70);
+  const fine = seededRandom(gx, gy, 120);
+  const raw = fine * 0.42 + clusterA * 0.33 + clusterB * 0.25;
+  // Smoothstep removes tonal steps that read as horizontal dividers.
+  return raw * raw * (3 - 2 * raw);
 }
 
 function drawOaasCamoSmooth(
@@ -54,35 +60,18 @@ function drawOaasCamoSmooth(
   width: number,
   height: number,
   blockSize: number,
-  cols: number,
-  rows: number,
-  grid: number[][],
   palette: (string | null)[],
+  seededRandom: (x: number, y: number, offset?: number) => number,
 ) {
   const imageData = ctx.createImageData(width, height);
   const data = imageData.data;
 
   for (let py = 0; py < height; py++) {
     const gy = py / blockSize;
-    const y0 = Math.min(Math.floor(gy), rows - 1);
-    const y1 = Math.min(y0 + 1, rows - 1);
-    const fy = gy - y0;
-
     for (let px = 0; px < width; px++) {
       const gx = px / blockSize;
-      const x0 = Math.min(Math.floor(gx), cols - 1);
-      const x1 = Math.min(x0 + 1, cols - 1);
-      const fx = gx - x0;
-
-      const rgba = bilinearPaletteColor(
-        palette,
-        grid[y0][x0],
-        grid[y0][x1],
-        grid[y1][x0],
-        grid[y1][x1],
-        fx,
-        fy,
-      );
+      const tone = oaasNoiseAt(gx, gy, seededRandom);
+      const rgba = paletteColorAt(palette, tone);
 
       const idx = (py * width + px) * 4;
       if (rgba && rgba.a > 0.008) {
@@ -221,7 +210,7 @@ export function CamoThreeOverlay({
         null,
         "rgba(91, 141, 168, 0.22)",
         null,
-        "rgba(15, 35, 40, 0.30)",
+        "rgba(45, 72, 82, 0.22)",
       ];
 
       const toneCount = isCheckoutCamo
@@ -231,6 +220,14 @@ export function CamoThreeOverlay({
           : isOaasCamo
             ? oaasColors.length
             : 3;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (isOaasCamo) {
+        drawOaasCamoSmooth(ctx, width, height, blockSize, oaasColors, seededRandom);
+        return;
+      }
+
       const grid: number[][] = [];
       for (let y = 0; y < rows; y++) {
         grid[y] = [];
@@ -239,17 +236,9 @@ export function CamoThreeOverlay({
           const clusterX = Math.floor(x / 4);
           const clusterY = Math.floor(y / 4);
           const clusterRand = seededRandom(clusterX, clusterY, 50);
-          let combined = rand * 0.35 + clusterRand * 0.65;
+          const combined = rand * 0.35 + clusterRand * 0.65;
 
-          if (isOaasCamo) {
-            // Diagonal/multi-scale noise avoids horizontal row banding on long mobile sections.
-            const clusterA = seededRandom(Math.floor(x / 6 + y / 8), Math.floor(y / 6 + x / 8), 50);
-            const clusterB = seededRandom(Math.floor(x / 4 - y / 5), Math.floor(y / 4 + x / 5), 70);
-            const fine = seededRandom(x, y, 120);
-            combined = fine * 0.42 + clusterA * 0.33 + clusterB * 0.25;
-          }
-
-          if (isCheckoutCamo || isIntroCamo || isOaasCamo) {
+          if (isCheckoutCamo || isIntroCamo) {
             grid[y][x] = Math.min(Math.floor(combined * toneCount), toneCount - 1);
           } else {
             if (combined < 0.333) {
@@ -263,8 +252,7 @@ export function CamoThreeOverlay({
         }
       }
 
-      const smoothPasses = isOaasCamo ? 5 : 2;
-      for (let pass = 0; pass < smoothPasses; pass++) {
+      for (let pass = 0; pass < 2; pass++) {
         for (let y = 1; y < rows - 1; y++) {
           for (let x = 1; x < cols - 1; x++) {
             const neighbors = [
@@ -290,37 +278,31 @@ export function CamoThreeOverlay({
         }
       }
 
-      ctx.clearRect(0, 0, width, height);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const px = x * blockSize;
+          const py = y * blockSize;
+          const val = grid[y][x];
 
-      if (isOaasCamo) {
-        drawOaasCamoSmooth(ctx, width, height, blockSize, cols, rows, grid, oaasColors);
-      } else {
-        for (let y = 0; y < rows; y++) {
-          for (let x = 0; x < cols; x++) {
-            const px = x * blockSize;
-            const py = y * blockSize;
-            const val = grid[y][x];
-
-            if (isCheckoutCamo) {
-              const color = checkoutColors[val];
-              if (color) {
-                ctx.fillStyle = color;
-                ctx.fillRect(px, py, blockSize, blockSize);
-              }
-            } else if (isIntroCamo) {
-              const color = introColors[val];
-              if (color) {
-                ctx.fillStyle = color;
-                ctx.fillRect(px, py, blockSize, blockSize);
-              }
-            } else {
-              if (val === 0) {
-                ctx.fillStyle = "rgb(0, 0, 0)";
-                ctx.fillRect(px, py, blockSize, blockSize);
-              } else if (val === 2) {
-                ctx.fillStyle = "rgba(15, 35, 40, 0.58)";
-                ctx.fillRect(px, py, blockSize, blockSize);
-              }
+          if (isCheckoutCamo) {
+            const color = checkoutColors[val];
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(px, py, blockSize, blockSize);
+            }
+          } else if (isIntroCamo) {
+            const color = introColors[val];
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(px, py, blockSize, blockSize);
+            }
+          } else {
+            if (val === 0) {
+              ctx.fillStyle = "rgb(0, 0, 0)";
+              ctx.fillRect(px, py, blockSize, blockSize);
+            } else if (val === 2) {
+              ctx.fillStyle = "rgba(15, 35, 40, 0.58)";
+              ctx.fillRect(px, py, blockSize, blockSize);
             }
           }
         }
@@ -364,7 +346,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-38 md:opacity-48 blur-[0.8px]"
+              ? "opacity-38 md:opacity-48 blur-[1.2px]"
               : isIntro
                 ? "opacity-55 md:opacity-60"
                 : "opacity-60 md:opacity-100"

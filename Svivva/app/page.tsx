@@ -495,16 +495,16 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <div className="relative overflow-hidden border-b border-[#5B8DA8]/20">
+        <div className="relative overflow-hidden">
           {/* Camo + metallic water + flowers — OaaS through transition, stops before BUILD */}
           <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0">
             <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
           </div>
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-28 sm:h-40 z-[1]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-36 sm:h-52 z-[1]"
             style={{
               background:
-                "linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 30%, hsl(var(--background) / 0.35) 62%, hsl(var(--background) / 0.08) 88%, transparent 100%)",
+                "linear-gradient(to bottom, hsl(var(--background) / 0.9) 0%, hsl(var(--background) / 0.45) 38%, hsl(var(--background) / 0.12) 72%, transparent 100%)",
             }}
           />
           <div className="relative z-10">
@@ -512,17 +512,17 @@ export default function LandingPage() {
             <div className="h-16 sm:h-24" aria-hidden />
           </div>
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-44 z-[1]"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 sm:h-56 z-[1]"
             style={{
               background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.72) 30%, hsl(var(--background) / 0.35) 62%, hsl(var(--background) / 0.08) 88%, transparent 100%)",
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.55) 35%, hsl(var(--background) / 0.2) 68%, hsl(var(--background) / 0.04) 92%, transparent 100%)",
             }}
           />
         </div>
 
         <section
           id="platforms"
-          className="py-16 sm:py-24 relative z-10 overflow-visible bg-muted/20 border-y border-border/30"
+          className="py-16 sm:py-24 relative z-10 overflow-visible bg-gradient-to-b from-transparent via-background/30 to-muted/20"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center space-y-4 mb-16">
