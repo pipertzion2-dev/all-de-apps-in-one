@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -9,8 +9,19 @@ import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
+import { getSiteUrl } from "@/lib/site-url";
+import { BRAND } from "@/lib/brand";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
+const siteUrl = getSiteUrl();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   // Verification token resolution order:
@@ -70,6 +81,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: siteUrl,
+    },
+    icons: {
+      icon: [{ url: BRAND.logoPath, type: "image/png" }],
+      apple: [{ url: BRAND.logoPath, type: "image/png" }],
     },
     robots: {
       index: true,

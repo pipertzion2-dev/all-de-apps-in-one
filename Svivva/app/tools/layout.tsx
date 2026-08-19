@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: "Tools",
   description:
     "Free tools for developers and creators — calculators, validators, and playgrounds. Most need no signup.",
-  openGraph: {
-    title: "ZZAI tools",
-    description:
-      "Free tools for developers and creators — explore calculators, validators, and playgrounds on ZZAI.",
-    type: "website",
-  },
-};
+  path: "/tools",
+});
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;

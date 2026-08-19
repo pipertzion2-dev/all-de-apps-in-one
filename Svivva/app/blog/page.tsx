@@ -3,19 +3,16 @@ import { db } from "@/server/db";
 import { blogPosts } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import BlogIndexContent from "./blog-index-content";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: "Blog",
   description:
     "Guides and stories from ZZAI — shipping with guardrails: prompts, schemas, evaluations, versioning, and what we learn along the way.",
-  openGraph: {
-    title: "ZZAI blog",
-    description: "Guides and stories on shipping with ZZAI — from seed to symphony.",
-    type: "website",
-  },
-};
+  path: "/blog",
+});
 
 export default async function BlogIndexPage() {
   let posts: (typeof blogPosts.$inferSelect)[] = [];

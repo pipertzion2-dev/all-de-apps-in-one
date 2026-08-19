@@ -14,6 +14,7 @@ import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
 import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
 
@@ -70,7 +71,7 @@ function isMiniApp(page: LandingPage): boolean {
   return !!page.toolUrl?.startsWith("replit:");
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
+const BASE_URL = getSiteUrl();
 
 function hubLabel(hubPath: string): string {
   if (hubPath === "/ai-tools-hub") return "AI Tools Hub";

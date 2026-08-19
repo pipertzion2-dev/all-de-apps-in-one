@@ -5,6 +5,11 @@ export const metadata: Metadata = {
   title: { template: "%s | Marketing Hub", default: "Marketing Hub" },
   description:
     "Manage campaigns, leads, referrals, UTM tracking, content amplification, and A/B tests.",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {

@@ -14,28 +14,7 @@ const APP_ROOT = path.join(process.cwd(), "app");
 
 const SKIP_SEGMENTS = new Set(["api", "favicon.ico"]);
 
-const NOINDEX_PREFIXES = [
-  "/dashboard",
-  "/api",
-  "/gate",
-  "/play",
-  "/playground",
-  "/test",
-  "/badge",
-  "/api-card",
-];
-
-const DISALLOWED_IN_ROBOTS = [
-  "/dashboard",
-  "/api",
-  "/_next",
-  "/gate",
-  "/play",
-  "/playground",
-  "/test",
-  "/badge",
-  "/api-card",
-];
+import { isNoindexPath as isNoindexPathFromConfig, isRobotsDisallowed } from "@/lib/seo/robots-config";
 
 function segmentToPath(parts: string[]): string {
   const filtered = parts.filter((p) => !p.startsWith("(") && !p.startsWith("@"));
@@ -107,12 +86,10 @@ export async function discoverAppRoutes(): Promise<DiscoveredRoute[]> {
 }
 
 export function isNoindexPath(routePath: string): boolean {
-  return NOINDEX_PREFIXES.some((p) => routePath === p || routePath.startsWith(`${p}/`));
+  return isNoindexPathFromConfig(routePath);
 }
 
-export function isRobotsDisallowed(routePath: string): boolean {
-  return DISALLOWED_IN_ROBOTS.some((p) => routePath === p || routePath.startsWith(`${p}/`));
-}
+export { isRobotsDisallowed };
 
 export function isCrawlablePublicPath(routePath: string): boolean {
   if (isNoindexPath(routePath)) return false;

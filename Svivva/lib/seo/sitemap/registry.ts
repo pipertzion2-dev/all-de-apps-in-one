@@ -6,6 +6,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
 import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
+import { dedupeSitemapUrls, normalizeSitemapUrl } from "@/lib/seo/sitemap/normalize";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
 
@@ -48,6 +49,7 @@ function staticPagesEntries(): SitemapEntry[] {
     { path: "/orbit", priority: 0.8, changeFrequency: "weekly" },
     { path: "/seeds", priority: 0.7, changeFrequency: "weekly" },
     { path: "/referrals", priority: 0.6, changeFrequency: "monthly" },
+    { path: "/marketing", priority: 0.75, changeFrequency: "monthly" },
   ];
 
   return defs.map(({ path, priority, changeFrequency }) => ({
@@ -154,7 +156,20 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
     /* db */
   }
 
-  return entries;
+  const bNorm = base();
+  const normalized = entries.map((e) => ({
+    ...e,
+    url: normalizeSitemapUrl(e.url, bNorm),
+  }));
+
+  return dedupeSitemapUrls(normalized).filter((e) => {
+    try {
+      const path = new URL(e.url).pathname;
+      return !path.startsWith("/dashboard") && !path.startsWith("/marketing-hub");
+    } catch {
+      return true;
+    }
+  });
 }
 
 export async function buildSitemapChunk(id: SitemapChunkId): Promise<MetadataRoute.Sitemap> {

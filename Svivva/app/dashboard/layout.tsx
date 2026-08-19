@@ -35,6 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description: "Your ZZAI workspace — From seed to symphony.",
+    robots: {
+      index: false,
+      follow: false,
+      googleBot: { index: false, follow: false },
+    },
   };
 }
 

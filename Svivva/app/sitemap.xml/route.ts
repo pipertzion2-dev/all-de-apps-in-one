@@ -30,3 +30,14 @@ export async function GET() {
     },
   });
 }
+
+/** Some crawlers probe sitemap with HEAD — return 200 so GSC/diagnostics do not false-fail. */
+export async function HEAD() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+    },
+  });
+}
