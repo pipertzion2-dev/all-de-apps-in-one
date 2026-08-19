@@ -438,7 +438,9 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       const json = await r.json();
       if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
       setResult(json as RunResult);
-      if ((json as { ai?: { providerLabel?: string; marketingModel?: string } }).ai?.providerLabel) {
+      if (
+        (json as { ai?: { providerLabel?: string; marketingModel?: string } }).ai?.providerLabel
+      ) {
         setAiProviderLabel((json as { ai: { providerLabel: string } }).ai.providerLabel);
       }
       if ((json as { ai?: { marketingModel?: string } }).ai?.marketingModel) {

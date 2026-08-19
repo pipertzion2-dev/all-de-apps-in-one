@@ -329,8 +329,7 @@ export async function runMarketingAutopilot(opts?: {
     } else {
       const fb = copyReadyOrNeedsCredentials({
         copyOnly,
-        needsCredentialsMessage:
-          "Article ready — add Dev.to API key (free) or copy & paste",
+        needsCredentialsMessage: "Article ready — add Dev.to API key (free) or copy & paste",
       });
       tasks.push(
         task("manual-devto", fb.status, fb.message, {
@@ -360,8 +359,7 @@ export async function runMarketingAutopilot(opts?: {
     } else {
       const fb = copyReadyOrNeedsCredentials({
         copyOnly,
-        needsCredentialsMessage:
-          "Article ready — add Hashnode key (free) or copy & paste",
+        needsCredentialsMessage: "Article ready — add Hashnode key (free) or copy & paste",
       });
       tasks.push(
         task("manual-hashnode", fb.status, fb.message, {
@@ -444,9 +442,7 @@ export async function runMarketingAutopilot(opts?: {
         needsCredentialsMessage:
           "Thread ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on X",
       });
-      tasks.push(
-        task("manual-twitter-thread", fb.status, fb.message, { copyText: threadCopy }),
-      );
+      tasks.push(task("manual-twitter-thread", fb.status, fb.message, { copyText: threadCopy }));
     }
   }
 
@@ -492,9 +488,7 @@ export async function runMarketingAutopilot(opts?: {
         needsCredentialsMessage:
           "Post ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on LinkedIn",
       });
-      tasks.push(
-        task("manual-linkedin", fb.status, fb.message, { copyText: liCopy }),
-      );
+      tasks.push(task("manual-linkedin", fb.status, fb.message, { copyText: liCopy }));
     }
   }
 
@@ -598,9 +592,7 @@ export async function runMarketingAutopilot(opts?: {
         needsCredentialsMessage:
           "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
       });
-      tasks.push(
-        task("manual-newsletters", fb.status, fb.message, { copyText: pitchCopy }),
-      );
+      tasks.push(task("manual-newsletters", fb.status, fb.message, { copyText: pitchCopy }));
     }
   }
 
@@ -627,9 +619,7 @@ export async function runMarketingAutopilot(opts?: {
         needsCredentialsMessage:
           "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
       });
-      tasks.push(
-        task("manual-podcasts", fb.status, fb.message, { copyText: podCopy }),
-      );
+      tasks.push(task("manual-podcasts", fb.status, fb.message, { copyText: podCopy }));
     }
   }
 

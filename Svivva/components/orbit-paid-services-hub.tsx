@@ -298,7 +298,9 @@ export function OrbitPaidServicesHub({
           <CreditCard className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
           <div>
             <p className="text-sm font-black text-foreground leading-tight">
-              {copyOnlyMode ? "Automated stack — GPT + Google indexing" : "Best stack — paid, indexing & analytics"}
+              {copyOnlyMode
+                ? "Automated stack — GPT + Google indexing"
+                : "Best stack — paid, indexing & analytics"}
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
               Best picks: {bestStackReady}/{bestStackSteps.length} · Google: {indexingReadyCount}/
