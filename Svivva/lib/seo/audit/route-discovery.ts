@@ -14,7 +14,10 @@ const APP_ROOT = path.join(process.cwd(), "app");
 
 const SKIP_SEGMENTS = new Set(["api", "favicon.ico"]);
 
-import { isNoindexPath as isNoindexPathFromConfig, isRobotsDisallowed } from "@/lib/seo/robots-config";
+import {
+  isNoindexPath as isNoindexPathFromConfig,
+  isRobotsDisallowed,
+} from "@/lib/seo/robots-config";
 
 function segmentToPath(parts: string[]): string {
   const filtered = parts.filter((p) => !p.startsWith("(") && !p.startsWith("@"));

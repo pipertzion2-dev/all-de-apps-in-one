@@ -45,7 +45,10 @@ export function middleware(request: NextRequest) {
   const canonical = canonicalSiteUrl();
 
   if (host && !isLikelyLocalDevHost(host) && proto === "http") {
-    const dest = new URL(request.nextUrl.pathname + request.nextUrl.search, `https://${hostHeader}`);
+    const dest = new URL(
+      request.nextUrl.pathname + request.nextUrl.search,
+      `https://${hostHeader}`,
+    );
     return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest, 308)));
   }
 

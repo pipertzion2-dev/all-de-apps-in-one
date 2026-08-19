@@ -9,7 +9,12 @@ export interface SitemapChunk {
 /** @deprecated Use lib/seo/sitemap/registry for canonical sitemap generation. */
 export async function getSitemapChunks(): Promise<SitemapChunk[]> {
   const siteUrl = getSiteUrl().replace(/\/$/, "");
-  const staticUrls = [`${siteUrl}/`, `${siteUrl}/orbit`, `${siteUrl}/referrals`, `${siteUrl}/marketing`];
+  const staticUrls = [
+    `${siteUrl}/`,
+    `${siteUrl}/orbit`,
+    `${siteUrl}/referrals`,
+    `${siteUrl}/marketing`,
+  ];
 
   const CHUNK_SIZE = 1000;
   const chunks: SitemapChunk[] = [];
