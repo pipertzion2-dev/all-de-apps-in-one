@@ -189,7 +189,8 @@ export function CamoThreeOverlay({
       const isIntroCamo = preset === "hero";
       const isOaasCamo = preset === "oaas";
       const isSectionCamo = isSectionCamoPreset(preset);
-      const useSmoothSectionCamo = isOaasCamo || (isSectionCamo && isMobileViewport);
+      // OaaS keeps block digi camo; only lower sections use smooth camo on phones.
+      const useSmoothSectionCamo = isSectionCamo && isMobileViewport;
 
       const introColors = [
         "rgba(210, 170, 180, 0.38)", // 0: blush pink
@@ -226,7 +227,7 @@ export function CamoThreeOverlay({
         null,
         "rgba(91, 141, 168, 0.22)",
         null,
-        "rgba(45, 72, 82, 0.22)",
+        "rgba(15, 35, 40, 0.30)",
       ];
 
       // Section camo: intro-style tints with transparent gaps so blooms read on phones.
@@ -254,14 +255,7 @@ export function CamoThreeOverlay({
       ctx.clearRect(0, 0, width, height);
 
       if (useSmoothSectionCamo) {
-        drawOaasCamoSmooth(
-          ctx,
-          width,
-          height,
-          blockSize,
-          isOaasCamo ? oaasColors : sectionCamoColors,
-          seededRandom,
-        );
+        drawOaasCamoSmooth(ctx, width, height, blockSize, sectionCamoColors, seededRandom);
         return;
       }
 
@@ -275,7 +269,7 @@ export function CamoThreeOverlay({
           const clusterRand = seededRandom(clusterX, clusterY, 50);
           const combined = rand * 0.35 + clusterRand * 0.65;
 
-          if (isCheckoutCamo || isIntroCamo) {
+          if (isCheckoutCamo || isIntroCamo || isOaasCamo) {
             grid[y][x] = Math.min(Math.floor(combined * toneCount), toneCount - 1);
           } else {
             if (combined < 0.333) {
@@ -327,6 +321,12 @@ export function CamoThreeOverlay({
               ctx.fillStyle = color;
               ctx.fillRect(px, py, blockSize, blockSize);
             }
+          } else if (isOaasCamo) {
+            const color = oaasColors[val];
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(px, py, blockSize, blockSize);
+            }
           } else if (isIntroCamo) {
             const color = introColors[val];
             if (color) {
@@ -370,9 +370,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? isMobileViewport
-                ? "brightness(1.12) saturate(1.32)"
-                : "brightness(1.22) saturate(1.5) contrast(1.08)"
+              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
               : useMobileSectionCamo
                 ? "brightness(1.14) saturate(1.28) contrast(1.04)"
                 : isIntro
@@ -389,7 +387,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-38 md:opacity-48 md:blur-[1.5px]"
+              ? "opacity-38 md:opacity-48 blur-[1.2px]"
               : useMobileSectionCamo
                 ? "opacity-[0.36] md:opacity-[0.72] md:blur-0"
                 : isIntro

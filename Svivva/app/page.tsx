@@ -453,16 +453,12 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* ── ZZAI6 cube + OaaS — one continuous smooth backdrop ── */}
-        <div
-          className="relative overflow-hidden"
-          style={{
-            background:
-              "radial-gradient(ellipse 120% 70% at 50% 0%, rgba(91,141,168,0.22), transparent 58%), radial-gradient(ellipse 100% 55% at 50% 100%, rgba(140,170,110,0.14), transparent 52%), hsl(var(--background))",
-          }}
-        >
-          <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0 min-h-full">
-            {canMountHeavy3d ? <CamoThreeOverlay preset="oaas" eagerMount keepMounted /> : null}
+        {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
+        <div className="relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
+            <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
+              {canMountHeavy3d ? <CamoThreeOverlay preset="oaas" eagerMount keepMounted /> : null}
+            </div>
           </div>
 
           <div className="relative z-10">{canMountHeavy3d ? <SvivvaArtifact /> : null}</div>
@@ -538,11 +534,10 @@ export default function LandingPage() {
           </div>
 
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 sm:h-56 z-[1] md:hidden"
-            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
             style={{
               background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, hsl(var(--background) / 0.35) 65%, transparent 100%)",
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
             }}
           />
         </div>
