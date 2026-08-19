@@ -1,36 +1,35 @@
-import { db } from "@/lib/db";
+import { getSiteUrl } from "@/lib/site-url";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
-
+/** @deprecated Prefer {@link getSitemapEntries} from lib/seo/sitemap/registry — kept for legacy chunk helpers. */
 export interface SitemapChunk {
   id: number;
   urls: string[];
 }
 
+/** @deprecated Use lib/seo/sitemap/registry for canonical sitemap generation. */
 export async function getSitemapChunks(): Promise<SitemapChunk[]> {
-  // Static pages only for now - will add dynamic pages from schema later
+  const siteUrl = getSiteUrl().replace(/\/$/, "");
   const staticUrls = [
-    `${SITE_URL}/`,
-    `${SITE_URL}/marketing`,
-    `${SITE_URL}/referrals`,
-    `${SITE_URL}/orbit`,
+    `${siteUrl}/`,
+    `${siteUrl}/orbit`,
+    `${siteUrl}/referrals`,
+    `${siteUrl}/marketing`,
   ];
 
   const CHUNK_SIZE = 1000;
   const chunks: SitemapChunk[] = [];
 
-  const allUrls = [...staticUrls];
-
-  for (let i = 0; i < allUrls.length; i += CHUNK_SIZE) {
+  for (let i = 0; i < staticUrls.length; i += CHUNK_SIZE) {
     chunks.push({
       id: chunks.length + 1,
-      urls: allUrls.slice(i, i + CHUNK_SIZE),
+      urls: staticUrls.slice(i, i + CHUNK_SIZE),
     });
   }
 
   return chunks;
 }
 
+/** @deprecated */
 export async function getSitemapChunk(id: number): Promise<string> {
   const chunks = await getSitemapChunks();
   const chunk = chunks.find((c) => c.id === id);
