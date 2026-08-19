@@ -536,6 +536,15 @@ export default function LandingPage() {
           <div className="relative z-10 pb-8 sm:pb-12">
             <PlatformFeatureHub hideBackground />
           </div>
+
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 sm:h-56 z-[1] md:hidden"
+            aria-hidden
+            style={{
+              background:
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, hsl(var(--background) / 0.35) 65%, transparent 100%)",
+            }}
+          />
         </div>
 
         <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
@@ -595,7 +604,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
-        <section className="py-8 bg-background/40 backdrop-blur-sm">
+        <section className="py-8 md:bg-background/40 md:backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-3 gap-4 text-center">
               {[
@@ -654,13 +663,13 @@ export default function LandingPage() {
             <CamoThreeOverlay preset="features" />
           </div>
           <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
             }}
@@ -912,13 +921,13 @@ export default function LandingPage() {
             <CamoThreeOverlay preset="howItWorks" />
           </div>
           <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
             }}
@@ -1170,13 +1179,13 @@ export default function LandingPage() {
             <CamoThreeOverlay preset="evals" />
           </div>
           <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
             }}
@@ -1401,13 +1410,13 @@ export default function LandingPage() {
             <CamoThreeOverlay preset="pricing" />
           </div>
           <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
             }}
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
             style={{
               background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
             }}

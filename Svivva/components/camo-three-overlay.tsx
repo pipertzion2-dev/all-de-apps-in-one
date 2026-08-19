@@ -371,20 +371,14 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
+              ? isMobileViewport
+                ? "brightness(1.08) saturate(1.25)"
+                : "brightness(1.22) saturate(1.5) contrast(1.08)"
               : useMobileSectionCamo
-                ? "brightness(1.14) saturate(1.28) contrast(1.04)"
+                ? "brightness(1.1) saturate(1.2)"
                 : isIntro
                   ? "brightness(1.05) saturate(1.35)"
                   : "brightness(1.15) saturate(1.1)",
-          ...(useMobileSectionCamo && !isOaas
-            ? {
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
-                maskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
-              }
-            : {}),
         }}
       >
         {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
@@ -398,9 +392,9 @@ export function CamoThreeOverlay({
             : isCheckout
               ? "opacity-30"
               : isOaas
-                ? "opacity-28 md:opacity-40 blur-[2.5px] md:blur-[1.5px]"
+                ? "opacity-20 md:opacity-40 md:blur-[1.5px]"
                 : useMobileSectionCamo
-                  ? "opacity-[0.36] md:opacity-[0.72] blur-[1.2px] md:blur-0"
+                  ? "hidden md:block opacity-[0.72]"
                   : isIntro
                     ? "opacity-55 md:opacity-60"
                     : "opacity-60 md:opacity-100"

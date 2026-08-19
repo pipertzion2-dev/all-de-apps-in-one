@@ -1062,7 +1062,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         };
 
     const cameraAspect = resolveCameraAspect(width, height, preset, isMediumMobile);
-    const useCrtPost = true;
+    // CRT post (chromatic aberration, vignette) causes visible horizontal banding on mobile OaaS/sections.
+    const useCrtPost = !(isMediumMobile && (isOaasPreset || isSectionCamo));
     const sceneLookAtY = isTightCamoMobile ? -0.35 : config.lookAtY;
 
     const scene = new THREE.Scene();
@@ -1093,69 +1094,76 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Create render target for post-processing
-    const renderTarget = new THREE.WebGLRenderTarget(width, height, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.NearestFilter,
-      format: THREE.RGBAFormat,
-    });
-
-    // CRT post-processing setup
-    const crtScene = new THREE.Scene();
-    const crtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const crtGeometry = new THREE.PlaneGeometry(2, 2);
-    const crtMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        tDiffuse: { value: renderTarget.texture },
-        uTime: { value: 0 },
-        uResolution: { value: new THREE.Vector2(width, height) },
-        uScanlineIntensity: { value: config.scanlineIntensity },
-        uCrtIntensity: { value: config.crtIntensity },
-        uPixelSize: { value: config.pixelSize },
-      },
-      vertexShader: CRT_VERTEX_SHADER,
-      fragmentShader: CRT_FRAGMENT_SHADER,
-      transparent: true,
-    });
-    const crtQuad = new THREE.Mesh(crtGeometry, crtMaterial);
-    crtScene.add(crtQuad);
-
     const disposables: {
       geometry?: THREE.BufferGeometry;
       material?: THREE.Material | THREE.Material[];
     }[] = [];
-    disposables.push({ geometry: crtGeometry, material: crtMaterial });
 
-    // Metallic water matching Vivva logo — sized so camo water reads on mobile sections
-    const waterSegments = isTightCamoMobile ? 32 : 56;
-    const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
-    const waterGeometry = new THREE.PlaneGeometry(
-      waterPlaneSize,
-      waterPlaneSize,
-      waterSegments,
-      waterSegments,
-    );
-    const waterMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uMouse: { value: new THREE.Vector2(0, 0) },
-        uInteraction: { value: config.interactionStrength },
-        uColorTeal: { value: VIVVA_COLORS.teal },
-        uColorTealLight: { value: VIVVA_COLORS.tealLight },
-        uColorBurgundy: { value: VIVVA_COLORS.burgundy },
-        uColorMint: { value: VIVVA_COLORS.mint },
-      },
-      vertexShader: WATER_VERTEX_SHADER,
-      fragmentShader: WATER_FRAGMENT_SHADER,
-      transparent: true,
-      side: THREE.DoubleSide,
-    });
-    disposables.push({ geometry: waterGeometry, material: waterMaterial });
+    let renderTarget: THREE.WebGLRenderTarget | null = null;
+    let crtScene: THREE.Scene | null = null;
+    let crtCamera: THREE.OrthographicCamera | null = null;
+    let crtMaterial: THREE.ShaderMaterial | null = null;
 
-    const water = new THREE.Mesh(waterGeometry, waterMaterial);
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = isTightCamoMobile ? -1.05 : -1.4;
-    scene.add(water);
+    if (useCrtPost) {
+      renderTarget = new THREE.WebGLRenderTarget(width, height, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.NearestFilter,
+        format: THREE.RGBAFormat,
+      });
+
+      crtScene = new THREE.Scene();
+      crtCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const crtGeometry = new THREE.PlaneGeometry(2, 2);
+      crtMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          tDiffuse: { value: renderTarget.texture },
+          uTime: { value: 0 },
+          uResolution: { value: new THREE.Vector2(width, height) },
+          uScanlineIntensity: { value: config.scanlineIntensity },
+          uCrtIntensity: { value: config.crtIntensity },
+          uPixelSize: { value: config.pixelSize },
+        },
+        vertexShader: CRT_VERTEX_SHADER,
+        fragmentShader: CRT_FRAGMENT_SHADER,
+        transparent: true,
+      });
+      const crtQuad = new THREE.Mesh(crtGeometry, crtMaterial);
+      crtScene.add(crtQuad);
+      disposables.push({ geometry: crtGeometry, material: crtMaterial });
+    }
+
+    // Metallic water reads as harsh horizontal bands on phone OaaS/section camo — flowers only there.
+    let waterMaterial: THREE.ShaderMaterial | null = null;
+    if (!isTightCamoMobile) {
+      const waterSegments = 56;
+      const waterGeometry = new THREE.PlaneGeometry(
+        config.waterSize,
+        config.waterSize,
+        waterSegments,
+        waterSegments,
+      );
+      waterMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: { value: 0 },
+          uMouse: { value: new THREE.Vector2(0, 0) },
+          uInteraction: { value: config.interactionStrength },
+          uColorTeal: { value: VIVVA_COLORS.teal },
+          uColorTealLight: { value: VIVVA_COLORS.tealLight },
+          uColorBurgundy: { value: VIVVA_COLORS.burgundy },
+          uColorMint: { value: VIVVA_COLORS.mint },
+        },
+        vertexShader: WATER_VERTEX_SHADER,
+        fragmentShader: WATER_FRAGMENT_SHADER,
+        transparent: true,
+        side: THREE.DoubleSide,
+      });
+      disposables.push({ geometry: waterGeometry, material: waterMaterial });
+
+      const water = new THREE.Mesh(waterGeometry, waterMaterial);
+      water.rotation.x = -Math.PI / 2;
+      water.position.y = -1.4;
+      scene.add(water);
+    }
 
     // Create many exotic flowers spread evenly across scene
     const flowers: THREE.Group[] = [];
@@ -1386,9 +1394,11 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       mouseX += (targetMouseX - mouseX) * 0.04;
       mouseY += (targetMouseY - mouseY) * 0.04;
 
-      waterMaterial.uniforms.uTime.value = elapsed;
-      waterMaterial.uniforms.uMouse.value.set(mouseX, mouseY);
-      crtMaterial.uniforms.uTime.value = elapsed;
+      if (waterMaterial) {
+        waterMaterial.uniforms.uTime.value = elapsed;
+        waterMaterial.uniforms.uMouse.value.set(mouseX, mouseY);
+      }
+      if (crtMaterial) crtMaterial.uniforms.uTime.value = elapsed;
 
       flowers.forEach((flower) => {
         const { phase, baseY, bloomSpeed, rotationOffset } = flower.userData;
@@ -1424,8 +1434,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       camera.position.y = config.cameraY + mouseY * 0.35 * config.interactionStrength;
       camera.lookAt(0, sceneLookAtY, 0);
 
-      // Render scene — skip CRT post on OaaS mobile for stability
-      if (useCrtPost) {
+      // Render scene — skip CRT post on OaaS/section mobile to avoid horizontal banding
+      if (useCrtPost && renderTarget && crtScene && crtCamera) {
         renderer.setRenderTarget(renderTarget);
         renderer.render(scene, camera);
         renderer.setRenderTarget(null);
@@ -1443,7 +1453,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       camera.aspect = resolveCameraAspect(newWidth, newHeight, preset, newWidth < 768);
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
-      if (useCrtPost) {
+      if (useCrtPost && renderTarget && crtMaterial) {
         renderTarget.setSize(newWidth, newHeight);
         crtMaterial.uniforms.uResolution.value.set(newWidth, newHeight);
       }
@@ -1478,7 +1488,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         vivvaTextTex.dispose();
       }
 
-      renderTarget.dispose();
+      renderTarget?.dispose();
       renderer.forceContextLoss();
       renderer.dispose();
       rendererRef.current = null;
