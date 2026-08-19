@@ -176,7 +176,6 @@ const WATER_VERTEX_SHADER = `
   uniform float uTime;
   uniform vec2 uMouse;
   uniform float uInteraction;
-  uniform float uWaveScale;
   varying vec2 vUv;
   varying float vElevation;
   
@@ -184,12 +183,12 @@ const WATER_VERTEX_SHADER = `
     vUv = uv;
     vec3 pos = position;
     
-    float wave1 = sin(pos.x * 1.8 + uTime * 1.2) * 0.15 * uWaveScale;
-    float wave2 = sin(pos.z * 2.5 + uTime * 1.6) * 0.10 * uWaveScale;
-    float wave3 = cos(pos.x * 1.2 + pos.z * 1.8 + uTime * 0.8) * 0.08 * uWaveScale;
+    float wave1 = sin(pos.x * 1.8 + uTime * 1.2) * 0.15;
+    float wave2 = sin(pos.z * 2.5 + uTime * 1.6) * 0.10;
+    float wave3 = cos(pos.x * 1.2 + pos.z * 1.8 + uTime * 0.8) * 0.08;
     
     float dist = length(pos.xz - uMouse * 6.0);
-    float ripple = sin(dist * 3.5 - uTime * 4.5) * 0.3 * exp(-dist * 0.35) * uInteraction * uWaveScale;
+    float ripple = sin(dist * 3.5 - uTime * 4.5) * 0.3 * exp(-dist * 0.35) * uInteraction;
     
     pos.y += wave1 + wave2 + wave3 + ripple;
     vElevation = pos.y;
@@ -1133,9 +1132,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       disposables.push({ geometry: crtGeometry, material: crtMaterial });
     }
 
-    // Metallic water + digi camo stack — mobile uses fewer segments and gentler waves.
+    // Metallic water matching Vivva logo — sized so digi camo water reads on mobile OaaS.
     let waterMaterial: THREE.ShaderMaterial | null = null;
-    const waterSegments = isTightCamoMobile ? 28 : 56;
+    const isOaasWater = preset === "oaas";
+    const waterSegments = isTightCamoMobile ? 32 : 56;
     const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
     const waterGeometry = new THREE.PlaneGeometry(
       waterPlaneSize,
@@ -1148,7 +1148,6 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uInteraction: { value: config.interactionStrength },
-        uWaveScale: { value: isTightCamoMobile ? 0.5 : 1.0 },
         uColorTeal: { value: VIVVA_COLORS.teal },
         uColorTealLight: { value: VIVVA_COLORS.tealLight },
         uColorBurgundy: { value: VIVVA_COLORS.burgundy },
@@ -1163,7 +1162,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = isTightCamoMobile ? -1.05 : -1.4;
+    water.position.y = isOaasWater && isMediumMobile ? -1.05 : -1.4;
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene

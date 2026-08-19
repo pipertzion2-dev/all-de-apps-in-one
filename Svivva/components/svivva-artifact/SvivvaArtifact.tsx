@@ -395,10 +395,10 @@ export function SvivvaArtifact() {
   };
 
   return (
-    <section className="relative w-full py-28 flex flex-col items-center overflow-hidden">
-      {/* Ambient background glow */}
+    <section className="relative w-full py-28 flex flex-col items-center overflow-hidden bg-transparent">
+      {/* Ambient background glow — keep subtle so digi camo water shows through */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-20 transition-colors duration-1000"
+        className="pointer-events-none absolute inset-0 opacity-10 transition-colors duration-1000"
         style={{
           background: `radial-gradient(ellipse 60% 50% at 50% 50%, rgba(${activeFeature.accentColorRgb},0.35) 0%, transparent 70%)`,
         }}
