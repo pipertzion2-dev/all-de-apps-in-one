@@ -7,6 +7,19 @@ import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 import { ARTIFACT_FEATURES, type ArtworkFeature } from "./feature-data";
 
+function isWebGLAvailable() {
+  if (typeof window === "undefined") return true;
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ─── Cube face geometry ───────────────────────────────────────────────
 function CubeFace({
   feature,
@@ -365,7 +378,12 @@ function FeaturePreview({ feature, onClose }: { feature: ArtworkFeature; onClose
 export function SvivvaArtifact() {
   const [activeIndex, setActiveIndex] = useState(4); // "api" face front
   const [showPreview, setShowPreview] = useState(false);
+  const [webGLAvailable, setWebGLAvailable] = useState(true);
   const activeFeature = ARTIFACT_FEATURES[activeIndex];
+
+  useEffect(() => {
+    setWebGLAvailable(isWebGLAvailable());
+  }, []);
 
   const handleFaceSelect = (i: number) => {
     if (i === activeIndex) {
@@ -413,16 +431,26 @@ export function SvivvaArtifact() {
           className="relative flex-shrink-0 rounded-3xl overflow-hidden"
           style={{ width: 320, height: 320, touchAction: "pan-y" }}
         >
-          <Canvas
-            camera={{ position: [0, 0, 2.4], fov: 50 }}
-            gl={{ antialias: true, alpha: true }}
-            style={{ background: "transparent", touchAction: "pan-y" }}
-          >
-            <Suspense fallback={null}>
-              <SceneLights activeFeature={activeFeature} />
-              <ArtifactCube activeIndex={activeIndex} onFaceSelect={handleFaceSelect} />
-            </Suspense>
-          </Canvas>
+          {webGLAvailable ? (
+            <Canvas
+              camera={{ position: [0, 0, 2.4], fov: 50 }}
+              gl={{ antialias: true, alpha: true }}
+              style={{ background: "transparent", touchAction: "pan-y" }}
+            >
+              <Suspense fallback={null}>
+                <SceneLights activeFeature={activeFeature} />
+                <ArtifactCube activeIndex={activeIndex} onFaceSelect={handleFaceSelect} />
+              </Suspense>
+            </Canvas>
+          ) : (
+            <div
+              className="flex h-full w-full flex-col items-center justify-center rounded-3xl border border-white/10 bg-black/40 px-6 text-center"
+              aria-hidden
+            >
+              <p className="text-sm font-medium text-white/80">{activeFeature.title}</p>
+              <p className="mt-1 text-xs text-white/50">3D preview unavailable on this device</p>
+            </div>
+          )}
         </div>
 
         {/* Preview panel */}

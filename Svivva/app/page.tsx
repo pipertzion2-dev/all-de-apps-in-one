@@ -163,6 +163,16 @@ export default function LandingPage() {
     developers: number;
     apiCalls: number;
   } | null>(null);
+  const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
+
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!mobile) setCanMountHeavy3d(true);
+  }, []);
+
+  useEffect(() => {
+    if (flipComplete) setCanMountHeavy3d(true);
+  }, [flipComplete]);
 
   useEffect(() => {
     fetch("/api/public-stats")
@@ -211,6 +221,13 @@ export default function LandingPage() {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
 
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const autoSkipTimer = mobile
+      ? window.setTimeout(() => {
+          if (!lastProgressRef.current) finishIntro();
+        }, 12000)
+      : undefined;
+
     const flipZone = Math.max(window.innerHeight * 0.55, 280);
     const applyDelta = (delta: number) => {
       virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
@@ -243,6 +260,7 @@ export default function LandingPage() {
     captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
+      if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
       captureEl.removeEventListener("wheel", handleWheel);
@@ -444,12 +462,10 @@ export default function LandingPage() {
           }}
         >
           <div className="absolute inset-0 opacity-70 md:opacity-55 pointer-events-none z-0 min-h-full">
-            <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
+            {canMountHeavy3d ? <CamoThreeOverlay preset="oaas" eagerMount keepMounted /> : null}
           </div>
 
-          <div className="relative z-10">
-            <SvivvaArtifact />
-          </div>
+          <div className="relative z-10">{canMountHeavy3d ? <SvivvaArtifact /> : null}</div>
 
           <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
             <div className="max-w-5xl mx-auto px-4 sm:px-6">
