@@ -573,16 +573,42 @@ function resolveCameraAspect(
   scenePreset: ScenePreset,
   isMediumMobile: boolean,
 ): number {
-  const containerAspect = containerWidth / Math.max(containerHeight, 1);
+  const { width, height } = resolveRenderDimensions(
+    containerWidth,
+    containerHeight,
+    scenePreset,
+    isMediumMobile,
+  );
+  const containerAspect = width / Math.max(height, 1);
   if (!isMediumMobile) return containerAspect;
 
   if (scenePreset === "oaas" || isSectionCamoPreset(scenePreset)) {
-    const vw = typeof window !== "undefined" ? window.innerWidth : containerWidth;
-    const vh = typeof window !== "undefined" ? window.innerHeight : containerHeight;
+    const vw = typeof window !== "undefined" ? window.innerWidth : width;
+    const vh = typeof window !== "undefined" ? window.innerHeight : height;
     return Math.max(containerAspect, vw / Math.max(vh, 1), 0.62);
   }
 
   return Math.max(containerAspect, 0.45);
+}
+
+/** Cap WebGL height to the viewport on mobile camo sections so water is not squashed. */
+function resolveRenderDimensions(
+  containerWidth: number,
+  containerHeight: number,
+  scenePreset: ScenePreset,
+  isMediumMobile: boolean,
+): { width: number; height: number } {
+  if (
+    isMediumMobile &&
+    (scenePreset === "oaas" || isSectionCamoPreset(scenePreset)) &&
+    typeof window !== "undefined"
+  ) {
+    const viewportHeight = window.innerHeight;
+    if (containerHeight > viewportHeight * 1.05) {
+      return { width: containerWidth, height: viewportHeight };
+    }
+  }
+  return { width: containerWidth, height: containerHeight };
 }
 
 function createSeededRandom(seed: number) {
@@ -942,9 +968,15 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     const container = containerRef.current;
 
     const updateDimensions = () => {
-      const w = container.clientWidth || container.offsetWidth;
-      const h = container.clientHeight || container.offsetHeight;
-      if (w > 0 && h > 0) {
+      const rawW = container.clientWidth || container.offsetWidth;
+      const rawH = container.clientHeight || container.offsetHeight;
+      if (rawW > 0 && rawH > 0) {
+        const { width: w, height: h } = resolveRenderDimensions(
+          rawW,
+          rawH,
+          preset,
+          rawW < 768,
+        );
         setDimensions((prev) => {
           if (prev?.width === w && prev?.height === h) return prev;
           return { width: w, height: h };
@@ -998,8 +1030,11 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     if (!containerRef.current) return;
 
     const container = containerRef.current;
+    const rawW = container.clientWidth || dimensions.width;
+    const rawH = container.clientHeight || dimensions.height;
     const width = dimensions.width;
     const height = dimensions.height;
+    const renderHeightCapped = height < rawH - 1;
 
     if (width === 0 || height === 0) return;
 
@@ -1061,7 +1096,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           mobileScaleBoost: isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
         };
 
-    const cameraAspect = resolveCameraAspect(width, height, preset, isMediumMobile);
+    const cameraAspect = resolveCameraAspect(rawW, rawH, preset, isMediumMobile);
     // CRT post (chromatic aberration, vignette) causes visible horizontal banding on mobile OaaS/sections.
     const useCrtPost = !(isMediumMobile && (isOaasPreset || isSectionCamo));
     const sceneLookAtY = isTightCamoMobile ? -0.35 : config.lookAtY;
@@ -1089,7 +1124,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     renderer.domElement.style.top = "0";
     renderer.domElement.style.left = "0";
     renderer.domElement.style.width = "100%";
-    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.height = renderHeightCapped ? `${height}px` : "100%";
 
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -1457,11 +1492,18 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     animate();
 
     const handleResize = () => {
-      const newWidth = container.clientWidth;
-      const newHeight = container.clientHeight;
-      camera.aspect = resolveCameraAspect(newWidth, newHeight, preset, newWidth < 768);
+      const rawW = container.clientWidth;
+      const rawH = container.clientHeight;
+      const { width: newWidth, height: newHeight } = resolveRenderDimensions(
+        rawW,
+        rawH,
+        preset,
+        rawW < 768,
+      );
+      camera.aspect = resolveCameraAspect(rawW, rawH, preset, rawW < 768);
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
+      renderer.domElement.style.height = newHeight < rawH - 1 ? `${newHeight}px` : "100%";
       if (useCrtPost && renderTarget && crtMaterial) {
         renderTarget.setSize(newWidth, newHeight);
         crtMaterial.uniforms.uResolution.value.set(newWidth, newHeight);
