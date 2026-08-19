@@ -3,6 +3,7 @@
  */
 import {
   getOrbitDefaultModel,
+  getOrbitModelChain,
   isOrbitAiConfigured,
   isOrbitUsingGemini,
   isOrbitUsingOllama,
@@ -18,14 +19,30 @@ export {
   getOrbitAiProviderLabel,
 };
 
+function isRetryableModelError(e: unknown): boolean {
+  const msg = String(e instanceof Error ? e.message : e).toLowerCase();
+  return (
+    msg.includes("model") &&
+    (msg.includes("not found") ||
+      msg.includes("does not exist") ||
+      msg.includes("invalid") ||
+      msg.includes("unsupported"))
+  );
+}
+
 /**
- * Model used for marketing + research work. Defaults to the provider's model,
- * but can be upgraded to a stronger model (e.g. gpt-4o, gpt-4.1)
- * by setting ORBIT_AI_MODEL — no code change needed when you add credits.
+ * Model used for marketing + research work. Defaults to gpt-5 for paid OpenAI;
+ * override with ORBIT_AI_MODEL in Vercel / Platform Secrets.
  */
 export function getMarketingModel(): string {
   const override = process.env.ORBIT_AI_MODEL?.trim();
   return override || getOrbitDefaultModel();
+}
+
+/** Ordered models for Orbit marketing — primary first, then fallbacks. */
+export function getMarketingModelChain(): string[] {
+  const primary = getMarketingModel();
+  return [...new Set([primary, ...getOrbitModelChain()])];
 }
 
 export async function generateText(
@@ -39,14 +56,25 @@ export async function generateText(
   }
   messages.push({ role: "user", content: prompt });
 
-  const res = await orbitOpenai.chat.completions.create({
-    model: model || getMarketingModel(),
-    messages,
-    max_tokens: maxTokens,
-    temperature: 0.7,
-  });
+  const models = model ? [model] : getMarketingModelChain();
+  let lastError: unknown;
 
-  return res.choices[0]?.message?.content?.trim() ?? "";
+  for (const m of models) {
+    try {
+      const res = await orbitOpenai.chat.completions.create({
+        model: m,
+        messages,
+        max_tokens: maxTokens,
+        temperature: 0.7,
+      });
+      return res.choices[0]?.message?.content?.trim() ?? "";
+    } catch (e) {
+      lastError = e;
+      if (!isRetryableModelError(e) || m === models[models.length - 1]) break;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
 }
 
 /** Generate and parse a JSON response, tolerating ```json fences. */

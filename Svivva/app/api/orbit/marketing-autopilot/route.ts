@@ -16,6 +16,7 @@ import {
   getOrbitActiveAiProvider,
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
 
 export const maxDuration = 300;
 
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
         configured: isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),
         providerLabel: getOrbitAiProviderLabel(),
+        marketingModel: getMarketingModel(),
       },
     });
   } catch (e) {
@@ -89,7 +91,16 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
-    return NextResponse.json({ ...result, ok: result.ok });
+    return NextResponse.json({
+      ...result,
+      ok: result.ok,
+      ai: {
+        configured: isOrbitAiConfigured(),
+        provider: getOrbitActiveAiProvider(),
+        providerLabel: getOrbitAiProviderLabel(),
+        marketingModel: getMarketingModel(),
+      },
+    });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

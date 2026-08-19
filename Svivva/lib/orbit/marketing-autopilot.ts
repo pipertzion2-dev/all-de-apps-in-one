@@ -28,6 +28,9 @@ import type {
 } from "@/lib/orbit/marketing-autopilot-types";
 import { getSiteUrl } from "@/lib/site-url";
 import { runIndexHealth } from "@/lib/seo/index-health";
+import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { getGoogleOAuthAccessTokenForUser } from "@/lib/google-gsc-oauth";
+import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 function now(): string {
   return new Date().toISOString();
 }
@@ -143,6 +146,26 @@ export async function runMarketingAutopilot(opts?: {
   const creds = await loadMarketingPlatformCredentials();
   const credStatus = await getMarketingCredentialStatus();
   let indexingSummary: MarketingIndexingSummary | undefined;
+
+  // ── Phase 0: GSC OAuth preflight (one-button indexing refresh) ───────────
+  try {
+    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+    const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
+    if (accessToken) {
+      const gscSetup = await runGscAutoSetup({ userId, accessToken });
+      tasks.push(
+        task(
+          "auto-gsc-preflight",
+          gscSetup.ok ? "done" : "failed",
+          gscSetup.ok
+            ? `GSC preflight: ${gscSetup.message}`
+            : gscSetup.message || "GSC preflight failed — check /dashboard/gsc-connect",
+        ),
+      );
+    }
+  } catch {
+    /* OAuth preflight is best-effort; service-account path runs in Phase 1 */
+  }
 
   // ── Phase 1: On-site + indexing ───────────────────────────────────────────
   if (!opts?.skipOnSite) {
