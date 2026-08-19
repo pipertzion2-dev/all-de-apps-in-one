@@ -971,12 +971,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       const rawW = container.clientWidth || container.offsetWidth;
       const rawH = container.clientHeight || container.offsetHeight;
       if (rawW > 0 && rawH > 0) {
-        const { width: w, height: h } = resolveRenderDimensions(
-          rawW,
-          rawH,
-          preset,
-          rawW < 768,
-        );
+        const { width: w, height: h } = resolveRenderDimensions(rawW, rawH, preset, rawW < 768);
         setDimensions((prev) => {
           if (prev?.width === w && prev?.height === h) return prev;
           return { width: w, height: h };

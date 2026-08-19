@@ -460,12 +460,7 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
             <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
               {canMountCamo ? (
-                <CamoThreeOverlay
-                  preset="oaas"
-                  eagerMount
-                  keepMounted
-                  className="h-full w-full"
-                />
+                <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
               ) : null}
             </div>
           </div>
