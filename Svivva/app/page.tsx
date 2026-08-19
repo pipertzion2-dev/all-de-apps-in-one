@@ -151,10 +151,15 @@ export default function LandingPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
+  const flipRotorRef = useRef<HTMLDivElement>(null);
+  const flipRafRef = useRef(0);
+  const halfHRef = useRef(400);
   const [flipProgress, setFlipProgress] = useState(0);
+  const [showScrollHint, setShowScrollHint] = useState(true);
   const [flipComplete, setFlipComplete] = useState(false);
   const virtualScrollRef = useRef(0);
   const lastProgressRef = useRef(0);
+  const scrollHintHiddenRef = useRef(false);
   const [vpHeight, setVpHeight] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight : 0,
   );
@@ -167,13 +172,18 @@ export default function LandingPage() {
   const [canMountCube, setCanMountCube] = useState(false);
 
   useEffect(() => {
-    setCanMountCamo(true);
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!mobile) setCanMountCube(true);
+    if (!mobile) {
+      setCanMountCamo(true);
+      setCanMountCube(true);
+    }
   }, []);
 
   useEffect(() => {
-    if (flipComplete) setCanMountCube(true);
+    if (flipComplete) {
+      setCanMountCamo(true);
+      setCanMountCube(true);
+    }
   }, [flipComplete]);
 
   useEffect(() => {
@@ -201,7 +211,11 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
-    const updateHeight = () => setVpHeight(window.innerHeight);
+    const updateHeight = () => {
+      const h = window.innerHeight;
+      setVpHeight(h);
+      halfHRef.current = h / 2;
+    };
     updateHeight();
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
@@ -231,14 +245,43 @@ export default function LandingPage() {
       : undefined;
 
     const flipZone = Math.max(window.innerHeight * 0.55, 280);
-    const applyDelta = (delta: number) => {
-      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
-      const progress = Math.min(virtualScrollRef.current / flipZone, 1);
+
+    const paintFlip = (progress: number) => {
+      const halfH = halfHRef.current;
+      const angle = progress * 90;
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translateZ(${-halfH}px) rotateX(${angle}deg)`;
+      }
+    };
+
+    const commitFlipProgress = (progress: number) => {
       if (Math.abs(progress - lastProgressRef.current) <= 0.001) return;
       lastProgressRef.current = progress;
-      setFlipProgress(progress);
+      paintFlip(progress);
+
+      if (!scrollHintHiddenRef.current) {
+        if (progress >= 0.08) {
+          scrollHintHiddenRef.current = true;
+          setShowScrollHint(false);
+        } else {
+          setFlipProgress(progress);
+        }
+      }
+
       if (progress >= 1) finishIntro();
     };
+
+    const applyDelta = (delta: number) => {
+      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
+      if (flipRafRef.current) return;
+      flipRafRef.current = requestAnimationFrame(() => {
+        flipRafRef.current = 0;
+        const progress = Math.min(virtualScrollRef.current / flipZone, 1);
+        commitFlipProgress(progress);
+      });
+    };
+
+    paintFlip(0);
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -263,6 +306,7 @@ export default function LandingPage() {
 
     return () => {
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
+      if (flipRafRef.current) cancelAnimationFrame(flipRafRef.current);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
       captureEl.removeEventListener("wheel", handleWheel);
@@ -271,7 +315,6 @@ export default function LandingPage() {
     };
   }, [flipComplete]);
 
-  const cubeAngle = flipProgress * 90;
   const flipHeight =
     vpHeight > 0 ? vpHeight : typeof window !== "undefined" ? window.innerHeight : 800;
   const halfH = flipHeight / 2;
@@ -303,12 +346,13 @@ export default function LandingPage() {
             }}
           >
             <div
+              ref={flipRotorRef}
               style={{
                 width: "100%",
                 height: "100%",
                 position: "relative",
                 transformStyle: "preserve-3d",
-                transform: `translateZ(${-halfH}px) rotateX(${cubeAngle}deg)`,
+                transform: `translateZ(${-halfH}px) rotateX(0deg)`,
                 willChange: "transform",
               }}
             >
@@ -353,12 +397,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          {flipProgress < 0.08 && (
+          {showScrollHint && (
             <div
               className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
               style={{
                 zIndex: 10,
-                opacity: 1 - flipProgress * 15,
+                opacity: Math.max(0, 1 - flipProgress * 15),
                 animation: "scrollBounce 1.5s ease-in-out 0s infinite",
               }}
             >
