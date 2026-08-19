@@ -285,6 +285,8 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
   const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
+  const [marketingModel, setMarketingModel] = useState<string | null>(null);
+  const [copyOnlyMode, setCopyOnlyMode] = useState(true);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [gsc, setGsc] = useState<{
@@ -393,12 +395,15 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
         if (!r.ok || cancelled) return;
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
-          ai?: { configured?: boolean; providerLabel?: string };
+          ai?: { configured?: boolean; providerLabel?: string; marketingModel?: string };
+          copyOnlyMode?: boolean;
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
         if (json.ai?.configured) setAiConfigured(true);
         if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
+        if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
+        if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
         // non-blocking
@@ -433,6 +438,14 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       const json = await r.json();
       if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
       setResult(json as RunResult);
+      if (
+        (json as { ai?: { providerLabel?: string; marketingModel?: string } }).ai?.providerLabel
+      ) {
+        setAiProviderLabel((json as { ai: { providerLabel: string } }).ai.providerLabel);
+      }
+      if ((json as { ai?: { marketingModel?: string } }).ai?.marketingModel) {
+        setMarketingModel((json as { ai: { marketingModel: string } }).ai.marketingModel);
+      }
       onComplete?.();
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e));
@@ -552,23 +565,31 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg font-black text-foreground leading-tight">
               {running
-                ? "Running AI marketing…"
+                ? `Running everything${marketingModel ? ` (${marketingModel})` : ""}…`
                 : hasRun
-                  ? "AI marketing complete"
-                  : "AI marketing — one button"}
+                  ? "Everything complete"
+                  : "Everything — one button (GPT-5)"}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "Orbit is building pages, indexing Google/Bing, writing copy, and auto-posting. Leave this page open."
+                ? "GPT-5 + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
                 : hasRun
-                  ? "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press: AI builds all on-site SEO, submits to Google & Bing, generates copy, and posts via API."}
+                  ? copyOnlyMode
+                    ? "Fully automated: pages, indexing, GPT-5 copy. Optional social/email copy saved in Growth Content."
+                    : "Everything automatable ran below. Manual paste tasks are in their own section."
+                  : "One press: GPT-5 builds SEO pages, submits to Google & Bing, saves launch copy — no auto-posting needed."}
             </p>
+            {aiConfigured && (marketingModel || aiProviderLabel) && (
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
+                AI: {aiProviderLabel || marketingModel}
+              </p>
+            )}
           </div>
         </div>
 
         <OrbitPaidServicesHub
           defaultExpanded={!aiConfigured}
+          copyOnlyMode={copyOnlyMode}
           configuredKeys={configuredKeys}
           aiConfigured={aiConfigured}
           aiProviderLabel={aiProviderLabel}
@@ -695,7 +716,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
               </>
             ) : (
               <>
-                <Rocket className="w-5 h-5" /> Run all AI marketing
+                <Rocket className="w-5 h-5" /> Run everything (GPT-5)
               </>
             )}
           </button>

@@ -16,6 +16,8 @@ import {
   getOrbitActiveAiProvider,
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
+import { getMarketingModel } from "@/lib/orbit/ai-client";
+import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
 
 export const maxDuration = 300;
 
@@ -35,6 +37,7 @@ export async function GET(req: NextRequest) {
     const creds = await loadMarketingPlatformCredentials();
     const status = await getMarketingCredentialStatus();
     const lastRun = await loadLastAutopilotRun();
+    const copyOnlyMode = isCopyOnlyDistributionMode(creds);
 
     return NextResponse.json({
       credentials: maskCredentialsForClient(creds),
@@ -43,10 +46,12 @@ export async function GET(req: NextRequest) {
       tasks: MARKETING_AUTOPILOT_TASKS,
       gscConnectUrl: "/dashboard/gsc-connect",
       setupProviders: ORBIT_SETUP_PROVIDERS,
+      copyOnlyMode,
       ai: {
         configured: isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),
         providerLabel: getOrbitAiProviderLabel(),
+        marketingModel: getMarketingModel(),
       },
     });
   } catch (e) {
@@ -89,7 +94,16 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
-    return NextResponse.json({ ...result, ok: result.ok });
+    return NextResponse.json({
+      ...result,
+      ok: result.ok,
+      ai: {
+        configured: isOrbitAiConfigured(),
+        provider: getOrbitActiveAiProvider(),
+        providerLabel: getOrbitAiProviderLabel(),
+        marketingModel: getMarketingModel(),
+      },
+    });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

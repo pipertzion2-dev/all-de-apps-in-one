@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import { getGeminiApiKey, getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl } from "@/lib/env";
 
+/** Paid OpenAI default for Orbit marketing — override with ORBIT_AI_MODEL in env. */
+export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-5";
+
 export type AiProvider = "gemini" | "openai" | "replit" | "ollama" | "none";
 
 let cachedOllamaUrl: string | null | undefined;
@@ -82,8 +85,10 @@ export function isOrbitAiConfigured(): boolean {
 
 export function getOrbitAiProviderLabel(provider: AiProvider = getOrbitActiveAiProvider()): string {
   switch (provider) {
-    case "openai":
-      return "OpenAI gpt-4o";
+    case "openai": {
+      const model = process.env.ORBIT_AI_MODEL?.trim() || ORBIT_DEFAULT_OPENAI_MODEL;
+      return `OpenAI ${model}`;
+    }
     case "gemini":
       return "Google Gemini";
     case "ollama":
@@ -132,7 +137,7 @@ export function getOrbitDefaultModelForProvider(
       return "gemini-2.0-flash";
     case "replit":
     case "openai":
-      return "gpt-4o";
+      return ORBIT_DEFAULT_OPENAI_MODEL;
     case "ollama":
       return "llama3.2";
     default:
@@ -148,7 +153,7 @@ export function getOrbitModelFallbackChain(
       return ["gemini-2.0-flash", "gemini-1.5-flash"];
     case "replit":
     case "openai":
-      return ["gpt-4o", "gpt-4o-mini"];
+      return [ORBIT_DEFAULT_OPENAI_MODEL, "gpt-4o", "gpt-4o-mini"];
     case "ollama":
       return ["llama3.2", "llama3.1", "mistral"];
     default:

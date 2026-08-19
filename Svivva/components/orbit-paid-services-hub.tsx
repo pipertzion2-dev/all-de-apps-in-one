@@ -38,6 +38,8 @@ type Props = {
   defaultExpanded?: boolean;
   /** Scroll to cred-* anchor in one-click launch panel */
   onPasteKey?: (credentialKey: string) => void;
+  /** When true, hide Ayrshare/Resend/n8n setup — indexing + GPT only */
+  copyOnlyMode?: boolean;
   className?: string;
 };
 
@@ -153,6 +155,7 @@ export function OrbitPaidServicesHub({
   showFreeFallback = false,
   defaultExpanded = true,
   onPasteKey,
+  copyOnlyMode = false,
   className = "",
 }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -248,22 +251,34 @@ export function OrbitPaidServicesHub({
     return false;
   };
 
-  const bestStackReady = ORBIT_BEST_STACK.filter((s) => {
+  const paidServices = useMemo(() => {
+    if (!copyOnlyMode) return ORBIT_PAID_SERVICES;
+    const skip = new Set(["n8n", "ayrshare", "resend", "omnisocials"]);
+    return ORBIT_PAID_SERVICES.filter((s) => !skip.has(s.id));
+  }, [copyOnlyMode]);
+
+  const bestStackSteps = useMemo(() => {
+    if (!copyOnlyMode) return ORBIT_BEST_STACK;
+    const keep = new Set(["gsc-oauth", "openai", "clarity"]);
+    return ORBIT_BEST_STACK.filter((s) => keep.has(s.id));
+  }, [copyOnlyMode]);
+
+  const bestStackReady = bestStackSteps.filter((s) => {
     const item = orbitServiceById(s.id);
     return item ? isReady(item) : false;
   }).length;
 
-  const paidReadyCount = ORBIT_PAID_SERVICES.filter((s) => isReady(s)).length;
+  const paidReadyCount = paidServices.filter((s) => isReady(s)).length;
   const indexingReadyCount = ORBIT_INDEXING_SERVICES.filter((s) => isReady(s)).length;
   const analyticsReadyCount = ORBIT_ANALYTICS_SERVICES.filter((s) => isReady(s)).length;
 
   const paidByCategory = useMemo(() => {
     const groups: Record<string, OrbitServiceItem[]> = {};
-    for (const s of ORBIT_PAID_SERVICES) {
+    for (const s of paidServices) {
       (groups[s.category] ??= []).push(s);
     }
     return groups;
-  }, []);
+  }, [paidServices]);
 
   return (
     <div
@@ -283,12 +298,15 @@ export function OrbitPaidServicesHub({
           <CreditCard className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
           <div>
             <p className="text-sm font-black text-foreground leading-tight">
-              Best stack — paid, indexing &amp; analytics
+              {copyOnlyMode
+                ? "Automated stack — GPT + Google indexing"
+                : "Best stack — paid, indexing & analytics"}
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Best picks: {bestStackReady}/{ORBIT_BEST_STACK.length} · Google: {indexingReadyCount}/
-              {ORBIT_INDEXING_SERVICES.length} · Paid: {paidReadyCount}/{ORBIT_PAID_SERVICES.length}
+              Best picks: {bestStackReady}/{bestStackSteps.length} · Google: {indexingReadyCount}/
+              {ORBIT_INDEXING_SERVICES.length} · Paid: {paidReadyCount}/{paidServices.length}
               {aiProviderLabel ? ` · AI: ${aiProviderLabel}` : ""}
+              {copyOnlyMode ? " · Auto-post off" : ""}
             </p>
           </div>
         </div>
@@ -305,7 +323,7 @@ export function OrbitPaidServicesHub({
           <div className="rounded-xl border border-teal-500/35 bg-teal-500/8 p-2.5 space-y-2 pt-3">
             <p className="text-[11px] font-black text-teal-200">Recommended stack (best results)</p>
             <ol className="space-y-1.5">
-              {ORBIT_BEST_STACK.map((entry) => {
+              {bestStackSteps.map((entry) => {
                 const item = orbitServiceById(entry.id);
                 const ready = item ? isReady(item) : false;
                 return (
