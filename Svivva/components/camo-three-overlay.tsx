@@ -358,7 +358,6 @@ export function CamoThreeOverlay({
   const isOaas = preset === "oaas";
   const isSectionCamo = isSectionCamoPreset(preset);
   const useMobileSectionCamo = isSectionCamo && isMobileViewport;
-  const hideCamoCanvas = isOaas && isMobileViewport;
 
   return (
     <div
@@ -372,10 +371,10 @@ export function CamoThreeOverlay({
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
               ? isMobileViewport
-                ? "brightness(1.08) saturate(1.25)"
+                ? "brightness(1.12) saturate(1.32)"
                 : "brightness(1.22) saturate(1.5) contrast(1.08)"
               : useMobileSectionCamo
-                ? "brightness(1.1) saturate(1.2)"
+                ? "brightness(1.14) saturate(1.28) contrast(1.04)"
                 : isIntro
                   ? "brightness(1.05) saturate(1.35)"
                   : "brightness(1.15) saturate(1.1)",
@@ -387,17 +386,15 @@ export function CamoThreeOverlay({
       <canvas
         ref={canvasRef}
         className={`absolute inset-0 w-full h-full pointer-events-none ${
-          hideCamoCanvas
-            ? "hidden"
-            : isCheckout
-              ? "opacity-30"
-              : isOaas
-                ? "opacity-20 md:opacity-40 md:blur-[1.5px]"
-                : useMobileSectionCamo
-                  ? "hidden md:block opacity-[0.72]"
-                  : isIntro
-                    ? "opacity-55 md:opacity-60"
-                    : "opacity-60 md:opacity-100"
+          isCheckout
+            ? "opacity-30"
+            : isOaas
+              ? "opacity-38 md:opacity-48 md:blur-[1.5px]"
+              : useMobileSectionCamo
+                ? "opacity-[0.36] md:opacity-[0.72] md:blur-0"
+                : isIntro
+                  ? "opacity-55 md:opacity-60"
+                  : "opacity-60 md:opacity-100"
         }`}
       />
     </div>

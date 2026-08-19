@@ -176,6 +176,7 @@ const WATER_VERTEX_SHADER = `
   uniform float uTime;
   uniform vec2 uMouse;
   uniform float uInteraction;
+  uniform float uWaveScale;
   varying vec2 vUv;
   varying float vElevation;
   
@@ -183,12 +184,12 @@ const WATER_VERTEX_SHADER = `
     vUv = uv;
     vec3 pos = position;
     
-    float wave1 = sin(pos.x * 1.8 + uTime * 1.2) * 0.15;
-    float wave2 = sin(pos.z * 2.5 + uTime * 1.6) * 0.10;
-    float wave3 = cos(pos.x * 1.2 + pos.z * 1.8 + uTime * 0.8) * 0.08;
+    float wave1 = sin(pos.x * 1.8 + uTime * 1.2) * 0.15 * uWaveScale;
+    float wave2 = sin(pos.z * 2.5 + uTime * 1.6) * 0.10 * uWaveScale;
+    float wave3 = cos(pos.x * 1.2 + pos.z * 1.8 + uTime * 0.8) * 0.08 * uWaveScale;
     
     float dist = length(pos.xz - uMouse * 6.0);
-    float ripple = sin(dist * 3.5 - uTime * 4.5) * 0.3 * exp(-dist * 0.35) * uInteraction;
+    float ripple = sin(dist * 3.5 - uTime * 4.5) * 0.3 * exp(-dist * 0.35) * uInteraction * uWaveScale;
     
     pos.y += wave1 + wave2 + wave3 + ripple;
     vElevation = pos.y;
@@ -1046,12 +1047,12 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset || isSectionCamo ? 0.75 : 0.85),
           mobileScaleBoost: isOaasPreset
             ? isSmallMobile
-              ? 0.96
-              : 1.05
+              ? 1.08
+              : 1.18
             : isSectionCamo
               ? isSmallMobile
-                ? 0.5
-                : 0.56
+                ? 0.72
+                : 0.78
               : isSmallMobile
                 ? 0.28
                 : 0.36,
@@ -1132,38 +1133,38 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       disposables.push({ geometry: crtGeometry, material: crtMaterial });
     }
 
-    // Metallic water reads as harsh horizontal bands on phone OaaS/section camo — flowers only there.
+    // Metallic water + digi camo stack — mobile uses fewer segments and gentler waves.
     let waterMaterial: THREE.ShaderMaterial | null = null;
-    if (!isTightCamoMobile) {
-      const waterSegments = 56;
-      const waterGeometry = new THREE.PlaneGeometry(
-        config.waterSize,
-        config.waterSize,
-        waterSegments,
-        waterSegments,
-      );
-      waterMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          uTime: { value: 0 },
-          uMouse: { value: new THREE.Vector2(0, 0) },
-          uInteraction: { value: config.interactionStrength },
-          uColorTeal: { value: VIVVA_COLORS.teal },
-          uColorTealLight: { value: VIVVA_COLORS.tealLight },
-          uColorBurgundy: { value: VIVVA_COLORS.burgundy },
-          uColorMint: { value: VIVVA_COLORS.mint },
-        },
-        vertexShader: WATER_VERTEX_SHADER,
-        fragmentShader: WATER_FRAGMENT_SHADER,
-        transparent: true,
-        side: THREE.DoubleSide,
-      });
-      disposables.push({ geometry: waterGeometry, material: waterMaterial });
+    const waterSegments = isTightCamoMobile ? 28 : 56;
+    const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
+    const waterGeometry = new THREE.PlaneGeometry(
+      waterPlaneSize,
+      waterPlaneSize,
+      waterSegments,
+      waterSegments,
+    );
+    waterMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0, 0) },
+        uInteraction: { value: config.interactionStrength },
+        uWaveScale: { value: isTightCamoMobile ? 0.5 : 1.0 },
+        uColorTeal: { value: VIVVA_COLORS.teal },
+        uColorTealLight: { value: VIVVA_COLORS.tealLight },
+        uColorBurgundy: { value: VIVVA_COLORS.burgundy },
+        uColorMint: { value: VIVVA_COLORS.mint },
+      },
+      vertexShader: WATER_VERTEX_SHADER,
+      fragmentShader: WATER_FRAGMENT_SHADER,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+    disposables.push({ geometry: waterGeometry, material: waterMaterial });
 
-      const water = new THREE.Mesh(waterGeometry, waterMaterial);
-      water.rotation.x = -Math.PI / 2;
-      water.position.y = -1.4;
-      scene.add(water);
-    }
+    const water = new THREE.Mesh(waterGeometry, waterMaterial);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = isTightCamoMobile ? -1.05 : -1.4;
+    scene.add(water);
 
     // Create many exotic flowers spread evenly across scene
     const flowers: THREE.Group[] = [];
@@ -1195,10 +1196,14 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           : isOaas
             ? OAAS_FLOWER_CONFIGS
             : FLOWER_CONFIGS;
-      const typeIndex = Math.floor(
-        (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) *
-          activeConfigs.length,
-      );
+      // On mobile camo sections, cycle types by grid index so all six shapes/colors
+      // appear in view — random picks cluster and read as identical specks at phone scale.
+      const typeIndex = isTightCamoMobile
+        ? flowerIndex % activeConfigs.length
+        : Math.floor(
+            (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) *
+              activeConfigs.length,
+          );
       const flowerConfig = activeConfigs[typeIndex];
 
       const sizeVariation = isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random();
@@ -1206,10 +1211,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         ? 1
         : isOaas
           ? isMediumMobile
-            ? 1.08
+            ? 1.12
             : 1.32
           : isSectionCamo && isMediumMobile
-            ? 0.92
+            ? 1.0
             : isMediumMobile
               ? 0.72
               : 1.4;
@@ -1218,7 +1223,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
           ? 0.9 + (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.5
           : 0.6 + (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.4;
       const mobileBoost = config.mobileScaleBoost ?? 1;
-      const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost;
+      const typeScaleBoost = isTightCamoMobile ? 0.88 + (typeIndex % 4) * 0.1 : 1;
+      const scale = baseScale * mobileBoost * scaleMultiplier * sectionBoost * typeScaleBoost;
 
       const flowerNoise = isCheckout ? 0.18 : isIntro ? 0.25 : isOaas ? 0.14 : 0.12;
       const flower = createExoticFlower(
@@ -1231,7 +1237,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         vivvaTextTex,
       );
       const initialGrowth = isTightCamoMobile
-        ? 0.58 + rand() * 0.3
+        ? 0.38 + (flowerIndex % 6) * 0.09 + rand() * 0.1
         : isMediumMobile
           ? 0.04 + Math.random() * 0.08
           : isIntro
@@ -1247,10 +1253,14 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
         targetGrowth: 1,
         phase: flowerIndex * 0.15,
         bloomSpeed: config.bloomSpeed + (isOaas ? rand() : Math.random()) * 0.01,
-        rotationOffset: ((isOaas ? rand() : Math.random()) - 0.5) * Math.PI * 0.4,
+        rotationOffset: isTightCamoMobile
+          ? (flowerIndex % 8) * (Math.PI / 4) - Math.PI / 2
+          : ((isOaas ? rand() : Math.random()) - 0.5) * Math.PI * 0.4,
       };
       flower.scale.setScalar(initialGrowth * (isMediumMobile ? 1 : 1.2));
-      flower.rotation.y = (isOaas ? rand() : Math.random()) * Math.PI * 2;
+      flower.rotation.y = isTightCamoMobile
+        ? (flowerIndex * 0.73) % (Math.PI * 2)
+        : (isOaas ? rand() : Math.random()) * Math.PI * 2;
       flowers.push(flower);
     };
 
