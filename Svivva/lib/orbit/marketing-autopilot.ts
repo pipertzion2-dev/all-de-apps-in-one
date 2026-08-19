@@ -31,6 +31,10 @@ import { runIndexHealth } from "@/lib/seo/index-health";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { getGoogleOAuthAccessTokenForUser } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
+import {
+  copyReadyOrNeedsCredentials,
+  isCopyOnlyDistributionMode,
+} from "@/lib/orbit/distribution-mode";
 function now(): string {
   return new Date().toISOString();
 }
@@ -145,6 +149,7 @@ export async function runMarketingAutopilot(opts?: {
   const tasks: AutopilotTaskResult[] = [];
   const creds = await loadMarketingPlatformCredentials();
   const credStatus = await getMarketingCredentialStatus();
+  const copyOnly = isCopyOnlyDistributionMode(creds);
   let indexingSummary: MarketingIndexingSummary | undefined;
 
   // ── Phase 0: GSC OAuth preflight (one-button indexing refresh) ───────────
@@ -307,7 +312,7 @@ export async function runMarketingAutopilot(opts?: {
     task("content-outreach", "done", "Newsletter + podcast pitches generated"),
   );
 
-  // ── Phase 3: API publishing ─────────────────────────────────────────────────
+  // ── Phase 3: API publishing (skipped when copy-only — copy saved, no auto-post) ──
   const devto = content.parasite.devto;
   if (devto?.content) {
     await persistContent("parasite-devto", devto.title, devto.content);
@@ -322,13 +327,15 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-devto",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Article ready — add Dev.to API key (free) or copy & paste",
-          { copyText: `# ${devto.title}\n\n${devto.content}` },
-        ),
+      });
+      tasks.push(
+        task("manual-devto", fb.status, fb.message, {
+          copyText: `# ${devto.title}\n\n${devto.content}`,
+        }),
       );
     }
   }
@@ -351,13 +358,15 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-hashnode",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Article ready — add Hashnode key (free) or copy & paste",
-          { copyText: `# ${hashnode.title}\n\n${hashnode.content}` },
-        ),
+      });
+      tasks.push(
+        task("manual-hashnode", fb.status, fb.message, {
+          copyText: `# ${hashnode.title}\n\n${hashnode.content}`,
+        }),
       );
     }
   }
@@ -430,13 +439,13 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-twitter-thread",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Thread ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on X",
-          { copyText: threadCopy },
-        ),
+      });
+      tasks.push(
+        task("manual-twitter-thread", fb.status, fb.message, { copyText: threadCopy }),
       );
     }
   }
@@ -478,13 +487,13 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-linkedin",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Post ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on LinkedIn",
-          { copyText: liCopy },
-        ),
+      });
+      tasks.push(
+        task("manual-linkedin", fb.status, fb.message, { copyText: liCopy }),
       );
     }
   }
@@ -520,15 +529,14 @@ export async function runMarketingAutopilot(opts?: {
         );
       }
     } else if (rp.id === "manual-reddit-sideproject") {
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage: "Post ready — add Reddit app keys (free) or copy & paste",
+      });
       tasks.push(
-        task(
-          rp.id,
-          "needs_credentials",
-          "Post ready — add Reddit app keys (free) or copy & paste",
-          {
-            copyText: `${rp.post.title}\n\n${rp.post.body}`,
-          },
-        ),
+        task(rp.id, fb.status, fb.message, {
+          copyText: `${rp.post.title}\n\n${rp.post.body}`,
+        }),
       );
     }
   }
@@ -585,13 +593,13 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-newsletters",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
-          { copyText: pitchCopy },
-        ),
+      });
+      tasks.push(
+        task("manual-newsletters", fb.status, fb.message, { copyText: pitchCopy }),
       );
     }
   }
@@ -614,13 +622,13 @@ export async function runMarketingAutopilot(opts?: {
         ),
       );
     } else {
-      tasks.push(
-        task(
-          "manual-podcasts",
-          "needs_credentials",
+      const fb = copyReadyOrNeedsCredentials({
+        copyOnly,
+        needsCredentialsMessage:
           "Pitch ready — add n8n webhook (recommended) or Resend key, or copy & email manually",
-          { copyText: podCopy },
-        ),
+      });
+      tasks.push(
+        task("manual-podcasts", fb.status, fb.message, { copyText: podCopy }),
       );
     }
   }
@@ -681,7 +689,7 @@ export async function runMarketingAutopilot(opts?: {
     "manual-podcasts",
   ]);
 
-  if (hasCreds(creds, ["n8nWebhookUrl"])) {
+  if (!copyOnly && hasCreds(creds, ["n8nWebhookUrl"])) {
     const finishedAt = now();
     const preStats = statsFromTasks(tasks);
     const n8nPayload = {
@@ -730,8 +738,10 @@ export async function runMarketingAutopilot(opts?: {
         tasks.push(
           task(
             def.id,
-            "skipped",
-            "Add n8n webhook URL to route social, email & outreach to your automation graph",
+            copyOnly ? "skipped" : "skipped",
+            copyOnly
+              ? "Auto-post off — social & email copy saved in Growth Content"
+              : "Add n8n webhook URL to route social, email & outreach to your automation graph",
           ),
         );
       } else {
@@ -746,7 +756,9 @@ export async function runMarketingAutopilot(opts?: {
     `Posted: ${stats.posted} · Prepared: ${stats.prepared} · Done: ${stats.done} · Failed: ${stats.failed}`,
     stats.needsCredentials > 0
       ? `⚠ ${stats.needsCredentials} tasks need credentials — add keys in Autopilot tab`
-      : "✓ All credential-backed tasks attempted",
+      : copyOnly
+        ? "✓ Auto-post off — indexing + GPT copy fully automated; social/email copy saved"
+        : "✓ All credential-backed tasks attempted",
     "",
     ...tasks
       .filter((t) => t.status === "failed" || t.status === "needs_credentials")
@@ -763,6 +775,7 @@ export async function runMarketingAutopilot(opts?: {
     stats,
     contentGenerated: true,
     indexing: indexingSummary,
+    copyOnlyMode: copyOnly,
   };
 
   await saveLastAutopilotRun(result);

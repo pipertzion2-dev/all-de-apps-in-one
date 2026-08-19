@@ -286,6 +286,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [aiConfigured, setAiConfigured] = useState(false);
   const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
   const [marketingModel, setMarketingModel] = useState<string | null>(null);
+  const [copyOnlyMode, setCopyOnlyMode] = useState(true);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
   const [gsc, setGsc] = useState<{
@@ -395,12 +396,14 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
           ai?: { configured?: boolean; providerLabel?: string; marketingModel?: string };
+          copyOnlyMode?: boolean;
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
         if (json.ai?.configured) setAiConfigured(true);
         if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
         if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
+        if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
         // non-blocking
@@ -567,10 +570,12 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "GPT-5 writes copy while Orbit builds pages, submits to Google/Bing, and auto-posts. Leave this page open."
+                ? "GPT-5 + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
                 : hasRun
-                  ? "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press with paid GPT-5: SEO pages, Google & Bing indexing, AI copy, and API posting."}
+                  ? copyOnlyMode
+                    ? "Fully automated: pages, indexing, GPT-5 copy. Optional social/email copy saved in Growth Content."
+                    : "Everything automatable ran below. Manual paste tasks are in their own section."
+                  : "One press: GPT-5 builds SEO pages, submits to Google & Bing, saves launch copy — no auto-posting needed."}
             </p>
             {aiConfigured && (marketingModel || aiProviderLabel) && (
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
@@ -582,6 +587,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
 
         <OrbitPaidServicesHub
           defaultExpanded={!aiConfigured}
+          copyOnlyMode={copyOnlyMode}
           configuredKeys={configuredKeys}
           aiConfigured={aiConfigured}
           aiProviderLabel={aiProviderLabel}

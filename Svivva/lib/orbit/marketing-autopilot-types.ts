@@ -231,6 +231,8 @@ export type MarketingAutopilotRunResult = {
   };
   contentGenerated: boolean;
   indexing?: MarketingIndexingSummary;
+  /** True when outbound APIs are off — copy saved, indexing + on-site SEO still run. */
+  copyOnlyMode?: boolean;
 };
 
 export type MarketingCredentialStatus = {
