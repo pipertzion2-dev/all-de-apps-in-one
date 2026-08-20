@@ -15,7 +15,7 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { getRequestOrigin } from "@/lib/site-url";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
-import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 
 export { gscOAuthConnectUrl as gscOAuthConnectPath };
 
@@ -50,7 +50,8 @@ export async function handleGscOAuthStart(req: NextRequest): Promise<NextRespons
     req.nextUrl.searchParams.get("email")?.trim() ||
     sessionUser?.email?.trim() ||
     savedOAuth?.email?.trim() ||
-    undefined;
+    process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
+    GSC_OAUTH_LOGIN_HINT;
 
   await db.insert(oauthStates).values({
     state,

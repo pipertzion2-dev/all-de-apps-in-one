@@ -31,7 +31,7 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
-import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -363,7 +363,9 @@ export default function GscConnectPage() {
               <div>
                 <p className="font-bold text-foreground">One-click setup</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Sign in with Google → AI matches your site → sitemap + indexing run automatically.
+                  Sign in as{" "}
+                  <span className="font-medium text-foreground">{GSC_OAUTH_LOGIN_HINT}</span> → AI
+                  matches your site → sitemap + indexing run automatically.
                 </p>
               </div>
             </div>
@@ -371,14 +373,25 @@ export default function GscConnectPage() {
 
           <div className="flex flex-wrap gap-2">
             {!connected && oauthAvailable && (
-              <Button
-                className="text-white font-bold"
-                style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
-                onClick={startOAuth}
-                data-testid="btn-connect-google"
-              >
-                Connect with Google
-              </Button>
+              adminUnlocked ? (
+                <Button
+                  asChild
+                  className="text-white font-bold"
+                  style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+                  data-testid="btn-connect-google"
+                >
+                  <a href={OAUTH_START}>Connect with Google</a>
+                </Button>
+              ) : (
+                <Button
+                  className="text-white font-bold"
+                  style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+                  onClick={startOAuth}
+                  data-testid="btn-connect-google"
+                >
+                  Connect with Google
+                </Button>
+              )
             )}
             {connected && !propertyOk && (
               <Button
@@ -485,7 +498,7 @@ export default function GscConnectPage() {
             >
               Google Search Console
             </a>{" "}
-            on the same Google account you connect.
+            on <span className="font-medium text-foreground">{GSC_OAUTH_LOGIN_HINT}</span> (Owner).
           </p>
         </CardContent>
       </Card>
