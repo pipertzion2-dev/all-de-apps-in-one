@@ -3,7 +3,7 @@ import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
+import { getSiteUrl, getSitemapUrl, getSiteHostname } from "@/lib/site-url";
 import {
   getGoogleServiceAccountAccessToken,
   GoogleServiceAccount,
@@ -12,8 +12,8 @@ import {
   ensureGscOAuthColumns,
   getGoogleOAuthAccessTokenForUser,
   isGoogleGscOAuthConfigured,
-  listGscSites,
-  matchGscSiteToCanonical,
+  findMatchedGscSite,
+  hasGscWritePermission,
 } from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
 
@@ -197,11 +197,9 @@ export async function GET() {
       if (accessToken) {
         const sites = await listGscSites(accessToken);
         gscSitesSample = sites.slice(0, 8).map((s) => s.siteUrl);
-        const matchedUrl = matchGscSiteToCanonical(sites, canonicalSite);
-        const matched = matchedUrl ? sites.find((s) => s.siteUrl === matchedUrl) : undefined;
-        gscMatchedSite = matchedUrl;
-        const level = matched?.permissionLevel?.toLowerCase() ?? "";
-        gscPropertyOk = !!matched && (level.includes("owner") || level.includes("full"));
+        const matched = findMatchedGscSite(sites, canonicalSite);
+        gscMatchedSite = matched?.siteUrl ?? null;
+        gscPropertyOk = !!matched && hasGscWritePermission(matched.permissionLevel);
         steps.push({
           id: "gsc_property",
           label: "Search Console property",
@@ -211,8 +209,8 @@ export async function GET() {
             : matched
               ? `Found ${gscMatchedSite} but permission is "${matched?.permissionLevel}" — need Owner or Full.`
               : sites.length
-                ? `No property matches ${canonicalSite}. Add it in Search Console, then reconnect.`
-                : "No Search Console properties on this Google account — add https://zzaizzai.com first.",
+                ? `No property matches ${canonicalSite}. Add sc-domain:${getSiteHostname()} or ${canonicalSite}/ in Search Console (Owner), then Sync property.`
+                : `No Search Console properties on this Google account — add ${getSiteHostname()} first.`,
           fix: gscPropertyOk ? undefined : "https://search.google.com/search-console",
         });
       }

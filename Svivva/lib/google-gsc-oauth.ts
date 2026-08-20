@@ -197,6 +197,12 @@ export async function getGoogleOAuthAccessTokenForUser(userId: string): Promise<
 
 export type GscSiteEntry = { siteUrl: string; permissionLevel?: string };
 
+/** GSC permission levels that allow sitemap submit + Indexing API (siteOwner, siteFullUser). */
+export function hasGscWritePermission(permissionLevel?: string): boolean {
+  const level = permissionLevel?.toLowerCase() ?? "";
+  return level.includes("owner") || level.includes("full");
+}
+
 export async function listGscSites(accessToken: string): Promise<GscSiteEntry[]> {
   const res = await fetch(GSC_SITES, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -219,19 +225,46 @@ export function matchGscSiteToCanonical(
 ): string | null {
   const u = new URL(canonicalUrl);
   const host = u.hostname.replace(/^www\./i, "");
-  const prefix = `${canonicalUrl.replace(/\/$/, "")}/`;
+  const base = canonicalUrl.replace(/\/$/, "");
+  const prefixCandidates = [
+    `${base}/`,
+    `https://${host}/`,
+    `https://www.${host}/`,
+    `http://${host}/`,
+    `http://www.${host}/`,
+  ];
 
-  const exact = sites.find((s) => s.siteUrl === prefix || s.siteUrl === `${canonicalUrl}/`);
+  const exact = sites.find((s) => prefixCandidates.includes(s.siteUrl));
   if (exact) return exact.siteUrl;
 
-  const domain = sites.find(
-    (s) =>
-      s.siteUrl === `sc-domain:${host}` ||
-      s.siteUrl === `sc-domain:www.${host}` ||
-      s.siteUrl === `sc-domain:${u.hostname}`,
-  );
+  const domainCandidates = [
+    `sc-domain:${host}`,
+    `sc-domain:www.${host}`,
+    `sc-domain:${u.hostname}`,
+  ];
+  const domain = sites.find((s) => domainCandidates.includes(s.siteUrl));
   if (domain) return domain.siteUrl;
 
-  const loose = sites.find((s) => s.siteUrl.includes(host));
+  const loose = sites.find((s) => {
+    if (s.siteUrl.startsWith("sc-domain:")) {
+      const d = s.siteUrl.slice("sc-domain:".length).replace(/^www\./i, "");
+      return d === host || d === u.hostname.replace(/^www\./i, "");
+    }
+    try {
+      const su = new URL(s.siteUrl.endsWith("/") ? s.siteUrl : `${s.siteUrl}/`);
+      return su.hostname.replace(/^www\./i, "") === host;
+    } catch {
+      return s.siteUrl.includes(host);
+    }
+  });
   return loose?.siteUrl ?? null;
+}
+
+export function findMatchedGscSite(
+  sites: GscSiteEntry[],
+  canonicalUrl: string,
+): GscSiteEntry | null {
+  const matchedUrl = matchGscSiteToCanonical(sites, canonicalUrl);
+  if (!matchedUrl) return null;
+  return sites.find((s) => s.siteUrl === matchedUrl) ?? null;
 }

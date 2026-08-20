@@ -4,9 +4,15 @@ import { eq } from "drizzle-orm";
 import { generateText } from "@/lib/orbit/ai-client";
 import { isAnyAiProviderAvailable } from "@/lib/llm/openai";
 import { submitSitemapWithAccessToken, submitUrlsWithAccessToken } from "@/lib/google-indexing";
-import { listGscSites, matchGscSiteToCanonical, type GscSiteEntry } from "@/lib/google-gsc-oauth";
+import {
+  listGscSites,
+  matchGscSiteToCanonical,
+  findMatchedGscSite,
+  hasGscWritePermission,
+  type GscSiteEntry,
+} from "@/lib/google-gsc-oauth";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
-import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
+import { getSiteUrl, getSitemapUrl, getSiteHostname } from "@/lib/site-url";
 
 export type GscAutoSetupResult = {
   ok: boolean;
@@ -82,8 +88,8 @@ export async function runGscAutoSetup(opts: {
     matched = await pickSiteWithAi(sites, canonical);
     aiUsed = !!matched;
   }
-  if (!matched && sites.length === 1) matched = sites[0].siteUrl;
   if (!matched) {
+    const host = getSiteHostname();
     return {
       ok: false,
       siteUrl: null,
@@ -91,7 +97,25 @@ export async function runGscAutoSetup(opts: {
       indexingSubmitted: 0,
       indexingAttempted: 0,
       sitesFound: sites.length,
-      message: `Could not match ${canonical} to any of ${sites.length} GSC properties. Verify the site in Search Console.`,
+      message:
+        sites.length === 0
+          ? "No Search Console properties on this Google account. Add and verify your site first."
+          : `Could not match ${canonical} to any of ${sites.length} GSC properties. In Search Console (same Google account), add ${host} as a domain property (sc-domain:${host}) or URL prefix ${canonical}/ with Owner access, then click Sync property.`,
+      aiUsed,
+    };
+  }
+
+  const matchedEntry =
+    findMatchedGscSite(sites, canonical) ?? sites.find((s) => s.siteUrl === matched);
+  if (!hasGscWritePermission(matchedEntry?.permissionLevel)) {
+    return {
+      ok: false,
+      siteUrl: matched,
+      sitemapOk: false,
+      indexingSubmitted: 0,
+      indexingAttempted: 0,
+      sitesFound: sites.length,
+      message: `Found ${matched} but permission is "${matchedEntry?.permissionLevel ?? "unknown"}" — you need Owner or Full access on that property in Search Console.`,
       aiUsed,
     };
   }
