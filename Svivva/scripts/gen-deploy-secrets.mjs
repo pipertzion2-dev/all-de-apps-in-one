@@ -8,8 +8,7 @@ import crypto from "crypto";
 const hex = (bytes = 24) => crypto.randomBytes(bytes).toString("hex");
 
 console.log(`
-=== Paste into Netlify → Site configuration → Environment variables (Production) ===
-(or Vercel → Project → Settings → Environment Variables if using Vercel)
+=== Paste into Vercel → Project → Settings → Environment Variables (Production) ===
 
 NEXTAUTH_SECRET=${hex()}
 CRON_SECRET=${hex()}

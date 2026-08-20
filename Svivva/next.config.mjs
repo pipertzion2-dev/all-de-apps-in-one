@@ -4,15 +4,7 @@ import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["drizzle-orm", "pg"],
-  allowedDevOrigins: [
-    "*.vercel.app",
-    "*.netlify.app",
-    "127.0.0.1",
-    "localhost",
-    "192.168.*",
-    "10.*",
-    "172.*",
-  ],
+  allowedDevOrigins: ["*.vercel.app", "127.0.0.1", "localhost", "192.168.*", "10.*", "172.*"],
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200],

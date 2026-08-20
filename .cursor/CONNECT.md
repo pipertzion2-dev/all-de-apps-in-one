@@ -1,89 +1,102 @@
-# Connect zzaizzai.com (GoDaddy → Netlify)
+# Connect zzaizzai.com (GoDaddy → Vercel)
 
-**Production host is Netlify** (`Svivva/netlify.toml`). Cursor **Origin** can hold your git repo; Netlify serves the live site. GoDaddy DNS points at Netlify.
+## Important
+
+**Your domain cannot point at Cursor.** Cursor is an editor. The public site runs on **Vercel**. GoDaddy only holds DNS that points at that host.
 
 | Piece | Role |
 | --- | --- |
-| **Cursor / Origin** | Edit code, PRs, optional git host ([cursor.com/codebase](https://cursor.com/codebase)) |
-| **GitHub** | Sync mirror (Netlify imports from here today) |
-| **Netlify** | Hosts the live Next.js app — **Base directory = `Svivva`** |
-| **GoDaddy** | DNS for `zzaizzai.com` → Netlify |
+| **Cursor / Origin** | Edit code, commit, push (optional git host — see `docs/ORIGIN_HOSTING.md`) |
+| **Vercel** | Hosts the live Next.js app (`Svivva/` root directory) |
+| **GoDaddy** | DNS for `zzaizzai.com` → Vercel |
+
+## Your values
 
 | What | Value |
 | --- | --- |
 | Domain | `zzaizzai.com` |
-| Host | **Netlify** (not Vercel while deploys are blocked) |
+| Host | Vercel team **zzai-zzai**, project **all-de-apps-in-one** (`ziontpiper@icloud.com`) — not `svivva-main-app` ([disconnect wrong project](../docs/VERCEL_ACCOUNT.md)) |
 | GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
-| App root on Netlify | **Base / Package directory = `Svivva`** |
+| App root on Vercel | `Svivva` |
 
-See also: **`docs/ORIGIN_HOSTING.md`** (Origin git + Netlify deploy), **`docs/VERCEL_ACCOUNT.md`** (optional Vercel later).
+## One-command cutover (after this code is deployed)
 
-## 1. Create the Netlify site
+From `Svivva/` (uses GoDaddy keys already saved in the dashboard + admin passcode):
 
-1. Open [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import an existing project** → GitHub
-2. Select **`pipertzion2-dev/all-de-apps-in-one`**
-3. Set:
-   - **Base directory:** `Svivva`
-   - **Build command:** `npm run build:vercel` (from `netlify.toml`)
-   - **Publish directory:** `.next`
-4. **Add environment variables** (Site configuration → Environment variables). Minimum:
+```bash
+npm run domain:cutover
+# or: node scripts/domain-cutover.mjs --domain zzaizzai.com
+```
+
+That sets GoDaddy `@` → Vercel A (`76.76.21.21`) and `www` → `cname.vercel-dns.com`, updates app credentials, and adds the domain in Vercel when `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` are present.
+
+### Manual checklist (if the CLI can’t reach GoDaddy / Vercel)
+
+### 1. Vercel — add the domain
+
+1. Open [vercel.com](https://vercel.com) as **ziontpiper@icloud.com** → team **zzai-zzai** → **all-de-apps-in-one** → **Settings → Domains**
+2. Add **`zzaizzai.com`** and **`www.zzaizzai.com`**
+3. Copy the DNS records Vercel shows (usually):
+   - Apex `zzaizzai.com`: **A** → `76.76.21.21` (confirm in Vercel UI)
+   - `www`: **CNAME** → `cname.vercel-dns.com` (confirm in Vercel UI)
+
+### 2. GoDaddy — point DNS at Vercel
+
+1. GoDaddy → **My Products → Domains → zzaizzai.com → DNS**
+2. Remove old Replit / parking / conflicting **A** / **CNAME** records for `@` and `www`
+3. Add the records Vercel gave you
+4. Wait for DNS (often minutes; can take up to 48h)
+
+### 3. Vercel — production env
+
+Set (or update) these for **Production**:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
-DATABASE_URL=           # production Postgres URL
-NEXTAUTH_SECRET=        # npm run secrets:for-deploy in Svivva/
-CRON_SECRET=
-ORBIT_INTERNAL_SECRET=
-ADMIN_USER_ID=
 
-# Google Search Console OAuth (required for Connect Google)
+# Required for Connect Google (Search Console)
 GOOGLE_GSC_CLIENT_ID=
 GOOGLE_GSC_CLIENT_SECRET=
 ```
 
-Also copy Stripe, OpenAI/Gemini, etc. from `Svivva/.env.example`.  
-**Or** paste Google OAuth client ID + secret in-app at `/dashboard/gsc-connect` after deploy (saved to DB — no redeploy needed).
+Also copy Stripe, `DATABASE_URL`, `NEXTAUTH_SECRET`, etc. from `Svivva/.env.example`.
 
-5. **Deploy site.** Confirm the `*.netlify.app` URL returns HTTP 200.
+**Alternative:** paste Google OAuth client ID + secret in-app at `/dashboard/gsc-connect` (admin code 272727) — saved to DB, no redeploy needed for those two keys.
 
-### Secrets helper
+Also update anything that embeds the old domain:
 
-```bash
-cd Svivva && npm run secrets:for-deploy
-```
+- **Stripe** webhook: `https://zzaizzai.com/api/stripe/webhook`
+- **GSC OAuth** redirect: `https://zzaizzai.com/api/gsc/oauth/callback`
+- **Auth / OIDC** callback URLs if you use them
+- Redeploy after env changes
 
-## 2. Add the custom domain on Netlify
-
-1. Site → **Domain management** → **Add a domain** → `zzaizzai.com`
-2. Add **`www.zzaizzai.com`**
-3. Copy DNS records Netlify shows:
-
-| Host | Type | Value |
-| --- | --- | --- |
-| `@` (apex) | **A** | confirm in Netlify UI (often `75.2.60.5`) |
-| `www` | **CNAME** | `<your-site>.netlify.app` |
-
-## 3. Point GoDaddy at Netlify
-
-1. GoDaddy → **My Products → Domains → zzaizzai.com → DNS**
-2. Remove Vercel / Replit / parking **A** / **CNAME** for `@` and `www`
-3. Add Netlify records from step 2
-4. Wait for DNS + SSL (minutes to 48h)
-
-## 4. Google OAuth (fix “not configured” error)
+### 4. Google OAuth (fix “not configured” JSON error)
 
 1. [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) → OAuth 2.0 Web client
 2. Redirect URI: `https://zzaizzai.com/api/gsc/oauth/callback`
 3. Enable **Search Console API** + **Web Search Indexing API**
-4. Add `GOOGLE_GSC_CLIENT_ID` + `GOOGLE_GSC_CLIENT_SECRET` in **Netlify env**, redeploy  
-   **or** paste in **https://zzaizzai.com/dashboard/gsc-connect** (admin code 272727)
-5. Connect Google as **pipertzion2@gmail.com**
+4. Add `GOOGLE_GSC_CLIENT_ID` + `GOOGLE_GSC_CLIENT_SECRET` in Vercel → **Settings → Environment Variables → Production**, then redeploy  
+   **or** paste on `/dashboard/gsc-connect` after deploy
+5. Admin code **272727** → **Connect with Google** → sign in as **pipertzion2@gmail.com**
 
-Also update: Stripe webhook, GSC redirect (same domain), Search Console property.
+### 5. In-app Marketing → Traffic Setup
 
-## 5. Optional: Vercel later
+1. Sign in as admin → **Dashboard → Marketing** (or Connections Hub)
+2. Set **GoDaddy domain** to `zzaizzai.com`
+3. Paste GoDaddy API key + secret ([developer.godaddy.com/keys](https://developer.godaddy.com/keys))
+4. Set **Google site URL** to `https://zzaizzai.com` (or `sc-domain:zzaizzai.com`)
+5. Reconnect GSC / submit sitemap for the **new** property
 
-Do **not** point `zzaizzai.com` at both Netlify and Vercel. When Vercel is active again, pick one host. See `docs/VERCEL_ACCOUNT.md`.
+### 6. Search Console + Analytics
+
+1. Add `zzaizzai.com` (or domain property) in [Google Search Console](https://search.google.com/search-console)
+2. Verify ownership (DNS TXT or HTML tag → `GOOGLE_SITE_VERIFICATION`)
+3. Submit `https://zzaizzai.com/sitemap.xml`
+4. In GA4, add `zzaizzai.com` as a data stream / allowed domain if needed
+
+### 7. Optional: keep svivva.com
+
+If you still own `svivva.com`, in Vercel add it as a domain and set a **301 redirect** to `zzaizzai.com` so old links and SEO equity move over.
 
 ## Verify
 
@@ -92,11 +105,11 @@ curl -sI https://zzaizzai.com | head -15
 curl -sL https://zzaizzai.com/sitemap.xml | head -20
 ```
 
-Expect Netlify (or your HTML), not `x-vercel-error: DEPLOYMENT_DISABLED`.
+You should see Vercel headers and sitemap URLs under `https://zzaizzai.com/...`.
 
 ## Quick problems
 
-- **Raw JSON “Google OAuth not configured”:** add `GOOGLE_GSC_CLIENT_ID` + `SECRET` in Netlify env or paste on `/dashboard/gsc-connect`.
-- **Domain still on Vercel / 402:** GoDaddy DNS still points at Vercel — fix to Netlify.
-- **Build fails on peer deps:** `Svivva/.npmrc` sets `legacy-peer-deps=true`.
-- **Cron 401:** set `CRON_SECRET` in Netlify env (`Svivva/netlify/functions/`).
+- **Raw JSON “Google OAuth not configured”:** add `GOOGLE_GSC_CLIENT_ID` + `SECRET` in Vercel env or paste on `/dashboard/gsc-connect`.
+- **Domain still shows parking / old host**: GoDaddy DNS not updated or not propagated yet.
+- **SSL pending on Vercel**: DNS not pointing at Vercel yet — wait until Vercel shows the domain as Valid.
+- **Wrong Vercel project**: use **all-de-apps-in-one** on team **zzai-zzai**, not `svivva-main-app`.

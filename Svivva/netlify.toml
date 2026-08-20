@@ -1,24 +1,10 @@
-# Netlify host for Svivva (Next.js).
-#
-# In the Netlify UI when connecting the GitHub monorepo:
-#   Base directory / Package directory = Svivva
-# Do NOT also set `base = "Svivva"` here (paths would double).
-#
-# Custom domain: Site settings → Domain management → Add zzaizzai.com + www
-# Then point GoDaddy DNS at the records Netlify shows (see .cursor/CONNECT.md).
-
 [build]
   command = "npm run build:vercel"
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "20"
   NEXT_PUBLIC_SITE_URL = "https://zzaizzai.com"
 
-# Next.js runtime (App Router, API routes, ISR). Auto-detected; kept explicit.
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Scheduled jobs (replaces Vercel Cron). Requires CRON_SECRET in Netlify env.
-[functions]
-  directory = "netlify/functions"

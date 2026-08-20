@@ -20,17 +20,6 @@ export function getInternalAppOrigin(): string {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  // Netlify injects URL / DEPLOY_PRIME_URL for the site / deploy.
-  for (const key of ["URL", "DEPLOY_PRIME_URL"] as const) {
-    const raw = process.env[key]?.trim();
-    if (!raw) continue;
-    try {
-      return new URL(raw.startsWith("http") ? raw : `https://${raw}`).origin;
-    } catch {
-      /* fall through */
-    }
-  }
-
   const port = process.env.PORT || "5000";
   return `http://127.0.0.1:${port}`;
 }

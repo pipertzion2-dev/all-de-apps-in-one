@@ -6,7 +6,7 @@ Monorepo of multiple apps. The production-ready **Next.js** product lives in **`
 
 | Folder                                           | What it is                                       | Run locally                                                        |
 | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------------------ |
-| **`Svivva/`**                                    | Main product (Next.js, production deploy target) | `npm run dev:svivva` from repo root, or `cd Svivva && npm run dev` |
+| **`Svivva/`**                                    | Main product (Next.js, deploy target for Vercel) | `npm run dev:svivva` from repo root, or `cd Svivva && npm run dev` |
 | **`Ai-Tools-Hub/`**                              | pnpm workspace (AI tools hub + libs)             | `npm run dev:ai-tools-hub` (needs `pnpm install` in that folder)   |
 | **`Pyracrypt/`**                                 | Crypto / cybersec app artifacts                  | `npm run dev:pyracrypt-web` / `dev:pyracrypt-api`                  |
 | **`CYBER-SECURITY-MINI-APPS-zip/cyberwavy-hub`** | Vite hub for mini-apps                           | `npm run dev:mini-apps`                                            |
@@ -28,33 +28,56 @@ npm run format:check # CI-style check
 
 **`Svivva`** also has its own `format` / `format:check`; `npm run verify` there includes Prettier + Vitest + the owner-note scan.
 
-## Deploy Svivva (Netlify + Origin)
+## Deploy Svivva on Vercel (pick one path)
 
-Production domain: **`zzaizzai.com`**.
+Production host is Vercel team **`zzai-zzai`**, project **`all-de-apps-in-one`**, account **`ziontpiper@icloud.com`**. Domain: **`zzaizzai.com`**.
 
-| Layer | Service | Notes |
-| --- | --- | --- |
-| **Git** | [Cursor Origin](https://cursor.com/codebase) (optional) + GitHub sync | See **`docs/ORIGIN_HOSTING.md`** |
-| **Host** | **Netlify** (recommended) | Base directory **`Svivva`**, config in `Svivva/netlify.toml` |
-| **DNS** | GoDaddy → Netlify | **`.cursor/CONNECT.md`** |
+Do **not** deploy to **`svivva-main-app`** (a different/old Vercel account). Ignore GitHub checks named `Vercel – svivva-main-app`. **Disconnect that project** from this repo — see **`docs/VERCEL_ACCOUNT.md`**.
 
-### Path N — Netlify (recommended)
+Do **not** wire both **Path A** and **Path B** at the same time, or every code push can trigger **two** production deploys.
 
-1. [app.netlify.com](https://app.netlify.com) → **Add new site** → import **`pipertzion2-dev/all-de-apps-in-one`**
-2. **Base / Package directory:** **`Svivva`**
-3. Env vars from **`Svivva/.env.example`** — include **`GOOGLE_GSC_CLIENT_ID`** + **`GOOGLE_GSC_CLIENT_SECRET`**
-4. Deploy → add **`zzaizzai.com`** → update GoDaddy DNS to Netlify
+### Path A — Vercel imports GitHub (simplest)
 
-Scheduled jobs: **`Svivva/netlify/functions/`** (needs **`CRON_SECRET`**).
+1. Push this repo to GitHub.
+2. Sign in to [vercel.com](https://vercel.com) as **ziontpiper@icloud.com** → team **zzai-zzai** → project **all-de-apps-in-one**.
+3. **Root Directory:** **`Svivva`** (required).
+4. Add env vars from **`Svivva/.env.example`** — see **`Svivva/README.md`** for the checklist.
+5. **Deploy.**
 
-### Path V — Vercel (optional, when account is active)
+Optional: disable the GitHub Action **Deploy Svivva (Vercel production)** so only Vercel’s Git hook runs  
+(GitHub → **Actions** → workflow → **⋯** → **Disable workflow**).
 
-Team **`zzai-zzai`**, project **`all-de-apps-in-one`**, root **`Svivva`**. Do **not** use **`svivva-main-app`**. See **`docs/VERCEL_ACCOUNT.md`**. Do not run Vercel Git + GitHub Actions deploy together.
+### Path B — GitHub Actions (`vercel deploy --prebuilt`)
+
+Use this if you want deploys driven only by Actions (no Vercel↔Git integration).
+
+1. Create a Vercel project (empty is fine) so you have **Organization** and **Project** IDs.
+2. Create a token: [vercel.com/account/tokens](https://vercel.com/account/tokens).
+3. GitHub repo → **Settings → Secrets and variables → Actions → Secrets**:
+   - **`VERCEL_TOKEN`**
+   - **`VERCEL_ORG_ID`** — Vercel → Project → **Settings → General**
+   - **`VERCEL_PROJECT_ID`** — same  
+     Or run `cd Svivva && npx vercel link` locally once and read `.vercel/project.json` (gitignored).
+4. **Variables** tab: **`VERCEL_CI_DEPLOY`** = **`true`**  
+   (Until this is set, pushes skip the deploy job so CI stays green while you configure secrets.)
+5. Push to **`main`** (or **Actions → Deploy Svivva → Run workflow**).
+
+Then **do not** also connect the same repo in Vercel’s **Git** tab for automatic deploys (or disable this workflow).
 
 ### Secrets helper
 
+From **`Svivva`:**
+
 ```bash
-cd Svivva && npm run secrets:for-deploy
+npm run secrets:for-deploy
 ```
 
-Paste into **Netlify** (or Vercel) env UI.
+Prints random values for `NEXTAUTH_SECRET`, `CRON_SECRET`, and `ORBIT_INTERNAL_SECRET` — paste them into the Vercel env UI.
+
+### Push blocked when adding GitHub Actions?
+
+If `git push` says OAuth cannot update **workflow** files, use SSH or a Personal Access Token that includes the **`workflow`** scope, or push with **GitHub Desktop**. This environment cannot grant that scope for you.
+
+### Custom domain (GoDaddy, etc.)
+
+Production domain: **`zzaizzai.com`**. After the site is live on `*.vercel.app`: Vercel → **Project → Domains** → add `zzaizzai.com` + `www` → paste the DNS records at GoDaddy. Set `NEXT_PUBLIC_SITE_URL=https://zzaizzai.com`. Full checklist: **`.cursor/CONNECT.md`** and **`Svivva/docs/DOMAIN_ZZAIZZAI.md`**.
