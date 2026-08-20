@@ -35,11 +35,11 @@ const pull = spawnSync(
 );
 if (pull.status !== 0) process.exit(pull.status ?? 1);
 
-const build = spawnSync(
-  "vercel",
-  ["build", "--prod", "--token", token, ...vercelScopeArgs()],
-  { cwd: root, stdio: "inherit", env: process.env },
-);
+const build = spawnSync("vercel", ["build", "--prod", "--token", token, ...vercelScopeArgs()], {
+  cwd: root,
+  stdio: "inherit",
+  env: process.env,
+});
 if (build.status !== 0) process.exit(build.status ?? 1);
 
 const deploy = spawnSync(
