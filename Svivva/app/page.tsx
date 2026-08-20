@@ -187,6 +187,20 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
+    if (flipComplete) {
+      document.body.style.backgroundColor = "";
+      document.documentElement.style.backgroundColor = "";
+      return;
+    }
+    document.body.style.backgroundColor = "#ffffff";
+    document.documentElement.style.backgroundColor = "#ffffff";
+    return () => {
+      document.body.style.backgroundColor = "";
+      document.documentElement.style.backgroundColor = "";
+    };
+  }, [flipComplete]);
+
+  useEffect(() => {
     fetch("/api/public-stats")
       .then((r) => r.json())
       .then((d) => setStats(d))
@@ -374,7 +388,7 @@ export default function LandingPage() {
             zIndex: 70,
             touchAction: "none",
             overflow: "hidden",
-            backgroundColor: "transparent",
+            backgroundColor: "#ffffff",
             opacity: 1,
             willChange: "opacity",
             contain: "layout style paint",
@@ -398,6 +412,7 @@ export default function LandingPage() {
                 transformStyle: "preserve-3d",
                 willChange: "transform",
                 transformOrigin: "center center",
+                transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
               }}
             >
               <div
@@ -409,6 +424,7 @@ export default function LandingPage() {
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
                   willChange: "transform",
+                  transform: "translate3d(0, 0, 50vh)",
                 }}
               >
                 <div
@@ -450,6 +466,7 @@ export default function LandingPage() {
                   WebkitBackfaceVisibility: "hidden",
                   background: "hsl(var(--background))",
                   willChange: "transform",
+                  transform: "rotateX(180deg) translate3d(0, 0, 50vh)",
                 }}
               />
             </div>
@@ -506,7 +523,16 @@ export default function LandingPage() {
         </div>
       )}
 
-      <div className="bg-background">
+      <div
+        className="bg-background"
+        aria-hidden={!flipComplete}
+        style={{
+          opacity: flipComplete ? 1 : 0,
+          visibility: flipComplete ? "visible" : "hidden",
+          pointerEvents: flipComplete ? "auto" : "none",
+          transition: flipComplete ? "opacity 0.25s ease-out" : "none",
+        }}
+      >
         <nav
           className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
