@@ -40,6 +40,8 @@ import {
   RefreshCw,
   Zap,
   Activity,
+  CreditCard,
+  Search,
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
@@ -314,6 +316,20 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
   const [health, setHealth] = useState<HealthSnapshot | null>(null);
   const [healthChecking, setHealthChecking] = useState(false);
 
+  type QuickStartResult = {
+    ok: boolean;
+    summary: string;
+    message?: string;
+    indexing?: MarketingIndexingSummary;
+    stripe?: {
+      allOk: boolean;
+      checks: { label: string; ok: boolean; action: string; liveVerified?: boolean }[];
+    };
+  };
+  const [quickStartRunning, setQuickStartRunning] = useState(false);
+  const [quickStartResult, setQuickStartResult] = useState<QuickStartResult | null>(null);
+  const [quickStartError, setQuickStartError] = useState<string | null>(null);
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -420,6 +436,43 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
       phaseTimers.current.forEach(clearTimeout);
     };
   }, []);
+
+  async function runQuickStart() {
+    setQuickStartRunning(true);
+    setQuickStartError(null);
+    setQuickStartResult(null);
+    try {
+      const r = await authFetch("/api/orbit/quick-start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = (await r.json()) as QuickStartResult & { error?: string };
+      if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
+      setQuickStartResult(json);
+      if (json.indexing) {
+        try {
+          const gr = await authFetch("/api/gsc/diagnose");
+          if (gr.ok) {
+            const d = await gr.json();
+            setGsc({
+              connected: !!d.oauthConnected,
+              available: d.oauthAvailable !== false,
+              email: d.oauthEmail ?? null,
+              propertyOk: !!d.gscPropertyOk,
+              matchedSite: d.gscMatchedSite ?? null,
+            });
+          }
+        } catch {
+          /* best-effort */
+        }
+      }
+      onComplete?.();
+    } catch (e) {
+      setQuickStartError(String(e instanceof Error ? e.message : e));
+    } finally {
+      setQuickStartRunning(false);
+    }
+  }
 
   async function run() {
     setRunning(true);
@@ -696,30 +749,59 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         )}
 
-        {/* Primary launch + paid subscribe strip */}
+        {/* Primary launch + quick start + paid subscribe strip */}
         <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-          <button
-            type="button"
-            onClick={run}
-            disabled={running}
-            data-testid="orbit-one-click-launch"
-            className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] lg:min-h-0"
-            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-          >
-            {running ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" /> Working…
-              </>
-            ) : hasRun ? (
-              <>
-                <RefreshCw className="w-5 h-5" /> Run autopilot again
-              </>
-            ) : (
-              <>
-                <Rocket className="w-5 h-5" /> Run everything (GPT-5)
-              </>
-            )}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
+            <button
+              type="button"
+              onClick={run}
+              disabled={running || quickStartRunning}
+              data-testid="orbit-one-click-launch"
+              className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] sm:min-h-0"
+              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+            >
+              {running ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> Working…
+                </>
+              ) : hasRun ? (
+                <>
+                  <RefreshCw className="w-5 h-5" /> Run autopilot again
+                </>
+              ) : (
+                <>
+                  <Rocket className="w-5 h-5" /> Run everything (GPT-5)
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={runQuickStart}
+              disabled={running || quickStartRunning}
+              data-testid="orbit-quick-start"
+              className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
+              style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
+              title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
+            >
+              {quickStartRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Indexing…
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-left leading-tight">
+                    Index Google
+                    <br />
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      + check Stripe
+                    </span>
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
 
           <OrbitSubscribeQuickStrip
             className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
@@ -777,6 +859,77 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 flex items-start gap-2 text-xs text-red-300">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             {error}
+          </div>
+        )}
+
+        {quickStartError && !quickStartRunning && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 flex items-start gap-2 text-xs text-red-300">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            {quickStartError}
+          </div>
+        )}
+
+        {quickStartResult && !quickStartRunning && (
+          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2
+                className="w-4 h-4 flex-shrink-0"
+                style={{ color: quickStartResult.ok ? TEAL : "#fbbf24" }}
+              />
+              <p className="text-xs font-bold text-foreground">
+                {quickStartResult.message || "Quick start complete"}
+              </p>
+            </div>
+
+            {quickStartResult.stripe && (
+              <div className="rounded-lg border border-border/40 bg-card/40 px-3 py-2.5 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                  <p className="text-[11px] font-black text-foreground">Stripe</p>
+                  <span
+                    className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                      quickStartResult.stripe.allOk
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-amber-500/15 text-amber-400"
+                    }`}
+                  >
+                    {quickStartResult.stripe.allOk ? "Ready" : "Needs setup"}
+                  </span>
+                </div>
+                <ul className="space-y-1">
+                  {quickStartResult.stripe.checks.map((c) => (
+                    <li key={c.label} className="text-[10px] text-muted-foreground flex gap-1.5">
+                      <span className={c.ok ? "text-emerald-400" : "text-amber-400"}>
+                        {c.ok ? "✓" : "•"}
+                      </span>
+                      <span>
+                        <span className="font-semibold text-foreground">{c.label}</span>
+                        {" — "}
+                        {c.action}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {!quickStartResult.stripe.allOk && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById("orbit-stripe-setup")?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
+                    }
+                    className="text-[10px] font-bold underline text-foreground"
+                  >
+                    Jump to Stripe setup
+                  </button>
+                )}
+              </div>
+            )}
+
+            {quickStartResult.indexing && (
+              <GoogleIndexingCard indexing={quickStartResult.indexing} />
+            )}
           </div>
         )}
       </div>
