@@ -2,6 +2,11 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { platformRuntimeSecrets } from "@/lib/schema";
 import { resetOpenAIClientCache } from "@/lib/llm/openai";
+import {
+  isValidGscOAuthClientId,
+  isValidGscOAuthClientSecret,
+  isValidGscOAuthCredentials,
+} from "@/lib/gsc-oauth-credentials";
 
 const ROW_ID = "default";
 
@@ -36,8 +41,8 @@ export const runtimeSecretColdStart = {
   ),
   stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
   siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
-  googleGscClientId: !!process.env.GOOGLE_GSC_CLIENT_ID?.trim(),
-  googleGscClientSecret: !!process.env.GOOGLE_GSC_CLIENT_SECRET?.trim(),
+  googleGscClientId: isValidGscOAuthClientId(process.env.GOOGLE_GSC_CLIENT_ID),
+  googleGscClientSecret: isValidGscOAuthClientSecret(process.env.GOOGLE_GSC_CLIENT_SECRET),
 };
 
 export type PlatformRuntimeSecretsPatch = Partial<{
@@ -104,17 +109,28 @@ function syncProcessEnvFromRow(
     else delete process.env.NEXT_PUBLIC_SITE_URL;
   }
 
-  if (!runtimeSecretColdStart.googleGscClientId) {
-    const v = row.googleGscClientId?.trim();
-    if (v) process.env.GOOGLE_GSC_CLIENT_ID = v;
-    else delete process.env.GOOGLE_GSC_CLIENT_ID;
+  applyGoogleGscOAuthFromRow(row);
+}
+
+/** Prefer valid env; fall back to DB when Vercel has placeholder values like your-client-id. */
+function applyGoogleGscOAuthFromRow(
+  row: NonNullable<Awaited<ReturnType<typeof getPlatformRuntimeSecretsRow>>>,
+) {
+  const envId = process.env.GOOGLE_GSC_CLIENT_ID?.trim() || "";
+  const envSecret = process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() || "";
+  const dbId = row.googleGscClientId?.trim() || "";
+  const dbSecret = row.googleGscClientSecret?.trim() || "";
+
+  if (isValidGscOAuthCredentials(envId, envSecret)) return;
+
+  if (isValidGscOAuthCredentials(dbId, dbSecret)) {
+    process.env.GOOGLE_GSC_CLIENT_ID = dbId;
+    process.env.GOOGLE_GSC_CLIENT_SECRET = dbSecret;
+    return;
   }
 
-  if (!runtimeSecretColdStart.googleGscClientSecret) {
-    const v = row.googleGscClientSecret?.trim();
-    if (v) process.env.GOOGLE_GSC_CLIENT_SECRET = v;
-    else delete process.env.GOOGLE_GSC_CLIENT_SECRET;
-  }
+  delete process.env.GOOGLE_GSC_CLIENT_ID;
+  delete process.env.GOOGLE_GSC_CLIENT_SECRET;
 }
 
 /** Merge database secrets into process.env when the host did not provide them. */

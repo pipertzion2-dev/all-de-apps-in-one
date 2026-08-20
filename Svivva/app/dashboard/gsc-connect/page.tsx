@@ -89,6 +89,9 @@ function gscErrorMessage(err: string | null): string {
   if (err === "oauth_not_configured") {
     return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
   }
+  if (err === "oauth_invalid_client") {
+    return "Google OAuth credentials are invalid or still placeholders in Vercel (your-client-id). Paste your real OAuth client ID + secret below, then try Connect with Google again.";
+  }
   if (err === "invalid_state") {
     return "Sign-in session expired. Click Connect with Google again.";
   }
@@ -108,6 +111,7 @@ export default function GscConnectPage() {
   const [adminUnlocked, setAdminUnlocked] = useState<boolean | null>(null);
   const [showAdminUnlock, setShowAdminUnlock] = useState(false);
   const [pendingOAuth, setPendingOAuth] = useState(false);
+  const [needsOAuthSetup, setNeedsOAuthSetup] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -169,6 +173,9 @@ export default function GscConnectPage() {
       });
       if (err === "admin_required") {
         setShowAdminUnlock(true);
+      }
+      if (err === "oauth_invalid_client" || err === "oauth_not_configured") {
+        setNeedsOAuthSetup(true);
       }
       window.history.replaceState({}, "", "/dashboard/gsc-connect");
     }
@@ -242,7 +249,7 @@ export default function GscConnectPage() {
     (isError && error instanceof Error && error.message === "admin_required");
   const connected = !!data?.oauthConnected;
   const propertyOk = !!data?.gscPropertyOk;
-  const oauthAvailable = data?.oauthAvailable !== false;
+  const oauthAvailable = data?.oauthAvailable !== false && !needsOAuthSetup;
   const fullyReady = connected && propertyOk;
 
   return (

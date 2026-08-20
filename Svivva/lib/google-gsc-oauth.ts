@@ -3,6 +3,11 @@ import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  isValidGscOAuthClientId,
+  isValidGscOAuthClientSecret,
+  isValidGscOAuthCredentials,
+} from "@/lib/gsc-oauth-credentials";
 
 const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token";
@@ -57,7 +62,7 @@ export function getGoogleGscOAuthConfig(): { clientId: string; clientSecret: str
     process.env.GOOGLE_GSC_CLIENT_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || "";
   const clientSecret =
     process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || "";
-  if (!clientId || !clientSecret) return null;
+  if (!isValidGscOAuthCredentials(clientId, clientSecret)) return null;
   return { clientId, clientSecret };
 }
 

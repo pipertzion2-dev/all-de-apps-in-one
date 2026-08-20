@@ -192,6 +192,12 @@ export async function POST(req: NextRequest) {
     const id = clientId.trim();
     const secret = clientSecret.trim();
     if (!id || !secret) return badRequest("clientId and clientSecret required");
+    const { isValidGscOAuthCredentials } = await import("@/lib/gsc-oauth-credentials");
+    if (!isValidGscOAuthCredentials(id, secret)) {
+      return badRequest(
+        "Invalid Google OAuth client — Client ID must end with .apps.googleusercontent.com and secret must be real (not a placeholder).",
+      );
+    }
     await patchPlatformRuntimeSecrets({
       googleGscClientId: id,
       googleGscClientSecret: secret,

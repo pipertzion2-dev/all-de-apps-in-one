@@ -19,6 +19,7 @@ import {
 import { getSiteUrl } from "@/lib/site-url";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthConfigProblem } from "@/lib/gsc-oauth-credentials";
 
 export type GscOAuthPrepareResult =
   | {
@@ -74,9 +75,18 @@ export async function prepareGscOAuthStart(opts: {
 
   await hydratePlatformSecrets();
 
+  const rawId =
+    process.env.GOOGLE_GSC_CLIENT_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || "";
+  const rawSecret =
+    process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || "";
+  const configProblem = gscOAuthConfigProblem(rawId, rawSecret);
+
   if (!isGoogleGscOAuthConfigured()) {
     const dest = new URL(returnTo, origin);
-    dest.searchParams.set("gsc_error", "oauth_not_configured");
+    dest.searchParams.set(
+      "gsc_error",
+      configProblem ? "oauth_invalid_client" : "oauth_not_configured",
+    );
     return { ok: false, redirectPath: `${dest.pathname}${dest.search}` };
   }
 
