@@ -86,6 +86,7 @@ export function middleware(request: NextRequest) {
 
   // Google OAuth entry — must enter admin code 272727 first (blocks direct sign-in URL).
   const oauthEntry =
+    request.nextUrl.pathname.endsWith("/connect") ||
     request.nextUrl.pathname.endsWith("/google-sign-in") ||
     request.nextUrl.pathname.endsWith("/oauth");
   if (pathRequiresAdminCode(request.nextUrl.pathname) && oauthEntry && !hasAdminPasscode(request)) {
