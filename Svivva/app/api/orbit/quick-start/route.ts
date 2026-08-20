@@ -109,8 +109,12 @@ export async function POST(req: NextRequest) {
     indexing.bingPing.ok;
 
   const summaryLines = [
-    indexingOk ? "Google indexing submitted." : "Indexing ran — connect Google for full GSC coverage.",
-    stripe.allOk ? "Stripe is connected and ready." : "Stripe needs keys — see Orbit Stripe card below.",
+    indexingOk
+      ? "Google indexing submitted."
+      : "Indexing ran — connect Google for full GSC coverage.",
+    stripe.allOk
+      ? "Stripe is connected and ready."
+      : "Stripe needs keys — see Orbit Stripe card below.",
     "",
     ...indexing.summaryLines,
     "",
