@@ -2,14 +2,14 @@
 
 Production **must** deploy to one Vercel project only:
 
-| | Correct | Wrong (remove) |
-| --- | --- | --- |
-| **Account** | `ziontpiper@icloud.com` | Any other Vercel login |
-| **Team** | `zzai-zzai` | Personal / other teams |
-| **Project** | `all-de-apps-in-one` | `svivva-main-app` |
-| **Root directory** | `Svivva` | — |
-| **Domain** | `zzaizzai.com` | — |
-| **Dashboard** | https://vercel.com/zzai-zzai/all-de-apps-in-one | — |
+|                    | Correct                                         | Wrong (remove)         |
+| ------------------ | ----------------------------------------------- | ---------------------- |
+| **Account**        | `ziontpiper@icloud.com`                         | Any other Vercel login |
+| **Team**           | `zzai-zzai`                                     | Personal / other teams |
+| **Project**        | `all-de-apps-in-one`                            | `svivva-main-app`      |
+| **Root directory** | `Svivva`                                        | —                      |
+| **Domain**         | `zzaizzai.com`                                  | —                      |
+| **Dashboard**      | https://vercel.com/zzai-zzai/all-de-apps-in-one | —                      |
 
 Canonical config is committed at **`Svivva/vercel-canonical.json`**.
 
