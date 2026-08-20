@@ -4,13 +4,13 @@
 
 ## Stack
 
-| Layer | Service | What it does |
-| --- | --- | --- |
-| Edit | Cursor IDE | Write code |
-| Git (optional) | **Cursor Origin** | Host repo, PRs, sync with GitHub |
-| Git (mirror) | **GitHub** | `pipertzion2-dev/all-de-apps-in-one` |
-| Production | **Vercel** | team **zzai-zzai**, project **all-de-apps-in-one**, root **`Svivva`** |
-| DNS | GoDaddy | Points domain at Vercel |
+| Layer          | Service           | What it does                                                          |
+| -------------- | ----------------- | --------------------------------------------------------------------- |
+| Edit           | Cursor IDE        | Write code                                                            |
+| Git (optional) | **Cursor Origin** | Host repo, PRs, sync with GitHub                                      |
+| Git (mirror)   | **GitHub**        | `pipertzion2-dev/all-de-apps-in-one`                                  |
+| Production     | **Vercel**        | team **zzai-zzai**, project **all-de-apps-in-one**, root **`Svivva`** |
+| DNS            | GoDaddy           | Points domain at Vercel                                               |
 
 Canonical Vercel config: **`Svivva/vercel-canonical.json`**. Full checklist: **`.cursor/CONNECT.md`**.
 
