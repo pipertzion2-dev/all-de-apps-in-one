@@ -7,6 +7,7 @@
     "build": "tsx script/build.ts",
     "build:vercel": "node scripts/vercel-prebuild.mjs && npm run check && next build",
     "deploy:prod": "vercel deploy --prod --yes --scope zzai-zzai --project all-de-apps-in-one",
+    "redeploy:prod": "node scripts/redeploy-prod.mjs",
     "vercel:link": "vercel link --yes --scope zzai-zzai --project all-de-apps-in-one",
     "deploy:wait": "node scripts/wait-vercel-deploy.mjs",
     "db:play": "node scripts/play-db-migrate.mjs",
