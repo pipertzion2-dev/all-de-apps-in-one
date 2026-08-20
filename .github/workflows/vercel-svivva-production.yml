@@ -6,16 +6,9 @@
 #   Project: all-de-apps-in-one  (Root Directory = Svivva)
 #   NOT:     svivva-main-app (old/wrong account — disconnect its GitHub integration)
 #
-# Use EITHER this workflow OR Vercel’s built-in “Git” integration for the same repo —
-# not both, or every push will trigger two production deploys. To rely only on Vercel’s
-# Git connection: disable this workflow in GitHub → Actions → … → Disable workflow.
-#
-# Disconnect wrong project: docs/VERCEL_ACCOUNT.md
-#
-# One-time GitHub repo secrets (Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN        — https://vercel.com/account/tokens (from ziontpiper@icloud.com / team zzai-zzai)
-#   VERCEL_ORG_ID       — all-de-apps-in-one → Settings → General
-#   VERCEL_PROJECT_ID   — same
+# Runs on every push to main (when Svivva/ changes). Requires GitHub secrets:
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# Optional manual run: Actions → Deploy Svivva → Run workflow
 #
 name: Deploy Svivva (Vercel production)
 
@@ -37,9 +30,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Avoid failing every push until secrets exist: set repo variable VERCEL_CI_DEPLOY=true
-    # (Settings → Secrets and variables → Actions → Variables). Manual runs always execute.
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.VERCEL_CI_DEPLOY == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
