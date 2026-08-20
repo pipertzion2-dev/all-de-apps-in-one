@@ -12,6 +12,7 @@ import {
   ensureGscOAuthColumns,
   getGoogleOAuthAccessTokenForUser,
   isGoogleGscOAuthConfigured,
+  listGscSites,
   findMatchedGscSite,
   hasGscWritePermission,
 } from "@/lib/google-gsc-oauth";
