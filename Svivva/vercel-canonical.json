@@ -1,0 +1,18 @@
+{
+  "accountEmail": "ziontpiper@icloud.com",
+  "teamSlug": "zzai-zzai",
+  "projectName": "all-de-apps-in-one",
+  "rootDirectory": "Svivva",
+  "productionDomain": "zzaizzai.com",
+  "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
+  "deprecatedProjects": [
+    {
+      "name": "svivva-main-app",
+      "reason": "Old Vercel account — blocked, wrong deploy target. Disconnect its GitHub integration."
+    }
+  ],
+  "githubStatusCheck": {
+    "required": "Vercel – all-de-apps-in-one",
+    "ignore": "Vercel – svivva-main-app"
+  }
+}

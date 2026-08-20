@@ -32,7 +32,7 @@ npm run format:check # CI-style check
 
 Production host is Vercel team **`zzai-zzai`**, project **`all-de-apps-in-one`**, account **`ziontpiper@icloud.com`**. Domain: **`zzaizzai.com`**.
 
-Do **not** deploy to **`svivva-main-app`** (a different/old Vercel account). Ignore GitHub checks named `Vercel – svivva-main-app`.
+Do **not** deploy to **`svivva-main-app`** (a different/old Vercel account). Ignore GitHub checks named `Vercel – svivva-main-app`. **Disconnect that project** from this repo — see **`docs/VERCEL_ACCOUNT.md`**.
 
 Do **not** wire both **Path A** and **Path B** at the same time, or every code push can trigger **two** production deploys.
 

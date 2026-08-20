@@ -1,12 +1,20 @@
 # Deploy Svivva to Vercel using the CLI (prebuilt).
 #
+# CANONICAL TARGET (do not change without updating Svivva/vercel-canonical.json):
+#   Account: ziontpiper@icloud.com
+#   Team:    zzai-zzai
+#   Project: all-de-apps-in-one  (Root Directory = Svivva)
+#   NOT:     svivva-main-app (old/wrong account — disconnect its GitHub integration)
+#
 # Use EITHER this workflow OR Vercel’s built-in “Git” integration for the same repo —
 # not both, or every push will trigger two production deploys. To rely only on Vercel’s
 # Git connection: disable this workflow in GitHub → Actions → … → Disable workflow.
 #
+# Disconnect wrong project: docs/VERCEL_ACCOUNT.md
+#
 # One-time GitHub repo secrets (Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN        — https://vercel.com/account/tokens
-#   VERCEL_ORG_ID       — Project → Settings → General (or run `vercel link` in Svivva and read .vercel/project.json)
+#   VERCEL_TOKEN        — https://vercel.com/account/tokens (from ziontpiper@icloud.com / team zzai-zzai)
+#   VERCEL_ORG_ID       — all-de-apps-in-one → Settings → General
 #   VERCEL_PROJECT_ID   — same
 #
 name: Deploy Svivva (Vercel production)
@@ -45,6 +53,17 @@ jobs:
         working-directory: Svivva
         run: npm ci --legacy-peer-deps
 
+      - name: Assert canonical Vercel project config
+        run: |
+          node -e "
+            const c = require('./Svivva/vercel-canonical.json');
+            if (c.teamSlug !== 'zzai-zzai' || c.projectName !== 'all-de-apps-in-one') {
+              console.error('vercel-canonical.json must point at zzai-zzai/all-de-apps-in-one');
+              process.exit(1);
+            }
+            console.log('Vercel target:', c.teamSlug + '/' + c.projectName, '(not svivva-main-app)');
+          "
+
       - name: Install Vercel CLI
         run: npm install -g vercel@53.3.1
 
@@ -54,7 +73,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN" --scope=zzai-zzai --project=all-de-apps-in-one
 
       - name: Build (Vercel prebuilt)
         working-directory: Svivva
@@ -62,7 +81,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel build --prod --token="$VERCEL_TOKEN"
+        run: vercel build --prod --token="$VERCEL_TOKEN" --scope=zzai-zzai --project=all-de-apps-in-one
 
       - name: Deploy prebuilt → production
         working-directory: Svivva
@@ -70,4 +89,4 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
+        run: vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN" --scope=zzai-zzai --project=all-de-apps-in-one
