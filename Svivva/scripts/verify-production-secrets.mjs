@@ -23,8 +23,18 @@ if (!isProd) {
   process.exit(0);
 }
 
+const gscRecommended = ["GOOGLE_GSC_CLIENT_ID", "GOOGLE_GSC_CLIENT_SECRET"];
+const gscMissing = gscRecommended.filter((key) => !process.env[key]?.trim());
+
 if (missing.length === 0) {
   console.log("✓ Production security env check passed");
+  if (gscMissing.length) {
+    console.warn(
+      `ℹ GSC OAuth not configured (${gscMissing.join(", ")}) — run: bash scripts/connect-google-gsc.sh <CLIENT_ID> <CLIENT_SECRET>`,
+    );
+  } else {
+    console.log("✓ Google Search Console OAuth env present");
+  }
   process.exit(0);
 }
 
