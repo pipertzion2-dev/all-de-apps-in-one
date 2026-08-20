@@ -30,6 +30,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Skip (don't fail CI) until GitHub secrets are configured — see docs/VERCEL_ACCOUNT.md
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 

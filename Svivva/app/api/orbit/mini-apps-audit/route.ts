@@ -124,9 +124,7 @@ export async function POST(req: NextRequest) {
   const basePaths = nativeToolSitemapPaths();
   const nativeUrls = basePaths.map((p) => `${base}${p}`);
 
-  const allToolUrls = [
-    ...new Set([...toolRows.map((r) => `${base}/${r.slug}`), ...nativeUrls]),
-  ];
+  const allToolUrls = [...new Set([...toolRows.map((r) => `${base}/${r.slug}`), ...nativeUrls])];
   const inSitemapCount = allToolUrls.filter((u) => sitemapUrls.has(u)).length;
 
   // Crawl DB tool pages + every native /tools/* mini-app.
@@ -171,7 +169,9 @@ export async function POST(req: NextRequest) {
   };
   if (body.submit !== false && allToolUrls.length > 0) {
     try {
-      const priority = getMiniAppUrlsForIndexing(base).filter((u) => allToolUrls.includes(u) || sitemapUrls.has(u));
+      const priority = getMiniAppUrlsForIndexing(base).filter(
+        (u) => allToolUrls.includes(u) || sitemapUrls.has(u),
+      );
       const ordered = [...new Set([...priority, ...allToolUrls])];
       const r = await submitIndexNowBatched(ordered);
       indexNow = { ok: r.ok, submitted: r.submittedCount, total: r.totalUrls };
