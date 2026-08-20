@@ -8,6 +8,7 @@ import {
   saveGoogleOAuthTokens,
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
+import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
     meta = { path: "/dashboard/gsc-connect" };
   }
 
-  const userId = meta.userId || "orbit-admin";
+  const userId = meta.userId || (await resolveGscOAuthSaveUserId());
   const returnPath = meta.path || "/dashboard/gsc-connect";
   const redirectUri = getGscOAuthRedirectUri(row.callbackBase || req.nextUrl.origin);
 

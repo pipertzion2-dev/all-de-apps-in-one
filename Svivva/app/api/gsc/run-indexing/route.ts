@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
 import { getGoogleOAuthAccessTokenForUser } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
-  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+  const userId = await resolveGscCredentialsUserId();
   const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
 
   let autoSetup = null;

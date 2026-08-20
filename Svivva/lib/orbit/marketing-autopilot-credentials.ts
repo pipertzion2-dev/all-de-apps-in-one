@@ -3,6 +3,7 @@ import { seedCredentials } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import type {
   MarketingCredentialStatus,
   MarketingPlatformCredentials,
@@ -91,30 +92,20 @@ export async function saveLastAutopilotRun(run: unknown): Promise<void> {
 
 export async function getMarketingCredentialStatus(): Promise<MarketingCredentialStatus> {
   await ensureColumn();
-  const adminId = getPrimaryAdminUserId() || "";
+  const credUserId = await resolveGscCredentialsUserId();
   const { ensureGscOAuthColumns } = await import("@/lib/google-gsc-oauth");
   await ensureGscOAuthColumns();
 
-  const [row] = adminId
-    ? await db
-        .select({
-          sa: seedCredentials.googleServiceAccountJson,
-          site: seedCredentials.googleSiteUrl,
-          indexnow: seedCredentials.indexnowKey,
-          oauth: seedCredentials.googleOauthRefreshToken,
-        })
-        .from(seedCredentials)
-        .where(eq(seedCredentials.userId, adminId))
-        .limit(1)
-    : await db
-        .select({
-          sa: seedCredentials.googleServiceAccountJson,
-          site: seedCredentials.googleSiteUrl,
-          indexnow: seedCredentials.indexnowKey,
-          oauth: seedCredentials.googleOauthRefreshToken,
-        })
-        .from(seedCredentials)
-        .limit(1);
+  const [row] = await db
+    .select({
+      sa: seedCredentials.googleServiceAccountJson,
+      site: seedCredentials.googleSiteUrl,
+      indexnow: seedCredentials.indexnowKey,
+      oauth: seedCredentials.googleOauthRefreshToken,
+    })
+    .from(seedCredentials)
+    .where(eq(seedCredentials.userId, credUserId))
+    .limit(1);
 
   const platform = await loadMarketingPlatformCredentials();
 
