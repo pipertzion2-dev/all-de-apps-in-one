@@ -3,7 +3,11 @@ import { cookies, headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth/session";
 import { adminAccessCookieName, adminAccessCookieValue } from "@/lib/auth/admin";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
-import { saveGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
+import {
+  buildGscOAuthStateCookieValue,
+  GSC_OAUTH_STATE_COOKIE,
+  gscOAuthStateCookieOptions,
+} from "@/lib/gsc-oauth-state-cookie";
 import {
   buildGoogleOAuthUrl,
   generatePkce,
@@ -17,7 +21,11 @@ import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 
 export type GscOAuthPrepareResult =
-  | { ok: true; googleUrl: string }
+  | {
+      ok: true;
+      googleUrl: string;
+      oauthCookie: { name: string; value: string; options: ReturnType<typeof gscOAuthStateCookieOptions> };
+    }
   | { ok: false; redirectPath: string };
 
 function requestOriginFromHeaders(host: string | null, proto: string | null): string {
@@ -70,13 +78,23 @@ export async function prepareGscOAuthStart(opts: {
 
   try {
     const cfg = getGoogleGscOAuthConfig()!;
-    const userId = await resolveGscOAuthSaveUserId();
+    let userId = "orbit-admin";
+    try {
+      userId = await resolveGscOAuthSaveUserId();
+    } catch {
+      /* use default */
+    }
     const { codeVerifier, codeChallenge } = generatePkce();
     const state = crypto.randomBytes(24).toString("hex");
     const redirectUri = getGscOAuthRedirectUri(origin);
 
-    const sessionUser = await getCurrentUser();
-    const savedOAuth = await loadGoogleOAuthRefreshToken(userId);
+    const sessionUser = await getCurrentUser().catch(() => null);
+    let savedOAuth: Awaited<ReturnType<typeof loadGoogleOAuthRefreshToken>> = null;
+    try {
+      savedOAuth = await loadGoogleOAuthRefreshToken(userId);
+    } catch {
+      /* optional hint */
+    }
     const loginHint =
       opts.email?.trim() ||
       sessionUser?.email?.trim() ||
@@ -85,13 +103,17 @@ export async function prepareGscOAuthStart(opts: {
       GSC_OAUTH_LOGIN_HINT;
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-    await saveGscOAuthState({
-      state,
-      codeVerifier,
-      redirectAfter: JSON.stringify({ path: returnTo, userId }),
-      callbackBase: origin,
-      expiresAt,
-    });
+    const oauthCookie = {
+      name: GSC_OAUTH_STATE_COOKIE,
+      value: buildGscOAuthStateCookieValue({
+        state,
+        codeVerifier,
+        redirectAfter: JSON.stringify({ path: returnTo, userId }),
+        callbackBase: origin,
+        expiresAt,
+      }),
+      options: gscOAuthStateCookieOptions(expiresAt),
+    };
 
     const googleUrl = buildGoogleOAuthUrl({
       clientId: cfg.clientId,
@@ -101,7 +123,7 @@ export async function prepareGscOAuthStart(opts: {
       loginHint,
     });
 
-    return { ok: true, googleUrl };
+    return { ok: true, googleUrl, oauthCookie };
   } catch (e) {
     console.error("[gsc-oauth-prepare] failed:", e);
     const dest = new URL(returnTo, origin);

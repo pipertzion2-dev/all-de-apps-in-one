@@ -56,7 +56,23 @@ export function gscOAuthStateCookieOptions(expiresAt: Date) {
   };
 }
 
-/** Persist PKCE + redirect metadata in a signed httpOnly cookie (no DB table required). */
+export function buildGscOAuthStateCookieValue(payload: {
+  state: string;
+  codeVerifier: string;
+  redirectAfter: string;
+  callbackBase: string;
+  expiresAt: Date;
+}): string {
+  return encodePayload({
+    state: payload.state,
+    codeVerifier: payload.codeVerifier,
+    redirectAfter: payload.redirectAfter,
+    callbackBase: payload.callbackBase,
+    exp: payload.expiresAt.getTime(),
+  });
+}
+
+/** Persist PKCE + redirect metadata in a signed httpOnly cookie (route handlers only). */
 export async function saveGscOAuthState(payload: {
   state: string;
   codeVerifier: string;
@@ -65,14 +81,11 @@ export async function saveGscOAuthState(payload: {
   expiresAt: Date;
 }): Promise<void> {
   const store = await cookies();
-  const value = encodePayload({
-    state: payload.state,
-    codeVerifier: payload.codeVerifier,
-    redirectAfter: payload.redirectAfter,
-    callbackBase: payload.callbackBase,
-    exp: payload.expiresAt.getTime(),
-  });
-  store.set(GSC_OAUTH_STATE_COOKIE, value, gscOAuthStateCookieOptions(payload.expiresAt));
+  store.set(
+    GSC_OAUTH_STATE_COOKIE,
+    buildGscOAuthStateCookieValue(payload),
+    gscOAuthStateCookieOptions(payload.expiresAt),
+  );
 }
 
 /** Load OAuth state if the callback `state` matches the signed cookie. */
