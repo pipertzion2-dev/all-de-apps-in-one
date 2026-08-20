@@ -152,17 +152,18 @@ export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
-  const flipRafRef = useRef(0);
+  const flipFrontRef = useRef<HTMLDivElement>(null);
+  const flipBackRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
+  const scrollHintBounceRef = useRef<HTMLDivElement>(null);
+  const flipAnimRef = useRef(0);
   const halfHRef = useRef(400);
-  const [flipProgress, setFlipProgress] = useState(0);
-  const [showScrollHint, setShowScrollHint] = useState(true);
   const [flipComplete, setFlipComplete] = useState(false);
   const virtualScrollRef = useRef(0);
-  const lastProgressRef = useRef(0);
+  const targetProgressRef = useRef(0);
+  const displayedProgressRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
-  const [vpHeight, setVpHeight] = useState(() =>
-    typeof window !== "undefined" ? window.innerHeight : 0,
-  );
+  const finishingIntroRef = useRef(false);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -211,14 +212,7 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
-    const updateHeight = () => {
-      const h = window.innerHeight;
-      setVpHeight(h);
-      halfHRef.current = h / 2;
-    };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
+    halfHRef.current = window.innerHeight / 2;
   }, []);
 
   useEffect(() => {
@@ -240,52 +234,137 @@ export default function LandingPage() {
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const autoSkipTimer = mobile
       ? window.setTimeout(() => {
-          if (!lastProgressRef.current) finishIntro();
+          if (!targetProgressRef.current) finishIntro();
         }, 12000)
       : undefined;
 
-    const flipZone = Math.max(window.innerHeight * 0.55, 280);
+    const flipZone = Math.max(window.innerHeight * 0.62, 320);
+
+    const syncFlipDepth = () => {
+      const halfH = halfHRef.current;
+      const clamped = displayedProgressRef.current;
+      const eased = clamped >= 1 ? 1 : 1 - Math.pow(1 - clamped, 2.35);
+      const angle = eased * 90;
+
+      if (flipFrontRef.current) {
+        flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
+      }
+      if (flipBackRef.current) {
+        flipBackRef.current.style.transform = `rotateX(180deg) translate3d(0, 0, ${halfH}px)`;
+      }
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+    };
 
     const paintFlip = (progress: number) => {
       const halfH = halfHRef.current;
-      const angle = progress * 90;
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      displayedProgressRef.current = clamped;
+      const eased = clamped >= 1 ? 1 : 1 - Math.pow(1 - clamped, 2.35);
+      const angle = eased * 90;
+
       if (flipRotorRef.current) {
-        flipRotorRef.current.style.transform = `translateZ(${-halfH}px) rotateX(${angle}deg)`;
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+
+      const fadeStart = 0.78;
+      const fade =
+        clamped <= fadeStart ? 1 : Math.max(0, 1 - (clamped - fadeStart) / (1 - fadeStart));
+      captureEl.style.opacity = String(fade);
+
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 14));
+      }
+
+      if (!scrollHintHiddenRef.current && clamped >= 0.05) {
+        scrollHintHiddenRef.current = true;
+        if (scrollHintBounceRef.current) {
+          scrollHintBounceRef.current.style.animation = "none";
+        }
       }
     };
 
-    const commitFlipProgress = (progress: number) => {
-      if (Math.abs(progress - lastProgressRef.current) <= 0.001) return;
-      lastProgressRef.current = progress;
-      paintFlip(progress);
+    const stopFlipAnim = () => {
+      if (flipAnimRef.current) {
+        cancelAnimationFrame(flipAnimRef.current);
+        flipAnimRef.current = 0;
+      }
+    };
 
-      if (!scrollHintHiddenRef.current) {
-        if (progress >= 0.08) {
-          scrollHintHiddenRef.current = true;
-          setShowScrollHint(false);
-        } else {
-          setFlipProgress(progress);
+    const scheduleFinish = () => {
+      if (finishingIntroRef.current) return;
+      finishingIntroRef.current = true;
+      paintFlip(1);
+      targetProgressRef.current = 1;
+      window.setTimeout(finishIntro, 240);
+    };
+
+    const tickFlip = () => {
+      flipAnimRef.current = 0;
+      const target = targetProgressRef.current;
+      let current = displayedProgressRef.current;
+      const delta = target - current;
+
+      if (Math.abs(delta) > 0.0008) {
+        current += delta * (delta > 0 ? 0.28 : 0.34);
+        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+          current = target;
         }
+        paintFlip(current);
+      } else if (current !== target) {
+        paintFlip(target);
       }
 
-      if (progress >= 1) finishIntro();
+      if (target >= 1 && displayedProgressRef.current >= 0.999) {
+        scheduleFinish();
+        return;
+      }
+
+      if (Math.abs(targetProgressRef.current - displayedProgressRef.current) > 0.0008) {
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
+    };
+
+    const ensureFlipAnim = () => {
+      if (!flipAnimRef.current) {
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
+    };
+
+    const setTargetProgress = (progress: number) => {
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      if (Math.abs(clamped - targetProgressRef.current) < 0.0004) return;
+      targetProgressRef.current = clamped;
+      ensureFlipAnim();
     };
 
     const applyDelta = (delta: number) => {
-      virtualScrollRef.current = Math.max(0, virtualScrollRef.current + delta);
-      if (flipRafRef.current) return;
-      flipRafRef.current = requestAnimationFrame(() => {
-        flipRafRef.current = 0;
-        const progress = Math.min(virtualScrollRef.current / flipZone, 1);
-        commitFlipProgress(progress);
-      });
+      if (finishingIntroRef.current) return;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta), 48);
+      virtualScrollRef.current = Math.max(
+        0,
+        Math.min(flipZone, virtualScrollRef.current + clampedDelta),
+      );
+      setTargetProgress(virtualScrollRef.current / flipZone);
     };
 
+    syncFlipDepth();
     paintFlip(0);
+
+    const handleResize = () => {
+      halfHRef.current = window.innerHeight / 2;
+      syncFlipDepth();
+      paintFlip(displayedProgressRef.current);
+    };
+    window.addEventListener("resize", handleResize);
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      applyDelta(e.deltaY);
+      let delta = e.deltaY;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight * 0.35;
+      applyDelta(delta);
     };
 
     let touchStartY = 0;
@@ -306,7 +385,8 @@ export default function LandingPage() {
 
     return () => {
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
-      if (flipRafRef.current) cancelAnimationFrame(flipRafRef.current);
+      stopFlipAnim();
+      window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
       captureEl.removeEventListener("wheel", handleWheel);
@@ -314,10 +394,6 @@ export default function LandingPage() {
       captureEl.removeEventListener("touchmove", handleTouchMove);
     };
   }, [flipComplete]);
-
-  const flipHeight =
-    vpHeight > 0 ? vpHeight : typeof window !== "undefined" ? window.innerHeight : 800;
-  const halfH = flipHeight / 2;
 
   return (
     <div
@@ -334,6 +410,9 @@ export default function LandingPage() {
             touchAction: "none",
             overflow: "hidden",
             backgroundColor: "transparent",
+            opacity: 1,
+            willChange: "opacity",
+            contain: "layout style paint",
           }}
         >
           <div
@@ -341,8 +420,8 @@ export default function LandingPage() {
               position: "absolute",
               inset: 0,
               zIndex: 1,
-              perspective: "3000px",
-              perspectiveOrigin: "center center",
+              perspective: "2400px",
+              perspectiveOrigin: "50% 50%",
             }}
           >
             <div
@@ -352,18 +431,18 @@ export default function LandingPage() {
                 height: "100%",
                 position: "relative",
                 transformStyle: "preserve-3d",
-                transform: `translateZ(${-halfH}px) rotateX(0deg)`,
                 willChange: "transform",
+                transformOrigin: "center center",
               }}
             >
               <div
+                ref={flipFrontRef}
                 style={{
                   position: "absolute",
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
-                  transform: `translateZ(${halfH}px)`,
                   willChange: "transform",
                 }}
               >
@@ -395,16 +474,34 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
+              <div
+                ref={flipBackRef}
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  background: "hsl(var(--background))",
+                  willChange: "transform",
+                }}
+              />
             </div>
           </div>
-          {showScrollHint && (
+          <div
+            ref={scrollHintRef}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+            style={{
+              zIndex: 10,
+              opacity: 1,
+              willChange: "opacity",
+            }}
+          >
             <div
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
-              style={{
-                zIndex: 10,
-                opacity: Math.max(0, 1 - flipProgress * 15),
-                animation: "scrollBounce 1.5s ease-in-out 0s infinite",
-              }}
+              ref={scrollHintBounceRef}
+              className="flex flex-col items-center gap-1"
+              style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
             >
               <span
                 className="text-sm font-medium text-gray-500 dark:text-gray-400"
@@ -424,7 +521,7 @@ export default function LandingPage() {
                 <path d="M10 4v12M5 11l5 5 5-5" />
               </svg>
             </div>
-          )}
+          </div>
           <button
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
