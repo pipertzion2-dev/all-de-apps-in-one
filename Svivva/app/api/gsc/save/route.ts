@@ -6,7 +6,9 @@ import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { getSitemapUrl } from "@/lib/site-url";
-import { submitSitemapToGSC } from "@/lib/google-indexing";
+import { submitSitemapToGSC, submitSitemapWithAccessToken } from "@/lib/google-indexing";
+import { getGoogleOAuthAccessTokenForUser } from "@/lib/google-gsc-oauth";
+import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import {
   getGoogleServiceAccountAccessToken,
   GoogleServiceAccount,
@@ -35,38 +37,57 @@ export async function POST(req: NextRequest) {
       // Find the admin's stored service-account + site URL.
       // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
       const adminUserId = getPrimaryAdminUserId() || "";
-      const [creds] = adminUserId
+      const orbitUserId = (await resolveOrbitInternalUserId()) || adminUserId || "orbit-admin";
+      const lookupUserId = orbitUserId || adminUserId;
+      const [creds] = lookupUserId
         ? await db
             .select({
               sa: seedCredentials.googleServiceAccountJson,
               site: seedCredentials.googleSiteUrl,
+              userId: seedCredentials.userId,
             })
             .from(seedCredentials)
-            .where(eq(seedCredentials.userId, adminUserId))
+            .where(eq(seedCredentials.userId, lookupUserId))
             .limit(1)
         : await db
             .select({
               sa: seedCredentials.googleServiceAccountJson,
               site: seedCredentials.googleSiteUrl,
+              userId: seedCredentials.userId,
             })
             .from(seedCredentials)
             .where(
               and(
                 eq(seedCredentials.googleIndexingEnabled, true),
-                isNotNull(seedCredentials.googleServiceAccountJson),
                 isNotNull(seedCredentials.googleSiteUrl),
               ),
             )
             .orderBy(desc(seedCredentials.updatedAt))
             .limit(1);
 
+      const credUserId = creds?.userId || orbitUserId;
+      const accessToken = await getGoogleOAuthAccessTokenForUser(credUserId);
+
       const googlePromise =
-        creds?.sa && creds?.site
-          ? submitSitemapToGSC(creds.sa, creds.site, sitemapUrl)
-          : Promise.resolve({
-              ok: false as const,
-              error: "No service account configured (paste JSON at /dashboard/gsc-connect)",
-            });
+        accessToken && creds?.site
+          ? submitSitemapWithAccessToken(accessToken, creds.site, sitemapUrl)
+          : creds?.sa && creds?.site
+            ? submitSitemapToGSC(creds.sa, creds.site, sitemapUrl)
+            : accessToken
+              ? (async () => {
+                  const setup = await runGscAutoSetup({ userId: credUserId, accessToken });
+                  if (setup.siteUrl && setup.sitemapOk) {
+                    return { ok: true as const };
+                  }
+                  return {
+                    ok: false as const,
+                    error: setup.message || "GSC property not matched — sync property first",
+                  };
+                })()
+              : Promise.resolve({
+                  ok: false as const,
+                  error: "Connect Google at /dashboard/gsc-connect or paste a service account JSON",
+                });
 
       const bingPromise = fetch(
         `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
@@ -96,6 +117,20 @@ export async function POST(req: NextRequest) {
     .limit(1);
   if (!existing) {
     await db.insert(seedCredentials).values({ userId, updatedAt: new Date() });
+  }
+
+  // Re-match GSC property + submit sitemap (OAuth — no re-sign-in)
+  if (action === "sync_property") {
+    const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
+    if (!accessToken) {
+      return badRequest("Connect Google first — no OAuth refresh token saved.");
+    }
+    const setup = await runGscAutoSetup({ userId, accessToken });
+    return ok({
+      success: setup.ok,
+      setup,
+      message: setup.message,
+    });
   }
 
   // Fix site URL

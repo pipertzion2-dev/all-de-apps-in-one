@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { getPublicSiteUrl } from "@/lib/site-url-public";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -50,9 +51,13 @@ type DiagResult = {
   oauthConnected?: boolean;
   oauthEmail?: string | null;
   oauthAvailable?: boolean;
+  gscPropertyOk?: boolean;
+  gscMatchedSite?: string | null;
+  gscSitesSample?: string[];
 };
 
 const TEAL = "#5B8DA8";
+const canonicalSite = getPublicSiteUrl();
 
 function StatusIcon({ status }: { status: StepStatus }) {
   if (status === "ok") return <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />;
@@ -80,17 +85,27 @@ export default function GscConnectPage() {
     const p = new URLSearchParams(window.location.search);
     if (p.get("gsc_connected") === "1") {
       const setup = p.get("gsc_setup");
+      const setupOk = setup === "ok";
       setMsg({
-        ok: setup === "ok" || !p.get("gsc_error"),
-        text:
-          setup === "ok"
-            ? "Google connected — AI matched your site, submitted sitemap, and requested indexing."
-            : setup || "Google connected.",
+        ok: setupOk || !p.get("gsc_error"),
+        text: setupOk
+          ? "Google connected — matched your site, submitted sitemap, and requested indexing."
+          : setup?.startsWith("Found")
+            ? setup
+            : setup ||
+              "Google signed in — add your site in Search Console (Owner), then click Sync property.",
       });
       window.history.replaceState({}, "", "/dashboard/gsc-connect");
       void refetch();
     } else if (p.get("gsc_error")) {
-      setMsg({ ok: false, text: `Google sign-in failed: ${p.get("gsc_error")}` });
+      const err = p.get("gsc_error");
+      setMsg({
+        ok: false,
+        text:
+          err === "no_refresh_token"
+            ? "Google did not return a refresh token. Revoke Svivva at myaccount.google.com/permissions, then connect again."
+            : `Google sign-in failed: ${err}`,
+      });
       window.history.replaceState({}, "", "/dashboard/gsc-connect");
     }
   }, [refetch]);
@@ -118,6 +133,27 @@ export default function GscConnectPage() {
     onError: (e: Error) => setMsg({ text: e.message, ok: false }),
   });
 
+  const syncProperty = useMutation({
+    mutationFn: async () => {
+      const r = await authFetch("/api/gsc/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync_property" }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "Failed");
+      return d;
+    },
+    onSuccess: (d) => {
+      setMsg({
+        ok: !!d.success,
+        text: d.message || "GSC property synced.",
+      });
+      refetch();
+    },
+    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+  });
+
   const runIndexing = useMutation({
     mutationFn: async () => {
       const r = await authFetch("/api/gsc/run-indexing", { method: "POST" });
@@ -137,25 +173,31 @@ export default function GscConnectPage() {
   });
 
   const connected = !!data?.oauthConnected;
+  const propertyOk = !!data?.gscPropertyOk;
   const oauthAvailable = data?.oauthAvailable !== false;
+  const fullyReady = connected && propertyOk;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       {/* Hero: one-press camo orb to connect */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <GscConnectOrb
-          connected={connected}
+          connected={fullyReady}
           available={oauthAvailable}
           oauthUrl="/api/gsc/oauth/start?return=/dashboard/gsc-connect"
         />
         <p className="text-xs text-muted-foreground text-center max-w-xs">
-          {connected
+          {fullyReady
             ? data?.oauthEmail
-              ? `Signed in as ${data.oauthEmail}`
-              : "Google account linked."
-            : oauthAvailable
-              ? "Press the orb to connect Google Search Console — AI does the rest."
-              : "Connecting will be available shortly."}
+              ? `Ready · ${data.oauthEmail} · ${data.gscMatchedSite || data.siteUrl}`
+              : "Google Search Console is connected and indexing is enabled."
+            : connected
+              ? data?.oauthEmail
+                ? `Signed in as ${data.oauthEmail} — finish setup in Search Console, then Sync property.`
+                : "Google signed in — verify your site property, then Sync property."
+              : oauthAvailable
+                ? "Press the orb to connect Google Search Console — AI does the rest."
+                : "Connecting will be available shortly."}
         </p>
       </div>
 
@@ -170,15 +212,59 @@ export default function GscConnectPage() {
       {/* Primary CTA */}
       <Card className="border-2 border-[#5B8DA8]/40 bg-gradient-to-br from-[#5B8DA8]/10 to-transparent">
         <CardContent className="py-6 space-y-4">
-          {connected ? (
+          {fullyReady ? (
             <div className="flex items-start gap-3">
               <CheckCircle2 className="w-8 h-8 text-emerald-500 shrink-0" />
               <div className="flex-1">
-                <p className="font-bold text-foreground">Google connected</p>
+                <p className="font-bold text-foreground">Google indexing ready</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {data?.oauthEmail ? `Signed in as ${data.oauthEmail}` : "Account linked"}
-                  {data?.siteUrl ? ` · Property: ${data.siteUrl}` : ""}
+                  {data?.gscMatchedSite || data?.siteUrl
+                    ? ` · Property: ${data.gscMatchedSite || data.siteUrl}`
+                    : ""}
                 </p>
+              </div>
+            </div>
+          ) : connected ? (
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-8 h-8 text-amber-500 shrink-0" />
+              <div className="flex-1 space-y-1">
+                <p className="font-bold text-foreground">Google signed in — property needed</p>
+                <p className="text-sm text-muted-foreground">
+                  {data?.oauthEmail ? `${data.oauthEmail} is connected` : "OAuth linked"}, but
+                  Search Console does not have an Owner/Full property for{" "}
+                  <span className="font-medium text-foreground">{canonicalSite}</span> yet.
+                </p>
+                <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5 mt-2">
+                  <li>
+                    Open{" "}
+                    <a
+                      href="https://search.google.com/search-console"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Search Console
+                    </a>{" "}
+                    as the same Google account
+                  </li>
+                  <li>
+                    Add property{" "}
+                    <code className="text-[10px] bg-muted px-1 rounded">
+                      sc-domain:{new URL(canonicalSite).hostname.replace(/^www\./, "")}
+                    </code>{" "}
+                    or URL prefix{" "}
+                    <code className="text-[10px] bg-muted px-1 rounded">{canonicalSite}/</code>
+                  </li>
+                  <li>Verify ownership and ensure you are Owner (not Restricted)</li>
+                  <li>Click Sync property below — no need to sign in again</li>
+                </ol>
+                {data?.gscSitesSample && data.gscSitesSample.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground pt-1">
+                    Properties on this account: {data.gscSitesSample.join(", ")}
+                    {(data.gscSitesSample.length ?? 0) >= 8 ? "…" : ""}
+                  </p>
+                )}
               </div>
             </div>
           ) : (
@@ -204,6 +290,17 @@ export default function GscConnectPage() {
                   Connect with Google
                 </Button>
               </a>
+            )}
+            {connected && !propertyOk && (
+              <Button
+                className="text-white font-bold"
+                style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+                onClick={() => syncProperty.mutate()}
+                disabled={syncProperty.isPending}
+                data-testid="btn-sync-gsc-property"
+              >
+                {syncProperty.isPending ? "Syncing…" : "Sync property"}
+              </Button>
             )}
             {!connected && !oauthAvailable && (
               <p className="text-xs text-amber-500">

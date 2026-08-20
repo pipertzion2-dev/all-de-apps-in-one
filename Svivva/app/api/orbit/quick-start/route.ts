@@ -77,8 +77,7 @@ export async function POST(req: NextRequest) {
   const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
   const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
   const credStatus = await getMarketingCredentialStatus();
-  const gscConnected =
-    (credStatus.google.serviceAccount || credStatus.google.siteUrl) && credStatus.google.siteUrl;
+  const oauthConnected = !!accessToken || credStatus.google.serviceAccount;
 
   let autoSetup = null;
   if (accessToken) {
@@ -86,6 +85,8 @@ export async function POST(req: NextRequest) {
   }
 
   const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
+
+  const gscReady = !!autoSetup?.ok || (oauthConnected && credStatus.google.siteUrl);
 
   const indexingSummary: MarketingIndexingSummary = {
     indexNow: {
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
     googleSitemap: indexing.googleSitemap,
     googleIndexing: indexing.googleIndexing,
     bingPing: { ok: indexing.bingPing.ok },
-    gscConnected: !!gscConnected || !!accessToken,
+    gscConnected: gscReady,
   };
 
   const stripe = await verifyStripe();
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
     summary: summaryLines.join("\n"),
     message: accessToken
       ? autoSetup?.message || "Quick start complete"
-      : gscConnected
+      : gscReady
         ? "Indexing run complete"
         : "Connect Google via the camo orb for full Search Console indexing",
   });
