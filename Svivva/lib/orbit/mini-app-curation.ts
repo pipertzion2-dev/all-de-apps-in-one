@@ -49,6 +49,20 @@ export function nativeToolSitemapPaths(): string[] {
   return NATIVE_SVIVVA_TOOLS.map((t) => t.path);
 }
 
+/** Hub + native /tools/* paths — always prioritize for IndexNow / Google batches. */
+export function getMiniAppPathsForIndexing(): string[] {
+  return [
+    "/tools",
+    ...ORBIT_HUB_SLUGS.map((hub) => `/${hub}`),
+    ...nativeToolSitemapPaths(),
+  ];
+}
+
+export function getMiniAppUrlsForIndexing(origin?: string): string[] {
+  const base = (origin || siteBase()).replace(/\/$/, "");
+  return getMiniAppPathsForIndexing().map((path) => `${base}${path}`);
+}
+
 export function nativeToolsAsIndexCards() {
   return NATIVE_SVIVVA_TOOLS.map((t) => {
     const slug = t.path.replace(/^\/tools\//, "");

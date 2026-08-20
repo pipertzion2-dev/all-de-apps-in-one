@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, type ComponentProps } from "react";
 import { useAuth, authFetch } from "@/hooks/use-auth";
 import { usePlan } from "@/hooks/use-plan";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { usePlatform } from "@/lib/platform-context";
@@ -254,6 +255,42 @@ const physicalMenuGroups: MenuGroup[] = [
   },
 ];
 
+/** Close the mobile drawer after navigation so the overlay does not block the new page. */
+function MobileSidebarCloser() {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+
+  return null;
+}
+
+function SidebarNavLink({
+  href,
+  className,
+  title,
+  children,
+  ...props
+}: ComponentProps<typeof Link>) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  return (
+    <Link
+      href={href}
+      title={title}
+      className={className}
+      onClick={() => {
+        if (isMobile) setOpenMobile(false);
+      }}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const { mode, toggleMode } = usePlatform();
@@ -429,6 +466,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
+      <MobileSidebarCloser />
       <div className="flex h-screen w-full bg-background">
         <Sidebar>
           <SidebarHeader className="p-4">
@@ -463,7 +501,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild>
-                            <Link
+                            <SidebarNavLink
                               href={href}
                               data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
                               title={locked ? `${item.desc} — Pro feature` : item.desc}
@@ -474,7 +512,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                               {locked && (
                                 <Lock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                               )}
-                            </Link>
+                            </SidebarNavLink>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -487,19 +525,19 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             <SidebarGroup>
               <SidebarGroupContent>
                 {mode === "digital" ? (
-                  <Link href="/dashboard/api-builder" key="digital-cta">
-                    <Button className="w-full gap-2" data-testid="button-new-project">
+                  <Button asChild className="w-full gap-2" data-testid="button-new-project">
+                    <Link href="/dashboard/api-builder">
                       <Plus className="w-4 h-4" />
                       New API
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 ) : (
-                  <Link href="/dashboard/hardware-builder" key="physical-cta">
-                    <Button className="w-full gap-2" data-testid="button-new-project">
+                  <Button asChild className="w-full gap-2" data-testid="button-new-project">
+                    <Link href="/dashboard/hardware-builder">
                       <Plus className="w-4 h-4" />
                       New Product
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 )}
               </SidebarGroupContent>
             </SidebarGroup>

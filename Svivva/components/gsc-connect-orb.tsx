@@ -133,18 +133,16 @@ export default function GscConnectOrb({
 
   /** Gate: admin must be unlocked (passcode cookie) before the OAuth redirect. */
   const connect = () => {
-    if (!interactive) return;
-    if (adminUnlocked) {
-      window.location.href = oauthUrl;
-    } else {
-      setShowUnlock(true);
-    }
+    if (!interactive || adminUnlocked) return;
+    setShowUnlock(true);
   };
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     connect();
   };
+
+  const useOAuthLink = interactive && adminUnlocked === true;
 
   const caption = connected
     ? "Connected"
@@ -169,23 +167,36 @@ export default function GscConnectOrb({
           boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
           borderColor: connected ? "rgba(46,150,80,0.6)" : "rgba(91, 141, 168,0.55)",
         }}
-        onClick={connect}
-        role={interactive ? "button" : undefined}
-        aria-label={interactive ? "Connect Google Search Console" : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        onKeyDown={(e) => {
-          if (interactive && (e.key === "Enter" || e.key === " ")) connect();
-        }}
+        onClick={useOAuthLink ? undefined : connect}
+        role={interactive && !useOAuthLink ? "button" : undefined}
+        aria-label={interactive && !useOAuthLink ? "Connect Google Search Console" : undefined}
+        tabIndex={interactive && !useOAuthLink ? 0 : undefined}
+        onKeyDown={
+          interactive && !useOAuthLink
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") connect();
+              }
+            : undefined
+        }
       >
         <Canvas camera={{ position: [0, 0, 3.4], fov: 45 }} dpr={[1, 2]} gl={{ alpha: true }}>
           <ambientLight intensity={0.7} />
           <directionalLight position={[3, 4, 5]} intensity={1.4} />
           <pointLight position={[-3, -2, 2]} intensity={0.6} color="#9aa06b" />
-          <group onClick={handleClick}>
-            <CamoSphere connected={connected} interactive={interactive} />
+          <group onClick={useOAuthLink ? undefined : handleClick}>
+            <CamoSphere connected={connected} interactive={interactive && !useOAuthLink} />
           </group>
         </Canvas>
       </div>
+
+      {useOAuthLink ? (
+        <a
+          href={oauthUrl}
+          className="absolute inset-0 z-20 rounded-full"
+          aria-label="Connect Google Search Console"
+          data-testid="gsc-connect-orb-link"
+        />
+      ) : null}
 
       {/* center label overlay (click passes through to the orb) */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -216,7 +227,8 @@ export default function GscConnectOrb({
               onSuccess={() => {
                 setAdminUnlocked(true);
                 setShowUnlock(false);
-                window.location.href = oauthUrl;
+                // Full navigation via assign so iOS Safari follows the OAuth redirect chain.
+                window.location.assign(oauthUrl);
               }}
             />
           </div>

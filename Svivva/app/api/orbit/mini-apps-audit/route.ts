@@ -5,6 +5,7 @@ import { seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { getCanonicalUrlsForIndexing } from "@/lib/seo/sitemap/registry";
+import { getMiniAppUrlsForIndexing, nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { recordSubmission } from "@/lib/seo/index-health";
@@ -120,12 +121,30 @@ export async function POST(req: NextRequest) {
   );
 
   const sitemapUrls = new Set(await getCanonicalUrlsForIndexing());
-  const allToolUrls = toolRows.map((r) => `${base}/${r.slug}`);
+  const basePaths = nativeToolSitemapPaths();
+  const nativeUrls = basePaths.map((p) => `${base}${p}`);
+
+  const allToolUrls = [
+    ...new Set([...toolRows.map((r) => `${base}/${r.slug}`), ...nativeUrls]),
+  ];
   const inSitemapCount = allToolUrls.filter((u) => sitemapUrls.has(u)).length;
 
-  // Crawl a sample to verify they actually render + funnel.
+  // Crawl DB tool pages + every native /tools/* mini-app.
+  const nativeChecks = await mapWithConcurrency(basePaths, 8, async (path) => {
+    const url = `${base}${path}`;
+    const c = await checkPage(url);
+    const slug = path.replace(/^\/tools\//, "");
+    return {
+      slug,
+      url,
+      name: slug,
+      inSitemap: sitemapUrls.has(url),
+      ...c,
+    };
+  });
+
   const sample = [...toolRows].sort(() => Math.random() - 0.5).slice(0, sampleLimit);
-  const checks: MiniAppCheck[] = await mapWithConcurrency(sample, 8, async (r) => {
+  const dbChecks: MiniAppCheck[] = await mapWithConcurrency(sample, 8, async (r) => {
     const url = `${base}/${r.slug}`;
     const c = await checkPage(url);
     return {
@@ -136,6 +155,8 @@ export async function POST(req: NextRequest) {
       ...c,
     };
   });
+
+  const checks = [...nativeChecks, ...dbChecks];
 
   const live = checks.filter((c) => c.live).length;
   const indexable = checks.filter((c) => c.indexable).length;
@@ -150,9 +171,11 @@ export async function POST(req: NextRequest) {
   };
   if (body.submit !== false && allToolUrls.length > 0) {
     try {
-      const r = await submitIndexNowBatched(allToolUrls);
+      const priority = getMiniAppUrlsForIndexing(base).filter((u) => allToolUrls.includes(u) || sitemapUrls.has(u));
+      const ordered = [...new Set([...priority, ...allToolUrls])];
+      const r = await submitIndexNowBatched(ordered);
       indexNow = { ok: r.ok, submitted: r.submittedCount, total: r.totalUrls };
-      await recordSubmission(allToolUrls);
+      await recordSubmission(ordered);
     } catch {
       /* best effort */
     }
@@ -160,7 +183,8 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: problems.length === 0,
-    totalMiniApps: toolRows.length,
+    totalMiniApps: allToolUrls.length,
+    nativeMiniApps: nativeUrls.length,
     inSitemap: inSitemapCount,
     sampled: checks.length,
     live,
@@ -168,7 +192,7 @@ export async function POST(req: NextRequest) {
     withFunnelLink: withFunnel,
     indexNow,
     summary:
-      `${toolRows.length} mini-app/tool pages found · ${inSitemapCount} in sitemap · ` +
+      `${allToolUrls.length} mini-app/tool pages (${nativeUrls.length} native /tools/* + ${toolRows.length} SEO) · ${inSitemapCount} in sitemap · ` +
       `sample: ${live}/${checks.length} live, ${indexable}/${checks.length} indexable, ` +
       `${withFunnel}/${checks.length} link to the main product.`,
     problems: problems.slice(0, 25),

@@ -14,6 +14,7 @@
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { getCanonicalUrlsForIndexing } from "@/lib/seo/sitemap/registry";
+import { getMiniAppUrlsForIndexing } from "@/lib/orbit/mini-app-curation";
 import { getSiteUrl } from "@/lib/site-url";
 
 export type UrlCheck = {
@@ -287,13 +288,17 @@ export async function getIndexingBatch(batchSize = 200): Promise<string[]> {
     WHERE confirmed = FALSE OR last_submitted_at IS NULL
        OR last_submitted_at < NOW() - INTERVAL '3 days'
     ORDER BY last_submitted_at ASC NULLS FIRST, submit_count ASC
-    LIMIT ${batchSize}
+    LIMIT ${batchSize * 2}
   `);
   const picked = ((res.rows || []) as Array<{ url: string }>)
     .map((r) => r.url)
     .filter((u) => known.has(u));
-  // Fall back to the canonical list if the tracker has nothing pending.
-  return picked.length > 0 ? picked : allUrls.slice(0, batchSize);
+
+  const miniAppSet = new Set(getMiniAppUrlsForIndexing().filter((u) => known.has(u)));
+  const miniFirst = [...miniAppSet];
+  const rest = picked.filter((u) => !miniAppSet.has(u));
+  const merged = [...new Set([...miniFirst, ...rest])].slice(0, batchSize);
+  return merged.length > 0 ? merged : allUrls.slice(0, batchSize);
 }
 
 /** Record that a set of URLs was just submitted to a search engine. */
