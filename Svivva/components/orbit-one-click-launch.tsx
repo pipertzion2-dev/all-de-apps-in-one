@@ -48,6 +48,7 @@ import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketi
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
+import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -693,7 +694,7 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           <GscConnectOrb
             connected={gsc.connected}
             available={gsc.available}
-            oauthUrl="/api/gsc/oauth/start?return=/dashboard/launchpad"
+            oauthUrl={gscOAuthConnectUrl("/dashboard/launchpad")}
             size={170}
           />
           <p className="text-[11px] text-center text-muted-foreground max-w-xs">

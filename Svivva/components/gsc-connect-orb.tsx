@@ -135,7 +135,7 @@ export default function GscConnectOrb({
   const connect = () => {
     if (!interactive) return;
     if (adminUnlocked) {
-      window.location.href = oauthUrl;
+      window.location.assign(oauthUrl);
     } else {
       setShowUnlock(true);
     }
@@ -216,7 +216,7 @@ export default function GscConnectOrb({
               onSuccess={() => {
                 setAdminUnlocked(true);
                 setShowUnlock(false);
-                window.location.href = oauthUrl;
+                window.location.assign(oauthUrl);
               }}
             />
           </div>
