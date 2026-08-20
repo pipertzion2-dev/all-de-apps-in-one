@@ -4,7 +4,7 @@ import { oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
 
 export const dynamic = "force-dynamic";
 
-/** @deprecated Use /dashboard/gsc-connect/oauth — iOS Safari treats `/start` as a download. */
+/** @deprecated Use /dashboard/gsc-connect/google-sign-in — iOS Safari downloads `/start` and `/oauth`. */
 export async function GET(req: NextRequest) {
   const returnTo = req.nextUrl.searchParams.get("return") || "/dashboard/gsc-connect";
   const email = req.nextUrl.searchParams.get("email");

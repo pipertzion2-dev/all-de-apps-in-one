@@ -84,12 +84,11 @@ export function middleware(request: NextRequest) {
     return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.rewrite(url)));
   }
 
-  // Google OAuth entry — must enter admin code 272727 first (blocks direct /oauth URL).
-  if (
-    pathRequiresAdminCode(request.nextUrl.pathname) &&
-    request.nextUrl.pathname.includes("/oauth") &&
-    !hasAdminPasscode(request)
-  ) {
+  // Google OAuth entry — must enter admin code 272727 first (blocks direct sign-in URL).
+  const oauthEntry =
+    request.nextUrl.pathname.endsWith("/google-sign-in") ||
+    request.nextUrl.pathname.endsWith("/oauth");
+  if (pathRequiresAdminCode(request.nextUrl.pathname) && oauthEntry && !hasAdminPasscode(request)) {
     const dest = new URL("/dashboard/gsc-connect", request.url);
     dest.searchParams.set("gsc_error", "admin_required");
     const returnTo = request.nextUrl.searchParams.get("return");

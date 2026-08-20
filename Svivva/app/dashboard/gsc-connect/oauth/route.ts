@@ -1,9 +1,14 @@
 import { NextRequest } from "next/server";
-import { handleGscOAuthStart } from "@/lib/gsc-oauth-start-handler";
+import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import { oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
 
 export const dynamic = "force-dynamic";
 
-/** Google OAuth entry — page route avoids iOS Safari downloading a file named "start". */
+/** @deprecated Legacy path — iOS Safari may download a file named "oauth". */
 export async function GET(req: NextRequest) {
-  return handleGscOAuthStart(req);
+  const returnTo = req.nextUrl.searchParams.get("return") || "/dashboard/gsc-connect";
+  const email = req.nextUrl.searchParams.get("email");
+  const dest = new URL(gscOAuthConnectUrl(returnTo), req.nextUrl.origin);
+  if (email) dest.searchParams.set("email", email);
+  return oauthHtmlBridgeResponse(dest.toString(), "Continue to Google Search Console");
 }

@@ -16,7 +16,7 @@ import {
 import { getRequestOrigin } from "@/lib/site-url";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
-import { isIosBrowser, oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
+import { oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
 
 export { gscOAuthConnectUrl as gscOAuthConnectPath };
 
@@ -70,10 +70,6 @@ export async function handleGscOAuthStart(req: NextRequest): Promise<NextRespons
     loginHint,
   });
 
-  // iOS Safari mishandles 307 redirect chains to Google OAuth.
-  if (isIosBrowser(req.headers.get("user-agent"))) {
-    return oauthHtmlBridgeResponse(url, "Continue to Google sign-in");
-  }
-
-  return NextResponse.redirect(url);
+  // Never 307 to Google — iOS Safari treats API-like paths (/start, /oauth) as file downloads.
+  return oauthHtmlBridgeResponse(url, "Continue to Google sign-in");
 }

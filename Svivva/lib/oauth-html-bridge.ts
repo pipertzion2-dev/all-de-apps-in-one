@@ -24,7 +24,10 @@ export function oauthHtmlBridgeResponse(
   </style>
 </head>
 <body>
-  <p>Opening Google sign-in… <a href="${safeUrl}">${label}</a></p>
+  <main style="text-align:center;padding:1.5rem;max-width:24rem">
+    <p style="margin:0 0 1rem">Opening Google sign-in…</p>
+    <p style="margin:0"><a href="${safeUrl}" style="display:inline-block;padding:0.75rem 1.25rem;border-radius:0.5rem;background:#5B8DA8;color:#fff;text-decoration:none;font-weight:600">${label}</a></p>
+  </main>
   <script>window.location.replace(${JSON.stringify(targetUrl)});</script>
 </body>
 </html>`;
@@ -33,6 +36,7 @@ export function oauthHtmlBridgeResponse(
     status: 200,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
+      "Content-Disposition": "inline",
       "Cache-Control": "no-store, no-cache, must-revalidate",
       "X-Robots-Tag": "noindex, nofollow",
     },
