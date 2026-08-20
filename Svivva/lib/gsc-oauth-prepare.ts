@@ -24,7 +24,11 @@ export type GscOAuthPrepareResult =
   | {
       ok: true;
       googleUrl: string;
-      oauthCookie: { name: string; value: string; options: ReturnType<typeof gscOAuthStateCookieOptions> };
+      oauthCookie: {
+        name: string;
+        value: string;
+        options: ReturnType<typeof gscOAuthStateCookieOptions>;
+      };
     }
   | { ok: false; redirectPath: string };
 

@@ -36,7 +36,9 @@ function decodePayload(raw: string): GscOAuthStatePayload | null {
   if (sig.length !== expected.length) return null;
   if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as GscOAuthStatePayload;
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as GscOAuthStatePayload;
     if (!payload.state || !payload.codeVerifier || !payload.callbackBase) return null;
     if (typeof payload.exp !== "number" || payload.exp < Date.now()) return null;
     return payload;
