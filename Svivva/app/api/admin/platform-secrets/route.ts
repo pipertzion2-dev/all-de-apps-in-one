@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import {
   getPlatformRuntimeSecretsRow,
   patchPlatformRuntimeSecrets,
@@ -30,6 +31,9 @@ export async function GET() {
   try {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const row = await getPlatformRuntimeSecretsRow();
 

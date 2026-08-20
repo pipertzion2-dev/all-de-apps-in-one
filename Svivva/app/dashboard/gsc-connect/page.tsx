@@ -88,6 +88,9 @@ function gscErrorMessage(err: string | null): string {
   if (err === "oauth_not_configured") {
     return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
   }
+  if (err === "database_not_configured") {
+    return "Database is not configured. Add DATABASE_URL in Vercel → Settings → Environment Variables (Production), then redeploy.";
+  }
   if (err === "invalid_state") {
     return "Sign-in session expired. Click Connect with Google again.";
   }

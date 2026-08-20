@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, authFetch } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -268,14 +268,25 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
 
   useAuth(); // kept for side effects only
 
-  const { data: creds, isLoading: credsLoading } = useQuery<CredsData>({
+  const {
+    data: creds,
+    isLoading: credsLoading,
+    isError: credsIsError,
+    error: credsLoadError,
+  } = useQuery<CredsData>({
     queryKey: ["/api/seeds/credentials"],
     queryFn: async () => {
-      const r = await fetch("/api/seeds/credentials");
-      if (!r.ok) return null as unknown as CredsData;
-      return r.json();
+      const r = await authFetch("/api/seeds/credentials");
+      const data = await r.json().catch(() => ({}));
+      if (r.status === 403) {
+        throw new Error("Enter admin code 272727 to manage connections.");
+      }
+      if (!r.ok) {
+        throw new Error(data.error || `Failed to load connections (${r.status})`);
+      }
+      return data as CredsData;
     },
-    retry: 2,
+    retry: 1,
   });
 
   // Pre-fill form fields from server data
@@ -288,7 +299,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
 
   const saveMut = useMutation({
     mutationFn: async (payload: Record<string, string>) => {
-      const res = await fetch("/api/seeds/credentials", {
+      const res = await authFetch("/api/seeds/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -324,6 +335,18 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
     return (
       <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading connections…
+      </div>
+    );
+
+  if (credsIsError)
+    return (
+      <div className="flex items-start gap-2 rounded-xl border border-red-300/60 bg-red-50 dark:bg-red-950/20 px-3 py-2.5 text-xs text-red-700 dark:text-red-300">
+        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+        <span>
+          {credsLoadError instanceof Error
+            ? credsLoadError.message
+            : "Could not load connections. Check DATABASE_URL in Vercel and enter admin code 272727."}
+        </span>
       </div>
     );
 

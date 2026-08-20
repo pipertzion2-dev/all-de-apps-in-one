@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { seedCredentials } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
@@ -10,6 +11,9 @@ export async function GET() {
   try {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
@@ -31,15 +35,7 @@ export async function GET() {
     }
 
     // Also check indexnow_key via raw SQL since it may not be in the ORM model
-    let indexnowKey: string | null = null;
-    try {
-      const rows = await db.execute(
-        sql`SELECT indexnow_key FROM seed_credentials WHERE user_id = ${userId} LIMIT 1`,
-      );
-      indexnowKey = (rows as unknown as any[])[0]?.indexnow_key || null;
-    } catch {
-      /* column may not exist yet */
-    }
+    const indexnowKey = creds.indexnowKey || null;
 
     return NextResponse.json({
       hasReplit: !!(creds.replitUsername || creds.replitToken),
@@ -54,8 +50,12 @@ export async function GET() {
       miniAppsSubdomain: creds.miniAppsSubdomain || null,
     });
   } catch (e) {
-    console.error("Credentials GET error:", e);
-    return NextResponse.json({ error: "Failed to fetch credentials" }, { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Credentials GET error:", msg, e);
+    return NextResponse.json(
+      { error: msg.includes("DATABASE_URL") ? msg : "Failed to fetch credentials" },
+      { status: 500 },
+    );
   }
 }
 
@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
   try {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
     const body = await request.json();

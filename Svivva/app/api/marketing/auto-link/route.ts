@@ -6,6 +6,7 @@ import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import { submitSitemapToGSC } from "@/lib/google-indexing";
 import { ok, serverError } from "@/lib/http-response";
 import { requireAdminUser } from "@/lib/auth/require-admin-user";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 const GODADDY_API = "https://api.godaddy.com/v1";
@@ -159,7 +160,11 @@ async function createGodaddyCname(creds: any, subdomain: string, targetDomain: s
 export async function POST(req: NextRequest) {
   try {
     const { user, error } = await requireAdminUser();
-    if (error || !user) return error!;
+    if (error) return error;
+    if (!user) return serverError("Admin session could not be resolved");
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const [creds] = await db
       .select()

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/db";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { oauthStates } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
@@ -34,6 +35,13 @@ export async function GET(req: NextRequest) {
   if (!isGoogleGscOAuthConfigured()) {
     const dest = new URL(returnTo, origin);
     dest.searchParams.set("gsc_error", "oauth_not_configured");
+    return NextResponse.redirect(dest);
+  }
+
+  const dbBoot = await bootstrapConnectionDb();
+  if (dbBoot) {
+    const dest = new URL(returnTo, origin);
+    dest.searchParams.set("gsc_error", "database_not_configured");
     return NextResponse.redirect(dest);
   }
 

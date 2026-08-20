@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, sql, isNotNull, desc } from "drizzle-orm";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
@@ -25,6 +26,9 @@ export async function GET() {
   try {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const [
       seoRows,

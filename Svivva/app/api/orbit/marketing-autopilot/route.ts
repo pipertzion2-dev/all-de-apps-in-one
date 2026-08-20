@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { runMarketingAutopilot } from "@/lib/orbit/marketing-autopilot";
 import {
   getMarketingCredentialStatus,
@@ -33,6 +34,8 @@ export async function GET(req: NextRequest) {
     if (!(await isOrbitAdminAllowed(req))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const creds = await loadMarketingPlatformCredentials();
     const status = await getMarketingCredentialStatus();
