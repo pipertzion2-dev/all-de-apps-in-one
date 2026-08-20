@@ -150,6 +150,10 @@ export default function GscConnectPage() {
   });
 
   useEffect(() => {
+    if (data?.oauthAvailable) setNeedsOAuthSetup(false);
+  }, [data?.oauthAvailable]);
+
+  useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get("gsc_connected") === "1") {
       const setup = p.get("gsc_setup");
@@ -199,6 +203,7 @@ export default function GscConnectPage() {
         submit_sitemap: "Sitemap pinged.",
         save_oauth_client: "Google OAuth client saved — click Connect with Google.",
       };
+      if (vars.action === "save_oauth_client") setNeedsOAuthSetup(false);
       setMsg({ text: msgs[vars.action] || "Saved.", ok: true });
       refetch();
     },
