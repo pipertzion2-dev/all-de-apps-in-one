@@ -1,13 +1,11 @@
 import crypto from "crypto";
 import { cookies, headers } from "next/headers";
-import { db } from "@/lib/db";
-import { oauthStates } from "@/lib/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { adminAccessCookieName, adminAccessCookieValue } from "@/lib/auth/admin";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
+import { saveGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 import {
   buildGoogleOAuthUrl,
-  ensureOAuthStatesTable,
   generatePkce,
   getGscOAuthRedirectUri,
   getGoogleGscOAuthConfig,
@@ -86,13 +84,13 @@ export async function prepareGscOAuthStart(opts: {
       process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
       GSC_OAUTH_LOGIN_HINT;
 
-    await ensureOAuthStatesTable();
-    await db.insert(oauthStates).values({
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    await saveGscOAuthState({
       state,
       codeVerifier,
-      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       redirectAfter: JSON.stringify({ path: returnTo, userId }),
       callbackBase: origin,
+      expiresAt,
     });
 
     const googleUrl = buildGoogleOAuthUrl({

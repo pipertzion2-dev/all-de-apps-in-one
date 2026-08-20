@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { GscOAuthBridge } from "@/components/gsc-oauth-bridge";
-import { prepareGscOAuthStart } from "@/lib/gsc-oauth-prepare";
+import { prepareGscOAuthStart, gscOAuthErrorRedirectPath } from "@/lib/gsc-oauth-prepare";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +11,20 @@ type PageProps = {
 /** Real HTML page for OAuth — iOS Safari downloads route-handler/API paths as files. */
 export default async function GscGoogleConnectPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const result = await prepareGscOAuthStart({
-    returnTo: params.return || "/dashboard/gsc-connect",
-    email: params.email,
-  });
+  const returnTo = params.return || "/dashboard/gsc-connect";
+  try {
+    const result = await prepareGscOAuthStart({
+      returnTo,
+      email: params.email,
+    });
 
-  if (!result.ok) {
-    redirect(result.redirectPath);
+    if (!result.ok) {
+      redirect(result.redirectPath);
+    }
+
+    return <GscOAuthBridge googleUrl={result.googleUrl} />;
+  } catch (e) {
+    console.error("[gsc-connect/page]", e);
+    redirect(gscOAuthErrorRedirectPath(returnTo, "oauth_start_failed"));
   }
-
-  return <GscOAuthBridge googleUrl={result.googleUrl} />;
 }

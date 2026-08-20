@@ -295,6 +295,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const { mode, toggleMode } = usePlatform();
   const pathname = usePathname() || "";
+  const isGscOAuthBridge = /\/gsc-connect\/(connect|oauth|google-sign-in)$/.test(pathname);
   const isPublicFeatureRoute = isPublicFeaturePath(pathname);
   const featureThreeBg =
     pathname.startsWith("/dashboard/security") ||
@@ -340,6 +341,10 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
       }
     }
   }, []);
+
+  if (isGscOAuthBridge) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

@@ -10,8 +10,41 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
+import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 
 export const dynamic = "force-dynamic";
+
+type OAuthResume = {
+  codeVerifier: string;
+  redirectAfter: string;
+  callbackBase: string;
+};
+
+async function loadOAuthResume(state: string): Promise<OAuthResume | null> {
+  const fromCookie = await consumeGscOAuthState(state);
+  if (fromCookie) {
+    return {
+      codeVerifier: fromCookie.codeVerifier,
+      redirectAfter: fromCookie.redirectAfter,
+      callbackBase: fromCookie.callbackBase,
+    };
+  }
+
+  await ensureOAuthStatesTable();
+  const [row] = await db
+    .select()
+    .from(oauthStates)
+    .where(and(eq(oauthStates.state, state), gt(oauthStates.expiresAt, new Date())))
+    .limit(1);
+  if (!row) return null;
+
+  await db.delete(oauthStates).where(eq(oauthStates.state, state));
+  return {
+    codeVerifier: row.codeVerifier,
+    redirectAfter: row.redirectAfter || "{}",
+    callbackBase: row.callbackBase || "",
+  };
+}
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -30,20 +63,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(fallback);
   }
 
-  await ensureOAuthStatesTable();
-
-  const [row] = await db
-    .select()
-    .from(oauthStates)
-    .where(and(eq(oauthStates.state, state), gt(oauthStates.expiresAt, new Date())))
-    .limit(1);
-
+  const row = await loadOAuthResume(state);
   if (!row) {
     fallback.searchParams.set("gsc_error", "invalid_state");
     return NextResponse.redirect(fallback);
   }
-
-  await db.delete(oauthStates).where(eq(oauthStates.state, state));
 
   let meta: { path?: string; userId?: string } = {};
   try {
