@@ -28,7 +28,7 @@ import type {
 } from "@/lib/orbit/marketing-autopilot-types";
 import { getSiteUrl } from "@/lib/site-url";
 import { runIndexHealth } from "@/lib/seo/index-health";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { getGoogleOAuthAccessTokenForUser } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import {
@@ -154,7 +154,7 @@ export async function runMarketingAutopilot(opts?: {
 
   // ── Phase 0: GSC OAuth preflight (one-button indexing refresh) ───────────
   try {
-    const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+    const userId = await resolveGscCredentialsUserId();
     const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
     if (accessToken) {
       const gscSetup = await runGscAutoSetup({ userId, accessToken });

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       // Find the admin's stored service-account + site URL.
       // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
       const adminUserId = getPrimaryAdminUserId() || "";
-      const orbitUserId = (await resolveOrbitInternalUserId()) || adminUserId || "orbit-admin";
+      const orbitUserId = (await resolveGscCredentialsUserId()) || adminUserId || "orbit-admin";
       const lookupUserId = orbitUserId || adminUserId;
       const [creds] = lookupUserId
         ? await db
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
   // Remaining actions require admin access
   if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
-  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+  const userId = await resolveGscCredentialsUserId();
 
   const [existing] = await db
     .select({ id: seedCredentials.id })

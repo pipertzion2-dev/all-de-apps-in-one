@@ -60,6 +60,7 @@ export function buildGoogleOAuthUrl(opts: {
   redirectUri: string;
   state: string;
   codeChallenge: string;
+  loginHint?: string;
 }): string {
   const params = new URLSearchParams({
     client_id: opts.clientId,
@@ -67,11 +68,14 @@ export function buildGoogleOAuthUrl(opts: {
     response_type: "code",
     scope: GSC_OAUTH_SCOPES,
     access_type: "offline",
-    prompt: "consent",
+    prompt: "consent select_account",
     state: opts.state,
     code_challenge: opts.codeChallenge,
     code_challenge_method: "S256",
   });
+  if (opts.loginHint?.trim()) {
+    params.set("login_hint", opts.loginHint.trim());
+  }
   return `${GOOGLE_AUTH}?${params.toString()}`;
 }
 
@@ -187,6 +191,17 @@ export async function saveGoogleOAuthTokens(
       google_indexing_enabled = true,
       updated_at = NOW()
   `);
+
+  // Keep a single canonical OAuth row — clear stale tokens on other users.
+  if (tokens.email?.trim()) {
+    await db.execute(sql`
+      UPDATE seed_credentials
+      SET google_oauth_refresh_token = NULL, updated_at = NOW()
+      WHERE user_id <> ${userId}
+        AND google_oauth_email = ${tokens.email.trim()}
+        AND google_oauth_refresh_token IS NOT NULL
+    `);
+  }
 }
 
 export async function getGoogleOAuthAccessTokenForUser(userId: string): Promise<string | null> {
@@ -218,43 +233,66 @@ export async function listGscSites(accessToken: string): Promise<GscSiteEntry[]>
   return data.siteEntry ?? [];
 }
 
+/** Normalize GSC property URLs for comparison (trailing slash, casing). */
+function normalizeGscPropertyUrl(siteUrl: string): string {
+  const trimmed = siteUrl.trim();
+  if (trimmed.startsWith("sc-domain:")) {
+    const domain = trimmed
+      .slice("sc-domain:".length)
+      .replace(/^www\./i, "")
+      .toLowerCase();
+    return `sc-domain:${domain}`;
+  }
+  try {
+    const withSlash = trimmed.endsWith("/") ? trimmed : `${trimmed}/`;
+    const u = new URL(withSlash);
+    const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+    return `https://${host}/`;
+  } catch {
+    return trimmed.toLowerCase();
+  }
+}
+
 /** Pick the GSC property that matches this deployment (hostname / URL-prefix). */
 export function matchGscSiteToCanonical(
   sites: GscSiteEntry[],
   canonicalUrl: string,
 ): string | null {
   const u = new URL(canonicalUrl);
-  const host = u.hostname.replace(/^www\./i, "");
+  const host = u.hostname.replace(/^www\./i, "").toLowerCase();
   const base = canonicalUrl.replace(/\/$/, "");
-  const prefixCandidates = [
-    `${base}/`,
-    `https://${host}/`,
-    `https://www.${host}/`,
-    `http://${host}/`,
-    `http://www.${host}/`,
-  ];
+  const prefixCandidates = new Set(
+    [
+      `${base}/`,
+      `https://${host}/`,
+      `https://www.${host}/`,
+      `http://${host}/`,
+      `http://www.${host}/`,
+    ].map(normalizeGscPropertyUrl),
+  );
+  const domainCandidates = new Set(
+    [`sc-domain:${host}`, `sc-domain:www.${host}`, `sc-domain:${u.hostname.toLowerCase()}`].map(
+      normalizeGscPropertyUrl,
+    ),
+  );
 
-  const exact = sites.find((s) => prefixCandidates.includes(s.siteUrl));
+  const exact = sites.find((s) => prefixCandidates.has(normalizeGscPropertyUrl(s.siteUrl)));
   if (exact) return exact.siteUrl;
 
-  const domainCandidates = [
-    `sc-domain:${host}`,
-    `sc-domain:www.${host}`,
-    `sc-domain:${u.hostname}`,
-  ];
-  const domain = sites.find((s) => domainCandidates.includes(s.siteUrl));
+  const domain = sites.find((s) => domainCandidates.has(normalizeGscPropertyUrl(s.siteUrl)));
   if (domain) return domain.siteUrl;
 
   const loose = sites.find((s) => {
-    if (s.siteUrl.startsWith("sc-domain:")) {
-      const d = s.siteUrl.slice("sc-domain:".length).replace(/^www\./i, "");
-      return d === host || d === u.hostname.replace(/^www\./i, "");
+    const normalized = normalizeGscPropertyUrl(s.siteUrl);
+    if (normalized.startsWith("sc-domain:")) {
+      const d = normalized.slice("sc-domain:".length);
+      return d === host;
     }
     try {
-      const su = new URL(s.siteUrl.endsWith("/") ? s.siteUrl : `${s.siteUrl}/`);
-      return su.hostname.replace(/^www\./i, "") === host;
+      const su = new URL(normalized);
+      return su.hostname.replace(/^www\./i, "").toLowerCase() === host;
     } catch {
-      return s.siteUrl.includes(host);
+      return s.siteUrl.toLowerCase().includes(host);
     }
   });
   return loose?.siteUrl ?? null;

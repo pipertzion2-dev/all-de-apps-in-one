@@ -1,5 +1,5 @@
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -31,7 +31,7 @@ export type DiagStep = {
 export async function GET() {
   if (!(await isOrbitAdminAllowed())) return forbidden();
 
-  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+  const userId = await resolveGscCredentialsUserId();
 
   await ensureGscOAuthColumns();
 
