@@ -6,8 +6,8 @@
 #   Project: all-de-apps-in-one  (Root Directory = Svivva)
 #   NOT:     svivva-main-app (old/wrong account — disconnect its GitHub integration)
 #
-# Runs on every push to main (when Svivva/ changes). Requires GitHub secrets:
-#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# Runs when Svivva/ changes and VERCEL_CI_DEPLOY=true (GitHub repo variable).
+# Requires GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
 # Optional manual run: Actions → Deploy Svivva → Run workflow
 #
 name: Deploy Svivva (Vercel production)
@@ -30,8 +30,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Skip (don't fail CI) until GitHub secrets are configured — see docs/VERCEL_ACCOUNT.md
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
+    # Repo variable (not secret) — secrets cannot be used in job-level if; see README Path B
+    if: ${{ vars.VERCEL_CI_DEPLOY == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
