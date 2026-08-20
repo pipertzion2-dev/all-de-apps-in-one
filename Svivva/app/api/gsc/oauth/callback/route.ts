@@ -3,6 +3,7 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { oauthStates, seedCredentials } from "@/lib/schema";
 import {
+  ensureOAuthStatesTable,
   exchangeGoogleOAuthCode,
   getGscOAuthRedirectUri,
   saveGoogleOAuthTokens,
@@ -28,6 +29,8 @@ export async function GET(req: NextRequest) {
     fallback.searchParams.set("gsc_error", "missing_code");
     return NextResponse.redirect(fallback);
   }
+
+  await ensureOAuthStatesTable();
 
   const [row] = await db
     .select()

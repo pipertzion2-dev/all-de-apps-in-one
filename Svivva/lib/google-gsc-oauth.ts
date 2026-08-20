@@ -16,6 +16,26 @@ export const GSC_OAUTH_SCOPES = [
 ].join(" ");
 
 let oauthColumnsEnsured = false;
+let oauthStatesTableEnsured = false;
+
+/** PKCE OAuth state rows — created on demand when migrations were not run. */
+export async function ensureOAuthStatesTable(): Promise<void> {
+  if (oauthStatesTableEnsured) return;
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS oauth_states (
+        state TEXT PRIMARY KEY,
+        code_verifier TEXT NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        redirect_after TEXT,
+        callback_base TEXT
+      )
+    `);
+    oauthStatesTableEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 export async function ensureGscOAuthColumns(): Promise<void> {
   if (oauthColumnsEnsured) return;

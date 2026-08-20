@@ -7,6 +7,7 @@ import { adminAccessCookieName, adminAccessCookieValue } from "@/lib/auth/admin"
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 import {
   buildGoogleOAuthUrl,
+  ensureOAuthStatesTable,
   generatePkce,
   getGscOAuthRedirectUri,
   getGoogleGscOAuthConfig,
@@ -69,38 +70,46 @@ export async function prepareGscOAuthStart(opts: {
     return { ok: false, redirectPath: `${dest.pathname}${dest.search}` };
   }
 
-  const cfg = getGoogleGscOAuthConfig()!;
-  const userId = await resolveGscOAuthSaveUserId();
-  const { codeVerifier, codeChallenge } = generatePkce();
-  const state = crypto.randomBytes(24).toString("hex");
-  const redirectUri = getGscOAuthRedirectUri(origin);
+  try {
+    const cfg = getGoogleGscOAuthConfig()!;
+    const userId = await resolveGscOAuthSaveUserId();
+    const { codeVerifier, codeChallenge } = generatePkce();
+    const state = crypto.randomBytes(24).toString("hex");
+    const redirectUri = getGscOAuthRedirectUri(origin);
 
-  const sessionUser = await getCurrentUser();
-  const savedOAuth = await loadGoogleOAuthRefreshToken(userId);
-  const loginHint =
-    opts.email?.trim() ||
-    sessionUser?.email?.trim() ||
-    savedOAuth?.email?.trim() ||
-    process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
-    GSC_OAUTH_LOGIN_HINT;
+    const sessionUser = await getCurrentUser();
+    const savedOAuth = await loadGoogleOAuthRefreshToken(userId);
+    const loginHint =
+      opts.email?.trim() ||
+      sessionUser?.email?.trim() ||
+      savedOAuth?.email?.trim() ||
+      process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
+      GSC_OAUTH_LOGIN_HINT;
 
-  await db.insert(oauthStates).values({
-    state,
-    codeVerifier,
-    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-    redirectAfter: JSON.stringify({ path: returnTo, userId }),
-    callbackBase: origin,
-  });
+    await ensureOAuthStatesTable();
+    await db.insert(oauthStates).values({
+      state,
+      codeVerifier,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      redirectAfter: JSON.stringify({ path: returnTo, userId }),
+      callbackBase: origin,
+    });
 
-  const googleUrl = buildGoogleOAuthUrl({
-    clientId: cfg.clientId,
-    redirectUri,
-    state,
-    codeChallenge,
-    loginHint,
-  });
+    const googleUrl = buildGoogleOAuthUrl({
+      clientId: cfg.clientId,
+      redirectUri,
+      state,
+      codeChallenge,
+      loginHint,
+    });
 
-  return { ok: true, googleUrl };
+    return { ok: true, googleUrl };
+  } catch (e) {
+    console.error("[gsc-oauth-prepare] failed:", e);
+    const dest = new URL(returnTo, origin);
+    dest.searchParams.set("gsc_error", "oauth_start_failed");
+    return { ok: false, redirectPath: `${dest.pathname}${dest.search}` };
+  }
 }
 
 export function gscOAuthErrorRedirectPath(returnTo: string, code: string): string {

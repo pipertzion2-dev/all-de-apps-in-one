@@ -92,6 +92,9 @@ function gscErrorMessage(err: string | null): string {
   if (err === "invalid_state") {
     return "Sign-in session expired. Click Connect with Google again.";
   }
+  if (err === "oauth_start_failed") {
+    return "Could not start Google sign-in. Wait a moment and try Connect with Google again.";
+  }
   return `Google sign-in failed: ${err}`;
 }
 
