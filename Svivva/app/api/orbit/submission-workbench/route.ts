@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { growthContent, growthSubmissions } from "@/lib/schema";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { generateSubmissionFields } from "@/lib/orbit/submission-ai";
 import {
   SUBMISSION_ITEMS,
@@ -127,6 +128,8 @@ export async function GET(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const dbBoot = await bootstrapConnectionDb();
+  if (dbBoot) return dbBoot;
 
   const kind = req.nextUrl.searchParams.get("kind");
   const hints = await loadContentHints();

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { runIndexHealth, getCoverageSnapshot } from "@/lib/seo/index-health";
 import { runAutomatableManualActions } from "@/lib/orbit/automate-manual-actions";
 
@@ -11,6 +12,9 @@ export async function GET(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const dbBoot = await bootstrapConnectionDb();
+  if (dbBoot) return dbBoot;
+
   const snapshot = await getCoverageSnapshot();
   return NextResponse.json({ snapshot });
 }
@@ -24,6 +28,8 @@ export async function POST(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const dbBoot = await bootstrapConnectionDb();
+  if (dbBoot) return dbBoot;
 
   const body = (await req.json().catch(() => ({}))) as {
     resubmit?: boolean;

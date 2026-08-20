@@ -1,6 +1,7 @@
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { db } from "@/lib/db";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl, getSitemapUrl, getSiteHostname } from "@/lib/site-url";
@@ -31,6 +32,9 @@ export type DiagStep = {
 
 export async function GET() {
   if (!(await isOrbitAdminAllowed())) return forbidden();
+
+  const dbBoot = await bootstrapConnectionDb();
+  if (dbBoot) return dbBoot;
 
   await hydratePlatformSecrets();
 

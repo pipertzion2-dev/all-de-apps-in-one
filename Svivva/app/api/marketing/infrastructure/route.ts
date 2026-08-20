@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { bootstrapConnectionDb } from "@/lib/db/bootstrap-connection-db";
 import { seoLandingPages, blogPosts, seedCredentials } from "@/lib/schema";
 import { eq, count } from "drizzle-orm";
 import { sql } from "drizzle-orm";
@@ -13,7 +14,11 @@ const ROOT_CATEGORIES = ["seo-landing", "seed-marketing"];
 export async function GET() {
   try {
     const { user, error } = await requireAdminUser();
-    if (error || !user) return error!;
+    if (error) return error;
+    if (!user) return serverError("Admin session could not be resolved");
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zzaizzai.com";
 
@@ -95,7 +100,11 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { user, error } = await requireAdminUser();
-    if (error || !user) return error!;
+    if (error) return error;
+    if (!user) return serverError("Admin session could not be resolved");
+
+    const dbBoot = await bootstrapConnectionDb();
+    if (dbBoot) return dbBoot;
 
     const { action, replitDomain, hostingTarget, googleSiteUrl } = await req.json();
     const cnameTargetHost = (hostingTarget ?? replitDomain) as string | undefined;
