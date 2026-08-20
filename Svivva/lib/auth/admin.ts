@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import type { SessionUser } from "./session";
+import { siteCookieDomain } from "@/lib/site-cookie-domain";
 
 /** Site admin passcode — enter on Settings or Orbit to unlock admin APIs & pages. */
 export const ADMIN_ACCESS_CODE = "272727";
@@ -17,12 +18,14 @@ export async function hasAdminAccess(): Promise<boolean> {
 
 /** Cookie set by POST /api/auth/admin-code when passcode matches. */
 export function adminAccessCookieOptions() {
+  const domain = siteCookieDomain();
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
+    ...(domain ? { domain } : {}),
   };
 }
 

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { db } from "@/lib/db";
-import { seedCredentials } from "@/lib/schema";
+import { oauthStates, seedCredentials } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import {
@@ -39,6 +39,28 @@ export async function ensureOAuthStatesTable(): Promise<void> {
     oauthStatesTableEnsured = true;
   } catch {
     /* test env */
+  }
+}
+
+/** DB fallback when the signed PKCE cookie is lost (common on iOS handoff). */
+export async function saveGscOAuthStateRow(payload: {
+  state: string;
+  codeVerifier: string;
+  redirectAfter: string;
+  callbackBase: string;
+  expiresAt: Date;
+}): Promise<void> {
+  await ensureOAuthStatesTable();
+  try {
+    await db.insert(oauthStates).values({
+      state: payload.state,
+      codeVerifier: payload.codeVerifier,
+      expiresAt: payload.expiresAt,
+      redirectAfter: payload.redirectAfter,
+      callbackBase: payload.callbackBase,
+    });
+  } catch (e) {
+    console.warn("[gsc-oauth] save state row failed:", e);
   }
 }
 

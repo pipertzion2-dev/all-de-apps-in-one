@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
+import { siteCookieDomain } from "@/lib/site-cookie-domain";
 
 export const GSC_OAUTH_STATE_COOKIE = "gsc_oauth_pkce";
 
@@ -47,14 +48,21 @@ function decodePayload(raw: string): GscOAuthStatePayload | null {
   }
 }
 
+/** Share PKCE cookie across www/apex when production site URL is configured. */
+export function gscOAuthCookieDomain(): string | undefined {
+  return siteCookieDomain();
+}
+
 export function gscOAuthStateCookieOptions(expiresAt: Date) {
   const maxAge = Math.max(60, Math.floor((expiresAt.getTime() - Date.now()) / 1000));
+  const domain = gscOAuthCookieDomain();
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     maxAge,
     path: "/",
+    ...(domain ? { domain } : {}),
   };
 }
 
@@ -96,7 +104,7 @@ export async function consumeGscOAuthState(state: string): Promise<GscOAuthState
   const raw = store.get(GSC_OAUTH_STATE_COOKIE)?.value;
   if (!raw) return null;
   const payload = decodePayload(raw);
-  store.delete(GSC_OAUTH_STATE_COOKIE);
   if (!payload || payload.state !== state) return null;
+  store.delete(GSC_OAUTH_STATE_COOKIE);
   return payload;
 }

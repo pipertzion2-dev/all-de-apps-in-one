@@ -133,7 +133,7 @@ export default function GscConnectOrb({
 
   /** Gate: admin must be unlocked (passcode cookie) before the OAuth redirect. */
   const connect = () => {
-    if (!interactive || adminUnlocked) return;
+    if (!interactive || adminUnlocked !== false) return;
     setShowUnlock(true);
   };
 

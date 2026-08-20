@@ -93,7 +93,7 @@ function gscErrorMessage(err: string | null): string {
     return "Google OAuth credentials are invalid or still placeholders in Vercel (your-client-id). Paste your real OAuth client ID + secret below, then try Connect with Google again.";
   }
   if (err === "invalid_state") {
-    return "Sign-in session expired. Click Connect with Google again.";
+    return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use Safari, tap Connect with Google again, and choose Continue to Google sign-in on the next screen.";
   }
   if (err === "oauth_start_failed") {
     return "Could not start Google sign-in. Wait a moment and try Connect with Google again.";

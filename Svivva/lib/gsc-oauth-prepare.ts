@@ -15,6 +15,7 @@ import {
   getGoogleGscOAuthConfig,
   isGoogleGscOAuthConfigured,
   loadGoogleOAuthRefreshToken,
+  saveGscOAuthStateRow,
 } from "@/lib/google-gsc-oauth";
 import { getSiteUrl } from "@/lib/site-url";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
@@ -117,12 +118,20 @@ export async function prepareGscOAuthStart(opts: {
       GSC_OAUTH_LOGIN_HINT;
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const redirectAfter = JSON.stringify({ path: returnTo, userId });
+    await saveGscOAuthStateRow({
+      state,
+      codeVerifier,
+      redirectAfter,
+      callbackBase: origin,
+      expiresAt,
+    });
     const oauthCookie = {
       name: GSC_OAUTH_STATE_COOKIE,
       value: buildGscOAuthStateCookieValue({
         state,
         codeVerifier,
-        redirectAfter: JSON.stringify({ path: returnTo, userId }),
+        redirectAfter,
         callbackBase: origin,
         expiresAt,
       }),
