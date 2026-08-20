@@ -1265,7 +1265,7 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
         <div className="flex gap-1.5">
           {!indexing.gscConnected && (
             <a
-              href="/api/gsc/oauth/start?return=/dashboard/launchpad"
+              href="/dashboard/gsc-connect"
               className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white"
               style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
             >

@@ -14,7 +14,7 @@ NEXTAUTH_SECRET=${hex()}
 CRON_SECRET=${hex()}
 ORBIT_INTERNAL_SECRET=${hex()}
 
-(Also set DATABASE_URL, NEXT_PUBLIC_SITE_URL, auth keys, Stripe, etc. from .env.example)
+(Also set DATABASE_URL, NEXT_PUBLIC_SITE_URL, GOOGLE_GSC_CLIENT_ID, GOOGLE_GSC_CLIENT_SECRET, Stripe, etc. from .env.example)
 
 ================================================================================
 `);

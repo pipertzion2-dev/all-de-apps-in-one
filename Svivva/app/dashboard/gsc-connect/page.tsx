@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AdminCodeForm } from "@/components/admin-code-form";
 import {
   CheckCircle2,
   XCircle,
@@ -66,19 +75,70 @@ function StatusIcon({ status }: { status: StepStatus }) {
   return <Clock className="w-5 h-5 text-muted-foreground shrink-0" />;
 }
 
+const OAUTH_START = "/api/gsc/oauth/start?return=/dashboard/gsc-connect";
+
+function gscErrorMessage(err: string | null): string {
+  if (!err) return "Google sign-in failed.";
+  if (err === "no_refresh_token") {
+    return "Google did not return a refresh token. Revoke ZZAI at myaccount.google.com/permissions, then connect again.";
+  }
+  if (err === "admin_required") {
+    return "Enter the admin code first (272727), then connect with Google.";
+  }
+  if (err === "oauth_not_configured") {
+    return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
+  }
+  if (err === "invalid_state") {
+    return "Sign-in session expired. Click Connect with Google again.";
+  }
+  return `Google sign-in failed: ${err}`;
+}
+
 export default function GscConnectPage() {
+  const queryClient = useQueryClient();
   const [saJson, setSaJson] = useState("");
+  const [oauthClientId, setOauthClientId] = useState("");
+  const [oauthClientSecret, setOauthClientSecret] = useState("");
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [adminUnlocked, setAdminUnlocked] = useState<boolean | null>(null);
+  const [showAdminUnlock, setShowAdminUnlock] = useState(false);
+  const [pendingOAuth, setPendingOAuth] = useState(false);
 
-  const { data, isLoading, refetch, isFetching } = useQuery<DiagResult>({
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (alive && d) setAdminUnlocked(!!d.isAdmin);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const startOAuth = useCallback(() => {
+    if (adminUnlocked) {
+      window.location.href = OAUTH_START;
+      return;
+    }
+    setPendingOAuth(true);
+    setShowAdminUnlock(true);
+  }, [adminUnlocked]);
+
+  const { data, isLoading, refetch, isFetching, isError, error } = useQuery<DiagResult>({
     queryKey: ["/api/gsc/diagnose"],
     queryFn: async () => {
       const r = await authFetch("/api/gsc/diagnose");
+      if (r.status === 403) {
+        throw new Error("admin_required");
+      }
       if (!r.ok) throw new Error("Failed");
       return r.json();
     },
     staleTime: 30_000,
+    retry: false,
   });
 
   useEffect(() => {
@@ -101,11 +161,11 @@ export default function GscConnectPage() {
       const err = p.get("gsc_error");
       setMsg({
         ok: false,
-        text:
-          err === "no_refresh_token"
-            ? "Google did not return a refresh token. Revoke Svivva at myaccount.google.com/permissions, then connect again."
-            : `Google sign-in failed: ${err}`,
+        text: gscErrorMessage(err),
       });
+      if (err === "admin_required") {
+        setShowAdminUnlock(true);
+      }
       window.history.replaceState({}, "", "/dashboard/gsc-connect");
     }
   }, [refetch]);
@@ -126,6 +186,7 @@ export default function GscConnectPage() {
         fix_url: "Site URL updated.",
         save_service_account: "Service account saved.",
         submit_sitemap: "Sitemap pinged.",
+        save_oauth_client: "Google OAuth client saved — click Connect with Google.",
       };
       setMsg({ text: msgs[vars.action] || "Saved.", ok: true });
       refetch();
@@ -172,6 +233,9 @@ export default function GscConnectPage() {
     onError: (e: Error) => setMsg({ text: e.message, ok: false }),
   });
 
+  const needsAdmin =
+    adminUnlocked === false ||
+    (isError && error instanceof Error && error.message === "admin_required");
   const connected = !!data?.oauthConnected;
   const propertyOk = !!data?.gscPropertyOk;
   const oauthAvailable = data?.oauthAvailable !== false;
@@ -179,6 +243,31 @@ export default function GscConnectPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      {needsAdmin && (
+        <Card className="border-amber-500/40 bg-amber-500/5">
+          <CardContent className="py-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">Admin unlock required</p>
+            <p className="text-xs text-muted-foreground">
+              Enter the 6-digit admin code before connecting Google Search Console or running health
+              checks.
+            </p>
+            <AdminCodeForm
+              title="Unlock Google Search Console"
+              description="Use the same admin code as Orbit (272727)."
+              onSuccess={() => {
+                setAdminUnlocked(true);
+                setShowAdminUnlock(false);
+                void queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+                void refetch();
+                if (pendingOAuth) {
+                  setPendingOAuth(false);
+                  window.location.href = OAUTH_START;
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
+      )}
       {/* Hero: one-press camo orb to connect */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <GscConnectOrb
@@ -281,15 +370,14 @@ export default function GscConnectPage() {
 
           <div className="flex flex-wrap gap-2">
             {!connected && oauthAvailable && (
-              <a href="/api/gsc/oauth/start?return=/dashboard/gsc-connect">
-                <Button
-                  className="text-white font-bold"
-                  style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
-                  data-testid="btn-connect-google"
-                >
-                  Connect with Google
-                </Button>
-              </a>
+              <Button
+                className="text-white font-bold"
+                style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+                onClick={startOAuth}
+                data-testid="btn-connect-google"
+              >
+                Connect with Google
+              </Button>
             )}
             {connected && !propertyOk && (
               <Button
@@ -303,9 +391,74 @@ export default function GscConnectPage() {
               </Button>
             )}
             {!connected && !oauthAvailable && (
-              <p className="text-xs text-amber-500">
-                Server needs GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env.
-              </p>
+              <div className="w-full space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                <p className="text-xs font-semibold text-foreground">
+                  Google OAuth client not configured yet
+                </p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Create an OAuth 2.0 Web client in{" "}
+                  <a
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Google Cloud Console
+                  </a>
+                  . Enable <strong>Search Console API</strong> and{" "}
+                  <strong>Web Search Indexing API</strong>. Add redirect URI{" "}
+                  <code className="text-[10px] bg-muted px-1 rounded">
+                    {canonicalSite}/api/gsc/oauth/callback
+                  </code>
+                  , then paste the client ID and secret below (saved in the app database — no Vercel
+                  redeploy needed).
+                </p>
+                <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="gsc-oauth-client-id" className="text-[11px]">
+                      Client ID
+                    </Label>
+                    <Input
+                      id="gsc-oauth-client-id"
+                      value={oauthClientId}
+                      onChange={(e) => setOauthClientId(e.target.value)}
+                      placeholder="123456789-abc.apps.googleusercontent.com"
+                      className="h-8 text-xs font-mono mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="gsc-oauth-client-secret" className="text-[11px]">
+                      Client secret
+                    </Label>
+                    <Input
+                      id="gsc-oauth-client-secret"
+                      type="password"
+                      value={oauthClientSecret}
+                      onChange={(e) => setOauthClientSecret(e.target.value)}
+                      placeholder="GOCSPX-…"
+                      className="h-8 text-xs font-mono mt-1"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    className="text-white font-bold"
+                    style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+                    disabled={
+                      !oauthClientId.trim() || !oauthClientSecret.trim() || saveMutation.isPending
+                    }
+                    onClick={() =>
+                      saveMutation.mutate({
+                        action: "save_oauth_client",
+                        clientId: oauthClientId.trim(),
+                        clientSecret: oauthClientSecret.trim(),
+                      })
+                    }
+                    data-testid="btn-save-oauth-client"
+                  >
+                    {saveMutation.isPending ? "Saving…" : "Save OAuth client"}
+                  </Button>
+                </div>
+              </div>
             )}
             <Button
               variant="outline"
@@ -434,6 +587,33 @@ export default function GscConnectPage() {
           </Button>
         </a>
       </div>
+
+      <Dialog open={showAdminUnlock} onOpenChange={setShowAdminUnlock}>
+        <DialogContent className="max-w-sm border-border/60 bg-background/95 p-0 backdrop-blur-xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Unlock admin to connect Google</DialogTitle>
+            <DialogDescription>
+              Enter the admin passcode to connect Google Search Console.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-2">
+            <AdminCodeForm
+              title="Unlock to connect Google"
+              description="Enter the 6-digit admin code, then we'll open Google sign-in."
+              onSuccess={() => {
+                setAdminUnlocked(true);
+                setShowAdminUnlock(false);
+                void queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+                void refetch();
+                if (pendingOAuth) {
+                  setPendingOAuth(false);
+                  window.location.href = OAUTH_START;
+                }
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

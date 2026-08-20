@@ -1642,6 +1642,8 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   stripePublishableKey: text("stripe_publishable_key"),
   stripeWebhookSecret: text("stripe_webhook_secret"),
   nextPublicSiteUrl: text("next_public_site_url"),
+  googleGscClientId: text("google_gsc_client_id"),
+  googleGscClientSecret: text("google_gsc_client_secret"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

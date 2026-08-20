@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
@@ -15,6 +15,10 @@ import {
   parseGoogleServiceAccount,
 } from "@/lib/google-service-account";
 import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
+import {
+  hydratePlatformSecrets,
+  patchPlatformRuntimeSecrets,
+} from "@/lib/platform-runtime-secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +41,7 @@ export async function POST(req: NextRequest) {
       // Find the admin's stored service-account + site URL.
       // Prefer ADMIN_USER_ID (deterministic); fall back to most-recent enabled row.
       const adminUserId = getPrimaryAdminUserId() || "";
-      const orbitUserId = (await resolveOrbitInternalUserId()) || adminUserId || "orbit-admin";
+      const orbitUserId = (await resolveGscCredentialsUserId()) || adminUserId || "orbit-admin";
       const lookupUserId = orbitUserId || adminUserId;
       const [creds] = lookupUserId
         ? await db
@@ -108,7 +112,7 @@ export async function POST(req: NextRequest) {
   // Remaining actions require admin access
   if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
-  const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
+  const userId = await resolveGscCredentialsUserId();
 
   const [existing] = await db
     .select({ id: seedCredentials.id })
@@ -172,6 +176,31 @@ export async function POST(req: NextRequest) {
       return serverError(`DB save failed: ${e.message}`);
     }
     return ok({ success: true, email: sa.client_email });
+  }
+
+  // Save Google OAuth client credentials (when not set in Vercel env)
+  if (action === "save_oauth_client") {
+    const { clientId, clientSecret } = body;
+    if (
+      !clientId ||
+      typeof clientId !== "string" ||
+      !clientSecret ||
+      typeof clientSecret !== "string"
+    ) {
+      return badRequest("clientId and clientSecret required");
+    }
+    const id = clientId.trim();
+    const secret = clientSecret.trim();
+    if (!id || !secret) return badRequest("clientId and clientSecret required");
+    await patchPlatformRuntimeSecrets({
+      googleGscClientId: id,
+      googleGscClientSecret: secret,
+    });
+    await hydratePlatformSecrets();
+    return ok({
+      success: true,
+      message: "Google OAuth client saved — you can connect with Google now.",
+    });
   }
 
   return badRequest("Unknown action");

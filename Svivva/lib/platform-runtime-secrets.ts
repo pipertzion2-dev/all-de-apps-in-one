@@ -1,9 +1,26 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { platformRuntimeSecrets } from "@/lib/schema";
 import { resetOpenAIClientCache } from "@/lib/llm/openai";
 
 const ROW_ID = "default";
+
+let googleGscColumnsEnsured = false;
+
+async function ensureGoogleGscPlatformColumns(): Promise<void> {
+  if (googleGscColumnsEnsured) return;
+  try {
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS google_gsc_client_id TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS google_gsc_client_secret TEXT`,
+    );
+    googleGscColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 /**
  * Snapshot of deployment env before DB hydration. When true, that slot is never
@@ -19,6 +36,8 @@ export const runtimeSecretColdStart = {
   ),
   stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
   siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
+  googleGscClientId: !!process.env.GOOGLE_GSC_CLIENT_ID?.trim(),
+  googleGscClientSecret: !!process.env.GOOGLE_GSC_CLIENT_SECRET?.trim(),
 };
 
 export type PlatformRuntimeSecretsPatch = Partial<{
@@ -28,6 +47,8 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   stripePublishableKey: string | null;
   stripeWebhookSecret: string | null;
   nextPublicSiteUrl: string | null;
+  googleGscClientId: string | null;
+  googleGscClientSecret: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
@@ -82,11 +103,24 @@ function syncProcessEnvFromRow(
     if (v) process.env.NEXT_PUBLIC_SITE_URL = v;
     else delete process.env.NEXT_PUBLIC_SITE_URL;
   }
+
+  if (!runtimeSecretColdStart.googleGscClientId) {
+    const v = row.googleGscClientId?.trim();
+    if (v) process.env.GOOGLE_GSC_CLIENT_ID = v;
+    else delete process.env.GOOGLE_GSC_CLIENT_ID;
+  }
+
+  if (!runtimeSecretColdStart.googleGscClientSecret) {
+    const v = row.googleGscClientSecret?.trim();
+    if (v) process.env.GOOGLE_GSC_CLIENT_SECRET = v;
+    else delete process.env.GOOGLE_GSC_CLIENT_SECRET;
+  }
 }
 
 /** Merge database secrets into process.env when the host did not provide them. */
 export async function hydratePlatformSecrets(): Promise<void> {
   try {
+    await ensureGoogleGscPlatformColumns();
     const row = await getPlatformRuntimeSecretsRow();
     if (row) syncProcessEnvFromRow(row);
     resetOpenAIClientCache();
@@ -105,6 +139,8 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     stripePublishableKey: existing?.stripePublishableKey ?? null,
     stripeWebhookSecret: existing?.stripeWebhookSecret ?? null,
     nextPublicSiteUrl: existing?.nextPublicSiteUrl ?? null,
+    googleGscClientId: existing?.googleGscClientId ?? null,
+    googleGscClientSecret: existing?.googleGscClientSecret ?? null,
     updatedAt: new Date(),
   };
 
@@ -122,6 +158,8 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         stripePublishableKey: merged.stripePublishableKey,
         stripeWebhookSecret: merged.stripeWebhookSecret,
         nextPublicSiteUrl: merged.nextPublicSiteUrl,
+        googleGscClientId: merged.googleGscClientId,
+        googleGscClientSecret: merged.googleGscClientSecret,
         updatedAt: merged.updatedAt,
       },
     });

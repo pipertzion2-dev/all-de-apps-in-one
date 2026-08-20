@@ -2,11 +2,11 @@
 
 ## Important
 
-**Your domain cannot point at Cursor.** Cursor is an editor. The public site runs on **Vercel** (or another host). GoDaddy only holds DNS that points at that host.
+**Your domain cannot point at Cursor.** Cursor is an editor. The public site runs on **Vercel**. GoDaddy only holds DNS that points at that host.
 
 | Piece | Role |
 | --- | --- |
-| **Cursor** | Edit code, commit, push |
+| **Cursor / Origin** | Edit code, commit, push (optional git host — see `docs/ORIGIN_HOSTING.md`) |
 | **Vercel** | Hosts the live Next.js app (`Svivva/` root directory) |
 | **GoDaddy** | DNS for `zzaizzai.com` → Vercel |
 
@@ -53,7 +53,15 @@ Set (or update) these for **Production**:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://zzaizzai.com
+
+# Required for Connect Google (Search Console)
+GOOGLE_GSC_CLIENT_ID=
+GOOGLE_GSC_CLIENT_SECRET=
 ```
+
+Also copy Stripe, `DATABASE_URL`, `NEXTAUTH_SECRET`, etc. from `Svivva/.env.example`.
+
+**Alternative:** paste Google OAuth client ID + secret in-app at `/dashboard/gsc-connect` (admin code 272727) — saved to DB, no redeploy needed for those two keys.
 
 Also update anything that embeds the old domain:
 
@@ -62,7 +70,16 @@ Also update anything that embeds the old domain:
 - **Auth / OIDC** callback URLs if you use them
 - Redeploy after env changes
 
-### 4. In-app Marketing → Traffic Setup
+### 4. Google OAuth (fix “not configured” JSON error)
+
+1. [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) → OAuth 2.0 Web client
+2. Redirect URI: `https://zzaizzai.com/api/gsc/oauth/callback`
+3. Enable **Search Console API** + **Web Search Indexing API**
+4. Add `GOOGLE_GSC_CLIENT_ID` + `GOOGLE_GSC_CLIENT_SECRET` in Vercel → **Settings → Environment Variables → Production**, then redeploy  
+   **or** paste on `/dashboard/gsc-connect` after deploy
+5. Admin code **272727** → **Connect with Google** → sign in as **pipertzion2@gmail.com**
+
+### 5. In-app Marketing → Traffic Setup
 
 1. Sign in as admin → **Dashboard → Marketing** (or Connections Hub)
 2. Set **GoDaddy domain** to `zzaizzai.com`
@@ -70,14 +87,14 @@ Also update anything that embeds the old domain:
 4. Set **Google site URL** to `https://zzaizzai.com` (or `sc-domain:zzaizzai.com`)
 5. Reconnect GSC / submit sitemap for the **new** property
 
-### 5. Search Console + Analytics
+### 6. Search Console + Analytics
 
 1. Add `zzaizzai.com` (or domain property) in [Google Search Console](https://search.google.com/search-console)
 2. Verify ownership (DNS TXT or HTML tag → `GOOGLE_SITE_VERIFICATION`)
 3. Submit `https://zzaizzai.com/sitemap.xml`
 4. In GA4, add `zzaizzai.com` as a data stream / allowed domain if needed
 
-### 6. Optional: keep svivva.com
+### 7. Optional: keep svivva.com
 
 If you still own `svivva.com`, in Vercel add it as a domain and set a **301 redirect** to `zzaizzai.com` so old links and SEO equity move over.
 
@@ -92,6 +109,7 @@ You should see Vercel headers and sitemap URLs under `https://zzaizzai.com/...`.
 
 ## Quick problems
 
+- **Raw JSON “Google OAuth not configured”:** add `GOOGLE_GSC_CLIENT_ID` + `SECRET` in Vercel env or paste on `/dashboard/gsc-connect`.
 - **Domain still shows parking / old host**: GoDaddy DNS not updated or not propagated yet.
 - **SSL pending on Vercel**: DNS not pointing at Vercel yet — wait until Vercel shows the domain as Valid.
-- **“I want it only in Cursor”**: Local `localhost` is fine for development; the public domain always needs Vercel (or another host).
+- **Wrong Vercel project**: use **all-de-apps-in-one** on team **zzai-zzai**, not `svivva-main-app`.
