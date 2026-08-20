@@ -3,6 +3,19 @@ import type { NextRequest } from "next/server";
 import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
 import { isNoindexPath } from "@/lib/seo/robots-config";
 
+const ADMIN_COOKIE = "svivva_admin";
+
+/** Orbit admin surfaces — require passcode cookie before OAuth/API actions. */
+const ADMIN_CODE_PREFIXES = ["/dashboard/gsc-connect"];
+
+function pathRequiresAdminCode(pathname: string): boolean {
+  return ADMIN_CODE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function hasAdminPasscode(request: NextRequest): boolean {
+  return request.cookies.get(ADMIN_COOKIE)?.value === "1";
+}
+
 function withSecurityHeaders(response: NextResponse): NextResponse {
   for (const { key, value } of SECURITY_HEADERS) {
     response.headers.set(key, value);
@@ -69,6 +82,19 @@ export function middleware(request: NextRequest) {
     url.pathname = "/api/indexnow-key";
     url.searchParams.set("key", keyMatch[1].toLowerCase());
     return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.rewrite(url)));
+  }
+
+  // Google OAuth entry — must enter admin code 272727 first (blocks direct /oauth URL).
+  if (
+    pathRequiresAdminCode(request.nextUrl.pathname) &&
+    request.nextUrl.pathname.includes("/oauth") &&
+    !hasAdminPasscode(request)
+  ) {
+    const dest = new URL("/dashboard/gsc-connect", request.url);
+    dest.searchParams.set("gsc_error", "admin_required");
+    const returnTo = request.nextUrl.searchParams.get("return");
+    if (returnTo) dest.searchParams.set("return", returnTo);
+    return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest)));
   }
 
   const requestHeaders = new Headers(request.headers);
