@@ -1,23 +1,17 @@
-# Deploy Svivva to Vercel using the CLI (prebuilt).
+# Optional manual deploy via Vercel CLI (prebuilt).
 #
-# CANONICAL TARGET (do not change without updating Svivva/vercel-canonical.json):
-#   Account: ziontpiper@icloud.com
-#   Team:    zzai-zzai
-#   Project: all-de-apps-in-one  (Root Directory = Svivva)
-#   NOT:     svivva-main-app (old/wrong account — disconnect its GitHub integration)
+# Production deploys normally use Vercel Git integration (Path A):
+#   team zzai-zzai / project all-de-apps-in-one / Root Directory Svivva
 #
-# Runs when Svivva/ changes and VERCEL_CI_DEPLOY=true (GitHub repo variable).
-# Requires GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
-# Optional manual run: Actions → Deploy Svivva → Run workflow
+# This workflow is MANUAL ONLY so pushes do not add failed/skipped deploy jobs
+# when VERCEL_CI_DEPLOY or secrets are unset. Run from Actions when needed.
+#
+# Requires: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID secrets
+#           and repo variable VERCEL_CI_DEPLOY=true
 #
 name: Deploy Svivva (Vercel production)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "Svivva/**"
-      - ".github/workflows/vercel-svivva-production.yml"
   workflow_dispatch:
 
 concurrency:
@@ -30,7 +24,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Repo variable (not secret) — secrets cannot be used in job-level if; see README Path B
     if: ${{ vars.VERCEL_CI_DEPLOY == 'true' }}
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +48,17 @@ jobs:
             }
             console.log('Vercel target:', c.teamSlug + '/' + c.projectName, '(not svivva-main-app)');
           "
+
+      - name: Require Vercel secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::error::Set VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID in repo secrets before running this workflow."
+            exit 1
+          fi
 
       - name: Install Vercel CLI
         run: npm install -g vercel@53.3.1
