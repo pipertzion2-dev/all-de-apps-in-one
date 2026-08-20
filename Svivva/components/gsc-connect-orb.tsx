@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminCodeForm } from "@/components/admin-code-form";
+import { followOAuthLink } from "@/lib/follow-oauth-link";
 
 type Props = {
   connected: boolean;
@@ -227,8 +228,7 @@ export default function GscConnectOrb({
               onSuccess={() => {
                 setAdminUnlocked(true);
                 setShowUnlock(false);
-                // Full navigation via assign so iOS Safari follows the OAuth redirect chain.
-                window.location.assign(oauthUrl);
+                followOAuthLink(oauthUrl);
               }}
             />
           </div>

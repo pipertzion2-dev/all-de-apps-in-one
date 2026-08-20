@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { gscOAuthConnectPath } from "@/lib/gsc-oauth-start-handler";
+import { oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
 
 export const dynamic = "force-dynamic";
 
@@ -9,5 +10,6 @@ export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get("email");
   const dest = new URL(gscOAuthConnectPath(returnTo), req.nextUrl.origin);
   if (email) dest.searchParams.set("email", email);
-  return NextResponse.redirect(dest);
+  // HTML page (not 307) — iOS Safari downloads a file named "start" from this path.
+  return oauthHtmlBridgeResponse(dest.toString(), "Continue to Google Search Console");
 }

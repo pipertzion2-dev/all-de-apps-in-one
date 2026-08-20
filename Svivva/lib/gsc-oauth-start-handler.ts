@@ -16,6 +16,7 @@ import {
 import { getRequestOrigin } from "@/lib/site-url";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { isIosBrowser, oauthHtmlBridgeResponse } from "@/lib/oauth-html-bridge";
 
 export { gscOAuthConnectUrl as gscOAuthConnectPath };
 
@@ -68,6 +69,11 @@ export async function handleGscOAuthStart(req: NextRequest): Promise<NextRespons
     codeChallenge,
     loginHint,
   });
+
+  // iOS Safari mishandles 307 redirect chains to Google OAuth.
+  if (isIosBrowser(req.headers.get("user-agent"))) {
+    return oauthHtmlBridgeResponse(url, "Continue to Google sign-in");
+  }
 
   return NextResponse.redirect(url);
 }

@@ -32,6 +32,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { followOAuthLink } from "@/lib/follow-oauth-link";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -121,7 +122,7 @@ export default function GscConnectPage() {
 
   const startOAuth = useCallback(() => {
     if (adminUnlocked) {
-      window.location.assign(OAUTH_START);
+      followOAuthLink(OAUTH_START);
       return;
     }
     setPendingOAuth(true);
@@ -262,7 +263,7 @@ export default function GscConnectPage() {
                 void refetch();
                 if (pendingOAuth) {
                   setPendingOAuth(false);
-                  window.location.assign(OAUTH_START);
+                  followOAuthLink(OAUTH_START);
                 }
               }}
             />
@@ -621,7 +622,7 @@ export default function GscConnectPage() {
                 void refetch();
                 if (pendingOAuth) {
                   setPendingOAuth(false);
-                  window.location.assign(OAUTH_START);
+                  followOAuthLink(OAUTH_START);
                 }
               }}
             />
