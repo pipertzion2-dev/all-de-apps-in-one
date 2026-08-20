@@ -15,6 +15,10 @@ import {
   parseGoogleServiceAccount,
 } from "@/lib/google-service-account";
 import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
+import {
+  hydratePlatformSecrets,
+  patchPlatformRuntimeSecrets,
+} from "@/lib/platform-runtime-secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +176,31 @@ export async function POST(req: NextRequest) {
       return serverError(`DB save failed: ${e.message}`);
     }
     return ok({ success: true, email: sa.client_email });
+  }
+
+  // Save Google OAuth client credentials (when not set in Vercel env)
+  if (action === "save_oauth_client") {
+    const { clientId, clientSecret } = body;
+    if (
+      !clientId ||
+      typeof clientId !== "string" ||
+      !clientSecret ||
+      typeof clientSecret !== "string"
+    ) {
+      return badRequest("clientId and clientSecret required");
+    }
+    const id = clientId.trim();
+    const secret = clientSecret.trim();
+    if (!id || !secret) return badRequest("clientId and clientSecret required");
+    await patchPlatformRuntimeSecrets({
+      googleGscClientId: id,
+      googleGscClientSecret: secret,
+    });
+    await hydratePlatformSecrets();
+    return ok({
+      success: true,
+      message: "Google OAuth client saved — you can connect with Google now.",
+    });
   }
 
   return badRequest("Unknown action");

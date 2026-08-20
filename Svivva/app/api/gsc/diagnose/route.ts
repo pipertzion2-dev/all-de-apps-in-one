@@ -17,6 +17,7 @@ import {
   hasGscWritePermission,
 } from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ export type DiagStep = {
 
 export async function GET() {
   if (!(await isOrbitAdminAllowed())) return forbidden();
+
+  await hydratePlatformSecrets();
 
   const userId = await resolveGscCredentialsUserId();
 
@@ -143,7 +146,7 @@ export async function GET() {
       status: isGoogleGscOAuthConfigured() ? "fail" : "warn",
       detail: isGoogleGscOAuthConfigured()
         ? "Not connected — click Connect with Google (one sign-in, AI configures the rest)."
-        : "OAuth not configured on server — set GOOGLE_GSC_CLIENT_ID + SECRET in Vercel, or use service account below.",
+        : "OAuth not configured — paste client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + SECRET in Vercel.",
     });
   }
 

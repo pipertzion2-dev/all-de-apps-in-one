@@ -14,6 +14,7 @@ import {
   loadGoogleOAuthRefreshToken,
 } from "@/lib/google-gsc-oauth";
 import { getRequestOrigin } from "@/lib/site-url";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,8 @@ export async function GET(req: NextRequest) {
     dest.searchParams.set("gsc_error", "admin_required");
     return NextResponse.redirect(dest);
   }
+
+  await hydratePlatformSecrets();
 
   if (!isGoogleGscOAuthConfigured()) {
     const dest = new URL(returnTo, origin);
