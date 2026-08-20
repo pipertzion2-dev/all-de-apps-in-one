@@ -1,0 +1,29 @@
+---
+description: Canonical Vercel account and project for production deploys
+alwaysApply: false
+---
+
+# Vercel — correct account only
+
+Production deploys for this monorepo **must** use:
+
+- **Account:** `ziontpiper@icloud.com`
+- **Team:** `zzai-zzai`
+- **Project:** `all-de-apps-in-one`
+- **Root directory:** `Svivva`
+- **Domain:** `zzaizzai.com`
+
+**Never** deploy to or document **`svivva-main-app`** as production — it is a deprecated project on a different/blocked Vercel account.
+
+Canonical config: `Svivva/vercel-canonical.json`  
+Full disconnect steps: `docs/VERCEL_ACCOUNT.md`
+
+CLI deploy/link must include:
+
+```bash
+--scope zzai-zzai --project all-de-apps-in-one
+```
+
+Or use `npm run deploy:prod` / `npm run vercel:link` from `Svivva/`.
+
+GitHub CI: trust **`Vercel – all-de-apps-in-one`**; ignore **`Vercel – svivva-main-app`** until disconnected.

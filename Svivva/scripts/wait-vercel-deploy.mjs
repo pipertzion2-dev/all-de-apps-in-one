@@ -5,6 +5,7 @@
 import { spawnSync } from "child_process";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
+import { vercelCanonical, vercelScopeArgs } from "./vercel-canonical.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -45,7 +46,7 @@ function deploymentUrl(raw) {
 }
 
 function latestProductionUrl() {
-  const result = runVercel(["ls", "--prod", "--format", "json", "--yes"]);
+  const result = runVercel(["ls", "--prod", "--format", "json", "--yes", ...vercelScopeArgs()]);
   if (result.status !== 0) {
     process.stderr.write(result.stderr || result.stdout || "vercel ls failed\n");
     process.exit(result.status ?? 1);
@@ -63,7 +64,9 @@ function latestProductionUrl() {
 }
 
 const target = deploymentArg ? deploymentUrl(deploymentArg) : latestProductionUrl();
-console.log(`Waiting for ${target} (timeout ${timeout})…`);
+console.log(
+  `Waiting for ${target} on ${vercelCanonical.teamSlug}/${vercelCanonical.projectName} (timeout ${timeout})…`,
+);
 
 const waitResult = runVercel(
   ["inspect", target, "--wait", "--format", "json", "--timeout", timeout],

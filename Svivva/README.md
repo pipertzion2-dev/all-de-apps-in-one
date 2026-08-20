@@ -64,7 +64,7 @@ GitHub only stores code; [Vercel](https://vercel.com) builds and hosts the Next.
 6. **Deploy.** First deploy does **not** run `drizzle-kit push`. Against production Postgres run **`npm run db:push`** once from your machine (with prod `DATABASE_URL` in env), or apply migrations your platform supports.
 7. Optional: **Settings → Domains** add `yourdomain.com`; put the DNS records Vercel shows into GoDaddy (apex **A** / **www** **CNAME**).
 
-Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup. Production is Vercel team **zzai-zzai** / project **all-de-apps-in-one** (`ziontpiper@icloud.com`). Do not use **svivva-main-app**.
+Repo layout reminder: this monorepo has other folders; only **`Svivva`** is configured for this Next+Vercel setup. Production is Vercel team **zzai-zzai** / project **all-de-apps-in-one** (`ziontpiper@icloud.com`). Do not use **svivva-main-app** — see **`docs/VERCEL_ACCOUNT.md`** to disconnect it.
 
 ### GitHub Actions deploy (optional)
 
@@ -76,8 +76,7 @@ The repo includes **`.github/workflows/vercel-svivva-production.yml`**. It runs 
 ### Local CLI deploy (optional)
 
 ```bash
-cd ZZAI
-npx vercel@53.3.1 login
-npx vercel@53.3.1 link    # creates .vercel/project.json (gitignored)
-npx vercel@53.3.1 deploy --prod
+cd Svivva
+npm run vercel:link   # pins to zzai-zzai / all-de-apps-in-one
+npm run deploy:prod   # never use bare vercel deploy --prod (wrong team risk)
 ```

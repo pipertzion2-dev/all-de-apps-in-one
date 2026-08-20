@@ -1,4 +1,4 @@
-# Exclude sibling projects — production deploy uses svivva-main-app with Root Directory = Svivva
+# Exclude sibling monorepo folders — production deploy: team zzai-zzai / project all-de-apps-in-one (Root Directory = Svivva). NOT svivva-main-app.
 Ai-Tools-Hub/
 CYBER-SECURITY-MINI-APPS-zip/
 Pyracrypt/

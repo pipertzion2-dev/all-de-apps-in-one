@@ -15,7 +15,7 @@
 | What | Value |
 | --- | --- |
 | Domain | `zzaizzai.com` |
-| Host | Vercel team **zzai-zzai**, project **all-de-apps-in-one** (`ziontpiper@icloud.com`) — not `svivva-main-app` |
+| Host | Vercel team **zzai-zzai**, project **all-de-apps-in-one** (`ziontpiper@icloud.com`) — not `svivva-main-app` ([disconnect wrong project](../docs/VERCEL_ACCOUNT.md)) |
 | GitHub repo | `pipertzion2-dev/all-de-apps-in-one` |
 | App root on Vercel | `Svivva` |
 
