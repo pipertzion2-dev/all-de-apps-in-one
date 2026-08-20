@@ -156,7 +156,6 @@ export default function LandingPage() {
   const flipBackRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
-  const flipAnimRef = useRef(0);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
   const virtualScrollRef = useRef(0);
@@ -238,13 +237,17 @@ export default function LandingPage() {
         }, 12000)
       : undefined;
 
-    const flipZone = Math.max(window.innerHeight * 0.62, 320);
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.5 : 0.58), mobile ? 260 : 300);
+
+    const progressToAngle = (progress: number) => {
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      // Linear mapping — immediate visual response on first scroll (no ease-in dead zone).
+      return clamped * 90;
+    };
 
     const syncFlipDepth = () => {
       const halfH = halfHRef.current;
-      const clamped = displayedProgressRef.current;
-      const eased = clamped >= 1 ? 1 : 1 - Math.pow(1 - clamped, 2.35);
-      const angle = eased * 90;
+      const angle = progressToAngle(displayedProgressRef.current);
 
       if (flipFrontRef.current) {
         flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
@@ -261,8 +264,8 @@ export default function LandingPage() {
       const halfH = halfHRef.current;
       const clamped = Math.min(Math.max(progress, 0), 1);
       displayedProgressRef.current = clamped;
-      const eased = clamped >= 1 ? 1 : 1 - Math.pow(1 - clamped, 2.35);
-      const angle = eased * 90;
+      targetProgressRef.current = clamped;
+      const angle = progressToAngle(clamped);
 
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
@@ -277,7 +280,7 @@ export default function LandingPage() {
         scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 14));
       }
 
-      if (!scrollHintHiddenRef.current && clamped >= 0.05) {
+      if (!scrollHintHiddenRef.current && clamped >= 0.02) {
         scrollHintHiddenRef.current = true;
         if (scrollHintBounceRef.current) {
           scrollHintBounceRef.current.style.animation = "none";
@@ -285,68 +288,24 @@ export default function LandingPage() {
       }
     };
 
-    const stopFlipAnim = () => {
-      if (flipAnimRef.current) {
-        cancelAnimationFrame(flipAnimRef.current);
-        flipAnimRef.current = 0;
-      }
-    };
-
     const scheduleFinish = () => {
       if (finishingIntroRef.current) return;
       finishingIntroRef.current = true;
       paintFlip(1);
-      targetProgressRef.current = 1;
-      window.setTimeout(finishIntro, 240);
-    };
-
-    const tickFlip = () => {
-      flipAnimRef.current = 0;
-      const target = targetProgressRef.current;
-      let current = displayedProgressRef.current;
-      const delta = target - current;
-
-      if (Math.abs(delta) > 0.0008) {
-        current += delta * (delta > 0 ? 0.28 : 0.34);
-        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
-          current = target;
-        }
-        paintFlip(current);
-      } else if (current !== target) {
-        paintFlip(target);
-      }
-
-      if (target >= 1 && displayedProgressRef.current >= 0.999) {
-        scheduleFinish();
-        return;
-      }
-
-      if (Math.abs(targetProgressRef.current - displayedProgressRef.current) > 0.0008) {
-        flipAnimRef.current = requestAnimationFrame(tickFlip);
-      }
-    };
-
-    const ensureFlipAnim = () => {
-      if (!flipAnimRef.current) {
-        flipAnimRef.current = requestAnimationFrame(tickFlip);
-      }
-    };
-
-    const setTargetProgress = (progress: number) => {
-      const clamped = Math.min(Math.max(progress, 0), 1);
-      if (Math.abs(clamped - targetProgressRef.current) < 0.0004) return;
-      targetProgressRef.current = clamped;
-      ensureFlipAnim();
+      window.setTimeout(finishIntro, 180);
     };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
-      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta), 48);
+      const gain = mobile ? 1.45 : 1;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 64);
       virtualScrollRef.current = Math.max(
         0,
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
       );
-      setTargetProgress(virtualScrollRef.current / flipZone);
+      const progress = virtualScrollRef.current / flipZone;
+      paintFlip(progress);
+      if (progress >= 1) scheduleFinish();
     };
 
     syncFlipDepth();
@@ -382,16 +341,22 @@ export default function LandingPage() {
     captureEl.addEventListener("wheel", handleWheel, { passive: false });
     captureEl.addEventListener("touchstart", handleTouchStart, { passive: false });
     captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
+    // Window-level fallback so the first wheel/touch is never missed before capture mounts.
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
-      stopFlipAnim();
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
       captureEl.removeEventListener("wheel", handleWheel);
       captureEl.removeEventListener("touchstart", handleTouchStart);
       captureEl.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
   }, [flipComplete]);
 
