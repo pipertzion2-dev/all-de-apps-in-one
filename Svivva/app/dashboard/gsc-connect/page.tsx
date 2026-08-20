@@ -272,11 +272,7 @@ export default function GscConnectPage() {
       )}
       {/* Hero: one-press camo orb to connect */}
       <div className="flex flex-col items-center gap-3 pt-2">
-        <GscConnectOrb
-          connected={fullyReady}
-          available={oauthAvailable}
-          oauthUrl={OAUTH_START}
-        />
+        <GscConnectOrb connected={fullyReady} available={oauthAvailable} oauthUrl={OAUTH_START} />
         <p className="text-xs text-muted-foreground text-center max-w-xs">
           {fullyReady
             ? data?.oauthEmail
@@ -373,8 +369,9 @@ export default function GscConnectPage() {
           )}
 
           <div className="flex flex-wrap gap-2">
-            {!connected && oauthAvailable && (
-              adminUnlocked ? (
+            {!connected &&
+              oauthAvailable &&
+              (adminUnlocked ? (
                 <Button
                   asChild
                   className="text-white font-bold"
@@ -392,8 +389,7 @@ export default function GscConnectPage() {
                 >
                   Connect with Google
                 </Button>
-              )
-            )}
+              ))}
             {connected && !propertyOk && (
               <Button
                 className="text-white font-bold"

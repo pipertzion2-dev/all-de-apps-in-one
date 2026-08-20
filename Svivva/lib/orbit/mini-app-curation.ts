@@ -51,11 +51,7 @@ export function nativeToolSitemapPaths(): string[] {
 
 /** Hub + native /tools/* paths — always prioritize for IndexNow / Google batches. */
 export function getMiniAppPathsForIndexing(): string[] {
-  return [
-    "/tools",
-    ...ORBIT_HUB_SLUGS.map((hub) => `/${hub}`),
-    ...nativeToolSitemapPaths(),
-  ];
+  return ["/tools", ...ORBIT_HUB_SLUGS.map((hub) => `/${hub}`), ...nativeToolSitemapPaths()];
 }
 
 export function getMiniAppUrlsForIndexing(origin?: string): string[] {
