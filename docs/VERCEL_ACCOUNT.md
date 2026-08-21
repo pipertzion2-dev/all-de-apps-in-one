@@ -22,9 +22,9 @@ This repo is (or was) connected to **two** Vercel projects:
 
 Only the first one matters for production. The second pollutes CI until you disconnect it.
 
-**Important:** `svivva-main-app` being blocked does **not** mean your main account is blocked. Ignore that check after disconnecting the wrong project.
+**Your main Vercel account (`ziontpiper@icloud.com` / `zzai-zzai`) is not blocked.** GitHub’s `Vercel – svivva-main-app` check comes from a **different, old Vercel login** — always ignore it. Only trust **`Vercel – all-de-apps-in-one`**.
 
-If **`all-de-apps-in-one`** suddenly shows blocked but the account looks fine in the dashboard, Vercel usually means **deployments are paused** (`DEPLOYMENT_DISABLED` / spend management / billing), not that the whole account is banned. `zzaizzai.com` may still serve an **old cached deployment** until you unpause and redeploy.
+If **`all-de-apps-in-one`** briefly shows “Account is blocked” but the dashboard looks normal, Vercel usually means **deployments are paused** (spend cap / billing), not a banned account. The label is misleading. `zzaizzai.com` may keep serving an **older deployment** until you **Resume** the project and redeploy.
 
 ## Fix: disconnect the wrong project (one-time)
 
