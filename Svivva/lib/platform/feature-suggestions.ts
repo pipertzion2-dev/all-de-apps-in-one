@@ -70,6 +70,32 @@ function scoreFeature(feature: PlatformFeature, goalTerms: string[], fromId?: st
   ) {
     score += 8;
   }
+  if (
+    (feature.bus === "advocate" ||
+      feature.id.startsWith("edu-") ||
+      feature.id === "education-advocacy") &&
+    goalTerms.some((t) =>
+      [
+        "education",
+        "school",
+        "student",
+        "rights",
+        "advocacy",
+        "ferpa",
+        "iep",
+        "crisis",
+        "evidence",
+        "vault",
+        "legal",
+        "counselor",
+        "graduation",
+        "transfer",
+        "scholarship",
+      ].includes(t),
+    )
+  ) {
+    score += 16;
+  }
   return score;
 }
 
@@ -91,6 +117,9 @@ function fallbackReason(feature: PlatformFeature, goal: string): string {
   }
   if (feature.layer === "protect") {
     return `${feature.channelLabel} on the Protect bus — limiter chain before Master out.`;
+  }
+  if (feature.layer === "advocate") {
+    return `${feature.channelLabel} on the Advocate bus — education rights, evidence, and human help routing.`;
   }
   return `${feature.channelLabel}: ${feature.description}`;
 }
@@ -159,9 +188,9 @@ export async function suggestFeatures(options: {
 
 Desk layout:
 - Each feature is a CHANNEL STRIP (CH 01 Seeds, CH 02 API Builder, etc.)
-- Subgroup BUSES: Seed, Build, FX/Hybrid, Grow, Protect, Aux
+- Subgroup BUSES: Seed, Build, FX/Hybrid, Grow, Protect, Aux, Advocate
 - Main buses: Signal (digital/API) and Crest (hardware)
-- MASTER BUS: deploy, launch, live endpoints, court packs
+- MASTER BUS: deploy, launch, live endpoints, court packs, education proof receipts
 - PATCH BAY (orchestration): AI assigns channel order and bus sends
 
 User goal: ${options.goal.trim()}

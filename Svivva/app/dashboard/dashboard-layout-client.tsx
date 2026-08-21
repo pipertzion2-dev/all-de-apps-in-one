@@ -53,6 +53,7 @@ import {
   Users,
   ShieldCheck,
   PiggyBank,
+  BookOpen,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
@@ -114,6 +115,12 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/poor-man-protection",
         icon: ShieldCheck,
         proOnly: true,
+      },
+      {
+        title: "Education Advocacy",
+        desc: "Rights, vault, human help",
+        href: "/dashboard/education-advocacy",
+        icon: BookOpen,
       },
     ],
   },
@@ -235,6 +242,12 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Feeds & threats",
         href: "/dashboard/security",
         icon: Lock,
+      },
+      {
+        title: "Education Advocacy",
+        desc: "Rights, vault, human help",
+        href: "/dashboard/education-advocacy",
+        icon: BookOpen,
       },
     ],
   },
