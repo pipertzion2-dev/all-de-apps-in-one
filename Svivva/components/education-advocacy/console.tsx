@@ -82,6 +82,7 @@ const UX_PILLARS = [
   { label: "Your Education", href: "/dashboard/education-advocacy" },
   { label: "Your Rights", href: "/dashboard/education-advocacy/rights" },
   { label: "Access & Coercion Review", href: "/dashboard/education-advocacy/coercion-review" },
+  { label: "Timeline Reconstruction", href: "/dashboard/education-advocacy/timeline" },
   { label: "Your Story", href: "/dashboard/education-advocacy/protect" },
   { label: "Your Evidence", href: "/dashboard/education-advocacy/vault" },
   { label: "Your Proof", href: "/education/verify" },

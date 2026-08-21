@@ -77,6 +77,9 @@ export default function CoercionReviewPage() {
               <Link href="/dashboard/education-advocacy/protect">Open Protect My Education</Link>
             </Button>
             <Button asChild variant="ghost">
+              <Link href="/dashboard/education-advocacy/timeline">Timeline Reconstruction</Link>
+            </Button>
+            <Button asChild variant="ghost">
               <Link href="/dashboard/education-advocacy/vault">Evidence Vault</Link>
             </Button>
           </div>
