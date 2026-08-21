@@ -150,7 +150,6 @@ export default function LandingPage() {
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
-  const flipBackRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -207,6 +206,12 @@ export default function LandingPage() {
     document.body.style.touchAction = "none";
 
     const finishIntro = () => {
+      try {
+        sessionStorage.setItem("svivva:homepageIntroComplete", "1");
+        window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
+      } catch {
+        /* ignore */
+      }
       setFlipComplete(true);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
@@ -223,11 +228,11 @@ export default function LandingPage() {
     // Longer scroll distance so the 3D rotate is readable (not a snap/slide).
     const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
 
-    /** Map progress → cube rotateX. Ease keeps early motion visible as a tilt, not a fade. */
+    /** Map progress → full cube rotateX (180° reveals hero beneath the intro card). */
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      const eased = 1 - Math.pow(1 - clamped, 2.2);
-      return eased * 90;
+      const eased = 1 - Math.pow(1 - clamped, 2.4);
+      return eased * 180;
     };
 
     const applyRotorTransform = (progress: number) => {
@@ -235,9 +240,6 @@ export default function LandingPage() {
       const angle = progressToAngle(progress);
       if (flipFrontRef.current) {
         flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
-      }
-      if (flipBackRef.current) {
-        flipBackRef.current.style.transform = `rotateX(180deg) translate3d(0, 0, ${halfH}px)`;
       }
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
@@ -263,7 +265,7 @@ export default function LandingPage() {
         navRef.current.style.pointerEvents = navOpacity > 0.45 ? "auto" : "none";
       }
 
-      if (clamped >= 0.72 && !introCubeInteractive) {
+      if (clamped >= 0.82 && !introCubeInteractive) {
         setIntroCubeInteractive(true);
       }
 
@@ -472,33 +474,6 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-              <div
-                ref={flipBackRef}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  background: "hsl(var(--background))",
-                  willChange: "transform",
-                  transformStyle: "preserve-3d",
-                  WebkitTransformStyle: "preserve-3d",
-                  transform: "rotateX(180deg) translate3d(0, 0, 50vh)",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  className="w-full h-full overflow-x-hidden overflow-y-auto"
-                  style={{
-                    transform: "rotateX(180deg)",
-                    transformOrigin: "50% 50%",
-                  }}
-                >
-                  <HomepageHeroBlock interactive={introCubeInteractive} />
-                </div>
-              </div>
             </div>
           </div>
           <div
@@ -538,8 +513,15 @@ export default function LandingPage() {
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
             onClick={() => {
+              try {
+                sessionStorage.setItem("svivva:homepageIntroComplete", "1");
+                window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
+              } catch {
+                /* ignore */
+              }
               setFlipComplete(true);
               document.body.style.overflow = "";
+              document.body.style.touchAction = "";
               window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
               document
                 .querySelectorAll(
@@ -552,6 +534,11 @@ export default function LandingPage() {
           </button>
         </div>
       )}
+
+      {/* Hero stays mounted under the intro card — no remount glitch when flip completes. */}
+      <div className={flipComplete ? "relative" : "fixed inset-0 z-[8]"}>
+        <HomepageHeroBlock interactive={flipComplete || introCubeInteractive} />
+      </div>
 
       <div className="bg-background" style={{ pointerEvents: flipComplete ? "auto" : "none" }}>
         <nav
@@ -608,9 +595,6 @@ export default function LandingPage() {
             </div>
           </div>
         </nav>
-
-        {/* ── ZZAI6 cube hero (after intro flip completes) ── */}
-        {flipComplete ? <HomepageHeroBlock /> : null}
 
         <div className="relative overflow-x-hidden">
           <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">

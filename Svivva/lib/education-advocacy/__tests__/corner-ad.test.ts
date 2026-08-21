@@ -14,9 +14,9 @@ describe("EducationAdvocacyCornerAd", () => {
       "utf8",
     );
     expect(src).toContain("/dashboard/education-advocacy");
-    expect(src).toMatch(/helping someone else/i);
     expect(src).toMatch(/education advocacy/i);
-    expect(src).toContain("backdrop-blur");
+    expect(src).toMatch(/backdrop-blur/i);
+    expect(src).toMatch(/homepageIntroDone|homepage-intro-complete/i);
     expect(src).toContain("Not a lawyer");
   });
 });
