@@ -17,10 +17,14 @@ Canonical config is committed at **`Svivva/vercel-canonical.json`**.
 
 This repo is (or was) connected to **two** Vercel projects:
 
-- **`Vercel – all-de-apps-in-one`** — correct (team `zzai-zzai`)
-- **`Vercel – svivva-main-app`** — wrong / old account (often **Account is blocked**)
+- **`Vercel – all-de-apps-in-one`** — correct (team `zzai-zzai`, `ziontpiper@icloud.com`)
+- **`Vercel – svivva-main-app`** — wrong / old account (almost always **Account is blocked**)
 
 Only the first one matters for production. The second pollutes CI until you disconnect it.
+
+**Important:** `svivva-main-app` being blocked does **not** mean your main account is blocked. Ignore that check after disconnecting the wrong project.
+
+If **`all-de-apps-in-one`** suddenly shows blocked but the account looks fine in the dashboard, Vercel usually means **deployments are paused** (`DEPLOYMENT_DISABLED` / spend management / billing), not that the whole account is banned. `zzaizzai.com` may still serve an **old cached deployment** until you unpause and redeploy.
 
 ## Fix: disconnect the wrong project (one-time)
 
