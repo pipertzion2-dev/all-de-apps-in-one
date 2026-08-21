@@ -1,4 +1,4 @@
-import type { IntakeProfile } from "./timeline-reconstruction";
+import type { IntakeProfile } from "./advocacy/timeline-reconstruction";
 
 /**
  * Founder / admin reference case — never pre-fill this for general users.
