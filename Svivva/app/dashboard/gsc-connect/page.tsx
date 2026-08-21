@@ -32,6 +32,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -93,7 +94,7 @@ function gscErrorMessage(err: string | null): string {
     return "Google OAuth credentials are invalid or still placeholders in Vercel (your-client-id). Paste your real OAuth client ID + secret below, then try Connect with Google again.";
   }
   if (err === "invalid_state") {
-    return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use Safari, tap Connect with Google again, and choose Continue to Google sign-in on the next screen.";
+    return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use “Another way to connect” below (new-tab / paste URL), or retry in Safari.";
   }
   if (err === "oauth_start_failed") {
     return "Could not start Google sign-in. Wait a moment and try Connect with Google again.";
@@ -514,6 +515,18 @@ export default function GscConnectPage() {
         </CardContent>
       </Card>
 
+      {!connected && (
+        <GscManualConnectPanel
+          onConnected={(text) => {
+            setMsg({ ok: true, text });
+            void refetch();
+          }}
+          onError={(text) => {
+            if (text) setMsg({ ok: false, text });
+          }}
+        />
+      )}
+
       {msg && (
         <div
           className={`text-sm px-4 py-3 rounded-lg border ${msg.ok ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"}`}
@@ -567,15 +580,17 @@ export default function GscConnectPage() {
         className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
       >
         {advancedOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        Advanced: service account JSON (optional)
+        Another option: connect with a Google service account (no browser sign-in)
       </button>
 
       {advancedOpen && (
         <Card className="border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Service account JSON</CardTitle>
-            <CardDescription className="text-xs">
-              Legacy option — Connect with Google above is easier.
+            <CardDescription className="text-xs leading-relaxed">
+              Skips OAuth entirely. Create a service account in Google Cloud, enable Search Console
+              API + Indexing API, download the JSON key, and add the service account email as a user
+              (Owner or Full) on your Search Console property.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -589,6 +604,7 @@ export default function GscConnectPage() {
               size="sm"
               disabled={!saJson.trim() || saveMutation.isPending}
               onClick={() => saveMutation.mutate({ action: "save_service_account", json: saJson })}
+              data-testid="btn-save-service-account"
             >
               Save service account
             </Button>

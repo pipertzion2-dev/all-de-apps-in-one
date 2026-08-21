@@ -26,6 +26,9 @@ export type GscOAuthPrepareResult =
   | {
       ok: true;
       googleUrl: string;
+      state: string;
+      redirectUri: string;
+      expiresAt: string;
       oauthCookie: {
         name: string;
         value: string;
@@ -52,8 +55,11 @@ function requestOriginFromHeaders(host: string | null, proto: string | null): st
 export async function prepareGscOAuthStart(opts: {
   returnTo?: string;
   email?: string;
+  /** PKCE state lifetime — default 15m; use longer for manual/new-tab connect. */
+  ttlMs?: number;
 }): Promise<GscOAuthPrepareResult> {
   const returnTo = opts.returnTo || "/dashboard/gsc-connect";
+  const ttlMs = opts.ttlMs && opts.ttlMs > 0 ? opts.ttlMs : 15 * 60 * 1000;
   const headerStore = await headers();
   const origin = requestOriginFromHeaders(
     headerStore.get("host"),
@@ -117,7 +123,7 @@ export async function prepareGscOAuthStart(opts: {
       process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
       GSC_OAUTH_LOGIN_HINT;
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + ttlMs);
     const redirectAfter = JSON.stringify({ path: returnTo, userId });
     await saveGscOAuthStateRow({
       state,
@@ -146,7 +152,14 @@ export async function prepareGscOAuthStart(opts: {
       loginHint,
     });
 
-    return { ok: true, googleUrl, oauthCookie };
+    return {
+      ok: true,
+      googleUrl,
+      state,
+      redirectUri,
+      expiresAt: expiresAt.toISOString(),
+      oauthCookie,
+    };
   } catch (e) {
     console.error("[gsc-oauth-prepare] failed:", e);
     const dest = new URL(returnTo, origin);
