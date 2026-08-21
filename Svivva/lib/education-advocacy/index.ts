@@ -14,6 +14,7 @@ export * from "./resources/registry";
 export * from "./crisis/router";
 export * from "./advocacy/case-file";
 export * from "./advocacy/chat";
+export * from "./advocacy/coercion-review";
 export * from "./vault/crypto";
 export * from "./vault/custody";
 export * from "./vault/epv";
