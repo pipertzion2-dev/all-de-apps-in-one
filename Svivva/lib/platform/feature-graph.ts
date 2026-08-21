@@ -1,6 +1,6 @@
 /** ZZAI platform catalog — OaaS mixing-console OS: channels, subgroups, master bus, patch bay. */
 
-export type MixingBusId = "seed" | "build" | "hybrid" | "grow" | "protect" | "play";
+export type MixingBusId = "seed" | "build" | "hybrid" | "grow" | "protect" | "play" | "advocate";
 
 /** @deprecated Use MixingBusId — kept for internal grouping keyed to bus sends. */
 export type PlatformFeatureLayer = MixingBusId;
@@ -79,6 +79,14 @@ export const MIXING_BUSES: MixingBus[] = [
     description: "Cue & monitor — Play sampler and creative side-chain.",
     sendsTo: "crest",
   },
+  {
+    id: "advocate",
+    label: "Advocate Bus",
+    consoleName: "Bus G · Advocate",
+    description:
+      "Education advocacy desk — rights information, crisis routing, evidence vault, and human help (switchable channels).",
+    sendsTo: "master",
+  },
 ];
 
 export const SIGNAL_BUS = {
@@ -101,7 +109,7 @@ export const MASTER_BUS = {
   label: "Master Bus",
   consoleName: "Master L/R",
   description: "Final mix — deploy, launch, live endpoints, and shipped product.",
-  outputs: ["Deploy", "Launch", "Live API", "Court pack"],
+  outputs: ["Deploy", "Launch", "Live API", "Court pack", "Education Proof Receipt"],
 };
 
 export const PATCH_BAY = {
@@ -363,6 +371,133 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     connectsTo: ["projects", "marketing", "orbit"],
     mainBus: "signal",
   }),
+  feature({
+    id: "education-advocacy",
+    title: "Education Advocacy Console",
+    shortTitle: "Advocate",
+    href: "/dashboard/education-advocacy",
+    description:
+      "Channel 17 — Advocate bus master: Understand → Document → Verify → Protect → Advocate → Find Human Help.",
+    bus: "advocate",
+    channel: 17,
+    tags: [
+      "education",
+      "advocacy",
+      "rights",
+      "crisis",
+      "evidence",
+      "vault",
+      "student",
+      "channel",
+      "console",
+    ],
+    connectsTo: [
+      "edu-ai-guide",
+      "edu-rights-law",
+      "edu-evidence-vault",
+      "edu-crisis",
+      "edu-human-help",
+      "security",
+      "poor-man-protection",
+      "hybridization",
+      "orchestration",
+    ],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-ai-guide",
+    title: "AI Advocacy Guide",
+    shortTitle: "AI Guide",
+    href: "/dashboard/education-advocacy/chat",
+    description: "Channel 18 — conversational structuring with role boundaries (not a lawyer).",
+    bus: "advocate",
+    channel: 18,
+    tags: ["ai", "advocacy", "chat", "guide", "education", "channel"],
+    connectsTo: ["education-advocacy", "edu-rights-law", "edu-crisis", "edu-human-help"],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-rights-law",
+    title: "Student Rights & Law",
+    shortTitle: "Rights",
+    href: "/dashboard/education-advocacy/rights",
+    description:
+      "Channel 19 — jurisdiction-aware legal information engine with citations (not legal advice).",
+    bus: "advocate",
+    channel: 19,
+    tags: ["law", "rights", "ferpa", "jurisdiction", "legal-information", "channel"],
+    connectsTo: ["education-advocacy", "edu-human-help", "edu-ai-guide"],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-protect-workflow",
+    title: "Protect My Education",
+    shortTitle: "Protect Edu",
+    href: "/dashboard/education-advocacy/protect",
+    description: "Channel 20 — guided education interruption / dispute case file.",
+    bus: "advocate",
+    channel: 20,
+    tags: ["protect", "case-file", "timeline", "incident", "education", "channel"],
+    connectsTo: ["edu-evidence-vault", "education-advocacy", "edu-ai-guide"],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-evidence-vault",
+    title: "Education Proof Vault",
+    shortTitle: "EPV",
+    href: "/dashboard/education-advocacy/vault",
+    description:
+      "Channel 21 — encrypted evidence packages, chain of custody, Education Proof Receipts.",
+    bus: "advocate",
+    channel: 21,
+    tags: ["vault", "epv", "evidence", "hash", "seal", "proof", "channel"],
+    connectsTo: [
+      "edu-verification-ledger",
+      "security",
+      "poor-man-protection",
+      "edu-protect-workflow",
+      "education-advocacy",
+    ],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-verification-ledger",
+    title: "Verification Ledger",
+    shortTitle: "Ledger",
+    href: "/education/verify",
+    description: "Channel 22 — optional digest-only ledger adapters + public verification portal.",
+    bus: "advocate",
+    channel: 22,
+    tags: ["ledger", "verify", "anchor", "receipt", "blockchain-optional", "channel"],
+    connectsTo: ["edu-evidence-vault", "security"],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-crisis",
+    title: "I Need Help Now",
+    shortTitle: "Crisis",
+    href: "/dashboard/education-advocacy/crisis",
+    description:
+      "Channel 23 — always-accessible crisis routing from a verified resource directory only.",
+    bus: "advocate",
+    channel: 23,
+    tags: ["crisis", "safety", "988", "help", "emergency", "channel"],
+    connectsTo: ["edu-human-help", "education-advocacy", "edu-ai-guide"],
+    mainBus: "signal",
+  }),
+  feature({
+    id: "edu-human-help",
+    title: "Human Assistance",
+    shortTitle: "Human Help",
+    href: "/dashboard/education-advocacy/help",
+    description:
+      "Channel 24 — referral adapters for counselors, advocates, legal aid, and trusted adults.",
+    bus: "advocate",
+    channel: 24,
+    tags: ["human", "referral", "legal-aid", "counselor", "advocate", "channel"],
+    connectsTo: ["edu-crisis", "edu-rights-law", "education-advocacy"],
+    mainBus: "signal",
+  }),
 ];
 
 export const FEATURE_BY_ID = new Map(PLATFORM_FEATURES.map((f) => [f.id, f]));
@@ -399,4 +534,4 @@ export const OAAS_FULL_NAME = "Orchestration as a Service";
 export const OAAS_TAGLINE =
   "A mixing-console OS for builders. Every ZZAI module is a channel strip; OaaS is the patch bay that routes your signal to the master bus.";
 export const OAAS_TECHNICAL_BLURB =
-  "Channels patch into subgroup buses (Seed, Build, FX, Grow, Protect, Aux), sum through Signal or Crest mains, and print to Master — deploy, launch, and ship.";
+  "Channels patch into subgroup buses (Seed, Build, FX, Grow, Protect, Aux, Advocate), sum through Signal or Crest mains, and print to Master — deploy, launch, advocate, and ship.";
