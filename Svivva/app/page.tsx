@@ -156,6 +156,7 @@ export default function LandingPage() {
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
   const [introCubeInteractive, setIntroCubeInteractive] = useState(false);
+  const introCubeInteractiveRef = useRef(false);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -225,14 +226,15 @@ export default function LandingPage() {
         }, 12000)
       : undefined;
 
-    // Longer scroll distance so the 3D rotate is readable (not a snap/slide).
-    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.78 : 0.92), mobile ? 360 : 460);
+
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     /** Map progress → full cube rotateX (180° reveals hero beneath the intro card). */
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      const eased = 1 - Math.pow(1 - clamped, 2.4);
-      return eased * 180;
+      return easeInOutCubic(clamped) * 180;
     };
 
     const applyRotorTransform = (progress: number) => {
@@ -251,21 +253,22 @@ export default function LandingPage() {
       displayedProgressRef.current = clamped;
       applyRotorTransform(clamped);
 
-      // Keep overlay fully opaque until the cube finishes rotating — homepage shows
-      // only through the transparent back face, not via a cross-fade/slide.
-      captureEl.style.opacity = "1";
+      if (!finishingIntroRef.current) {
+        captureEl.style.opacity = "1";
+      }
 
       if (scrollHintRef.current) {
-        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 10));
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 8));
       }
 
       if (navRef.current) {
-        const navOpacity = Math.min(1, Math.max(0, (clamped - 0.32) / 0.38));
+        const navOpacity = Math.min(1, Math.max(0, (clamped - 0.36) / 0.42));
         navRef.current.style.opacity = String(navOpacity);
         navRef.current.style.pointerEvents = navOpacity > 0.45 ? "auto" : "none";
       }
 
-      if (clamped >= 0.82 && !introCubeInteractive) {
+      if (clamped >= 0.84 && !introCubeInteractiveRef.current) {
+        introCubeInteractiveRef.current = true;
         setIntroCubeInteractive(true);
       }
 
@@ -287,19 +290,27 @@ export default function LandingPage() {
     const scheduleFinish = () => {
       if (finishingIntroRef.current) return;
       finishingIntroRef.current = true;
+      stopFlipAnim();
       targetProgressRef.current = 1;
       paintFlip(1);
-      window.setTimeout(finishIntro, 220);
+      captureEl.style.transition = "opacity 480ms cubic-bezier(0.22, 1, 0.36, 1)";
+      captureEl.style.opacity = "0";
+      window.setTimeout(finishIntro, 500);
     };
 
-    const tickFlip = () => {
+    let lastFrameMs = performance.now();
+    const tickFlip = (now: number) => {
       flipAnimRef.current = 0;
+      const dt = Math.min((now - lastFrameMs) / 1000, 0.032);
+      lastFrameMs = now;
+
       const target = targetProgressRef.current;
       let current = displayedProgressRef.current;
       const delta = target - current;
 
-      if (Math.abs(delta) > 0.0006) {
-        current += delta * (delta > 0 ? 0.22 : 0.3);
+      if (Math.abs(delta) > 0.0004) {
+        const smoothing = 1 - Math.exp(-10 * dt);
+        current += delta * smoothing;
         if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
           current = target;
         }
@@ -310,20 +321,22 @@ export default function LandingPage() {
 
       if (current !== target) paintFlip(target);
 
-      if (target >= 1 && displayedProgressRef.current >= 0.995) {
+      if (target >= 1 && displayedProgressRef.current >= 0.998) {
         scheduleFinish();
-        return;
       }
     };
 
     const ensureTick = () => {
-      if (!flipAnimRef.current) flipAnimRef.current = requestAnimationFrame(tickFlip);
+      if (!flipAnimRef.current) {
+        lastFrameMs = performance.now();
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
     };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
-      const gain = mobile ? 1.15 : 0.95;
-      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 48);
+      const gain = mobile ? 1.05 : 0.88;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 32);
       virtualScrollRef.current = Math.max(
         0,
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
@@ -342,6 +355,7 @@ export default function LandingPage() {
     window.addEventListener("resize", handleResize);
 
     const handleWheel = (e: WheelEvent) => {
+      if (finishingIntroRef.current) return;
       e.preventDefault();
       let delta = e.deltaY;
       if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
@@ -354,6 +368,7 @@ export default function LandingPage() {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const handleTouchMove = (e: TouchEvent) => {
+      if (finishingIntroRef.current) return;
       e.preventDefault();
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
@@ -361,12 +376,8 @@ export default function LandingPage() {
       applyDelta(delta);
     };
 
-    captureEl.addEventListener("wheel", handleWheel, { passive: false });
-    captureEl.addEventListener("touchstart", handleTouchStart, { passive: false });
-    captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
-    // Window-level fallback so the first wheel/touch is never missed before capture mounts.
     window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
@@ -375,14 +386,11 @@ export default function LandingPage() {
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
-      captureEl.removeEventListener("wheel", handleWheel);
-      captureEl.removeEventListener("touchstart", handleTouchStart);
-      captureEl.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [flipComplete, introCubeInteractive]);
+  }, [flipComplete]);
 
   return (
     <div
@@ -410,8 +418,8 @@ export default function LandingPage() {
               position: "absolute",
               inset: 0,
               zIndex: 1,
-              perspective: "1800px",
-              perspectiveOrigin: "50% 42%",
+              perspective: "2000px",
+              perspectiveOrigin: "50% 46%",
               overflow: "visible",
               transformStyle: "preserve-3d",
               WebkitTransformStyle: "preserve-3d",
@@ -427,7 +435,9 @@ export default function LandingPage() {
                 WebkitTransformStyle: "preserve-3d",
                 willChange: "transform",
                 transformOrigin: "50% 50%",
-                transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "translate3d(0, 0, 0) rotateX(0deg)",
               }}
             >
               <div
@@ -442,7 +452,7 @@ export default function LandingPage() {
                   willChange: "transform",
                   transformStyle: "preserve-3d",
                   WebkitTransformStyle: "preserve-3d",
-                  transform: "translate3d(0, 0, 50vh)",
+                  transform: "translate3d(0, 0, 0)",
                 }}
               >
                 <div
@@ -453,7 +463,7 @@ export default function LandingPage() {
                     flexDirection: "column",
                     justifyContent: "flex-end",
                     alignItems: "center",
-                    boxShadow: "0 24px 80px rgba(0,0,0,0.18)",
+                    boxShadow: "0 20px 64px rgba(0,0,0,0.12)",
                   }}
                 >
                   <Image
