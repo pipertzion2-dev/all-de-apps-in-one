@@ -24,7 +24,13 @@ Only the first one matters for production. The second pollutes CI until you disc
 
 ## Fix: disconnect the wrong project (one-time)
 
-Do **both** if possible:
+Do **both** if possible. After disconnect, **svivva-main-app deploys fail automatically** — the repo blocks root deploys and deprecated project names (`scripts/assert-vercel-project.mjs`).
+
+Print the checklist anytime:
+
+```bash
+cd Svivva && node scripts/disconnect-wrong-vercel.mjs
+```
 
 ### A — Wrong Vercel account (where `svivva-main-app` lives)
 

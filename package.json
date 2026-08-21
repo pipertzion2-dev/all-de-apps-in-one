@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "vercel-build": "cd \"Svivva\" && npm run build:vercel && rm -rf ../.next ../public && cp -R .next ../.next && cp -R public ../public",
+    "vercel-build": "ASSERT_VERCEL_ROOT=1 node scripts/assert-vercel-project.mjs && cd \"Svivva\" && npm run build:vercel && rm -rf ../.next ../public && cp -R .next ../.next && cp -R public ../public",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify:svivva": "cd \"Svivva\" && npm run verify",
