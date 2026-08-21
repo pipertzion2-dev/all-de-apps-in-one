@@ -1,21 +1,24 @@
-# Optional manual deploy via Vercel CLI (prebuilt).
+# Single production deploy path for main — clears queued builds then deploys once.
 #
-# Production deploys normally use Vercel Git integration (Path A):
-#   team zzai-zzai / project all-de-apps-in-one / Root Directory Svivva
+# Setup (one-time):
+#   1. GitHub repo secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   2. Repo variable: VERCEL_CI_DEPLOY = true
+#   3. Vercel dashboard: disconnect svivva-main-app from this repo (see docs/VERCEL_ACCOUNT.md)
+#   4. Optional: Vercel → all-de-apps-in-one → Git → disable auto-deploy on push
+#      when using this workflow exclusively (vercel.json git.deploymentEnabled.main = false)
 #
-# This workflow is MANUAL ONLY so pushes do not add failed/skipped deploy jobs
-# when VERCEL_CI_DEPLOY or secrets are unset. Run from Actions when needed.
-#
-# Requires: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID secrets
-#           and repo variable VERCEL_CI_DEPLOY=true
-#
-name: Deploy Svivva (Vercel production)
+name: Vercel production (auto)
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Svivva/**"
+      - ".github/workflows/vercel-production-auto.yml"
+      - "vercel.json"
 
 concurrency:
-  group: vercel-svivva-${{ github.ref }}
+  group: vercel-production-main
   cancel-in-progress: true
 
 permissions:
@@ -23,8 +26,8 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
     if: ${{ vars.VERCEL_CI_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -34,19 +37,15 @@ jobs:
           cache: npm
           cache-dependency-path: Svivva/package-lock.json
 
-      - name: Install dependencies (Svivva)
-        working-directory: Svivva
-        run: npm ci --legacy-peer-deps
-
-      - name: Assert canonical Vercel project config
+      - name: Assert canonical Vercel project
         run: |
           node -e "
             const c = require('./Svivva/vercel-canonical.json');
             if (c.teamSlug !== 'zzai-zzai' || c.projectName !== 'all-de-apps-in-one') {
-              console.error('vercel-canonical.json must point at zzai-zzai/all-de-apps-in-one');
+              console.error('Wrong Vercel project in vercel-canonical.json');
               process.exit(1);
             }
-            console.log('Vercel target:', c.teamSlug + '/' + c.projectName, '(not svivva-main-app)');
+            console.log('Target:', c.teamSlug + '/' + c.projectName);
           "
 
       - name: Require Vercel secrets
@@ -56,7 +55,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "::error::Set VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID in repo secrets before running this workflow."
+            echo "::error::Add VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID to repo secrets."
             exit 1
           fi
 
@@ -71,7 +70,7 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@53.3.1
 
-      - name: Pull Vercel configuration & env (production)
+      - name: Pull Vercel env (production)
         working-directory: Svivva
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -79,7 +78,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN" --scope=zzai-zzai --project=all-de-apps-in-one
 
-      - name: Build (Vercel prebuilt)
+      - name: Build prebuilt (production)
         working-directory: Svivva
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

@@ -71,6 +71,37 @@ If you use **Deploy Svivva (Vercel production)**:
 
 Do **not** use Path A (Vercel Git hook) **and** Path B (Actions) at the same time.
 
+## Permanent fix in this repo (multiple deployments)
+
+These settings stop deploy spam and duplicate checks once merged:
+
+| Layer                                              | What it does                                                                              |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **`Svivva/vercel.json`**                           | `git.deploymentEnabled`: only **`main`** deploys; all other branches (`*`) off            |
+| **`Svivva/scripts/vercel-should-build.mjs`**       | Ignored Build Step: skip when not `main`, no `Svivva/` diff, or `[skip vercel]` in commit |
+| **`.github/workflows/vercel-production-auto.yml`** | Optional single deploy path: concurrency + cancel in-progress + clear queue before deploy |
+| **`Svivva/scripts/clear-vercel-queue.mjs`**        | Cancels queued/building deploys before manual or CI redeploy                              |
+
+### Choose one deploy path (not both)
+
+**Path A — Vercel Git (default, no secrets needed)**
+
+- Push to **`main`** with changes under **`Svivva/`** → one production deploy.
+- Do **not** set `VERCEL_CI_DEPLOY=true` unless you switch to Path B.
+
+**Path B — GitHub Actions only (requires secrets)**
+
+1. Repo secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+2. Repo variable: `VERCEL_CI_DEPLOY=true`
+3. Vercel dashboard → **all-de-apps-in-one** → Git → disable auto-deploy on push  
+   (or set `"main": false` in `Svivva/vercel.json` `git.deploymentEnabled`)
+4. Actions workflow **Vercel production (auto)** deploys once per push with queue cleared.
+
+### Stop empty “trigger redeploy” commits
+
+Commits that only touch docs, workflows, or root files **do not** rebuild Svivva.  
+To redeploy the same code without changes, run **Deploy Svivva (Vercel production)** manually or use `npm run redeploy:prod` with `VERCEL_TOKEN`.
+
 ## Agents / docs in this repo
 
 - **Use:** `all-de-apps-in-one` on team `zzai-zzai`
