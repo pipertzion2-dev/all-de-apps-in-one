@@ -34,10 +34,7 @@ import {
   Settings2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-const SvivvaArtifact = dynamic(
-  () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
-  { ssr: false },
-);
+import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
   { ssr: false },
@@ -156,8 +153,10 @@ export default function LandingPage() {
   const flipBackRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
+  const [introCubeInteractive, setIntroCubeInteractive] = useState(false);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -169,8 +168,6 @@ export default function LandingPage() {
     developers: number;
     apiCalls: number;
   } | null>(null);
-  const [canMountCamo, setCanMountCamo] = useState(true);
-  const [canMountCube, setCanMountCube] = useState(true);
 
   useEffect(() => {
     fetch("/api/public-stats")
@@ -258,6 +255,16 @@ export default function LandingPage() {
 
       if (scrollHintRef.current) {
         scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 10));
+      }
+
+      if (navRef.current) {
+        const navOpacity = Math.min(1, Math.max(0, (clamped - 0.32) / 0.38));
+        navRef.current.style.opacity = String(navOpacity);
+        navRef.current.style.pointerEvents = navOpacity > 0.45 ? "auto" : "none";
+      }
+
+      if (clamped >= 0.72 && !introCubeInteractive) {
+        setIntroCubeInteractive(true);
       }
 
       if (!scrollHintHiddenRef.current && clamped >= 0.02) {
@@ -373,7 +380,7 @@ export default function LandingPage() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [flipComplete]);
+  }, [flipComplete, introCubeInteractive]);
 
   return (
     <div
@@ -467,7 +474,6 @@ export default function LandingPage() {
               </div>
               <div
                 ref={flipBackRef}
-                aria-hidden
                 style={{
                   position: "absolute",
                   inset: 0,
@@ -475,13 +481,24 @@ export default function LandingPage() {
                   height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
-                  background: "transparent",
+                  background: "hsl(var(--background))",
                   willChange: "transform",
                   transformStyle: "preserve-3d",
                   WebkitTransformStyle: "preserve-3d",
                   transform: "rotateX(180deg) translate3d(0, 0, 50vh)",
+                  overflow: "hidden",
                 }}
-              />
+              >
+                <div
+                  className="w-full h-full overflow-x-hidden overflow-y-auto"
+                  style={{
+                    transform: "rotateX(180deg)",
+                    transformOrigin: "50% 50%",
+                  }}
+                >
+                  <HomepageHeroBlock interactive={introCubeInteractive} />
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -538,7 +555,8 @@ export default function LandingPage() {
 
       <div className="bg-background" style={{ pointerEvents: flipComplete ? "auto" : "none" }}>
         <nav
-          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
+          ref={navRef}
+          className="fixed top-0 left-0 right-0 z-[80] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
         >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
@@ -591,18 +609,10 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
+        {/* ── ZZAI6 cube hero (after intro flip completes) ── */}
+        {flipComplete ? <HomepageHeroBlock /> : null}
+
         <div className="relative overflow-x-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
-            <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
-              {canMountCamo ? (
-                <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
-              ) : null}
-            </div>
-          </div>
-
-          <div className="relative z-10">{canMountCube ? <SvivvaArtifact /> : null}</div>
-
           <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
             <div className="max-w-5xl mx-auto px-4 sm:px-6">
               <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
@@ -672,14 +682,6 @@ export default function LandingPage() {
           <div className="relative z-10 pb-8 sm:pb-12">
             <PlatformFeatureHub hideBackground />
           </div>
-
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
-            style={{
-              background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
-            }}
-          />
         </div>
 
         <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
