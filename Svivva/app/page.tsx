@@ -163,6 +163,7 @@ export default function LandingPage() {
   const displayedProgressRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
   const finishingIntroRef = useRef(false);
+  const flipAnimRef = useRef(0);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -222,18 +223,20 @@ export default function LandingPage() {
         }, 12000)
       : undefined;
 
-    const flipZone = Math.max(window.innerHeight * (mobile ? 0.5 : 0.58), mobile ? 260 : 300);
+    // Slightly longer scroll distance so the 3D rotate is readable (not a snap/slide).
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
 
+    /** Map progress → cube rotateX. Ease keeps early motion visible as a tilt, not a fade. */
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      // Linear mapping — immediate visual response on first scroll (no ease-in dead zone).
-      return clamped * 90;
+      // Ease-out cubic: strong initial 3D tilt, settles into the final face-up reveal.
+      const eased = 1 - Math.pow(1 - clamped, 2.2);
+      return eased * 90;
     };
 
-    const syncFlipDepth = () => {
+    const applyRotorTransform = (progress: number) => {
       const halfH = halfHRef.current;
-      const angle = progressToAngle(displayedProgressRef.current);
-
+      const angle = progressToAngle(progress);
       if (flipFrontRef.current) {
         flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
       }
@@ -241,28 +244,24 @@ export default function LandingPage() {
         flipBackRef.current.style.transform = `rotateX(180deg) translate3d(0, 0, ${halfH}px)`;
       }
       if (flipRotorRef.current) {
+        // Cube hinge: pull face back by half depth, then rotateX so the intro face flips upward.
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
       }
     };
 
     const paintFlip = (progress: number) => {
-      const halfH = halfHRef.current;
       const clamped = Math.min(Math.max(progress, 0), 1);
       displayedProgressRef.current = clamped;
-      targetProgressRef.current = clamped;
-      const angle = progressToAngle(clamped);
+      applyRotorTransform(clamped);
 
-      if (flipRotorRef.current) {
-        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
-      }
-
-      const fadeStart = 0.78;
+      // Keep full opacity through most of the cube turn so it reads as 3D, not a fade/slide.
+      const fadeStart = 0.92;
       const fade =
         clamped <= fadeStart ? 1 : Math.max(0, 1 - (clamped - fadeStart) / (1 - fadeStart));
       captureEl.style.opacity = String(fade);
 
       if (scrollHintRef.current) {
-        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 14));
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 10));
       }
 
       if (!scrollHintHiddenRef.current && clamped >= 0.02) {
@@ -273,32 +272,67 @@ export default function LandingPage() {
       }
     };
 
+    const stopFlipAnim = () => {
+      if (flipAnimRef.current) {
+        cancelAnimationFrame(flipAnimRef.current);
+        flipAnimRef.current = 0;
+      }
+    };
+
     const scheduleFinish = () => {
       if (finishingIntroRef.current) return;
       finishingIntroRef.current = true;
+      targetProgressRef.current = 1;
       paintFlip(1);
-      window.setTimeout(finishIntro, 180);
+      window.setTimeout(finishIntro, 220);
+    };
+
+    const tickFlip = () => {
+      flipAnimRef.current = 0;
+      const target = targetProgressRef.current;
+      let current = displayedProgressRef.current;
+      const delta = target - current;
+
+      if (Math.abs(delta) > 0.0006) {
+        // Lerp toward target — readable cube rotation instead of per-frame snaps.
+        current += delta * (delta > 0 ? 0.22 : 0.3);
+        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+          current = target;
+        }
+        paintFlip(current);
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+        return;
+      }
+
+      if (current !== target) paintFlip(target);
+
+      if (target >= 1 && displayedProgressRef.current >= 0.995) {
+        scheduleFinish();
+        return;
+      }
+    };
+
+    const ensureTick = () => {
+      if (!flipAnimRef.current) flipAnimRef.current = requestAnimationFrame(tickFlip);
     };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
-      const gain = mobile ? 1.45 : 1;
-      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 64);
+      const gain = mobile ? 1.15 : 0.95;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 48);
       virtualScrollRef.current = Math.max(
         0,
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
       );
-      const progress = virtualScrollRef.current / flipZone;
-      paintFlip(progress);
-      if (progress >= 1) scheduleFinish();
+      targetProgressRef.current = virtualScrollRef.current / flipZone;
+      ensureTick();
     };
 
-    syncFlipDepth();
+    halfHRef.current = window.innerHeight / 2;
     paintFlip(0);
 
     const handleResize = () => {
       halfHRef.current = window.innerHeight / 2;
-      syncFlipDepth();
       paintFlip(displayedProgressRef.current);
     };
     window.addEventListener("resize", handleResize);
@@ -326,12 +360,12 @@ export default function LandingPage() {
     captureEl.addEventListener("wheel", handleWheel, { passive: false });
     captureEl.addEventListener("touchstart", handleTouchStart, { passive: false });
     captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
-    // Window-level fallback so the first wheel/touch is never missed before capture mounts.
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: false });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
+      stopFlipAnim();
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
@@ -349,7 +383,7 @@ export default function LandingPage() {
     <div
       ref={containerRef}
       data-landing-page
-      className="min-h-screen w-full bg-background overflow-x-hidden"
+      className={`min-h-screen w-full bg-background ${flipComplete ? "overflow-x-hidden" : "overflow-visible"}`}
     >
       {!flipComplete && (
         <div
@@ -358,10 +392,13 @@ export default function LandingPage() {
           style={{
             zIndex: 70,
             touchAction: "none",
-            overflow: "hidden",
+            // IMPORTANT: do not use overflow:hidden here — it flattens preserve-3d
+            // so the cube rotateX looks like a vertical slide instead of a 3D flip.
+            overflow: "visible",
             backgroundColor: "transparent",
             opacity: 1,
             willChange: "opacity",
+            perspective: "none",
           }}
         >
           <div
@@ -369,8 +406,12 @@ export default function LandingPage() {
               position: "absolute",
               inset: 0,
               zIndex: 1,
-              perspective: "2400px",
-              perspectiveOrigin: "50% 50%",
+              perspective: "1800px",
+              perspectiveOrigin: "50% 42%",
+              // Keep 3D context; avoid overflow clipping on this node too.
+              overflow: "visible",
+              transformStyle: "preserve-3d",
+              WebkitTransformStyle: "preserve-3d",
             }}
           >
             <div
@@ -380,8 +421,9 @@ export default function LandingPage() {
                 height: "100%",
                 position: "relative",
                 transformStyle: "preserve-3d",
+                WebkitTransformStyle: "preserve-3d",
                 willChange: "transform",
-                transformOrigin: "center center",
+                transformOrigin: "50% 50%",
                 transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
               }}
             >
@@ -389,11 +431,14 @@ export default function LandingPage() {
                 ref={flipFrontRef}
                 style={{
                   position: "absolute",
+                  inset: 0,
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
                   willChange: "transform",
+                  transformStyle: "preserve-3d",
+                  WebkitTransformStyle: "preserve-3d",
                   transform: "translate3d(0, 0, 50vh)",
                 }}
               >
@@ -405,6 +450,8 @@ export default function LandingPage() {
                     flexDirection: "column",
                     justifyContent: "flex-end",
                     alignItems: "center",
+                    // Soft edge so the rotating face still reads as a solid cube side.
+                    boxShadow: "0 24px 80px rgba(0,0,0,0.18)",
                   }}
                 >
                   <Image
@@ -430,6 +477,7 @@ export default function LandingPage() {
                 aria-hidden
                 style={{
                   position: "absolute",
+                  inset: 0,
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
