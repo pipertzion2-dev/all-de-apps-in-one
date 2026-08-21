@@ -7,8 +7,9 @@ import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
 import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
 import { dedupeSitemapUrls, normalizeSitemapUrl } from "@/lib/seo/sitemap/normalize";
+import { listPublicAppsForSitemap } from "@/lib/orbit/seo/publish-pipeline";
 
-export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
+export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images", "apps"] as const;
 
 export type SitemapChunkId = (typeof SITEMAP_CHUNK_IDS)[number];
 
@@ -47,6 +48,7 @@ function staticPagesEntries(): SitemapEntry[] {
     { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
     { path: "/orbit", priority: 0.8, changeFrequency: "weekly" },
+    { path: "/apps", priority: 0.88, changeFrequency: "daily" },
     { path: "/seeds", priority: 0.7, changeFrequency: "weekly" },
     { path: "/referrals", priority: 0.6, changeFrequency: "monthly" },
     { path: "/marketing", priority: 0.75, changeFrequency: "monthly" },
@@ -73,6 +75,24 @@ function nativeToolEntries(): SitemapEntry[] {
   }));
 }
 
+async function orbitAppsEntries(): Promise<SitemapEntry[]> {
+  const b = base();
+  try {
+    const apps = await listPublicAppsForSitemap();
+    return apps
+      .filter((a) => a.sitemapIncluded && a.isPublic && a.status === "published" && a.indexable)
+      .map((a) => ({
+        url: `${b}/apps/${a.slug}`,
+        lastModified: a.lastmod || new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.85,
+        chunk: "apps" as const,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function lpEntries(): SitemapEntry[] {
   const b = base();
   const now = new Date();
@@ -93,6 +113,12 @@ export function getStaticSitemapFallback(): SitemapEntry[] {
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const b = base();
   const entries: SitemapEntry[] = getStaticSitemapFallback();
+
+  try {
+    entries.push(...(await orbitAppsEntries()));
+  } catch {
+    /* db */
+  }
 
   try {
     const posts = await db.select().from(blogPosts).where(eq(blogPosts.published, true));

@@ -641,21 +641,6 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         </div>
 
-        <OrbitPaidServicesHub
-          defaultExpanded={!aiConfigured}
-          copyOnlyMode={copyOnlyMode}
-          configuredKeys={configuredKeys}
-          aiConfigured={aiConfigured}
-          aiProviderLabel={aiProviderLabel}
-          gscConnected={gsc.connected}
-          gscPropertyOk={gsc.propertyOk}
-          indexNowActive={!!orbitStatus?.indexNowSubmitted}
-          onPasteKey={(key) => {
-            const el = document.getElementById(`cred-${key}`);
-            el?.scrollIntoView({ behavior: "smooth", block: "center" });
-          }}
-        />
-
         {!configuredKeys.n8nWebhookUrl && (
           <div
             id="cred-n8nWebhookUrl"
@@ -750,77 +735,90 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
           </div>
         )}
 
-        {/* Primary launch + quick start + paid subscribe strip */}
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
-            <button
-              type="button"
-              onClick={run}
-              disabled={running || quickStartRunning}
-              data-testid="orbit-one-click-launch"
-              className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] sm:min-h-0"
-              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-            >
-              {running ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Working…
-                </>
-              ) : hasRun ? (
-                <>
-                  <RefreshCw className="w-5 h-5" /> Run autopilot again
-                </>
-              ) : (
-                <>
-                  <Rocket className="w-5 h-5" /> Run everything (GPT-5)
-                </>
-              )}
-            </button>
+        {/* Primary launch + quick start — paid options stay below */}
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+          <button
+            type="button"
+            onClick={run}
+            disabled={running || quickStartRunning}
+            data-testid="orbit-one-click-launch"
+            className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] sm:min-h-0"
+            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Working…
+              </>
+            ) : hasRun ? (
+              <>
+                <RefreshCw className="w-5 h-5" /> Run autopilot again
+              </>
+            ) : (
+              <>
+                <Rocket className="w-5 h-5" /> Run everything (GPT-5)
+              </>
+            )}
+          </button>
 
-            <button
-              type="button"
-              onClick={runQuickStart}
-              disabled={running || quickStartRunning}
-              data-testid="orbit-quick-start"
-              className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
-              style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
-              title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
-            >
-              {quickStartRunning ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Indexing…
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-left leading-tight">
-                    Index Google
-                    <br />
-                    <span className="text-[11px] font-semibold text-muted-foreground">
-                      + check Stripe
-                    </span>
+          <button
+            type="button"
+            onClick={runQuickStart}
+            disabled={running || quickStartRunning}
+            data-testid="orbit-quick-start"
+            className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
+            style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
+            title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
+          >
+            {quickStartRunning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Indexing…
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 flex-shrink-0" />
+                <span className="text-left leading-tight">
+                  Index Google
+                  <br />
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    + check Stripe
                   </span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <OrbitSubscribeQuickStrip
-            className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
-            configuredKeys={configuredKeys}
-            aiConfigured={aiConfigured}
-            onPasteKey={(key) => {
-              const el = document.getElementById(`cred-${key}`);
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-                return;
-              }
-              document.getElementById("orbit-paid-services")?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }}
-          />
+                </span>
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Paid options — bottom of the all-in-one control (after free launch actions) */}
+        <OrbitSubscribeQuickStrip
+          className="w-full"
+          configuredKeys={configuredKeys}
+          aiConfigured={aiConfigured}
+          onPasteKey={(key) => {
+            const el = document.getElementById(`cred-${key}`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              return;
+            }
+            document.getElementById("orbit-paid-services")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }}
+        />
+        <OrbitPaidServicesHub
+          defaultExpanded={false}
+          copyOnlyMode={copyOnlyMode}
+          configuredKeys={configuredKeys}
+          aiConfigured={aiConfigured}
+          aiProviderLabel={aiProviderLabel}
+          gscConnected={gsc.connected}
+          gscPropertyOk={gsc.propertyOk}
+          indexNowActive={!!orbitStatus?.indexNowSubmitted}
+          onPasteKey={(key) => {
+            const el = document.getElementById(`cred-${key}`);
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
 
         {/* Running progress */}
         {running && (

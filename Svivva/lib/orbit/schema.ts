@@ -310,3 +310,5 @@ export type NewOrbitContentAsset = typeof orbitContentAssets.$inferInsert;
 export type OrbitDistributionJob = typeof orbitDistributionJobs.$inferSelect;
 export type OrbitIndexRecord = typeof orbitIndexRecords.$inferSelect;
 export type OrbitRoute = typeof orbitRoutes.$inferSelect;
+
+export * from "./seo/schema";
