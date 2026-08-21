@@ -41,7 +41,7 @@ export function EducationAdvocacyCornerAd() {
 
   return (
     <div
-      className="fixed z-40 flex flex-col items-end gap-1 pointer-events-none max-w-[min(18.5rem,calc(100vw-2rem))]"
+      className="fixed z-[85] flex flex-col items-end gap-1 pointer-events-none max-w-[min(18.5rem,calc(100vw-2rem))]"
       style={{
         right: "max(1rem, env(safe-area-inset-right))",
         bottom: "max(1rem, env(safe-area-inset-bottom))",
