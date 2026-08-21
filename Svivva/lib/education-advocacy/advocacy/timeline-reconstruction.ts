@@ -251,7 +251,12 @@ export type TimelineReconstruction = {
     aiInterpretation: string;
     interpretationCertainty: "user_supplied" | "uncertain" | "none";
   }>;
-  keyTurningPoints: Array<{ eventId: string; title: string; why: string; evidenceStrength: string }>;
+  keyTurningPoints: Array<{
+    eventId: string;
+    title: string;
+    why: string;
+    evidenceStrength: string;
+  }>;
   evidenceStrengthSummary: {
     strongDocumentation: string[];
     partialDocumentation: string[];
@@ -261,7 +266,12 @@ export type TimelineReconstruction = {
     missingRecords: string[];
   };
   questionsStillUnanswered: string[];
-  potentiallyRelevantProtections: Array<{ title: string; citation: string; url: string; note: string }>;
+  potentiallyRelevantProtections: Array<{
+    title: string;
+    citation: string;
+    url: string;
+    note: string;
+  }>;
   seniorYearEducationImpactReview: SeniorYearEducationImpactReview;
   advocacyNextSteps: string[];
   neverAssumesLegalViolation: true;
@@ -280,13 +290,29 @@ function blank(v?: string): string {
 }
 
 function detectHousingIndicators(intake: IntakeProfile, text: string): string[] {
-  const hay = `${intake.housingLivingSituation || ""} ${intake.majorFamilyHouseholdChanges || ""} ${text}`.toLowerCase();
+  const hay =
+    `${intake.housingLivingSituation || ""} ${intake.majorFamilyHouseholdChanges || ""} ${text}`.toLowerCase();
   const checks: Array<[RegExp, string]> = [
-    [/homeless|shelter|motel|couch.?surf|doubled.?up|temporary housing/, "Possible homelessness or temporary housing language"],
-    [/kicked out|thrown out|asked to leave|living apart|not living with (parent|guardian)/, "Possible living apart from parent/guardian"],
-    [/friends?('|’)s? (house|apartment|place)|relatives?|grandma|aunt|uncle/, "Possible staying with friends or relatives"],
-    [/frequent moves|moved (a lot|often)|unstable housing|housing (instability|conflict)/, "Possible frequent moves / housing instability"],
-    [/living situation|family conflict.*live|where (i|the student) could live/, "Family conflict affecting where student could live"],
+    [
+      /homeless|shelter|motel|couch.?surf|doubled.?up|temporary housing/,
+      "Possible homelessness or temporary housing language",
+    ],
+    [
+      /kicked out|thrown out|asked to leave|living apart|not living with (parent|guardian)/,
+      "Possible living apart from parent/guardian",
+    ],
+    [
+      /friends?('|’)s? (house|apartment|place)|relatives?|grandma|aunt|uncle/,
+      "Possible staying with friends or relatives",
+    ],
+    [
+      /frequent moves|moved (a lot|often)|unstable housing|housing (instability|conflict)/,
+      "Possible frequent moves / housing instability",
+    ],
+    [
+      /living situation|family conflict.*live|where (i|the student) could live/,
+      "Family conflict affecting where student could live",
+    ],
   ];
   return checks.filter(([re]) => re.test(hay)).map(([, label]) => label);
 }
@@ -314,7 +340,8 @@ function sortKeyFromDate(approx: string, index: number): string {
     return `30-${String(index).padStart(3, "0")}`;
   if (/yabc|told to enter|permanent record|assurance|transfer|alternative/.test(s))
     return `40-${String(index).padStart(3, "0")}`;
-  if (/later|discovered|transcript|appeared on/.test(s)) return `50-${String(index).padStart(3, "0")}`;
+  if (/later|discovered|transcript|appeared on/.test(s))
+    return `50-${String(index).padStart(3, "0")}`;
   if (/thanksgiving|before thanksgiving/.test(s)) return `35-${String(index).padStart(3, "0")}`;
   return `25-${String(index).padStart(3, "0")}`;
 }
@@ -406,7 +433,12 @@ export function synthesizeEventsFromIntake(intake: IntakeProfile): UserTimelineE
       ],
       sourceKind: "student_recollection",
       evidenceStatus: "user_reported",
-      lanes: ["student_experience", "education_attendance", "records_evidence", "school_knowledge_response"],
+      lanes: [
+        "student_experience",
+        "education_attendance",
+        "records_evidence",
+        "school_knowledge_response",
+      ],
       educationalConsequence: "Pathway change from traditional high school to alternative program",
       educationalImpact: "Possible change to transcript notation, school name, graduation timing",
       causationLabel: "possible_connection",
@@ -467,7 +499,10 @@ function toReconstructed(ev: UserTimelineEventInput, index: number): Reconstruct
   const markers: string[] = [];
   const tags = ev.tags || [];
 
-  if (tags.includes("student_reported_parent_guardian_action") || tags.includes("parent_guardian_action")) {
+  if (
+    tags.includes("student_reported_parent_guardian_action") ||
+    tags.includes("parent_guardian_action")
+  ) {
     labels.push("Student-Reported Parent/Guardian Action");
   }
   if (tags.includes("education_access_interruption") || tags.includes("extended_absence")) {
@@ -483,14 +518,13 @@ function toReconstructed(ev: UserTimelineEventInput, index: number): Reconstruct
   const consequence = ev.educationalConsequence;
   const impact = ev.educationalImpact;
   const chain =
-    consequence && impact
-      ? { event: ev.event, consequence, educationalImpact: impact }
-      : undefined;
+    consequence && impact ? { event: ev.event, consequence, educationalImpact: impact } : undefined;
 
   const schoolKnowledge =
     (ev.lanes || []).includes("school_knowledge_response") || tags.includes("extended_absence")
       ? {
-          whatSchoolKnew: "Unknown / Needs Verification — attendance marks may establish awareness of absences",
+          whatSchoolKnew:
+            "Unknown / Needs Verification — attendance marks may establish awareness of absences",
           whenSchoolKnew: "Unknown — compare first absence date to outreach logs",
           whoAtSchoolKnew: "Unknown — teachers, attendance office, counselor (TBD)",
           whatHappenedAfterward: "Unknown — outreach, coding, transfer, or no documented response",
@@ -512,9 +546,7 @@ function toReconstructed(ev: UserTimelineEventInput, index: number): Reconstruct
     educationalImpact: impact,
     causationLabel: ev.causationLabel || "possible_connection",
     chain,
-    lanes: ev.lanes?.length
-      ? ev.lanes
-      : (["student_experience"] as TimelineLaneId[]),
+    lanes: ev.lanes?.length ? ev.lanes : (["student_experience"] as TimelineLaneId[]),
     markers,
     schoolKnowledge,
     labels,
@@ -564,14 +596,17 @@ function buildAltProgramReview(
   text: string,
   events: ReconstructedEvent[],
 ): AlternativeProgramTransitionReview {
-  const triggered = detectYabcOrAlt(text, intake) || events.some((e) => e.markers.includes("Alternative Program Transition"));
+  const triggered =
+    detectYabcOrAlt(text, intake) ||
+    events.some((e) => e.markers.includes("Alternative Program Transition"));
   const recordAssurance = /not appear|would not|permanent record|affect.*(record|transcript)/i.test(
     text,
   );
   return {
     triggered,
     originalSchool: blank(intake.schoolName),
-    creditsCompletedAtTime: "Unknown / Needs Verification — obtain credit audit as of transfer date",
+    creditsCompletedAtTime:
+      "Unknown / Needs Verification — obtain credit audit as of transfer date",
     graduationRequirementsRemaining: "Unknown / Needs Verification",
     expectedGraduationBeforeChange: blank(intake.expectedGraduationDate),
     whoFirstSuggested: "Unknown — counselor, administrator, parent, or other (Verification Needed)",
@@ -626,7 +661,9 @@ function buildInterruptions(events: ReconstructedEvent[]): EducationAccessInterr
     counselorInvolved: "Unknown / Needs Verification",
     attendanceIntervention: "Unknown / Needs Verification",
     housingInstabilityDiscussed: "Unknown / Needs Verification",
-    whatHappenedImmediatelyAfter: events.find((x) => x.markers.includes("Alternative Program Transition"))
+    whatHappenedImmediatelyAfter: events.find((x) =>
+      x.markers.includes("Alternative Program Transition"),
+    )
       ? "User reports alternative-program / YABC pathway discussion or placement"
       : "Unknown / Needs Verification",
     relatedEventIds: [e.id],
@@ -669,8 +706,10 @@ function buildInterventions(
     points.push({
       id: "int_housing",
       label: "Potential Intervention Point",
-      trigger: "Indicators of housing instability, displacement, or living apart from parent/guardian",
-      whoCouldHaveResponded: "Counselor; social worker; McKinney-Vento / Students in Temporary Housing liaison",
+      trigger:
+        "Indicators of housing instability, displacement, or living apart from parent/guardian",
+      whoCouldHaveResponded:
+        "Counselor; social worker; McKinney-Vento / Students in Temporary Housing liaison",
       evidenceNeeded: [
         "SIS address/residence history",
         "MV / STH screening forms",
@@ -688,7 +727,8 @@ function buildInterventions(
     points.push({
       id: "int_yabc",
       label: "Potential Intervention Point",
-      trigger: "Abrupt senior-year pathway change / alternative-program referral; student reluctance or reliance on record assurances",
+      trigger:
+        "Abrupt senior-year pathway change / alternative-program referral; student reluctance or reliance on record assurances",
       whoCouldHaveResponded: "Guidance counselor; administrator; YABC intake staff",
       evidenceNeeded: [
         "Written YABC/referral disclosures",
@@ -710,40 +750,49 @@ function buildInterventions(
   return points;
 }
 
-function buildEvidenceNeeded(intake: IntakeProfile, alt: AlternativeProgramTransitionReview): EvidenceNeededItem[] {
+function buildEvidenceNeeded(
+  intake: IntakeProfile,
+  alt: AlternativeProgramTransitionReview,
+): EvidenceNeededItem[] {
   const items: EvidenceNeededItem[] = [
     {
       question: "What were the exact dates and codes for the extended absence?",
       bestEvidence: "Complete attendance history with code legend for the school year",
       likelyRecordHolder: "School attendance office / district SIS",
-      suggestedRequest: "Please produce my full daily attendance record and absence-code legend for [school year].",
+      suggestedRequest:
+        "Please produce my full daily attendance record and absence-code legend for [school year].",
     },
     {
       question: "What enrollment, discharge, and transfer actions were recorded?",
       bestEvidence: "Enrollment/discharge/transfer forms and SIS status history",
       likelyRecordHolder: "Pupil accounting / registrar",
-      suggestedRequest: "Please produce all enrollment, discharge, and transfer records from [date range].",
+      suggestedRequest:
+        "Please produce all enrollment, discharge, and transfer records from [date range].",
     },
     {
       question: "What does the permanent educational record show about schools/programs?",
       bestEvidence: "Official and unofficial transcripts; cumulative/permanent file",
       likelyRecordHolder: "Transcript office / guidance / district records custodian",
-      suggestedRequest: "Please produce my complete transcript(s) and cumulative/permanent record under FERPA.",
+      suggestedRequest:
+        "Please produce my complete transcript(s) and cumulative/permanent record under FERPA.",
     },
     {
       question: "What did school staff know about housing or barriers to attendance, and when?",
       bestEvidence: "Counselor notes, emails, phone logs, meeting records",
       likelyRecordHolder: "Guidance office / school administration",
-      suggestedRequest: "Please produce counselor notes and attendance-outreach logs for [absence window].",
+      suggestedRequest:
+        "Please produce counselor notes and attendance-outreach logs for [absence window].",
     },
   ];
 
   if (alt.triggered) {
     items.push({
-      question: "What written disclosures were made about how YABC/alternative placement appears on records?",
+      question:
+        "What written disclosures were made about how YABC/alternative placement appears on records?",
       bestEvidence: "YABC referral/enrollment packet, brochures, emails",
       likelyRecordHolder: "Guidance office / YABC site",
-      suggestedRequest: "Please produce all YABC or alternative-program referral and enrollment documents in my file.",
+      suggestedRequest:
+        "Please produce all YABC or alternative-program referral and enrollment documents in my file.",
     });
   }
 
@@ -765,7 +814,8 @@ function buildSeniorReview(intake: IntakeProfile, text: string): SeniorYearEduca
     triggered,
     creditsAlreadyCompleted: "Unknown / Needs Verification — credit audit before disruption",
     creditsRemaining: "Unknown / Needs Verification",
-    graduationRequirements: "Unknown / Needs Verification — district graduation policy then in force",
+    graduationRequirements:
+      "Unknown / Needs Verification — district graduation policy then in force",
     expectedGraduationTimeline: blank(intake.expectedGraduationDate),
     attendanceImmediatelyBefore: blank(intake.lastNormalAttendance),
     programBefore: intake.schoolName
@@ -871,21 +921,16 @@ export async function buildEducationTimelineReconstruction(
     kind: d.kind || "other",
     originalDocument: "preserved — not altered" as const,
     aiInterpretation: d.aiInterpretation || "No AI interpretation supplied — dates not extracted",
-    interpretationCertainty: d.aiInterpretation
-      ? ("user_supplied" as const)
-      : ("none" as const),
+    interpretationCertainty: d.aiInterpretation ? ("user_supplied" as const) : ("none" as const),
   }));
 
   const keyTurningPoints = (
     events.filter(
-      (e) =>
-        e.markers.length > 0 ||
-        e.labels.includes("Student-Reported Parent/Guardian Action"),
+      (e) => e.markers.length > 0 || e.labels.includes("Student-Reported Parent/Guardian Action"),
     ).length
       ? events.filter(
           (e) =>
-            e.markers.length > 0 ||
-            e.labels.includes("Student-Reported Parent/Guardian Action"),
+            e.markers.length > 0 || e.labels.includes("Student-Reported Parent/Guardian Action"),
         )
       : events.slice(0, 5)
   )

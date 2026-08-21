@@ -9,13 +9,7 @@ import type {
   TimelineEventDraft,
 } from "@/lib/education-advocacy/advocacy/coercion-review";
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-3 border-t border-border/40 pt-5">
       <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
@@ -127,7 +121,12 @@ function IssueCard({ issue }: { issue: IssueAnalysis }) {
         <ul className="text-xs text-muted-foreground space-y-1 pt-1">
           {issue.citedSources.map((s) => (
             <li key={s.citation}>
-              <a className="underline underline-offset-2" href={s.url} target="_blank" rel="noreferrer">
+              <a
+                className="underline underline-offset-2"
+                href={s.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {s.title}
               </a>{" "}
               — {s.citation}

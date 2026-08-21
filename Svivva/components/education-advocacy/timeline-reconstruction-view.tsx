@@ -26,9 +26,7 @@ export function TimelineReconstructionView({
   onToggleLane: (id: TimelineLaneId) => void;
 }) {
   const hidden = new Set(hiddenLanes);
-  const visibleEvents = reconstruction.events.filter((e) =>
-    e.lanes.some((l) => !hidden.has(l)),
-  );
+  const visibleEvents = reconstruction.events.filter((e) => e.lanes.some((l) => !hidden.has(l)));
 
   return (
     <div className="space-y-6">
@@ -164,7 +162,9 @@ export function TimelineReconstructionView({
             >
               <p className="font-medium">{i.label}</p>
               <p>Approx. days missed: {i.approximateSchoolDaysMissed}</p>
-              <p>First / last missed day: {i.firstMissedDayApprox} → {i.lastMissedDayApprox}</p>
+              <p>
+                First / last missed day: {i.firstMissedDayApprox} → {i.lastMissedDayApprox}
+              </p>
               <p>Attendance codes: {i.attendanceCodes}</p>
               <p>School contacted student: {i.schoolContactedStudent}</p>
               <p>School contacted parent: {i.schoolContactedParent}</p>
@@ -223,7 +223,10 @@ export function TimelineReconstructionView({
           <dl className="grid gap-2 text-sm">
             {(
               [
-                ["Original school", reconstruction.alternativeProgramTransitionReview.originalSchool],
+                [
+                  "Original school",
+                  reconstruction.alternativeProgramTransitionReview.originalSchool,
+                ],
                 [
                   "Credits at time",
                   reconstruction.alternativeProgramTransitionReview.creditsCompletedAtTime,
@@ -277,9 +280,7 @@ export function TimelineReconstructionView({
             {reconstruction.seniorYearEducationImpactReview.presentationNote}
           </p>
           <ul className="list-disc pl-5 text-sm space-y-1">
-            <li>
-              On track: {reconstruction.seniorYearEducationImpactReview.onTrackToGraduate}
-            </li>
+            <li>On track: {reconstruction.seniorYearEducationImpactReview.onTrackToGraduate}</li>
             <li>
               Proximity: {reconstruction.seniorYearEducationImpactReview.proximityToCompletion}
             </li>
@@ -308,11 +309,16 @@ export function TimelineReconstructionView({
       <Section title="Potential intervention points">
         <div className="space-y-3">
           {reconstruction.potentialInterventionPoints.map((p) => (
-            <article key={p.id} className="rounded-lg border border-border/50 p-4 text-sm space-y-1">
+            <article
+              key={p.id}
+              className="rounded-lg border border-border/50 p-4 text-sm space-y-1"
+            >
               <p className="font-medium">{p.label}</p>
               <p>Trigger: {p.trigger}</p>
               <p>Who could have responded: {p.whoCouldHaveResponded}</p>
-              <p className="text-xs">Guidance that may have applied: {p.lawPolicyGuidanceMayHaveApplied.join(" · ")}</p>
+              <p className="text-xs">
+                Guidance that may have applied: {p.lawPolicyGuidanceMayHaveApplied.join(" · ")}
+              </p>
               <ul className="list-disc pl-5 text-xs">
                 {p.evidenceNeeded.map((e) => (
                   <li key={e}>{e}</li>
@@ -355,8 +361,14 @@ export function TimelineReconstructionView({
           {(
             [
               ["Strong documentation", reconstruction.evidenceStrengthSummary.strongDocumentation],
-              ["Partial documentation", reconstruction.evidenceStrengthSummary.partialDocumentation],
-              ["User recollection only", reconstruction.evidenceStrengthSummary.userRecollectionOnly],
+              [
+                "Partial documentation",
+                reconstruction.evidenceStrengthSummary.partialDocumentation,
+              ],
+              [
+                "User recollection only",
+                reconstruction.evidenceStrengthSummary.userRecollectionOnly,
+              ],
               ["Conflicting evidence", reconstruction.evidenceStrengthSummary.conflictingEvidence],
               ["Unknown", reconstruction.evidenceStrengthSummary.unknown],
               ["Missing records", reconstruction.evidenceStrengthSummary.missingRecords],

@@ -95,7 +95,9 @@ export async function POST(req: NextRequest) {
       (parsed.data.events || []).length > 0 ||
       Object.values(parsed.data.intake).some((v) => typeof v === "string" && v.trim().length > 0);
     if (!hasContent) {
-      return badRequest("Provide a recollection, intake fields, or at least one event — approximate dates are fine.");
+      return badRequest(
+        "Provide a recollection, intake fields, or at least one event — approximate dates are fine.",
+      );
     }
     const reconstruction = await buildEducationTimelineReconstruction(parsed.data);
     return ok({ reconstruction });

@@ -51,9 +51,7 @@ describe("Education Timeline Reconstruction", () => {
     expect(reconstruction.evidenceNeeded.length).toBeGreaterThan(3);
     expect(reconstruction.lanes).toHaveLength(7);
     expect(reconstruction.disclaimers.join(" ")).toMatch(/not a lawyer/i);
-    expect(
-      reconstruction.events.every((e) => e.evidenceStatusLabel.length > 0),
-    ).toBe(true);
+    expect(reconstruction.events.every((e) => e.evidenceStatusLabel.length > 0)).toBe(true);
     expect(
       reconstruction.events
         .filter((e) => e.labels.includes("Student-Reported Parent/Guardian Action"))
@@ -65,7 +63,8 @@ describe("Education Timeline Reconstruction", () => {
     const reconstruction = await buildEducationTimelineReconstruction({
       intake: {
         stateProvince: "NY",
-        freeformRecollection: "I do not remember exact dates. Sometime after I stopped working I left my school path.",
+        freeformRecollection:
+          "I do not remember exact dates. Sometime after I stopped working I left my school path.",
       },
     });
     expect(reconstruction.events.length).toBeGreaterThanOrEqual(1);
