@@ -16,6 +16,7 @@ export * from "./advocacy/case-file";
 export * from "./advocacy/chat";
 export * from "./advocacy/coercion-review";
 export * from "./advocacy/timeline-reconstruction";
+export * from "./admin-seed-case";
 export * from "./vault/crypto";
 export * from "./vault/custody";
 export * from "./vault/epv";

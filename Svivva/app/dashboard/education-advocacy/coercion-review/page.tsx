@@ -1,37 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROLE_BOUNDARY, LEGAL_INFO_NOT_ADVICE } from "@/lib/education-advocacy/disclaimers";
 import type { CoercionReviewBrief } from "@/lib/education-advocacy/advocacy/coercion-review";
 import { CoercionReviewBriefView } from "@/components/education-advocacy/coercion-review-brief";
-
-const DEFAULT_NARRATIVE = `I was a high-school senior in New York State. Around October of my senior year, I was close to completing high school and was also working two jobs. Because of my living situation and actions by my parent, I lost access to both jobs and ultimately stopped attending my regular school. My parent used my iPhone/location information to track where I was, came to my location, put me in a car, and interfered with my ability to continue going to work and school. I then did not attend school at all for approximately 2–3 weeks. Afterward, I was told that I should enter a YABC program and that participation would not appear on or affect my permanent educational record. I relied on that information. I later discovered information about the program on my educational record. Had I known that beforehand, I would not have agreed to leave my existing high-school path for YABC.`;
+import {
+  ADMIN_EDUCATION_ADVOCACY_SEED,
+  AUDIENCE_MODE_COPY,
+  type AdvocacyAudienceMode,
+} from "@/lib/education-advocacy/admin-seed-case";
+import {
+  AudienceModePicker,
+  AdminSeedButton,
+  ExploreToolsStrip,
+} from "@/components/education-advocacy/audience-mode-picker";
 
 export default function CoercionReviewPage() {
-  const [narrative, setNarrative] = useState(DEFAULT_NARRATIVE);
+  const [mode, setMode] = useState<AdvocacyAudienceMode>("my_situation");
+  const [narrative, setNarrative] = useState("");
+  const [country, setCountry] = useState("US");
+  const [stateProvince, setStateProvince] = useState("");
+  const [district, setDistrict] = useState("");
+  const [gradeContext, setGradeContext] = useState("");
+  const [yearHint, setYearHint] = useState("");
   const [busy, setBusy] = useState(false);
   const [brief, setBrief] = useState<CoercionReviewBrief | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSeedLoaded, setAdminSeedLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive) setIsAdmin(!!d?.isAdmin);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const loadAdminSeed = () => {
+    setNarrative(ADMIN_EDUCATION_ADVOCACY_SEED.coercionNarrative);
+    setCountry(ADMIN_EDUCATION_ADVOCACY_SEED.coercionMeta.country);
+    setStateProvince(ADMIN_EDUCATION_ADVOCACY_SEED.coercionMeta.stateProvince);
+    setDistrict(ADMIN_EDUCATION_ADVOCACY_SEED.coercionMeta.district);
+    setGradeContext(ADMIN_EDUCATION_ADVOCACY_SEED.coercionMeta.gradeContext);
+    setYearHint(ADMIN_EDUCATION_ADVOCACY_SEED.coercionMeta.yearHint);
+    setMode("my_situation");
+    setAdminSeedLoaded(true);
+    setBrief(null);
+  };
+
+  const clearForm = () => {
+    setNarrative("");
+    setCountry("US");
+    setStateProvince("");
+    setDistrict("");
+    setGradeContext("");
+    setYearHint("");
+    setAdminSeedLoaded(false);
+    setBrief(null);
+  };
 
   const run = async () => {
     setBusy(true);
     setError(null);
     try {
+      const helpingPrefix =
+        mode === "helping_someone"
+          ? "[Helping someone else — information as reported to the helper.]\n\n"
+          : "";
       const res = await fetch("/api/education-advocacy/coercion-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          narrative,
-          country: "US",
-          stateProvince: "NY",
-          district: "NYC DOE",
-          gradeContext: "high-school senior",
-          yearHint: "senior year (October window)",
+          narrative: `${helpingPrefix}${narrative}`.trim(),
+          country: country || "US",
+          stateProvince: stateProvince || "NY",
+          district: district || undefined,
+          gradeContext: gradeContext || "student",
+          yearHint: yearHint || undefined,
         }),
       });
       const data = await res.json();
@@ -44,6 +101,8 @@ export default function CoercionReviewPage() {
     }
   };
 
+  const copy = AUDIENCE_MODE_COPY[mode];
+
   return (
     <div className="px-4 sm:px-6 py-8 pb-16 max-w-4xl mx-auto space-y-6">
       <div className="space-y-2">
@@ -55,35 +114,94 @@ export default function CoercionReviewPage() {
           Student Education Access & Coercion Review
         </h1>
         <p className="text-sm text-muted-foreground">
-          {ROLE_BOUNDARY} {LEGAL_INFO_NOT_ADVICE}
+          Investigate whether education access may have been disrupted — for a new situation of your
+          own, or while supporting someone else. {ROLE_BOUNDARY} {LEGAL_INFO_NOT_ADVICE}
         </p>
       </div>
 
+      <AudienceModePicker value={mode} onChange={setMode} />
+
+      {mode === "explore_tools" ? <ExploreToolsStrip /> : null}
+
       <Card className="border-border/50 bg-card/40 backdrop-blur-md">
         <CardHeader>
-          <CardTitle className="text-lg">Your situation</CardTitle>
-          <CardDescription>
-            Edit the narrative if needed, then generate a cited investigation brief for New York.
-          </CardDescription>
+          <CardTitle className="text-lg">{copy.title}</CardTitle>
+          <CardDescription>{copy.blurb} Start blank. Add only what you know.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Textarea rows={12} value={narrative} onChange={(e) => setNarrative(e.target.value)} />
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => void run()} disabled={busy || narrative.trim().length < 20}>
-              {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Generate review brief
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/education-advocacy/protect">Open Protect My Education</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link href="/dashboard/education-advocacy/timeline">Timeline Reconstruction</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link href="/dashboard/education-advocacy/vault">Evidence Vault</Link>
-            </Button>
-          </div>
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {mode !== "explore_tools" ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Country</label>
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">State / province</label>
+                  <Input
+                    value={stateProvince}
+                    onChange={(e) => setStateProvince(e.target.value)}
+                    placeholder="e.g. NY, CA, TX"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">District (optional)</label>
+                  <Input
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                    placeholder="e.g. local district name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Grade / level</label>
+                  <Input
+                    value={gradeContext}
+                    onChange={(e) => setGradeContext(e.target.value)}
+                    placeholder="e.g. 10th grade, senior, college"
+                  />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs text-muted-foreground">When (approximate)</label>
+                  <Input
+                    value={yearHint}
+                    onChange={(e) => setYearHint(e.target.value)}
+                    placeholder="e.g. fall 2022, sophomore year, last spring"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">Situation narrative</label>
+                <Textarea
+                  rows={10}
+                  value={narrative}
+                  onChange={(e) => setNarrative(e.target.value)}
+                  placeholder={copy.promptHint}
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => void run()} disabled={busy || narrative.trim().length < 20}>
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Generate review brief
+                </Button>
+                <Button type="button" variant="outline" onClick={clearForm}>
+                  Clear form
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href="/dashboard/education-advocacy/timeline">Timeline Reconstruction</Link>
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href="/dashboard/education-advocacy/chat">AI Advocacy Guide</Link>
+                </Button>
+              </div>
+              {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Explore tools first, then return here when you have a situation to review.
+            </p>
+          )}
+
+          <AdminSeedButton isAdmin={isAdmin} onLoad={loadAdminSeed} loaded={adminSeedLoaded} />
         </CardContent>
       </Card>
 
@@ -92,8 +210,8 @@ export default function CoercionReviewPage() {
           <CardHeader>
             <CardTitle className="text-lg">Investigation brief</CardTitle>
             <CardDescription>
-              Timeline layers, intervention points, issue-by-issue analysis, and action plan. Not a
-              court finding.
+              Timeline layers, intervention points, issue analysis, and action plan. Not a court
+              finding.
             </CardDescription>
           </CardHeader>
           <CardContent>

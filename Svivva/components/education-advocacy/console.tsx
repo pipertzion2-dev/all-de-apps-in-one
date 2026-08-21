@@ -56,7 +56,7 @@ const HREF: Partial<Record<AdvocacyChannelId, string>> = {
   human_assistance: "/dashboard/education-advocacy/help",
   opportunity_resources: "/dashboard/education-advocacy/help",
   career_pathways: "/dashboard/education-advocacy",
-  story_timeline: "/dashboard/education-advocacy/protect",
+  story_timeline: "/dashboard/education-advocacy/timeline",
   cybersecurity: "/dashboard/security",
   evidence_vault: "/dashboard/education-advocacy/vault",
   verification_ledger: "/education/verify",
@@ -88,6 +88,27 @@ const UX_PILLARS = [
   { label: "Your Proof", href: "/education/verify" },
   { label: "Your Safety", href: "/dashboard/education-advocacy/crisis" },
   { label: "People Who Can Help", href: "/dashboard/education-advocacy/help" },
+];
+
+const ENTRY_PATHS = [
+  {
+    title: "I have a new situation",
+    body: "Start blank. Reconstruct a timeline or review education access in your own words.",
+    href: "/dashboard/education-advocacy/timeline",
+    cta: "Start timeline",
+  },
+  {
+    title: "I’m helping someone",
+    body: "Support a student, parent, or peer with AI-guided documentation — keep their privacy in mind.",
+    href: "/dashboard/education-advocacy/coercion-review",
+    cta: "Open access review",
+  },
+  {
+    title: "Explore advocacy with AI",
+    body: "Learn rights, ask the guide, or browse verified help before sharing a full story.",
+    href: "/dashboard/education-advocacy/chat",
+    cta: "Open AI guide",
+  },
 ];
 
 export function EducationAdvocacyConsole() {
@@ -159,13 +180,27 @@ export function EducationAdvocacyConsole() {
           Education Advocacy Console
         </h1>
         <p className="text-muted-foreground max-w-2xl text-sm sm:text-base leading-relaxed">
-          Move from uncertainty to action: Understand → Document → Verify → Protect → Advocate →
-          Find Human Help → Follow Up. Channels are independently switchable and share data only
-          through buses — existing Protect and Security modules stay in place.
+          Built for new situations — whether this happened to you, you’re helping someone else, or
+          you want AI-guided education advocacy tools. Move from uncertainty to action: Understand →
+          Document → Verify → Protect → Advocate → Find Human Help.
         </p>
         <p className="text-xs text-muted-foreground border-l-2 border-amber-500/50 pl-3">
           {ROLE_BOUNDARY}
         </p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {ENTRY_PATHS.map((p) => (
+          <Link
+            key={p.title}
+            href={p.href}
+            className="rounded-xl border border-border/50 bg-card/40 backdrop-blur-md p-4 space-y-2 hover:border-[#5B8DA8]/50 transition-colors"
+          >
+            <p className="text-sm font-semibold tracking-tight">{p.title}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{p.body}</p>
+            <p className="text-xs text-[#8EB8C8] pt-1">{p.cta} →</p>
+          </Link>
+        ))}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -210,10 +245,10 @@ export function EducationAdvocacyConsole() {
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
         <Card className="border-border/50 bg-card/40 backdrop-blur-md">
           <CardHeader>
-            <CardTitle className="text-lg">Describe your situation</CardTitle>
+            <CardTitle className="text-lg">Describe a situation (optional)</CardTitle>
             <CardDescription>
-              OaaS adjusts channel weighting from context. Scores are routing signals —{" "}
-              {RISK_CLASSIFICATION_NOTICE}
+              Leave blank to explore tools, or write a new situation in your own words. OaaS adjusts
+              channel weighting from context — {RISK_CLASSIFICATION_NOTICE}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -221,7 +256,7 @@ export function EducationAdvocacyConsole() {
               rows={5}
               value={situation}
               onChange={(e) => setSituation(e.target.value)}
-              placeholder="Example: My parent is forcing me to leave school."
+              placeholder="Example: I’m helping a student who missed three weeks of school after a housing change…"
               className="bg-background/50"
             />
             <Button onClick={() => void runMix()} disabled={busy} className="gap-2">
@@ -254,6 +289,8 @@ export function EducationAdvocacyConsole() {
           <CardContent className="grid gap-2">
             {[
               ["AI Advocacy Guide", "/dashboard/education-advocacy/chat"],
+              ["Timeline Reconstruction", "/dashboard/education-advocacy/timeline"],
+              ["Access & Coercion Review", "/dashboard/education-advocacy/coercion-review"],
               ["Protect My Education", "/dashboard/education-advocacy/protect"],
               ["Know My Rights", "/dashboard/education-advocacy/rights"],
               ["Education Proof Vault", "/dashboard/education-advocacy/vault"],

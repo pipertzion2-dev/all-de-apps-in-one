@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GitBranch, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,43 +13,61 @@ import type {
   TimelineLaneId,
   TimelineReconstruction,
 } from "@/lib/education-advocacy/advocacy/timeline-reconstruction";
+import {
+  ADMIN_EDUCATION_ADVOCACY_SEED,
+  EMPTY_TIMELINE_INTAKE,
+  AUDIENCE_MODE_COPY,
+  type AdvocacyAudienceMode,
+} from "@/lib/education-advocacy/admin-seed-case";
 import { TimelineReconstructionView } from "@/components/education-advocacy/timeline-reconstruction-view";
-
-const DEFAULT_INTAKE: IntakeProfile = {
-  country: "US",
-  stateProvince: "NY",
-  district: "NYC DOE (if applicable — edit if different)",
-  schoolName: "",
-  approximateSchoolYear: "Senior year (exact calendar year TBD)",
-  studentAgeAtTime: "",
-  grade: "12 / senior",
-  expectedGraduationDate: "Expected spring of senior year (exact date TBD)",
-  lastNormalAttendance: "Early fall / before October disruption (approx.)",
-  housingLivingSituation:
-    "Living situation was disrupted in connection with family/parent actions — details incomplete; nighttime residence facts still needed",
-  employmentSituation: "Working two jobs until access was lost around the October window",
-  majorFamilyHouseholdChanges:
-    "Student reports parent used iPhone/location information, came to location, put student in a car, and interfered with work and school attendance",
-  periodsUnableToAttend: "Approximately 2–3 weeks with no school attendance",
-  transfersOrAlternativePrograms:
-    "YABC — told participation would not appear on or affect permanent educational record; later saw program information on the record",
-  graduationOrOutcome: "Pathway changed from traditional high school to YABC (outcome details TBD)",
-  freeformRecollection: `I was a high-school senior in New York State. Around October of my senior year, I was close to completing high school and was also working two jobs. Because of my living situation and actions by my parent, I lost access to both jobs and ultimately stopped attending my regular school. My parent used my iPhone/location information to track where I was, came to my location, put me in a car, and interfered with my ability to continue going to work and school. I then did not attend school at all for approximately 2–3 weeks. Afterward, I was told that I should enter a YABC program and that participation would not appear on or affect my permanent educational record. I relied on that information. I later discovered information about the program on my educational record. Had I known that beforehand, I would not have agreed to leave my existing high-school path for YABC.
-
-Approximate answers are fine. I don't remember every exact date.`,
-};
+import {
+  AudienceModePicker,
+  AdminSeedButton,
+  ExploreToolsStrip,
+} from "@/components/education-advocacy/audience-mode-picker";
 
 export default function TimelineReconstructionPage() {
-  const [intake, setIntake] = useState<IntakeProfile>(DEFAULT_INTAKE);
+  const [mode, setMode] = useState<AdvocacyAudienceMode>("my_situation");
+  const [intake, setIntake] = useState<IntakeProfile>({ ...EMPTY_TIMELINE_INTAKE });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reconstruction, setReconstruction] = useState<TimelineReconstruction | null>(null);
   const [hiddenLanes, setHiddenLanes] = useState<TimelineLaneId[]>([]);
   const [docName, setDocName] = useState("");
   const [docNote, setDocNote] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSeedLoaded, setAdminSeedLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive) setIsAdmin(!!d?.isAdmin);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const setField = (key: keyof IntakeProfile, value: string) =>
     setIntake((prev) => ({ ...prev, [key]: value }));
+
+  const loadAdminSeed = () => {
+    setIntake({ ...ADMIN_EDUCATION_ADVOCACY_SEED.timelineIntake });
+    setMode("my_situation");
+    setAdminSeedLoaded(true);
+    setReconstruction(null);
+  };
+
+  const clearForm = () => {
+    setIntake({ ...EMPTY_TIMELINE_INTAKE });
+    setAdminSeedLoaded(false);
+    setDocName("");
+    setDocNote("");
+    setReconstruction(null);
+  };
 
   const run = async () => {
     setBusy(true);
@@ -66,11 +84,18 @@ export default function TimelineReconstructionPage() {
               },
             ]
           : [];
+      const helpingNote =
+        mode === "helping_someone"
+          ? "\n\n[Mode: helping someone else — distinguish first-hand knowledge from what you were told.]"
+          : "";
       const res = await fetch("/api/education-advocacy/timeline-reconstruction", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          intake,
+          intake: {
+            ...intake,
+            freeformRecollection: `${intake.freeformRecollection || ""}${helpingNote}`.trim(),
+          },
           documents,
           hiddenLanes,
         }),
@@ -93,17 +118,19 @@ export default function TimelineReconstructionPage() {
           rows={rows}
           value={intake[key] || ""}
           onChange={(e) => setField(key, e.target.value)}
-          placeholder="Approximate answers are fine — or write I don't remember"
+          placeholder="Optional — approximate answers or “I don’t remember” are fine"
         />
       ) : (
         <Input
           value={intake[key] || ""}
           onChange={(e) => setField(key, e.target.value)}
-          placeholder="Optional — approximate OK"
+          placeholder="Optional"
         />
       )}
     </div>
   );
+
+  const copy = AUDIENCE_MODE_COPY[mode];
 
   return (
     <div className="px-4 sm:px-6 py-8 pb-16 max-w-4xl mx-auto space-y-6">
@@ -116,86 +143,100 @@ export default function TimelineReconstructionPage() {
           Education Timeline Reconstruction
         </h1>
         <p className="text-sm text-muted-foreground">
-          Transform recollections and records into a layered chronological timeline. Exact dates are
-          not required. {ROLE_BOUNDARY} {LEGAL_INFO_NOT_ADVICE}
+          Build a clear chronology from a new situation — yours or someone you’re supporting. Exact
+          dates are not required. {ROLE_BOUNDARY} {LEGAL_INFO_NOT_ADVICE}
         </p>
       </div>
 
+      <AudienceModePicker value={mode} onChange={setMode} />
+
+      {mode === "explore_tools" ? <ExploreToolsStrip /> : null}
+
       <Card className="border-border/50 bg-card/40 backdrop-blur-md">
         <CardHeader>
-          <CardTitle className="text-lg">1. Begin the reconstruction</CardTitle>
-          <CardDescription>
-            Share whatever you remember. “October of senior year,” “about two weeks later,” or “I
-            don’t remember” are all valid. Incomplete information never blocks you from continuing.
-          </CardDescription>
+          <CardTitle className="text-lg">{copy.title}</CardTitle>
+          <CardDescription>{copy.blurb}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {field("stateProvince", "State")}
-            {field("district", "School district / borough")}
-            {field("schoolName", "School name (if known)")}
-            {field("approximateSchoolYear", "Approximate school year")}
-            {field("grade", "Grade")}
-            {field("studentAgeAtTime", "Age at the time (if known)")}
-            {field("expectedGraduationDate", "Expected graduation date")}
-            {field("lastNormalAttendance", "Last period of normal attendance")}
-          </div>
-          {field("housingLivingSituation", "Housing / living situation", true, 3)}
-          {field("employmentSituation", "Employment situation (if relevant)", true, 2)}
-          {field("majorFamilyHouseholdChanges", "Major family or household changes", true, 3)}
-          {field("periodsUnableToAttend", "Periods when you could not attend school", true, 2)}
-          {field(
-            "transfersOrAlternativePrograms",
-            "School transfers or alternative-program placements (e.g. YABC)",
-            true,
-            3,
-          )}
-          {field("graduationOrOutcome", "Graduation or educational outcome", true, 2)}
-          {field(
-            "freeformRecollection",
-            "Whatever else you remember (freeform — approximate OK)",
-            true,
-            10,
+          {mode !== "explore_tools" ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {field("stateProvince", "State / province")}
+                {field("district", "School district / borough")}
+                {field("schoolName", "School name (if known)")}
+                {field("approximateSchoolYear", "Approximate school year")}
+                {field("grade", "Grade")}
+                {field("studentAgeAtTime", "Age at the time (if known)")}
+                {field("expectedGraduationDate", "Expected graduation date")}
+                {field("lastNormalAttendance", "Last period of normal attendance")}
+              </div>
+              {field("housingLivingSituation", "Housing / living situation", true, 3)}
+              {field("employmentSituation", "Employment (if relevant)", true, 2)}
+              {field("majorFamilyHouseholdChanges", "Major family or household changes", true, 3)}
+              {field("periodsUnableToAttend", "Periods when school could not be attended", true, 2)}
+              {field(
+                "transfersOrAlternativePrograms",
+                "Transfers or alternative programs",
+                true,
+                3,
+              )}
+              {field("graduationOrOutcome", "Graduation or educational outcome", true, 2)}
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">What you remember</label>
+                <Textarea
+                  rows={8}
+                  value={intake.freeformRecollection || ""}
+                  onChange={(e) => setField("freeformRecollection", e.target.value)}
+                  placeholder={copy.promptHint}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-border/40">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">
+                    Document note (optional — originals never altered)
+                  </label>
+                  <Input
+                    value={docName}
+                    onChange={(e) => setDocName(e.target.value)}
+                    placeholder="e.g. Attendance printout"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Interpretation note</label>
+                  <Input
+                    value={docNote}
+                    onChange={(e) => setDocNote(e.target.value)}
+                    placeholder="Dates or facts you see on it"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button onClick={() => void run()} disabled={busy}>
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Reconstruct timeline
+                </Button>
+                <Button type="button" variant="outline" onClick={clearForm}>
+                  Clear form
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href="/dashboard/education-advocacy/chat">Ask AI guide</Link>
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href="/dashboard/education-advocacy/vault">Evidence Vault</Link>
+                </Button>
+              </div>
+              {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Pick a tool above, or switch to “This is my situation” / “I’m helping someone” when
+              you’re ready to reconstruct a timeline.
+            </p>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-border/40">
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">
-                Document note (optional — originals are never altered)
-              </label>
-              <Input
-                value={docName}
-                onChange={(e) => setDocName(e.target.value)}
-                placeholder="e.g. Unofficial transcript scan"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">
-                Interpretation note (separate from original)
-              </label>
-              <Input
-                value={docNote}
-                onChange={(e) => setDocNote(e.target.value)}
-                placeholder="Dates you see on it, if any"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Button onClick={() => void run()} disabled={busy}>
-              {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Reconstruct timeline
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/education-advocacy/coercion-review">
-                Open Access & Coercion Review
-              </Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link href="/dashboard/education-advocacy/vault">Evidence Vault</Link>
-            </Button>
-          </div>
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <AdminSeedButton isAdmin={isAdmin} onLoad={loadAdminSeed} loaded={adminSeedLoaded} />
         </CardContent>
       </Card>
 
@@ -205,7 +246,7 @@ export default function TimelineReconstructionPage() {
             <CardTitle className="text-lg">Reconstruction</CardTitle>
             <CardDescription>
               Parallel lanes, interruptions, intervention points, and evidence gaps. Not a court
-              finding and not a determination that anyone violated the law.
+              finding.
             </CardDescription>
           </CardHeader>
           <CardContent>

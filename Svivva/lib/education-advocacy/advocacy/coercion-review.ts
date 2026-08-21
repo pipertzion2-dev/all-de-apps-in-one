@@ -234,12 +234,7 @@ export async function buildEducationAccessCoercionReview(
     schemaVersion: SCHEMA_VERSION,
     createdAt,
     disclaimers: [ROLE_BOUNDARY, LEGAL_INFO_NOT_ADVICE, RECORDING_LAW_WARNING, mix.notice],
-    whatIUnderstand: [
-      "You were a high-school senior in New York State, close to completing school while working two jobs.",
-      "You report parent interference involving location tracking and transport that disrupted work and school access.",
-      "You report approximately 2–3 weeks of nonattendance, then a move into YABC based on assurances that it would not appear on / affect your permanent record — assurances you later found were inconsistent with what appeared on your record.",
-      "You want a jurisdiction-aware review of protections, a document-backed timeline, intervention points, and a practical advocacy plan — without premature legal conclusions.",
-    ],
+    whatIUnderstand: buildWhatIUnderstand(input),
     channelMixNotice: mix.synthesisHints.join(" ") || mix.notice,
     timeline,
     interventionPoints,
@@ -249,6 +244,44 @@ export async function buildEducationAccessCoercionReview(
     verifiedResources,
     neverMakesDefinitiveLegalConclusions: true,
   };
+}
+
+function buildWhatIUnderstand(input: CoercionReviewInput): string[] {
+  const text = input.narrative.trim();
+  const bullets: string[] = [];
+  const juris = [input.jurisdiction.stateProvince, input.jurisdiction.district, input.gradeContext]
+    .filter(Boolean)
+    .join(" · ");
+  if (juris)
+    bullets.push(`Context provided: ${juris}${input.yearHint ? ` · ${input.yearHint}` : ""}.`);
+  if (text.length) {
+    const snippet = text.length > 280 ? `${text.slice(0, 280).trim()}…` : text;
+    bullets.push(`Your account (as written): ${snippet}`);
+  }
+  if (/parent|guardian|faculty|teacher|counselor|administrator/i.test(text)) {
+    bullets.push(
+      "You mention adults (parent/guardian and/or school staff) in connection with education access — roles and knowledge still need verification.",
+    );
+  }
+  if (/absent|missed|stopped attending|did not attend|transfer|yabc|alternative/i.test(text)) {
+    bullets.push(
+      "You describe attendance disruption and/or a pathway change — exact dates, codes, and school response remain to be documented.",
+    );
+  }
+  if (/housing|homeless|shelter|kicked out|living (apart|with)|motel/i.test(text)) {
+    bullets.push(
+      "Housing or living-situation stress appears in the narrative — McKinney-Vento / local homeless-education screening may be relevant after facts are clarified.",
+    );
+  }
+  if (/record|transcript|told|promised|said/i.test(text)) {
+    bullets.push(
+      "Statements about records or program effects are treated as reported claims until written disclosures and transcripts are compared.",
+    );
+  }
+  bullets.push(
+    "Goal of this review: jurisdiction-aware protections, layered timeline, intervention points, and an advocacy plan — without premature legal conclusions.",
+  );
+  return bullets;
 }
 
 function dedupeRecords(rows: LegalInformationRecord[]): LegalInformationRecord[] {

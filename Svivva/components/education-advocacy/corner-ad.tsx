@@ -77,11 +77,11 @@ export function EducationAdvocacyCornerAd() {
               Education Advocacy
             </p>
             <p className="text-sm font-medium leading-snug text-foreground/95">
-              Taken advantage of in your academic career?
+              Need education advocacy help?
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              If a parent or faculty member interfered with your education, get calm guidance to
-              understand options, document what happened, and find verified human help.
+              Whether this happened to you or you’re helping someone else, get calm AI-guided tools
+              to understand options, rebuild a timeline, and find verified human help.
             </p>
           </div>
         </div>
