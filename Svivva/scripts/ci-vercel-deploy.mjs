@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * GitHub Actions deploy helper — clears queue when possible, then deploys latest main.
+ * GitHub Actions deploy helper.
  *
- * Priority:
- *  1. VERCEL_TOKEN + org/project → cancel queue + prebuilt CLI deploy
- *  2. VERCEL_DEPLOY_HOOK → POST hook (deploys latest connected branch)
+ * workflow_dispatch or push with credentials:
+ *   1. VERCEL_TOKEN + org/project → clear queue + prebuilt CLI deploy
+ *   2. VERCEL_DEPLOY_HOOK → POST hook
  *
- * Exits 0 when credentials are missing and VERCEL_CI_DEPLOY is not "true" (skip quietly).
+ * push without credentials → wait for Vercel Git status on this commit.
  */
 import { spawnSync } from "child_process";
 import { dirname, resolve } from "path";
@@ -18,12 +18,9 @@ const root = resolve(__dirname, "..");
 
 const token = process.env.VERCEL_TOKEN?.trim();
 const hook = process.env.VERCEL_DEPLOY_HOOK?.trim();
+const event = process.env.GITHUB_EVENT_NAME || "";
 const requireDeploy = process.env.VERCEL_CI_DEPLOY === "true";
-
-function fail(message) {
-  console.error(message);
-  process.exit(requireDeploy ? 1 : 0);
-}
+const hasCredentials = Boolean(token || hook);
 
 function run(cmd, args, options = {}) {
   const result = spawnSync(cmd, args, {
@@ -35,13 +32,17 @@ function run(cmd, args, options = {}) {
   return result.status ?? 1;
 }
 
+function fail(message, code = 1) {
+  console.error(message);
+  process.exit(code);
+}
+
 async function deployViaHook() {
   console.log("Triggering Vercel deploy hook…");
   const res = await fetch(hook, { method: "POST" });
   const text = await res.text();
   if (!res.ok) {
-    console.error(`Deploy hook failed (${res.status}): ${text}`);
-    process.exit(1);
+    fail(`Deploy hook failed (${res.status}): ${text}`);
   }
   console.log(`Deploy hook accepted (${res.status}): ${text || "ok"}`);
 }
@@ -67,15 +68,22 @@ async function deployViaCli() {
   ) {
     process.exit(1);
   }
-  console.log("Production deploy complete.");
+  console.log("Production deploy complete (CLI).");
 }
 
-if (!token && !hook) {
-  fail(
-    requireDeploy
-      ? "VERCEL_CI_DEPLOY=true but no VERCEL_TOKEN or VERCEL_DEPLOY_HOOK secret is set."
-      : "Skip: add VERCEL_DEPLOY_HOOK or VERCEL_TOKEN to GitHub secrets to deploy from Actions.",
-  );
+async function waitForGitDeploy() {
+  console.log("No Actions Vercel secrets — waiting for Vercel Git integration on this commit…");
+  const status = run("node", ["scripts/wait-github-vercel-status.mjs"]);
+  process.exit(status);
+}
+
+if (!hasCredentials) {
+  if (event === "workflow_dispatch" || requireDeploy) {
+    fail(
+      "Deploy credentials required. Add VERCEL_DEPLOY_HOOK (easiest) or VERCEL_TOKEN + VERCEL_ORG_ID + VERCEL_PROJECT_ID to GitHub secrets.",
+    );
+  }
+  await waitForGitDeploy();
 }
 
 if (token) {
