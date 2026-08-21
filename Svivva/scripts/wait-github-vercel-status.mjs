@@ -49,9 +49,13 @@ while (Date.now() - started < timeoutMs) {
       console.log("Vercel production deploy confirmed via Git integration.");
       process.exit(0);
     }
-    if (match.state === "failure" || match.state === "error") {
+    const blocked = /blocked|paused|queued/i.test(match.description || "");
+    if ((match.state === "failure" || match.state === "error") && !blocked) {
       console.error(`Vercel Git deploy failed: ${match.description || match.state}`);
       process.exit(1);
+    }
+    if (blocked) {
+      console.log("  (Vercel label often means queued/paused — keep waiting…)");
     }
   } else {
     console.log(`  ${required}: pending (not reported yet)`);
