@@ -110,6 +110,9 @@ export function EducationAdvocacyCornerAd() {
           Help now
         </Link>
       </div>
+      <p className="hidden sm:block text-[9px] leading-snug text-muted-foreground/55">
+        Not a lawyer or emergency service — resource navigation only.
+      </p>
     </aside>
   );
 }

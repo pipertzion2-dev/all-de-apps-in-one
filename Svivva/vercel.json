@@ -3,6 +3,13 @@
   "framework": "nextjs",
   "installCommand": "npm ci --legacy-peer-deps",
   "buildCommand": "npm run build:vercel",
+  "ignoreCommand": "node scripts/vercel-should-build.mjs",
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "main": true
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",
