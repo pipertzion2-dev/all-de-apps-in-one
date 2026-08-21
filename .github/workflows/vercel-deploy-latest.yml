@@ -1,9 +1,22 @@
-# Deprecated — use "Deploy latest (Vercel production)" (vercel-deploy-latest.yml).
-# Kept as manual alias for anyone who bookmarked this workflow name.
-name: Vercel production (auto)
+# Deploy latest main to production when Git deploys are stuck or queued.
+#
+# Setup (pick one):
+#   Easy — GitHub secret VERCEL_DEPLOY_HOOK
+#     Vercel → all-de-apps-in-one → Settings → Git → Deploy Hooks → main branch
+#   Full — VERCEL_TOKEN + VERCEL_ORG_ID + VERCEL_PROJECT_ID (clears queue first)
+#
+# Run manually: Actions → "Deploy latest (Vercel production)" → Run workflow
+#
+name: Deploy latest (Vercel production)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Svivva/**"
+      - ".github/workflows/vercel-deploy-latest.yml"
+      - ".github/workflows/vercel-production-auto.yml"
 
 concurrency:
   group: vercel-production-main

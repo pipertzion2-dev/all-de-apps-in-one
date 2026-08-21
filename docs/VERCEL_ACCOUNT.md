@@ -75,12 +75,12 @@ Do **not** use Path A (Vercel Git hook) **and** Path B (Actions) at the same tim
 
 These settings stop deploy spam and duplicate checks once merged:
 
-| Layer                                              | What it does                                                                              |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **`Svivva/vercel.json`**                           | `git.deploymentEnabled`: only **`main`** deploys; all other branches (`*`) off            |
-| **`Svivva/scripts/vercel-should-build.mjs`**       | Ignored Build Step: skip when not `main`, no `Svivva/` diff, or `[skip vercel]` in commit |
-| **`.github/workflows/vercel-production-auto.yml`** | Optional single deploy path: concurrency + cancel in-progress + clear queue before deploy |
-| **`Svivva/scripts/clear-vercel-queue.mjs`**        | Cancels queued/building deploys before manual or CI redeploy                              |
+| Layer                                            | What it does                                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **`Svivva/vercel.json`**                         | `git.deploymentEnabled`: only **`main`** deploys; all other branches (`*`) off            |
+| **`Svivva/scripts/vercel-should-build.mjs`**     | Ignored Build Step: skip when not `main`, no `Svivva/` diff, or `[skip vercel]` in commit |
+| **`.github/workflows/vercel-deploy-latest.yml`** | Deploy latest on `main` push or manual run; hook or token; clears queue when token set    |
+| **`Svivva/scripts/clear-vercel-queue.mjs`**      | Cancels queued/building deploys before manual or CI redeploy                              |
 
 ### Choose one deploy path (not both)
 
@@ -96,6 +96,18 @@ These settings stop deploy spam and duplicate checks once merged:
 3. Vercel dashboard → **all-de-apps-in-one** → Git → disable auto-deploy on push  
    (or set `"main": false` in `Svivva/vercel.json` `git.deploymentEnabled`)
 4. Actions workflow **Vercel production (auto)** deploys once per push with queue cleared.
+
+### Stuck queue — latest commit not live
+
+When Vercel shows **Account is blocked** or deployments stay **Queued**, production keeps serving an **older** build until you:
+
+1. **Vercel dashboard** → `zzai-zzai` / `all-de-apps-in-one` → **Deployments** → cancel **Queued** / **Building** rows (or **Resume** if the project is paused).
+2. **Deploy latest** via GitHub Actions (fastest once configured):
+   - **Easy:** repo secret **`VERCEL_DEPLOY_HOOK`** — Vercel → project → **Settings → Git → Deploy Hooks** → create hook for branch **`main`**, paste URL into GitHub **Settings → Secrets → Actions**.
+   - **Full:** secrets **`VERCEL_TOKEN`**, **`VERCEL_ORG_ID`**, **`VERCEL_PROJECT_ID`** (clears queue automatically before deploy).
+   - Run **Actions → Deploy latest (Vercel production) → Run workflow** (or push to `main` with `Svivva/` changes).
+
+Without those secrets, the agent cannot clear the queue or trigger production from here — Git integration alone will stay red until the dashboard queue is cleared.
 
 ### Stop empty “trigger redeploy” commits
 
