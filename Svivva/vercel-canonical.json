@@ -8,7 +8,7 @@
   "deprecatedProjects": [
     {
       "name": "svivva-main-app",
-      "reason": "Old Vercel account — blocked, wrong deploy target. Disconnect its GitHub integration."
+      "reason": "Wrong Vercel account/project — ignore its GitHub check. Disconnect its GitHub integration."
     }
   ],
   "githubStatusCheck": {
