@@ -14,6 +14,8 @@ const PUBLIC_PREFIXES = [
   ...Object.values(FEATURE_PUBLIC_PATHS),
   "/dashboard/launchpad",
   "/dashboard/poor-man-protection",
+  "/dashboard/education-advocacy",
+  "/education/verify",
 ];
 
 /** Dashboard + product routes guests can open from the homepage cube. */
@@ -29,6 +31,8 @@ export function featureTitleFromPath(pathname: string): string {
   }
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
   if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
+  if (pathname.startsWith("/dashboard/education-advocacy")) return "Education Advocacy";
+  if (pathname.startsWith("/education/verify")) return "Verify Education Proof";
   if (pathname.startsWith("/protect/verify")) return "Verify Protection";
   if (pathname.startsWith("/dashboard/api-builder")) return "Digital";
   if (pathname.startsWith("/dashboard/hardware-builder")) return "Hardware Builder";

@@ -30,6 +30,8 @@ const PRESET_SCENES = [
   "Blend Seeds with Protect then hybridize that blend with Play",
   "Build an API and ship with evals",
   "Watch Starter Story and apply their tactics",
+  "Protect my education and document a school rights issue",
+  "I need help now with a crisis and verified resources",
 ];
 
 type PlatformFeatureHubProps = {

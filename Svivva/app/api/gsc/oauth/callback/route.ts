@@ -65,8 +65,10 @@ export async function GET(req: NextRequest) {
 
   const row = await loadOAuthResume(state);
   if (!row) {
-    fallback.searchParams.set("gsc_error", "invalid_state");
-    return NextResponse.redirect(fallback);
+    const dest = new URL("/dashboard/gsc-connect", req.nextUrl.origin);
+    dest.searchParams.set("gsc_error", "invalid_state");
+    dest.searchParams.set("gsc_alt", "1");
+    return NextResponse.redirect(dest);
   }
 
   let meta: { path?: string; userId?: string } = {};
