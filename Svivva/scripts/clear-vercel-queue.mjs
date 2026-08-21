@@ -75,7 +75,9 @@ console.log(`Clearing queue for ${teamSlug}/${projectName}…`);
 
 const projectId = await resolveProjectId();
 const deployments = await listDeployments(projectId);
-const pending = deployments.filter((d) => CANCELABLE.has(String(d.readyState || d.state || "").toUpperCase()));
+const pending = deployments.filter((d) =>
+  CANCELABLE.has(String(d.readyState || d.state || "").toUpperCase()),
+);
 
 if (pending.length === 0) {
   console.log("No queued or building deployments found.");
