@@ -28,6 +28,15 @@ console.log(
   `Redeploying ${vercelCanonical.teamSlug}/${vercelCanonical.projectName} → ${vercelCanonical.productionDomain}…`,
 );
 
+const clear = spawnSync("node", ["scripts/clear-vercel-queue.mjs"], {
+  cwd: root,
+  stdio: "inherit",
+  env: process.env,
+});
+if (clear.status !== 0) {
+  console.warn("Queue clear skipped or partial (continuing with redeploy)…");
+}
+
 const pull = spawnSync(
   "vercel",
   ["pull", "--yes", "--environment=production", "--token", token, ...vercelScopeArgs()],
