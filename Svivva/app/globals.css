@@ -2,13 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Zc";
-  src: url("/fonts/Zc-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-}
+/* "Zc" face is registered from layout via bundled MEDIA.fontZc (see app/layout.tsx). */
 
 @layer base {
   :root {

@@ -1,3 +1,4 @@
+import { MEDIA } from "@/lib/media-assets";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Normalized crop rect — origin top-left, values 0–1. */
@@ -40,7 +41,7 @@ export type ArtworkManifest = {
 
 export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
   play: {
-    src: "/artworks/play.png",
+    src: MEDIA.artworks.play,
     accentColor: "#905CBF",
     faceElements: [
       {
@@ -184,7 +185,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
     ],
   },
   seeds: {
-    src: "/artworks/seeds.png",
+    src: MEDIA.artworks.seeds,
     accentColor: "#5B8DA8",
     faceElements: [
       {
@@ -314,7 +315,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
     ],
   },
   orbit: {
-    src: "/artworks/orbit.png",
+    src: MEDIA.artworks.orbit,
     accentColor: "#3D6F8A",
     faceElements: [
       {
@@ -459,7 +460,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
     ],
   },
   security: {
-    src: "/artworks/security.png",
+    src: MEDIA.artworks.security,
     accentColor: "#6B2C4E",
     faceElements: [
       {
@@ -575,7 +576,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
     ],
   },
   api: {
-    src: "/artworks/api.png",
+    src: MEDIA.artworks.api,
     accentColor: "#9B4D73",
     faceElements: [
       {
@@ -693,7 +694,7 @@ export const ARTWORK_MANIFESTS: Record<FeatureId, ArtworkManifest> = {
     ],
   },
   hardware: {
-    src: "/artworks/hardware.png",
+    src: MEDIA.artworks.hardware,
     accentColor: "#B55480",
     faceElements: [
       {

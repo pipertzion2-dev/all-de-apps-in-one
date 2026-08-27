@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "@/components/providers";
@@ -11,6 +12,14 @@ import { eq } from "drizzle-orm";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
+import { MEDIA } from "@/lib/media-assets";
+
+const zcFont = localFont({
+  src: "../media/fonts/Zc-Regular.ttf",
+  variable: "--font-zc",
+  display: "block",
+  weight: "400",
+});
 
 const siteUrl = getSiteUrl();
 
@@ -66,7 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: siteUrl,
       images: [
         {
-          url: "/zzai-logo.png",
+          url: MEDIA.logo,
           width: 1200,
           height: 630,
           alt: "zzai zzai",
@@ -77,7 +86,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/zzai-logo.png"],
+      images: [MEDIA.logo],
     },
     alternates: {
       canonical: siteUrl,
@@ -106,15 +115,14 @@ const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className="min-h-full w-full">
+    <html lang="en" suppressHydrationWarning className={`min-h-full w-full ${zcFont.variable}`}>
       <head>
-        <link
-          rel="preload"
-          href="/fonts/Zc-Regular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@font-face{font-family:"Zc";src:url("${MEDIA.fontZc}") format("truetype");font-weight:normal;font-style:normal;font-display:block;}`,
+          }}
         />
+        <link rel="preload" href={MEDIA.fontZc} as="font" type="font/ttf" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -124,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 "@type": "Organization",
                 name: "zzai zzai",
                 url: siteUrl,
-                logo: `${siteUrl}/zzai-logo.png`,
+                logo: new URL(MEDIA.logo, siteUrl).toString(),
                 description:
                   "From seed to symphony — zzai zzai is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
                 sameAs: [],

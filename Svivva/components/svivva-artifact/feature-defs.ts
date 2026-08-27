@@ -1,4 +1,5 @@
 import { FEATURE_PUBLIC_PATHS } from "@/lib/feature-routes";
+import { MEDIA } from "@/lib/media-assets";
 
 export type FeatureId = "play" | "seeds" | "orbit" | "security" | "api" | "hardware";
 
@@ -25,7 +26,7 @@ export const FEATURES: FeatureDef[] = [
     name: "ZZAI Play",
     shortLabel: "Play",
     artworkTitle: "BREATH AWAY",
-    artworkSrc: "/artworks/play.png",
+    artworkSrc: MEDIA.artworks.play,
     tagline: "Sampler · stems · neural audio",
     description:
       "ZZAI Play — the music studio face. Hardware sampler UI, stems, patches, and neural audio workflows.",
@@ -40,7 +41,7 @@ export const FEATURES: FeatureDef[] = [
     name: "ZZAI Seeds",
     shortLabel: "Seeds",
     artworkTitle: "SETTLE DOWN",
-    artworkSrc: "/artworks/seeds.png",
+    artworkSrc: MEDIA.artworks.seeds,
     tagline: "PDF or YouTube → many apps",
     description:
       "ZZAI Seeds — CH 01 on the mixing board. PDF blueprint or YouTube transcript in; full-stack app suites out.",
@@ -55,7 +56,7 @@ export const FEATURES: FeatureDef[] = [
     name: "Marketing Orbit",
     shortLabel: "Orbit",
     artworkTitle: "ORBIT / IMG 2007",
-    artworkSrc: "/artworks/orbit.png",
+    artworkSrc: MEDIA.artworks.orbit,
     tagline: "Growth intelligence on autopilot",
     description:
       "Marketing Orbit — SEO, indexing, Channel Intel, and traffic automation while you sleep.",
@@ -70,7 +71,7 @@ export const FEATURES: FeatureDef[] = [
     name: "Poor Man Protection",
     shortLabel: "Protect",
     artworkTitle: "FOREVER YOURS",
-    artworkSrc: "/artworks/security.png",
+    artworkSrc: MEDIA.artworks.security,
     tagline: "Sketch-to-seal group patents",
     description:
       "Poor Man Protection — deposit sketches, mint a protection coin, and build a court-ready pack.",
@@ -85,7 +86,7 @@ export const FEATURES: FeatureDef[] = [
     name: "Digital",
     shortLabel: "Digital",
     artworkTitle: "BANG ON ME",
-    artworkSrc: "/artworks/api.png",
+    artworkSrc: MEDIA.artworks.api,
     tagline: "Signal bus — prompt to API",
     description:
       "Digital — the Signal path. Plain English becomes a production API with schema, evals, and rollback.",
@@ -100,7 +101,7 @@ export const FEATURES: FeatureDef[] = [
     name: "Hardware",
     shortLabel: "Hardware",
     artworkTitle: "DIAMOND FISTS",
-    artworkSrc: "/artworks/hardware.png",
+    artworkSrc: MEDIA.artworks.hardware,
     tagline: "Crest bus — schematics to BOM",
     description:
       "Hardware — the Crest path. AI schematics, material sourcing, and manufacturing from concept to part.",

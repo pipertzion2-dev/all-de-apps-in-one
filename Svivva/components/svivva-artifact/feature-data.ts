@@ -1,3 +1,4 @@
+import { MEDIA } from "@/lib/media-assets";
 export type FeatureId = "play" | "seeds" | "orbit" | "security" | "api" | "hardware";
 
 export type ArtworkFeature = {
@@ -20,7 +21,7 @@ export type ArtworkFeature = {
 export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   {
     id: "play",
-    artwork: "/artworks/play.png",
+    artwork: MEDIA.artworks.play,
     artworkAlt: "BREATH_AWAY — ZZAI Play",
     title: "ZZAI Play",
     subtitle: "Takes your breath away",
@@ -35,7 +36,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   },
   {
     id: "seeds",
-    artwork: "/artworks/seeds.png",
+    artwork: MEDIA.artworks.seeds,
     artworkAlt: "Settle Down — ZZAI Seeds",
     title: "ZZAI Seeds",
     subtitle: "Together we discover a path",
@@ -50,7 +51,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   },
   {
     id: "orbit",
-    artwork: "/artworks/orbit.png",
+    artwork: MEDIA.artworks.orbit,
     artworkAlt: "IMG_2007 — Seeds Marketing Engine",
     title: "Marketing Orbit",
     subtitle: "Intelligent organic growth",
@@ -65,7 +66,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   },
   {
     id: "security",
-    artwork: "/artworks/security.png",
+    artwork: MEDIA.artworks.security,
     artworkAlt: "ROMEO_3 — Security",
     title: "Poor Man Protection",
     subtitle: "Sketch-to-seal group patents",
@@ -80,7 +81,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   },
   {
     id: "api",
-    artwork: "/artworks/api-builder.png",
+    artwork: MEDIA.artworks.apiBuilder,
     artworkAlt: "Bang On Me — AI API Builder",
     title: "Digital",
     subtitle: "Signal bus — prompt to API",
@@ -95,7 +96,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   },
   {
     id: "hardware",
-    artwork: "/artworks/hardware.png",
+    artwork: MEDIA.artworks.hardware,
     artworkAlt: "PETALS_3 — Hardware Mode",
     title: "Hardware",
     subtitle: "Real things, real hands",

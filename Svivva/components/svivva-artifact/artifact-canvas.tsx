@@ -9,6 +9,7 @@ import {
   orientPlaneToNormal,
   placeOnFace,
 } from "@/lib/artwork-three";
+import { MEDIA } from "@/lib/media-assets";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES, type FeatureDef } from "./feature-defs";
 
@@ -30,7 +31,7 @@ function ensureZcFont(): Promise<void> {
     if (typeof document === "undefined") return;
     try {
       if (document.fonts.check(`64px ${ZC_FACE_FONT}`)) return;
-      const face = new FontFace("Zc", "url(/fonts/Zc-Regular.ttf)");
+      const face = new FontFace("Zc", `url(${MEDIA.fontZc})`);
       document.fonts.add(await face.load());
       await document.fonts.load(`160px ${ZC_FACE_FONT}`);
     } catch {
