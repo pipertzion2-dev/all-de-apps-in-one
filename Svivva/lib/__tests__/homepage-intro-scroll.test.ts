@@ -21,4 +21,10 @@ describe("homepage intro scroll", () => {
   it("unlocks body overflow and touchAction on skip", () => {
     expect(pageSrc).toMatch(/onClick=\{\(\) => \{[\s\S]*touchAction = ""/);
   });
+
+  it("uses 180° flip revealing HomepageHeroBlock beneath (not empty back face)", () => {
+    expect(pageSrc).toContain("return eased * 180");
+    expect(pageSrc).toContain("HomepageHeroBlock");
+    expect(pageSrc).not.toContain("flipBackRef");
+  });
 });
