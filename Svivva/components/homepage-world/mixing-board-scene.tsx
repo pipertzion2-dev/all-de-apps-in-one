@@ -60,9 +60,7 @@ function ChannelStripMesh({
     if (!fader.current) return;
     const t = state.clock.elapsedTime;
     const pulse =
-      hovered || selected
-        ? 0.08 * Math.sin(t * 4)
-        : 0.03 * Math.sin(t * 1.6 + feature.channel);
+      hovered || selected ? 0.08 * Math.sin(t * 4) : 0.03 * Math.sin(t * 1.6 + feature.channel);
     fader.current.position.y = -0.15 + level * 0.55 + pulse;
     if (group.current) {
       group.current.position.y = THREE.MathUtils.lerp(
@@ -221,10 +219,7 @@ function MasterSection({ position }: { position: [number, number, number] }) {
         </div>
       </Html>
       {MASTER_BUS.outputs.slice(0, 4).map((out, i) => (
-        <mesh
-          key={out}
-          position={[-0.3 + (i % 2) * 0.55, 0.12, 0.05 + Math.floor(i / 2) * 0.35]}
-        >
+        <mesh key={out} position={[-0.3 + (i % 2) * 0.55, 0.12, 0.05 + Math.floor(i / 2) * 0.35]}>
           <boxGeometry args={[0.4, 0.04, 0.22]} />
           <meshStandardMaterial color="#3a2e1a" metalness={0.3} roughness={0.5} />
         </mesh>

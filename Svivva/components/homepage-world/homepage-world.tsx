@@ -173,8 +173,8 @@ export function HomepageWorld({ onExit }: HomepageWorldProps) {
                   <p className="text-[10px] font-mono tracking-[0.2em] uppercase">Pick a place</p>
                 </div>
                 <p className="text-sm text-white/65 mt-1">
-                  Every feature is a channel strip on the giant OaaS desk. Select one above or on the
-                  board — or head back to the business site anytime.
+                  Every feature is a channel strip on the giant OaaS desk. Select one above or on
+                  the board — or head back to the business site anytime.
                 </p>
               </>
             )}
