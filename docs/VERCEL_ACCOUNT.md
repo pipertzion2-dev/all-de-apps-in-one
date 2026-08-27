@@ -28,6 +28,8 @@ If **`all-de-apps-in-one`** briefly shows “Account is blocked” but the dashb
 
 ## Fix: disconnect the wrong project (one-time)
 
+**This is the only way to stop the red `Vercel – svivva-main-app` GitHub check.** Repo scripts can refuse a build if that project ever runs, but a **blocked** account fails the check _before_ any ignore/build step — so GitHub stays red until you disconnect the integration.
+
 Do **both** if possible:
 
 ### A — Wrong Vercel account (where `svivva-main-app` lives)

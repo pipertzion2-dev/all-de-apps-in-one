@@ -3,6 +3,13 @@
   "framework": "nextjs",
   "installCommand": "cd Svivva && npm ci --legacy-peer-deps",
   "buildCommand": "npm run vercel-build",
+  "ignoreCommand": "node Svivva/scripts/vercel-should-build.mjs",
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "main": true
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/run-scheduled?job=seo",

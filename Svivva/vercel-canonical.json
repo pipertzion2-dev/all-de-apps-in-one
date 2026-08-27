@@ -5,10 +5,11 @@
   "rootDirectory": "Svivva",
   "productionDomain": "zzaizzai.com",
   "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
+  "allowedProjectIds": [],
   "deprecatedProjects": [
     {
       "name": "svivva-main-app",
-      "reason": "Wrong Vercel account/project — ignore its GitHub check. Disconnect its GitHub integration."
+      "reason": "Wrong Vercel account/project — disconnect its GitHub integration. Never deploy here."
     }
   ],
   "githubStatusCheck": {
