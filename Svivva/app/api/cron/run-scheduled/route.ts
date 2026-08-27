@@ -39,7 +39,16 @@ export async function GET(req: NextRequest) {
     }).then(async (r) => ({ ok: r.ok, status: r.status, body: await r.json().catch(() => ({})) }));
     const { runSeoMonitor } = await import("@/lib/seo/monitoring/detector");
     const monitor = await runSeoMonitor();
-    out.seo = { indexNow, gsc, monitor };
+    let orbitSeo: unknown = null;
+    try {
+      const { runOrbitSeoJobs } = await import("@/lib/orbit/seo/overview");
+      const { resolveOrbitInternalUserId } = await import("@/lib/orbit/internal-user");
+      const ws = (await resolveOrbitInternalUserId()) || "orbit-default-workspace";
+      orbitSeo = await runOrbitSeoJobs(ws);
+    } catch (e) {
+      orbitSeo = { ok: false, error: String(e instanceof Error ? e.message : e) };
+    }
+    out.seo = { indexNow, gsc, monitor, orbitSeo };
   }
 
   if (job === "growth" || job === "all") {

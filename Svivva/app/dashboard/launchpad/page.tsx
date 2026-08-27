@@ -56,6 +56,7 @@ import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
+import { OrbitSeoManager } from "@/components/orbit/seo-manager";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
@@ -3585,6 +3586,21 @@ export default function LaunchpadPage() {
           onComplete={() => void refetchStatus()}
           orbitStatus={orbitStatus ?? null}
         />
+
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              SEO &amp; Indexing
+            </p>
+            <a
+              href="/dashboard/orbit/seo"
+              className="text-[11px] text-[#5B8DA8] underline underline-offset-2"
+            >
+              Open full SEO Manager
+            </a>
+          </div>
+          <OrbitSeoManager />
+        </div>
 
         {/* ── ADVANCED (collapsed by default) ── */}
         <details className="group rounded-2xl border border-border/50 bg-card/30 overflow-hidden">
