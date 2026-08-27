@@ -272,11 +272,18 @@ type Props = {
   orbitStatus?: StatusData | null;
   /** When true, scroll into view and run autopilot once on mount (e.g. ?autorun=1). */
   autoRun?: boolean;
+  /** Open Orbit Stripe setup (keys form). */
+  onOpenStripeSetup?: () => void;
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props) {
+export function OrbitOneClickLaunch({
+  onComplete,
+  orbitStatus,
+  autoRun,
+  onOpenStripeSetup,
+}: Props) {
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState(0);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -914,12 +921,14 @@ export function OrbitOneClickLaunch({ onComplete, orbitStatus, autoRun }: Props)
                 {!quickStartResult.stripe.allOk && (
                   <button
                     type="button"
-                    onClick={() =>
-                      document.getElementById("orbit-stripe-setup")?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      })
-                    }
+                    onClick={() => {
+                      if (onOpenStripeSetup) onOpenStripeSetup();
+                      else
+                        document.getElementById("orbit-stripe-setup")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                    }}
                     className="text-[10px] font-bold underline text-foreground"
                   >
                     Jump to Stripe setup

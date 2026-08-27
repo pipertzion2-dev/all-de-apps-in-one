@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, ExternalLink, Loader2 } from "lucide-react";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
+import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 
 const STRIPE_DASHBOARD = "https://dashboard.stripe.com";
 const STRIPE_KEYS = "https://dashboard.stripe.com/apikeys";
@@ -18,27 +19,27 @@ export default function StripeSetupPage() {
   const [webhookOk, setWebhookOk] = useState<boolean | null>(null);
   const [envKeysComplete, setEnvKeysComplete] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    const checkStripe = async () => {
-      try {
-        const response = await fetch("/api/health");
-        const data = await response.json();
+  const checkStripe = async () => {
+    try {
+      const response = await fetch("/api/health");
+      const data = await response.json();
 
-        if (data.stripe?.connected) {
-          setStripeStatus("connected");
-        } else {
-          setStripeStatus("disconnected");
-        }
-        setWebhookOk(data.stripe?.webhookConfigured ?? null);
-        setEnvKeysComplete(data.stripe?.envKeysComplete ?? null);
-      } catch {
+      if (data.stripe?.connected) {
+        setStripeStatus("connected");
+      } else {
         setStripeStatus("disconnected");
-        setWebhookOk(null);
-        setEnvKeysComplete(null);
       }
-    };
+      setWebhookOk(data.stripe?.webhookConfigured ?? null);
+      setEnvKeysComplete(data.stripe?.envKeysComplete ?? null);
+    } catch {
+      setStripeStatus("disconnected");
+      setWebhookOk(null);
+      setEnvKeysComplete(null);
+    }
+  };
 
-    checkStripe();
+  useEffect(() => {
+    void checkStripe();
   }, []);
 
   const siteUrl = getPublicSiteUrl();
@@ -48,9 +49,15 @@ export default function StripeSetupPage() {
       <div>
         <h1 className="text-3xl font-bold">Stripe Setup</h1>
         <p className="text-muted-foreground">
-          Connect Stripe to accept payments on billing and checkout
+          Connect Stripe to accept payments on billing and checkout. Prefer{" "}
+          <Link href="/dashboard/orbit?tab=stripe" className="text-primary underline">
+            Orbit Admin → Stripe
+          </Link>{" "}
+          for the full setup flow.
         </p>
       </div>
+
+      <OrbitStripeSetup onConfiguredChange={() => void checkStripe()} />
 
       <Card>
         <CardHeader>

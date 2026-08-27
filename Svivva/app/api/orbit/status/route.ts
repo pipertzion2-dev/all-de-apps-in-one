@@ -9,7 +9,8 @@ import {
   getOrbitActiveAiProvider,
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
-import { getOpenAIApiKey } from "@/lib/env";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+import { getOpenAIApiKey, hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { stepCompletionFromCounts } from "@/lib/orbit/fill-marketing-gaps";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import {
@@ -25,6 +26,8 @@ export async function GET() {
   try {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    await hydratePlatformSecrets();
 
     const [
       seoRows,
@@ -187,8 +190,22 @@ export async function GET() {
       })),
     ];
 
+    const stripeConnected = hasStripeConfigured();
+    const stripeWebhookConfigured = hasStripeWebhookConfigured();
+    if (!stripeConnected) {
+      warnings.push(
+        "Stripe is not configured — open Orbit → Stripe tab and paste secret + publishable keys for checkout.",
+      );
+    } else if (!stripeWebhookConfigured) {
+      warnings.push(
+        "Stripe webhook secret missing — subscriptions may not sync until you add whsec_* in Orbit → Stripe.",
+      );
+    }
+
     return NextResponse.json({
       ...counts,
+      stripeConnected,
+      stripeWebhookConfigured,
       totalPages,
       targetPages: TARGET_TOTAL_MARKETING_PAGES,
       targetToolSeoPages: TARGET_TOOL_SEO_PAGES,
@@ -205,6 +222,8 @@ export async function GET() {
         orbitAiProviderLabel: getOrbitAiProviderLabel(orbitAiProvider),
         orbitFreeAi: orbitAiConfigured,
         hasPaidOpenAiKey,
+        stripeConnected,
+        stripeWebhookConfigured,
         indexHealthScore,
         warnings,
       },
@@ -223,6 +242,8 @@ export async function GET() {
         hubExists: false,
         indexNowKey: false,
         indexNowSubmitted: false,
+        stripeConnected: hasStripeConfigured(),
+        stripeWebhookConfigured: hasStripeWebhookConfigured(),
         integrationPages: 0,
         usecasePages: 0,
         templatePages: 0,

@@ -163,7 +163,7 @@ export function OrbitAdminMissionBoard({
             label: "Stripe subscriber payments",
             lane: "credential",
             done: Boolean(s.stripeConnected),
-            hint: "Connect in Orbit → Stripe tab",
+            hint: "Open /dashboard/orbit?tab=stripe — paste secret + publishable keys",
           },
         ],
       },
@@ -388,9 +388,16 @@ export function OrbitAdminMissionBoard({
                         >
                           {item.label}
                         </p>
-                        {item.hint && (
+                        {item.hint && item.id === "stripe" && !item.done ? (
+                          <a
+                            href="/dashboard/orbit?tab=stripe"
+                            className="text-[10px] text-amber-300/90 underline truncate block"
+                          >
+                            {item.hint}
+                          </a>
+                        ) : item.hint ? (
                           <p className="text-[10px] text-white/30 truncate">{item.hint}</p>
-                        )}
+                        ) : null}
                       </div>
                       <span
                         className="flex-shrink-0 inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full"

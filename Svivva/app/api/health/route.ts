@@ -5,6 +5,7 @@ import { getSiteUrl, getSitemapUrl } from "@/lib/site-url";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hasCompleteStripeEnvKeys } from "@/lib/stripe/client";
 import { isCronSecretAuthorized, isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 
 export async function GET(req: NextRequest) {
   const isProd = process.env.NODE_ENV === "production";
@@ -18,6 +19,12 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 },
     );
+  }
+
+  try {
+    await hydratePlatformSecrets();
+  } catch {
+    /* continue with env-only */
   }
 
   const health: {

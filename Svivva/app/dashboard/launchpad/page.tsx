@@ -45,6 +45,7 @@ import {
   Info,
   Radar,
   TrendingUp,
+  CreditCard,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
@@ -2489,6 +2490,7 @@ export default function LaunchpadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const autoRunMarketing = searchParams.get("autorun") === "1";
+  const tabParam = searchParams.get("tab");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const orbitUrls = usePublicOrbitUrls();
@@ -2512,8 +2514,34 @@ export default function LaunchpadPage() {
     };
   }, []);
   const [tab, setTab] = useState<
-    "svivva" | "mini" | "index22" | "deploy" | "checklist" | "growth" | "autopilot" | "causal"
+    | "svivva"
+    | "mini"
+    | "index22"
+    | "deploy"
+    | "checklist"
+    | "growth"
+    | "autopilot"
+    | "causal"
+    | "stripe"
   >("checklist");
+  useEffect(() => {
+    const allowed = new Set([
+      "svivva",
+      "mini",
+      "index22",
+      "deploy",
+      "checklist",
+      "growth",
+      "autopilot",
+      "causal",
+      "stripe",
+    ]);
+    if (tabParam && allowed.has(tabParam)) {
+      setTab(tabParam as typeof tab);
+    } else if (typeof window !== "undefined" && window.location.hash === "#orbit-stripe-setup") {
+      setTab("stripe");
+    }
+  }, [tabParam]);
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [runAllActive, setRunAllActive] = useState(false);
@@ -2572,6 +2600,8 @@ export default function LaunchpadPage() {
     hubExists: boolean;
     indexNowKey: boolean;
     indexNowSubmitted: boolean;
+    stripeConnected?: boolean;
+    stripeWebhookConfigured?: boolean;
     integrationPages: number;
     usecasePages: number;
     templatePages: number;
@@ -2593,6 +2623,8 @@ export default function LaunchpadPage() {
       orbitAiProviderLabel?: string;
       orbitFreeAi: boolean;
       hasPaidOpenAiKey: boolean;
+      stripeConnected?: boolean;
+      stripeWebhookConfigured?: boolean;
       indexHealthScore: number;
       warnings: string[];
     };
@@ -3584,7 +3616,45 @@ export default function LaunchpadPage() {
           autoRun={autoRunMarketing}
           onComplete={() => void refetchStatus()}
           orbitStatus={orbitStatus ?? null}
+          onOpenStripeSetup={() => {
+            setTab("stripe");
+            router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
+            window.setTimeout(() => {
+              document.getElementById("orbit-stripe-setup")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }, 50);
+          }}
         />
+
+        {/* Stripe setup entry — full form is on the Stripe tab */}
+        <div className="rounded-2xl border-2 border-amber-500/40 bg-card p-3 sm:p-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-black text-foreground flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-amber-600" />
+                Stripe payments
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Connect Stripe so checkout, billing portal, and subscriptions work.
+                {orbitStatus?.stripeConnected ? " Keys look ready." : " Keys not configured yet."}
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant={orbitStatus?.stripeConnected ? "outline" : "default"}
+              onClick={() => {
+                setTab("stripe");
+                router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
+              }}
+              data-testid="orbit-open-stripe-tab"
+            >
+              {orbitStatus?.stripeConnected ? "Manage Stripe" : "Set up Stripe"}
+            </Button>
+          </div>
+        </div>
 
         {/* ── ADVANCED (collapsed by default) ── */}
         <details className="group rounded-2xl border border-border/50 bg-card/30 overflow-hidden">
@@ -4139,8 +4209,21 @@ export default function LaunchpadPage() {
               <ConnectionsHub />
             </div>
 
-            {/* Stripe Setup - Always visible for admin */}
-            <OrbitStripeSetup />
+            {/* Stripe setup lives above Advanced + in the Stripe tab */}
+            <div className="rounded-xl border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+              Need payments? Use{" "}
+              <button
+                type="button"
+                className="underline font-semibold text-foreground"
+                onClick={() => {
+                  setTab("stripe");
+                  router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
+                }}
+              >
+                Orbit → Stripe
+              </button>{" "}
+              (or the Stripe card above Advanced).
+            </div>
 
             {/* ── Marketing Status (DB-verified) ── */}
             {orbitStatus &&
@@ -4367,6 +4450,39 @@ export default function LaunchpadPage() {
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <button
+                  onClick={() => {
+                    setTab("stripe");
+                    router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
+                  }}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "stripe" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="orbit-tab-stripe"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <CreditCard
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "stripe" ? "#d97706" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "stripe" ? "#d97706" : undefined }}
+                    >
+                      Stripe
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${
+                        orbitStatus?.stripeConnected
+                          ? "bg-green-500/15 text-green-700"
+                          : "bg-amber-500/15 text-amber-700"
+                      }`}
+                    >
+                      {orbitStatus?.stripeConnected ? "ON" : "Setup"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Keys, webhook, checkout
+                  </p>
+                </button>
+                <button
                   onClick={() => setTab("growth")}
                   className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "growth" ? "border-violet-500 bg-violet-500/10" : "border-border bg-card hover:bg-muted/30"}`}
                   data-testid="tab-growth-intel"
@@ -4563,6 +4679,33 @@ export default function LaunchpadPage() {
             </div>
 
             {/* Growth Intelligence tab */}
+            {tab === "stripe" && (
+              <div className="space-y-4">
+                <OrbitStripeSetup onConfiguredChange={() => void refetchStatus()} />
+                <div className="rounded-xl border border-border bg-muted/20 px-3 py-3 text-xs text-muted-foreground space-y-2">
+                  <p className="font-semibold text-foreground">After keys are saved</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>
+                      Optional: seed Pro/Enterprise products with{" "}
+                      <code className="text-[10px]">npm run stripe:seed</code> (server).
+                    </li>
+                    <li>
+                      Customer billing UI:{" "}
+                      <Link href="/dashboard/billing" className="underline text-foreground">
+                        /dashboard/billing
+                      </Link>
+                    </li>
+                    <li>
+                      Status page:{" "}
+                      <Link href="/dashboard/settings/stripe" className="underline text-foreground">
+                        Settings → Stripe
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
             {tab === "growth" && (
               <OrbitGrowthIntelligence
                 onReportReady={(summary) => {
@@ -4667,67 +4810,75 @@ export default function LaunchpadPage() {
             )}
 
             {/* ── LAUNCH EVERYTHING ─────────────────────────────────────────────── */}
-            {tab !== "deploy" && tab !== "checklist" && tab !== "index22" && tab !== "growth" && (
-              <LaunchStation
-                launchActive={launchActive}
-                launchDone={launchDone}
-                launchProgress={launchProgress}
-                launchCopied={launchCopied}
-                setLaunchCopied={setLaunchCopied}
-                setLaunchDone={setLaunchDone}
-                onLaunch={launchEverything}
-                coreUrls={orbitStatus?.coreUrls ?? []}
-                toolUrls={orbitStatus?.toolUrls ?? []}
-                totalSteps={SVIVVA_STEPS.length + miniSteps.length}
-                sitemapUrl={orbitUrls.sitemap}
-              />
-            )}
+            {tab !== "deploy" &&
+              tab !== "checklist" &&
+              tab !== "index22" &&
+              tab !== "growth" &&
+              tab !== "stripe" && (
+                <LaunchStation
+                  launchActive={launchActive}
+                  launchDone={launchDone}
+                  launchProgress={launchProgress}
+                  launchCopied={launchCopied}
+                  setLaunchCopied={setLaunchCopied}
+                  setLaunchDone={setLaunchDone}
+                  onLaunch={launchEverything}
+                  coreUrls={orbitStatus?.coreUrls ?? []}
+                  toolUrls={orbitStatus?.toolUrls ?? []}
+                  totalSteps={SVIVVA_STEPS.length + miniSteps.length}
+                  sitemapUrl={orbitUrls.sitemap}
+                />
+              )}
 
             {/* Progress + Run All — only for svivva/mini/index22 tabs */}
-            {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && steps.length > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      {tabDone} of {steps.length} steps complete
-                    </span>
-                    <span className="font-bold" style={{ color: TEAL }}>
-                      {Math.round((tabDone / steps.length) * 100)}%
-                    </span>
+            {tab !== "deploy" &&
+              tab !== "checklist" &&
+              tab !== "growth" &&
+              tab !== "stripe" &&
+              steps.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {tabDone} of {steps.length} steps complete
+                      </span>
+                      <span className="font-bold" style={{ color: TEAL }}>
+                        {Math.round((tabDone / steps.length) * 100)}%
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.round((tabDone / steps.length) * 100)}%`,
+                          background: allTabDone ? "#16a34a" : TEAL,
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.round((tabDone / steps.length) * 100)}%`,
-                        background: allTabDone ? "#16a34a" : TEAL,
-                      }}
-                    />
-                  </div>
-                </div>
 
-                {!allTabDone &&
-                  (runAllActive ? (
-                    <button
-                      onClick={stopRunAll}
-                      className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px]"
-                      style={{ background: "#dc2626" }}
-                    >
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Stop
-                    </button>
-                  ) : (
-                    <button
-                      onClick={runAll}
-                      className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px] active:scale-95 transition-transform"
-                      style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
-                      data-testid="btn-run-all"
-                    >
-                      <ListChecks className="w-3.5 h-3.5" />
-                      Run All <span className="opacity-70 text-xs">({pendingCount})</span>
-                    </button>
-                  ))}
-              </div>
-            )}
+                  {!allTabDone &&
+                    (runAllActive ? (
+                      <button
+                        onClick={stopRunAll}
+                        className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px]"
+                        style={{ background: "#dc2626" }}
+                      >
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Stop
+                      </button>
+                    ) : (
+                      <button
+                        onClick={runAll}
+                        className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white min-h-[40px] active:scale-95 transition-transform"
+                        style={{ background: `linear-gradient(135deg, ${BURG}, ${TEAL})` }}
+                        data-testid="btn-run-all"
+                      >
+                        <ListChecks className="w-3.5 h-3.5" />
+                        Run All <span className="opacity-70 text-xs">({pendingCount})</span>
+                      </button>
+                    ))}
+                </div>
+              )}
 
             {/* Mini Source Config (above step 1) */}
             {tab === "mini" && (
@@ -4757,47 +4908,51 @@ export default function LaunchpadPage() {
               ))}
 
             {/* Completion */}
-            {tab !== "deploy" && tab !== "checklist" && tab !== "growth" && allTabDone && (
-              <div
-                className="rounded-2xl p-6 text-center space-y-2"
-                style={{
-                  background: `linear-gradient(135deg, ${TEAL}15, ${BURG}15)`,
-                  border: `2px solid ${TEAL}30`,
-                }}
-              >
-                <p className="text-3xl">🚀</p>
-                <p className="font-black text-lg">
-                  {tab === "svivva"
-                    ? "zzaizzai.com is in orbit!"
-                    : tab === "mini"
-                      ? "Your tools are live on Google!"
-                      : tab === "index22"
-                        ? "Index 22 infrastructure complete!"
-                        : "Deployment configured"}
-                </p>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                  {tab === "svivva"
-                    ? "Switch to the Your Tools tab to promote your deployed mini apps."
-                    : tab === "mini"
-                      ? "Your app URLs are connected — Google traffic can flow to your live tools."
-                      : tab === "index22"
-                        ? "Run marketing steps on zzaizzai.com and Your tools tabs, or use Run Everything above."
-                        : "Deployment is ready — your marketing will go live on deploy."}
-                </p>
-                {tab === "svivva" && (
-                  <button
-                    onClick={() => setTab("mini")}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
-                    style={{ background: TEAL }}
-                  >
-                    Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            )}
+            {tab !== "deploy" &&
+              tab !== "checklist" &&
+              tab !== "growth" &&
+              tab !== "stripe" &&
+              allTabDone && (
+                <div
+                  className="rounded-2xl p-6 text-center space-y-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${TEAL}15, ${BURG}15)`,
+                    border: `2px solid ${TEAL}30`,
+                  }}
+                >
+                  <p className="text-3xl">🚀</p>
+                  <p className="font-black text-lg">
+                    {tab === "svivva"
+                      ? "zzaizzai.com is in orbit!"
+                      : tab === "mini"
+                        ? "Your tools are live on Google!"
+                        : tab === "index22"
+                          ? "Index 22 infrastructure complete!"
+                          : "Deployment configured"}
+                  </p>
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    {tab === "svivva"
+                      ? "Switch to the Your Tools tab to promote your deployed mini apps."
+                      : tab === "mini"
+                        ? "Your app URLs are connected — Google traffic can flow to your live tools."
+                        : tab === "index22"
+                          ? "Run marketing steps on zzaizzai.com and Your tools tabs, or use Run Everything above."
+                          : "Deployment is ready — your marketing will go live on deploy."}
+                  </p>
+                  {tab === "svivva" && (
+                    <button
+                      onClick={() => setTab("mini")}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white mt-1"
+                      style={{ background: TEAL }}
+                    >
+                      Connect your tools app <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
 
             {/* Google Indexing Panel — always visible once orbit has run */}
-            {tab !== "deploy" && tab !== "checklist" && (
+            {tab !== "deploy" && tab !== "checklist" && tab !== "stripe" && (
               <GoogleIndexPanel
                 coreUrls={orbitStatus?.coreUrls ?? []}
                 toolUrls={orbitStatus?.toolUrls ?? []}

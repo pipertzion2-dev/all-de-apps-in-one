@@ -33,7 +33,7 @@ async function verifyStripe(): Promise<{ checks: StripeCheck[]; allOk: boolean }
     ok: keysOk,
     action: keysOk
       ? "Secret + publishable keys are configured"
-      : "Paste sk_live_* and pk_live_* in Orbit (Stripe card below) or Vercel env",
+      : "Paste sk_live_* and pk_live_* in Orbit → Stripe tab or Vercel env",
   });
 
   const webhookOk = hasStripeWebhookConfigured();
