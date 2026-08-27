@@ -35,8 +35,14 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+import { HomepageExperienceToggle } from "@/components/homepage-experience-toggle";
+import { useHomepageExperience } from "@/hooks/use-homepage-experience";
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
+  { ssr: false },
+);
+const HomepageWorld = dynamic(
+  () => import("@/components/homepage-world").then((m) => m.HomepageWorld),
   { ssr: false },
 );
 const features = [
@@ -139,6 +145,7 @@ const pricingTiers = [
 
 export default function LandingPage() {
   const { mode } = usePlatform();
+  const { isWorld, enterWorld, exitWorld } = useHomepageExperience();
   const { data: meData } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/auth/me"],
     queryFn: () => authFetch("/api/auth/me").then((r) => r.json()),
@@ -182,6 +189,20 @@ export default function LandingPage() {
       )
       .forEach((el) => el.remove());
   }, []);
+
+  // World is opt-in fun mode — skip the business intro card so the desk opens immediately.
+  useEffect(() => {
+    if (!isWorld || flipComplete) return;
+    try {
+      sessionStorage.setItem("svivva:homepageIntroComplete", "1");
+      window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
+    } catch {
+      /* ignore */
+    }
+    setFlipComplete(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "";
+  }, [isWorld, flipComplete]);
 
   useEffect(() => {
     if (!flipComplete) return;
@@ -390,6 +411,7 @@ export default function LandingPage() {
       data-landing-page
       className={`min-h-screen w-full bg-background ${flipComplete ? "overflow-x-hidden" : "overflow-visible"}`}
     >
+      {isWorld && flipComplete && <HomepageWorld onExit={exitWorld} />}
       {!flipComplete && (
         <div
           ref={introCaptureRef}
@@ -555,6 +577,12 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <HomepageExperienceToggle
+                isWorld={isWorld}
+                onEnterWorld={enterWorld}
+                onExitWorld={exitWorld}
+                variant="nav"
+              />
               <Link
                 href="/play"
                 className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
@@ -651,6 +679,12 @@ export default function LandingPage() {
                           Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
                         </Button>
                       </a>
+                      <HomepageExperienceToggle
+                        isWorld={isWorld}
+                        onEnterWorld={enterWorld}
+                        onExitWorld={exitWorld}
+                        variant="cta"
+                      />
                       <Link href="/seeds">
                         <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
                           Open ZZAI Seeds
