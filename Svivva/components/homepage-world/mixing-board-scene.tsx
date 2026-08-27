@@ -73,6 +73,8 @@ function ChannelStripMesh({
     }
   });
 
+  const pointerDown = useRef<{ x: number; y: number } | null>(null);
+
   const onPointer = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setHovered(true);
@@ -90,11 +92,24 @@ function ChannelStripMesh({
       position={position}
       onPointerOver={onPointer}
       onPointerOut={onOut}
-      onClick={(e) => {
+      onPointerDown={(e) => {
         e.stopPropagation();
-        onSelect(feature);
+        pointerDown.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerUp={(e) => {
+        e.stopPropagation();
+        const start = pointerDown.current;
+        pointerDown.current = null;
+        if (!start) return;
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        if (dx * dx + dy * dy < 36) onSelect(feature);
       }}
     >
+      {/* Invisible hit volume so orbit doesn't steal thin-strip clicks */}
+      <mesh position={[0, 0.2, 0]} visible={false}>
+        <boxGeometry args={[STRIP_W + 0.06, 0.55, 1.4]} />
+      </mesh>
       <mesh position={[0, 0.02, 0]} castShadow>
         <boxGeometry args={[STRIP_W, 0.08, 1.35]} />
         <meshStandardMaterial
@@ -258,21 +273,26 @@ function Desk({
         return (
           <group key={bus.id}>
             <Html
-              position={[-deskW / 2 + 0.55, 0.2, z]}
+              position={[startX - STRIP_W * 0.15, 0.55, z - 0.55]}
               center
-              distanceFactor={10}
+              distanceFactor={9}
               style={{ pointerEvents: "none" }}
+              zIndexRange={[20, 0]}
             >
               <div
                 style={{
                   color: BUS_TINT[bus.id],
                   fontSize: 9,
                   fontWeight: 700,
-                  letterSpacing: "0.2em",
+                  letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   whiteSpace: "nowrap",
                   fontFamily: "ui-monospace, Menlo, monospace",
-                  opacity: 0.9,
+                  opacity: 0.95,
+                  background: "rgba(8,10,14,0.72)",
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  border: `1px solid ${BUS_TINT[bus.id]}55`,
                 }}
               >
                 {bus.consoleName}
