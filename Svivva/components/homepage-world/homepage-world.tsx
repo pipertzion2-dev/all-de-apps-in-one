@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, LayoutDashboard, Orbit, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { PlatformFeature } from "@/lib/platform/feature-graph";
-import { OAAS_NAME, OAAS_TAGLINE } from "@/lib/platform/feature-graph";
+import {
+  MIXING_BUSES,
+  OAAS_NAME,
+  OAAS_TAGLINE,
+  PLATFORM_FEATURES,
+  type PlatformFeature,
+} from "@/lib/platform/feature-graph";
 import { MixingBoardScene } from "@/components/homepage-world/mixing-board-scene";
 
 type HomepageWorldProps = {
@@ -16,6 +21,17 @@ type HomepageWorldProps = {
 export function HomepageWorld({ onExit }: HomepageWorldProps) {
   const [selected, setSelected] = useState<PlatformFeature | null>(null);
   const [entered, setEntered] = useState(false);
+
+  const places = useMemo(
+    () =>
+      MIXING_BUSES.map((bus) => ({
+        bus,
+        channels: PLATFORM_FEATURES.filter((f) => !f.adminOnly && f.bus === bus.id).sort(
+          (a, b) => a.channel - b.channel,
+        ),
+      })).filter((g) => g.channels.length > 0),
+    [],
+  );
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setEntered(true));
@@ -42,7 +58,6 @@ export function HomepageWorld({ onExit }: HomepageWorldProps) {
         <MixingBoardScene selectedId={selected?.id ?? null} onSelect={setSelected} />
       </div>
 
-      {/* Soft vignette */}
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
@@ -51,7 +66,6 @@ export function HomepageWorld({ onExit }: HomepageWorldProps) {
         }}
       />
 
-      {/* Chrome */}
       <div className="pointer-events-none absolute inset-0 z-[2] flex flex-col">
         <header className="pointer-events-auto flex items-start justify-between gap-3 p-4 sm:p-6">
           <div className="max-w-md space-y-1">
@@ -99,6 +113,28 @@ export function HomepageWorld({ onExit }: HomepageWorldProps) {
           </div>
         </header>
 
+        <div className="pointer-events-auto px-4 sm:px-6">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin max-w-full">
+            {places.flatMap(({ channels }) =>
+              channels.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setSelected(f)}
+                  className={`shrink-0 rounded-md border px-2.5 py-1 text-[10px] font-mono tracking-wide transition-colors ${
+                    selected?.id === f.id
+                      ? "border-[#5B8DA8] bg-[#5B8DA8]/25 text-white"
+                      : "border-white/15 bg-black/45 text-white/70 hover:border-white/35 hover:text-white"
+                  }`}
+                  data-testid={`world-place-${f.id}`}
+                >
+                  {f.channelLabel} · {f.shortTitle}
+                </button>
+              )),
+            )}
+          </div>
+        </div>
+
         <div className="flex-1" />
 
         <footer className="pointer-events-auto p-4 sm:p-6 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
@@ -137,8 +173,8 @@ export function HomepageWorld({ onExit }: HomepageWorldProps) {
                   <p className="text-[10px] font-mono tracking-[0.2em] uppercase">Pick a place</p>
                 </div>
                 <p className="text-sm text-white/65 mt-1">
-                  Every feature is a channel strip on the giant OaaS desk. Select one to open it —
-                  or head back to the business site anytime.
+                  Every feature is a channel strip on the giant OaaS desk. Select one above or on the
+                  board — or head back to the business site anytime.
                 </p>
               </>
             )}
