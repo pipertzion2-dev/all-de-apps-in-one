@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
@@ -161,6 +161,7 @@ export default function LandingPage() {
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
+  const flipAnimRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
   const finishingIntroRef = useRef(false);
   const [stats, setStats] = useState<{
@@ -199,7 +200,7 @@ export default function LandingPage() {
     halfHRef.current = window.innerHeight / 2;
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (flipComplete) return;
 
     const captureEl = introCaptureRef.current;
@@ -208,7 +209,15 @@ export default function LandingPage() {
     document.body.style.overflow = "hidden";
     document.body.style.touchAction = "none";
 
+    const stopFlipAnim = () => {
+      if (flipAnimRef.current) {
+        cancelAnimationFrame(flipAnimRef.current);
+        flipAnimRef.current = 0;
+      }
+    };
+
     const finishIntro = () => {
+      stopFlipAnim();
       setFlipComplete(true);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
@@ -222,12 +231,15 @@ export default function LandingPage() {
         }, 12000)
       : undefined;
 
-    const flipZone = Math.max(window.innerHeight * (mobile ? 0.5 : 0.58), mobile ? 260 : 300);
+    // Longer zone so the first scroll is controllable (not a snap).
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      // Linear mapping — immediate visual response on first scroll (no ease-in dead zone).
-      return clamped * 90;
+      // Mild ease-out keeps first pixels responsive without a dead zone.
+      return easeOutCubic(clamped) * 90;
     };
 
     const syncFlipDepth = () => {
@@ -249,20 +261,19 @@ export default function LandingPage() {
       const halfH = halfHRef.current;
       const clamped = Math.min(Math.max(progress, 0), 1);
       displayedProgressRef.current = clamped;
-      targetProgressRef.current = clamped;
       const angle = progressToAngle(clamped);
 
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
       }
 
-      const fadeStart = 0.78;
-      const fade =
-        clamped <= fadeStart ? 1 : Math.max(0, 1 - (clamped - fadeStart) / (1 - fadeStart));
-      captureEl.style.opacity = String(fade);
+      // Stay opaque during the flip; opacity fade only runs in scheduleFinish.
+      if (!finishingIntroRef.current) {
+        captureEl.style.opacity = "1";
+      }
 
       if (scrollHintRef.current) {
-        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 14));
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 8));
       }
 
       if (!scrollHintHiddenRef.current && clamped >= 0.02) {
@@ -276,21 +287,59 @@ export default function LandingPage() {
     const scheduleFinish = () => {
       if (finishingIntroRef.current) return;
       finishingIntroRef.current = true;
+      stopFlipAnim();
+      targetProgressRef.current = 1;
       paintFlip(1);
-      window.setTimeout(finishIntro, 180);
+      captureEl.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
+      captureEl.style.opacity = "0";
+      window.setTimeout(finishIntro, 440);
+    };
+
+    let lastFrameMs = performance.now();
+    const tickFlip = (now: number) => {
+      flipAnimRef.current = 0;
+      const dt = Math.min((now - lastFrameMs) / 1000, 0.032);
+      lastFrameMs = now;
+
+      const target = targetProgressRef.current;
+      let current = displayedProgressRef.current;
+      const delta = target - current;
+
+      if (Math.abs(delta) > 0.0004) {
+        const smoothing = 1 - Math.exp(-10 * dt);
+        current += delta * smoothing;
+        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+          current = target;
+        }
+        paintFlip(current);
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+        return;
+      }
+
+      if (current !== target) paintFlip(target);
+
+      if (target >= 1 && displayedProgressRef.current >= 0.998) {
+        scheduleFinish();
+      }
+    };
+
+    const ensureTick = () => {
+      if (!flipAnimRef.current) {
+        lastFrameMs = performance.now();
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
     };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
-      const gain = mobile ? 1.45 : 1;
-      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 64);
+      const gain = mobile ? 1.05 : 0.9;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 36);
       virtualScrollRef.current = Math.max(
         0,
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
       );
-      const progress = virtualScrollRef.current / flipZone;
-      paintFlip(progress);
-      if (progress >= 1) scheduleFinish();
+      targetProgressRef.current = virtualScrollRef.current / flipZone;
+      ensureTick();
     };
 
     syncFlipDepth();
@@ -304,6 +353,7 @@ export default function LandingPage() {
     window.addEventListener("resize", handleResize);
 
     const handleWheel = (e: WheelEvent) => {
+      if (finishingIntroRef.current) return;
       e.preventDefault();
       let delta = e.deltaY;
       if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
@@ -316,6 +366,7 @@ export default function LandingPage() {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const handleTouchMove = (e: TouchEvent) => {
+      if (finishingIntroRef.current) return;
       e.preventDefault();
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
@@ -323,22 +374,17 @@ export default function LandingPage() {
       applyDelta(delta);
     };
 
-    captureEl.addEventListener("wheel", handleWheel, { passive: false });
-    captureEl.addEventListener("touchstart", handleTouchStart, { passive: false });
-    captureEl.addEventListener("touchmove", handleTouchMove, { passive: false });
-    // Window-level fallback so the first wheel/touch is never missed before capture mounts.
+    // Single window listeners only — capture + window previously doubled every delta.
     window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
+      stopFlipAnim();
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
-      captureEl.removeEventListener("wheel", handleWheel);
-      captureEl.removeEventListener("touchstart", handleTouchStart);
-      captureEl.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
@@ -358,7 +404,7 @@ export default function LandingPage() {
           style={{
             zIndex: 70,
             touchAction: "none",
-            overflow: "hidden",
+            overflow: "visible",
             backgroundColor: "transparent",
             opacity: 1,
             willChange: "opacity",
@@ -371,6 +417,9 @@ export default function LandingPage() {
               zIndex: 1,
               perspective: "2400px",
               perspectiveOrigin: "50% 50%",
+              overflow: "visible",
+              transformStyle: "preserve-3d",
+              WebkitTransformStyle: "preserve-3d",
             }}
           >
             <div
@@ -480,6 +529,7 @@ export default function LandingPage() {
             onClick={() => {
               setFlipComplete(true);
               document.body.style.overflow = "";
+              document.body.style.touchAction = "";
               window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
               document
                 .querySelectorAll(
