@@ -1,4 +1,3 @@
-import { MEDIA } from "@/lib/media-assets";
 /** Public brand — ZZAI on zzaizzai.com (code folder may still be named Svivva). */
 export const BRAND = {
   name: "zzai zzai",
@@ -8,9 +7,9 @@ export const BRAND = {
   siteUrl: "https://zzaizzai.com",
   shortDescription:
     "ZZAI turns plain-language intent into shipped product — software, hardware, and go-to-market — with validation, evaluations, and rollback.",
-  logoPath: MEDIA.logo,
+  logoPath: "/zzai-logo.png",
   /** Open Graph / Twitter card image — ZZAI crest. */
-  ogImagePath: MEDIA.logo,
+  ogImagePath: "/zzai-logo.png",
 } as const;
 
 export function brandTitle(page?: string): string {
