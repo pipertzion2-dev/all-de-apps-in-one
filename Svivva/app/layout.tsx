@@ -122,7 +122,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `@font-face{font-family:"Zc";src:url("${MEDIA.fontZc}") format("truetype");font-weight:normal;font-style:normal;font-display:block;}`,
           }}
         />
-        <link rel="preload" href={MEDIA.fontZc} as="font" type="font/ttf" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

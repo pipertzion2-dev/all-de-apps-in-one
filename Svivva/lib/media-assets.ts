@@ -6,12 +6,12 @@ import apiArt from "@/media/artworks/api.png";
 import apiBuilderArt from "@/media/artworks/api-builder.png";
 import hardwareArt from "@/media/artworks/hardware.png";
 import zzaiLogo from "@/media/zzai-logo.png";
-import zcFont from "@/media/fonts/Zc-Regular.ttf";
+import { ZC_FONT_DATA_URL } from "@/lib/zc-font-data";
 
-/** Bundled static URLs — survive CLI deploys even when public/ is omitted from the upload. */
+/** Bundled static URLs — survive CLI deploys even when public/ is missing from the upload. */
 export const MEDIA = {
   logo: zzaiLogo.src,
-  fontZc: typeof zcFont === "string" ? zcFont : (zcFont as { src: string }).src,
+  fontZc: ZC_FONT_DATA_URL,
   artworks: {
     play: playArt.src,
     seeds: seedsArt.src,
