@@ -34,7 +34,10 @@ import {
   Settings2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+const SvivvaArtifact = dynamic(
+  () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
+  { ssr: false },
+);
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
   { ssr: false },
@@ -150,23 +153,23 @@ export default function LandingPage() {
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
+  const flipBackRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
-  const [introCubeInteractive, setIntroCubeInteractive] = useState(false);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
   const finishingIntroRef = useRef(false);
-  const flipAnimRef = useRef(0);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
     apiCalls: number;
   } | null>(null);
+  const [canMountCamo, setCanMountCamo] = useState(true);
+  const [canMountCube, setCanMountCube] = useState(true);
 
   useEffect(() => {
     fetch("/api/public-stats")
@@ -206,12 +209,6 @@ export default function LandingPage() {
     document.body.style.touchAction = "none";
 
     const finishIntro = () => {
-      try {
-        sessionStorage.setItem("svivva:homepageIntroComplete", "1");
-        window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
-      } catch {
-        /* ignore */
-      }
       setFlipComplete(true);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
@@ -225,21 +222,23 @@ export default function LandingPage() {
         }, 12000)
       : undefined;
 
-    // Longer scroll distance so the 3D rotate is readable (not a snap/slide).
-    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.5 : 0.58), mobile ? 260 : 300);
 
-    /** Map progress → full cube rotateX (180° reveals hero beneath the intro card). */
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      const eased = 1 - Math.pow(1 - clamped, 2.4);
-      return eased * 180;
+      // Linear mapping — immediate visual response on first scroll (no ease-in dead zone).
+      return clamped * 90;
     };
 
-    const applyRotorTransform = (progress: number) => {
+    const syncFlipDepth = () => {
       const halfH = halfHRef.current;
-      const angle = progressToAngle(progress);
+      const angle = progressToAngle(displayedProgressRef.current);
+
       if (flipFrontRef.current) {
         flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
+      }
+      if (flipBackRef.current) {
+        flipBackRef.current.style.transform = `rotateX(180deg) translate3d(0, 0, ${halfH}px)`;
       }
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
@@ -247,26 +246,23 @@ export default function LandingPage() {
     };
 
     const paintFlip = (progress: number) => {
+      const halfH = halfHRef.current;
       const clamped = Math.min(Math.max(progress, 0), 1);
       displayedProgressRef.current = clamped;
-      applyRotorTransform(clamped);
+      targetProgressRef.current = clamped;
+      const angle = progressToAngle(clamped);
 
-      // Keep overlay fully opaque until the cube finishes rotating — homepage shows
-      // only through the transparent back face, not via a cross-fade/slide.
-      captureEl.style.opacity = "1";
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+
+      const fadeStart = 0.78;
+      const fade =
+        clamped <= fadeStart ? 1 : Math.max(0, 1 - (clamped - fadeStart) / (1 - fadeStart));
+      captureEl.style.opacity = String(fade);
 
       if (scrollHintRef.current) {
-        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 10));
-      }
-
-      if (navRef.current) {
-        const navOpacity = Math.min(1, Math.max(0, (clamped - 0.32) / 0.38));
-        navRef.current.style.opacity = String(navOpacity);
-        navRef.current.style.pointerEvents = navOpacity > 0.45 ? "auto" : "none";
-      }
-
-      if (clamped >= 0.82 && !introCubeInteractive) {
-        setIntroCubeInteractive(true);
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 14));
       }
 
       if (!scrollHintHiddenRef.current && clamped >= 0.02) {
@@ -277,66 +273,32 @@ export default function LandingPage() {
       }
     };
 
-    const stopFlipAnim = () => {
-      if (flipAnimRef.current) {
-        cancelAnimationFrame(flipAnimRef.current);
-        flipAnimRef.current = 0;
-      }
-    };
-
     const scheduleFinish = () => {
       if (finishingIntroRef.current) return;
       finishingIntroRef.current = true;
-      targetProgressRef.current = 1;
       paintFlip(1);
-      window.setTimeout(finishIntro, 220);
-    };
-
-    const tickFlip = () => {
-      flipAnimRef.current = 0;
-      const target = targetProgressRef.current;
-      let current = displayedProgressRef.current;
-      const delta = target - current;
-
-      if (Math.abs(delta) > 0.0006) {
-        current += delta * (delta > 0 ? 0.22 : 0.3);
-        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
-          current = target;
-        }
-        paintFlip(current);
-        flipAnimRef.current = requestAnimationFrame(tickFlip);
-        return;
-      }
-
-      if (current !== target) paintFlip(target);
-
-      if (target >= 1 && displayedProgressRef.current >= 0.995) {
-        scheduleFinish();
-        return;
-      }
-    };
-
-    const ensureTick = () => {
-      if (!flipAnimRef.current) flipAnimRef.current = requestAnimationFrame(tickFlip);
+      window.setTimeout(finishIntro, 180);
     };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
-      const gain = mobile ? 1.15 : 0.95;
-      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 48);
+      const gain = mobile ? 1.45 : 1;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 64);
       virtualScrollRef.current = Math.max(
         0,
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
       );
-      targetProgressRef.current = virtualScrollRef.current / flipZone;
-      ensureTick();
+      const progress = virtualScrollRef.current / flipZone;
+      paintFlip(progress);
+      if (progress >= 1) scheduleFinish();
     };
 
-    halfHRef.current = window.innerHeight / 2;
+    syncFlipDepth();
     paintFlip(0);
 
     const handleResize = () => {
       halfHRef.current = window.innerHeight / 2;
+      syncFlipDepth();
       paintFlip(displayedProgressRef.current);
     };
     window.addEventListener("resize", handleResize);
@@ -370,7 +332,6 @@ export default function LandingPage() {
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
-      stopFlipAnim();
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
@@ -382,13 +343,13 @@ export default function LandingPage() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [flipComplete, introCubeInteractive]);
+  }, [flipComplete]);
 
   return (
     <div
       ref={containerRef}
       data-landing-page
-      className={`min-h-screen w-full bg-background ${flipComplete ? "overflow-x-hidden" : "overflow-visible"}`}
+      className="min-h-screen w-full bg-background overflow-x-hidden"
     >
       {!flipComplete && (
         <div
@@ -397,12 +358,10 @@ export default function LandingPage() {
           style={{
             zIndex: 70,
             touchAction: "none",
-            // Do not use overflow:hidden — it flattens preserve-3d so rotateX looks like a slide.
-            overflow: "visible",
+            overflow: "hidden",
             backgroundColor: "transparent",
             opacity: 1,
             willChange: "opacity",
-            perspective: "none",
           }}
         >
           <div
@@ -410,11 +369,8 @@ export default function LandingPage() {
               position: "absolute",
               inset: 0,
               zIndex: 1,
-              perspective: "1800px",
-              perspectiveOrigin: "50% 42%",
-              overflow: "visible",
-              transformStyle: "preserve-3d",
-              WebkitTransformStyle: "preserve-3d",
+              perspective: "2400px",
+              perspectiveOrigin: "50% 50%",
             }}
           >
             <div
@@ -424,9 +380,8 @@ export default function LandingPage() {
                 height: "100%",
                 position: "relative",
                 transformStyle: "preserve-3d",
-                WebkitTransformStyle: "preserve-3d",
                 willChange: "transform",
-                transformOrigin: "50% 50%",
+                transformOrigin: "center center",
                 transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
               }}
             >
@@ -434,14 +389,11 @@ export default function LandingPage() {
                 ref={flipFrontRef}
                 style={{
                   position: "absolute",
-                  inset: 0,
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
                   willChange: "transform",
-                  transformStyle: "preserve-3d",
-                  WebkitTransformStyle: "preserve-3d",
                   transform: "translate3d(0, 0, 50vh)",
                 }}
               >
@@ -453,7 +405,6 @@ export default function LandingPage() {
                     flexDirection: "column",
                     justifyContent: "flex-end",
                     alignItems: "center",
-                    boxShadow: "0 24px 80px rgba(0,0,0,0.18)",
                   }}
                 >
                   <Image
@@ -474,6 +425,20 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
+              <div
+                ref={flipBackRef}
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  background: "transparent",
+                  willChange: "transform",
+                  transform: "rotateX(180deg) translate3d(0, 0, 50vh)",
+                }}
+              />
             </div>
           </div>
           <div
@@ -513,15 +478,8 @@ export default function LandingPage() {
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
             onClick={() => {
-              try {
-                sessionStorage.setItem("svivva:homepageIntroComplete", "1");
-                window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
-              } catch {
-                /* ignore */
-              }
               setFlipComplete(true);
               document.body.style.overflow = "";
-              document.body.style.touchAction = "";
               window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
               document
                 .querySelectorAll(
@@ -535,15 +493,9 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Hero stays mounted under the intro card — no remount glitch when flip completes. */}
-      <div className={flipComplete ? "relative" : "fixed inset-0 z-[8]"}>
-        <HomepageHeroBlock interactive={flipComplete || introCubeInteractive} />
-      </div>
-
       <div className="bg-background" style={{ pointerEvents: flipComplete ? "auto" : "none" }}>
         <nav
-          ref={navRef}
-          className="fixed top-0 left-0 right-0 z-[80] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
+          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
           style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
         >
           <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
@@ -596,7 +548,18 @@ export default function LandingPage() {
           </div>
         </nav>
 
+        {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
         <div className="relative overflow-x-hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
+            <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
+              {canMountCamo ? (
+                <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
+              ) : null}
+            </div>
+          </div>
+
+          <div className="relative z-10">{canMountCube ? <SvivvaArtifact /> : null}</div>
+
           <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
             <div className="max-w-5xl mx-auto px-4 sm:px-6">
               <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
@@ -666,6 +629,14 @@ export default function LandingPage() {
           <div className="relative z-10 pb-8 sm:pb-12">
             <PlatformFeatureHub hideBackground />
           </div>
+
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
+            style={{
+              background:
+                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
+            }}
+          />
         </div>
 
         <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">

@@ -3,12 +3,12 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 describe("EducationAdvocacyCornerAd", () => {
-  it("is mounted from Providers for site-wide visibility", () => {
+  it("is not mounted site-wide from Providers (homepage UI revert)", () => {
     const providers = readFileSync(resolve(__dirname, "../../../components/providers.tsx"), "utf8");
-    expect(providers).toContain("EducationAdvocacyCornerAd");
+    expect(providers).not.toContain("EducationAdvocacyCornerAd");
   });
 
-  it("invites new situations and helpers into the advocate console", () => {
+  it("still invites new situations and helpers into the advocate console", () => {
     const src = readFileSync(
       resolve(__dirname, "../../../components/education-advocacy/corner-ad.tsx"),
       "utf8",
