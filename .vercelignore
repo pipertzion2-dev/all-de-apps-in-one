@@ -21,5 +21,7 @@ Svivva/node_modules/
 node_modules/
 .git/
 .next/
-public/
+# Only ignore a root-level copied public/ (vercel-build may copy here).
+# Never ignore Svivva/public — those static assets must ship with the app.
+/public/
 *.pdf
