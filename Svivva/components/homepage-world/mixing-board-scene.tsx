@@ -338,7 +338,6 @@ export function MixingBoardScene({ selectedId, onSelect, className = "" }: Mixin
         <Suspense fallback={null}>
           <Desk selectedId={selectedId} onSelect={onSelect} />
           <ContactShadows position={[0, -0.34, 0]} opacity={0.45} scale={22} blur={2.4} far={8} />
-          <Environment preset="city" environmentIntensity={0.25} />
         </Suspense>
         <CameraBreathing />
         <OrbitControls

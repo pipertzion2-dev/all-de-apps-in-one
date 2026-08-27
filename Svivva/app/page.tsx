@@ -190,6 +190,20 @@ export default function LandingPage() {
       .forEach((el) => el.remove());
   }, []);
 
+  // World is opt-in fun mode — skip the business intro card so the desk opens immediately.
+  useEffect(() => {
+    if (!isWorld || flipComplete) return;
+    try {
+      sessionStorage.setItem("svivva:homepageIntroComplete", "1");
+      window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
+    } catch {
+      /* ignore */
+    }
+    setFlipComplete(true);
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "";
+  }, [isWorld, flipComplete]);
+
   useEffect(() => {
     if (!flipComplete) return;
     document
