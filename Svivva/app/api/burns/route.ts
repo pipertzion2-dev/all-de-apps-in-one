@@ -7,7 +7,7 @@ import {
   burnsEstimatedSeconds,
   burnsExecutionOrder,
 } from "@/lib/burns/burns-graph";
-import { loadBurnsRuns } from "@/lib/burns/burns-store";
+import { loadBurnsRuns, loadBurnsProgress } from "@/lib/burns/burns-store";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +18,10 @@ export async function GET(req: NextRequest) {
   }
 
   const runs = await loadBurnsRuns();
+  const progress = await loadBurnsProgress();
+  const progressRun = progress.status === "complete" ? progress.run : null;
+  const lastRun = progressRun ?? runs[0] ?? null;
+
   return NextResponse.json({
     nodes: BURNS_NODES,
     edges: burnsEdges(),
@@ -25,7 +29,8 @@ export async function GET(req: NextRequest) {
     order: burnsExecutionOrder().map((n) => n.id),
     estimatedSeconds: burnsEstimatedSeconds(),
     schedule: "Daily 06:00 UTC",
-    lastRun: runs[0] ?? null,
+    progress,
+    lastRun,
     history: runs.slice(0, 7),
   });
 }

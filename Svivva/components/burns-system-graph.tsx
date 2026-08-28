@@ -37,9 +37,37 @@ type BurnsPayload = {
   order: string[];
   estimatedSeconds: number;
   schedule: string;
+  progress?:
+    | { status: "idle" }
+    | { status: "running"; startedAt: string }
+    | { status: "complete"; run: BurnsRunResult }
+    | { status: "failed"; error: string; startedAt: string };
   lastRun: BurnsRunResult | null;
   history: BurnsRunResult[];
 };
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Merge a partial run (single-node retry) into the last full run for the graph. */
+function mergeBurnsRuns(
+  previous: BurnsRunResult | null,
+  partial: BurnsRunResult,
+  order: string[],
+): BurnsRunResult {
+  const byId = new Map<string, BurnsNodeResult>();
+  for (const n of previous?.nodes ?? []) byId.set(n.id, n);
+  for (const n of partial.nodes) byId.set(n.id, n);
+  const nodes = order
+    .map((id) => byId.get(id))
+    .filter((n): n is BurnsNodeResult => Boolean(n));
+  return {
+    ...(previous ?? partial),
+    ...partial,
+    nodes: nodes.length ? nodes : partial.nodes,
+  };
+}
 
 const STATUS_COLOR: Record<BurnsNodeStatus, string> = {
   ok: "#34d399",
@@ -62,6 +90,7 @@ export function BurnsSystemGraph() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | "all" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [runNotice, setRunNotice] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -77,30 +106,107 @@ export function BurnsSystemGraph() {
     }
   }, []);
 
+  const pollUntilSettled = useCallback(
+    async (startedAt: string) => {
+      for (let attempt = 0; attempt < 150; attempt++) {
+        await sleep(2000);
+        const res = await authFetch("/api/burns");
+        if (!res.ok) continue;
+        const payload = (await res.json()) as BurnsPayload;
+        setData(payload);
+
+        if (payload.progress?.status === "complete") {
+          setRunNotice(`Done — ${payload.progress.run.summary}`);
+          setError(null);
+          return;
+        }
+        if (payload.progress?.status === "failed") {
+          setRunNotice(null);
+          setError(payload.progress.error || "Burns run failed");
+          return;
+        }
+        if (payload.progress?.status !== "running") {
+          if (payload.lastRun && payload.lastRun.startedAt >= startedAt) {
+            setRunNotice(null);
+            return;
+          }
+        }
+      }
+      setRunNotice(null);
+      setError("Run is still going — hit Refresh in a minute to see results.");
+    },
+    [],
+  );
+
   useEffect(() => {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    const progress = data?.progress;
+    if (progress?.status !== "running" || running !== null) return;
+    const startedAt = progress.startedAt;
+    setRunning("all");
+    void (async () => {
+      await pollUntilSettled(startedAt);
+      setRunning(null);
+    })();
+  }, [data?.progress, pollUntilSettled, running]);
+
   const run = useCallback(
     async (only?: string[]) => {
+      const isFullRun = !only?.length;
       setRunning(only?.length === 1 ? only[0] : "all");
       setError(null);
+      setRunNotice(
+        isFullRun
+          ? "Burns run started — this can take several minutes. Nodes will update when it finishes."
+          : null,
+      );
       try {
         const res = await authFetch("/api/burns/run", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(only ? { only } : {}),
+          body: JSON.stringify(isFullRun ? { async: true } : { only, async: false }),
         });
+
+        if (res.status === 202) {
+          const json = (await res.json()) as { startedAt?: string };
+          await pollUntilSettled(json.startedAt ?? new Date().toISOString());
+          return;
+        }
+
         const json = (await res.json()) as { run?: BurnsRunResult; error?: string };
         if (!res.ok) throw new Error(json.error || "Run failed");
-        await load();
+
+        if (json.run) {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  lastRun: isFullRun
+                    ? json.run!
+                    : mergeBurnsRuns(prev.lastRun, json.run!, prev.order),
+                  history: isFullRun ? [json.run!, ...prev.history].slice(0, 7) : prev.history,
+                }
+              : prev,
+          );
+          setRunNotice(
+            json.run.ok
+              ? `Done — ${json.run.summary}`
+              : `Finished with issues — ${json.run.summary}`,
+          );
+        } else {
+          await load();
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Run failed");
+        setRunNotice(null);
       } finally {
         setRunning(null);
       }
     },
-    [load],
+    [load, pollUntilSettled],
   );
 
   const resultById = useMemo(() => {
@@ -153,6 +259,8 @@ export function BurnsSystemGraph() {
   }
 
   const lastRun = data?.lastRun ?? null;
+  const progressRunning = data?.progress?.status === "running";
+  const showRunning = running !== null || progressRunning;
 
   return (
     <div className="space-y-4">
@@ -179,22 +287,22 @@ export function BurnsSystemGraph() {
             <Button
               size="sm"
               onClick={() => void run()}
-              disabled={running !== null}
+              disabled={showRunning}
               className="gap-1.5 bg-[#6B2C4E] text-white"
               data-testid="button-burns-run-all"
             >
-              {running === "all" ? (
+              {showRunning && running === "all" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Play className="w-3.5 h-3.5" />
               )}
-              Run now
+              {showRunning && running === "all" ? "Running…" : "Run now"}
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => void load()}
-              disabled={running !== null}
+              disabled={showRunning && running !== null}
               className="gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -229,6 +337,14 @@ export function BurnsSystemGraph() {
         )}
 
         {error && <p className="text-[11px] text-destructive">{error}</p>}
+        {runNotice && !error && (
+          <p className="text-[11px] text-[#5B8DA8] font-medium">{runNotice}</p>
+        )}
+        {progressRunning && data?.progress?.status === "running" && (
+          <p className="text-[11px] text-muted-foreground">
+            Started {new Date(data.progress.startedAt).toLocaleTimeString()} — polling for results…
+          </p>
+        )}
       </div>
 
       {/* Graph */}
@@ -300,7 +416,8 @@ export function BurnsSystemGraph() {
                 const result = resultById.get(node.id);
                 const status: BurnsNodeStatus = result?.status ?? "pending";
                 const isSel = selected === node.id;
-                const isRunning = running === node.id || running === "all";
+                const isRunning =
+                  running === node.id || (running === "all" && progressRunning) || running === "all";
                 return (
                   <g
                     key={node.id}
