@@ -28,7 +28,7 @@ describe("orbit admin access code", () => {
   it("accepts 272727 in production", () => {
     // Regression: production returned an empty expected code, so every attempt
     // failed with "Incorrect code" and the Orbit gate could not be opened even
-    // though the UI prints 272727.
+    // UI must not print passcodes; verification stays server-side.
     setNodeEnv("production");
     delete process.env.ADMIN_ACCESS_CODE;
     expect(verifyAdminAccessCode("272727")).toBe(true);

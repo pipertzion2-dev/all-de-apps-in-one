@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!(await canUseHybridizationEngine(req))) {
       return NextResponse.json(
-        { error: "Sign in or enter access code 333 to use Poor Man Protection." },
+        { error: "Sign in or enter your Pro access code to use Poor Man Protection." },
         { status: 401 },
       );
     }

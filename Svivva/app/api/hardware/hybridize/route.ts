@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!(await canUseHybridizationEngine(req))) {
       return NextResponse.json(
-        { error: "Sign in or enter access code 333 to use the Hybridization Engine." },
+        { error: "Sign in or enter your Pro access code to use the Hybridization Engine." },
         { status: 401 },
       );
     }

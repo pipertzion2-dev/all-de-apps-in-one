@@ -97,12 +97,12 @@ export default function OrbitPage() {
 
   const handleLaunch = async () => {
     setLaunching(true);
-    // Public marketing demo → hand off to real admin Orbit (requires 272727).
+    // Public marketing demo → hand off to real admin Orbit (owner passcode at /admin).
     await new Promise((r) => setTimeout(r, 600));
     setLaunching(false);
     toast({
       title: "Open Admin Orbit",
-      description: "Sign in with admin code 272727 to run the live marketing funnel.",
+      description: "Use your owner passcode to run the live marketing funnel.",
       duration: 4000,
     });
     window.location.href = "/dashboard/orbit";

@@ -64,7 +64,6 @@ import {
 } from "@/lib/feature-routes";
 import { TutorialProvider } from "@/components/tutorial-system";
 import { CommandPalette, SearchTrigger } from "@/components/command-palette";
-import { AdminCodeForm } from "@/components/admin-code-form";
 
 type MenuItem = {
   title: string;
@@ -386,6 +385,9 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   }
 
   if (!canEnterDashboard && !isPublicFeatureRoute) {
+    const loginHref = `/login?redirect=${encodeURIComponent(pathname)}`;
+    const signupHref = `/signup?redirect=${encodeURIComponent(pathname)}`;
+
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Card className="w-full max-w-md mx-4">
@@ -399,62 +401,27 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                 className="h-12 w-12 object-contain"
               />
             </div>
-            <CardTitle className="text-2xl">Dashboard access</CardTitle>
+            <CardTitle className="text-2xl">Sign in to your dashboard</CardTitle>
             <CardDescription>
               {authError ? (
                 <span className="text-amber-500 flex items-center justify-center gap-2 mt-2">
                   <AlertCircle className="w-4 h-4" />
-                  Login interrupted. Try admin code below or sign in again.
+                  Login interrupted — please sign in again.
                 </span>
               ) : (
-                <>
-                  <strong className="text-foreground font-medium">Admin:</strong> enter code{" "}
-                  <strong className="text-foreground font-medium">272727</strong> — no account
-                  needed.
-                  <span className="block mt-1 text-muted-foreground">
-                    Members use <strong className="font-medium">333</strong>. User accounts sign in
-                    below.
-                  </span>
-                </>
+                <>Use your ZZAI account to access projects, builders, and settings.</>
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <AdminCodeForm
-              title="Admin / member code"
-              description="272727 unlocks the full admin dashboard (Orbit, Burns, GSC, etc.). 333 unlocks Pro features."
-              onSuccess={() => {
-                window.location.reload();
-              }}
-            />
-            <Link href="/dashboard/orbit" className="block">
-              <Button variant="secondary" className="w-full gap-2" data-testid="button-orbit-admin">
-                <Rocket className="w-4 h-4" />
-                Orbit Admin (no account needed)
-              </Button>
-            </Link>
-            <Link href="/dashboard/burns" className="block">
-              <Button variant="secondary" className="w-full gap-2">
-                <Flame className="w-4 h-4" />
-                Burns System (admin code)
-              </Button>
-            </Link>
-            <div className="relative py-1">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">User accounts</span>
-              </div>
-            </div>
-            <a href={`/login?redirect=${encodeURIComponent(pathname)}`} className="block">
-              <Button variant="outline" className="w-full gap-2" data-testid="button-login">
+            <a href={loginHref} className="block">
+              <Button className="w-full gap-2" data-testid="button-login">
                 <LogIn className="w-4 h-4" />
-                Sign in (existing users)
+                Sign in
               </Button>
             </a>
-            <a href={`/signup?redirect=${encodeURIComponent(pathname)}`} className="block">
-              <Button variant="ghost" className="w-full gap-2">
+            <a href={signupHref} className="block">
+              <Button variant="outline" className="w-full gap-2">
                 Create account
               </Button>
             </a>

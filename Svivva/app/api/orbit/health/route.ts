@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
           "Execute marketing steps from the launchpad UI",
         ]
       : [
-          "Set ADMIN_USER_ID or enter admin code 272727",
+          "Set ADMIN_USER_ID or enter the owner passcode at /admin",
           "Ensure NEXT_PUBLIC_SITE_URL / site URL is configured",
           "Create a seed_credentials row by running IndexNow once",
         ],

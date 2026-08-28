@@ -105,13 +105,6 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p className="text-xs text-white/30 text-center max-w-sm">
-        Admin or member?{" "}
-        <Link href="/dashboard" className="text-[#5B8DA8] hover:underline">
-          Open dashboard with access code
-        </Link>{" "}
-        (272727 — no sign-in)
-      </p>
       <p className="text-xs text-white/30">
         New to ZZAI?{" "}
         <Link href="/signup" className="text-[#5B8DA8] hover:underline">

@@ -3,10 +3,7 @@ import { cookies } from "next/headers";
 const MEMBERSHIP_COOKIE = "svivva_membership";
 
 /**
- * Pro membership code. Same reasoning as the admin passcode: /dashboard/settings
- * tells the user to "Enter access code 333 for Pro", so it must work in
- * production rather than falling through to an empty value that rejects
- * everything. Set MEMBERSHIP_ACCESS_CODE to override.
+ * Pro membership code. Set MEMBERSHIP_ACCESS_CODE to override in production.
  */
 const DEFAULT_MEMBERSHIP_CODE = "333";
 

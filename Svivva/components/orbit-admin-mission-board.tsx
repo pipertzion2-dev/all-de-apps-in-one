@@ -156,7 +156,7 @@ export function OrbitAdminMissionBoard({
             label: "Burns System daily graph",
             lane: "auto",
             done: false,
-            hint: "Admin code only — /dashboard/burns (272727, no sign-in)",
+            hint: "Admin passcode — /admin or /dashboard/burns (no sign-in)",
           },
           {
             id: "svivva-submit",
