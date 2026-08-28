@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { projectRepository, versionRepository } from "@/lib/repositories";
+import { versionRepository } from "@/lib/repositories";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 import { db } from "@/lib/db";
 import { trainingExamples } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -13,10 +14,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const project = await projectRepository.findById(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const { project, error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {

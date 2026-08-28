@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { versionRepository, projectRepository } from "@/lib/repositories";
+import { versionRepository } from "@/lib/repositories";
 import { insertProjectVersionSchema } from "@/lib/schema";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-
-    const project = await projectRepository.findById(id);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const { error } = await requireProjectOwner(id);
+    if (error) return error;
 
     const versions = await versionRepository.findByProject(id);
     return NextResponse.json(versions);
@@ -22,12 +20,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const body = await request.json();
+    const { project, error } = await requireProjectOwner(id);
+    if (error) return error;
 
-    const project = await projectRepository.findById(id);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const body = await request.json();
 
     const version = await versionRepository.createFromProject(
       id,

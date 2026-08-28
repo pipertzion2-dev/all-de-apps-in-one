@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { apiAutopsies, projects, usageLogs } from "@/lib/schema";
+import { apiAutopsies, usageLogs } from "@/lib/schema";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 import { eq, desc, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
@@ -97,16 +98,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
+    const { project, error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
+
     const body = await request.json();
     const { input, output, error: errorMsg } = body;
 
     if (!input) {
       return NextResponse.json({ error: "Failed input is required" }, { status: 400 });
-    }
-
-    const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     const recentFailures = await db
@@ -161,6 +160,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
+    const { error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
+
     const autopsies = await db
       .select()
       .from(apiAutopsies)
