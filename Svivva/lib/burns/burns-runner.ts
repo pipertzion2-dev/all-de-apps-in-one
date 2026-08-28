@@ -49,12 +49,22 @@ export function burnsExecutors(): Record<string, Executor> {
 
   return {
     owner: async () => {
-      const { resolveOrbitInternalUserId } = await import("@/lib/orbit/internal-user");
-      ownerId = await resolveOrbitInternalUserId();
-      if (!ownerId) {
-        throw new Error("No Orbit owner — set ADMIN_USER_ID or save Orbit credentials once");
-      }
-      return { message: "Orbit owner resolved", detail: { ownerId } };
+      const {
+        resolveOrbitOwnerUserId,
+        ensureOrbitOwnerCredentials,
+        resolveOrbitInternalUserId,
+        ORBIT_OWNER_FALLBACK_USER_ID,
+      } = await import("@/lib/orbit/internal-user");
+      ownerId = await resolveOrbitOwnerUserId();
+      await ensureOrbitOwnerCredentials(ownerId);
+      const fromConfig = await resolveOrbitInternalUserId();
+      const usedFallback = !fromConfig && ownerId === ORBIT_OWNER_FALLBACK_USER_ID;
+      return {
+        message: usedFallback
+          ? "Using orbit-admin fallback — set ADMIN_USER_ID for your account"
+          : "Orbit owner resolved",
+        detail: { ownerId, usedFallback },
+      };
     },
 
     "hub-pages": async () => {

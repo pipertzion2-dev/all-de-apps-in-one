@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   BURNS_NODES,
   BURNS_STAGES,
@@ -160,5 +160,14 @@ describe("burns runner", () => {
     const round = JSON.parse(JSON.stringify(run)) as BurnsRunResult;
     expect(round.nodes).toHaveLength(run.nodes.length);
     expect(round.summary).toBe(run.summary);
+  });
+
+  it("owner executor resolves without throwing when no env is set", async () => {
+    vi.stubEnv("ADMIN_USER_ID", "");
+    vi.stubEnv("ORBIT_INTERNAL_USER_ID", "");
+    const run = await runBurnsSystem({ only: ["owner"] });
+    const owner = run.nodes.find((n) => n.id === "owner");
+    expect(owner?.status).toBe("ok");
+    expect(owner?.detail).toMatchObject({ ownerId: "orbit-admin", usedFallback: true });
   });
 });

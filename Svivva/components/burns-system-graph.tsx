@@ -165,6 +165,13 @@ export function BurnsSystemGraph() {
 
   const effectiveLastRun = liveRun ?? data?.lastRun ?? null;
 
+  const ownerResult = effectiveLastRun?.nodes.find((n) => n.id === "owner");
+  const showOwnerHint =
+    ownerResult?.status === "failed" ||
+    (ownerResult?.detail as { usedFallback?: boolean } | undefined)?.usedFallback;
+  const showBlockedHint =
+    (effectiveLastRun?.counts.blocked ?? 0) > 0 && ownerResult?.status !== "failed";
+
   const resultById = useMemo(() => {
     const map = new Map<string, BurnsNodeResult>();
     for (const n of effectiveLastRun?.nodes ?? []) map.set(n.id, n);
@@ -292,6 +299,55 @@ export function BurnsSystemGraph() {
         {error && <p className="text-[11px] text-destructive">{error}</p>}
         {runNotice && !error && (
           <p className="text-[11px] text-[#5B8DA8] font-medium">{runNotice}</p>
+        )}
+
+        {(showOwnerHint || showBlockedHint) && (
+          <div
+            className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-[11px] space-y-1.5"
+            data-testid="burns-setup-hint"
+          >
+            {ownerResult?.status === "failed" ? (
+              <>
+                <p className="font-semibold text-amber-200">
+                  Owner node failed — most downstream nodes are blocked.
+                </p>
+                <p className="text-muted-foreground">
+                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in Vercel to your
+                  user id, or save Orbit credentials once from{" "}
+                  <Link href="/dashboard/orbit" className="text-[#5B8DA8] underline">
+                    Orbit
+                  </Link>
+                  .
+                </p>
+              </>
+            ) : showOwnerHint ? (
+              <>
+                <p className="font-semibold text-amber-200">
+                  Running as orbit-admin fallback — credentials may not match your account.
+                </p>
+                <p className="text-muted-foreground">
+                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in production for
+                  your signed-in user, or connect GSC at{" "}
+                  <Link href="/dashboard/gsc-connect" className="text-[#5B8DA8] underline">
+                    GSC Connect
+                  </Link>
+                  .
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-amber-200">
+                  {effectiveLastRun?.counts.blocked} node
+                  {(effectiveLastRun?.counts.blocked ?? 0) === 1 ? "" : "s"} blocked by upstream
+                  failures.
+                </p>
+                <p className="text-muted-foreground">
+                  Click a red or amber node below for the error message, then fix the upstream node
+                  and run again.
+                </p>
+              </>
+            )}
+          </div>
         )}
       </div>
 
