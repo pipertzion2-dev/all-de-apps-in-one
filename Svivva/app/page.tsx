@@ -165,21 +165,19 @@ export default function LandingPage() {
   const flipAnimRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
   const finishingIntroRef = useRef(false);
-  const requestIntroFinishRef = useRef<(() => void) | null>(null);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
+  const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    const mobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!mobile) setCanMountHeavy3d(true);
-  }, []);
-
-  useEffect(() => {
-    if (flipComplete) setCanMountHeavy3d(true);
+    if (!flipComplete) return;
+    // Defer WebGL until the intro overlay is gone — mounting during the flip freezes scroll.
+    const mountTimer = window.setTimeout(() => setCanMountHeavy3d(true), 200);
+    return () => window.clearTimeout(mountTimer);
   }, [flipComplete]);
 
   useEffect(() => {
@@ -241,16 +239,26 @@ export default function LandingPage() {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
 
-    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    skipIntroRef.current = finishIntro;
 
-    // Longer zone so the first scroll is controllable (not a snap).
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Reduced motion skips the rotation entirely — finishIntro also releases the
+    // page face, so the 3D transform is never applied for these users.
+    if (reducedMotion) {
+      finishIntro();
+      return () => {
+        skipIntroRef.current = null;
+      };
+    }
+
     const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
 
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const progressToAngle = (progress: number) => {
       const clamped = Math.min(Math.max(progress, 0), 1);
-      // Mild ease-out keeps first pixels responsive without a dead zone.
       return easeOutCubic(clamped) * 90;
     };
 
@@ -291,7 +299,6 @@ export default function LandingPage() {
       }
       paintPageFace(angle);
 
-      // Stay opaque during the flip; opacity fade only runs in scheduleFinish.
       if (!finishingIntroRef.current) {
         captureEl.style.opacity = "1";
       }
@@ -314,20 +321,13 @@ export default function LandingPage() {
       stopFlipAnim();
       targetProgressRef.current = 1;
       paintFlip(1);
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+      captureEl.style.pointerEvents = "none";
       captureEl.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
       captureEl.style.opacity = "0";
       window.setTimeout(finishIntro, 440);
     };
-
-    // Skip button and the mobile idle timer both fade out like a completed flip
-    // instead of cutting the intro away in a single frame.
-    requestIntroFinishRef.current = scheduleFinish;
-
-    const autoSkipTimer = mobile
-      ? window.setTimeout(() => {
-          if (!targetProgressRef.current) scheduleFinish();
-        }, 12000)
-      : undefined;
 
     let lastFrameMs = performance.now();
     const tickFlip = (now: number) => {
@@ -340,7 +340,7 @@ export default function LandingPage() {
       const delta = target - current;
 
       if (Math.abs(delta) > 0.0004) {
-        const smoothing = 1 - Math.exp(-10 * dt);
+        const smoothing = 1 - Math.exp(-12 * dt);
         current += delta * smoothing;
         if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
           current = target;
@@ -352,7 +352,7 @@ export default function LandingPage() {
 
       if (current !== target) paintFlip(target);
 
-      if (target >= 1 && displayedProgressRef.current >= 0.998) {
+      if (target >= 1 && displayedProgressRef.current >= 0.985) {
         scheduleFinish();
       }
     };
@@ -364,6 +364,34 @@ export default function LandingPage() {
       }
     };
 
+    const snapToFinish = () => {
+      if (finishingIntroRef.current) return;
+      targetProgressRef.current = 1;
+      virtualScrollRef.current = flipZone;
+      ensureTick();
+    };
+
+    let idleCompleteTimer: number | undefined;
+    const bumpIdleComplete = () => {
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      idleCompleteTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.68) {
+          snapToFinish();
+        }
+      }, 750);
+    };
+
+    const autoSkipMs = mobile ? 5500 : 8000;
+    const autoSkipTimer = window.setTimeout(() => {
+      if (finishingIntroRef.current) return;
+      if (displayedProgressRef.current >= 0.12) {
+        snapToFinish();
+      } else {
+        scheduleFinish();
+      }
+    }, autoSkipMs);
+
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
       const gain = mobile ? 1.05 : 0.9;
@@ -373,6 +401,7 @@ export default function LandingPage() {
         Math.min(flipZone, virtualScrollRef.current + clampedDelta),
       );
       targetProgressRef.current = virtualScrollRef.current / flipZone;
+      bumpIdleComplete();
       ensureTick();
     };
 
@@ -408,21 +437,45 @@ export default function LandingPage() {
       applyDelta(delta);
     };
 
+    const handleTouchEnd = () => {
+      if (finishingIntroRef.current) return;
+      if (displayedProgressRef.current >= 0.72) {
+        snapToFinish();
+      }
+    };
+
+    let wheelEndTimer: number | undefined;
+    const handleWheelEnd = () => {
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
+      wheelEndTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.72) {
+          snapToFinish();
+        }
+      }, 120);
+    };
+
     // Single window listeners only — capture + window previously doubled every delta.
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("wheel", handleWheelEnd, { passive: true });
 
     return () => {
-      if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
-      requestIntroFinishRef.current = null;
+      skipIntroRef.current = null;
+      window.clearTimeout(autoSkipTimer);
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
       stopFlipAnim();
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("wheel", handleWheelEnd);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [flipComplete]);
 
@@ -569,15 +622,7 @@ export default function LandingPage() {
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
             onClick={() => {
-              const requestFinish = requestIntroFinishRef.current;
-              if (requestFinish) {
-                requestFinish();
-                return;
-              }
-              setFlipComplete(true);
-              document.body.style.overflow = "";
-              document.body.style.touchAction = "";
-              window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+              skipIntroRef.current?.();
             }}
           >
             Skip intro
@@ -585,10 +630,11 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* During the intro this is the flip's second face. Rotating the real page
-          keeps the camo and cube authentic instead of duplicating the WebGL
-          scene, and it is clipped to one screen so a 10,000px document is never
-          promoted to a 3D layer. */}
+      {/* During the intro this is the flip's second face, so the reveal is a real
+          rotation rather than a cross-fade. Rotating the actual page avoids a
+          duplicate copy, and it is clipped to one screen so a 10,000px document
+          is never promoted to a 3D layer. Heavy WebGL stays unmounted until the
+          intro ends, so the face rotates in with the page chrome, not the camo. */}
       <div
         style={
           flipComplete

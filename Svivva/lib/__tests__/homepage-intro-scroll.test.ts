@@ -18,10 +18,16 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("flipAnimRef");
   });
 
-  it("defers heavy 3D on mobile until intro completes", () => {
+  it("defers heavy 3D until intro completes on all devices", () => {
     expect(pageSrc).toContain("canMountHeavy3d");
-    expect(pageSrc).toContain("setCanMountHeavy3d(true)");
-    expect(pageSrc).toContain("if (flipComplete) setCanMountHeavy3d(true)");
+    expect(pageSrc).toContain("if (!flipComplete) return");
+    expect(pageSrc).not.toMatch(/if \(!mobile\) setCanMountHeavy3d\(true\)/);
+  });
+
+  it("auto-advances to homepage when intro is idle", () => {
+    expect(pageSrc).toContain("autoSkipTimer");
+    expect(pageSrc).toContain("snapToFinish");
+    expect(pageSrc).toContain("bumpIdleComplete");
   });
 
   it("rotates the real page in as the flip's second face", () => {
