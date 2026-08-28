@@ -29,7 +29,9 @@ async function ensureColumn() {
   if (columnEnsured) return;
   try {
     await db.execute(sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS burns_runs TEXT`);
-    await db.execute(sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS burns_progress TEXT`);
+    await db.execute(
+      sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS burns_progress TEXT`,
+    );
     columnEnsured = true;
   } catch {
     /* table may not exist in test env */

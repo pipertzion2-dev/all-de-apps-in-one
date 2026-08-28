@@ -50,7 +50,9 @@ export default function AdminAccessPage() {
       <header className="h-14 border-b border-border/50 flex items-center px-4">
         <Link href="/" className="flex items-center gap-2">
           <Image src={zzaiLogo} alt="zzai zzai" width={32} height={32} className="h-8 w-8" />
-          <span className="text-xs font-bold tracking-wide text-muted-foreground">Owner access</span>
+          <span className="text-xs font-bold tracking-wide text-muted-foreground">
+            Owner access
+          </span>
         </Link>
       </header>
       <div className="flex flex-1 items-center justify-center p-4">

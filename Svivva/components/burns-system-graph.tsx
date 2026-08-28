@@ -59,9 +59,7 @@ function mergeBurnsRuns(
   const byId = new Map<string, BurnsNodeResult>();
   for (const n of previous?.nodes ?? []) byId.set(n.id, n);
   for (const n of partial.nodes) byId.set(n.id, n);
-  const nodes = order
-    .map((id) => byId.get(id))
-    .filter((n): n is BurnsNodeResult => Boolean(n));
+  const nodes = order.map((id) => byId.get(id)).filter((n): n is BurnsNodeResult => Boolean(n));
   return {
     ...(previous ?? partial),
     ...partial,
@@ -126,9 +124,7 @@ export function BurnsSystemGraph() {
       setRunning(only?.length === 1 ? only[0] : "all");
       setError(null);
       setRunNotice(
-        isFullRun
-          ? "Running all nodes — keep this tab open. This can take several minutes."
-          : null,
+        isFullRun ? "Running all nodes — keep this tab open. This can take several minutes." : null,
       );
       try {
         const res = await authFetch("/api/burns/run", {
@@ -150,16 +146,12 @@ export function BurnsSystemGraph() {
             ? {
                 ...prev,
                 lastRun: merged,
-                history: isFullRun
-                  ? [merged, ...prev.history].slice(0, 7)
-                  : prev.history,
+                history: isFullRun ? [merged, ...prev.history].slice(0, 7) : prev.history,
               }
             : prev,
         );
         setRunNotice(
-          merged.ok
-            ? `Done — ${merged.summary}`
-            : `Finished with issues — ${merged.summary}`,
+          merged.ok ? `Done — ${merged.summary}` : `Finished with issues — ${merged.summary}`,
         );
       } catch (e) {
         setError(e instanceof Error ? e.message : "Run failed");
