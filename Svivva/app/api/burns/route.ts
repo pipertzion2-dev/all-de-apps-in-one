@@ -7,7 +7,7 @@ import {
   burnsEstimatedSeconds,
   burnsExecutionOrder,
 } from "@/lib/burns/burns-graph";
-import { loadBurnsRuns, loadBurnsProgress } from "@/lib/burns/burns-store";
+import { loadBurnsProgress, loadBurnsRuns, resolveBurnsLastRun } from "@/lib/burns/burns-store";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +17,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const runs = await loadBurnsRuns();
-  const progress = await loadBurnsProgress();
-  const progressRun = progress.status === "complete" ? progress.run : null;
-  const lastRun = progressRun ?? runs[0] ?? null;
+  const [runs, progress, lastRun] = await Promise.all([
+    loadBurnsRuns(),
+    loadBurnsProgress(),
+    resolveBurnsLastRun(),
+  ]);
 
   return NextResponse.json({
     nodes: BURNS_NODES,

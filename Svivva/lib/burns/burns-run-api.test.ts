@@ -3,24 +3,29 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 describe("burns manual run API", () => {
-  it("starts full manual runs in the background (202 + after)", () => {
+  it("returns run results synchronously from POST /api/burns/run", () => {
     const src = readFileSync(resolve(__dirname, "../../app/api/burns/run/route.ts"), "utf8");
-    expect(src).toContain('from "next/server"');
-    expect(src).toContain("after(");
-    expect(src).toContain("status: 202");
-    expect(src).toContain("setBurnsProgress");
+    expect(src).toContain("return NextResponse.json({ success: run.ok, run })");
+    expect(src).not.toContain("after(");
+    expect(src).not.toContain("status: 202");
   });
 
-  it("returns graph progress from GET /api/burns", () => {
+  it("resolves lastRun from DB, progress, or memory on GET /api/burns", () => {
     const src = readFileSync(resolve(__dirname, "../../app/api/burns/route.ts"), "utf8");
-    expect(src).toContain("loadBurnsProgress");
-    expect(src).toContain("progress");
+    expect(src).toContain("resolveBurnsLastRun");
   });
 
-  it("applies run results in the graph UI instead of reload-only", () => {
+  it("paints node results from the POST response (liveRun)", () => {
     const src = readFileSync(resolve(__dirname, "../../components/burns-system-graph.tsx"), "utf8");
-    expect(src).toContain("pollUntilSettled");
-    expect(src).toContain("mergeBurnsRuns");
-    expect(src).toContain("res.status === 202");
+    expect(src).toContain("liveRun");
+    expect(src).toContain("setLiveRun");
+    expect(src).toContain("effectiveLastRun");
+    expect(src).not.toContain("pollUntilSettled");
+  });
+
+  it("keeps an in-memory fallback when DB persistence fails", () => {
+    const src = readFileSync(resolve(__dirname, "./burns-store.ts"), "utf8");
+    expect(src).toContain("memoryLastRun");
+    expect(src).toContain("resolveBurnsLastRun");
   });
 });
