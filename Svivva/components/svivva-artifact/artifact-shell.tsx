@@ -17,7 +17,16 @@ const ArtifactCanvas = lazy(() =>
 const CUBE_SIZE = "min(520px, 92vw)";
 const CANVAS_OVERFLOW = `calc(0.425 * ${CUBE_SIZE})`;
 
-export function SvivvaArtifact() {
+type SvivvaArtifactProps = {
+  /**
+   * Mount the WebGL canvas. The shell (heading, copy, face buttons) is cheap and
+   * always renders, so the section holds its layout and stays readable while the
+   * canvas is deferred — during the homepage intro, for instance.
+   */
+  mountCanvas?: boolean;
+};
+
+export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
   const router = useRouter();
 
   const handleSelect = (id: FeatureId) => {
@@ -80,15 +89,21 @@ export function SvivvaArtifact() {
           }}
         />
 
-        <Suspense
-          fallback={
-            <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
-              loading cube…
-            </div>
-          }
-        >
-          <ArtifactCanvas active="play" onSelect={handleSelect} />
-        </Suspense>
+        {mountCanvas ? (
+          <Suspense
+            fallback={
+              <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
+                loading cube…
+              </div>
+            }
+          >
+            <ArtifactCanvas active="play" onSelect={handleSelect} />
+          </Suspense>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
+            loading cube…
+          </div>
+        )}
       </div>
 
       <nav

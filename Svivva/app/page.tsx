@@ -726,7 +726,14 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative z-10">{canMountHeavy3d ? <SvivvaArtifact /> : null}</div>
+            {/* The shell always renders so the hero holds its layout and reads as
+                the page's first screen; only the WebGL canvas waits for
+                canMountHeavy3d. Gating the whole section collapsed the hero, so
+                the top of the page was the OaaS block until the cube mounted and
+                shoved everything down. */}
+            <div className="relative z-10">
+              <SvivvaArtifact mountCanvas={canMountHeavy3d} />
+            </div>
 
             <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
               <div className="max-w-5xl mx-auto px-4 sm:px-6">
