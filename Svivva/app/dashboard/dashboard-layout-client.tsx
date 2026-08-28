@@ -57,7 +57,11 @@ import {
   BookOpen,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { isPublicFeaturePath, featureTitleFromPath } from "@/lib/feature-routes";
+import {
+  isPublicFeaturePath,
+  featureTitleFromPath,
+  isAdminCodeFirstPath,
+} from "@/lib/feature-routes";
 import { TutorialProvider } from "@/components/tutorial-system";
 import { CommandPalette, SearchTrigger } from "@/components/command-palette";
 import { AdminCodeForm } from "@/components/admin-code-form";
@@ -211,6 +215,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/burns",
         icon: Flame,
         adminOnly: true,
+        highlight: true,
       },
     ],
   },
@@ -318,6 +323,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   const pathname = usePathname() || "";
   const isGscOAuthBridge = /\/gsc-connect\/(connect|oauth|google-sign-in)$/.test(pathname);
   const isPublicFeatureRoute = isPublicFeaturePath(pathname);
+  const isAdminCodeFirstRoute = isAdminCodeFirstPath(pathname);
   const featureThreeBg =
     pathname.startsWith("/dashboard/security") ||
     pathname.startsWith("/dashboard/api-builder") ||
@@ -363,7 +369,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  if (isGscOAuthBridge) {
+  if (isGscOAuthBridge || isAdminCodeFirstRoute) {
     return <>{children}</>;
   }
 

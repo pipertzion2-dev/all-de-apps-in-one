@@ -152,6 +152,13 @@ export function OrbitAdminMissionBoard({
             hint: "Bing, Yandex, Yahoo",
           },
           {
+            id: "burns-system",
+            label: "Burns System daily graph",
+            lane: "auto",
+            done: false,
+            hint: "Admin code only — /dashboard/burns (272727, no sign-in)",
+          },
+          {
             id: "svivva-submit",
             label: "Sitemap + GSC API submit",
             lane: "credential",

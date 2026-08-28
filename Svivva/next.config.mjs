@@ -67,6 +67,7 @@ const nextConfig = {
         destination: "/cyber-security-mini-apps",
         permanent: true,
       },
+      { source: "/burns", destination: "/dashboard/burns", permanent: false },
     ];
   },
 };
