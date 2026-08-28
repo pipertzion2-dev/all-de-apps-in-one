@@ -2,13 +2,19 @@ import { cookies } from "next/headers";
 import type { SessionUser } from "./session";
 import { siteCookieDomain } from "@/lib/site-cookie-domain";
 
-/** Site admin passcode — enter on Settings or Orbit to unlock admin APIs & pages. */
-export const ADMIN_ACCESS_CODE = "272727";
-
 const ADMIN_COOKIE = "svivva_admin";
 
+function configuredAdminCode(): string {
+  const fromEnv = process.env.ADMIN_ACCESS_CODE?.trim();
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV !== "production") return "272727";
+  return "";
+}
+
 export function verifyAdminAccessCode(code: string): boolean {
-  return code.trim() === ADMIN_ACCESS_CODE;
+  const expected = configuredAdminCode();
+  if (!expected) return false;
+  return code.trim() === expected;
 }
 
 export async function hasAdminAccess(): Promise<boolean> {

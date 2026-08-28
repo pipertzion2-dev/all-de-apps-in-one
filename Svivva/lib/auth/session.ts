@@ -13,20 +13,29 @@ export interface SessionUser {
 }
 
 const SESSION_COOKIE_NAME = "vivva_session";
+const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60;
+
+function sessionCookieOptions(maxAgeSec = SESSION_MAX_AGE_SEC) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: maxAgeSec,
+  };
+}
+
+function looksLikeLegacySessionCookie(value: string): boolean {
+  return value.startsWith("{");
+}
 
 export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
 
-  if (sessionCookie?.value) {
-    try {
-      const session = JSON.parse(sessionCookie.value);
-      if (session.expiresAt && Date.now() < session.expiresAt) {
-        return session.user;
-      }
-    } catch {
-      // invalid cookie
-    }
+  if (sessionCookie?.value && !looksLikeLegacySessionCookie(sessionCookie.value)) {
+    const user = await getUserFromToken(sessionCookie.value);
+    if (user) return user;
   }
 
   const headerStore = await headers();
@@ -71,34 +80,40 @@ function generateSessionToken(): string {
 }
 
 export async function setSession(user: SessionUser, expiresAt: number): Promise<string> {
-  try {
-    const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify({ user, expiresAt }), {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 30 * 24 * 60 * 60,
-    });
-  } catch {
-    console.log("Could not set session cookie");
-  }
-
   const token = generateSessionToken();
   const sessionId = randomBytes(16).toString("hex");
+  const expiresAtDate = new Date(expiresAt);
 
   await db.insert(sessions).values({
     id: sessionId,
     userId: user.id,
     token,
-    expiresAt: new Date(expiresAt),
+    expiresAt: expiresAtDate,
   });
+
+  try {
+    const cookieStore = await cookies();
+    const maxAgeSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+    cookieStore.set(SESSION_COOKIE_NAME, token, sessionCookieOptions(maxAgeSec));
+  } catch {
+    console.log("Could not set session cookie");
+  }
 
   return token;
 }
 
 export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+
+  if (sessionCookie?.value && !looksLikeLegacySessionCookie(sessionCookie.value)) {
+    try {
+      await db.delete(sessions).where(eq(sessions.token, sessionCookie.value));
+    } catch (e) {
+      console.error("Error clearing session row:", e);
+    }
+  }
+
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 

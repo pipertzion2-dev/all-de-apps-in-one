@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +27,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const [page] = await db.insert(seoLandingPages).values(body).returning();

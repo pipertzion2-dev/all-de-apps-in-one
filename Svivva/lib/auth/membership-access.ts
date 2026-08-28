@@ -1,15 +1,18 @@
 import { cookies } from "next/headers";
 
-/**
- * Owner/membership bypass — enter on Settings or Billing instead of a paid plan.
- * Unlocks Pro features for both digital and hardware modes.
- */
-export const MEMBERSHIP_ACCESS_CODE = "333";
-
 const MEMBERSHIP_COOKIE = "svivva_membership";
 
+function configuredMembershipCode(): string {
+  const fromEnv = process.env.MEMBERSHIP_ACCESS_CODE?.trim();
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV !== "production") return "333";
+  return "";
+}
+
 export function verifyMembershipAccessCode(code: string): boolean {
-  return code.trim() === MEMBERSHIP_ACCESS_CODE;
+  const expected = configuredMembershipCode();
+  if (!expected) return false;
+  return code.trim() === expected;
 }
 
 export async function hasMembershipAccess(): Promise<boolean> {

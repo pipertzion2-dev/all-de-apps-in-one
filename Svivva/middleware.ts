@@ -3,10 +3,16 @@ import type { NextRequest } from "next/server";
 import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
 import { isNoindexPath } from "@/lib/seo/robots-config";
 
+const SESSION_COOKIE = "vivva_session";
 const ADMIN_COOKIE = "svivva_admin";
 
 /** Orbit admin surfaces — require passcode cookie before OAuth/API actions. */
 const ADMIN_CODE_PREFIXES = ["/dashboard/gsc-connect"];
+
+function hasSessionCookie(request: NextRequest): boolean {
+  const value = request.cookies.get(SESSION_COOKIE)?.value;
+  return Boolean(value && !value.startsWith("{"));
+}
 
 function pathRequiresAdminCode(pathname: string): boolean {
   return ADMIN_CODE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -52,31 +58,39 @@ function applyCrawlHeaders(request: NextRequest, response: NextResponse): NextRe
 }
 
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   const hostHeader = request.headers.get("host") || "";
   const host = hostHeader.split(":")[0]?.toLowerCase();
   const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
   const canonical = canonicalSiteUrl();
 
   if (host && !isLikelyLocalDevHost(host) && proto === "http") {
-    const dest = new URL(
-      request.nextUrl.pathname + request.nextUrl.search,
-      `https://${hostHeader}`,
-    );
+    const dest = new URL(pathname + request.nextUrl.search, `https://${hostHeader}`);
     return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest, 308)));
   }
 
   if (host && canonical) {
     const apex = canonical.hostname.toLowerCase();
     if (host === `www.${apex}`) {
-      const dest = new URL(
-        request.nextUrl.pathname + request.nextUrl.search,
-        `${canonical.protocol}//${apex}`,
-      );
+      const dest = new URL(pathname + request.nextUrl.search, `${canonical.protocol}//${apex}`);
       return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest, 308)));
     }
   }
 
-  const keyMatch = request.nextUrl.pathname.match(/^\/([0-9a-f]{32})\.txt$/i);
+  if (process.env.NODE_ENV === "production" && pathname === "/test") {
+    return applyCrawlHeaders(
+      request,
+      withSecurityHeaders(NextResponse.redirect(new URL("/", request.url))),
+    );
+  }
+
+  if (pathname.startsWith("/dashboard") && !hasSessionCookie(request)) {
+    const login = new URL("/login", request.url);
+    login.searchParams.set("redirect", pathname + request.nextUrl.search);
+    return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(login)));
+  }
+
+  const keyMatch = pathname.match(/^\/([0-9a-f]{32})\.txt$/i);
   if (keyMatch) {
     const url = request.nextUrl.clone();
     url.pathname = "/api/indexnow-key";
@@ -84,12 +98,11 @@ export function middleware(request: NextRequest) {
     return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.rewrite(url)));
   }
 
-  // Google OAuth entry — must enter admin code 272727 first (blocks direct sign-in URL).
   const oauthEntry =
-    request.nextUrl.pathname.endsWith("/connect") ||
-    request.nextUrl.pathname.endsWith("/google-sign-in") ||
-    request.nextUrl.pathname.endsWith("/oauth");
-  if (pathRequiresAdminCode(request.nextUrl.pathname) && oauthEntry && !hasAdminPasscode(request)) {
+    pathname.endsWith("/connect") ||
+    pathname.endsWith("/google-sign-in") ||
+    pathname.endsWith("/oauth");
+  if (pathRequiresAdminCode(pathname) && oauthEntry && !hasAdminPasscode(request)) {
     const dest = new URL("/dashboard/gsc-connect", request.url);
     dest.searchParams.set("gsc_error", "admin_required");
     const returnTo = request.nextUrl.searchParams.get("return");
@@ -98,7 +111,7 @@ export function middleware(request: NextRequest) {
   }
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set("x-pathname", pathname);
   return applyCrawlHeaders(
     request,
     withSecurityHeaders(

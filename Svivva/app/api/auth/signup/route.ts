@@ -6,9 +6,19 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { setSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/session";
+import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIp(request);
+    const limit = checkRateLimit(`signup:${ip}`, 8, 60_000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many sign-up attempts. Try again shortly." },
+        { status: 429 },
+      );
+    }
+
     const { email, password, name } = await request.json();
 
     if (!email || !password) {

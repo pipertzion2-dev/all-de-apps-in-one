@@ -22,8 +22,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (error) return error;
 
     const body = await request.json();
+    const { ownerId: _ownerId, id: _id, ...updates } = body as Record<string, unknown>;
 
-    const project = await projectRepository.update(id, body);
+    const project = await projectRepository.update(id, updates);
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });

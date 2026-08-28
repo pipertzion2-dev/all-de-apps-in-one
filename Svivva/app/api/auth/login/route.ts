@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { setSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/session";
+import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
 
 export async function GET(request: NextRequest) {
   const redirect = request.nextUrl.searchParams.get("redirect");
@@ -17,6 +18,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIp(request);
+    const limit = checkRateLimit(`login:${ip}`, 12, 60_000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many sign-in attempts. Try again shortly." },
+        { status: 429 },
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
