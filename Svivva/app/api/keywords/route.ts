@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { seoKeywords } from "@/lib/schema";
 import { desc } from "drizzle-orm";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 const VALID_INTENTS = ["high", "medium", "low"];
 const VALID_STATUSES = ["planned", "writing", "published"];
@@ -17,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
 

@@ -11,9 +11,22 @@ import {
   membershipAccessCookieValue,
   verifyMembershipAccessCode,
 } from "@/lib/auth/membership-access";
+import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIp(request);
+    const limit = checkRateLimit(`admin-code:${ip}`, 8, 60_000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Try again shortly." },
+        {
+          status: 429,
+          headers: limit.retryAfterSec ? { "Retry-After": String(limit.retryAfterSec) } : undefined,
+        },
+      );
+    }
+
     const { code } = (await request.json()) as { code?: string };
     if (!code || typeof code !== "string") {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });

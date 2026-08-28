@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { seoKeywords } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 const VALID_INTENTS = ["high", "medium", "low"];
 const VALID_STATUSES = ["planned", "writing", "published"];
@@ -22,6 +23,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -60,6 +64,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const [deleted] = await db.delete(seoKeywords).where(eq(seoKeywords.id, id)).returning();

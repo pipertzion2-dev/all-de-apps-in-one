@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { projectRepository } from "@/lib/repositories";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const project = await projectRepository.findById(id);
-
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const { project, error } = await requireProjectOwner(id);
+    if (error) return error;
 
     return NextResponse.json(project);
   } catch (error) {
@@ -20,9 +18,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const body = await request.json();
+    const { error } = await requireProjectOwner(id);
+    if (error) return error;
 
-    const project = await projectRepository.update(id, body);
+    const body = await request.json();
+    const { ownerId: _ownerId, id: _id, ...updates } = body as Record<string, unknown>;
+
+    const project = await projectRepository.update(id, updates);
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -41,6 +43,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const { error } = await requireProjectOwner(id);
+    if (error) return error;
+
     const deleted = await projectRepository.delete(id);
 
     if (!deleted) {

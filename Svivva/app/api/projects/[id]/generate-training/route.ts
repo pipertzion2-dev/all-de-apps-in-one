@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { projectRepository, versionRepository } from "@/lib/repositories";
+import { versionRepository } from "@/lib/repositories";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 import { generateAndGradeTraining, type GradedExample } from "@/lib/llm/training";
 import { type JsonSchema } from "@/lib/spec";
 import { db } from "@/lib/db";
@@ -23,10 +24,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const project = await projectRepository.findById(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found", projectId }, { status: 404 });
-    }
+    const { project, error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {
@@ -114,10 +113,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const project = await projectRepository.findById(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const { project, error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
 
     const latestVersion = await versionRepository.findLatestByProjectId(projectId);
     if (!latestVersion) {

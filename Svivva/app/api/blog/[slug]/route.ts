@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { blogPosts } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { requireAdminUser } from "@/lib/auth/require-admin-user";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -22,6 +23,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const { slug } = await params;
     const body = await request.json();
@@ -45,6 +49,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  const { error: authError } = await requireAdminUser();
+  if (authError) return authError;
+
   try {
     const { slug } = await params;
     await db.delete(blogPosts).where(eq(blogPosts.slug, slug));

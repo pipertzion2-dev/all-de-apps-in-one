@@ -40,8 +40,23 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function sanitizeMarkdownInput(md: string): string {
+  const codeBlocks: string[] = [];
+  const withPlaceholders = md.replace(/```[\s\S]*?```/g, (block) => {
+    codeBlocks.push(block);
+    return `\x00CODE${codeBlocks.length - 1}\x00`;
+  });
+
+  const escaped = withPlaceholders
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  return escaped.replace(/\x00CODE(\d+)\x00/g, (_, index) => codeBlocks[Number(index)]);
+}
+
 function renderMarkdown(md: string): string {
-  let html = md;
+  let html = sanitizeMarkdownInput(md);
 
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
     return `<pre class="bg-muted rounded-md p-4 overflow-x-auto my-4 text-sm"><code class="language-${lang}">${code

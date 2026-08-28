@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sessions, users } from "@/lib/schema";
+import { sessions } from "@/lib/schema";
 import { and, eq, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 const SESSION_COOKIE_NAME = "vivva_session";
+
+function sessionCookieOptions(maxAgeSec: number) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: maxAgeSec,
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,29 +32,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid or expired session" }, { status: 401 });
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, session.userId));
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-    }
-
-    const sessionUser = {
-      id: user.id,
-      email: user.email,
-      firstName: user.name?.split(" ")[0] || null,
-      lastName: user.name?.split(" ").slice(1).join(" ") || null,
-      profileImageUrl: user.avatarUrl,
-    };
-
-    const expiresAt = session.expiresAt.getTime();
-
+    const maxAgeSec = Math.max(0, Math.floor((session.expiresAt.getTime() - Date.now()) / 1000));
     const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify({ user: sessionUser, expiresAt }), {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: Math.max(0, Math.floor((expiresAt - Date.now()) / 1000)),
-    });
+    cookieStore.set(SESSION_COOKIE_NAME, token, sessionCookieOptions(maxAgeSec));
 
     return NextResponse.json({ ok: true });
   } catch (e) {

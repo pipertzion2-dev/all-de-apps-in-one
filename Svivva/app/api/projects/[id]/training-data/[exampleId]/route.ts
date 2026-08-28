@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { projectRepository, versionRepository } from "@/lib/repositories";
+import { versionRepository } from "@/lib/repositories";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
+import { notFound } from "@/lib/http-response";
 import { db } from "@/lib/db";
 import { trainingExamples } from "@/lib/schema";
 import { z } from "zod";
@@ -16,11 +18,11 @@ const UpdateTrainingExampleSchema = z.object({
 });
 
 async function validateExampleOwnership(projectId: string, exampleId: string) {
-  const project = await projectRepository.findById(projectId);
-  if (!project) return { error: "Project not found", status: 404 };
+  const { error } = await requireProjectOwner(projectId);
+  if (error) return { response: error };
 
   const latestVersion = await versionRepository.findLatestByProjectId(projectId);
-  if (!latestVersion) return { error: "No version found", status: 404 };
+  if (!latestVersion) return { response: notFound("No version found") };
 
   const example = await db
     .select()
@@ -31,7 +33,7 @@ async function validateExampleOwnership(projectId: string, exampleId: string) {
     .limit(1);
 
   if (example.length === 0) {
-    return { error: "Example not found or does not belong to this project", status: 404 };
+    return { response: notFound("Example not found or does not belong to this project") };
   }
 
   return { example: example[0], versionId: latestVersion.id };
@@ -42,8 +44,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ("error" in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+    if ("response" in result) {
+      return result.response;
     }
 
     return NextResponse.json({ example: result.example });
@@ -58,8 +60,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ("error" in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+    if ("response" in result) {
+      return result.response;
     }
 
     const body = await request.json();
@@ -99,8 +101,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
   try {
     const result = await validateExampleOwnership(projectId, exampleId);
-    if ("error" in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+    if ("response" in result) {
+      return result.response;
     }
 
     await db.delete(trainingExamples).where(eq(trainingExamples.id, exampleId));

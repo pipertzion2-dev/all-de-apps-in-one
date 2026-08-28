@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
-import { projectRepository } from "@/lib/repositories";
+import { requireProjectOwner } from "@/lib/auth/require-project-owner";
 import { db } from "@/lib/db";
 import { projectBrands } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -144,10 +144,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
-    const project = await projectRepository.findById(projectId);
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    const { project, error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
 
     const body = await request.json();
     const { type, context } = SuggestionRequestSchema.parse(body);
@@ -236,6 +234,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id: projectId } = await params;
 
   try {
+    const { error: authError } = await requireProjectOwner(projectId);
+    if (authError) return authError;
+
     const brand = await db
       .select()
       .from(projectBrands)
