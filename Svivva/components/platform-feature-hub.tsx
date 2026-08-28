@@ -13,7 +13,6 @@ import {
   getFeaturesByBus,
   MASTER_BUS,
   MIXING_BUSES,
-  OAAS_FULL_NAME,
   OAAS_NAME,
   OAAS_TAGLINE,
   OAAS_TECHNICAL_BLURB,
@@ -159,7 +158,7 @@ export function PlatformFeatureHub({
         {!isCompact && (
           <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/35 backdrop-blur-sm rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
             <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
-              {OAAS_NAME} · {OAAS_FULL_NAME}
+              {OAAS_NAME}
             </Badge>
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2">
               <SlidersHorizontal className="w-8 h-8 text-[#5B8DA8]" />

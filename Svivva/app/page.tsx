@@ -750,9 +750,6 @@ export default function LandingPage() {
                     </div>
                     <div className="flex-1 text-center md:text-left space-y-3">
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                        <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                          Orchestration as a Service
-                        </span>
                         <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
                         <Badge variant="secondary" className="text-[10px]">
                           Mixing-console OS
