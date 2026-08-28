@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isCronSecretAuthorized, isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { runBurnsSystem } from "@/lib/burns/burns-runner";
-import { recordBurnsAudit, saveBurnsRun } from "@/lib/burns/burns-store";
+import { recordBurnsAudit, saveBurnsRun, setBurnsProgress } from "@/lib/burns/burns-store";
 import { getBurnsNode } from "@/lib/burns/burns-graph";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,9 @@ export const maxDuration = 300;
 /**
  * Execute the Burns graph. Admin (UI button) or CRON_SECRET (scheduler).
  *
- * Body: { only?: string[] } to run a subset — the graph UI uses this to retry a
- * single node without redoing the whole morning run.
+ * Body: { only?: string[] } — subset for single-node retry.
+ * Returns `{ run }` with per-node status so the UI can paint the graph without
+ * relying on a separate DB round-trip (history persistence is best-effort).
  */
 export async function POST(req: NextRequest) {
   const isCron = isCronSecretAuthorized(req);
@@ -39,10 +40,10 @@ export async function POST(req: NextRequest) {
 
   const run = await runBurnsSystem({ trigger: isCron ? "cron" : "manual", only });
 
-  // A partial retry should not overwrite the record of the full morning run.
   if (!only) {
     await saveBurnsRun(run);
     await recordBurnsAudit(run);
+    await setBurnsProgress({ status: "complete", run });
   }
 
   return NextResponse.json({ success: run.ok, run });

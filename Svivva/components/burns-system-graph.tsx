@@ -22,8 +22,6 @@ import type { BurnsNodeResult, BurnsNodeStatus, BurnsRunResult } from "@/lib/bur
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
 
-// Column-per-stage layout. Fixed geometry keeps the SVG deterministic and
-// avoids pulling in a graph-layout dependency for 13 nodes.
 const COL_W = 208;
 const NODE_W = 170;
 const NODE_H = 66;
@@ -37,9 +35,39 @@ type BurnsPayload = {
   order: string[];
   estimatedSeconds: number;
   schedule: string;
+  progress?:
+    | { status: "idle" }
+    | { status: "running"; startedAt: string }
+    | { status: "complete"; run: BurnsRunResult }
+    | { status: "failed"; error: string; startedAt: string };
   lastRun: BurnsRunResult | null;
   history: BurnsRunResult[];
 };
+
+function pickNewerRun(a: BurnsRunResult | null, b: BurnsRunResult | null): BurnsRunResult | null {
+  if (!a) return b;
+  if (!b) return a;
+  return a.startedAt >= b.startedAt ? a : b;
+}
+
+/** Merge a partial run (single-node retry) into the last full run for the graph. */
+function mergeBurnsRuns(
+  previous: BurnsRunResult | null,
+  partial: BurnsRunResult,
+  order: string[],
+): BurnsRunResult {
+  const byId = new Map<string, BurnsNodeResult>();
+  for (const n of previous?.nodes ?? []) byId.set(n.id, n);
+  for (const n of partial.nodes) byId.set(n.id, n);
+  const nodes = order
+    .map((id) => byId.get(id))
+    .filter((n): n is BurnsNodeResult => Boolean(n));
+  return {
+    ...(previous ?? partial),
+    ...partial,
+    nodes: nodes.length ? nodes : partial.nodes,
+  };
+}
 
 const STATUS_COLOR: Record<BurnsNodeStatus, string> = {
   ok: "#34d399",
@@ -59,16 +87,27 @@ function StatusIcon({ status, className = "" }: { status: BurnsNodeStatus; class
 
 export function BurnsSystemGraph() {
   const [data, setData] = useState<BurnsPayload | null>(null);
+  /** Client-side run snapshot — painted on the graph even when DB history is empty. */
+  const [liveRun, setLiveRun] = useState<BurnsRunResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState<string | "all" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [runNotice, setRunNotice] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await authFetch("/api/burns");
       if (!res.ok) throw new Error(res.status === 403 ? "Admin access required" : "Failed to load");
-      setData((await res.json()) as BurnsPayload);
+      const payload = (await res.json()) as BurnsPayload;
+      setData(payload);
+      const fromApi =
+        payload.progress?.status === "complete"
+          ? payload.progress.run
+          : payload.lastRun?.nodes?.length
+            ? payload.lastRun
+            : null;
+      setLiveRun((prev) => pickNewerRun(prev, fromApi));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load Burns System");
@@ -83,8 +122,14 @@ export function BurnsSystemGraph() {
 
   const run = useCallback(
     async (only?: string[]) => {
+      const isFullRun = !only?.length;
       setRunning(only?.length === 1 ? only[0] : "all");
       setError(null);
+      setRunNotice(
+        isFullRun
+          ? "Running all nodes — keep this tab open. This can take several minutes."
+          : null,
+      );
       try {
         const res = await authFetch("/api/burns/run", {
           method: "POST",
@@ -93,23 +138,47 @@ export function BurnsSystemGraph() {
         });
         const json = (await res.json()) as { run?: BurnsRunResult; error?: string };
         if (!res.ok) throw new Error(json.error || "Run failed");
-        await load();
+        if (!json.run?.nodes?.length) throw new Error("Run returned no node results");
+
+        const merged = isFullRun
+          ? json.run
+          : mergeBurnsRuns(liveRun ?? data?.lastRun ?? null, json.run, data?.order ?? []);
+
+        setLiveRun(merged);
+        setData((prev) =>
+          prev
+            ? {
+                ...prev,
+                lastRun: merged,
+                history: isFullRun
+                  ? [merged, ...prev.history].slice(0, 7)
+                  : prev.history,
+              }
+            : prev,
+        );
+        setRunNotice(
+          merged.ok
+            ? `Done — ${merged.summary}`
+            : `Finished with issues — ${merged.summary}`,
+        );
       } catch (e) {
         setError(e instanceof Error ? e.message : "Run failed");
+        setRunNotice(null);
       } finally {
         setRunning(null);
       }
     },
-    [load],
+    [data?.lastRun, data?.order, liveRun],
   );
+
+  const effectiveLastRun = liveRun ?? data?.lastRun ?? null;
 
   const resultById = useMemo(() => {
     const map = new Map<string, BurnsNodeResult>();
-    for (const n of data?.lastRun?.nodes ?? []) map.set(n.id, n);
+    for (const n of effectiveLastRun?.nodes ?? []) map.set(n.id, n);
     return map;
-  }, [data]);
+  }, [effectiveLastRun]);
 
-  // Position every node once, then reuse for nodes and edge endpoints.
   const layout = useMemo(() => {
     if (!data) return null;
     const stages: BurnsStageId[] = [];
@@ -152,7 +221,7 @@ export function BurnsSystemGraph() {
     );
   }
 
-  const lastRun = data?.lastRun ?? null;
+  const showRunning = running !== null;
 
   return (
     <div className="space-y-4">
@@ -179,22 +248,22 @@ export function BurnsSystemGraph() {
             <Button
               size="sm"
               onClick={() => void run()}
-              disabled={running !== null}
+              disabled={showRunning}
               className="gap-1.5 bg-[#6B2C4E] text-white"
               data-testid="button-burns-run-all"
             >
-              {running === "all" ? (
+              {showRunning && running === "all" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Play className="w-3.5 h-3.5" />
               )}
-              Run now
+              {showRunning && running === "all" ? "Running…" : "Run now"}
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={() => void load()}
-              disabled={running !== null}
+              disabled={showRunning}
               className="gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -203,23 +272,23 @@ export function BurnsSystemGraph() {
           </div>
         </div>
 
-        {lastRun ? (
+        {effectiveLastRun ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
             <span className="font-semibold text-foreground">
-              Last run ({lastRun.trigger}): {lastRun.summary}
+              Last run ({effectiveLastRun.trigger}): {effectiveLastRun.summary}
             </span>
             <span className="text-muted-foreground">
-              {new Date(lastRun.finishedAt).toLocaleString()}
+              {new Date(effectiveLastRun.finishedAt).toLocaleString()}
             </span>
-            <span className="text-emerald-400">{lastRun.counts.ok} ok</span>
-            {lastRun.counts.failed > 0 && (
-              <span className="text-red-400">{lastRun.counts.failed} failed</span>
+            <span className="text-emerald-400">{effectiveLastRun.counts.ok} ok</span>
+            {effectiveLastRun.counts.failed > 0 && (
+              <span className="text-red-400">{effectiveLastRun.counts.failed} failed</span>
             )}
-            {lastRun.counts.blocked > 0 && (
-              <span className="text-amber-400">{lastRun.counts.blocked} blocked</span>
+            {effectiveLastRun.counts.blocked > 0 && (
+              <span className="text-amber-400">{effectiveLastRun.counts.blocked} blocked</span>
             )}
-            {lastRun.counts.skipped > 0 && (
-              <span className="text-slate-400">{lastRun.counts.skipped} skipped</span>
+            {effectiveLastRun.counts.skipped > 0 && (
+              <span className="text-slate-400">{effectiveLastRun.counts.skipped} skipped</span>
             )}
           </div>
         ) : (
@@ -229,9 +298,11 @@ export function BurnsSystemGraph() {
         )}
 
         {error && <p className="text-[11px] text-destructive">{error}</p>}
+        {runNotice && !error && (
+          <p className="text-[11px] text-[#5B8DA8] font-medium">{runNotice}</p>
+        )}
       </div>
 
-      {/* Graph */}
       {layout && (
         <div
           className="rounded-2xl border border-border/60 bg-card/40 overflow-x-auto"
@@ -271,7 +342,6 @@ export function BurnsSystemGraph() {
               </text>
             ))}
 
-            {/* Edges first so nodes paint over them */}
             {data?.edges.map(({ from, to }) => {
               const a = layout.pos.get(from);
               const b = layout.pos.get(to);
@@ -352,7 +422,6 @@ export function BurnsSystemGraph() {
         </div>
       )}
 
-      {/* Detail panel */}
       {selectedNode && (
         <div className="rounded-2xl border border-border/60 bg-card p-4 space-y-2">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -410,7 +479,6 @@ export function BurnsSystemGraph() {
         </div>
       )}
 
-      {/* History */}
       {!!data?.history?.length && (
         <div className="rounded-2xl border border-border/60 bg-card/40 p-3">
           <p className="text-[11px] font-black text-foreground mb-2">Recent runs</p>
