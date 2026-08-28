@@ -164,6 +164,7 @@ export default function LandingPage() {
   const flipAnimRef = useRef(0);
   const scrollHintHiddenRef = useRef(false);
   const finishingIntroRef = useRef(false);
+  const requestIntroFinishRef = useRef<(() => void) | null>(null);
   const [stats, setStats] = useState<{
     projects: number;
     developers: number;
@@ -233,11 +234,6 @@ export default function LandingPage() {
     };
 
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const autoSkipTimer = mobile
-      ? window.setTimeout(() => {
-          if (!targetProgressRef.current) finishIntro();
-        }, 12000)
-      : undefined;
 
     // Longer zone so the first scroll is controllable (not a snap).
     const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
@@ -302,6 +298,16 @@ export default function LandingPage() {
       captureEl.style.opacity = "0";
       window.setTimeout(finishIntro, 440);
     };
+
+    // Skip button and the mobile idle timer both fade out like a completed flip
+    // instead of cutting the intro away in a single frame.
+    requestIntroFinishRef.current = scheduleFinish;
+
+    const autoSkipTimer = mobile
+      ? window.setTimeout(() => {
+          if (!targetProgressRef.current) scheduleFinish();
+        }, 12000)
+      : undefined;
 
     let lastFrameMs = performance.now();
     const tickFlip = (now: number) => {
@@ -389,6 +395,7 @@ export default function LandingPage() {
 
     return () => {
       if (autoSkipTimer !== undefined) window.clearTimeout(autoSkipTimer);
+      requestIntroFinishRef.current = null;
       stopFlipAnim();
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
@@ -413,7 +420,9 @@ export default function LandingPage() {
             zIndex: 70,
             touchAction: "none",
             overflow: "visible",
-            backgroundColor: "transparent",
+            // Opaque so the tilted panel's receding corners reveal the intro's own
+            // white, not the dark page behind it. The final fade does the reveal.
+            backgroundColor: "#ffffff",
             opacity: 1,
             willChange: "opacity",
           }}
@@ -460,7 +469,7 @@ export default function LandingPage() {
                     backgroundColor: "#ffffff",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end",
+                    justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
@@ -471,11 +480,13 @@ export default function LandingPage() {
                     height={1024}
                     sizes="100vw"
                     style={{
+                      // Fill the panel in both axes: `height: auto` left the square
+                      // image only as tall as the viewport was wide, stranding the
+                      // slack as blank space on portrait/mobile viewports.
                       width: "100%",
-                      maxHeight: "100%",
-                      height: "auto",
+                      height: "100%",
                       objectFit: "contain",
-                      objectPosition: "bottom center",
+                      objectPosition: "center",
                       display: "block",
                     }}
                     priority
@@ -509,11 +520,11 @@ export default function LandingPage() {
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex flex-col items-center gap-1"
+              className="flex flex-col items-center gap-1 rounded-full bg-white/85 px-5 py-2.5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
             >
               <span
-                className="text-sm font-medium text-gray-500 dark:text-gray-400"
+                className="text-sm font-medium text-gray-700"
                 style={{ fontFamily: "'Zc', sans-serif" }}
               >
                 Scroll to enter
@@ -525,7 +536,7 @@ export default function LandingPage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-gray-500 dark:text-gray-400"
+                className="text-gray-700"
               >
                 <path d="M10 4v12M5 11l5 5 5-5" />
               </svg>
@@ -535,15 +546,15 @@ export default function LandingPage() {
             type="button"
             className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
             onClick={() => {
+              const requestFinish = requestIntroFinishRef.current;
+              if (requestFinish) {
+                requestFinish();
+                return;
+              }
               setFlipComplete(true);
               document.body.style.overflow = "";
               document.body.style.touchAction = "";
               window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-              document
-                .querySelectorAll(
-                  "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0",
-                )
-                .forEach((el) => el.remove());
             }}
           >
             Skip intro

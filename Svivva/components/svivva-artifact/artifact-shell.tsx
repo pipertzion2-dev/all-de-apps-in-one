@@ -33,7 +33,9 @@ export function SvivvaArtifact() {
       data-svivva-artifact
       className="w-full flex flex-col items-center gap-0 pt-24 sm:pt-28 pb-10 sm:pb-12 px-4 overflow-visible relative z-10"
     >
-      <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl">
+      {/* Same backdrop panel the other over-camo sections use, so the copy stays
+          legible against the 3D background instead of sitting directly on it. */}
+      <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8">
         <p
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
@@ -52,14 +54,13 @@ export function SvivvaArtifact() {
         >
           Each face is a product. Drag to rotate. Tap a face — or a name below — to open it.
         </p>
+        <p
+          className="mt-3 text-muted-foreground/80 text-sm"
+          style={{ fontFamily: '"Zc", sans-serif' }}
+        >
+          Play · Seeds · Hardware · Digital · Orbit · Protect
+        </p>
       </div>
-
-      <p
-        className="text-muted-foreground/80 text-sm mb-0 select-none pointer-events-none relative z-[1]"
-        style={{ fontFamily: '"Zc", sans-serif' }}
-      >
-        Play · Seeds · Hardware · Digital · Orbit · Protect
-      </p>
 
       <div
         style={{
