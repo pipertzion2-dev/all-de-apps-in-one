@@ -169,8 +169,16 @@ export default function LandingPage() {
     developers: number;
     apiCalls: number;
   } | null>(null);
-  const [canMountCamo, setCanMountCamo] = useState(true);
-  const [canMountCube, setCanMountCube] = useState(true);
+  const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
+
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!mobile) setCanMountHeavy3d(true);
+  }, []);
+
+  useEffect(() => {
+    if (flipComplete) setCanMountHeavy3d(true);
+  }, [flipComplete]);
 
   useEffect(() => {
     fetch("/api/public-stats")
@@ -602,13 +610,13 @@ export default function LandingPage() {
         <div className="relative overflow-x-hidden">
           <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
             <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
-              {canMountCamo ? (
+              {canMountHeavy3d ? (
                 <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
               ) : null}
             </div>
           </div>
 
-          <div className="relative z-10">{canMountCube ? <SvivvaArtifact /> : null}</div>
+          <div className="relative z-10">{canMountHeavy3d ? <SvivvaArtifact /> : null}</div>
 
           <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
             <div className="max-w-5xl mx-auto px-4 sm:px-6">

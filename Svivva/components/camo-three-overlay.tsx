@@ -255,7 +255,26 @@ export function CamoThreeOverlay({
       ctx.clearRect(0, 0, width, height);
 
       if (useSmoothSectionCamo) {
-        drawOaasCamoSmooth(ctx, width, height, blockSize, sectionCamoColors, seededRandom);
+        // Half-resolution on mobile — full per-pixel camo on resize was blocking the main thread.
+        const scale = 0.5;
+        const sw = Math.max(1, Math.round(width * scale));
+        const sh = Math.max(1, Math.round(height * scale));
+        const scratch = document.createElement("canvas");
+        scratch.width = sw;
+        scratch.height = sh;
+        const scratchCtx = scratch.getContext("2d");
+        if (scratchCtx) {
+          drawOaasCamoSmooth(
+            scratchCtx,
+            sw,
+            sh,
+            blockSize * scale,
+            sectionCamoColors,
+            seededRandom,
+          );
+          ctx.imageSmoothingEnabled = true;
+          ctx.drawImage(scratch, 0, 0, width, height);
+        }
         return;
       }
 
