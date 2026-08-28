@@ -2,18 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
 import { isNoindexPath } from "@/lib/seo/robots-config";
-import { isDashboardGuestPath } from "@/lib/dashboard-guest-paths";
 
-const SESSION_COOKIE = "vivva_session";
 const ADMIN_COOKIE = "svivva_admin";
-
-/** Orbit admin surfaces — require passcode cookie before OAuth/API actions. */
 const ADMIN_CODE_PREFIXES = ["/dashboard/gsc-connect"];
-
-function hasSessionCookie(request: NextRequest): boolean {
-  const value = request.cookies.get(SESSION_COOKIE)?.value;
-  return Boolean(value && !value.startsWith("{"));
-}
 
 function pathRequiresAdminCode(pathname: string): boolean {
   return ADMIN_CODE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -85,16 +76,9 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  if (
-    pathname.startsWith("/dashboard") &&
-    !hasSessionCookie(request) &&
-    !hasAdminPasscode(request) &&
-    !isDashboardGuestPath(pathname)
-  ) {
-    const login = new URL("/login", request.url);
-    login.searchParams.set("redirect", pathname + request.nextUrl.search);
-    return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(login)));
-  }
+  // Dashboard access is gated in dashboard-layout-client (admin code 272727 / member 333
+  // or user sign-in). Do not redirect /dashboard/* to /login here — admins must reach
+  // the access-code form without creating an account.
 
   const keyMatch = pathname.match(/^\/([0-9a-f]{32})\.txt$/i);
   if (keyMatch) {

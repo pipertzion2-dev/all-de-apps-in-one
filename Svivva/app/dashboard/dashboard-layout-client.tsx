@@ -399,53 +399,67 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                 className="h-12 w-12 object-contain"
               />
             </div>
-            <CardTitle className="text-2xl">Welcome to zzai zzai</CardTitle>
+            <CardTitle className="text-2xl">Dashboard access</CardTitle>
             <CardDescription>
               {authError ? (
                 <span className="text-amber-500 flex items-center justify-center gap-2 mt-2">
                   <AlertCircle className="w-4 h-4" />
-                  Login interrupted. Please try again.
+                  Login interrupted. Try admin code below or sign in again.
                 </span>
               ) : (
-                "Sign in, or enter your access code to open the dashboard"
+                <>
+                  <strong className="text-foreground font-medium">Admin:</strong> enter code{" "}
+                  <strong className="text-foreground font-medium">272727</strong> — no account
+                  needed.
+                  <span className="block mt-1 text-muted-foreground">
+                    Members use <strong className="font-medium">333</strong>. User accounts sign in
+                    below.
+                  </span>
+                </>
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <AdminCodeForm
-              title="Access code"
-              description="Enter 333 for Pro access (digital + hardware), or your admin code."
+              title="Admin / member code"
+              description="272727 unlocks the full admin dashboard (Orbit, Burns, GSC, etc.). 333 unlocks Pro features."
               onSuccess={() => {
-                window.location.href = "/dashboard";
+                window.location.reload();
               }}
             />
-            <div className="relative py-1">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
-              </div>
-            </div>
             <Link href="/dashboard/orbit" className="block">
               <Button variant="secondary" className="w-full gap-2" data-testid="button-orbit-admin">
                 <Rocket className="w-4 h-4" />
                 Orbit Admin (no account needed)
               </Button>
             </Link>
-            <a href="/login" className="block">
-              <Button className="w-full gap-2" data-testid="button-login">
+            <Link href="/dashboard/burns" className="block">
+              <Button variant="secondary" className="w-full gap-2">
+                <Flame className="w-4 h-4" />
+                Burns System (admin code)
+              </Button>
+            </Link>
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">User accounts</span>
+              </div>
+            </div>
+            <a href={`/login?redirect=${encodeURIComponent(pathname)}`} className="block">
+              <Button variant="outline" className="w-full gap-2" data-testid="button-login">
                 <LogIn className="w-4 h-4" />
-                Sign In
+                Sign in (existing users)
               </Button>
             </a>
-            <a href="/signup" className="block">
-              <Button variant="outline" className="w-full gap-2">
-                Create Account
+            <a href={`/signup?redirect=${encodeURIComponent(pathname)}`} className="block">
+              <Button variant="ghost" className="w-full gap-2">
+                Create account
               </Button>
             </a>
             <Link href="/" className="block">
-              <Button variant="outline" className="w-full" data-testid="button-back-home">
+              <Button variant="ghost" className="w-full" data-testid="button-back-home">
                 Back to Homepage
               </Button>
             </Link>
