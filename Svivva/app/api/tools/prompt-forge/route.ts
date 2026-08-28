@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/llm/openai";
+import { isAnyAiProviderAvailable } from "@/lib/llm/providers";
 
 const ALLOWED_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-11-20", "gpt-4-turbo"] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
@@ -48,6 +49,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Prompt too long — max 8000 chars for user message, 4000 for system prompt" },
       { status: 400 },
+    );
+  }
+  if (!isAnyAiProviderAvailable()) {
+    return NextResponse.json(
+      { error: "No AI provider configured. Set OPENAI_API_KEY, GEMINI_API_KEY, or OLLAMA_URL." },
+      { status: 503 },
     );
   }
 

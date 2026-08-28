@@ -5,6 +5,7 @@ import { Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { getPublicSiteUrl } from "@/lib/site-url-public";
 
 const TEAL = "#5B8DA8";
 
@@ -36,7 +37,10 @@ function CopyBlock({ code, label }: { code: string; label: string }) {
 }
 
 export default function BadgePage() {
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://zzaizzai.com";
+  // Resolved the same way on server and client. Reading window.location.origin
+  // here made the server and client markup disagree and broke hydration, and it
+  // put whatever host you happened to browse into snippets meant for a README.
+  const baseUrl = getPublicSiteUrl();
   const badgeUrl = `${baseUrl}/api/badge`;
   const siteUrl = "https://zzaizzai.com";
 
