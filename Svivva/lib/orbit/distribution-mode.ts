@@ -16,6 +16,7 @@ function hasTwitterOAuth(creds: MarketingPlatformCredentials): boolean {
 export function hasAutoPostCredentials(creds: MarketingPlatformCredentials): boolean {
   return !!(
     creds.n8nWebhookUrl?.trim() ||
+    creds.postizApiKey?.trim() ||
     creds.ayrshareApiKey?.trim() ||
     creds.omnisocialsApiKey?.trim() ||
     (creds.resendApiKey?.trim() && creds.outreachFromEmail?.trim()) ||

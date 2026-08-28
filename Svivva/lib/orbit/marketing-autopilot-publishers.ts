@@ -134,6 +134,193 @@ export async function publishOmniSocialsPost(
   }
 }
 
+const POSTIZ_CLOUD_BASE = "https://api.postiz.com/public/v1";
+
+/**
+ * Postiz public API base. Self-hosted instances serve it from their own domain
+ * under /api/public/v1; the managed cloud uses api.postiz.com/public/v1.
+ */
+export function postizApiBase(apiUrl?: string): string {
+  const raw = apiUrl?.trim().replace(/\/+$/, "");
+  if (!raw) return POSTIZ_CLOUD_BASE;
+  if (/\/public\/v1$/i.test(raw)) return raw;
+  if (/\/api$/i.test(raw)) return `${raw}/public/v1`;
+  return `${raw}/api/public/v1`;
+}
+
+export type PostizIntegration = {
+  id: string;
+  name?: string;
+  provider?: string;
+  disabled?: boolean;
+};
+
+/**
+ * Postiz calls a connected account an "integration"; the UI calls it a channel.
+ * Provider ids double as the settings.__type discriminator when creating posts.
+ */
+const POSTIZ_PROVIDER_ALIASES: Record<string, string> = {
+  twitter: "x",
+  x: "x",
+  linkedin: "linkedin",
+  "linkedin-page": "linkedin-page",
+  mastodon: "mastodon",
+  bluesky: "bluesky",
+  telegram: "telegram",
+  threads: "threads",
+  nostr: "nostr",
+  discord: "discord",
+  slack: "slack",
+};
+
+/** Providers Orbit can post to without platform-specific required settings. */
+const POSTIZ_SETTINGS_FREE = new Set(["mastodon", "bluesky", "telegram", "threads", "nostr"]);
+
+function postizSettingsFor(provider: string): Record<string, unknown> | null {
+  if (provider === "x") return { __type: "x", who_can_reply_post: "everyone" };
+  if (provider === "linkedin" || provider === "linkedin-page") return { __type: provider };
+  if (POSTIZ_SETTINGS_FREE.has(provider)) return { __type: provider };
+  // discord/slack/reddit need a channel or subreddit we do not collect — skip
+  // rather than send a request Postiz will reject.
+  return null;
+}
+
+function normalizePostizProvider(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const key = raw.toLowerCase();
+  return POSTIZ_PROVIDER_ALIASES[key] ?? key;
+}
+
+/** List connected Postiz channels so posts can target real integration ids. */
+export async function listPostizIntegrations(
+  creds: Pick<MarketingPlatformCredentials, "postizApiKey" | "postizApiUrl">,
+): Promise<{ ok: boolean; integrations?: PostizIntegration[]; error?: string }> {
+  const apiKey = creds.postizApiKey?.trim();
+  if (!apiKey) return { ok: false, error: "Postiz API key not configured" };
+  try {
+    const res = await fetch(`${postizApiBase(creds.postizApiUrl)}/integrations`, {
+      headers: { Authorization: apiKey, "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(20_000),
+    });
+    const text = await res.text();
+    if (!res.ok) return { ok: false, error: text.slice(0, 200) || `HTTP ${res.status}` };
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      return { ok: false, error: "Postiz returned a non-JSON integrations response" };
+    }
+    const rows = Array.isArray(parsed)
+      ? parsed
+      : ((parsed as { integrations?: unknown[]; data?: unknown[] }).integrations ??
+        (parsed as { data?: unknown[] }).data ??
+        []);
+
+    const integrations: PostizIntegration[] = (rows as Record<string, unknown>[])
+      .map((r) => ({
+        id: String(r.id ?? ""),
+        name: typeof r.name === "string" ? r.name : undefined,
+        provider: normalizePostizProvider(
+          (r.providerIdentifier ?? r.provider ?? r.identifier) as string | undefined,
+        ),
+        disabled: r.disabled === true,
+      }))
+      .filter((r) => r.id);
+
+    return { ok: true, integrations };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
+/**
+ * Publish through a self-hosted or cloud Postiz instance — the free, open-source
+ * path for multi-platform social posting.
+ */
+export async function publishPostizPost(
+  creds: Pick<MarketingPlatformCredentials, "postizApiKey" | "postizApiUrl">,
+  opts: { text: string; platforms: string[]; linkUrl?: string },
+): Promise<PublishResult> {
+  const apiKey = creds.postizApiKey?.trim();
+  if (!apiKey) return { ok: false, error: "Postiz API key not configured" };
+
+  const listed = await listPostizIntegrations(creds);
+  if (!listed.ok) return { ok: false, error: listed.error };
+
+  const wanted = new Set(
+    opts.platforms.map((p) => normalizePostizProvider(p)).filter((p): p is string => !!p),
+  );
+  const targets = (listed.integrations ?? []).filter(
+    (i) => !i.disabled && i.provider && wanted.has(i.provider),
+  );
+  if (!targets.length) {
+    return {
+      ok: false,
+      error: `No connected Postiz channel for ${[...wanted].join(", ")} — connect it in Postiz first`,
+    };
+  }
+
+  let content = opts.text.slice(0, 3000);
+  if (opts.linkUrl && !content.includes(opts.linkUrl)) {
+    content = `${content}\n\n${opts.linkUrl}`.trim();
+  }
+
+  const posts = targets
+    .map((t) => {
+      const settings = postizSettingsFor(t.provider!);
+      if (!settings) return null;
+      return {
+        integration: { id: t.id },
+        value: [{ content, image: [] as unknown[] }],
+        settings,
+      };
+    })
+    .filter((p): p is NonNullable<typeof p> => !!p);
+
+  if (!posts.length) {
+    return { ok: false, error: "Connected Postiz channels need settings Orbit does not collect" };
+  }
+
+  try {
+    const res = await fetch(`${postizApiBase(creds.postizApiUrl)}/posts`, {
+      method: "POST",
+      headers: {
+        Authorization: apiKey,
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+      },
+      body: JSON.stringify({
+        type: "now",
+        date: new Date().toISOString(),
+        shortLink: false,
+        tags: [],
+        posts,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      if (res.status === 429) {
+        return { ok: false, error: "Postiz rate limit reached (90 create-post calls/hour)" };
+      }
+      return { ok: false, error: text.slice(0, 200) || `HTTP ${res.status}` };
+    }
+    let id: string | undefined;
+    try {
+      const data = JSON.parse(text) as unknown;
+      const first = Array.isArray(data) ? data[0] : data;
+      const rec = first as { id?: string; postId?: string } | undefined;
+      id = rec?.id ?? rec?.postId;
+    } catch {
+      /* Postiz returns an empty body on some versions — a 2xx is still success */
+    }
+    return { ok: true, id: id ?? "postiz-post" };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 const AYRSHARE_POST = "https://api.ayrshare.com/api/post";
 
 /** Multi-platform social via Ayrshare — best direct API for LinkedIn, X, Threads, etc. */

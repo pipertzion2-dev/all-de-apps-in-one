@@ -17,9 +17,12 @@ import {
   ORBIT_ANALYTICS_SERVICES,
   ORBIT_BEST_STACK,
   ORBIT_FREE_FALLBACK_SERVICES,
+  ORBIT_FREE_STACK_SERVICES,
   ORBIT_INDEXING_SERVICES,
   ORBIT_PAID_SERVICES,
   ORBIT_SERVICE_CATEGORY_LABELS,
+  isOrbitFreeTierService,
+  orbitFreeStackServices,
   orbitServiceById,
   type OrbitServiceItem,
 } from "@/lib/orbit/orbit-services-catalog";
@@ -90,6 +93,11 @@ function ServiceRow({
             )}
           </div>
           <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{item.purpose}</p>
+          {item.freeTier && (
+            <p className="text-[10px] mt-1 leading-relaxed text-emerald-700 dark:text-emerald-300">
+              <strong>Free tier:</strong> {item.freeTier}
+            </p>
+          )}
           <ol className="mt-1.5 space-y-0.5 list-decimal list-inside">
             {item.steps.map((step) => (
               <li key={step} className="text-[10px] text-muted-foreground leading-snug">
@@ -170,6 +178,8 @@ export function OrbitPaidServicesHub({
   const [gscPropertyOk, setGscPropertyOk] = useState(gscPropertyOkProp ?? false);
   const [hasServiceAccount, setHasServiceAccount] = useState(false);
   const [indexNowActive, setIndexNowActive] = useState(indexNowActiveProp ?? false);
+  // Default to the $0 path — paid services are opt-in, not the starting point.
+  const [freeOnly, setFreeOnly] = useState(true);
 
   useEffect(() => {
     if (configuredKeysProp) setConfiguredKeys(configuredKeysProp);
@@ -252,10 +262,17 @@ export function OrbitPaidServicesHub({
   };
 
   const paidServices = useMemo(() => {
-    if (!copyOnlyMode) return ORBIT_PAID_SERVICES;
-    const skip = new Set(["n8n", "ayrshare", "resend", "omnisocials"]);
-    return ORBIT_PAID_SERVICES.filter((s) => !skip.has(s.id));
-  }, [copyOnlyMode]);
+    // Free-tier options live alongside the paid ones in each category so the
+    // cheaper route is visible at the point of decision.
+    const all = [...ORBIT_PAID_SERVICES, ...ORBIT_FREE_STACK_SERVICES];
+    const base = copyOnlyMode
+      ? all.filter((s) => !new Set(["n8n", "ayrshare", "resend", "omnisocials"]).has(s.id))
+      : all;
+    return freeOnly ? base.filter(isOrbitFreeTierService) : base;
+  }, [copyOnlyMode, freeOnly]);
+
+  const freeStackSteps = useMemo(() => orbitFreeStackServices(), []);
+  const freeStackReady = freeStackSteps.filter((s) => isReady(s.item)).length;
 
   const bestStackSteps = useMemo(() => {
     if (!copyOnlyMode) return ORBIT_BEST_STACK;
@@ -300,11 +317,12 @@ export function OrbitPaidServicesHub({
             <p className="text-sm font-black text-foreground leading-tight">
               {copyOnlyMode
                 ? "Automated stack — GPT + Google indexing"
-                : "Best stack — paid, indexing & analytics"}
+                : "Service setup — free $0 path, paid picks & indexing"}
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Best picks: {bestStackReady}/{bestStackSteps.length} · Google: {indexingReadyCount}/
-              {ORBIT_INDEXING_SERVICES.length} · Paid: {paidReadyCount}/{paidServices.length}
+              $0 path: {freeStackReady}/{freeStackSteps.length} · Best picks: {bestStackReady}/
+              {bestStackSteps.length} · Google: {indexingReadyCount}/
+              {ORBIT_INDEXING_SERVICES.length} · Services: {paidReadyCount}/{paidServices.length}
               {aiProviderLabel ? ` · AI: ${aiProviderLabel}` : ""}
               {copyOnlyMode ? " · Auto-post off" : ""}
             </p>
@@ -319,24 +337,45 @@ export function OrbitPaidServicesHub({
 
       {expanded && (
         <div className="px-3 pb-3 space-y-3 border-t border-border/40">
-          {/* Best stack roadmap */}
-          <div className="rounded-xl border border-teal-500/35 bg-teal-500/8 p-2.5 space-y-2 pt-3">
-            <p className="text-[11px] font-black text-teal-200">Recommended stack (best results)</p>
+          {/* $0 path — complete Orbit + SEO on permanent free tiers only */}
+          <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/8 p-2.5 space-y-2 pt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-200">
+                Complete Orbit + SEO for $0 ({freeStackReady}/{freeStackSteps.length})
+              </p>
+              <button
+                type="button"
+                onClick={() => setFreeOnly((v) => !v)}
+                aria-pressed={freeOnly}
+                className={`px-2 py-1 rounded-md text-[10px] font-bold border ${
+                  freeOnly
+                    ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-700 dark:text-emerald-200"
+                    : "border-border text-muted-foreground"
+                }`}
+                data-testid="button-orbit-free-only"
+              >
+                {freeOnly ? "Show paid options" : "Hide paid services"}
+              </button>
+            </div>
+            <p className="text-[10px] text-emerald-900/80 dark:text-emerald-100/80 leading-relaxed">
+              Every step below is a permanent free tier, a free Google/Bing API, or open-source
+              software you self-host — no trials and no card. Follow it in order and Orbit runs end
+              to end, including auto-posting, at no subscription cost.
+            </p>
             <ol className="space-y-1.5">
-              {bestStackSteps.map((entry) => {
-                const item = orbitServiceById(entry.id);
-                const ready = item ? isReady(item) : false;
+              {freeStackSteps.map((entry) => {
+                const ready = isReady(entry.item);
                 return (
-                  <li key={entry.id} className="flex items-start gap-2 text-[10px]">
+                  <li key={entry.item.id} className="flex items-start gap-2 text-[10px]">
                     {ready ? (
                       <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5" />
                     ) : (
-                      <span className="w-3 h-3 flex-shrink-0 mt-0.5 text-center font-black text-teal-400/80">
+                      <span className="w-3 h-3 flex-shrink-0 mt-0.5 text-center font-black text-emerald-500/80">
                         {entry.step}
                       </span>
                     )}
                     <span className="text-muted-foreground leading-snug">
-                      <strong className="text-foreground">{item?.name ?? entry.id}</strong>
+                      <strong className="text-foreground">{entry.item.name}</strong>
                       {" — "}
                       {entry.why}
                     </span>
@@ -345,6 +384,37 @@ export function OrbitPaidServicesHub({
               })}
             </ol>
           </div>
+
+          {/* Best stack roadmap — hidden while the $0 path is the focus */}
+          {!freeOnly && (
+            <div className="rounded-xl border border-teal-500/35 bg-teal-500/8 p-2.5 space-y-2 pt-3">
+              <p className="text-[11px] font-black text-teal-200">
+                Recommended stack (best results, paid)
+              </p>
+              <ol className="space-y-1.5">
+                {bestStackSteps.map((entry) => {
+                  const item = orbitServiceById(entry.id);
+                  const ready = item ? isReady(item) : false;
+                  return (
+                    <li key={entry.id} className="flex items-start gap-2 text-[10px]">
+                      {ready ? (
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <span className="w-3 h-3 flex-shrink-0 mt-0.5 text-center font-black text-teal-400/80">
+                          {entry.step}
+                        </span>
+                      )}
+                      <span className="text-muted-foreground leading-snug">
+                        <strong className="text-foreground">{item?.name ?? entry.id}</strong>
+                        {" — "}
+                        {entry.why}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
 
           {/* Google indexing — NOT AI */}
           <div className="rounded-xl border border-sky-500/35 bg-sky-500/8 p-2.5 space-y-2 pt-3">
@@ -371,40 +441,43 @@ export function OrbitPaidServicesHub({
             </div>
           </div>
 
-          {/* Paid services */}
-          {(["automation", "ai-marketing", "distribution"] as const).map((cat) => (
-            <div key={cat} className="space-y-2">
-              <div className="flex items-center gap-2">
-                {cat === "ai-marketing" ? (
-                  <Sparkles className="w-4 h-4 text-violet-400" />
-                ) : cat === "automation" ? (
-                  <CreditCard className="w-4 h-4 text-teal-400" />
-                ) : (
-                  <CreditCard className="w-4 h-4 text-violet-400" />
+          {/* Service categories — a category with nothing left after filtering
+              would otherwise render as a bare heading. */}
+          {(["automation", "ai-marketing", "distribution"] as const)
+            .filter((cat) => (paidByCategory[cat] ?? []).length > 0)
+            .map((cat) => (
+              <div key={cat} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  {cat === "ai-marketing" ? (
+                    <Sparkles className="w-4 h-4 text-violet-400" />
+                  ) : cat === "automation" ? (
+                    <CreditCard className="w-4 h-4 text-teal-400" />
+                  ) : (
+                    <CreditCard className="w-4 h-4 text-violet-400" />
+                  )}
+                  <p className="text-[11px] font-black text-foreground">
+                    {ORBIT_SERVICE_CATEGORY_LABELS[cat]}
+                  </p>
+                </div>
+                {cat === "automation" && (
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Orbit sends a JSON payload to your n8n webhook after each autopilot run — social
+                    posts, outreach pitches, directories, and indexing stats. Wire OmniSocials,
+                    Resend, Slack, or CRM nodes inside n8n instead of pasting keys here.
+                  </p>
                 )}
-                <p className="text-[11px] font-black text-foreground">
-                  {ORBIT_SERVICE_CATEGORY_LABELS[cat]}
-                </p>
+                <div className="space-y-2">
+                  {(paidByCategory[cat] ?? []).map((item) => (
+                    <ServiceRow
+                      key={item.id}
+                      item={item}
+                      ready={isReady(item)}
+                      onPasteKey={onPasteKey}
+                    />
+                  ))}
+                </div>
               </div>
-              {cat === "automation" && (
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  Orbit sends a JSON payload to your n8n webhook after each autopilot run — social
-                  posts, outreach pitches, directories, and indexing stats. Wire OmniSocials,
-                  Resend, Slack, or CRM nodes inside n8n instead of pasting keys here.
-                </p>
-              )}
-              <div className="space-y-2">
-                {(paidByCategory[cat] ?? []).map((item) => (
-                  <ServiceRow
-                    key={item.id}
-                    item={item}
-                    ready={isReady(item)}
-                    onPasteKey={onPasteKey}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
 
           {/* Analytics */}
           <div className="space-y-2">
@@ -427,7 +500,8 @@ export function OrbitPaidServicesHub({
             </div>
           </div>
 
-          {showFreeFallback && (
+          {/* Gemini is step 4 of the $0 path, so its setup must be reachable there. */}
+          {(showFreeFallback || freeOnly) && (
             <div className="space-y-2 opacity-90">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                 {ORBIT_SERVICE_CATEGORY_LABELS["free-fallback"]}
@@ -444,8 +518,9 @@ export function OrbitPaidServicesHub({
           )}
 
           <p className="text-[9px] text-muted-foreground leading-relaxed">
-            Pay links work with Apple Pay in Safari. Keys live server-side only. After each paid
-            service, redeploy if you used Vercel env vars.
+            {freeOnly
+              ? "Free tiers only — nothing here needs a card. Keys live server-side only; redeploy if you set one as a Vercel env var."
+              : "Pay links work with Apple Pay in Safari. Keys live server-side only. After each paid service, redeploy if you used Vercel env vars."}
           </p>
         </div>
       )}

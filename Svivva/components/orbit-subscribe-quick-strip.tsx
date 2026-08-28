@@ -7,7 +7,10 @@ import { ORBIT_SETUP_PROVIDERS } from "@/lib/orbit/orbit-setup-providers";
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
 
-/** Paid / best-pick services — one-tap sign-up next to the Run button. */
+/**
+ * Best-pick services — one-tap sign-up next to the Run button. Every bestPick
+ * provider is on a free tier, so this strip never sends you to a paywall.
+ */
 const SUBSCRIBE_PROVIDERS = ORBIT_SETUP_PROVIDERS.filter(
   (p) => p.bestPick && p.id !== "clarity",
 ).sort((a, b) => a.priority - b.priority);
@@ -37,14 +40,14 @@ export function OrbitSubscribeQuickStrip({
 }: Props) {
   return (
     <div
-      className={`rounded-xl border border-violet-500/30 bg-violet-500/5 p-2.5 space-y-2 ${className}`}
-      aria-label="Subscribe to paid marketing services"
+      className={`rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-2.5 space-y-2 ${className}`}
+      aria-label="Set up free marketing services"
     >
-      <p className="text-[10px] font-black text-violet-200 leading-tight">
-        Sign up for paid services
+      <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-200 leading-tight">
+        Free setup — no card needed
       </p>
       <p className="text-[9px] text-muted-foreground leading-snug">
-        Apple Pay works in Safari. After checkout, paste keys below or in Platform Secrets.
+        Each of these has a permanent free tier. Paste keys below or in Platform Secrets.
       </p>
 
       <ul className="space-y-1.5">
@@ -71,7 +74,7 @@ export function OrbitSubscribeQuickStrip({
                   className="inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-[9px] font-bold text-white"
                   style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
                 >
-                  {p.id === "openai" ? "Add billing" : "Sign up"}
+                  {p.id === "openai" ? "Add billing" : "Get free key"}
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
                 {p.credentialKey && onPasteKey && (
