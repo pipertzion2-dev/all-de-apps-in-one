@@ -1,0 +1,434 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Circle,
+  Clock,
+  ExternalLink,
+  Flame,
+  Loader2,
+  MinusCircle,
+  Play,
+  RefreshCw,
+} from "lucide-react";
+import { authFetch } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import type { BurnsNode, BurnsStageId } from "@/lib/burns/burns-graph";
+import type { BurnsNodeResult, BurnsNodeStatus, BurnsRunResult } from "@/lib/burns/burns-runner";
+
+const TEAL = "#5B8DA8";
+const BURG = "#6B2C4E";
+
+// Column-per-stage layout. Fixed geometry keeps the SVG deterministic and
+// avoids pulling in a graph-layout dependency for 13 nodes.
+const COL_W = 208;
+const NODE_W = 170;
+const NODE_H = 66;
+const V_GAP = 24;
+const PAD = 18;
+
+type BurnsPayload = {
+  nodes: BurnsNode[];
+  edges: { from: string; to: string }[];
+  stageLabels: Record<BurnsStageId, string>;
+  order: string[];
+  estimatedSeconds: number;
+  schedule: string;
+  lastRun: BurnsRunResult | null;
+  history: BurnsRunResult[];
+};
+
+const STATUS_COLOR: Record<BurnsNodeStatus, string> = {
+  ok: "#34d399",
+  failed: "#f87171",
+  blocked: "#fbbf24",
+  skipped: "#94a3b8",
+  pending: "#475569",
+};
+
+function StatusIcon({ status, className = "" }: { status: BurnsNodeStatus; className?: string }) {
+  if (status === "ok") return <CheckCircle2 className={`text-emerald-400 ${className}`} />;
+  if (status === "failed") return <AlertTriangle className={`text-red-400 ${className}`} />;
+  if (status === "blocked") return <MinusCircle className={`text-amber-400 ${className}`} />;
+  if (status === "skipped") return <Clock className={`text-slate-400 ${className}`} />;
+  return <Circle className={`text-muted-foreground ${className}`} />;
+}
+
+export function BurnsSystemGraph() {
+  const [data, setData] = useState<BurnsPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState<string | "all" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await authFetch("/api/burns");
+      if (!res.ok) throw new Error(res.status === 403 ? "Admin access required" : "Failed to load");
+      setData((await res.json()) as BurnsPayload);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load Burns System");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const run = useCallback(
+    async (only?: string[]) => {
+      setRunning(only?.length === 1 ? only[0] : "all");
+      setError(null);
+      try {
+        const res = await authFetch("/api/burns/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(only ? { only } : {}),
+        });
+        const json = (await res.json()) as { run?: BurnsRunResult; error?: string };
+        if (!res.ok) throw new Error(json.error || "Run failed");
+        await load();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Run failed");
+      } finally {
+        setRunning(null);
+      }
+    },
+    [load],
+  );
+
+  const resultById = useMemo(() => {
+    const map = new Map<string, BurnsNodeResult>();
+    for (const n of data?.lastRun?.nodes ?? []) map.set(n.id, n);
+    return map;
+  }, [data]);
+
+  // Position every node once, then reuse for nodes and edge endpoints.
+  const layout = useMemo(() => {
+    if (!data) return null;
+    const stages: BurnsStageId[] = [];
+    for (const n of data.nodes) if (!stages.includes(n.stage)) stages.push(n.stage);
+
+    const pos = new Map<string, { x: number; y: number }>();
+    const columns = stages.map((stage, col) => {
+      const nodes = data.nodes.filter((n) => n.stage === stage);
+      nodes.forEach((n, row) => {
+        pos.set(n.id, { x: PAD + col * COL_W, y: PAD + 26 + row * (NODE_H + V_GAP) });
+      });
+      return { stage, label: data.stageLabels[stage] ?? stage, x: PAD + col * COL_W, nodes };
+    });
+
+    const rows = Math.max(...columns.map((c) => c.nodes.length), 1);
+    return {
+      columns,
+      pos,
+      width: PAD * 2 + (stages.length - 1) * COL_W + NODE_W,
+      height: PAD * 2 + 26 + rows * (NODE_H + V_GAP),
+    };
+  }, [data]);
+
+  const selectedNode = data?.nodes.find((n) => n.id === selected) ?? null;
+  const selectedResult = selected ? resultById.get(selected) : undefined;
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground p-6">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading Burns System…
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+        {error}
+      </div>
+    );
+  }
+
+  const lastRun = data?.lastRun ?? null;
+
+  return (
+    <div className="space-y-4">
+      <div
+        className="rounded-2xl border-2 p-4 space-y-3"
+        style={{
+          borderColor: `${TEAL}44`,
+          background: `linear-gradient(135deg,${TEAL}0a,${BURG}06)`,
+        }}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-2 min-w-0">
+            <Flame className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: BURG }} />
+            <div className="min-w-0">
+              <h2 className="text-base font-black text-foreground leading-tight">Burns System</h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Every ZZAI feature run against zzaizzai.com itself, in dependency order.{" "}
+                {data?.schedule ?? "Daily 06:00 UTC"} · {data?.nodes.length ?? 0} nodes · ~
+                {Math.round((data?.estimatedSeconds ?? 0) / 60)} min
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => void run()}
+              disabled={running !== null}
+              className="gap-1.5 bg-[#6B2C4E] text-white"
+              data-testid="button-burns-run-all"
+            >
+              {running === "all" ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5" />
+              )}
+              Run now
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void load()}
+              disabled={running !== null}
+              className="gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {lastRun ? (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+            <span className="font-semibold text-foreground">
+              Last run ({lastRun.trigger}): {lastRun.summary}
+            </span>
+            <span className="text-muted-foreground">
+              {new Date(lastRun.finishedAt).toLocaleString()}
+            </span>
+            <span className="text-emerald-400">{lastRun.counts.ok} ok</span>
+            {lastRun.counts.failed > 0 && (
+              <span className="text-red-400">{lastRun.counts.failed} failed</span>
+            )}
+            {lastRun.counts.blocked > 0 && (
+              <span className="text-amber-400">{lastRun.counts.blocked} blocked</span>
+            )}
+            {lastRun.counts.skipped > 0 && (
+              <span className="text-slate-400">{lastRun.counts.skipped} skipped</span>
+            )}
+          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            No run recorded yet — the scheduler runs at 06:00 UTC, or press Run now.
+          </p>
+        )}
+
+        {error && <p className="text-[11px] text-destructive">{error}</p>}
+      </div>
+
+      {/* Graph */}
+      {layout && (
+        <div
+          className="rounded-2xl border border-border/60 bg-card/40 overflow-x-auto"
+          data-testid="burns-graph"
+        >
+          <svg
+            width={layout.width}
+            height={layout.height}
+            viewBox={`0 0 ${layout.width} ${layout.height}`}
+            role="img"
+            aria-label="Burns System task graph"
+            className="min-w-full"
+          >
+            <defs>
+              <marker
+                id="burns-arrow"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill={`${TEAL}99`} />
+              </marker>
+            </defs>
+
+            {layout.columns.map((col) => (
+              <text
+                key={col.stage}
+                x={col.x}
+                y={PAD + 12}
+                className="fill-muted-foreground"
+                style={{ fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase" }}
+              >
+                {col.label}
+              </text>
+            ))}
+
+            {/* Edges first so nodes paint over them */}
+            {data?.edges.map(({ from, to }) => {
+              const a = layout.pos.get(from);
+              const b = layout.pos.get(to);
+              if (!a || !b) return null;
+              const x1 = a.x + NODE_W;
+              const y1 = a.y + NODE_H / 2;
+              const x2 = b.x;
+              const y2 = b.y + NODE_H / 2;
+              const mid = (x1 + x2) / 2;
+              const active = selected === from || selected === to;
+              return (
+                <path
+                  key={`${from}-${to}`}
+                  d={`M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`}
+                  fill="none"
+                  stroke={active ? TEAL : `${TEAL}55`}
+                  strokeWidth={active ? 2 : 1.25}
+                  markerEnd="url(#burns-arrow)"
+                />
+              );
+            })}
+
+            {layout.columns.flatMap((col) =>
+              col.nodes.map((node) => {
+                const p = layout.pos.get(node.id)!;
+                const result = resultById.get(node.id);
+                const status: BurnsNodeStatus = result?.status ?? "pending";
+                const isSel = selected === node.id;
+                const isRunning = running === node.id || running === "all";
+                return (
+                  <g
+                    key={node.id}
+                    transform={`translate(${p.x},${p.y})`}
+                    onClick={() => setSelected(isSel ? null : node.id)}
+                    style={{ cursor: "pointer" }}
+                    data-testid={`burns-node-${node.id}`}
+                  >
+                    <rect
+                      width={NODE_W}
+                      height={NODE_H}
+                      rx={10}
+                      fill={isSel ? `${TEAL}1f` : "rgba(15,23,42,0.55)"}
+                      stroke={isSel ? TEAL : `${STATUS_COLOR[status]}88`}
+                      strokeWidth={isSel ? 2 : 1.25}
+                    />
+                    <circle cx={13} cy={15} r={4} fill={STATUS_COLOR[status]}>
+                      {isRunning && (
+                        <animate
+                          attributeName="opacity"
+                          values="1;0.25;1"
+                          dur="1s"
+                          repeatCount="indefinite"
+                        />
+                      )}
+                    </circle>
+                    <text
+                      x={26}
+                      y={18}
+                      className="fill-foreground"
+                      style={{ fontSize: 10.5, fontWeight: 700 }}
+                    >
+                      {node.label.length > 22 ? `${node.label.slice(0, 21)}…` : node.label}
+                    </text>
+                    <text x={13} y={36} className="fill-muted-foreground" style={{ fontSize: 9 }}>
+                      ~{node.estimatedSeconds}s
+                      {node.requires.length ? ` · ${node.requires.join(" ")}` : ""}
+                    </text>
+                    <text x={13} y={52} style={{ fontSize: 9, fill: STATUS_COLOR[status] }}>
+                      {result
+                        ? `${status}${result.durationMs ? ` · ${Math.round(result.durationMs / 100) / 10}s` : ""}`
+                        : "not run"}
+                    </text>
+                  </g>
+                );
+              }),
+            )}
+          </svg>
+        </div>
+      )}
+
+      {/* Detail panel */}
+      {selectedNode && (
+        <div className="rounded-2xl border border-border/60 bg-card p-4 space-y-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="flex items-start gap-2 min-w-0">
+              <StatusIcon status={selectedResult?.status ?? "pending"} className="w-4 h-4 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">{selectedNode.label}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {selectedNode.stage} · ~{selectedNode.estimatedSeconds}s
+                  {selectedNode.dependsOn.length
+                    ? ` · after ${selectedNode.dependsOn.join(", ")}`
+                    : " · no dependencies"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedNode.href && (
+                <Link
+                  href={selectedNode.href}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border border-[#5B8DA8]/40 text-[#5B8DA8]"
+                >
+                  Open <ExternalLink className="w-2.5 h-2.5" />
+                </Link>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void run([selectedNode.id])}
+                disabled={running !== null}
+                className="gap-1.5 text-[10px] h-7"
+                data-testid="button-burns-run-node"
+              >
+                {running === selectedNode.id ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Play className="w-3 h-3" />
+                )}
+                Run this node
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {selectedNode.description}
+          </p>
+          {selectedResult && (
+            <div className="rounded-lg border border-border/50 bg-muted/20 p-2.5 space-y-1">
+              <p className="text-[11px] text-foreground">{selectedResult.message}</p>
+              {selectedResult.detail && (
+                <pre className="text-[10px] text-muted-foreground overflow-x-auto whitespace-pre-wrap">
+                  {JSON.stringify(selectedResult.detail, null, 2)}
+                </pre>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* History */}
+      {!!data?.history?.length && (
+        <div className="rounded-2xl border border-border/60 bg-card/40 p-3">
+          <p className="text-[11px] font-black text-foreground mb-2">Recent runs</p>
+          <ul className="space-y-1">
+            {data.history.map((h) => (
+              <li
+                key={h.startedAt}
+                className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground"
+              >
+                <StatusIcon status={h.ok ? "ok" : "failed"} className="w-3 h-3" />
+                <span className="text-foreground">{new Date(h.startedAt).toLocaleString()}</span>
+                <span>{h.trigger}</span>
+                <span>{h.summary}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}

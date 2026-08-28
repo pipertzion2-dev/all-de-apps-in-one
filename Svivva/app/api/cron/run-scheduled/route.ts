@@ -42,6 +42,28 @@ export async function GET(req: NextRequest) {
     out.seo = { indexNow, gsc, monitor };
   }
 
+  // Burns System — runs every ZZAI feature against zzaizzai.com itself as a
+  // dependency graph. Superset of the `seo` job (it submits IndexNow, pushes the
+  // GSC sitemap and runs the SEO monitor as graph nodes), so the 6am slot points
+  // here instead of running both and double-submitting.
+  if (job === "burns" || job === "all") {
+    try {
+      const { runBurnsSystem } = await import("@/lib/burns/burns-runner");
+      const { recordBurnsAudit, saveBurnsRun } = await import("@/lib/burns/burns-store");
+      const run = await runBurnsSystem({ trigger: "cron" });
+      await saveBurnsRun(run);
+      await recordBurnsAudit(run);
+      out.burns = {
+        ok: run.ok,
+        summary: run.summary,
+        counts: run.counts,
+        truncated: run.truncated,
+      };
+    } catch (e) {
+      out.burns = { ok: false, error: String(e instanceof Error ? e.message : e) };
+    }
+  }
+
   if (job === "growth" || job === "all") {
     const growth = await fetch(`${origin}/api/growth/tasks`, {
       method: "POST",

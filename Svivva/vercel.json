@@ -12,7 +12,7 @@
   },
   "crons": [
     {
-      "path": "/api/cron/run-scheduled?job=seo",
+      "path": "/api/cron/run-scheduled?job=burns",
       "schedule": "0 6 * * *"
     },
     {
