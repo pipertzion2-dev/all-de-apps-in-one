@@ -4,7 +4,21 @@ import { useRef, useEffect } from "react";
 
 export type MotifId = "waveform" | "branching" | "web" | "seal" | "packaging" | "crystal";
 
-function WaveformLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
+function syncCanvasSize(cv: HTMLCanvasElement): boolean {
+  const w = cv.offsetWidth;
+  const h = cv.offsetHeight;
+  if (w <= 0 || h <= 0) return false;
+  if (cv.width !== w || cv.height !== h) {
+    cv.width = w;
+    cv.height = h;
+  }
+  return true;
+}
+
+function useMotifCanvas(
+  drawFrame: (ctx: CanvasRenderingContext2D, cv: HTMLCanvasElement, t: number) => void,
+  deps: unknown[],
+) {
   const cvRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const cv = cvRef.current;
@@ -13,11 +27,38 @@ function WaveformLayer({ color, opacity = 1 }: { color: string; opacity?: number
     if (!ctx) return;
     let t = 0;
     let raf = 0;
+    let inView = true;
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            ([entry]) => {
+              inView = Boolean(entry?.isIntersecting);
+            },
+            { threshold: 0 },
+          )
+        : null;
+    io?.observe(cv);
     const draw = () => {
       raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
+      if (document.hidden || !inView) return;
+      if (!syncCanvasSize(cv)) return;
       ctx.clearRect(0, 0, cv.width, cv.height);
+      drawFrame(ctx, cv, t);
+      t += 1;
+    };
+    draw();
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- drawFrame identity follows deps
+  }, deps);
+  return cvRef;
+}
+
+function WaveformLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
       const lines = 8;
       for (let l = 0; l < lines; l++) {
         ctx.beginPath();
@@ -42,11 +83,9 @@ function WaveformLayer({ color, opacity = 1 }: { color: string; opacity?: number
       ctx.globalAlpha = 0.18 * opacity;
       ctx.fillStyle = grad;
       ctx.fillRect(scanX - 1, 0, 2, cv.height);
-      t += 1;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}
@@ -57,25 +96,17 @@ function WaveformLayer({ color, opacity = 1 }: { color: string; opacity?: number
 }
 
 function BranchingLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
-  const cvRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    let t = 0;
-    let raf = 0;
-    const nodes = Array.from({ length: 7 }, (_, i) => ({
+  const nodesRef = useRef(
+    Array.from({ length: 7 }, (_, i) => ({
       x: 0.5,
       y: 0.5,
       angle: (i / 7) * Math.PI * 2,
       len: 0.15 + Math.random() * 0.1,
-    }));
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
-      ctx.clearRect(0, 0, cv.width, cv.height);
+    })),
+  );
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
+      const nodes = nodesRef.current;
       const cx = cv.width * 0.5;
       const cy = cv.height * 0.5;
       nodes.forEach((n, i) => {
@@ -101,11 +132,9 @@ function BranchingLayer({ color, opacity = 1 }: { color: string; opacity?: numbe
       ctx.fillStyle = color;
       ctx.globalAlpha = 0.28 * opacity;
       ctx.fill();
-      t++;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}
@@ -116,25 +145,17 @@ function BranchingLayer({ color, opacity = 1 }: { color: string; opacity?: numbe
 }
 
 function WebLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
-  const cvRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    let t = 0;
-    let raf = 0;
-    const pts = Array.from({ length: 9 }, () => ({
+  const ptsRef = useRef(
+    Array.from({ length: 9 }, () => ({
       x: Math.random(),
       y: Math.random(),
       vx: (Math.random() - 0.5) * 0.0005,
       vy: (Math.random() - 0.5) * 0.0005,
-    }));
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
-      ctx.clearRect(0, 0, cv.width, cv.height);
+    })),
+  );
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
+      const pts = ptsRef.current;
       pts.forEach((p) => {
         p.x = (p.x + p.vx + 1) % 1;
         p.y = (p.y + p.vy + 1) % 1;
@@ -162,11 +183,9 @@ function WebLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
       ctx.globalAlpha = 0.08 * opacity;
       ctx.lineWidth = 1;
       ctx.stroke();
-      t++;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}
@@ -177,19 +196,8 @@ function WebLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
 }
 
 function SealLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
-  const cvRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    let t = 0;
-    let raf = 0;
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
-      ctx.clearRect(0, 0, cv.width, cv.height);
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
       const progress = Math.sin(t * 0.015) * 0.5 + 0.5;
       const perim = 2 * (cv.width + cv.height);
       const drawn = perim * progress;
@@ -234,11 +242,9 @@ function SealLayer({ color, opacity = 1 }: { color: string; opacity?: number }) 
         ctx.globalAlpha = 0.35 * opacity;
         ctx.fill();
       });
-      t++;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}
@@ -249,19 +255,8 @@ function SealLayer({ color, opacity = 1 }: { color: string; opacity?: number }) 
 }
 
 function PackagingLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
-  const cvRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    let t = 0;
-    let raf = 0;
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
-      ctx.clearRect(0, 0, cv.width, cv.height);
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
       const cols = 3;
       const rows = 3;
       const panelW = cv.width / cols;
@@ -290,11 +285,9 @@ function PackagingLayer({ color, opacity = 1 }: { color: string; opacity?: numbe
       ctx.globalAlpha = 0.1 * opacity;
       ctx.fillStyle = g;
       ctx.fillRect(sweepX - 20, 0, 40, cv.height);
-      t++;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}
@@ -305,59 +298,46 @@ function PackagingLayer({ color, opacity = 1 }: { color: string; opacity?: numbe
 }
 
 function CrystalLayer({ color, opacity = 1 }: { color: string; opacity?: number }) {
-  const cvRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const cv = cvRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    let t = 0;
-    let raf = 0;
-    const crystals = [
-      { x: 0.72, y: 0.78, r: 0 },
-      { x: 0.15, y: 0.62, r: Math.PI / 4 },
-    ];
-    const drawDiamond = (cx: number, cy: number, size: number, rot: number) => {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rot);
-      const pts = [
-        [0, -size * 1.4],
-        [size, 0],
-        [0, size * 0.9],
-        [-size, 0],
-      ];
-      ctx.beginPath();
-      pts.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
-      ctx.closePath();
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.3 * opacity;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      const g = ctx.createLinearGradient(-size, -size, size, size);
-      g.addColorStop(0, "transparent");
-      g.addColorStop(0.5, color);
-      g.addColorStop(1, "transparent");
-      ctx.fillStyle = g;
-      ctx.globalAlpha = (0.06 + 0.04 * Math.sin(t * 0.05)) * opacity;
-      ctx.fill();
-      ctx.restore();
-    };
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      cv.width = cv.offsetWidth;
-      cv.height = cv.offsetHeight;
-      ctx.clearRect(0, 0, cv.width, cv.height);
+  const crystalsRef = useRef([
+    { x: 0.72, y: 0.78, r: 0 },
+    { x: 0.15, y: 0.62, r: Math.PI / 4 },
+  ]);
+  const cvRef = useMotifCanvas(
+    (ctx, cv, t) => {
+      const crystals = crystalsRef.current;
       const s = Math.min(cv.width, cv.height) * 0.12;
       crystals.forEach((c, i) => {
         c.r += 0.004 + i * 0.002;
-        drawDiamond(c.x * cv.width, c.y * cv.height, s, c.r);
+        const cx = c.x * cv.width;
+        const cy = c.y * cv.height;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(c.r);
+        const pts = [
+          [0, -s * 1.4],
+          [s, 0],
+          [0, s * 0.9],
+          [-s, 0],
+        ];
+        ctx.beginPath();
+        pts.forEach(([px, py], idx) => (idx === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
+        ctx.closePath();
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.3 * opacity;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        const g = ctx.createLinearGradient(-s, -s, s, s);
+        g.addColorStop(0, "transparent");
+        g.addColorStop(0.5, color);
+        g.addColorStop(1, "transparent");
+        ctx.fillStyle = g;
+        ctx.globalAlpha = (0.06 + 0.04 * Math.sin(t * 0.05)) * opacity;
+        ctx.fill();
+        ctx.restore();
       });
-      t++;
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, [color, opacity]);
+    },
+    [color, opacity],
+  );
   return (
     <canvas
       ref={cvRef}

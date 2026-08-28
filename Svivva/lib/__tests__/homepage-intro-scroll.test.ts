@@ -18,7 +18,9 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("flipAnimRef");
   });
 
-  it("unlocks body overflow and touchAction on skip", () => {
-    expect(pageSrc).toMatch(/onClick=\{\(\) => \{[\s\S]*touchAction = ""/);
+  it("defers heavy 3D on mobile until intro completes", () => {
+    expect(pageSrc).toContain("canMountHeavy3d");
+    expect(pageSrc).toContain("setCanMountHeavy3d(true)");
+    expect(pageSrc).toContain("if (flipComplete) setCanMountHeavy3d(true)");
   });
 });

@@ -40,14 +40,22 @@ function WebPulseOverlay({ hovered }: { hovered: boolean }) {
     if (!ctx) return;
 
     let t = 0;
-    const draw = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (!hovered) {
-        animRef.current = requestAnimationFrame(draw);
-        return;
+    const syncSize = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      if (w <= 0 || h <= 0) return false;
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
       }
+      return true;
+    };
+    const draw = () => {
+      animRef.current = requestAnimationFrame(draw);
+      if (document.hidden) return;
+      if (!syncSize()) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!hovered) return;
       const cx = canvas.width / 2;
       const cy = canvas.height / 2;
       const maxR = Math.hypot(cx, cy);
@@ -71,7 +79,6 @@ function WebPulseOverlay({ hovered }: { hovered: boolean }) {
         ctx.stroke();
       }
       t += 0.03;
-      animRef.current = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(animRef.current);

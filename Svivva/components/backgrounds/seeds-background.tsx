@@ -68,7 +68,7 @@ export default function SeedsBackground() {
     const onScroll = () => {
       scrollRef.current = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
     };
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     let raf: number;
     const clock = new THREE.Clock();
