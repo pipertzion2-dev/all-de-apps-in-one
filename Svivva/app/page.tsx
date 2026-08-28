@@ -153,7 +153,8 @@ export default function LandingPage() {
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
-  const flipBackRef = useRef<HTMLDivElement>(null);
+  /** The page itself is the flip's second face, so it rotates in as a real surface. */
+  const pageFaceRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
@@ -225,6 +226,13 @@ export default function LandingPage() {
 
     const finishIntro = () => {
       stopFlipAnim();
+      // Imperatively-set transforms are invisible to React's style diff, so the
+      // page face has to be released by hand or the finished page stays in 3D.
+      if (pageFaceRef.current) {
+        pageFaceRef.current.style.transform = "";
+        pageFaceRef.current.style.transformOrigin = "";
+        pageFaceRef.current.style.willChange = "";
+      }
       setFlipComplete(true);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
@@ -236,6 +244,8 @@ export default function LandingPage() {
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // Reduced motion skips the rotation entirely — finishIntro also releases the
+    // page face, so the 3D transform is never applied for these users.
     if (reducedMotion) {
       finishIntro();
       return () => {
@@ -252,6 +262,19 @@ export default function LandingPage() {
       return easeOutCubic(clamped) * 90;
     };
 
+    /**
+     * The intro panel is the front face of a box whose depth matches the
+     * viewport height; the page below is the adjacent face. Painting both from
+     * one angle is what makes the reveal read as a solid rotating object
+     * instead of a flat cross-fade.
+     */
+    const paintPageFace = (angle: number) => {
+      if (!pageFaceRef.current) return;
+      // Hinged on its bottom edge: edge-on at 0deg, exactly in place at 90deg,
+      // so the handoff to the real page needs no correction.
+      pageFaceRef.current.style.transform = `rotateX(${angle - 90}deg)`;
+    };
+
     const syncFlipDepth = () => {
       const halfH = halfHRef.current;
       const angle = progressToAngle(displayedProgressRef.current);
@@ -259,12 +282,10 @@ export default function LandingPage() {
       if (flipFrontRef.current) {
         flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
       }
-      if (flipBackRef.current) {
-        flipBackRef.current.style.transform = `rotateX(180deg) translate3d(0, 0, ${halfH}px)`;
-      }
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
       }
+      paintPageFace(angle);
     };
 
     const paintFlip = (progress: number) => {
@@ -276,6 +297,7 @@ export default function LandingPage() {
       if (flipRotorRef.current) {
         flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
       }
+      paintPageFace(angle);
 
       if (!finishingIntroRef.current) {
         captureEl.style.opacity = "1";
@@ -471,6 +493,9 @@ export default function LandingPage() {
             zIndex: 70,
             touchAction: "none",
             overflow: "visible",
+            // Transparent on purpose: the receding corners now expose the page
+            // face rotating in behind, which is what reads as a solid box. An
+            // opaque backdrop here would hide the second face entirely.
             backgroundColor: "transparent",
             opacity: 1,
             willChange: "opacity",
@@ -512,13 +537,29 @@ export default function LandingPage() {
                   transform: "translate3d(0, 0, 50vh)",
                 }}
               >
+                {/* Overscan bleed. Under perspective the panel's top corners
+                    pull inward as they recede, and neither face covers the gap
+                    mid-rotation, which showed as black wedges. Extending the
+                    white past the top and sides keeps it covered; the bottom
+                    stays flush so it never hides the page face rising in. */}
                 <div
-                  className="w-full h-full overflow-hidden"
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    top: "-45%",
+                    left: "-45%",
+                    right: "-45%",
+                    bottom: 0,
+                    backgroundColor: "#ffffff",
+                  }}
+                />
+                <div
+                  className="w-full h-full overflow-hidden relative"
                   style={{
                     backgroundColor: "#ffffff",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end",
+                    justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
@@ -529,31 +570,19 @@ export default function LandingPage() {
                     height={1024}
                     sizes="100vw"
                     style={{
+                      // Fill the panel in both axes: `height: auto` left the square
+                      // image only as tall as the viewport was wide, stranding the
+                      // slack as blank space on portrait/mobile viewports.
                       width: "100%",
-                      maxHeight: "100%",
-                      height: "auto",
+                      height: "100%",
                       objectFit: "contain",
-                      objectPosition: "bottom center",
+                      objectPosition: "center",
                       display: "block",
                     }}
                     priority
                   />
                 </div>
               </div>
-              <div
-                ref={flipBackRef}
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  background: "transparent",
-                  willChange: "transform",
-                  transform: "rotateX(180deg) translate3d(0, 0, 50vh)",
-                }}
-              />
             </div>
           </div>
           <div
@@ -567,11 +596,11 @@ export default function LandingPage() {
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex flex-col items-center gap-1"
+              className="flex flex-col items-center gap-1 rounded-full bg-white/85 px-5 py-2.5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
             >
               <span
-                className="text-sm font-medium text-gray-500 dark:text-gray-400"
+                className="text-sm font-medium text-gray-700"
                 style={{ fontFamily: "'Zc', sans-serif" }}
               >
                 Scroll to enter
@@ -583,7 +612,7 @@ export default function LandingPage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-gray-500 dark:text-gray-400"
+                className="text-gray-700"
               >
                 <path d="M10 4v12M5 11l5 5 5-5" />
               </svg>
@@ -601,1335 +630,1394 @@ export default function LandingPage() {
         </div>
       )}
 
-      <div className="bg-background" style={{ pointerEvents: flipComplete ? "auto" : "none" }}>
-        <nav
-          className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
-          style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
+      {/* During the intro this is the flip's second face, so the reveal is a real
+          rotation rather than a cross-fade. Rotating the actual page avoids a
+          duplicate copy, and it is clipped to one screen so a 10,000px document
+          is never promoted to a 3D layer. Heavy WebGL stays unmounted until the
+          intro ends, so the face rotates in with the page chrome, not the camo. */}
+      <div
+        style={
+          flipComplete
+            ? undefined
+            : { perspective: "2400px", perspectiveOrigin: "50% 50%", overflow: "hidden" }
+        }
+      >
+        <div
+          ref={pageFaceRef}
+          className="bg-background"
+          style={
+            flipComplete
+              ? { pointerEvents: "auto" }
+              : {
+                  pointerEvents: "none",
+                  height: "100svh",
+                  overflow: "hidden",
+                  transformOrigin: "50% 100%",
+                  willChange: "transform",
+                }
+          }
         >
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
-            <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-              <ZzaiModeToggle size="sm" />
-              <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
-                zzai zzai
-              </span>
+          <nav
+            className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
+            style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
+          >
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
+              <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                <ZzaiModeToggle size="sm" />
+                <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
+                  zzai zzai
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                <Link
+                  href="/play"
+                  className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
+                  data-testid="link-svivva-play-mobile"
+                >
+                  <span className="seeds-holo-text text-base leading-none">&#9835;</span>
+                  <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
+                </Link>
+                <Link href="/dashboard">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="px-2.5 text-xs border-[#5B8DA8]/50"
+                    data-testid="button-nav-dashboard"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+                <a href="/login" className="hidden md:block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-2 text-xs"
+                    data-testid="button-signin"
+                  >
+                    Sign In
+                  </Button>
+                </a>
+                <a href="/signup">
+                  <Button
+                    size="sm"
+                    className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
+                    data-testid="button-start-free"
+                  >
+                    Start Free
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </nav>
+
+          {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
+          <div className="relative overflow-x-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
+              <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
+                {canMountHeavy3d ? (
+                  <CamoThreeOverlay
+                    preset="oaas"
+                    eagerMount
+                    keepMounted
+                    className="h-full w-full"
+                  />
+                ) : null}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-              <Link
-                href="/play"
-                className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
-                data-testid="link-svivva-play-mobile"
-              >
-                <span className="seeds-holo-text text-base leading-none">&#9835;</span>
-                <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
-              </Link>
-              <Link href="/dashboard">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="px-2.5 text-xs border-[#5B8DA8]/50"
-                  data-testid="button-nav-dashboard"
-                >
-                  Dashboard
-                </Button>
-              </Link>
-              <a href="/login" className="hidden md:block">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-2 text-xs"
-                  data-testid="button-signin"
-                >
-                  Sign In
-                </Button>
-              </a>
-              <a href="/signup">
-                <Button
-                  size="sm"
-                  className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
-                  data-testid="button-start-free"
-                >
-                  Start Free
-                </Button>
-              </a>
+            {/* The shell always renders so the hero holds its layout and reads as
+                the page's first screen; only the WebGL canvas waits for
+                canMountHeavy3d. Gating the whole section collapsed the hero, so
+                the top of the page was the OaaS block until the cube mounted and
+                shoved everything down. */}
+            <div className="relative z-10">
+              <SvivvaArtifact mountCanvas={canMountHeavy3d} />
             </div>
+
+            <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
+                  <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5B8DA8]/50">
+                      <Image
+                        src={seedsLogo}
+                        alt="ZZAI Seeds"
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 text-center md:text-left space-y-3">
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                        <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
+                          Orchestration as a Service
+                        </span>
+                        <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
+                        <Badge variant="secondary" className="text-[10px]">
+                          Mixing-console OS
+                        </Badge>
+                      </div>
+                      <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+                        <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI
+                        module is a <strong>channel strip</strong>; subgroup <strong>buses</strong>{" "}
+                        sum your signal through <strong>Signal</strong> or <strong>Crest</strong>{" "}
+                        mains to the <strong>Master bus</strong> — deploy, launch, and ship.
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                        {[
+                          "16 channel strips",
+                          "6 subgroup buses",
+                          "Signal · Crest mains",
+                          "Master bus out",
+                        ].map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[10px] px-2 py-1 rounded-full bg-[#5B8DA8]/15 border border-[#5B8DA8]/40 text-foreground/80"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
+                        <a href="#oaas">
+                          <Button
+                            size="sm"
+                            className="gap-2 bg-[#5B8DA8]"
+                            data-testid="button-oaas-cta"
+                          >
+                            Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
+                          </Button>
+                        </a>
+                        <Link href="/seeds">
+                          <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
+                            Open ZZAI Seeds
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="relative z-10 pb-8 sm:pb-12">
+              <PlatformFeatureHub hideBackground />
+            </div>
+
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
+              style={{
+                background:
+                  "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
+              }}
+            />
           </div>
-        </nav>
 
-        {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
-        <div className="relative overflow-x-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
-            <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
-              {canMountHeavy3d ? (
-                <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
-              ) : null}
+          <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="text-center space-y-4 mb-16">
+                <Badge variant="secondary" className="px-4 py-1.5">
+                  The BUILD System
+                </Badge>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                  {mode === "digital" ? (
+                    <span
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      5 steps
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      5 steps
+                    </span>
+                  )}{" "}
+                  to delivery
+                </h2>
+
+                <div className="flex justify-center mt-6 px-4">
+                  <ZzaiModeToggle size="md" showLabels />
+                </div>
+
+                <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mt-6">
+                  Bring Users Into Logical Delivery — our guided process takes you from concept to
+                  completion.
+                </p>
+              </div>
+
+              <div className="mt-12 text-center">
+                <a href="/signup">
+                  <Button
+                    size="lg"
+                    className="gap-2 bg-[#5B8DA8]"
+                    data-testid="button-platforms-cta"
+                  >
+                    {mode === "digital" ? "Enter Signal — Build APIs" : "Enter Crest — Manufacture"}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </a>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="relative z-10">{canMountHeavy3d ? <SvivvaArtifact /> : null}</div>
+          {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
+          <section className="py-8 md:bg-background/40 md:backdrop-blur-sm">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                {[
+                  {
+                    label: "APIs Built",
+                    value: stats
+                      ? stats.projects > 0
+                        ? stats.projects.toLocaleString()
+                        : "—"
+                      : "…",
+                    suffix: stats && stats.projects > 0 ? "+" : "",
+                  },
+                  {
+                    label: "Developers",
+                    value: stats
+                      ? stats.developers > 0
+                        ? stats.developers.toLocaleString()
+                        : "—"
+                      : "…",
+                    suffix: stats && stats.developers > 0 ? "+" : "",
+                  },
+                  {
+                    label: "API Calls Served",
+                    value: stats
+                      ? stats.apiCalls > 0
+                        ? stats.apiCalls.toLocaleString()
+                        : "—"
+                      : "…",
+                    suffix: stats && stats.apiCalls > 0 ? "+" : "",
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex flex-col items-center gap-1"
+                    data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <span
+                      className="text-2xl sm:text-3xl font-black tracking-tight"
+                      style={{
+                        background: "linear-gradient(135deg, #5B8DA8, #D94F9C)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      {stat.value}
+                      {stat.suffix}
+                    </span>
+                    <span className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                      {stat.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+          {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
-          <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6">
-              <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
-                <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
-                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ring-[#5B8DA8]/50">
-                    <Image
-                      src={seedsLogo}
-                      alt="ZZAI Seeds"
-                      fill
-                      sizes="128px"
-                      className="object-cover"
+          <section
+            id="features"
+            className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden -mt-1"
+          >
+            <div className="absolute inset-0 opacity-60 md:opacity-50">
+              <CamoThreeOverlay preset="features" />
+            </div>
+            <div
+              className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+              <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
+                <Badge variant="secondary" className="px-4 py-1.5">
+                  Features
+                </Badge>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                  {mode === "digital" ? (
+                    <>
+                      Everything you need for{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        production
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Everything you need to{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        manufacture
+                      </span>
+                    </>
+                  )}
+                </h2>
+                <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  {mode === "digital"
+                    ? "From prompt to production in minutes. Built-in evaluation, versioning, and rollback."
+                    : "From concept to production-ready. AI-powered schematics, materials, and budgets."}
+                </p>
+              </div>
+
+              {mode === "digital" ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {features.map((feature, index) => (
+                    <Card
+                      key={index}
+                      className="rounded-2xl p-6 hover-elevate active-elevate-2 group backdrop-blur-xl bg-card/95 border-border/50"
+                      data-testid={`card-feature-${index}`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="w-10 h-10 rounded-lg bg-[#5B8DA8]/15 flex items-center justify-center">
+                            <feature.icon className="w-5 h-5 text-[#5B8DA8]" />
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-[#5B8DA8]/10 text-[#5B8DA8] border-[#5B8DA8]/20 invisible group-hover:visible"
+                          >
+                            {feature.highlight}
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg font-semibold">{feature.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {feature.description}
+                        </p>
+                        <div className="pt-2">
+                          <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#5B8DA8]">
+                            {feature.code}
+                          </code>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    {
+                      icon: Layers,
+                      title: "Smart Project Briefs",
+                      description:
+                        "AI interprets your vision and creates comprehensive project outlines with all requirements.",
+                      highlight: "AI-Powered",
+                      code: "brief.generate()",
+                    },
+                    {
+                      icon: Box,
+                      title: "Material Discovery",
+                      description:
+                        "Automatically scout and compare materials from multiple suppliers with real-time pricing.",
+                      highlight: "Live Pricing",
+                      code: "materials.scout()",
+                    },
+                    {
+                      icon: Ruler,
+                      title: "Dimensional preview",
+                      description:
+                        "See illustrative dimensions inferred from your product category and requirements — a planning aid, not engineering drawings.",
+                      highlight: "From your brief",
+                      code: "layout.preview()",
+                    },
+                    {
+                      icon: Palette,
+                      title: "Optional reference images",
+                      description:
+                        "Generate 2D reference sketches from prompts (DALL-E 3) when your deployment has OpenAI configured — not CAD or mesh output.",
+                      highlight: "DALL-E 3",
+                      code: "images.generate()",
+                    },
+                    {
+                      icon: Settings2,
+                      title: "Budget Optimization",
+                      description:
+                        "Real-time cost tracking with AI suggestions for cost-effective alternatives.",
+                      highlight: "Save Money",
+                      code: "budget.optimize()",
+                    },
+                    {
+                      icon: Database,
+                      title: "Supplier Network",
+                      description:
+                        "Access vetted suppliers with verified lead times and quality ratings.",
+                      highlight: "Verified",
+                      code: "suppliers.find()",
+                    },
+                  ].map((feature, index) => (
+                    <Card
+                      key={index}
+                      className="rounded-2xl p-6 hover-elevate active-elevate-2 group backdrop-blur-xl bg-card/95 border-border/50"
+                      data-testid={`card-feature-physical-${index}`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="w-10 h-10 rounded-lg bg-[#D94F9C]/15 flex items-center justify-center">
+                            <feature.icon className="w-5 h-5 text-[#D94F9C]" />
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-[#D94F9C]/10 text-[#D94F9C] border-[#D94F9C]/20 invisible group-hover:visible"
+                          >
+                            {feature.highlight}
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg font-semibold">{feature.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {feature.description}
+                        </p>
+                        <div className="pt-2">
+                          <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#D94F9C]">
+                            {feature.code}
+                          </code>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Founder Story */}
+          <section className="py-16 sm:py-24 relative overflow-hidden">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+              <div className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-center">
+                {/* Image */}
+                <div className="relative order-2 lg:order-1 pb-8">
+                  <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-w-sm mx-auto lg:max-w-none">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/founder-son.jpeg"
+                      alt="ZZAI founder working with his 6-year-old son on the app design"
+                      className="w-full h-auto object-cover block"
                     />
                   </div>
-                  <div className="flex-1 text-center md:text-left space-y-3">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                      <span className="seeds-holo-text text-xl sm:text-2xl font-bold tracking-wide">
-                        Orchestration as a Service
-                      </span>
-                      <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
-                      <Badge variant="secondary" className="text-[10px]">
-                        Mixing-console OS
-                      </Badge>
-                    </div>
-                    <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                      <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every ZZAI
-                      module is a <strong>channel strip</strong>; subgroup <strong>buses</strong>{" "}
-                      sum your signal through <strong>Signal</strong> or <strong>Crest</strong>{" "}
-                      mains to the <strong>Master bus</strong> — deploy, launch, and ship.
+                  {/* Floating caption */}
+                  <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[200px]">
+                    <p className="text-xs font-semibold text-foreground leading-snug">
+                      Studying flower color palettes
                     </p>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
-                      {[
-                        "16 channel strips",
-                        "6 subgroup buses",
-                        "Signal · Crest mains",
-                        "Master bus out",
-                      ].map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] px-2 py-1 rounded-full bg-[#5B8DA8]/15 border border-[#5B8DA8]/40 text-foreground/80"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                      <a href="#oaas">
-                        <Button
-                          size="sm"
-                          className="gap-2 bg-[#5B8DA8]"
-                          data-testid="button-oaas-cta"
-                        >
-                          Explore OaaS <ArrowRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </a>
-                      <Link href="/seeds">
-                        <Button size="sm" variant="outline" className="gap-2 border-[#5B8DA8]/40">
-                          Open ZZAI Seeds
-                        </Button>
-                      </Link>
-                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Age 6 · Lead color designer
+                    </p>
+                  </div>
+                </div>
+
+                {/* Text */}
+                <div className="order-1 lg:order-2 space-y-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 text-xs font-medium text-[#5B8DA8]">
+                    <span>🌸</span> Founder Story
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
+                    Built by a father and son,{" "}
+                    <span
+                      style={{
+                        backgroundImage: "linear-gradient(to right, #D94F9C, #5B8DA8)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      one petal at a time
+                    </span>
+                  </h2>
+
+                  <div className="space-y-4 text-muted-foreground leading-relaxed">
+                    <p>
+                      I homeschool my six-year-old son, and somewhere between math lessons and
+                      afternoon walks, he developed a quiet obsession with flowers, plants, and
+                      herbs — the way they grow, the way they smell, and above everything else, the
+                      way they hold color.
+                    </p>
+                    <p>
+                      He studies color the way most kids study cartoons. He'll spend an hour noting
+                      how orchid cyan flares against deep magenta, or how silver metal catches light
+                      next to digital noise. When I started designing ZZAI, he was right there next
+                      to me. The cyan and magenta you see throughout the app? His picks — the same
+                      dual energy inside the ZZAI crest.
+                    </p>
+                    <p>
+                      The ZZAI mark — ornate silver crest, Yeoo-style lettering, glitch texture — is
+                      the brand signal for ZZAI. Crest on one side, Signal on the other. Ornate and
+                      digital at once. That duality is the product: Prompt to API, and manufacturing
+                      when you need hardware.
+                    </p>
+                    <p className="text-foreground/80 font-medium">
+                      We're building ZZAI to last. Not just as a platform for developers, but as
+                      something a six-year-old can one day point to and say he helped make
+                      beautiful.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <div className="relative z-10 pb-8 sm:pb-12">
-            <PlatformFeatureHub hideBackground />
-          </div>
-
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
-            style={{
-              background:
-                "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
-            }}
-          />
-        </div>
-
-        <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center space-y-4 mb-16">
-              <Badge variant="secondary" className="px-4 py-1.5">
-                The BUILD System
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                {mode === "digital" ? (
-                  <span
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    5 steps
-                  </span>
-                ) : (
-                  <span
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    5 steps
-                  </span>
-                )}{" "}
-                to delivery
-              </h2>
-
-              <div className="flex justify-center mt-6 px-4">
-                <ZzaiModeToggle size="md" showLabels />
-              </div>
-
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mt-6">
-                Bring Users Into Logical Delivery — our guided process takes you from concept to
-                completion.
-              </p>
+          <section
+            id="how-it-works"
+            className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden"
+          >
+            <div className="absolute inset-0 opacity-60 md:opacity-50">
+              <CamoThreeOverlay preset="howItWorks" />
             </div>
-
-            <div className="mt-12 text-center">
-              <a href="/signup">
-                <Button size="lg" className="gap-2 bg-[#5B8DA8]" data-testid="button-platforms-cta">
-                  {mode === "digital" ? "Enter Signal — Build APIs" : "Enter Crest — Manufacture"}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
-        <section className="py-8 md:bg-background/40 md:backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              {[
-                {
-                  label: "APIs Built",
-                  value: stats ? (stats.projects > 0 ? stats.projects.toLocaleString() : "—") : "…",
-                  suffix: stats && stats.projects > 0 ? "+" : "",
-                },
-                {
-                  label: "Developers",
-                  value: stats
-                    ? stats.developers > 0
-                      ? stats.developers.toLocaleString()
-                      : "—"
-                    : "…",
-                  suffix: stats && stats.developers > 0 ? "+" : "",
-                },
-                {
-                  label: "API Calls Served",
-                  value: stats ? (stats.apiCalls > 0 ? stats.apiCalls.toLocaleString() : "—") : "…",
-                  suffix: stats && stats.apiCalls > 0 ? "+" : "",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex flex-col items-center gap-1"
-                  data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  <span
-                    className="text-2xl sm:text-3xl font-black tracking-tight"
-                    style={{
-                      background: "linear-gradient(135deg, #5B8DA8, #D94F9C)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    {stat.value}
-                    {stat.suffix}
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        {/* ── End Traction Bar ──────────────────────────────────────────────── */}
-
-        <section
-          id="features"
-          className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden -mt-1"
-        >
-          <div className="absolute inset-0 opacity-60 md:opacity-50">
-            <CamoThreeOverlay preset="features" />
-          </div>
-          <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
-              <Badge variant="secondary" className="px-4 py-1.5">
-                Features
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                {mode === "digital" ? (
-                  <>
-                    Everything you need for{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      production
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Everything you need to{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      manufacture
-                    </span>
-                  </>
-                )}
-              </h2>
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                {mode === "digital"
-                  ? "From prompt to production in minutes. Built-in evaluation, versioning, and rollback."
-                  : "From concept to production-ready. AI-powered schematics, materials, and budgets."}
-              </p>
-            </div>
-
-            {mode === "digital" ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {features.map((feature, index) => (
-                  <Card
-                    key={index}
-                    className="rounded-2xl p-6 hover-elevate active-elevate-2 group backdrop-blur-xl bg-card/95 border-border/50"
-                    data-testid={`card-feature-${index}`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-[#5B8DA8]/15 flex items-center justify-center">
-                          <feature.icon className="w-5 h-5 text-[#5B8DA8]" />
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-[#5B8DA8]/10 text-[#5B8DA8] border-[#5B8DA8]/20 invisible group-hover:visible"
-                        >
-                          {feature.highlight}
-                        </Badge>
-                      </div>
-                      <h3 className="text-lg font-semibold">{feature.title}</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {feature.description}
-                      </p>
-                      <div className="pt-2">
-                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#5B8DA8]">
-                          {feature.code}
-                        </code>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    icon: Layers,
-                    title: "Smart Project Briefs",
-                    description:
-                      "AI interprets your vision and creates comprehensive project outlines with all requirements.",
-                    highlight: "AI-Powered",
-                    code: "brief.generate()",
-                  },
-                  {
-                    icon: Box,
-                    title: "Material Discovery",
-                    description:
-                      "Automatically scout and compare materials from multiple suppliers with real-time pricing.",
-                    highlight: "Live Pricing",
-                    code: "materials.scout()",
-                  },
-                  {
-                    icon: Ruler,
-                    title: "Dimensional preview",
-                    description:
-                      "See illustrative dimensions inferred from your product category and requirements — a planning aid, not engineering drawings.",
-                    highlight: "From your brief",
-                    code: "layout.preview()",
-                  },
-                  {
-                    icon: Palette,
-                    title: "Optional reference images",
-                    description:
-                      "Generate 2D reference sketches from prompts (DALL-E 3) when your deployment has OpenAI configured — not CAD or mesh output.",
-                    highlight: "DALL-E 3",
-                    code: "images.generate()",
-                  },
-                  {
-                    icon: Settings2,
-                    title: "Budget Optimization",
-                    description:
-                      "Real-time cost tracking with AI suggestions for cost-effective alternatives.",
-                    highlight: "Save Money",
-                    code: "budget.optimize()",
-                  },
-                  {
-                    icon: Database,
-                    title: "Supplier Network",
-                    description:
-                      "Access vetted suppliers with verified lead times and quality ratings.",
-                    highlight: "Verified",
-                    code: "suppliers.find()",
-                  },
-                ].map((feature, index) => (
-                  <Card
-                    key={index}
-                    className="rounded-2xl p-6 hover-elevate active-elevate-2 group backdrop-blur-xl bg-card/95 border-border/50"
-                    data-testid={`card-feature-physical-${index}`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="w-10 h-10 rounded-lg bg-[#D94F9C]/15 flex items-center justify-center">
-                          <feature.icon className="w-5 h-5 text-[#D94F9C]" />
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-[#D94F9C]/10 text-[#D94F9C] border-[#D94F9C]/20 invisible group-hover:visible"
-                        >
-                          {feature.highlight}
-                        </Badge>
-                      </div>
-                      <h3 className="text-lg font-semibold">{feature.title}</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {feature.description}
-                      </p>
-                      <div className="pt-2">
-                        <code className="inline-block px-2.5 py-1.5 rounded-md bg-muted/80 text-xs font-mono text-[#D94F9C]">
-                          {feature.code}
-                        </code>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Founder Story */}
-        <section className="py-16 sm:py-24 relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-center">
-              {/* Image */}
-              <div className="relative order-2 lg:order-1 pb-8">
-                <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-w-sm mx-auto lg:max-w-none">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/founder-son.jpeg"
-                    alt="ZZAI founder working with his 6-year-old son on the app design"
-                    className="w-full h-auto object-cover block"
-                  />
-                </div>
-                {/* Floating caption */}
-                <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[200px]">
-                  <p className="text-xs font-semibold text-foreground leading-snug">
-                    Studying flower color palettes
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Age 6 · Lead color designer
-                  </p>
-                </div>
-              </div>
-
-              {/* Text */}
-              <div className="order-1 lg:order-2 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 text-xs font-medium text-[#5B8DA8]">
-                  <span>🌸</span> Founder Story
-                </div>
-
-                <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                  Built by a father and son,{" "}
-                  <span
-                    style={{
-                      backgroundImage: "linear-gradient(to right, #D94F9C, #5B8DA8)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    one petal at a time
-                  </span>
+            <div
+              className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+              <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
+                <Badge variant="secondary" className="px-4 py-1.5">
+                  How it Works
+                </Badge>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                  {mode === "digital" ? (
+                    <>
+                      Prompt to{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        product
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Idea to{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        invoice
+                      </span>
+                    </>
+                  )}
                 </h2>
-
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    I homeschool my six-year-old son, and somewhere between math lessons and
-                    afternoon walks, he developed a quiet obsession with flowers, plants, and herbs
-                    — the way they grow, the way they smell, and above everything else, the way they
-                    hold color.
-                  </p>
-                  <p>
-                    He studies color the way most kids study cartoons. He'll spend an hour noting
-                    how orchid cyan flares against deep magenta, or how silver metal catches light
-                    next to digital noise. When I started designing ZZAI, he was right there next to
-                    me. The cyan and magenta you see throughout the app? His picks — the same dual
-                    energy inside the ZZAI crest.
-                  </p>
-                  <p>
-                    The ZZAI mark — ornate silver crest, Yeoo-style lettering, glitch texture — is
-                    the brand signal for ZZAI. Crest on one side, Signal on the other. Ornate and
-                    digital at once. That duality is the product: Prompt to API, and manufacturing
-                    when you need hardware.
-                  </p>
-                  <p className="text-foreground/80 font-medium">
-                    We're building ZZAI to last. Not just as a platform for developers, but as
-                    something a six-year-old can one day point to and say he helped make beautiful.
-                  </p>
-                </div>
+                <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  {mode === "digital"
+                    ? "Write what you want. Get a tested, versioned, rollback-ready API. No YAML. No boilerplate. No surprises."
+                    : "Describe your product. Get specs, suppliers, and a budget. No CAD skills needed. No guessing at costs."}
+                </p>
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section
-          id="how-it-works"
-          className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden"
-        >
-          <div className="absolute inset-0 opacity-60 md:opacity-50">
-            <CamoThreeOverlay preset="howItWorks" />
-          </div>
-          <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
-              <Badge variant="secondary" className="px-4 py-1.5">
-                How it Works
-              </Badge>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                {mode === "digital" ? (
-                  <>
-                    Prompt to{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      product
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Idea to{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      invoice
-                    </span>
-                  </>
-                )}
-              </h2>
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                {mode === "digital"
-                  ? "Write what you want. Get a tested, versioned, rollback-ready API. No YAML. No boilerplate. No surprises."
-                  : "Describe your product. Get specs, suppliers, and a budget. No CAD skills needed. No guessing at costs."}
-              </p>
-            </div>
-
-            {mode === "digital" ? (
-              <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/10">
-                    <Terminal className="w-5 h-5 text-[#5B8DA8]" />
-                    <span className="font-semibold text-[#5B8DA8]">1. Your Prompt</span>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <p className="text-sm text-gray-300">
-                      Describe what your API should do in plain English:
-                    </p>
-                    <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                      <p className="text-sm text-gray-200 italic">
-                        &quot;Analyze customer feedback to extract sentiment, identify key topics,
-                        and provide a confidence score. Handle multiple languages.&quot;
+              {mode === "digital" ? (
+                <div className="grid lg:grid-cols-3 gap-6 mb-12">
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/10">
+                      <Terminal className="w-5 h-5 text-[#5B8DA8]" />
+                      <span className="font-semibold text-[#5B8DA8]">1. Your Prompt</span>
+                    </div>
+                    <div className="p-5 space-y-4">
+                      <p className="text-sm text-gray-300">
+                        Describe what your API should do in plain English:
                       </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Check className="w-3.5 h-3.5 text-green-400" />
-                      <span>Intent detected: Sentiment Analysis</span>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
-                    <Layers className="w-5 h-5 text-[#D782B2]" />
-                    <span className="font-semibold text-[#D782B2]">2. Generated Schema</span>
-                  </div>
-                  <div className="p-5 font-mono text-xs space-y-1">
-                    <div>
-                      <span className="text-[#6B3A67]">interface</span>{" "}
-                      <span className="text-[#425884]">Response</span> {"{"}
-                    </div>
-                    <div className="pl-3">
-                      <span className="text-[#6B7B59]">sentiment</span>:{" "}
-                      <span className="text-[#D782B2]">&quot;positive&quot;</span> |{" "}
-                      <span className="text-[#D782B2]">&quot;negative&quot;</span>;
-                    </div>
-                    <div className="pl-3">
-                      <span className="text-[#6B7B59]">topics</span>:{" "}
-                      <span className="text-[#425884]">string[]</span>;
-                    </div>
-                    <div className="pl-3">
-                      <span className="text-[#6B7B59]">confidence</span>:{" "}
-                      <span className="text-[#425884]">number</span>;
-                    </div>
-                    <div className="pl-3">
-                      <span className="text-[#6B7B59]">language</span>:{" "}
-                      <span className="text-[#425884]">string</span>;
-                    </div>
-                    <div>{"}"}</div>
-                    <div className="pt-3 flex items-center gap-2 text-gray-400 font-sans">
-                      <Shield className="w-3.5 h-3.5 text-[#D782B2]" />
-                      <span>Schema validated</span>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
-                    <Globe className="w-5 h-5 text-[#63B3A6]" />
-                    <span className="font-semibold text-[#63B3A6]">3. Live API</span>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <div className="bg-black/40 rounded-lg p-3 border border-white/10">
-                      <div className="flex items-center gap-2 text-xs mb-2">
-                        <Badge className="bg-green-500/20 text-green-400 text-[10px]">POST</Badge>
-                        <span className="text-gray-300 font-mono text-[10px]">
-                          api.zzaizzai.com/v1/sentiment
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-mono">200 OK • 124ms</div>
-                    </div>
-                    <div className="bg-black/40 rounded-lg p-3 border border-white/10 font-mono text-xs">
-                      <div className="text-gray-400">{"{"}</div>
-                      <div className="pl-2">
-                        <span className="text-[#6B7B59]">&quot;sentiment&quot;</span>:{" "}
-                        <span className="text-[#D782B2]">&quot;positive&quot;</span>,
-                      </div>
-                      <div className="pl-2">
-                        <span className="text-[#6B7B59]">&quot;confidence&quot;</span>:{" "}
-                        <span className="text-[#425884]">0.94</span>
-                      </div>
-                      <div className="text-gray-400">{"}"}</div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            ) : (
-              <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D94F9C]/20 bg-[#D94F9C]/10">
-                    <Layers className="w-5 h-5 text-[#D94F9C]" />
-                    <span className="font-semibold text-[#D94F9C]">1. Your Vision</span>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <p className="text-sm text-gray-300">Describe what you want to build:</p>
-                    <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                      <p className="text-sm text-gray-200 italic">
-                        &quot;A modular desk organizer with 3 compartments, made from sustainable
-                        bamboo, fits standard office supplies.&quot;
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Check className="w-3.5 h-3.5 text-green-400" />
-                      <span>Category: Home Office Furniture</span>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
-                    <Ruler className="w-5 h-5 text-[#D782B2]" />
-                    <span className="font-semibold text-[#D782B2]">2. Layout preview</span>
-                  </div>
-                  <div className="p-5 space-y-3">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Dimensions</span>
-                      <span className="text-gray-200">300 x 200 x 120mm</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Material</span>
-                      <span className="text-gray-200">Bamboo (FSC)</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Components</span>
-                      <span className="text-gray-200">7 pieces</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Assembly</span>
-                      <span className="text-gray-200">Snap-fit joints</span>
-                    </div>
-                    <div className="pt-3 flex items-center gap-2 text-gray-400 font-sans text-xs">
-                      <Ruler className="w-3.5 h-3.5 text-[#D782B2]" />
-                      <span>Preview updates from your brief</span>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
-                    <Settings2 className="w-5 h-5 text-[#63B3A6]" />
-                    <span className="font-semibold text-[#63B3A6]">3. Production Ready</span>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-400">Unit cost</span>
-                        <span className="text-green-400 font-mono">$12.40</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-400">Lead time</span>
-                        <span className="text-gray-200">14 days</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-400">MOQ</span>
-                        <span className="text-gray-200">100 units</span>
-                      </div>
-                    </div>
-                    <div className="pt-2 flex flex-wrap gap-1">
-                      <Badge className="bg-purple-500/20 text-purple-400 text-[10px]">
-                        PDF blueprint
-                      </Badge>
-                      <Badge className="bg-blue-500/20 text-blue-400 text-[10px]">Sourcing</Badge>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            <div className="flex justify-center px-4">
-              <div className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-5 sm:px-6 py-3 bg-black/50 backdrop-blur-md rounded-2xl sm:rounded-full border border-white/10">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-                  <span className="text-xs sm:text-sm text-gray-300">
-                    {mode === "digital"
-                      ? "All responses validated against schema"
-                      : "All specs verified for manufacturability"}
-                  </span>
-                </div>
-                <div className="hidden sm:block w-px h-4 bg-white/20" />
-                <div className="flex items-center gap-2">
-                  <RefreshCw
-                    className={`w-4 h-4 flex-shrink-0 ${mode === "digital" ? "text-[#5B8DA8]" : "text-[#D94F9C]"}`}
-                  />
-                  <span className="text-xs sm:text-sm text-gray-300">
-                    {mode === "digital"
-                      ? "Auto-retry on validation failure"
-                      : "Real-time cost updates"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
-          <div className="absolute inset-0 opacity-60 md:opacity-50">
-            <CamoThreeOverlay preset="evals" />
-          </div>
-          <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            {mode === "digital" ? (
-              <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-                <div className="space-y-6 bg-background/85 backdrop-blur-xl rounded-2xl p-5 sm:p-8">
-                  <Badge variant="secondary" className="px-4 py-1.5">
-                    Evaluation Engine
-                  </Badge>
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                    We break it{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      so you don't
-                    </span>
-                  </h2>
-                  <p className="text-base sm:text-xl text-muted-foreground">
-                    Every endpoint gets 50+ AI-generated test cases—edge cases, adversarial inputs,
-                    malformed data. When pass rates drop, we roll back automatically. You sleep
-                    soundly.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Edge case detection</h3>
-                        <p className="text-muted-foreground text-sm">
-                          AI identifies boundary conditions your tests would miss
+                      <div className="bg-black/40 rounded-lg p-4 border border-white/10">
+                        <p className="text-sm text-gray-200 italic">
+                          &quot;Analyze customer feedback to extract sentiment, identify key topics,
+                          and provide a confidence score. Handle multiple languages.&quot;
                         </p>
                       </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Adversarial testing</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Tests malicious inputs and injection attempts
-                        </p>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <span>Intent detected: Sentiment Analysis</span>
                       </div>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Instant rollback</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Automatically reverts to last passing version on failures
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  </Card>
 
-                <Card className="rounded-2xl p-8 backdrop-blur-xl bg-card/95 border-border/50">
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="font-semibold">Eval Results</h3>
-                      <Badge className="bg-green-500/20 text-green-400">Passing</Badge>
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
+                      <Layers className="w-5 h-5 text-[#D782B2]" />
+                      <span className="font-semibold text-[#D782B2]">2. Generated Schema</span>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center gap-4">
-                        <span className="text-muted-foreground">Pass Rate</span>
-                        <span className="font-mono text-green-400">94.2%</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-white/10">
-                        <div className="w-[94%] h-full rounded-full bg-[#5B8DA8]" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">156</div>
-                        <div className="text-xs text-muted-foreground">Total</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-400">147</div>
-                        <div className="text-xs text-muted-foreground">Passed</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-red-400">9</div>
-                        <div className="text-xs text-muted-foreground">Failed</div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            ) : (
-              <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-                <div className="space-y-6 bg-background/85 backdrop-blur-xl rounded-2xl p-5 sm:p-8">
-                  <Badge variant="secondary" className="px-4 py-1.5">
-                    Quality Assurance
-                  </Badge>
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                    Find the problems{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      on screen
-                    </span>
-                  </h2>
-                  <p className="text-base sm:text-xl text-muted-foreground">
-                    AI stress-tests your design for manufacturability before you spend a dime on
-                    materials. Material conflicts, tolerance issues, cost overruns—caught early,
-                    fixed fast.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
+                    <div className="p-5 font-mono text-xs space-y-1">
                       <div>
-                        <h3 className="font-semibold">Manufacturability check</h3>
-                        <p className="text-muted-foreground text-sm">
-                          AI verifies your design can be produced with available methods
-                        </p>
+                        <span className="text-[#6B3A67]">interface</span>{" "}
+                        <span className="text-[#425884]">Response</span> {"{"}
+                      </div>
+                      <div className="pl-3">
+                        <span className="text-[#6B7B59]">sentiment</span>:{" "}
+                        <span className="text-[#D782B2]">&quot;positive&quot;</span> |{" "}
+                        <span className="text-[#D782B2]">&quot;negative&quot;</span>;
+                      </div>
+                      <div className="pl-3">
+                        <span className="text-[#6B7B59]">topics</span>:{" "}
+                        <span className="text-[#425884]">string[]</span>;
+                      </div>
+                      <div className="pl-3">
+                        <span className="text-[#6B7B59]">confidence</span>:{" "}
+                        <span className="text-[#425884]">number</span>;
+                      </div>
+                      <div className="pl-3">
+                        <span className="text-[#6B7B59]">language</span>:{" "}
+                        <span className="text-[#425884]">string</span>;
+                      </div>
+                      <div>{"}"}</div>
+                      <div className="pt-3 flex items-center gap-2 text-gray-400 font-sans">
+                        <Shield className="w-3.5 h-3.5 text-[#D782B2]" />
+                        <span>Schema validated</span>
                       </div>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Structural analysis</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Validates load-bearing capacity and material stress points
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Cost optimization</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Suggests material alternatives to reduce costs without quality loss
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  </Card>
 
-                <Card className="rounded-2xl p-8 backdrop-blur-xl bg-card/95 border-border/50">
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="font-semibold">Design Validation</h3>
-                      <Badge className="bg-green-500/20 text-green-400">Approved</Badge>
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
+                      <Globe className="w-5 h-5 text-[#63B3A6]" />
+                      <span className="font-semibold text-[#63B3A6]">3. Live API</span>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center gap-4">
-                        <span className="text-muted-foreground">Validation Score</span>
-                        <span className="font-mono text-green-400">96.8%</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-white/10">
-                        <div className="w-[97%] h-full rounded-full bg-[#D94F9C]" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">12</div>
-                        <div className="text-xs text-muted-foreground">Checks</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-400">11</div>
-                        <div className="text-xs text-muted-foreground">Passed</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-400">1</div>
-                        <div className="text-xs text-muted-foreground">Warning</div>
-                      </div>
-                    </div>
-                    <div className="space-y-2 pt-4 border-t border-white/10">
-                      <div className="flex items-center justify-between gap-2 text-sm">
-                        <span>Structural</span>
-                        <Badge className="bg-green-500/20 text-green-400 text-[10px]">Pass</Badge>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 text-sm">
-                        <span>Material</span>
-                        <Badge className="bg-green-500/20 text-green-400 text-[10px]">Pass</Badge>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 text-sm">
-                        <span>Assembly</span>
-                        <Badge className="bg-yellow-500/20 text-yellow-400 text-[10px]">
-                          Review
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 text-sm">
-                        <span>Cost</span>
-                        <Badge className="bg-green-500/20 text-green-400 text-[10px]">
-                          Optimized
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section id="pricing" className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
-          <div className="absolute inset-0 opacity-60 md:opacity-50">
-            <CamoThreeOverlay preset="pricing" />
-          </div>
-          <div
-            className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
-            style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
-              <Badge variant="secondary" className="px-4 py-1.5">
-                Pricing
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                Simple, transparent <span className="solid-accent">pricing</span>
-              </h2>
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Start free, scale as you grow. No hidden fees.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-              {pricingTiers.map((tier, index) => (
-                <div
-                  key={index}
-                  className={`relative ${tier.popular ? "p-[3px] rounded-2xl" : ""}`}
-                  style={
-                    tier.popular
-                      ? {
-                          background:
-                            "linear-gradient(135deg, #3F2A2C 0%, #7A4F3A 14%, #6B3A67 28%, #425884 42%, #D782B2 56%, #F3AFC4 70%, #6B7B59 85%, #4A5A3D 100%)",
-                        }
-                      : undefined
-                  }
-                >
-                  <Card
-                    className={`rounded-2xl p-6 relative backdrop-blur-xl bg-card h-full ${tier.popular ? "border-0" : "border-border/50"}`}
-                    data-testid={`card-pricing-${tier.name.toLowerCase()}`}
-                  >
-                    {tier.popular && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5B8DA8] text-white">
-                        Most Popular
-                      </Badge>
-                    )}
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-xl font-semibold">{tier.name}</h3>
-                        <p className="text-sm text-muted-foreground">{tier.description}</p>
-                      </div>
-                      {tier.hasSeeds && (
-                        <div className="flex items-center gap-2">
-                          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
-                            <Image
-                              src={seedsLogo}
-                              alt="ZZAI Seeds"
-                              fill
-                              sizes="32px"
-                              className="object-cover"
-                            />
-                          </div>
-                          <span className="seeds-holo-text text-[10px] font-bold tracking-widest uppercase">
-                            Includes Seeds
+                    <div className="p-5 space-y-4">
+                      <div className="bg-black/40 rounded-lg p-3 border border-white/10">
+                        <div className="flex items-center gap-2 text-xs mb-2">
+                          <Badge className="bg-green-500/20 text-green-400 text-[10px]">POST</Badge>
+                          <span className="text-gray-300 font-mono text-[10px]">
+                            api.zzaizzai.com/v1/sentiment
                           </span>
                         </div>
-                      )}
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold">{tier.price}</span>
-                        <span className="text-muted-foreground">{tier.period}</span>
+                        <div className="text-[10px] text-gray-500 font-mono">200 OK • 124ms</div>
                       </div>
-                      <ul className="space-y-3">
-                        {tier.features.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm">
-                            <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <a href={tier.href} className="block">
-                        <Button
-                          className={`w-full ${tier.popular ? "bg-[#5B8DA8] text-white" : ""}`}
-                          variant={tier.popular ? "default" : "outline"}
-                          data-testid={`button-pricing-${tier.name.toLowerCase()}`}
-                        >
-                          {tier.cta}
-                        </Button>
-                      </a>
+                      <div className="bg-black/40 rounded-lg p-3 border border-white/10 font-mono text-xs">
+                        <div className="text-gray-400">{"{"}</div>
+                        <div className="pl-2">
+                          <span className="text-[#6B7B59]">&quot;sentiment&quot;</span>:{" "}
+                          <span className="text-[#D782B2]">&quot;positive&quot;</span>,
+                        </div>
+                        <div className="pl-2">
+                          <span className="text-[#6B7B59]">&quot;confidence&quot;</span>:{" "}
+                          <span className="text-[#425884]">0.94</span>
+                        </div>
+                        <div className="text-gray-400">{"}"}</div>
+                      </div>
                     </div>
                   </Card>
                 </div>
-              ))}
-            </div>
-            <p className="text-center text-sm text-muted-foreground mt-8">
-              Want to explore first?{" "}
-              <a href="/signup" className="underline hover:text-foreground transition-colors">
-                Start free
-              </a>{" "}
-              — no credit card required.
-            </p>
-          </div>
-        </section>
+              ) : (
+                <div className="grid lg:grid-cols-3 gap-6 mb-12">
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D94F9C]/20 bg-[#D94F9C]/10">
+                      <Layers className="w-5 h-5 text-[#D94F9C]" />
+                      <span className="font-semibold text-[#D94F9C]">1. Your Vision</span>
+                    </div>
+                    <div className="p-5 space-y-4">
+                      <p className="text-sm text-gray-300">Describe what you want to build:</p>
+                      <div className="bg-black/40 rounded-lg p-4 border border-white/10">
+                        <p className="text-sm text-gray-200 italic">
+                          &quot;A modular desk organizer with 3 compartments, made from sustainable
+                          bamboo, fits standard office supplies.&quot;
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <span>Category: Home Office Furniture</span>
+                      </div>
+                    </div>
+                  </Card>
 
-        <section className="py-24 relative bg-gradient-to-b from-transparent to-background/50">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <div className="rounded-3xl p-6 sm:p-8 md:p-12 space-y-6 sm:space-y-8 bg-card/95 backdrop-blur-xl border border-border/50">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                {mode === "digital" ? (
-                  <>
-                    Ready to build{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      your next release
-                    </span>
-                    ?
-                  </>
-                ) : (
-                  <>
-                    Ready to manufacture{" "}
-                    <span
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      your next prototype
-                    </span>
-                    ?
-                  </>
-                )}
-              </h2>
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                {mode === "digital"
-                  ? "Join thousands of developers shipping AI-powered features faster and more reliably."
-                  : "Join thousands of creators turning ideas into manufactured products with AI-powered tools."}
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/dashboard">
-                  <Button
-                    size="lg"
-                    className="bg-[#5B8DA8] gap-2"
-                    data-testid="button-cta-dashboard"
-                  >
-                    Go to Dashboard
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <a href="/signup">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="gap-2"
-                    data-testid="button-cta-start"
-                  >
-                    {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
-                  </Button>
-                </a>
-              </div>
-              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-6 text-sm text-muted-foreground pt-4">
-                <span>Deploy in 60 seconds</span>
-                <span>No credit card required</span>
-                <span>SOC 2 compliant</span>
-              </div>
-            </div>
-          </div>
-        </section>
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
+                      <Ruler className="w-5 h-5 text-[#D782B2]" />
+                      <span className="font-semibold text-[#D782B2]">2. Layout preview</span>
+                    </div>
+                    <div className="p-5 space-y-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Dimensions</span>
+                        <span className="text-gray-200">300 x 200 x 120mm</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Material</span>
+                        <span className="text-gray-200">Bamboo (FSC)</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Components</span>
+                        <span className="text-gray-200">7 pieces</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Assembly</span>
+                        <span className="text-gray-200">Snap-fit joints</span>
+                      </div>
+                      <div className="pt-3 flex items-center gap-2 text-gray-400 font-sans text-xs">
+                        <Ruler className="w-3.5 h-3.5 text-[#D782B2]" />
+                        <span>Preview updates from your brief</span>
+                      </div>
+                    </div>
+                  </Card>
 
-        <footer className="border-t border-white/10 py-8 sm:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-              <div className="space-y-4 col-span-2 md:col-span-1">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <Image
-                    src={zzaiLogo}
-                    alt="zzai zzai"
-                    width={48}
-                    height={48}
-                    className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
-                  />
-                  <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
-                    zzai zzai
-                  </span>
+                  <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
+                      <Settings2 className="w-5 h-5 text-[#63B3A6]" />
+                      <span className="font-semibold text-[#63B3A6]">3. Production Ready</span>
+                    </div>
+                    <div className="p-5 space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Unit cost</span>
+                          <span className="text-green-400 font-mono">$12.40</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Lead time</span>
+                          <span className="text-gray-200">14 days</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">MOQ</span>
+                          <span className="text-gray-200">100 units</span>
+                        </div>
+                      </div>
+                      <div className="pt-2 flex flex-wrap gap-1">
+                        <Badge className="bg-purple-500/20 text-purple-400 text-[10px]">
+                          PDF blueprint
+                        </Badge>
+                        <Badge className="bg-blue-500/20 text-blue-400 text-[10px]">Sourcing</Badge>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              <div className="flex justify-center px-4">
+                <div className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-5 sm:px-6 py-3 bg-black/50 backdrop-blur-md rounded-2xl sm:rounded-full border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-gray-300">
+                      {mode === "digital"
+                        ? "All responses validated against schema"
+                        : "All specs verified for manufacturability"}
+                    </span>
+                  </div>
+                  <div className="hidden sm:block w-px h-4 bg-white/20" />
+                  <div className="flex items-center gap-2">
+                    <RefreshCw
+                      className={`w-4 h-4 flex-shrink-0 ${mode === "digital" ? "text-[#5B8DA8]" : "text-[#D94F9C]"}`}
+                    />
+                    <span className="text-xs sm:text-sm text-gray-300">
+                      {mode === "digital"
+                        ? "Auto-retry on validation failure"
+                        : "Real-time cost updates"}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <h4 className="font-semibold mb-4">Product</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>
-                    <a href="#features" className="hover:text-foreground transition-colors">
-                      Features
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#pricing" className="hover:text-foreground transition-colors">
-                      Pricing
-                    </a>
-                  </li>
-                  <li>
-                    <Link href="/play" className="hover:text-foreground transition-colors">
-                      ZZAI Play
-                    </Link>
-                  </li>
-                  <li>
-                    <a href="#oaas" className="hover:text-foreground transition-colors">
-                      OaaS
-                    </a>
-                  </li>
-                  <li>
-                    <Link href="/seeds" className="hover:text-foreground transition-colors">
-                      ZZAI Seeds
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/tools" className="hover:text-foreground transition-colors">
-                      Free AI Tools
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/ai-tools-hub" className="hover:text-foreground transition-colors">
-                      AI Tools Hub
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/cyber-security-mini-apps"
-                      className="hover:text-foreground transition-colors"
-                    >
-                      Security Tools (Clutety)
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/seo-pack" className="hover:text-foreground transition-colors">
-                      SEO Pack
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/blog" className="hover:text-foreground transition-colors">
-                      Blog
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/orbit" className="hover:text-foreground transition-colors">
-                      Orbit Growth
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Developers</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>
-                    <Link href="/docs" className="hover:text-foreground transition-colors">
-                      Documentation
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/docs" className="hover:text-foreground transition-colors">
-                      API Reference
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/docs" className="hover:text-foreground transition-colors">
-                      SDK
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Company</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>
-                    <Link href="/about" className="hover:text-foreground transition-colors">
-                      About
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contact" className="hover:text-foreground transition-colors">
-                      Contact
-                    </Link>
-                  </li>
-                </ul>
-              </div>
             </div>
-            <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-              <p>2026 zzai zzai. All rights reserved.</p>
-              <div className="flex items-center gap-6">
-                {userIsAdmin && (
-                  <Link href="/dashboard/traffic">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-2 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
-                      data-testid="button-homepage-traffic"
+          </section>
+
+          <section className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
+            <div className="absolute inset-0 opacity-60 md:opacity-50">
+              <CamoThreeOverlay preset="evals" />
+            </div>
+            <div
+              className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+              {mode === "digital" ? (
+                <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+                  <div className="space-y-6 bg-background/85 backdrop-blur-xl rounded-2xl p-5 sm:p-8">
+                    <Badge variant="secondary" className="px-4 py-1.5">
+                      Evaluation Engine
+                    </Badge>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                      We break it{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        so you don't
+                      </span>
+                    </h2>
+                    <p className="text-base sm:text-xl text-muted-foreground">
+                      Every endpoint gets 50+ AI-generated test cases—edge cases, adversarial
+                      inputs, malformed data. When pass rates drop, we roll back automatically. You
+                      sleep soundly.
+                    </p>
+                    <div className="space-y-4">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Edge case detection</h3>
+                          <p className="text-muted-foreground text-sm">
+                            AI identifies boundary conditions your tests would miss
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Adversarial testing</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Tests malicious inputs and injection attempts
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Instant rollback</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Automatically reverts to last passing version on failures
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Card className="rounded-2xl p-8 backdrop-blur-xl bg-card/95 border-border/50">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="font-semibold">Eval Results</h3>
+                        <Badge className="bg-green-500/20 text-green-400">Passing</Badge>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-muted-foreground">Pass Rate</span>
+                          <span className="font-mono text-green-400">94.2%</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-white/10">
+                          <div className="w-[94%] h-full rounded-full bg-[#5B8DA8]" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold">156</div>
+                          <div className="text-xs text-muted-foreground">Total</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-400">147</div>
+                          <div className="text-xs text-muted-foreground">Passed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-red-400">9</div>
+                          <div className="text-xs text-muted-foreground">Failed</div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ) : (
+                <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+                  <div className="space-y-6 bg-background/85 backdrop-blur-xl rounded-2xl p-5 sm:p-8">
+                    <Badge variant="secondary" className="px-4 py-1.5">
+                      Quality Assurance
+                    </Badge>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                      Find the problems{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        on screen
+                      </span>
+                    </h2>
+                    <p className="text-base sm:text-xl text-muted-foreground">
+                      AI stress-tests your design for manufacturability before you spend a dime on
+                      materials. Material conflicts, tolerance issues, cost overruns—caught early,
+                      fixed fast.
+                    </p>
+                    <div className="space-y-4">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Manufacturability check</h3>
+                          <p className="text-muted-foreground text-sm">
+                            AI verifies your design can be produced with available methods
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Structural analysis</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Validates load-bearing capacity and material stress points
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Cost optimization</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Suggests material alternatives to reduce costs without quality loss
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Card className="rounded-2xl p-8 backdrop-blur-xl bg-card/95 border-border/50">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="font-semibold">Design Validation</h3>
+                        <Badge className="bg-green-500/20 text-green-400">Approved</Badge>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-muted-foreground">Validation Score</span>
+                          <span className="font-mono text-green-400">96.8%</span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-white/10">
+                          <div className="w-[97%] h-full rounded-full bg-[#D94F9C]" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold">12</div>
+                          <div className="text-xs text-muted-foreground">Checks</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-400">11</div>
+                          <div className="text-xs text-muted-foreground">Passed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-yellow-400">1</div>
+                          <div className="text-xs text-muted-foreground">Warning</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2 pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span>Structural</span>
+                          <Badge className="bg-green-500/20 text-green-400 text-[10px]">Pass</Badge>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span>Material</span>
+                          <Badge className="bg-green-500/20 text-green-400 text-[10px]">Pass</Badge>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span>Assembly</span>
+                          <Badge className="bg-yellow-500/20 text-yellow-400 text-[10px]">
+                            Review
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span>Cost</span>
+                          <Badge className="bg-green-500/20 text-green-400 text-[10px]">
+                            Optimized
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section id="pricing" className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
+            <div className="absolute inset-0 opacity-60 md:opacity-50">
+              <CamoThreeOverlay preset="pricing" />
+            </div>
+            <div
+              className="absolute inset-x-0 top-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-32 sm:h-40 z-[1] pointer-events-none hidden md:block"
+              style={{
+                background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
+              }}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+              <div className="text-center space-y-4 mb-12 sm:mb-16 bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8 max-w-3xl mx-auto">
+                <Badge variant="secondary" className="px-4 py-1.5">
+                  Pricing
+                </Badge>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                  Simple, transparent <span className="solid-accent">pricing</span>
+                </h2>
+                <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Start free, scale as you grow. No hidden fees.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                {pricingTiers.map((tier, index) => (
+                  <div
+                    key={index}
+                    className={`relative ${tier.popular ? "p-[3px] rounded-2xl" : ""}`}
+                    style={
+                      tier.popular
+                        ? {
+                            background:
+                              "linear-gradient(135deg, #3F2A2C 0%, #7A4F3A 14%, #6B3A67 28%, #425884 42%, #D782B2 56%, #F3AFC4 70%, #6B7B59 85%, #4A5A3D 100%)",
+                          }
+                        : undefined
+                    }
+                  >
+                    <Card
+                      className={`rounded-2xl p-6 relative backdrop-blur-xl bg-card h-full ${tier.popular ? "border-0" : "border-border/50"}`}
+                      data-testid={`card-pricing-${tier.name.toLowerCase()}`}
                     >
-                      <BarChart3 className="h-3.5 w-3.5" />
-                      Traffic & Analytics
+                      {tier.popular && (
+                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5B8DA8] text-white">
+                          Most Popular
+                        </Badge>
+                      )}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-xl font-semibold">{tier.name}</h3>
+                          <p className="text-sm text-muted-foreground">{tier.description}</p>
+                        </div>
+                        {tier.hasSeeds && (
+                          <div className="flex items-center gap-2">
+                            <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image
+                                src={seedsLogo}
+                                alt="ZZAI Seeds"
+                                fill
+                                sizes="32px"
+                                className="object-cover"
+                              />
+                            </div>
+                            <span className="seeds-holo-text text-[10px] font-bold tracking-widest uppercase">
+                              Includes Seeds
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-4xl font-bold">{tier.price}</span>
+                          <span className="text-muted-foreground">{tier.period}</span>
+                        </div>
+                        <ul className="space-y-3">
+                          {tier.features.map((feature, i) => (
+                            <li key={i} className="flex items-center gap-2 text-sm">
+                              <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <a href={tier.href} className="block">
+                          <Button
+                            className={`w-full ${tier.popular ? "bg-[#5B8DA8] text-white" : ""}`}
+                            variant={tier.popular ? "default" : "outline"}
+                            data-testid={`button-pricing-${tier.name.toLowerCase()}`}
+                          >
+                            {tier.cta}
+                          </Button>
+                        </a>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-8">
+                Want to explore first?{" "}
+                <a href="/signup" className="underline hover:text-foreground transition-colors">
+                  Start free
+                </a>{" "}
+                — no credit card required.
+              </p>
+            </div>
+          </section>
+
+          <section className="py-24 relative bg-gradient-to-b from-transparent to-background/50">
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <div className="rounded-3xl p-6 sm:p-8 md:p-12 space-y-6 sm:space-y-8 bg-card/95 backdrop-blur-xl border border-border/50">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                  {mode === "digital" ? (
+                    <>
+                      Ready to build{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        your next release
+                      </span>
+                      ?
+                    </>
+                  ) : (
+                    <>
+                      Ready to manufacture{" "}
+                      <span
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}
+                      >
+                        your next prototype
+                      </span>
+                      ?
+                    </>
+                  )}
+                </h2>
+                <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  {mode === "digital"
+                    ? "Join thousands of developers shipping AI-powered features faster and more reliably."
+                    : "Join thousands of creators turning ideas into manufactured products with AI-powered tools."}
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link href="/dashboard">
+                    <Button
+                      size="lg"
+                      className="bg-[#5B8DA8] gap-2"
+                      data-testid="button-cta-dashboard"
+                    >
+                      Go to Dashboard
+                      <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
-                )}
-                <Link href="/privacy" className="hover:text-foreground transition-colors">
-                  Privacy
-                </Link>
-                <Link href="/terms" className="hover:text-foreground transition-colors">
-                  Terms
-                </Link>
+                  <a href="/signup">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="gap-2"
+                      data-testid="button-cta-start"
+                    >
+                      {mode === "digital" ? "Start Building Free" : "Start Creating Free"}
+                    </Button>
+                  </a>
+                </div>
+                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-6 text-sm text-muted-foreground pt-4">
+                  <span>Deploy in 60 seconds</span>
+                  <span>No credit card required</span>
+                  <span>SOC 2 compliant</span>
+                </div>
               </div>
             </div>
-          </div>
-        </footer>
+          </section>
+
+          <footer className="border-t border-white/10 py-8 sm:py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+                <div className="space-y-4 col-span-2 md:col-span-1">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <Image
+                      src={zzaiLogo}
+                      alt="zzai zzai"
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
+                    />
+                    <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
+                      zzai zzai
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Product</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>
+                      <a href="#features" className="hover:text-foreground transition-colors">
+                        Features
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#pricing" className="hover:text-foreground transition-colors">
+                        Pricing
+                      </a>
+                    </li>
+                    <li>
+                      <Link href="/play" className="hover:text-foreground transition-colors">
+                        ZZAI Play
+                      </Link>
+                    </li>
+                    <li>
+                      <a href="#oaas" className="hover:text-foreground transition-colors">
+                        OaaS
+                      </a>
+                    </li>
+                    <li>
+                      <Link href="/seeds" className="hover:text-foreground transition-colors">
+                        ZZAI Seeds
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/tools" className="hover:text-foreground transition-colors">
+                        Free AI Tools
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/ai-tools-hub"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        AI Tools Hub
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/cyber-security-mini-apps"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Security Tools (Clutety)
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/seo-pack" className="hover:text-foreground transition-colors">
+                        SEO Pack
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/blog" className="hover:text-foreground transition-colors">
+                        Blog
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/orbit" className="hover:text-foreground transition-colors">
+                        Orbit Growth
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Developers</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>
+                      <Link href="/docs" className="hover:text-foreground transition-colors">
+                        Documentation
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/docs" className="hover:text-foreground transition-colors">
+                        API Reference
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/docs" className="hover:text-foreground transition-colors">
+                        SDK
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Company</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>
+                      <Link href="/about" className="hover:text-foreground transition-colors">
+                        About
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/contact" className="hover:text-foreground transition-colors">
+                        Contact
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+                <p>2026 zzai zzai. All rights reserved.</p>
+                <div className="flex items-center gap-6">
+                  {userIsAdmin && (
+                    <Link href="/dashboard/traffic">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
+                        data-testid="button-homepage-traffic"
+                      >
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        Traffic & Analytics
+                      </Button>
+                    </Link>
+                  )}
+                  <Link href="/privacy" className="hover:text-foreground transition-colors">
+                    Privacy
+                  </Link>
+                  <Link href="/terms" className="hover:text-foreground transition-colors">
+                    Terms
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
       </div>
     </div>
   );

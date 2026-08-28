@@ -17,7 +17,16 @@ const ArtifactCanvas = lazy(() =>
 const CUBE_SIZE = "min(520px, 92vw)";
 const CANVAS_OVERFLOW = `calc(0.425 * ${CUBE_SIZE})`;
 
-export function SvivvaArtifact() {
+type SvivvaArtifactProps = {
+  /**
+   * Mount the WebGL canvas. The shell (heading, copy, face buttons) is cheap and
+   * always renders, so the section holds its layout and stays readable while the
+   * canvas is deferred — during the homepage intro, for instance.
+   */
+  mountCanvas?: boolean;
+};
+
+export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
   const router = useRouter();
 
   const handleSelect = (id: FeatureId) => {
@@ -33,7 +42,9 @@ export function SvivvaArtifact() {
       data-svivva-artifact
       className="w-full flex flex-col items-center gap-0 pt-24 sm:pt-28 pb-10 sm:pb-12 px-4 overflow-visible relative z-10"
     >
-      <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl">
+      {/* Same backdrop panel the other over-camo sections use, so the copy stays
+          legible against the 3D background instead of sitting directly on it. */}
+      <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8">
         <p
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
@@ -52,14 +63,13 @@ export function SvivvaArtifact() {
         >
           Each face is a product. Drag to rotate. Tap a face — or a name below — to open it.
         </p>
+        <p
+          className="mt-3 text-muted-foreground/80 text-sm"
+          style={{ fontFamily: '"Zc", sans-serif' }}
+        >
+          Play · Seeds · Hardware · Digital · Orbit · Protect
+        </p>
       </div>
-
-      <p
-        className="text-muted-foreground/80 text-sm mb-0 select-none pointer-events-none relative z-[1]"
-        style={{ fontFamily: '"Zc", sans-serif' }}
-      >
-        Play · Seeds · Hardware · Digital · Orbit · Protect
-      </p>
 
       <div
         style={{
@@ -79,15 +89,21 @@ export function SvivvaArtifact() {
           }}
         />
 
-        <Suspense
-          fallback={
-            <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
-              loading cube…
-            </div>
-          }
-        >
-          <ArtifactCanvas active="play" onSelect={handleSelect} />
-        </Suspense>
+        {mountCanvas ? (
+          <Suspense
+            fallback={
+              <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
+                loading cube…
+              </div>
+            }
+          >
+            <ArtifactCanvas active="play" onSelect={handleSelect} />
+          </Suspense>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
+            loading cube…
+          </div>
+        )}
       </div>
 
       <nav
