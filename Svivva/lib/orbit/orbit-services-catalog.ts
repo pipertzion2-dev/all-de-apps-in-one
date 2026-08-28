@@ -393,7 +393,7 @@ export const ORBIT_FREE_FALLBACK_SERVICES: OrbitServiceItem[] = [
 export const ORBIT_SERVICE_CATEGORY_LABELS: Record<OrbitServiceCategory, string> = {
   indexing: "Google & search indexing (free — not AI)",
   automation: "Best — n8n funnel orchestration",
-  "ai-marketing": "Best — AI marketing copy (gpt-4o)",
+  "ai-marketing": "AI marketing copy",
   distribution: "Social & email APIs (free and paid)",
   analytics: "Best — free conversion analytics",
   "free-fallback": "Free AI (no OpenAI billing needed)",
