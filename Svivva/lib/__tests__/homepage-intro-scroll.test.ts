@@ -23,4 +23,26 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("setCanMountHeavy3d(true)");
     expect(pageSrc).toContain("if (flipComplete) setCanMountHeavy3d(true)");
   });
+
+  it("rotates the real page in as the flip's second face", () => {
+    // Without a second face the reveal is a flat cross-fade, so the page face
+    // must be driven from the same angle as the intro panel.
+    expect(pageSrc).toContain("pageFaceRef");
+    expect(pageSrc).toContain("paintPageFace");
+    expect(pageSrc).toContain("rotateX(${angle - 90}deg)");
+    // paintFlip drives every frame; syncFlipDepth covers resize.
+    expect(pageSrc.match(/paintPageFace\(angle\)/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps the intro layer transparent so the second face is visible behind it", () => {
+    expect(pageSrc).toContain('backgroundColor: "transparent"');
+  });
+
+  it("releases the page from 3D when the intro finishes", () => {
+    // Imperative transforms survive React's style diff, so finishIntro must
+    // clear them or the finished page stays in a 3D layer with fixed
+    // positioning broken.
+    expect(pageSrc).toMatch(/pageFaceRef\.current\.style\.transform = ""/);
+    expect(pageSrc).toMatch(/pageFaceRef\.current\.style\.transformOrigin = ""/);
+  });
 });
