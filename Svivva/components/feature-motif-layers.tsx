@@ -30,9 +30,12 @@ function useMotifCanvas(
     let inView = true;
     const io =
       typeof IntersectionObserver !== "undefined"
-        ? new IntersectionObserver(([entry]) => {
-            inView = Boolean(entry?.isIntersecting);
-          }, { threshold: 0 })
+        ? new IntersectionObserver(
+            ([entry]) => {
+              inView = Boolean(entry?.isIntersecting);
+            },
+            { threshold: 0 },
+          )
         : null;
     io?.observe(cv);
     const draw = () => {
