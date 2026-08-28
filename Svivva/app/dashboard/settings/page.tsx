@@ -91,7 +91,7 @@ export default function SettingsPage() {
       </Card>
 
       {!me?.isAdmin && !me?.isMembershipAccess && (
-        <AdminCodeForm description="Enter access code 333 for Pro (digital + hardware), or the admin code for Orbit tools." />
+        <AdminCodeForm description="Enter your Pro access code, or the owner passcode for Orbit tools." />
       )}
       {me?.isMembershipAccess && !me?.isAdmin && (
         <Card>

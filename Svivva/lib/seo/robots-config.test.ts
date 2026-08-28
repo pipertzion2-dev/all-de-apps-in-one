@@ -12,6 +12,7 @@ describe("robots-config", () => {
     expect(isRobotsDisallowed("/marketing-hub/campaigns")).toBe(true);
     expect(isRobotsDisallowed("/login")).toBe(true);
     expect(isRobotsDisallowed("/signup")).toBe(true);
+    expect(isRobotsDisallowed("/admin")).toBe(true);
     expect(isRobotsDisallowed("/api/gsc/diagnose")).toBe(true);
   });
 

@@ -2567,7 +2567,7 @@ export default function LaunchpadPage() {
   const runAllRef = useRef(false);
   const statusesRef = useRef<Record<string, StepStatus>>({});
 
-  // Admin passcode cookie (272727 via Settings or Orbit)
+  // Admin passcode cookie (set via /admin or Settings)
   const { data: me, isLoading: meLoading } = useQuery<{
     isAdmin: boolean;
     vercelCommit?: string | null;

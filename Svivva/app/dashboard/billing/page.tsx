@@ -211,7 +211,7 @@ function BillingPageContent() {
       {!isMembershipAccess && !isPro && (
         <AdminCodeForm
           title="Have an access code?"
-          description="Enter code 333 to unlock Pro for digital and hardware without a membership."
+          description="Enter your Pro access code to unlock digital and hardware without a membership."
         />
       )}
 

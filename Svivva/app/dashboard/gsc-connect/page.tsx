@@ -85,7 +85,7 @@ function gscErrorMessage(err: string | null): string {
     return "Google did not return a refresh token. Revoke ZZAI at myaccount.google.com/permissions, then connect again.";
   }
   if (err === "admin_required") {
-    return "Enter the admin code first (272727), then connect with Google.";
+    return "Enter the admin passcode first, then connect with Google.";
   }
   if (err === "oauth_not_configured") {
     return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
@@ -270,7 +270,7 @@ export default function GscConnectPage() {
             </p>
             <AdminCodeForm
               title="Unlock Google Search Console"
-              description="Use the same admin code as Orbit (272727)."
+              description="Use the same owner passcode as Orbit Admin."
               onSuccess={() => {
                 setAdminUnlocked(true);
                 setShowAdminUnlock(false);

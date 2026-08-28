@@ -76,9 +76,8 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // Dashboard access is gated in dashboard-layout-client (admin code 272727 / member 333
-  // or user sign-in). Do not redirect /dashboard/* to /login here — admins must reach
-  // the access-code form without creating an account.
+  // Dashboard access is gated in dashboard-layout-client (user sign-in or passcode cookie).
+  // Owner passcode entry: /admin (not linked on public pages). Do not redirect /dashboard/* to /login.
 
   const keyMatch = pathname.match(/^\/([0-9a-f]{32})\.txt$/i);
   if (keyMatch) {

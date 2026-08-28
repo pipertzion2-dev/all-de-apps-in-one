@@ -50,9 +50,8 @@ export default function BurnsPage() {
               </div>
               <CardTitle>Burns System</CardTitle>
               <CardDescription>
-                Enter admin code <strong className="text-foreground font-medium">272727</strong> —
-                no account sign-in needed. This runs every ZZAI feature against zzaizzai.com on a
-                daily graph schedule.
+                Enter your admin passcode — no account sign-in needed. This runs every ZZAI feature
+                against zzaizzai.com on a daily graph schedule.
               </CardDescription>
             </CardHeader>
             <CardContent>
