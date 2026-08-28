@@ -5,7 +5,10 @@ export type MarketingPlatformCredentials = {
   n8nWebhookUrl?: string;
   /** Optional header secret for n8n webhook auth (sent as X-Orbit-Secret) */
   n8nWebhookSecret?: string;
-  /** Ayrshare — best-in-class multi-platform social API (LinkedIn, X, Threads, etc.) */
+  /** Postiz — free open-source social posting (self-host); blank URL = Postiz cloud */
+  postizApiUrl?: string;
+  postizApiKey?: string;
+  /** Ayrshare — multi-platform social API (LinkedIn, X, Threads, etc.); paid only */
   ayrshareApiKey?: string;
   /** OmniSocials — budget LinkedIn/X API ($10/mo) if you skip Ayrshare */
   omnisocialsApiKey?: string;
@@ -50,16 +53,29 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
     group: "automation",
   },
   {
+    key: "postizApiUrl",
+    label: "Postiz URL (free — self-hosted social)",
+    hint: "Your Postiz instance, e.g. https://postiz.yourdomain.com. Leave blank to use Postiz cloud.",
+    group: "social",
+  },
+  {
+    key: "postizApiKey",
+    label: "Postiz API key (free auto-posting)",
+    hint: "Postiz → Settings → API key. Free self-hosted posting to Mastodon, Bluesky, Telegram, Threads, LinkedIn & X.",
+    secret: true,
+    group: "social",
+  },
+  {
     key: "ayrshareApiKey",
-    label: "Ayrshare API key (best direct social)",
-    hint: "app.ayrshare.com → API Key. Best reach: LinkedIn, X, Threads, Bluesky, Reddit in one call.",
+    label: "Ayrshare API key (paid — $149/mo+)",
+    hint: "app.ayrshare.com → API Key. No free tier; use Postiz above or n8n for a $0 path.",
     secret: true,
     group: "social",
   },
   {
     key: "omnisocialsApiKey",
     label: "OmniSocials API key (budget alternative)",
-    hint: "$10/mo LinkedIn/X — or route social through n8n / Ayrshare instead",
+    hint: "$10/mo LinkedIn/X — or route social through n8n / Postiz instead",
     secret: true,
     group: "social",
   },
@@ -85,8 +101,8 @@ export const MARKETING_CREDENTIAL_FIELDS: MarketingCredentialField[] = [
   },
   {
     key: "twitterApiKey",
-    label: "Twitter/X API key (consumer)",
-    hint: "developer.twitter.com → App keys",
+    label: "Twitter/X API key (consumer — paid since Feb 2026)",
+    hint: "developer.twitter.com → App keys. X removed its free tier: posting is ~$0.015, or $0.20 if the post has a link. Postiz or n8n avoids this.",
     secret: true,
     group: "social",
   },

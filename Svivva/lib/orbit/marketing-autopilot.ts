@@ -13,6 +13,7 @@ import {
   publishHashnodeArticle,
   publishAyrsharePost,
   publishOmniSocialsPost,
+  publishPostizPost,
   publishRedditPost,
   publishTwitterThread,
   sendResendEmail,
@@ -436,11 +437,30 @@ export async function runMarketingAutopilot(opts?: {
           { url: r.url, copyText: threadCopy },
         ),
       );
+    } else if (hasCreds(creds, ["postizApiKey"])) {
+      const site = getSiteUrl();
+      const lead =
+        `${thread[0]}\n\n${thread.length > 1 ? `Full thread (${thread.length} posts) → ${site}` : ""}`.trim();
+      const r = await publishPostizPost(creds, {
+        text: lead.slice(0, 280),
+        platforms: ["x"],
+        linkUrl: site,
+      });
+      tasks.push(
+        task(
+          "manual-twitter-thread",
+          r.ok ? "posted" : "failed",
+          r.ok
+            ? `Posted to X via Postiz${thread.length > 1 ? " (lead tweet + link)" : ""}`
+            : r.error || "Postiz X publish failed",
+          { url: r.url, copyText: threadCopy },
+        ),
+      );
     } else {
       const fb = copyReadyOrNeedsCredentials({
         copyOnly,
         needsCredentialsMessage:
-          "Thread ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on X",
+          "Thread ready — add n8n webhook or a free Postiz key (or Ayrshare/OmniSocials) — or copy & paste on X",
       });
       tasks.push(task("manual-twitter-thread", fb.status, fb.message, { copyText: threadCopy }));
     }
@@ -482,11 +502,25 @@ export async function runMarketingAutopilot(opts?: {
           { url: r.url, copyText: liCopy },
         ),
       );
+    } else if (hasCreds(creds, ["postizApiKey"])) {
+      const r = await publishPostizPost(creds, {
+        text: liCopy,
+        platforms: ["linkedin"],
+        linkUrl: li.cta || getSiteUrl(),
+      });
+      tasks.push(
+        task(
+          "manual-linkedin",
+          r.ok ? "posted" : "failed",
+          r.ok ? "Published on LinkedIn via Postiz" : r.error || "Postiz LinkedIn publish failed",
+          { url: r.url, copyText: liCopy },
+        ),
+      );
     } else {
       const fb = copyReadyOrNeedsCredentials({
         copyOnly,
         needsCredentialsMessage:
-          "Post ready — add n8n webhook, Ayrshare key, or OmniSocials — or copy & paste on LinkedIn",
+          "Post ready — add n8n webhook or a free Postiz key (or Ayrshare/OmniSocials) — or copy & paste on LinkedIn",
       });
       tasks.push(task("manual-linkedin", fb.status, fb.message, { copyText: liCopy }));
     }
