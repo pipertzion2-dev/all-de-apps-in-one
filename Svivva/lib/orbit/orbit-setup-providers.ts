@@ -28,7 +28,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     payUrl: "https://n8n.io/pricing",
     docsUrl: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/",
     payNote:
-      "Wire Ayrshare + Resend inside n8n instead of pasting keys separately. Webhook node → paste Production URL below.",
+      "Wire Postiz + Resend inside n8n instead of pasting keys separately. Webhook node → paste Production URL below.",
     credentialKey: "n8nWebhookUrl",
     bestPick: true,
     priority: 0,
@@ -41,10 +41,9 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     payUrl: "https://platform.openai.com/settings/organization/billing/overview",
     docsUrl: "https://platform.openai.com/api-keys",
     payNote:
-      "Orbit defaults to gpt-5 (falls back to gpt-4o) for marketing quality. Paste sk- key in Platform Secrets or Vercel.",
+      "Orbit defaults to gpt-5 (falls back to gpt-4o) for marketing quality. Paste sk- key in Platform Secrets or Vercel. Gemini's free tier covers the same jobs at $0.",
     envKey: "OPENAI_API_KEY",
-    bestPick: true,
-    priority: 1,
+    priority: 10,
   },
   {
     id: "postiz",
@@ -58,7 +57,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
       "Self-host with docker compose, connect channels, generate an API key, paste it below. No per-channel fees.",
     credentialKey: "postizApiKey",
     bestPick: true,
-    priority: 2,
+    priority: 1,
   },
   {
     id: "ayrshare",
@@ -70,7 +69,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     payNote:
       "No free tier — 28-day trial only. Prefer Postiz or n8n unless you need the managed API.",
     credentialKey: "ayrshareApiKey",
-    priority: 3,
+    priority: 11,
   },
   {
     id: "resend",
@@ -82,7 +81,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     payNote: "Verify your domain, paste API key below — or send via n8n Resend node.",
     credentialKey: "resendApiKey",
     bestPick: true,
-    priority: 4,
+    priority: 3,
   },
   {
     id: "omnisocials",
@@ -93,7 +92,7 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     docsUrl: "https://docs.omnisocials.com/introduction",
     payNote: "Lower cost than Ayrshare — use when basic X + LinkedIn posting is enough.",
     credentialKey: "omnisocialsApiKey",
-    priority: 5,
+    priority: 12,
   },
   {
     id: "clarity",
@@ -105,18 +104,21 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     payNote: "Create project → NEXT_PUBLIC_CLARITY_ID in Platform Secrets → redeploy.",
     envKey: "NEXT_PUBLIC_CLARITY_ID",
     bestPick: true,
-    priority: 6,
+    priority: 4,
   },
   {
     id: "gemini",
-    name: "Google Gemini (free fallback)",
-    purpose: "Free AI alternative if you skip OpenAI — lower quality for marketing",
+    name: "Google Gemini (free AI)",
+    purpose:
+      "Free AI for Orbit copy — the $0 alternative to OpenAI billing. Lower marketing polish, same jobs.",
     priceLabel: "Free tier",
     payUrl: "https://aistudio.google.com/apikey",
     docsUrl: "https://ai.google.dev/gemini-api/docs",
-    payNote: "Fallback only when OpenAI is not configured (unless ORBIT_AI_PROVIDER=gemini).",
+    payNote:
+      "Free AI key — no billing. Used when OpenAI is not configured, or always with ORBIT_AI_PROVIDER=gemini.",
     envKey: "GEMINI_API_KEY",
-    priority: 10,
+    bestPick: true,
+    priority: 2,
   },
 ];
 

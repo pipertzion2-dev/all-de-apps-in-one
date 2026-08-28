@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  ORBIT_ANALYTICS_SERVICES,
+  ORBIT_FREE_FALLBACK_SERVICES,
   ORBIT_FREE_STACK,
   ORBIT_FREE_STACK_SERVICES,
+  ORBIT_INDEXING_SERVICES,
   ORBIT_PAID_SERVICES,
   isOrbitFreeTierService,
   orbitFreeStackServices,
   orbitServiceById,
 } from "./orbit-services-catalog";
+import { ORBIT_SETUP_PROVIDERS } from "./orbit-setup-providers";
 import { MARKETING_CREDENTIAL_FIELDS } from "./marketing-autopilot-types";
 import { hasAutoPostCredentials, isCopyOnlyDistributionMode } from "./distribution-mode";
 import { postizApiBase, publishPostizPost } from "./marketing-autopilot-publishers";
@@ -56,6 +60,35 @@ describe("Orbit $0 free stack", () => {
     expect(ayrshare?.freeTier).toBeUndefined();
     // Guards against the stale "~$49/mo" label; entry price is $149/mo.
     expect(ayrshare?.priceLabel).toContain("149");
+  });
+
+  it("never marks a paid-only service as a best pick", () => {
+    const recommended = [
+      ...ORBIT_INDEXING_SERVICES,
+      ...ORBIT_PAID_SERVICES,
+      ...ORBIT_FREE_STACK_SERVICES,
+      ...ORBIT_ANALYTICS_SERVICES,
+      ...ORBIT_FREE_FALLBACK_SERVICES,
+    ].filter((s) => s.bestPick);
+    expect(recommended.length).toBeGreaterThan(0);
+    for (const s of recommended) {
+      expect(isOrbitFreeTierService(s), `${s.id} is a paid bestPick`).toBe(true);
+    }
+  });
+
+  it("keeps the quick-strip sign-up providers on free tiers", () => {
+    // The strip renders bestPick providers next to the Run button; a paid one
+    // there would send the admin straight to a paywall.
+    for (const p of ORBIT_SETUP_PROVIDERS.filter((x) => x.bestPick)) {
+      const item = orbitServiceById(p.id);
+      expect(item, `${p.id} has no catalog entry`).toBeDefined();
+      expect(isOrbitFreeTierService(item!), `${p.id} is a paid bestPick`).toBe(true);
+    }
+  });
+
+  it("recommends the free AI provider over paid OpenAI", () => {
+    expect(orbitServiceById("gemini")?.bestPick).toBe(true);
+    expect(orbitServiceById("openai")?.bestPick).toBeFalsy();
   });
 
   it("offers a free social auto-post route so posting is not paid-only", () => {

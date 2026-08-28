@@ -228,7 +228,6 @@ export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
     billing: "paid",
     name: "OpenAI gpt-4o",
     priceLabel: "~$10–30 prepaid",
-    bestPick: true,
     purpose:
       "Best LLM for marketing copy — long-form SEO pages, comparison posts, social threads, and outreach pitches. Orbit defaults to gpt-4o when your sk- key is set.",
     steps: [
@@ -374,6 +373,7 @@ export const ORBIT_FREE_FALLBACK_SERVICES: OrbitServiceItem[] = [
     name: "Google Gemini (free AI)",
     priceLabel: "Free tier",
     freeTier: "Free tier via Google AI Studio — enough for daily Orbit content runs.",
+    bestPick: true,
     purpose:
       "Free AI for Orbit copy. Lower marketing quality than OpenAI gpt-4o, but it makes the whole $0 path work with no billing set up.",
     steps: [

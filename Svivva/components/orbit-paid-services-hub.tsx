@@ -178,7 +178,8 @@ export function OrbitPaidServicesHub({
   const [gscPropertyOk, setGscPropertyOk] = useState(gscPropertyOkProp ?? false);
   const [hasServiceAccount, setHasServiceAccount] = useState(false);
   const [indexNowActive, setIndexNowActive] = useState(indexNowActiveProp ?? false);
-  const [freeOnly, setFreeOnly] = useState(false);
+  // Default to the $0 path — paid services are opt-in, not the starting point.
+  const [freeOnly, setFreeOnly] = useState(true);
 
   useEffect(() => {
     if (configuredKeysProp) setConfiguredKeys(configuredKeysProp);
@@ -353,7 +354,7 @@ export function OrbitPaidServicesHub({
                 }`}
                 data-testid="button-orbit-free-only"
               >
-                {freeOnly ? "Showing free only" : "Hide paid services"}
+                {freeOnly ? "Show paid options" : "Hide paid services"}
               </button>
             </div>
             <p className="text-[10px] text-emerald-900/80 dark:text-emerald-100/80 leading-relaxed">
@@ -496,7 +497,8 @@ export function OrbitPaidServicesHub({
             </div>
           </div>
 
-          {showFreeFallback && (
+          {/* Gemini is step 4 of the $0 path, so its setup must be reachable there. */}
+          {(showFreeFallback || freeOnly) && (
             <div className="space-y-2 opacity-90">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                 {ORBIT_SERVICE_CATEGORY_LABELS["free-fallback"]}
@@ -513,8 +515,9 @@ export function OrbitPaidServicesHub({
           )}
 
           <p className="text-[9px] text-muted-foreground leading-relaxed">
-            Pay links work with Apple Pay in Safari. Keys live server-side only. After each paid
-            service, redeploy if you used Vercel env vars.
+            {freeOnly
+              ? "Free tiers only — nothing here needs a card. Keys live server-side only; redeploy if you set one as a Vercel env var."
+              : "Pay links work with Apple Pay in Safari. Keys live server-side only. After each paid service, redeploy if you used Vercel env vars."}
           </p>
         </div>
       )}
