@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   BURNS_NODES,
   BURNS_STAGES,
@@ -9,7 +9,12 @@ import {
   burnsNodesByStage,
   getBurnsNode,
 } from "./burns-graph";
-import { burnsNodesMissingExecutors, runBurnsSystem, type BurnsRunResult } from "./burns-runner";
+import {
+  burnsNodesMissingExecutors,
+  burnsExecutors,
+  runBurnsSystem,
+  type BurnsRunResult,
+} from "./burns-runner";
 import { FEATURE_BY_ID } from "@/lib/platform/feature-graph";
 
 describe("burns graph integrity", () => {
@@ -160,5 +165,27 @@ describe("burns runner", () => {
     const round = JSON.parse(JSON.stringify(run)) as BurnsRunResult;
     expect(round.nodes).toHaveLength(run.nodes.length);
     expect(round.summary).toBe(run.summary);
+  });
+
+  it("owner executor resolves without throwing when no env is set", async () => {
+    vi.stubEnv("ADMIN_USER_ID", "");
+    vi.stubEnv("ORBIT_INTERNAL_USER_ID", "");
+    const run = await runBurnsSystem({ only: ["owner"] });
+    const owner = run.nodes.find((n) => n.id === "owner");
+    expect(owner?.status).toBe("ok");
+    expect(owner?.detail).toMatchObject({ ownerId: "orbit-admin", usedFallback: true });
+  });
+
+  it("content-gaps resolves owner when run as a single node", async () => {
+    vi.stubEnv("ADMIN_USER_ID", "");
+    vi.stubEnv("ORBIT_INTERNAL_USER_ID", "");
+    const calls: string[] = [];
+    const executors = stubExecutors(calls);
+    const realContentGaps = burnsExecutors()["content-gaps"];
+    executors["content-gaps"] = realContentGaps;
+    const run = await runBurnsSystem({ executors, only: ["content-gaps"], budgetMs: 5_000 });
+    const node = run.nodes.find((n) => n.id === "content-gaps");
+    expect(node?.status).not.toBe("failed");
+    expect(node?.message).not.toContain("Owner not resolved");
   });
 });
