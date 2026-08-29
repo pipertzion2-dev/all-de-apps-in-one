@@ -7,6 +7,9 @@
  */
 import { BURNS_NODES, burnsExecutionOrder, type BurnsNode } from "@/lib/burns/burns-graph";
 
+/** Wall-clock budget — Vercel maxDuration is 300s; leave headroom to persist. */
+export const BURNS_RUN_BUDGET_MS = 285_000;
+
 export type BurnsNodeStatus = "ok" | "skipped" | "failed" | "blocked" | "pending";
 
 export type BurnsNodeResult = {
@@ -47,6 +50,13 @@ export function burnsExecutors(): Record<string, Executor> {
   // Resolved by the owner node and reused by everything that writes content.
   let ownerId: string | null = null;
 
+  const ensureOwnerId = async (): Promise<string> => {
+    if (ownerId) return ownerId;
+    const { resolveOrbitOwnerUserId } = await import("@/lib/orbit/internal-user");
+    ownerId = await resolveOrbitOwnerUserId();
+    return ownerId;
+  };
+
   return {
     owner: async () => {
       const {
@@ -77,9 +87,9 @@ export function burnsExecutors(): Record<string, Executor> {
     },
 
     "content-gaps": async () => {
-      if (!ownerId) throw new Error("Owner not resolved");
+      const userId = await ensureOwnerId();
       const { fillMarketingGaps } = await import("@/lib/orbit/fill-marketing-gaps");
-      const result = await fillMarketingGaps(ownerId);
+      const result = await fillMarketingGaps(userId);
       // MarketingCounts mixes numeric tallies with boolean flags, so only sum
       // the numbers and keep the flags out of the item total.
       const counts: Record<string, number> = {};
@@ -226,7 +236,7 @@ export type RunBurnsOptions = {
 export async function runBurnsSystem(options: RunBurnsOptions = {}): Promise<BurnsRunResult> {
   const {
     trigger = "manual",
-    budgetMs = 240_000,
+    budgetMs = BURNS_RUN_BUDGET_MS,
     only,
     executors = burnsExecutors(),
     now = () => Date.now(),
