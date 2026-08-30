@@ -2,6 +2,7 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { oauthStates, seedCredentials } from "@/lib/schema";
 import {
+  ensureGscOAuthColumns,
   ensureOAuthStatesTable,
   exchangeGoogleOAuthCode,
   getGscOAuthRedirectUri,
@@ -27,8 +28,16 @@ export type ManualGscCompleteResult = {
 };
 
 export function parseGscOAuthCallbackUrl(raw: string): { code: string; state: string } | null {
+  const trimmed = raw.trim().replace(/\s+/g, "");
+  if (!trimmed) return null;
+
+  // Accept bare query string pasted from devtools
+  const candidate = trimmed.startsWith("?")
+    ? `https://placeholder.invalid/callback${trimmed}`
+    : trimmed;
+
   try {
-    const url = new URL(raw.trim());
+    const url = new URL(candidate);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     if (!code || !state) return null;
@@ -75,6 +84,21 @@ export async function completeManualGscOAuth(
     .limit(1);
 
   if (!row) {
+    await ensureGscOAuthColumns();
+    const userId = await resolveGscOAuthSaveUserId();
+    const [already] = await db
+      .select({ refresh: seedCredentials.googleOauthRefreshToken })
+      .from(seedCredentials)
+      .where(eq(seedCredentials.userId, userId))
+      .limit(1);
+    if (already?.refresh?.trim()) {
+      return {
+        ok: true,
+        setupOk: false,
+        message:
+          "Google is already connected — this sign-in link was used. Refresh the page or click Sync property.",
+      };
+    }
     throw new Error(
       "This sign-in session expired or was already used. Click “Start alternate connect” again, then sign in with Google within one hour.",
     );

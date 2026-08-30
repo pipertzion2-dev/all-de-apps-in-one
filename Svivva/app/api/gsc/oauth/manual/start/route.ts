@@ -3,6 +3,7 @@ import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { prepareGscOAuthStart } from "@/lib/gsc-oauth-prepare";
 import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
       const err = new URL(result.redirectPath, "https://example.invalid").searchParams.get(
         "gsc_error",
       );
-      return badRequest(err || "Could not start Google connect");
+      return badRequest(gscOAuthErrorMessage(err || "oauth_start_failed"));
     }
 
     return ok({

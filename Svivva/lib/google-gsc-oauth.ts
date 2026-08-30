@@ -60,7 +60,11 @@ export async function saveGscOAuthStateRow(payload: {
       callbackBase: payload.callbackBase,
     });
   } catch (e) {
-    console.warn("[gsc-oauth] save state row failed:", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[gsc-oauth] save state row failed:", msg);
+    throw new Error(
+      "Could not save the sign-in session — database unavailable. Retry in a moment or contact support if this persists.",
+    );
   }
 }
 

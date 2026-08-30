@@ -32,6 +32,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
@@ -78,29 +79,6 @@ function StatusIcon({ status }: { status: StepStatus }) {
 }
 
 const OAUTH_START = gscOAuthConnectUrl("/dashboard/gsc-connect");
-
-function gscErrorMessage(err: string | null): string {
-  if (!err) return "Google sign-in failed.";
-  if (err === "no_refresh_token") {
-    return "Google did not return a refresh token. Revoke ZZAI at myaccount.google.com/permissions, then connect again.";
-  }
-  if (err === "admin_required") {
-    return "Enter the admin passcode first, then connect with Google.";
-  }
-  if (err === "oauth_not_configured") {
-    return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
-  }
-  if (err === "oauth_invalid_client") {
-    return "Google OAuth credentials are invalid or still placeholders in Vercel (your-client-id). Paste your real OAuth client ID + secret below, then try Connect with Google again.";
-  }
-  if (err === "invalid_state") {
-    return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use “Another way to connect” below (new-tab / paste URL), or retry in Safari.";
-  }
-  if (err === "oauth_start_failed") {
-    return "Could not start Google sign-in. Wait a moment and try Connect with Google again.";
-  }
-  return `Google sign-in failed: ${err}`;
-}
 
 export default function GscConnectPage() {
   const queryClient = useQueryClient();
@@ -174,7 +152,7 @@ export default function GscConnectPage() {
       const err = p.get("gsc_error");
       setMsg({
         ok: false,
-        text: gscErrorMessage(err),
+        text: gscOAuthErrorMessage(err),
       });
       if (err === "admin_required") {
         setShowAdminUnlock(true);
@@ -517,6 +495,8 @@ export default function GscConnectPage() {
 
       {!connected && (
         <GscManualConnectPanel
+          adminUnlocked={adminUnlocked === true}
+          onRequestAdminUnlock={() => setShowAdminUnlock(true)}
           onConnected={(text) => {
             setMsg({ ok: true, text });
             void refetch();
