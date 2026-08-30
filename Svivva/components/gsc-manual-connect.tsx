@@ -212,7 +212,7 @@ export function GscManualConnectPanel({
       <CardContent className="space-y-3">
         {!adminUnlocked && (
           <p className="text-xs text-amber-700 dark:text-amber-400 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-            Enter admin passcode <strong>272727</strong> above before starting alternate connect.
+            Enter the admin passcode above before starting alternate connect.
           </p>
         )}
 
