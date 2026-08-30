@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, ExternalLink, Loader2, Link2 } from "lucide-react";
 import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 
 type StartPayload = {
   googleUrl: string;
@@ -20,7 +21,14 @@ type StartPayload = {
   instructions?: string[];
 };
 
+type DiagSnapshot = {
+  oauthConnected?: boolean;
+  gscPropertyOk?: boolean;
+};
+
 type Props = {
+  adminUnlocked: boolean;
+  onRequestAdminUnlock?: () => void;
   onConnected?: (message: string) => void;
   onError?: (message: string) => void;
 };
@@ -29,9 +37,14 @@ type Props = {
  * Alternate Google Search Console connect — avoids same-tab redirect/cookie failures.
  * 1) Generate a Google URL (PKCE state in DB for 1 hour)
  * 2) Open it in a new tab
- * 3) Optionally paste the callback URL to finish if auto-return fails
+ * 3) Paste the callback URL to finish if auto-return fails
  */
-export function GscManualConnectPanel({ onConnected, onError }: Props) {
+export function GscManualConnectPanel({
+  adminUnlocked,
+  onRequestAdminUnlock,
+  onConnected,
+  onError,
+}: Props) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -40,6 +53,20 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
   const [copied, setCopied] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const connectedNotifiedRef = useRef(false);
+
+  const { data: diag } = useQuery<DiagSnapshot>({
+    queryKey: ["/api/gsc/diagnose"],
+    queryFn: async () => {
+      const r = await authFetch("/api/gsc/diagnose");
+      if (r.status === 403) throw new Error("admin_required");
+      if (!r.ok) throw new Error("Failed");
+      return r.json();
+    },
+    enabled: waiting && adminUnlocked,
+    refetchInterval: waiting ? 3000 : false,
+    staleTime: 0,
+  });
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -49,10 +76,38 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
     setWaiting(false);
   }, []);
 
+  const notifyConnected = useCallback(
+    (message: string) => {
+      if (connectedNotifiedRef.current) return;
+      connectedNotifiedRef.current = true;
+      stopPolling();
+      setSession(null);
+      setCallbackUrl("");
+      void queryClient.invalidateQueries({ queryKey: ["/api/gsc/diagnose"] });
+      onConnected?.(message);
+    },
+    [onConnected, queryClient, stopPolling],
+  );
+
   useEffect(() => () => stopPolling(), [stopPolling]);
 
+  useEffect(() => {
+    if (!waiting || !diag?.oauthConnected) return;
+    notifyConnected(
+      diag.gscPropertyOk
+        ? "Google connected — property matched via alternate sign-in."
+        : "Google signed in — click Sync property above if Search Console still needs setup.",
+    );
+  }, [waiting, diag?.oauthConnected, diag?.gscPropertyOk, notifyConnected]);
+
   const start = async () => {
+    if (!adminUnlocked) {
+      onError?.(gscOAuthErrorMessage("admin_required"));
+      onRequestAdminUnlock?.();
+      return;
+    }
     setBusy(true);
+    connectedNotifiedRef.current = false;
     onError?.("");
     try {
       const res = await authFetch("/api/gsc/oauth/manual/start", {
@@ -64,10 +119,11 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not start alternate connect");
+      if (!res.ok) {
+        throw new Error(gscOAuthErrorMessage(data.error || "oauth_start_failed"));
+      }
       setSession(data as StartPayload);
       setWaiting(true);
-      // Poll diagnose — if redirect callback succeeds, UI refreshes itself
       pollRef.current = setInterval(() => {
         void queryClient.invalidateQueries({ queryKey: ["/api/gsc/diagnose"] });
       }, 3000);
@@ -95,27 +151,48 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
   };
 
   const finish = async () => {
+    const trimmed = callbackUrl.trim();
+    if (!trimmed) {
+      onError?.("Paste the full redirect URL from your browser after Google sign-in.");
+      return;
+    }
     setFinishing(true);
     try {
       const res = await authFetch("/api/gsc/oauth/manual/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          callbackUrl: callbackUrl.trim() || undefined,
+          callbackUrl: trimmed,
           state: session?.state,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not finish connect");
-      stopPolling();
-      setSession(null);
-      setCallbackUrl("");
-      await queryClient.invalidateQueries({ queryKey: ["/api/gsc/diagnose"] });
-      onConnected?.(data.message || "Google Search Console connected.");
+      if (!res.ok) {
+        throw new Error(data.error || "Could not finish connect");
+      }
+      notifyConnected(data.message || "Google Search Console connected.");
     } catch (e) {
       onError?.(e instanceof Error ? e.message : "Finish failed");
     } finally {
       setFinishing(false);
+    }
+  };
+
+  const checkStatus = async () => {
+    try {
+      const r = await authFetch("/api/gsc/diagnose");
+      const d = (await r.json()) as DiagSnapshot;
+      if (d.oauthConnected) {
+        notifyConnected(
+          d.gscPropertyOk
+            ? "Google is connected."
+            : "Google signed in — finish property setup with Sync property above.",
+        );
+      } else {
+        onError?.("Not connected yet — complete Google sign-in, then paste the redirect URL.");
+      }
+    } catch {
+      onError?.("Could not check status — enter admin passcode first.");
     }
   };
 
@@ -133,10 +210,16 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        {!adminUnlocked && (
+          <p className="text-xs text-amber-700 dark:text-amber-400 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+            Enter admin passcode <strong>272727</strong> above before starting alternate connect.
+          </p>
+        )}
+
         {!session ? (
           <Button
             onClick={() => void start()}
-            disabled={busy}
+            disabled={busy || !adminUnlocked}
             className="text-white font-semibold"
             style={{ background: "linear-gradient(135deg,#5B8DA8,#2d4a3e)" }}
             data-testid="btn-gsc-manual-start"
@@ -171,6 +254,9 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
                 <Copy className="w-3.5 h-3.5 mr-1" />
                 {copied ? "Copied" : "Copy link"}
               </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => void checkStatus()}>
+                Check if connected
+              </Button>
               {waiting ? (
                 <span className="text-[11px] text-muted-foreground self-center inline-flex items-center gap-1">
                   <Loader2 className="w-3 h-3 animate-spin" /> Waiting for connection…
@@ -180,20 +266,22 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
 
             <div className="space-y-1.5">
               <Label htmlFor="gsc-manual-callback" className="text-[11px]">
-                Paste Google redirect URL (if needed)
+                Paste Google redirect URL (required if auto-return fails)
               </Label>
               <Textarea
                 id="gsc-manual-callback"
                 rows={3}
                 value={callbackUrl}
                 onChange={(e) => setCallbackUrl(e.target.value)}
-                placeholder={`${typeof window !== "undefined" ? window.location.origin : ""}/api/gsc/oauth/callback?code=…&state=…`}
+                placeholder={`https://zzaizzai.com/api/gsc/oauth/callback?code=…&state=${session.state}`}
                 className="font-mono text-[11px]"
               />
               <p className="text-[10px] text-muted-foreground">
                 Sign in as{" "}
-                <span className="font-medium text-foreground">{GSC_OAUTH_LOGIN_HINT}</span>. Session
-                expires{" "}
+                <span className="font-medium text-foreground">{GSC_OAUTH_LOGIN_HINT}</span>. After
+                Google redirects, copy the <strong>entire</strong> address bar URL (must include{" "}
+                <code className="text-[10px]">code=</code> and{" "}
+                <code className="text-[10px]">state=</code>). Session expires{" "}
                 {session.expiresAt
                   ? new Date(session.expiresAt).toLocaleTimeString()
                   : "in about 1 hour"}
@@ -217,6 +305,7 @@ export function GscManualConnectPanel({ onConnected, onError }: Props) {
                 size="sm"
                 onClick={() => {
                   stopPolling();
+                  connectedNotifiedRef.current = false;
                   setSession(null);
                   setCallbackUrl("");
                 }}
