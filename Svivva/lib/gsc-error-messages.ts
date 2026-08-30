@@ -6,7 +6,7 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
     return "Google did not return a refresh token. Revoke ZZAI at myaccount.google.com/permissions, then connect again.";
   }
   if (code === "admin_required") {
-    return "Enter the admin passcode first (272727 on this page), then try again.";
+    return "Enter the admin passcode on this page first, then try again.";
   }
   if (code === "oauth_not_configured") {
     return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
@@ -21,7 +21,7 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
     return "Could not start Google sign-in. Wait a moment and try again.";
   }
   if (code === "Forbidden") {
-    return "Admin unlock required — enter passcode 272727 on this page first.";
+    return "Admin unlock required — enter the admin passcode on this page first.";
   }
   if (code.length > 80 || code.includes("Error") || code.includes("error")) {
     return code.slice(0, 220);
