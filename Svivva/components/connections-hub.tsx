@@ -29,6 +29,7 @@ const TEAL = "#5B8DA8";
 interface CredsData {
   hasGodaddy: boolean;
   hasGoogle: boolean;
+  hasGscConnected?: boolean;
   godaddyDomain: string | null;
   googleSiteUrl: string | null;
   indexnowKey?: string | null;
@@ -349,7 +350,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
         <div className="flex items-center gap-2">
           {/* Progress dots */}
           <div className="flex gap-1">
-            {[true, creds?.hasGodaddy, creds?.hasGoogle].map((ok, i) => (
+            {[true, creds?.hasGodaddy, creds?.hasGscConnected].map((ok, i) => (
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full ${ok ? "bg-green-500" : "bg-muted-foreground/25"}`}
@@ -386,21 +387,31 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
             icon={Search}
             name="Google Search Console"
             description={
-              creds?.hasGoogle
-                ? `Verified: ${creds.googleSiteUrl}. Submit sitemap at /sitemap.xml to accelerate Google indexing.`
-                : "Free tool to verify your site with Google and submit your sitemap. Required for Google to index your pages."
+              creds?.hasGscConnected
+                ? `Connected${creds.googleSiteUrl ? `: ${creds.googleSiteUrl}` : ""}. Sitemap at /sitemap.xml is submitted automatically when Orbit runs.`
+                : creds?.hasGoogle
+                  ? `Site URL saved (${creds.googleSiteUrl}) — finish setup at /dashboard/gsc-connect to enable automatic sitemap submission.`
+                  : "Verify your site with Google and connect OAuth at /dashboard/gsc-connect for automatic sitemap + indexing."
             }
-            status={creds?.hasGoogle ? "connected" : "setup"}
-            statusLabel={creds?.hasGoogle ? "Site Verified" : "Not Set Up"}
-            statusColor={creds?.hasGoogle ? "#16a34a" : "#d97706"}
+            status={creds?.hasGscConnected ? "connected" : creds?.hasGoogle ? "setup" : "setup"}
+            statusLabel={
+              creds?.hasGscConnected
+                ? "API Connected"
+                : creds?.hasGoogle
+                  ? "URL Saved Only"
+                  : "Not Set Up"
+            }
+            statusColor={creds?.hasGscConnected ? "#16a34a" : "#d97706"}
             accentColor="#4285F4"
             externalLinks={(() => {
               const siteUrl = creds?.googleSiteUrl?.trim() || "";
               const normalizedUrl = siteUrl && !siteUrl.endsWith("/") ? siteUrl + "/" : siteUrl;
               const links: { label: string; href: string }[] = [
                 {
-                  label: creds?.hasGoogle ? "Open Console" : "Create Free Account",
-                  href: "https://search.google.com/search-console/welcome",
+                  label: creds?.hasGscConnected ? "Open Console" : "Connect in ZZAI",
+                  href: creds?.hasGscConnected
+                    ? "https://search.google.com/search-console"
+                    : "/dashboard/gsc-connect",
                 },
               ];
               if (creds?.hasGoogle && normalizedUrl) {

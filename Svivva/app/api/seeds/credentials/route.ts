@@ -24,6 +24,7 @@ export async function GET() {
         hasReplit: false,
         hasGodaddy: false,
         hasGoogle: false,
+        hasGscConnected: false,
         godaddyDomain: null,
         googleSiteUrl: null,
         googleVerificationToken: null,
@@ -45,7 +46,12 @@ export async function GET() {
       hasReplit: !!(creds.replitUsername || creds.replitToken),
       replitUsername: creds.replitUsername || null,
       hasGodaddy: !!(creds.godaddyApiKey && creds.godaddyApiSecret && creds.godaddyDomain),
+      /** Saved Search Console site URL string (manual entry — not the same as API connected). */
       hasGoogle: !!creds.googleSiteUrl,
+      /** Google OAuth or service account configured for sitemap/indexing APIs. */
+      hasGscConnected: !!(
+        creds.googleOauthRefreshToken?.trim() || creds.googleServiceAccountJson?.trim()
+      ),
       godaddyDomain: creds.godaddyDomain,
       googleSiteUrl: creds.googleSiteUrl,
       googleVerificationToken: creds.googleVerificationToken,

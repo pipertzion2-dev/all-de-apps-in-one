@@ -3,7 +3,7 @@
  * without shipping full product replacements on free tiers.
  */
 
-import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-apps";
+import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-app-data";
 import { getSiteUrl } from "../site-url";
 
 function siteBase(): string {
