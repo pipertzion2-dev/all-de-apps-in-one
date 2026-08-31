@@ -1,0 +1,29 @@
+# One-time: disconnect deprecated Vercel project(s) from this GitHub repo.
+# Requires GitHub secret VERCEL_TOKEN (from ziontpiper@icloud.com / team zzai-zzai).
+#
+# Run: Actions → "Disconnect deprecated Vercel Git" → Run workflow
+name: Disconnect deprecated Vercel Git
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disconnect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Disconnect svivva-main-app Git link
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: node scripts/disconnect-deprecated-vercel-git.mjs

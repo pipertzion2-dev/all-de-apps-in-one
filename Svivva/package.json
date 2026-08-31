@@ -9,6 +9,7 @@
     "deploy:prod": "vercel deploy --prod --yes --scope zzai-zzai --project all-de-apps-in-one",
     "redeploy:prod": "node scripts/redeploy-prod.mjs",
     "clear-vercel-queue": "node scripts/clear-vercel-queue.mjs",
+    "vercel:disconnect-deprecated": "node scripts/disconnect-deprecated-vercel-git.mjs",
     "vercel:link": "vercel link --yes --scope zzai-zzai --project all-de-apps-in-one",
     "deploy:wait": "node scripts/wait-vercel-deploy.mjs",
     "db:play": "node scripts/play-db-migrate.mjs",
