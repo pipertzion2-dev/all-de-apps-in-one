@@ -3610,7 +3610,7 @@ export default function LaunchpadPage() {
       </div>
 
       {/* ── Content ── */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
+      <div className="max-w-2xl xl:max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
         {/* ── PRIMARY MISSION CONTROL ── */}
         <OrbitOneClickLaunch
           autoRun={autoRunMarketing}
