@@ -1,5 +1,7 @@
-# One-time: disconnect deprecated Vercel project(s) from this GitHub repo.
-# Requires GitHub secret VERCEL_TOKEN (from ziontpiper@icloud.com / team zzai-zzai).
+# One-time: disconnect deprecated Vercel project(s) on team zzai-zzai from this repo.
+# NOTE: svivva-main-app usually lives on a DIFFERENT blocked Vercel login — this
+# workflow cannot remove that ghost check. Use docs/VERCEL_ACCOUNT.md section B instead.
+# Requires GitHub secret VERCEL_TOKEN (ziontpiper@icloud.com / zzai-zzai).
 #
 # Run: Actions → "Disconnect deprecated Vercel Git" → Run workflow
 name: Disconnect deprecated Vercel Git

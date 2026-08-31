@@ -32,16 +32,18 @@ Do **both** if possible:
 
 ### A — Wrong Vercel account (where `svivva-main-app` lives)
 
-1. Sign in to Vercel with the account that owns **`svivva-main-app`** (not `ziontpiper@icloud.com` if that’s a different login).
-2. Open project **`svivva-main-app`** → **Settings** → **Git**.
-3. **Disconnect** repository `pipertzion2-dev/all-de-apps-in-one`.
-4. Optional: delete or pause the project so it cannot be re-linked by mistake.
+**`svivva-main-app` is not on `ziontpiper@icloud.com` / team `zzai-zzai`.** It is a leftover project on an **older, blocked Vercel login** (often Replit-era, Cursor default, or another email). That account still posts the red **`Vercel – svivva-main-app`** status on every push even though you cannot see the project in your dashboard.
 
-### B — GitHub side
+1. Try signing in to [vercel.com](https://vercel.com) with **any other email** you may have used (e.g. `pipertzion2@gmail.com`, Replit-linked login, old personal email).
+2. If you find **`svivva-main-app`**: **Settings → Git → Disconnect** `pipertzion2-dev/all-de-apps-in-one`, then delete or pause the project.
+3. If the account is **blocked** and you cannot sign in: open [Vercel Support](https://vercel.com/help) and ask them to **unlink `svivva-main-app` from `github.com/pipertzion2-dev/all-de-apps-in-one`** (account blocked, project not visible on current login).
 
-1. GitHub → **Settings** → **Integrations** → **Applications** → **Vercel** → **Configure**.
-2. Ensure only the **`zzai-zzai` / `all-de-apps-in-one`** connection remains for this repo.
-3. Remove access for the old team/project if listed.
+### B — GitHub side (when you do not own the old Vercel login)
+
+1. GitHub (as **`pipertzion2-dev`**) → [Installed GitHub Apps → Vercel → Configure](https://github.com/settings/installations).
+2. Under **Repository access**, confirm this repo is listed. You cannot remove only `svivva-main-app` from here — the ghost check comes from the **other Vercel account’s** project link.
+3. **Nuclear option (only if Support cannot help):** Revoke Vercel’s GitHub access, then reconnect Git **once** from **`ziontpiper@icloud.com` → `zzai-zzai` → `all-de-apps-in-one` → Settings → Git**. Do **not** reconnect from any other Vercel login.
+4. Until disconnected, **ignore** `Vercel – svivva-main-app` in CI. Only **`Vercel – all-de-apps-in-one`** is production.
 
 ### C — Correct account (keep this one)
 
