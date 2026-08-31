@@ -71,7 +71,9 @@ for (const deprecated of vercelCanonical.deprecatedProjects) {
   } catch (e) {
     const msg = String(e);
     if (msg.includes("404") || msg.includes("not_found")) {
-      console.log(`• ${projectName}: not found under ${teamSlug} (may live on a different Vercel account)`);
+      console.log(
+        `• ${projectName}: not found under ${teamSlug} (may live on a different Vercel account)`,
+      );
       continue;
     }
     console.error(`✗ ${projectName}: ${msg}`);
