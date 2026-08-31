@@ -3,6 +3,8 @@ import {
   isValidGscOAuthClientId,
   isValidGscOAuthCredentials,
   gscOAuthConfigProblem,
+  normalizeGscOAuthClientId,
+  normalizeGscOAuthClientSecret,
 } from "@/lib/gsc-oauth-credentials";
 
 describe("gsc-oauth-credentials", () => {
@@ -26,5 +28,12 @@ describe("gsc-oauth-credentials", () => {
     expect(
       gscOAuthConfigProblem("your-client-id.apps.googleusercontent.com", "your-client-secret"),
     ).toMatch(/placeholder/i);
+  });
+
+  it("extracts client_id from JSON credentials paste", () => {
+    const json =
+      '{"web":{"client_id":"123456789012-abc.apps.googleusercontent.com","client_secret":"GOCSPX-secret"}}';
+    expect(normalizeGscOAuthClientId(json)).toBe("123456789012-abc.apps.googleusercontent.com");
+    expect(normalizeGscOAuthClientSecret(json)).toBe("GOCSPX-secret");
   });
 });

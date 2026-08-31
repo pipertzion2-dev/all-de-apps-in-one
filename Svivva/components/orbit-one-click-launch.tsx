@@ -14,6 +14,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import nextDynamic from "next/dynamic";
+import Link from "next/link";
 import { authFetch } from "@/hooks/use-auth";
 
 const GscConnectOrb = nextDynamic(() => import("@/components/gsc-connect-orb"), {
@@ -307,7 +308,7 @@ export function OrbitOneClickLaunch({
     matchedSite: string | null;
   }>({
     connected: false,
-    available: true,
+    available: false,
     email: null,
     propertyOk: false,
     matchedSite: null,
@@ -348,7 +349,7 @@ export function OrbitOneClickLaunch({
           if (alive)
             setGsc({
               connected: !!d.oauthConnected,
-              available: d.oauthAvailable !== false,
+              available: d.oauthAvailable === true,
               email: d.oauthEmail ?? null,
               propertyOk: !!d.gscPropertyOk,
               matchedSite: d.gscMatchedSite ?? null,
@@ -464,7 +465,7 @@ export function OrbitOneClickLaunch({
             const d = await gr.json();
             setGsc({
               connected: !!d.oauthConnected,
-              available: d.oauthAvailable !== false,
+              available: d.oauthAvailable === true,
               email: d.oauthEmail ?? null,
               propertyOk: !!d.gscPropertyOk,
               matchedSite: d.gscMatchedSite ?? null,
@@ -715,8 +716,16 @@ export function OrbitOneClickLaunch({
                   : "Google connected — verify zzaizzai.com property in Search Console."
               : gsc.available
                 ? "Press the camo orb to connect Google Search Console — AI handles the rest."
-                : "Google connect will be available shortly."}
+                : "Paste your Google OAuth client ID + secret to enable one-click connect."}
           </p>
+          {!gsc.connected && !gsc.available && (
+            <Link
+              href="/dashboard/gsc-connect?gsc_error=oauth_not_configured"
+              className="text-[11px] font-bold underline text-[#5B8DA8]"
+            >
+              Configure Google OAuth credentials →
+            </Link>
+          )}
         </div>
 
         {/* Live marketing health — always visible, reflects work already done */}

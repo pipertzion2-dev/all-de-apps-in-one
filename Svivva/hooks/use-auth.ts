@@ -141,6 +141,50 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
   });
 }
 
+/** Parse JSON from authFetch without Safari's cryptic response.json() failures on empty/HTML bodies. */
+export async function parseAuthJsonResponse<T = Record<string, unknown>>(
+  response: Response,
+): Promise<T> {
+  if (response.status === 204 || response.status === 205) {
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    return {} as T;
+  }
+
+  let text = "";
+  try {
+    text = await response.text();
+  } catch {
+    throw new Error(
+      response.status === 403
+        ? "Admin unlock required — enter the admin passcode on this page first."
+        : `Could not read server response (HTTP ${response.status}).`,
+    );
+  }
+
+  if (!text.trim()) {
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error("Admin unlock required — enter the admin passcode on this page first.");
+      }
+      throw new Error(`Request failed (HTTP ${response.status})`);
+    }
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    const html = text.trimStart().startsWith("<");
+    throw new Error(
+      !response.ok
+        ? html
+          ? `Server error (HTTP ${response.status}). Sign in and unlock admin, then try again.`
+          : `Request failed (HTTP ${response.status}).`
+        : "Server returned an unexpected response. Refresh the page and try again.",
+    );
+  }
+}
+
 export function useAuth() {
   const queryClient = useQueryClient();
 

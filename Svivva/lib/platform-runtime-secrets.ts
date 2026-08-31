@@ -146,6 +146,9 @@ export async function hydratePlatformSecrets(): Promise<void> {
 }
 
 export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsPatch) {
+  if ("googleGscClientId" in patch || "googleGscClientSecret" in patch) {
+    await ensureGoogleGscPlatformColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
