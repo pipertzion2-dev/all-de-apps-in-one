@@ -18,7 +18,10 @@ import {
   saveGscOAuthStateRow,
 } from "@/lib/google-gsc-oauth";
 import { getSiteUrl } from "@/lib/site-url";
-import { hydratePlatformSecrets, stripInvalidGoogleGscEnvFromProcess } from "@/lib/platform-runtime-secrets";
+import {
+  hydratePlatformSecrets,
+  stripInvalidGoogleGscEnvFromProcess,
+} from "@/lib/platform-runtime-secrets";
 import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthConfigProblem } from "@/lib/gsc-oauth-credentials";
 

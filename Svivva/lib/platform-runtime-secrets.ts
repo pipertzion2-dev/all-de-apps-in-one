@@ -117,9 +117,7 @@ export function stripInvalidGoogleGscEnvFromProcess(): void {
   const envId =
     process.env.GOOGLE_GSC_CLIENT_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || "";
   const envSecret =
-    process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() ||
-    process.env.GOOGLE_CLIENT_SECRET?.trim() ||
-    "";
+    process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() || process.env.GOOGLE_CLIENT_SECRET?.trim() || "";
   if (isValidGscOAuthCredentials(envId, envSecret)) return;
   delete process.env.GOOGLE_GSC_CLIENT_ID;
   delete process.env.GOOGLE_GSC_CLIENT_SECRET;
