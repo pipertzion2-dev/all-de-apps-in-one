@@ -26,6 +26,12 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (/did not match the expected pattern/i.test(code)) {
     return "Could not read the server reply (common in Safari). Unlock admin, refresh the page, and try save again.";
   }
+  if (/econnrefused|connect refused|database connection failed/i.test(code)) {
+    return "Database connection failed — Google signed in, but the app could not save your session. Set DATABASE_URL in Vercel to your hosted Postgres and redeploy.";
+  }
+  if (code === "database_unavailable") {
+    return "Database unavailable — Google OAuth cannot save tokens until DATABASE_URL is configured in Vercel (hosted Postgres, not localhost).";
+  }
   if (code.length > 80 || code.includes("Error") || code.includes("error")) {
     return code.slice(0, 220);
   }
