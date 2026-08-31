@@ -62,9 +62,7 @@ export async function saveGscOAuthStateRow(payload: {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[gsc-oauth] save state row failed:", msg);
-    throw new Error(
-      "Could not save the sign-in session — database unavailable. Retry in a moment or contact support if this persists.",
-    );
+    // Cookie PKCE state is enough for same-browser sign-in; DB row is iOS/handoff fallback.
   }
 }
 

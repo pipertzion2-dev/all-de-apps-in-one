@@ -11,6 +11,10 @@ import {
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
+import {
+  formatDatabaseConnectionError,
+  isDatabaseConnectionError,
+} from "@/lib/db-connection-error";
 
 export const dynamic = "force-dynamic";
 
@@ -30,20 +34,32 @@ async function loadOAuthResume(state: string): Promise<OAuthResume | null> {
     };
   }
 
-  await ensureOAuthStatesTable();
-  const [row] = await db
-    .select()
-    .from(oauthStates)
-    .where(and(eq(oauthStates.state, state), gt(oauthStates.expiresAt, new Date())))
-    .limit(1);
-  if (!row) return null;
+  try {
+    await ensureOAuthStatesTable();
+    const [row] = await db
+      .select()
+      .from(oauthStates)
+      .where(and(eq(oauthStates.state, state), gt(oauthStates.expiresAt, new Date())))
+      .limit(1);
+    if (!row) return null;
 
-  await db.delete(oauthStates).where(eq(oauthStates.state, state));
-  return {
-    codeVerifier: row.codeVerifier,
-    redirectAfter: row.redirectAfter || "{}",
-    callbackBase: row.callbackBase || "",
-  };
+    await db.delete(oauthStates).where(eq(oauthStates.state, state));
+    return {
+      codeVerifier: row.codeVerifier,
+      redirectAfter: row.redirectAfter || "{}",
+      callbackBase: row.callbackBase || "",
+    };
+  } catch (e) {
+    if (isDatabaseConnectionError(e)) throw e;
+    console.warn("[gsc/oauth/callback] oauth_states lookup failed:", e);
+    return null;
+  }
+}
+
+function redirectWithError(origin: string, returnPath: string, code: string) {
+  const dest = new URL(returnPath, origin);
+  dest.searchParams.set("gsc_error", code);
+  return NextResponse.redirect(dest);
 }
 
 export async function GET(req: NextRequest) {
@@ -63,7 +79,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(fallback);
   }
 
-  const row = await loadOAuthResume(state);
+  let row: OAuthResume | null;
+  try {
+    row = await loadOAuthResume(state);
+  } catch (e) {
+    const dbMsg = formatDatabaseConnectionError(e);
+    fallback.searchParams.set("gsc_error", dbMsg ? "database_unavailable" : "oauth_start_failed");
+    return NextResponse.redirect(fallback);
+  }
   if (!row) {
     const dest = new URL("/dashboard/gsc-connect", req.nextUrl.origin);
     dest.searchParams.set("gsc_error", "invalid_state");
@@ -112,6 +135,10 @@ export async function GET(req: NextRequest) {
     else dest.searchParams.set("gsc_setup", setup.message.slice(0, 200));
     return NextResponse.redirect(dest);
   } catch (e) {
+    const dbMsg = formatDatabaseConnectionError(e);
+    if (dbMsg) {
+      return redirectWithError(req.nextUrl.origin, returnPath, "database_unavailable");
+    }
     const dest = new URL(returnPath, req.nextUrl.origin);
     dest.searchParams.set("gsc_error", String(e).slice(0, 180));
     return NextResponse.redirect(dest);
