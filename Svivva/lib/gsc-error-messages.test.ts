@@ -15,4 +15,8 @@ describe("gscOAuthErrorMessage", () => {
       /Safari/i,
     );
   });
+
+  it("maps database_unavailable to DATABASE_URL guidance", () => {
+    expect(gscOAuthErrorMessage("database_unavailable")).toMatch(/DATABASE_URL/i);
+  });
 });
