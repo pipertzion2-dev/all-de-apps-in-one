@@ -110,7 +110,9 @@ export async function POST(req: NextRequest) {
   }
 
   // Remaining actions require admin access
-  if (!(await isOrbitAdminAllowed(req))) return forbidden();
+  if (!(await isOrbitAdminAllowed(req))) {
+    return forbidden("Admin unlock required — enter the admin passcode on this page first.");
+  }
 
   const userId = await resolveGscCredentialsUserId();
 
@@ -198,11 +200,17 @@ export async function POST(req: NextRequest) {
         "Invalid Google OAuth client — Client ID must end with .apps.googleusercontent.com and secret must be real (not a placeholder).",
       );
     }
-    await patchPlatformRuntimeSecrets({
-      googleGscClientId: id,
-      googleGscClientSecret: secret,
-    });
-    await hydratePlatformSecrets();
+    try {
+      await patchPlatformRuntimeSecrets({
+        googleGscClientId: id,
+        googleGscClientSecret: secret,
+      });
+      await hydratePlatformSecrets();
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("[gsc/save] save_oauth_client failed:", message);
+      return serverError(`Could not save OAuth client: ${message}`);
+    }
     return ok({
       success: true,
       message: "Google OAuth client saved — you can connect with Google now.",

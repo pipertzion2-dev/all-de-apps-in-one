@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -34,6 +34,7 @@ import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
+import { useToast } from "@/hooks/use-toast";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -82,6 +83,8 @@ const OAUTH_START = gscOAuthConnectUrl("/dashboard/gsc-connect");
 
 export default function GscConnectPage() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const [saJson, setSaJson] = useState("");
   const [oauthClientId, setOauthClientId] = useState("");
   const [oauthClientSecret, setOauthClientSecret] = useState("");
@@ -129,8 +132,21 @@ export default function GscConnectPage() {
   });
 
   useEffect(() => {
-    if (data?.oauthAvailable) setNeedsOAuthSetup(false);
+    if (data?.oauthAvailable === true) setNeedsOAuthSetup(false);
+    else if (data?.oauthAvailable === false) setNeedsOAuthSetup(true);
   }, [data?.oauthAvailable]);
+
+  const showSaveFeedback = useCallback((text: string, ok: boolean) => {
+    setMsg({ text, ok });
+    toast({
+      title: ok ? "Saved" : "Could not save",
+      description: text,
+      variant: ok ? "default" : "destructive",
+    });
+    requestAnimationFrame(() => {
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }, [toast]);
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -175,19 +191,41 @@ export default function GscConnectPage() {
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
-    onSuccess: (_, vars) => {
+    onSuccess: (result, vars) => {
       const msgs: Record<string, string> = {
         fix_url: "Site URL updated.",
         save_service_account: "Service account saved.",
         submit_sitemap: "Sitemap pinged.",
-        save_oauth_client: "Google OAuth client saved — click Connect with Google.",
+        save_oauth_client:
+          (result as { message?: string }).message ||
+          "Google OAuth client saved — click Connect with Google.",
       };
-      if (vars.action === "save_oauth_client") setNeedsOAuthSetup(false);
-      setMsg({ text: msgs[vars.action] || "Saved.", ok: true });
-      refetch();
+      const text = msgs[vars.action] || "Saved.";
+      showSaveFeedback(text, true);
+      if (vars.action === "save_oauth_client") {
+        void refetch().then((r) => {
+          if (r.data?.oauthAvailable) setNeedsOAuthSetup(false);
+        });
+      } else {
+        void refetch();
+      }
     },
-    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+    onError: (e: Error) => showSaveFeedback(gscOAuthErrorMessage(e.message), false),
   });
+
+  const saveOAuthClient = useCallback(() => {
+    if (!oauthClientId.trim() || !oauthClientSecret.trim()) return;
+    if (!adminUnlocked) {
+      setShowAdminUnlock(true);
+      showSaveFeedback(gscOAuthErrorMessage("admin_required"), false);
+      return;
+    }
+    saveMutation.mutate({
+      action: "save_oauth_client",
+      clientId: oauthClientId.trim(),
+      clientSecret: oauthClientSecret.trim(),
+    });
+  }, [adminUnlocked, oauthClientId, oauthClientSecret, saveMutation, showSaveFeedback]);
 
   const syncProperty = useMutation({
     mutationFn: async () => {
@@ -233,7 +271,9 @@ export default function GscConnectPage() {
     (isError && error instanceof Error && error.message === "admin_required");
   const connected = !!data?.oauthConnected;
   const propertyOk = !!data?.gscPropertyOk;
-  const oauthAvailable = data?.oauthAvailable !== false && !needsOAuthSetup;
+  const oauthConfigured = data?.oauthAvailable === true;
+  const oauthAvailable = oauthConfigured && !needsOAuthSetup;
+  const showOAuthClientForm = !connected && (!oauthConfigured || needsOAuthSetup);
   const fullyReady = connected && propertyOk;
 
   return (
@@ -394,11 +434,16 @@ export default function GscConnectPage() {
                 {syncProperty.isPending ? "Syncing…" : "Sync property"}
               </Button>
             )}
-            {!connected && !oauthAvailable && (
+            {!connected && showOAuthClientForm && (
               <div className="w-full space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
                 <p className="text-xs font-semibold text-foreground">
                   Google OAuth client not configured yet
                 </p>
+                {!adminUnlocked && (
+                  <p className="text-[11px] text-amber-700 dark:text-amber-400 rounded-md border border-amber-500/25 bg-amber-500/10 px-2.5 py-2">
+                    Enter the admin passcode above before saving OAuth credentials.
+                  </p>
+                )}
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
                   Create an OAuth 2.0 Web client in{" "}
                   <a
@@ -444,23 +489,30 @@ export default function GscConnectPage() {
                     />
                   </div>
                   <Button
+                    type="button"
                     size="sm"
                     className="text-white font-bold"
                     style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
                     disabled={
                       !oauthClientId.trim() || !oauthClientSecret.trim() || saveMutation.isPending
                     }
-                    onClick={() =>
-                      saveMutation.mutate({
-                        action: "save_oauth_client",
-                        clientId: oauthClientId.trim(),
-                        clientSecret: oauthClientSecret.trim(),
-                      })
-                    }
+                    onClick={saveOAuthClient}
                     data-testid="btn-save-oauth-client"
                   >
                     {saveMutation.isPending ? "Saving…" : "Save OAuth client"}
                   </Button>
+                  {msg && (
+                    <p
+                      ref={feedbackRef}
+                      className={`text-xs px-2.5 py-2 rounded-md border ${
+                        msg.ok
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+                          : "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"
+                      }`}
+                    >
+                      {msg.text}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -507,8 +559,9 @@ export default function GscConnectPage() {
         />
       )}
 
-      {msg && (
+      {msg && !showOAuthClientForm && (
         <div
+          ref={feedbackRef}
           className={`text-sm px-4 py-3 rounded-lg border ${msg.ok ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"}`}
         >
           {msg.text}
