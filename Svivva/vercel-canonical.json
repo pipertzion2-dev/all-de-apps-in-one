@@ -5,6 +5,7 @@
   "rootDirectory": "Svivva",
   "productionDomain": "zzaizzai.com",
   "deployBranch": "main",
+  "databaseEnvVar": "DATABASE_URL",
   "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
   "deprecatedProjects": [
     {
