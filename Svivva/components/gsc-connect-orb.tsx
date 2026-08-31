@@ -133,7 +133,11 @@ export default function GscConnectOrb({
 
   /** Gate: admin must be unlocked (passcode cookie) before the OAuth redirect. */
   const connect = () => {
-    if (!interactive || adminUnlocked !== false) return;
+    if (!interactive) return;
+    if (adminUnlocked === true) {
+      window.location.assign(oauthUrl);
+      return;
+    }
     setShowUnlock(true);
   };
 
@@ -142,7 +146,8 @@ export default function GscConnectOrb({
     connect();
   };
 
-  const useOAuthLink = interactive && adminUnlocked === true;
+  // Overlay link only when admin is confirmed — otherwise click opens passcode dialog.
+  const useOAuthLink = false;
 
   const caption = connected
     ? "Connected"

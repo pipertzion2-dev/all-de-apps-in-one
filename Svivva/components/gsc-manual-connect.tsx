@@ -31,6 +31,8 @@ type Props = {
   onRequestAdminUnlock?: () => void;
   onConnected?: (message: string) => void;
   onError?: (message: string) => void;
+  /** Highlight when one-click connect failed (invalid_state, mobile, etc.) */
+  highlighted?: boolean;
 };
 
 /**
@@ -44,6 +46,7 @@ export function GscManualConnectPanel({
   onRequestAdminUnlock,
   onConnected,
   onError,
+  highlighted = false,
 }: Props) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -197,7 +200,10 @@ export function GscManualConnectPanel({
   };
 
   return (
-    <Card className="border-[#5B8DA8]/35 bg-[#5B8DA8]/5" data-testid="gsc-manual-connect">
+    <Card
+      className={`border-[#5B8DA8]/35 bg-[#5B8DA8]/5 ${highlighted ? "ring-2 ring-amber-500/60 border-amber-500/50" : ""}`}
+      data-testid="gsc-manual-connect"
+    >
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Link2 className="w-4 h-4 text-[#5B8DA8]" />
