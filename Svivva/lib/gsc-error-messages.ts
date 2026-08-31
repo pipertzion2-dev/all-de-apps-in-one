@@ -12,7 +12,7 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
     return "Google OAuth is not configured yet. Paste your OAuth client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel.";
   }
   if (code === "oauth_invalid_client") {
-    return "Google OAuth credentials are invalid or still placeholders in Vercel. Paste your real OAuth client ID + secret above, then try again.";
+    return "Google OAuth is not ready yet. Click Save OAuth client below first (admin passcode required). If Save fails, set DATABASE_URL in Vercel to hosted Postgres, or paste GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars and redeploy.";
   }
   if (code === "invalid_state") {
     return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use alternate connect below (new tab + paste URL), or retry in Safari.";
@@ -31,6 +31,9 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   }
   if (code === "database_unavailable") {
     return "Database unavailable — Google OAuth cannot save tokens until DATABASE_URL is configured in Vercel (hosted Postgres, not localhost).";
+  }
+  if (/database unavailable|could not save oauth client/i.test(code)) {
+    return "Database unavailable — could not save OAuth credentials. Set DATABASE_URL in Vercel to hosted Postgres and redeploy, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars.";
   }
   if (code.length > 80 || code.includes("Error") || code.includes("error")) {
     return code.slice(0, 220);
