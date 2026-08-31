@@ -4,6 +4,7 @@
   "projectName": "all-de-apps-in-one",
   "rootDirectory": "Svivva",
   "productionDomain": "zzaizzai.com",
+  "deployBranch": "main",
   "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
   "deprecatedProjects": [
     {
