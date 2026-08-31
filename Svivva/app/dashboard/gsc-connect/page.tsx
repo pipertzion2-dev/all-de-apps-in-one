@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch, parseAuthJsonResponse } from "@/hooks/use-auth";
-import {
-  normalizeGscOAuthClientId,
-  normalizeGscOAuthClientSecret,
-} from "@/lib/gsc-oauth-credentials";
+import { parseGscOAuthCredentialsFromFields } from "@/lib/gsc-oauth-credentials";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -220,10 +217,34 @@ export default function GscConnectPage() {
     onError: (e: Error) => showSaveFeedback(gscOAuthErrorMessage(e.message), false),
   });
 
+  const parsedOAuth = useMemo(
+    () => parseGscOAuthCredentialsFromFields(oauthClientId, oauthClientSecret),
+    [oauthClientId, oauthClientSecret],
+  );
+  const canSaveOAuth = Boolean(
+    parsedOAuth.clientId && parsedOAuth.clientSecret && !saveMutation.isPending,
+  );
+
+  const applyOAuthPaste = useCallback((value: string) => {
+    if (!value.trim().startsWith("{")) return false;
+    const { clientId, clientSecret } = parseGscOAuthCredentialsFromFields(value, value);
+    if (clientId) setOauthClientId(clientId);
+    if (clientSecret) setOauthClientSecret(clientSecret);
+    return Boolean(clientId && clientSecret);
+  }, []);
+
   const saveOAuthClient = useCallback(() => {
-    const clientId = normalizeGscOAuthClientId(oauthClientId);
-    const clientSecret = normalizeGscOAuthClientSecret(oauthClientSecret);
-    if (!clientId || !clientSecret) return;
+    const { clientId, clientSecret } = parseGscOAuthCredentialsFromFields(
+      oauthClientId,
+      oauthClientSecret,
+    );
+    if (!clientId || !clientSecret) {
+      showSaveFeedback(
+        "Paste Client ID + secret, or paste the full JSON from Google Cloud Console into either field.",
+        false,
+      );
+      return;
+    }
     if (clientId !== oauthClientId) setOauthClientId(clientId);
     if (clientSecret !== oauthClientSecret) setOauthClientSecret(clientSecret);
     if (!adminUnlocked) {
@@ -470,19 +491,28 @@ export default function GscConnectPage() {
                   <code className="text-[10px] bg-muted px-1 rounded">
                     {canonicalSite}/api/gsc/oauth/callback
                   </code>
-                  , then paste the client ID and secret below (saved in the app database — no Vercel
-                  redeploy needed).
+                  , then paste the client ID and secret below — or paste the{" "}
+                  <strong>entire JSON</strong> from Google Cloud into either field (saved in the app
+                  database, no Vercel redeploy needed).
                 </p>
                 <div className="space-y-2">
                   <div>
                     <Label htmlFor="gsc-oauth-client-id" className="text-[11px]">
-                      Client ID
+                      Client ID (or full JSON)
                     </Label>
                     <Input
                       id="gsc-oauth-client-id"
                       value={oauthClientId}
-                      onChange={(e) => setOauthClientId(e.target.value)}
-                      placeholder="123456789-abc.apps.googleusercontent.com"
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (applyOAuthPaste(v)) return;
+                        setOauthClientId(v);
+                      }}
+                      onPaste={(e) => {
+                        const v = e.clipboardData.getData("text");
+                        if (applyOAuthPaste(v)) e.preventDefault();
+                      }}
+                      placeholder="123456789-abc.apps.googleusercontent.com — or paste full JSON"
                       className="h-8 text-xs font-mono mt-1"
                     />
                   </div>
@@ -494,8 +524,16 @@ export default function GscConnectPage() {
                       id="gsc-oauth-client-secret"
                       type="password"
                       value={oauthClientSecret}
-                      onChange={(e) => setOauthClientSecret(e.target.value)}
-                      placeholder="GOCSPX-…"
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (applyOAuthPaste(v)) return;
+                        setOauthClientSecret(v);
+                      }}
+                      onPaste={(e) => {
+                        const v = e.clipboardData.getData("text");
+                        if (applyOAuthPaste(v)) e.preventDefault();
+                      }}
+                      placeholder="GOCSPX-… (auto-filled if you pasted JSON above)"
                       className="h-8 text-xs font-mono mt-1"
                     />
                   </div>
@@ -504,9 +542,7 @@ export default function GscConnectPage() {
                     size="sm"
                     className="text-white font-bold"
                     style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
-                    disabled={
-                      !oauthClientId.trim() || !oauthClientSecret.trim() || saveMutation.isPending
-                    }
+                    disabled={!canSaveOAuth}
                     onClick={saveOAuthClient}
                     data-testid="btn-save-oauth-client"
                   >
