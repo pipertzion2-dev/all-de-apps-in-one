@@ -113,6 +113,20 @@ function syncProcessEnvFromRow(
 }
 
 /** Prefer valid env; fall back to DB when Vercel has placeholder values like your-client-id. */
+export function stripInvalidGoogleGscEnvFromProcess(): void {
+  const envId =
+    process.env.GOOGLE_GSC_CLIENT_ID?.trim() || process.env.GOOGLE_CLIENT_ID?.trim() || "";
+  const envSecret =
+    process.env.GOOGLE_GSC_CLIENT_SECRET?.trim() ||
+    process.env.GOOGLE_CLIENT_SECRET?.trim() ||
+    "";
+  if (isValidGscOAuthCredentials(envId, envSecret)) return;
+  delete process.env.GOOGLE_GSC_CLIENT_ID;
+  delete process.env.GOOGLE_GSC_CLIENT_SECRET;
+  delete process.env.GOOGLE_CLIENT_ID;
+  delete process.env.GOOGLE_CLIENT_SECRET;
+}
+
 function applyGoogleGscOAuthFromRow(
   row: NonNullable<Awaited<ReturnType<typeof getPlatformRuntimeSecretsRow>>>,
 ) {
@@ -136,6 +150,7 @@ function applyGoogleGscOAuthFromRow(
 /** Merge database secrets into process.env when the host did not provide them. */
 export async function hydratePlatformSecrets(): Promise<void> {
   try {
+    stripInvalidGoogleGscEnvFromProcess();
     await ensureGoogleGscPlatformColumns();
     const row = await getPlatformRuntimeSecretsRow();
     if (row) syncProcessEnvFromRow(row);

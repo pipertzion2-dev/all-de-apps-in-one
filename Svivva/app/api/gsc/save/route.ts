@@ -19,6 +19,7 @@ import {
   hydratePlatformSecrets,
   patchPlatformRuntimeSecrets,
 } from "@/lib/platform-runtime-secrets";
+import { formatDatabaseConnectionError } from "@/lib/db-connection-error";
 
 export const dynamic = "force-dynamic";
 
@@ -216,6 +217,12 @@ export async function POST(req: NextRequest) {
         });
         await hydratePlatformSecrets();
       } catch (e: unknown) {
+        const dbMsg = formatDatabaseConnectionError(e);
+        if (dbMsg) {
+          return serverError(
+            "Database unavailable — could not save OAuth client. Set DATABASE_URL in Vercel to hosted Postgres and redeploy, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars instead.",
+          );
+        }
         const message = e instanceof Error ? e.message : String(e);
         console.error("[gsc/save] save_oauth_client failed:", message);
         return serverError(`Could not save OAuth client: ${message}`);

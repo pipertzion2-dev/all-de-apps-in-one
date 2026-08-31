@@ -548,6 +548,12 @@ export default function GscConnectPage() {
                   >
                     {saveMutation.isPending ? "Saving…" : "Save OAuth client"}
                   </Button>
+                  {!oauthConfigured && canSaveOAuth && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Save first, then use Connect with Google. Saving needs DATABASE_URL in Vercel
+                      (hosted Postgres).
+                    </p>
+                  )}
                   {msg && (
                     <p
                       ref={feedbackRef}
