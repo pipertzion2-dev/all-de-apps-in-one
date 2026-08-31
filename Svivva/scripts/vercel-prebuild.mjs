@@ -22,6 +22,16 @@ if (!process.env.DATABASE_URL?.trim()) {
   console.warn("⚠ DATABASE_URL not set — skipping DB migrations on Vercel build");
 } else {
   try {
+    console.log("\n→ Pushing full Drizzle schema (seed_credentials, platform secrets, …)…");
+    execSync("npx drizzle-kit push --force", {
+      cwd: root,
+      stdio: "inherit",
+      env: process.env,
+    });
+  } catch (err) {
+    console.warn("⚠ drizzle-kit push failed (continuing build):", err?.message ?? err);
+  }
+  try {
     runNodeScript("scripts/play-db-migrate.mjs", "Ensuring Svivva Play tables…");
   } catch (err) {
     console.warn("⚠ Play table migration failed (continuing build):", err?.message ?? err);
