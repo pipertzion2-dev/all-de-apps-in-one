@@ -11,6 +11,8 @@ describe("gscOAuthErrorMessage", () => {
   });
 
   it("maps Safari JSON parse noise to actionable guidance", () => {
-    expect(gscOAuthErrorMessage("The string did not match the expected pattern.")).toMatch(/Safari/i);
+    expect(gscOAuthErrorMessage("The string did not match the expected pattern.")).toMatch(
+      /Safari/i,
+    );
   });
 });

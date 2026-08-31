@@ -140,17 +140,20 @@ export default function GscConnectPage() {
     else if (data?.oauthAvailable === false) setNeedsOAuthSetup(true);
   }, [data?.oauthAvailable]);
 
-  const showSaveFeedback = useCallback((text: string, ok: boolean) => {
-    setMsg({ text, ok });
-    toast({
-      title: ok ? "Saved" : "Could not save",
-      description: text,
-      variant: ok ? "default" : "destructive",
-    });
-    requestAnimationFrame(() => {
-      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  }, [toast]);
+  const showSaveFeedback = useCallback(
+    (text: string, ok: boolean) => {
+      setMsg({ text, ok });
+      toast({
+        title: ok ? "Saved" : "Could not save",
+        description: text,
+        variant: ok ? "default" : "destructive",
+      });
+      requestAnimationFrame(() => {
+        feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    },
+    [toast],
+  );
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
