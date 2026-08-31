@@ -29,6 +29,9 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (/econnrefused|connect refused|database connection failed/i.test(code)) {
     return "Database connection failed — Google signed in, but the app could not save your session. Set DATABASE_URL in Vercel to your hosted Postgres and redeploy.";
   }
+  if (code === "database_unavailable") {
+    return "Database unavailable — Google OAuth cannot save tokens until DATABASE_URL is configured in Vercel (hosted Postgres, not localhost).";
+  }
   if (/database unavailable|could not save oauth client/i.test(code)) {
     return "Database unavailable — could not save OAuth credentials. Set DATABASE_URL in Vercel to hosted Postgres and redeploy, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars.";
   }
