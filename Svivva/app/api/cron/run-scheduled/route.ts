@@ -88,6 +88,20 @@ export async function GET(req: NextRequest) {
     } catch (e) {
       out.autopilot = { ok: false, error: String(e instanceof Error ? e.message : e) };
     }
+
+    // Weekly SEO routine — GSC insights, 14-step checklist, learning roadmap
+    try {
+      const { runSeoWeeklyRoutine } = await import("@/lib/orbit/seo-weekly-routine");
+      const seoWeekly = await runSeoWeeklyRoutine();
+      out.seoWeekly = {
+        ok: seoWeekly.ok,
+        stats: seoWeekly.stats,
+        roadmapPercent: seoWeekly.roadmap.overallPercent,
+        gscConnected: !!seoWeekly.gsc,
+      };
+    } catch (e) {
+      out.seoWeekly = { ok: false, error: String(e instanceof Error ? e.message : e) };
+    }
   }
 
   if (job === "channel-intel" || job === "all") {
