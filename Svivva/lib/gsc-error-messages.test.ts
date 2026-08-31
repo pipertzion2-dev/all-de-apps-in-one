@@ -9,4 +9,8 @@ describe("gscOAuthErrorMessage", () => {
   it("maps Forbidden to admin guidance", () => {
     expect(gscOAuthErrorMessage("Forbidden")).toMatch(/admin/i);
   });
+
+  it("maps Safari JSON parse noise to actionable guidance", () => {
+    expect(gscOAuthErrorMessage("The string did not match the expected pattern.")).toMatch(/Safari/i);
+  });
 });

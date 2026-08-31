@@ -1,5 +1,41 @@
 /** Reject Vercel/.env placeholder OAuth values so DB-saved credentials can hydrate. */
 
+/** Strip labels / extract client_id when user pastes from Google Cloud Console. */
+export function normalizeGscOAuthClientId(raw: string): string {
+  let s = raw.trim().replace(/^["']|["']$/g, "");
+  s = s.replace(/^(client\s*id\s*[:=]\s*)/i, "");
+  const fromJson = s.match(/"client_id"\s*:\s*"([^"]+)"/i);
+  if (fromJson) return fromJson[1].trim();
+  if (s.startsWith("{")) {
+    try {
+      const j = JSON.parse(s) as { client_id?: string; web?: { client_id?: string } };
+      const id = j.client_id || j.web?.client_id;
+      if (id?.trim()) return id.trim();
+    } catch {
+      /* ignore partial JSON paste */
+    }
+  }
+  return s.trim();
+}
+
+/** Strip labels / extract client_secret when user pastes from Google Cloud Console. */
+export function normalizeGscOAuthClientSecret(raw: string): string {
+  let s = raw.trim().replace(/^["']|["']$/g, "");
+  s = s.replace(/^(client\s*secret\s*[:=]\s*)/i, "");
+  const fromJson = s.match(/"client_secret"\s*:\s*"([^"]+)"/i);
+  if (fromJson) return fromJson[1].trim();
+  if (s.startsWith("{")) {
+    try {
+      const j = JSON.parse(s) as { client_secret?: string; web?: { client_secret?: string } };
+      const secret = j.client_secret || j.web?.client_secret;
+      if (secret?.trim()) return secret.trim();
+    } catch {
+      /* ignore partial JSON paste */
+    }
+  }
+  return s.trim();
+}
+
 const PLACEHOLDER_CLIENT_ID =
   /your-client-id|placeholder|changeme|example|xxx+|replace-?me|insert-?here|todo|fake|dummy|test-client/i;
 const PLACEHOLDER_SECRET =

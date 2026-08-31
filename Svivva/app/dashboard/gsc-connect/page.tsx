@@ -2,7 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authFetch } from "@/hooks/use-auth";
+import { authFetch, parseAuthJsonResponse } from "@/hooks/use-auth";
+import {
+  normalizeGscOAuthClientId,
+  normalizeGscOAuthClientSecret,
+} from "@/lib/gsc-oauth-credentials";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -187,7 +191,7 @@ export default function GscConnectPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const d = await r.json();
+      const d = await parseAuthJsonResponse<{ error?: string; message?: string }>(r);
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
@@ -214,7 +218,11 @@ export default function GscConnectPage() {
   });
 
   const saveOAuthClient = useCallback(() => {
-    if (!oauthClientId.trim() || !oauthClientSecret.trim()) return;
+    const clientId = normalizeGscOAuthClientId(oauthClientId);
+    const clientSecret = normalizeGscOAuthClientSecret(oauthClientSecret);
+    if (!clientId || !clientSecret) return;
+    if (clientId !== oauthClientId) setOauthClientId(clientId);
+    if (clientSecret !== oauthClientSecret) setOauthClientSecret(clientSecret);
     if (!adminUnlocked) {
       setShowAdminUnlock(true);
       showSaveFeedback(gscOAuthErrorMessage("admin_required"), false);
@@ -222,8 +230,8 @@ export default function GscConnectPage() {
     }
     saveMutation.mutate({
       action: "save_oauth_client",
-      clientId: oauthClientId.trim(),
-      clientSecret: oauthClientSecret.trim(),
+      clientId,
+      clientSecret,
     });
   }, [adminUnlocked, oauthClientId, oauthClientSecret, saveMutation, showSaveFeedback]);
 

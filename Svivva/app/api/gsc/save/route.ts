@@ -23,9 +23,15 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  try {
   const internalSecret = req.headers.get("x-internal-secret");
   const isInternal = internalSecret && internalSecret === process.env.ORBIT_INTERNAL_SECRET;
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return badRequest("Invalid JSON body");
+  }
   const { action } = body;
 
   // submit_sitemap can run without user context (internal scheduler or authenticated user).
@@ -191,8 +197,11 @@ export async function POST(req: NextRequest) {
     ) {
       return badRequest("clientId and clientSecret required");
     }
-    const id = clientId.trim();
-    const secret = clientSecret.trim();
+    const { normalizeGscOAuthClientId, normalizeGscOAuthClientSecret } = await import(
+      "@/lib/gsc-oauth-credentials"
+    );
+    const id = normalizeGscOAuthClientId(clientId);
+    const secret = normalizeGscOAuthClientSecret(clientSecret);
     if (!id || !secret) return badRequest("clientId and clientSecret required");
     const { isValidGscOAuthCredentials } = await import("@/lib/gsc-oauth-credentials");
     if (!isValidGscOAuthCredentials(id, secret)) {
@@ -218,4 +227,9 @@ export async function POST(req: NextRequest) {
   }
 
   return badRequest("Unknown action");
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error("[gsc/save] unhandled:", message);
+    return serverError(message || "Save failed");
+  }
 }

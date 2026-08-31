@@ -23,6 +23,9 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (code === "Forbidden") {
     return "Admin unlock required — enter the admin passcode on this page first.";
   }
+  if (/did not match the expected pattern/i.test(code)) {
+    return "Could not read the server reply (common in Safari). Unlock admin, refresh the page, and try save again.";
+  }
   if (code.length > 80 || code.includes("Error") || code.includes("error")) {
     return code.slice(0, 220);
   }
