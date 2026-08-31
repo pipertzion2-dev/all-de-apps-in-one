@@ -62,6 +62,32 @@ export function isValidGscOAuthCredentials(
   return isValidGscOAuthClientId(clientId) && isValidGscOAuthClientSecret(clientSecret);
 }
 
+/** Parse ID + secret from separate fields or a full Google OAuth JSON download in either field. */
+export function parseGscOAuthCredentialsFromFields(
+  rawClientId: string,
+  rawClientSecret: string,
+): { clientId: string; clientSecret: string } {
+  const idInput = rawClientId.trim();
+  const secretInput = rawClientSecret.trim();
+  const jsonBlob = idInput.startsWith("{")
+    ? idInput
+    : secretInput.startsWith("{")
+      ? secretInput
+      : "";
+
+  if (jsonBlob) {
+    return {
+      clientId: normalizeGscOAuthClientId(jsonBlob),
+      clientSecret: normalizeGscOAuthClientSecret(jsonBlob),
+    };
+  }
+
+  return {
+    clientId: normalizeGscOAuthClientId(idInput),
+    clientSecret: normalizeGscOAuthClientSecret(secretInput),
+  };
+}
+
 /** Human-readable reason when credentials are present but invalid (e.g. Vercel placeholder). */
 export function gscOAuthConfigProblem(
   clientId: string | null | undefined,

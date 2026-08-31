@@ -193,21 +193,17 @@ export async function POST(req: NextRequest) {
 
     // Save Google OAuth client credentials (when not set in Vercel env)
     if (action === "save_oauth_client") {
-      const { clientId, clientSecret } = body;
-      if (
-        !clientId ||
-        typeof clientId !== "string" ||
-        !clientSecret ||
-        typeof clientSecret !== "string"
-      ) {
+      const { parseGscOAuthCredentialsFromFields, isValidGscOAuthCredentials } =
+        await import("@/lib/gsc-oauth-credentials");
+      const { clientId: rawId, clientSecret: rawSecret } = body;
+      if (!rawId || typeof rawId !== "string" || !rawSecret || typeof rawSecret !== "string") {
         return badRequest("clientId and clientSecret required");
       }
-      const { normalizeGscOAuthClientId, normalizeGscOAuthClientSecret } =
-        await import("@/lib/gsc-oauth-credentials");
-      const id = normalizeGscOAuthClientId(clientId);
-      const secret = normalizeGscOAuthClientSecret(clientSecret);
+      const { clientId: id, clientSecret: secret } = parseGscOAuthCredentialsFromFields(
+        rawId,
+        rawSecret,
+      );
       if (!id || !secret) return badRequest("clientId and clientSecret required");
-      const { isValidGscOAuthCredentials } = await import("@/lib/gsc-oauth-credentials");
       if (!isValidGscOAuthCredentials(id, secret)) {
         return badRequest(
           "Invalid Google OAuth client — Client ID must end with .apps.googleusercontent.com and secret must be real (not a placeholder).",

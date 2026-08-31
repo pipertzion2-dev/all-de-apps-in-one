@@ -5,6 +5,7 @@ import {
   gscOAuthConfigProblem,
   normalizeGscOAuthClientId,
   normalizeGscOAuthClientSecret,
+  parseGscOAuthCredentialsFromFields,
 } from "@/lib/gsc-oauth-credentials";
 
 describe("gsc-oauth-credentials", () => {
@@ -35,5 +36,14 @@ describe("gsc-oauth-credentials", () => {
       '{"web":{"client_id":"123456789012-abc.apps.googleusercontent.com","client_secret":"GOCSPX-secret"}}';
     expect(normalizeGscOAuthClientId(json)).toBe("123456789012-abc.apps.googleusercontent.com");
     expect(normalizeGscOAuthClientSecret(json)).toBe("GOCSPX-secret");
+  });
+
+  it("parses full JSON when pasted only in the client id field", () => {
+    const json =
+      '{"web":{"client_id":"123456789012-abc.apps.googleusercontent.com","client_secret":"GOCSPX-secret"}}';
+    expect(parseGscOAuthCredentialsFromFields(json, "")).toEqual({
+      clientId: "123456789012-abc.apps.googleusercontent.com",
+      clientSecret: "GOCSPX-secret",
+    });
   });
 });
