@@ -32,12 +32,14 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
-import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT, isCanonicalGscOAuthEmail } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
+import { GscApiFixPanel } from "@/components/gsc-api-fix-panel";
 import { followOAuthLink } from "@/lib/follow-oauth-link";
 import { useToast } from "@/hooks/use-toast";
+import type { GoogleApiEnableLinks } from "@/lib/google-cloud-project";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -70,6 +72,7 @@ type DiagResult = {
   gscPropertyOk?: boolean;
   gscMatchedSite?: string | null;
   gscSitesSample?: string[];
+  googleApiEnableLinks?: GoogleApiEnableLinks | null;
 };
 
 const TEAL = "#5B8DA8";
@@ -97,6 +100,7 @@ export default function GscConnectPage() {
   const [showAdminUnlock, setShowAdminUnlock] = useState(false);
   const [pendingOAuth, setPendingOAuth] = useState(false);
   const [needsOAuthSetup, setNeedsOAuthSetup] = useState(false);
+  const [showApiFix, setShowApiFix] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -128,7 +132,7 @@ export default function GscConnectPage() {
         throw new Error("admin_required");
       }
       if (!r.ok) throw new Error("Failed");
-      return r.json();
+      return parseAuthJsonResponse<DiagResult>(r);
     },
     staleTime: 30_000,
     retry: false,
@@ -138,6 +142,11 @@ export default function GscConnectPage() {
     if (data?.oauthAvailable === true) setNeedsOAuthSetup(false);
     else if (data?.oauthAvailable === false) setNeedsOAuthSetup(true);
   }, [data?.oauthAvailable]);
+
+  useEffect(() => {
+    const indexingStep = data?.steps.find((s) => s.id === "indexing_api");
+    if (indexingStep?.status === "fail") setShowApiFix(true);
+  }, [data?.steps]);
 
   const showSaveFeedback = useCallback(
     (text: string, ok: boolean) => {
@@ -159,6 +168,7 @@ export default function GscConnectPage() {
     if (p.get("gsc_connected") === "1") {
       const setup = p.get("gsc_setup");
       const setupOk = setup === "ok";
+      setShowApiFix(p.get("gsc_fix_apis") === "1");
       setMsg({
         ok: setupOk || !p.get("gsc_error"),
         text: setupOk
@@ -268,7 +278,9 @@ export default function GscConnectPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "sync_property" }),
       });
-      const d = await r.json();
+      const d = await parseAuthJsonResponse<{ error?: string; success?: boolean; message?: string }>(
+        r,
+      );
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
@@ -279,13 +291,18 @@ export default function GscConnectPage() {
       });
       refetch();
     },
-    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+    onError: (e: Error) => setMsg({ text: gscOAuthErrorMessage(e.message), ok: false }),
   });
 
   const runIndexing = useMutation({
     mutationFn: async () => {
       const r = await authFetch("/api/gsc/run-indexing", { method: "POST" });
-      const d = await r.json();
+      const d = await parseAuthJsonResponse<{
+        ok?: boolean;
+        error?: string;
+        message?: string;
+        indexing?: { googleIndexing?: { submitted?: number } };
+      }>(r);
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
@@ -297,7 +314,7 @@ export default function GscConnectPage() {
       });
       refetch();
     },
-    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+    onError: (e: Error) => setMsg({ text: gscOAuthErrorMessage(e.message), ok: false }),
   });
 
   const needsAdmin =
@@ -308,7 +325,11 @@ export default function GscConnectPage() {
   const oauthConfigured = data?.oauthAvailable === true;
   const oauthAvailable = oauthConfigured && !needsOAuthSetup;
   const showOAuthClientForm = !connected && (!oauthConfigured || needsOAuthSetup);
-  const fullyReady = connected && propertyOk;
+  const indexingApiFailed = data?.steps.some((s) => s.id === "indexing_api" && s.status === "fail");
+  const enableLinks = data?.googleApiEnableLinks ?? null;
+  const fullyReady = connected && propertyOk && !indexingApiFailed;
+  const wrongGoogleAccount =
+    connected && !!data?.oauthEmail && !isCanonicalGscOAuthEmail(data.oauthEmail);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -337,6 +358,27 @@ export default function GscConnectPage() {
           </CardContent>
         </Card>
       )}
+
+      {wrongGoogleAccount && (
+        <Card className="border-red-500/40 bg-red-500/5">
+          <CardContent className="py-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">Wrong Google account linked</p>
+            <p className="text-xs text-muted-foreground">
+              Connected as <strong>{data?.oauthEmail}</strong>, but Search Console for this site
+              must use <strong>{GSC_OAUTH_LOGIN_HINT}</strong>. Reconnect below and pick the correct
+              account in Google (tap your profile photo to switch).
+            </p>
+            <Button
+              asChild
+              className="text-white font-bold"
+              style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+            >
+              <a href={OAUTH_START}>Reconnect as {GSC_OAUTH_LOGIN_HINT}</a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Hero: one-press camo orb to connect */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <GscConnectOrb connected={fullyReady} available={oauthAvailable} oauthUrl={OAUTH_START} />
@@ -629,6 +671,16 @@ export default function GscConnectPage() {
         >
           {msg.text}
         </div>
+      )}
+
+      {(showApiFix || indexingApiFailed) && enableLinks && (
+        <GscApiFixPanel
+          enableLinks={enableLinks}
+          onFixed={() => {
+            setShowApiFix(false);
+            void refetch();
+          }}
+        />
       )}
 
       <div className="flex items-center justify-between">

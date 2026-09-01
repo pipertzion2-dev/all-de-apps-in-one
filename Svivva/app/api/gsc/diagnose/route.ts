@@ -10,12 +10,22 @@ import {
 } from "@/lib/google-service-account";
 import {
   ensureGscOAuthColumns,
+  getGoogleGscOAuthConfig,
   getGoogleOAuthAccessTokenForUser,
   isGoogleGscOAuthConfigured,
   listGscSites,
   findMatchedGscSite,
   hasGscWritePermission,
 } from "@/lib/google-gsc-oauth";
+import {
+  probeGoogleIndexingApi,
+  resolveProjectNumberForEnable,
+} from "@/lib/google-cloud-enable-apis";
+import {
+  buildGoogleApiEnableLinks,
+  extractGoogleCloudProjectNumber,
+  maskGoogleOAuthClientId,
+} from "@/lib/google-cloud-project";
 import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
@@ -219,7 +229,50 @@ export async function GET() {
         fix: "https://search.google.com/search-console",
       });
     }
+
+    try {
+      const token = await getGoogleOAuthAccessTokenForUser(userId);
+      if (token) {
+        const probe = await probeGoogleIndexingApi(token);
+        const project = probe.projectNumber || resolveProjectNumberForEnable();
+        const links = project ? buildGoogleApiEnableLinks(project) : null;
+        steps.push({
+          id: "indexing_api",
+          label: "Web Search Indexing API",
+          status: probe.enabled ? "ok" : "fail",
+          detail: probe.enabled
+            ? "Indexing API is enabled on your Google Cloud project."
+            : probe.error?.slice(0, 180) ||
+              "Indexing API is disabled — enable it in Google Cloud Console.",
+          fix: links?.indexingApi,
+        });
+      }
+    } catch {
+      steps.push({
+        id: "indexing_api",
+        label: "Web Search Indexing API",
+        status: "skip",
+        detail: "Could not probe Indexing API.",
+      });
+    }
+  } else {
+    const cfg = getGoogleGscOAuthConfig();
+    const project = cfg ? resolveProjectNumberForEnable() : null;
+    if (project) {
+      const links = buildGoogleApiEnableLinks(project);
+      steps.push({
+        id: "indexing_api",
+        label: "Web Search Indexing API",
+        status: "skip",
+        detail: "Connect Google to verify Indexing API status.",
+        fix: links.indexingApi,
+      });
+    }
   }
+
+  const projectNumber = resolveProjectNumberForEnable();
+  const enableLinks = projectNumber ? buildGoogleApiEnableLinks(projectNumber) : null;
+  const cfg = getGoogleGscOAuthConfig();
 
   return ok({
     steps,
@@ -232,5 +285,8 @@ export async function GET() {
     gscPropertyOk,
     gscMatchedSite,
     gscSitesSample,
+    googleApiEnableLinks: enableLinks,
+    googleOAuthProjectNumber: cfg ? extractGoogleCloudProjectNumber(cfg.clientId) : null,
+    googleOAuthClientIdMasked: cfg ? maskGoogleOAuthClientId(cfg.clientId) : null,
   });
 }

@@ -17,6 +17,7 @@ const GSC_SITES = "https://www.googleapis.com/webmasters/v3/sites";
 export const GSC_OAUTH_SCOPES = [
   "https://www.googleapis.com/auth/webmasters",
   "https://www.googleapis.com/auth/indexing",
+  "https://www.googleapis.com/auth/service.management",
   "openid",
   "email",
 ].join(" ");

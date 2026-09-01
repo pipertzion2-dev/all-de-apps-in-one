@@ -3,6 +3,10 @@ import { growthContent, growthSubmissions } from "@/lib/schema";
 import { and, eq } from "drizzle-orm";
 import { runFullTrafficAutomation } from "@/lib/orbit/full-traffic-automation";
 import {
+  summarizeGoogleIndexingErrors,
+  isGoogleIndexingOwnershipError,
+} from "@/lib/google-cloud-project";
+import {
   getMarketingCredentialStatus,
   loadMarketingPlatformCredentials,
   saveLastAutopilotRun,
@@ -233,7 +237,13 @@ export async function runMarketingAutopilot(opts?: {
         ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
         : idx.googleSitemap.ok
           ? idx.googleIndexing.errorsSample.length > 0
-            ? `Indexing API errors: ${idx.googleIndexing.errorsSample.slice(0, 2).join(" · ")}`
+            ? (() => {
+                const summary = summarizeGoogleIndexingErrors(idx.googleIndexing.errorsSample);
+                if (isGoogleIndexingOwnershipError(summary)) {
+                  return `Indexing ownership: verify zzaizzai.com in Search Console as Owner, then retry. (${summary.slice(0, 120)})`;
+                }
+                return `Indexing API errors: ${summary.slice(0, 220)}`;
+              })()
             : "Sitemap registered — IndexNow + sitemap cover discovery"
           : idx.googleSitemap.error || "GSC sitemap failed — verify Owner access in Search Console";
 

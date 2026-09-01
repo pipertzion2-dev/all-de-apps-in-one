@@ -9,6 +9,8 @@ import {
   saveGoogleOAuthTokens,
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
+import { ensureGoogleIndexingApisEnabled } from "@/lib/google-cloud-enable-apis";
+import { isCanonicalGscOAuthEmail } from "@/lib/gsc-oauth-connect-url";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 import {
@@ -116,17 +118,39 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(dest);
     }
 
+    if (tokens.email && !isCanonicalGscOAuthEmail(tokens.email)) {
+      return redirectWithError(
+        req.nextUrl.origin,
+        returnPath,
+        `wrong_google_account:${tokens.email}`,
+      );
+    }
+
     await saveGoogleOAuthTokens(userId, {
       refreshToken: tokens.refreshToken,
       email: tokens.email,
     });
 
+    const apiEnable = await ensureGoogleIndexingApisEnabled(tokens.accessToken);
+
     const setup = await runGscAutoSetup({ userId, accessToken: tokens.accessToken });
 
     const dest = new URL(returnPath, req.nextUrl.origin);
     dest.searchParams.set("gsc_connected", "1");
-    if (setup.ok) dest.searchParams.set("gsc_setup", "ok");
-    else dest.searchParams.set("gsc_setup", setup.message.slice(0, 200));
+    if (setup.ok && apiEnable.ok) dest.searchParams.set("gsc_setup", "ok");
+    else if (setup.ok && !apiEnable.ok)
+      dest.searchParams.set(
+        "gsc_setup",
+        `${setup.message} · ${apiEnable.message}`.slice(0, 200),
+      );
+    else if (!setup.ok && apiEnable.ok)
+      dest.searchParams.set("gsc_setup", setup.message.slice(0, 200));
+    else
+      dest.searchParams.set(
+        "gsc_setup",
+        `${setup.message} · ${apiEnable.message}`.slice(0, 200),
+      );
+    if (!apiEnable.ok && apiEnable.needsReconnect) dest.searchParams.set("gsc_fix_apis", "1");
     return NextResponse.redirect(dest);
   } catch (e) {
     const dbMsg = formatDatabaseConnectionError(e);

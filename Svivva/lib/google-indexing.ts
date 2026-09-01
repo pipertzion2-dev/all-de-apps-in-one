@@ -133,5 +133,5 @@ export async function submitUrlsWithAccessToken(
     }
   }
 
-  return { submitted, errors };
+  return { submitted, errors: [...new Set(errors)] };
 }
