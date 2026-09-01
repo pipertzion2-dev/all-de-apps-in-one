@@ -5,7 +5,7 @@ import {
   getEasyPeasyModelFallbackChain,
   getEasyPeasyTierId,
   isEasyPeasyConfiguredFromEnv,
-} from "@/lib/easypeasy/config";
+} from "@/lib/easypeasy/runtime";
 
 /** Paid OpenAI default for Orbit marketing — override with ORBIT_AI_MODEL in env. */
 export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-5";

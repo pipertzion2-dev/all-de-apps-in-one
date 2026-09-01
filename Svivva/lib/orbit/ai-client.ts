@@ -5,7 +5,7 @@ import {
   isEasyPeasyConfiguredFromEnv,
   getEasyPeasyModel,
   getEasyPeasyModelFallbackChain,
-} from "@/lib/easypeasy/config";
+} from "@/lib/easypeasy/runtime";
 import {
   getOrbitDefaultModel,
   getOrbitModelChain,

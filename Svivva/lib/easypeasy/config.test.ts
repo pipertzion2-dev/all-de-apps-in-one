@@ -1,10 +1,7 @@
 import { describe, expect, it, afterEach } from "vitest";
-import {
-  EASYPEASY_BASE_URL,
-  isEasyPeasyActive,
-  isEasyPeasyBaseUrl,
-  mergeEasyPeasyConfig,
-} from "./config";
+import { EASYPEASY_BASE_URL } from "./constants";
+import { isEasyPeasyActive, mergeEasyPeasyConfig } from "./config";
+import { isEasyPeasyBaseUrl } from "./runtime";
 
 describe("EasyPeasy config", () => {
   afterEach(() => {
