@@ -962,7 +962,12 @@ export function OrbitOneClickLaunch({
             )}
 
             {quickStartResult.indexing && (
-              <GoogleIndexingCard indexing={quickStartResult.indexing} />
+              <GoogleIndexingCard
+                indexing={quickStartResult.indexing}
+                gscConnected={gsc.connected && gsc.propertyOk}
+                oauthReady={gsc.available}
+                onGscSaved={() => void refreshGscStatus()}
+              />
             )}
           </div>
         )}
@@ -974,7 +979,12 @@ export function OrbitOneClickLaunch({
           {/* Google & search indexing */}
           {result.indexing && (
             <div className="px-4 sm:px-5 py-4">
-              <GoogleIndexingCard indexing={result.indexing} />
+              <GoogleIndexingCard
+                indexing={result.indexing}
+                gscConnected={gsc.connected && gsc.propertyOk}
+                oauthReady={gsc.available}
+                onGscSaved={() => void refreshGscStatus()}
+              />
             </div>
           )}
 
@@ -1290,22 +1300,24 @@ function StatusPill({
   );
 }
 
-function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }) {
-  const gscOk = indexing.gscConnected && indexing.googleSitemap.ok;
+function GoogleIndexingCard({
+  indexing,
+  gscConnected: gscConnectedProp,
+  oauthReady = false,
+  onGscSaved,
+}: {
+  indexing: MarketingIndexingSummary;
+  gscConnected?: boolean;
+  oauthReady?: boolean;
+  onGscSaved?: () => void;
+}) {
+  const gscConnected = gscConnectedProp ?? indexing.gscConnected;
+  const gscOk = gscConnected && indexing.googleSitemap.ok;
   return (
     <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-xs font-black text-sky-300">Google &amp; search indexing</p>
         <div className="flex gap-1.5">
-          {!indexing.gscConnected && (
-            <a
-              href="/dashboard/gsc-connect"
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white"
-              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
-            >
-              Connect Google
-            </a>
-          )}
           <a
             href="/dashboard/gsc-connect"
             className="px-2 py-1 rounded-lg text-[10px] font-bold border border-sky-500/40 text-sky-300"
@@ -1314,6 +1326,15 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           </a>
         </div>
       </div>
+      {!gscConnected && (
+        <GscOAuthClientSavePanel
+          compact
+          oauthReady={oauthReady}
+          connectReturnTo="/dashboard/launchpad"
+          onSaved={onGscSaved}
+          data-testid="google-indexing-connect-bro"
+        />
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <IndexStat
           label="IndexNow"
@@ -1329,7 +1350,7 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           label="GSC sitemap"
           ok={gscOk}
           detail={
-            indexing.gscConnected
+            gscConnected
               ? indexing.googleSitemap.ok
                 ? "Submitted"
                 : "Failed"
@@ -1382,10 +1403,10 @@ function GoogleIndexingCard({ indexing }: { indexing: MarketingIndexingSummary }
           )}
         </div>
       )}
-      {!indexing.gscConnected && (
+      {!gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
-          Tap <strong className="text-sky-300">Connect Google</strong> — one sign-in. Orbit submits
-          your sitemap and requests indexing via Search Console (not via an LLM).
+          Tap <strong className="text-sky-300">Connect bro</strong> — one sign-in. Orbit submits your
+          sitemap and requests indexing via Search Console (not via an LLM).
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (

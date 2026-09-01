@@ -35,6 +35,7 @@ import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
+import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
 import { followOAuthLink } from "@/lib/follow-oauth-link";
 import { useToast } from "@/hooks/use-toast";
 
@@ -352,6 +353,14 @@ export default function GscConnectPage() {
                 ? "Press the orb to connect Google Search Console — AI does the rest."
                 : "Connecting will be available shortly."}
         </p>
+        {!connected && (
+          <GscOAuthClientSavePanel
+            oauthReady={oauthAvailable}
+            connectReturnTo="/dashboard/gsc-connect"
+            onSaved={() => void refetch()}
+            data-testid="gsc-connect-connect-bro"
+          />
+        )}
       </div>
 
       <div>
