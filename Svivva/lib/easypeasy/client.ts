@@ -1,10 +1,7 @@
 import OpenAI from "openai";
-import {
-  EASYPEASY_BASE_URL,
-  EASYPEASY_DEFAULT_MODEL,
-  getEasyPeasyModel,
-  type EasyPeasyConfig,
-} from "./config";
+import { EASYPEASY_BASE_URL, EASYPEASY_DEFAULT_MODEL } from "./constants";
+import type { EasyPeasyConfig } from "./config";
+import { getEasyPeasyModel } from "./runtime";
 
 export type EasyPeasyTestResult =
   { ok: true; model: string; reply: string } | { ok: false; error: string; status?: number };

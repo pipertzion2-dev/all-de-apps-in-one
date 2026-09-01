@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ExternalLink, Loader2, Sparkles } from "lucide-react";
-import { EASYPEASY_BASE_URL } from "@/lib/easypeasy/config";
+import { EASYPEASY_BASE_URL } from "@/lib/easypeasy/constants";
 import {
   EASYPEASY_SUBSCRIPTION_PLANS,
   EASYPEASY_TIERS,
