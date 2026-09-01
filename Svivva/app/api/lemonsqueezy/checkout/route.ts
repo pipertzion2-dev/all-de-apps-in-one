@@ -24,7 +24,10 @@ export async function POST(req: NextRequest) {
 
     const config = await loadLemonSqueezyConfig();
     if (!lemonSqueezyCheckoutCapable(config, parsed.data.tier)) {
-      return NextResponse.json({ error: "Lemon Squeezy is not configured for this plan" }, { status: 503 });
+      return NextResponse.json(
+        { error: "Lemon Squeezy is not configured for this plan" },
+        { status: 503 },
+      );
     }
 
     const checkout = await createLemonSqueezyCheckoutUrl(config, parsed.data.tier, {

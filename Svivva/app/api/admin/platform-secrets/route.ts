@@ -8,7 +8,11 @@ import {
 } from "@/lib/platform-runtime-secrets";
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
 import { isInterimPaymentActive, mergeInterimPaymentConfig } from "@/lib/interim-payments";
-import { isLemonSqueezyActive, lemonSqueezyCheckoutCapable, mergeLemonSqueezyConfig } from "@/lib/lemonsqueezy/config";
+import {
+  isLemonSqueezyActive,
+  lemonSqueezyCheckoutCapable,
+  mergeLemonSqueezyConfig,
+} from "@/lib/lemonsqueezy/config";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
@@ -173,7 +177,9 @@ export async function POST(request: Request) {
     if ("lemonSqueezyCheckoutUrlPro" in body)
       patch.lemonSqueezyCheckoutUrlPro = toPatchValue(body.lemonSqueezyCheckoutUrlPro);
     if ("lemonSqueezyCheckoutUrlEnterprise" in body)
-      patch.lemonSqueezyCheckoutUrlEnterprise = toPatchValue(body.lemonSqueezyCheckoutUrlEnterprise);
+      patch.lemonSqueezyCheckoutUrlEnterprise = toPatchValue(
+        body.lemonSqueezyCheckoutUrlEnterprise,
+      );
 
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });

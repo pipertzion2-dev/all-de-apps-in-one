@@ -73,14 +73,16 @@ export function isLemonSqueezyActive(config: LemonSqueezyConfig): boolean {
   return hasApiCheckout || hasUrlCheckout;
 }
 
-export function lemonSqueezyCheckoutCapable(config: LemonSqueezyConfig, tier: "pro" | "enterprise") {
+export function lemonSqueezyCheckoutCapable(
+  config: LemonSqueezyConfig,
+  tier: "pro" | "enterprise",
+) {
   if (tier === "pro") {
     return Boolean(
       config.checkoutUrlPro || (config.apiKey && config.storeId && config.variantIdPro),
     );
   }
   return Boolean(
-    config.checkoutUrlEnterprise ||
-      (config.apiKey && config.storeId && config.variantIdEnterprise),
+    config.checkoutUrlEnterprise || (config.apiKey && config.storeId && config.variantIdEnterprise),
   );
 }

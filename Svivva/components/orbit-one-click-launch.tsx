@@ -1350,11 +1350,7 @@ function GoogleIndexingCard({
           label="GSC sitemap"
           ok={gscOk}
           detail={
-            gscConnected
-              ? indexing.googleSitemap.ok
-                ? "Submitted"
-                : "Failed"
-              : "Not connected"
+            gscConnected ? (indexing.googleSitemap.ok ? "Submitted" : "Failed") : "Not connected"
           }
         />
         <IndexStat
@@ -1405,8 +1401,8 @@ function GoogleIndexingCard({
       )}
       {!gscConnected && (
         <p className="text-[9px] text-muted-foreground leading-relaxed">
-          Tap <strong className="text-sky-300">Connect bro</strong> — one sign-in. Orbit submits your
-          sitemap and requests indexing via Search Console (not via an LLM).
+          Tap <strong className="text-sky-300">Connect bro</strong> — one sign-in. Orbit submits
+          your sitemap and requests indexing via Search Console (not via an LLM).
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (

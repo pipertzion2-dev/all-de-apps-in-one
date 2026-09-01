@@ -202,9 +202,7 @@ function BillingPageContent() {
 
   const currentPlan = isPro ? "pro" : subscriptionData?.plan || "free";
   const currentPlanData = plans.find((p) => p.tier === currentPlan);
-  const stripeCheckoutReady = Boolean(
-    paymentOptions?.stripe.checkoutReady && plans[1]?.priceId,
-  );
+  const stripeCheckoutReady = Boolean(paymentOptions?.stripe.checkoutReady && plans[1]?.priceId);
   const showInterimPayments =
     !isPro &&
     (interimPayments?.active || paymentOptions?.lemonSqueezy.active) &&
