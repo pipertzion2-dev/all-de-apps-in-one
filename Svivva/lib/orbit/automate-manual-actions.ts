@@ -1,5 +1,6 @@
 import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { dedupeErrorMessages } from "@/lib/orbit/orbit-error-messages";
 import { seedCredentials } from "@/lib/schema";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import {
@@ -185,7 +186,7 @@ export async function runAutomatableManualActions(opts?: {
 
     googleIndexing.submitted = totalGiSubmitted;
     googleIndexing.batched = totalGiAttempted;
-    googleIndexing.errorsSample = allGiErrors.slice(0, 8);
+    googleIndexing.errorsSample = dedupeErrorMessages(allGiErrors).slice(0, 4);
 
     try {
       await db.execute(

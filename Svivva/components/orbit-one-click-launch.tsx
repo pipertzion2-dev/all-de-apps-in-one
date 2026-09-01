@@ -57,6 +57,7 @@ import {
   PINK_CAMO_BUTTON_STYLE,
   URRTHANG_LABEL,
 } from "@/lib/ui-pink-camo-button";
+import { dedupeErrorMessages, formatOrbitRunError } from "@/lib/orbit/orbit-error-messages";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -437,6 +438,8 @@ export function OrbitOneClickLaunch({
   const phaseTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const autoRunStarted = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const urrthangButtonRef = useRef<HTMLButtonElement>(null);
+  const [urrthangPinned, setUrrthangPinned] = useState(false);
 
   // Load last run + setup state on mount
   useEffect(() => {
@@ -473,6 +476,17 @@ export function OrbitOneClickLaunch({
     };
   }, []);
 
+  useEffect(() => {
+    const el = urrthangButtonRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setUrrthangPinned(!entry.isIntersecting),
+      { root: null, threshold: 0.15, rootMargin: "-8px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   async function runQuickStart() {
     setQuickStartRunning(true);
     setQuickStartError(null);
@@ -505,20 +519,37 @@ export function OrbitOneClickLaunch({
     phaseTimers.current.forEach(clearTimeout);
     phaseTimers.current = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 9_000));
     try {
-      const ensureRes = await authFetch("/api/easypeasy/ensure", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: "premium", testConnection: true }),
-      });
-      const ensureJson = (await ensureRes.json()) as {
-        ok?: boolean;
-        error?: string;
-        tierId?: string;
-        model?: string;
-        providerLabel?: string;
-        marketingModel?: string;
-        testReply?: string;
-      };
+      async function ensureEasyPeasy(
+        tier?: "standard" | "balanced" | "premium",
+        forceTier?: boolean,
+      ) {
+        const res = await authFetch("/api/easypeasy/ensure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...(tier ? { tier, forceTier: !!forceTier } : {}),
+            testConnection: true,
+          }),
+        });
+        return {
+          res,
+          json: (await res.json()) as {
+            ok?: boolean;
+            error?: string;
+            tierId?: string;
+            model?: string;
+            providerLabel?: string;
+            marketingModel?: string;
+          },
+        };
+      }
+
+      let { res: ensureRes, json: ensureJson } = await ensureEasyPeasy();
+      const wordLimit =
+        !ensureJson.ok && /allowed words|word limit|429/i.test(String(ensureJson.error || ""));
+      if (wordLimit) {
+        ({ res: ensureRes, json: ensureJson } = await ensureEasyPeasy("standard", true));
+      }
       if (!ensureRes.ok || !ensureJson.ok) {
         throw new Error(
           ensureJson.error ||
@@ -700,6 +731,7 @@ export function OrbitOneClickLaunch({
 
         {/* urrthang — primary all-in-one control */}
         <button
+          ref={urrthangButtonRef}
           type="button"
           onClick={run}
           disabled={running || quickStartRunning}
@@ -927,12 +959,35 @@ export function OrbitOneClickLaunch({
         )}
 
         {/* Error */}
-        {error && !running && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 flex items-start gap-2 text-xs text-red-300">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            {error}
-          </div>
-        )}
+        {error &&
+          !running &&
+          (() => {
+            const formatted = formatOrbitRunError(error);
+            return (
+              <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-3 space-y-2">
+                <div className="flex items-start gap-2 text-xs text-red-200">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-red-100">{formatted.title}</p>
+                    <p className="mt-1 leading-relaxed">{formatted.detail}</p>
+                  </div>
+                </div>
+                {formatted.actions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pl-6">
+                    {formatted.actions.map((a) => (
+                      <Link
+                        key={a.href}
+                        href={a.href}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-md border border-red-400/40 text-red-100 hover:bg-red-500/15"
+                      >
+                        {a.label} →
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
         {quickStartError && !quickStartRunning && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 flex items-start gap-2 text-xs text-red-300">
@@ -1166,6 +1221,21 @@ export function OrbitOneClickLaunch({
             Weekly cron runs every Monday 8am — re-submits all URLs and fills content gaps
             automatically.
           </span>
+        </div>
+      )}
+
+      {urrthangPinned && !running && (
+        <div className="sticky bottom-3 z-20 px-4 sm:px-5 pb-1">
+          <button
+            type="button"
+            onClick={run}
+            disabled={quickStartRunning}
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm shadow-lg ${PINK_CAMO_BUTTON_CLASS}`}
+            style={PINK_CAMO_BUTTON_STYLE}
+            aria-label={`${URRTHANG_LABEL} — scroll back up or tap to run`}
+          >
+            <Rocket className="w-4 h-4" /> {URRTHANG_LABEL}
+          </button>
         </div>
       )}
     </div>
@@ -1446,8 +1516,8 @@ function GoogleIndexingCard({
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (
-        <p className="text-[9px] text-amber-400/90">
-          Sample: {indexing.googleIndexing.errorsSample.slice(0, 2).join(" · ")}
+        <p className="text-[9px] text-amber-400/90 leading-relaxed">
+          {dedupeErrorMessages(indexing.googleIndexing.errorsSample).slice(0, 1).join(" ")}
         </p>
       )}
     </div>

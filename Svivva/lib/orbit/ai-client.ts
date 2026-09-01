@@ -26,6 +26,14 @@ export {
 
 function isRetryableModelError(e: unknown): boolean {
   const msg = String(e instanceof Error ? e.message : e).toLowerCase();
+  if (
+    msg.includes("429") ||
+    msg.includes("rate limit") ||
+    msg.includes("allowed words") ||
+    (msg.includes("limit") && msg.includes("plan"))
+  ) {
+    return true;
+  }
   return (
     msg.includes("model") &&
     (msg.includes("not found") ||
