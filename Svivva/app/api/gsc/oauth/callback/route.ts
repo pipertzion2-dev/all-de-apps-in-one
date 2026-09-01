@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { oauthStates, seedCredentials } from "@/lib/schema";
+import { oauthStates } from "@/lib/schema";
 import {
   ensureOAuthStatesTable,
   exchangeGoogleOAuthCode,
@@ -14,6 +14,8 @@ import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 import {
   formatDatabaseConnectionError,
   isDatabaseConnectionError,
+  isMissingSeedCredentialsTableError,
+  missingSeedCredentialsTableMessage,
 } from "@/lib/db-connection-error";
 
 export const dynamic = "force-dynamic";
@@ -118,15 +120,6 @@ export async function GET(req: NextRequest) {
       email: tokens.email,
     });
 
-    const [existing] = await db
-      .select({ id: seedCredentials.id })
-      .from(seedCredentials)
-      .where(eq(seedCredentials.userId, userId))
-      .limit(1);
-    if (!existing) {
-      await db.insert(seedCredentials).values({ userId, updatedAt: new Date() });
-    }
-
     const setup = await runGscAutoSetup({ userId, accessToken: tokens.accessToken });
 
     const dest = new URL(returnPath, req.nextUrl.origin);
@@ -138,6 +131,13 @@ export async function GET(req: NextRequest) {
     const dbMsg = formatDatabaseConnectionError(e);
     if (dbMsg) {
       return redirectWithError(req.nextUrl.origin, returnPath, "database_unavailable");
+    }
+    if (isMissingSeedCredentialsTableError(e)) {
+      return redirectWithError(
+        req.nextUrl.origin,
+        returnPath,
+        missingSeedCredentialsTableMessage(),
+      );
     }
     const dest = new URL(returnPath, req.nextUrl.origin);
     dest.searchParams.set("gsc_error", String(e).slice(0, 180));

@@ -19,7 +19,12 @@ import {
   hydratePlatformSecrets,
   patchPlatformRuntimeSecrets,
 } from "@/lib/platform-runtime-secrets";
-import { formatDatabaseConnectionError } from "@/lib/db-connection-error";
+import {
+  formatDatabaseConnectionError,
+  isMissingSeedCredentialsTableError,
+  missingSeedCredentialsTableMessage,
+} from "@/lib/db-connection-error";
+import { ensureSeedCredentialsRow } from "@/lib/seed-credentials-table";
 
 export const dynamic = "force-dynamic";
 
@@ -124,13 +129,15 @@ export async function POST(req: NextRequest) {
 
     const userId = await resolveGscCredentialsUserId();
 
-    const [existing] = await db
-      .select({ id: seedCredentials.id })
-      .from(seedCredentials)
-      .where(eq(seedCredentials.userId, userId))
-      .limit(1);
-    if (!existing) {
-      await db.insert(seedCredentials).values({ userId, updatedAt: new Date() });
+    try {
+      await ensureSeedCredentialsRow(userId);
+    } catch (e: unknown) {
+      if (isMissingSeedCredentialsTableError(e)) {
+        return serverError(missingSeedCredentialsTableMessage());
+      }
+      const dbMsg = formatDatabaseConnectionError(e);
+      if (dbMsg) return serverError(dbMsg);
+      throw e;
     }
 
     // Re-match GSC property + submit sitemap (OAuth — no re-sign-in)
