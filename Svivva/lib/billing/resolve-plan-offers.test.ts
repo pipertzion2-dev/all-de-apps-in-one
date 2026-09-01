@@ -1,46 +1,56 @@
 import { describe, expect, it } from "vitest";
 import { resolveBillingPlanOffers } from "./resolve-plan-offers";
 
+const emptyInterim = {
+  stripePaymentLinkStarter: null,
+  stripePaymentLinkPro: null,
+  stripePaymentLinkEnterprise: null,
+  paypalUrlStarter: null,
+  paypalUrlPro: null,
+  paypalUrl: null,
+  venmoUrlStarter: null,
+  venmoUrlPro: null,
+  venmoUrl: null,
+  cashAppUrlStarter: null,
+  cashAppUrlPro: null,
+  zelleContact: null,
+  note: null,
+};
+
 describe("resolveBillingPlanOffers", () => {
-  it("prefers Lemon Squeezy when configured", () => {
+  it("enables Venmo checkout per tier", () => {
     const plans = resolveBillingPlanOffers({
-      stripeProducts: [],
       interim: {
-        stripePaymentLinkStarter: null,
-        stripePaymentLinkPro: null,
-        stripePaymentLinkEnterprise: null,
-        paypalUrl: null,
-        venmoUrl: null,
-        note: null,
+        ...emptyInterim,
+        venmoUrlStarter: "https://venmo.com/u/starter",
+        venmoUrlPro: "https://venmo.com/u/pro",
       },
-      stripeCheckoutReady: true,
-      lemonStarter: true,
-      lemonPro: true,
     });
 
     const starter = plans.find((p) => p.tier === "starter");
     const pro = plans.find((p) => p.tier === "pro");
-    expect(starter?.checkoutProvider).toBe("lemonsqueezy");
-    expect(pro?.checkoutProvider).toBe("lemonsqueezy");
-    expect(starter?.checkoutAvailable).toBe(true);
+    expect(starter?.checkoutProvider).toBe("venmo");
+    expect(pro?.checkoutProvider).toBe("venmo");
+    expect(starter?.paymentLink).toContain("starter");
+    expect(pro?.paymentLink).toContain("pro");
   });
 
-  it("enables checkout when payment links exist", () => {
+  it("falls back to Cash App when Venmo missing", () => {
     const plans = resolveBillingPlanOffers({
-      stripeProducts: [],
       interim: {
-        stripePaymentLinkStarter: "https://buy.stripe.com/starter",
-        stripePaymentLinkPro: "https://buy.stripe.com/pro",
-        stripePaymentLinkEnterprise: "https://buy.stripe.com/starter",
-        paypalUrl: null,
-        venmoUrl: null,
-        note: null,
+        ...emptyInterim,
+        cashAppUrlStarter: "https://cash.app/$tag/20",
       },
-      stripeCheckoutReady: false,
     });
 
     const starter = plans.find((p) => p.tier === "starter");
-    expect(starter?.checkoutProvider).toBe("link");
-    expect(starter?.paymentLink).toContain("starter");
+    expect(starter?.checkoutProvider).toBe("cashapp");
+    expect(starter?.checkoutAvailable).toBe(true);
+  });
+
+  it("free tier has no checkout", () => {
+    const plans = resolveBillingPlanOffers({ interim: emptyInterim });
+    const free = plans.find((p) => p.tier === "free");
+    expect(free?.checkoutAvailable).toBe(false);
   });
 });

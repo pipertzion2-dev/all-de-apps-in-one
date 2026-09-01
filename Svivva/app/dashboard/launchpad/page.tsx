@@ -4718,8 +4718,8 @@ export default function LaunchpadPage() {
             {/* Growth Intelligence tab */}
             {tab === "stripe" && (
               <div className="space-y-4">
-                <OrbitLemonSqueezySetup />
                 <OrbitInterimPaymentsSetup />
+                <OrbitLemonSqueezySetup />
                 <OrbitStripeSetup onConfiguredChange={() => void refetchStatus()} />
                 <div className="rounded-xl border border-border bg-muted/20 px-3 py-3 text-xs text-muted-foreground space-y-2">
                   <p className="font-semibold text-foreground">After keys are saved</p>

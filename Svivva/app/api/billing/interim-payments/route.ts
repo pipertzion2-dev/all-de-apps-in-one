@@ -4,17 +4,19 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-/** Public interim payment links (Stripe Payment Link, PayPal, etc.). */
+/** Public direct-pay links (Venmo, Cash App, Zelle). */
 export async function GET() {
   try {
     const row = await getPlatformRuntimeSecretsRow();
     const config = mergeInterimPaymentConfig(
       row
         ? {
-            stripePaymentLinkPro: row.interimStripePaymentLinkPro,
-            stripePaymentLinkEnterprise: row.interimStripePaymentLinkEnterprise,
-            paypalUrl: row.interimPaypalUrl,
+            venmoUrlStarter: row.interimVenmoUrlStarter,
+            venmoUrlPro: row.interimVenmoUrlPro,
             venmoUrl: row.interimVenmoUrl,
+            cashAppUrlStarter: row.interimCashAppUrlStarter,
+            cashAppUrlPro: row.interimCashAppUrlPro,
+            zelleContact: row.interimZelleContact,
             note: row.interimPaymentNote,
           }
         : null,

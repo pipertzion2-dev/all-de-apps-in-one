@@ -7,7 +7,11 @@ import {
   runtimeSecretColdStart,
 } from "@/lib/platform-runtime-secrets";
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
-import { isInterimPaymentActive, mergeInterimPaymentConfig } from "@/lib/interim-payments";
+import {
+  isDirectPayActive,
+  isInterimPaymentActive,
+  mergeInterimPaymentConfig,
+} from "@/lib/interim-payments";
 import {
   isLemonSqueezyActive,
   lemonSqueezyCheckoutCapable,
@@ -37,8 +41,12 @@ const patchSchema = z
     nextPublicSiteUrl: z.string().optional(),
     interimStripePaymentLinkPro: z.string().optional(),
     interimStripePaymentLinkEnterprise: z.string().optional(),
-    interimPaypalUrl: z.string().optional(),
+    interimVenmoUrlStarter: z.string().optional(),
+    interimVenmoUrlPro: z.string().optional(),
     interimVenmoUrl: z.string().optional(),
+    interimCashAppUrlStarter: z.string().optional(),
+    interimCashAppUrlPro: z.string().optional(),
+    interimZelleContact: z.string().optional(),
     interimPaymentNote: z.string().optional(),
     lemonSqueezyApiKey: z.string().optional(),
     lemonSqueezyStoreId: z.string().optional(),
@@ -68,10 +76,12 @@ export async function GET() {
     const interim = mergeInterimPaymentConfig(
       row
         ? {
-            stripePaymentLinkPro: row.interimStripePaymentLinkPro,
-            stripePaymentLinkEnterprise: row.interimStripePaymentLinkEnterprise,
-            paypalUrl: row.interimPaypalUrl,
+            venmoUrlStarter: row.interimVenmoUrlStarter,
+            venmoUrlPro: row.interimVenmoUrlPro,
             venmoUrl: row.interimVenmoUrl,
+            cashAppUrlStarter: row.interimCashAppUrlStarter,
+            cashAppUrlPro: row.interimCashAppUrlPro,
+            zelleContact: row.interimZelleContact,
             note: row.interimPaymentNote,
           }
         : null,
@@ -113,8 +123,12 @@ export async function GET() {
         siteUrl: !!row?.nextPublicSiteUrl?.trim(),
         interimStripePaymentLinkPro: !!row?.interimStripePaymentLinkPro?.trim(),
         interimStripePaymentLinkEnterprise: !!row?.interimStripePaymentLinkEnterprise?.trim(),
-        interimPaypalUrl: !!row?.interimPaypalUrl?.trim(),
+        interimVenmoUrlStarter: !!row?.interimVenmoUrlStarter?.trim(),
+        interimVenmoUrlPro: !!row?.interimVenmoUrlPro?.trim(),
         interimVenmoUrl: !!row?.interimVenmoUrl?.trim(),
+        interimCashAppUrlStarter: !!row?.interimCashAppUrlStarter?.trim(),
+        interimCashAppUrlPro: !!row?.interimCashAppUrlPro?.trim(),
+        interimZelleContact: !!row?.interimZelleContact?.trim(),
         lemonSqueezyApiKey: !!row?.lemonSqueezyApiKey?.trim(),
         lemonSqueezyStoreId: !!row?.lemonSqueezyStoreId?.trim(),
         lemonSqueezyVariantIdPro: !!row?.lemonSqueezyVariantIdPro?.trim(),
@@ -137,10 +151,13 @@ export async function GET() {
       },
       interim: {
         active: isInterimPaymentActive(interim),
-        stripePaymentLinkPro: !!interim.stripePaymentLinkPro,
-        stripePaymentLinkEnterprise: !!interim.stripePaymentLinkEnterprise,
-        paypalUrl: !!interim.paypalUrl,
+        directPayActive: isDirectPayActive(interim),
+        venmoUrlStarter: !!interim.venmoUrlStarter,
+        venmoUrlPro: !!interim.venmoUrlPro,
         venmoUrl: !!interim.venmoUrl,
+        cashAppUrlStarter: !!interim.cashAppUrlStarter,
+        cashAppUrlPro: !!interim.cashAppUrlPro,
+        zelleContact: !!interim.zelleContact,
       },
       lemonSqueezy: {
         active: isLemonSqueezyActive(lemonConfig),
@@ -207,8 +224,17 @@ export async function POST(request: Request) {
       patch.interimStripePaymentLinkEnterprise = toPatchValue(
         body.interimStripePaymentLinkEnterprise,
       );
-    if ("interimPaypalUrl" in body) patch.interimPaypalUrl = toPatchValue(body.interimPaypalUrl);
+    if ("interimVenmoUrlStarter" in body)
+      patch.interimVenmoUrlStarter = toPatchValue(body.interimVenmoUrlStarter);
+    if ("interimVenmoUrlPro" in body)
+      patch.interimVenmoUrlPro = toPatchValue(body.interimVenmoUrlPro);
     if ("interimVenmoUrl" in body) patch.interimVenmoUrl = toPatchValue(body.interimVenmoUrl);
+    if ("interimCashAppUrlStarter" in body)
+      patch.interimCashAppUrlStarter = toPatchValue(body.interimCashAppUrlStarter);
+    if ("interimCashAppUrlPro" in body)
+      patch.interimCashAppUrlPro = toPatchValue(body.interimCashAppUrlPro);
+    if ("interimZelleContact" in body)
+      patch.interimZelleContact = toPatchValue(body.interimZelleContact);
     if ("interimPaymentNote" in body)
       patch.interimPaymentNote = toPatchValue(body.interimPaymentNote);
     if ("lemonSqueezyApiKey" in body)

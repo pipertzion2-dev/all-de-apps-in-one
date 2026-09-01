@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Check, CreditCard, Loader2, ExternalLink } from "lucide-react";
+import { Check, CreditCard, Loader2, ExternalLink, Wallet } from "lucide-react";
 import { trackUpgrade } from "@/lib/analytics";
 import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePlan, type Plan } from "@/hooks/use-plan";
@@ -16,10 +16,10 @@ import type { ResolvedBillingPlan } from "@/lib/billing/resolve-plan-offers";
 type PlansResponse = {
   plans: ResolvedBillingPlan[];
   paymentOptions: {
-    stripe: { checkoutReady: boolean; configured: boolean; detail: string };
-    lemonSqueezy: { active: boolean; starter: boolean; pro: boolean };
-    interimActive: boolean;
+    directPayActive: boolean;
     preferredProvider: string | null;
+    stripe: { checkoutReady: boolean; configured: boolean; detail: string };
+    interim: { active: boolean; note: string | null; zelleContact: string | null };
   };
 };
 
@@ -60,55 +60,15 @@ function BillingPageContent() {
   });
 
   const plans = plansData?.plans ?? [];
+  const directPayActive = Boolean(plansData?.paymentOptions.directPayActive);
   const stripeCheckoutReady = Boolean(plansData?.paymentOptions.stripe.checkoutReady);
-  const lemonActive = Boolean(plansData?.paymentOptions.lemonSqueezy?.active);
-  const interimActive = Boolean(plansData?.paymentOptions.interimActive);
+  const stripeConfigured = Boolean(plansData?.paymentOptions.stripe.configured);
+  const zelleContact = plansData?.paymentOptions.interim.zelleContact ?? null;
+  const payNote = plansData?.paymentOptions.interim.note ?? null;
 
   const currentPlan =
     (isPro ? currentPlanTier : (subscriptionData?.plan as Plan | undefined)) ?? "free";
   const currentPlanData = plans.find((p) => p.tier === currentPlan) ?? plans[0];
-
-  const hostedCheckoutMutation = useMutation({
-    mutationFn: async ({ priceId, tier }: { priceId: string; tier: string }) => {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ priceId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Checkout failed");
-      return data as { url: string };
-    },
-    onSuccess: (data) => {
-      if (data.url) window.location.href = data.url;
-    },
-    onError: (error: Error) => {
-      toast({ title: "Checkout error", description: error.message, variant: "destructive" });
-      setLoadingPlan(null);
-    },
-  });
-
-  const lemonCheckoutMutation = useMutation({
-    mutationFn: async (tier: "starter" | "pro") => {
-      const res = await fetch("/api/lemonsqueezy/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ tier }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Checkout failed");
-      return data as { url: string };
-    },
-    onSuccess: (data) => {
-      if (data.url) window.location.href = data.url;
-    },
-    onError: (error: Error) => {
-      toast({ title: "Checkout error", description: error.message, variant: "destructive" });
-      setLoadingPlan(null);
-    },
-  });
 
   const portalMutation = useMutation({
     mutationFn: async () => {
@@ -135,40 +95,28 @@ function BillingPageContent() {
     setLoadingPlan(plan.name);
     trackUpgrade(plan.tier);
 
-    if (
-      plan.checkoutProvider === "lemonsqueezy" &&
-      (plan.tier === "starter" || plan.tier === "pro")
-    ) {
-      lemonCheckoutMutation.mutate(plan.tier);
-      return;
-    }
-
-    if (plan.checkoutProvider === "stripe" && plan.priceId) {
-      hostedCheckoutMutation.mutate({ priceId: plan.priceId, tier: plan.tier });
-      return;
-    }
-
-    if (plan.checkoutProvider === "link" && plan.paymentLink) {
+    if (plan.paymentLink) {
       window.open(plan.paymentLink, "_blank", "noopener,noreferrer");
+      toast({
+        title: "Complete payment in the new tab",
+        description:
+          "After paying, enter your access code above or email hello@zzaizzai.com with your receipt.",
+      });
       setLoadingPlan(null);
       return;
     }
 
     setLoadingPlan(null);
     toast({
-      title: "Checkout not configured",
-      description:
-        "Add Lemon Squeezy checkout URLs in Orbit admin (Launchpad → Lemon Squeezy), or Stripe keys in Vercel.",
+      title: "Payment link not configured yet",
+      description: "Ask the site admin to add Venmo or Cash App links in Orbit Launchpad.",
       variant: "destructive",
     });
   };
 
   const checkoutLabel = (plan: ResolvedBillingPlan) => {
-    if (plan.checkoutProvider === "lemonsqueezy") {
-      return `Subscribe — ${plan.priceLabel}/mo`;
-    }
-    if (plan.checkoutProvider === "stripe") return `Subscribe — ${plan.priceLabel}/mo`;
-    if (plan.checkoutProvider === "link") return `Pay — ${plan.priceLabel}/mo`;
+    if (plan.checkoutProvider === "venmo") return `Pay with Venmo — ${plan.priceLabel}/mo`;
+    if (plan.checkoutProvider === "cashapp") return `Pay with Cash App — ${plan.priceLabel}/mo`;
     return "Setup required";
   };
 
@@ -176,34 +124,58 @@ function BillingPageContent() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="text-muted-foreground">
-          Starter $20/mo · Pro $50/mo — powered by Lemon Squeezy or Stripe
-        </p>
+        <p className="text-muted-foreground">Starter $20/mo · Pro $50/mo</p>
       </div>
 
       {!isMembershipAccess && !isPro && (
         <AdminCodeForm
           title="Have an access code?"
-          description="Enter your access code to unlock Pro without a subscription."
+          description="After you pay (Venmo, Cash App, or Zelle), enter the access code we send you to unlock your plan."
         />
       )}
 
-      {lemonActive && (
-        <Card className="border border-lime-500/35 bg-lime-500/5">
-          <CardContent className="pt-4 text-sm text-foreground">
-            Lemon Squeezy checkout is live — pick Starter ($20) or Pro ($50) below.
+      {stripeConfigured && !stripeCheckoutReady && !isPro && (
+        <Card className="border border-amber-500/30 bg-amber-500/5">
+          <CardContent className="pt-4 text-sm text-muted-foreground">
+            <strong className="text-foreground">Stripe is still verifying.</strong> Card checkout
+            will turn on automatically once your account is approved. Until then, pay with Venmo or
+            Cash App below, then use your access code.
           </CardContent>
         </Card>
       )}
 
-      {!lemonActive && !stripeCheckoutReady && !interimActive && !isPro && (
-        <Card className="border border-amber-500/30 bg-amber-500/5">
-          <CardContent className="pt-4 text-sm text-muted-foreground">
-            To enable checkout, paste Lemon Squeezy URLs in Orbit admin →{" "}
-            <strong className="text-foreground">Lemon Squeezy</strong> (Starter $20 + Pro $50), or
-            set Stripe / payment link env vars in Vercel.
+      {directPayActive && !isPro && (
+        <Card className="border border-emerald-500/35 bg-emerald-500/5">
+          <CardContent className="pt-4 text-sm text-foreground flex items-start gap-2">
+            <Wallet className="h-4 w-4 mt-0.5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+            <span>
+              Direct pay is live — choose Starter ($20) or Pro ($50), pay in the app that opens,
+              then redeem your access code.
+              {zelleContact ? (
+                <>
+                  {" "}
+                  Zelle: <strong>{zelleContact}</strong>
+                </>
+              ) : null}
+            </span>
           </CardContent>
         </Card>
+      )}
+
+      {!directPayActive && !stripeCheckoutReady && !isPro && (
+        <Card className="border border-amber-500/30 bg-amber-500/5">
+          <CardContent className="pt-4 text-sm text-muted-foreground">
+            Checkout isn&apos;t wired yet. In Orbit Launchpad →{" "}
+            <strong className="text-foreground">Direct Pay</strong>, paste Venmo links for $20 and
+            $50 (or Cash App / Zelle).
+          </CardContent>
+        </Card>
+      )}
+
+      {payNote && directPayActive && (
+        <p className="text-sm text-muted-foreground border border-border rounded-lg px-3 py-2">
+          {payNote}
+        </p>
       )}
 
       <Card>
@@ -275,7 +247,7 @@ function BillingPageContent() {
                       {loadingPlan === plan.name ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          Processing…
+                          Opening…
                         </>
                       ) : isCurrent ? (
                         "Current Plan"
@@ -284,9 +256,7 @@ function BillingPageContent() {
                       ) : (
                         <>
                           {checkoutLabel(plan)}
-                          {plan.paymentLink && !stripeCheckoutReady ? (
-                            <ExternalLink className="w-3.5 h-3.5 ml-1" />
-                          ) : null}
+                          {plan.paymentLink ? <ExternalLink className="w-3.5 h-3.5 ml-1" /> : null}
                         </>
                       )}
                     </Button>
@@ -301,7 +271,11 @@ function BillingPageContent() {
       <Card>
         <CardHeader>
           <CardTitle>Payment Method</CardTitle>
-          <CardDescription>Manage cards and invoices in the billing portal</CardDescription>
+          <CardDescription>
+            {stripeCheckoutReady
+              ? "Manage cards and invoices in the billing portal"
+              : "Card billing activates when Stripe verification completes"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
@@ -312,14 +286,18 @@ function BillingPageContent() {
               <p className="text-sm text-muted-foreground">
                 {subscriptionData?.subscription
                   ? "Manage your payment method in the billing portal"
-                  : "No payment method on file"}
+                  : stripeCheckoutReady
+                    ? "No payment method on file"
+                    : "Stripe verifying — use direct pay above for now"}
               </p>
             </div>
             <Button
               variant="outline"
               data-testid="button-manage-billing"
               onClick={() => portalMutation.mutate()}
-              disabled={portalMutation.isPending || !subscriptionData?.subscription}
+              disabled={
+                portalMutation.isPending || !subscriptionData?.subscription || !stripeCheckoutReady
+              }
             >
               {portalMutation.isPending ? (
                 <>

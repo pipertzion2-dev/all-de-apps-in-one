@@ -9,13 +9,24 @@ import { Loader2, Wallet, ExternalLink } from "lucide-react";
 
 type InterimStatus = {
   stored: {
-    interimStripePaymentLinkPro: boolean;
-    interimStripePaymentLinkEnterprise: boolean;
-    interimPaypalUrl: boolean;
+    interimVenmoUrlStarter: boolean;
+    interimVenmoUrlPro: boolean;
     interimVenmoUrl: boolean;
+    interimCashAppUrlStarter: boolean;
+    interimCashAppUrlPro: boolean;
+    interimZelleContact: boolean;
   };
   interim: {
     active: boolean;
+    directPayActive: boolean;
+    venmoUrlStarter: boolean;
+    venmoUrlPro: boolean;
+    venmoUrl: boolean;
+  };
+  stripeReady: {
+    checkoutReady: boolean;
+    configured: boolean;
+    detail: string;
   };
 };
 
@@ -25,10 +36,11 @@ export function OrbitInterimPaymentsSetup() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const [stripeLinkPro, setStripeLinkPro] = useState("");
-  const [stripeLinkEnterprise, setStripeLinkEnterprise] = useState("");
-  const [paypalUrl, setPaypalUrl] = useState("");
-  const [venmoUrl, setVenmoUrl] = useState("");
+  const [venmoStarter, setVenmoStarter] = useState("");
+  const [venmoPro, setVenmoPro] = useState("");
+  const [cashAppStarter, setCashAppStarter] = useState("");
+  const [cashAppPro, setCashAppPro] = useState("");
+  const [zelleContact, setZelleContact] = useState("");
   const [note, setNote] = useState("");
 
   const load = useCallback(async () => {
@@ -54,15 +66,15 @@ export function OrbitInterimPaymentsSetup() {
     setSaving(true);
     try {
       const body: Record<string, string> = {};
-      if (stripeLinkPro.trim()) body.interimStripePaymentLinkPro = stripeLinkPro.trim();
-      if (stripeLinkEnterprise.trim())
-        body.interimStripePaymentLinkEnterprise = stripeLinkEnterprise.trim();
-      if (paypalUrl.trim()) body.interimPaypalUrl = paypalUrl.trim();
-      if (venmoUrl.trim()) body.interimVenmoUrl = venmoUrl.trim();
+      if (venmoStarter.trim()) body.interimVenmoUrlStarter = venmoStarter.trim();
+      if (venmoPro.trim()) body.interimVenmoUrlPro = venmoPro.trim();
+      if (cashAppStarter.trim()) body.interimCashAppUrlStarter = cashAppStarter.trim();
+      if (cashAppPro.trim()) body.interimCashAppUrlPro = cashAppPro.trim();
+      if (zelleContact.trim()) body.interimZelleContact = zelleContact.trim();
       if (note.trim()) body.interimPaymentNote = note.trim();
 
       if (Object.keys(body).length === 0) {
-        setMessage("Paste at least one payment link, then save.");
+        setMessage("Paste at least one Venmo/Cash App link or Zelle contact, then save.");
         setSaving(false);
         return;
       }
@@ -75,12 +87,13 @@ export function OrbitInterimPaymentsSetup() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j.error || res.statusText);
 
-      setStripeLinkPro("");
-      setStripeLinkEnterprise("");
-      setPaypalUrl("");
-      setVenmoUrl("");
+      setVenmoStarter("");
+      setVenmoPro("");
+      setCashAppStarter("");
+      setCashAppPro("");
+      setZelleContact("");
       setNote("");
-      setMessage("Saved — customers see these on Billing while Stripe verifies.");
+      setMessage("Saved — Billing page shows these while Stripe verifies.");
       await load();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : String(e));
@@ -89,20 +102,21 @@ export function OrbitInterimPaymentsSetup() {
     }
   };
 
-  const active = status?.interim.active;
+  const active = status?.interim.directPayActive ?? status?.interim.active;
+  const stripePending = status?.stripeReady?.configured && !status?.stripeReady?.checkoutReady;
 
   return (
     <div
-      className="rounded-2xl border-2 border-amber-500/35 bg-gradient-to-br from-amber-500/8 to-transparent p-4 space-y-4"
+      className="rounded-2xl border-2 border-emerald-500/35 bg-gradient-to-br from-emerald-500/8 to-transparent p-4 space-y-4"
       data-testid="orbit-interim-payments-setup"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10">
-          <Wallet className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+          <Wallet className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-bold text-sm tracking-tight">Get paid while Stripe verifies</h3>
+            <h3 className="font-bold text-sm tracking-tight">Direct Pay — while Stripe verifies</h3>
             {status && (
               <span
                 className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
@@ -116,18 +130,28 @@ export function OrbitInterimPaymentsSetup() {
             )}
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Stripe account still verifying? Create a{" "}
+            {stripePending
+              ? "Your Stripe account isn't fully verified yet — customers can pay via Venmo or Cash App and redeem an access code."
+              : "No card processor needed. Add Venmo or Cash App payment links for Starter ($20) and Pro ($50). After payment, send customers an access code."}{" "}
             <a
-              href="https://dashboard.stripe.com/payment-links"
+              href="https://venmo.com/account/sign-in"
               target="_blank"
               rel="noopener noreferrer"
               className="underline text-foreground inline-flex items-center gap-0.5"
             >
-              Payment Link
+              Venmo
               <ExternalLink className="h-3 w-3" />
             </a>{" "}
-            for ZZAI Pro ($49/mo) — it often works before full verification. Add PayPal or Venmo
-            too. After payment, grant Pro via access code on Billing.
+            ·{" "}
+            <a
+              href="https://cash.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-foreground inline-flex items-center gap-0.5"
+            >
+              Cash App
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </p>
         </div>
       </div>
@@ -139,63 +163,82 @@ export function OrbitInterimPaymentsSetup() {
       )}
 
       <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Stripe Payment Link — Pro ($50/mo)</Label>
-          <Input
-            type="text"
-            inputMode="url"
-            autoComplete="off"
-            placeholder={
-              status?.stored.interimStripePaymentLinkPro
-                ? "https://buy.stripe.com/… (saved — paste to replace)"
-                : "https://buy.stripe.com/…"
-            }
-            value={stripeLinkPro}
-            onChange={(e) => setStripeLinkPro(e.target.value)}
-            className="h-9 text-xs font-mono"
-            data-testid="interim-stripe-pro-link"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Stripe Payment Link — Starter ($20/mo)</Label>
-          <Input
-            type="text"
-            inputMode="url"
-            autoComplete="off"
-            placeholder="https://buy.stripe.com/…"
-            value={stripeLinkEnterprise}
-            onChange={(e) => setStripeLinkEnterprise(e.target.value)}
-            className="h-9 text-xs font-mono"
-          />
-        </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className="text-xs">PayPal link</Label>
+            <Label className="text-xs">Venmo — Starter ($20/mo)</Label>
             <Input
               type="text"
               inputMode="url"
               autoComplete="off"
               placeholder={
-                status?.stored.interimPaypalUrl
-                  ? "https://paypal.me/… (saved)"
-                  : "https://paypal.me/yourname"
+                status?.stored.interimVenmoUrlStarter || status?.stored.interimVenmoUrl
+                  ? "https://venmo.com/… (saved — paste to replace)"
+                  : "https://venmo.com/u/yourname"
               }
-              value={paypalUrl}
-              onChange={(e) => setPaypalUrl(e.target.value)}
+              value={venmoStarter}
+              onChange={(e) => setVenmoStarter(e.target.value)}
+              className="h-9 text-xs font-mono"
+              data-testid="interim-venmo-starter"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Venmo — Pro ($50/mo)</Label>
+            <Input
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              placeholder={
+                status?.stored.interimVenmoUrlPro
+                  ? "https://venmo.com/… (saved)"
+                  : "https://venmo.com/u/yourname"
+              }
+              value={venmoPro}
+              onChange={(e) => setVenmoPro(e.target.value)}
+              className="h-9 text-xs font-mono"
+              data-testid="interim-venmo-pro"
+            />
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Cash App — Starter ($20/mo) optional</Label>
+            <Input
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              placeholder="https://cash.app/$yourtag/20"
+              value={cashAppStarter}
+              onChange={(e) => setCashAppStarter(e.target.value)}
               className="h-9 text-xs font-mono"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">Venmo link (optional)</Label>
+            <Label className="text-xs">Cash App — Pro ($50/mo) optional</Label>
             <Input
-              type="url"
+              type="text"
               inputMode="url"
-              placeholder="https://venmo.com/…"
-              value={venmoUrl}
-              onChange={(e) => setVenmoUrl(e.target.value)}
+              autoComplete="off"
+              placeholder="https://cash.app/$yourtag/50"
+              value={cashAppPro}
+              onChange={(e) => setCashAppPro(e.target.value)}
               className="h-9 text-xs font-mono"
             />
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Zelle email or phone (shown on Billing)</Label>
+          <Input
+            type="text"
+            autoComplete="off"
+            placeholder={
+              status?.stored.interimZelleContact
+                ? "Saved — paste to replace"
+                : "you@email.com or +1 555…"
+            }
+            value={zelleContact}
+            onChange={(e) => setZelleContact(e.target.value)}
+            className="h-9 text-xs"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Note shown to customers (optional)</Label>
@@ -214,10 +257,10 @@ export function OrbitInterimPaymentsSetup() {
           type="button"
           onClick={() => void submit()}
           disabled={saving}
-          className="bg-amber-600 hover:bg-amber-700 text-white"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
           data-testid="interim-payments-save"
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save payment links"}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save direct pay links"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
           <a href="/dashboard/billing" target="_blank" rel="noopener noreferrer">

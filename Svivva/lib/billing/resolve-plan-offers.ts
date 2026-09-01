@@ -1,4 +1,5 @@
 import type { InterimPaymentConfig } from "@/lib/interim-payments";
+import { directPayForTier } from "@/lib/interim-payments";
 import {
   BILLING_PLANS,
   envPriceIdForTier,
@@ -7,7 +8,7 @@ import {
 } from "@/lib/billing/plans";
 import { inferBillingTier } from "@/lib/stripe/catalog";
 
-export type BillingCheckoutProvider = "lemonsqueezy" | "stripe" | "link" | null;
+export type BillingCheckoutProvider = "venmo" | "cashapp" | null;
 
 export type ResolvedBillingPlan = BillingPlanDefinition & {
   priceId: string | null;
@@ -28,19 +29,6 @@ type StripeProductRow = {
   prices: StripePriceRow[];
 };
 
-function interimLinkForPlan(
-  plan: BillingPlanDefinition,
-  interim: InterimPaymentConfig,
-): string | null {
-  if (plan.interimLinkKey === "interimStripePaymentLinkStarter") {
-    return interim.stripePaymentLinkStarter ?? interim.stripePaymentLinkEnterprise ?? null;
-  }
-  if (plan.interimLinkKey === "interimStripePaymentLinkPro") {
-    return interim.stripePaymentLinkPro ?? null;
-  }
-  return null;
-}
-
 function priceIdFromStripeProducts(
   tier: BillingPlanTier,
   products: StripeProductRow[],
@@ -55,21 +43,10 @@ function priceIdFromStripeProducts(
   return null;
 }
 
-function lemonAvailableForTier(
-  tier: BillingPlanTier,
-  opts: { lemonStarter?: boolean; lemonPro?: boolean },
-): boolean {
-  if (tier === "starter") return !!opts.lemonStarter;
-  if (tier === "pro") return !!opts.lemonPro;
-  return false;
-}
-
+/** Resolves $20 Starter / $50 Pro checkout via Venmo or Cash App only. */
 export function resolveBillingPlanOffers(opts: {
   stripeProducts?: StripeProductRow[];
   interim: InterimPaymentConfig;
-  stripeCheckoutReady: boolean;
-  lemonStarter?: boolean;
-  lemonPro?: boolean;
 }): ResolvedBillingPlan[] {
   const products = opts.stripeProducts ?? [];
 
@@ -86,16 +63,14 @@ export function resolveBillingPlanOffers(opts: {
 
     const priceId =
       priceIdFromStripeProducts(plan.tier, products) ?? envPriceIdForTier(plan.tier) ?? null;
-    const paymentLink = interimLinkForPlan(plan, opts.interim);
-    const lemonOk = lemonAvailableForTier(plan.tier, opts);
+    const direct = directPayForTier(plan.tier, opts.interim);
 
-    let checkoutProvider: BillingCheckoutProvider = null;
-    if (lemonOk) checkoutProvider = "lemonsqueezy";
-    else if (opts.stripeCheckoutReady && priceId) checkoutProvider = "stripe";
-    else if (paymentLink) checkoutProvider = "link";
-
-    const checkoutAvailable = checkoutProvider !== null;
-
-    return { ...plan, priceId, paymentLink, checkoutAvailable, checkoutProvider };
+    return {
+      ...plan,
+      priceId,
+      paymentLink: direct?.link ?? null,
+      checkoutAvailable: direct !== null,
+      checkoutProvider: direct?.method ?? null,
+    };
   });
 }
