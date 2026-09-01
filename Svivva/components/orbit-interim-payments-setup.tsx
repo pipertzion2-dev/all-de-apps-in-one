@@ -140,7 +140,7 @@ export function OrbitInterimPaymentsSetup() {
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <Label className="text-xs">Stripe Payment Link — Pro ($49)</Label>
+          <Label className="text-xs">Stripe Payment Link — Pro ($50/mo)</Label>
           <Input
             type="text"
             inputMode="url"
@@ -157,7 +157,7 @@ export function OrbitInterimPaymentsSetup() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">Stripe Payment Link — Enterprise (optional)</Label>
+          <Label className="text-xs">Stripe Payment Link — Starter ($20/mo)</Label>
           <Input
             type="text"
             inputMode="url"

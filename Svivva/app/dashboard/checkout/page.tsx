@@ -36,9 +36,25 @@ const plans: Record<
     badge: string;
   }
 > = {
+  starter: {
+    name: "Starter",
+    price: "$20",
+    period: "/month",
+    icon: Star,
+    features: [
+      "3 projects",
+      "2,000 API calls/month",
+      "Full eval suite",
+      "Email support",
+      "Orbit marketing copy",
+    ],
+    color: "#6B8DA8",
+    glow: "rgba(107, 141, 168,0.25)",
+    badge: "Great start",
+  },
   pro: {
     name: "Pro",
-    price: "$49",
+    price: "$50",
     period: "/month",
     icon: Zap,
     features: [
@@ -54,21 +70,14 @@ const plans: Record<
     badge: "Most Popular",
   },
   enterprise: {
-    name: "Enterprise",
-    price: "$299",
+    name: "Pro",
+    price: "$50",
     period: "/month",
     icon: Building2,
-    features: [
-      "Unlimited projects",
-      "Unlimited API calls",
-      "SLA guarantee",
-      "Dedicated support",
-      "Custom integrations",
-      "On-premise option",
-    ],
+    features: ["10 projects", "10,000 API calls/month", "Priority support", "Custom integrations"],
     color: "#6B2C4E",
     glow: "rgba(107, 44, 78,0.3)",
-    badge: "Full Power",
+    badge: "Legacy",
   },
 };
 

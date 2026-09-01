@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const stripe = await getUncachableStripeClient();
 
-    if (!tier || !["pro", "enterprise"].includes(tier)) {
+    if (!tier || !["starter", "pro", "enterprise"].includes(tier)) {
       const v = await validateCheckoutPrice(stripe, priceId);
       if (!v.ok) {
         return NextResponse.json(

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 
-export type Plan = "free" | "pro" | "enterprise";
+export type Plan = "free" | "starter" | "pro" | "enterprise";
 
 export function usePlan() {
   const { isAuthenticated } = useAuth();
@@ -31,7 +31,8 @@ export function usePlan() {
 
   return {
     plan,
-    isPro: plan === "pro" || plan === "enterprise",
+    isStarter: plan === "starter",
+    isPro: plan === "starter" || plan === "pro" || plan === "enterprise",
     isEnterprise: plan === "enterprise",
     isFree: plan === "free",
     isLoading,

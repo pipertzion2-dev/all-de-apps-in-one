@@ -67,6 +67,44 @@ export async function GET() {
     return NextResponse.json({ products, source: "stripe_api" });
   } catch (error: any) {
     console.error("[stripe/prices] Stripe API fallback failed:", error);
-    return NextResponse.json({ products: [], source: "none", error: error?.message });
   }
+
+  const envProducts = [
+    {
+      name: "ZZAI Starter",
+      metadata: { tier: "starter" },
+      prices: process.env.STRIPE_PRICE_ID_STARTER
+        ? [
+            {
+              id: process.env.STRIPE_PRICE_ID_STARTER,
+              unitAmount: 2000,
+              currency: "usd",
+              recurring: { interval: "month" },
+              metadata: {},
+            },
+          ]
+        : [],
+    },
+    {
+      name: "ZZAI Pro",
+      metadata: { tier: "pro" },
+      prices: process.env.STRIPE_PRICE_ID_PRO
+        ? [
+            {
+              id: process.env.STRIPE_PRICE_ID_PRO,
+              unitAmount: 5000,
+              currency: "usd",
+              recurring: { interval: "month" },
+              metadata: {},
+            },
+          ]
+        : [],
+    },
+  ].filter((p) => p.prices.length > 0);
+
+  if (envProducts.length > 0) {
+    return NextResponse.json({ products: envProducts, source: "env" });
+  }
+
+  return NextResponse.json({ products: [], source: "none", error: "Stripe not configured" });
 }
