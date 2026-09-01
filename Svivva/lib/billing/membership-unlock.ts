@@ -8,7 +8,7 @@ export function getMembershipUnlockInfo(): {
   const code = getPublicMembershipAccessCode();
   return {
     instructions:
-      "After you pay on Cash App, enter this access code on Launchpad or Billing to run urrthang and activate your plan.",
+      "After you pay on Cash App, enter this access code to run urrthang only — not Orbit admin.",
     code,
   };
 }

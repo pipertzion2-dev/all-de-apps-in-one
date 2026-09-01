@@ -60,6 +60,7 @@ import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
+import { UrrthangSubscriberGate } from "@/components/urrthang-subscriber-gate";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
@@ -2575,6 +2576,7 @@ export default function LaunchpadPage() {
   // Admin passcode cookie (set via /admin or Settings)
   const { data: me, isLoading: meLoading } = useQuery<{
     isAdmin: boolean;
+    isMembershipAccess?: boolean;
     vercelCommit?: string | null;
     nextPublicSiteUrl?: string | null;
   }>({
@@ -2582,6 +2584,7 @@ export default function LaunchpadPage() {
     queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
   const isAdmin = me?.isAdmin ?? false;
+  const isUrrthangSubscriber = Boolean(me?.isMembershipAccess && !isAdmin);
 
   const { data: creds } = useQuery<{
     godaddyDomain: string | null;
@@ -3441,19 +3444,20 @@ export default function LaunchpadPage() {
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
-  if (!isAdmin)
+  if (!isAdmin && !isUrrthangSubscriber) {
+    return <UrrthangSubscriberGate />;
+  }
+
+  if (isUrrthangSubscriber) {
     return (
       <div className="relative bg-transparent overflow-x-hidden" data-feature-page>
         <FeatureThreeBg variant="orbit" scope="page" />
-        <div className="relative z-10 py-16 px-4">
-          <AdminCodeForm
-            title="Orbit admin"
-            description="Enter the 6-digit admin code to unlock Orbit and all admin pages."
-            onSuccess={() => window.location.reload()}
-          />
+        <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 py-8">
+          <OrbitOneClickLaunch subscriberOnly onComplete={() => void refetchStatus()} />
         </div>
       </div>
     );
+  }
 
   const steps =
     tab === "svivva"

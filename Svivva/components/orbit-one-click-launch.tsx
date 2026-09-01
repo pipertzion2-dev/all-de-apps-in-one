@@ -288,6 +288,8 @@ type Props = {
   autoRun?: boolean;
   /** Open Orbit Stripe setup (keys form). */
   onOpenStripeSetup?: () => void;
+  /** Paying subscribers — urrthang run only, no Orbit admin tooling. */
+  subscriberOnly?: boolean;
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -297,6 +299,7 @@ export function OrbitOneClickLaunch({
   orbitStatus,
   autoRun,
   onOpenStripeSetup,
+  subscriberOnly = false,
 }: Props) {
   const { isPro, isMembershipAccess } = usePlan();
   const { data: meData } = useQuery<{ isAdmin?: boolean; isMembershipAccess?: boolean }>({
@@ -404,6 +407,7 @@ export function OrbitOneClickLaunch({
   };
 
   useEffect(() => {
+    if (subscriberOnly) return;
     let alive = true;
     (async () => {
       try {
@@ -435,7 +439,7 @@ export function OrbitOneClickLaunch({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [subscriberOnly]);
 
   const runHealthCheck = async () => {
     setHealthChecking(true);
@@ -862,7 +866,9 @@ export function OrbitOneClickLaunch({
                   EasyPeasy not configured
                 </p>
                 <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">
-                  Paste your API key in the EasyPeasy card below, then run {URRTHANG_LABEL}.
+                  {subscriberOnly
+                    ? `EasyPeasy must be configured by the site owner before you can run ${URRTHANG_LABEL}.`
+                    : `Paste your API key in the EasyPeasy card below, then run ${URRTHANG_LABEL}.`}
                 </p>
               </div>
             </>
@@ -982,7 +988,40 @@ export function OrbitOneClickLaunch({
           </div>
         )}
 
+        {/* Error from urrthang run */}
+        {error &&
+          !running &&
+          (() => {
+            const formatted = formatOrbitRunError(error);
+            return (
+              <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-3 space-y-2">
+                <div className="flex items-start gap-2 text-xs text-red-200">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-red-100">{formatted.title}</p>
+                    <p className="mt-1 leading-relaxed">{formatted.detail}</p>
+                  </div>
+                </div>
+                {formatted.actions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pl-6">
+                    {formatted.actions.map((a) => (
+                      <Link
+                        key={a.href}
+                        href={a.href}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-md border border-red-400/40 text-red-100 hover:bg-red-500/15"
+                      >
+                        {a.label} →
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
         {/* Index Google — separate from free setup (indexing + Stripe check only) */}
+        {!subscriberOnly && (
+        <>
         <div className="rounded-xl border-2 border-[#5B8DA8]/35 bg-[#5B8DA8]/8 p-3 space-y-2">
           <div>
             <p className="text-[11px] font-black text-[#5B8DA8] uppercase tracking-wide">
@@ -1159,37 +1198,6 @@ export function OrbitOneClickLaunch({
           </div>
         )}
 
-        {/* Error */}
-        {error &&
-          !running &&
-          (() => {
-            const formatted = formatOrbitRunError(error);
-            return (
-              <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-3 space-y-2">
-                <div className="flex items-start gap-2 text-xs text-red-200">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-bold text-red-100">{formatted.title}</p>
-                    <p className="mt-1 leading-relaxed">{formatted.detail}</p>
-                  </div>
-                </div>
-                {formatted.actions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pl-6">
-                    {formatted.actions.map((a) => (
-                      <Link
-                        key={a.href}
-                        href={a.href}
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-md border border-red-400/40 text-red-100 hover:bg-red-500/15"
-                      >
-                        {a.label} →
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
         {quickStartError && !quickStartRunning && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 flex items-start gap-2 text-xs text-red-300">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -1267,13 +1275,15 @@ export function OrbitOneClickLaunch({
             )}
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* ── Results ── */}
       {result && !running && (
         <div className="border-t border-border/50 divide-y divide-border/40">
           {/* Google & search indexing */}
-          {result.indexing && (
+          {!subscriberOnly && result.indexing && (
             <div className="px-4 sm:px-5 py-4">
               <GoogleIndexingCard
                 indexing={result.indexing}
@@ -1336,7 +1346,7 @@ export function OrbitOneClickLaunch({
                 </div>
               )}
 
-              {automatedNeedsKey.length > 0 && (
+              {!subscriberOnly && automatedNeedsKey.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-violet-400">
                     Add API keys once — these become automatic forever
@@ -1371,7 +1381,7 @@ export function OrbitOneClickLaunch({
           )}
 
           {/* ── Manual only (no API exists) ── */}
-          {manualPending.length > 0 && (
+          {!subscriberOnly && manualPending.length > 0 && (
             <div className="px-4 sm:px-5 py-4 border-l-4 border-amber-500/50 bg-amber-500/[0.03]">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-amber-400" />
@@ -1415,7 +1425,7 @@ export function OrbitOneClickLaunch({
       )}
 
       {/* ── Footer: weekly hint ── */}
-      {!running && (
+      {!running && !subscriberOnly && (
         <div className="px-4 sm:px-5 py-3 border-t border-border/40 flex items-center gap-1.5 text-[10px] text-muted-foreground">
           <Clock className="w-3 h-3 flex-shrink-0" />
           <span>

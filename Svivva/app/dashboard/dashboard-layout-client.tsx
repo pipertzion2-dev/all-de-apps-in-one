@@ -336,10 +336,10 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
     queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
   });
   const userIsAdmin = meData?.isAdmin ?? false;
-  const hasCodeAccess = Boolean(meData?.isAdmin || meData?.isMembershipAccess);
+  const hasCodeAccess = Boolean(meData?.isAdmin);
   const { isPro } = usePlan();
   const effectiveIsAdmin = userIsAdmin;
-  const effectiveIsPro = isPro || effectiveIsAdmin || Boolean(meData?.isMembershipAccess);
+  const effectiveIsPro = isPro || effectiveIsAdmin;
   const canEnterDashboard = isAuthenticated || hasCodeAccess;
 
   const baseMenuGroups = mode === "digital" ? digitalMenuGroups : physicalMenuGroups;

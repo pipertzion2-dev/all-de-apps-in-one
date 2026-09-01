@@ -97,7 +97,7 @@ function BillingPageContent() {
               <p className="text-emerald-800 dark:text-emerald-200">
                 After payment, use access code{" "}
                 <strong className="font-mono tracking-widest">{plansData.membershipUnlock.code}</strong>{" "}
-                on this page or Launchpad to run urrthang.
+                to run urrthang on Launchpad — not Orbit admin.
               </p>
             ) : null}
           </CardContent>
