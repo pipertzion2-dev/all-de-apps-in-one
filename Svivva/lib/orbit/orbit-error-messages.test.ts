@@ -3,6 +3,7 @@ import {
   dedupeErrorMessages,
   formatOrbitRunError,
   formatIndexingApiError,
+  isEasyPeasyWordLimitError,
 } from "./orbit-error-messages";
 
 describe("orbit-error-messages", () => {
@@ -11,7 +12,11 @@ describe("orbit-error-messages", () => {
       "Quota exceeded for quota metric 'Publish requests' and limit 'Publish requests per day' of service 'indexing.googleapis.com' for consumer 'project_number:680989077677'.";
     const out = dedupeErrorMessages([raw, raw]);
     expect(out).toHaveLength(1);
-    expect(out[0]).toContain("daily quota");
+    expect(out[0]).toContain("not a Search Console");
+  });
+
+  it("detects EasyPeasy word limit strings", () => {
+    expect(isEasyPeasyWordLimitError("429 You reached the limit of allowed words")).toBe(true);
   });
 
   it("formats EasyPeasy word limit with actions", () => {
@@ -24,7 +29,7 @@ describe("orbit-error-messages", () => {
 
   it("shortens indexing API quota prose", () => {
     expect(formatIndexingApiError("Quota exceeded for Publish requests per day")).toContain(
-      "daily quota",
+      "not a Search Console",
     );
   });
 });
