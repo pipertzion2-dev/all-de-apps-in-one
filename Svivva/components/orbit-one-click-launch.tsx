@@ -309,8 +309,8 @@ export function OrbitOneClickLaunch({
       priceLabel: string;
       paymentLink: string | null;
       checkoutAvailable: boolean;
-      checkoutProvider: string | null;
     }[];
+    paymentOptions?: { cashAppTag?: string };
   }>({
     queryKey: ["/api/billing/plans"],
     queryFn: () => fetch("/api/billing/plans").then((r) => r.json()),
@@ -908,9 +908,8 @@ export function OrbitOneClickLaunch({
         {!canRunUrrthang && (
           <div className="space-y-3" data-testid="urrthang-user-cash-pay">
             <p className="text-xs text-center text-muted-foreground leading-relaxed">
-              Stripe is still verifying — users pay via Cash App to{" "}
-              <strong className="text-foreground">$pipertzion</strong>, then enter an access code
-              to run {URRTHANG_LABEL}.
+              Cash App is the plan — pay ${plansData?.paymentOptions?.cashAppTag ?? "pipertzion"},
+              then enter your access code to run {URRTHANG_LABEL}.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               {starterPay?.paymentLink ? (

@@ -18,7 +18,23 @@ const emptyInterim = {
 };
 
 describe("resolveBillingPlanOffers", () => {
-  it("prefers Cash App over Venmo when both exist", () => {
+  it("enables Cash App checkout per tier", () => {
+    const plans = resolveBillingPlanOffers({
+      interim: {
+        ...emptyInterim,
+        cashAppUrlStarter: "https://cash.app/$pipertzion/20",
+        cashAppUrlPro: "https://cash.app/$pipertzion/50",
+      },
+    });
+
+    const starter = plans.find((p) => p.tier === "starter");
+    const pro = plans.find((p) => p.tier === "pro");
+    expect(starter?.checkoutProvider).toBe("cashapp");
+    expect(pro?.checkoutProvider).toBe("cashapp");
+    expect(starter?.paymentLink).toContain("pipertzion");
+  });
+
+  it("ignores Venmo — Cash App is the plan", () => {
     const plans = resolveBillingPlanOffers({
       interim: {
         ...emptyInterim,
@@ -28,41 +44,11 @@ describe("resolveBillingPlanOffers", () => {
     });
     const starter = plans.find((p) => p.tier === "starter");
     expect(starter?.checkoutProvider).toBe("cashapp");
-  });
-
-  it("enables Venmo checkout per tier", () => {
-    const plans = resolveBillingPlanOffers({
-      interim: {
-        ...emptyInterim,
-        venmoUrlStarter: "https://venmo.com/u/starter",
-        venmoUrlPro: "https://venmo.com/u/pro",
-      },
-    });
-
-    const starter = plans.find((p) => p.tier === "starter");
-    const pro = plans.find((p) => p.tier === "pro");
-    expect(starter?.checkoutProvider).toBe("venmo");
-    expect(pro?.checkoutProvider).toBe("venmo");
-    expect(starter?.paymentLink).toContain("starter");
-    expect(pro?.paymentLink).toContain("pro");
-  });
-
-  it("falls back to Cash App when Venmo missing", () => {
-    const plans = resolveBillingPlanOffers({
-      interim: {
-        ...emptyInterim,
-        cashAppUrlStarter: "https://cash.app/$tag/20",
-      },
-    });
-
-    const starter = plans.find((p) => p.tier === "starter");
-    expect(starter?.checkoutProvider).toBe("cashapp");
-    expect(starter?.checkoutAvailable).toBe(true);
+    expect(starter?.paymentLink).toContain("cash.app");
   });
 
   it("free tier has no checkout", () => {
     const plans = resolveBillingPlanOffers({ interim: emptyInterim });
-    const free = plans.find((p) => p.tier === "free");
-    expect(free?.checkoutAvailable).toBe(false);
+    expect(plans.find((p) => p.tier === "free")?.checkoutAvailable).toBe(false);
   });
 });
