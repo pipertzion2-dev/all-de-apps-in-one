@@ -642,20 +642,20 @@ export function OrbitOneClickLaunch({
     <div
       ref={rootRef}
       id="orbit-one-click"
-      className="rounded-2xl border-2 overflow-hidden"
+      className="rounded-2xl border-2 overflow-hidden pink-camo-panel"
       style={{
-        borderColor: running ? TEAL : hasRun ? `${TEAL}55` : `${BURG}55`,
+        borderColor: running ? "#ff69b4" : "rgba(255, 105, 180, 0.55)",
         background: running
-          ? `linear-gradient(135deg,${TEAL}12,${BURG}08)`
-          : `linear-gradient(135deg,${BURG}08,${TEAL}06)`,
+          ? `linear-gradient(135deg, rgba(255,105,180,0.14), rgba(219,112,147,0.08))`
+          : `linear-gradient(135deg, rgba(255,182,193,0.12), rgba(255,105,180,0.06))`,
       }}
     >
       {/* ── Hero header ── */}
       <div className="px-4 sm:px-5 pt-5 pb-4 space-y-4">
         <div className="flex items-start gap-3">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-lg"
-            style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+            className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-lg pink-camo-btn"
+            style={{ animation: "none", minWidth: 48, minHeight: 48 }}
           >
             {running ? (
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -697,6 +697,105 @@ export function OrbitOneClickLaunch({
             )}
           </div>
         </div>
+
+        {/* urrthang — primary all-in-one control (top of panel so it is always visible) */}
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
+            <button
+              type="button"
+              onClick={run}
+              disabled={running || quickStartRunning}
+              data-testid="orbit-one-click-launch"
+              data-urrthang="true"
+              aria-label={`${URRTHANG_LABEL} — run all Orbit marketing and indexing`}
+              className={`flex-1 flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
+              style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
+            >
+              {running ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" /> Working…
+                </>
+              ) : hasRun ? (
+                <>
+                  <RefreshCw className="w-6 h-6" /> {URRTHANG_LABEL} again
+                </>
+              ) : (
+                <>
+                  <Rocket className="w-6 h-6" /> {URRTHANG_LABEL}
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={runQuickStart}
+              disabled={running || quickStartRunning}
+              data-testid="orbit-quick-start"
+              className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
+              style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
+              title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
+            >
+              {quickStartRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Indexing…
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-left leading-tight">
+                    Index Google
+                    <br />
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      + check Stripe
+                    </span>
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <OrbitSubscribeQuickStrip
+            className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
+            configuredKeys={configuredKeys}
+            aiConfigured={aiConfigured}
+            onPasteKey={(key) => {
+              const el = document.getElementById(`cred-${key}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+              }
+              document.getElementById("orbit-paid-services")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
+          />
+        </div>
+
+        {running && (
+          <div className="rounded-xl bg-black/20 border border-pink-300/25 p-3 space-y-2.5">
+            {PHASES.map((p, i) => {
+              const st = i < phase ? "done" : i === phase ? "active" : "pending";
+              return (
+                <div
+                  key={p.label}
+                  className={`flex items-center gap-2.5 text-xs ${st === "pending" ? "opacity-40" : ""}`}
+                >
+                  {st === "done" ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                  ) : st === "active" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-pink-300 flex-shrink-0" />
+                  ) : (
+                    <div className="w-3.5 h-3.5 rounded-full border border-white/20 flex-shrink-0" />
+                  )}
+                  <span className={st === "active" ? "font-bold text-foreground" : ""}>
+                    {p.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <OrbitPaidServicesHub
           defaultExpanded={!aiConfigured}
@@ -822,111 +921,6 @@ export function OrbitOneClickLaunch({
                 ok
               />
             )}
-          </div>
-        )}
-
-        {/* Primary launch + quick start + paid subscribe strip */}
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
-            <button
-              type="button"
-              onClick={run}
-              disabled={running || quickStartRunning}
-              data-testid="orbit-one-click-launch"
-              className={`flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl text-base sm:text-lg min-h-[120px] sm:min-h-0 ${PINK_CAMO_BUTTON_CLASS}`}
-              style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
-            >
-              {running ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Working…
-                </>
-              ) : hasRun ? (
-                <>
-                  <RefreshCw className="w-5 h-5" /> {URRTHANG_LABEL} again
-                </>
-              ) : (
-                <>
-                  <Rocket className="w-5 h-5" /> {URRTHANG_LABEL}
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={runQuickStart}
-              disabled={running || quickStartRunning}
-              data-testid="orbit-quick-start"
-              className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
-              style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
-              title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
-            >
-              {quickStartRunning ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Indexing…
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-left leading-tight">
-                    Index Google
-                    <br />
-                    <span className="text-[11px] font-semibold text-muted-foreground">
-                      + check Stripe
-                    </span>
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <OrbitSubscribeQuickStrip
-            className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
-            configuredKeys={configuredKeys}
-            aiConfigured={aiConfigured}
-            onPasteKey={(key) => {
-              const el = document.getElementById(`cred-${key}`);
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-                return;
-              }
-              document.getElementById("orbit-paid-services")?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }}
-          />
-        </div>
-
-        {/* Running progress */}
-        {running && (
-          <div className="rounded-xl bg-black/20 border border-white/10 p-3 space-y-2.5">
-            {PHASES.map((p, i) => {
-              const st = i < phase ? "done" : i === phase ? "active" : "pending";
-              return (
-                <div
-                  key={p.label}
-                  className={`flex items-center gap-2.5 text-xs transition-opacity ${st === "pending" ? "opacity-30" : "opacity-100"}`}
-                >
-                  {st === "done" ? (
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
-                  ) : st === "active" ? (
-                    <Loader2
-                      className="w-4 h-4 animate-spin flex-shrink-0"
-                      style={{ color: TEAL }}
-                    />
-                  ) : (
-                    <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" />
-                  )}
-                  <span
-                    className={
-                      st === "active" ? "font-semibold text-foreground" : "text-muted-foreground"
-                    }
-                  >
-                    {p.label}
-                  </span>
-                </div>
-              );
-            })}
           </div>
         )}
 
