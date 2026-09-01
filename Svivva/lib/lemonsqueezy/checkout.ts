@@ -1,14 +1,21 @@
 import { getSiteUrl } from "@/lib/site-url";
 import type { LemonSqueezyConfig } from "./config";
+import { normalizeLemonSqueezyTier, type LemonSqueezyCheckoutTier } from "./config";
 
-type CheckoutTier = "pro" | "enterprise";
-
-function variantIdForTier(config: LemonSqueezyConfig, tier: CheckoutTier): string | null {
-  return tier === "enterprise" ? config.variantIdEnterprise : config.variantIdPro;
+function variantIdForTier(
+  config: LemonSqueezyConfig,
+  tier: LemonSqueezyCheckoutTier,
+): string | null {
+  return normalizeLemonSqueezyTier(tier) === "pro" ? config.variantIdPro : config.variantIdStarter;
 }
 
-function directUrlForTier(config: LemonSqueezyConfig, tier: CheckoutTier): string | null {
-  return tier === "enterprise" ? config.checkoutUrlEnterprise : config.checkoutUrlPro;
+function directUrlForTier(
+  config: LemonSqueezyConfig,
+  tier: LemonSqueezyCheckoutTier,
+): string | null {
+  return normalizeLemonSqueezyTier(tier) === "pro"
+    ? config.checkoutUrlPro
+    : config.checkoutUrlStarter;
 }
 
 function appendCheckoutParams(
@@ -22,10 +29,10 @@ function appendCheckoutParams(
   return url.toString();
 }
 
-/** Create a hosted Lemon Squeezy checkout URL for the given tier. */
+/** Create a hosted Lemon Squeezy checkout URL for Starter ($20) or Pro ($50). */
 export async function createLemonSqueezyCheckoutUrl(
   config: LemonSqueezyConfig,
-  tier: CheckoutTier,
+  tier: LemonSqueezyCheckoutTier,
   opts: { userId: string; email?: string | null },
 ): Promise<{ url: string; mode: "direct" | "api" }> {
   const direct = directUrlForTier(config, tier);

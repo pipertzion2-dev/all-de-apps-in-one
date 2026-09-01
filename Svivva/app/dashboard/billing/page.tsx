@@ -17,7 +17,9 @@ type PlansResponse = {
   plans: ResolvedBillingPlan[];
   paymentOptions: {
     stripe: { checkoutReady: boolean; configured: boolean; detail: string };
+    lemonSqueezy: { active: boolean; starter: boolean; pro: boolean };
     interimActive: boolean;
+    preferredProvider: string | null;
   };
 };
 
@@ -59,6 +61,7 @@ function BillingPageContent() {
 
   const plans = plansData?.plans ?? [];
   const stripeCheckoutReady = Boolean(plansData?.paymentOptions.stripe.checkoutReady);
+  const lemonActive = Boolean(plansData?.paymentOptions.lemonSqueezy?.active);
   const interimActive = Boolean(plansData?.paymentOptions.interimActive);
 
   const currentPlan =
@@ -88,12 +91,11 @@ function BillingPageContent() {
 
   const lemonCheckoutMutation = useMutation({
     mutationFn: async (tier: "starter" | "pro") => {
-      const lemonTier = tier === "starter" ? "enterprise" : "pro";
       const res = await fetch("/api/lemonsqueezy/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ tier: lemonTier }),
+        body: JSON.stringify({ tier }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Checkout failed");
@@ -133,34 +135,40 @@ function BillingPageContent() {
     setLoadingPlan(plan.name);
     trackUpgrade(plan.tier);
 
-    if (plan.priceId && stripeCheckoutReady) {
+    if (
+      plan.checkoutProvider === "lemonsqueezy" &&
+      (plan.tier === "starter" || plan.tier === "pro")
+    ) {
+      lemonCheckoutMutation.mutate(plan.tier);
+      return;
+    }
+
+    if (plan.checkoutProvider === "stripe" && plan.priceId) {
       hostedCheckoutMutation.mutate({ priceId: plan.priceId, tier: plan.tier });
       return;
     }
 
-    if (plan.paymentLink) {
+    if (plan.checkoutProvider === "link" && plan.paymentLink) {
       window.open(plan.paymentLink, "_blank", "noopener,noreferrer");
       setLoadingPlan(null);
-      return;
-    }
-
-    if (plan.tier === "starter" || plan.tier === "pro") {
-      lemonCheckoutMutation.mutate(plan.tier);
       return;
     }
 
     setLoadingPlan(null);
     toast({
       title: "Checkout not configured",
-      description: "Add Stripe keys or payment links in Orbit admin → Platform Secrets.",
+      description:
+        "Add Lemon Squeezy checkout URLs in Orbit admin (Launchpad → Lemon Squeezy), or Stripe keys in Vercel.",
       variant: "destructive",
     });
   };
 
   const checkoutLabel = (plan: ResolvedBillingPlan) => {
-    if (plan.priceId && stripeCheckoutReady) return `Subscribe — ${plan.priceLabel}/mo`;
-    if (plan.paymentLink) return `Pay — ${plan.priceLabel}/mo`;
-    if (plan.checkoutAvailable) return `Subscribe — ${plan.priceLabel}/mo`;
+    if (plan.checkoutProvider === "lemonsqueezy") {
+      return `Subscribe — ${plan.priceLabel}/mo`;
+    }
+    if (plan.checkoutProvider === "stripe") return `Subscribe — ${plan.priceLabel}/mo`;
+    if (plan.checkoutProvider === "link") return `Pay — ${plan.priceLabel}/mo`;
     return "Setup required";
   };
 
@@ -168,7 +176,9 @@ function BillingPageContent() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="text-muted-foreground">Starter $20/mo · Pro $50/mo — cancel anytime</p>
+        <p className="text-muted-foreground">
+          Starter $20/mo · Pro $50/mo — powered by Lemon Squeezy or Stripe
+        </p>
       </div>
 
       {!isMembershipAccess && !isPro && (
@@ -178,13 +188,20 @@ function BillingPageContent() {
         />
       )}
 
-      {!stripeCheckoutReady && !interimActive && !isPro && (
+      {lemonActive && (
+        <Card className="border border-lime-500/35 bg-lime-500/5">
+          <CardContent className="pt-4 text-sm text-foreground">
+            Lemon Squeezy checkout is live — pick Starter ($20) or Pro ($50) below.
+          </CardContent>
+        </Card>
+      )}
+
+      {!lemonActive && !stripeCheckoutReady && !interimActive && !isPro && (
         <Card className="border border-amber-500/30 bg-amber-500/5">
           <CardContent className="pt-4 text-sm text-muted-foreground">
-            Card checkout needs Stripe keys or payment links in Platform Secrets. Paste your $20 and
-            $50 Stripe Payment Links in Orbit admin, or set{" "}
-            <code className="text-xs">STRIPE_PRICE_ID_STARTER</code> and{" "}
-            <code className="text-xs">STRIPE_PRICE_ID_PRO</code> in Vercel.
+            To enable checkout, paste Lemon Squeezy URLs in Orbit admin →{" "}
+            <strong className="text-foreground">Lemon Squeezy</strong> (Starter $20 + Pro $50), or
+            set Stripe / payment link env vars in Vercel.
           </CardContent>
         </Card>
       )}

@@ -95,7 +95,7 @@ export async function GET() {
         note: paymentOptions.interim.note,
       },
       stripeCheckoutReady: paymentOptions.stripe.checkoutReady,
-      lemonStarter: paymentOptions.lemonSqueezy.enterprise,
+      lemonStarter: paymentOptions.lemonSqueezy.starter,
       lemonPro: paymentOptions.lemonSqueezy.pro,
     });
 
@@ -105,6 +105,7 @@ export async function GET() {
         stripe: paymentOptions.stripe,
         lemonSqueezy: paymentOptions.lemonSqueezy,
         interimActive: paymentOptions.interim.active,
+        preferredProvider: paymentOptions.preferredProvider,
       },
     });
   } catch (e) {

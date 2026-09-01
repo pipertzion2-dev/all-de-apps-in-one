@@ -16,6 +16,7 @@ export type BillingPaymentOptions = {
   stripe: Awaited<ReturnType<typeof getStripeReadyStatus>>;
   lemonSqueezy: {
     active: boolean;
+    starter: boolean;
     pro: boolean;
     enterprise: boolean;
   };
@@ -56,17 +57,19 @@ export async function getBillingPaymentOptions(): Promise<BillingPaymentOptions>
 
   const lemonSqueezy = {
     active: isLemonSqueezyActive(lemonConfig),
+    starter: lemonSqueezyCheckoutCapable(lemonConfig, "starter"),
     pro: lemonSqueezyCheckoutCapable(lemonConfig, "pro"),
-    enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "enterprise"),
+    /** @deprecated use starter — legacy alias */
+    enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "starter"),
   };
 
   const interim = toPublicInterimPayments(interimConfig, {
-    checkoutUnavailable: !stripe.checkoutReady,
+    checkoutUnavailable: !stripe.checkoutReady && !lemonSqueezy.active,
   });
 
   let preferredProvider: BillingPaymentOptions["preferredProvider"] = null;
-  if (stripe.checkoutReady) preferredProvider = "stripe";
-  else if (lemonSqueezy.pro) preferredProvider = "lemonsqueezy";
+  if (lemonSqueezy.starter || lemonSqueezy.pro) preferredProvider = "lemonsqueezy";
+  else if (stripe.checkoutReady) preferredProvider = "stripe";
   else if (isInterimPaymentActive(interimConfig)) preferredProvider = "interim";
 
   return { stripe, lemonSqueezy, interim, preferredProvider };
