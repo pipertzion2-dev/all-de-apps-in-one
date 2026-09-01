@@ -3136,7 +3136,7 @@ export default function LaunchpadPage() {
         const ep = await authFetch("/api/easypeasy/ensure", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tier: "premium", testConnection: true }),
+          body: JSON.stringify({ tier: "standard", forceTier: true, testConnection: true }),
         });
         const epData = await ep.json();
         if (!ep.ok || !epData.ok) {

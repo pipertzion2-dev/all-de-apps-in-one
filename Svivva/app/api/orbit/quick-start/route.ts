@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 
   await hydratePlatformSecrets();
   const easypeasy = await ensureEasyPeasyForOrbit({
-    tierId: "premium",
     testConnection: false,
   });
 

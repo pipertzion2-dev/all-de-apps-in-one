@@ -46,7 +46,7 @@ export function OrbitEasyPeasySetup() {
   const [apiKey, setApiKey] = useState("");
   const [tierId, setTierId] = useState<EasyPeasyTierId>("standard");
 
-  const tiers = status?.easypeasy.tiers ?? EASYPEASY_TIERS;
+  const tiers = (status?.easypeasy.tiers ?? EASYPEASY_TIERS).filter((t) => t.id !== "premium");
   const selectedTier = tiers.find((t) => t.id === tierId) ?? tiers[0];
 
   const load = useCallback(async () => {
@@ -59,7 +59,8 @@ export function OrbitEasyPeasySetup() {
       }
       const payload = (await res.json()) as EasyPeasyStatus;
       setStatus(payload);
-      if (payload.easypeasy?.tierId) setTierId(payload.easypeasy.tierId);
+      const loadedTier = payload.easypeasy?.tierId ?? "standard";
+      setTierId(loadedTier === "premium" ? "standard" : loadedTier);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
@@ -176,7 +177,9 @@ export function OrbitEasyPeasySetup() {
       )}
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold">Orbit AI tier</Label>
+        <Label className="text-xs font-semibold">
+          Orbit AI tier (Standard recommended — free-tier friendly)
+        </Label>
         <div className="grid gap-2 sm:grid-cols-3">
           {tiers.map((tier) => {
             const selected = tierId === tier.id;
