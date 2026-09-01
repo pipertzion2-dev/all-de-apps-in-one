@@ -7,6 +7,7 @@ import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { getMarketingCredentialStatus } from "@/lib/orbit/marketing-autopilot-credentials";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
 import { getUncachableStripeClient } from "@/lib/stripe/client";
 import { getSiteUrl } from "@/lib/site-url";
 import { forbidden, ok, badRequest } from "@/lib/http-response";
@@ -74,6 +75,12 @@ async function verifyStripe(): Promise<{ checks: StripeCheck[]; allOk: boolean }
 export async function POST(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
+  await hydratePlatformSecrets();
+  const easypeasy = await ensureEasyPeasyForOrbit({
+    tierId: "premium",
+    testConnection: false,
+  });
+
   const userId = await resolveGscCredentialsUserId();
   const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
   const credStatus = await getMarketingCredentialStatus();
@@ -124,6 +131,7 @@ export async function POST(req: NextRequest) {
 
   return ok({
     ok: indexingOk && stripe.allOk,
+    easypeasy,
     indexing: indexingSummary,
     autoSetup,
     stripe,

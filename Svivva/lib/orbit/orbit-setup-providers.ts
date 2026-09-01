@@ -46,6 +46,19 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priority: 10,
   },
   {
+    id: "easypeasy",
+    name: "EasyPeasy.AI",
+    purpose:
+      "OpenAI-compatible AI gateway — gemini-3-flash and more for Orbit SEO copy without OpenAI billing",
+    priceLabel: "Credits · from easy-peasy.ai",
+    payUrl: "https://easy-peasy.ai/pricing",
+    docsUrl: "https://docs.easy-peasy.ai/api-reference/endpoint/chat-completions",
+    payNote:
+      "Paste API key in Launchpad EasyPeasy card — Orbit stores openaiBaseUrl=https://easy-peasy.ai/api automatically.",
+    envKey: "EASYPEASY_API_KEY",
+    priority: 5,
+  },
+  {
     id: "postiz",
     name: "Postiz (free social)",
     purpose:

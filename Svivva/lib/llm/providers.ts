@@ -1,5 +1,11 @@
 import OpenAI from "openai";
 import { getGeminiApiKey, getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl } from "@/lib/env";
+import {
+  getEasyPeasyModel,
+  getEasyPeasyModelFallbackChain,
+  getEasyPeasyTierId,
+  isEasyPeasyConfiguredFromEnv,
+} from "@/lib/easypeasy/config";
 
 /** Paid OpenAI default for Orbit marketing — override with ORBIT_AI_MODEL in env. */
 export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-5";
@@ -83,9 +89,17 @@ export function isOrbitAiConfigured(): boolean {
   return getOrbitActiveAiProvider() !== "none";
 }
 
+function isEasyPeasyOpenAiRoute(): boolean {
+  return isEasyPeasyConfiguredFromEnv();
+}
+
 export function getOrbitAiProviderLabel(provider: AiProvider = getOrbitActiveAiProvider()): string {
   switch (provider) {
     case "openai": {
+      if (isEasyPeasyOpenAiRoute()) {
+        const tier = getEasyPeasyTierId();
+        return `EasyPeasy ${tier} · ${getEasyPeasyModel()}`;
+      }
       const model = process.env.ORBIT_AI_MODEL?.trim() || ORBIT_DEFAULT_OPENAI_MODEL;
       return `OpenAI ${model}`;
     }
@@ -137,6 +151,7 @@ export function getOrbitDefaultModelForProvider(
       return "gemini-2.0-flash";
     case "replit":
     case "openai":
+      if (isEasyPeasyOpenAiRoute()) return getEasyPeasyModel();
       return ORBIT_DEFAULT_OPENAI_MODEL;
     case "ollama":
       return "llama3.2";
@@ -153,6 +168,9 @@ export function getOrbitModelFallbackChain(
       return ["gemini-2.0-flash", "gemini-1.5-flash"];
     case "replit":
     case "openai":
+      if (isEasyPeasyOpenAiRoute()) {
+        return getEasyPeasyModelFallbackChain();
+      }
       return [ORBIT_DEFAULT_OPENAI_MODEL, "gpt-4o", "gpt-4o-mini"];
     case "ollama":
       return ["llama3.2", "llama3.1", "mistral"];

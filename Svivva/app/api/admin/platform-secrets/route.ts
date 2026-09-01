@@ -13,11 +13,19 @@ import {
   lemonSqueezyCheckoutCapable,
   mergeLemonSqueezyConfig,
 } from "@/lib/lemonsqueezy/config";
+import {
+  EASYPEASY_BASE_URL,
+  isEasyPeasyActive,
+  isEasyPeasyBaseUrl,
+  mergeEasyPeasyConfig,
+} from "@/lib/easypeasy/config";
+import { EASYPEASY_TIERS, resolveEasyPeasyTierId } from "@/lib/easypeasy/tiers";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
     openaiBaseUrl: z.string().optional(),
+    easypeasyTier: z.enum(["standard", "balanced", "premium"]).optional(),
     stripeSecretKey: z.string().optional(),
     stripePublishableKey: z.string().optional(),
     stripeWebhookSecret: z.string().optional(),
@@ -76,11 +84,23 @@ export async function GET() {
         : null,
     );
     const stripeReady = await getStripeReadyStatus();
+    const easypeasyConfig = mergeEasyPeasyConfig(
+      row
+        ? {
+            apiKey: row.openaiApiKey,
+            baseUrl: row.openaiBaseUrl,
+            tierId: row.easypeasyTier,
+          }
+        : null,
+    );
 
     return NextResponse.json({
       stored: {
         openai: !!row?.openaiApiKey?.trim(),
         openaiBaseUrl: !!row?.openaiBaseUrl?.trim(),
+        easypeasyApiKey: !!(row?.openaiApiKey?.trim() && isEasyPeasyBaseUrl(row.openaiBaseUrl)),
+        easypeasyBaseUrl: !!isEasyPeasyBaseUrl(row?.openaiBaseUrl),
+        easypeasyTier: !!row?.easypeasyTier?.trim(),
         stripeSecret: !!row?.stripeSecretKey?.trim(),
         stripePublishable: !!row?.stripePublishableKey?.trim(),
         stripeWebhook: !!row?.stripeWebhookSecret?.trim(),
@@ -121,6 +141,20 @@ export async function GET() {
         pro: lemonSqueezyCheckoutCapable(lemonConfig, "pro"),
         enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "enterprise"),
       },
+      easypeasy: {
+        active: isEasyPeasyActive(easypeasyConfig),
+        model: easypeasyConfig.model,
+        tierId: easypeasyConfig.tierId,
+        baseUrl: EASYPEASY_BASE_URL,
+        tiers: EASYPEASY_TIERS.map((t) => ({
+          id: t.id,
+          name: t.name,
+          model: t.model,
+          tagline: t.tagline,
+          minEasyPeasyPlan: t.minEasyPeasyPlan,
+          orbitUse: t.orbitUse,
+        })),
+      },
       stripeReady,
       updatedAt: row?.updatedAt?.toISOString() ?? null,
     });
@@ -148,6 +182,10 @@ export async function POST(request: Request) {
 
     if ("openaiApiKey" in body) patch.openaiApiKey = toPatchValue(body.openaiApiKey);
     if ("openaiBaseUrl" in body) patch.openaiBaseUrl = toPatchValue(body.openaiBaseUrl);
+    if ("easypeasyTier" in body) {
+      const raw = body.easypeasyTier?.trim();
+      patch.easypeasyTier = raw ? resolveEasyPeasyTierId(raw) : null;
+    }
     if ("stripeSecretKey" in body) patch.stripeSecretKey = toPatchValue(body.stripeSecretKey);
     if ("stripePublishableKey" in body)
       patch.stripePublishableKey = toPatchValue(body.stripePublishableKey);

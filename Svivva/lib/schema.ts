@@ -1659,6 +1659,7 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   lemonSqueezyWebhookSecret: text("lemon_squeezy_webhook_secret"),
   lemonSqueezyCheckoutUrlPro: text("lemon_squeezy_checkout_url_pro"),
   lemonSqueezyCheckoutUrlEnterprise: text("lemon_squeezy_checkout_url_enterprise"),
+  easypeasyTier: text("easypeasy_tier"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

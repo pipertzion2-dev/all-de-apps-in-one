@@ -17,6 +17,8 @@ import {
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
+import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
 import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
 import { formatOrbitDbSetupError } from "@/lib/db-connection-error";
@@ -36,6 +38,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    await hydratePlatformSecrets();
     const creds = await loadMarketingPlatformCredentials();
     const status = await getMarketingCredentialStatus();
     const lastRun = await loadLastAutopilotRun();
@@ -102,10 +105,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 503 });
     }
 
+    const easypeasy = await ensureEasyPeasyForOrbit({
+      tierId: "premium",
+      forceTier: false,
+      testConnection: true,
+    });
+
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
     return NextResponse.json({
       ...result,
       ok: result.ok,
+      easypeasy,
       ai: {
         configured: isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),
