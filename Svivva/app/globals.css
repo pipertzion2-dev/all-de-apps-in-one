@@ -438,3 +438,74 @@
     transform: none !important;
   }
 }
+
+/* Pink camo — urrthang all-in-one Orbit button */
+@keyframes pink-camo-drift {
+  0%,
+  100% {
+    background-position:
+      0% 0%,
+      100% 100%,
+      50% 50%,
+      0 0;
+  }
+  50% {
+    background-position:
+      100% 40%,
+      0% 60%,
+      30% 80%,
+      0 0;
+  }
+}
+
+.pink-camo-btn {
+  background-color: #ff69b4;
+  background-image:
+    radial-gradient(ellipse 42% 36% at 18% 28%, #ffc0cb 0%, transparent 70%),
+    radial-gradient(ellipse 38% 44% at 82% 22%, #c71585 0%, transparent 68%),
+    radial-gradient(ellipse 48% 40% at 72% 78%, #db7093 0%, transparent 72%),
+    radial-gradient(ellipse 36% 38% at 28% 82%, #ff1493 0%, transparent 65%),
+    radial-gradient(ellipse 44% 34% at 52% 48%, #8b2252 0%, transparent 60%),
+    linear-gradient(145deg, #ffb6c1 0%, #ff69b4 42%, #db7093 100%);
+  background-size:
+    120% 120%,
+    120% 120%,
+    120% 120%,
+    120% 120%,
+    120% 120%,
+    100% 100%;
+  animation: pink-camo-drift 10s ease-in-out infinite;
+  box-shadow:
+    0 6px 22px rgba(199, 21, 85, 0.5),
+    0 0 0 3px rgba(255, 105, 180, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.45) inset;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(80, 0, 40, 0.65);
+  border: 2px solid rgba(255, 192, 203, 0.75);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pink-camo-btn:hover:not(:disabled) {
+  filter: brightness(1.06) saturate(1.1);
+}
+
+.pink-camo-btn:disabled {
+  animation: none;
+  filter: brightness(0.92);
+}
+
+.pink-camo-panel {
+  border-color: rgba(255, 105, 180, 0.55) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 182, 193, 0.14),
+    rgba(219, 112, 147, 0.08)
+  ) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pink-camo-btn {
+    animation: none !important;
+  }
+}
