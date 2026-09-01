@@ -75,6 +75,7 @@ export function UrrthangSubscriberGate() {
         </div>
 
         <AdminCodeForm
+          scope="membership"
           title="Subscriber access code"
           description={
             plansData?.membershipUnlock?.instructions ??

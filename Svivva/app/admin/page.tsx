@@ -66,6 +66,7 @@ export default function AdminAccessPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <AdminCodeForm
+              scope="admin"
               title="Owner passcode"
               description="Six-digit admin passcode."
               onSuccess={() => {

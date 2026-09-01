@@ -5,13 +5,8 @@ import { siteCookieDomain } from "@/lib/site-cookie-domain";
 const ADMIN_COOKIE = "svivva_admin";
 
 /**
- * The Orbit admin passcode. This has to work in production: the UI hands the
- * code to the user in several places (/orbit, /dashboard/gsc-connect,
- * /dashboard/settings, and the Orbit health hints), so it is documentation, not
- * a secret. Production previously fell through to an empty expected value,
- * which made every code fail and locked the Orbit gate outright.
- *
- * Set ADMIN_ACCESS_CODE to replace it with something private.
+ * Owner Orbit admin passcode. Set ADMIN_ACCESS_CODE in production (Vercel env).
+ * Never shown in public UI — unlock at /admin only.
  */
 const DEFAULT_ADMIN_CODE = "272727";
 

@@ -91,7 +91,11 @@ export default function SettingsPage() {
       </Card>
 
       {!me?.isAdmin && !me?.isMembershipAccess && (
-        <AdminCodeForm description="Enter your Pro access code. Owner admin passcode is separate from subscriber urrthang access." />
+        <AdminCodeForm
+          scope="membership"
+          title="Subscriber access code"
+          description="After Cash App payment, enter your code to run urrthang on Launchpad. Orbit admin is owner-only."
+        />
       )}
       {me?.isMembershipAccess && !me?.isAdmin && (
         <Card>

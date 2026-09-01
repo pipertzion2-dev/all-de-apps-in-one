@@ -222,6 +222,7 @@ export default function GscConnectOrb({
           </DialogHeader>
           <div className="p-2">
             <AdminCodeForm
+              scope="admin"
               title="Unlock to connect Google"
               description="Enter the 6-digit admin code, then we'll open Google sign-in."
               onSuccess={() => {

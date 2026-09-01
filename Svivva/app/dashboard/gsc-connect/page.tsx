@@ -321,6 +321,7 @@ export default function GscConnectPage() {
               checks.
             </p>
             <AdminCodeForm
+              scope="admin"
               title="Unlock Google Search Console"
               description="Use the same owner passcode as Orbit Admin."
               onSuccess={() => {
@@ -735,6 +736,7 @@ export default function GscConnectPage() {
           </DialogHeader>
           <div className="p-2">
             <AdminCodeForm
+              scope="admin"
               title="Unlock to connect Google"
               description="Enter the 6-digit admin code, then we'll open Google sign-in."
               onSuccess={() => {
