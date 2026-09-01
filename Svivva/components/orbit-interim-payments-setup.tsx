@@ -172,8 +172,9 @@ export function OrbitInterimPaymentsSetup() {
           <div className="space-y-1.5">
             <Label className="text-xs">PayPal link</Label>
             <Input
-              type="url"
+              type="text"
               inputMode="url"
+              autoComplete="off"
               placeholder={
                 status?.stored.interimPaypalUrl
                   ? "https://paypal.me/… (saved)"
