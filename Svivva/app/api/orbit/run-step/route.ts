@@ -51,6 +51,8 @@ import {
 } from "@/lib/orbit/content-templates";
 import { isSeoIndexStepId } from "@/lib/orbit/seo-index-phases";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
+import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
+import { formatOrbitDbSetupError } from "@/lib/db-connection-error";
 
 const BASE_URL = getSiteUrl();
 
@@ -233,6 +235,13 @@ export async function POST(req: NextRequest) {
   try {
     if (!(await isOrbitAdminAllowed(req)))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    try {
+      await ensureOrbitDbReady();
+    } catch (e) {
+      const msg = formatOrbitDbSetupError(e) || String(e);
+      return NextResponse.json({ error: msg }, { status: 503 });
+    }
 
     const userId = (await resolveOrbitInternalUserId()) || "orbit-admin";
 
@@ -5121,6 +5130,7 @@ Return JSON:
       { status: 400 },
     );
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    const setupMsg = formatOrbitDbSetupError(e);
+    return NextResponse.json({ error: setupMsg || String(e) }, { status: setupMsg ? 503 : 500 });
   }
 }
