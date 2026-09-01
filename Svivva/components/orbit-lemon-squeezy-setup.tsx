@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ExternalLink, Citrus } from "lucide-react";
+import { Loader2, ExternalLink, Citrus, CheckCircle2 } from "lucide-react";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
 
 type LemonStatus = {
@@ -19,6 +19,7 @@ type LemonStatus = {
   };
   lemonSqueezy: {
     active: boolean;
+    starter: boolean;
     pro: boolean;
     enterprise: boolean;
   };
@@ -33,10 +34,10 @@ export function OrbitLemonSqueezySetup() {
   const [apiKey, setApiKey] = useState("");
   const [storeId, setStoreId] = useState("");
   const [variantIdPro, setVariantIdPro] = useState("");
-  const [variantIdEnterprise, setVariantIdEnterprise] = useState("");
+  const [variantIdStarter, setVariantIdStarter] = useState("");
   const [webhookSecret, setWebhookSecret] = useState("");
   const [checkoutUrlPro, setCheckoutUrlPro] = useState("");
-  const [checkoutUrlEnterprise, setCheckoutUrlEnterprise] = useState("");
+  const [checkoutUrlStarter, setCheckoutUrlStarter] = useState("");
 
   const webhookUrl =
     typeof window !== "undefined"
@@ -69,15 +70,14 @@ export function OrbitLemonSqueezySetup() {
       if (apiKey.trim()) body.lemonSqueezyApiKey = apiKey.trim();
       if (storeId.trim()) body.lemonSqueezyStoreId = storeId.trim();
       if (variantIdPro.trim()) body.lemonSqueezyVariantIdPro = variantIdPro.trim();
-      if (variantIdEnterprise.trim())
-        body.lemonSqueezyVariantIdEnterprise = variantIdEnterprise.trim();
+      if (variantIdStarter.trim()) body.lemonSqueezyVariantIdEnterprise = variantIdStarter.trim();
       if (webhookSecret.trim()) body.lemonSqueezyWebhookSecret = webhookSecret.trim();
       if (checkoutUrlPro.trim()) body.lemonSqueezyCheckoutUrlPro = checkoutUrlPro.trim();
-      if (checkoutUrlEnterprise.trim())
-        body.lemonSqueezyCheckoutUrlEnterprise = checkoutUrlEnterprise.trim();
+      if (checkoutUrlStarter.trim())
+        body.lemonSqueezyCheckoutUrlEnterprise = checkoutUrlStarter.trim();
 
       if (Object.keys(body).length === 0) {
-        setMessage("Paste at least one field (checkout URL or API + store + variant), then save.");
+        setMessage("Paste at least one checkout URL (Starter + Pro), then save.");
         setSaving(false);
         return;
       }
@@ -93,11 +93,11 @@ export function OrbitLemonSqueezySetup() {
       setApiKey("");
       setStoreId("");
       setVariantIdPro("");
-      setVariantIdEnterprise("");
+      setVariantIdStarter("");
       setWebhookSecret("");
       setCheckoutUrlPro("");
-      setCheckoutUrlEnterprise("");
-      setMessage("Saved — Lemon Squeezy checkout is live on Billing when Stripe is not verified.");
+      setCheckoutUrlStarter("");
+      setMessage("Saved — Lemon Squeezy checkout is live on Billing ($20 Starter + $50 Pro).");
       await load();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : String(e));
@@ -107,6 +107,8 @@ export function OrbitLemonSqueezySetup() {
   };
 
   const active = status?.lemonSqueezy.active;
+  const starterLive = status?.lemonSqueezy.starter;
+  const proLive = status?.lemonSqueezy.pro;
 
   return (
     <div
@@ -119,7 +121,7 @@ export function OrbitLemonSqueezySetup() {
         </div>
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-bold text-sm tracking-tight">Lemon Squeezy subscriptions</h3>
+            <h3 className="font-bold text-sm tracking-tight">Lemon Squeezy — live checkout</h3>
             {status && (
               <span
                 className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${
@@ -133,8 +135,10 @@ export function OrbitLemonSqueezySetup() {
             )}
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Use Lemon Squeezy while Stripe verifies — merchant-of-record handles tax/VAT and
-            subscriptions auto-activate via webhook. Create a store + $49/mo Pro product at{" "}
+            Merchant-of-record billing for{" "}
+            <strong className="text-foreground">Starter $20/mo</strong> and{" "}
+            <strong className="text-foreground">Pro $50/mo</strong>. Create two subscription
+            products at{" "}
             <a
               href="https://app.lemonsqueezy.com/"
               target="_blank"
@@ -144,10 +148,26 @@ export function OrbitLemonSqueezySetup() {
               Lemon Squeezy
               <ExternalLink className="h-3 w-3" />
             </a>
-            .
+            , then paste each checkout link below.
           </p>
         </div>
       </div>
+
+      {active && (
+        <div
+          className="rounded-xl border border-emerald-500/35 bg-emerald-500/8 px-3 py-2 flex flex-wrap gap-3 text-xs"
+          data-testid="lemon-squeezy-status"
+        >
+          <span className="inline-flex items-center gap-1 text-emerald-800 dark:text-emerald-200">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Starter ($20): {starterLive ? "ready" : "needs URL"}
+          </span>
+          <span className="inline-flex items-center gap-1 text-emerald-800 dark:text-emerald-200">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Pro ($50): {proLive ? "ready" : "needs URL"}
+          </span>
+        </div>
+      )}
 
       {loadError && (
         <p className="text-xs text-destructive border border-destructive/30 rounded-lg px-2 py-1.5">
@@ -157,7 +177,7 @@ export function OrbitLemonSqueezySetup() {
 
       <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[11px] space-y-1">
         <p className="font-semibold text-foreground">
-          Webhook URL (paste in Lemon Squeezy → Settings → Webhooks)
+          Webhook URL (Lemon Squeezy → Settings → Webhooks)
         </p>
         <code className="block break-all text-[10px]">{webhookUrl}</code>
         <p className="text-muted-foreground">
@@ -168,7 +188,22 @@ export function OrbitLemonSqueezySetup() {
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <Label className="text-xs">Quick setup — Pro checkout URL (easiest)</Label>
+          <Label className="text-xs font-semibold">Starter checkout URL — $20/mo</Label>
+          <Input
+            type="url"
+            placeholder={
+              status?.stored.lemonSqueezyCheckoutUrlEnterprise
+                ? "https://yourstore.lemonsqueezy.com/checkout/… (saved)"
+                : "https://yourstore.lemonsqueezy.com/checkout/buy/…"
+            }
+            value={checkoutUrlStarter}
+            onChange={(e) => setCheckoutUrlStarter(e.target.value)}
+            className="h-9 text-xs font-mono"
+            data-testid="lemon-checkout-url-starter"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold">Pro checkout URL — $50/mo</Label>
           <Input
             type="url"
             placeholder={
@@ -185,7 +220,7 @@ export function OrbitLemonSqueezySetup() {
 
         <details className="text-xs">
           <summary className="cursor-pointer font-semibold text-foreground">
-            API setup (auto checkout URLs)
+            API setup (optional — auto-builds checkout URLs)
           </summary>
           <div className="mt-3 space-y-3">
             <div className="space-y-1.5">
@@ -201,7 +236,7 @@ export function OrbitLemonSqueezySetup() {
                 className="h-9 text-xs font-mono"
               />
             </div>
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Store ID</Label>
                 <Input
@@ -212,11 +247,20 @@ export function OrbitLemonSqueezySetup() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Pro variant ID ($49/mo)</Label>
+                <Label className="text-xs">Starter variant ID ($20)</Label>
+                <Input
+                  value={variantIdStarter}
+                  onChange={(e) => setVariantIdStarter(e.target.value)}
+                  placeholder={status?.stored.lemonSqueezyVariantIdEnterprise ? "Saved" : "67890"}
+                  className="h-9 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Pro variant ID ($50)</Label>
                 <Input
                   value={variantIdPro}
                   onChange={(e) => setVariantIdPro(e.target.value)}
-                  placeholder={status?.stored.lemonSqueezyVariantIdPro ? "Saved" : "67890"}
+                  placeholder={status?.stored.lemonSqueezyVariantIdPro ? "Saved" : "67891"}
                   className="h-9 text-xs font-mono"
                 />
               </div>

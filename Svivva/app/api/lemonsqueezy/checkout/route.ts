@@ -6,7 +6,7 @@ import { createLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy/checkout";
 import { loadLemonSqueezyConfig, lemonSqueezyCheckoutCapable } from "@/lib/lemonsqueezy/config";
 
 const bodySchema = z.object({
-  tier: z.enum(["pro", "enterprise"]),
+  tier: z.enum(["starter", "pro", "enterprise"]),
 });
 
 export async function POST(req: NextRequest) {

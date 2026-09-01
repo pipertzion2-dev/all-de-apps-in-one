@@ -144,8 +144,9 @@ export async function GET() {
       },
       lemonSqueezy: {
         active: isLemonSqueezyActive(lemonConfig),
+        starter: lemonSqueezyCheckoutCapable(lemonConfig, "starter"),
         pro: lemonSqueezyCheckoutCapable(lemonConfig, "pro"),
-        enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "enterprise"),
+        enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "starter"),
       },
       easypeasy: {
         active: isEasyPeasyActive(easypeasyConfig),

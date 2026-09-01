@@ -7,10 +7,13 @@ import {
 } from "@/lib/billing/plans";
 import { inferBillingTier } from "@/lib/stripe/catalog";
 
+export type BillingCheckoutProvider = "lemonsqueezy" | "stripe" | "link" | null;
+
 export type ResolvedBillingPlan = BillingPlanDefinition & {
   priceId: string | null;
   paymentLink: string | null;
   checkoutAvailable: boolean;
+  checkoutProvider: BillingCheckoutProvider;
 };
 
 type StripePriceRow = {
@@ -52,6 +55,15 @@ function priceIdFromStripeProducts(
   return null;
 }
 
+function lemonAvailableForTier(
+  tier: BillingPlanTier,
+  opts: { lemonStarter?: boolean; lemonPro?: boolean },
+): boolean {
+  if (tier === "starter") return !!opts.lemonStarter;
+  if (tier === "pro") return !!opts.lemonPro;
+  return false;
+}
+
 export function resolveBillingPlanOffers(opts: {
   stripeProducts?: StripeProductRow[];
   interim: InterimPaymentConfig;
@@ -63,19 +75,27 @@ export function resolveBillingPlanOffers(opts: {
 
   return BILLING_PLANS.map((plan) => {
     if (plan.tier === "free") {
-      return { ...plan, priceId: null, paymentLink: null, checkoutAvailable: false };
+      return {
+        ...plan,
+        priceId: null,
+        paymentLink: null,
+        checkoutAvailable: false,
+        checkoutProvider: null,
+      };
     }
 
     const priceId =
       priceIdFromStripeProducts(plan.tier, products) ?? envPriceIdForTier(plan.tier) ?? null;
     const paymentLink = interimLinkForPlan(plan, opts.interim);
-    const checkoutAvailable = Boolean(
-      (opts.stripeCheckoutReady && priceId) ||
-      paymentLink ||
-      (plan.tier === "starter" && opts.lemonStarter) ||
-      (plan.tier === "pro" && opts.lemonPro),
-    );
+    const lemonOk = lemonAvailableForTier(plan.tier, opts);
 
-    return { ...plan, priceId, paymentLink, checkoutAvailable };
+    let checkoutProvider: BillingCheckoutProvider = null;
+    if (lemonOk) checkoutProvider = "lemonsqueezy";
+    else if (opts.stripeCheckoutReady && priceId) checkoutProvider = "stripe";
+    else if (paymentLink) checkoutProvider = "link";
+
+    const checkoutAvailable = checkoutProvider !== null;
+
+    return { ...plan, priceId, paymentLink, checkoutAvailable, checkoutProvider };
   });
 }
