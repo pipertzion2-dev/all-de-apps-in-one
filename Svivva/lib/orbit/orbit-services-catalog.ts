@@ -247,9 +247,10 @@ export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
   {
     id: "easypeasy",
     category: "ai-marketing",
-    billing: "paid",
+    billing: "free-tier-paid-upgrade",
     name: "EasyPeasy.AI",
-    priceLabel: "Credits · easy-peasy.ai",
+    priceLabel: "Free tier · credits for premium models",
+    freeTier: "1,000 words/month free — enough to test Orbit marketing runs.",
     purpose:
       "OpenAI-compatible gateway for Orbit marketing — default model gemini-3-flash. Same SEO/autopilot jobs without an OpenAI sk- key.",
     steps: [

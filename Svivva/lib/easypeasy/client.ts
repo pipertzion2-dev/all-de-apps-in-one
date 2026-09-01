@@ -7,7 +7,8 @@ import {
 } from "./config";
 
 export type EasyPeasyTestResult =
-  { ok: true; model: string; reply: string } | { ok: false; error: string; status?: number };
+  | { ok: true; model: string; reply: string }
+  | { ok: false; error: string; status?: number };
 
 export function buildEasyPeasyClient(apiKey: string, baseUrl = EASYPEASY_BASE_URL): OpenAI {
   return new OpenAI({
