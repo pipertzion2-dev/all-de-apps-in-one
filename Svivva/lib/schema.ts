@@ -1644,6 +1644,11 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   nextPublicSiteUrl: text("next_public_site_url"),
   googleGscClientId: text("google_gsc_client_id"),
   googleGscClientSecret: text("google_gsc_client_secret"),
+  interimStripePaymentLinkPro: text("interim_stripe_payment_link_pro"),
+  interimStripePaymentLinkEnterprise: text("interim_stripe_payment_link_enterprise"),
+  interimPaypalUrl: text("interim_paypal_url"),
+  interimVenmoUrl: text("interim_venmo_url"),
+  interimPaymentNote: text("interim_payment_note"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
