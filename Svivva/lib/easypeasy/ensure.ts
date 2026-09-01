@@ -96,7 +96,7 @@ export async function ensureEasyPeasyForOrbit(
     config = merged;
   }
 
-  const resolvedTier = resolveEasyPeasyTierId(config.tierId ?? tierId);
+  const resolvedTier = resolveEasyPeasyTierId(patch.easypeasyTier ?? config.tierId ?? tierId);
   let tested = false;
   let testReply: string | undefined;
   let error: string | undefined;

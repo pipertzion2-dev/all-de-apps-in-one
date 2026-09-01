@@ -1,4 +1,3 @@
-import { getPlatformRuntimeSecretsRow } from "@/lib/platform-runtime-secrets";
 import {
   EASYPEASY_DEFAULT_TIER_ID,
   getEasyPeasyModelForTier,
@@ -29,9 +28,9 @@ function trimKey(v: string | null | undefined): string | null {
 function fromEnv(): EasyPeasyConfig {
   const envKey = trimKey(process.env.EASYPEASY_API_KEY);
   const openaiKey = trimKey(process.env.ORBIT_OPENAI_API_KEY || process.env.OPENAI_API_KEY);
-  const base =
-    trimKey(process.env.ORBIT_OPENAI_BASE_URL || process.env.AI_INTEGRATIONS_OPENAI_BASE_URL) ||
-    EASYPEASY_BASE_URL;
+  const base = trimKey(
+    process.env.ORBIT_OPENAI_BASE_URL || process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  );
 
   if (envKey) {
     return {
@@ -70,7 +69,14 @@ export function mergeEasyPeasyConfig(
   const dbBase = trimKey(db?.baseUrl);
   const dbTier = resolveEasyPeasyTierId(db?.tierId ?? undefined);
 
-  if (env.apiKey) return env;
+  if (env.apiKey) {
+    const tierId = db?.tierId ? dbTier : env.tierId;
+    return {
+      ...env,
+      tierId,
+      model: getEasyPeasyModelForTier(tierId),
+    };
+  }
 
   if (dbKey && isEasyPeasyBaseUrl(dbBase)) {
     const tierId = dbTier;
@@ -86,6 +92,7 @@ export function mergeEasyPeasyConfig(
 }
 
 export async function loadEasyPeasyConfig(): Promise<EasyPeasyConfig> {
+  const { getPlatformRuntimeSecretsRow } = await import("@/lib/platform-runtime-secrets");
   const row = await getPlatformRuntimeSecretsRow();
   return mergeEasyPeasyConfig(
     row

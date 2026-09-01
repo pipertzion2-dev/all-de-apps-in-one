@@ -51,6 +51,12 @@ import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
 import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import {
+  PINK_CAMO_BUTTON_ACTIVE_STYLE,
+  PINK_CAMO_BUTTON_CLASS,
+  PINK_CAMO_BUTTON_STYLE,
+  URRTHANG_LABEL,
+} from "@/lib/ui-pink-camo-button";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -58,7 +64,13 @@ const BURG = "#6B2C4E";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type TaskStatus =
-  "posted" | "done" | "prepared" | "failed" | "needs_credentials" | "skipped" | "running";
+  | "posted"
+  | "done"
+  | "prepared"
+  | "failed"
+  | "needs_credentials"
+  | "skipped"
+  | "running";
 
 type Task = {
   id: string;
@@ -656,12 +668,12 @@ export function OrbitOneClickLaunch({
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg font-black text-foreground leading-tight">
               {running
-                ? `Running everything${marketingModel ? ` (${marketingModel})` : ""}…`
+                ? `Running ${URRTHANG_LABEL}${marketingModel ? ` (${marketingModel})` : ""}…`
                 : hasRun
-                  ? "Everything complete"
+                  ? `${URRTHANG_LABEL} complete`
                   : aiProviderLabel
-                    ? `Everything — one button (${aiProviderLabel})`
-                    : "Everything — one button (EasyPeasy AI)"}
+                    ? `${URRTHANG_LABEL} — one button (${aiProviderLabel})`
+                    : `${URRTHANG_LABEL} — one button (EasyPeasy AI)`}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
@@ -821,8 +833,8 @@ export function OrbitOneClickLaunch({
               onClick={run}
               disabled={running || quickStartRunning}
               data-testid="orbit-one-click-launch"
-              className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] sm:min-h-0"
-              style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
+              className={`flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl text-base sm:text-lg min-h-[120px] sm:min-h-0 ${PINK_CAMO_BUTTON_CLASS}`}
+              style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
             >
               {running ? (
                 <>
@@ -830,11 +842,11 @@ export function OrbitOneClickLaunch({
                 </>
               ) : hasRun ? (
                 <>
-                  <RefreshCw className="w-5 h-5" /> Run autopilot again
+                  <RefreshCw className="w-5 h-5" /> {URRTHANG_LABEL} again
                 </>
               ) : (
                 <>
-                  <Rocket className="w-5 h-5" /> Run everything
+                  <Rocket className="w-5 h-5" /> {URRTHANG_LABEL}
                 </>
               )}
             </button>
