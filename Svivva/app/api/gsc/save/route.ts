@@ -15,7 +15,10 @@ import {
   parseGoogleServiceAccount,
 } from "@/lib/google-service-account";
 import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
-import { hydratePlatformSecrets, patchPlatformRuntimeSecrets } from "@/lib/platform-runtime-secrets";
+import {
+  hydratePlatformSecrets,
+  patchPlatformRuntimeSecrets,
+} from "@/lib/platform-runtime-secrets";
 import {
   formatDatabaseConnectionError,
   isMissingSeedCredentialsTableError,
