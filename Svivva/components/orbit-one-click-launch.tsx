@@ -47,7 +47,6 @@ import {
   CreditCard,
   Search,
   ExternalLink,
-  Lock,
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
@@ -317,7 +316,7 @@ export function OrbitOneClickLaunch({
     queryFn: () => fetch("/api/billing/plans").then((r) => r.json()),
   });
 
-  const urrthangUnlocked = Boolean(
+  const canRunUrrthang = Boolean(
     isPro || isMembershipAccess || meData?.isAdmin || meData?.isMembershipAccess,
   );
   const starterPay = plansData?.plans.find((p) => p.tier === "starter");
@@ -564,6 +563,17 @@ export function OrbitOneClickLaunch({
     } finally {
       setQuickStartRunning(false);
     }
+  }
+
+  function handleUrrthangClick() {
+    if (!canRunUrrthang) {
+      const link = proPay?.paymentLink ?? starterPay?.paymentLink;
+      if (link) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
+    void run();
   }
 
   async function run() {
@@ -858,38 +868,61 @@ export function OrbitOneClickLaunch({
           )}
         </div>
 
-        {/* urrthang — primary all-in-one control */}
-        {!urrthangUnlocked ? (
-          <div
-            className="rounded-xl border-2 border-fuchsia-500/40 bg-fuchsia-500/8 p-4 space-y-4"
-            data-testid="urrthang-cashapp-unlock"
-          >
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-300 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-foreground">
-                  Pay with Cash App to unlock {URRTHANG_LABEL}
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Stripe is still verifying — pay $
-                  {starterPay?.priceLabel?.replace("$", "") ?? "20"} or $
-                  {proPay?.priceLabel?.replace("$", "") ?? "50"} to{" "}
-                  <strong className="text-foreground">$pipertzion</strong>, then enter your access
-                  code below.
-                </p>
-              </div>
-            </div>
+        {/* urrthang — runs Orbit for subscribers; opens Cash App for users who haven't paid */}
+        <button
+          ref={urrthangButtonRef}
+          type="button"
+          onClick={handleUrrthangClick}
+          disabled={running || quickStartRunning}
+          data-testid="orbit-one-click-launch"
+          data-urrthang="true"
+          aria-label={
+            canRunUrrthang
+              ? `${URRTHANG_LABEL} — run all Orbit marketing and indexing`
+              : `${URRTHANG_LABEL} — pay with Cash App to subscribe`
+          }
+          className={`w-full flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
+          style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
+        >
+          {running ? (
+            <>
+              <Loader2 className="w-6 h-6 animate-spin" /> Working…
+            </>
+          ) : !canRunUrrthang ? (
+            <>
+              <Rocket className="w-6 h-6" />
+              {URRTHANG_LABEL} — Cash App {proPay?.priceLabel ?? "$50"}/mo
+              <ExternalLink className="w-5 h-5 opacity-90" />
+            </>
+          ) : hasRun ? (
+            <>
+              <RefreshCw className="w-6 h-6" /> {URRTHANG_LABEL} again
+            </>
+          ) : (
+            <>
+              <Rocket className="w-6 h-6" /> {URRTHANG_LABEL}
+            </>
+          )}
+        </button>
+
+        {!canRunUrrthang && (
+          <div className="space-y-3" data-testid="urrthang-user-cash-pay">
+            <p className="text-xs text-center text-muted-foreground leading-relaxed">
+              Stripe is still verifying — users pay via Cash App to{" "}
+              <strong className="text-foreground">$pipertzion</strong>, then enter an access code
+              to run {URRTHANG_LABEL}.
+            </p>
             <div className="flex flex-col sm:flex-row gap-2">
               {starterPay?.paymentLink ? (
                 <a
                   href={starterPay.paymentLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold border border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
                   data-testid="urrthang-cashapp-starter"
                 >
-                  Cash App — Starter {starterPay.priceLabel}/mo
-                  <ExternalLink className="w-4 h-4" />
+                  Starter {starterPay.priceLabel}/mo
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               ) : null}
               {proPay?.paymentLink ? (
@@ -897,45 +930,19 @@ export function OrbitOneClickLaunch({
                   href={proPay.paymentLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-emerald-700 hover:bg-emerald-800 text-white"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold border border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
                   data-testid="urrthang-cashapp-pro"
                 >
-                  Cash App — Pro {proPay.priceLabel}/mo
-                  <ExternalLink className="w-4 h-4" />
+                  Pro {proPay.priceLabel}/mo
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               ) : null}
             </div>
             <AdminCodeForm
               title="Access code"
-              description="After Cash App payment, enter the code we sent you — this turns on urrthang."
+              description="After Cash App payment, enter your code here to run urrthang."
             />
           </div>
-        ) : (
-          <button
-            ref={urrthangButtonRef}
-            type="button"
-            onClick={run}
-            disabled={running || quickStartRunning}
-            data-testid="orbit-one-click-launch"
-            data-urrthang="true"
-            aria-label={`${URRTHANG_LABEL} — run all Orbit marketing and indexing`}
-            className={`w-full flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
-            style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
-          >
-            {running ? (
-              <>
-                <Loader2 className="w-6 h-6 animate-spin" /> Working…
-              </>
-            ) : hasRun ? (
-              <>
-                <RefreshCw className="w-6 h-6" /> {URRTHANG_LABEL} again
-              </>
-            ) : (
-              <>
-                <Rocket className="w-6 h-6" /> {URRTHANG_LABEL}
-              </>
-            )}
-          </button>
         )}
 
         {running && (
@@ -1406,17 +1413,22 @@ export function OrbitOneClickLaunch({
         </div>
       )}
 
-      {urrthangUnlocked && urrthangPinned && !running && (
+      {urrthangPinned && !running && (
         <div className="sticky bottom-3 z-20 px-4 sm:px-5 pb-1">
           <button
             type="button"
-            onClick={run}
+            onClick={handleUrrthangClick}
             disabled={quickStartRunning}
             className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm shadow-lg ${PINK_CAMO_BUTTON_CLASS}`}
             style={PINK_CAMO_BUTTON_STYLE}
-            aria-label={`${URRTHANG_LABEL} — scroll back up or tap to run`}
+            aria-label={
+              canRunUrrthang
+                ? `${URRTHANG_LABEL} — scroll back up or tap to run`
+                : `${URRTHANG_LABEL} — pay with Cash App`
+            }
           >
-            <Rocket className="w-4 h-4" /> {URRTHANG_LABEL}
+            <Rocket className="w-4 h-4" />{" "}
+            {canRunUrrthang ? URRTHANG_LABEL : `${URRTHANG_LABEL} · Cash App`}
           </button>
         </div>
       )}
