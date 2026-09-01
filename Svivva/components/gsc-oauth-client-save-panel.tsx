@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authFetch, parseAuthJsonResponse } from "@/hooks/use-auth";
 import { parseGscOAuthCredentialsFromFields } from "@/lib/gsc-oauth-credentials";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
+import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
 import {
   CHROME_SILVER_BUTTON_CLASS,
   CHROME_SILVER_BUTTON_STYLE,
@@ -13,12 +14,15 @@ import {
 type Props = {
   /** Tighter layout for Orbit Admin mission control */
   compact?: boolean;
+  /** Where Google sends the user after OAuth (Orbit Admin path). */
+  connectReturnTo?: string;
   onSaved?: () => void;
   "data-testid"?: string;
 };
 
 export function GscOAuthClientSavePanel({
   compact = false,
+  connectReturnTo = "/dashboard/orbit",
   onSaved,
   "data-testid": testId = "orbit-admin-save-oauth-client",
 }: Props) {
@@ -63,11 +67,9 @@ export function GscOAuthClientSavePanel({
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
-    onSuccess: (result) => {
-      const text =
-        result.message || "Google OAuth client saved — press the camo orb to connect Google.";
-      setFeedback({ ok: true, text });
+    onSuccess: () => {
       onSaved?.();
+      window.location.assign(gscOAuthConnectUrl(connectReturnTo));
     },
     onError: (e: Error) => setFeedback({ ok: false, text: gscOAuthErrorMessage(e.message) }),
   });
@@ -85,7 +87,7 @@ export function GscOAuthClientSavePanel({
         Google OAuth client
       </p>
       <p className={`text-muted-foreground leading-relaxed ${compact ? "text-[10px]" : "text-xs"}`}>
-        Paste Client ID + secret from Google Cloud, or paste the full JSON into either field.
+        Paste Client ID + secret, then Connect bro saves credentials and opens Google sign-in.
       </p>
       <div className="space-y-2">
         <input
@@ -129,7 +131,7 @@ export function GscOAuthClientSavePanel({
         style={CHROME_SILVER_BUTTON_STYLE}
         data-testid={`${testId}-button`}
       >
-        {saveMutation.isPending ? "Saving…" : "Save OAuth client"}
+        {saveMutation.isPending ? "Connecting bro…" : "Connect bro"}
       </button>
       {feedback && (
         <p

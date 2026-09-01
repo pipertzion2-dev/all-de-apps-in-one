@@ -724,7 +724,11 @@ export function OrbitOneClickLaunch({
                 : "Paste your Google OAuth client ID + secret to enable one-click connect."}
           </p>
           {!gsc.connected && !gsc.available && (
-            <GscOAuthClientSavePanel compact onSaved={() => void refreshGscStatus()} />
+            <GscOAuthClientSavePanel
+              compact
+              connectReturnTo="/dashboard/orbit"
+              onSaved={() => void refreshGscStatus()}
+            />
           )}
           {!gsc.connected && gsc.available && (
             <Link
