@@ -18,6 +18,7 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
 
 export const dynamic = "force-dynamic";
 
@@ -94,36 +95,24 @@ export async function GET() {
     });
   }
 
-  // Step 3 — IndexNow key file
-  const indexnowKey = creds?.indexnowKey || "";
+  // Step 3 — IndexNow key file (global key — may live on a different seed_credentials row)
+  const indexnowKey = (await getActiveIndexNowKey()) || "";
   if (indexnowKey) {
-    try {
-      const keyRes = await fetch(`${canonicalSite}/${indexnowKey}.txt`, {
-        signal: AbortSignal.timeout(8000),
-        method: "HEAD",
-      });
-      steps.push({
-        id: "indexnow_key",
-        label: "IndexNow key file",
-        status: keyRes.ok ? "ok" : "fail",
-        detail: keyRes.ok
-          ? `Key file reachable at /${indexnowKey}.txt`
-          : `Key file not found (HTTP ${keyRes.status}). Bing/IndexNow submissions will fail.`,
-      });
-    } catch {
-      steps.push({
-        id: "indexnow_key",
-        label: "IndexNow key file",
-        status: "fail",
-        detail: "Could not reach IndexNow key file.",
-      });
-    }
+    const keyCheck = await verifyIndexNowKeyFile(indexnowKey);
+    steps.push({
+      id: "indexnow_key",
+      label: "IndexNow key file",
+      status: keyCheck.ok ? "ok" : "fail",
+      detail: keyCheck.ok ? keyCheck.detail : keyCheck.detail,
+      fix: keyCheck.ok ? undefined : "Run “Set Up IndexNow” in Orbit, then re-run Complete Now.",
+    });
   } else {
     steps.push({
       id: "indexnow_key",
       label: "IndexNow key file",
       status: "skip",
       detail: "No IndexNow key configured.",
+      fix: "Run “Set Up IndexNow” in Orbit launchpad.",
     });
   }
 

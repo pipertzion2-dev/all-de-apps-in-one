@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
+import { getActiveIndexNowKey } from "@/lib/indexing/indexnow-key";
 import type {
   MarketingCredentialStatus,
   MarketingPlatformCredentials,
@@ -100,13 +101,13 @@ export async function getMarketingCredentialStatus(): Promise<MarketingCredentia
     .select({
       sa: seedCredentials.googleServiceAccountJson,
       site: seedCredentials.googleSiteUrl,
-      indexnow: seedCredentials.indexnowKey,
       oauth: seedCredentials.googleOauthRefreshToken,
     })
     .from(seedCredentials)
     .where(eq(seedCredentials.userId, credUserId))
     .limit(1);
 
+  const indexNowKey = await getActiveIndexNowKey();
   const platform = await loadMarketingPlatformCredentials();
 
   const configured: MarketingCredentialStatus["configured"] = {};
@@ -119,7 +120,7 @@ export async function getMarketingCredentialStatus(): Promise<MarketingCredentia
     google: {
       serviceAccount: !!(row?.sa?.trim() || row?.oauth?.trim()),
       siteUrl: !!row?.site?.trim(),
-      indexNow: !!row?.indexnow?.trim(),
+      indexNow: !!indexNowKey,
     },
   };
 }
