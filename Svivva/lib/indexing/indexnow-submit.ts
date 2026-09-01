@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
-import { desc, eq, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { isLegacyBrandSlug, slugFromPublicUrl } from "@/lib/seo/legacy-paths";
 import { getSiteUrl } from "@/lib/site-url";
+import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
 
 /** IndexNow allows large batches; stay under 10k URLs and reasonable JSON size per request. */
 const INDEXNOW_CHUNK_SIZE = 5000;
@@ -48,13 +49,7 @@ export async function submitIndexNowBatched(
 
   let key = options?.indexnowKey?.trim() || null;
   if (!key) {
-    const [credRow] = await db
-      .select({ indexnowKey: seedCredentials.indexnowKey })
-      .from(seedCredentials)
-      .where(isNotNull(seedCredentials.indexnowKey))
-      .orderBy(desc(seedCredentials.updatedAt))
-      .limit(1);
-    key = credRow?.indexnowKey ?? null;
+    key = await getActiveIndexNowKey();
   }
 
   if (!key) {
@@ -71,6 +66,18 @@ export async function submitIndexNowBatched(
   const baseUrl = getSiteUrl().replace(/\/$/, "");
   const host = baseUrl.replace(/^https?:\/\//, "");
   const keyLocation = `${baseUrl}/${key}.txt`;
+
+  const keyFile = await verifyIndexNowKeyFile(key);
+  if (!keyFile.ok) {
+    return {
+      ok: false,
+      submittedCount: 0,
+      totalUrls,
+      chunks: 0,
+      message: keyFile.detail,
+      lastHttpStatus: keyFile.httpStatus || 403,
+    };
+  }
 
   let submittedCount = 0;
   let lastHttpStatus = 0;
