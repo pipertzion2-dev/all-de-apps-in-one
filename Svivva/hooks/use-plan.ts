@@ -25,7 +25,7 @@ export function usePlan() {
     staleTime: 60_000,
   });
 
-  const bypass = Boolean(meData?.isMembershipAccess || meData?.isAdmin);
+  const bypass = Boolean(meData?.isAdmin);
   const plan: Plan = bypass ? "pro" : (data?.plan ?? "free");
   const isLoading = meLoading || (isAuthenticated && subLoading);
 

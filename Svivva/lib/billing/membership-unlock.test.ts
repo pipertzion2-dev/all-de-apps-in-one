@@ -8,6 +8,7 @@ describe("getMembershipUnlockInfo", () => {
     const info = getMembershipUnlockInfo();
     expect(info.instructions).toMatch(/Cash App/i);
     expect(info.instructions).toMatch(/urrthang/i);
+    expect(info.instructions).toMatch(/not Orbit admin/i);
     expect(info.code).toBe("333");
     if (prev === undefined) delete process.env.MEMBERSHIP_ACCESS_CODE;
     else process.env.MEMBERSHIP_ACCESS_CODE = prev;

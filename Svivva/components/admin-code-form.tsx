@@ -11,6 +11,7 @@ type Props = {
   description?: string;
   /** Shown after description (e.g. from /api/billing/plans — not hardcoded in source). */
   codeHint?: string | null;
+  successMessage?: string;
   onSuccess?: () => void;
 };
 
@@ -18,6 +19,7 @@ export function AdminCodeForm({
   title = "Access code",
   description = "Enter your access code to unlock Pro (digital + hardware) or admin tools.",
   codeHint,
+  successMessage = "Unlocked — you can run urrthang now.",
   onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
@@ -84,7 +86,7 @@ export function AdminCodeForm({
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {unlocked ? (
         <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300" data-testid="access-code-unlocked">
-          Unlocked — you can run urrthang now.
+          {successMessage}
         </p>
       ) : null}
       <Button

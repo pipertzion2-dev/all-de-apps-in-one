@@ -91,18 +91,17 @@ export default function SettingsPage() {
       </Card>
 
       {!me?.isAdmin && !me?.isMembershipAccess && (
-        <AdminCodeForm description="Enter your Pro access code, or the owner passcode for Orbit tools." />
+        <AdminCodeForm description="Enter your Pro access code. Owner admin passcode is separate from subscriber urrthang access." />
       )}
       {me?.isMembershipAccess && !me?.isAdmin && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <KeyRound className="w-5 h-5" />
-              Membership access
+              urrthang subscriber
             </CardTitle>
             <CardDescription>
-              Access code unlocked. Pro features are available for digital and hardware without a
-              paid subscription.
+              Your access code unlocks urrthang only — not Orbit admin, credentials, or owner tools.
             </CardDescription>
           </CardHeader>
         </Card>
