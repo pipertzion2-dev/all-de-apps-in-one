@@ -9,6 +9,19 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
+/** Neon DDL must use direct URL — pooler cannot CREATE TABLE reliably. */
+function getDatabaseMigrationUrl() {
+  const unpooled =
+    process.env.DATABASE_URL_UNPOOLED?.trim() ||
+    process.env.POSTGRES_URL_NON_POOLING?.trim() ||
+    process.env.POSTGRES_URL?.trim();
+  if (unpooled) return unpooled;
+  const pooled = process.env.DATABASE_URL?.trim();
+  if (!pooled) return null;
+  if (pooled.includes("-pooler.")) return pooled.replace("-pooler.", ".");
+  return pooled;
+}
+
 function runNodeScript(relPath, label) {
   console.log(`\n→ ${label}`);
   execSync(`node "${resolve(root, relPath)}"`, {
@@ -18,15 +31,16 @@ function runNodeScript(relPath, label) {
   });
 }
 
-if (!process.env.DATABASE_URL?.trim()) {
+const migrationUrl = getDatabaseMigrationUrl();
+if (!migrationUrl) {
   console.warn("⚠ DATABASE_URL not set — skipping DB migrations on Vercel build");
 } else {
   try {
-    console.log("\n→ Pushing full Drizzle schema (seed_credentials, platform secrets, …)…");
+    console.log("\n→ Pushing full Drizzle schema (direct/unpooled Neon URL)…");
     execSync("npx drizzle-kit push --force", {
       cwd: root,
       stdio: "inherit",
-      env: process.env,
+      env: { ...process.env, DATABASE_URL: migrationUrl },
     });
   } catch (err) {
     console.warn("⚠ drizzle-kit push failed (continuing build):", err?.message ?? err);

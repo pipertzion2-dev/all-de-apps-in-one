@@ -2,6 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { platformRuntimeSecrets } from "@/lib/schema";
 import { resetOpenAIClientCache } from "@/lib/llm/openai";
+import { ensureCoreDbTables } from "@/lib/ensure-core-db-tables";
 import {
   isValidGscOAuthClientId,
   isValidGscOAuthClientSecret,
@@ -15,6 +16,7 @@ let googleGscColumnsEnsured = false;
 async function ensureGoogleGscPlatformColumns(): Promise<void> {
   if (googleGscColumnsEnsured) return;
   try {
+    await ensureCoreDbTables();
     await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS google_gsc_client_id TEXT`,
     );

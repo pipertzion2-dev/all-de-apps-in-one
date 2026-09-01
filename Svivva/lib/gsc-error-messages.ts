@@ -32,8 +32,12 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (code === "database_unavailable") {
     return "Database unavailable — Google OAuth cannot save tokens until DATABASE_URL is configured in Vercel (hosted Postgres, not localhost).";
   }
-  if (/seed_credentials.*does not exist|seed credentials.*don.t exist/i.test(code)) {
-    return "Database tables are not set up yet — redeploy after DATABASE_URL is connected in Vercel (Neon), then try Save / Connect again.";
+  if (
+    /seed_credentials.*does not exist|seed credentials.*don.t exist|platform_runtime_secrets.*does not exist/i.test(
+      code,
+    )
+  ) {
+    return "Database tables are not set up yet. Ensure Neon is connected in Vercel (DATABASE_URL + DATABASE_URL_UNPOOLED), then redeploy and try Save / Connect again.";
   }
   if (/database unavailable|could not save oauth client/i.test(code)) {
     return "Database unavailable — could not save OAuth credentials. Set DATABASE_URL in Vercel to hosted Postgres and redeploy, or set GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars.";

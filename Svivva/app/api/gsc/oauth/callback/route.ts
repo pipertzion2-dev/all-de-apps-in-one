@@ -15,7 +15,8 @@ import {
   formatDatabaseConnectionError,
   isDatabaseConnectionError,
   isMissingSeedCredentialsTableError,
-  missingSeedCredentialsTableMessage,
+  isSchemaSetupError,
+  schemaSetupErrorMessage,
 } from "@/lib/db-connection-error";
 
 export const dynamic = "force-dynamic";
@@ -132,12 +133,8 @@ export async function GET(req: NextRequest) {
     if (dbMsg) {
       return redirectWithError(req.nextUrl.origin, returnPath, "database_unavailable");
     }
-    if (isMissingSeedCredentialsTableError(e)) {
-      return redirectWithError(
-        req.nextUrl.origin,
-        returnPath,
-        missingSeedCredentialsTableMessage(),
-      );
+    if (isMissingSeedCredentialsTableError(e) || isSchemaSetupError(e)) {
+      return redirectWithError(req.nextUrl.origin, returnPath, schemaSetupErrorMessage());
     }
     const dest = new URL(returnPath, req.nextUrl.origin);
     dest.searchParams.set("gsc_error", String(e).slice(0, 180));

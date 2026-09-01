@@ -22,9 +22,10 @@ import {
 import {
   formatDatabaseConnectionError,
   isMissingSeedCredentialsTableError,
-  missingSeedCredentialsTableMessage,
+  isSchemaSetupError,
+  schemaSetupErrorMessage,
 } from "@/lib/db-connection-error";
-import { ensureSeedCredentialsRow } from "@/lib/seed-credentials-table";
+import { ensureCoreDbTables, ensureSeedCredentialsRow } from "@/lib/ensure-core-db-tables";
 
 export const dynamic = "force-dynamic";
 
@@ -127,13 +128,24 @@ export async function POST(req: NextRequest) {
       return forbidden("Admin unlock required — enter the admin passcode on this page first.");
     }
 
+    try {
+      await ensureCoreDbTables();
+    } catch (e: unknown) {
+      if (isSchemaSetupError(e) || isMissingSeedCredentialsTableError(e)) {
+        return serverError(schemaSetupErrorMessage());
+      }
+      const dbMsg = formatDatabaseConnectionError(e);
+      if (dbMsg) return serverError(dbMsg);
+      throw e;
+    }
+
     const userId = await resolveGscCredentialsUserId();
 
     try {
       await ensureSeedCredentialsRow(userId);
     } catch (e: unknown) {
-      if (isMissingSeedCredentialsTableError(e)) {
-        return serverError(missingSeedCredentialsTableMessage());
+      if (isMissingSeedCredentialsTableError(e) || isSchemaSetupError(e)) {
+        return serverError(schemaSetupErrorMessage());
       }
       const dbMsg = formatDatabaseConnectionError(e);
       if (dbMsg) return serverError(dbMsg);
@@ -224,6 +236,9 @@ export async function POST(req: NextRequest) {
         });
         await hydratePlatformSecrets();
       } catch (e: unknown) {
+        if (isSchemaSetupError(e) || isMissingSeedCredentialsTableError(e)) {
+          return serverError(schemaSetupErrorMessage());
+        }
         const dbMsg = formatDatabaseConnectionError(e);
         if (dbMsg) {
           return serverError(
