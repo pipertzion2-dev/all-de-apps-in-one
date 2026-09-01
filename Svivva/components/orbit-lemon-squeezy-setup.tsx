@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ExternalLink, Citrus } from "lucide-react";
-import { getSiteUrl } from "@/lib/site-url-public";
+import { getPublicSiteUrl } from "@/lib/site-url-public";
 
 type LemonStatus = {
   stored: {
@@ -41,7 +41,7 @@ export function OrbitLemonSqueezySetup() {
   const webhookUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/api/lemonsqueezy/webhook`
-      : `${getSiteUrl()}/api/lemonsqueezy/webhook`;
+      : `${getPublicSiteUrl()}/api/lemonsqueezy/webhook`;
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -156,10 +156,13 @@ export function OrbitLemonSqueezySetup() {
       )}
 
       <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[11px] space-y-1">
-        <p className="font-semibold text-foreground">Webhook URL (paste in Lemon Squeezy → Settings → Webhooks)</p>
+        <p className="font-semibold text-foreground">
+          Webhook URL (paste in Lemon Squeezy → Settings → Webhooks)
+        </p>
         <code className="block break-all text-[10px]">{webhookUrl}</code>
         <p className="text-muted-foreground">
-          Events: subscription_created, subscription_updated, subscription_cancelled, subscription_expired
+          Events: subscription_created, subscription_updated, subscription_cancelled,
+          subscription_expired
         </p>
       </div>
 
@@ -181,14 +184,18 @@ export function OrbitLemonSqueezySetup() {
         </div>
 
         <details className="text-xs">
-          <summary className="cursor-pointer font-semibold text-foreground">API setup (auto checkout URLs)</summary>
+          <summary className="cursor-pointer font-semibold text-foreground">
+            API setup (auto checkout URLs)
+          </summary>
           <div className="mt-3 space-y-3">
             <div className="space-y-1.5">
               <Label className="text-xs">API key</Label>
               <Input
                 type="password"
                 autoComplete="off"
-                placeholder={status?.stored.lemonSqueezyApiKey ? "Saved — paste to replace" : "eyJ…"}
+                placeholder={
+                  status?.stored.lemonSqueezyApiKey ? "Saved — paste to replace" : "eyJ…"
+                }
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="h-9 text-xs font-mono"

@@ -44,7 +44,11 @@ async function resolveUserId(payload: LemonWebhookPayload): Promise<string | nul
   const email = payload.data?.attributes?.user_email?.trim();
   if (!email) return null;
 
-  const [row] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
+  const [row] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
   return row?.id ?? null;
 }
 
@@ -67,7 +71,10 @@ export async function processLemonSqueezyWebhook(payload: LemonWebhookPayload) {
 
   const isActive = ACTIVE_STATUSES.has(status) && !INACTIVE_EVENTS.has(event);
   const isInactive =
-    INACTIVE_EVENTS.has(event) || status === "cancelled" || status === "expired" || status === "unpaid";
+    INACTIVE_EVENTS.has(event) ||
+    status === "cancelled" ||
+    status === "expired" ||
+    status === "unpaid";
 
   if (isActive) {
     await db
