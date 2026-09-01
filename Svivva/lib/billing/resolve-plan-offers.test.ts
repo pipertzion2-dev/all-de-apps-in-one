@@ -18,6 +18,18 @@ const emptyInterim = {
 };
 
 describe("resolveBillingPlanOffers", () => {
+  it("prefers Cash App over Venmo when both exist", () => {
+    const plans = resolveBillingPlanOffers({
+      interim: {
+        ...emptyInterim,
+        venmoUrlStarter: "https://venmo.com/u/x",
+        cashAppUrlStarter: "https://cash.app/$pipertzion/20",
+      },
+    });
+    const starter = plans.find((p) => p.tier === "starter");
+    expect(starter?.checkoutProvider).toBe("cashapp");
+  });
+
   it("enables Venmo checkout per tier", () => {
     const plans = resolveBillingPlanOffers({
       interim: {

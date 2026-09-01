@@ -49,6 +49,9 @@ function trimText(v: string | null | undefined): string | null {
 
 function fromEnv(): InterimPaymentConfig {
   const legacyVenmo = trimUrl(process.env.INTERIM_VENMO_URL);
+  const cashTag = (process.env.INTERIM_CASHAPP_TAG?.trim() || "pipertzion").replace(/^\$/, "");
+  const defaultCashStarter = `https://cash.app/$${cashTag}/20`;
+  const defaultCashPro = `https://cash.app/$${cashTag}/50`;
   return {
     stripePaymentLinkStarter:
       trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_STARTER) ??
@@ -61,8 +64,8 @@ function fromEnv(): InterimPaymentConfig {
     venmoUrlStarter: trimUrl(process.env.INTERIM_VENMO_URL_STARTER) ?? legacyVenmo,
     venmoUrlPro: trimUrl(process.env.INTERIM_VENMO_URL_PRO),
     venmoUrl: legacyVenmo,
-    cashAppUrlStarter: trimUrl(process.env.INTERIM_CASHAPP_URL_STARTER),
-    cashAppUrlPro: trimUrl(process.env.INTERIM_CASHAPP_URL_PRO),
+    cashAppUrlStarter: trimUrl(process.env.INTERIM_CASHAPP_URL_STARTER) ?? defaultCashStarter,
+    cashAppUrlPro: trimUrl(process.env.INTERIM_CASHAPP_URL_PRO) ?? defaultCashPro,
     zelleContact: trimText(process.env.INTERIM_ZELLE_CONTACT),
     note: process.env.INTERIM_PAYMENT_NOTE?.trim() || null,
   };
@@ -116,15 +119,15 @@ export function cashAppUrlForTier(
   return urlForTier(tier, config.cashAppUrlStarter, config.cashAppUrlPro);
 }
 
-/** Best direct-pay link for a tier: Venmo first, then Cash App. */
+/** Best direct-pay link for a tier: Cash App first, then Venmo. */
 export function directPayForTier(
   tier: "starter" | "pro",
   config: InterimPaymentConfig,
 ): { method: DirectPayMethod; link: string } | null {
-  const venmo = venmoUrlForTier(tier, config);
-  if (venmo) return { method: "venmo", link: venmo };
   const cashApp = cashAppUrlForTier(tier, config);
   if (cashApp) return { method: "cashapp", link: cashApp };
+  const venmo = venmoUrlForTier(tier, config);
+  if (venmo) return { method: "venmo", link: venmo };
   return null;
 }
 

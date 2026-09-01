@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { canRunUrrthang } from "@/lib/orbit/urrthang-access";
 import { runMarketingAutopilot } from "@/lib/orbit/marketing-autopilot";
 import {
   getMarketingCredentialStatus,
@@ -35,7 +36,7 @@ function isMasked(v: unknown): boolean {
 /** GET — credential status, masked values, last run, task catalog */
 export async function GET(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed(req))) {
+    if (!(await canRunUrrthang(req))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -76,10 +77,6 @@ export async function GET(req: NextRequest) {
 /** POST — save credentials and/or run autopilot */
 export async function POST(req: NextRequest) {
   try {
-    if (!(await isOrbitAdminAllowed(req))) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const body = (await req.json()) as {
       action?: "save" | "run" | "save_and_run";
       credentials?: Partial<MarketingPlatformCredentials>;
@@ -87,6 +84,9 @@ export async function POST(req: NextRequest) {
     };
 
     if (body.credentials && Object.keys(body.credentials).length > 0) {
+      if (!(await isOrbitAdminAllowed(req))) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       const patch: Partial<MarketingPlatformCredentials> = {};
       const existing = await loadMarketingPlatformCredentials();
       for (const [k, v] of Object.entries(body.credentials)) {
@@ -105,6 +105,10 @@ export async function POST(req: NextRequest) {
     const action = body.action ?? "run";
     if (action === "save") {
       return NextResponse.json({ ok: true, saved: true });
+    }
+
+    if (!(await canRunUrrthang(req))) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     try {

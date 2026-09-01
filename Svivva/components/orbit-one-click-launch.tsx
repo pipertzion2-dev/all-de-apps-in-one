@@ -15,7 +15,10 @@
 import { useEffect, useRef, useState } from "react";
 import nextDynamic from "next/dynamic";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
+import { usePlan } from "@/hooks/use-plan";
+import { AdminCodeForm } from "@/components/admin-code-form";
 
 const GscConnectOrb = nextDynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -43,6 +46,8 @@ import {
   Activity,
   CreditCard,
   Search,
+  ExternalLink,
+  Lock,
 } from "lucide-react";
 import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
@@ -294,6 +299,30 @@ export function OrbitOneClickLaunch({
   autoRun,
   onOpenStripeSetup,
 }: Props) {
+  const { isPro, isMembershipAccess } = usePlan();
+  const { data: meData } = useQuery<{ isAdmin?: boolean; isMembershipAccess?: boolean }>({
+    queryKey: ["/api/auth/me"],
+    queryFn: () => fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()),
+  });
+  const { data: plansData } = useQuery<{
+    plans: {
+      tier: string;
+      priceLabel: string;
+      paymentLink: string | null;
+      checkoutAvailable: boolean;
+      checkoutProvider: string | null;
+    }[];
+  }>({
+    queryKey: ["/api/billing/plans"],
+    queryFn: () => fetch("/api/billing/plans").then((r) => r.json()),
+  });
+
+  const urrthangUnlocked = Boolean(
+    isPro || isMembershipAccess || meData?.isAdmin || meData?.isMembershipAccess,
+  );
+  const starterPay = plansData?.plans.find((p) => p.tier === "starter");
+  const proPay = plansData?.plans.find((p) => p.tier === "pro");
+
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState(0);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -830,31 +859,84 @@ export function OrbitOneClickLaunch({
         </div>
 
         {/* urrthang — primary all-in-one control */}
-        <button
-          ref={urrthangButtonRef}
-          type="button"
-          onClick={run}
-          disabled={running || quickStartRunning}
-          data-testid="orbit-one-click-launch"
-          data-urrthang="true"
-          aria-label={`${URRTHANG_LABEL} — run all Orbit marketing and indexing`}
-          className={`w-full flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
-          style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
-        >
-          {running ? (
-            <>
-              <Loader2 className="w-6 h-6 animate-spin" /> Working…
-            </>
-          ) : hasRun ? (
-            <>
-              <RefreshCw className="w-6 h-6" /> {URRTHANG_LABEL} again
-            </>
-          ) : (
-            <>
-              <Rocket className="w-6 h-6" /> {URRTHANG_LABEL}
-            </>
-          )}
-        </button>
+        {!urrthangUnlocked ? (
+          <div
+            className="rounded-xl border-2 border-fuchsia-500/40 bg-fuchsia-500/8 p-4 space-y-4"
+            data-testid="urrthang-cashapp-unlock"
+          >
+            <div className="flex items-start gap-3">
+              <Lock className="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-300 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-foreground">
+                  Pay with Cash App to unlock {URRTHANG_LABEL}
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Stripe is still verifying — pay $
+                  {starterPay?.priceLabel?.replace("$", "") ?? "20"} or $
+                  {proPay?.priceLabel?.replace("$", "") ?? "50"} to{" "}
+                  <strong className="text-foreground">$pipertzion</strong>, then enter your access
+                  code below.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {starterPay?.paymentLink ? (
+                <a
+                  href={starterPay.paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                  data-testid="urrthang-cashapp-starter"
+                >
+                  Cash App — Starter {starterPay.priceLabel}/mo
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              ) : null}
+              {proPay?.paymentLink ? (
+                <a
+                  href={proPay.paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-emerald-700 hover:bg-emerald-800 text-white"
+                  data-testid="urrthang-cashapp-pro"
+                >
+                  Cash App — Pro {proPay.priceLabel}/mo
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              ) : null}
+            </div>
+            <AdminCodeForm
+              title="Access code"
+              description="After Cash App payment, enter the code we sent you — this turns on urrthang."
+            />
+          </div>
+        ) : (
+          <button
+            ref={urrthangButtonRef}
+            type="button"
+            onClick={run}
+            disabled={running || quickStartRunning}
+            data-testid="orbit-one-click-launch"
+            data-urrthang="true"
+            aria-label={`${URRTHANG_LABEL} — run all Orbit marketing and indexing`}
+            className={`w-full flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
+            style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin" /> Working…
+              </>
+            ) : hasRun ? (
+              <>
+                <RefreshCw className="w-6 h-6" /> {URRTHANG_LABEL} again
+              </>
+            ) : (
+              <>
+                <Rocket className="w-6 h-6" /> {URRTHANG_LABEL}
+              </>
+            )}
+          </button>
+        )}
 
         {running && (
           <div className="rounded-xl bg-black/20 border border-pink-300/25 p-3 space-y-2.5">
@@ -1324,7 +1406,7 @@ export function OrbitOneClickLaunch({
         </div>
       )}
 
-      {urrthangPinned && !running && (
+      {urrthangUnlocked && urrthangPinned && !running && (
         <div className="sticky bottom-3 z-20 px-4 sm:px-5 pb-1">
           <button
             type="button"
