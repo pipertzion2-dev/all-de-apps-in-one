@@ -8,6 +8,7 @@ import {
   isValidGscOAuthClientSecret,
   isValidGscOAuthCredentials,
 } from "@/lib/gsc-oauth-credentials";
+import { ensureSeedCredentialsTable } from "@/lib/seed-credentials-table";
 
 const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token";
@@ -69,6 +70,7 @@ export async function saveGscOAuthStateRow(payload: {
 export async function ensureGscOAuthColumns(): Promise<void> {
   if (oauthColumnsEnsured) return;
   try {
+    await ensureSeedCredentialsTable();
     await db.execute(
       sql`ALTER TABLE seed_credentials ADD COLUMN IF NOT EXISTS google_oauth_refresh_token TEXT`,
     );
@@ -231,6 +233,8 @@ export async function saveGoogleOAuthTokens(
   tokens: { refreshToken: string; email?: string },
 ): Promise<void> {
   await ensureGscOAuthColumns();
+  const { ensureSeedCredentialsRow } = await import("@/lib/seed-credentials-table");
+  await ensureSeedCredentialsRow(userId);
   await db.execute(sql`
     INSERT INTO seed_credentials (id, user_id, google_oauth_refresh_token, google_oauth_email, google_indexing_enabled, updated_at)
     VALUES (${crypto.randomUUID()}, ${userId}, ${tokens.refreshToken}, ${tokens.email ?? null}, true, NOW())
