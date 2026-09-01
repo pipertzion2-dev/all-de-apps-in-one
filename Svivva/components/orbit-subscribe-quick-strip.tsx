@@ -41,10 +41,10 @@ export function OrbitSubscribeQuickStrip({
 }: Props) {
   return (
     <div
-      className={`rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-2.5 space-y-2 ${className}`}
+      className={`rounded-xl border-2 border-emerald-500/35 bg-emerald-500/5 p-3 space-y-2 ${className}`}
       aria-label="Set up free marketing services"
     >
-      <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-200 leading-tight">
+      <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-200 uppercase tracking-wide">
         Free setup — no card needed
       </p>
       <p className="text-[9px] text-muted-foreground leading-snug">
