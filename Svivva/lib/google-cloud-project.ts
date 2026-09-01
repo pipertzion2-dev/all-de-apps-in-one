@@ -47,8 +47,40 @@ export function isGoogleApiDisabledError(message: string | null | undefined): bo
   const low = message.toLowerCase();
   return (
     low.includes("has not been used in project") ||
-    low.includes("is disabled") ||
+    low.includes("accessnotconfigured") ||
+    (low.includes("is disabled") && low.includes("indexing")) ||
     low.includes("access not configured") ||
     low.includes("service is not enabled")
   );
+}
+
+/** URL ownership / GSC permission — different fix than enabling the API. */
+export function isGoogleIndexingOwnershipError(message: string | null | undefined): boolean {
+  if (!message?.trim()) return false;
+  const low = message.toLowerCase();
+  return (
+    low.includes("failed to verify the url ownership") ||
+    low.includes("permission denied") ||
+    (low.includes("forbidden") && low.includes("ownership"))
+  );
+}
+
+export function summarizeGoogleIndexingErrors(errors: string[]): string {
+  const unique = [...new Set(errors.map((e) => e.trim()).filter(Boolean))];
+  if (unique.length === 0) return "";
+  if (unique.length === 1) return unique[0];
+  const disabled = unique.find(isGoogleApiDisabledError);
+  if (disabled) return disabled;
+  const ownership = unique.find(isGoogleIndexingOwnershipError);
+  if (ownership) return ownership;
+  return unique.slice(0, 2).join(" · ");
+}
+
+/** Masked OAuth client id for UI: `680989077677-abc…ontent.com` */
+export function maskGoogleOAuthClientId(clientId: string | null | undefined): string | null {
+  const id = clientId?.trim() || "";
+  if (!id) return null;
+  const m = id.match(/^(\d+-[\w-]{3})[\w-]+(\.apps\.googleusercontent\.com)$/i);
+  if (m) return `${m[1]}…${m[2]}`;
+  return id.length > 24 ? `${id.slice(0, 20)}…` : id;
 }

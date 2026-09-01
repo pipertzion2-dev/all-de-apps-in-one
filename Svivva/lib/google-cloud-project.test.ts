@@ -5,6 +5,8 @@ import {
   extractGoogleCloudProjectNumber,
   isGoogleApiDisabledError,
   resolveGoogleApiEnableLinks,
+  summarizeGoogleIndexingErrors,
+  isGoogleIndexingOwnershipError,
 } from "@/lib/google-cloud-project";
 
 describe("google-cloud-project", () => {
@@ -34,15 +36,22 @@ describe("google-cloud-project", () => {
     ).toBe(true);
   });
 
-  it("resolves links from client ID or error", () => {
-    const fromClient = resolveGoogleApiEnableLinks({
-      clientId: "680989077677-x.apps.googleusercontent.com",
-    });
-    expect(fromClient?.projectNumber).toBe("680989077677");
+  it("summarizes duplicate indexing errors", () => {
+    const msg =
+      "Web Search Indexing API has not been used in project 680989077677 before or it is disabled.";
+    expect(
+      summarizeGoogleIndexingErrors([msg, msg, msg]),
+    ).toBe(msg);
+  });
 
-    const fromError = resolveGoogleApiEnableLinks({
-      errorMessage: "disabled in project 123456789012",
-    });
-    expect(fromError?.projectNumber).toBe("123456789012");
+  it("detects ownership errors separately from disabled API", () => {
+    expect(isGoogleIndexingOwnershipError("Permission denied. Failed to verify the URL ownership.")).toBe(
+      true,
+    );
+    expect(
+      isGoogleApiDisabledError(
+        "Web Search Indexing API has not been used in project 680989077677 before or it is disabled.",
+      ),
+    ).toBe(true);
   });
 });

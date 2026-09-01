@@ -47,8 +47,10 @@ export function GscApiFixPanel({ enableLinks, compact, onFixed }: Props) {
         Indexing API disabled on Google Cloud project {enableLinks.projectNumber}
       </p>
       <p className={`text-muted-foreground leading-relaxed ${compact ? "text-[10px]" : "text-[11px]"}`}>
-        Enable the API once, then retry indexing. Auto-fix tries to turn it on for you; if that fails,
-        open the link and click Enable.
+        Enable the API once on OAuth project <strong>{enableLinks.projectNumber}</strong>, then retry
+        indexing. If you already enabled it, confirm it is{" "}
+        <strong>Web Search Indexing API</strong> (not just Search Console API) on that exact project,
+        wait 2 minutes, and re-run launch.
       </p>
       <div className="flex flex-wrap gap-2">
         <Button

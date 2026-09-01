@@ -21,7 +21,11 @@ import {
   probeGoogleIndexingApi,
   resolveProjectNumberForEnable,
 } from "@/lib/google-cloud-enable-apis";
-import { buildGoogleApiEnableLinks } from "@/lib/google-cloud-project";
+import {
+  buildGoogleApiEnableLinks,
+  extractGoogleCloudProjectNumber,
+  maskGoogleOAuthClientId,
+} from "@/lib/google-cloud-project";
 import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
@@ -268,6 +272,7 @@ export async function GET() {
 
   const projectNumber = resolveProjectNumberForEnable();
   const enableLinks = projectNumber ? buildGoogleApiEnableLinks(projectNumber) : null;
+  const cfg = getGoogleGscOAuthConfig();
 
   return ok({
     steps,
@@ -281,5 +286,7 @@ export async function GET() {
     gscMatchedSite,
     gscSitesSample,
     googleApiEnableLinks: enableLinks,
+    googleOAuthProjectNumber: cfg ? extractGoogleCloudProjectNumber(cfg.clientId) : null,
+    googleOAuthClientIdMasked: cfg ? maskGoogleOAuthClientId(cfg.clientId) : null,
   });
 }
