@@ -35,6 +35,7 @@ import { getPublicSiteUrl } from "@/lib/site-url-public";
 import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
+import { followOAuthLink } from "@/lib/follow-oauth-link";
 import { useToast } from "@/hooks/use-toast";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
@@ -111,7 +112,7 @@ export default function GscConnectPage() {
 
   const startOAuth = useCallback(() => {
     if (adminUnlocked) {
-      window.location.assign(OAUTH_START);
+      followOAuthLink(OAUTH_START);
       return;
     }
     setPendingOAuth(true);
@@ -328,7 +329,7 @@ export default function GscConnectPage() {
                 void refetch();
                 if (pendingOAuth) {
                   setPendingOAuth(false);
-                  window.location.assign(OAUTH_START);
+                  followOAuthLink(OAUTH_START);
                 }
               }}
             />
@@ -734,7 +735,7 @@ export default function GscConnectPage() {
                 void refetch();
                 if (pendingOAuth) {
                   setPendingOAuth(false);
-                  window.location.assign(OAUTH_START);
+                  followOAuthLink(OAUTH_START);
                 }
               }}
             />
