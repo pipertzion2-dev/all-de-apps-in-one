@@ -544,7 +544,7 @@ export function OrbitOneClickLaunch({
         };
       }
 
-      let { res: ensureRes, json: ensureJson } = await ensureEasyPeasy();
+      let { res: ensureRes, json: ensureJson } = await ensureEasyPeasy("standard", true);
       const wordLimit =
         !ensureJson.ok && /allowed words|word limit|429/i.test(String(ensureJson.error || ""));
       if (wordLimit) {

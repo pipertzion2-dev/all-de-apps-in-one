@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const getPlatformRuntimeSecretsRow = vi.fn(async () => null);
+const patchPlatformRuntimeSecrets = vi.fn(async () => {});
+
 vi.mock("@/lib/platform-runtime-secrets", () => ({
   hydratePlatformSecrets: vi.fn(async () => {}),
-  patchPlatformRuntimeSecrets: vi.fn(async () => {}),
-  getPlatformRuntimeSecretsRow: vi.fn(async () => null),
+  patchPlatformRuntimeSecrets,
+  getPlatformRuntimeSecretsRow,
 }));
 
 vi.mock("@/lib/easypeasy/client", () => ({
@@ -15,6 +18,7 @@ describe("ensureEasyPeasyForOrbit", () => {
     delete process.env.EASYPEASY_API_KEY;
     delete process.env.EASYPEASY_TIER;
     vi.clearAllMocks();
+    getPlatformRuntimeSecretsRow.mockResolvedValue(null);
   });
 
   it("returns error when no key is configured", async () => {
@@ -24,17 +28,31 @@ describe("ensureEasyPeasyForOrbit", () => {
     expect(result.active).toBe(false);
   });
 
-  it("activates from EASYPEASY_API_KEY env", async () => {
+  it("activates from EASYPEASY_API_KEY env on standard tier", async () => {
     process.env.EASYPEASY_API_KEY = "test-key";
-    const { patchPlatformRuntimeSecrets } = await import("@/lib/platform-runtime-secrets");
     const { ensureEasyPeasyForOrbit } = await import("./ensure");
     const result = await ensureEasyPeasyForOrbit({
-      tierId: "premium",
+      tierId: "standard",
       forceTier: true,
       testConnection: false,
     });
     expect(patchPlatformRuntimeSecrets).toHaveBeenCalled();
     expect(result.active).toBe(true);
-    expect(result.tierId).toBe("premium");
+    expect(result.tierId).toBe("standard");
+  });
+
+  it("migrates stored premium tier to standard", async () => {
+    process.env.EASYPEASY_API_KEY = "test-key";
+    getPlatformRuntimeSecretsRow.mockResolvedValue({
+      openaiApiKey: "test-key",
+      openaiBaseUrl: "https://easy-peasy.ai/api",
+      easypeasyTier: "premium",
+    });
+    const { ensureEasyPeasyForOrbit } = await import("./ensure");
+    const result = await ensureEasyPeasyForOrbit({ testConnection: false });
+    expect(patchPlatformRuntimeSecrets).toHaveBeenCalledWith(
+      expect.objectContaining({ easypeasyTier: "standard" }),
+    );
+    expect(result.tierId).toBe("standard");
   });
 });

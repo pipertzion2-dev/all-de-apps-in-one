@@ -12,9 +12,11 @@ import {
 import { testEasyPeasyConnection } from "@/lib/easypeasy/client";
 import {
   EASYPEASY_DEFAULT_TIER_ID,
+  getEasyPeasyModelForTier,
   resolveEasyPeasyTierId,
   type EasyPeasyTierId,
 } from "@/lib/easypeasy/tiers";
+import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 
 export type EnsureEasyPeasyResult = {
   ok: boolean;
@@ -37,6 +39,20 @@ export type EnsureEasyPeasyOptions = {
   testConnection?: boolean;
 };
 
+/** Orbit defaults to Standard — Premium burns paid word quota and is never auto-selected. */
+function resolveOrbitEasyPeasyTier(
+  opts: EnsureEasyPeasyOptions,
+  storedTier: string | null | undefined,
+): EasyPeasyTierId {
+  if (opts.tierId && opts.forceTier) {
+    return resolveEasyPeasyTierId(opts.tierId);
+  }
+  if (storedTier?.trim().toLowerCase() === "premium") {
+    return EASYPEASY_DEFAULT_TIER_ID;
+  }
+  return resolveEasyPeasyTierId(opts.tierId ?? storedTier ?? process.env.EASYPEASY_TIER);
+}
+
 /**
  * Idempotent: hydrates secrets, ensures EasyPeasy base URL + tier, optionally tests API.
  * Used by Orbit one-click admin before marketing autopilot runs.
@@ -46,8 +62,10 @@ export async function ensureEasyPeasyForOrbit(
 ): Promise<EnsureEasyPeasyResult> {
   await hydratePlatformSecrets();
 
-  const tierId = resolveEasyPeasyTierId(opts.tierId ?? process.env.EASYPEASY_TIER);
   let configuredNow = false;
+  const row = await getPlatformRuntimeSecretsRow();
+  const storedTier = row?.easypeasyTier?.trim();
+  const tierId = resolveOrbitEasyPeasyTier(opts, storedTier);
 
   const envKey = process.env.EASYPEASY_API_KEY?.trim();
   let config = await loadEasyPeasyConfig();
@@ -60,11 +78,18 @@ export async function ensureEasyPeasyForOrbit(
     configuredNow = true;
   }
 
-  if (opts.tierId && (opts.forceTier || !config.tierId || config.tierId !== tierId)) {
-    const row = await getPlatformRuntimeSecretsRow();
-    const storedTier = row?.easypeasyTier?.trim();
-    if (opts.forceTier || !storedTier || storedTier !== tierId) {
-      patch.easypeasyTier = tierId;
+  const storedNormalized = storedTier?.toLowerCase();
+  const shouldMigratePremium =
+    storedNormalized === "premium" && !(opts.tierId === "premium" && opts.forceTier);
+  const shouldApplyTier =
+    shouldMigratePremium ||
+    (opts.tierId && (opts.forceTier || !storedTier || storedTier !== tierId)) ||
+    !storedTier;
+
+  if (shouldApplyTier) {
+    const targetTier = shouldMigratePremium ? EASYPEASY_DEFAULT_TIER_ID : tierId;
+    if (shouldMigratePremium || opts.forceTier || !storedTier || storedTier !== targetTier) {
+      patch.easypeasyTier = targetTier;
       configuredNow = true;
     }
   }
@@ -96,7 +121,9 @@ export async function ensureEasyPeasyForOrbit(
     config = merged;
   }
 
-  const resolvedTier = resolveEasyPeasyTierId(patch.easypeasyTier ?? config.tierId ?? tierId);
+  const resolvedTier = resolveEasyPeasyTierId(
+    patch.easypeasyTier ?? config.tierId ?? EASYPEASY_DEFAULT_TIER_ID,
+  );
   let tested = false;
   let testReply: string | undefined;
   let error: string | undefined;
@@ -111,6 +138,28 @@ export async function ensureEasyPeasyForOrbit(
       testReply = test.reply;
     } else {
       error = test.error;
+      if (isEasyPeasyWordLimitError(test.error) && resolvedTier !== "standard") {
+        await patchPlatformRuntimeSecrets({ easypeasyTier: "standard" });
+        await hydratePlatformSecrets();
+        config = await loadEasyPeasyConfig();
+        const standardModel = getEasyPeasyModelForTier("standard");
+        const retry = await testEasyPeasyConnection({
+          apiKey: config.apiKey!,
+          model: standardModel,
+        });
+        if (retry.ok) {
+          return {
+            ok: true,
+            active: true,
+            tierId: "standard",
+            model: standardModel,
+            tested: true,
+            testReply: retry.reply,
+            configuredNow: true,
+          };
+        }
+        error = retry.error ?? test.error;
+      }
       return {
         ok: false,
         active: true,
@@ -119,7 +168,7 @@ export async function ensureEasyPeasyForOrbit(
         tested,
         testReply,
         configuredNow,
-        error: test.error,
+        error,
       };
     }
   }

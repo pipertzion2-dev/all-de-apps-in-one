@@ -18,6 +18,7 @@ import {
 } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
+import { isEasyPeasyActive, loadEasyPeasyConfig } from "@/lib/easypeasy/config";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
 import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest) {
     const status = await getMarketingCredentialStatus();
     const lastRun = await loadLastAutopilotRun();
     const copyOnlyMode = isCopyOnlyDistributionMode(creds);
+    const easypeasyConfig = await loadEasyPeasyConfig();
 
     return NextResponse.json({
       credentials: maskCredentialsForClient(creds),
@@ -52,6 +54,11 @@ export async function GET(req: NextRequest) {
       gscConnectUrl: "/dashboard/gsc-connect",
       setupProviders: ORBIT_SETUP_PROVIDERS,
       copyOnlyMode,
+      easypeasy: {
+        active: isEasyPeasyActive(easypeasyConfig),
+        tierId: easypeasyConfig.tierId,
+        model: easypeasyConfig.model,
+      },
       ai: {
         configured: isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),
@@ -106,8 +113,6 @@ export async function POST(req: NextRequest) {
     }
 
     const easypeasy = await ensureEasyPeasyForOrbit({
-      tierId: "premium",
-      forceTier: false,
       testConnection: true,
     });
 

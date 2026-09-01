@@ -19,7 +19,7 @@ import {
   isEasyPeasyBaseUrl,
   mergeEasyPeasyConfig,
 } from "@/lib/easypeasy/config";
-import { EASYPEASY_TIERS, resolveEasyPeasyTierId } from "@/lib/easypeasy/tiers";
+import { EASYPEASY_TIERS, EASYPEASY_DEFAULT_TIER_ID, resolveEasyPeasyTierId } from "@/lib/easypeasy/tiers";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
@@ -58,7 +58,11 @@ export async function GET() {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const row = await getPlatformRuntimeSecretsRow();
+    let row = await getPlatformRuntimeSecretsRow();
+    if (row?.easypeasyTier?.trim().toLowerCase() === "premium") {
+      await patchPlatformRuntimeSecrets({ easypeasyTier: EASYPEASY_DEFAULT_TIER_ID });
+      row = await getPlatformRuntimeSecretsRow();
+    }
     const interim = mergeInterimPaymentConfig(
       row
         ? {
@@ -184,7 +188,9 @@ export async function POST(request: Request) {
     if ("openaiBaseUrl" in body) patch.openaiBaseUrl = toPatchValue(body.openaiBaseUrl);
     if ("easypeasyTier" in body) {
       const raw = body.easypeasyTier?.trim();
-      patch.easypeasyTier = raw ? resolveEasyPeasyTierId(raw) : null;
+      const resolved = raw ? resolveEasyPeasyTierId(raw) : null;
+      patch.easypeasyTier =
+        resolved === "premium" ? EASYPEASY_DEFAULT_TIER_ID : resolved;
     }
     if ("stripeSecretKey" in body) patch.stripeSecretKey = toPatchValue(body.stripeSecretKey);
     if ("stripePublishableKey" in body)
