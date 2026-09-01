@@ -1,5 +1,15 @@
 /** Turn raw API errors into short, actionable Orbit admin copy. */
 
+export function isEasyPeasyWordLimitError(message: string | null | undefined): boolean {
+  const m = (message ?? "").toLowerCase();
+  return (
+    m.includes("429") ||
+    m.includes("allowed words") ||
+    m.includes("word limit") ||
+    (m.includes("limit") && m.includes("plan"))
+  );
+}
+
 export function dedupeErrorMessages(errors: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];

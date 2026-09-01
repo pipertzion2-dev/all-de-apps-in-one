@@ -177,7 +177,9 @@ export function OrbitEasyPeasySetup() {
       )}
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold">Orbit AI tier (Standard recommended — free-tier friendly)</Label>
+        <Label className="text-xs font-semibold">
+          Orbit AI tier (Standard recommended — free-tier friendly)
+        </Label>
         <div className="grid gap-2 sm:grid-cols-3">
           {tiers.map((tier) => {
             const selected = tierId === tier.id;
