@@ -11,6 +11,11 @@ function configuredMembershipCode(): string {
   return process.env.MEMBERSHIP_ACCESS_CODE?.trim() || DEFAULT_MEMBERSHIP_CODE;
 }
 
+/** Public plan-unlock code (API only — do not hardcode in UI source). */
+export function getPublicMembershipAccessCode(): string {
+  return configuredMembershipCode();
+}
+
 export function verifyMembershipAccessCode(code: string): boolean {
   return code.trim() === configuredMembershipCode();
 }

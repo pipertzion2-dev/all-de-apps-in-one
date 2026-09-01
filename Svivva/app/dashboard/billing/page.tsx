@@ -15,6 +15,7 @@ import type { ResolvedBillingPlan } from "@/lib/billing/resolve-plan-offers";
 
 type PlansResponse = {
   plans: ResolvedBillingPlan[];
+  membershipUnlock?: { instructions: string; code: string };
   paymentOptions: {
     cashAppPlansActive: boolean;
     cashAppTag: string;
@@ -58,7 +59,9 @@ function BillingPageContent() {
     window.open(plan.paymentLink, "_blank", "noopener,noreferrer");
     toast({
       title: "Complete payment in Cash App",
-      description: `Pay $${cashAppTag}, then enter your access code above.`,
+      description: plansData?.membershipUnlock?.code
+        ? `Then enter access code ${plansData.membershipUnlock.code} on this page or Launchpad.`
+        : "Then enter your access code on this page or Launchpad.",
     });
     setLoadingPlan(null);
   };
@@ -74,16 +77,29 @@ function BillingPageContent() {
 
       {!isMembershipAccess && !isPro && (
         <AdminCodeForm
-          title="Have an access code?"
-          description="After you pay on Cash App, enter the access code we send you to activate your plan."
+          title="Unlock after Cash App payment"
+          description={
+            plansData?.membershipUnlock?.instructions ??
+            "After you pay on Cash App, enter your access code here to activate your plan and run urrthang."
+          }
+          codeHint={plansData?.membershipUnlock?.code ?? null}
         />
       )}
 
       {!isPro && (
         <Card className="border border-[#00D632]/40 bg-[#00D632]/8">
-          <CardContent className="pt-4 text-sm text-foreground">
-            <strong>Cash App is how you subscribe.</strong> Pick a plan below — Cash App opens with
-            the right amount. No card or Stripe required. After payment, redeem your access code.
+          <CardContent className="pt-4 text-sm text-foreground space-y-2">
+            <p>
+              <strong>Cash App is how you subscribe.</strong> Pick a plan below — Cash App opens with
+              the right amount. No card or Stripe required.
+            </p>
+            {plansData?.membershipUnlock?.code ? (
+              <p className="text-emerald-800 dark:text-emerald-200">
+                After payment, use access code{" "}
+                <strong className="font-mono tracking-widest">{plansData.membershipUnlock.code}</strong>{" "}
+                on this page or Launchpad to run urrthang.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       )}

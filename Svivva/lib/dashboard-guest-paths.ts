@@ -12,6 +12,7 @@ export const DASHBOARD_PUBLIC_PREFIXES = [
   "/seeds",
   "/dashboard/orbit",
   "/dashboard/launchpad",
+  "/dashboard/billing",
   "/dashboard/poor-man-protection",
   "/dashboard/education-advocacy",
   "/dashboard/api-builder",
