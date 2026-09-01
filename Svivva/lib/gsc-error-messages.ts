@@ -1,9 +1,15 @@
 /** Human-readable copy for GSC OAuth error codes (URL params + API responses). */
+import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+
 export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (!err?.trim()) return "Google sign-in failed.";
   const code = err.trim();
   if (code === "no_refresh_token") {
     return "Google did not return a refresh token. Revoke ZZAI at myaccount.google.com/permissions, then connect again.";
+  }
+  if (code.startsWith("wrong_google_account:")) {
+    const signedInAs = code.slice("wrong_google_account:".length);
+    return `Wrong Google account (${signedInAs}). Sign in as ${GSC_OAUTH_LOGIN_HINT} — tap your profile in Google and switch accounts before approving.`;
   }
   if (code === "admin_required") {
     return "Enter the admin passcode on this page first, then try again.";

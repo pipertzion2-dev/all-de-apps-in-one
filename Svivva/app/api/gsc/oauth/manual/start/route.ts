@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { badRequest, forbidden, ok, serverError } from "@/lib/http-response";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { prepareGscOAuthStart } from "@/lib/gsc-oauth-prepare";
-import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { resolveGscOAuthLoginHint, isCanonicalGscOAuthEmail } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     };
     const result = await prepareGscOAuthStart({
       returnTo: body.returnTo || "/dashboard/gsc-connect",
-      email: body.email || GSC_OAUTH_LOGIN_HINT,
+      email: resolveGscOAuthLoginHint(body.email),
       ttlMs: 60 * 60 * 1000,
     });
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       state: result.state,
       redirectUri: result.redirectUri,
       expiresAt: result.expiresAt,
-      loginHint: body.email || GSC_OAUTH_LOGIN_HINT,
+      loginHint: resolveGscOAuthLoginHint(body.email),
       instructions: [
         "Open the Google URL in a new tab (desktop browser works best).",
         "Sign in and approve Search Console access.",

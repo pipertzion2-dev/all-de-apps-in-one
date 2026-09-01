@@ -8,7 +8,6 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const returnTo = req.nextUrl.searchParams.get("return") || "/dashboard/gsc-connect";
   const email = req.nextUrl.searchParams.get("email");
-  const dest = new URL(gscOAuthConnectUrl(returnTo), req.nextUrl.origin);
-  if (email) dest.searchParams.set("email", email);
+  const dest = new URL(gscOAuthConnectUrl(returnTo, email ?? undefined), req.nextUrl.origin);
   return oauthHtmlBridgeResponse(dest.toString(), "Continue to Google Search Console");
 }

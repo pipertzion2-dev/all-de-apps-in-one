@@ -10,6 +10,7 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { ensureGoogleIndexingApisEnabled } from "@/lib/google-cloud-enable-apis";
+import { isCanonicalGscOAuthEmail, resolveGscOAuthLoginHint } from "@/lib/gsc-oauth-connect-url";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 import {
@@ -115,6 +116,14 @@ export async function GET(req: NextRequest) {
       const dest = new URL(returnPath, req.nextUrl.origin);
       dest.searchParams.set("gsc_error", "no_refresh_token");
       return NextResponse.redirect(dest);
+    }
+
+    if (tokens.email && !isCanonicalGscOAuthEmail(tokens.email)) {
+      return redirectWithError(
+        req.nextUrl.origin,
+        returnPath,
+        `wrong_google_account:${tokens.email}`,
+      );
     }
 
     await saveGoogleOAuthTokens(userId, {

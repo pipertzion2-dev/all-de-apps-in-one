@@ -10,6 +10,7 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
+import { isCanonicalGscOAuthEmail, resolveGscOAuthLoginHint } from "@/lib/gsc-oauth-connect-url";
 
 export type ManualGscCompleteInput = {
   /** Authorization code from Google */
@@ -120,6 +121,12 @@ export async function completeManualGscOAuth(
   if (!tokens.refreshToken) {
     throw new Error(
       "Google did not return a refresh token. Revoke ZZAI access at myaccount.google.com/permissions, then try again.",
+    );
+  }
+
+  if (tokens.email && !isCanonicalGscOAuthEmail(tokens.email)) {
+    throw new Error(
+      `Wrong Google account (${tokens.email}). Sign in as ${resolveGscOAuthLoginHint()} — switch accounts in Google before approving.`,
     );
   }
 

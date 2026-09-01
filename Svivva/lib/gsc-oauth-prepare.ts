@@ -14,7 +14,6 @@ import {
   getGscOAuthRedirectUri,
   getGoogleGscOAuthConfig,
   isGoogleGscOAuthConfigured,
-  loadGoogleOAuthRefreshToken,
   saveGscOAuthStateRow,
 } from "@/lib/google-gsc-oauth";
 import { getSiteUrl } from "@/lib/site-url";
@@ -22,7 +21,7 @@ import {
   hydratePlatformSecrets,
   stripInvalidGoogleGscEnvFromProcess,
 } from "@/lib/platform-runtime-secrets";
-import { GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { resolveGscOAuthLoginHint } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthConfigProblem } from "@/lib/gsc-oauth-credentials";
 
 export type GscOAuthPrepareResult =
@@ -113,19 +112,7 @@ export async function prepareGscOAuthStart(opts: {
     const state = crypto.randomBytes(24).toString("hex");
     const redirectUri = getGscOAuthRedirectUri(origin);
 
-    const sessionUser = await getCurrentUser().catch(() => null);
-    let savedOAuth: Awaited<ReturnType<typeof loadGoogleOAuthRefreshToken>> = null;
-    try {
-      savedOAuth = await loadGoogleOAuthRefreshToken(userId);
-    } catch {
-      /* optional hint */
-    }
-    const loginHint =
-      opts.email?.trim() ||
-      sessionUser?.email?.trim() ||
-      savedOAuth?.email?.trim() ||
-      process.env.GSC_OAUTH_LOGIN_HINT?.trim() ||
-      GSC_OAUTH_LOGIN_HINT;
+    const loginHint = resolveGscOAuthLoginHint(opts.email);
 
     const expiresAt = new Date(Date.now() + ttlMs);
     const redirectAfter = JSON.stringify({ path: returnTo, userId });

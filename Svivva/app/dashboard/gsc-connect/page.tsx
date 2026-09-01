@@ -32,7 +32,7 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { getPublicSiteUrl } from "@/lib/site-url-public";
-import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connect-url";
+import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT, isCanonicalGscOAuthEmail } from "@/lib/gsc-oauth-connect-url";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
@@ -321,6 +321,8 @@ export default function GscConnectPage() {
   const indexingApiFailed = data?.steps.some((s) => s.id === "indexing_api" && s.status === "fail");
   const enableLinks = data?.googleApiEnableLinks ?? null;
   const fullyReady = connected && propertyOk && !indexingApiFailed;
+  const wrongGoogleAccount =
+    connected && !!data?.oauthEmail && !isCanonicalGscOAuthEmail(data.oauthEmail);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -349,6 +351,27 @@ export default function GscConnectPage() {
           </CardContent>
         </Card>
       )}
+
+      {wrongGoogleAccount && (
+        <Card className="border-red-500/40 bg-red-500/5">
+          <CardContent className="py-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">Wrong Google account linked</p>
+            <p className="text-xs text-muted-foreground">
+              Connected as <strong>{data?.oauthEmail}</strong>, but Search Console for this site
+              must use <strong>{GSC_OAUTH_LOGIN_HINT}</strong>. Reconnect below and pick the correct
+              account in Google (tap your profile photo to switch).
+            </p>
+            <Button
+              asChild
+              className="text-white font-bold"
+              style={{ background: `linear-gradient(135deg,${TEAL},#6B2C4E)` }}
+            >
+              <a href={OAUTH_START}>Reconnect as {GSC_OAUTH_LOGIN_HINT}</a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Hero: one-press camo orb to connect */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <GscConnectOrb connected={fullyReady} available={oauthAvailable} oauthUrl={OAUTH_START} />
