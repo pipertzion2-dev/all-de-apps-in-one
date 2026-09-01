@@ -30,6 +30,7 @@ export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/dashboard/launchpad")) {
     return "Marketing Orbit";
   }
+  if (pathname.startsWith("/dashboard/billing")) return "Plans & Billing";
   if (pathname.startsWith("/dashboard/burns")) return "Burns System";
   if (pathname.startsWith("/dashboard/gsc-connect")) return "Google Search Console";
   if (pathname.startsWith("/dashboard/security")) return "Security Center";

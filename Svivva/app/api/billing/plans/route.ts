@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBillingPaymentOptions } from "@/lib/billing/payment-options";
+import { getMembershipUnlockInfo } from "@/lib/billing/membership-unlock";
 import { resolveBillingPlanOffers } from "@/lib/billing/resolve-plan-offers";
 
 /** Public plan catalog — Starter $20 / Pro $50 via Cash App. */
@@ -13,6 +14,7 @@ export async function GET() {
 
     return NextResponse.json({
       plans,
+      membershipUnlock: getMembershipUnlockInfo(),
       paymentOptions: {
         cashAppPlansActive: paymentOptions.cashAppPlansActive,
         cashAppTag: paymentOptions.cashAppTag,

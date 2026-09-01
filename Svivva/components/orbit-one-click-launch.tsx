@@ -310,6 +310,7 @@ export function OrbitOneClickLaunch({
       paymentLink: string | null;
       checkoutAvailable: boolean;
     }[];
+    membershipUnlock?: { instructions: string; code: string };
     paymentOptions?: { cashAppTag?: string };
   }>({
     queryKey: ["/api/billing/plans"],
@@ -909,8 +910,16 @@ export function OrbitOneClickLaunch({
           <div className="space-y-3" data-testid="urrthang-user-cash-pay">
             <p className="text-xs text-center text-muted-foreground leading-relaxed">
               Cash App is the plan — pay ${plansData?.paymentOptions?.cashAppTag ?? "pipertzion"},
-              then enter your access code to run {URRTHANG_LABEL}.
+              then enter your access code below to run {URRTHANG_LABEL}.
             </p>
+            {plansData?.membershipUnlock?.code ? (
+              <p
+                className="text-center text-sm font-mono font-bold tracking-[0.35em] text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg py-2.5 px-3"
+                data-testid="urrthang-access-code-hint"
+              >
+                Access code: {plansData.membershipUnlock.code}
+              </p>
+            ) : null}
             <div className="flex flex-col sm:flex-row gap-2">
               {starterPay?.paymentLink ? (
                 <a
@@ -939,7 +948,11 @@ export function OrbitOneClickLaunch({
             </div>
             <AdminCodeForm
               title="Access code"
-              description="After Cash App payment, enter your code here to run urrthang."
+              description={
+                plansData?.membershipUnlock?.instructions ??
+                "After Cash App payment, enter your access code here to run urrthang."
+              }
+              codeHint={plansData?.membershipUnlock?.code ?? null}
             />
           </div>
         )}
