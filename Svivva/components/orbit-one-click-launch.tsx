@@ -261,6 +261,7 @@ function metaFor(id: string): ActionMeta {
 // ─── Running phases ───────────────────────────────────────────────────────────
 
 const PHASES = [
+  { label: "Wiring EasyPeasy AI (tier + connection test)" },
   { label: "Building SEO pages, blog, comparisons & tool pages" },
   { label: "Submitting URLs to Google (GSC + Indexing API), Bing & IndexNow" },
   { label: "Generating AI launch copy & auto-posting where APIs allow" },
@@ -298,6 +299,7 @@ export function OrbitOneClickLaunch({
   const [aiConfigured, setAiConfigured] = useState(false);
   const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
   const [marketingModel, setMarketingModel] = useState<string | null>(null);
+  const [easypeasyTier, setEasypeasyTier] = useState<string | null>(null);
   const [copyOnlyMode, setCopyOnlyMode] = useState(true);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
@@ -497,6 +499,31 @@ export function OrbitOneClickLaunch({
     phaseTimers.current.forEach(clearTimeout);
     phaseTimers.current = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 9_000));
     try {
+      const ensureRes = await authFetch("/api/easypeasy/ensure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier: "premium", testConnection: true }),
+      });
+      const ensureJson = (await ensureRes.json()) as {
+        ok?: boolean;
+        error?: string;
+        tierId?: string;
+        model?: string;
+        providerLabel?: string;
+        marketingModel?: string;
+        testReply?: string;
+      };
+      if (!ensureRes.ok || !ensureJson.ok) {
+        throw new Error(
+          ensureJson.error ||
+            "EasyPeasy AI is not configured. Paste your API key in the EasyPeasy card below, then try again.",
+        );
+      }
+      setAiConfigured(true);
+      if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
+      if (ensureJson.marketingModel) setMarketingModel(ensureJson.marketingModel);
+      if (ensureJson.tierId) setEasypeasyTier(ensureJson.tierId);
+
       const r = await authFetch("/api/orbit/marketing-autopilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -512,6 +539,9 @@ export function OrbitOneClickLaunch({
       }
       if ((json as { ai?: { marketingModel?: string } }).ai?.marketingModel) {
         setMarketingModel((json as { ai: { marketingModel: string } }).ai.marketingModel);
+      }
+      if ((json as { easypeasy?: { tierId?: string } }).easypeasy?.tierId) {
+        setEasypeasyTier((json as { easypeasy: { tierId: string } }).easypeasy.tierId);
       }
       onComplete?.();
     } catch (e) {
@@ -635,17 +665,25 @@ export function OrbitOneClickLaunch({
                 ? `Running everything${marketingModel ? ` (${marketingModel})` : ""}…`
                 : hasRun
                   ? "Everything complete"
-                  : "Everything — one button (GPT-5)"}
+                  : aiProviderLabel
+                    ? `Everything — one button (${aiProviderLabel})`
+                    : "Everything — one button (EasyPeasy AI)"}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "GPT-5 + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
+                ? "EasyPeasy AI + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
                 : hasRun
                   ? copyOnlyMode
-                    ? "Fully automated: pages, indexing, GPT-5 copy. Optional social/email copy saved in Growth Content."
+                    ? "Fully automated: pages, indexing, AI copy. Optional social/email copy saved in Growth Content."
                     : "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press: GPT-5 builds SEO pages, submits to Google & Bing, saves launch copy — no auto-posting needed."}
+                  : "One press: wires EasyPeasy AI, builds SEO pages, submits to Google & Bing, saves launch copy."}
             </p>
+            {easypeasyTier && !running && (
+              <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300 mt-1">
+                AI tier: <strong>{easypeasyTier}</strong>
+                {marketingModel ? ` · ${marketingModel}` : ""}
+              </p>
+            )}
             {aiConfigured && (marketingModel || aiProviderLabel) && (
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
                 AI: {aiProviderLabel || marketingModel}
@@ -802,7 +840,7 @@ export function OrbitOneClickLaunch({
                 </>
               ) : (
                 <>
-                  <Rocket className="w-5 h-5" /> Run everything (GPT-5)
+                  <Rocket className="w-5 h-5" /> Run everything
                 </>
               )}
             </button>

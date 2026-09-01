@@ -3129,6 +3129,28 @@ export default function LaunchpadPage() {
     setLaunchDone(false);
 
     try {
+      setFullAutopilotStep("Wiring EasyPeasy AI (tier + connection)…");
+      try {
+        const ep = await authFetch("/api/easypeasy/ensure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tier: "premium", testConnection: true }),
+        });
+        const epData = await ep.json();
+        if (!ep.ok || !epData.ok) {
+          toast({
+            title: "EasyPeasy not ready",
+            description:
+              epData.error ||
+              "Paste your EasyPeasy API key in the card below, then run again.",
+            variant: "destructive",
+            duration: 10000,
+          });
+        }
+      } catch {
+        /* continue — steps may still use templates */
+      }
+
       setFullAutopilotStep("Discovering every mini app across all hubs…");
       const discovered = await discoverAllHubTools();
       toast({
@@ -3260,7 +3282,16 @@ export default function LaunchpadPage() {
         setGoldPhaseDisplay(g + 1);
       }
 
-      setFullAutopilotStep("Final pass: marketing DB gaps + full IndexNow…");
+      setFullAutopilotStep("Final pass: EasyPeasy marketing autopilot + IndexNow…");
+      try {
+        await authFetch("/api/orbit/marketing-autopilot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "run" }),
+        });
+      } catch {
+        /* non-fatal */
+      }
       try {
         const acRes = await authFetch("/api/orbit/auto-complete", { method: "POST" });
         const acData = await acRes.json();
