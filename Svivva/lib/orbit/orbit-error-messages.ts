@@ -1,5 +1,16 @@
 /** Turn raw API errors into short, actionable Orbit admin copy. */
 
+export function isEasyPeasyWordLimitError(message: string | null | undefined): boolean {
+  if (!message) return false;
+  const m = message.toLowerCase();
+  return (
+    m.includes("429") ||
+    m.includes("allowed words") ||
+    m.includes("word limit") ||
+    (m.includes("limit") && m.includes("plan"))
+  );
+}
+
 export function dedupeErrorMessages(errors: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -26,7 +37,7 @@ function normalizeErrorKey(message: string): string {
 export function formatIndexingApiError(message: string): string {
   const m = message.toLowerCase();
   if (m.includes("publish requests") && m.includes("quota")) {
-    return "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.";
+    return "Optional Google Indexing API daily cap reached (~200 URLs/day) — this is not a Search Console limit. IndexNow + your GSC sitemap already submitted; cap resets tomorrow.";
   }
   if (m.includes("indexing api") && m.includes("disabled")) {
     return "Google Indexing API is disabled for this project — enable it in Google Cloud Console.";
@@ -43,12 +54,7 @@ export type OrbitRunErrorHint = {
 export function formatOrbitRunError(raw: string): OrbitRunErrorHint {
   const m = raw.toLowerCase();
 
-  if (
-    m.includes("429") ||
-    m.includes("allowed words") ||
-    m.includes("word limit") ||
-    (m.includes("limit") && m.includes("plan"))
-  ) {
+  if (isEasyPeasyWordLimitError(raw)) {
     return {
       title: "EasyPeasy word limit reached",
       detail:

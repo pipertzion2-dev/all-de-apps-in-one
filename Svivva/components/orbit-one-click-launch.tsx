@@ -57,7 +57,11 @@ import {
   PINK_CAMO_BUTTON_STYLE,
   URRTHANG_LABEL,
 } from "@/lib/ui-pink-camo-button";
-import { dedupeErrorMessages, formatOrbitRunError } from "@/lib/orbit/orbit-error-messages";
+import {
+  dedupeErrorMessages,
+  formatOrbitRunError,
+  isEasyPeasyWordLimitError,
+} from "@/lib/orbit/orbit-error-messages";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -451,6 +455,7 @@ export function OrbitOneClickLaunch({
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
           ai?: { configured?: boolean; providerLabel?: string; marketingModel?: string };
+          easypeasy?: { active?: boolean; tierId?: string; model?: string };
           copyOnlyMode?: boolean;
           status?: { configured?: Record<string, boolean> };
         };
@@ -458,6 +463,7 @@ export function OrbitOneClickLaunch({
         if (json.ai?.configured) setAiConfigured(true);
         if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
         if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
+        if (json.easypeasy?.tierId && !cancelled) setEasypeasyTier(json.easypeasy.tierId);
         if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
       } catch {
@@ -724,6 +730,13 @@ export function OrbitOneClickLaunch({
             {aiConfigured && (marketingModel || aiProviderLabel) && (
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
                 AI: {aiProviderLabel || marketingModel}
+                {easypeasyTier ? ` · tier ${easypeasyTier}` : ""}
+              </p>
+            )}
+            {error && isEasyPeasyWordLimitError(error) && (
+              <p className="text-[10px] text-amber-600 dark:text-amber-300 mt-1">
+                EasyPeasy key is valid but hit a word cap on premium models — urrthang will retry
+                Standard (gemini-3-flash) automatically.
               </p>
             )}
           </div>
@@ -1516,7 +1529,8 @@ function GoogleIndexingCard({
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (
-        <p className="text-[9px] text-amber-400/90 leading-relaxed">
+        <p className="text-[9px] text-sky-300/90 leading-relaxed rounded-lg border border-sky-500/25 bg-sky-500/5 px-2 py-1.5">
+          <span className="font-bold text-sky-200">Indexing API note — not Search Console: </span>
           {dedupeErrorMessages(indexing.googleIndexing.errorsSample).slice(0, 1).join(" ")}
         </p>
       )}

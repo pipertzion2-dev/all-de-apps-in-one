@@ -12,9 +12,11 @@ import {
 import { testEasyPeasyConnection } from "@/lib/easypeasy/client";
 import {
   EASYPEASY_DEFAULT_TIER_ID,
+  getEasyPeasyModelForTier,
   resolveEasyPeasyTierId,
   type EasyPeasyTierId,
 } from "@/lib/easypeasy/tiers";
+import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 
 export type EnsureEasyPeasyResult = {
   ok: boolean;
@@ -111,6 +113,28 @@ export async function ensureEasyPeasyForOrbit(
       testReply = test.reply;
     } else {
       error = test.error;
+      if (isEasyPeasyWordLimitError(test.error) && resolvedTier !== "standard") {
+        await patchPlatformRuntimeSecrets({ easypeasyTier: "standard" });
+        await hydratePlatformSecrets();
+        config = await loadEasyPeasyConfig();
+        const standardModel = getEasyPeasyModelForTier("standard");
+        const retry = await testEasyPeasyConnection({
+          apiKey: config.apiKey!,
+          model: standardModel,
+        });
+        if (retry.ok) {
+          return {
+            ok: true,
+            active: true,
+            tierId: "standard",
+            model: standardModel,
+            tested: true,
+            testReply: retry.reply,
+            configuredNow: true,
+          };
+        }
+        error = retry.error ?? test.error;
+      }
       return {
         ok: false,
         active: true,
@@ -119,7 +143,7 @@ export async function ensureEasyPeasyForOrbit(
         tested,
         testReply,
         configuredNow,
-        error: test.error,
+        error,
       };
     }
   }
