@@ -278,7 +278,9 @@ export default function GscConnectPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "sync_property" }),
       });
-      const d = await r.json();
+      const d = await parseAuthJsonResponse<{ error?: string; success?: boolean; message?: string }>(
+        r,
+      );
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
@@ -295,7 +297,12 @@ export default function GscConnectPage() {
   const runIndexing = useMutation({
     mutationFn: async () => {
       const r = await authFetch("/api/gsc/run-indexing", { method: "POST" });
-      const d = await r.json();
+      const d = await parseAuthJsonResponse<{
+        ok?: boolean;
+        error?: string;
+        message?: string;
+        indexing?: { googleIndexing?: { submitted?: number } };
+      }>(r);
       if (!r.ok) throw new Error(d.error || "Failed");
       return d;
     },
@@ -307,7 +314,7 @@ export default function GscConnectPage() {
       });
       refetch();
     },
-    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+    onError: (e: Error) => setMsg({ text: gscOAuthErrorMessage(e.message), ok: false }),
   });
 
   const needsAdmin =

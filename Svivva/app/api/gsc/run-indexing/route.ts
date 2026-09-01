@@ -11,6 +11,7 @@ import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { forbidden, ok, badRequest } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 /** One-click: re-run Google sitemap + Indexing API (+ full IndexNow/Bing from traffic engine). */
 export async function POST(req: NextRequest) {
@@ -32,7 +33,8 @@ export async function POST(req: NextRequest) {
     autoSetup = await runGscAutoSetup({ userId, accessToken });
   }
 
-  const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
+  // One batch (200 URLs) keeps mobile Safari under Vercel timeout; full runs use /api/orbit/automate-manual.
+  const indexing = await runAutomatableManualActions({ googleMaxBatches: 1 });
 
   return ok({
     ok: indexing.googleSitemap.ok || indexing.googleIndexing.submitted > 0,
