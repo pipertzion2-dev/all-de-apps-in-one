@@ -49,6 +49,7 @@ import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketi
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
+import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
 import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
 
 const TEAL = "#5B8DA8";
@@ -339,6 +340,24 @@ export function OrbitOneClickLaunch({
   const [quickStartResult, setQuickStartResult] = useState<QuickStartResult | null>(null);
   const [quickStartError, setQuickStartError] = useState<string | null>(null);
 
+  const refreshGscStatus = async () => {
+    try {
+      const r = await authFetch("/api/gsc/diagnose");
+      if (r.ok) {
+        const d = await r.json();
+        setGsc({
+          connected: !!d.oauthConnected,
+          available: d.oauthAvailable === true,
+          email: d.oauthEmail ?? null,
+          propertyOk: !!d.gscPropertyOk,
+          matchedSite: d.gscMatchedSite ?? null,
+        });
+      }
+    } catch {
+      /* best-effort */
+    }
+  };
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -459,21 +478,7 @@ export function OrbitOneClickLaunch({
       if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
       setQuickStartResult(json);
       if (json.indexing) {
-        try {
-          const gr = await authFetch("/api/gsc/diagnose");
-          if (gr.ok) {
-            const d = await gr.json();
-            setGsc({
-              connected: !!d.oauthConnected,
-              available: d.oauthAvailable === true,
-              email: d.oauthEmail ?? null,
-              propertyOk: !!d.gscPropertyOk,
-              matchedSite: d.gscMatchedSite ?? null,
-            });
-          }
-        } catch {
-          /* best-effort */
-        }
+        await refreshGscStatus();
       }
       onComplete?.();
     } catch (e) {
@@ -719,11 +724,14 @@ export function OrbitOneClickLaunch({
                 : "Paste your Google OAuth client ID + secret to enable one-click connect."}
           </p>
           {!gsc.connected && !gsc.available && (
+            <GscOAuthClientSavePanel compact onSaved={() => void refreshGscStatus()} />
+          )}
+          {!gsc.connected && gsc.available && (
             <Link
-              href="/dashboard/gsc-connect?gsc_error=oauth_not_configured"
+              href="/dashboard/gsc-connect"
               className="text-[11px] font-bold underline text-[#5B8DA8]"
             >
-              Configure Google OAuth credentials →
+              Advanced GSC setup →
             </Link>
           )}
         </div>
