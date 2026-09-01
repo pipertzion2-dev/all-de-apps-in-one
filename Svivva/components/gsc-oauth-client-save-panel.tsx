@@ -6,6 +6,7 @@ import { authFetch, parseAuthJsonResponse } from "@/hooks/use-auth";
 import { parseGscOAuthCredentialsFromFields } from "@/lib/gsc-oauth-credentials";
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import { followOAuthLink } from "@/lib/follow-oauth-link";
 import {
   CHROME_SILVER_BUTTON_CLASS,
   CHROME_SILVER_BUTTON_STYLE,
@@ -14,6 +15,8 @@ import {
 type Props = {
   /** Tighter layout for Orbit Admin mission control */
   compact?: boolean;
+  /** OAuth client already saved or set in Vercel — show Connect bro only (no paste fields). */
+  oauthReady?: boolean;
   /** Where Google sends the user after OAuth (Orbit Admin path). */
   connectReturnTo?: string;
   onSaved?: () => void;
@@ -22,6 +25,7 @@ type Props = {
 
 export function GscOAuthClientSavePanel({
   compact = false,
+  oauthReady = false,
   connectReturnTo = "/dashboard/orbit",
   onSaved,
   "data-testid": testId = "orbit-admin-save-oauth-client",
@@ -36,6 +40,12 @@ export function GscOAuthClientSavePanel({
   );
 
   const canSave = Boolean(parsedOAuth.clientId && parsedOAuth.clientSecret);
+  const connectUrl = gscOAuthConnectUrl(connectReturnTo);
+
+  const openGoogleSignIn = useCallback(() => {
+    onSaved?.();
+    followOAuthLink(connectUrl);
+  }, [connectUrl, onSaved]);
 
   const applyOAuthPaste = useCallback((value: string) => {
     if (!value.trim().startsWith("{")) return false;
@@ -68,8 +78,7 @@ export function GscOAuthClientSavePanel({
       return d;
     },
     onSuccess: () => {
-      onSaved?.();
-      window.location.assign(gscOAuthConnectUrl(connectReturnTo));
+      openGoogleSignIn();
     },
     onError: (e: Error) => setFeedback({ ok: false, text: gscOAuthErrorMessage(e.message) }),
   });
@@ -87,46 +96,50 @@ export function GscOAuthClientSavePanel({
         Google OAuth client
       </p>
       <p className={`text-muted-foreground leading-relaxed ${compact ? "text-[10px]" : "text-xs"}`}>
-        Paste Client ID + secret, then Connect bro saves credentials and opens Google sign-in.
+        {oauthReady
+          ? "OAuth client is ready — Connect bro opens Google sign-in."
+          : "Paste Client ID + secret, then Connect bro saves credentials and opens Google sign-in."}
       </p>
-      <div className="space-y-2">
-        <input
-          type="text"
-          value={oauthClientId}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (applyOAuthPaste(v)) return;
-            setOauthClientId(v);
-          }}
-          onPaste={(e) => {
-            const v = e.clipboardData.getData("text");
-            if (applyOAuthPaste(v)) e.preventDefault();
-          }}
-          placeholder="Client ID or full JSON"
-          className={inputClass}
-          aria-label="Google OAuth client ID"
-        />
-        <input
-          type="password"
-          value={oauthClientSecret}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (applyOAuthPaste(v)) return;
-            setOauthClientSecret(v);
-          }}
-          onPaste={(e) => {
-            const v = e.clipboardData.getData("text");
-            if (applyOAuthPaste(v)) e.preventDefault();
-          }}
-          placeholder="Client secret (GOCSPX-…)"
-          className={inputClass}
-          aria-label="Google OAuth client secret"
-        />
-      </div>
+      {!oauthReady && (
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={oauthClientId}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (applyOAuthPaste(v)) return;
+              setOauthClientId(v);
+            }}
+            onPaste={(e) => {
+              const v = e.clipboardData.getData("text");
+              if (applyOAuthPaste(v)) e.preventDefault();
+            }}
+            placeholder="Client ID or full JSON"
+            className={inputClass}
+            aria-label="Google OAuth client ID"
+          />
+          <input
+            type="password"
+            value={oauthClientSecret}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (applyOAuthPaste(v)) return;
+              setOauthClientSecret(v);
+            }}
+            onPaste={(e) => {
+              const v = e.clipboardData.getData("text");
+              if (applyOAuthPaste(v)) e.preventDefault();
+            }}
+            placeholder="Client secret (GOCSPX-…)"
+            className={inputClass}
+            aria-label="Google OAuth client secret"
+          />
+        </div>
+      )}
       <button
         type="button"
-        disabled={!canSave || saveMutation.isPending}
-        onClick={() => saveMutation.mutate()}
+        disabled={oauthReady ? saveMutation.isPending : !canSave || saveMutation.isPending}
+        onClick={() => (oauthReady ? openGoogleSignIn() : saveMutation.mutate())}
         className={`w-full rounded-lg px-4 py-2 text-sm ${CHROME_SILVER_BUTTON_CLASS} ${compact ? "h-9 text-xs" : "h-10"}`}
         style={CHROME_SILVER_BUTTON_STYLE}
         data-testid={`${testId}-button`}

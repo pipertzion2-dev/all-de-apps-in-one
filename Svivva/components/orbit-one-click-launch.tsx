@@ -681,7 +681,9 @@ export function OrbitOneClickLaunch({
             </p>
             <div className="flex gap-2">
               <input
-                type="url"
+                type="text"
+                inputMode="url"
+                autoComplete="url"
                 placeholder="https://your-n8n.app/webhook/..."
                 value={credInputs.n8nWebhookUrl ?? ""}
                 onChange={(e) =>
@@ -723,10 +725,11 @@ export function OrbitOneClickLaunch({
                 ? "Press the camo orb to connect Google Search Console — AI handles the rest."
                 : "Paste your Google OAuth client ID + secret to enable one-click connect."}
           </p>
-          {!gsc.connected && !gsc.available && (
+          {!gsc.connected && (
             <GscOAuthClientSavePanel
               compact
-              connectReturnTo="/dashboard/orbit"
+              oauthReady={gsc.available}
+              connectReturnTo="/dashboard/launchpad"
               onSaved={() => void refreshGscStatus()}
             />
           )}

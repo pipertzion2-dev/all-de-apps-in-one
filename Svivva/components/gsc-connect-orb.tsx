@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminCodeForm } from "@/components/admin-code-form";
+import { followOAuthLink } from "@/lib/follow-oauth-link";
 
 type Props = {
   connected: boolean;
@@ -123,17 +124,27 @@ export default function GscConnectOrb({
     fetch("/api/auth/me", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (alive && d) setAdminUnlocked(!!d.isAdmin);
+        if (alive) setAdminUnlocked(d ? !!d.isAdmin : false);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (alive) setAdminUnlocked(false);
+      });
     return () => {
       alive = false;
     };
   }, []);
 
+  const startOAuth = () => {
+    followOAuthLink(oauthUrl);
+  };
+
   /** Gate: admin must be unlocked (passcode cookie) before the OAuth redirect. */
   const connect = () => {
-    if (!interactive || adminUnlocked !== false) return;
+    if (!interactive) return;
+    if (adminUnlocked === true) {
+      startOAuth();
+      return;
+    }
     setShowUnlock(true);
   };
 
@@ -141,8 +152,6 @@ export default function GscConnectOrb({
     e.stopPropagation();
     connect();
   };
-
-  const useOAuthLink = interactive && adminUnlocked === true;
 
   const caption = connected
     ? "Connected"
@@ -167,12 +176,12 @@ export default function GscConnectOrb({
           boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
           borderColor: connected ? "rgba(46,150,80,0.6)" : "rgba(91, 141, 168,0.55)",
         }}
-        onClick={useOAuthLink ? undefined : connect}
-        role={interactive && !useOAuthLink ? "button" : undefined}
-        aria-label={interactive && !useOAuthLink ? "Connect Google Search Console" : undefined}
-        tabIndex={interactive && !useOAuthLink ? 0 : undefined}
+        onClick={interactive ? connect : undefined}
+        role={interactive ? "button" : undefined}
+        aria-label={interactive ? "Connect Google Search Console" : undefined}
+        tabIndex={interactive ? 0 : undefined}
         onKeyDown={
-          interactive && !useOAuthLink
+          interactive
             ? (e) => {
                 if (e.key === "Enter" || e.key === " ") connect();
               }
@@ -183,20 +192,11 @@ export default function GscConnectOrb({
           <ambientLight intensity={0.7} />
           <directionalLight position={[3, 4, 5]} intensity={1.4} />
           <pointLight position={[-3, -2, 2]} intensity={0.6} color="#9aa06b" />
-          <group onClick={useOAuthLink ? undefined : handleClick}>
-            <CamoSphere connected={connected} interactive={interactive && !useOAuthLink} />
+          <group onClick={interactive ? handleClick : undefined}>
+            <CamoSphere connected={connected} interactive={interactive} />
           </group>
         </Canvas>
       </div>
-
-      {useOAuthLink ? (
-        <a
-          href={oauthUrl}
-          className="absolute inset-0 z-20 rounded-full"
-          aria-label="Connect Google Search Console"
-          data-testid="gsc-connect-orb-link"
-        />
-      ) : null}
 
       {/* center label overlay (click passes through to the orb) */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -227,7 +227,7 @@ export default function GscConnectOrb({
               onSuccess={() => {
                 setAdminUnlocked(true);
                 setShowUnlock(false);
-                window.location.assign(oauthUrl);
+                startOAuth();
               }}
             />
           </div>
