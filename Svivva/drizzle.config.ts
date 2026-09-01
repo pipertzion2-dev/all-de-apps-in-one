@@ -1,6 +1,8 @@
 import { defineConfig } from "drizzle-kit";
+import { getDatabaseMigrationUrl } from "./lib/db-migration-url";
 
-if (!process.env.DATABASE_URL) {
+const migrationUrl = getDatabaseMigrationUrl();
+if (!migrationUrl) {
   throw new Error("DATABASE_URL, ensure the database is provisioned");
 }
 
@@ -14,7 +16,7 @@ export default defineConfig({
   ],
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    url: migrationUrl,
   },
   tablesFilter: ["!apex_call_logs", "!apex_cycles"],
 });

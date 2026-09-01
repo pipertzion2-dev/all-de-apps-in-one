@@ -15,11 +15,28 @@ export function isDatabaseConnectionError(error: unknown): boolean {
 
 export function isMissingSeedCredentialsTableError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
-  return /relation .*seed_credentials.* does not exist/i.test(msg);
+  return (
+    /relation .*seed_credentials.* does not exist/i.test(msg) ||
+    /relation .*platform_runtime_secrets.* does not exist/i.test(msg)
+  );
+}
+
+export function isSchemaSetupError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    isMissingSeedCredentialsTableError(error) ||
+    /DATABASE_URL_UNPOOLED/i.test(msg) ||
+    /direct Postgres URL/i.test(msg) ||
+    /Schema setup requires/i.test(msg)
+  );
 }
 
 export function missingSeedCredentialsTableMessage(): string {
-  return "Database tables are not set up yet — the seed_credentials table is missing. Redeploy after DATABASE_URL is set in Vercel (Neon), or run npm run db:push once against your production database.";
+  return schemaSetupErrorMessage();
+}
+
+export function schemaSetupErrorMessage(): string {
+  return "Database tables are not set up yet. In Vercel, connect Neon (prefix DATABASE) so both DATABASE_URL and DATABASE_URL_UNPOOLED are set, then redeploy. Tables are created on the direct (unpooled) connection.";
 }
 
 export function databaseConnectionErrorMessage(): string {
