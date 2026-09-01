@@ -10,7 +10,7 @@ import {
 } from "@/lib/google-gsc-oauth";
 import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { ensureGoogleIndexingApisEnabled } from "@/lib/google-cloud-enable-apis";
-import { isCanonicalGscOAuthEmail, resolveGscOAuthLoginHint } from "@/lib/gsc-oauth-connect-url";
+import { isCanonicalGscOAuthEmail } from "@/lib/gsc-oauth-connect-url";
 import { resolveGscOAuthSaveUserId } from "@/lib/orbit/gsc-credentials-user";
 import { consumeGscOAuthState } from "@/lib/gsc-oauth-state-cookie";
 import {

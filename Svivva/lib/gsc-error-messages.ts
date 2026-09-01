@@ -30,7 +30,10 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
     return "Admin unlock required — enter the admin passcode on this page first.";
   }
   if (/did not match the expected pattern/i.test(code)) {
-    return "Could not read the server reply (common in Safari). Unlock admin, refresh the page, and try save again.";
+    return "Could not read the server reply (common in Safari Private). Wait 30s and tap Run Google indexing again, or retry from desktop Safari.";
+  }
+  if (/unexpected response|HTTP 504|gateway timeout|timed out/i.test(code)) {
+    return "Indexing took too long for mobile (server timeout). Your Google connection is fine — wait 30s and try again, or use Run All on the Orbit launchpad from desktop.";
   }
   if (/econnrefused|connect refused|database connection failed/i.test(code)) {
     return "Database connection failed — Google signed in, but the app could not save your session. Set DATABASE_URL in Vercel to your hosted Postgres and redeploy.";

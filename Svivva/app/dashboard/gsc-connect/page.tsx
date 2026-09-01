@@ -132,7 +132,7 @@ export default function GscConnectPage() {
         throw new Error("admin_required");
       }
       if (!r.ok) throw new Error("Failed");
-      return r.json();
+      return parseAuthJsonResponse<DiagResult>(r);
     },
     staleTime: 30_000,
     retry: false,
@@ -291,7 +291,7 @@ export default function GscConnectPage() {
       });
       refetch();
     },
-    onError: (e: Error) => setMsg({ text: e.message, ok: false }),
+    onError: (e: Error) => setMsg({ text: gscOAuthErrorMessage(e.message), ok: false }),
   });
 
   const runIndexing = useMutation({
