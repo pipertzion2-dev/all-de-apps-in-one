@@ -705,7 +705,7 @@ export function OrbitOneClickLaunch({
         )}
 
         {/* One-press Google Search Console connect — camo orb */}
-        <div className="flex flex-col items-center gap-2 py-1">
+        <div className="flex flex-col items-center gap-2 py-2 px-3 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm">
           <GscConnectOrb
             connected={gsc.connected}
             available={gsc.available}
@@ -781,15 +781,16 @@ export function OrbitOneClickLaunch({
           </div>
         )}
 
-        {/* Primary launch + quick start + paid subscribe strip */}
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
+        {/* Primary launch + quick start + paid subscribe strip — always stacked:
+            lg:flex-row was cramming 3 panels into max-w-2xl (~672px) on desktop viewports. */}
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               onClick={run}
               disabled={running || quickStartRunning}
               data-testid="orbit-one-click-launch"
-              className="flex-1 flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[120px] sm:min-h-0"
+              className="flex items-center justify-center gap-2.5 py-4 sm:py-5 rounded-xl font-black text-base sm:text-lg text-white transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-[56px]"
               style={{ background: `linear-gradient(135deg,${TEAL},${BURG})` }}
             >
               {running ? (
@@ -812,7 +813,7 @@ export function OrbitOneClickLaunch({
               onClick={runQuickStart}
               disabled={running || quickStartRunning}
               data-testid="orbit-quick-start"
-              className="sm:w-[min(100%,13.5rem)] sm:flex-shrink-0 flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-0"
+              className="flex items-center justify-center gap-2 py-4 sm:py-5 px-4 rounded-xl font-bold text-sm text-foreground border-2 transition-all active:scale-[0.98] disabled:opacity-70 min-h-[72px] sm:min-h-[56px]"
               style={{ borderColor: `${TEAL}66`, background: `${TEAL}10` }}
               title="Submit sitemap + Indexing API to Google and verify Stripe keys — no content generation"
             >
@@ -836,7 +837,7 @@ export function OrbitOneClickLaunch({
           </div>
 
           <OrbitSubscribeQuickStrip
-            className="lg:w-[min(100%,17rem)] lg:flex-shrink-0"
+            className="w-full"
             configuredKeys={configuredKeys}
             aiConfigured={aiConfigured}
             onPasteKey={(key) => {
