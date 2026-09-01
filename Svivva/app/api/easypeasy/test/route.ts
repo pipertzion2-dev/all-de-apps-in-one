@@ -33,8 +33,7 @@ export async function POST(request: Request) {
     const saved = await loadEasyPeasyConfig();
     const apiKey = parsed.data.apiKey?.trim() || saved.apiKey;
     const tierId = parsed.data.tier ? resolveEasyPeasyTierId(parsed.data.tier) : saved.tierId;
-    const model =
-      parsed.data.model?.trim() || getEasyPeasyModelForTier(tierId) || saved.model;
+    const model = parsed.data.model?.trim() || getEasyPeasyModelForTier(tierId) || saved.model;
 
     const result = await testEasyPeasyConnection({ apiKey, model });
     if (!result.ok) {

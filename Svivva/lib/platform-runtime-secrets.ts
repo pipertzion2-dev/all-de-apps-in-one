@@ -112,8 +112,7 @@ export const runtimeSecretColdStart = {
     process.env.EASYPEASY_API_KEY?.trim()
   ),
   openaiBaseUrl: !!(
-    process.env.ORBIT_OPENAI_BASE_URL?.trim() ||
-    process.env.EASYPEASY_API_KEY?.trim()
+    process.env.ORBIT_OPENAI_BASE_URL?.trim() || process.env.EASYPEASY_API_KEY?.trim()
   ),
   easypeasyTier: !!process.env.EASYPEASY_TIER?.trim(),
   stripeSecret: !!process.env.STRIPE_SECRET_KEY?.trim(),

@@ -98,9 +98,7 @@ export async function GET() {
       stored: {
         openai: !!row?.openaiApiKey?.trim(),
         openaiBaseUrl: !!row?.openaiBaseUrl?.trim(),
-        easypeasyApiKey: !!(
-          row?.openaiApiKey?.trim() && isEasyPeasyBaseUrl(row.openaiBaseUrl)
-        ),
+        easypeasyApiKey: !!(row?.openaiApiKey?.trim() && isEasyPeasyBaseUrl(row.openaiBaseUrl)),
         easypeasyBaseUrl: !!isEasyPeasyBaseUrl(row?.openaiBaseUrl),
         easypeasyTier: !!row?.easypeasyTier?.trim(),
         stripeSecret: !!row?.stripeSecretKey?.trim(),

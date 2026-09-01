@@ -3141,8 +3141,7 @@ export default function LaunchpadPage() {
           toast({
             title: "EasyPeasy not ready",
             description:
-              epData.error ||
-              "Paste your EasyPeasy API key in the card below, then run again.",
+              epData.error || "Paste your EasyPeasy API key in the card below, then run again.",
             variant: "destructive",
             duration: 10000,
           });
@@ -3180,10 +3179,7 @@ export default function LaunchpadPage() {
 
       const allSteps = [...SVIVVA_STEPS, ...miniSteps];
       type Unit =
-        | { t: "connect" }
-        | { t: "autopilot" }
-        | { t: "step"; step: Step }
-        | { t: "finish" };
+        { t: "connect" } | { t: "autopilot" } | { t: "step"; step: Step } | { t: "finish" };
 
       const units: Unit[] = [
         { t: "connect" },

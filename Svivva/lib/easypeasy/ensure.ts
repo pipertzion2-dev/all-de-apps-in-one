@@ -1,4 +1,8 @@
-import { hydratePlatformSecrets, patchPlatformRuntimeSecrets, getPlatformRuntimeSecretsRow } from "@/lib/platform-runtime-secrets";
+import {
+  hydratePlatformSecrets,
+  patchPlatformRuntimeSecrets,
+  getPlatformRuntimeSecretsRow,
+} from "@/lib/platform-runtime-secrets";
 import {
   EASYPEASY_BASE_URL,
   isEasyPeasyActive,

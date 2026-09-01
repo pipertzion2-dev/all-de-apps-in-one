@@ -58,13 +58,7 @@ const BURG = "#6B2C4E";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type TaskStatus =
-  | "posted"
-  | "done"
-  | "prepared"
-  | "failed"
-  | "needs_credentials"
-  | "skipped"
-  | "running";
+  "posted" | "done" | "prepared" | "failed" | "needs_credentials" | "skipped" | "running";
 
 type Task = {
   id: string;

@@ -149,9 +149,7 @@ export function OrbitEasyPeasySetup() {
                     : "bg-fuchsia-500/10 text-fuchsia-800 dark:text-fuchsia-200 border-fuchsia-500/30"
                 }`}
               >
-                {active
-                  ? `${status.easypeasy.tierId} · ${status.easypeasy.model}`
-                  : "Not set up"}
+                {active ? `${status.easypeasy.tierId} · ${status.easypeasy.model}` : "Not set up"}
               </span>
             )}
           </div>
@@ -198,7 +196,9 @@ export function OrbitEasyPeasySetup() {
                 <p className="text-[10px] font-mono text-fuchsia-700 dark:text-fuchsia-300 mt-0.5">
                   {tier.model}
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{tier.tagline}</p>
+                <p className="text-[10px] text-muted-foreground mt-1 leading-snug">
+                  {tier.tagline}
+                </p>
                 <p className="text-[9px] text-muted-foreground mt-1.5 leading-snug">
                   <span className="font-semibold text-foreground">Orbit:</span> {tier.orbitUse}
                 </p>
@@ -226,7 +226,9 @@ export function OrbitEasyPeasySetup() {
                 <span className="text-[10px] font-bold">{plan.name}</span>
                 <span className="text-[9px] text-muted-foreground">{plan.price}</span>
               </div>
-              <p className="text-[9px] text-muted-foreground mt-0.5 leading-snug">{plan.highlight}</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5 leading-snug">
+                {plan.highlight}
+              </p>
             </a>
           ))}
         </div>

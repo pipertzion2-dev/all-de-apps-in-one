@@ -87,7 +87,10 @@ function fromEnv(): EasyPeasyConfig {
 }
 
 export function mergeEasyPeasyConfig(
-  db: Partial<{ apiKey: string | null; baseUrl: string | null; tierId: string | null }> | null | undefined,
+  db:
+    | Partial<{ apiKey: string | null; baseUrl: string | null; tierId: string | null }>
+    | null
+    | undefined,
 ): EasyPeasyConfig {
   const env = fromEnv();
   const dbKey = trimKey(db?.apiKey);
