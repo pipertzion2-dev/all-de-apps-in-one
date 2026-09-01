@@ -7,6 +7,7 @@ import {
   runtimeSecretColdStart,
 } from "@/lib/platform-runtime-secrets";
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
+import { isInterimPaymentActive, mergeInterimPaymentConfig } from "@/lib/interim-payments";
 const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
@@ -15,6 +16,11 @@ const patchSchema = z
     stripePublishableKey: z.string().optional(),
     stripeWebhookSecret: z.string().optional(),
     nextPublicSiteUrl: z.string().optional(),
+    interimStripePaymentLinkPro: z.string().optional(),
+    interimStripePaymentLinkEnterprise: z.string().optional(),
+    interimPaypalUrl: z.string().optional(),
+    interimVenmoUrl: z.string().optional(),
+    interimPaymentNote: z.string().optional(),
   })
   .strict();
 
@@ -32,6 +38,17 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const row = await getPlatformRuntimeSecretsRow();
+    const interim = mergeInterimPaymentConfig(
+      row
+        ? {
+            stripePaymentLinkPro: row.interimStripePaymentLinkPro,
+            stripePaymentLinkEnterprise: row.interimStripePaymentLinkEnterprise,
+            paypalUrl: row.interimPaypalUrl,
+            venmoUrl: row.interimVenmoUrl,
+            note: row.interimPaymentNote,
+          }
+        : null,
+    );
 
     return NextResponse.json({
       stored: {
@@ -41,6 +58,10 @@ export async function GET() {
         stripePublishable: !!row?.stripePublishableKey?.trim(),
         stripeWebhook: !!row?.stripeWebhookSecret?.trim(),
         siteUrl: !!row?.nextPublicSiteUrl?.trim(),
+        interimStripePaymentLinkPro: !!row?.interimStripePaymentLinkPro?.trim(),
+        interimStripePaymentLinkEnterprise: !!row?.interimStripePaymentLinkEnterprise?.trim(),
+        interimPaypalUrl: !!row?.interimPaypalUrl?.trim(),
+        interimVenmoUrl: !!row?.interimVenmoUrl?.trim(),
       },
       deploymentOverrides: runtimeSecretColdStart,
       effective: {
@@ -53,6 +74,13 @@ export async function GET() {
         ),
         stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
         siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
+      },
+      interim: {
+        active: isInterimPaymentActive(interim),
+        stripePaymentLinkPro: !!interim.stripePaymentLinkPro,
+        stripePaymentLinkEnterprise: !!interim.stripePaymentLinkEnterprise,
+        paypalUrl: !!interim.paypalUrl,
+        venmoUrl: !!interim.venmoUrl,
       },
       updatedAt: row?.updatedAt?.toISOString() ?? null,
     });
@@ -86,6 +114,16 @@ export async function POST(request: Request) {
     if ("stripeWebhookSecret" in body)
       patch.stripeWebhookSecret = toPatchValue(body.stripeWebhookSecret);
     if ("nextPublicSiteUrl" in body) patch.nextPublicSiteUrl = toPatchValue(body.nextPublicSiteUrl);
+    if ("interimStripePaymentLinkPro" in body)
+      patch.interimStripePaymentLinkPro = toPatchValue(body.interimStripePaymentLinkPro);
+    if ("interimStripePaymentLinkEnterprise" in body)
+      patch.interimStripePaymentLinkEnterprise = toPatchValue(
+        body.interimStripePaymentLinkEnterprise,
+      );
+    if ("interimPaypalUrl" in body) patch.interimPaypalUrl = toPatchValue(body.interimPaypalUrl);
+    if ("interimVenmoUrl" in body) patch.interimVenmoUrl = toPatchValue(body.interimVenmoUrl);
+    if ("interimPaymentNote" in body)
+      patch.interimPaymentNote = toPatchValue(body.interimPaymentNote);
 
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });

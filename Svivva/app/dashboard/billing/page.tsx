@@ -12,6 +12,8 @@ import { trackUpgrade } from "@/lib/analytics";
 import { inferBillingTier } from "@/lib/stripe/catalog";
 import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePlan } from "@/hooks/use-plan";
+import { InterimPaymentCard } from "@/components/interim-payment-card";
+import type { InterimPaymentPublic } from "@/lib/interim-payments";
 
 interface Price {
   id: string;
@@ -116,6 +118,14 @@ function BillingPageContent() {
     },
   });
 
+  const { data: interimPayments } = useQuery<InterimPaymentPublic>({
+    queryKey: ["/api/billing/interim-payments"],
+    queryFn: async () => {
+      const res = await fetch("/api/billing/interim-payments");
+      return res.json();
+    },
+  });
+
   useEffect(() => {
     if (pricesData?.products) {
       const updatedPlans = [...defaultPlans];
@@ -200,6 +210,17 @@ function BillingPageContent() {
 
   const currentPlan = isPro ? "pro" : subscriptionData?.plan || "free";
   const currentPlanData = plans.find((p) => p.tier === currentPlan);
+  const stripeCheckoutReady = Boolean(plans[1]?.priceId);
+  const showInterimPayments =
+    !isPro && interimPayments?.active && (!stripeCheckoutReady || interimPayments.active);
+
+  const handleInterimPay = (tier: "pro" | "enterprise") => {
+    const url =
+      tier === "enterprise"
+        ? interimPayments?.stripePaymentLinkEnterprise
+        : interimPayments?.stripePaymentLinkPro;
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="space-y-6">
@@ -212,6 +233,14 @@ function BillingPageContent() {
         <AdminCodeForm
           title="Have an access code?"
           description="Enter your Pro access code to unlock digital and hardware without a membership."
+        />
+      )}
+
+      {showInterimPayments && interimPayments && (
+        <InterimPaymentCard
+          config={interimPayments}
+          stripeCheckoutReady={stripeCheckoutReady}
+          showAlways
         />
       )}
 
@@ -305,9 +334,33 @@ function BillingPageContent() {
                     disabled={
                       isCurrent ||
                       loadingPlan === plan.name ||
-                      (plan.tier !== "enterprise" && plan.tier !== "free" && !plan.priceId)
+                      (plan.tier !== "enterprise" &&
+                        plan.tier !== "free" &&
+                        !plan.priceId &&
+                        !(plan.tier === "pro" && interimPayments?.stripePaymentLinkPro) &&
+                        !(
+                          plan.tier === "enterprise" && interimPayments?.stripePaymentLinkEnterprise
+                        ))
                     }
-                    onClick={() => handleUpgrade(plan)}
+                    onClick={() => {
+                      if (
+                        plan.tier === "pro" &&
+                        !plan.priceId &&
+                        interimPayments?.stripePaymentLinkPro
+                      ) {
+                        handleInterimPay("pro");
+                        return;
+                      }
+                      if (
+                        plan.tier === "enterprise" &&
+                        !plan.priceId &&
+                        interimPayments?.stripePaymentLinkEnterprise
+                      ) {
+                        handleInterimPay("enterprise");
+                        return;
+                      }
+                      handleUpgrade(plan);
+                    }}
                     data-testid={`button-plan-${plan.name.toLowerCase()}`}
                   >
                     {loadingPlan === plan.name ? (
@@ -322,7 +375,14 @@ function BillingPageContent() {
                     ) : plan.tier === "free" ? (
                       "Downgrade"
                     ) : !plan.priceId ? (
-                      "Coming Soon"
+                      interimPayments?.stripePaymentLinkPro && plan.tier === "pro" ? (
+                        "Pay with link"
+                      ) : interimPayments?.stripePaymentLinkEnterprise &&
+                        plan.tier === "enterprise" ? (
+                        "Pay with link"
+                      ) : (
+                        "Coming Soon"
+                      )
                     ) : (
                       "Upgrade"
                     )}

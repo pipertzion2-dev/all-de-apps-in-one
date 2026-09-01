@@ -12,6 +12,32 @@ import {
 const ROW_ID = "default";
 
 let googleGscColumnsEnsured = false;
+let interimPaymentColumnsEnsured = false;
+
+async function ensureInterimPaymentColumns(): Promise<void> {
+  if (interimPaymentColumnsEnsured) return;
+  try {
+    await ensureCoreDbTables();
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_stripe_payment_link_pro TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_stripe_payment_link_enterprise TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_paypal_url TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_venmo_url TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_payment_note TEXT`,
+    );
+    interimPaymentColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 async function ensureGoogleGscPlatformColumns(): Promise<void> {
   if (googleGscColumnsEnsured) return;
@@ -56,9 +82,15 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   nextPublicSiteUrl: string | null;
   googleGscClientId: string | null;
   googleGscClientSecret: string | null;
+  interimStripePaymentLinkPro: string | null;
+  interimStripePaymentLinkEnterprise: string | null;
+  interimPaypalUrl: string | null;
+  interimVenmoUrl: string | null;
+  interimPaymentNote: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
+  await ensureInterimPaymentColumns();
   const [row] = await db
     .select()
     .from(platformRuntimeSecrets)
@@ -164,6 +196,15 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   if ("googleGscClientId" in patch || "googleGscClientSecret" in patch) {
     await ensureGoogleGscPlatformColumns();
   }
+  if (
+    "interimStripePaymentLinkPro" in patch ||
+    "interimStripePaymentLinkEnterprise" in patch ||
+    "interimPaypalUrl" in patch ||
+    "interimVenmoUrl" in patch ||
+    "interimPaymentNote" in patch
+  ) {
+    await ensureInterimPaymentColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
@@ -175,6 +216,11 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     nextPublicSiteUrl: existing?.nextPublicSiteUrl ?? null,
     googleGscClientId: existing?.googleGscClientId ?? null,
     googleGscClientSecret: existing?.googleGscClientSecret ?? null,
+    interimStripePaymentLinkPro: existing?.interimStripePaymentLinkPro ?? null,
+    interimStripePaymentLinkEnterprise: existing?.interimStripePaymentLinkEnterprise ?? null,
+    interimPaypalUrl: existing?.interimPaypalUrl ?? null,
+    interimVenmoUrl: existing?.interimVenmoUrl ?? null,
+    interimPaymentNote: existing?.interimPaymentNote ?? null,
     updatedAt: new Date(),
   };
 
@@ -194,6 +240,11 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         nextPublicSiteUrl: merged.nextPublicSiteUrl,
         googleGscClientId: merged.googleGscClientId,
         googleGscClientSecret: merged.googleGscClientSecret,
+        interimStripePaymentLinkPro: merged.interimStripePaymentLinkPro,
+        interimStripePaymentLinkEnterprise: merged.interimStripePaymentLinkEnterprise,
+        interimPaypalUrl: merged.interimPaypalUrl,
+        interimVenmoUrl: merged.interimVenmoUrl,
+        interimPaymentNote: merged.interimPaymentNote,
         updatedAt: merged.updatedAt,
       },
     });
