@@ -18,6 +18,8 @@ import {
 } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
 import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
+import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
+import { formatOrbitDbSetupError } from "@/lib/db-connection-error";
 
 export const maxDuration = 300;
 
@@ -93,6 +95,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, saved: true });
     }
 
+    try {
+      await ensureOrbitDbReady();
+    } catch (e) {
+      const msg = formatOrbitDbSetupError(e) || String(e);
+      return NextResponse.json({ error: msg }, { status: 503 });
+    }
+
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
     return NextResponse.json({
       ...result,
@@ -105,6 +114,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    const setupMsg = formatOrbitDbSetupError(e);
+    return NextResponse.json({ error: setupMsg || String(e) }, { status: setupMsg ? 503 : 500 });
   }
 }

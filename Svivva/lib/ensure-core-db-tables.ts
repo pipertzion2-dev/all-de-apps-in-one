@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { executeDatabaseDdl } from "@/lib/db-ddl";
 
 let coreTablesEnsured = false;
+let marketingTablesEnsured = false;
 
 const SEED_CREDENTIALS_DDL = `
   CREATE TABLE IF NOT EXISTS seed_credentials (
@@ -51,6 +52,100 @@ const PLATFORM_RUNTIME_SECRETS_DDL = `
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )
 `;
+
+const SEO_LANDING_PAGES_DDL = `
+  CREATE TABLE IF NOT EXISTS seo_landing_pages (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    keyword TEXT NOT NULL,
+    title TEXT NOT NULL,
+    headline TEXT NOT NULL,
+    subheadline TEXT,
+    content TEXT NOT NULL,
+    benefits TEXT[] NOT NULL DEFAULT '{}',
+    how_it_works TEXT NOT NULL,
+    whos_it_for TEXT NOT NULL,
+    related_slugs TEXT[] NOT NULL DEFAULT '{}',
+    category TEXT NOT NULL DEFAULT 'general',
+    tool_url TEXT,
+    meta_title TEXT,
+    meta_description TEXT,
+    published BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+
+const BLOG_POSTS_DDL = `
+  CREATE TABLE IF NOT EXISTS blog_posts (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    excerpt TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author TEXT NOT NULL DEFAULT 'ZZAI Team',
+    category TEXT NOT NULL DEFAULT 'general',
+    tags TEXT[] NOT NULL DEFAULT '{}',
+    meta_title TEXT,
+    meta_description TEXT,
+    og_image TEXT,
+    published BOOLEAN NOT NULL DEFAULT false,
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+
+const GROWTH_SUBMISSIONS_DDL = `
+  CREATE TABLE IF NOT EXISTS growth_submissions (
+    id TEXT PRIMARY KEY,
+    directory_id TEXT NOT NULL,
+    product TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    submitted_at TIMESTAMPTZ,
+    live_url TEXT,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+
+const GROWTH_CONTENT_DDL = `
+  CREATE TABLE IF NOT EXISTS growth_content (
+    id TEXT PRIMARY KEY,
+    product TEXT NOT NULL,
+    content_type TEXT NOT NULL,
+    title TEXT,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+
+const GROWTH_TASKS_DDL = `
+  CREATE TABLE IF NOT EXISTS growth_tasks (
+    id TEXT PRIMARY KEY,
+    task_type TEXT NOT NULL,
+    product TEXT,
+    status TEXT NOT NULL DEFAULT 'completed',
+    details JSONB,
+    run_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+
+/** SEO/blog/growth tables Orbit Run All needs when drizzle push did not run on deploy. */
+export async function ensureMarketingContentTables(): Promise<void> {
+  if (marketingTablesEnsured) return;
+  await executeDatabaseDdl(SEO_LANDING_PAGES_DDL);
+  await executeDatabaseDdl(BLOG_POSTS_DDL);
+  await executeDatabaseDdl(GROWTH_SUBMISSIONS_DDL);
+  await executeDatabaseDdl(GROWTH_CONTENT_DDL);
+  await executeDatabaseDdl(GROWTH_TASKS_DDL);
+  marketingTablesEnsured = true;
+}
+
+/** GSC credentials + Orbit marketing content tables. */
+export async function ensureOrbitDbReady(): Promise<void> {
+  await ensureCoreDbTables();
+  await ensureMarketingContentTables();
+}
 
 /** Creates GSC/OAuth tables on demand when build migrations did not run (Neon unpooled DDL). */
 export async function ensureCoreDbTables(): Promise<void> {

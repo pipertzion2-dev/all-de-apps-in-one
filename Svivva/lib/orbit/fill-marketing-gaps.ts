@@ -29,6 +29,7 @@ import {
   MINI_TOOL_CATALOG_SIZE,
   type SEOPageData,
 } from "@/lib/orbit/content-templates";
+import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
 import { TARGET_TOTAL_MARKETING_PAGES, TARGET_TOOL_SEO_PAGES } from "@/lib/orbit/marketing-targets";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { nativeToolsAsDiscoverable } from "@/lib/orbit/mini-app-curation";
@@ -489,6 +490,7 @@ export type FillMarketingGapsResult = {
 };
 
 export async function fillMarketingGaps(userId: string): Promise<FillMarketingGapsResult> {
+  await ensureOrbitDbReady();
   const steps: string[] = [];
   const newUrls: string[] = [];
 

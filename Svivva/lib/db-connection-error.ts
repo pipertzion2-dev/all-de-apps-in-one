@@ -21,14 +21,33 @@ export function isMissingSeedCredentialsTableError(error: unknown): boolean {
   );
 }
 
+export function isMissingMarketingTableError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    /relation .*seo_landing_pages.* does not exist/i.test(msg) ||
+    /relation .*blog_posts.* does not exist/i.test(msg) ||
+    /relation .*growth_content.* does not exist/i.test(msg) ||
+    /relation .*growth_submissions.* does not exist/i.test(msg) ||
+    /relation .*growth_tasks.* does not exist/i.test(msg)
+  );
+}
+
 export function isSchemaSetupError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
   return (
     isMissingSeedCredentialsTableError(error) ||
+    isMissingMarketingTableError(error) ||
     /DATABASE_URL_UNPOOLED/i.test(msg) ||
     /direct Postgres URL/i.test(msg) ||
     /Schema setup requires/i.test(msg)
   );
+}
+
+export function formatOrbitDbSetupError(error: unknown): string | null {
+  if (isMissingMarketingTableError(error) || isMissingSeedCredentialsTableError(error)) {
+    return schemaSetupErrorMessage();
+  }
+  return formatDatabaseConnectionError(error);
 }
 
 export function missingSeedCredentialsTableMessage(): string {
