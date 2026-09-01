@@ -24,6 +24,7 @@ import {
   EASYPEASY_DEFAULT_TIER_ID,
   resolveEasyPeasyTierId,
 } from "@/lib/easypeasy/tiers";
+import { migrateStoredPremiumTierIfNeeded } from "@/lib/easypeasy/ensure";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
@@ -62,11 +63,8 @@ export async function GET() {
     if (!(await isOrbitAdminAllowed()))
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    const tierMigration = await migrateStoredPremiumTierIfNeeded();
     let row = await getPlatformRuntimeSecretsRow();
-    if (row?.easypeasyTier?.trim().toLowerCase() === "premium") {
-      await patchPlatformRuntimeSecrets({ easypeasyTier: EASYPEASY_DEFAULT_TIER_ID });
-      row = await getPlatformRuntimeSecretsRow();
-    }
     const interim = mergeInterimPaymentConfig(
       row
         ? {
@@ -153,6 +151,7 @@ export async function GET() {
         active: isEasyPeasyActive(easypeasyConfig),
         model: easypeasyConfig.model,
         tierId: easypeasyConfig.tierId,
+        migratedFromPremium: tierMigration.migrated,
         baseUrl: EASYPEASY_BASE_URL,
         tiers: EASYPEASY_TIERS.map((t) => ({
           id: t.id,

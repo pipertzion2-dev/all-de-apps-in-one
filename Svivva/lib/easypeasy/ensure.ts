@@ -40,6 +40,21 @@ export type EnsureEasyPeasyOptions = {
 };
 
 /** Orbit defaults to Standard — Premium burns paid word quota and is never auto-selected. */
+export async function migrateStoredPremiumTierIfNeeded(): Promise<{
+  migrated: boolean;
+  tierId: EasyPeasyTierId;
+}> {
+  await hydratePlatformSecrets();
+  const row = await getPlatformRuntimeSecretsRow();
+  const stored = row?.easypeasyTier?.trim().toLowerCase();
+  if (stored === "premium") {
+    await patchPlatformRuntimeSecrets({ easypeasyTier: EASYPEASY_DEFAULT_TIER_ID });
+    await hydratePlatformSecrets();
+    return { migrated: true, tierId: EASYPEASY_DEFAULT_TIER_ID };
+  }
+  return { migrated: false, tierId: resolveEasyPeasyTierId(row?.easypeasyTier) };
+}
+
 function resolveOrbitEasyPeasyTier(
   opts: EnsureEasyPeasyOptions,
   storedTier: string | null | undefined,

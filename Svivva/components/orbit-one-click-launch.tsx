@@ -307,6 +307,13 @@ export function OrbitOneClickLaunch({
   const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
   const [marketingModel, setMarketingModel] = useState<string | null>(null);
   const [easypeasyTier, setEasypeasyTier] = useState<string | null>(null);
+  const [easypeasyLive, setEasypeasyLive] = useState<{
+    loading: boolean;
+    active: boolean;
+    tierId: string | null;
+    model: string | null;
+    migratedFromPremium: boolean;
+  }>({ loading: true, active: false, tierId: null, model: null, migratedFromPremium: false });
   const [copyOnlyMode, setCopyOnlyMode] = useState(true);
   const [configuredKeys, setConfiguredKeys] = useState<Record<string, boolean>>({});
   const [manualDoneIds, setManualDoneIds] = useState<Set<string>>(() => new Set());
@@ -451,6 +458,12 @@ export function OrbitOneClickLaunch({
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
           ai?: { configured?: boolean; providerLabel?: string; marketingModel?: string };
+          easypeasy?: {
+            active?: boolean;
+            tierId?: string;
+            model?: string;
+            migratedFromPremium?: boolean;
+          };
           copyOnlyMode?: boolean;
           status?: { configured?: Record<string, boolean> };
         };
@@ -460,6 +473,20 @@ export function OrbitOneClickLaunch({
         if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
         if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
+        if (json.easypeasy && !cancelled) {
+          setEasypeasyLive({
+            loading: false,
+            active: !!json.easypeasy.active,
+            tierId: json.easypeasy.tierId ?? null,
+            model: json.easypeasy.model ?? null,
+            migratedFromPremium: !!json.easypeasy.migratedFromPremium,
+          });
+          if (json.easypeasy.tierId) setEasypeasyTier(json.easypeasy.tierId);
+          if (json.easypeasy.model) setMarketingModel(json.easypeasy.model);
+          if (json.easypeasy.active) setAiConfigured(true);
+        } else if (!cancelled) {
+          setEasypeasyLive((prev) => ({ ...prev, loading: false }));
+        }
       } catch {
         // non-blocking
       }
@@ -560,6 +587,13 @@ export function OrbitOneClickLaunch({
       if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
       if (ensureJson.marketingModel) setMarketingModel(ensureJson.marketingModel);
       if (ensureJson.tierId) setEasypeasyTier(ensureJson.tierId);
+      setEasypeasyLive((prev) => ({
+        loading: false,
+        active: true,
+        tierId: ensureJson.tierId ?? "standard",
+        model: ensureJson.model ?? null,
+        migratedFromPremium: prev.migratedFromPremium,
+      }));
 
       const r = await authFetch("/api/orbit/marketing-autopilot", {
         method: "POST",
@@ -577,8 +611,19 @@ export function OrbitOneClickLaunch({
       if ((json as { ai?: { marketingModel?: string } }).ai?.marketingModel) {
         setMarketingModel((json as { ai: { marketingModel: string } }).ai.marketingModel);
       }
-      if ((json as { easypeasy?: { tierId?: string } }).easypeasy?.tierId) {
-        setEasypeasyTier((json as { easypeasy: { tierId: string } }).easypeasy.tierId);
+      if (
+        (json as { easypeasy?: { tierId?: string; model?: string; active?: boolean } }).easypeasy
+      ) {
+        const ep = (json as { easypeasy: { tierId?: string; model?: string; active?: boolean } })
+          .easypeasy;
+        if (ep.tierId) setEasypeasyTier(ep.tierId);
+        setEasypeasyLive((prev) => ({
+          loading: false,
+          active: !!ep.active,
+          tierId: ep.tierId ?? null,
+          model: ep.model ?? null,
+          migratedFromPremium: prev.migratedFromPremium,
+        }));
       }
       onComplete?.();
     } catch (e) {
@@ -716,17 +761,72 @@ export function OrbitOneClickLaunch({
                   : "One press: wires EasyPeasy AI, builds SEO pages, submits to Google & Bing, saves launch copy."}
             </p>
             {easypeasyTier && !running && (
-              <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300 mt-1">
+              <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300 mt-1 sr-only">
                 AI tier: <strong>{easypeasyTier}</strong>
                 {marketingModel ? ` · ${marketingModel}` : ""}
               </p>
             )}
             {aiConfigured && (marketingModel || aiProviderLabel) && (
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-semibold sr-only">
                 AI: {aiProviderLabel || marketingModel}
               </p>
             )}
           </div>
+        </div>
+
+        {/* EasyPeasy live status — visible confirmation of tier + migration */}
+        <div
+          data-testid="easypeasy-live-status"
+          className={`rounded-xl border-2 px-3 py-2.5 sm:px-4 sm:py-3 flex items-start gap-3 ${
+            easypeasyLive.loading
+              ? "border-border/60 bg-muted/30"
+              : easypeasyLive.active
+                ? "border-emerald-500/50 bg-emerald-500/10 shadow-sm"
+                : "border-amber-500/45 bg-amber-500/10"
+          }`}
+        >
+          {easypeasyLive.loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Checking EasyPeasy…</p>
+                <p className="text-xs text-muted-foreground">Loading your AI tier settings</p>
+              </div>
+            </>
+          ) : easypeasyLive.active ? (
+            <>
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
+                  EasyPeasy ready —{" "}
+                  {easypeasyLive.tierId === "standard"
+                    ? "Standard (free-tier)"
+                    : (easypeasyLive.tierId ?? "Standard")}
+                </p>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300 font-mono mt-0.5">
+                  {easypeasyLive.model ?? "gemini-3-flash"}
+                  {easypeasyLive.tierId === "standard" ? " · no Premium word quota" : ""}
+                </p>
+                {easypeasyLive.migratedFromPremium && (
+                  <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
+                    Switched from Premium → Standard. Paid word limits no longer apply.
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
+                  EasyPeasy not configured
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">
+                  Paste your API key in the EasyPeasy card below, then run {URRTHANG_LABEL}.
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* urrthang — primary all-in-one control */}
