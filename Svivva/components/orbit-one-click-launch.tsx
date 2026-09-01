@@ -50,7 +50,9 @@ import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-t
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
+import { GscApiFixPanel } from "@/components/gsc-api-fix-panel";
 import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
+import { resolveGoogleApiEnableLinks, isGoogleApiDisabledError } from "@/lib/google-cloud-project";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -1030,13 +1032,19 @@ export function OrbitOneClickLaunch({
               )}
 
               {automatedFailed.length > 0 && (
-                <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-2.5 mb-3 space-y-1">
+                <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-2.5 mb-3 space-y-2">
                   <p className="text-[10px] font-bold text-red-400">Needs attention</p>
                   {automatedFailed.map((t) => (
                     <p key={t.id} className="text-[10px] text-muted-foreground">
                       {t.label}: {t.message}
                     </p>
                   ))}
+                  {(() => {
+                    const errText = automatedFailed.map((t) => t.message).join(" ");
+                    if (!isGoogleApiDisabledError(errText)) return null;
+                    const links = resolveGoogleApiEnableLinks({ errorMessage: errText });
+                    return links ? <GscApiFixPanel enableLinks={links} compact /> : null;
+                  })()}
                 </div>
               )}
 
@@ -1406,9 +1414,17 @@ function GoogleIndexingCard({
         </p>
       )}
       {indexing.googleIndexing.errorsSample.length > 0 && (
-        <p className="text-[9px] text-amber-400/90">
-          Sample: {indexing.googleIndexing.errorsSample.slice(0, 2).join(" · ")}
-        </p>
+        <>
+          <p className="text-[9px] text-amber-400/90">
+            Sample: {indexing.googleIndexing.errorsSample.slice(0, 2).join(" · ")}
+          </p>
+          {(() => {
+            const errText = indexing.googleIndexing.errorsSample.join(" ");
+            if (!isGoogleApiDisabledError(errText)) return null;
+            const links = resolveGoogleApiEnableLinks({ errorMessage: errText });
+            return links ? <GscApiFixPanel enableLinks={links} compact /> : null;
+          })()}
+        </>
       )}
     </div>
   );

@@ -36,8 +36,10 @@ import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connec
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
+import { GscApiFixPanel } from "@/components/gsc-api-fix-panel";
 import { followOAuthLink } from "@/lib/follow-oauth-link";
 import { useToast } from "@/hooks/use-toast";
+import type { GoogleApiEnableLinks } from "@/lib/google-cloud-project";
 
 const GscConnectOrb = dynamic(() => import("@/components/gsc-connect-orb"), {
   ssr: false,
@@ -70,6 +72,7 @@ type DiagResult = {
   gscPropertyOk?: boolean;
   gscMatchedSite?: string | null;
   gscSitesSample?: string[];
+  googleApiEnableLinks?: GoogleApiEnableLinks | null;
 };
 
 const TEAL = "#5B8DA8";
@@ -97,6 +100,7 @@ export default function GscConnectPage() {
   const [showAdminUnlock, setShowAdminUnlock] = useState(false);
   const [pendingOAuth, setPendingOAuth] = useState(false);
   const [needsOAuthSetup, setNeedsOAuthSetup] = useState(false);
+  const [showApiFix, setShowApiFix] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -139,6 +143,11 @@ export default function GscConnectPage() {
     else if (data?.oauthAvailable === false) setNeedsOAuthSetup(true);
   }, [data?.oauthAvailable]);
 
+  useEffect(() => {
+    const indexingStep = data?.steps.find((s) => s.id === "indexing_api");
+    if (indexingStep?.status === "fail") setShowApiFix(true);
+  }, [data?.steps]);
+
   const showSaveFeedback = useCallback(
     (text: string, ok: boolean) => {
       setMsg({ text, ok });
@@ -159,6 +168,7 @@ export default function GscConnectPage() {
     if (p.get("gsc_connected") === "1") {
       const setup = p.get("gsc_setup");
       const setupOk = setup === "ok";
+      setShowApiFix(p.get("gsc_fix_apis") === "1");
       setMsg({
         ok: setupOk || !p.get("gsc_error"),
         text: setupOk
@@ -308,7 +318,9 @@ export default function GscConnectPage() {
   const oauthConfigured = data?.oauthAvailable === true;
   const oauthAvailable = oauthConfigured && !needsOAuthSetup;
   const showOAuthClientForm = !connected && (!oauthConfigured || needsOAuthSetup);
-  const fullyReady = connected && propertyOk;
+  const indexingApiFailed = data?.steps.some((s) => s.id === "indexing_api" && s.status === "fail");
+  const enableLinks = data?.googleApiEnableLinks ?? null;
+  const fullyReady = connected && propertyOk && !indexingApiFailed;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -629,6 +641,16 @@ export default function GscConnectPage() {
         >
           {msg.text}
         </div>
+      )}
+
+      {(showApiFix || indexingApiFailed) && enableLinks && (
+        <GscApiFixPanel
+          enableLinks={enableLinks}
+          onFixed={() => {
+            setShowApiFix(false);
+            void refetch();
+          }}
+        />
       )}
 
       <div className="flex items-center justify-between">
