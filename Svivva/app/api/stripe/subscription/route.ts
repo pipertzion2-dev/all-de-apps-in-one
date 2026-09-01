@@ -47,11 +47,12 @@ export async function GET() {
       const subscription = result.rows[0] as any;
 
       if (subscription?.id) {
-        let plan: "free" | "pro" | "enterprise" = "free";
+        let plan: "free" | "starter" | "pro" | "enterprise" = "free";
         if (subscription.status === "active" || subscription.status === "trialing") {
           const productMeta = subscription.product_metadata;
           if (productMeta?.tier === "enterprise") plan = "enterprise";
           else if (productMeta?.tier === "pro") plan = "pro";
+          else if (productMeta?.tier === "starter") plan = "starter";
         }
 
         return NextResponse.json({

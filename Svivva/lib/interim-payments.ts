@@ -1,7 +1,10 @@
 /** Payment links while Stripe account verification or product seeding is pending. */
 
 export type InterimPaymentConfig = {
+  /** Starter plan ($20/mo) — stored in legacy enterprise link field or INTERIM_STRIPE_PAYMENT_LINK_STARTER */
+  stripePaymentLinkStarter: string | null;
   stripePaymentLinkPro: string | null;
+  /** @deprecated Legacy field — treated as Starter ($20) link when starter link unset */
   stripePaymentLinkEnterprise: string | null;
   paypalUrl: string | null;
   venmoUrl: string | null;
@@ -25,7 +28,11 @@ function trimUrl(v: string | null | undefined): string | null {
 }
 
 function fromEnv(): InterimPaymentConfig {
+  const starter =
+    trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_STARTER) ??
+    trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_ENTERPRISE);
   return {
+    stripePaymentLinkStarter: starter,
     stripePaymentLinkPro: trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_PRO),
     stripePaymentLinkEnterprise: trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_ENTERPRISE),
     paypalUrl: trimUrl(process.env.INTERIM_PAYPAL_URL),
@@ -38,10 +45,11 @@ export function mergeInterimPaymentConfig(
   db: Partial<InterimPaymentConfig> | null | undefined,
 ): InterimPaymentConfig {
   const env = fromEnv();
+  const legacyStarter = trimUrl(db?.stripePaymentLinkEnterprise) ?? env.stripePaymentLinkEnterprise;
   return {
+    stripePaymentLinkStarter: legacyStarter ?? env.stripePaymentLinkStarter,
     stripePaymentLinkPro: trimUrl(db?.stripePaymentLinkPro) ?? env.stripePaymentLinkPro,
-    stripePaymentLinkEnterprise:
-      trimUrl(db?.stripePaymentLinkEnterprise) ?? env.stripePaymentLinkEnterprise,
+    stripePaymentLinkEnterprise: legacyStarter,
     paypalUrl: trimUrl(db?.paypalUrl) ?? env.paypalUrl,
     venmoUrl: trimUrl(db?.venmoUrl) ?? env.venmoUrl,
     note: db?.note?.trim() || env.note || DEFAULT_NOTE,
@@ -50,6 +58,7 @@ export function mergeInterimPaymentConfig(
 
 export function isInterimPaymentActive(config: InterimPaymentConfig): boolean {
   return Boolean(
+    config.stripePaymentLinkStarter ||
     config.stripePaymentLinkPro ||
     config.stripePaymentLinkEnterprise ||
     config.paypalUrl ||

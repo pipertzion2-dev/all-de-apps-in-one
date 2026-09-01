@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { getUncachableStripeClient } from "./client";
 
-export type BillingTier = "pro" | "enterprise";
+export type BillingTier = "starter" | "pro" | "enterprise";
 
 /** Infer billing tier from metadata or product name (legacy products often lack metadata.tier). */
 export function inferBillingTier(
@@ -9,9 +9,10 @@ export function inferBillingTier(
   metadata?: Stripe.Metadata | null,
 ): BillingTier | null {
   const meta = metadata?.tier;
-  if (meta === "pro" || meta === "enterprise") return meta;
+  if (meta === "starter" || meta === "pro" || meta === "enterprise") return meta;
   const n = name.toLowerCase();
   if (n.includes("enterprise")) return "enterprise";
+  if (n.includes("starter") || n.includes("basic")) return "starter";
   if (/\b(pro|team)\b/.test(n) || n.includes(" pro") || n.endsWith(" pro")) return "pro";
   return null;
 }
@@ -37,7 +38,7 @@ export async function validateCheckoutPrice(
 
   const tier = inferBillingTier(product.name, product.metadata);
   if (!tier) {
-    return { ok: false, reason: "Product missing metadata.tier (pro | enterprise)" };
+    return { ok: false, reason: "Product missing metadata.tier (starter | pro | enterprise)" };
   }
   return { ok: true, tier };
 }
@@ -135,6 +136,7 @@ export async function getSubscriptionPlanFromStripe(
   if (sub.status === "active" || sub.status === "trialing") {
     if (tierMeta === "enterprise") plan = "enterprise";
     else if (tierMeta === "pro") plan = "pro";
+    else if (tierMeta === "starter") plan = "starter";
   }
 
   return {
