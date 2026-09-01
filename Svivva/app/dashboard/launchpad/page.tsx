@@ -68,6 +68,12 @@ import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
 import { getClutetyOrbitPreset } from "@/lib/workspace-external-apps";
 import { getAutoCompletableManualKeys } from "@/lib/orbit/manual-checklist-auto";
+import {
+  PINK_CAMO_BUTTON_ACTIVE_STYLE,
+  PINK_CAMO_BUTTON_CLASS,
+  PINK_CAMO_BUTTON_STYLE,
+  URRTHANG_LABEL,
+} from "@/lib/ui-pink-camo-button";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -1168,7 +1174,7 @@ function LaunchStation({
               ? "Done — 2 manual steps left for Google"
               : launchActive
                 ? launchProgress || "Running…"
-                : "Launch Everything in Orbit"}
+                : `${URRTHANG_LABEL} in Orbit`}
           </p>
           <p className="text-[11px] text-muted-foreground leading-tight">
             {launchDone
@@ -1187,12 +1193,8 @@ function LaunchStation({
             onClick={onLaunch}
             disabled={launchActive}
             data-testid="btn-launch-everything"
-            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-black text-base text-white transition-all active:scale-95 disabled:opacity-70"
-            style={{
-              background: launchActive
-                ? TEAL
-                : "linear-gradient(135deg, #b45309, #eab308, #fde047, #eab308)",
-            }}
+            className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-xl text-base ${PINK_CAMO_BUTTON_CLASS}`}
+            style={launchActive ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
           >
             {launchActive ? (
               <>
@@ -1200,7 +1202,7 @@ function LaunchStation({
               </>
             ) : (
               <>
-                <Rocket className="w-5 h-5" /> Launch Everything in Orbit
+                <Rocket className="w-5 h-5" /> {URRTHANG_LABEL}
               </>
             )}
           </button>
@@ -3179,7 +3181,10 @@ export default function LaunchpadPage() {
 
       const allSteps = [...SVIVVA_STEPS, ...miniSteps];
       type Unit =
-        { t: "connect" } | { t: "autopilot" } | { t: "step"; step: Step } | { t: "finish" };
+        | { t: "connect" }
+        | { t: "autopilot" }
+        | { t: "step"; step: Step }
+        | { t: "finish" };
 
       const units: Unit[] = [
         { t: "connect" },
@@ -3783,13 +3788,12 @@ export default function LaunchpadPage() {
                 <button
                   onClick={runFullAutopilot}
                   disabled={fullAutopilotActive || launchActive}
-                  className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-black text-base text-white transition-all active:scale-95 disabled:opacity-60"
-                  style={{
-                    background:
-                      fullAutopilotActive || launchActive
-                        ? TEAL
-                        : "linear-gradient(135deg, #b45309, #eab308, #fde047, #eab308)",
-                  }}
+                  className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-xl text-base ${PINK_CAMO_BUTTON_CLASS}`}
+                  style={
+                    fullAutopilotActive || launchActive
+                      ? PINK_CAMO_BUTTON_ACTIVE_STYLE
+                      : PINK_CAMO_BUTTON_STYLE
+                  }
                 >
                   {fullAutopilotActive ? (
                     <>
@@ -3802,7 +3806,7 @@ export default function LaunchpadPage() {
                         ? "All phases done — reset to run again"
                         : goldPhaseDisplay > 0
                           ? `Continue (${goldPhaseDisplay + 1}/${GOLD_PHASES})`
-                          : "Run Everything — Index 22 + marketing"}
+                          : `${URRTHANG_LABEL} — Index 22 + marketing`}
                     </>
                   )}
                 </button>
