@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const isAdmin = await isOrbitAdminAllowed(req);
+
     await hydratePlatformSecrets();
     const creds = await loadMarketingPlatformCredentials();
     const status = await getMarketingCredentialStatus();
@@ -49,12 +51,12 @@ export async function GET(req: NextRequest) {
     const easypeasyConfig = await loadEasyPeasyConfig();
 
     return NextResponse.json({
-      credentials: maskCredentialsForClient(creds),
-      status,
+      credentials: isAdmin ? maskCredentialsForClient(creds) : {},
+      status: isAdmin ? status : { configured: {} },
       lastRun,
-      tasks: MARKETING_AUTOPILOT_TASKS,
-      gscConnectUrl: "/dashboard/gsc-connect",
-      setupProviders: ORBIT_SETUP_PROVIDERS,
+      tasks: isAdmin ? MARKETING_AUTOPILOT_TASKS : [],
+      gscConnectUrl: isAdmin ? "/dashboard/gsc-connect" : null,
+      setupProviders: isAdmin ? ORBIT_SETUP_PROVIDERS : [],
       copyOnlyMode,
       easypeasy: {
         active: isEasyPeasyActive(easypeasyConfig),

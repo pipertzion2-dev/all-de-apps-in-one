@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  adminAccessCookieName,
-  adminAccessCookieOptions,
-  adminAccessCookieValue,
-  verifyAdminAccessCode,
-} from "@/lib/auth/admin";
+  membershipAccessCookieName,
+  membershipAccessCookieOptions,
+  membershipAccessCookieValue,
+  verifyMembershipAccessCode,
+} from "@/lib/auth/membership-access";
 import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
 
-/** Owner Orbit admin unlock only. Never sets subscriber / membership cookie. */
+/** Subscriber unlock — urrthang only. Never sets Orbit admin cookie. */
 export async function POST(request: NextRequest) {
   try {
     const ip = clientIp(request);
-    const limit = checkRateLimit(`admin-code:${ip}`, 8, 60_000);
+    const limit = checkRateLimit(`membership-code:${ip}`, 8, 60_000);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: "Too many attempts. Try again shortly." },
@@ -27,19 +27,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    if (!verifyAdminAccessCode(code)) {
+    if (!verifyMembershipAccessCode(code)) {
       return NextResponse.json({ error: "Incorrect code" }, { status: 401 });
     }
 
     const response = NextResponse.json({
       success: true,
-      admin: true,
+      membership: true,
     });
 
     response.cookies.set(
-      adminAccessCookieName(),
-      adminAccessCookieValue(),
-      adminAccessCookieOptions(),
+      membershipAccessCookieName(),
+      membershipAccessCookieValue(),
+      membershipAccessCookieOptions(),
     );
 
     return response;

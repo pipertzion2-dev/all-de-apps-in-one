@@ -953,6 +953,7 @@ export function OrbitOneClickLaunch({
               ) : null}
             </div>
             <AdminCodeForm
+              scope="membership"
               title="Access code"
               description={
                 plansData?.membershipUnlock?.instructions ??

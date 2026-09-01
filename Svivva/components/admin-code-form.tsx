@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KeyRound, Loader2 } from "lucide-react";
 
+export type AccessCodeScope = "admin" | "membership";
+
 type Props = {
+  /** admin = owner Orbit only (/admin). membership = urrthang subscriber only. */
+  scope?: AccessCodeScope;
   title?: string;
   description?: string;
   /** Shown after description (e.g. from /api/billing/plans — not hardcoded in source). */
@@ -16,10 +20,11 @@ type Props = {
 };
 
 export function AdminCodeForm({
+  scope = "admin",
   title = "Access code",
   description = "Enter your access code to unlock Pro (digital + hardware) or admin tools.",
   codeHint,
-  successMessage = "Unlocked — you can run urrthang now.",
+  successMessage,
   onSuccess,
 }: Props) {
   const queryClient = useQueryClient();
@@ -28,11 +33,18 @@ export function AdminCodeForm({
   const [loading, setLoading] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
 
+  const endpoint =
+    scope === "membership" ? "/api/auth/membership-code" : "/api/auth/admin-code";
+  const defaultSuccess =
+    scope === "membership"
+      ? "Unlocked — you can run urrthang now."
+      : "Owner admin unlocked.";
+
   const submit = async () => {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/admin-code", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -45,7 +57,9 @@ export function AdminCodeForm({
       }
       setUnlocked(true);
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/stripe/subscription"] });
+      if (scope === "membership") {
+        await queryClient.invalidateQueries({ queryKey: ["/api/stripe/subscription"] });
+      }
       onSuccess?.();
     } catch {
       setError("Something went wrong");
@@ -72,7 +86,7 @@ export function AdminCodeForm({
       <Input
         type="password"
         inputMode="numeric"
-        maxLength={6}
+        maxLength={scope === "admin" ? 6 : 6}
         placeholder="•••"
         value={code}
         onChange={(e) => {
@@ -86,7 +100,7 @@ export function AdminCodeForm({
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {unlocked ? (
         <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300" data-testid="access-code-unlocked">
-          {successMessage}
+          {successMessage ?? defaultSuccess}
         </p>
       ) : null}
       <Button

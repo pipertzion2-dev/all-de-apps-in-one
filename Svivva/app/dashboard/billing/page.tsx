@@ -77,6 +77,7 @@ function BillingPageContent() {
 
       {!isMembershipAccess && !isPro && (
         <AdminCodeForm
+          scope="membership"
           title="Unlock after Cash App payment"
           description={
             plansData?.membershipUnlock?.instructions ??

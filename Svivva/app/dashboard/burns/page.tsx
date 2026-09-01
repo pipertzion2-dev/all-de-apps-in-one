@@ -56,6 +56,7 @@ export default function BurnsPage() {
             </CardHeader>
             <CardContent>
               <AdminCodeForm
+                scope="admin"
                 title="Admin code"
                 description="Same code as Orbit Admin and Google Search Console setup."
                 onSuccess={() => window.location.reload()}
