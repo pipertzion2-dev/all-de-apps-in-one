@@ -19,4 +19,9 @@ describe("gscOAuthErrorMessage", () => {
   it("maps database_unavailable to DATABASE_URL guidance", () => {
     expect(gscOAuthErrorMessage("database_unavailable")).toMatch(/DATABASE_URL/i);
   });
+
+  it("maps org_internal to External consent screen guidance", () => {
+    expect(gscOAuthErrorMessage("org_internal")).toMatch(/External/i);
+    expect(gscOAuthErrorMessage("org_internal")).toMatch(/Test user/i);
+  });
 });

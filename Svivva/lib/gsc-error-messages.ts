@@ -14,6 +14,12 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (code === "oauth_invalid_client") {
     return "Google OAuth is not ready yet. Click Save OAuth client below first (admin passcode required). If Save fails, set DATABASE_URL in Vercel to hosted Postgres, or paste GOOGLE_GSC_CLIENT_ID + GOOGLE_GSC_CLIENT_SECRET in Vercel env vars and redeploy.";
   }
+  if (
+    code === "org_internal" ||
+    /403.*org_internal|only be used within its organization/i.test(code)
+  ) {
+    return "Google blocked sign-in (org_internal): your OAuth app is set to Internal in Google Cloud. Open APIs & Services → OAuth consent screen → change User type to External, add pipertzion2@gmail.com as a Test user (if Testing), then try Connect bro again.";
+  }
   if (code === "invalid_state") {
     return "Sign-in session expired — common on iPhone if Google opened outside Safari. Use alternate connect below (new tab + paste URL), or retry in Safari.";
   }

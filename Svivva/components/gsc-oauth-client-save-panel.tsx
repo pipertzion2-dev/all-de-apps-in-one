@@ -87,7 +87,10 @@ export function GscOAuthClientSavePanel({
         Google OAuth client
       </p>
       <p className={`text-muted-foreground leading-relaxed ${compact ? "text-[10px]" : "text-xs"}`}>
-        Paste Client ID + secret, then Connect bro saves credentials and opens Google sign-in.
+        Paste Client ID + secret, then Connect bro saves credentials and opens Google sign-in. In
+        Google Cloud, OAuth consent screen must be{" "}
+        <strong className="text-foreground">External</strong> (not Internal) and add your Gmail as a
+        Test user.
       </p>
       <div className="space-y-2">
         <input
