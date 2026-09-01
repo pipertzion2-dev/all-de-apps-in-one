@@ -23,6 +23,9 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  lemonSqueezyCustomerId: text("lemon_squeezy_customer_id"),
+  lemonSqueezySubscriptionId: text("lemon_squeezy_subscription_id"),
+  paymentProvider: text("payment_provider"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -1649,6 +1652,13 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   interimPaypalUrl: text("interim_paypal_url"),
   interimVenmoUrl: text("interim_venmo_url"),
   interimPaymentNote: text("interim_payment_note"),
+  lemonSqueezyApiKey: text("lemon_squeezy_api_key"),
+  lemonSqueezyStoreId: text("lemon_squeezy_store_id"),
+  lemonSqueezyVariantIdPro: text("lemon_squeezy_variant_id_pro"),
+  lemonSqueezyVariantIdEnterprise: text("lemon_squeezy_variant_id_enterprise"),
+  lemonSqueezyWebhookSecret: text("lemon_squeezy_webhook_secret"),
+  lemonSqueezyCheckoutUrlPro: text("lemon_squeezy_checkout_url_pro"),
+  lemonSqueezyCheckoutUrlEnterprise: text("lemon_squeezy_checkout_url_enterprise"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

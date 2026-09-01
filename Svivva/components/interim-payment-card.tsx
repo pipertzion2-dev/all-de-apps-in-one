@@ -10,15 +10,19 @@ type Props = {
   /** Hide when embedded checkout works and interim is not required */
   showAlways?: boolean;
   stripeCheckoutReady?: boolean;
+  lemonSqueezyActive?: boolean;
+  onLemonSqueezyCheckout?: () => void;
 };
 
 export function InterimPaymentCard({
   config,
   showAlways = false,
   stripeCheckoutReady = false,
+  lemonSqueezyActive = false,
+  onLemonSqueezyCheckout,
 }: Props) {
-  if (!config.active) return null;
-  if (!showAlways && stripeCheckoutReady) return null;
+  if (!config.active && !lemonSqueezyActive) return null;
+  if (!showAlways && stripeCheckoutReady && !lemonSqueezyActive) return null;
 
   return (
     <Card
@@ -28,16 +32,30 @@ export function InterimPaymentCard({
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-amber-700 dark:text-amber-300" />
-          <CardTitle className="text-lg">Pay while Stripe finishes verifying</CardTitle>
+          <CardTitle className="text-lg">
+            {stripeCheckoutReady ? "Other payment options" : "Subscribe while Stripe verifies"}
+          </CardTitle>
         </div>
         <CardDescription>
-          {stripeCheckoutReady
-            ? "Card checkout on this page is still setting up — use one of these options now."
-            : "Subscribe to ZZAI Pro now with a secure link or PayPal. We'll activate your account after payment."}
+          {lemonSqueezyActive
+            ? "Lemon Squeezy activates Pro automatically after payment. PayPal/Venmo require manual activation (access code)."
+            : stripeCheckoutReady
+              ? "Card checkout on this page is still setting up — use one of these options now."
+              : "Subscribe to ZZAI Pro now. We'll activate your account after payment (or instantly with Lemon Squeezy)."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+          {lemonSqueezyActive && onLemonSqueezyCheckout && (
+            <Button
+              type="button"
+              className="bg-lime-600 hover:bg-lime-700 text-white gap-2"
+              data-testid="btn-pay-lemon-squeezy"
+              onClick={onLemonSqueezyCheckout}
+            >
+              Subscribe — Lemon Squeezy $49/mo
+            </Button>
+          )}
           {config.stripePaymentLinkPro && (
             <Button
               asChild
