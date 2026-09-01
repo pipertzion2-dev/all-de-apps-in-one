@@ -5,21 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ExternalLink, Loader2, Sparkles } from "lucide-react";
-import { EASYPEASY_BASE_URL, EASYPEASY_DEFAULT_MODEL } from "@/lib/easypeasy/config";
+import { EASYPEASY_BASE_URL } from "@/lib/easypeasy/config";
+import {
+  EASYPEASY_SUBSCRIPTION_PLANS,
+  EASYPEASY_TIERS,
+  type EasyPeasyTierId,
+} from "@/lib/easypeasy/tiers";
+
+type TierMeta = {
+  id: EasyPeasyTierId;
+  name: string;
+  model: string;
+  tagline: string;
+  minEasyPeasyPlan: string;
+  orbitUse: string;
+};
 
 type EasyPeasyStatus = {
   stored: {
     easypeasyApiKey: boolean;
     easypeasyBaseUrl: boolean;
+    easypeasyTier: boolean;
   };
   easypeasy: {
     active: boolean;
     model: string;
+    tierId: EasyPeasyTierId;
     baseUrl: string;
-  };
-  effective: {
-    openai: boolean;
-    openaiBaseUrl: boolean;
+    tiers?: TierMeta[];
   };
 };
 
@@ -31,7 +44,10 @@ export function OrbitEasyPeasySetup() {
   const [message, setMessage] = useState<string | null>(null);
 
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState(EASYPEASY_DEFAULT_MODEL);
+  const [tierId, setTierId] = useState<EasyPeasyTierId>("standard");
+
+  const tiers = status?.easypeasy.tiers ?? EASYPEASY_TIERS;
+  const selectedTier = tiers.find((t) => t.id === tierId) ?? tiers[0];
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -43,7 +59,7 @@ export function OrbitEasyPeasySetup() {
       }
       const payload = (await res.json()) as EasyPeasyStatus;
       setStatus(payload);
-      if (payload.easypeasy?.model) setModel(payload.easypeasy.model);
+      if (payload.easypeasy?.tierId) setTierId(payload.easypeasy.tierId);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
@@ -57,8 +73,12 @@ export function OrbitEasyPeasySetup() {
     setMessage(null);
     setSaving(true);
     try {
-      if (!apiKey.trim()) {
-        setMessage("Paste your EasyPeasy API key, then save.");
+      const body: Record<string, string> = { easypeasyTier: tierId };
+      if (apiKey.trim()) {
+        body.openaiApiKey = apiKey.trim();
+        body.openaiBaseUrl = EASYPEASY_BASE_URL;
+      } else if (!status?.stored.easypeasyApiKey && !status?.easypeasy.active) {
+        setMessage("Paste your EasyPeasy API key, pick a tier, then save.");
         setSaving(false);
         return;
       }
@@ -66,17 +86,14 @@ export function OrbitEasyPeasySetup() {
       const res = await fetch("/api/admin/platform-secrets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          openaiApiKey: apiKey.trim(),
-          openaiBaseUrl: EASYPEASY_BASE_URL,
-        }),
+        body: JSON.stringify(body),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j.error || res.statusText);
 
       setApiKey("");
       setMessage(
-        "Saved — Orbit marketing AI now routes through EasyPeasy. Set EASYPEASY_MODEL or ORBIT_AI_MODEL in Vercel to change the model.",
+        `Saved — Orbit marketing AI uses EasyPeasy ${selectedTier?.name ?? tierId} (${selectedTier?.model ?? "model"}).`,
       );
       await load();
     } catch (e) {
@@ -95,7 +112,7 @@ export function OrbitEasyPeasySetup() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
-          ...(model.trim() ? { model: model.trim() } : {}),
+          model: selectedTier?.model,
         }),
       });
       const j = await res.json().catch(() => ({}));
@@ -132,13 +149,14 @@ export function OrbitEasyPeasySetup() {
                     : "bg-fuchsia-500/10 text-fuchsia-800 dark:text-fuchsia-200 border-fuchsia-500/30"
                 }`}
               >
-                {active ? "Connected" : "Not set up"}
+                {active
+                  ? `${status.easypeasy.tierId} · ${status.easypeasy.model}`
+                  : "Not set up"}
               </span>
             )}
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            OpenAI-compatible gateway for Orbit SEO copy, launch packs, and autopilot. Get an API key
-            at{" "}
+            Pick a quality tier for Orbit autopilot, then paste your API key from{" "}
             <a
               href="https://easy-peasy.ai/settings/api"
               target="_blank"
@@ -148,8 +166,7 @@ export function OrbitEasyPeasySetup() {
               EasyPeasy settings
               <ExternalLink className="h-3 w-3" />
             </a>
-            . Orbit stores it as Platform Secrets and uses base URL{" "}
-            <code className="text-[10px]">{EASYPEASY_BASE_URL}</code>.
+            . API access requires the Unlimited plan ($16.50/mo yearly).
           </p>
         </div>
       </div>
@@ -160,45 +177,74 @@ export function OrbitEasyPeasySetup() {
         </p>
       )}
 
-      <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[11px] space-y-1">
-        <p className="font-semibold text-foreground">Vercel env (optional — overrides DB)</p>
-        <p className="text-muted-foreground">
-          <code className="text-[10px]">EASYPEASY_API_KEY</code> ·{" "}
-          <code className="text-[10px]">EASYPEASY_MODEL</code> (default{" "}
-          {EASYPEASY_DEFAULT_MODEL})
-        </p>
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold">Orbit AI tier</Label>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {tiers.map((tier) => {
+            const selected = tierId === tier.id;
+            return (
+              <button
+                key={tier.id}
+                type="button"
+                onClick={() => setTierId(tier.id)}
+                className={`rounded-xl border-2 p-3 text-left transition-all ${
+                  selected
+                    ? "border-fuchsia-500 bg-fuchsia-500/10 shadow-sm"
+                    : "border-border bg-card/50 hover:border-fuchsia-500/40"
+                }`}
+                data-testid={`easypeasy-tier-${tier.id}`}
+              >
+                <p className="text-xs font-bold text-foreground">{tier.name}</p>
+                <p className="text-[10px] font-mono text-fuchsia-700 dark:text-fuchsia-300 mt-0.5">
+                  {tier.model}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{tier.tagline}</p>
+                <p className="text-[9px] text-muted-foreground mt-1.5 leading-snug">
+                  <span className="font-semibold text-foreground">Orbit:</span> {tier.orbitUse}
+                </p>
+                <p className="text-[9px] text-amber-700 dark:text-amber-300 mt-1 leading-snug">
+                  {tier.minEasyPeasyPlan}
+                </p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">API key</Label>
-          <Input
-            type="password"
-            autoComplete="off"
-            placeholder={
-              status?.stored.easypeasyApiKey ? "Saved — paste to replace" : "Your EasyPeasy API key"
-            }
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="h-9 text-xs font-mono"
-            data-testid="easypeasy-api-key"
-          />
+      <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[11px] space-y-2">
+        <p className="font-semibold text-foreground">EasyPeasy subscription plans</p>
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          {EASYPEASY_SUBSCRIPTION_PLANS.map((plan) => (
+            <a
+              key={plan.id}
+              href={plan.payUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-border/50 bg-card/40 px-2 py-1.5 hover:bg-muted/40 transition-colors"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold">{plan.name}</span>
+                <span className="text-[9px] text-muted-foreground">{plan.price}</span>
+              </div>
+              <p className="text-[9px] text-muted-foreground mt-0.5 leading-snug">{plan.highlight}</p>
+            </a>
+          ))}
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Model (env override recommended)</Label>
-          <Input
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder={EASYPEASY_DEFAULT_MODEL}
-            className="h-9 text-xs font-mono"
-            data-testid="easypeasy-model"
-          />
-          <p className="text-[10px] text-muted-foreground">
-            Used for the Test button. Production uses{" "}
-            <code className="text-[10px]">EASYPEASY_MODEL</code> or{" "}
-            <code className="text-[10px]">ORBIT_AI_MODEL</code> in Vercel when set.
-          </p>
-        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">API key</Label>
+        <Input
+          type="password"
+          autoComplete="off"
+          placeholder={
+            status?.stored.easypeasyApiKey ? "Saved — paste to replace" : "Your EasyPeasy API key"
+          }
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="h-9 text-xs font-mono"
+          data-testid="easypeasy-api-key"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -209,7 +255,7 @@ export function OrbitEasyPeasySetup() {
           className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white"
           data-testid="easypeasy-save"
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save EasyPeasy"}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save tier & key"}
         </Button>
         <Button
           type="button"
@@ -219,7 +265,7 @@ export function OrbitEasyPeasySetup() {
           disabled={testing || (!apiKey.trim() && !status?.stored.easypeasyApiKey)}
           data-testid="easypeasy-test"
         >
-          {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Test connection"}
+          {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : `Test ${selectedTier?.model}`}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
           <a

@@ -23,7 +23,10 @@ describe("EasyPeasy config", () => {
     const config = mergeEasyPeasyConfig({
       apiKey: "ep-test-key",
       baseUrl: EASYPEASY_BASE_URL,
+      tierId: "balanced",
     });
+    expect(config.tierId).toBe("balanced");
+    expect(config.model).toBe("claude-sonnet-4-6");
     expect(isEasyPeasyActive(config)).toBe(true);
     expect(config.apiKey).toBe("ep-test-key");
   });

@@ -1,5 +1,12 @@
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
 import { getPlatformRuntimeSecretsRow } from "@/lib/platform-runtime-secrets";
+import {
+  EASYPEASY_DEFAULT_TIER_ID,
+  getEasyPeasyFallbacksForTier,
+  getEasyPeasyModelForTier,
+  resolveEasyPeasyTierId,
+  type EasyPeasyTierId,
+} from "@/lib/easypeasy/tiers";
 
 /** OpenAI-compatible chat completions base URL. */
 export const EASYPEASY_BASE_URL = "https://easy-peasy.ai/api";
@@ -13,12 +20,18 @@ export function isEasyPeasyBaseUrl(url: string | null | undefined): boolean {
   return t.includes("easy-peasy.ai");
 }
 
+export function getEasyPeasyTierId(): EasyPeasyTierId {
+  return resolveEasyPeasyTierId(process.env.EASYPEASY_TIER);
+}
+
 export function getEasyPeasyModel(): string {
-  return (
-    process.env.EASYPEASY_MODEL?.trim() ||
-    process.env.ORBIT_AI_MODEL?.trim() ||
-    EASYPEASY_DEFAULT_MODEL
-  );
+  if (process.env.EASYPEASY_MODEL?.trim()) return process.env.EASYPEASY_MODEL.trim();
+  if (process.env.ORBIT_AI_MODEL?.trim()) return process.env.ORBIT_AI_MODEL.trim();
+  return getEasyPeasyModelForTier(getEasyPeasyTierId());
+}
+
+export function getEasyPeasyModelFallbackChain(): string[] {
+  return getEasyPeasyFallbacksForTier(getEasyPeasyTierId());
 }
 
 export function isEasyPeasyConfiguredFromEnv(): boolean {
@@ -32,6 +45,7 @@ export type EasyPeasyConfig = {
   apiKey: string | null;
   baseUrl: string;
   model: string;
+  tierId: EasyPeasyTierId;
 };
 
 function trimKey(v: string | null | undefined): string | null {
@@ -47,30 +61,48 @@ function fromEnv(): EasyPeasyConfig {
     EASYPEASY_BASE_URL;
 
   if (envKey) {
-    return { apiKey: envKey, baseUrl: EASYPEASY_BASE_URL, model: getEasyPeasyModel() };
+    return {
+      apiKey: envKey,
+      baseUrl: EASYPEASY_BASE_URL,
+      model: getEasyPeasyModel(),
+      tierId: getEasyPeasyTierId(),
+    };
   }
 
   if (openaiKey && isEasyPeasyBaseUrl(base)) {
-    return { apiKey: openaiKey, baseUrl: EASYPEASY_BASE_URL, model: getEasyPeasyModel() };
+    return {
+      apiKey: openaiKey,
+      baseUrl: EASYPEASY_BASE_URL,
+      model: getEasyPeasyModel(),
+      tierId: getEasyPeasyTierId(),
+    };
   }
 
-  return { apiKey: null, baseUrl: EASYPEASY_BASE_URL, model: getEasyPeasyModel() };
+  return {
+    apiKey: null,
+    baseUrl: EASYPEASY_BASE_URL,
+    model: getEasyPeasyModel(),
+    tierId: EASYPEASY_DEFAULT_TIER_ID,
+  };
 }
 
 export function mergeEasyPeasyConfig(
-  db: Partial<{ apiKey: string | null; baseUrl: string | null }> | null | undefined,
+  db: Partial<{ apiKey: string | null; baseUrl: string | null; tierId: string | null }> | null | undefined,
 ): EasyPeasyConfig {
   const env = fromEnv();
   const dbKey = trimKey(db?.apiKey);
   const dbBase = trimKey(db?.baseUrl);
+  const dbTier = resolveEasyPeasyTierId(db?.tierId ?? undefined);
 
   if (env.apiKey) return env;
 
   if (dbKey && isEasyPeasyBaseUrl(dbBase)) {
+    const tierId = dbTier;
     return {
       apiKey: dbKey,
       baseUrl: EASYPEASY_BASE_URL,
-      model: getEasyPeasyModel(),
+      model: getEasyPeasyModelForTier(tierId),
+      tierId,
     };
   }
 
@@ -84,6 +116,7 @@ export async function loadEasyPeasyConfig(): Promise<EasyPeasyConfig> {
       ? {
           apiKey: row.openaiApiKey,
           baseUrl: row.openaiBaseUrl,
+          tierId: row.easypeasyTier,
         }
       : null,
   );

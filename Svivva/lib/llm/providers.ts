@@ -2,7 +2,8 @@ import OpenAI from "openai";
 import { getGeminiApiKey, getOpenAIApiKey, getOpenAIBaseUrl, getOllamaUrl } from "@/lib/env";
 import {
   getEasyPeasyModel,
-  isEasyPeasyBaseUrl,
+  getEasyPeasyModelFallbackChain,
+  getEasyPeasyTierId,
   isEasyPeasyConfiguredFromEnv,
 } from "@/lib/easypeasy/config";
 
@@ -96,7 +97,8 @@ export function getOrbitAiProviderLabel(provider: AiProvider = getOrbitActiveAiP
   switch (provider) {
     case "openai": {
       if (isEasyPeasyOpenAiRoute()) {
-        return `EasyPeasy ${getEasyPeasyModel()}`;
+        const tier = getEasyPeasyTierId();
+        return `EasyPeasy ${tier} · ${getEasyPeasyModel()}`;
       }
       const model = process.env.ORBIT_AI_MODEL?.trim() || ORBIT_DEFAULT_OPENAI_MODEL;
       return `OpenAI ${model}`;
@@ -167,8 +169,7 @@ export function getOrbitModelFallbackChain(
     case "replit":
     case "openai":
       if (isEasyPeasyOpenAiRoute()) {
-        const primary = getEasyPeasyModel();
-        return [primary, "gemini-3-flash", "gpt-4o-mini"];
+        return getEasyPeasyModelFallbackChain();
       }
       return [ORBIT_DEFAULT_OPENAI_MODEL, "gpt-4o", "gpt-4o-mini"];
     case "ollama":

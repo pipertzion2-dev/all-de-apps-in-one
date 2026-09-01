@@ -14,6 +14,20 @@ const ROW_ID = "default";
 let googleGscColumnsEnsured = false;
 let interimPaymentColumnsEnsured = false;
 let lemonSqueezyColumnsEnsured = false;
+let easypeasyColumnsEnsured = false;
+
+async function ensureEasyPeasyColumns(): Promise<void> {
+  if (easypeasyColumnsEnsured) return;
+  try {
+    await ensureCoreDbTables();
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS easypeasy_tier TEXT`,
+    );
+    easypeasyColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 async function ensureLemonSqueezyColumns(): Promise<void> {
   if (lemonSqueezyColumnsEnsured) return;
@@ -101,6 +115,7 @@ export const runtimeSecretColdStart = {
     process.env.ORBIT_OPENAI_BASE_URL?.trim() ||
     process.env.EASYPEASY_API_KEY?.trim()
   ),
+  easypeasyTier: !!process.env.EASYPEASY_TIER?.trim(),
   stripeSecret: !!process.env.STRIPE_SECRET_KEY?.trim(),
   stripePublishable: !!(
     process.env.STRIPE_PUBLISHABLE_KEY?.trim() ||
@@ -133,11 +148,13 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   lemonSqueezyWebhookSecret: string | null;
   lemonSqueezyCheckoutUrlPro: string | null;
   lemonSqueezyCheckoutUrlEnterprise: string | null;
+  easypeasyTier: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
   await ensureInterimPaymentColumns();
   await ensureLemonSqueezyColumns();
+  await ensureEasyPeasyColumns();
   const [row] = await db
     .select()
     .from(platformRuntimeSecrets)
@@ -182,6 +199,12 @@ function syncProcessEnvFromRow(
     const v = row.openaiBaseUrl?.trim();
     if (v) process.env.AI_INTEGRATIONS_OPENAI_BASE_URL = v;
     else delete process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  }
+
+  if (!runtimeSecretColdStart.easypeasyTier) {
+    const v = row.easypeasyTier?.trim();
+    if (v) process.env.EASYPEASY_TIER = v;
+    else delete process.env.EASYPEASY_TIER;
   }
 
   if (!runtimeSecretColdStart.siteUrl) {
@@ -263,6 +286,9 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   ) {
     await ensureLemonSqueezyColumns();
   }
+  if ("easypeasyTier" in patch) {
+    await ensureEasyPeasyColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
@@ -286,6 +312,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     lemonSqueezyWebhookSecret: existing?.lemonSqueezyWebhookSecret ?? null,
     lemonSqueezyCheckoutUrlPro: existing?.lemonSqueezyCheckoutUrlPro ?? null,
     lemonSqueezyCheckoutUrlEnterprise: existing?.lemonSqueezyCheckoutUrlEnterprise ?? null,
+    easypeasyTier: existing?.easypeasyTier ?? null,
     updatedAt: new Date(),
   };
 
@@ -317,6 +344,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         lemonSqueezyWebhookSecret: merged.lemonSqueezyWebhookSecret,
         lemonSqueezyCheckoutUrlPro: merged.lemonSqueezyCheckoutUrlPro,
         lemonSqueezyCheckoutUrlEnterprise: merged.lemonSqueezyCheckoutUrlEnterprise,
+        easypeasyTier: merged.easypeasyTier,
         updatedAt: merged.updatedAt,
       },
     });

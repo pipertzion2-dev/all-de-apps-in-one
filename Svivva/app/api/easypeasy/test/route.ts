@@ -3,11 +3,13 @@ import { z } from "zod";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { loadEasyPeasyConfig } from "@/lib/easypeasy/config";
 import { testEasyPeasyConnection } from "@/lib/easypeasy/client";
+import { getEasyPeasyModelForTier, resolveEasyPeasyTierId } from "@/lib/easypeasy/tiers";
 
 const bodySchema = z
   .object({
     apiKey: z.string().optional(),
     model: z.string().optional(),
+    tier: z.enum(["standard", "balanced", "premium"]).optional(),
   })
   .strict();
 
@@ -30,7 +32,9 @@ export async function POST(request: Request) {
 
     const saved = await loadEasyPeasyConfig();
     const apiKey = parsed.data.apiKey?.trim() || saved.apiKey;
-    const model = parsed.data.model?.trim() || saved.model;
+    const tierId = parsed.data.tier ? resolveEasyPeasyTierId(parsed.data.tier) : saved.tierId;
+    const model =
+      parsed.data.model?.trim() || getEasyPeasyModelForTier(tierId) || saved.model;
 
     const result = await testEasyPeasyConnection({ apiKey, model });
     if (!result.ok) {

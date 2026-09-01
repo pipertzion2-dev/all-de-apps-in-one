@@ -2,6 +2,11 @@
  * Orbit marketing/admin AI — uses paid OpenAI when configured (see getOrbitActiveAiProvider).
  */
 import {
+  isEasyPeasyConfiguredFromEnv,
+  getEasyPeasyModel,
+  getEasyPeasyModelFallbackChain,
+} from "@/lib/easypeasy/config";
+import {
   getOrbitDefaultModel,
   getOrbitModelChain,
   isOrbitAiConfigured,
@@ -35,13 +40,18 @@ function isRetryableModelError(e: unknown): boolean {
  * override with ORBIT_AI_MODEL in Vercel / Platform Secrets.
  */
 export function getMarketingModel(): string {
-  const override = process.env.ORBIT_AI_MODEL?.trim();
-  return override || getOrbitDefaultModel();
+  const override = process.env.ORBIT_AI_MODEL?.trim() || process.env.EASYPEASY_MODEL?.trim();
+  if (override) return override;
+  if (isEasyPeasyConfiguredFromEnv()) return getEasyPeasyModel();
+  return getOrbitDefaultModel();
 }
 
 /** Ordered models for Orbit marketing — primary first, then fallbacks. */
 export function getMarketingModelChain(): string[] {
   const primary = getMarketingModel();
+  if (isEasyPeasyConfiguredFromEnv()) {
+    return [...new Set([primary, ...getEasyPeasyModelFallbackChain()])];
+  }
   return [...new Set([primary, ...getOrbitModelChain()])];
 }
 
