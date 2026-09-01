@@ -1,5 +1,6 @@
 import {
-  isDirectPayActive,
+  getCashAppTag,
+  isCashAppPlansActive,
   mergeInterimPaymentConfig,
   toPublicInterimPayments,
 } from "@/lib/interim-payments";
@@ -7,8 +8,9 @@ import { getPlatformRuntimeSecretsRow } from "@/lib/platform-runtime-secrets";
 
 export type BillingPaymentOptions = {
   interim: ReturnType<typeof toPublicInterimPayments>;
-  directPayActive: boolean;
-  preferredProvider: "direct" | null;
+  cashAppPlansActive: boolean;
+  cashAppTag: string;
+  preferredProvider: "cashapp" | null;
 };
 
 export async function getBillingPaymentOptions(): Promise<BillingPaymentOptions> {
@@ -17,23 +19,20 @@ export async function getBillingPaymentOptions(): Promise<BillingPaymentOptions>
   const interimConfig = mergeInterimPaymentConfig(
     row
       ? {
-          venmoUrlStarter: row.interimVenmoUrlStarter,
-          venmoUrlPro: row.interimVenmoUrlPro,
-          venmoUrl: row.interimVenmoUrl,
           cashAppUrlStarter: row.interimCashAppUrlStarter,
           cashAppUrlPro: row.interimCashAppUrlPro,
-          zelleContact: row.interimZelleContact,
           note: row.interimPaymentNote,
         }
       : null,
   );
 
-  const directPayActive = isDirectPayActive(interimConfig);
+  const cashAppPlansActive = isCashAppPlansActive(interimConfig);
   const interim = toPublicInterimPayments(interimConfig);
 
   return {
     interim,
-    directPayActive,
-    preferredProvider: directPayActive ? "direct" : null,
+    cashAppPlansActive,
+    cashAppTag: getCashAppTag(interimConfig),
+    preferredProvider: cashAppPlansActive ? "cashapp" : null,
   };
 }

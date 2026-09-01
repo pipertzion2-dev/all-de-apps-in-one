@@ -8,7 +8,8 @@ import {
 } from "@/lib/platform-runtime-secrets";
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
 import {
-  isDirectPayActive,
+  getCashAppTag,
+  isCashAppPlansActive,
   isInterimPaymentActive,
   mergeInterimPaymentConfig,
 } from "@/lib/interim-payments";
@@ -76,12 +77,8 @@ export async function GET() {
     const interim = mergeInterimPaymentConfig(
       row
         ? {
-            venmoUrlStarter: row.interimVenmoUrlStarter,
-            venmoUrlPro: row.interimVenmoUrlPro,
-            venmoUrl: row.interimVenmoUrl,
             cashAppUrlStarter: row.interimCashAppUrlStarter,
             cashAppUrlPro: row.interimCashAppUrlPro,
-            zelleContact: row.interimZelleContact,
             note: row.interimPaymentNote,
           }
         : null,
@@ -151,13 +148,10 @@ export async function GET() {
       },
       interim: {
         active: isInterimPaymentActive(interim),
-        directPayActive: isDirectPayActive(interim),
-        venmoUrlStarter: !!interim.venmoUrlStarter,
-        venmoUrlPro: !!interim.venmoUrlPro,
-        venmoUrl: !!interim.venmoUrl,
+        cashAppPlansActive: isCashAppPlansActive(interim),
+        cashAppTag: getCashAppTag(interim),
         cashAppUrlStarter: !!interim.cashAppUrlStarter,
         cashAppUrlPro: !!interim.cashAppUrlPro,
-        zelleContact: !!interim.zelleContact,
       },
       lemonSqueezy: {
         active: isLemonSqueezyActive(lemonConfig),

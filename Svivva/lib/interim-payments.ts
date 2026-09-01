@@ -1,4 +1,4 @@
-/** Direct peer-to-peer payment links — no Stripe, PayPal, or card processors. */
+/** Cash App subscription plans — $20 Starter / $50 Pro via cash.app links. */
 
 export type InterimPaymentConfig = {
   /** @deprecated Legacy Stripe links — not used for customer checkout */
@@ -24,22 +24,27 @@ export type InterimPaymentConfig = {
   note: string | null;
 };
 
-export type DirectPayMethod = "venmo" | "cashapp";
+export type CashAppPlanMethod = "cashapp";
 
 export type InterimPaymentPublic = InterimPaymentConfig & {
   active: boolean;
-  directPayActive: boolean;
+  cashAppPlansActive: boolean;
+  cashAppTag: string;
   checkoutUnavailable: boolean;
 };
 
 const DEFAULT_NOTE =
-  "After you pay, enter your access code above — or email your receipt to hello@zzaizzai.com and we'll activate your plan within a few hours.";
+  "After you pay on Cash App, enter your access code above — or email your receipt to hello@zzaizzai.com and we'll activate your plan.";
 
 function trimUrl(v: string | null | undefined): string | null {
   const t = v?.trim();
   if (!t) return null;
   if (!/^https?:\/\//i.test(t)) return null;
   return t;
+}
+
+function cashAppTagFromEnv(): string {
+  return (process.env.INTERIM_CASHAPP_TAG?.trim() || "pipertzion").replace(/^\$/, "");
 }
 
 function trimText(v: string | null | undefined): string | null {
@@ -49,6 +54,9 @@ function trimText(v: string | null | undefined): string | null {
 
 function fromEnv(): InterimPaymentConfig {
   const legacyVenmo = trimUrl(process.env.INTERIM_VENMO_URL);
+  const cashTag = cashAppTagFromEnv();
+  const defaultCashStarter = `https://cash.app/$${cashTag}/20`;
+  const defaultCashPro = `https://cash.app/$${cashTag}/50`;
   return {
     stripePaymentLinkStarter:
       trimUrl(process.env.INTERIM_STRIPE_PAYMENT_LINK_STARTER) ??
@@ -61,11 +69,20 @@ function fromEnv(): InterimPaymentConfig {
     venmoUrlStarter: trimUrl(process.env.INTERIM_VENMO_URL_STARTER) ?? legacyVenmo,
     venmoUrlPro: trimUrl(process.env.INTERIM_VENMO_URL_PRO),
     venmoUrl: legacyVenmo,
-    cashAppUrlStarter: trimUrl(process.env.INTERIM_CASHAPP_URL_STARTER),
-    cashAppUrlPro: trimUrl(process.env.INTERIM_CASHAPP_URL_PRO),
+    cashAppUrlStarter: trimUrl(process.env.INTERIM_CASHAPP_URL_STARTER) ?? defaultCashStarter,
+    cashAppUrlPro: trimUrl(process.env.INTERIM_CASHAPP_URL_PRO) ?? defaultCashPro,
     zelleContact: trimText(process.env.INTERIM_ZELLE_CONTACT),
     note: process.env.INTERIM_PAYMENT_NOTE?.trim() || null,
   };
+}
+
+export function getCashAppTag(config?: InterimPaymentConfig | null): string {
+  const starter = config?.cashAppUrlStarter ?? fromEnv().cashAppUrlStarter;
+  if (starter) {
+    const m = starter.match(/cash\.app\/\$([^/]+)/i);
+    if (m?.[1]) return m[1];
+  }
+  return cashAppTagFromEnv();
 }
 
 export function mergeInterimPaymentConfig(
@@ -116,50 +133,53 @@ export function cashAppUrlForTier(
   return urlForTier(tier, config.cashAppUrlStarter, config.cashAppUrlPro);
 }
 
-/** Best direct-pay link for a tier: Venmo first, then Cash App. */
-export function directPayForTier(
+/** Cash App checkout URL for Starter ($20) or Pro ($50). */
+export function cashAppPlanForTier(
   tier: "starter" | "pro",
   config: InterimPaymentConfig,
-): { method: DirectPayMethod; link: string } | null {
-  const venmo = venmoUrlForTier(tier, config);
-  if (venmo) return { method: "venmo", link: venmo };
-  const cashApp = cashAppUrlForTier(tier, config);
-  if (cashApp) return { method: "cashapp", link: cashApp };
-  return null;
+): { method: CashAppPlanMethod; link: string } | null {
+  const link = cashAppUrlForTier(tier, config);
+  if (!link) return null;
+  return { method: "cashapp", link };
 }
 
-export function hasDirectPayForTier(
+/** @deprecated use cashAppPlanForTier */
+export const directPayForTier = cashAppPlanForTier;
+
+export function hasCashAppPlanForTier(
   tier: "starter" | "pro",
   config: InterimPaymentConfig,
 ): boolean {
-  return directPayForTier(tier, config) !== null;
+  return cashAppPlanForTier(tier, config) !== null;
+}
+
+/** @deprecated */
+export const hasDirectPayForTier = hasCashAppPlanForTier;
+
+export function isCashAppPlansActive(config: InterimPaymentConfig): boolean {
+  return Boolean(config.cashAppUrlStarter || config.cashAppUrlPro);
 }
 
 export function isInterimPaymentActive(config: InterimPaymentConfig): boolean {
-  return isDirectPayActive(config);
+  return isCashAppPlansActive(config);
 }
 
+/** @deprecated use isCashAppPlansActive */
 export function isDirectPayActive(config: InterimPaymentConfig): boolean {
-  return Boolean(
-    config.venmoUrlStarter ||
-    config.venmoUrlPro ||
-    config.venmoUrl ||
-    config.cashAppUrlStarter ||
-    config.cashAppUrlPro ||
-    config.zelleContact,
-  );
+  return isCashAppPlansActive(config);
 }
 
 export function toPublicInterimPayments(
   config: InterimPaymentConfig,
   opts?: { checkoutUnavailable?: boolean },
 ): InterimPaymentPublic {
-  const directPayActive = isDirectPayActive(config);
+  const cashAppPlansActive = isCashAppPlansActive(config);
   return {
     ...config,
     note: config.note || DEFAULT_NOTE,
-    active: directPayActive,
-    directPayActive,
-    checkoutUnavailable: opts?.checkoutUnavailable ?? !directPayActive,
+    active: cashAppPlansActive,
+    cashAppPlansActive,
+    cashAppTag: getCashAppTag(config),
+    checkoutUnavailable: opts?.checkoutUnavailable ?? !cashAppPlansActive,
   };
 }

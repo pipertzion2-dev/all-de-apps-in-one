@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
+import { canRunUrrthang } from "@/lib/orbit/urrthang-access";
 import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
 import { getOrbitAiProviderLabel } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
@@ -18,7 +18,7 @@ export const maxDuration = 60;
 /** Wire EasyPeasy (key, base URL, tier) before Orbit one-click runs. */
 export async function POST(request: Request) {
   try {
-    if (!(await isOrbitAdminAllowed())) {
+    if (!(await canRunUrrthang())) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

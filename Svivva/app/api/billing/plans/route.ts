@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { getBillingPaymentOptions } from "@/lib/billing/payment-options";
 import { resolveBillingPlanOffers } from "@/lib/billing/resolve-plan-offers";
-import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 
-/** Public plan catalog with live checkout flags ($20 Starter, $50 Pro). */
+/** Public plan catalog — Starter $20 / Pro $50 via Cash App. */
 export async function GET() {
   try {
     const paymentOptions = await getBillingPaymentOptions();
-    const stripe = await getStripeReadyStatus();
 
     const plans = resolveBillingPlanOffers({
       interim: paymentOptions.interim,
@@ -16,17 +14,12 @@ export async function GET() {
     return NextResponse.json({
       plans,
       paymentOptions: {
-        directPayActive: paymentOptions.directPayActive,
+        cashAppPlansActive: paymentOptions.cashAppPlansActive,
+        cashAppTag: paymentOptions.cashAppTag,
         preferredProvider: paymentOptions.preferredProvider,
-        stripe: {
-          checkoutReady: stripe.checkoutReady,
-          configured: stripe.configured,
-          detail: stripe.detail,
-        },
         interim: {
           active: paymentOptions.interim.active,
           note: paymentOptions.interim.note,
-          zelleContact: paymentOptions.interim.zelleContact,
         },
       },
     });
