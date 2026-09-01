@@ -42,6 +42,21 @@ describe("ensureEasyPeasyForOrbit", () => {
   });
 
   it("migrates stored premium tier to standard", async () => {
+    getPlatformRuntimeSecretsRow.mockResolvedValue({
+      openaiApiKey: "test-key",
+      openaiBaseUrl: "https://easy-peasy.ai/api",
+      easypeasyTier: "premium",
+    });
+    const { migrateStoredPremiumTierIfNeeded } = await import("./ensure");
+    const result = await migrateStoredPremiumTierIfNeeded();
+    expect(patchPlatformRuntimeSecrets).toHaveBeenCalledWith(
+      expect.objectContaining({ easypeasyTier: "standard" }),
+    );
+    expect(result.migrated).toBe(true);
+    expect(result.tierId).toBe("standard");
+  });
+
+  it("migrates stored premium tier to standard via ensure", async () => {
     process.env.EASYPEASY_API_KEY = "test-key";
     getPlatformRuntimeSecretsRow.mockResolvedValue({
       openaiApiKey: "test-key",

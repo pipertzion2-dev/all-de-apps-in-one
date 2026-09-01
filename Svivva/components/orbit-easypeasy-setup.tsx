@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { ExternalLink, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
 import { EASYPEASY_BASE_URL } from "@/lib/easypeasy/constants";
 import {
   EASYPEASY_SUBSCRIPTION_PLANS,
@@ -31,6 +31,7 @@ type EasyPeasyStatus = {
     active: boolean;
     model: string;
     tierId: EasyPeasyTierId;
+    migratedFromPremium?: boolean;
     baseUrl: string;
     tiers?: TierMeta[];
   };
@@ -129,12 +130,50 @@ export function OrbitEasyPeasySetup() {
   };
 
   const active = status?.easypeasy.active;
+  const tierLabel =
+    status?.easypeasy.tierId === "standard"
+      ? "Standard · free-tier"
+      : status?.easypeasy.tierId === "balanced"
+        ? "Balanced"
+        : status?.easypeasy.tierId;
 
   return (
     <div
       className="rounded-2xl border-2 border-fuchsia-500/35 bg-gradient-to-br from-fuchsia-500/8 to-transparent p-4 space-y-4"
       data-testid="orbit-easypeasy-setup"
     >
+      {status?.easypeasy.migratedFromPremium && (
+        <div
+          className="rounded-xl border-2 border-emerald-500/45 bg-emerald-500/10 px-3 py-2.5 flex items-start gap-2"
+          data-testid="easypeasy-migrated-banner"
+        >
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
+              Updated to Standard tier
+            </p>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-0.5">
+              Premium was removed — Orbit now uses gemini-3-flash (free-tier friendly).
+            </p>
+          </div>
+        </div>
+      )}
+
+      {active &&
+        status?.easypeasy.tierId === "standard" &&
+        !status.easypeasy.migratedFromPremium && (
+          <div
+            className="rounded-xl border border-emerald-500/35 bg-emerald-500/8 px-3 py-2"
+            data-testid="easypeasy-standard-active"
+          >
+            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
+              ✓ Standard tier active — gemini-3-flash
+            </p>
+            <p className="text-[10px] text-emerald-700 dark:text-emerald-300 mt-0.5">
+              Free-tier friendly. Premium models are disabled in Orbit.
+            </p>
+          </div>
+        )}
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10">
           <Sparkles className="h-5 w-5 text-fuchsia-700 dark:text-fuchsia-300" />
@@ -150,7 +189,7 @@ export function OrbitEasyPeasySetup() {
                     : "bg-fuchsia-500/10 text-fuchsia-800 dark:text-fuchsia-200 border-fuchsia-500/30"
                 }`}
               >
-                {active ? `${status.easypeasy.tierId} · ${status.easypeasy.model}` : "Not set up"}
+                {active ? `${tierLabel} · ${status.easypeasy.model}` : "Not set up"}
               </span>
             )}
           </div>

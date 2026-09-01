@@ -17,7 +17,7 @@ import {
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
-import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
+import { ensureEasyPeasyForOrbit, migrateStoredPremiumTierIfNeeded } from "@/lib/easypeasy/ensure";
 import { isEasyPeasyActive, loadEasyPeasyConfig } from "@/lib/easypeasy/config";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
     const status = await getMarketingCredentialStatus();
     const lastRun = await loadLastAutopilotRun();
     const copyOnlyMode = isCopyOnlyDistributionMode(creds);
+    const tierMigration = await migrateStoredPremiumTierIfNeeded();
     const easypeasyConfig = await loadEasyPeasyConfig();
 
     return NextResponse.json({
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
         active: isEasyPeasyActive(easypeasyConfig),
         tierId: easypeasyConfig.tierId,
         model: easypeasyConfig.model,
+        migratedFromPremium: tierMigration.migrated,
       },
       ai: {
         configured: isOrbitAiConfigured(),
