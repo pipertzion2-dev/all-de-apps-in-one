@@ -55,6 +55,7 @@ import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-pha
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { OrbitInterimPaymentsSetup } from "@/components/orbit-interim-payments-setup";
+import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
@@ -4682,6 +4683,7 @@ export default function LaunchpadPage() {
             {/* Growth Intelligence tab */}
             {tab === "stripe" && (
               <div className="space-y-4">
+                <OrbitLemonSqueezySetup />
                 <OrbitInterimPaymentsSetup />
                 <OrbitStripeSetup onConfiguredChange={() => void refetchStatus()} />
                 <div className="rounded-xl border border-border bg-muted/20 px-3 py-3 text-xs text-muted-foreground space-y-2">

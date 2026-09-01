@@ -13,6 +13,38 @@ const ROW_ID = "default";
 
 let googleGscColumnsEnsured = false;
 let interimPaymentColumnsEnsured = false;
+let lemonSqueezyColumnsEnsured = false;
+
+async function ensureLemonSqueezyColumns(): Promise<void> {
+  if (lemonSqueezyColumnsEnsured) return;
+  try {
+    await ensureCoreDbTables();
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_api_key TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_store_id TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_variant_id_pro TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_variant_id_enterprise TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_webhook_secret TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_checkout_url_pro TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_checkout_url_enterprise TEXT`,
+    );
+    lemonSqueezyColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 async function ensureInterimPaymentColumns(): Promise<void> {
   if (interimPaymentColumnsEnsured) return;
@@ -87,10 +119,18 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   interimPaypalUrl: string | null;
   interimVenmoUrl: string | null;
   interimPaymentNote: string | null;
+  lemonSqueezyApiKey: string | null;
+  lemonSqueezyStoreId: string | null;
+  lemonSqueezyVariantIdPro: string | null;
+  lemonSqueezyVariantIdEnterprise: string | null;
+  lemonSqueezyWebhookSecret: string | null;
+  lemonSqueezyCheckoutUrlPro: string | null;
+  lemonSqueezyCheckoutUrlEnterprise: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
   await ensureInterimPaymentColumns();
+  await ensureLemonSqueezyColumns();
   const [row] = await db
     .select()
     .from(platformRuntimeSecrets)
@@ -205,6 +245,17 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   ) {
     await ensureInterimPaymentColumns();
   }
+  if (
+    "lemonSqueezyApiKey" in patch ||
+    "lemonSqueezyStoreId" in patch ||
+    "lemonSqueezyVariantIdPro" in patch ||
+    "lemonSqueezyVariantIdEnterprise" in patch ||
+    "lemonSqueezyWebhookSecret" in patch ||
+    "lemonSqueezyCheckoutUrlPro" in patch ||
+    "lemonSqueezyCheckoutUrlEnterprise" in patch
+  ) {
+    await ensureLemonSqueezyColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
@@ -221,6 +272,13 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     interimPaypalUrl: existing?.interimPaypalUrl ?? null,
     interimVenmoUrl: existing?.interimVenmoUrl ?? null,
     interimPaymentNote: existing?.interimPaymentNote ?? null,
+    lemonSqueezyApiKey: existing?.lemonSqueezyApiKey ?? null,
+    lemonSqueezyStoreId: existing?.lemonSqueezyStoreId ?? null,
+    lemonSqueezyVariantIdPro: existing?.lemonSqueezyVariantIdPro ?? null,
+    lemonSqueezyVariantIdEnterprise: existing?.lemonSqueezyVariantIdEnterprise ?? null,
+    lemonSqueezyWebhookSecret: existing?.lemonSqueezyWebhookSecret ?? null,
+    lemonSqueezyCheckoutUrlPro: existing?.lemonSqueezyCheckoutUrlPro ?? null,
+    lemonSqueezyCheckoutUrlEnterprise: existing?.lemonSqueezyCheckoutUrlEnterprise ?? null,
     updatedAt: new Date(),
   };
 
@@ -245,6 +303,13 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         interimPaypalUrl: merged.interimPaypalUrl,
         interimVenmoUrl: merged.interimVenmoUrl,
         interimPaymentNote: merged.interimPaymentNote,
+        lemonSqueezyApiKey: merged.lemonSqueezyApiKey,
+        lemonSqueezyStoreId: merged.lemonSqueezyStoreId,
+        lemonSqueezyVariantIdPro: merged.lemonSqueezyVariantIdPro,
+        lemonSqueezyVariantIdEnterprise: merged.lemonSqueezyVariantIdEnterprise,
+        lemonSqueezyWebhookSecret: merged.lemonSqueezyWebhookSecret,
+        lemonSqueezyCheckoutUrlPro: merged.lemonSqueezyCheckoutUrlPro,
+        lemonSqueezyCheckoutUrlEnterprise: merged.lemonSqueezyCheckoutUrlEnterprise,
         updatedAt: merged.updatedAt,
       },
     });

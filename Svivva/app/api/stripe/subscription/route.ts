@@ -1,19 +1,33 @@
 import { NextResponse } from "next/server";
+import { eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
+import { ensureBillingColumns } from "@/lib/billing/ensure-billing-columns";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
-import { eq, sql } from "drizzle-orm";
 import { getUncachableStripeClient } from "@/lib/stripe/client";
 import { getSubscriptionPlanFromStripe } from "@/lib/stripe/catalog";
 
 export async function GET() {
   try {
+    await ensureBillingColumns();
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ subscription: null, plan: "free" });
     }
 
     const [dbUser] = await db.select().from(users).where(eq(users.id, user.id));
+
+    if (dbUser?.lemonSqueezySubscriptionId) {
+      return NextResponse.json({
+        subscription: {
+          id: dbUser.lemonSqueezySubscriptionId,
+          status: "active",
+          provider: "lemonsqueezy",
+        },
+        plan: "pro",
+        source: "lemonsqueezy",
+      });
+    }
 
     if (!dbUser?.stripeSubscriptionId) {
       return NextResponse.json({ subscription: null, plan: "free" });
@@ -46,6 +60,7 @@ export async function GET() {
             status: subscription.status,
             currentPeriodEnd: subscription.current_period_end,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            provider: "stripe",
           },
           plan,
           source: "database",
@@ -62,7 +77,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      subscription: api.subscription,
+      subscription: { ...api.subscription, provider: "stripe" },
       plan: api.plan,
       source: "stripe_api",
     });

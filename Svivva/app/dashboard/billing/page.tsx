@@ -14,6 +14,7 @@ import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePlan } from "@/hooks/use-plan";
 import { InterimPaymentCard } from "@/components/interim-payment-card";
 import type { InterimPaymentPublic } from "@/lib/interim-payments";
+import type { BillingPaymentOptions } from "@/lib/billing/payment-options";
 
 interface Price {
   id: string;
@@ -118,13 +119,15 @@ function BillingPageContent() {
     },
   });
 
-  const { data: interimPayments } = useQuery<InterimPaymentPublic>({
-    queryKey: ["/api/billing/interim-payments"],
+  const { data: paymentOptions } = useQuery<BillingPaymentOptions>({
+    queryKey: ["/api/billing/payment-options"],
     queryFn: async () => {
-      const res = await fetch("/api/billing/interim-payments");
+      const res = await fetch("/api/billing/payment-options");
       return res.json();
     },
   });
+
+  const interimPayments = paymentOptions?.interim as InterimPaymentPublic | undefined;
 
   useEffect(() => {
     if (pricesData?.products) {
@@ -197,22 +200,36 @@ function BillingPageContent() {
     },
   });
 
-  const handleUpgrade = (plan: (typeof plans)[0]) => {
-    if (plan.priceId) {
-      setLoadingPlan(plan.name);
-      trackUpgrade(plan.tier);
-      checkoutMutation.mutate({ priceId: plan.priceId, tier: plan.tier });
-    } else if (plan.tier === "enterprise") {
-      trackUpgrade("enterprise");
-      window.location.href = "mailto:hello@zzaizzai.com?subject=Enterprise%20Plan%20Inquiry";
-    }
-  };
-
   const currentPlan = isPro ? "pro" : subscriptionData?.plan || "free";
   const currentPlanData = plans.find((p) => p.tier === currentPlan);
-  const stripeCheckoutReady = Boolean(plans[1]?.priceId);
+  const stripeCheckoutReady = Boolean(
+    paymentOptions?.stripe.checkoutReady && plans[1]?.priceId,
+  );
   const showInterimPayments =
-    !isPro && interimPayments?.active && (!stripeCheckoutReady || interimPayments.active);
+    !isPro &&
+    (interimPayments?.active || paymentOptions?.lemonSqueezy.active) &&
+    !stripeCheckoutReady;
+
+  const lemonCheckoutMutation = useMutation({
+    mutationFn: async (tier: "pro" | "enterprise") => {
+      const res = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ tier }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Checkout failed");
+      return data as { url: string };
+    },
+    onSuccess: (data) => {
+      if (data.url) window.location.href = data.url;
+    },
+    onError: (error: Error) => {
+      toast({ title: "Checkout error", description: error.message, variant: "destructive" });
+      setLoadingPlan(null);
+    },
+  });
 
   const handleInterimPay = (tier: "pro" | "enterprise") => {
     const url =
@@ -220,6 +237,46 @@ function BillingPageContent() {
         ? interimPayments?.stripePaymentLinkEnterprise
         : interimPayments?.stripePaymentLinkPro;
     if (url) window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleAlternativePay = (plan: (typeof plans)[0]) => {
+    if (plan.tier === "pro" || plan.tier === "enterprise") {
+      if (paymentOptions?.lemonSqueezy[plan.tier === "enterprise" ? "enterprise" : "pro"]) {
+        setLoadingPlan(plan.name);
+        lemonCheckoutMutation.mutate(plan.tier);
+        return;
+      }
+      if (plan.tier === "pro" && interimPayments?.paypalUrl) {
+        window.open(interimPayments.paypalUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+      handleInterimPay(plan.tier);
+    }
+  };
+
+  const canPayWithoutStripe = (plan: (typeof plans)[0]) => {
+    if (plan.tier === "free" || plan.tier === "enterprise") return false;
+    if (paymentOptions?.lemonSqueezy.pro) return true;
+    if (interimPayments?.stripePaymentLinkPro) return true;
+    if (interimPayments?.paypalUrl) return true;
+    return false;
+  };
+
+  const handleUpgrade = (plan: (typeof plans)[0]) => {
+    if (plan.priceId && stripeCheckoutReady) {
+      setLoadingPlan(plan.name);
+      trackUpgrade(plan.tier);
+      checkoutMutation.mutate({ priceId: plan.priceId, tier: plan.tier });
+      return;
+    }
+    if (canPayWithoutStripe(plan)) {
+      handleAlternativePay(plan);
+      return;
+    }
+    if (plan.tier === "enterprise") {
+      trackUpgrade("enterprise");
+      window.location.href = "mailto:hello@zzaizzai.com?subject=Enterprise%20Plan%20Inquiry";
+    }
   };
 
   return (
@@ -241,7 +298,21 @@ function BillingPageContent() {
           config={interimPayments}
           stripeCheckoutReady={stripeCheckoutReady}
           showAlways
+          lemonSqueezyActive={paymentOptions?.lemonSqueezy.active}
+          onLemonSqueezyCheckout={() => {
+            setLoadingPlan("Pro");
+            lemonCheckoutMutation.mutate("pro");
+          }}
         />
+      )}
+
+      {!stripeCheckoutReady && paymentOptions?.stripe.configured && !isPro && (
+        <Card className="border border-amber-500/30 bg-amber-500/5">
+          <CardContent className="pt-4 text-sm text-muted-foreground">
+            Stripe is configured but still verifying — use Lemon Squeezy or PayPal below until card
+            checkout is ready.
+          </CardContent>
+        </Card>
       )}
 
       <Card>
@@ -272,7 +343,11 @@ function BillingPageContent() {
                 className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
                 data-testid="button-upgrade"
                 onClick={() => handleUpgrade(plans[1])}
-                disabled={checkoutMutation.isPending || !plans[1].priceId}
+                disabled={
+                  checkoutMutation.isPending ||
+                  lemonCheckoutMutation.isPending ||
+                  (!plans[1].priceId && !canPayWithoutStripe(plans[1]))
+                }
               >
                 {checkoutMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -337,12 +412,13 @@ function BillingPageContent() {
                       (plan.tier !== "enterprise" &&
                         plan.tier !== "free" &&
                         !plan.priceId &&
-                        !(plan.tier === "pro" && interimPayments?.stripePaymentLinkPro) &&
-                        !(
-                          plan.tier === "enterprise" && interimPayments?.stripePaymentLinkEnterprise
-                        ))
+                        !canPayWithoutStripe(plan))
                     }
                     onClick={() => {
+                      if (!plan.priceId && canPayWithoutStripe(plan)) {
+                        handleAlternativePay(plan);
+                        return;
+                      }
                       if (
                         plan.tier === "pro" &&
                         !plan.priceId &&
@@ -375,7 +451,11 @@ function BillingPageContent() {
                     ) : plan.tier === "free" ? (
                       "Downgrade"
                     ) : !plan.priceId ? (
-                      interimPayments?.stripePaymentLinkPro && plan.tier === "pro" ? (
+                      paymentOptions?.lemonSqueezy.pro && plan.tier === "pro" ? (
+                        "Subscribe — Lemon Squeezy"
+                      ) : interimPayments?.paypalUrl && plan.tier === "pro" ? (
+                        "Pay with PayPal"
+                      ) : interimPayments?.stripePaymentLinkPro && plan.tier === "pro" ? (
                         "Pay with link"
                       ) : interimPayments?.stripePaymentLinkEnterprise &&
                         plan.tier === "enterprise" ? (

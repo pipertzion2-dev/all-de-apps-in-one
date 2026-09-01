@@ -8,6 +8,8 @@ import {
 } from "@/lib/platform-runtime-secrets";
 import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
 import { isInterimPaymentActive, mergeInterimPaymentConfig } from "@/lib/interim-payments";
+import { isLemonSqueezyActive, lemonSqueezyCheckoutCapable, mergeLemonSqueezyConfig } from "@/lib/lemonsqueezy/config";
+import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
@@ -21,6 +23,13 @@ const patchSchema = z
     interimPaypalUrl: z.string().optional(),
     interimVenmoUrl: z.string().optional(),
     interimPaymentNote: z.string().optional(),
+    lemonSqueezyApiKey: z.string().optional(),
+    lemonSqueezyStoreId: z.string().optional(),
+    lemonSqueezyVariantIdPro: z.string().optional(),
+    lemonSqueezyVariantIdEnterprise: z.string().optional(),
+    lemonSqueezyWebhookSecret: z.string().optional(),
+    lemonSqueezyCheckoutUrlPro: z.string().optional(),
+    lemonSqueezyCheckoutUrlEnterprise: z.string().optional(),
   })
   .strict();
 
@@ -49,6 +58,20 @@ export async function GET() {
           }
         : null,
     );
+    const lemonConfig = mergeLemonSqueezyConfig(
+      row
+        ? {
+            apiKey: row.lemonSqueezyApiKey,
+            storeId: row.lemonSqueezyStoreId,
+            variantIdPro: row.lemonSqueezyVariantIdPro,
+            variantIdEnterprise: row.lemonSqueezyVariantIdEnterprise,
+            webhookSecret: row.lemonSqueezyWebhookSecret,
+            checkoutUrlPro: row.lemonSqueezyCheckoutUrlPro,
+            checkoutUrlEnterprise: row.lemonSqueezyCheckoutUrlEnterprise,
+          }
+        : null,
+    );
+    const stripeReady = await getStripeReadyStatus();
 
     return NextResponse.json({
       stored: {
@@ -62,6 +85,13 @@ export async function GET() {
         interimStripePaymentLinkEnterprise: !!row?.interimStripePaymentLinkEnterprise?.trim(),
         interimPaypalUrl: !!row?.interimPaypalUrl?.trim(),
         interimVenmoUrl: !!row?.interimVenmoUrl?.trim(),
+        lemonSqueezyApiKey: !!row?.lemonSqueezyApiKey?.trim(),
+        lemonSqueezyStoreId: !!row?.lemonSqueezyStoreId?.trim(),
+        lemonSqueezyVariantIdPro: !!row?.lemonSqueezyVariantIdPro?.trim(),
+        lemonSqueezyVariantIdEnterprise: !!row?.lemonSqueezyVariantIdEnterprise?.trim(),
+        lemonSqueezyWebhookSecret: !!row?.lemonSqueezyWebhookSecret?.trim(),
+        lemonSqueezyCheckoutUrlPro: !!row?.lemonSqueezyCheckoutUrlPro?.trim(),
+        lemonSqueezyCheckoutUrlEnterprise: !!row?.lemonSqueezyCheckoutUrlEnterprise?.trim(),
       },
       deploymentOverrides: runtimeSecretColdStart,
       effective: {
@@ -82,6 +112,12 @@ export async function GET() {
         paypalUrl: !!interim.paypalUrl,
         venmoUrl: !!interim.venmoUrl,
       },
+      lemonSqueezy: {
+        active: isLemonSqueezyActive(lemonConfig),
+        pro: lemonSqueezyCheckoutCapable(lemonConfig, "pro"),
+        enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "enterprise"),
+      },
+      stripeReady,
       updatedAt: row?.updatedAt?.toISOString() ?? null,
     });
   } catch (e) {
@@ -124,6 +160,20 @@ export async function POST(request: Request) {
     if ("interimVenmoUrl" in body) patch.interimVenmoUrl = toPatchValue(body.interimVenmoUrl);
     if ("interimPaymentNote" in body)
       patch.interimPaymentNote = toPatchValue(body.interimPaymentNote);
+    if ("lemonSqueezyApiKey" in body)
+      patch.lemonSqueezyApiKey = toPatchValue(body.lemonSqueezyApiKey);
+    if ("lemonSqueezyStoreId" in body)
+      patch.lemonSqueezyStoreId = toPatchValue(body.lemonSqueezyStoreId);
+    if ("lemonSqueezyVariantIdPro" in body)
+      patch.lemonSqueezyVariantIdPro = toPatchValue(body.lemonSqueezyVariantIdPro);
+    if ("lemonSqueezyVariantIdEnterprise" in body)
+      patch.lemonSqueezyVariantIdEnterprise = toPatchValue(body.lemonSqueezyVariantIdEnterprise);
+    if ("lemonSqueezyWebhookSecret" in body)
+      patch.lemonSqueezyWebhookSecret = toPatchValue(body.lemonSqueezyWebhookSecret);
+    if ("lemonSqueezyCheckoutUrlPro" in body)
+      patch.lemonSqueezyCheckoutUrlPro = toPatchValue(body.lemonSqueezyCheckoutUrlPro);
+    if ("lemonSqueezyCheckoutUrlEnterprise" in body)
+      patch.lemonSqueezyCheckoutUrlEnterprise = toPatchValue(body.lemonSqueezyCheckoutUrlEnterprise);
 
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });
