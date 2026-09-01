@@ -1,38 +1,38 @@
 import { describe, expect, it } from "vitest";
 import {
+  isDirectPayActive,
   isInterimPaymentActive,
   mergeInterimPaymentConfig,
   toPublicInterimPayments,
 } from "./interim-payments";
 
 describe("interim-payments", () => {
-  it("merges db over env", () => {
-    const prev = process.env.INTERIM_PAYPAL_URL;
-    process.env.INTERIM_PAYPAL_URL = "https://paypal.me/env";
+  it("merges db venmo over env", () => {
+    const prev = process.env.INTERIM_VENMO_URL;
+    process.env.INTERIM_VENMO_URL = "https://venmo.com/u/env";
     const config = mergeInterimPaymentConfig({
-      stripePaymentLinkPro: "https://buy.stripe.com/test_pro",
-      paypalUrl: null,
+      venmoUrlPro: "https://venmo.com/u/pro",
+      venmoUrl: null,
     });
-    expect(config.stripePaymentLinkPro).toBe("https://buy.stripe.com/test_pro");
-    expect(config.paypalUrl).toBe("https://paypal.me/env");
-    if (prev === undefined) delete process.env.INTERIM_PAYPAL_URL;
-    else process.env.INTERIM_PAYPAL_URL = prev;
+    expect(config.venmoUrlStarter).toBe("https://venmo.com/u/env");
+    expect(config.venmoUrlPro).toBe("https://venmo.com/u/pro");
+    if (prev === undefined) delete process.env.INTERIM_VENMO_URL;
+    else process.env.INTERIM_VENMO_URL = prev;
   });
 
-  it("detects active when any link exists", () => {
+  it("detects active when direct pay exists", () => {
     expect(isInterimPaymentActive(mergeInterimPaymentConfig(null))).toBe(false);
     expect(
-      isInterimPaymentActive(
-        mergeInterimPaymentConfig({ stripePaymentLinkPro: "https://buy.stripe.com/x" }),
-      ),
+      isDirectPayActive(mergeInterimPaymentConfig({ venmoUrlStarter: "https://venmo.com/u/x" })),
     ).toBe(true);
   });
 
   it("public payload includes default note", () => {
     const pub = toPublicInterimPayments(
-      mergeInterimPaymentConfig({ stripePaymentLinkPro: "https://buy.stripe.com/x" }),
+      mergeInterimPaymentConfig({ venmoUrlStarter: "https://venmo.com/u/x" }),
     );
     expect(pub.active).toBe(true);
+    expect(pub.directPayActive).toBe(true);
     expect(pub.note).toContain("hello@zzaizzai.com");
   });
 });

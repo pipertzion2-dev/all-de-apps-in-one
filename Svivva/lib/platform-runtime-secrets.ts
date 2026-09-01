@@ -71,10 +71,31 @@ async function ensureInterimPaymentColumns(): Promise<void> {
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_stripe_payment_link_enterprise TEXT`,
     );
     await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_paypal_url_starter TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_paypal_url_pro TEXT`,
+    );
+    await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_paypal_url TEXT`,
     );
     await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_venmo_url_starter TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_venmo_url_pro TEXT`,
+    );
+    await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_venmo_url TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_cashapp_url_starter TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_cashapp_url_pro TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_zelle_contact TEXT`,
     );
     await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS interim_payment_note TEXT`,
@@ -137,8 +158,15 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   googleGscClientSecret: string | null;
   interimStripePaymentLinkPro: string | null;
   interimStripePaymentLinkEnterprise: string | null;
+  interimPaypalUrlStarter: string | null;
+  interimPaypalUrlPro: string | null;
   interimPaypalUrl: string | null;
+  interimVenmoUrlStarter: string | null;
+  interimVenmoUrlPro: string | null;
   interimVenmoUrl: string | null;
+  interimCashAppUrlStarter: string | null;
+  interimCashAppUrlPro: string | null;
+  interimZelleContact: string | null;
   interimPaymentNote: string | null;
   lemonSqueezyApiKey: string | null;
   lemonSqueezyStoreId: string | null;
@@ -268,8 +296,15 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   if (
     "interimStripePaymentLinkPro" in patch ||
     "interimStripePaymentLinkEnterprise" in patch ||
+    "interimPaypalUrlStarter" in patch ||
+    "interimPaypalUrlPro" in patch ||
     "interimPaypalUrl" in patch ||
+    "interimVenmoUrlStarter" in patch ||
+    "interimVenmoUrlPro" in patch ||
     "interimVenmoUrl" in patch ||
+    "interimCashAppUrlStarter" in patch ||
+    "interimCashAppUrlPro" in patch ||
+    "interimZelleContact" in patch ||
     "interimPaymentNote" in patch
   ) {
     await ensureInterimPaymentColumns();
@@ -301,8 +336,15 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     googleGscClientSecret: existing?.googleGscClientSecret ?? null,
     interimStripePaymentLinkPro: existing?.interimStripePaymentLinkPro ?? null,
     interimStripePaymentLinkEnterprise: existing?.interimStripePaymentLinkEnterprise ?? null,
+    interimPaypalUrlStarter: existing?.interimPaypalUrlStarter ?? null,
+    interimPaypalUrlPro: existing?.interimPaypalUrlPro ?? null,
     interimPaypalUrl: existing?.interimPaypalUrl ?? null,
+    interimVenmoUrlStarter: existing?.interimVenmoUrlStarter ?? null,
+    interimVenmoUrlPro: existing?.interimVenmoUrlPro ?? null,
     interimVenmoUrl: existing?.interimVenmoUrl ?? null,
+    interimCashAppUrlStarter: existing?.interimCashAppUrlStarter ?? null,
+    interimCashAppUrlPro: existing?.interimCashAppUrlPro ?? null,
+    interimZelleContact: existing?.interimZelleContact ?? null,
     interimPaymentNote: existing?.interimPaymentNote ?? null,
     lemonSqueezyApiKey: existing?.lemonSqueezyApiKey ?? null,
     lemonSqueezyStoreId: existing?.lemonSqueezyStoreId ?? null,
@@ -333,8 +375,15 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         googleGscClientSecret: merged.googleGscClientSecret,
         interimStripePaymentLinkPro: merged.interimStripePaymentLinkPro,
         interimStripePaymentLinkEnterprise: merged.interimStripePaymentLinkEnterprise,
+        interimPaypalUrlStarter: merged.interimPaypalUrlStarter,
+        interimPaypalUrlPro: merged.interimPaypalUrlPro,
         interimPaypalUrl: merged.interimPaypalUrl,
+        interimVenmoUrlStarter: merged.interimVenmoUrlStarter,
+        interimVenmoUrlPro: merged.interimVenmoUrlPro,
         interimVenmoUrl: merged.interimVenmoUrl,
+        interimCashAppUrlStarter: merged.interimCashAppUrlStarter,
+        interimCashAppUrlPro: merged.interimCashAppUrlPro,
+        interimZelleContact: merged.interimZelleContact,
         interimPaymentNote: merged.interimPaymentNote,
         lemonSqueezyApiKey: merged.lemonSqueezyApiKey,
         lemonSqueezyStoreId: merged.lemonSqueezyStoreId,
