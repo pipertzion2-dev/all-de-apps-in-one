@@ -92,8 +92,15 @@ async function ensureGoogleGscPlatformColumns(): Promise<void> {
  * overwritten or cleared from database values (Vercel/host env wins).
  */
 export const runtimeSecretColdStart = {
-  openai: !!(process.env.ORBIT_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim()),
-  openaiBaseUrl: !!process.env.ORBIT_OPENAI_BASE_URL?.trim(),
+  openai: !!(
+    process.env.ORBIT_OPENAI_API_KEY?.trim() ||
+    process.env.OPENAI_API_KEY?.trim() ||
+    process.env.EASYPEASY_API_KEY?.trim()
+  ),
+  openaiBaseUrl: !!(
+    process.env.ORBIT_OPENAI_BASE_URL?.trim() ||
+    process.env.EASYPEASY_API_KEY?.trim()
+  ),
   stripeSecret: !!process.env.STRIPE_SECRET_KEY?.trim(),
   stripePublishable: !!(
     process.env.STRIPE_PUBLISHABLE_KEY?.trim() ||

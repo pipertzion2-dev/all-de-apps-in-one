@@ -56,6 +56,7 @@ import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { OrbitInterimPaymentsSetup } from "@/components/orbit-interim-payments-setup";
 import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
+import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
@@ -4204,6 +4205,9 @@ export default function LaunchpadPage() {
             </div>
 
             {/* Services checklist — Google indexing (free) + paid marketing APIs */}
+            <div id="orbit-easypeasy-setup">
+              <OrbitEasyPeasySetup />
+            </div>
             <OrbitPaidServicesHub showFreeFallback />
 
             {/* Connections Hub — domain, GSC URL, GoDaddy (free infra) */}
@@ -4723,7 +4727,12 @@ export default function LaunchpadPage() {
             {tab === "causal" && <OrbitCausalAttribution />}
 
             {/* Marketing Autopilot tab */}
-            {tab === "autopilot" && <OrbitMarketingAutopilot />}
+            {tab === "autopilot" && (
+              <div className="space-y-4">
+                <OrbitEasyPeasySetup />
+                <OrbitMarketingAutopilot />
+              </div>
+            )}
 
             {/* Checklist tab — visual mission control + detailed list */}
             {tab === "checklist" && (

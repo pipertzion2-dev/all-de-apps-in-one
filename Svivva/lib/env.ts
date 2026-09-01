@@ -28,12 +28,28 @@ function validateEnv(): Env {
 
 export const env = validateEnv();
 
+export function getEasyPeasyApiKey(): string | undefined {
+  return process.env.EASYPEASY_API_KEY?.trim() || undefined;
+}
+
 export function getOpenAIApiKey(): string | undefined {
-  return process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  return (
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+    process.env.ORBIT_OPENAI_API_KEY ||
+    getEasyPeasyApiKey() ||
+    process.env.OPENAI_API_KEY
+  );
 }
 
 export function getOpenAIBaseUrl(): string | undefined {
-  return process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  const explicit =
+    process.env.AI_INTEGRATIONS_OPENAI_BASE_URL?.trim() ||
+    process.env.ORBIT_OPENAI_BASE_URL?.trim();
+  if (explicit) return explicit;
+  if (getEasyPeasyApiKey()) {
+    return "https://easy-peasy.ai/api";
+  }
+  return undefined;
 }
 
 export function getOllamaUrl(): string | undefined {

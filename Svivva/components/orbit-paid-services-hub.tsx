@@ -249,6 +249,8 @@ export function OrbitPaidServicesHub({
     if (item.id === "indexnow") return indexNowActive;
     if (item.id === "bing-webmaster") return indexNowActive;
     if (item.envKey === "OPENAI_API_KEY") return aiConfigured;
+    if (item.envKey === "EASYPEASY_API_KEY") return aiConfigured;
+    if (item.id === "easypeasy") return aiConfigured;
     if (item.envKey === "GEMINI_API_KEY") return aiConfigured && !configuredKeys.openai;
     if (item.envKey === "NEXT_PUBLIC_CLARITY_ID") {
       return !!(

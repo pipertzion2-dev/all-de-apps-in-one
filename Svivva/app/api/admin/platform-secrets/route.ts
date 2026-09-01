@@ -13,6 +13,12 @@ import {
   lemonSqueezyCheckoutCapable,
   mergeLemonSqueezyConfig,
 } from "@/lib/lemonsqueezy/config";
+import {
+  EASYPEASY_BASE_URL,
+  isEasyPeasyActive,
+  isEasyPeasyBaseUrl,
+  mergeEasyPeasyConfig,
+} from "@/lib/easypeasy/config";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
 const patchSchema = z
   .object({
@@ -76,11 +82,23 @@ export async function GET() {
         : null,
     );
     const stripeReady = await getStripeReadyStatus();
+    const easypeasyConfig = mergeEasyPeasyConfig(
+      row
+        ? {
+            apiKey: row.openaiApiKey,
+            baseUrl: row.openaiBaseUrl,
+          }
+        : null,
+    );
 
     return NextResponse.json({
       stored: {
         openai: !!row?.openaiApiKey?.trim(),
         openaiBaseUrl: !!row?.openaiBaseUrl?.trim(),
+        easypeasyApiKey: !!(
+          row?.openaiApiKey?.trim() && isEasyPeasyBaseUrl(row.openaiBaseUrl)
+        ),
+        easypeasyBaseUrl: !!isEasyPeasyBaseUrl(row?.openaiBaseUrl),
         stripeSecret: !!row?.stripeSecretKey?.trim(),
         stripePublishable: !!row?.stripePublishableKey?.trim(),
         stripeWebhook: !!row?.stripeWebhookSecret?.trim(),
@@ -120,6 +138,11 @@ export async function GET() {
         active: isLemonSqueezyActive(lemonConfig),
         pro: lemonSqueezyCheckoutCapable(lemonConfig, "pro"),
         enterprise: lemonSqueezyCheckoutCapable(lemonConfig, "enterprise"),
+      },
+      easypeasy: {
+        active: isEasyPeasyActive(easypeasyConfig),
+        model: easypeasyConfig.model,
+        baseUrl: EASYPEASY_BASE_URL,
       },
       stripeReady,
       updatedAt: row?.updatedAt?.toISOString() ?? null,

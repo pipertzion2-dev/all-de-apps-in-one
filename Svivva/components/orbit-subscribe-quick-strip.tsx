@@ -28,6 +28,7 @@ function isProviderReady(
   aiConfigured: boolean,
 ): boolean {
   if (p.envKey === "OPENAI_API_KEY") return aiConfigured;
+  if (p.envKey === "EASYPEASY_API_KEY") return aiConfigured;
   if (p.credentialKey) return !!configuredKeys[p.credentialKey];
   return false;
 }
@@ -94,6 +95,15 @@ export function OrbitSubscribeQuickStrip({
                   >
                     <KeyRound className="w-2.5 h-2.5" />
                     Secrets
+                  </Link>
+                )}
+                {p.envKey === "EASYPEASY_API_KEY" && (
+                  <Link
+                    href="/dashboard/launchpad#orbit-easypeasy-setup"
+                    className="inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-[9px] font-semibold border border-fuchsia-500/40 text-fuchsia-600"
+                  >
+                    <KeyRound className="w-2.5 h-2.5" />
+                    EasyPeasy
                   </Link>
                 )}
               </div>
