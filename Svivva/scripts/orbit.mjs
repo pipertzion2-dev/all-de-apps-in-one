@@ -206,6 +206,32 @@ async function cmdComplete() {
   }
 }
 
+async function cmdSeoWeekly() {
+  const auditOnly = hasFlag("--audit-only");
+  header(`SEO weekly routine — ${SITE}`);
+  console.log(
+    auditOnly
+      ? "Running audit-only pass (no new content)…\n"
+      : "Running full 14-step SEO weekly routine…\n",
+  );
+  const r = await api("/api/orbit/seo-weekly-routine", {
+    method: "POST",
+    body: { skipContentGeneration: auditOnly },
+    timeoutMs: 300_000,
+  });
+  console.log(r.summary || "(no summary)");
+  if (r.roadmap) {
+    console.log(`\nLearning roadmap: ${r.roadmap.overallPercent}% (week ${r.roadmap.currentWeek})`);
+  }
+  if (r.gsc?.ok) {
+    console.log(
+      `\nGSC: ${r.gsc.nearPageOne?.length ?? 0} near page-1 keywords, ${r.gsc.lowCtrPages?.length ?? 0} low-CTR pages`,
+    );
+  }
+  const st = r.stats || {};
+  console.log(`\nDone. ${st.done}/14 tasks · failed=${st.failed} needsGsc=${st.needsCredentials}`);
+}
+
 const cmd = process.argv[2];
 const commands = {
   status: cmdStatus,
@@ -215,6 +241,7 @@ const commands = {
   "mini-apps": cmdMiniApps,
   research: cmdResearch,
   ingest: cmdIngest,
+  "seo-weekly": cmdSeoWeekly,
 };
 
 if (!cmd || !commands[cmd]) {
@@ -226,6 +253,7 @@ if (!cmd || !commands[cmd]) {
       `  node scripts/orbit.mjs complete\n` +
       `  node scripts/orbit.mjs mini-apps\n` +
       `  node scripts/orbit.mjs research [--count N] [--focus "topic"]\n` +
+      `  node scripts/orbit.mjs seo-weekly [--audit-only]\n` +
       `  node scripts/orbit.mjs ingest <file.json>\n`,
   );
   process.exit(cmd ? 1 : 0);

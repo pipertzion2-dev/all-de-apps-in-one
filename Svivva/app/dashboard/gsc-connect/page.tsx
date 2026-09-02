@@ -36,6 +36,7 @@ import { gscOAuthConnectUrl, GSC_OAUTH_LOGIN_HINT } from "@/lib/gsc-oauth-connec
 import { gscOAuthErrorMessage } from "@/lib/gsc-error-messages";
 import { GscManualConnectPanel } from "@/components/gsc-manual-connect";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
+import { GscConnectionTroubleshooter } from "@/components/gsc-connection-troubleshooter";
 import { followOAuthLink } from "@/lib/follow-oauth-link";
 import { useToast } from "@/hooks/use-toast";
 
@@ -97,6 +98,7 @@ export default function GscConnectPage() {
   const [showAdminUnlock, setShowAdminUnlock] = useState(false);
   const [pendingOAuth, setPendingOAuth] = useState(false);
   const [needsOAuthSetup, setNeedsOAuthSetup] = useState(false);
+  const [showAlternateConnect, setShowAlternateConnect] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -181,6 +183,14 @@ export default function GscConnectPage() {
       }
       if (err === "oauth_invalid_client" || err === "oauth_not_configured") {
         setNeedsOAuthSetup(true);
+      }
+      if (
+        err === "invalid_state" ||
+        err === "access_denied" ||
+        err?.includes("redirect_uri") ||
+        err === "no_refresh_token"
+      ) {
+        setShowAlternateConnect(true);
       }
       window.history.replaceState({}, "", "/dashboard/gsc-connect");
     }
@@ -609,9 +619,21 @@ export default function GscConnectPage() {
         </CardContent>
       </Card>
 
+      {!fullyReady && (
+        <GscConnectionTroubleshooter
+          adminUnlocked={adminUnlocked === true}
+          oauthAvailable={oauthAvailable}
+          oauthConnected={connected}
+          propertyOk={propertyOk}
+          lastError={msg && !msg.ok ? msg.text : null}
+          gscSitesSample={data?.gscSitesSample}
+        />
+      )}
+
       {!connected && (
         <GscManualConnectPanel
           adminUnlocked={adminUnlocked === true}
+          highlighted={showAlternateConnect}
           onRequestAdminUnlock={() => setShowAdminUnlock(true)}
           onConnected={(text) => {
             setMsg({ ok: true, text });

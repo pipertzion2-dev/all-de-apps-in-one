@@ -59,6 +59,7 @@ import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
 import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
+import { OrbitSeoWeeklyRoutine } from "@/components/orbit-seo-weekly-routine";
 import { OrbitOneClickLaunch } from "@/components/orbit-one-click-launch";
 import { PlanActivationGate } from "@/components/plan-activation-gate";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
@@ -2527,6 +2528,7 @@ export default function LaunchpadPage() {
     | "checklist"
     | "growth"
     | "autopilot"
+    | "seo"
     | "causal"
     | "stripe"
   >("checklist");
@@ -2539,6 +2541,7 @@ export default function LaunchpadPage() {
       "checklist",
       "growth",
       "autopilot",
+      "seo",
       "causal",
       "stripe",
     ]);
@@ -4588,6 +4591,32 @@ export default function LaunchpadPage() {
                   </p>
                 </button>
                 <button
+                  onClick={() => setTab("seo")}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "seo" ? "border-teal-500 bg-teal-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-seo"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Search
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "seo" ? TEAL : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "seo" ? TEAL : undefined }}
+                    >
+                      SEO Weekly
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "seo" ? "bg-teal-500/20 text-teal-600" : "bg-teal-500/10 text-teal-700"}`}
+                    >
+                      14
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    GSC + automated checklist
+                  </p>
+                </button>
+                <button
                   onClick={() => setTab("checklist")}
                   className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "checklist" ? "border-amber-500 bg-amber-500/10" : "border-border bg-card hover:bg-muted/30"}`}
                   data-testid="tab-checklist"
@@ -4755,6 +4784,9 @@ export default function LaunchpadPage() {
                 <OrbitMarketingAutopilot />
               </div>
             )}
+
+            {/* SEO Weekly Routine tab */}
+            {tab === "seo" && <OrbitSeoWeeklyRoutine />}
 
             {/* Checklist tab — visual mission control + detailed list */}
             {tab === "checklist" && (

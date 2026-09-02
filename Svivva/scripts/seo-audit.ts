@@ -7,6 +7,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runSiteAudit } from "../lib/seo/audit/run-audit";
+import { checkSeoDeployGates } from "../lib/seo/audit/deploy-gates";
 import { buildInternalLinkMap } from "../lib/seo/internal-links/graph";
 import { buildAnalyticsMap } from "../lib/seo/analytics-events";
 import { buildPerformanceReport } from "../lib/seo/performance/budget";
@@ -42,10 +43,23 @@ async function main() {
     console.log(`Wrote ${dest}`);
   }
 
+  const gates = await checkSeoDeployGates();
+  await writeFile(path.join(outDir, "deploy_gates.json"), JSON.stringify(gates, null, 2));
+  console.log(`Wrote ${path.join(outDir, "deploy_gates.json")}`);
+
   console.log("\nAudit complete at", audit.generatedAt);
   console.log(
     `Orphans: ${audit.orphan_pages.orphans.length}, thin: ${audit.thin_content.belowThreshold.length}, dup titles: ${audit.duplicate_content.duplicateTitles.length}`,
   );
+
+  if (!gates.pass) {
+    console.error("\n❌ Deploy gates FAILED:");
+    for (const issue of gates.issues.filter((i) => i.severity === "critical")) {
+      console.error(`  · [${issue.gate}] ${issue.message} (${issue.count ?? "?"})`);
+    }
+    process.exit(1);
+  }
+  console.log("\n✓ Deploy gates passed");
 }
 
 main().catch((e) => {

@@ -192,6 +192,12 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     automatable: "onsite",
   },
   {
+    id: "tech-seo-weekly-routine",
+    label: "SEO weekly routine (14 steps)",
+    group: "Technical Foundation",
+    automatable: "onsite",
+  },
+  {
     id: "dir-futurepedia",
     label: "Futurepedia listing",
     group: "Directories",

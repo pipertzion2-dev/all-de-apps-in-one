@@ -280,6 +280,26 @@ export async function runMarketingAutopilot(opts?: {
       ),
     );
 
+    try {
+      const { runSeoWeeklyRoutine } = await import("@/lib/orbit/seo-weekly-routine");
+      const weekly = await runSeoWeeklyRoutine({ skipContentGeneration: true });
+      tasks.push(
+        task(
+          "tech-seo-weekly-routine",
+          weekly.ok ? "done" : weekly.stats.failed ? "failed" : "prepared",
+          `SEO weekly: ${weekly.stats.done}/14 done · roadmap ${weekly.roadmap.overallPercent}%`,
+        ),
+      );
+    } catch (e) {
+      tasks.push(
+        task(
+          "tech-seo-weekly-routine",
+          "failed",
+          e instanceof Error ? e.message : "SEO weekly routine failed",
+        ),
+      );
+    }
+
     const c = traffic.marketing.counts;
     tasks.push(
       task("content-seo-pages", c.seoPages >= 20 ? "done" : "done", `${c.seoPages} SEO pages`),
