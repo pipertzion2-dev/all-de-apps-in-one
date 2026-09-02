@@ -270,10 +270,10 @@ function metaFor(id: string): ActionMeta {
 // ─── Running phases ───────────────────────────────────────────────────────────
 
 const PHASES = [
-  { label: "Wiring Orbit AI (Gemini / OpenAI / fallback test)" },
+  { label: "Loading content engine (AI or built-in templates — no key required)" },
   { label: "Building SEO pages, blog, comparisons & tool pages" },
   { label: "Submitting URLs to Google (GSC + Indexing API), Bing & IndexNow" },
-  { label: "Generating AI launch copy & auto-posting where APIs allow" },
+  { label: "Generating launch copy & auto-posting where APIs allow" },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -313,7 +313,10 @@ export function OrbitOneClickLaunch({
   const [savingCred, setSavingCred] = useState<string | null>(null);
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
-  const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(null);
+  const [templateMode, setTemplateMode] = useState(true);
+  const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(
+    "Built-in templates (no API key)",
+  );
   const [marketingModel, setMarketingModel] = useState<string | null>(null);
   const [easypeasyTier, setEasypeasyTier] = useState<string | null>(null);
   const [easypeasyLive, setEasypeasyLive] = useState<{
@@ -477,7 +480,15 @@ export function OrbitOneClickLaunch({
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
-        if (json.ai?.configured) setAiConfigured(true);
+        if (json.ai?.configured) {
+          setAiConfigured(true);
+          setTemplateMode(false);
+        } else if (!cancelled) {
+          setAiConfigured(true);
+          setTemplateMode(true);
+          setAiProviderLabel("Built-in templates (no API key)");
+          setMarketingModel("template-v1");
+        }
         if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
         if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
         if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
@@ -494,7 +505,13 @@ export function OrbitOneClickLaunch({
           if (json.easypeasy.model) setMarketingModel(json.easypeasy.model);
           if (json.easypeasy.active) setAiConfigured(true);
         } else if (!cancelled) {
-          setEasypeasyLive((prev) => ({ ...prev, loading: false }));
+          setEasypeasyLive((prev) => ({
+            ...prev,
+            loading: false,
+            active: true,
+            model: "template-v1",
+          }));
+          setTemplateMode(true);
         }
       } catch {
         // non-blocking
@@ -581,27 +598,19 @@ export function OrbitOneClickLaunch({
         };
       }
 
-      let { res: ensureRes, json: ensureJson } = await ensureOrbitAi();
-      if (!ensureRes.ok || !ensureJson.ok) {
-        const altHint =
-          ensureJson.alternatives?.length &&
-          ensureJson.alternatives.map((a) => a.name).join(" or ");
-        throw new Error(
-          ensureJson.error ||
-            (altHint
-              ? `No working AI provider. Try ${altHint} in Platform Secrets.`
-              : "No working AI provider. Add GEMINI_API_KEY or OPENAI_API_KEY in Platform Secrets."),
-        );
-      }
+      let { json: ensureJson } = await ensureOrbitAi();
       setAiConfigured(true);
+      setTemplateMode(!!ensureJson.templateMode);
       if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
-      if (ensureJson.marketingModel) setMarketingModel(ensureJson.marketingModel);
+      if (ensureJson.marketingModel || ensureJson.model) {
+        setMarketingModel(ensureJson.marketingModel ?? ensureJson.model ?? null);
+      }
       if (ensureJson.provider === "easypeasy") setEasypeasyTier("standard");
       setEasypeasyLive((prev) => ({
         loading: false,
         active: true,
         tierId: ensureJson.provider === "easypeasy" ? "standard" : null,
-        model: ensureJson.model ?? ensureJson.marketingModel ?? null,
+        model: ensureJson.model ?? ensureJson.marketingModel ?? "template-v1",
         migratedFromPremium: prev.migratedFromPremium,
       }));
 
@@ -759,16 +768,16 @@ export function OrbitOneClickLaunch({
                   ? `${URRTHANG_LABEL} complete`
                   : aiProviderLabel
                     ? `${URRTHANG_LABEL} — one button (${aiProviderLabel})`
-                    : `${URRTHANG_LABEL} — one button (add AI key)`}
+                    : `${URRTHANG_LABEL} — one button (no API key)`}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "Orbit AI + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
+                ? "Orbit runs on built-in templates or AI if configured. Google/Bing indexing runs automatically."
                 : hasRun
                   ? copyOnlyMode
-                    ? "Fully automated: pages, indexing, AI copy. Optional social/email copy saved in Growth Content."
+                    ? "Fully automated: pages, indexing, launch copy. Optional social/email copy saved in Growth Content."
                     : "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press: wires Gemini or OpenAI (EasyPeasy only if nothing else works), builds SEO pages, submits to Google & Bing, saves launch copy."}
+                  : "One press: SEO pages, Google & Bing indexing, and launch copy — works with zero API keys via built-in templates."}
             </p>
             {easypeasyTier && !running && (
               <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300 mt-1 sr-only">
@@ -800,7 +809,7 @@ export function OrbitOneClickLaunch({
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-foreground">Checking Orbit AI…</p>
-                <p className="text-xs text-muted-foreground">Gemini → OpenAI → EasyPeasy fallback</p>
+                <p className="text-xs text-muted-foreground">Templates first — AI optional upgrade</p>
               </div>
             </>
           ) : easypeasyLive.active ? (
@@ -808,11 +817,12 @@ export function OrbitOneClickLaunch({
               <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
-                  {aiProviderLabel ?? "Orbit AI ready"}
+                  {aiProviderLabel ?? "Orbit ready"}
+                  {templateMode ? " — no API key" : ""}
                 </p>
                 <p className="text-xs text-emerald-700 dark:text-emerald-300 font-mono mt-0.5">
-                  {easypeasyLive.model ?? marketingModel ?? "model configured"}
-                  {easypeasyTier === "standard" ? " · EasyPeasy Standard" : ""}
+                  {easypeasyLive.model ?? marketingModel ?? "template-v1"}
+                  {templateMode ? " · SEO pages, social copy, outreach" : ""}
                 </p>
                 {easypeasyLive.migratedFromPremium && (
                   <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
@@ -823,21 +833,14 @@ export function OrbitOneClickLaunch({
             </>
           ) : (
             <>
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
-                  No working AI provider
+                <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
+                  Built-in templates ready
                 </p>
-                <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">
-                  Add GEMINI_API_KEY (free) or OPENAI_API_KEY in Platform Secrets — EasyPeasy is last
-                  resort only.
+                <p className="text-xs text-emerald-800 dark:text-emerald-200 mt-0.5">
+                  No API key needed — Orbit generates SEO pages and launch copy from templates.
                 </p>
-                <Link
-                  href="/dashboard/settings/runtime-keys"
-                  className="text-[10px] font-bold text-amber-900 dark:text-amber-100 underline mt-1 inline-block"
-                >
-                  Open Platform Secrets →
-                </Link>
               </div>
             </>
           )}

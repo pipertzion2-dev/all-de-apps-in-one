@@ -16,15 +16,25 @@ import {
   type OrbitAiAlternative,
 } from "@/lib/orbit/orbit-ai-alternatives";
 import { resetOpenAIClientCache } from "@/lib/llm/openai";
+import {
+  enableOrbitTemplateMode,
+  disableOrbitTemplateMode,
+  ORBIT_TEMPLATE_MODEL,
+  ORBIT_TEMPLATE_PROVIDER_LABEL,
+} from "@/lib/orbit/orbit-template-mode";
 
 export type EnsureOrbitAiResult = {
   ok: boolean;
-  provider: AiProvider | "easypeasy" | "none";
+  provider: AiProvider | "easypeasy" | "templates" | "none";
   providerLabel: string;
   model: string;
   tested: boolean;
   testReply?: string;
   error?: string;
+  /** True when using built-in templates — no API key required */
+  templateMode?: boolean;
+  /** Warning when AI failed but templates will be used */
+  warning?: string;
   /** Suggested next steps when ok is false or a lower-priority provider was used after fallback */
   alternatives: OrbitAiAlternative[];
   /** True when we fell back from a higher-priority provider that failed its connection test */
@@ -132,18 +142,40 @@ async function probeProvider(
   return { ok: false, error: test.error };
 }
 
+async function succeedWithTemplates(warning?: string): Promise<EnsureOrbitAiResult> {
+  enableOrbitTemplateMode();
+  resetOpenAIClientCache();
+  return {
+    ok: true,
+    provider: "templates",
+    providerLabel: ORBIT_TEMPLATE_PROVIDER_LABEL,
+    model: ORBIT_TEMPLATE_MODEL,
+    tested: false,
+    templateMode: true,
+    warning,
+    alternatives: getOrbitAiAlternatives(),
+    usedFallback: !!warning,
+  };
+}
+
 /**
  * Wire a working Orbit AI provider before autopilot runs.
- * Prefers Gemini → direct OpenAI → EasyPeasy (last resort).
+ * Prefers Gemini → direct OpenAI → EasyPeasy → built-in templates (no key).
  */
 export async function ensureOrbitAiForRun(opts?: {
   testConnection?: boolean;
+  /** When true (default), never block — fall back to zero-key templates */
+  allowTemplateFallback?: boolean;
 }): Promise<EnsureOrbitAiResult> {
   await hydratePlatformSecrets();
   const testConnection = opts?.testConnection ?? true;
+  const allowTemplateFallback = opts?.allowTemplateFallback !== false;
   const probes = orderedProbes();
 
   if (probes.length === 0) {
+    if (allowTemplateFallback) {
+      return succeedWithTemplates("No AI keys configured — using built-in Orbit templates.");
+    }
     const alts = getOrbitAiAlternatives();
     return {
       ok: false,
@@ -157,6 +189,7 @@ export async function ensureOrbitAiForRun(opts?: {
     };
   }
 
+  disableOrbitTemplateMode();
   let failedProvider: AiProvider | "easypeasy" | undefined;
   let lastError: string | undefined;
 
@@ -165,6 +198,7 @@ export async function ensureOrbitAiForRun(opts?: {
     const result = await probeProvider(probe, testConnection);
 
     if (result.ok) {
+      disableOrbitTemplateMode();
       // Force env to match winning provider when not EasyPeasy
       if (probe.id === "gemini") {
         process.env.ORBIT_AI_PROVIDER = "gemini";
@@ -197,6 +231,14 @@ export async function ensureOrbitAiForRun(opts?: {
   }
 
   const alts = getOrbitAiAlternatives(failedProvider ? [failedProvider] : undefined);
+
+  if (allowTemplateFallback) {
+    const warn = lastError
+      ? `AI unavailable (${lastError.slice(0, 120)}) — using built-in templates instead.`
+      : "AI unavailable — using built-in Orbit templates (no API key).";
+    return succeedWithTemplates(warn);
+  }
+
   const altText = describeOrbitAiAlternatives(failedProvider ? [failedProvider] : undefined);
 
   return {

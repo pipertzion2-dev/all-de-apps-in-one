@@ -67,9 +67,12 @@ export async function GET(req: NextRequest) {
       },
       ai: {
         configured: isOrbitAiConfigured(),
+        templateMode: !isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),
-        providerLabel: getOrbitAiProviderLabel(),
-        marketingModel: getMarketingModel(),
+        providerLabel: isOrbitAiConfigured()
+          ? getOrbitAiProviderLabel()
+          : "Built-in templates (no API key)",
+        marketingModel: isOrbitAiConfigured() ? getMarketingModel() : "template-v1",
       },
     });
   } catch (e) {
@@ -125,17 +128,6 @@ export async function POST(req: NextRequest) {
       testConnection: true,
     });
 
-    if (!orbitAi.ok) {
-      return NextResponse.json(
-        {
-          error: orbitAi.error || "No working AI provider",
-          alternatives: orbitAi.alternatives,
-          failedProvider: orbitAi.failedProvider,
-        },
-        { status: 429 },
-      );
-    }
-
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
     return NextResponse.json({
       ...result,
@@ -144,9 +136,10 @@ export async function POST(req: NextRequest) {
       easypeasy: orbitAi.provider === "easypeasy" ? orbitAi : undefined,
       ai: {
         configured: isOrbitAiConfigured(),
+        templateMode: !!orbitAi.templateMode,
         provider: getOrbitActiveAiProvider(),
-        providerLabel: getOrbitAiProviderLabel(),
-        marketingModel: getMarketingModel(),
+        providerLabel: orbitAi.providerLabel,
+        marketingModel: orbitAi.templateMode ? orbitAi.model : getMarketingModel(),
       },
     });
   } catch (e) {

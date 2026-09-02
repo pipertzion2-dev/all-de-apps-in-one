@@ -33,21 +33,10 @@ export async function POST(request: Request) {
       testConnection: parsed.data.testConnection ?? true,
     });
 
-    if (!result.ok) {
-      return NextResponse.json(
-        {
-          ...result,
-          providerLabel: getOrbitAiProviderLabel(),
-          marketingModel: getMarketingModel(),
-        },
-        { status: 429 },
-      );
-    }
-
     return NextResponse.json({
       ...result,
       providerLabel: getOrbitAiProviderLabel(),
-      marketingModel: getMarketingModel(),
+      marketingModel: result.templateMode ? result.model : getMarketingModel(),
     });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

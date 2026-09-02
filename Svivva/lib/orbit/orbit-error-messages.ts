@@ -73,12 +73,10 @@ function isStandardEasyPeasyTier(tierId: string | null | undefined): boolean {
 }
 
 function aiNotConfiguredHint(raw: string): OrbitRunErrorHint {
-  const alts = getOrbitAiAlternatives(["easypeasy"]);
   return {
-    title: "No working AI provider",
-    detail: `${raw} ${describeOrbitAiAlternatives(["easypeasy"])}`,
-    actions: orbitAiAlternativeActions(["easypeasy"]),
-    alternatives: alts.map((a) => ({ name: a.name, why: a.why, href: a.setupHref })),
+    title: "AI unavailable — templates used instead",
+    detail: `${raw} Orbit still runs with built-in templates (no API key). Add an AI key later for richer copy.`,
+    actions: [{ label: "Run again (templates)", href: "/dashboard/launchpad#orbit-one-click" }],
   };
 }
 

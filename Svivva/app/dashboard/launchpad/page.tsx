@@ -3136,7 +3136,7 @@ export default function LaunchpadPage() {
     setLaunchDone(false);
 
     try {
-      setFullAutopilotStep("Wiring Orbit AI (Gemini / OpenAI / fallback)…");
+      setFullAutopilotStep("Loading content engine (templates or AI)…");
       try {
         const ep = await authFetch("/api/orbit/ensure-ai", {
           method: "POST",
@@ -3144,21 +3144,23 @@ export default function LaunchpadPage() {
           body: JSON.stringify({ testConnection: true }),
         });
         const epData = await ep.json();
-        if (!ep.ok || !epData.ok) {
-          const altNames = Array.isArray(epData.alternatives)
-            ? epData.alternatives.map((a: { name: string }) => a.name).join(" or ")
-            : "Gemini or OpenAI";
+        if (epData.templateMode) {
           toast({
-            title: "Orbit AI not ready",
+            title: "Template mode — no API key",
             description:
-              epData.error ||
-              `Add ${altNames} in Platform Secrets, then run again.`,
-            variant: "destructive",
-            duration: 10000,
+              epData.warning ||
+              "Orbit will generate SEO pages and launch copy from built-in templates.",
+            duration: 6000,
+          });
+        } else if (!ep.ok || !epData.ok) {
+          toast({
+            title: "Orbit AI not ready — using templates",
+            description: epData.warning || epData.error || "Built-in templates will be used.",
+            duration: 8000,
           });
         }
       } catch {
-        /* continue — steps may still use templates */
+        /* continue — templates always available */
       }
 
       setFullAutopilotStep("Discovering every mini app across all hubs…");

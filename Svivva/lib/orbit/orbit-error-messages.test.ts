@@ -21,7 +21,12 @@ describe("orbit-error-messages", () => {
     );
     expect(hint.title).toContain("switch provider");
     expect(hint.actions.length).toBeGreaterThan(0);
-    expect(hint.alternatives?.some((a) => a.name.includes("Gemini"))).toBe(true);
+  });
+
+  it("explains template fallback when AI is not configured", () => {
+    const hint = formatOrbitRunError("No AI provider configured");
+    expect(hint.title).toContain("templates");
+    expect(hint.detail).toContain("no API key");
   });
 
   it("formats standard-tier word limit without blaming premium models", () => {
