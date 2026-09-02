@@ -270,7 +270,7 @@ function metaFor(id: string): ActionMeta {
 // ─── Running phases ───────────────────────────────────────────────────────────
 
 const PHASES = [
-  { label: "Wiring EasyPeasy AI (tier + connection test)" },
+  { label: "Wiring Orbit AI (Gemini / OpenAI / fallback test)" },
   { label: "Building SEO pages, blog, comparisons & tool pages" },
   { label: "Submitting URLs to Google (GSC + Indexing API), Bing & IndexNow" },
   { label: "Generating AI launch copy & auto-posting where APIs allow" },
@@ -560,47 +560,48 @@ export function OrbitOneClickLaunch({
     phaseTimers.current.forEach(clearTimeout);
     phaseTimers.current = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 9_000));
     try {
-      async function ensureEasyPeasy(
-        tier?: "standard" | "balanced" | "premium",
-        forceTier?: boolean,
-      ) {
-        const res = await authFetch("/api/easypeasy/ensure", {
+      async function ensureOrbitAi() {
+        const res = await authFetch("/api/orbit/ensure-ai", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...(tier ? { tier, forceTier: !!forceTier } : {}),
-            testConnection: true,
-          }),
+          body: JSON.stringify({ testConnection: true }),
         });
         return {
           res,
           json: (await res.json()) as {
             ok?: boolean;
             error?: string;
-            tierId?: string;
-            model?: string;
+            provider?: string;
             providerLabel?: string;
             marketingModel?: string;
+            model?: string;
+            usedFallback?: boolean;
+            alternatives?: { name: string; why: string; setupHref: string }[];
           },
         };
       }
 
-      let { res: ensureRes, json: ensureJson } = await ensureEasyPeasy("standard", true);
+      let { res: ensureRes, json: ensureJson } = await ensureOrbitAi();
       if (!ensureRes.ok || !ensureJson.ok) {
+        const altHint =
+          ensureJson.alternatives?.length &&
+          ensureJson.alternatives.map((a) => a.name).join(" or ");
         throw new Error(
           ensureJson.error ||
-            "EasyPeasy AI is not configured. Paste your API key in the EasyPeasy card below, then try again.",
+            (altHint
+              ? `No working AI provider. Try ${altHint} in Platform Secrets.`
+              : "No working AI provider. Add GEMINI_API_KEY or OPENAI_API_KEY in Platform Secrets."),
         );
       }
       setAiConfigured(true);
       if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
       if (ensureJson.marketingModel) setMarketingModel(ensureJson.marketingModel);
-      if (ensureJson.tierId) setEasypeasyTier(ensureJson.tierId);
+      if (ensureJson.provider === "easypeasy") setEasypeasyTier("standard");
       setEasypeasyLive((prev) => ({
         loading: false,
         active: true,
-        tierId: ensureJson.tierId ?? "standard",
-        model: ensureJson.model ?? null,
+        tierId: ensureJson.provider === "easypeasy" ? "standard" : null,
+        model: ensureJson.model ?? ensureJson.marketingModel ?? null,
         migratedFromPremium: prev.migratedFromPremium,
       }));
 
@@ -758,16 +759,16 @@ export function OrbitOneClickLaunch({
                   ? `${URRTHANG_LABEL} complete`
                   : aiProviderLabel
                     ? `${URRTHANG_LABEL} — one button (${aiProviderLabel})`
-                    : `${URRTHANG_LABEL} — one button (EasyPeasy AI)`}
+                    : `${URRTHANG_LABEL} — one button (add AI key)`}
             </h2>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 leading-relaxed">
               {running
-                ? "EasyPeasy AI + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
+                ? "Orbit AI + Google/Bing indexing run automatically. Social copy is saved — not auto-posted."
                 : hasRun
                   ? copyOnlyMode
                     ? "Fully automated: pages, indexing, AI copy. Optional social/email copy saved in Growth Content."
                     : "Everything automatable ran below. Manual paste tasks are in their own section."
-                  : "One press: wires EasyPeasy AI, builds SEO pages, submits to Google & Bing, saves launch copy."}
+                  : "One press: wires Gemini or OpenAI (EasyPeasy only if nothing else works), builds SEO pages, submits to Google & Bing, saves launch copy."}
             </p>
             {easypeasyTier && !running && (
               <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300 mt-1 sr-only">
@@ -783,9 +784,9 @@ export function OrbitOneClickLaunch({
           </div>
         </div>
 
-        {/* EasyPeasy live status — visible confirmation of tier + migration */}
+        {/* Orbit AI live status */}
         <div
-          data-testid="easypeasy-live-status"
+          data-testid="orbit-ai-live-status"
           className={`rounded-xl border-2 px-3 py-2.5 sm:px-4 sm:py-3 flex items-start gap-3 ${
             easypeasyLive.loading
               ? "border-border/60 bg-muted/30"
@@ -798,8 +799,8 @@ export function OrbitOneClickLaunch({
             <>
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-foreground">Checking EasyPeasy…</p>
-                <p className="text-xs text-muted-foreground">Loading your AI tier settings</p>
+                <p className="text-sm font-semibold text-foreground">Checking Orbit AI…</p>
+                <p className="text-xs text-muted-foreground">Gemini → OpenAI → EasyPeasy fallback</p>
               </div>
             </>
           ) : easypeasyLive.active ? (
@@ -807,14 +808,11 @@ export function OrbitOneClickLaunch({
               <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
-                  EasyPeasy ready —{" "}
-                  {easypeasyLive.tierId === "standard"
-                    ? "Standard (free-tier)"
-                    : (easypeasyLive.tierId ?? "Standard")}
+                  {aiProviderLabel ?? "Orbit AI ready"}
                 </p>
                 <p className="text-xs text-emerald-700 dark:text-emerald-300 font-mono mt-0.5">
-                  {easypeasyLive.model ?? "gemini-3-flash"}
-                  {easypeasyLive.tierId === "standard" ? " · no Premium word quota" : ""}
+                  {easypeasyLive.model ?? marketingModel ?? "model configured"}
+                  {easypeasyTier === "standard" ? " · EasyPeasy Standard" : ""}
                 </p>
                 {easypeasyLive.migratedFromPremium && (
                   <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
@@ -828,11 +826,18 @@ export function OrbitOneClickLaunch({
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
-                  EasyPeasy not configured
+                  No working AI provider
                 </p>
                 <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">
-                  Paste your API key in the EasyPeasy card below, then run {URRTHANG_LABEL}.
+                  Add GEMINI_API_KEY (free) or OPENAI_API_KEY in Platform Secrets — EasyPeasy is last
+                  resort only.
                 </p>
+                <Link
+                  href="/dashboard/settings/runtime-keys"
+                  className="text-[10px] font-bold text-amber-900 dark:text-amber-100 underline mt-1 inline-block"
+                >
+                  Open Platform Secrets →
+                </Link>
               </div>
             </>
           )}
@@ -916,6 +921,22 @@ export function OrbitOneClickLaunch({
                         className="text-[10px] font-bold px-2.5 py-1 rounded-md border border-red-400/40 text-red-100 hover:bg-red-500/15"
                       >
                         {a.label} →
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                {formatted.alternatives && formatted.alternatives.length > 0 && (
+                  <div className="pl-6 pt-1 space-y-1">
+                    <p className="text-[10px] font-bold text-red-100 uppercase tracking-wide">
+                      Try instead
+                    </p>
+                    {formatted.alternatives.map((alt) => (
+                      <Link
+                        key={alt.href}
+                        href={alt.href}
+                        className="block text-[10px] text-red-100/90 hover:text-red-50"
+                      >
+                        <span className="font-bold">{alt.name}</span> — {alt.why}
                       </Link>
                     ))}
                   </div>

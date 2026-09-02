@@ -18,7 +18,8 @@ import {
   getOrbitAiProviderLabel,
 } from "@/lib/llm/providers";
 import { getMarketingModel } from "@/lib/orbit/ai-client";
-import { ensureEasyPeasyForOrbit, migrateStoredPremiumTierIfNeeded } from "@/lib/easypeasy/ensure";
+import { ensureOrbitAiForRun } from "@/lib/orbit/ensure-orbit-ai";
+import { migrateStoredPremiumTierIfNeeded } from "@/lib/easypeasy/ensure";
 import { isEasyPeasyActive, loadEasyPeasyConfig } from "@/lib/easypeasy/config";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { isCopyOnlyDistributionMode } from "@/lib/orbit/distribution-mode";
@@ -120,13 +121,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 503 });
     }
 
-    const easypeasy = await ensureEasyPeasyForOrbit({
+    const orbitAi = await ensureOrbitAiForRun({
       testConnection: true,
     });
 
-    if (!easypeasy.ok) {
+    if (!orbitAi.ok) {
       return NextResponse.json(
-        { error: easypeasy.error || "EasyPeasy is not ready" },
+        {
+          error: orbitAi.error || "No working AI provider",
+          alternatives: orbitAi.alternatives,
+          failedProvider: orbitAi.failedProvider,
+        },
         { status: 429 },
       );
     }
@@ -135,7 +140,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ...result,
       ok: result.ok,
-      easypeasy,
+      orbitAi,
+      easypeasy: orbitAi.provider === "easypeasy" ? orbitAi : undefined,
       ai: {
         configured: isOrbitAiConfigured(),
         provider: getOrbitActiveAiProvider(),

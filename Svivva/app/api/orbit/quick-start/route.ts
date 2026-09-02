@@ -7,7 +7,7 @@ import { runGscAutoSetup } from "@/lib/google-gsc-auto-setup";
 import { getMarketingCredentialStatus } from "@/lib/orbit/marketing-autopilot-credentials";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
-import { ensureEasyPeasyForOrbit } from "@/lib/easypeasy/ensure";
+import { ensureOrbitAiForRun } from "@/lib/orbit/ensure-orbit-ai";
 import { getUncachableStripeClient } from "@/lib/stripe/client";
 import { getSiteUrl } from "@/lib/site-url";
 import { forbidden, ok, badRequest } from "@/lib/http-response";
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   if (!(await isOrbitAdminAllowed(req))) return forbidden();
 
   await hydratePlatformSecrets();
-  const easypeasy = await ensureEasyPeasyForOrbit({
+  const orbitAi = await ensureOrbitAiForRun({
     testConnection: false,
   });
 
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
 
   return ok({
     ok: indexingOk && stripe.allOk,
-    easypeasy,
+    orbitAi,
     indexing: indexingSummary,
     autoSetup,
     stripe,

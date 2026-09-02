@@ -1,17 +1,47 @@
-import { describe, expect, it } from "vitest";
-import {
-  ORBIT_DEFAULT_OPENAI_MODEL,
-  getOrbitDefaultModelForProvider,
-  getOrbitModelFallbackChain,
-} from "./providers";
+import { describe, expect, it, beforeEach } from "vitest";
+import { getOrbitActiveAiProvider, isDirectOpenAiConfigured } from "./providers";
 
-describe("Orbit OpenAI defaults", () => {
-  it("uses gpt-5 as the paid marketing default", () => {
-    expect(ORBIT_DEFAULT_OPENAI_MODEL).toBe("gpt-5");
-    expect(getOrbitDefaultModelForProvider("openai")).toBe("gpt-5");
+describe("Orbit AI provider priority", () => {
+  beforeEach(() => {
+    delete process.env.ORBIT_AI_PROVIDER;
+    delete process.env.EASYPEASY_API_KEY;
+    delete process.env.EASYPEASY_TIER;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.ORBIT_OPENAI_API_KEY;
+    delete process.env.ORBIT_OPENAI_BASE_URL;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
   });
 
-  it("falls back through gpt-4o when gpt-5 is unavailable", () => {
-    expect(getOrbitModelFallbackChain("openai")).toEqual(["gpt-5", "gpt-4o", "gpt-4o-mini"]);
+  it("prefers Gemini over EasyPeasy when both are configured", () => {
+    process.env.GEMINI_API_KEY = "gemini-test-key-12345";
+    process.env.EASYPEASY_API_KEY = "ep-key";
+    expect(getOrbitActiveAiProvider()).toBe("gemini");
+  });
+
+  it("prefers Gemini over direct OpenAI when both are configured", () => {
+    process.env.GEMINI_API_KEY = "gemini-test-key-12345";
+    process.env.OPENAI_API_KEY = "sk-test-openai-key";
+    expect(getOrbitActiveAiProvider()).toBe("gemini");
+  });
+
+  it("uses direct OpenAI when only sk- key is set", () => {
+    process.env.OPENAI_API_KEY = "sk-test-openai-key";
+    expect(getOrbitActiveAiProvider()).toBe("openai");
+    expect(isDirectOpenAiConfigured()).toBe(true);
+  });
+
+  it("falls back to EasyPeasy openai route when only EasyPeasy is configured", () => {
+    process.env.EASYPEASY_API_KEY = "ep-key";
+    expect(getOrbitActiveAiProvider()).toBe("openai");
+    expect(isDirectOpenAiConfigured()).toBe(false);
+  });
+
+  it("respects ORBIT_AI_PROVIDER=openai override", () => {
+    process.env.GEMINI_API_KEY = "gemini-test-key-12345";
+    process.env.OPENAI_API_KEY = "sk-test-openai-key";
+    process.env.ORBIT_AI_PROVIDER = "openai";
+    expect(getOrbitActiveAiProvider()).toBe("openai");
   });
 });

@@ -56,8 +56,20 @@ export function getActiveAiProvider(): AiProvider {
   return "none";
 }
 
+/** Direct OpenAI billing key — excludes EasyPeasy gateway keys. */
+export function isDirectOpenAiConfigured(): boolean {
+  const key =
+    process.env.OPENAI_API_KEY?.trim() ||
+    process.env.ORBIT_OPENAI_API_KEY?.trim() ||
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY?.trim();
+  if (!key?.startsWith("sk-")) return false;
+  const base = getOpenAIBaseUrl()?.trim();
+  if (base && isEasyPeasyConfiguredFromEnv()) return false;
+  return true;
+}
+
 /**
- * Orbit marketing/admin AI — prefers paid OpenAI when a billing key is set.
+ * Orbit marketing/admin AI — prefers Gemini (free) then direct OpenAI, then EasyPeasy gateway.
  * Override with ORBIT_AI_PROVIDER=openai|gemini|ollama.
  */
 export function getOrbitActiveAiProvider(): AiProvider {
@@ -65,16 +77,19 @@ export function getOrbitActiveAiProvider(): AiProvider {
   const openaiKey = getOpenAIApiKey()?.trim();
   const geminiKey = getGeminiApiKey()?.trim();
   const customBase = getOpenAIBaseUrl()?.trim();
+  const easyPeasyRoute = isEasyPeasyConfiguredFromEnv();
 
-  if (forced === "openai" && openaiKey) return "openai";
+  if (forced === "openai" && (isDirectOpenAiConfigured() || (openaiKey && !easyPeasyRoute)))
+    return "openai";
   if (forced === "gemini" && geminiKey) return "gemini";
   if (forced === "ollama" && !isOnVercelRuntime()) {
     if (getOllamaUrl()?.trim() || cachedOllamaUrl) return "ollama";
   }
 
-  // Default: paid OpenAI for Orbit when configured (sk- key or custom gateway base)
-  if (openaiKey && (openaiKey.startsWith("sk-") || customBase)) return "openai";
+  // Default stack: free Gemini → direct OpenAI → EasyPeasy gateway (last resort)
   if (geminiKey) return "gemini";
+  if (isDirectOpenAiConfigured()) return "openai";
+  if (easyPeasyRoute && openaiKey) return "openai";
 
   if (!isOnVercelRuntime()) {
     if (hasReplitAiIntegration()) return "replit";

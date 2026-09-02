@@ -3136,19 +3136,23 @@ export default function LaunchpadPage() {
     setLaunchDone(false);
 
     try {
-      setFullAutopilotStep("Wiring EasyPeasy AI (tier + connection)…");
+      setFullAutopilotStep("Wiring Orbit AI (Gemini / OpenAI / fallback)…");
       try {
-        const ep = await authFetch("/api/easypeasy/ensure", {
+        const ep = await authFetch("/api/orbit/ensure-ai", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tier: "standard", forceTier: true, testConnection: true }),
+          body: JSON.stringify({ testConnection: true }),
         });
         const epData = await ep.json();
         if (!ep.ok || !epData.ok) {
+          const altNames = Array.isArray(epData.alternatives)
+            ? epData.alternatives.map((a: { name: string }) => a.name).join(" or ")
+            : "Gemini or OpenAI";
           toast({
-            title: "EasyPeasy not ready",
+            title: "Orbit AI not ready",
             description:
-              epData.error || "Paste your EasyPeasy API key in the card below, then run again.",
+              epData.error ||
+              `Add ${altNames} in Platform Secrets, then run again.`,
             variant: "destructive",
             duration: 10000,
           });
