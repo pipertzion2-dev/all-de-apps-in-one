@@ -1,9 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { AdminCodeForm } from "@/components/admin-code-form";
+import { Button } from "@/components/ui/button";
 
 const FeatureThreeBg = dynamic(
   () =>
@@ -24,8 +26,8 @@ type PlansResponse = {
   paymentOptions?: { cashAppTag?: string };
 };
 
-/** Cash App pay + subscriber code — not Orbit admin. */
-export function UrrthangSubscriberGate() {
+/** Cash App subscription — not Orbit admin, not urrthang. */
+export function PlanActivationGate() {
   const { data: plansData } = useQuery<PlansResponse>({
     queryKey: ["/api/billing/plans"],
     queryFn: () => fetch("/api/billing/plans").then((r) => r.json()),
@@ -40,10 +42,10 @@ export function UrrthangSubscriberGate() {
       <FeatureThreeBg variant="orbit" scope="page" />
       <div className="relative z-10 max-w-md mx-auto py-12 px-4 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-black">urrthang</h1>
+          <h1 className="text-2xl font-black">Subscribe with Cash App</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Subscribe with Cash App (${cashAppTag}), then enter your access code to run marketing
-            autopilot. This is <strong>not</strong> Orbit admin — owner tools stay separate.
+            Pay ${cashAppTag} for Starter ($20/mo) or Pro ($50/mo), then enter your access code to
+            activate your plan. Orbit and urrthang are owner tools — not part of customer billing.
           </p>
         </div>
 
@@ -54,7 +56,7 @@ export function UrrthangSubscriberGate() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold border border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
-              data-testid="urrthang-gate-cashapp-starter"
+              data-testid="plan-gate-cashapp-starter"
             >
               Starter {starter.priceLabel}/mo
               <ExternalLink className="w-4 h-4" />
@@ -66,7 +68,7 @@ export function UrrthangSubscriberGate() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold border border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
-              data-testid="urrthang-gate-cashapp-pro"
+              data-testid="plan-gate-cashapp-pro"
             >
               Pro {pro.priceLabel}/mo
               <ExternalLink className="w-4 h-4" />
@@ -76,15 +78,21 @@ export function UrrthangSubscriberGate() {
 
         <AdminCodeForm
           scope="membership"
-          title="Subscriber access code"
+          title="Plan access code"
           description={
             plansData?.membershipUnlock?.instructions ??
-            "After Cash App payment, enter your subscriber code to run urrthang only."
+            "After Cash App payment, enter your code to activate your plan."
           }
           codeHint={plansData?.membershipUnlock?.code ?? null}
-          successMessage="Unlocked — you can run urrthang now. Orbit admin stays owner-only."
-          onSuccess={() => window.location.reload()}
+          successMessage="Plan activated — open Billing to see your subscription."
+          onSuccess={() => window.location.assign("/dashboard/billing")}
         />
+
+        <Link href="/dashboard/billing" className="block">
+          <Button variant="outline" className="w-full">
+            Open Billing &amp; Plans
+          </Button>
+        </Link>
       </div>
     </div>
   );

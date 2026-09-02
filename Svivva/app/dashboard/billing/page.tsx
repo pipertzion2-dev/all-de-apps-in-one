@@ -28,7 +28,7 @@ function BillingPageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const { isPro, isMembershipAccess, plan: currentPlanTier } = usePlan();
+  const { isPro, isMembershipAccess } = usePlan();
 
   useEffect(() => {
     if (searchParams.get("success")) {
@@ -49,7 +49,7 @@ function BillingPageContent() {
   const cashAppTag = plansData?.paymentOptions.cashAppTag ?? "pipertzion";
   const payNote = plansData?.paymentOptions.interim.note ?? null;
 
-  const currentPlan = (isPro ? currentPlanTier : "free") as Plan;
+  const currentPlan = (isPro || isMembershipAccess ? "pro" : "free") as Plan;
   const currentPlanData = plans.find((p) => p.tier === currentPlan) ?? plans[0];
 
   const handleSubscribe = (plan: ResolvedBillingPlan) => {
@@ -60,8 +60,8 @@ function BillingPageContent() {
     toast({
       title: "Complete payment in Cash App",
       description: plansData?.membershipUnlock?.code
-        ? `Then enter access code ${plansData.membershipUnlock.code} on this page or Launchpad.`
-        : "Then enter your access code on this page or Launchpad.",
+        ? `Then enter access code ${plansData.membershipUnlock.code} on this page to activate your plan.`
+        : "Then enter your access code on this page to activate your plan.",
     });
     setLoadingPlan(null);
   };
@@ -81,7 +81,7 @@ function BillingPageContent() {
           title="Unlock after Cash App payment"
           description={
             plansData?.membershipUnlock?.instructions ??
-            "After you pay on Cash App, enter your access code here to activate your plan and run urrthang."
+            "After you pay on Cash App, enter your access code here to activate your Starter or Pro plan."
           }
           codeHint={plansData?.membershipUnlock?.code ?? null}
         />
@@ -98,7 +98,7 @@ function BillingPageContent() {
               <p className="text-emerald-800 dark:text-emerald-200">
                 After payment, use access code{" "}
                 <strong className="font-mono tracking-widest">{plansData.membershipUnlock.code}</strong>{" "}
-                to run urrthang on Launchpad — not Orbit admin.
+                on this page to activate your plan.
               </p>
             ) : null}
           </CardContent>
