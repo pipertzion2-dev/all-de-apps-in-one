@@ -124,6 +124,13 @@ export async function POST(req: NextRequest) {
       testConnection: true,
     });
 
+    if (!easypeasy.ok) {
+      return NextResponse.json(
+        { error: easypeasy.error || "EasyPeasy is not ready" },
+        { status: 429 },
+      );
+    }
+
     const result = await runMarketingAutopilot({ skipOnSite: body.skipOnSite });
     return NextResponse.json({
       ...result,

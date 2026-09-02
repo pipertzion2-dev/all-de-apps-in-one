@@ -50,19 +50,38 @@ export type OrbitRunErrorHint = {
   actions: { label: string; href: string }[];
 };
 
-export function formatOrbitRunError(raw: string): OrbitRunErrorHint {
+export type OrbitRunErrorContext = {
+  tierId?: string | null;
+  model?: string | null;
+};
+
+function isStandardEasyPeasyTier(tierId: string | null | undefined): boolean {
+  const t = tierId?.trim().toLowerCase();
+  return !t || t === "standard";
+}
+
+export function formatOrbitRunError(
+  raw: string,
+  ctx: OrbitRunErrorContext = {},
+): OrbitRunErrorHint {
   const m = raw.toLowerCase();
 
-  if (
-    m.includes("429") ||
-    m.includes("allowed words") ||
-    m.includes("word limit") ||
-    (m.includes("limit") && m.includes("plan"))
-  ) {
+  if (isEasyPeasyWordLimitError(raw)) {
+    if (isStandardEasyPeasyTier(ctx.tierId)) {
+      return {
+        title: "EasyPeasy free-tier word limit reached",
+        detail:
+          "Standard tier (gemini-3-flash) is active — your EasyPeasy plan word allowance is used up. Upgrade at easy-peasy.ai/pricing, wait for the quota reset, or add GEMINI_API_KEY in Platform Secrets for free daily Orbit runs.",
+        actions: [
+          { label: "EasyPeasy pricing", href: "https://easy-peasy.ai/pricing" },
+          { label: "Platform Secrets (Gemini)", href: "/dashboard/settings/runtime-keys" },
+        ],
+      };
+    }
     return {
       title: "EasyPeasy word limit reached",
       detail:
-        "Premium models (gpt-5) burn through your EasyPeasy word quota fast. Switch to Standard tier (gemini-3-flash) or add GEMINI_API_KEY for free daily runs.",
+        "Premium or balanced models burn through your EasyPeasy word quota fast. Switch to Standard tier (gemini-3-flash) or add GEMINI_API_KEY for free daily runs.",
       actions: [
         { label: "EasyPeasy tier settings", href: "/dashboard/launchpad#orbit-easypeasy-setup" },
         { label: "Platform Secrets (Gemini)", href: "/dashboard/settings/runtime-keys" },

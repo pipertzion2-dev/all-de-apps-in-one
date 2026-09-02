@@ -19,7 +19,7 @@ export const EASYPEASY_TIERS: EasyPeasyTier[] = [
     id: "standard",
     name: "Standard",
     model: "gemini-3-flash",
-    fallbackModels: ["gpt-5-mini", "claude-haiku-4-5"],
+    fallbackModels: ["gemini-2.0-flash", "deepseek-v3"],
     tagline: "Fast daily autopilot — unlimited on Unlimited 50+ plans",
     minEasyPeasyPlan: "Free tier (1K words) · best on Unlimited 50 ($12/mo)",
     planPriceHint: "Uses standard-model quota",

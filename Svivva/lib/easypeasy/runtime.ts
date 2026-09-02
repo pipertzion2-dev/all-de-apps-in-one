@@ -20,8 +20,8 @@ export function getEasyPeasyTierId(): EasyPeasyTierId {
 }
 
 export function getEasyPeasyModel(): string {
+  // EASYPEASY_MODEL only — ORBIT_AI_MODEL is for direct OpenAI, not the EasyPeasy gateway.
   if (process.env.EASYPEASY_MODEL?.trim()) return process.env.EASYPEASY_MODEL.trim();
-  if (process.env.ORBIT_AI_MODEL?.trim()) return process.env.ORBIT_AI_MODEL.trim();
   return getEasyPeasyModelForTier(getEasyPeasyTierId());
 }
 
