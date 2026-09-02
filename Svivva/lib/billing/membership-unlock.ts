@@ -1,6 +1,6 @@
 import { getPublicMembershipAccessCode } from "@/lib/auth/membership-access";
 
-/** Shown via /api/billing/plans — not hardcoded in client source. */
+/** Cash App plan activation — separate from Orbit / urrthang (owner tools). */
 export function getMembershipUnlockInfo(): {
   instructions: string;
   code: string;
@@ -8,7 +8,7 @@ export function getMembershipUnlockInfo(): {
   const code = getPublicMembershipAccessCode();
   return {
     instructions:
-      "After you pay on Cash App, enter this access code to run urrthang only — not Orbit admin.",
+      "After you pay on Cash App, enter this access code on the Billing page to activate your Starter or Pro plan.",
     code,
   };
 }

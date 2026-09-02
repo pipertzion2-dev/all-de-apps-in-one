@@ -339,7 +339,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
   const hasCodeAccess = Boolean(meData?.isAdmin);
   const { isPro } = usePlan();
   const effectiveIsAdmin = userIsAdmin;
-  const effectiveIsPro = isPro || effectiveIsAdmin;
+  const effectiveIsPro = isPro || effectiveIsAdmin || Boolean(meData?.isMembershipAccess);
   const canEnterDashboard = isAuthenticated || hasCodeAccess;
 
   const baseMenuGroups = mode === "digital" ? digitalMenuGroups : physicalMenuGroups;

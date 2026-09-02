@@ -1,10 +1,7 @@
 import type { NextRequest } from "next/server";
-import { hasMembershipAccess } from "@/lib/auth/membership-access";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 
-/** urrthang / marketing autopilot — admin, membership code (after Cash App pay), or internal cron. */
+/** urrthang / marketing autopilot — owner (Orbit admin) or internal cron only. */
 export async function canRunUrrthang(req?: NextRequest): Promise<boolean> {
-  if (await isOrbitAdminAllowed(req)) return true;
-  if (await hasMembershipAccess()) return true;
-  return false;
+  return isOrbitAdminAllowed(req);
 }

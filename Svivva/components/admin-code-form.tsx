@@ -37,7 +37,7 @@ export function AdminCodeForm({
     scope === "membership" ? "/api/auth/membership-code" : "/api/auth/admin-code";
   const defaultSuccess =
     scope === "membership"
-      ? "Unlocked — you can run urrthang now."
+      ? "Plan activated — your subscription is now active."
       : "Owner admin unlocked.";
 
   const submit = async () => {

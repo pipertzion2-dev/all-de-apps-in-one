@@ -93,8 +93,8 @@ export default function SettingsPage() {
       {!me?.isAdmin && !me?.isMembershipAccess && (
         <AdminCodeForm
           scope="membership"
-          title="Subscriber access code"
-          description="After Cash App payment, enter your code to run urrthang on Launchpad. Orbit admin is owner-only."
+          title="Plan access code"
+          description="After Cash App payment, enter your code to activate Starter or Pro."
         />
       )}
       {me?.isMembershipAccess && !me?.isAdmin && (
@@ -102,10 +102,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <KeyRound className="w-5 h-5" />
-              urrthang subscriber
+              Plan active
             </CardTitle>
             <CardDescription>
-              Your access code unlocks urrthang only — not Orbit admin, credentials, or owner tools.
+              Your Cash App subscription is active. Orbit and urrthang are owner-only tools.
             </CardDescription>
           </CardHeader>
         </Card>
