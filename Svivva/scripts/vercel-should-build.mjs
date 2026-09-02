@@ -21,15 +21,33 @@ if (/\[skip vercel\]/i.test(msg)) {
   process.exit(0);
 }
 
+const current = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
+const previous = process.env.VERCEL_GIT_PREVIOUS_SHA?.trim();
+
+function diffQuiet(base, head) {
+  execSync(`git diff ${base} ${head} --quiet -- .`, { stdio: "ignore" });
+}
+
+if (current && previous && previous !== current) {
+  try {
+    diffQuiet(previous, current);
+    console.log(`Skip: no file changes under Svivva (${previous.slice(0, 7)}..${current.slice(0, 7)})`);
+    process.exit(0);
+  } catch {
+    console.log(`Build: Svivva changes detected (${previous.slice(0, 7)}..${current.slice(0, 7)})`);
+    process.exit(1);
+  }
+}
+
 try {
   execSync("git rev-parse HEAD^", { stdio: "ignore" });
 } catch {
-  console.log("Build: first commit or shallow clone");
+  console.log("Build: first commit or shallow clone (no previous SHA)");
   process.exit(1);
 }
 
 try {
-  execSync("git diff HEAD^ HEAD --quiet -- .", { stdio: "ignore" });
+  diffQuiet("HEAD^", "HEAD");
   console.log("Skip: no file changes under Svivva (Root Directory)");
   process.exit(0);
 } catch {

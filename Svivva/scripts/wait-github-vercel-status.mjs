@@ -45,6 +45,13 @@ while (Date.now() - started < timeoutMs) {
   const match = (data.statuses || []).find((s) => s.context === required);
   if (match) {
     console.log(`  ${required}: ${match.state} — ${match.description || ""}`);
+    const ignored = /ignored build step/i.test(match.description || "");
+    if (match.state === "success" && ignored) {
+      console.error(
+        `Vercel skipped the build (${match.description}). Production was not updated — set VERCEL_TOKEN or VERCEL_DEPLOY_HOOK, or fix ignoreCommand.`,
+      );
+      process.exit(1);
+    }
     if (match.state === "success") {
       console.log("Vercel production deploy confirmed via Git integration.");
       process.exit(0);
