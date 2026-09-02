@@ -57,6 +57,7 @@ import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { OrbitInterimPaymentsSetup } from "@/components/orbit-interim-payments-setup";
 import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
 import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
+import { OrbitAgentModeCard } from "@/components/orbit-agent-mode-card";
 import { MarketingChecklist } from "@/components/marketing-checklist";
 import { OrbitMarketingAutopilot } from "@/components/orbit-marketing-autopilot";
 import { OrbitSeoWeeklyRoutine } from "@/components/orbit-seo-weekly-routine";
@@ -4237,6 +4238,7 @@ export default function LaunchpadPage() {
             </div>
 
             {/* Services checklist — Google indexing (free) + paid marketing APIs */}
+            <OrbitAgentModeCard />
             <div id="orbit-easypeasy-setup">
               <OrbitEasyPeasySetup />
             </div>

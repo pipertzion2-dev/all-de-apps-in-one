@@ -1,8 +1,9 @@
 import type { AiProvider } from "@/lib/llm/providers";
+import { ORBIT_AGENT_PROVIDER_LABEL } from "@/lib/orbit/orbit-agent-mode";
 
 /** One AI option Orbit can suggest when the active provider fails. */
 export type OrbitAiAlternative = {
-  id: AiProvider | "easypeasy";
+  id: AiProvider | "easypeasy" | "cursor-agent";
   name: string;
   why: string;
   priceLabel: string;
@@ -13,8 +14,17 @@ export type OrbitAiAlternative = {
   priority: number;
 };
 
-/** Ordered alternatives — Gemini and direct OpenAI before EasyPeasy. */
+/** Ordered alternatives — Cloud Agent and templates need no keys; API keys optional. */
 export const ORBIT_AI_ALTERNATIVES: OrbitAiAlternative[] = [
+  {
+    id: "cursor-agent",
+    name: "Cursor Cloud Agent",
+    why: "Uses the AI model in this agent session — agent writes content and runs orbit.mjs ingest. No API key.",
+    priceLabel: "Included with Cursor",
+    setupHref: "/dashboard/launchpad#orbit-agent-mode",
+    envKey: "CURSOR_AGENT",
+    priority: -1,
+  },
   {
     id: "gemini",
     name: "Google Gemini",

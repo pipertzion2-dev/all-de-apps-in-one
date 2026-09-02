@@ -50,6 +50,7 @@ import { stepsForTask } from "@/lib/orbit/orbit-setup-providers";
 import { isAutomatedSuccess, partitionAutopilotTasks } from "@/lib/orbit/marketing-task-buckets";
 import type { MarketingIndexingSummary } from "@/lib/orbit/marketing-autopilot-types";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
+import { OrbitAgentModeCard } from "@/components/orbit-agent-mode-card";
 import { OrbitSubscribeQuickStrip } from "@/components/orbit-subscribe-quick-strip";
 import { GscOAuthClientSavePanel } from "@/components/gsc-oauth-client-save-panel";
 import { gscOAuthConnectUrl } from "@/lib/gsc-oauth-connect-url";
@@ -845,6 +846,8 @@ export function OrbitOneClickLaunch({
             </>
           )}
         </div>
+
+        <OrbitAgentModeCard />
 
         {/* urrthang — owner Orbit admin only (Launchpad is admin-gated) */}
         <button

@@ -31,6 +31,7 @@
     "orbit:status": "node scripts/orbit.mjs status",
     "orbit:health": "node scripts/orbit.mjs health --resubmit",
     "orbit:run": "node scripts/orbit.mjs run",
+    "orbit:ingest": "node scripts/orbit.mjs ingest",
     "orbit:research": "node scripts/orbit.mjs research",
     "marketing:execute": "node scripts/marketing-execute.mjs",
     "domain:cutover": "node scripts/domain-cutover.mjs"

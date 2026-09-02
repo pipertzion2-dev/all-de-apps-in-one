@@ -1,0 +1,30 @@
+{
+  "blogPosts": [
+    {
+      "title": "Orbit Marketing Without Any AI API Key",
+      "slug": "orbit-marketing-without-ai-api-key",
+      "category": "guides",
+      "tags": ["orbit", "seo", "no api key", "cursor agent"],
+      "metaDescription": "Run Orbit SEO and launch copy without EasyPeasy, OpenAI, or Gemini. Built-in templates plus Cursor Cloud Agent ingest — zero new API keys.",
+      "content": "You do not need another AI API key to run Orbit.\n\n## Three ways Orbit writes content\n\n1. **Built-in templates** — SEO pages, social packs, and outreach copy generate instantly with zero configuration.\n2. **Cursor Cloud Agent** — the AI model in your agent session writes researched articles and ingests them straight into your site.\n3. **Optional API keys** — Gemini or OpenAI only if you want richer copy on the live button press.\n\n## When EasyPeasy stops working\n\nWord limits and connection errors are common on gateway accounts. Orbit no longer blocks your run. It falls back to templates automatically, or you can ask a Cloud Agent to write and publish content using `/api/orbit/ingest-content`.\n\n## How the agent path works\n\nFrom this repo:\n\n```bash\ncd Svivva\nnode scripts/orbit.mjs ingest scripts/orbit-agent-content.json\n```\n\nThe agent uses its own model to draft posts, saves JSON, and the CLI publishes plus pings IndexNow. No keys pasted in Vercel.\n\n## What still runs without AI\n\nGoogle Search Console indexing, IndexNow, sitemap submission, Stripe checks, and template-based page generation all work with no AI billing at all.\n\n## Start now\n\nPress **urrthang** for templates and indexing. For premium copy, run a Cloud Agent task to ingest fresh blog and SEO pages — like this article."
+    }
+  ],
+  "seoPages": [
+    {
+      "keyword": "free seo automation no api key",
+      "title": "Free SEO Automation Without an API Key | ZZAI Orbit",
+      "headline": "SEO automation that works with zero AI keys",
+      "subheadline": "Templates, indexing, and Cloud Agent ingest — not another SaaS bill.",
+      "metaDescription": "Automate SEO landing pages, Google indexing, and launch copy without OpenAI, Gemini, or EasyPeasy keys. Orbit templates + Cursor Agent mode.",
+      "content": "<h1>Free SEO automation without an API key</h1><p>Most SEO stacks assume you already pay for an LLM. Orbit does not.</p><h2>Built-in templates</h2><p>Orbit ships hundreds of SEO page patterns, comparison layouts, and social launch packs. One button fills gaps and submits URLs to Google and Bing.</p><h2>Cloud Agent writes the premium copy</h2><p>When you want human-quality articles, a Cursor Cloud Agent drafts content with its session model and ingests it via API — no key in Vercel.</p><h2>Indexing always on</h2><p>Search Console, Indexing API, and IndexNow run regardless of AI status.</p><p><a href=\"/dashboard/launchpad\">Open Orbit Launchpad</a></p>"
+    },
+    {
+      "keyword": "cursor cloud agent seo content",
+      "title": "Cursor Cloud Agent SEO Content | ZZAI",
+      "headline": "Let your Cloud Agent publish SEO content",
+      "subheadline": "The AI in your agent session becomes your Orbit copywriter.",
+      "metaDescription": "Use Cursor Cloud Agent to write and publish SEO pages and blog posts to ZZAI via Orbit ingest — no external AI API key required.",
+      "content": "<h1>Cursor Cloud Agent for SEO content</h1><p>Your Cloud Agent already has a strong language model. Orbit exposes <code>/api/orbit/ingest-content</code> so the agent can publish directly.</p><h2>Workflow</h2><ol><li>Agent researches keywords and drafts markdown.</li><li>Agent saves JSON and runs <code>node scripts/orbit.mjs ingest</code>.</li><li>Orbit upserts pages and notifies search engines.</li></ol><h2>No EasyPeasy required</h2><p>Skip broken gateways. The agent is the model.</p><p><a href=\"/tools\">Browse free AI tools</a></p>"
+    }
+  ]
+}
