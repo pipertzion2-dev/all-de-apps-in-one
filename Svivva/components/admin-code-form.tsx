@@ -33,8 +33,7 @@ export function AdminCodeForm({
   const [loading, setLoading] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
 
-  const endpoint =
-    scope === "membership" ? "/api/auth/membership-code" : "/api/auth/admin-code";
+  const endpoint = scope === "membership" ? "/api/auth/membership-code" : "/api/auth/admin-code";
   const defaultSuccess =
     scope === "membership"
       ? "Plan activated — your subscription is now active."
@@ -99,7 +98,10 @@ export function AdminCodeForm({
       />
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {unlocked ? (
-        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300" data-testid="access-code-unlocked">
+        <p
+          className="text-sm font-medium text-emerald-700 dark:text-emerald-300"
+          data-testid="access-code-unlocked"
+        >
           {successMessage ?? defaultSuccess}
         </p>
       ) : null}

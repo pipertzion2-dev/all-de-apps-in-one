@@ -23,10 +23,10 @@ describe("orbit-error-messages", () => {
   });
 
   it("formats standard-tier word limit without blaming premium models", () => {
-    const hint = formatOrbitRunError(
-      "429 You reached the limit of allowed words in your plan.",
-      { tierId: "standard", model: "gemini-3-flash" },
-    );
+    const hint = formatOrbitRunError("429 You reached the limit of allowed words in your plan.", {
+      tierId: "standard",
+      model: "gemini-3-flash",
+    });
     expect(hint.title).toContain("free-tier");
     expect(hint.detail).not.toContain("gpt-5");
     expect(hint.detail).toContain("Standard tier");

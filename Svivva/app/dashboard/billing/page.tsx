@@ -91,13 +91,15 @@ function BillingPageContent() {
         <Card className="border border-[#00D632]/40 bg-[#00D632]/8">
           <CardContent className="pt-4 text-sm text-foreground space-y-2">
             <p>
-              <strong>Cash App is how you subscribe.</strong> Pick a plan below — Cash App opens with
-              the right amount. No card or Stripe required.
+              <strong>Cash App is how you subscribe.</strong> Pick a plan below — Cash App opens
+              with the right amount. No card or Stripe required.
             </p>
             {plansData?.membershipUnlock?.code ? (
               <p className="text-emerald-800 dark:text-emerald-200">
                 After payment, use access code{" "}
-                <strong className="font-mono tracking-widest">{plansData.membershipUnlock.code}</strong>{" "}
+                <strong className="font-mono tracking-widest">
+                  {plansData.membershipUnlock.code}
+                </strong>{" "}
                 on this page to activate your plan.
               </p>
             ) : null}

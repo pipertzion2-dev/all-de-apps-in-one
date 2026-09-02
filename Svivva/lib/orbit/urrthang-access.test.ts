@@ -5,10 +5,7 @@ import { canRunUrrthang } from "./urrthang-access";
 
 describe("canRunUrrthang", () => {
   it("delegates to Orbit admin only", async () => {
-    const adminSpy = vi.spyOn(
-      await import("@/lib/orbit/admin-access"),
-      "isOrbitAdminAllowed",
-    );
+    const adminSpy = vi.spyOn(await import("@/lib/orbit/admin-access"), "isOrbitAdminAllowed");
     adminSpy.mockResolvedValueOnce(true);
     await expect(canRunUrrthang()).resolves.toBe(true);
     adminSpy.mockRestore();
