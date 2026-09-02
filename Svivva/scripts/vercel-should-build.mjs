@@ -31,7 +31,9 @@ function diffQuiet(base, head) {
 if (current && previous && previous !== current) {
   try {
     diffQuiet(previous, current);
-    console.log(`Skip: no file changes under Svivva (${previous.slice(0, 7)}..${current.slice(0, 7)})`);
+    console.log(
+      `Skip: no file changes under Svivva (${previous.slice(0, 7)}..${current.slice(0, 7)})`,
+    );
     process.exit(0);
   } catch {
     console.log(`Build: Svivva changes detected (${previous.slice(0, 7)}..${current.slice(0, 7)})`);
