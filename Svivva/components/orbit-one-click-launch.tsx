@@ -586,11 +586,6 @@ export function OrbitOneClickLaunch({
       }
 
       let { res: ensureRes, json: ensureJson } = await ensureEasyPeasy("standard", true);
-      const wordLimit =
-        !ensureJson.ok && /allowed words|word limit|429/i.test(String(ensureJson.error || ""));
-      if (wordLimit) {
-        ({ res: ensureRes, json: ensureJson } = await ensureEasyPeasy("standard", true));
-      }
       if (!ensureRes.ok || !ensureJson.ok) {
         throw new Error(
           ensureJson.error ||
@@ -899,7 +894,10 @@ export function OrbitOneClickLaunch({
         {error &&
           !running &&
           (() => {
-            const formatted = formatOrbitRunError(error);
+            const formatted = formatOrbitRunError(error, {
+              tierId: easypeasyLive.tierId,
+              model: easypeasyLive.model,
+            });
             return (
               <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-3 space-y-2">
                 <div className="flex items-start gap-2 text-xs text-red-200">

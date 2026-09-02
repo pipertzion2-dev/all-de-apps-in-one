@@ -6,6 +6,7 @@ import {
   getEasyPeasyModel,
   getEasyPeasyModelFallbackChain,
 } from "@/lib/easypeasy/runtime";
+import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 import {
   getOrbitDefaultModel,
   getOrbitModelChain,
@@ -25,21 +26,17 @@ export {
 };
 
 function isRetryableModelError(e: unknown): boolean {
-  const msg = String(e instanceof Error ? e.message : e).toLowerCase();
-  if (
-    msg.includes("429") ||
-    msg.includes("rate limit") ||
-    msg.includes("allowed words") ||
-    (msg.includes("limit") && msg.includes("plan"))
-  ) {
-    return true;
-  }
+  const msg = String(e instanceof Error ? e.message : e);
+  // Same EasyPeasy account quota — switching models (especially to premium) cannot fix this.
+  if (isEasyPeasyWordLimitError(msg)) return false;
+  const lower = msg.toLowerCase();
+  if (lower.includes("rate limit")) return true;
   return (
-    msg.includes("model") &&
-    (msg.includes("not found") ||
-      msg.includes("does not exist") ||
-      msg.includes("invalid") ||
-      msg.includes("unsupported"))
+    lower.includes("model") &&
+    (lower.includes("not found") ||
+      lower.includes("does not exist") ||
+      lower.includes("invalid") ||
+      lower.includes("unsupported"))
   );
 }
 
@@ -48,9 +45,9 @@ function isRetryableModelError(e: unknown): boolean {
  * override with ORBIT_AI_MODEL in Vercel / Platform Secrets.
  */
 export function getMarketingModel(): string {
-  const override = process.env.ORBIT_AI_MODEL?.trim() || process.env.EASYPEASY_MODEL?.trim();
-  if (override) return override;
   if (isEasyPeasyConfiguredFromEnv()) return getEasyPeasyModel();
+  const override = process.env.ORBIT_AI_MODEL?.trim();
+  if (override) return override;
   return getOrbitDefaultModel();
 }
 

@@ -22,6 +22,16 @@ describe("orbit-error-messages", () => {
     expect(hint.actions.length).toBeGreaterThan(0);
   });
 
+  it("formats standard-tier word limit without blaming premium models", () => {
+    const hint = formatOrbitRunError("429 You reached the limit of allowed words in your plan.", {
+      tierId: "standard",
+      model: "gemini-3-flash",
+    });
+    expect(hint.title).toContain("free-tier");
+    expect(hint.detail).not.toContain("gpt-5");
+    expect(hint.detail).toContain("Standard tier");
+  });
+
   it("shortens indexing API quota prose", () => {
     expect(formatIndexingApiError("Quota exceeded for Publish requests per day")).toContain(
       "daily quota",
