@@ -41,7 +41,7 @@ export function GscConnectionTroubleshooter({
   const steps = [
     {
       id: "admin",
-      label: "Enter admin passcode (272727)",
+      label: "Enter admin passcode",
       done: adminUnlocked,
       detail: "Required before Google sign-in. Use the unlock form at the top of this page.",
     },
