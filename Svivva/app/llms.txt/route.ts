@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
+import { getHubFeaturePagesForHub } from "@/lib/tools/catalogs/hub-feature-pages";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
@@ -76,6 +77,23 @@ export async function GET() {
     `- [Sketch Hash Stamp](${base}/tools/sketch-hash-stamp): SHA-256 in the browser. Poor Man Protection seals and court-packs.`,
   );
   lines.push("");
+
+  const cyberFeatures = getHubFeaturePagesForHub("cyber-security-mini-apps").slice(0, 24);
+  const aiFeatures = getHubFeaturePagesForHub("ai-tools-hub").slice(0, 24);
+  if (cyberFeatures.length) {
+    lines.push("## Cyber security feature pages (keyword targets)");
+    for (const p of cyberFeatures) {
+      lines.push(`- [${p.h1 || p.title}](${base}${p.path}): ${p.keyword}`);
+    }
+    lines.push("");
+  }
+  if (aiFeatures.length) {
+    lines.push("## AI tools feature pages (keyword targets)");
+    for (const p of aiFeatures) {
+      lines.push(`- [${p.h1 || p.title}](${base}${p.path}): ${p.keyword}`);
+    }
+    lines.push("");
+  }
 
   if (posts.length) {
     lines.push("## Guides & articles");
