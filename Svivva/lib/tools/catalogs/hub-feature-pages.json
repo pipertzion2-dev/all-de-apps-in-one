@@ -124,12 +124,7 @@
     "metaDescription": "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.",
     "description": "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.",
     "keyword": "ip lookup free",
-    "keywords": [
-      "IP lookup free",
-      "IP address checker",
-      "IP geolocation online",
-      "who is this IP"
-    ]
+    "keywords": ["IP lookup free", "IP address checker", "IP geolocation online", "who is this IP"]
   },
   {
     "slug": "jwt-decoder",
@@ -140,12 +135,7 @@
     "metaDescription": "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.",
     "description": "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.",
     "keyword": "jwt decoder online",
-    "keywords": [
-      "JWT decoder online",
-      "decode JWT free",
-      "JWT parser",
-      "JSON web token inspector"
-    ]
+    "keywords": ["JWT decoder online", "decode JWT free", "JWT parser", "JSON web token inspector"]
   },
   {
     "slug": "base64-hash-toolkit",
@@ -220,11 +210,7 @@
     "metaDescription": "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.",
     "description": "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.",
     "keyword": "sitemap parser online",
-    "keywords": [
-      "sitemap parser online",
-      "extract URLs from sitemap",
-      "sitemap.xml tool free"
-    ]
+    "keywords": ["sitemap parser online", "extract URLs from sitemap", "sitemap.xml tool free"]
   },
   {
     "slug": "email-breach-checker",
@@ -283,12 +269,7 @@
     "metaDescription": "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).",
     "description": "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).",
     "keyword": "api key checker",
-    "keywords": [
-      "API key checker",
-      "detect AWS key",
-      "Stripe key format",
-      "token type identifier"
-    ]
+    "keywords": ["API key checker", "detect AWS key", "Stripe key format", "token type identifier"]
   },
   {
     "slug": "tls-version-checker",
@@ -299,12 +280,7 @@
     "metaDescription": "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.",
     "description": "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.",
     "keyword": "tls version check",
-    "keywords": [
-      "TLS version check",
-      "disable TLS 1.0",
-      "SSL TLS best practices",
-      "TLS 1.2 1.3"
-    ]
+    "keywords": ["TLS version check", "disable TLS 1.0", "SSL TLS best practices", "TLS 1.2 1.3"]
   },
   {
     "slug": "cert-transparency",
@@ -315,12 +291,7 @@
     "metaDescription": "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.",
     "description": "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.",
     "keyword": "certificate transparency",
-    "keywords": [
-      "certificate transparency",
-      "crt.sh viewer",
-      "SSL cert history",
-      "CT log lookup"
-    ]
+    "keywords": ["certificate transparency", "crt.sh viewer", "SSL cert history", "CT log lookup"]
   },
   {
     "slug": "cvss-calculator",
@@ -376,11 +347,7 @@
     "metaDescription": "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.",
     "description": "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.",
     "keyword": "xss payload generator",
-    "keywords": [
-      "XSS payload generator",
-      "cross site scripting test",
-      "XSS scanner helper"
-    ]
+    "keywords": ["XSS payload generator", "cross site scripting test", "XSS scanner helper"]
   },
   {
     "slug": "open-redirect-tester",
@@ -391,11 +358,7 @@
     "metaDescription": "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).",
     "description": "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).",
     "keyword": "open redirect checker",
-    "keywords": [
-      "open redirect checker",
-      "redirect vulnerability test",
-      "URL redirect analyzer"
-    ]
+    "keywords": ["open redirect checker", "redirect vulnerability test", "URL redirect analyzer"]
   },
   {
     "slug": "csp-evaluator",
@@ -406,11 +369,7 @@
     "metaDescription": "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.",
     "description": "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.",
     "keyword": "csp checker",
-    "keywords": [
-      "CSP checker",
-      "Content Security Policy analyzer",
-      "CSP evaluator online"
-    ]
+    "keywords": ["CSP checker", "Content Security Policy analyzer", "CSP evaluator online"]
   },
   {
     "slug": "clickjacking-tester",
@@ -421,11 +380,7 @@
     "metaDescription": "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.",
     "description": "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.",
     "keyword": "clickjacking test",
-    "keywords": [
-      "clickjacking test",
-      "X-Frame-Options checker",
-      "frame-ancestors CSP test"
-    ]
+    "keywords": ["clickjacking test", "X-Frame-Options checker", "frame-ancestors CSP test"]
   },
   {
     "slug": "ssrf-payload-builder",
@@ -436,11 +391,7 @@
     "metaDescription": "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.",
     "description": "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.",
     "keyword": "ssrf payload",
-    "keywords": [
-      "SSRF payload",
-      "SSRF testing reference",
-      "internal URL probe security test"
-    ]
+    "keywords": ["SSRF payload", "SSRF testing reference", "internal URL probe security test"]
   },
   {
     "slug": "prototype-pollution-checker",
@@ -451,11 +402,7 @@
     "metaDescription": "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.",
     "description": "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.",
     "keyword": "prototype pollution scanner",
-    "keywords": [
-      "prototype pollution scanner",
-      "JavaScript merge risk",
-      "JSON pollution check"
-    ]
+    "keywords": ["prototype pollution scanner", "JavaScript merge risk", "JSON pollution check"]
   },
   {
     "slug": "dependency-vuln-lookup",
@@ -497,11 +444,7 @@
     "metaDescription": "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.",
     "description": "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.",
     "keyword": "zero trust assessment",
-    "keywords": [
-      "zero trust assessment",
-      "zero trust checklist free",
-      "ZTNA readiness score"
-    ]
+    "keywords": ["zero trust assessment", "zero trust checklist free", "ZTNA readiness score"]
   },
   {
     "slug": "soc2-checklist",
@@ -512,11 +455,7 @@
     "metaDescription": "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.",
     "description": "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.",
     "keyword": "soc 2 checklist free",
-    "keywords": [
-      "SOC 2 checklist free",
-      "SOC2 readiness",
-      "trust services criteria checklist"
-    ]
+    "keywords": ["SOC 2 checklist free", "SOC2 readiness", "trust services criteria checklist"]
   },
   {
     "slug": "ransomware-risk",
@@ -572,11 +511,7 @@
     "metaDescription": "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.",
     "description": "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.",
     "keyword": "bug bounty scope parser",
-    "keywords": [
-      "bug bounty scope parser",
-      "HackerOne scope tool",
-      "bug bounty in scope checker"
-    ]
+    "keywords": ["bug bounty scope parser", "HackerOne scope tool", "bug bounty in scope checker"]
   },
   {
     "slug": "security-awareness-quiz",
@@ -602,11 +537,7 @@
     "metaDescription": "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.",
     "description": "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.",
     "keyword": "penetration testing roadmap",
-    "keywords": [
-      "penetration testing roadmap",
-      "pentest plan template free",
-      "security test scope"
-    ]
+    "keywords": ["penetration testing roadmap", "pentest plan template free", "security test scope"]
   },
   {
     "slug": "vendor-risk-scorecard",
@@ -632,11 +563,7 @@
     "metaDescription": "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for ",
     "description": "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for depth.",
     "keyword": "is my website hackable? security check",
-    "keywords": [
-      "is my website hackable? security check",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["is my website hackable? security check", "free security tool", "online checker"],
     "relatedToolSlug": "url-safety-scanner"
   },
   {
@@ -648,11 +575,7 @@
     "metaDescription": "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt f",
     "description": "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt for full coverage.",
     "keyword": "website security scan",
-    "keywords": [
-      "website security scan",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["website security scan", "free security tool", "online checker"],
     "relatedToolSlug": "security-headers-grader"
   },
   {
@@ -664,11 +587,7 @@
     "metaDescription": "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Py",
     "description": "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Pyracrypt.",
     "keyword": "api exposure checker",
-    "keywords": [
-      "api exposure checker",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["api exposure checker", "free security tool", "online checker"],
     "relatedToolSlug": "cors-checker"
   },
   {
@@ -680,11 +599,7 @@
     "metaDescription": "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.",
     "description": "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.",
     "keyword": "ssl certificate checker",
-    "keywords": [
-      "ssl certificate checker",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["ssl certificate checker", "free security tool", "online checker"],
     "relatedToolSlug": "ssl-inspector"
   },
   {
@@ -696,11 +611,7 @@
     "metaDescription": "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracr",
     "description": "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracrypt.",
     "keyword": "security headers test",
-    "keywords": [
-      "security headers test",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["security headers test", "free security tool", "online checker"],
     "relatedToolSlug": "security-headers-grader"
   },
   {
@@ -712,11 +623,7 @@
     "metaDescription": "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our se",
     "description": "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our servers.",
     "keyword": "password strength test",
-    "keywords": [
-      "password strength test",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["password strength test", "free security tool", "online checker"],
     "relatedToolSlug": "password-strength"
   },
   {
@@ -728,11 +635,7 @@
     "metaDescription": "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.",
     "description": "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.",
     "keyword": "dns security check",
-    "keywords": [
-      "dns security check",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["dns security check", "free security tool", "online checker"],
     "relatedToolSlug": "dns-record-viewer"
   },
   {
@@ -744,11 +647,7 @@
     "metaDescription": "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.",
     "description": "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.",
     "keyword": "email breach check",
-    "keywords": [
-      "email breach check",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["email breach check", "free security tool", "online checker"],
     "relatedToolSlug": "email-breach-checker"
   },
   {
@@ -760,11 +659,7 @@
     "metaDescription": "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.",
     "description": "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.",
     "keyword": "owasp top 10 checklist 2025",
-    "keywords": [
-      "owasp top 10 checklist 2025",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["owasp top 10 checklist 2025", "free security tool", "online checker"],
     "relatedToolSlug": "owasp-self-assessment"
   },
   {
@@ -776,11 +671,7 @@
     "metaDescription": "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.",
     "description": "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.",
     "keyword": "sql injection prevention",
-    "keywords": [
-      "sql injection prevention",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["sql injection prevention", "free security tool", "online checker"],
     "relatedToolSlug": "sqli-payload-library"
   },
   {
@@ -792,11 +683,7 @@
     "metaDescription": "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracry",
     "description": "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracrypt.",
     "keyword": "xss test payload generator",
-    "keywords": [
-      "xss test payload generator",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["xss test payload generator", "free security tool", "online checker"],
     "relatedToolSlug": "xss-payload-generator"
   },
   {
@@ -824,11 +711,7 @@
     "metaDescription": "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.",
     "description": "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.",
     "keyword": "soc 2 readiness checklist",
-    "keywords": [
-      "soc 2 readiness checklist",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["soc 2 readiness checklist", "free security tool", "online checker"],
     "relatedToolSlug": "soc2-checklist"
   },
   {
@@ -840,11 +723,7 @@
     "metaDescription": "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.",
     "description": "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.",
     "keyword": "nist cybersecurity framework scorecard",
-    "keywords": [
-      "nist cybersecurity framework scorecard",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["nist cybersecurity framework scorecard", "free security tool", "online checker"],
     "relatedToolSlug": "nist-csf-scorecard"
   },
   {
@@ -872,11 +751,7 @@
     "metaDescription": "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.",
     "description": "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.",
     "keyword": "subdomain finder",
-    "keywords": [
-      "subdomain finder",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["subdomain finder", "free security tool", "online checker"],
     "relatedToolSlug": "subdomain-finder-lite"
   },
   {
@@ -888,11 +763,7 @@
     "metaDescription": "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.",
     "description": "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.",
     "keyword": "open port scanner",
-    "keywords": [
-      "open port scanner",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["open port scanner", "free security tool", "online checker"],
     "relatedToolSlug": "open-port-checker"
   },
   {
@@ -904,11 +775,7 @@
     "metaDescription": "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.",
     "description": "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.",
     "keyword": "github secret scanner",
-    "keywords": [
-      "github secret scanner",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["github secret scanner", "free security tool", "online checker"],
     "relatedToolSlug": "github-secret-scanner"
   },
   {
@@ -920,11 +787,7 @@
     "metaDescription": "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.",
     "description": "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.",
     "keyword": "cookie security checker",
-    "keywords": [
-      "cookie security checker",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["cookie security checker", "free security tool", "online checker"],
     "relatedToolSlug": "cookie-analyzer"
   },
   {
@@ -936,11 +799,7 @@
     "metaDescription": "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.",
     "description": "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.",
     "keyword": "csp checker",
-    "keywords": [
-      "csp checker",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["csp checker", "free security tool", "online checker"],
     "relatedToolSlug": "csp-evaluator"
   },
   {
@@ -952,11 +811,7 @@
     "metaDescription": "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.",
     "description": "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.",
     "keyword": "clickjacking test",
-    "keywords": [
-      "clickjacking test",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["clickjacking test", "free security tool", "online checker"],
     "relatedToolSlug": "clickjacking-tester"
   },
   {
@@ -968,11 +823,7 @@
     "metaDescription": "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.",
     "description": "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.",
     "keyword": "ip address reputation check",
-    "keywords": [
-      "ip address reputation check",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["ip address reputation check", "free security tool", "online checker"],
     "relatedToolSlug": "ip-reputation"
   },
   {
@@ -984,11 +835,7 @@
     "metaDescription": "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.",
     "description": "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.",
     "keyword": "ai cybersecurity tool",
-    "keywords": [
-      "ai cybersecurity tool",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["ai cybersecurity tool", "free security tool", "online checker"],
     "relatedToolSlug": "tls-version-checker"
   },
   {
@@ -1000,11 +847,7 @@
     "metaDescription": "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.",
     "description": "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.",
     "keyword": "phishing email checker",
-    "keywords": [
-      "phishing email checker",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["phishing email checker", "free security tool", "online checker"],
     "relatedToolSlug": "http-headers-analyzer"
   },
   {
@@ -1016,11 +859,7 @@
     "metaDescription": "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.",
     "description": "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.",
     "keyword": "incident response plan generator",
-    "keywords": [
-      "incident response plan generator",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["incident response plan generator", "free security tool", "online checker"],
     "relatedToolSlug": "ir-playbook-builder"
   },
   {
@@ -1032,11 +871,7 @@
     "metaDescription": "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.",
     "description": "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.",
     "keyword": "two",
-    "keywords": [
-      "two",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["two", "free security tool", "online checker"],
     "relatedToolSlug": "zero-trust-checker"
   },
   {
@@ -1048,11 +883,7 @@
     "metaDescription": "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.",
     "description": "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.",
     "keyword": "secure password generator",
-    "keywords": [
-      "secure password generator",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["secure password generator", "free security tool", "online checker"],
     "relatedToolSlug": "password-strength"
   },
   {
@@ -1064,11 +895,7 @@
     "metaDescription": "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.",
     "description": "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.",
     "keyword": "threat intel self",
-    "keywords": [
-      "threat intel self",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["threat intel self", "free security tool", "online checker"],
     "relatedToolSlug": "owasp-self-assessment"
   },
   {
@@ -1080,11 +907,7 @@
     "metaDescription": "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.",
     "description": "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.",
     "keyword": "cve lookup tool",
-    "keywords": [
-      "cve lookup tool",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["cve lookup tool", "free security tool", "online checker"],
     "relatedToolSlug": "dependency-vuln-lookup"
   },
   {
@@ -1096,11 +919,7 @@
     "metaDescription": "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.",
     "description": "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.",
     "keyword": "npm vulnerability scanner",
-    "keywords": [
-      "npm vulnerability scanner",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["npm vulnerability scanner", "free security tool", "online checker"],
     "relatedToolSlug": "dependency-vuln-lookup"
   },
   {
@@ -1112,11 +931,7 @@
     "metaDescription": "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.",
     "description": "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.",
     "keyword": "prototype pollution scanner",
-    "keywords": [
-      "prototype pollution scanner",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["prototype pollution scanner", "free security tool", "online checker"],
     "relatedToolSlug": "prototype-pollution-checker"
   },
   {
@@ -1128,11 +943,7 @@
     "metaDescription": "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.",
     "description": "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.",
     "keyword": "attack simulation tool",
-    "keywords": [
-      "attack simulation tool",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["attack simulation tool", "free security tool", "online checker"],
     "relatedToolSlug": "url-safety-scanner"
   },
   {
@@ -1144,11 +955,7 @@
     "metaDescription": "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.",
     "description": "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.",
     "keyword": "threat report ioc extractor + ai tips",
-    "keywords": [
-      "threat report ioc extractor + ai tips",
-      "free security tool",
-      "online checker"
-    ],
+    "keywords": ["threat report ioc extractor + ai tips", "free security tool", "online checker"],
     "relatedToolSlug": "github-secret-scanner"
   },
   {
@@ -1163,12 +970,7 @@
     "tagline": "Chat with advanced AI instantly — no setup required.",
     "category": "Content & Writing",
     "keyword": "ai chat online",
-    "keywords": [
-      "ai chat online",
-      "free ai chat",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["ai chat online", "free ai chat", "content & writing", "no signup"]
   },
   {
     "slug": "text-summarizer",
@@ -1182,12 +984,7 @@
     "tagline": "Paste any text. Get a crisp summary in seconds.",
     "category": "Content & Writing",
     "keyword": "text summarizer online",
-    "keywords": [
-      "text summarizer online",
-      "free text summarizer",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["text summarizer online", "free text summarizer", "content & writing", "no signup"]
   },
   {
     "slug": "ai-translator",
@@ -1201,12 +998,7 @@
     "tagline": "Translate any text into 50+ languages instantly.",
     "category": "Language Tools",
     "keyword": "ai translator online",
-    "keywords": [
-      "ai translator online",
-      "free ai translator",
-      "language tools",
-      "no signup"
-    ]
+    "keywords": ["ai translator online", "free ai translator", "language tools", "no signup"]
   },
   {
     "slug": "code-explainer",
@@ -1220,12 +1012,7 @@
     "tagline": "Paste any code snippet — get a plain-English explanation.",
     "category": "Code Tools",
     "keyword": "code explainer online",
-    "keywords": [
-      "code explainer online",
-      "free code explainer",
-      "code tools",
-      "no signup"
-    ]
+    "keywords": ["code explainer online", "free code explainer", "code tools", "no signup"]
   },
   {
     "slug": "grammar-checker",
@@ -1239,12 +1026,7 @@
     "tagline": "Write with confidence — catch every grammar mistake.",
     "category": "Content & Writing",
     "keyword": "grammar checker online",
-    "keywords": [
-      "grammar checker online",
-      "free grammar checker",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["grammar checker online", "free grammar checker", "content & writing", "no signup"]
   },
   {
     "slug": "sentiment-analyzer",
@@ -1258,12 +1040,7 @@
     "tagline": "Understand the emotion behind any text in seconds.",
     "category": "Data Tools",
     "keyword": "sentiment analyzer online",
-    "keywords": [
-      "sentiment analyzer online",
-      "free sentiment analyzer",
-      "data tools",
-      "no signup"
-    ]
+    "keywords": ["sentiment analyzer online", "free sentiment analyzer", "data tools", "no signup"]
   },
   {
     "slug": "keyword-extractor",
@@ -1296,12 +1073,7 @@
     "tagline": "Rewrite anything in a different tone — professional, casual, bold.",
     "category": "Content & Writing",
     "keyword": "tone rewriter online",
-    "keywords": [
-      "tone rewriter online",
-      "free tone rewriter",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["tone rewriter online", "free tone rewriter", "content & writing", "no signup"]
   },
   {
     "slug": "image-generator",
@@ -1315,12 +1087,7 @@
     "tagline": "Describe an image. See it come to life.",
     "category": "Content & Writing",
     "keyword": "image generator online",
-    "keywords": [
-      "image generator online",
-      "free image generator",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["image generator online", "free image generator", "content & writing", "no signup"]
   },
   {
     "slug": "quiz-generator",
@@ -1334,12 +1101,7 @@
     "tagline": "Turn any topic into a ready-to-use quiz instantly.",
     "category": "Content & Writing",
     "keyword": "quiz generator online",
-    "keywords": [
-      "quiz generator online",
-      "free quiz generator",
-      "content & writing",
-      "no signup"
-    ]
+    "keywords": ["quiz generator online", "free quiz generator", "content & writing", "no signup"]
   },
   {
     "slug": "prompt-coverage-checker",
@@ -1391,12 +1153,7 @@
     "tagline": "Lint your AI prompts for clarity, ambiguity, and best practices.",
     "category": "AI Prompt Tools",
     "keyword": "ai prompt linter online",
-    "keywords": [
-      "ai prompt linter online",
-      "free ai prompt linter",
-      "ai prompt tools",
-      "no signup"
-    ]
+    "keywords": ["ai prompt linter online", "free ai prompt linter", "ai prompt tools", "no signup"]
   },
   {
     "slug": "api-latency-calculator",
@@ -1505,12 +1262,7 @@
     "tagline": "Fix broken JSON from AI outputs automatically.",
     "category": "Developer Tools",
     "keyword": "json repair tool online",
-    "keywords": [
-      "json repair tool online",
-      "free json repair tool",
-      "developer tools",
-      "no signup"
-    ]
+    "keywords": ["json repair tool online", "free json repair tool", "developer tools", "no signup"]
   },
   {
     "slug": "prompt-consistency-checker",
@@ -1676,12 +1428,7 @@
     "tagline": "Generate bills of materials from a single description.",
     "category": "Hardware & BOM",
     "keyword": "ai bom generator online",
-    "keywords": [
-      "ai bom generator online",
-      "free ai bom generator",
-      "hardware & bom",
-      "no signup"
-    ]
+    "keywords": ["ai bom generator online", "free ai bom generator", "hardware & bom", "no signup"]
   },
   {
     "slug": "bom-material-sourcing",
@@ -2284,12 +2031,7 @@
     "tagline": "20 research thinking tools — compare, hypothesize, and map assumptions in seconds.",
     "category": "Data Tools",
     "keyword": "hypothesis labs online",
-    "keywords": [
-      "hypothesis labs online",
-      "free hypothesis labs",
-      "data tools",
-      "no signup"
-    ]
+    "keywords": ["hypothesis labs online", "free hypothesis labs", "data tools", "no signup"]
   },
   {
     "slug": "chord-creator",
@@ -2341,12 +2083,7 @@
     "tagline": "Generate Steve Reich–style phasing and counterpoint music live in the browser.",
     "category": "Music & Audio",
     "keyword": "reich composer online",
-    "keywords": [
-      "reich composer online",
-      "free reich composer",
-      "music & audio",
-      "no signup"
-    ]
+    "keywords": ["reich composer online", "free reich composer", "music & audio", "no signup"]
   },
   {
     "slug": "json-schema-generator",
