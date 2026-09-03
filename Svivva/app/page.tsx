@@ -1936,6 +1936,38 @@ export default function LandingPage() {
                       </Link>
                     </li>
                     <li>
+                      <Link
+                        href="/cyber-security-mini-apps/password-strength"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Password strength checker
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/cyber-security-mini-apps/ssl-inspector"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        SSL certificate checker
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/ai-tools-hub/text-summarizer"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Text summarizer
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/ai-tools-hub/grammar-checker"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Grammar checker
+                      </Link>
+                    </li>
+                    <li>
                       <Link href="/seo-pack" className="hover:text-foreground transition-colors">
                         SEO Pack
                       </Link>

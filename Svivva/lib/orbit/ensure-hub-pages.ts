@@ -39,8 +39,6 @@ export async function ensureOrbitHubPages(): Promise<string[]> {
       .where(eq(seoLandingPages.slug, hub.slug))
       .limit(1);
 
-    if (row?.published) continue;
-
     const content = buildHubPageHtml(hub.slug);
 
     if (row) {
@@ -58,7 +56,9 @@ export async function ensureOrbitHubPages(): Promise<string[]> {
           toolUrl: `${BASE}/${hub.slug}`,
         })
         .where(eq(seoLandingPages.id, row.id));
-      steps.push(`✓ Republished hub: ${hub.slug}`);
+      steps.push(
+        row.published ? `✓ Refreshed hub links: ${hub.slug}` : `✓ Republished hub: ${hub.slug}`,
+      );
     } else {
       try {
         await db.insert(seoLandingPages).values({

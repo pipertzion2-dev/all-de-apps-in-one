@@ -31,6 +31,13 @@ export const HUB_FEATURE_PAGES = catalog as HubFeaturePage[];
 
 export const HUB_FEATURE_PATHS = HUB_FEATURE_PAGES.map((p) => p.path);
 
+const FEATURE_SLUG_TO_PATH = new Map(HUB_FEATURE_PAGES.map((p) => [p.slug, p.path]));
+
+/** Canonical hub path for a feature slug (`password-strength` → `/cyber-security-mini-apps/...`). */
+export function canonicalPathForFeatureSlug(slug: string): string | undefined {
+  return FEATURE_SLUG_TO_PATH.get(slug);
+}
+
 export function getHubFeaturePage(hub: HubFeatureHub, slug: string): HubFeaturePage | undefined {
   return HUB_FEATURE_PAGES.find((p) => p.hub === hub && p.slug === slug);
 }

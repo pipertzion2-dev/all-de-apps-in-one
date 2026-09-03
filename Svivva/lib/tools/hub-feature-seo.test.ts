@@ -3,6 +3,7 @@ import {
   HUB_FEATURE_PAGES,
   getCyberFeatureSitemapPaths,
   getAiHubFeatureSitemapPaths,
+  canonicalPathForFeatureSlug,
 } from "@/lib/tools/catalogs/hub-feature-pages";
 import {
   allHubFeaturesPassQualityGate,
@@ -19,6 +20,14 @@ describe("hub feature SEO pages", () => {
     expect(getAiHubFeatureSitemapPaths().every((p) => p.startsWith("/ai-tools-hub/"))).toBe(true);
     expect(HUB_FEATURE_PAGES.some((p) => p.path === "/apps")).toBe(false);
     expect(HUB_FEATURE_PAGES.every((p) => p.keyword.trim().length > 0)).toBe(true);
+  });
+
+  it("maps root slugs to hub feature paths so /tools cards are not 404s", () => {
+    expect(canonicalPathForFeatureSlug("password-strength")).toBe(
+      "/cyber-security-mini-apps/password-strength",
+    );
+    expect(canonicalPathForFeatureSlug("text-summarizer")).toBe("/ai-tools-hub/text-summarizer");
+    expect(canonicalPathForFeatureSlug("not-a-real-tool")).toBeUndefined();
   });
 
   it("builds keyword-rich bodies that pass the quality gate", () => {
