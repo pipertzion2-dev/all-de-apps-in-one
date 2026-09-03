@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -15,6 +15,7 @@ import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
 import { getSiteUrl } from "@/lib/site-url";
+import { canonicalPathForFeatureSlug } from "@/lib/tools/catalogs/hub-feature-pages";
 
 export const revalidate = 3600;
 
@@ -86,6 +87,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const featurePath = canonicalPathForFeatureSlug(slug);
+  if (featurePath) {
+    redirect(featurePath);
+  }
   const page = await getPage(slug);
   if (!page) return { title: "Page Not Found | ZZAI" };
 
@@ -99,6 +104,10 @@ export async function generateMetadata({
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const featurePath = canonicalPathForFeatureSlug(slug);
+  if (featurePath) {
+    redirect(featurePath);
+  }
   const page = await getPage(slug);
   if (!page) notFound();
 

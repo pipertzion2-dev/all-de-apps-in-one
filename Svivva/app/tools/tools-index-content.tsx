@@ -40,10 +40,13 @@ const NATIVE_TOOL_SLUGS = new Set([
   "sketch-hash-stamp",
 ]);
 
-function toolPageHref(slug: string, published: boolean): string {
-  if (NATIVE_TOOL_SLUGS.has(slug)) return `/tools/${slug}`;
-  if (published) return `/${slug}`;
-  return `/tools/${slug}`;
+function toolPageHref(tool: { slug: string; published: boolean; toolUrl: string | null }): string {
+  if (tool.toolUrl?.startsWith("/") && !tool.toolUrl.startsWith("//")) {
+    return tool.toolUrl.split("?")[0];
+  }
+  if (NATIVE_TOOL_SLUGS.has(tool.slug)) return `/tools/${tool.slug}`;
+  if (tool.published) return `/${tool.slug}`;
+  return `/tools/${tool.slug}`;
 }
 
 export default function ToolsIndexContent({
@@ -168,7 +171,7 @@ export default function ToolsIndexContent({
             {filteredTools.map((tool) => (
               <Link
                 key={tool.id}
-                href={toolPageHref(tool.slug, tool.published)}
+                href={toolPageHref(tool)}
                 data-testid={`card-tool-${tool.slug}`}
                 className="group rounded-md border border-white/10 bg-white/5 p-6 hover-elevate transition-colors"
               >

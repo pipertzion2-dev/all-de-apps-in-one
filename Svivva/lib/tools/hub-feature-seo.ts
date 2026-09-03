@@ -61,8 +61,7 @@ export function buildHubFeatureHtml(page: HubFeaturePage): string {
     },
   ];
 
-  return `<h1>${h1}</h1>
-<p><strong>${keyword}</strong> — ${desc} This free mini-app lives on <a href="${SITE}">zzaizzai.com</a> under <a href="${SITE}${hubPath}">${hubLabel}</a>. It is indexed as its own feature page so people searching for ${keyword} find a specific tool, not a generic apps list.</p>
+  return `<p><strong>${h1}</strong> — ${desc} This free mini-app lives on <a href="${SITE}">zzaizzai.com</a> under <a href="${SITE}${hubPath}">${hubLabel}</a>. It is indexed as its own feature page so people searching for ${keyword} find a specific tool, not a generic apps list.</p>
 <h2>Why this page exists</h2>
 <p>Generic hub URLs like "apps" or a single tools index rarely rank for high-intent queries. ${escapeHtml(page.h1 || page.title)} targets the search phrase <em>${keyword}</em> with a clear job-to-be-done: ${desc} Google Search Console traffic grows when each feature has a crawlable URL, a unique title, and useful body copy.</p>
 ${toolCta}
