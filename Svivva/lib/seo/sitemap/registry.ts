@@ -101,12 +101,7 @@ function lpEntries(): SitemapEntry[] {
 
 /** Minimal sitemap when DB or runtime fails — keeps GSC from seeing 500 on /sitemap.xml. */
 export function getStaticSitemapFallback(): SitemapEntry[] {
-  return [
-    ...staticPagesEntries(),
-    ...nativeToolEntries(),
-    ...hubFeatureEntries(),
-    ...lpEntries(),
-  ];
+  return [...staticPagesEntries(), ...nativeToolEntries(), ...hubFeatureEntries(), ...lpEntries()];
 }
 
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {

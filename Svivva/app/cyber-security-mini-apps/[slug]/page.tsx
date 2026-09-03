@@ -20,11 +20,7 @@ export async function generateMetadata({
   return generateHubFeatureMetadata("cyber-security-mini-apps", slug);
 }
 
-export default async function CyberFeaturePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function CyberFeaturePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   return <HubFeaturePageView hub="cyber-security-mini-apps" slug={slug} />;
 }

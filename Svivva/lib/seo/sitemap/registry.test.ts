@@ -23,7 +23,9 @@ describe("sitemap native mini-apps", () => {
     for (const path of HUB_FEATURE_PATHS.slice(0, 20)) {
       expect(urls.some((u) => u.endsWith(path))).toBe(true);
     }
-    const password = entries.find((e) => e.url.endsWith("/cyber-security-mini-apps/password-strength"));
+    const password = entries.find((e) =>
+      e.url.endsWith("/cyber-security-mini-apps/password-strength"),
+    );
     const hub = entries.find((e) => e.url.endsWith("/cyber-security-mini-apps"));
     expect(password?.priority ?? 0).toBeGreaterThan(hub?.priority ?? 0);
   });

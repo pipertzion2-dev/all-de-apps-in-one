@@ -1,6 +1,9 @@
 import { scorePageContent } from "@/lib/seo/content-quality/score";
 import type { HubFeaturePage } from "@/lib/tools/catalogs/hub-feature-pages";
-import { getHubFeaturePagesForHub, HUB_FEATURE_PAGES } from "@/lib/tools/catalogs/hub-feature-pages";
+import {
+  getHubFeaturePagesForHub,
+  HUB_FEATURE_PAGES,
+} from "@/lib/tools/catalogs/hub-feature-pages";
 
 const SITE = "https://zzaizzai.com";
 

@@ -13,9 +13,9 @@ import {
 describe("hub feature SEO pages", () => {
   it("indexes cyber + AI feature URLs (not generic /apps)", () => {
     expect(HUB_FEATURE_PAGES.length).toBeGreaterThanOrEqual(100);
-    expect(getCyberFeatureSitemapPaths().every((p) => p.startsWith("/cyber-security-mini-apps/"))).toBe(
-      true,
-    );
+    expect(
+      getCyberFeatureSitemapPaths().every((p) => p.startsWith("/cyber-security-mini-apps/")),
+    ).toBe(true);
     expect(getAiHubFeatureSitemapPaths().every((p) => p.startsWith("/ai-tools-hub/"))).toBe(true);
     expect(HUB_FEATURE_PAGES.some((p) => p.path === "/apps")).toBe(false);
     expect(HUB_FEATURE_PAGES.every((p) => p.keyword.trim().length > 0)).toBe(true);
