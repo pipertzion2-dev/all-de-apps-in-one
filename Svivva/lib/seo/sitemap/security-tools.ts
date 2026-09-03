@@ -4,6 +4,27 @@ import { seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
+import {
+  getAiHubFeatureSitemapPaths,
+  getCyberFeatureSitemapPaths,
+} from "@/lib/tools/catalogs/hub-feature-pages";
+
+function featureEntries(base: string, now: Date): MetadataRoute.Sitemap {
+  return [
+    ...getCyberFeatureSitemapPaths().map((path) => ({
+      url: `${base}${path}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    })),
+    ...getAiHubFeatureSitemapPaths().map((path) => ({
+      url: `${base}${path}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.88,
+    })),
+  ];
+}
 
 /** Public indexable security / mini-app URLs (no auth, no redirects). */
 export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap> {
@@ -15,23 +36,23 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
       url: `${base}/cyber-security-mini-apps`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.9,
+      priority: 0.82,
     },
     {
       url: `${base}/ai-tools-hub`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.85,
+      priority: 0.8,
     },
     {
       url: `${base}/tools`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.8,
+      priority: 0.78,
     },
   ];
 
-  const toolPages: MetadataRoute.Sitemap = [];
+  const toolPages: MetadataRoute.Sitemap = [...featureEntries(base, now)];
 
   try {
     const pages = await db
@@ -67,7 +88,7 @@ export async function getSecuritySitemapEntries(): Promise<MetadataRoute.Sitemap
   return [...hubs, ...toolPages];
 }
 
-/** Hubs only — used when DB sitemap generation fails. */
+/** Hubs + feature pages — used when DB sitemap generation fails. */
 export function getSecuritySitemapFallback(): MetadataRoute.Sitemap {
   const base = getSiteUrl().replace(/\/$/, "");
   const now = new Date();
@@ -76,19 +97,20 @@ export function getSecuritySitemapFallback(): MetadataRoute.Sitemap {
       url: `${base}/cyber-security-mini-apps`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.9,
+      priority: 0.82,
     },
     {
       url: `${base}/ai-tools-hub`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.85,
+      priority: 0.8,
     },
     {
       url: `${base}/tools`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.8,
+      priority: 0.78,
     },
+    ...featureEntries(base, now),
   ];
 }

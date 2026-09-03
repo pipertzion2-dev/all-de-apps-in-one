@@ -4,6 +4,11 @@
  */
 
 import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-app-data";
+import {
+  getHubFeaturePagesForHub,
+  HUB_FEATURE_PATHS,
+  HUB_FEATURE_PAGES,
+} from "@/lib/tools/catalogs/hub-feature-pages";
 import { getSiteUrl } from "../site-url";
 
 function siteBase(): string {
@@ -49,9 +54,14 @@ export function nativeToolSitemapPaths(): string[] {
   return NATIVE_SVIVVA_TOOLS.map((t) => t.path);
 }
 
-/** Hub + native /tools/* paths — always prioritize for IndexNow / Google batches. */
+/** Hub + native /tools/* + per-feature keyword pages — prioritize for IndexNow / Google. */
 export function getMiniAppPathsForIndexing(): string[] {
-  return ["/tools", ...ORBIT_HUB_SLUGS.map((hub) => `/${hub}`), ...nativeToolSitemapPaths()];
+  return [
+    "/tools",
+    ...ORBIT_HUB_SLUGS.map((hub) => `/${hub}`),
+    ...nativeToolSitemapPaths(),
+    ...HUB_FEATURE_PATHS,
+  ];
 }
 
 export function getMiniAppUrlsForIndexing(origin?: string): string[] {
@@ -60,7 +70,7 @@ export function getMiniAppUrlsForIndexing(origin?: string): string[] {
 }
 
 export function nativeToolsAsIndexCards() {
-  return NATIVE_SVIVVA_TOOLS.map((t) => {
+  const natives = NATIVE_SVIVVA_TOOLS.map((t) => {
     const slug = t.path.replace(/^\/tools\//, "");
     return {
       id: `native-${slug}`,
@@ -83,6 +93,24 @@ export function nativeToolsAsIndexCards() {
       published: true,
     };
   });
+
+  const features = HUB_FEATURE_PAGES.map((p) => ({
+    id: `feature-${p.hub}-${p.slug}`,
+    slug: p.slug,
+    keyword: p.keyword,
+    title: p.title,
+    headline: p.h1 || p.title,
+    subheadline: p.metaDescription,
+    content: p.description,
+    benefits: [] as string[],
+    category: p.hub === "cyber-security-mini-apps" ? "Security" : p.category || "AI tools",
+    toolUrl: p.path,
+    metaTitle: p.title,
+    metaDescription: p.metaDescription,
+    published: true,
+  }));
+
+  return [...natives, ...features];
 }
 
 export const ORBIT_HUB_SLUGS = ["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"] as const;
@@ -106,11 +134,17 @@ export type DiscoverableTool = {
 };
 
 export function nativeToolsAsDiscoverable(): DiscoverableTool[] {
-  return NATIVE_SVIVVA_TOOLS.map((t) => ({
+  const natives = NATIVE_SVIVVA_TOOLS.map((t) => ({
     name: t.name,
     url: `${siteBase()}${t.path}`,
     description: t.description,
   }));
+  const features = HUB_FEATURE_PAGES.map((p) => ({
+    name: p.h1 || p.title,
+    url: `${siteBase()}${p.path}`,
+    description: p.description,
+  }));
+  return [...natives, ...features];
 }
 
 /** Keep discovery/import focused on traffic-safe, working funnel tools. */
@@ -127,7 +161,6 @@ export function filterToolsForTrafficDiscovery(tools: DiscoverableTool[]): Disco
     if (BLOCKED_NAME_RE.test(`${tool.name} ${tool.description ?? ""}`)) continue;
 
     const onSvivva = url.includes("zzaizzai.com");
-    const isNative = NATIVE_SVIVVA_TOOLS.some((n) => url.includes(n.path));
     if (!onSvivva && !PREFERRED_NAME_RE.test(tool.name)) continue;
 
     if (!byUrl.has(url)) byUrl.set(url, tool);
@@ -135,6 +168,9 @@ export function filterToolsForTrafficDiscovery(tools: DiscoverableTool[]): Disco
 
   const list = Array.from(byUrl.values());
   list.sort((a, b) => {
+    const aFeature = HUB_FEATURE_PATHS.some((p) => a.url.includes(p));
+    const bFeature = HUB_FEATURE_PATHS.some((p) => b.url.includes(p));
+    if (aFeature !== bFeature) return aFeature ? -1 : 1;
     const aNative = a.url.includes("zzaizzai.com/tools/");
     const bNative = b.url.includes("zzaizzai.com/tools/");
     if (aNative !== bNative) return aNative ? -1 : 1;
@@ -143,26 +179,38 @@ export function filterToolsForTrafficDiscovery(tools: DiscoverableTool[]): Disco
     return bPref - aPref;
   });
 
-  return list.slice(0, 48);
+  return list.slice(0, Math.max(200, NATIVE_SVIVVA_TOOLS.length + HUB_FEATURE_PATHS.length));
 }
 
 export function buildHubPageHtml(hub: HubSlug): string {
-  const hubTools = NATIVE_SVIVVA_TOOLS.filter((t) => t.hub === hub || hub === "ai-tools-hub");
-  const toolList = hubTools
+  const nativeHubTools = NATIVE_SVIVVA_TOOLS.filter((t) => t.hub === hub || hub === "ai-tools-hub");
+  const featurePages =
+    hub === "seo-pack"
+      ? []
+      : getHubFeaturePagesForHub(hub as "ai-tools-hub" | "cyber-security-mini-apps");
+
+  const nativeList = nativeHubTools
     .map(
       (t) =>
         `<li><a href="${siteBase()}${t.path}"><strong>${t.name}</strong></a> — ${t.description}</li>`,
     )
     .join("");
 
+  const featureList = featurePages
+    .map(
+      (p) =>
+        `<li><a href="${siteBase()}${p.path}"><strong>${p.h1 || p.title}</strong></a> — ${p.keyword}</li>`,
+    )
+    .join("");
+
   const titles: Record<HubSlug, { h1: string; lead: string }> = {
     "ai-tools-hub": {
       h1: "ZZAI AI Tools Hub",
-      lead: "Free utilities that solve one job well — then funnel to ZZAI for schema validation, deployment, and rollback.",
+      lead: "Free utilities that solve one job well — each tool has its own indexed keyword page, then funnel to ZZAI for schema validation, deployment, and rollback.",
     },
     "cyber-security-mini-apps": {
       h1: "Cyber Security Mini Apps (Clutety)",
-      lead: "Security scanners and hardening utilities. Full parental controls and device protection ship with Clutety on iOS — explore ZZAI for AI backends.",
+      lead: "Security scanners and hardening utilities — each checker is a crawlable feature URL with its own search keywords. Full parental controls ship with Clutety on iOS.",
     },
     "seo-pack": {
       h1: "ZZAI SEO Pack",
@@ -175,7 +223,13 @@ export function buildHubPageHtml(hub: HubSlug): string {
   return `<h1>${h1}</h1>
 <p>${lead}</p>
 <h2>Featured free tools</h2>
-<ul>${toolList}</ul>
+<ul>${nativeList}</ul>
+${
+  featureList
+    ? `<h2>Indexed feature pages (keyword targets)</h2>
+<ul>${featureList}</ul>`
+    : ""
+}
 <p><a href="${siteBase()}">Build on ZZAI →</a> · <a href="${siteBase()}/tools">All tools →</a> · <a href="${CLUTETY_LANDING}">Security mini apps →</a></p>
 <p><a href="${siteBase()}/orbit">Orbit growth autopilot →</a></p>`;
 }

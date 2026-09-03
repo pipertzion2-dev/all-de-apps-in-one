@@ -6,6 +6,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
 import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
+import { HUB_FEATURE_PATHS } from "@/lib/tools/catalogs/hub-feature-pages";
 import { dedupeSitemapUrls, normalizeSitemapUrl } from "@/lib/seo/sitemap/normalize";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
@@ -37,10 +38,10 @@ function staticPagesEntries(): SitemapEntry[] {
   }[] = [
     { path: "", priority: 1, changeFrequency: "weekly" },
     { path: "/blog", priority: 0.9, changeFrequency: "daily" },
-    { path: "/tools", priority: 0.9, changeFrequency: "weekly" },
-    { path: "/ai-tools-hub", priority: 0.88, changeFrequency: "weekly" },
-    { path: "/cyber-security-mini-apps", priority: 0.92, changeFrequency: "weekly" },
-    { path: "/seo-pack", priority: 0.8, changeFrequency: "monthly" },
+    { path: "/tools", priority: 0.85, changeFrequency: "weekly" },
+    { path: "/ai-tools-hub", priority: 0.82, changeFrequency: "weekly" },
+    { path: "/cyber-security-mini-apps", priority: 0.82, changeFrequency: "weekly" },
+    { path: "/seo-pack", priority: 0.75, changeFrequency: "monthly" },
     { path: "/about", priority: 0.5, changeFrequency: "monthly" },
     { path: "/contact", priority: 0.5, changeFrequency: "monthly" },
     { path: "/docs", priority: 0.6, changeFrequency: "weekly" },
@@ -68,7 +69,20 @@ function nativeToolEntries(): SitemapEntry[] {
     url: `${b}${path}`,
     lastModified: now,
     changeFrequency: "weekly" as const,
-    priority: 0.86,
+    priority: 0.88,
+    chunk: "tools" as const,
+  }));
+}
+
+/** Per-feature mini-app URLs with strategic keywords (not generic /apps hubs). */
+function hubFeatureEntries(): SitemapEntry[] {
+  const b = base();
+  const now = new Date();
+  return HUB_FEATURE_PATHS.map((path) => ({
+    url: `${b}${path}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
     chunk: "tools" as const,
   }));
 }
@@ -87,7 +101,12 @@ function lpEntries(): SitemapEntry[] {
 
 /** Minimal sitemap when DB or runtime fails — keeps GSC from seeing 500 on /sitemap.xml. */
 export function getStaticSitemapFallback(): SitemapEntry[] {
-  return [...staticPagesEntries(), ...nativeToolEntries(), ...lpEntries()];
+  return [
+    ...staticPagesEntries(),
+    ...nativeToolEntries(),
+    ...hubFeatureEntries(),
+    ...lpEntries(),
+  ];
 }
 
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {

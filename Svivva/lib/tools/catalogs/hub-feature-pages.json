@@ -1,0 +1,2750 @@
+[
+  {
+    "slug": "password-strength",
+    "path": "/cyber-security-mini-apps/password-strength",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Password Strength Checker Online (No Sign-Up)",
+    "metaDescription": "Free online password strength test: entropy estimate, weak-pattern hints, and a secure random generator. Runs in your browser — no account.",
+    "description": "Free online password strength test: entropy estimate, weak-pattern hints, and a secure random generator. Runs in your browser — no account.",
+    "keyword": "password strength checker",
+    "keywords": [
+      "password strength checker",
+      "free password test online",
+      "password security checker",
+      "NIST password",
+      "strong password generator"
+    ]
+  },
+  {
+    "slug": "ssl-inspector",
+    "path": "/cyber-security-mini-apps/ssl-inspector",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free SSL Certificate Checker Online | TLS & DNS Lookup",
+    "metaDescription": "Free SSL checker online: resolve host DNS (A records) and jump to SSL Labs for full TLS chain & expiry. Instant, no signup.",
+    "description": "Free SSL checker online: resolve host DNS (A records) and jump to SSL Labs for full TLS chain & expiry. Instant, no signup.",
+    "keyword": "ssl certificate checker",
+    "keywords": [
+      "SSL certificate checker",
+      "free SSL test",
+      "TLS checker online",
+      "certificate expiry check",
+      "SSL Labs"
+    ]
+  },
+  {
+    "slug": "security-headers-grader",
+    "path": "/cyber-security-mini-apps/security-headers-grader",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Security Headers Checker | HSTS, CSP, X-Frame Grade",
+    "metaDescription": "Free security headers test: grade HSTS, CSP, X-Frame-Options, nosniff, and more from pasted response headers. Website security checker.",
+    "description": "Free security headers test: grade HSTS, CSP, X-Frame-Options, nosniff, and more from pasted response headers. Website security checker.",
+    "keyword": "security headers checker",
+    "keywords": [
+      "security headers checker",
+      "HTTP security headers test",
+      "HSTS checker",
+      "CSP checker free",
+      "website headers analyzer"
+    ]
+  },
+  {
+    "slug": "http-headers-analyzer",
+    "path": "/cyber-security-mini-apps/http-headers-analyzer",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free HTTP Headers Analyzer & Email Header Checker",
+    "metaDescription": "Paste HTTP response headers or raw email source. Free online header analyzer for security review and phishing red flags.",
+    "description": "Paste HTTP response headers or raw email source. Free online header analyzer for security review and phishing red flags.",
+    "keyword": "http headers checker",
+    "keywords": [
+      "HTTP headers checker",
+      "email header analyzer",
+      "phishing header check",
+      "response headers online"
+    ]
+  },
+  {
+    "slug": "cors-checker",
+    "path": "/cyber-security-mini-apps/cors-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free CORS Checker Online | API Cross-Origin Policy Test",
+    "metaDescription": "Free CORS checker: paste Access-Control-* headers to spot wildcard + credentials risks. Online API security sanity check.",
+    "description": "Free CORS checker: paste Access-Control-* headers to spot wildcard + credentials risks. Online API security sanity check.",
+    "keyword": "cors checker online",
+    "keywords": [
+      "CORS checker online",
+      "CORS policy checker",
+      "cross origin test",
+      "API CORS misconfiguration"
+    ]
+  },
+  {
+    "slug": "url-safety-scanner",
+    "path": "/cyber-security-mini-apps/url-safety-scanner",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free URL Safety Checker & Phishing Link Analyzer",
+    "metaDescription": "Free URL checker online: detect risky patterns, odd hosts, and credential-in-URL issues before you click. No signup.",
+    "description": "Free URL checker online: detect risky patterns, odd hosts, and credential-in-URL issues before you click. No signup.",
+    "keyword": "url safety checker",
+    "keywords": [
+      "URL safety checker",
+      "check link safe",
+      "phishing URL scanner",
+      "malicious URL check free"
+    ]
+  },
+  {
+    "slug": "dns-record-viewer",
+    "path": "/cyber-security-mini-apps/dns-record-viewer",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free DNS Lookup Tool Online | A, MX, TXT, NS Records",
+    "metaDescription": "Free DNS lookup online via DNS-over-HTTPS: query A, AAAA, MX, TXT, NS, CNAME for any domain. DNS security check.",
+    "description": "Free DNS lookup online via DNS-over-HTTPS: query A, AAAA, MX, TXT, NS, CNAME for any domain. DNS security check.",
+    "keyword": "dns lookup free",
+    "keywords": [
+      "DNS lookup free",
+      "DNS record checker",
+      "MX lookup online",
+      "TXT record lookup",
+      "DNS over HTTPS"
+    ]
+  },
+  {
+    "slug": "ip-reputation",
+    "path": "/cyber-security-mini-apps/ip-reputation",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free IP Lookup & IP Address Checker Online",
+    "metaDescription": "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.",
+    "description": "Free IP address lookup: geolocation, ASN, and network context (browser fetch). Quick IP checker for SOC and curious users.",
+    "keyword": "ip lookup free",
+    "keywords": [
+      "IP lookup free",
+      "IP address checker",
+      "IP geolocation online",
+      "who is this IP"
+    ]
+  },
+  {
+    "slug": "jwt-decoder",
+    "path": "/cyber-security-mini-apps/jwt-decoder",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free JWT Decoder Online | JSON Web Token Parser",
+    "metaDescription": "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.",
+    "description": "Free JWT decoder online: read header & payload, flag risky algorithms. Paste token — decoding stays in the browser.",
+    "keyword": "jwt decoder online",
+    "keywords": [
+      "JWT decoder online",
+      "decode JWT free",
+      "JWT parser",
+      "JSON web token inspector"
+    ]
+  },
+  {
+    "slug": "base64-hash-toolkit",
+    "path": "/cyber-security-mini-apps/base64-hash-toolkit",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Base64 Encoder & SHA-256 Hash Generator Online",
+    "metaDescription": "Free Base64 encode/decode and SHA-256 hash generator in your browser. Hash tool for developers — no upload.",
+    "description": "Free Base64 encode/decode and SHA-256 hash generator in your browser. Hash tool for developers — no upload.",
+    "keyword": "base64 encoder online",
+    "keywords": [
+      "Base64 encoder online",
+      "Base64 decode",
+      "SHA256 generator",
+      "hash calculator free"
+    ]
+  },
+  {
+    "slug": "subdomain-finder-lite",
+    "path": "/cyber-security-mini-apps/subdomain-finder-lite",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Subdomain Finder Online (Quick DNS Probe)",
+    "metaDescription": "Free subdomain discovery lite: probe common hostnames with DNS-over-HTTPS. Not exhaustive — fast free subdomain check.",
+    "description": "Free subdomain discovery lite: probe common hostnames with DNS-over-HTTPS. Not exhaustive — fast free subdomain check.",
+    "keyword": "subdomain finder free",
+    "keywords": [
+      "subdomain finder free",
+      "find subdomains online",
+      "DNS subdomain check",
+      "subdomain enumeration lite"
+    ]
+  },
+  {
+    "slug": "open-port-checker",
+    "path": "/cyber-security-mini-apps/open-port-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Open Ports Reference | Top 20 Ports Security List",
+    "metaDescription": "Free open port reference: RDP, SSH, SMB, databases, and web ports teams audit first. Pair with a real scanner internally.",
+    "description": "Free open port reference: RDP, SSH, SMB, databases, and web ports teams audit first. Pair with a real scanner internally.",
+    "keyword": "open ports list",
+    "keywords": [
+      "open ports list",
+      "common ports security",
+      "port 3389 445 22",
+      "network security checklist"
+    ]
+  },
+  {
+    "slug": "robots-txt-analyzer",
+    "path": "/cyber-security-mini-apps/robots-txt-analyzer",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free robots.txt Checker & Security Analyzer Online",
+    "metaDescription": "Fetch or paste robots.txt. Free robots.txt analyzer highlights sensitive paths and sitemap lines — website security helper.",
+    "description": "Fetch or paste robots.txt. Free robots.txt analyzer highlights sensitive paths and sitemap lines — website security helper.",
+    "keyword": "robots.txt checker",
+    "keywords": [
+      "robots.txt checker",
+      "robots.txt analyzer",
+      "crawl rules security",
+      "SEO robots test"
+    ]
+  },
+  {
+    "slug": "sitemap-parser",
+    "path": "/cyber-security-mini-apps/sitemap-parser",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Sitemap.xml Parser & URL Extractor Online",
+    "metaDescription": "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.",
+    "description": "Paste sitemap XML — extract URLs and count endpoints. Free sitemap parser for audits and SEO/security inventory.",
+    "keyword": "sitemap parser online",
+    "keywords": [
+      "sitemap parser online",
+      "extract URLs from sitemap",
+      "sitemap.xml tool free"
+    ]
+  },
+  {
+    "slug": "email-breach-checker",
+    "path": "/cyber-security-mini-apps/email-breach-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Email Breach Check | MX Lookup + Have I Been Pwned",
+    "metaDescription": "Validate email format, lookup MX via DNS, open Have I Been Pwned in your tab. Free email security check — we don’t store email.",
+    "description": "Validate email format, lookup MX via DNS, open Have I Been Pwned in your tab. Free email security check — we don’t store email.",
+    "keyword": "email breach check",
+    "keywords": [
+      "email breach check",
+      "have i been pwned",
+      "email leak check free",
+      "MX record email security"
+    ]
+  },
+  {
+    "slug": "github-secret-scanner",
+    "path": "/cyber-security-mini-apps/github-secret-scanner",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Secret Scanner | Find API Keys & Tokens in Text",
+    "metaDescription": "Paste logs or snippets — free secret scanner finds common AWS, GitHub, Slack, and key patterns. Rotate anything matched.",
+    "description": "Paste logs or snippets — free secret scanner finds common AWS, GitHub, Slack, and key patterns. Rotate anything matched.",
+    "keyword": "secret scanner free",
+    "keywords": [
+      "secret scanner free",
+      "API key scanner",
+      "leaked token finder",
+      "GitHub secret detection"
+    ]
+  },
+  {
+    "slug": "cookie-analyzer",
+    "path": "/cyber-security-mini-apps/cookie-analyzer",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Cookie Checker | Secure, HttpOnly, SameSite Analyzer",
+    "metaDescription": "Paste Set-Cookie lines — free cookie security checker grades Secure, HttpOnly, and SameSite per cookie.",
+    "description": "Paste Set-Cookie lines — free cookie security checker grades Secure, HttpOnly, and SameSite per cookie.",
+    "keyword": "cookie checker",
+    "keywords": [
+      "cookie checker",
+      "Set-Cookie analyzer",
+      "HttpOnly Secure SameSite test",
+      "session cookie security"
+    ]
+  },
+  {
+    "slug": "api-key-tester",
+    "path": "/cyber-security-mini-apps/api-key-tester",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free API Key Format Checker (Stripe, AWS, GitHub Shapes)",
+    "metaDescription": "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).",
+    "description": "Paste a key snippet — heuristic format detection and rotation advice. Free API key exposure sanity check (educational).",
+    "keyword": "api key checker",
+    "keywords": [
+      "API key checker",
+      "detect AWS key",
+      "Stripe key format",
+      "token type identifier"
+    ]
+  },
+  {
+    "slug": "tls-version-checker",
+    "path": "/cyber-security-mini-apps/tls-version-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free TLS Version Checker Guide | SSL/TLS Best Practices",
+    "metaDescription": "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.",
+    "description": "TLS 1.0/1.1 sunset checklist and space to paste SSL Labs notes. Free TLS security guidance — pair with external SSL test.",
+    "keyword": "tls version check",
+    "keywords": [
+      "TLS version check",
+      "disable TLS 1.0",
+      "SSL TLS best practices",
+      "TLS 1.2 1.3"
+    ]
+  },
+  {
+    "slug": "cert-transparency",
+    "path": "/cyber-security-mini-apps/cert-transparency",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Certificate Transparency Log Viewer (Paste crt.sh JSON)",
+    "metaDescription": "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.",
+    "description": "Paste Certificate Transparency JSON from crt.sh — browse issuers and hostnames. Free CT log viewer for domain monitoring.",
+    "keyword": "certificate transparency",
+    "keywords": [
+      "certificate transparency",
+      "crt.sh viewer",
+      "SSL cert history",
+      "CT log lookup"
+    ]
+  },
+  {
+    "slug": "cvss-calculator",
+    "path": "/cyber-security-mini-apps/cvss-calculator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free CVSS 3.1 Calculator Online | Base Score & Severity",
+    "metaDescription": "Paste a CVSS:3.1 vector string — instant base score and severity label. Free CVSS calculator for triage and tickets.",
+    "description": "Paste a CVSS:3.1 vector string — instant base score and severity label. Free CVSS calculator for triage and tickets.",
+    "keyword": "cvss calculator online",
+    "keywords": [
+      "CVSS calculator online",
+      "CVSS 3.1 base score",
+      "vulnerability severity calculator"
+    ]
+  },
+  {
+    "slug": "owasp-self-assessment",
+    "path": "/cyber-security-mini-apps/owasp-self-assessment",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free OWASP Top 10 Checklist & Self-Assessment Online",
+    "metaDescription": "Answer ten OWASP-focused questions — get a simple risk band. Free OWASP Top 10 checklist for teams and builders.",
+    "description": "Answer ten OWASP-focused questions — get a simple risk band. Free OWASP Top 10 checklist for teams and builders.",
+    "keyword": "owasp top 10 checklist",
+    "keywords": [
+      "OWASP Top 10 checklist",
+      "OWASP self assessment",
+      "web app security checklist free"
+    ]
+  },
+  {
+    "slug": "sqli-payload-library",
+    "path": "/cyber-security-mini-apps/sqli-payload-library",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "SQL Injection Payload Reference (Authorized Testing Only)",
+    "metaDescription": "Browse small SQLi example payloads by DB family for authorized tests. Free reference — never use on systems without permission.",
+    "description": "Browse small SQLi example payloads by DB family for authorized tests. Free reference — never use on systems without permission.",
+    "keyword": "sql injection payloads",
+    "keywords": [
+      "SQL injection payloads",
+      "SQLi test reference",
+      "penetration testing SQLi education"
+    ]
+  },
+  {
+    "slug": "xss-payload-generator",
+    "path": "/cyber-security-mini-apps/xss-payload-generator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "XSS Payload Generator for Authorized Security Testing",
+    "metaDescription": "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.",
+    "description": "Generate simple reflected/DOM XSS test strings. Free XSS payload helper — only for systems you own or are allowed to test.",
+    "keyword": "xss payload generator",
+    "keywords": [
+      "XSS payload generator",
+      "cross site scripting test",
+      "XSS scanner helper"
+    ]
+  },
+  {
+    "slug": "open-redirect-tester",
+    "path": "/cyber-security-mini-apps/open-redirect-tester",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Open Redirect Checker | URL Redirect Safety Test",
+    "metaDescription": "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).",
+    "description": "Compare two URLs and reason about redirect parameters. Free open redirect tester for OAuth and login flows (manual review).",
+    "keyword": "open redirect checker",
+    "keywords": [
+      "open redirect checker",
+      "redirect vulnerability test",
+      "URL redirect analyzer"
+    ]
+  },
+  {
+    "slug": "csp-evaluator",
+    "path": "/cyber-security-mini-apps/csp-evaluator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free CSP Checker | Content-Security-Policy Analyzer Online",
+    "metaDescription": "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.",
+    "description": "Paste your CSP — graded risks like unsafe-inline and wildcards. Free Content Security Policy checker and hardening hints.",
+    "keyword": "csp checker",
+    "keywords": [
+      "CSP checker",
+      "Content Security Policy analyzer",
+      "CSP evaluator online"
+    ]
+  },
+  {
+    "slug": "clickjacking-tester",
+    "path": "/cyber-security-mini-apps/clickjacking-tester",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Clickjacking Test | X-Frame-Options & frame-ancestors",
+    "metaDescription": "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.",
+    "description": "Paste headers — see if X-Frame-Options or CSP frame-ancestors protects framing. Free clickjacking checker online.",
+    "keyword": "clickjacking test",
+    "keywords": [
+      "clickjacking test",
+      "X-Frame-Options checker",
+      "frame-ancestors CSP test"
+    ]
+  },
+  {
+    "slug": "ssrf-payload-builder",
+    "path": "/cyber-security-mini-apps/ssrf-payload-builder",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "SSRF Payload Examples (Authorized Assessments Only)",
+    "metaDescription": "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.",
+    "description": "Copy common internal SSRF probe targets for sanctioned tests. Free SSRF reference — use only with written authorization.",
+    "keyword": "ssrf payload",
+    "keywords": [
+      "SSRF payload",
+      "SSRF testing reference",
+      "internal URL probe security test"
+    ]
+  },
+  {
+    "slug": "prototype-pollution-checker",
+    "path": "/cyber-security-mini-apps/prototype-pollution-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Prototype Pollution Pattern Scanner (JS/JSON)",
+    "metaDescription": "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.",
+    "description": "Paste JSON or JS — flag __proto__ and risky merge patterns. Free prototype pollution checker for code review.",
+    "keyword": "prototype pollution scanner",
+    "keywords": [
+      "prototype pollution scanner",
+      "JavaScript merge risk",
+      "JSON pollution check"
+    ]
+  },
+  {
+    "slug": "dependency-vuln-lookup",
+    "path": "/cyber-security-mini-apps/dependency-vuln-lookup",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free npm Package.json Scanner | Dependency & CVE Links",
+    "metaDescription": "Paste package.json — list dependencies with npm and advisory search links. Free npm dependency checker starting point.",
+    "description": "Paste package.json — list dependencies with npm and advisory search links. Free npm dependency checker starting point.",
+    "keyword": "npm dependency checker",
+    "keywords": [
+      "npm dependency checker",
+      "package.json scanner",
+      "CVE lookup npm",
+      "supply chain check"
+    ]
+  },
+  {
+    "slug": "nist-csf-scorecard",
+    "path": "/cyber-security-mini-apps/nist-csf-scorecard",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free NIST Cybersecurity Framework Scorecard (Quick)",
+    "metaDescription": "Slider-based NIST CSF gap snapshot plus themes to document. Free NIST cybersecurity framework checklist starter.",
+    "description": "Slider-based NIST CSF gap snapshot plus themes to document. Free NIST cybersecurity framework checklist starter.",
+    "keyword": "nist csf scorecard",
+    "keywords": [
+      "NIST CSF scorecard",
+      "NIST cybersecurity framework checklist",
+      "free NIST audit tool"
+    ]
+  },
+  {
+    "slug": "zero-trust-checker",
+    "path": "/cyber-security-mini-apps/zero-trust-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Zero Trust Readiness Score | Identity & Network",
+    "metaDescription": "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.",
+    "description": "Score identity, device, network, and data pillars in minutes. Free zero trust assessment — not a replacement for architecture review.",
+    "keyword": "zero trust assessment",
+    "keywords": [
+      "zero trust assessment",
+      "zero trust checklist free",
+      "ZTNA readiness score"
+    ]
+  },
+  {
+    "slug": "soc2-checklist",
+    "path": "/cyber-security-mini-apps/soc2-checklist",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free SOC 2 Readiness Checklist Online (TSC Themes)",
+    "metaDescription": "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.",
+    "description": "Interactive SOC 2 style checklist for common TSC areas. Free SOC 2 checklist — pair with your auditor’s scope.",
+    "keyword": "soc 2 checklist free",
+    "keywords": [
+      "SOC 2 checklist free",
+      "SOC2 readiness",
+      "trust services criteria checklist"
+    ]
+  },
+  {
+    "slug": "ransomware-risk",
+    "path": "/cyber-security-mini-apps/ransomware-risk",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Ransomware Risk Calculator | Backups, MFA, EDR",
+    "metaDescription": "Weighted score from backups, EDR, MFA, and segmentation. Free ransomware risk assessment for leadership conversations.",
+    "description": "Weighted score from backups, EDR, MFA, and segmentation. Free ransomware risk assessment for leadership conversations.",
+    "keyword": "ransomware risk calculator",
+    "keywords": [
+      "ransomware risk calculator",
+      "ransomware checklist free",
+      "backup immaturity score"
+    ]
+  },
+  {
+    "slug": "ir-playbook-builder",
+    "path": "/cyber-security-mini-apps/ir-playbook-builder",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Incident Response Playbook Generator Outline",
+    "metaDescription": "Pick ransomware, data breach, or phishing — get a printable IR step outline. Free incident response plan helper.",
+    "description": "Pick ransomware, data breach, or phishing — get a printable IR step outline. Free incident response plan helper.",
+    "keyword": "incident response playbook",
+    "keywords": [
+      "incident response playbook",
+      "IR plan generator free",
+      "cybersecurity playbook template"
+    ]
+  },
+  {
+    "slug": "attack-surface-calculator",
+    "path": "/cyber-security-mini-apps/attack-surface-calculator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Attack Surface Estimator | Stack & Exposure Metaphor",
+    "metaDescription": "Turn SaaS, APIs, and workforce sliders into a simple exposure metaphor. Free attack surface calculator conversation starter.",
+    "description": "Turn SaaS, APIs, and workforce sliders into a simple exposure metaphor. Free attack surface calculator conversation starter.",
+    "keyword": "attack surface calculator",
+    "keywords": [
+      "attack surface calculator",
+      "digital attack surface estimate",
+      "security exposure score"
+    ]
+  },
+  {
+    "slug": "bug-bounty-scope",
+    "path": "/cyber-security-mini-apps/bug-bounty-scope",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Bug Bounty Scope Parser | In-Scope vs Out-of-Scope",
+    "metaDescription": "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.",
+    "description": "Paste program scope text — bucket lines into in/out scope heuristics. Free bug bounty scope analyzer for researchers.",
+    "keyword": "bug bounty scope parser",
+    "keywords": [
+      "bug bounty scope parser",
+      "HackerOne scope tool",
+      "bug bounty in scope checker"
+    ]
+  },
+  {
+    "slug": "security-awareness-quiz",
+    "path": "/cyber-security-mini-apps/security-awareness-quiz",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Security Awareness Quiz | Phishing & Passwords",
+    "metaDescription": "Short scored quiz on phishing and passwords. Free security awareness test for teams and lunch-and-learns.",
+    "description": "Short scored quiz on phishing and passwords. Free security awareness test for teams and lunch-and-learns.",
+    "keyword": "security awareness quiz free",
+    "keywords": [
+      "security awareness quiz free",
+      "phishing quiz employees",
+      "cybersecurity quiz online"
+    ]
+  },
+  {
+    "slug": "pentest-roadmap",
+    "path": "/cyber-security-mini-apps/pentest-roadmap",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Penetration Testing Roadmap Generator Online",
+    "metaDescription": "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.",
+    "description": "Pick scope and maturity — get a tailored pentest outline. Free penetration testing roadmap for scoping calls.",
+    "keyword": "penetration testing roadmap",
+    "keywords": [
+      "penetration testing roadmap",
+      "pentest plan template free",
+      "security test scope"
+    ]
+  },
+  {
+    "slug": "vendor-risk-scorecard",
+    "path": "/cyber-security-mini-apps/vendor-risk-scorecard",
+    "hub": "cyber-security-mini-apps",
+    "kind": "tool",
+    "title": "Free Third-Party Vendor Risk Scorecard Online",
+    "metaDescription": "Two-minute vendor security questionnaire with a simple risk tier. Free vendor risk assessment starting point.",
+    "description": "Two-minute vendor security questionnaire with a simple risk tier. Free vendor risk assessment starting point.",
+    "keyword": "vendor risk assessment free",
+    "keywords": [
+      "vendor risk assessment free",
+      "third party risk scorecard",
+      "supply chain security checklist"
+    ]
+  },
+  {
+    "slug": "is-my-website-hackable",
+    "path": "/cyber-security-mini-apps/is-my-website-hackable",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Is My Website Hackable? Free Online Security Check",
+    "metaDescription": "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for ",
+    "description": "Free website hackability check: analyze URLs for phishing-style patterns and risky hosts in your browser. No sign-up. Upgrade to a full Pyracrypt scan for depth.",
+    "keyword": "is my website hackable? security check",
+    "keywords": [
+      "is my website hackable? security check",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "url-safety-scanner"
+  },
+  {
+    "slug": "free-website-security-scan",
+    "path": "/cyber-security-mini-apps/free-website-security-scan",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Website Security Scan Online | No Sign-Up",
+    "metaDescription": "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt f",
+    "description": "Free website security scan: paste HTTP headers and get an instant security headers grade (HSTS, CSP, X-Frame). Browser-based checker — then run Pyracrypt for full coverage.",
+    "keyword": "website security scan",
+    "keywords": [
+      "website security scan",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "security-headers-grader"
+  },
+  {
+    "slug": "api-exposure-checker",
+    "path": "/cyber-security-mini-apps/api-exposure-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free API Exposure Checker | CORS & Cross-Origin Test",
+    "metaDescription": "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Py",
+    "description": "Free online CORS checker: paste Access-Control-* headers to spot leaked cross-origin data risks. Test API exposure before attackers do — full mapping on Pyracrypt.",
+    "keyword": "api exposure checker",
+    "keywords": [
+      "api exposure checker",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "cors-checker"
+  },
+  {
+    "slug": "ssl-certificate-checker",
+    "path": "/cyber-security-mini-apps/ssl-certificate-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free SSL Certificate Checker Online | TLS Test",
+    "metaDescription": "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.",
+    "description": "Free SSL certificate checker: DNS lookup for your host + link to SSL Labs for expiry, chain, and TLS version detail. No account — deep scan on Pyracrypt.",
+    "keyword": "ssl certificate checker",
+    "keywords": [
+      "ssl certificate checker",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "ssl-inspector"
+  },
+  {
+    "slug": "security-headers-test",
+    "path": "/cyber-security-mini-apps/security-headers-test",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Security Headers Test Online | HSTS & CSP Grade",
+    "metaDescription": "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracr",
+    "description": "Free security headers test online: grade CSP, HSTS, X-Frame-Options, nosniff, and more from pasted headers. Website security checker — fix gaps with Pyracrypt.",
+    "keyword": "security headers test",
+    "keywords": [
+      "security headers test",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "security-headers-grader"
+  },
+  {
+    "slug": "password-strength-test",
+    "path": "/cyber-security-mini-apps/password-strength-test",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Password Strength Test Online | No Sign-Up",
+    "metaDescription": "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our se",
+    "description": "Free password strength test: entropy-style score, tips, and secure random generator in your browser. Password security checker — no password sent to our servers.",
+    "keyword": "password strength test",
+    "keywords": [
+      "password strength test",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "password-strength"
+  },
+  {
+    "slug": "dns-security-check",
+    "path": "/cyber-security-mini-apps/dns-security-check",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free DNS Security Check Online | MX, TXT, SPF Lookup",
+    "metaDescription": "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.",
+    "description": "Free DNS security check: lookup A, MX, TXT, NS via DNS-over-HTTPS. Inspect mail and TXT records for email hardening — full infra scan on Pyracrypt.",
+    "keyword": "dns security check",
+    "keywords": [
+      "dns security check",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "dns-record-viewer"
+  },
+  {
+    "slug": "email-breach-check",
+    "path": "/cyber-security-mini-apps/email-breach-check",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Email Breach Check Online | Have I Been Pwned",
+    "metaDescription": "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.",
+    "description": "Free email breach check: validate email, MX DNS lookup, open Have I Been Pwned safely. Email leak checker — domain-wide posture on Pyracrypt.",
+    "keyword": "email breach check",
+    "keywords": [
+      "email breach check",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "email-breach-checker"
+  },
+  {
+    "slug": "owasp-top-10-checklist",
+    "path": "/cyber-security-mini-apps/owasp-top-10-checklist",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free OWASP Top 10 Checklist 2025 | Self-Assessment",
+    "metaDescription": "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.",
+    "description": "Free OWASP Top 10 checklist and self-assessment online. Quick web app security score — continuous testing and remediation with Pyracrypt.",
+    "keyword": "owasp top 10 checklist 2025",
+    "keywords": [
+      "owasp top 10 checklist 2025",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "owasp-self-assessment"
+  },
+  {
+    "slug": "sql-injection-prevention",
+    "path": "/cyber-security-mini-apps/sql-injection-prevention",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "SQL Injection Prevention | Free Payload Reference",
+    "metaDescription": "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.",
+    "description": "Free SQL injection reference by database type for authorized testing only. Learn prevention and safe testing — deep SQLi simulation on Pyracrypt.",
+    "keyword": "sql injection prevention",
+    "keywords": [
+      "sql injection prevention",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "sqli-payload-library"
+  },
+  {
+    "slug": "xss-scanner",
+    "path": "/cyber-security-mini-apps/xss-scanner",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free XSS Test Payload Generator | Authorized Use",
+    "metaDescription": "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracry",
+    "description": "Free XSS payload generator for reflected/DOM testing on systems you own or are allowed to test. XSS vulnerability helper — continuous coverage with Pyracrypt.",
+    "keyword": "xss test payload generator",
+    "keywords": [
+      "xss test payload generator",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "xss-payload-generator"
+  },
+  {
+    "slug": "ransomware-protection",
+    "path": "/cyber-security-mini-apps/ransomware-protection",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Ransomware Protection Checklist & Risk Calculator",
+    "metaDescription": "Free ransomware risk calculator: backups, EDR, MFA, segmentation. Ransomware protection checklist online — incident plans with Pyracrypt.",
+    "description": "Free ransomware risk calculator: backups, EDR, MFA, segmentation. Ransomware protection checklist online — incident plans with Pyracrypt.",
+    "keyword": "ransomware protection checklist & risk calculator",
+    "keywords": [
+      "ransomware protection checklist & risk calculator",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "ransomware-risk"
+  },
+  {
+    "slug": "soc2-readiness",
+    "path": "/cyber-security-mini-apps/soc2-readiness",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free SOC 2 Readiness Checklist Online | No Sign-Up",
+    "metaDescription": "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.",
+    "description": "Free SOC 2 readiness checklist: interactive TSC-style controls. SOC 2 gap analysis starter — evidence and scans with Pyracrypt.",
+    "keyword": "soc 2 readiness checklist",
+    "keywords": [
+      "soc 2 readiness checklist",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "soc2-checklist"
+  },
+  {
+    "slug": "nist-scorecard",
+    "path": "/cyber-security-mini-apps/nist-scorecard",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free NIST Cybersecurity Framework Scorecard Online",
+    "metaDescription": "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.",
+    "description": "Free NIST CSF scorecard: quick governance and control snapshot. NIST cybersecurity framework checklist — operationalize with Pyracrypt scans.",
+    "keyword": "nist cybersecurity framework scorecard",
+    "keywords": [
+      "nist cybersecurity framework scorecard",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "nist-csf-scorecard"
+  },
+  {
+    "slug": "zero-trust-checklist",
+    "path": "/cyber-security-mini-apps/zero-trust-checklist",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Zero Trust Security Checklist & Readiness Score",
+    "metaDescription": "Free zero trust checklist: score identity, device, network, and data pillars. Zero trust assessment online — enforce with Pyracrypt.",
+    "description": "Free zero trust checklist: score identity, device, network, and data pillars. Zero trust assessment online — enforce with Pyracrypt.",
+    "keyword": "zero trust security checklist & readiness score",
+    "keywords": [
+      "zero trust security checklist & readiness score",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "zero-trust-checker"
+  },
+  {
+    "slug": "subdomain-finder",
+    "path": "/cyber-security-mini-apps/subdomain-finder",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Subdomain Finder Online | Quick DNS Discovery",
+    "metaDescription": "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.",
+    "description": "Free subdomain finder online: probe common hostnames with DNS-over-HTTPS. How to find subdomains (lite) — full enumeration on Pyracrypt.",
+    "keyword": "subdomain finder",
+    "keywords": [
+      "subdomain finder",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "subdomain-finder-lite"
+  },
+  {
+    "slug": "port-scanner",
+    "path": "/cyber-security-mini-apps/port-scanner",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Open Port Scanner Online Free | Top Ports Reference",
+    "metaDescription": "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.",
+    "description": "Free open port reference online: top 20 ports attackers target (RDP, SSH, SMB, DB, web). Educational port scanner checklist — full sweep with Pyracrypt.",
+    "keyword": "open port scanner",
+    "keywords": [
+      "open port scanner",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "open-port-checker"
+  },
+  {
+    "slug": "github-secrets-scanner",
+    "path": "/cyber-security-mini-apps/github-secrets-scanner",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free GitHub Secret Scanner | Find Leaked API Keys",
+    "metaDescription": "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.",
+    "description": "Free GitHub secret scanner: paste CI logs or snippets to detect AWS, GitHub, Slack token patterns. Leaked credential finder — deep code scan on Pyracrypt.",
+    "keyword": "github secret scanner",
+    "keywords": [
+      "github secret scanner",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "github-secret-scanner"
+  },
+  {
+    "slug": "cookie-security-checker",
+    "path": "/cyber-security-mini-apps/cookie-security-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Cookie Security Checker | HttpOnly & SameSite",
+    "metaDescription": "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.",
+    "description": "Free cookie security checker: paste Set-Cookie lines for Secure, HttpOnly, SameSite grades. Session cookie analyzer — compliance scan on Pyracrypt.",
+    "keyword": "cookie security checker",
+    "keywords": [
+      "cookie security checker",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "cookie-analyzer"
+  },
+  {
+    "slug": "csp-checker",
+    "path": "/cyber-security-mini-apps/csp-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free CSP Checker Online | Content Security Policy Test",
+    "metaDescription": "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.",
+    "description": "Free CSP checker online: grade Content-Security-Policy and spot unsafe-inline and wildcards. CSP policy test — harden with Pyracrypt.",
+    "keyword": "csp checker",
+    "keywords": [
+      "csp checker",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "csp-evaluator"
+  },
+  {
+    "slug": "clickjacking-test",
+    "path": "/cyber-security-mini-apps/clickjacking-test",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Clickjacking Test Online | X-Frame-Options Check",
+    "metaDescription": "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.",
+    "description": "Free clickjacking test: paste headers to see X-Frame-Options or CSP frame-ancestors coverage. UI redress checker — full review on Pyracrypt.",
+    "keyword": "clickjacking test",
+    "keywords": [
+      "clickjacking test",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "clickjacking-tester"
+  },
+  {
+    "slug": "ip-reputation-checker",
+    "path": "/cyber-security-mini-apps/ip-reputation-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free IP Address Reputation Check | IP Lookup Online",
+    "metaDescription": "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.",
+    "description": "Free IP reputation check and geolocation lookup online. IP address checker for ASN and country — correlate with Pyracrypt infrastructure scans.",
+    "keyword": "ip address reputation check",
+    "keywords": [
+      "ip address reputation check",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "ip-reputation"
+  },
+  {
+    "slug": "ai-cybersecurity-tool",
+    "path": "/cyber-security-mini-apps/ai-cybersecurity-tool",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free AI Cybersecurity Tool | TLS Check + Smart Tips",
+    "metaDescription": "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.",
+    "description": "Free AI cybersecurity helper: TLS version checklist, smart tips, and optional AI insights. Browser security tool — full AI pipeline on Pyracrypt.",
+    "keyword": "ai cybersecurity tool",
+    "keywords": [
+      "ai cybersecurity tool",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "tls-version-checker"
+  },
+  {
+    "slug": "phishing-email-checker",
+    "path": "/cyber-security-mini-apps/phishing-email-checker",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Phishing Email Checker | Header Analyzer Online",
+    "metaDescription": "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.",
+    "description": "Free phishing email checker: paste raw email source for header and URL heuristics. Email security analyzer — org-wide posture on Pyracrypt.",
+    "keyword": "phishing email checker",
+    "keywords": [
+      "phishing email checker",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "http-headers-analyzer"
+  },
+  {
+    "slug": "ir-plan-generator",
+    "path": "/cyber-security-mini-apps/ir-plan-generator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Incident Response Plan Generator Online",
+    "metaDescription": "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.",
+    "description": "Free incident response plan generator: ransomware, breach, or phishing playbook outline. IR checklist printable — drills with Pyracrypt.",
+    "keyword": "incident response plan generator",
+    "keywords": [
+      "incident response plan generator",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "ir-playbook-builder"
+  },
+  {
+    "slug": "2fa-comparison",
+    "path": "/cyber-security-mini-apps/2fa-comparison",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Two-Factor Authentication Comparison | MFA Guide",
+    "metaDescription": "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.",
+    "description": "Free 2FA comparison: TOTP vs SMS vs security keys with a readiness-style score. MFA security guide — enforce controls with Pyracrypt.",
+    "keyword": "two",
+    "keywords": [
+      "two",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "zero-trust-checker"
+  },
+  {
+    "slug": "password-generator",
+    "path": "/cyber-security-mini-apps/password-generator",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Secure Password Generator Online | Strong & Random",
+    "metaDescription": "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.",
+    "description": "Free secure password generator online: cryptographic random passwords with strength meter. No sign-up — store secrets in a vault; deep audit on Pyracrypt.",
+    "keyword": "secure password generator",
+    "keywords": [
+      "secure password generator",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "password-strength"
+  },
+  {
+    "slug": "threat-actor-lookup",
+    "path": "/cyber-security-mini-apps/threat-actor-lookup",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Threat Intel Self-Check | OWASP & Risk Baseline",
+    "metaDescription": "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.",
+    "description": "Free security posture self-check aligned to common web risks (OWASP-style). Threat intel programs need baselines — map to Pyracrypt detection.",
+    "keyword": "threat intel self",
+    "keywords": [
+      "threat intel self",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "owasp-self-assessment"
+  },
+  {
+    "slug": "cve-lookup",
+    "path": "/cyber-security-mini-apps/cve-lookup",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free CVE Lookup Tool | npm & Package Advisory Links",
+    "metaDescription": "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.",
+    "description": "Free CVE lookup helper: paste package.json to list packages with npm and GitHub Advisory links. Dependency CVE starter — full graph on Pyracrypt.",
+    "keyword": "cve lookup tool",
+    "keywords": [
+      "cve lookup tool",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "dependency-vuln-lookup"
+  },
+  {
+    "slug": "npm-audit-tool",
+    "path": "/cyber-security-mini-apps/npm-audit-tool",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free npm Vulnerability Scanner Online | package.json",
+    "metaDescription": "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.",
+    "description": "Free npm vulnerability scanner: extract dependencies from package.json with advisory search links. npm audit helper — CI integration on Pyracrypt.",
+    "keyword": "npm vulnerability scanner",
+    "keywords": [
+      "npm vulnerability scanner",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "dependency-vuln-lookup"
+  },
+  {
+    "slug": "prototype-pollution",
+    "path": "/cyber-security-mini-apps/prototype-pollution",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Prototype Pollution Scanner Online | JSON/JS",
+    "metaDescription": "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.",
+    "description": "Free prototype pollution scanner: paste JSON or JS for risky merge patterns. JavaScript security checker — deep review on Pyracrypt.",
+    "keyword": "prototype pollution scanner",
+    "keywords": [
+      "prototype pollution scanner",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "prototype-pollution-checker"
+  },
+  {
+    "slug": "attack-simulation",
+    "path": "/cyber-security-mini-apps/attack-simulation",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Attack Simulation Tool | URL Risk Story Online",
+    "metaDescription": "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.",
+    "description": "Free attack simulation starter: combine URL safety checks into a simple risk narrative. Breach storyboard — full AI simulation on Pyracrypt.",
+    "keyword": "attack simulation tool",
+    "keywords": [
+      "attack simulation tool",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "url-safety-scanner"
+  },
+  {
+    "slug": "threat-report-summarizer",
+    "path": "/cyber-security-mini-apps/threat-report-summarizer",
+    "hub": "cyber-security-mini-apps",
+    "kind": "landing",
+    "title": "Free Threat Report IOC Extractor + AI Tips Online",
+    "metaDescription": "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.",
+    "description": "Free threat report tool: paste text to extract IOC-shaped tokens plus smart tips. AI threat summarizer upgrade on Pyracrypt with full parsing.",
+    "keyword": "threat report ioc extractor + ai tips",
+    "keywords": [
+      "threat report ioc extractor + ai tips",
+      "free security tool",
+      "online checker"
+    ],
+    "relatedToolSlug": "github-secret-scanner"
+  },
+  {
+    "slug": "ai-chat",
+    "path": "/ai-tools-hub/ai-chat",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Chat Online | ZZAI",
+    "h1": "Free AI Chat Online",
+    "metaDescription": "Chat with advanced AI instantly — no setup required. Talk to a powerful AI assistant in real time. Ask anything, get clear answers, brainstorm ideas, or ju",
+    "description": "Talk to a powerful AI assistant in real time. Ask anything, get clear answers, brainstorm ideas, or just explore what AI can do for you.",
+    "tagline": "Chat with advanced AI instantly — no setup required.",
+    "category": "Content & Writing",
+    "keyword": "ai chat online",
+    "keywords": [
+      "ai chat online",
+      "free ai chat",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "text-summarizer",
+    "path": "/ai-tools-hub/text-summarizer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Text Summarizer Online | ZZAI",
+    "h1": "Free Text Summarizer Online",
+    "metaDescription": "Paste any text. Get a crisp summary in seconds. Instantly compress long articles, documents, or notes into a clear, concise summary — saving you hours of r",
+    "description": "Instantly compress long articles, documents, or notes into a clear, concise summary — saving you hours of reading time.",
+    "tagline": "Paste any text. Get a crisp summary in seconds.",
+    "category": "Content & Writing",
+    "keyword": "text summarizer online",
+    "keywords": [
+      "text summarizer online",
+      "free text summarizer",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-translator",
+    "path": "/ai-tools-hub/ai-translator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Translator Online | ZZAI",
+    "h1": "Free AI Translator Online",
+    "metaDescription": "Translate any text into 50+ languages instantly. Accurate, context-aware translation powered by AI. Works for simple phrases and complex paragraphs alike.",
+    "description": "Accurate, context-aware translation powered by AI. Works for simple phrases and complex paragraphs alike.",
+    "tagline": "Translate any text into 50+ languages instantly.",
+    "category": "Language Tools",
+    "keyword": "ai translator online",
+    "keywords": [
+      "ai translator online",
+      "free ai translator",
+      "language tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "code-explainer",
+    "path": "/ai-tools-hub/code-explainer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Code Explainer Online | ZZAI",
+    "h1": "Free Code Explainer Online",
+    "metaDescription": "Paste any code snippet — get a plain-English explanation. Instantly understand what any code does. Perfect for learning, code reviews, or debugging unfamil",
+    "description": "Instantly understand what any code does. Perfect for learning, code reviews, or debugging unfamiliar codebases.",
+    "tagline": "Paste any code snippet — get a plain-English explanation.",
+    "category": "Code Tools",
+    "keyword": "code explainer online",
+    "keywords": [
+      "code explainer online",
+      "free code explainer",
+      "code tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "grammar-checker",
+    "path": "/ai-tools-hub/grammar-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Grammar Checker Online | ZZAI",
+    "h1": "Free Grammar Checker Online",
+    "metaDescription": "Write with confidence — catch every grammar mistake. AI-powered grammar and style checker that goes beyond spell check. Get corrections and explanations fo",
+    "description": "AI-powered grammar and style checker that goes beyond spell check. Get corrections and explanations for every issue.",
+    "tagline": "Write with confidence — catch every grammar mistake.",
+    "category": "Content & Writing",
+    "keyword": "grammar checker online",
+    "keywords": [
+      "grammar checker online",
+      "free grammar checker",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "sentiment-analyzer",
+    "path": "/ai-tools-hub/sentiment-analyzer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Sentiment Analyzer Online | ZZAI",
+    "h1": "Free Sentiment Analyzer Online",
+    "metaDescription": "Understand the emotion behind any text in seconds. Detect positive, negative, or neutral sentiment — and understand the emotional tone of reviews, feedback",
+    "description": "Detect positive, negative, or neutral sentiment — and understand the emotional tone of reviews, feedback, or messages.",
+    "tagline": "Understand the emotion behind any text in seconds.",
+    "category": "Data Tools",
+    "keyword": "sentiment analyzer online",
+    "keywords": [
+      "sentiment analyzer online",
+      "free sentiment analyzer",
+      "data tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "keyword-extractor",
+    "path": "/ai-tools-hub/keyword-extractor",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Keyword Extractor Online | ZZAI",
+    "h1": "Free Keyword Extractor Online",
+    "metaDescription": "Extract the most important keywords from any content. Instantly pull out the key topics, phrases, and terms from any text. Great for SEO, research, and con",
+    "description": "Instantly pull out the key topics, phrases, and terms from any text. Great for SEO, research, and content tagging.",
+    "tagline": "Extract the most important keywords from any content.",
+    "category": "Content & Writing",
+    "keyword": "keyword extractor online",
+    "keywords": [
+      "keyword extractor online",
+      "free keyword extractor",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "tone-rewriter",
+    "path": "/ai-tools-hub/tone-rewriter",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Tone Rewriter Online | ZZAI",
+    "h1": "Free Tone Rewriter Online",
+    "metaDescription": "Rewrite anything in a different tone — professional, casual, bold. Transform the tone of any text without changing its meaning. From formal to friendly, se",
+    "description": "Transform the tone of any text without changing its meaning. From formal to friendly, serious to playful — in one click.",
+    "tagline": "Rewrite anything in a different tone — professional, casual, bold.",
+    "category": "Content & Writing",
+    "keyword": "tone rewriter online",
+    "keywords": [
+      "tone rewriter online",
+      "free tone rewriter",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "image-generator",
+    "path": "/ai-tools-hub/image-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Image Generator Online | ZZAI",
+    "h1": "Free Image Generator Online",
+    "metaDescription": "Describe an image. See it come to life. Generate stunning AI images from text descriptions. Perfect for mockups, creative projects, and content creation.",
+    "description": "Generate stunning AI images from text descriptions. Perfect for mockups, creative projects, and content creation.",
+    "tagline": "Describe an image. See it come to life.",
+    "category": "Content & Writing",
+    "keyword": "image generator online",
+    "keywords": [
+      "image generator online",
+      "free image generator",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "quiz-generator",
+    "path": "/ai-tools-hub/quiz-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Quiz Generator Online | ZZAI",
+    "h1": "Free Quiz Generator Online",
+    "metaDescription": "Turn any topic into a ready-to-use quiz instantly. Generate multiple-choice quizzes on any subject. Great for teachers, trainers, and learners who want to ",
+    "description": "Generate multiple-choice quizzes on any subject. Great for teachers, trainers, and learners who want to test knowledge fast.",
+    "tagline": "Turn any topic into a ready-to-use quiz instantly.",
+    "category": "Content & Writing",
+    "keyword": "quiz generator online",
+    "keywords": [
+      "quiz generator online",
+      "free quiz generator",
+      "content & writing",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-coverage-checker",
+    "path": "/ai-tools-hub/prompt-coverage-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Coverage Checker Online | ZZAI",
+    "h1": "Free Prompt Coverage Checker Online",
+    "metaDescription": "Instantly see which fields your prompt is missing. Visualize how well your AI prompt covers all the fields in your schema. Spot gaps before they reach prod",
+    "description": "Visualize how well your AI prompt covers all the fields in your schema. Spot gaps before they reach production.",
+    "tagline": "Instantly see which fields your prompt is missing.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt coverage checker online",
+    "keywords": [
+      "prompt coverage checker online",
+      "free prompt coverage checker",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "json-schema-analyzer",
+    "path": "/ai-tools-hub/json-schema-analyzer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free JSON Schema Analyzer Online | ZZAI",
+    "h1": "Free JSON Schema Analyzer Online",
+    "metaDescription": "Analyze and validate any JSON schema in seconds. Paste a JSON schema and get instant structural analysis, validation feedback, and suggestions for improvem",
+    "description": "Paste a JSON schema and get instant structural analysis, validation feedback, and suggestions for improvement.",
+    "tagline": "Analyze and validate any JSON schema in seconds.",
+    "category": "Developer Tools",
+    "keyword": "json schema analyzer online",
+    "keywords": [
+      "json schema analyzer online",
+      "free json schema analyzer",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-prompt-linter",
+    "path": "/ai-tools-hub/ai-prompt-linter",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Prompt Linter Online | ZZAI",
+    "h1": "Free AI Prompt Linter Online",
+    "metaDescription": "Lint your AI prompts for clarity, ambiguity, and best practices. Run your prompts through an AI linter that catches vague instructions, missing context, an",
+    "description": "Run your prompts through an AI linter that catches vague instructions, missing context, and anti-patterns before you deploy.",
+    "tagline": "Lint your AI prompts for clarity, ambiguity, and best practices.",
+    "category": "AI Prompt Tools",
+    "keyword": "ai prompt linter online",
+    "keywords": [
+      "ai prompt linter online",
+      "free ai prompt linter",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "api-latency-calculator",
+    "path": "/ai-tools-hub/api-latency-calculator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free API Latency Calculator Online | ZZAI",
+    "h1": "Free API Latency Calculator Online",
+    "metaDescription": "Forecast your AI API latency before you go live. Model the expected response times for different AI APIs based on your prompt size, schema, and selected mo",
+    "description": "Model the expected response times for different AI APIs based on your prompt size, schema, and selected model tier.",
+    "tagline": "Forecast your AI API latency before you go live.",
+    "category": "Developer Tools",
+    "keyword": "api latency calculator online",
+    "keywords": [
+      "api latency calculator online",
+      "free api latency calculator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-test-case-generator",
+    "path": "/ai-tools-hub/ai-test-case-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Test Case Generator Online | ZZAI",
+    "h1": "Free AI Test Case Generator Online",
+    "metaDescription": "Generate test cases for your AI prompts automatically. Create comprehensive test inputs for any AI prompt — edge cases, boundary conditions, and typical sc",
+    "description": "Create comprehensive test inputs for any AI prompt — edge cases, boundary conditions, and typical scenarios included.",
+    "tagline": "Generate test cases for your AI prompts automatically.",
+    "category": "AI Prompt Tools",
+    "keyword": "ai test case generator online",
+    "keywords": [
+      "ai test case generator online",
+      "free ai test case generator",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-drift-detector",
+    "path": "/ai-tools-hub/prompt-drift-detector",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Drift Detector Online | ZZAI",
+    "h1": "Free Prompt Drift Detector Online",
+    "metaDescription": "Detect when your AI outputs start drifting from the original intent. Compare AI outputs over time to spot drift, regressions, or unexpected behavior change",
+    "description": "Compare AI outputs over time to spot drift, regressions, or unexpected behavior changes in your deployed prompts.",
+    "tagline": "Detect when your AI outputs start drifting from the original intent.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt drift detector online",
+    "keywords": [
+      "prompt drift detector online",
+      "free prompt drift detector",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-security-scanner",
+    "path": "/ai-tools-hub/prompt-security-scanner",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Security Scanner Online | ZZAI",
+    "h1": "Free Prompt Security Scanner Online",
+    "metaDescription": "Scan your prompts for injection vulnerabilities and security risks. Detect prompt injection attacks, jailbreak attempts, and unsafe instructions before the",
+    "description": "Detect prompt injection attacks, jailbreak attempts, and unsafe instructions before they reach your AI pipeline.",
+    "tagline": "Scan your prompts for injection vulnerabilities and security risks.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt security scanner online",
+    "keywords": [
+      "prompt security scanner online",
+      "free prompt security scanner",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-model-comparison",
+    "path": "/ai-tools-hub/ai-model-comparison",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Model Comparison Online | ZZAI",
+    "h1": "Free AI Model Comparison Online",
+    "metaDescription": "Compare AI models by cost, tokens, and compatibility — instantly. Simulate how your prompt would perform across GPT-4o, Claude, Gemini, and more. See cost ",
+    "description": "Simulate how your prompt would perform across GPT-4o, Claude, Gemini, and more. See cost estimates and compatibility scores side by side.",
+    "tagline": "Compare AI models by cost, tokens, and compatibility — instantly.",
+    "category": "AI Model Tools",
+    "keyword": "ai model comparison online",
+    "keywords": [
+      "ai model comparison online",
+      "free ai model comparison",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "json-repair-tool",
+    "path": "/ai-tools-hub/json-repair-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free JSON Repair Tool Online | ZZAI",
+    "h1": "Free JSON Repair Tool Online",
+    "metaDescription": "Fix broken JSON from AI outputs automatically. Paste malformed or truncated JSON from AI responses and get a clean, valid version repaired instantly.",
+    "description": "Paste malformed or truncated JSON from AI responses and get a clean, valid version repaired instantly.",
+    "tagline": "Fix broken JSON from AI outputs automatically.",
+    "category": "Developer Tools",
+    "keyword": "json repair tool online",
+    "keywords": [
+      "json repair tool online",
+      "free json repair tool",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-consistency-checker",
+    "path": "/ai-tools-hub/prompt-consistency-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Consistency Checker Online | ZZAI",
+    "h1": "Free Prompt Consistency Checker Online",
+    "metaDescription": "Score your prompt for consistency and clarity. Analyze your prompts for terminology consistency, structural clarity, and alignment with your schema — get a",
+    "description": "Analyze your prompts for terminology consistency, structural clarity, and alignment with your schema — get a consistency score and actionable fixes.",
+    "tagline": "Score your prompt for consistency and clarity.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt consistency checker online",
+    "keywords": [
+      "prompt consistency checker online",
+      "free prompt consistency checker",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "synthetic-dataset-generator",
+    "path": "/ai-tools-hub/synthetic-dataset-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Synthetic Dataset Generator Online | ZZAI",
+    "h1": "Free Synthetic Dataset Generator Online",
+    "metaDescription": "Generate realistic test datasets from any JSON schema. Instantly create synthetic data rows for testing, demos, or development — based on your schema or a ",
+    "description": "Instantly create synthetic data rows for testing, demos, or development — based on your schema or a natural language description.",
+    "tagline": "Generate realistic test datasets from any JSON schema.",
+    "category": "AI Model Tools",
+    "keyword": "synthetic dataset generator online",
+    "keywords": [
+      "synthetic dataset generator online",
+      "free synthetic dataset generator",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-confidence-heatmap",
+    "path": "/ai-tools-hub/prompt-confidence-heatmap",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Confidence Heatmap Online | ZZAI",
+    "h1": "Free Prompt Confidence Heatmap Online",
+    "metaDescription": "Visualize which parts of your prompt the AI is most confident about. See a token-level heatmap of your prompt showing where AI confidence is high or low — ",
+    "description": "See a token-level heatmap of your prompt showing where AI confidence is high or low — optimize accordingly.",
+    "tagline": "Visualize which parts of your prompt the AI is most confident about.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt confidence heatmap online",
+    "keywords": [
+      "prompt confidence heatmap online",
+      "free prompt confidence heatmap",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-output-diff-visualizer",
+    "path": "/ai-tools-hub/ai-output-diff-visualizer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Output Diff Visualizer Online | ZZAI",
+    "h1": "Free AI Output Diff Visualizer Online",
+    "metaDescription": "Compare two AI outputs side by side with a diff view. Paste two AI responses and instantly see exactly what changed — line by line, with semantic and textu",
+    "description": "Paste two AI responses and instantly see exactly what changed — line by line, with semantic and textual diffs.",
+    "tagline": "Compare two AI outputs side by side with a diff view.",
+    "category": "AI Model Tools",
+    "keyword": "ai output diff visualizer online",
+    "keywords": [
+      "ai output diff visualizer online",
+      "free ai output diff visualizer",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-compression-tool",
+    "path": "/ai-tools-hub/prompt-compression-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Compression Tool Online | ZZAI",
+    "h1": "Free Prompt Compression Tool Online",
+    "metaDescription": "Shrink your prompts without losing quality. Compress verbose prompts to reduce token usage and costs — while preserving all instructions and intent.",
+    "description": "Compress verbose prompts to reduce token usage and costs — while preserving all instructions and intent.",
+    "tagline": "Shrink your prompts without losing quality.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt compression tool online",
+    "keywords": [
+      "prompt compression tool online",
+      "free prompt compression tool",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "evaluation-rule-builder",
+    "path": "/ai-tools-hub/evaluation-rule-builder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Evaluation Rule Builder Online | ZZAI",
+    "h1": "Free Evaluation Rule Builder Online",
+    "metaDescription": "Build custom rules to evaluate AI output quality. Create structured evaluation criteria for your AI outputs — define rules, weights, and scoring logic with",
+    "description": "Create structured evaluation criteria for your AI outputs — define rules, weights, and scoring logic without writing code.",
+    "tagline": "Build custom rules to evaluate AI output quality.",
+    "category": "AI Model Tools",
+    "keyword": "evaluation rule builder online",
+    "keywords": [
+      "evaluation rule builder online",
+      "free evaluation rule builder",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "json-schema-linter",
+    "path": "/ai-tools-hub/json-schema-linter",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free JSON Schema Linter Online | ZZAI",
+    "h1": "Free JSON Schema Linter Online",
+    "metaDescription": "Lint your JSON schemas for errors and best practices. Detect structural errors, type inconsistencies, and schema anti-patterns before they cause issues dow",
+    "description": "Detect structural errors, type inconsistencies, and schema anti-patterns before they cause issues downstream.",
+    "tagline": "Lint your JSON schemas for errors and best practices.",
+    "category": "Developer Tools",
+    "keyword": "json schema linter online",
+    "keywords": [
+      "json schema linter online",
+      "free json schema linter",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hardware-bom-tools",
+    "path": "/ai-tools-hub/hardware-bom-tools",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hardware BOM Tools Online | ZZAI",
+    "h1": "Free Hardware BOM Tools Online",
+    "metaDescription": "Manage and preview hardware bills of materials with AI. AI-powered tools for hardware builders — generate, analyze, and verify bills of materials for elect",
+    "description": "AI-powered tools for hardware builders — generate, analyze, and verify bills of materials for electronics and hardware projects.",
+    "tagline": "Manage and preview hardware bills of materials with AI.",
+    "category": "Hardware & BOM",
+    "keyword": "hardware bom tools online",
+    "keywords": [
+      "hardware bom tools online",
+      "free hardware bom tools",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-bom-generator",
+    "path": "/ai-tools-hub/ai-bom-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI BOM Generator Online | ZZAI",
+    "h1": "Free AI BOM Generator Online",
+    "metaDescription": "Generate bills of materials from a single description. Describe your project in plain language — hardware, music production, or any creative build — and ge",
+    "description": "Describe your project in plain language — hardware, music production, or any creative build — and get an AI-generated BOM instantly.",
+    "tagline": "Generate bills of materials from a single description.",
+    "category": "Hardware & BOM",
+    "keyword": "ai bom generator online",
+    "keywords": [
+      "ai bom generator online",
+      "free ai bom generator",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "bom-material-sourcing",
+    "path": "/ai-tools-hub/bom-material-sourcing",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free BOM Material Sourcing Online | ZZAI",
+    "h1": "Free BOM Material Sourcing Online",
+    "metaDescription": "Find and compare sources for every item in your BOM. AI-assisted material sourcing that helps you identify suppliers, compare prices, and optimize your bil",
+    "description": "AI-assisted material sourcing that helps you identify suppliers, compare prices, and optimize your bill of materials for cost and availability.",
+    "tagline": "Find and compare sources for every item in your BOM.",
+    "category": "Hardware & BOM",
+    "keyword": "bom material sourcing online",
+    "keywords": [
+      "bom material sourcing online",
+      "free bom material sourcing",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hardware-cost-estimator",
+    "path": "/ai-tools-hub/hardware-cost-estimator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hardware Cost Estimator Online | ZZAI",
+    "h1": "Free Hardware Cost Estimator Online",
+    "metaDescription": "Estimate BOM and prototype costs instantly — no signup required. Plug in your components and get an instant cost estimate for PCB production, enclosure, an",
+    "description": "Plug in your components and get an instant cost estimate for PCB production, enclosure, and full prototype pricing. Powered by the Svivva hardware workflow.",
+    "tagline": "Estimate BOM and prototype costs instantly — no signup required.",
+    "category": "Hardware & BOM",
+    "keyword": "hardware cost estimator online",
+    "keywords": [
+      "hardware cost estimator online",
+      "free hardware cost estimator",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "3d-model-from-text",
+    "path": "/ai-tools-hub/3d-model-from-text",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free 3D Model From Text Preview Online | ZZAI",
+    "h1": "Free 3D Model From Text Preview Online",
+    "metaDescription": "Describe any project. See an AI-generated workflow preview in seconds. Enter a brief description and get an instant preview of what your project looks like",
+    "description": "Enter a brief description and get an instant preview of what your project looks like through the Svivva pipeline — 3D models, BOMs, audio, idea reports, and more.",
+    "tagline": "Describe any project. See an AI-generated workflow preview in seconds.",
+    "category": "AI Model Tools",
+    "keyword": "3d model from text preview online",
+    "keywords": [
+      "3d model from text preview online",
+      "free 3d model from text preview",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "manufacturing-readiness-checker",
+    "path": "/ai-tools-hub/manufacturing-readiness-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Manufacturing Readiness Checker Online | ZZAI",
+    "h1": "Free Manufacturing Readiness Checker Online",
+    "metaDescription": "Instantly evaluate how production-ready your hardware concept is. Free MRL assessment tool that evaluates your concept\\",
+    "description": "Free MRL assessment tool that evaluates your concept\\",
+    "tagline": "Instantly evaluate how production-ready your hardware concept is.",
+    "category": "Hardware & BOM",
+    "keyword": "manufacturing readiness checker online",
+    "keywords": [
+      "manufacturing readiness checker online",
+      "free manufacturing readiness checker",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hardware-documentation-exporter",
+    "path": "/ai-tools-hub/hardware-documentation-exporter",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hardware Documentation Exporter Online | ZZAI",
+    "h1": "Free Hardware Documentation Exporter Online",
+    "metaDescription": "Generate schematics, BOM tables, and production docs in seconds. Enter your hardware concept and instantly export schematics, BOM tables, cost estimates, a",
+    "description": "Enter your hardware concept and instantly export schematics, BOM tables, cost estimates, and production-style documentation. No login required. Powered by Svivva.",
+    "tagline": "Generate schematics, BOM tables, and production docs in seconds.",
+    "category": "Hardware & BOM",
+    "keyword": "hardware documentation exporter online",
+    "keywords": [
+      "hardware documentation exporter online",
+      "free hardware documentation exporter",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "supplier-comparison",
+    "path": "/ai-tools-hub/supplier-comparison",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Supplier Comparison Tool Online | ZZAI",
+    "h1": "Free Supplier Comparison Tool Online",
+    "metaDescription": "Compare suppliers side by side — lead times, costs, and regions. Enter your product concept and instantly compare suppliers for your hardware, play, or ide",
+    "description": "Enter your product concept and instantly compare suppliers for your hardware, play, or idea project. See lead times, cost tiers, minimum orders, and regions — no login required.",
+    "tagline": "Compare suppliers side by side — lead times, costs, and regions.",
+    "category": "Hardware & BOM",
+    "keyword": "supplier comparison tool online",
+    "keywords": [
+      "supplier comparison tool online",
+      "free supplier comparison tool",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "product-build-flow-simulator",
+    "path": "/ai-tools-hub/product-build-flow-simulator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Product Build Flow Simulator Online | ZZAI",
+    "h1": "Free Product Build Flow Simulator Online",
+    "metaDescription": "Preview one real production pipeline step — instantly, no signup. Enter a project brief and instantly preview one step of a real production pipeline — hard",
+    "description": "Enter a project brief and instantly preview one step of a real production pipeline — hardware schematics, BOMs, audio maps, collaboration flows, and more. Powered by Svivva.",
+    "tagline": "Preview one real production pipeline step — instantly, no signup.",
+    "category": "Hardware & BOM",
+    "keyword": "product build flow simulator online",
+    "keywords": [
+      "product build flow simulator online",
+      "free product build flow simulator",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hardware-compliance-checker",
+    "path": "/ai-tools-hub/hardware-compliance-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hardware Compliance Checker Online | ZZAI",
+    "h1": "Free Hardware Compliance Checker Online",
+    "metaDescription": "Scan your hardware concept for compliance risks and regulatory flags. Free hardware compliance and risk scanner. Enter your product brief and get an instan",
+    "description": "Free hardware compliance and risk scanner. Enter your product brief and get an instant overview of potential regulatory requirements, compliance risks, and certification flags.",
+    "tagline": "Scan your hardware concept for compliance risks and regulatory flags.",
+    "category": "Hardware & BOM",
+    "keyword": "hardware compliance checker online",
+    "keywords": [
+      "hardware compliance checker online",
+      "free hardware compliance checker",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "chord-progression-generator",
+    "path": "/ai-tools-hub/chord-progression-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Chord Progression Generator Online | ZZAI",
+    "h1": "Free Chord Progression Generator Online",
+    "metaDescription": "Generate chord progressions instantly — free, no signup. Create chord progressions for any style or genre in seconds. Enter a mood or brief and get a produ",
+    "description": "Create chord progressions for any style or genre in seconds. Enter a mood or brief and get a production-ready chord sequence powered by the Svivva Play pipeline.",
+    "tagline": "Generate chord progressions instantly — free, no signup.",
+    "category": "Music & Audio",
+    "keyword": "chord progression generator online",
+    "keywords": [
+      "chord progression generator online",
+      "free chord progression generator",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "patch-designer",
+    "path": "/ai-tools-hub/patch-designer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Synth Patch Designer Online | ZZAI",
+    "h1": "Free Synth Patch Designer Online",
+    "metaDescription": "Describe your sound — get a full signal chain and modular patch. Free online synth patch designer. Describe the sound you want and instantly get a signal c",
+    "description": "Free online synth patch designer. Describe the sound you want and instantly get a signal chain, module list, and patch map — no hardware required.",
+    "tagline": "Describe your sound — get a full signal chain and modular patch.",
+    "category": "Music & Audio",
+    "keyword": "synth patch designer online",
+    "keywords": [
+      "synth patch designer online",
+      "free synth patch designer",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "melody-interpolator",
+    "path": "/ai-tools-hub/melody-interpolator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Melody Interpolator Online | ZZAI",
+    "h1": "Free AI Melody Interpolator Online",
+    "metaDescription": "Turn a concept into a production-style melody in under 3 seconds. Free AI melody interpolator. Enter a project concept and get an instant melody preview wi",
+    "description": "Free AI melody interpolator. Enter a project concept and get an instant melody preview with notes, rhythm, and harmonic context — no account required.",
+    "tagline": "Turn a concept into a production-style melody in under 3 seconds.",
+    "category": "Music & Audio",
+    "keyword": "ai melody interpolator online",
+    "keywords": [
+      "ai melody interpolator online",
+      "free ai melody interpolator",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "composition-mode-preview-studio",
+    "path": "/ai-tools-hub/composition-mode-preview-studio",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Composition Mode Preview Studio Online | ZZAI",
+    "h1": "Free Composition Mode Preview Studio Online",
+    "metaDescription": "Submit a brief and instantly preview a composition pipeline step. Free composition preview studio. Enter your project brief and get an instant production-s",
+    "description": "Free composition preview studio. Enter your project brief and get an instant production-style preview of a composition pipeline step — modes cover audio, hardware, idea, and more.",
+    "tagline": "Submit a brief and instantly preview a composition pipeline step.",
+    "category": "Music & Audio",
+    "keyword": "composition mode preview studio online",
+    "keywords": [
+      "composition mode preview studio online",
+      "free composition mode preview studio",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ensemble-layering-playground",
+    "path": "/ai-tools-hub/ensemble-layering-playground",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Ensemble Layering Playground Online | ZZAI",
+    "h1": "Free Ensemble Layering Playground Online",
+    "metaDescription": "Preview multi-instrument ensemble layers from a single brief. Free ensemble layering tool. Submit a project brief and instantly preview a production-style ",
+    "description": "Free ensemble layering tool. Submit a project brief and instantly preview a production-style layering structure with instruments, roles, and spatial placement — no signup required.",
+    "tagline": "Preview multi-instrument ensemble layers from a single brief.",
+    "category": "Music & Audio",
+    "keyword": "ensemble layering playground online",
+    "keywords": [
+      "ensemble layering playground online",
+      "free ensemble layering playground",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-sound-generator",
+    "path": "/ai-tools-hub/ai-sound-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Sound Generator Online | ZZAI",
+    "h1": "Free AI Sound Generator Online",
+    "metaDescription": "Generate production-style sound previews from a text prompt in seconds. Free AI sound generator online. Describe your beat, melody, or sonic idea and insta",
+    "description": "Free AI sound generator online. Describe your beat, melody, or sonic idea and instantly get a production-style sound preview — no login, no software, no waiting.",
+    "tagline": "Generate production-style sound previews from a text prompt in seconds.",
+    "category": "Music & Audio",
+    "keyword": "ai sound generator online",
+    "keywords": [
+      "ai sound generator online",
+      "free ai sound generator",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "midi-mapper",
+    "path": "/ai-tools-hub/midi-mapper",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free MIDI Mapper & Stem Exporter Online | ZZAI",
+    "h1": "Free MIDI Mapper & Stem Exporter Online",
+    "metaDescription": "Map MIDI notes and CCs — then preview stereo stem exports instantly. Free online MIDI mapper and audio stem export tool. Map notes and CCs to hardware or s",
+    "description": "Free online MIDI mapper and audio stem export tool. Map notes and CCs to hardware or software targets, preview stereo exports, and generate MIDI mapping tables in seconds.",
+    "tagline": "Map MIDI notes and CCs — then preview stereo stem exports instantly.",
+    "category": "Music & Audio",
+    "keyword": "midi mapper & stem exporter online",
+    "keywords": [
+      "midi mapper & stem exporter online",
+      "free midi mapper & stem exporter",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "performance-preset-builder",
+    "path": "/ai-tools-hub/performance-preset-builder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Performance Preset Builder Online | ZZAI",
+    "h1": "Free Performance Preset Builder Online",
+    "metaDescription": "Build production-style performance presets from your creative brief in seconds. Free performance preset builder online. Describe your musical concept or li",
+    "description": "Free performance preset builder online. Describe your musical concept or live set brief and instantly generate a production-style performance preset — no login required. Preview one step of the Svivva workflow.",
+    "tagline": "Build production-style performance presets from your creative brief in seconds.",
+    "category": "Music & Audio",
+    "keyword": "performance preset builder online",
+    "keywords": [
+      "performance preset builder online",
+      "free performance preset builder",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "market-gap-analysis",
+    "path": "/ai-tools-hub/market-gap-analysis",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Market Gap Analysis Tool Online | ZZAI",
+    "h1": "Free Market Gap Analysis Tool Online",
+    "metaDescription": "Scan your product idea for untapped market opportunities in seconds. Free market gap analysis tool online. Enter your product idea, concept, or business sc",
+    "description": "Free market gap analysis tool online. Enter your product idea, concept, or business scenario and instantly identify untapped market opportunities — no signup required. Powered by Svivva\\",
+    "tagline": "Scan your product idea for untapped market opportunities in seconds.",
+    "category": "AI Prompt Tools",
+    "keyword": "market gap analysis tool online",
+    "keywords": [
+      "market gap analysis tool online",
+      "free market gap analysis tool",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "idea-scoring-feasibility",
+    "path": "/ai-tools-hub/idea-scoring-feasibility",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Idea Scoring & Feasibility Tool Online | ZZAI",
+    "h1": "Free Idea Scoring & Feasibility Tool Online",
+    "metaDescription": "Score your idea for feasibility and readiness in seconds. Free idea scoring and feasibility tool online. Enter your concept, hardware project, or team scen",
+    "description": "Free idea scoring and feasibility tool online. Enter your concept, hardware project, or team scenario and get a readiness score, feasibility breakdown, and actionable next steps — no signup required.",
+    "tagline": "Score your idea for feasibility and readiness in seconds.",
+    "category": "AI Prompt Tools",
+    "keyword": "idea scoring & feasibility tool online",
+    "keywords": [
+      "idea scoring & feasibility tool online",
+      "free idea scoring & feasibility tool",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "idea-comparison-tool",
+    "path": "/ai-tools-hub/idea-comparison-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Idea Comparison Tool Online | ZZAI",
+    "h1": "Free Idea Comparison Tool Online",
+    "metaDescription": "Compare concept versions side by side and track idea history. Free idea comparison tool online. Compare versions of your concept, product idea, or team sce",
+    "description": "Free idea comparison tool online. Compare versions of your concept, product idea, or team scenario side by side. View idea history, track changes, and evaluate readiness — no signup required.",
+    "tagline": "Compare concept versions side by side and track idea history.",
+    "category": "AI Prompt Tools",
+    "keyword": "idea comparison tool online",
+    "keywords": [
+      "idea comparison tool online",
+      "free idea comparison tool",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "api-marketplace-listing-generator",
+    "path": "/ai-tools-hub/api-marketplace-listing-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free API Marketplace Listing Generator Online | ZZAI",
+    "h1": "Free API Marketplace Listing Generator Online",
+    "metaDescription": "Generate production-style API marketplace listings in seconds. Free API marketplace listing generator online. Create production-style API listing previews ",
+    "description": "Free API marketplace listing generator online. Create production-style API listing previews with title, slug, endpoints, tags, and pricing tier in seconds — no signup required. Powered by Svivva.",
+    "tagline": "Generate production-style API marketplace listings in seconds.",
+    "category": "Developer Tools",
+    "keyword": "api marketplace listing generator online",
+    "keywords": [
+      "api marketplace listing generator online",
+      "free api marketplace listing generator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "team-permission-simulator",
+    "path": "/ai-tools-hub/team-permission-simulator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Team Permission Simulator Online | ZZAI",
+    "h1": "Free Team Permission Simulator Online",
+    "metaDescription": "Generate role and access maps for any team scenario instantly. Free team permission simulator online. Generate roles, access levels, and collaboration perm",
+    "description": "Free team permission simulator online. Generate roles, access levels, and collaboration permission maps for any team scenario in seconds — no signup required. Preview one step of Svivva\\",
+    "tagline": "Generate role and access maps for any team scenario instantly.",
+    "category": "Developer Tools",
+    "keyword": "team permission simulator online",
+    "keywords": [
+      "team permission simulator online",
+      "free team permission simulator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "build-planner-tool",
+    "path": "/ai-tools-hub/build-planner-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Build Planner Tool Online | ZZAI",
+    "h1": "Free Build Planner Tool Online",
+    "metaDescription": "Generate schematics, BOMs, and production workflows from a brief. Free online build planner tool. Generate hardware schematics, bill of materials, flow gra",
+    "description": "Free online build planner tool. Generate hardware schematics, bill of materials, flow graphs, and production workflow previews in seconds — no signup required. Powered by Svivva.",
+    "tagline": "Generate schematics, BOMs, and production workflows from a brief.",
+    "category": "Hardware & BOM",
+    "keyword": "build planner tool online",
+    "keywords": [
+      "build planner tool online",
+      "free build planner tool",
+      "hardware & bom",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-edge-case-generator",
+    "path": "/ai-tools-hub/ai-edge-case-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Edge Case Generator Online | ZZAI",
+    "h1": "Free AI Edge Case Generator Online",
+    "metaDescription": "Generate edge cases, adversarial inputs, and failure scenarios for your AI workflow. Free AI edge case generator online. Describe your AI workflow and inst",
+    "description": "Free AI edge case generator online. Describe your AI workflow and instantly get structured edge cases, adversarial inputs, and failure-inducing test scenarios — no signup required. Built by Svivva.",
+    "tagline": "Generate edge cases, adversarial inputs, and failure scenarios for your AI workflow.",
+    "category": "Developer Tools",
+    "keyword": "ai edge case generator online",
+    "keywords": [
+      "ai edge case generator online",
+      "free ai edge case generator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-api-cost-simulator",
+    "path": "/ai-tools-hub/ai-api-cost-simulator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI API Cost Simulator Online | ZZAI",
+    "h1": "Free AI API Cost Simulator Online",
+    "metaDescription": "Estimate and compare LLM API costs by model, volume, and prompt length. Free AI API cost simulator online. Calculate and compare LLM costs across GPT-4o, C",
+    "description": "Free AI API cost simulator online. Calculate and compare LLM costs across GPT-4o, Claude, Gemini, and more based on token usage and request volume — no signup required.",
+    "tagline": "Estimate and compare LLM API costs by model, volume, and prompt length.",
+    "category": "Developer Tools",
+    "keyword": "ai api cost simulator online",
+    "keywords": [
+      "ai api cost simulator online",
+      "free ai api cost simulator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "production-readiness-checker",
+    "path": "/ai-tools-hub/production-readiness-checker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Production Readiness Checker Online | ZZAI",
+    "h1": "Free Production Readiness Checker Online",
+    "metaDescription": "Score your AI system across 6 critical dimensions before you ship. Free AI production readiness checker online. Evaluate your system across schema enforcem",
+    "description": "Free AI production readiness checker online. Evaluate your system across schema enforcement, testing coverage, regression checks, rollback planning, cost monitoring, and observability — get a score and next steps instantly.",
+    "tagline": "Score your AI system across 6 critical dimensions before you ship.",
+    "category": "Developer Tools",
+    "keyword": "production readiness checker online",
+    "keywords": [
+      "production readiness checker online",
+      "free production readiness checker",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-to-api-preview",
+    "path": "/ai-tools-hub/prompt-to-api-preview",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt to API Preview Online | ZZAI",
+    "h1": "Free Prompt to API Preview Online",
+    "metaDescription": "Turn any plain-English API description into a REST spec, curl command, and OpenAPI snippet. Free prompt to API preview tool online. Describe an API endpoin",
+    "description": "Free prompt to API preview tool online. Describe an API endpoint in plain English and instantly get a REST endpoint spec, curl command, and OpenAPI YAML snippet — no signup required.",
+    "tagline": "Turn any plain-English API description into a REST spec, curl command, and OpenAPI snippet.",
+    "category": "Developer Tools",
+    "keyword": "prompt to api preview online",
+    "keywords": [
+      "prompt to api preview online",
+      "free prompt to api preview",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "few-shot-example-generator",
+    "path": "/ai-tools-hub/few-shot-example-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Few-Shot Example Generator Online | ZZAI",
+    "h1": "Free Few-Shot Example Generator Online",
+    "metaDescription": "Generate structured few-shot examples with good, bad, and edge cases for any AI task. Free few-shot example generator online. Describe your AI task and ins",
+    "description": "Free few-shot example generator online. Describe your AI task and instantly get structured few-shot examples including good, bad, and edge case inputs — ready to paste into your system prompt.",
+    "tagline": "Generate structured few-shot examples with good, bad, and edge cases for any AI task.",
+    "category": "AI Prompt Tools",
+    "keyword": "few-shot example generator online",
+    "keywords": [
+      "few-shot example generator online",
+      "free few-shot example generator",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "llm-output-validator",
+    "path": "/ai-tools-hub/llm-output-validator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free LLM Output Validator Online | ZZAI",
+    "h1": "Free LLM Output Validator Online",
+    "metaDescription": "Validate LLM JSON responses against a schema in one click. Free LLM output validator online. Paste a JSON Schema and an LLM response to instantly check typ",
+    "description": "Free LLM output validator online. Paste a JSON Schema and an LLM response to instantly check types, required fields, enum values, and nested structure — no API key needed.",
+    "tagline": "Validate LLM JSON responses against a schema in one click.",
+    "category": "Developer Tools",
+    "keyword": "llm output validator online",
+    "keywords": [
+      "llm output validator online",
+      "free llm output validator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "json-chat-sandbox",
+    "path": "/ai-tools-hub/json-chat-sandbox",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free JSON Only Chat Sandbox Online | ZZAI",
+    "h1": "Free JSON Only Chat Sandbox Online",
+    "metaDescription": "Test AI chat responses against a JSON schema in a live sandbox. Free JSON only chat sandbox online. Write a system prompt and JSON schema, then send messag",
+    "description": "Free JSON only chat sandbox online. Write a system prompt and JSON schema, then send messages and see simulated responses validated against your schema in real time — no signup required.",
+    "tagline": "Test AI chat responses against a JSON schema in a live sandbox.",
+    "category": "Developer Tools",
+    "keyword": "json only chat sandbox online",
+    "keywords": [
+      "json only chat sandbox online",
+      "free json only chat sandbox",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "prompt-version-diff",
+    "path": "/ai-tools-hub/prompt-version-diff",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Prompt Version Diff Tool Online | ZZAI",
+    "h1": "Free Prompt Version Diff Tool Online",
+    "metaDescription": "Compare two prompt versions and detect tone shifts, removed constraints, and output format drift. Free prompt version diff tool online. Paste two versions ",
+    "description": "Free prompt version diff tool online. Paste two versions of a prompt to see a line-by-line diff, detect behavioral risk indicators, and preview output drift across test inputs — no signup required.",
+    "tagline": "Compare two prompt versions and detect tone shifts, removed constraints, and output format drift.",
+    "category": "AI Prompt Tools",
+    "keyword": "prompt version diff tool online",
+    "keywords": [
+      "prompt version diff tool online",
+      "free prompt version diff tool",
+      "ai prompt tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "ai-regression-tester",
+    "path": "/ai-tools-hub/ai-regression-tester",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free AI Regression Tester Online | ZZAI",
+    "h1": "Free AI Regression Tester Online",
+    "metaDescription": "Run test cases against your AI prompt and instantly see which pass or fail. Free AI regression tester online. Define test cases with expected outputs, run ",
+    "description": "Free AI regression tester online. Define test cases with expected outputs, run them against your system prompt, and instantly see pass/fail results with similarity scoring — no API key needed.",
+    "tagline": "Run test cases against your AI prompt and instantly see which pass or fail.",
+    "category": "Developer Tools",
+    "keyword": "ai regression tester online",
+    "keywords": [
+      "ai regression tester online",
+      "free ai regression tester",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hypothesis-labs",
+    "path": "/ai-tools-hub/hypothesis-labs",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hypothesis Labs Online | ZZAI",
+    "h1": "Free Hypothesis Labs Online",
+    "metaDescription": "20 research thinking tools — compare, hypothesize, and map assumptions in seconds. A suite of 20 fast research tools: compare any two topics, spot contradi",
+    "description": "A suite of 20 fast research tools: compare any two topics, spot contradictions, map causal chains, surface assumptions, pick metrics, reverse-engineer effects, bridge domains, and more. All run instantly in the browser — no AI credits required.",
+    "tagline": "20 research thinking tools — compare, hypothesize, and map assumptions in seconds.",
+    "category": "Data Tools",
+    "keyword": "hypothesis labs online",
+    "keywords": [
+      "hypothesis labs online",
+      "free hypothesis labs",
+      "data tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "chord-creator",
+    "path": "/ai-tools-hub/chord-creator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Chord Creator (ChordKit) Online | ZZAI",
+    "h1": "Free Chord Creator (ChordKit) Online",
+    "metaDescription": "Browse, filter, and generate chords by root, style, and voicing — no signup required. Free chord generator and library browser. Filter by jazz, gospel, neo",
+    "description": "Free chord generator and library browser. Filter by jazz, gospel, neo-soul, Steely Dan, bossa nova, and more. Click any chord to see MIDI voicings, note spellings, and inversion data. Paste analysis JSON to arrange chord timelines.",
+    "tagline": "Browse, filter, and generate chords by root, style, and voicing — no signup required.",
+    "category": "Music & Audio",
+    "keyword": "chord creator (chordkit) online",
+    "keywords": [
+      "chord creator (chordkit) online",
+      "free chord creator (chordkit)",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "sketch-3d-model-maker",
+    "path": "/ai-tools-hub/sketch-3d-model-maker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Sketch & 3D Model Maker Online | ZZAI",
+    "h1": "Free Sketch & 3D Model Maker Online",
+    "metaDescription": "View Spline 3D scenes and generate AI reference images — free, no signup needed. Your workspace for 3D tool links, a live Spline scene viewer, and quick AI",
+    "description": "Your workspace for 3D tool links, a live Spline scene viewer, and quick AI image ideation. Load any public Spline scene by URL, and use the built-in AI image add-on to generate reference stills from text prompts.",
+    "tagline": "View Spline 3D scenes and generate AI reference images — free, no signup needed.",
+    "category": "AI Model Tools",
+    "keyword": "sketch & 3d model maker online",
+    "keywords": [
+      "sketch & 3d model maker online",
+      "free sketch & 3d model maker",
+      "ai model tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "reich-composer",
+    "path": "/ai-tools-hub/reich-composer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Reich Composer Online | ZZAI",
+    "h1": "Free Reich Composer Online",
+    "metaDescription": "Generate Steve Reich–style phasing and counterpoint music live in the browser. Free minimalist music generator inspired by Steve Reich\\",
+    "description": "Free minimalist music generator inspired by Steve Reich\\",
+    "tagline": "Generate Steve Reich–style phasing and counterpoint music live in the browser.",
+    "category": "Music & Audio",
+    "keyword": "reich composer online",
+    "keywords": [
+      "reich composer online",
+      "free reich composer",
+      "music & audio",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "json-schema-generator",
+    "path": "/ai-tools-hub/json-schema-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free JSON Schema Generator Online | ZZAI",
+    "h1": "Free JSON Schema Generator Online",
+    "metaDescription": "Paste any JSON object and generate a valid JSON Schema instantly. Free JSON Schema generator online. Paste one or two JSON samples and instantly generate a",
+    "description": "Free JSON Schema generator online. Paste one or two JSON samples and instantly generate a valid JSON Schema draft-07 with type inference, enum detection, and format hints — no signup required.",
+    "tagline": "Paste any JSON object and generate a valid JSON Schema instantly.",
+    "category": "Developer Tools",
+    "keyword": "json schema generator online",
+    "keywords": [
+      "json schema generator online",
+      "free json schema generator",
+      "developer tools",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "topic-comparator",
+    "path": "/ai-tools-hub/topic-comparator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Topic Comparator Online | ZZAI",
+    "h1": "Free Topic Comparator Online",
+    "metaDescription": "Side-by-side comparison of any two concepts, fields, or ideas — instant structured breakdown. Free topic comparison tool. Enter any two subjects — technolo",
+    "description": "Free topic comparison tool. Enter any two subjects — technologies, business models, historical events, scientific concepts — and get a structured side-by-side breakdown covering mechanics, tradeoffs, use cases, and key differences. No AI API required, runs entirely in your browser.",
+    "tagline": "Side-by-side comparison of any two concepts, fields, or ideas — instant structured breakdown.",
+    "category": "Research & Analysis",
+    "keyword": "topic comparator online",
+    "keywords": [
+      "topic comparator online",
+      "free topic comparator",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "trend-insight-generator",
+    "path": "/ai-tools-hub/trend-insight-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Trend Insight Generator Online | ZZAI",
+    "h1": "Free Trend Insight Generator Online",
+    "metaDescription": "Explore emerging signals, forces, and implications for any topic — free trend analysis tool. Free trend analysis tool. Enter any topic — a technology, indu",
+    "description": "Free trend analysis tool. Enter any topic — a technology, industry, social shift, or market — and get a structured insight report covering driving forces, early signals, likely implications, and countertrends. Great for researchers, product managers, and strategists.",
+    "tagline": "Explore emerging signals, forces, and implications for any topic — free trend analysis tool.",
+    "category": "Research & Analysis",
+    "keyword": "trend insight generator online",
+    "keywords": [
+      "trend insight generator online",
+      "free trend insight generator",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "impact-factor-finder",
+    "path": "/ai-tools-hub/impact-factor-finder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Impact Factor Finder Online | ZZAI",
+    "h1": "Free Impact Factor Finder Online",
+    "metaDescription": "Discover what causes, accelerates, or blocks any outcome — structured factor analysis. Free factor analysis tool. Type any outcome, metric, or phenomenon a",
+    "description": "Free factor analysis tool. Type any outcome, metric, or phenomenon and get a structured breakdown of what influences it: direct causes, accelerators, inhibitors, feedback loops, and contextual factors. Ideal for researchers, analysts, and product teams asking \"what drives X?\"",
+    "tagline": "Discover what causes, accelerates, or blocks any outcome — structured factor analysis.",
+    "category": "Research & Analysis",
+    "keyword": "impact factor finder online",
+    "keywords": [
+      "impact factor finder online",
+      "free impact factor finder",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "argument-contradiction-finder",
+    "path": "/ai-tools-hub/argument-contradiction-finder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Argument Contradiction Finder Online | ZZAI",
+    "h1": "Free Argument Contradiction Finder Online",
+    "metaDescription": "Spot logical contradictions between two claims, theories, or positions in seconds. Free logical contradiction checker. Enter two claims, positions, framewo",
+    "description": "Free logical contradiction checker. Enter two claims, positions, frameworks, or theories and the tool surfaces direct contradictions, implicit tensions, and reconciliation paths. Perfect for critical thinking, academic research, debate prep, and fact-checking.",
+    "tagline": "Spot logical contradictions between two claims, theories, or positions in seconds.",
+    "category": "Research & Analysis",
+    "keyword": "argument contradiction finder online",
+    "keywords": [
+      "argument contradiction finder online",
+      "free argument contradiction finder",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "research-hypothesis-generator",
+    "path": "/ai-tools-hub/research-hypothesis-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Research Hypothesis Generator Online | ZZAI",
+    "h1": "Free Research Hypothesis Generator Online",
+    "metaDescription": "Turn a research question or topic into testable hypotheses with variables and predictions. Free hypothesis generator for researchers and students. Enter a ",
+    "description": "Free hypothesis generator for researchers and students. Enter a research prompt or general idea and get multiple well-formed hypotheses with identified independent and dependent variables, directional predictions, and suggested test conditions. No login required.",
+    "tagline": "Turn a research question or topic into testable hypotheses with variables and predictions.",
+    "category": "Research & Analysis",
+    "keyword": "research hypothesis generator online",
+    "keywords": [
+      "research hypothesis generator online",
+      "free research hypothesis generator",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "causal-chain-mapper",
+    "path": "/ai-tools-hub/causal-chain-mapper",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Causal Chain Mapper Online | ZZAI",
+    "h1": "Free Causal Chain Mapper Online",
+    "metaDescription": "Sketch the full causal chain from root cause to downstream effect for any topic. Free causal diagram tool. Enter any event, decision, or phenomenon and get",
+    "description": "Free causal diagram tool. Enter any event, decision, or phenomenon and get a structured causal chain: triggers, immediate effects, secondary effects, and long-term consequences with feedback loops. Great for systems thinking, impact assessments, and research framing.",
+    "tagline": "Sketch the full causal chain from root cause to downstream effect for any topic.",
+    "category": "Research & Analysis",
+    "keyword": "causal chain mapper online",
+    "keywords": [
+      "causal chain mapper online",
+      "free causal chain mapper",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "assumption-mapping-tool",
+    "path": "/ai-tools-hub/assumption-mapping-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Assumption Mapper Online | ZZAI",
+    "h1": "Free Assumption Mapper Online",
+    "metaDescription": "Surface hidden assumptions behind any idea, plan, or claim — free assumption audit tool. Free assumption mapping tool for researchers, product teams, and s",
+    "description": "Free assumption mapping tool for researchers, product teams, and strategists. Enter any claim, business model, research design, or plan and get a structured list of explicit and hidden assumptions, categorized by confidence and risk level.",
+    "tagline": "Surface hidden assumptions behind any idea, plan, or claim — free assumption audit tool.",
+    "category": "Research & Analysis",
+    "keyword": "assumption mapper online",
+    "keywords": [
+      "assumption mapper online",
+      "free assumption mapper",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "metric-kpi-picker",
+    "path": "/ai-tools-hub/metric-kpi-picker",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Metric & KPI Picker Online | ZZAI",
+    "h1": "Free Metric & KPI Picker Online",
+    "metaDescription": "Find the right metrics and KPIs to track for any goal, project, or research question. Free KPI and metric selection tool. Enter any goal, business objectiv",
+    "description": "Free KPI and metric selection tool. Enter any goal, business objective, research question, or process and get a prioritized list of metrics to track — with rationale, measurement method, and common pitfalls for each metric. No spreadsheets needed.",
+    "tagline": "Find the right metrics and KPIs to track for any goal, project, or research question.",
+    "category": "Research & Analysis",
+    "keyword": "metric & kpi picker online",
+    "keywords": [
+      "metric & kpi picker online",
+      "free metric & kpi picker",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "reverse-cause-finder",
+    "path": "/ai-tools-hub/reverse-cause-finder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Reverse Cause Finder Online | ZZAI",
+    "h1": "Free Reverse Cause Finder Online",
+    "metaDescription": "Start with an effect or outcome and work backwards to find probable causes — free reverse analysis tool. Free reverse causation tool. Describe any observed",
+    "description": "Free reverse causation tool. Describe any observed effect, anomaly, or outcome and get a structured list of probable causes — ranked by likelihood, with diagnostic questions to test each. Ideal for debugging, root cause analysis, and retroactive research.",
+    "tagline": "Start with an effect or outcome and work backwards to find probable causes — free reverse analysis tool.",
+    "category": "Research & Analysis",
+    "keyword": "reverse cause finder online",
+    "keywords": [
+      "reverse cause finder online",
+      "free reverse cause finder",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "analogy-finder-tool",
+    "path": "/ai-tools-hub/analogy-finder-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Cross-Domain Analogy Finder Online | ZZAI",
+    "h1": "Free Cross-Domain Analogy Finder Online",
+    "metaDescription": "Bridge two unrelated fields and surface structural analogies for creative problem solving. Free analogy generator for researchers and creative thinkers. En",
+    "description": "Free analogy generator for researchers and creative thinkers. Enter two domains — e.g. \"immune system\" and \"cybersecurity\" — and get structural analogies, shared patterns, and cross-domain insights that can spark new ideas or explain complex concepts simply.",
+    "tagline": "Bridge two unrelated fields and surface structural analogies for creative problem solving.",
+    "category": "Research & Analysis",
+    "keyword": "cross-domain analogy finder online",
+    "keywords": [
+      "cross-domain analogy finder online",
+      "free cross-domain analogy finder",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "stakeholder-analysis-tool",
+    "path": "/ai-tools-hub/stakeholder-analysis-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Stakeholder Analysis Tool Online | ZZAI",
+    "h1": "Free Stakeholder Analysis Tool Online",
+    "metaDescription": "Map every stakeholder for any decision, project, or policy — interests, power, and concerns. Free stakeholder analysis and mapping tool. Enter any project,",
+    "description": "Free stakeholder analysis and mapping tool. Enter any project, decision, policy, or initiative and get a structured stakeholder map: who is affected, what their interests are, how much power they hold, and what concerns or objections they are likely to raise.",
+    "tagline": "Map every stakeholder for any decision, project, or policy — interests, power, and concerns.",
+    "category": "Research & Analysis",
+    "keyword": "stakeholder analysis tool online",
+    "keywords": [
+      "stakeholder analysis tool online",
+      "free stakeholder analysis tool",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "quick-risk-assessment-tool",
+    "path": "/ai-tools-hub/quick-risk-assessment-tool",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Quick Risk Assessment Tool Online | ZZAI",
+    "h1": "Free Quick Risk Assessment Tool Online",
+    "metaDescription": "Get a fast risk snapshot for any project, idea, or decision — likelihood, impact, and mitigations. Free risk assessment generator. Enter any project, plan,",
+    "description": "Free risk assessment generator. Enter any project, plan, or decision and get a structured risk snapshot: the top risks, their likelihood, potential impact, and recommended mitigations. Great for project managers, researchers, and founders who need quick risk coverage.",
+    "tagline": "Get a fast risk snapshot for any project, idea, or decision — likelihood, impact, and mitigations.",
+    "category": "Research & Analysis",
+    "keyword": "quick risk assessment tool online",
+    "keywords": [
+      "quick risk assessment tool online",
+      "free quick risk assessment tool",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "scenario-planner",
+    "path": "/ai-tools-hub/scenario-planner",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Best / Worst / Base Scenario Planner Online | ZZAI",
+    "h1": "Free Best / Worst / Base Scenario Planner Online",
+    "metaDescription": "Generate optimistic, pessimistic, and realistic scenarios for any decision or forecast. Free scenario planning tool. Enter any topic, decision, or forecast",
+    "description": "Free scenario planning tool. Enter any topic, decision, or forecast and get three structured scenarios: best case, worst case, and base case — with the key assumptions and triggers that lead to each. Used by strategists, researchers, and product leaders for structured foresight.",
+    "tagline": "Generate optimistic, pessimistic, and realistic scenarios for any decision or forecast.",
+    "category": "Research & Analysis",
+    "keyword": "best / worst / base scenario planner online",
+    "keywords": [
+      "best / worst / base scenario planner online",
+      "free best / worst / base scenario planner",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "variable-relationship-mapper",
+    "path": "/ai-tools-hub/variable-relationship-mapper",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Variable Relationship Mapper Online | ZZAI",
+    "h1": "Free Variable Relationship Mapper Online",
+    "metaDescription": "Map all variables related to any topic — independent, dependent, mediating, and confounding. Free variable mapping tool for researchers and analysts. Enter",
+    "description": "Free variable mapping tool for researchers and analysts. Enter any research topic, business metric, or system and get a structured map of all relevant variables: independent, dependent, mediating, moderating, and confounding. Essential for research design and causal modeling.",
+    "tagline": "Map all variables related to any topic — independent, dependent, mediating, and confounding.",
+    "category": "Research & Analysis",
+    "keyword": "variable relationship mapper online",
+    "keywords": [
+      "variable relationship mapper online",
+      "free variable relationship mapper",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "cognitive-bias-detector",
+    "path": "/ai-tools-hub/cognitive-bias-detector",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Cognitive Bias Detector Online | ZZAI",
+    "h1": "Free Cognitive Bias Detector Online",
+    "metaDescription": "Check any claim, argument, or plan for cognitive biases that might be distorting your thinking. Free cognitive bias checker. Enter any claim, argument, res",
+    "description": "Free cognitive bias checker. Enter any claim, argument, research conclusion, business decision, or plan and get a structured list of cognitive biases that may be influencing it — with explanations, examples, and debiasing strategies. Useful for researchers, decision makers, and critical thinkers.",
+    "tagline": "Check any claim, argument, or plan for cognitive biases that might be distorting your thinking.",
+    "category": "Research & Analysis",
+    "keyword": "cognitive bias detector online",
+    "keywords": [
+      "cognitive bias detector online",
+      "free cognitive bias detector",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "research-brief-generator",
+    "path": "/ai-tools-hub/research-brief-generator",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Research Brief Generator Online | ZZAI",
+    "h1": "Free Research Brief Generator Online",
+    "metaDescription": "Write a structured research brief for any topic in seconds — background, questions, and scope. Free research brief generator. Enter any research topic and ",
+    "description": "Free research brief generator. Enter any research topic and get a fully structured brief: background and context, research questions, scope and exclusions, expected outputs, and suggested methodology. Perfect for kicking off academic studies, market research, or UX research projects.",
+    "tagline": "Write a structured research brief for any topic in seconds — background, questions, and scope.",
+    "category": "Research & Analysis",
+    "keyword": "research brief generator online",
+    "keywords": [
+      "research brief generator online",
+      "free research brief generator",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "hypothesis-to-experiment",
+    "path": "/ai-tools-hub/hypothesis-to-experiment",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Hypothesis to Experiment Designer Online | ZZAI",
+    "h1": "Free Hypothesis to Experiment Designer Online",
+    "metaDescription": "Turn a vague hunch or hypothesis into a rigorous, testable experiment design. Free experiment design tool. Enter a rough hypothesis or hunch and get a stru",
+    "description": "Free experiment design tool. Enter a rough hypothesis or hunch and get a structured experiment plan: refined hypothesis, independent and dependent variables, control conditions, sample requirements, success criteria, and potential confounds to control for.",
+    "tagline": "Turn a vague hunch or hypothesis into a rigorous, testable experiment design.",
+    "category": "Research & Analysis",
+    "keyword": "hypothesis to experiment designer online",
+    "keywords": [
+      "hypothesis to experiment designer online",
+      "free hypothesis to experiment designer",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "free-decision-tree-builder",
+    "path": "/ai-tools-hub/free-decision-tree-builder",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Free Decision Tree Builder Online | ZZAI",
+    "h1": "Free Free Decision Tree Builder Online",
+    "metaDescription": "Build a structured decision tree for any choice or process — instant text-based decision flow. Free decision tree maker. Enter any decision, process, or ch",
+    "description": "Free decision tree maker. Enter any decision, process, or choice scenario and get a structured decision tree with branches, conditions, and outcomes. No diagramming software needed — the tool outputs a clear text-based decision flow you can copy into docs, slides, or code.",
+    "tagline": "Build a structured decision tree for any choice or process — instant text-based decision flow.",
+    "category": "Research & Analysis",
+    "keyword": "free decision tree builder online",
+    "keywords": [
+      "free decision tree builder online",
+      "free free decision tree builder",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "research-instrument-selector",
+    "path": "/ai-tools-hub/research-instrument-selector",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Research Instrument Selector Online | ZZAI",
+    "h1": "Free Research Instrument Selector Online",
+    "metaDescription": "Find the right survey, scale, or measurement tool for your research question. Free research instrument finder. Enter your research topic or construct and g",
+    "description": "Free research instrument finder. Enter your research topic or construct and get recommended measurement instruments: validated surveys, psychometric scales, observation protocols, and interview frameworks — with notes on reliability, validity, and best use cases.",
+    "tagline": "Find the right survey, scale, or measurement tool for your research question.",
+    "category": "Research & Analysis",
+    "keyword": "research instrument selector online",
+    "keywords": [
+      "research instrument selector online",
+      "free research instrument selector",
+      "research & analysis",
+      "no signup"
+    ]
+  },
+  {
+    "slug": "cross-domain-idea-hybridizer",
+    "path": "/ai-tools-hub/cross-domain-idea-hybridizer",
+    "hub": "ai-tools-hub",
+    "kind": "tool",
+    "title": "Free Cross-Domain Idea Hybridizer Online | ZZAI",
+    "h1": "Free Cross-Domain Idea Hybridizer Online",
+    "metaDescription": "Combine two hardware systems or technologies to generate emergent hybrid architectures and innovation ideas. Free cross-domain innovation tool. Select any ",
+    "description": "Free cross-domain innovation tool. Select any two hardware systems, engineering domains, or technology platforms and get a set of emergent hybrid architectures — complete with novelty scores, inheritance traits from each parent system, and emergent properties unique to the hybrid. Great for hardware engineers, product innovators, and R&D teams.",
+    "tagline": "Combine two hardware systems or technologies to generate emergent hybrid architectures and innovation ideas.",
+    "category": "Research & Analysis",
+    "keyword": "cross-domain idea hybridizer online",
+    "keywords": [
+      "cross-domain idea hybridizer online",
+      "free cross-domain idea hybridizer",
+      "research & analysis",
+      "no signup"
+    ]
+  }
+]
