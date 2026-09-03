@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/server/db";
 import { seoLandingPages } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -89,7 +89,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
-    redirect(featurePath);
+    permanentRedirect(featurePath);
   }
   const page = await getPage(slug);
   if (!page) return { title: "Page Not Found | ZZAI" };
@@ -106,7 +106,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
   const { slug } = await params;
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
-    redirect(featurePath);
+    permanentRedirect(featurePath);
   }
   const page = await getPage(slug);
   if (!page) notFound();
