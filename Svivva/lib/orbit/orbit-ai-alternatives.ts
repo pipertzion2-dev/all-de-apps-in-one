@@ -57,7 +57,9 @@ export const ORBIT_AI_ALTERNATIVES: OrbitAiAlternative[] = [
   },
 ];
 
-export function getOrbitAiAlternatives(exclude?: (AiProvider | "easypeasy")[]): OrbitAiAlternative[] {
+export function getOrbitAiAlternatives(
+  exclude?: (AiProvider | "easypeasy" | "cursor-agent")[],
+): OrbitAiAlternative[] {
   const skip = new Set(exclude ?? []);
   return ORBIT_AI_ALTERNATIVES.filter((a) => !skip.has(a.id)).sort(
     (a, b) => a.priority - b.priority,
@@ -65,15 +67,19 @@ export function getOrbitAiAlternatives(exclude?: (AiProvider | "easypeasy")[]): 
 }
 
 export function orbitAiAlternativeActions(
-  exclude?: (AiProvider | "easypeasy")[],
+  exclude?: (AiProvider | "easypeasy" | "cursor-agent")[],
 ): { label: string; href: string }[] {
-  return getOrbitAiAlternatives(exclude).slice(0, 3).map((a) => ({
-    label: a.name,
-    href: a.setupHref,
-  }));
+  return getOrbitAiAlternatives(exclude)
+    .slice(0, 3)
+    .map((a) => ({
+      label: a.name,
+      href: a.setupHref,
+    }));
 }
 
-export function describeOrbitAiAlternatives(exclude?: (AiProvider | "easypeasy")[]): string {
+export function describeOrbitAiAlternatives(
+  exclude?: (AiProvider | "easypeasy" | "cursor-agent")[],
+): string {
   const alts = getOrbitAiAlternatives(exclude);
   if (alts.length === 0) return "";
   const names = alts.slice(0, 2).map((a) => a.name);

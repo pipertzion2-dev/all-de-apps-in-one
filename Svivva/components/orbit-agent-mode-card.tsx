@@ -20,8 +20,8 @@ export function OrbitAgentModeCard() {
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
             The AI model in your Cloud Agent session can write SEO pages and blog posts and publish
-            them straight to your site. Orbit ingests agent-authored JSON — you never paste EasyPeasy
-            or OpenAI keys.
+            them straight to your site. Orbit ingests agent-authored JSON — you never paste
+            EasyPeasy or OpenAI keys.
           </p>
         </div>
       </div>

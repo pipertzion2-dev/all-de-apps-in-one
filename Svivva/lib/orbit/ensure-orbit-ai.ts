@@ -118,7 +118,11 @@ async function probeProvider(
   testConnection: boolean,
 ): Promise<{ ok: boolean; testReply?: string; error?: string }> {
   if (probe.id === "easypeasy") {
-    const ep = await ensureEasyPeasyForOrbit({ testConnection, tierId: "standard", forceTier: true });
+    const ep = await ensureEasyPeasyForOrbit({
+      testConnection,
+      tierId: "standard",
+      forceTier: true,
+    });
     if (ep.ok) {
       resetOpenAIClientCache();
       return { ok: true, testReply: ep.testReply };

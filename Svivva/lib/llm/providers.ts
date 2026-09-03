@@ -6,7 +6,10 @@ import {
   getEasyPeasyTierId,
   isEasyPeasyConfiguredFromEnv,
 } from "@/lib/easypeasy/runtime";
-import { isOrbitTemplateMode, ORBIT_TEMPLATE_PROVIDER_LABEL } from "@/lib/orbit/orbit-template-mode";
+import {
+  isOrbitTemplateMode,
+  ORBIT_TEMPLATE_PROVIDER_LABEL,
+} from "@/lib/orbit/orbit-template-mode";
 
 /** Paid OpenAI default for Orbit marketing — override with ORBIT_AI_MODEL in env. */
 export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-5";

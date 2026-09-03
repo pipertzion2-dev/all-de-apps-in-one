@@ -593,7 +593,9 @@ export function OrbitOneClickLaunch({
             providerLabel?: string;
             marketingModel?: string;
             model?: string;
+            templateMode?: boolean;
             usedFallback?: boolean;
+            warning?: string;
             alternatives?: { name: string; why: string; setupHref: string }[];
           },
         };
@@ -810,7 +812,9 @@ export function OrbitOneClickLaunch({
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-foreground">Checking Orbit AI…</p>
-                <p className="text-xs text-muted-foreground">Templates first — AI optional upgrade</p>
+                <p className="text-xs text-muted-foreground">
+                  Templates first — AI optional upgrade
+                </p>
               </div>
             </>
           ) : easypeasyLive.active ? (

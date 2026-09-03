@@ -109,7 +109,10 @@ export async function generateText(
   const models = model ? [model] : getMarketingModelChain();
   let lastError: unknown;
 
-  async function tryModels(client: typeof orbitOpenai, modelList: string[]): Promise<string | null> {
+  async function tryModels(
+    client: typeof orbitOpenai,
+    modelList: string[],
+  ): Promise<string | null> {
     for (const m of modelList) {
       try {
         const res = await client.chat.completions.create({
