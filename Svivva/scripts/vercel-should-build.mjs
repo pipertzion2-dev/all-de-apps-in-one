@@ -20,6 +20,10 @@ if (/\[skip vercel\]/i.test(msg)) {
   console.log("Skip: commit message contains [skip vercel]");
   process.exit(0);
 }
+if (/\[(vercel )?deploy\]/i.test(msg)) {
+  console.log("Build: commit message requests deploy");
+  process.exit(1);
+}
 
 const current = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
 const previous = process.env.VERCEL_GIT_PREVIOUS_SHA?.trim();
