@@ -148,9 +148,7 @@ export function ZzaiShowConsole() {
     if (!draft?.title.trim()) return;
     const saved = { ...draft, title: draft.title.trim() };
     const exists = events.some((e) => e.id === saved.id);
-    const next = exists
-      ? events.map((e) => (e.id === saved.id ? saved : e))
-      : [saved, ...events];
+    const next = exists ? events.map((e) => (e.id === saved.id ? saved : e)) : [saved, ...events];
     persist(next);
     setSelectedId(saved.id);
     setDraft({ ...saved });
@@ -165,9 +163,7 @@ export function ZzaiShowConsole() {
       }
       const saved = { ...nextDraft, title: nextDraft.title.trim() };
       const exists = events.some((e) => e.id === saved.id);
-      const next = exists
-        ? events.map((e) => (e.id === saved.id ? saved : e))
-        : [saved, ...events];
+      const next = exists ? events.map((e) => (e.id === saved.id ? saved : e)) : [saved, ...events];
       persist(next);
       setSelectedId(saved.id);
       setDraft({ ...saved });
@@ -370,7 +366,12 @@ export function ZzaiShowConsole() {
             <CardDescription>Events &amp; meetups</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button onClick={createEvent} size="sm" className="w-full gap-2" data-testid="show-create">
+            <Button
+              onClick={createEvent}
+              size="sm"
+              className="w-full gap-2"
+              data-testid="show-create"
+            >
               <Plus className="w-4 h-4" /> New show
             </Button>
             <div className="space-y-1 max-h-[320px] overflow-y-auto">
@@ -579,7 +580,11 @@ export function ZzaiShowConsole() {
                     className="sm:w-36"
                     inputMode="decimal"
                   />
-                  <Button onClick={addAttendee} className="gap-2 shrink-0" data-testid="show-add-guest">
+                  <Button
+                    onClick={addAttendee}
+                    className="gap-2 shrink-0"
+                    data-testid="show-add-guest"
+                  >
                     <Plus className="w-4 h-4" /> Add
                   </Button>
                 </div>
@@ -715,8 +720,8 @@ export function ZzaiShowConsole() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">Give / receive balances</CardTitle>
                     <CardDescription>
-                      Total {formatCents(divvy.totalCostCents)} split across{" "}
-                      {divvy.balances.length} — paid in {formatCents(divvy.totalPaidCents)}
+                      Total {formatCents(divvy.totalCostCents)} split across {divvy.balances.length}{" "}
+                      — paid in {formatCents(divvy.totalPaidCents)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -741,9 +746,7 @@ export function ZzaiShowConsole() {
                               Give {formatCents(-b.netCents)}
                             </Badge>
                           )}
-                          {b.role === "even" && (
-                            <Badge variant="secondary">Even</Badge>
-                          )}
+                          {b.role === "even" && <Badge variant="secondary">Even</Badge>}
                         </div>
                       </div>
                     ))}

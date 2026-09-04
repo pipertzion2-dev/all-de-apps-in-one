@@ -5,10 +5,7 @@ function roundCents(n: number): number {
 }
 
 /** Split cost evenly across checked-in attendees (or all if none checked in). */
-export function computeDivvy(
-  attendees: ShowAttendee[],
-  totalCostCents: number,
-): ShowDivvySummary {
+export function computeDivvy(attendees: ShowAttendee[], totalCostCents: number): ShowDivvySummary {
   const checkedIn = attendees.filter((a) => a.checkedIn);
   const splitPool = checkedIn.length > 0 ? checkedIn : attendees;
   const headcount = attendees.length;

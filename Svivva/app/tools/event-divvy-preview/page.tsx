@@ -118,7 +118,10 @@ export default function EventDivvyPreviewPage() {
               {divvy.checkedInCount} checked in · {formatCents(divvy.fairShareCents)} each
             </div>
             {divvy.balances.map((b) => (
-              <div key={b.attendeeId} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <div
+                key={b.attendeeId}
+                className="flex flex-wrap items-center justify-between gap-2 text-sm"
+              >
                 <span className="font-medium">{b.name}</span>
                 {b.role === "receive" && (
                   <Badge className="gap-1 bg-green-600/90">
