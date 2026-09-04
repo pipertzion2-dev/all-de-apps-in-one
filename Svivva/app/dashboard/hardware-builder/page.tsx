@@ -1096,24 +1096,6 @@ export default function HardwareBuilderPage() {
       className="pb-4"
     >
       <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 pb-4 relative z-10">
-        <Card className="border-[#5B8DA8]/30">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Merge className="w-5 h-5 text-[#5B8DA8]" />
-              <div>
-                <CardTitle className="text-lg">Schematic Hybridizer</CardTitle>
-                <CardDescription>
-                  Cross-domain AI analysis — discover novel hybrid architectures from any two
-                  hardware schematics
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <HardwareSchematicHybridizer />
-          </CardContent>
-        </Card>
-
         <Card className="border-primary/30">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1161,6 +1143,24 @@ export default function HardwareBuilderPage() {
 
               {renderStepContent()}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-[#5B8DA8]/30">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Merge className="w-5 h-5 text-[#5B8DA8]" />
+              <div>
+                <CardTitle className="text-lg">Schematic Hybridizer</CardTitle>
+                <CardDescription>
+                  Cross-domain AI analysis — discover novel hybrid architectures from any two
+                  hardware schematics
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <HardwareSchematicHybridizer />
           </CardContent>
         </Card>
 
