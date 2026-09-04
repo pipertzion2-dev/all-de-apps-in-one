@@ -55,6 +55,7 @@ import {
   ShieldCheck,
   PiggyBank,
   BookOpen,
+  Mic2,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
@@ -125,6 +126,12 @@ const digitalMenuGroups: MenuGroup[] = [
         desc: "Rights, vault, human help",
         href: "/dashboard/education-advocacy",
         icon: BookOpen,
+      },
+      {
+        title: "ZZAI ZZAI Show",
+        desc: "Events & payment divvy",
+        href: "/dashboard/zzai-show",
+        icon: Mic2,
       },
     ],
   },
@@ -260,6 +267,12 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Rights, vault, human help",
         href: "/dashboard/education-advocacy",
         icon: BookOpen,
+      },
+      {
+        title: "ZZAI ZZAI Show",
+        desc: "Events & payment divvy",
+        href: "/dashboard/zzai-show",
+        icon: Mic2,
       },
     ],
   },

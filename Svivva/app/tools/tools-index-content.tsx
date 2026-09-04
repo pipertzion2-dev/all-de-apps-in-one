@@ -34,6 +34,7 @@ const NATIVE_TOOL_SLUGS = new Set([
   "json-schema-validator",
   "ai-api-cost-calculator",
   "youtube-caption-preview",
+  "event-divvy-preview",
   "channel-blend-preview",
   "oaas-patch-preview",
   "zzai-face-chooser",

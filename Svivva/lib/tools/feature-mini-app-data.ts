@@ -15,6 +15,18 @@ export type FeatureMiniApp = {
 /** One-job public slices of newer ZZAI channels — not the full product. */
 export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
   {
+    slug: "event-divvy-preview",
+    path: "/tools/event-divvy-preview",
+    name: "Event Divvy Preview",
+    description:
+      "Enter a total cost and guest list to see who gives and who receives. ZZAI ZZAI Show tracks live events with full attendance.",
+    hub: "ai-tools-hub",
+    parentHref: "/seeds",
+    parentLabel: "ZZAI Seeds",
+    sliceNote: "One-shot split math — not saved events, check-in, or settlement tracking.",
+    keyword: "event cost split calculator",
+  },
+  {
     slug: "youtube-caption-preview",
     path: "/tools/youtube-caption-preview",
     name: "YouTube Caption Preview",
@@ -90,4 +102,5 @@ export const BLEND_PREVIEW_CHANNELS: { id: string; label: string }[] = [
   { id: "hardware-builder", label: "CH 05 Hardware" },
   { id: "poor-man-protection", label: "CH 13 Protect" },
   { id: "hybridization", label: "CH 06 Hybrid FX" },
+  { id: "zzai-show", label: "CH 25 Show" },
 ];
