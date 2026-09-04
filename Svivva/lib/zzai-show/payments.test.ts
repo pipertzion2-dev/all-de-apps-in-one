@@ -42,10 +42,12 @@ describe("zellePayInstructions", () => {
         note: "Show night",
       }),
     ).toContain("$25.00");
-    expect(zellePayInstructions({
-      profile: { method: "zelle", handle: "pay@example.com" },
-      amountCents: 2500,
-      note: "Show night",
-    })).toContain("pay@example.com");
+    expect(
+      zellePayInstructions({
+        profile: { method: "zelle", handle: "pay@example.com" },
+        amountCents: 2500,
+        note: "Show night",
+      }),
+    ).toContain("pay@example.com");
   });
 });

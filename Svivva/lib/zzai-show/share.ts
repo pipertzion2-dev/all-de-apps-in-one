@@ -1,10 +1,6 @@
 import { formatCents } from "./splits";
 import type { PaymentMethod, PaymentProfile, ShowAttendee, ShowEvent } from "./types";
-import {
-  buildPaymentLink,
-  PAYMENT_METHOD_LABEL,
-  zellePayInstructions,
-} from "./payments";
+import { buildPaymentLink, PAYMENT_METHOD_LABEL, zellePayInstructions } from "./payments";
 import type { SettlementTransfer } from "./types";
 
 export type GuestInvitePayload = {
@@ -38,9 +34,7 @@ export function decodeInvitePayload(encoded: string): GuestInvitePayload | null 
     let b64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
     while (b64.length % 4) b64 += "=";
     const json =
-      typeof atob !== "undefined"
-        ? atob(b64)
-        : Buffer.from(b64, "base64").toString("utf8");
+      typeof atob !== "undefined" ? atob(b64) : Buffer.from(b64, "base64").toString("utf8");
     const parsed = JSON.parse(json) as GuestInvitePayload;
     if (parsed.v !== 1 || !parsed.eventId || !parsed.guestId) return null;
     return parsed;
@@ -76,7 +70,10 @@ export function buildGuestInvitePayload(input: {
   };
 }
 
-export function invitePageUrl(payload: GuestInvitePayload, origin = "https://zzaizzai.com"): string {
+export function invitePageUrl(
+  payload: GuestInvitePayload,
+  origin = "https://zzaizzai.com",
+): string {
   return `${origin}/dashboard/zzai-show/invite?d=${encodeInvitePayload(payload)}`;
 }
 
@@ -129,7 +126,10 @@ export function zelleInstructionsForInvite(payload: GuestInvitePayload): string 
 
 export async function shareGuestInvite(payload: GuestInvitePayload): Promise<boolean> {
   const text = buildGuestEventMessage(payload);
-  const url = invitePageUrl(payload, typeof window !== "undefined" ? window.location.origin : undefined);
+  const url = invitePageUrl(
+    payload,
+    typeof window !== "undefined" ? window.location.origin : undefined,
+  );
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
       await navigator.share({ title: payload.title, text, url });

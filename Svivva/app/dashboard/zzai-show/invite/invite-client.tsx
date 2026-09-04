@@ -99,8 +99,8 @@ export default function ShowInvitePage() {
             )}
             {markedPaid && (
               <p className="text-sm text-green-600 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> Marked as sent — tell {payload.payToName}{" "}
-                to confirm on their console.
+                <CheckCircle2 className="w-4 h-4" /> Marked as sent — tell {payload.payToName} to
+                confirm on their console.
               </p>
             )}
           </CardContent>
