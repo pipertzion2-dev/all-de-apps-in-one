@@ -36,6 +36,7 @@ export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
   if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
   if (pathname.startsWith("/dashboard/education-advocacy")) return "Education Advocacy";
+  if (pathname.startsWith("/dashboard/zzai-show")) return "ZZAI ZZAI Show";
   if (pathname.startsWith("/education/verify")) return "Verify Education Proof";
   if (pathname.startsWith("/protect/verify")) return "Verify Protection";
   if (pathname.startsWith("/dashboard/api-builder")) return "Digital";

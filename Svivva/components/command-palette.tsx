@@ -23,6 +23,7 @@ import {
   Lock,
   Youtube,
   PiggyBank,
+  Mic2,
 } from "lucide-react";
 
 interface CommandItem {
@@ -108,6 +109,13 @@ const digitalCommands: CommandItem[] = [
     href: "/dashboard/security",
     icon: Lock,
     keywords: ["security", "shield", "threat", "cyber", "pqc"],
+    section: "Build",
+  },
+  {
+    title: "ZZAI ZZAI Show",
+    href: "/dashboard/zzai-show",
+    icon: Mic2,
+    keywords: ["show", "event", "attendance", "divvy", "split", "payment", "give", "receive"],
     section: "Build",
   },
   {
@@ -233,6 +241,13 @@ const physicalCommands: CommandItem[] = [
     href: "/dashboard/hypothesis-hardware",
     icon: FlaskConical,
     keywords: ["hypothesis", "innovation", "experiment"],
+    section: "Build",
+  },
+  {
+    title: "ZZAI ZZAI Show",
+    href: "/dashboard/zzai-show",
+    icon: Mic2,
+    keywords: ["show", "event", "attendance", "divvy", "split", "payment"],
     section: "Build",
   },
   {
