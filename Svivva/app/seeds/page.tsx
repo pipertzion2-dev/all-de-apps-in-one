@@ -50,6 +50,8 @@ import {
   ExternalLink,
   TrendingUp,
   ArrowRight,
+  Mic2,
+  Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { FeatureScrollToTop } from "@/components/feature-scroll-to-top";
@@ -898,6 +900,49 @@ export default function SeedsPage() {
             </div>
 
             <OrbitTrafficFunnelDiagram />
+
+            {/* ZZAI ZZAI Show — event attendance & divvy */}
+            <Link href="/dashboard/zzai-show">
+              <div
+                className="rounded-2xl border-2 p-4 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all"
+                style={{
+                  background: "linear-gradient(135deg, #5b8da818, #6b2c4e12)",
+                  borderColor: "#5b8da850",
+                }}
+                data-testid="seeds-zzai-show-cta"
+              >
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+                    >
+                      <Mic2 className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-black text-foreground">ZZAI ZZAI Show</p>
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full text-white font-semibold"
+                          style={{ background: "#6B2C4E" }}
+                        >
+                          CH 25
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Track event attendance and cleanly divvy payments — who gives, who receives
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className="flex items-center gap-1.5 text-sm font-bold flex-shrink-0"
+                    style={{ color: "#5B8DA8" }}
+                  >
+                    <Users className="w-4 h-4" /> Open Show <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            </Link>
 
             {/* Orbit CTA banner */}
             <Link href="/dashboard/orbit">

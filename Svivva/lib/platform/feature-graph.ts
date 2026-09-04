@@ -175,6 +175,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
       "marketing",
       "channel-intel",
       "orchestration",
+      "zzai-show",
     ],
     mainBus: "signal",
   }),
@@ -320,7 +321,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     bus: "play",
     channel: 15,
     tags: ["play", "audio", "music", "hardware", "sampler", "aux", "channel"],
-    connectsTo: ["seeds", "hardware-builder"],
+    connectsTo: ["seeds", "hardware-builder", "zzai-show"],
     mainBus: "crest",
   }),
   feature({
@@ -497,6 +498,19 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     tags: ["human", "referral", "legal-aid", "counselor", "advocate", "channel"],
     connectsTo: ["edu-crisis", "edu-rights-law", "education-advocacy"],
     mainBus: "signal",
+  }),
+  feature({
+    id: "zzai-show",
+    title: "ZZAI ZZAI Show",
+    shortTitle: "Show",
+    href: "/dashboard/zzai-show",
+    description:
+      "Channel 25 — live event desk: track attendance, check-ins, and clean payment divvy (give/receive).",
+    bus: "play",
+    channel: 25,
+    tags: ["show", "event", "attendance", "divvy", "split", "payment", "live", "channel"],
+    connectsTo: ["seeds", "launch-studio", "play", "marketing"],
+    mainBus: "both",
   }),
 ];
 
