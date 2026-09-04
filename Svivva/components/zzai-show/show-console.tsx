@@ -7,12 +7,18 @@ import {
   Calendar,
   CheckCircle2,
   Circle,
+  Copy,
   DollarSign,
+  ExternalLink,
+  Mail,
   MapPin,
+  MessageSquare,
   Mic2,
   Plus,
+  Share2,
   Trash2,
   Users,
+  Wallet,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,8 +27,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { computeDivvy, formatCents, parseDollarsToCents } from "@/lib/zzai-show/splits";
+import {
+  buildPaymentLink,
+  PAYMENT_METHOD_LABEL,
+  transferKey,
+  zellePayInstructions,
+} from "@/lib/zzai-show/payments";
+import {
+  buildGuestEventMessage,
+  buildGuestInvitePayload,
+  invitePageUrl,
+  mailtoGuestLink,
+  shareGuestInvite,
+  smsGuestLink,
+} from "@/lib/zzai-show/share";
 import { loadShowEvents, newAttendeeId, newEventId, saveShowEvents } from "@/lib/zzai-show/storage";
-import type { SettlementStatus, ShowAttendee, ShowEvent } from "@/lib/zzai-show/types";
+import type {
+  PaymentMethod,
+  PaymentProfile,
+  SettlementStatus,
+  ShowAttendee,
+  ShowEvent,
+  SettlementTransfer,
+} from "@/lib/zzai-show/types";
+import { useToast } from "@/hooks/use-toast";
 
 const STATUS_LABEL: Record<SettlementStatus, string> = {
   pending: "Pending",
@@ -46,13 +74,45 @@ function emptyEvent(): ShowEvent {
   };
 }
 
+const PAYMENT_METHODS: PaymentMethod[] = ["cashapp", "venmo", "zelle", "paypal"];
+
+function defaultHostPayment(tag = ""): PaymentProfile {
+  return { method: "cashapp", handle: tag || "pipertzion" };
+}
+
+function recipientProfile(
+  event: ShowEvent,
+  toId: string,
+  fallback: PaymentProfile,
+): PaymentProfile {
+  const person = event.attendees.find((a) => a.id === toId);
+  if (person?.payment?.handle) return person.payment;
+  if (event.hostPayment?.handle) return event.hostPayment;
+  return fallback;
+}
+
+function transferForGuest(transfers: SettlementTransfer[], guestId: string) {
+  return transfers.find((t) => t.fromId === guestId) ?? null;
+}
+
 export function ZzaiShowConsole() {
+  const { toast } = useToast();
   const [events, setEvents] = useState<ShowEvent[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ShowEvent | null>(null);
   const [costInput, setCostInput] = useState("");
   const [newName, setNewName] = useState("");
   const [newPaid, setNewPaid] = useState("");
+  const [hostFallback, setHostFallback] = useState<PaymentProfile>(defaultHostPayment());
+
+  useEffect(() => {
+    void fetch("/api/zzai-show/payment-defaults")
+      .then((r) => r.json())
+      .then((data: { defaultHostPayment?: PaymentProfile }) => {
+        if (data.defaultHostPayment?.handle) setHostFallback(data.defaultHostPayment);
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const loaded = loadShowEvents();
@@ -118,11 +178,12 @@ export function ZzaiShowConsole() {
   const createEvent = useCallback(() => {
     const ev = emptyEvent();
     ev.title = "New Show";
+    ev.hostPayment = { ...hostFallback };
     persist([ev, ...events]);
     setSelectedId(ev.id);
     setDraft(ev);
     setCostInput("0.00");
-  }, [events, persist]);
+  }, [events, persist, hostFallback]);
 
   const deleteEvent = useCallback(
     (id: string) => {
@@ -196,6 +257,98 @@ export function ZzaiShowConsole() {
     const cents = parseDollarsToCents(costInput);
     updateDraft({ totalCostCents: cents });
   };
+
+  const markTransferPaid = useCallback(
+    (transfer: SettlementTransfer, method: PaymentMethod) => {
+      if (!draft) return;
+      const key = transferKey(transfer.fromId, transfer.toId);
+      const next: ShowEvent = {
+        ...draft,
+        transferSettlements: {
+          ...draft.transferSettlements,
+          [key]: { status: "paid", paidAt: new Date().toISOString(), method },
+        },
+        attendees: draft.attendees.map((a) => {
+          if (a.id === transfer.fromId) return { ...a, settlementStatus: "paid" as const };
+          if (a.id === transfer.toId) return { ...a, settlementStatus: "received" as const };
+          return a;
+        }),
+        updatedAt: new Date().toISOString(),
+      };
+      saveDraftState(next);
+      toast({ title: "Marked paid", description: `${transfer.fromName} → ${transfer.toName}` });
+    },
+    [draft, saveDraftState, toast],
+  );
+
+  const payTransfer = useCallback(
+    (transfer: SettlementTransfer) => {
+      if (!draft) return;
+      const profile = recipientProfile(draft, transfer.toId, hostFallback);
+      const link = buildPaymentLink({
+        profile,
+        amountCents: transfer.amountCents,
+        note: draft.title,
+      });
+      if (link) window.open(link, "_blank", "noopener,noreferrer");
+      else if (profile.method === "zelle") {
+        toast({
+          title: "Zelle",
+          description: zellePayInstructions({
+            profile,
+            amountCents: transfer.amountCents,
+            note: draft.title,
+          }),
+        });
+      }
+      markTransferPaid(transfer, profile.method);
+    },
+    [draft, hostFallback, markTransferPaid, toast],
+  );
+
+  const sendGuestInvite = useCallback(
+    async (guest: ShowAttendee, channel: "email" | "sms" | "share" | "copy") => {
+      if (!draft || !divvy) return;
+      const transfer = transferForGuest(divvy.transfers, guest.id);
+      const profile = recipientProfile(
+        draft,
+        transfer?.toId ?? draft.attendees.find((a) => a.paidCents > divvy.fairShareCents)?.id ?? "",
+        hostFallback,
+      );
+      const balance = divvy.balances.find((b) => b.attendeeId === guest.id);
+      const payload = buildGuestInvitePayload({
+        event: draft,
+        guest,
+        transfer,
+        recipientProfile: profile,
+        fairShareCents: balance?.fairShareCents ?? divvy.fairShareCents,
+      });
+      if (channel === "email" && guest.contactEmail) {
+        window.location.href = mailtoGuestLink(payload, guest.contactEmail);
+        return;
+      }
+      if (channel === "sms" && guest.contactPhone) {
+        window.location.href = smsGuestLink(payload, guest.contactPhone);
+        return;
+      }
+      if (channel === "share") {
+        const ok = await shareGuestInvite(payload);
+        if (!ok) {
+          await navigator.clipboard.writeText(
+            buildGuestEventMessage(payload, window.location.origin),
+          );
+          toast({ title: "Copied invite text" });
+        }
+        return;
+      }
+      const url = invitePageUrl(payload, window.location.origin);
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Invite link copied" });
+    },
+    [draft, divvy, hostFallback, toast],
+  );
+
+  const hostPayment = draft?.hostPayment ?? hostFallback;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -336,6 +489,49 @@ export function ZzaiShowConsole() {
               </CardContent>
             </Card>
 
+            <Card className="border-amber-500/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Wallet className="w-5 h-5" />
+                  Host payout method
+                </CardTitle>
+                <CardDescription>
+                  Where guests send money — Cash App, Venmo, Zelle, or PayPal
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <select
+                  className="h-9 rounded-md border bg-background px-2 text-sm"
+                  value={hostPayment.method}
+                  onChange={(e) =>
+                    updateDraft({
+                      hostPayment: {
+                        ...hostPayment,
+                        method: e.target.value as PaymentMethod,
+                      },
+                    })
+                  }
+                >
+                  {PAYMENT_METHODS.map((m) => (
+                    <option key={m} value={m}>
+                      {PAYMENT_METHOD_LABEL[m]}
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  className="flex-1 min-w-[140px]"
+                  value={hostPayment.handle}
+                  onChange={(e) =>
+                    updateDraft({
+                      hostPayment: { ...hostPayment, handle: e.target.value },
+                    })
+                  }
+                  placeholder="$cashtag, @venmo, email…"
+                  onBlur={() => saveDraft()}
+                />
+              </CardContent>
+            </Card>
+
             {divvy && (
               <div className="grid sm:grid-cols-3 gap-3">
                 <Card>
@@ -393,60 +589,119 @@ export function ZzaiShowConsole() {
                 ) : (
                   <div className="space-y-2">
                     {draft.attendees.map((a) => (
-                      <div
-                        key={a.id}
-                        className="flex flex-wrap items-center gap-2 rounded-lg border p-3 bg-card"
-                      >
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateAttendee(a.id, {
-                              checkedIn: !a.checkedIn,
-                              checkedInAt: !a.checkedIn ? new Date().toISOString() : undefined,
-                            })
-                          }
-                          className="shrink-0"
-                          aria-label={a.checkedIn ? "Mark absent" : "Check in"}
-                        >
-                          {a.checkedIn ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-500" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </button>
-                        <span className="font-medium min-w-[80px] flex-1">{a.name}</span>
-                        <Input
-                          className="w-28 h-8 text-sm"
-                          inputMode="decimal"
-                          defaultValue={(a.paidCents / 100).toFixed(2)}
-                          onBlur={(e) =>
-                            updateAttendee(a.id, { paidCents: parseDollarsToCents(e.target.value) })
-                          }
-                          aria-label={`${a.name} paid amount`}
-                        />
-                        <select
-                          className="h-8 rounded-md border bg-background px-2 text-xs"
-                          value={a.settlementStatus}
-                          onChange={(e) =>
-                            updateAttendee(a.id, {
-                              settlementStatus: e.target.value as SettlementStatus,
-                            })
-                          }
-                        >
-                          {(Object.keys(STATUS_LABEL) as SettlementStatus[]).map((s) => (
-                            <option key={s} value={s}>
-                              {STATUS_LABEL[s]}
-                            </option>
-                          ))}
-                        </select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => removeAttendee(a.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                      <div key={a.id} className="rounded-lg border p-3 bg-card space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateAttendee(a.id, {
+                                checkedIn: !a.checkedIn,
+                                checkedInAt: !a.checkedIn ? new Date().toISOString() : undefined,
+                              })
+                            }
+                            className="shrink-0"
+                            aria-label={a.checkedIn ? "Mark absent" : "Check in"}
+                          >
+                            {a.checkedIn ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </button>
+                          <span className="font-medium min-w-[80px] flex-1">{a.name}</span>
+                          <Input
+                            className="w-28 h-8 text-sm"
+                            inputMode="decimal"
+                            defaultValue={(a.paidCents / 100).toFixed(2)}
+                            onBlur={(e) =>
+                              updateAttendee(a.id, {
+                                paidCents: parseDollarsToCents(e.target.value),
+                              })
+                            }
+                            aria-label={`${a.name} paid amount`}
+                          />
+                          <select
+                            className="h-8 rounded-md border bg-background px-2 text-xs"
+                            value={a.settlementStatus}
+                            onChange={(e) =>
+                              updateAttendee(a.id, {
+                                settlementStatus: e.target.value as SettlementStatus,
+                              })
+                            }
+                          >
+                            {(Object.keys(STATUS_LABEL) as SettlementStatus[]).map((s) => (
+                              <option key={s} value={s}>
+                                {STATUS_LABEL[s]}
+                              </option>
+                            ))}
+                          </select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => removeAttendee(a.id)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pl-7">
+                          <Input
+                            className="h-8 text-xs flex-1 min-w-[120px]"
+                            placeholder="Email"
+                            defaultValue={a.contactEmail ?? ""}
+                            onBlur={(e) =>
+                              updateAttendee(a.id, { contactEmail: e.target.value || undefined })
+                            }
+                          />
+                          <Input
+                            className="h-8 text-xs w-32"
+                            placeholder="Phone"
+                            defaultValue={a.contactPhone ?? ""}
+                            onBlur={(e) =>
+                              updateAttendee(a.id, { contactPhone: e.target.value || undefined })
+                            }
+                          />
+                          <div className="flex gap-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1 text-xs"
+                              onClick={() => void sendGuestInvite(a, "email")}
+                              disabled={!a.contactEmail}
+                            >
+                              <Mail className="w-3 h-3" /> Email
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1 text-xs"
+                              onClick={() => void sendGuestInvite(a, "sms")}
+                              disabled={!a.contactPhone}
+                            >
+                              <MessageSquare className="w-3 h-3" /> Text
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1 text-xs"
+                              onClick={() => void sendGuestInvite(a, "copy")}
+                            >
+                              <Copy className="w-3 h-3" /> Link
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1 text-xs"
+                              onClick={() => void sendGuestInvite(a, "share")}
+                            >
+                              <Share2 className="w-3 h-3" /> Share
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -505,18 +760,39 @@ export function ZzaiShowConsole() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {divvy.transfers.map((t, i) => (
-                        <div
-                          key={`${t.fromId}-${t.toId}-${i}`}
-                          className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-2.5 text-sm"
-                        >
-                          <span className="font-medium">{t.fromName}</span>
-                          <ArrowUpRight className="w-4 h-4 text-destructive shrink-0" />
-                          <span className="font-semibold">{formatCents(t.amountCents)}</span>
-                          <ArrowDownLeft className="w-4 h-4 text-green-600 shrink-0" />
-                          <span className="font-medium">{t.toName}</span>
-                        </div>
-                      ))}
+                      {divvy.transfers.map((t, i) => {
+                        const key = transferKey(t.fromId, t.toId);
+                        const settled = draft.transferSettlements?.[key];
+                        const profile = recipientProfile(draft, t.toId, hostFallback);
+                        return (
+                          <div
+                            key={`${t.fromId}-${t.toId}-${i}`}
+                            className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-2.5 text-sm"
+                          >
+                            <span className="font-medium">{t.fromName}</span>
+                            <ArrowUpRight className="w-4 h-4 text-destructive shrink-0" />
+                            <span className="font-semibold">{formatCents(t.amountCents)}</span>
+                            <ArrowDownLeft className="w-4 h-4 text-green-600 shrink-0" />
+                            <span className="font-medium">{t.toName}</span>
+                            <span className="text-xs text-muted-foreground">
+                              via {PAYMENT_METHOD_LABEL[profile.method]} {profile.handle}
+                            </span>
+                            {settled?.status === "paid" ? (
+                              <Badge className="bg-green-600/90 ml-auto">Paid</Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="ml-auto gap-1 h-8"
+                                onClick={() => payTransfer(t)}
+                                data-testid={`pay-transfer-${i}`}
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Pay now
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </CardContent>
                   </Card>
                 )}
