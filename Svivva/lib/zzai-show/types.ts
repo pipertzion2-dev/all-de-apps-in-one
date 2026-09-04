@@ -1,14 +1,22 @@
 export type SettlementStatus = "pending" | "paid" | "received" | "settled";
 
+export type PaymentMethod = "cashapp" | "venmo" | "zelle" | "paypal";
+
+export type PaymentProfile = {
+  method: PaymentMethod;
+  handle: string;
+};
+
 export type ShowAttendee = {
   id: string;
   name: string;
-  /** Amount this person already paid upfront (cents). */
   paidCents: number;
   checkedIn: boolean;
   checkedInAt?: string;
-  /** Outgoing settlement status when this person owes someone. */
   settlementStatus: SettlementStatus;
+  contactEmail?: string;
+  contactPhone?: string;
+  payment?: PaymentProfile;
 };
 
 export type ShowEvent = {
@@ -16,12 +24,16 @@ export type ShowEvent = {
   title: string;
   venue?: string;
   eventDate: string;
-  /** Total event cost to split (cents). */
   totalCostCents: number;
   attendees: ShowAttendee[];
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  hostPayment?: PaymentProfile;
+  transferSettlements?: Record<
+    string,
+    { status: SettlementStatus; paidAt?: string; method?: PaymentMethod }
+  >;
 };
 
 export type AttendeeBalance = {
@@ -29,7 +41,6 @@ export type AttendeeBalance = {
   name: string;
   fairShareCents: number;
   paidCents: number;
-  /** Positive = should receive, negative = should give. */
   netCents: number;
   role: "receive" | "give" | "even";
 };

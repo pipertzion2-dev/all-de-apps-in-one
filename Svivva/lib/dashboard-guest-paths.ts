@@ -16,6 +16,7 @@ export const DASHBOARD_PUBLIC_PREFIXES = [
   "/dashboard/poor-man-protection",
   "/dashboard/education-advocacy",
   "/dashboard/zzai-show",
+  "/dashboard/zzai-show/invite",
   "/dashboard/api-builder",
   "/dashboard/hardware-builder",
   "/education/verify",
