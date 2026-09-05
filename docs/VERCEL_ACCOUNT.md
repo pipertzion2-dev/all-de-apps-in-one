@@ -28,7 +28,13 @@ If **`all-de-apps-in-one`** briefly shows “Account is blocked” but the dashb
 
 ## Fix: disconnect the wrong project (one-time)
 
-Do **both** if possible:
+Do **both** if possible. After disconnect, **svivva-main-app deploys fail automatically** — the repo blocks root deploys and deprecated project names (`scripts/assert-vercel-project.mjs`).
+
+Print the checklist anytime:
+
+```bash
+cd Svivva && node scripts/disconnect-wrong-vercel.mjs
+```
 
 ### A — Wrong Vercel account (where `svivva-main-app` lives)
 

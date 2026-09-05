@@ -58,6 +58,13 @@ if (!migrationUrl) {
 }
 
 try {
+  runNodeScript("../scripts/assert-vercel-project.mjs", "Assert canonical Vercel project…");
+} catch (err) {
+  console.error("✖ Vercel project guard failed:", err?.message ?? err);
+  process.exit(1);
+}
+
+try {
   runNodeScript("scripts/verify-production-secrets.mjs", "Verifying production security env…");
 } catch (err) {
   console.warn("⚠ Production security env check failed:", err?.message ?? err);
