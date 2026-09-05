@@ -286,6 +286,49 @@ export async function listGscSites(accessToken: string): Promise<GscSiteEntry[]>
   return data.siteEntry ?? [];
 }
 
+export type GscSitemapStatus = {
+  path: string;
+  lastSubmitted?: string;
+  lastDownloaded?: string;
+  isPending?: boolean;
+  errors?: string;
+  warnings?: string;
+};
+
+/** What Google last saw for sitemaps on this property (processing lag vs submit). */
+export async function listGscSitemaps(
+  accessToken: string,
+  siteUrl: string,
+): Promise<GscSitemapStatus[]> {
+  const encoded = encodeURIComponent(siteUrl);
+  const res = await fetch(`${GSC_SITES}/${encoded}/sitemaps`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(15_000),
+  });
+  const data = (await res.json()) as {
+    sitemap?: Array<{
+      path?: string;
+      lastSubmitted?: string;
+      lastDownloaded?: string;
+      isPending?: boolean;
+      errors?: string;
+      warnings?: string;
+    }>;
+    error?: { message?: string };
+  };
+  if (!res.ok) {
+    throw new Error(data.error?.message || `List sitemaps failed (${res.status})`);
+  }
+  return (data.sitemap ?? []).map((s) => ({
+    path: s.path || "",
+    lastSubmitted: s.lastSubmitted,
+    lastDownloaded: s.lastDownloaded,
+    isPending: s.isPending,
+    errors: s.errors,
+    warnings: s.warnings,
+  }));
+}
+
 /** Normalize GSC property URLs for comparison (trailing slash, casing). */
 function normalizeGscPropertyUrl(siteUrl: string): string {
   const trimmed = siteUrl.trim();

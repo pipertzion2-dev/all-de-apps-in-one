@@ -12,12 +12,15 @@ import {
   type GscSiteEntry,
 } from "@/lib/google-gsc-oauth";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
-import { getSiteUrl, getSitemapUrl, getSiteHostname } from "@/lib/site-url";
+import { getIndexingBatch, recordSubmission } from "@/lib/seo/index-health";
+import { getSiteUrl, getSitemapUrl, getSecuritySitemapUrl, getSiteHostname } from "@/lib/site-url";
 
 export type GscAutoSetupResult = {
   ok: boolean;
   siteUrl: string | null;
   sitemapOk: boolean;
+  /** True when the security/tools sitemap was also accepted by GSC. */
+  securitySitemapOk?: boolean;
   indexingSubmitted: number;
   indexingAttempted: number;
   sitesFound: number;
@@ -125,26 +128,49 @@ export async function runGscAutoSetup(opts: {
     .set({ googleSiteUrl: matched, googleIndexingEnabled: true, updatedAt: new Date() })
     .where(eq(seedCredentials.userId, opts.userId));
 
+  const securitySitemapUrl = getSecuritySitemapUrl();
   const sm = await submitSitemapWithAccessToken(opts.accessToken, matched, sitemapUrl);
+  const smSecurity = await submitSitemapWithAccessToken(
+    opts.accessToken,
+    matched,
+    securitySitemapUrl,
+  );
 
+  // Rotate never-/least-recently-submitted URLs first. The old slice(0, 200)
+  // burned daily Indexing API quota on the same homepage/static set every sync,
+  // so new hub/tool pages never received URL_UPDATED notifications.
   const allUrls = await getAllSiteUrlsForIndexing();
-  const batch = allUrls.slice(0, 200);
+  let batch = await getIndexingBatch(200);
+  if (batch.length === 0) batch = allUrls.slice(0, 200);
+
   let indexingSubmitted = 0;
   if (batch.length > 0) {
     const gi = await submitUrlsWithAccessToken(opts.accessToken, batch);
     indexingSubmitted = gi.submitted;
+    // Record only URLs Google accepted so never-notified pages stay at the
+    // front of tomorrow's rotation when daily quota cuts the batch short.
+    if (gi.submittedUrls.length > 0) {
+      await recordSubmission(gi.submittedUrls);
+    }
   }
 
-  const ok = sm.ok && (indexingSubmitted > 0 || sm.ok);
+  const ok = sm.ok;
+  const sitemapBits = [
+    sm.ok ? "main sitemap submitted" : `main sitemap failed: ${sm.error || "unknown"}`,
+    smSecurity.ok
+      ? "security sitemap submitted"
+      : `security sitemap: ${smSecurity.error || "skipped"}`,
+  ];
   return {
     ok,
     siteUrl: matched,
     sitemapOk: sm.ok,
+    securitySitemapOk: smSecurity.ok,
     indexingSubmitted,
     indexingAttempted: batch.length,
     sitesFound: sites.length,
     message: sm.ok
-      ? `Connected ${matched} · Sitemap submitted · ${indexingSubmitted}/${batch.length} URLs sent to Google Indexing API`
+      ? `Connected ${matched} · ${sitemapBits.join(" · ")} · ${indexingSubmitted}/${batch.length} URLs sent to Google Indexing API (rotated for new pages)`
       : sm.error || "Sitemap submission failed",
     aiUsed,
   };
