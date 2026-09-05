@@ -60,7 +60,11 @@ import {
   PINK_CAMO_BUTTON_STYLE,
   URRTHANG_LABEL,
 } from "@/lib/ui-pink-camo-button";
-import { dedupeErrorMessages, formatOrbitRunError } from "@/lib/orbit/orbit-error-messages";
+import {
+  dedupeErrorMessages,
+  formatOrbitRunError,
+  isGoogleIndexingQuotaError,
+} from "@/lib/orbit/orbit-error-messages";
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
@@ -315,6 +319,7 @@ export function OrbitOneClickLaunch({
   const [savedCreds, setSavedCreds] = useState<string[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
   const [templateMode, setTemplateMode] = useState(true);
+  const [aiFallbackWarning, setAiFallbackWarning] = useState<string | null>(null);
   const [aiProviderLabel, setAiProviderLabel] = useState<string | null>(
     "Built-in templates (no API key)",
   );
@@ -470,7 +475,12 @@ export function OrbitOneClickLaunch({
         if (!r.ok || cancelled) return;
         const json = (await r.json()) as {
           lastRun?: RunResult | null;
-          ai?: { configured?: boolean; providerLabel?: string; marketingModel?: string };
+          ai?: {
+            configured?: boolean;
+            templateMode?: boolean;
+            providerLabel?: string;
+            marketingModel?: string;
+          };
           easypeasy?: {
             active?: boolean;
             tierId?: string;
@@ -481,31 +491,64 @@ export function OrbitOneClickLaunch({
           status?: { configured?: Record<string, boolean> };
         };
         if (json.lastRun && !cancelled) setResult(json.lastRun);
-        if (json.ai?.configured) {
-          setAiConfigured(true);
-          setTemplateMode(false);
-        } else if (!cancelled) {
-          setAiConfigured(true);
-          setTemplateMode(true);
-          setAiProviderLabel("Built-in templates (no API key)");
-          setMarketingModel("template-v1");
-        }
-        if (json.ai?.providerLabel) setAiProviderLabel(json.ai.providerLabel);
-        if (json.ai?.marketingModel) setMarketingModel(json.ai.marketingModel);
         if (typeof json.copyOnlyMode === "boolean") setCopyOnlyMode(json.copyOnlyMode);
         if (json.status?.configured) setConfiguredKeys(json.status.configured);
         if (json.easypeasy && !cancelled) {
-          setEasypeasyLive({
-            loading: false,
-            active: !!json.easypeasy.active,
-            tierId: json.easypeasy.tierId ?? null,
-            model: json.easypeasy.model ?? null,
-            migratedFromPremium: !!json.easypeasy.migratedFromPremium,
-          });
-          if (json.easypeasy.tierId) setEasypeasyTier(json.easypeasy.tierId);
-          if (json.easypeasy.model) setMarketingModel(json.easypeasy.model);
-          if (json.easypeasy.active) setAiConfigured(true);
-        } else if (!cancelled) {
+          setEasypeasyTier(json.easypeasy.tierId ?? null);
+        }
+      } catch {
+        // non-blocking
+      }
+
+      // Probe real AI health — EasyPeasy can look "active" while at word quota
+      try {
+        const er = await authFetch("/api/orbit/ensure-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ testConnection: true }),
+        });
+        if (!er.ok || cancelled) {
+          if (!cancelled) {
+            setEasypeasyLive((prev) => ({
+              ...prev,
+              loading: false,
+              active: true,
+              model: "template-v1",
+            }));
+            setTemplateMode(true);
+            setAiConfigured(true);
+          }
+          return;
+        }
+        const ensureJson = (await er.json()) as {
+          ok?: boolean;
+          provider?: string;
+          providerLabel?: string;
+          model?: string;
+          marketingModel?: string;
+          templateMode?: boolean;
+          warning?: string;
+          usedFallback?: boolean;
+        };
+        if (cancelled) return;
+        setAiConfigured(true);
+        setTemplateMode(!!ensureJson.templateMode);
+        if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
+        if (ensureJson.model || ensureJson.marketingModel) {
+          setMarketingModel(ensureJson.model ?? ensureJson.marketingModel ?? null);
+        }
+        if (ensureJson.warning) setAiFallbackWarning(ensureJson.warning);
+        else setAiFallbackWarning(null);
+        setEasypeasyLive({
+          loading: false,
+          active: true,
+          tierId: ensureJson.provider === "easypeasy" ? "standard" : null,
+          model: ensureJson.model ?? ensureJson.marketingModel ?? "template-v1",
+          migratedFromPremium: false,
+        });
+        if (ensureJson.provider === "easypeasy") setEasypeasyTier("standard");
+      } catch {
+        if (!cancelled) {
           setEasypeasyLive((prev) => ({
             ...prev,
             loading: false,
@@ -513,9 +556,8 @@ export function OrbitOneClickLaunch({
             model: "template-v1",
           }));
           setTemplateMode(true);
+          setAiConfigured(true);
         }
-      } catch {
-        // non-blocking
       }
     })();
     try {
@@ -573,6 +615,7 @@ export function OrbitOneClickLaunch({
     setRunning(true);
     setError(null);
     setResult(null);
+    setAiFallbackWarning(null);
     setPhase(0);
     setShowDone(false);
     phaseTimers.current.forEach(clearTimeout);
@@ -604,6 +647,7 @@ export function OrbitOneClickLaunch({
       let { json: ensureJson } = await ensureOrbitAi();
       setAiConfigured(true);
       setTemplateMode(!!ensureJson.templateMode);
+      if (ensureJson.warning) setAiFallbackWarning(ensureJson.warning);
       if (ensureJson.providerLabel) setAiProviderLabel(ensureJson.providerLabel);
       if (ensureJson.marketingModel || ensureJson.model) {
         setMarketingModel(ensureJson.marketingModel ?? ensureJson.model ?? null);
@@ -624,7 +668,16 @@ export function OrbitOneClickLaunch({
       });
       const json = await r.json();
       if (!r.ok) throw new Error(json.error || `HTTP ${r.status}`);
-      setResult(json as RunResult);
+      const runJson = json as RunResult & {
+        orbitAi?: { warning?: string; templateMode?: boolean; providerLabel?: string };
+        ai?: { templateMode?: boolean; providerLabel?: string; marketingModel?: string };
+      };
+      if (runJson.orbitAi?.warning) setAiFallbackWarning(runJson.orbitAi.warning);
+      if (runJson.ai?.templateMode || runJson.orbitAi?.templateMode) setTemplateMode(true);
+      if (runJson.ai?.providerLabel || runJson.orbitAi?.providerLabel) {
+        setAiProviderLabel(runJson.ai?.providerLabel ?? runJson.orbitAi?.providerLabel ?? null);
+      }
+      setResult(runJson);
       if (
         (json as { ai?: { providerLabel?: string; marketingModel?: string } }).ai?.providerLabel
       ) {
@@ -720,7 +773,12 @@ export function OrbitOneClickLaunch({
   const automatedNeedsKey = partitioned.automated.filter(
     (t) => t.status === "needs_credentials" && !manualDoneIds.has(t.id),
   );
-  const automatedFailed = partitioned.automated.filter((t) => t.status === "failed");
+  const automatedFailed = partitioned.automated.filter(
+    (t) => t.status === "failed" && !isGoogleIndexingQuotaError(t.message),
+  );
+  const softQuotaNotes = partitioned.automated.filter(
+    (t) => t.status === "failed" && isGoogleIndexingQuotaError(t.message),
+  );
   const manualPending = partitioned.manual.filter(
     (t) =>
       (t.status === "prepared" || t.status === "needs_credentials") && !manualDoneIds.has(t.id),
@@ -832,6 +890,11 @@ export function OrbitOneClickLaunch({
                 {easypeasyLive.migratedFromPremium && (
                   <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
                     Switched from Premium → Standard. Paid word limits no longer apply.
+                  </p>
+                )}
+                {aiFallbackWarning && (
+                  <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
+                    {aiFallbackWarning}
                   </p>
                 )}
               </div>
@@ -1271,6 +1334,19 @@ export function OrbitOneClickLaunch({
                 <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-2.5 mb-3 space-y-1">
                   <p className="text-[10px] font-bold text-red-400">Needs attention</p>
                   {automatedFailed.map((t) => (
+                    <p key={t.id} className="text-[10px] text-muted-foreground">
+                      {t.label}: {t.message}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {softQuotaNotes.length > 0 && (
+                <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-2.5 mb-3 space-y-1">
+                  <p className="text-[10px] font-bold text-amber-400">
+                    Indexing note (run still OK)
+                  </p>
+                  {softQuotaNotes.map((t) => (
                     <p key={t.id} className="text-[10px] text-muted-foreground">
                       {t.label}: {t.message}
                     </p>
