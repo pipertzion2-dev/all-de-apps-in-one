@@ -3,7 +3,7 @@ import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { getSiteUrl, getSitemapUrl, getSiteHostname } from "@/lib/site-url";
+import { getSiteUrl, getSitemapUrl, getSecuritySitemapUrl, getSiteHostname } from "@/lib/site-url";
 import {
   getGoogleServiceAccountAccessToken,
   GoogleServiceAccount,
@@ -13,8 +13,10 @@ import {
   getGoogleOAuthAccessTokenForUser,
   isGoogleGscOAuthConfigured,
   listGscSites,
+  listGscSitemaps,
   findMatchedGscSite,
   hasGscWritePermission,
+  type GscSitemapStatus,
 } from "@/lib/google-gsc-oauth";
 import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
@@ -183,6 +185,7 @@ export async function GET() {
   let gscPropertyOk = false;
   let gscMatchedSite: string | null = null;
   let gscSitesSample: string[] = [];
+  let gscSitemaps: GscSitemapStatus[] = [];
 
   if (oauthConnected) {
     try {
@@ -206,6 +209,54 @@ export async function GET() {
                 : `No Search Console properties on this Google account — add ${getSiteHostname()} first.`,
           fix: gscPropertyOk ? undefined : "https://search.google.com/search-console",
         });
+
+        const host = getSiteHostname();
+        const otherDeadProps = gscSitesSample.filter(
+          (s) =>
+            s.toLowerCase().includes("svivva") ||
+            (s.startsWith("sc-domain:") && !s.toLowerCase().includes(host)),
+        );
+        if (gscPropertyOk && otherDeadProps.length > 0) {
+          steps.push({
+            id: "gsc_wrong_property_hint",
+            label: "Open the right GSC property",
+            status: "warn",
+            detail: `This Google account also has ${otherDeadProps.join(", ")}. New ${host} pages only appear under sc-domain:${host} (or ${canonicalSite}/) — not under old/disabled properties.`,
+            fix: `https://search.google.com/search-console?resource_id=${encodeURIComponent(gscMatchedSite || `sc-domain:${host}`)}`,
+          });
+        }
+
+        if (gscMatchedSite) {
+          try {
+            gscSitemaps = await listGscSitemaps(accessToken, gscMatchedSite);
+            const mainPath = getSitemapUrl();
+            const securityPath = getSecuritySitemapUrl();
+            const main = gscSitemaps.find((s) => s.path === mainPath);
+            const security = gscSitemaps.find((s) => s.path === securityPath);
+            const pending = gscSitemaps.filter((s) => s.isPending).length;
+            const withErrors = gscSitemaps.filter((s) => Number(s.errors || 0) > 0);
+            steps.push({
+              id: "gsc_sitemaps",
+              label: "Sitemaps Google has registered",
+              status: withErrors.length ? "warn" : main ? "ok" : "warn",
+              detail: main
+                ? `${gscSitemaps.length} sitemap(s) on property. Main: last downloaded ${main.lastDownloaded || "not yet"} · submitted ${main.lastSubmitted || "—"}${main.isPending ? " · pending" : ""}${security ? ` · security sitemap registered` : " · security sitemap not registered yet"}${withErrors.length ? ` · ${withErrors.length} with errors` : ""}${pending ? ` · ${pending} pending` : ""}. Indexed counts in GSC often lag days behind submission.`
+                : `No ${mainPath} registered on this property yet — Sync property / Run indexing to submit it.`,
+              fix: `https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(gscMatchedSite)}`,
+            });
+          } catch (e: unknown) {
+            steps.push({
+              id: "gsc_sitemaps",
+              label: "Sitemaps Google has registered",
+              status: "warn",
+              detail:
+                `Could not list GSC sitemaps: ${e instanceof Error ? e.message : String(e)}`.slice(
+                  0,
+                  160,
+                ),
+            });
+          }
+        }
       }
     } catch (e: unknown) {
       steps.push({
@@ -232,5 +283,6 @@ export async function GET() {
     gscPropertyOk,
     gscMatchedSite,
     gscSitesSample,
+    gscSitemaps,
   });
 }

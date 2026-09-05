@@ -12,7 +12,7 @@ import {
 import { getGoogleOAuthAccessTokenForUser, ensureGscOAuthColumns } from "@/lib/google-gsc-oauth";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
-import { getSitemapUrl } from "@/lib/site-url";
+import { getSitemapUrl, getSecuritySitemapUrl } from "@/lib/site-url";
 import { getIndexingBatch, recordSubmission } from "@/lib/seo/index-health";
 
 /** Google Indexing API daily quota is limited; stay aligned with /api/marketing/google-search. */
@@ -108,6 +108,7 @@ export async function runAutomatableManualActions(opts?: {
   const summaryLines: string[] = [];
   const urls = await getAllSiteUrlsForIndexing();
   const sitemapUrl = getSitemapUrl();
+  const securitySitemapUrl = getSecuritySitemapUrl();
 
   const indexResult = await submitIndexNowBatched(urls);
   summaryLines.push(
@@ -146,10 +147,18 @@ export async function runAutomatableManualActions(opts?: {
       gsc.mode === "oauth" && gsc.accessToken
         ? await submitSitemapWithAccessToken(gsc.accessToken, gsc.site, sitemapUrl)
         : await submitSitemapToGSC(gsc.sa!, gsc.site, sitemapUrl);
-    googleSitemap = { attempted: true, ok: sm.ok, error: sm.error };
+    const smSecurity =
+      gsc.mode === "oauth" && gsc.accessToken
+        ? await submitSitemapWithAccessToken(gsc.accessToken, gsc.site, securitySitemapUrl)
+        : await submitSitemapToGSC(gsc.sa!, gsc.site, securitySitemapUrl);
+    googleSitemap = {
+      attempted: true,
+      ok: sm.ok,
+      error: sm.error || (!smSecurity.ok ? smSecurity.error : undefined),
+    };
     summaryLines.push(
       sm.ok
-        ? "✓ Google Search Console: sitemap registered (API)"
+        ? `✓ Google Search Console: sitemap registered (API)${smSecurity.ok ? " · security sitemap too" : ""}`
         : `⚠ GSC sitemap API: ${sm.error || "failed"}`,
     );
 
@@ -177,7 +186,11 @@ export async function runAutomatableManualActions(opts?: {
       totalGiSubmitted += gi.submitted;
       totalGiAttempted += batch.length;
       allGiErrors.push(...gi.errors);
-      await recordSubmission(batch);
+      if (gi.submittedUrls?.length) {
+        await recordSubmission(gi.submittedUrls);
+      } else if (gi.submitted > 0) {
+        await recordSubmission(batch.slice(0, gi.submitted));
+      }
       if (batch.length < GOOGLE_INDEXING_BATCH) break;
       if (b < batchCount - 1) {
         await new Promise((r) => setTimeout(r, 400));

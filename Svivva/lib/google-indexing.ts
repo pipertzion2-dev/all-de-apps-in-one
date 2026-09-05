@@ -90,7 +90,7 @@ export async function submitSitemapWithAccessToken(
 export async function submitUrlsToGoogleIndexingApi(
   serviceAccountJson: string,
   urls: string[],
-): Promise<{ submitted: number; errors: string[] }> {
+): Promise<{ submitted: number; submittedUrls: string[]; errors: string[] }> {
   const sa: ServiceAccount = JSON.parse(serviceAccountJson);
   const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/indexing");
   return submitUrlsWithAccessToken(token, urls);
@@ -99,9 +99,9 @@ export async function submitUrlsToGoogleIndexingApi(
 export async function submitUrlsWithAccessToken(
   accessToken: string,
   urls: string[],
-): Promise<{ submitted: number; errors: string[] }> {
+): Promise<{ submitted: number; submittedUrls: string[]; errors: string[] }> {
   const errors: string[] = [];
-  let submitted = 0;
+  const submittedUrls: string[] = [];
   const concurrency = 6;
   const delayMs = 150;
 
@@ -113,7 +113,7 @@ export async function submitUrlsWithAccessToken(
       signal: AbortSignal.timeout(12_000),
     });
     if (res.ok) {
-      submitted++;
+      submittedUrls.push(url);
       return;
     }
     const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
@@ -133,5 +133,5 @@ export async function submitUrlsWithAccessToken(
     }
   }
 
-  return { submitted, errors };
+  return { submitted: submittedUrls.length, submittedUrls, errors };
 }
