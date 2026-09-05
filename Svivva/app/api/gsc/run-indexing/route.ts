@@ -17,13 +17,44 @@ export async function POST(req: NextRequest) {
 
   let autoSetup = null;
   if (accessToken) {
-    autoSetup = await runGscAutoSetup({ userId, accessToken });
+    // Sitemap/property only here — Indexing API runs once in automate below
+    // so we do not burn the ~200/day quota twice in one click.
+    autoSetup = await runGscAutoSetup({ userId, accessToken, skipIndexingApi: true });
   }
 
   const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
 
+  const discoveryOk =
+    indexing.indexNow.ok ||
+    indexing.googleSitemap.ok ||
+    indexing.googleIndexing.submitted > 0 ||
+    !!autoSetup?.sitemapOk;
+
+  const messageParts: string[] = [];
+  if (accessToken) {
+    messageParts.push(autoSetup?.message || "GSC property synced");
+  } else {
+    messageParts.push("Connect Google first at /dashboard/gsc-connect");
+  }
+  if (indexing.indexNow.ok) {
+    messageParts.push(
+      `IndexNow accepted ${indexing.indexNow.submittedCount}/${indexing.indexNow.totalUrls}`,
+    );
+  }
+  if (indexing.googleIndexing.quotaExhausted && indexing.googleIndexing.submitted === 0) {
+    messageParts.push(
+      "Indexing API daily quota already used — IndexNow + GSC sitemap still cover discovery",
+    );
+  } else if (indexing.googleIndexing.submitted > 0) {
+    messageParts.push(
+      `Indexing API notified ${indexing.googleIndexing.submitted} URLs${
+        indexing.googleIndexing.quotaExhausted ? " (then hit daily quota)" : ""
+      }`,
+    );
+  }
+
   return ok({
-    ok: indexing.googleSitemap.ok || indexing.googleIndexing.submitted > 0,
+    ok: discoveryOk,
     autoSetup,
     indexing: {
       indexNow: indexing.indexNow,
@@ -31,9 +62,8 @@ export async function POST(req: NextRequest) {
       googleIndexing: indexing.googleIndexing,
       bingPing: indexing.bingPing,
     },
-    message: accessToken
-      ? autoSetup?.message || "Indexing run complete"
-      : "Connect Google first at /dashboard/gsc-connect",
+    summaryLines: indexing.summaryLines,
+    message: messageParts.join(" · "),
   });
 }
 

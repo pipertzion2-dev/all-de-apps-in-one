@@ -12,4 +12,11 @@ describe("runGscAutoSetup indexing rotation", () => {
     // Primary path must rotate; slice(0, 200) is only an empty-batch fallback.
     expect(src).toMatch(/let batch = await getIndexingBatch/);
   });
+
+  it("can skip Indexing API and respects daily quota soft-fail", () => {
+    const src = readFileSync(join(__dirname, "google-gsc-auto-setup.ts"), "utf8");
+    expect(src).toContain("skipIndexingApi");
+    expect(src).toContain("isGoogleIndexingQuotaExhaustedToday");
+    expect(src).toContain("GOOGLE_INDEXING_QUOTA_SOFT_MESSAGE");
+  });
 });

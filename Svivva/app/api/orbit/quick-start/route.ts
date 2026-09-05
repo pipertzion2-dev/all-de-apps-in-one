@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   let autoSetup = null;
   if (accessToken) {
-    autoSetup = await runGscAutoSetup({ userId, accessToken });
+    autoSetup = await runGscAutoSetup({ userId, accessToken, skipIndexingApi: true });
   }
 
   const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
@@ -103,7 +103,11 @@ export async function POST(req: NextRequest) {
     },
     googleSitemap: indexing.googleSitemap,
     googleIndexing: indexing.googleIndexing,
-    bingPing: { ok: indexing.bingPing.ok },
+    bingPing: {
+      ok: indexing.bingPing.ok,
+      deprecated: indexing.bingPing.deprecated,
+      status: indexing.bingPing.status,
+    },
     gscConnected: gscReady,
   };
 
@@ -113,7 +117,7 @@ export async function POST(req: NextRequest) {
     indexing.indexNow.ok ||
     indexing.googleSitemap.ok ||
     indexing.googleIndexing.submitted > 0 ||
-    indexing.bingPing.ok;
+    !!autoSetup?.sitemapOk;
 
   const summaryLines = [
     indexingOk

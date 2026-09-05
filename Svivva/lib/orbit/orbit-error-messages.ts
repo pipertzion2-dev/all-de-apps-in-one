@@ -46,9 +46,15 @@ function normalizeErrorKey(message: string): string {
 export function isGoogleIndexingQuotaError(message: string | null | undefined): boolean {
   const m = (message ?? "").toLowerCase();
   return (
+    m.includes("quota exceeded") ||
     m.includes("daily quota") ||
-    (m.includes("publish requests") && m.includes("quota")) ||
-    (m.includes("quota exceeded") && (m.includes("indexing") || m.includes("publish")))
+    m.includes("quota reached") ||
+    m.includes("quota resets") ||
+    m.includes("publishrequestsperday") ||
+    m.includes("resource_exhausted") ||
+    m.includes("resourcenexhausted") ||
+    (m.includes("publish requests") && (m.includes("day") || m.includes("quota"))) ||
+    (m.includes("quota") && (m.includes("indexing") || m.includes("publish")))
   );
 }
 

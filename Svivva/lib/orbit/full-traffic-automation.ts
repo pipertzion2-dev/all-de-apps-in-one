@@ -77,6 +77,18 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
     indexing.googleSitemap.ok
       ? "▸ Google sitemap API: submitted"
       : "▸ Google: connect service account at /dashboard/gsc-connect for full Google automation",
+  );
+  if (indexing.googleIndexing.quotaExhausted) {
+    summaryLines.push(
+      "▸ Google Indexing API: daily quota soft-skipped — IndexNow + sitemap cover discovery",
+    );
+  } else if (indexing.googleIndexing.submitted > 0) {
+    summaryLines.push(`▸ Google Indexing API: ${indexing.googleIndexing.submitted} URLs notified`);
+  }
+  if (indexing.bingPing.deprecated) {
+    summaryLines.push("▸ Bing ping retired — IndexNow covers Bing/Yahoo/Yandex");
+  }
+  summaryLines.push(
     "",
     "▸ Still manual: directory paste-ins, Reddit/Medium/PH posts, email outreach (no API keys).",
   );

@@ -216,8 +216,9 @@ export type MarketingIndexingSummary = {
     batched: number;
     totalUrls: number;
     errorsSample: string[];
+    quotaExhausted?: boolean;
   };
-  bingPing: { ok: boolean };
+  bingPing: { ok: boolean; deprecated?: boolean; status?: number };
   gscConnected: boolean;
   /** Live verification that submitted URLs are actually reachable + indexable. */
   health?: {
