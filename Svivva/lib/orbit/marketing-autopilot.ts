@@ -36,8 +36,22 @@ import {
   copyReadyOrNeedsCredentials,
   isCopyOnlyDistributionMode,
 } from "@/lib/orbit/distribution-mode";
+import { isGoogleIndexingQuotaError } from "@/lib/orbit/orbit-error-messages";
+
 function now(): string {
   return new Date().toISOString();
+}
+
+function indexingErrorsAreQuotaOnly(errors: string[]): boolean {
+  return errors.length > 0 && errors.every((e) => isGoogleIndexingQuotaError(e));
+}
+
+/** Failures that should not flip the whole urrthang run to ok:false. */
+function isNonBlockingAutopilotFailure(t: AutopilotTaskResult): boolean {
+  if (t.status !== "failed") return false;
+  if (isGoogleIndexingQuotaError(t.message)) return true;
+  if (t.id === "manual-gsc-indexing" && /quota|indexnow|sitemap/i.test(t.message)) return true;
+  return false;
 }
 
 function task(
@@ -175,151 +189,187 @@ export async function runMarketingAutopilot(opts?: {
 
   // ── Phase 1: On-site + indexing ───────────────────────────────────────────
   if (!opts?.skipOnSite) {
-    const traffic = await runFullTrafficAutomation();
-    const idx = traffic.indexing;
-    const gscConnected =
-      (credStatus.google.serviceAccount || credStatus.google.siteUrl) && credStatus.google.siteUrl;
-
-    // Verify the URLs we just pushed are actually live + indexable, and persist
-    // per-URL progress so a week-long crawl is tracked across runs.
-    let health: MarketingIndexingSummary["health"];
+    let traffic: Awaited<ReturnType<typeof runFullTrafficAutomation>> | null = null;
     try {
-      const hr = await runIndexHealth({ sampleLimit: 50 });
-      health = {
-        score: hr.score,
-        sampled: hr.sampled,
-        indexable: hr.indexable,
-        blocked: hr.blocked,
-        coveragePct: hr.coverage.pct,
-        staleUrls: hr.staleUrls,
-        summary: hr.summary,
-        problems: hr.problems
-          .slice(0, 15)
-          .map((p) => ({ url: p.url, httpStatus: p.httpStatus, notes: p.notes })),
-      };
-    } catch {
-      /* health is best-effort */
-    }
-
-    indexingSummary = {
-      indexNow: {
-        ok: idx.indexNow.ok,
-        submitted: idx.indexNow.submittedCount,
-        total: idx.indexNow.totalUrls,
-        message: idx.indexNow.message,
-      },
-      googleSitemap: idx.googleSitemap,
-      googleIndexing: idx.googleIndexing,
-      bingPing: { ok: idx.bingPing.ok },
-      gscConnected: !!gscConnected,
-      health,
-    };
-
-    const gscIndexingStatus: AutopilotTaskStatus = !gscConnected
-      ? "needs_credentials"
-      : idx.googleIndexing.submitted > 0
-        ? "done"
-        : idx.googleSitemap.ok
-          ? idx.googleIndexing.attempted && idx.googleIndexing.errorsSample.length > 0
-            ? "failed"
-            : "done"
-          : idx.googleSitemap.attempted
-            ? "failed"
-            : "needs_credentials";
-
-    const gscIndexingMessage = !gscConnected
-      ? "Connect Google at /dashboard/gsc-connect — one sign-in, AI sets up indexing"
-      : idx.googleIndexing.submitted > 0
-        ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
-        : idx.googleSitemap.ok
-          ? idx.googleIndexing.errorsSample.length > 0
-            ? `Indexing API errors: ${idx.googleIndexing.errorsSample.slice(0, 2).join(" · ")}`
-            : "Sitemap registered — IndexNow + sitemap cover discovery"
-          : idx.googleSitemap.error || "GSC sitemap failed — verify Owner access in Search Console";
-
-    tasks.push(
-      task(
-        "tech-indexnow-key",
-        credStatus.google.indexNow ? "done" : "failed",
-        credStatus.google.indexNow ? "IndexNow key configured" : "Run IndexNow setup first",
-      ),
-      task("tech-indexnow-submitted", idx.indexNow.ok ? "done" : "failed", idx.indexNow.message),
-      task("tech-sitemap", "done", `Sitemap: ${getSiteUrl()}/sitemap.xml`),
-      task(
-        "tech-gsc-sitemap",
-        idx.googleSitemap.ok
-          ? "done"
-          : credStatus.google.serviceAccount
-            ? "failed"
-            : "needs_credentials",
-        idx.googleSitemap.ok
-          ? "Google sitemap submitted via API"
-          : credStatus.google.serviceAccount
-            ? idx.googleSitemap.error || "GSC sitemap failed — verify Owner access"
-            : "Connect service account at /dashboard/gsc-connect",
-      ),
-      task("manual-gsc-indexing", gscIndexingStatus, gscIndexingMessage, {
-        copyText: !gscConnected ? `${getSiteUrl()}/dashboard/gsc-connect` : getSiteUrl(),
-        url: !gscConnected ? "/dashboard/gsc-connect" : undefined,
-      }),
-      task(
-        "auto-sitemap-pings",
-        idx.indexNow.ok ? "done" : "failed",
-        "IndexNow + Bing ping executed",
-      ),
-      task(
-        "tech-index-health",
-        health
-          ? health.score >= 80
-            ? "done"
-            : health.score >= 50
-              ? "prepared"
-              : "failed"
-          : "skipped",
-        health ? health.summary : "Index health check skipped (no URLs or check failed)",
-      ),
-    );
-
-    try {
-      const { runSeoWeeklyRoutine } = await import("@/lib/orbit/seo-weekly-routine");
-      const weekly = await runSeoWeeklyRoutine({ skipContentGeneration: true });
-      tasks.push(
-        task(
-          "tech-seo-weekly-routine",
-          weekly.ok ? "done" : weekly.stats.failed ? "failed" : "prepared",
-          `SEO weekly: ${weekly.stats.done}/14 done · roadmap ${weekly.roadmap.overallPercent}%`,
-        ),
-      );
+      traffic = await runFullTrafficAutomation();
     } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
       tasks.push(
         task(
-          "tech-seo-weekly-routine",
+          "content-seo-pages",
           "failed",
-          e instanceof Error ? e.message : "SEO weekly routine failed",
+          `On-site traffic automation failed: ${msg.slice(0, 180)}`,
         ),
       );
     }
 
-    const c = traffic.marketing.counts;
-    tasks.push(
-      task("content-seo-pages", c.seoPages >= 20 ? "done" : "done", `${c.seoPages} SEO pages`),
-      task("content-comparisons", "done", `${c.comparisons} comparisons`),
-      task("content-blog", "done", `${c.blogPosts} blog posts`),
-      task("content-aeo", "done", `${c.aeoPages} AEO pages`),
-      task("content-integrations", "done", `${c.integrationPages ?? 0} integration pages`),
-      task("content-usecases", "done", `${c.usecasePages ?? 0} use-case pages`),
-      task("content-templates", "done", `${c.templatePages ?? 0} template pages`),
-      task("content-paa", "done", `${c.paaPages ?? 0} PAA pages`),
-      task("auto-content-velocity", "done", `Tool SEO pages: ${c.seedMarketing}`),
-      task("auto-growth-tasks", "done", "Growth content gap-fill completed"),
-    );
+    if (traffic) {
+      const idx = traffic.indexing;
+      const gscConnected =
+        (credStatus.google.serviceAccount || credStatus.google.siteUrl) &&
+        credStatus.google.siteUrl;
+
+      // Verify the URLs we just pushed are actually live + indexable, and persist
+      // per-URL progress so a week-long crawl is tracked across runs.
+      let health: MarketingIndexingSummary["health"];
+      try {
+        const hr = await runIndexHealth({ sampleLimit: 50 });
+        health = {
+          score: hr.score,
+          sampled: hr.sampled,
+          indexable: hr.indexable,
+          blocked: hr.blocked,
+          coveragePct: hr.coverage.pct,
+          staleUrls: hr.staleUrls,
+          summary: hr.summary,
+          problems: hr.problems
+            .slice(0, 15)
+            .map((p) => ({ url: p.url, httpStatus: p.httpStatus, notes: p.notes })),
+        };
+      } catch {
+        /* health is best-effort */
+      }
+
+      indexingSummary = {
+        indexNow: {
+          ok: idx.indexNow.ok,
+          submitted: idx.indexNow.submittedCount,
+          total: idx.indexNow.totalUrls,
+          message: idx.indexNow.message,
+        },
+        googleSitemap: idx.googleSitemap,
+        googleIndexing: idx.googleIndexing,
+        bingPing: { ok: idx.bingPing.ok },
+        gscConnected: !!gscConnected,
+        health,
+      };
+
+      const indexingErrors = idx.googleIndexing.errorsSample ?? [];
+      const quotaOnly = indexingErrorsAreQuotaOnly(indexingErrors);
+      const discoveryOk = idx.indexNow.ok || idx.googleSitemap.ok;
+
+      // Indexing API daily quota is expected once ~200 URLs/day are used — IndexNow +
+      // sitemap still cover discovery, so do not mark the whole run as failed.
+      const gscIndexingStatus: AutopilotTaskStatus = !gscConnected
+        ? "needs_credentials"
+        : idx.googleIndexing.submitted > 0
+          ? "done"
+          : discoveryOk && (quotaOnly || indexingErrors.length === 0)
+            ? "done"
+            : idx.googleSitemap.ok
+              ? indexingErrors.length > 0
+                ? "failed"
+                : "done"
+              : idx.googleSitemap.attempted
+                ? "failed"
+                : "needs_credentials";
+
+      const gscIndexingMessage = !gscConnected
+        ? "Connect Google at /dashboard/gsc-connect — one sign-in, AI sets up indexing"
+        : idx.googleIndexing.submitted > 0
+          ? quotaOnly
+            ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs (daily quota then hit — IndexNow + sitemap still cover the rest)`
+            : `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
+          : idx.googleSitemap.ok || idx.indexNow.ok
+            ? quotaOnly
+              ? "Indexing API daily quota hit — IndexNow + sitemap still covering discovery. Quota resets tomorrow."
+              : indexingErrors.length > 0
+                ? `Indexing API errors: ${indexingErrors.slice(0, 2).join(" · ")}`
+                : "Sitemap registered — IndexNow + sitemap cover discovery"
+            : idx.googleSitemap.error ||
+              "GSC sitemap failed — verify Owner access in Search Console";
+
+      tasks.push(
+        task(
+          "tech-indexnow-key",
+          credStatus.google.indexNow ? "done" : "failed",
+          credStatus.google.indexNow ? "IndexNow key configured" : "Run IndexNow setup first",
+        ),
+        task("tech-indexnow-submitted", idx.indexNow.ok ? "done" : "failed", idx.indexNow.message),
+        task("tech-sitemap", "done", `Sitemap: ${getSiteUrl()}/sitemap.xml`),
+        task(
+          "tech-gsc-sitemap",
+          idx.googleSitemap.ok
+            ? "done"
+            : credStatus.google.serviceAccount
+              ? "failed"
+              : "needs_credentials",
+          idx.googleSitemap.ok
+            ? "Google sitemap submitted via API"
+            : credStatus.google.serviceAccount
+              ? idx.googleSitemap.error || "GSC sitemap failed — verify Owner access"
+              : "Connect service account at /dashboard/gsc-connect",
+        ),
+        task("manual-gsc-indexing", gscIndexingStatus, gscIndexingMessage, {
+          copyText: !gscConnected ? `${getSiteUrl()}/dashboard/gsc-connect` : getSiteUrl(),
+          url: !gscConnected ? "/dashboard/gsc-connect" : undefined,
+        }),
+        task(
+          "auto-sitemap-pings",
+          idx.indexNow.ok ? "done" : "failed",
+          "IndexNow + Bing ping executed",
+        ),
+        task(
+          "tech-index-health",
+          health
+            ? health.score >= 80
+              ? "done"
+              : health.score >= 50
+                ? "prepared"
+                : "failed"
+            : "skipped",
+          health ? health.summary : "Index health check skipped (no URLs or check failed)",
+        ),
+      );
+
+      try {
+        const { runSeoWeeklyRoutine } = await import("@/lib/orbit/seo-weekly-routine");
+        const weekly = await runSeoWeeklyRoutine({ skipContentGeneration: true });
+        tasks.push(
+          task(
+            "tech-seo-weekly-routine",
+            weekly.ok ? "done" : weekly.stats.failed ? "failed" : "prepared",
+            `SEO weekly: ${weekly.stats.done}/14 done · roadmap ${weekly.roadmap.overallPercent}%`,
+          ),
+        );
+      } catch (e) {
+        tasks.push(
+          task(
+            "tech-seo-weekly-routine",
+            "failed",
+            e instanceof Error ? e.message : "SEO weekly routine failed",
+          ),
+        );
+      }
+
+      const c = traffic.marketing.counts;
+      tasks.push(
+        task("content-seo-pages", c.seoPages >= 20 ? "done" : "done", `${c.seoPages} SEO pages`),
+        task("content-comparisons", "done", `${c.comparisons} comparisons`),
+        task("content-blog", "done", `${c.blogPosts} blog posts`),
+        task("content-aeo", "done", `${c.aeoPages} AEO pages`),
+        task("content-integrations", "done", `${c.integrationPages ?? 0} integration pages`),
+        task("content-usecases", "done", `${c.usecasePages ?? 0} use-case pages`),
+        task("content-templates", "done", `${c.templatePages ?? 0} template pages`),
+        task("content-paa", "done", `${c.paaPages ?? 0} PAA pages`),
+        task("auto-content-velocity", "done", `Tool SEO pages: ${c.seedMarketing}`),
+        task("auto-growth-tasks", "done", "Growth content gap-fill completed"),
+      );
+    } // end if (traffic)
   }
 
   // ── Phase 2: AI content ───────────────────────────────────────────────────
   const content = await generateMarketingLaunchContent();
-  await persistContent("schema-jsonld", "Organization + WebSite schema", content.schemaJsonLd);
+  try {
+    await persistContent("schema-jsonld", "Organization + WebSite schema", content.schemaJsonLd);
+    tasks.push(task("tech-schema-jsonld", "done", "Schema.org JSON-LD generated and saved"));
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    tasks.push(
+      task("tech-schema-jsonld", "failed", `Could not save schema copy: ${msg.slice(0, 140)}`),
+    );
+  }
   tasks.push(
-    task("tech-schema-jsonld", "done", "Schema.org JSON-LD generated and saved"),
     task("tech-rich-results", "prepared", "Optional: test rich results (30 sec)", {
       copyText: getSiteUrl(),
     }),
@@ -795,6 +845,9 @@ export async function runMarketingAutopilot(opts?: {
   }
 
   const stats = statsFromTasks(tasks);
+  const blockingFailed = tasks.filter(
+    (t) => t.status === "failed" && !isNonBlockingAutopilotFailure(t),
+  ).length;
   const summary = [
     "═══ Marketing Autopilot ═══",
     `Posted: ${stats.posted} · Prepared: ${stats.prepared} · Done: ${stats.done} · Failed: ${stats.failed}`,
@@ -811,7 +864,7 @@ export async function runMarketingAutopilot(opts?: {
   ].join("\n");
 
   const result: MarketingAutopilotRunResult = {
-    ok: stats.failed === 0,
+    ok: blockingFailed === 0,
     startedAt,
     finishedAt: now(),
     tasks,

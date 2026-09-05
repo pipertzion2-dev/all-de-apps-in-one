@@ -1,8 +1,9 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   dedupeErrorMessages,
   formatOrbitRunError,
   formatIndexingApiError,
+  isGoogleIndexingQuotaError,
 } from "./orbit-error-messages";
 import { getOrbitAiAlternatives } from "./orbit-ai-alternatives";
 
@@ -48,6 +49,28 @@ describe("orbit-error-messages", () => {
     expect(formatIndexingApiError("Quota exceeded for Publish requests per day")).toContain(
       "daily quota",
     );
+  });
+
+  it("detects Google Indexing daily quota messages", () => {
+    expect(
+      isGoogleIndexingQuotaError(
+        "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.",
+      ),
+    ).toBe(true);
+    expect(isGoogleIndexingQuotaError("IndexNow 403")).toBe(false);
+  });
+
+  it("maps indexing quota to a non-generic title", () => {
+    const hint = formatOrbitRunError(
+      "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.",
+    );
+    expect(hint.title).toContain("quota");
+    expect(hint.title).not.toBe("Run failed");
+  });
+
+  it("maps forbidden to admin unlock", () => {
+    const hint = formatOrbitRunError("Forbidden");
+    expect(hint.title).toContain("unlock");
   });
 });
 

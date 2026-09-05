@@ -42,9 +42,19 @@ function normalizeErrorKey(message: string): string {
   return m.replace(/\s+/g, " ").trim().slice(0, 120);
 }
 
+/** True when Google Indexing API daily publish quota was hit (IndexNow/sitemap still work). */
+export function isGoogleIndexingQuotaError(message: string | null | undefined): boolean {
+  const m = (message ?? "").toLowerCase();
+  return (
+    m.includes("daily quota") ||
+    (m.includes("publish requests") && m.includes("quota")) ||
+    (m.includes("quota exceeded") && (m.includes("indexing") || m.includes("publish")))
+  );
+}
+
 export function formatIndexingApiError(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes("publish requests") && m.includes("quota")) {
+  if (isGoogleIndexingQuotaError(m)) {
     return "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.";
   }
   if (m.includes("indexing api") && m.includes("disabled")) {
@@ -132,6 +142,19 @@ export function formatOrbitRunError(
     };
   }
 
+  if (
+    m === "forbidden" ||
+    m.includes("http 403") ||
+    m.includes("unauthorized") ||
+    m.includes("not allowed")
+  ) {
+    return {
+      title: "Orbit Admin unlock required",
+      detail: "Unlock Orbit Admin at /admin with your owner passcode, then run again.",
+      actions: [{ label: "Unlock admin", href: "/admin" }],
+    };
+  }
+
   if (m.includes("401") || m.includes("403") || m.includes("invalid api key")) {
     return {
       title: "AI API key rejected",
@@ -143,7 +166,7 @@ export function formatOrbitRunError(
     };
   }
 
-  if (m.includes("quota exceeded") && m.includes("indexing")) {
+  if (isGoogleIndexingQuotaError(raw)) {
     return {
       title: "Google Indexing API quota hit for today",
       detail:
@@ -166,6 +189,22 @@ export function formatOrbitRunError(
     };
   }
 
+  if (
+    m.includes("database tables are not set up") ||
+    m.includes("database_url") ||
+    m.includes("econnrefused") ||
+    m.includes("cannot reach postgres")
+  ) {
+    return {
+      title: "Database not ready",
+      detail: raw,
+      actions: [
+        { label: "Platform Secrets", href: "/dashboard/settings/runtime-keys" },
+        { label: "Manual setup guide", href: "/dashboard/launchpad#orbit-manual" },
+      ],
+    };
+  }
+
   if (m.includes("gsc") || m.includes("search console") || m.includes("google oauth")) {
     return {
       title: "Google Search Console not connected",
@@ -177,9 +216,20 @@ export function formatOrbitRunError(
     };
   }
 
+  if (m.includes("timeout") || m.includes("timed out") || m.includes("504") || m.includes("524")) {
+    return {
+      title: "Run timed out — partial progress may be saved",
+      detail: `${raw} Hit urrthang again to continue; indexing and pages often finish across multiple runs.`,
+      actions: [{ label: "Run again", href: "/dashboard/launchpad#orbit-one-click" }],
+    };
+  }
+
   return {
-    title: "Run failed",
+    title: "Run needs attention",
     detail: raw,
-    actions: orbitAiAlternativeActions().slice(0, 1),
+    actions: [
+      { label: "Run again", href: "/dashboard/launchpad#orbit-one-click" },
+      ...orbitAiAlternativeActions().slice(0, 1),
+    ],
   };
 }
