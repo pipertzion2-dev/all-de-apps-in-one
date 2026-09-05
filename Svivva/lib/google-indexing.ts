@@ -90,7 +90,12 @@ export async function submitSitemapWithAccessToken(
 export async function submitUrlsToGoogleIndexingApi(
   serviceAccountJson: string,
   urls: string[],
-): Promise<{ submitted: number; submittedUrls: string[]; errors: string[] }> {
+): Promise<{
+  submitted: number;
+  submittedUrls: string[];
+  errors: string[];
+  quotaExhausted: boolean;
+}> {
   const sa: ServiceAccount = JSON.parse(serviceAccountJson);
   const token = await getGoogleAccessToken(sa, "https://www.googleapis.com/auth/indexing");
   return submitUrlsWithAccessToken(token, urls);
@@ -99,13 +104,20 @@ export async function submitUrlsToGoogleIndexingApi(
 export async function submitUrlsWithAccessToken(
   accessToken: string,
   urls: string[],
-): Promise<{ submitted: number; submittedUrls: string[]; errors: string[] }> {
+): Promise<{
+  submitted: number;
+  submittedUrls: string[];
+  errors: string[];
+  /** True when Google returned daily publish-quota errors and remaining URLs were skipped. */
+  quotaExhausted: boolean;
+}> {
   const errors: string[] = [];
   const submittedUrls: string[] = [];
   const concurrency = 6;
   const delayMs = 150;
+  let quotaExhausted = false;
 
-  async function publishOne(url: string): Promise<void> {
+  async function publishOne(url: string): Promise<"ok" | "quota" | "error"> {
     const res = await fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
@@ -114,24 +126,50 @@ export async function submitUrlsWithAccessToken(
     });
     if (res.ok) {
       submittedUrls.push(url);
-      return;
+      return "ok";
     }
     const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
-    errors.push(body.error?.message || `HTTP ${res.status} for ${url}`);
+    const message = body.error?.message || `HTTP ${res.status} for ${url}`;
+    errors.push(message);
+    const lower = message.toLowerCase();
+    if (
+      lower.includes("quota") ||
+      lower.includes("resource_exhausted") ||
+      lower.includes("publishrequestsperday") ||
+      (lower.includes("publish requests") && lower.includes("day"))
+    ) {
+      return "quota";
+    }
+    return "error";
   }
 
   for (let i = 0; i < urls.length; i += concurrency) {
+    if (quotaExhausted) break;
     const chunk = urls.slice(i, i + concurrency);
     const results = await Promise.allSettled(chunk.map((url) => publishOne(url)));
     for (const r of results) {
-      if (r.status === "rejected") {
+      if (r.status === "fulfilled" && r.value === "quota") {
+        quotaExhausted = true;
+      } else if (r.status === "rejected") {
         errors.push(r.reason?.message || "Network error");
       }
     }
+    if (quotaExhausted) break;
     if (i + concurrency < urls.length) {
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
 
-  return { submitted: submittedUrls.length, submittedUrls, errors };
+  if (quotaExhausted && !errors.some((e) => e.toLowerCase().includes("quota"))) {
+    errors.push(
+      "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.",
+    );
+  }
+
+  return {
+    submitted: submittedUrls.length,
+    submittedUrls,
+    errors,
+    quotaExhausted,
+  };
 }

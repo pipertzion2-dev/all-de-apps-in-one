@@ -57,6 +57,12 @@ describe("orbit-error-messages", () => {
         "Google Indexing API daily quota reached (~200 URLs/day). IndexNow + GSC sitemap still work — quota resets tomorrow.",
       ),
     ).toBe(true);
+    expect(
+      isGoogleIndexingQuotaError(
+        "Quota exceeded for quota metric 'Publish requests' and limit 'Publish requests per day' of service 'indexing.googleapis.com'.",
+      ),
+    ).toBe(true);
+    expect(isGoogleIndexingQuotaError("RESOURCE_EXHAUSTED")).toBe(true);
     expect(isGoogleIndexingQuotaError("IndexNow 403")).toBe(false);
   });
 

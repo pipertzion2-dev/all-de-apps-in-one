@@ -11,6 +11,12 @@ import {
   hasGscWritePermission,
   type GscSiteEntry,
 } from "@/lib/google-gsc-oauth";
+import {
+  GOOGLE_INDEXING_QUOTA_SOFT_MESSAGE,
+  isGoogleIndexingQuotaExhaustedToday,
+  markGoogleIndexingQuotaExhausted,
+  noteGoogleIndexingErrors,
+} from "@/lib/orbit/google-indexing-quota";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getIndexingBatch, recordSubmission } from "@/lib/seo/index-health";
 import { getSiteUrl, getSitemapUrl, getSecuritySitemapUrl, getSiteHostname } from "@/lib/site-url";
@@ -23,6 +29,8 @@ export type GscAutoSetupResult = {
   securitySitemapOk?: boolean;
   indexingSubmitted: number;
   indexingAttempted: number;
+  /** True when Indexing API daily quota stopped further publishes. */
+  indexingQuotaExhausted?: boolean;
   sitesFound: number;
   message: string;
   aiUsed: boolean;
@@ -51,6 +59,12 @@ async function pickSiteWithAi(sites: GscSiteEntry[], canonical: string): Promise
 export async function runGscAutoSetup(opts: {
   userId: string;
   accessToken: string;
+  /**
+   * When true, only match the GSC property + submit sitemaps.
+   * Use before `runAutomatableManualActions` in the same request so Indexing API
+   * quota is not burned twice.
+   */
+  skipIndexingApi?: boolean;
 }): Promise<GscAutoSetupResult> {
   const canonical = getSiteUrl();
   const sitemapUrl = getSitemapUrl();
@@ -139,18 +153,28 @@ export async function runGscAutoSetup(opts: {
   // Rotate never-/least-recently-submitted URLs first. The old slice(0, 200)
   // burned daily Indexing API quota on the same homepage/static set every sync,
   // so new hub/tool pages never received URL_UPDATED notifications.
-  const allUrls = await getAllSiteUrlsForIndexing();
-  let batch = await getIndexingBatch(200);
-  if (batch.length === 0) batch = allUrls.slice(0, 200);
-
   let indexingSubmitted = 0;
-  if (batch.length > 0) {
-    const gi = await submitUrlsWithAccessToken(opts.accessToken, batch);
-    indexingSubmitted = gi.submitted;
-    // Record only URLs Google accepted so never-notified pages stay at the
-    // front of tomorrow's rotation when daily quota cuts the batch short.
-    if (gi.submittedUrls.length > 0) {
-      await recordSubmission(gi.submittedUrls);
+  let indexingAttempted = 0;
+  let indexingQuotaExhausted = false;
+
+  if (opts.skipIndexingApi || isGoogleIndexingQuotaExhaustedToday()) {
+    indexingQuotaExhausted = isGoogleIndexingQuotaExhaustedToday();
+  } else {
+    const allUrls = await getAllSiteUrlsForIndexing();
+    let batch = await getIndexingBatch(200);
+    if (batch.length === 0) batch = allUrls.slice(0, 200);
+    indexingAttempted = batch.length;
+
+    if (batch.length > 0) {
+      const gi = await submitUrlsWithAccessToken(opts.accessToken, batch);
+      indexingSubmitted = gi.submitted;
+      indexingQuotaExhausted = gi.quotaExhausted || noteGoogleIndexingErrors(gi.errors);
+      if (indexingQuotaExhausted) markGoogleIndexingQuotaExhausted();
+      // Record only URLs Google accepted so never-notified pages stay at the
+      // front of tomorrow's rotation when daily quota cuts the batch short.
+      if (gi.submittedUrls.length > 0) {
+        await recordSubmission(gi.submittedUrls);
+      }
     }
   }
 
@@ -161,16 +185,25 @@ export async function runGscAutoSetup(opts: {
       ? "security sitemap submitted"
       : `security sitemap: ${smSecurity.error || "skipped"}`,
   ];
+  const indexingBit = opts.skipIndexingApi
+    ? "Indexing API deferred to traffic engine"
+    : indexingQuotaExhausted && indexingSubmitted === 0
+      ? GOOGLE_INDEXING_QUOTA_SOFT_MESSAGE
+      : indexingQuotaExhausted
+        ? `${indexingSubmitted}/${indexingAttempted} URLs sent then daily quota (IndexNow + sitemap still cover discovery)`
+        : `${indexingSubmitted}/${indexingAttempted} URLs sent to Google Indexing API (rotated for new pages)`;
+
   return {
     ok,
     siteUrl: matched,
     sitemapOk: sm.ok,
     securitySitemapOk: smSecurity.ok,
     indexingSubmitted,
-    indexingAttempted: batch.length,
+    indexingAttempted,
+    indexingQuotaExhausted,
     sitesFound: sites.length,
     message: sm.ok
-      ? `Connected ${matched} · ${sitemapBits.join(" · ")} · ${indexingSubmitted}/${batch.length} URLs sent to Google Indexing API (rotated for new pages)`
+      ? `Connected ${matched} · ${sitemapBits.join(" · ")} · ${indexingBit}`
       : sm.error || "Sitemap submission failed",
     aiUsed,
   };

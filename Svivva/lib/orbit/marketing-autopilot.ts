@@ -172,7 +172,7 @@ export async function runMarketingAutopilot(opts?: {
     const userId = await resolveGscCredentialsUserId();
     const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
     if (accessToken) {
-      const gscSetup = await runGscAutoSetup({ userId, accessToken });
+      const gscSetup = await runGscAutoSetup({ userId, accessToken, skipIndexingApi: true });
       tasks.push(
         task(
           "auto-gsc-preflight",
@@ -239,30 +239,29 @@ export async function runMarketingAutopilot(opts?: {
         },
         googleSitemap: idx.googleSitemap,
         googleIndexing: idx.googleIndexing,
-        bingPing: { ok: idx.bingPing.ok },
+        bingPing: {
+          ok: idx.bingPing.ok,
+          deprecated: idx.bingPing.deprecated,
+          status: idx.bingPing.status,
+        },
         gscConnected: !!gscConnected,
         health,
       };
 
       const indexingErrors = idx.googleIndexing.errorsSample ?? [];
-      const quotaOnly = indexingErrorsAreQuotaOnly(indexingErrors);
+      const quotaOnly =
+        indexingErrorsAreQuotaOnly(indexingErrors) || !!idx.googleIndexing.quotaExhausted;
       const discoveryOk = idx.indexNow.ok || idx.googleSitemap.ok;
 
       // Indexing API daily quota is expected once ~200 URLs/day are used — IndexNow +
       // sitemap still cover discovery, so do not mark the whole run as failed.
       const gscIndexingStatus: AutopilotTaskStatus = !gscConnected
         ? "needs_credentials"
-        : idx.googleIndexing.submitted > 0
+        : idx.googleIndexing.submitted > 0 || discoveryOk
           ? "done"
-          : discoveryOk && (quotaOnly || indexingErrors.length === 0)
-            ? "done"
-            : idx.googleSitemap.ok
-              ? indexingErrors.length > 0
-                ? "failed"
-                : "done"
-              : idx.googleSitemap.attempted
-                ? "failed"
-                : "needs_credentials";
+          : idx.googleSitemap.attempted
+            ? "failed"
+            : "needs_credentials";
 
       const gscIndexingMessage = !gscConnected
         ? "Connect Google at /dashboard/gsc-connect — one sign-in, AI sets up indexing"
@@ -270,12 +269,10 @@ export async function runMarketingAutopilot(opts?: {
           ? quotaOnly
             ? `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs (daily quota then hit — IndexNow + sitemap still cover the rest)`
             : `Google Indexing API notified for ${idx.googleIndexing.submitted} URLs`
-          : idx.googleSitemap.ok || idx.indexNow.ok
+          : discoveryOk
             ? quotaOnly
               ? "Indexing API daily quota hit — IndexNow + sitemap still covering discovery. Quota resets tomorrow."
-              : indexingErrors.length > 0
-                ? `Indexing API errors: ${indexingErrors.slice(0, 2).join(" · ")}`
-                : "Sitemap registered — IndexNow + sitemap cover discovery"
+              : "Sitemap registered — IndexNow + sitemap cover discovery"
             : idx.googleSitemap.error ||
               "GSC sitemap failed — verify Owner access in Search Console";
 
@@ -306,8 +303,14 @@ export async function runMarketingAutopilot(opts?: {
         }),
         task(
           "auto-sitemap-pings",
-          idx.indexNow.ok ? "done" : "failed",
-          "IndexNow + Bing ping executed",
+          idx.indexNow.ok || idx.bingPing.ok ? "done" : "failed",
+          idx.indexNow.ok
+            ? idx.bingPing.deprecated
+              ? "IndexNow submitted (Bing ping retired — IndexNow covers Bing)"
+              : "IndexNow + Bing ping executed"
+            : idx.bingPing.ok
+              ? "Bing ping OK"
+              : "IndexNow failed — check key at Launchpad",
         ),
         task(
           "tech-index-health",

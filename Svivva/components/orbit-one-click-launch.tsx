@@ -1642,6 +1642,31 @@ function GoogleIndexingCard({
 }) {
   const gscConnected = gscConnectedProp ?? indexing.gscConnected;
   const gscOk = gscConnected && indexing.googleSitemap.ok;
+  const discoveryOk = indexing.indexNow.ok || gscOk;
+  const quotaHit =
+    !!indexing.googleIndexing.quotaExhausted ||
+    indexing.googleIndexing.errorsSample.some((e) => /quota|resets tomorrow/i.test(e));
+  const indexingApiOk =
+    indexing.googleIndexing.submitted > 0 ||
+    (discoveryOk && (quotaHit || !indexing.googleIndexing.attempted));
+  const bingOk = indexing.bingPing.ok || indexing.indexNow.ok;
+  const bingDetail = indexing.bingPing.deprecated
+    ? "via IndexNow"
+    : indexing.bingPing.ok
+      ? "OK"
+      : indexing.indexNow.ok
+        ? "via IndexNow"
+        : "—";
+  const indexApiDetail = !indexing.googleIndexing.attempted
+    ? quotaHit
+      ? "Quota today"
+      : "Skipped"
+    : indexing.googleIndexing.submitted > 0
+      ? `${indexing.googleIndexing.submitted} URLs`
+      : quotaHit
+        ? "Quota today"
+        : "0 URLs";
+
   return (
     <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -1670,11 +1695,7 @@ function GoogleIndexingCard({
           ok={indexing.indexNow.ok}
           detail={`${indexing.indexNow.submitted}/${indexing.indexNow.total}`}
         />
-        <IndexStat
-          label="Bing ping"
-          ok={indexing.bingPing.ok}
-          detail={indexing.bingPing.ok ? "OK" : "—"}
-        />
+        <IndexStat label="Bing" ok={bingOk} detail={bingDetail} />
         <IndexStat
           label="GSC sitemap"
           ok={gscOk}
@@ -1682,15 +1703,7 @@ function GoogleIndexingCard({
             gscConnected ? (indexing.googleSitemap.ok ? "Submitted" : "Failed") : "Not connected"
           }
         />
-        <IndexStat
-          label="Google Index API"
-          ok={indexing.googleIndexing.submitted > 0}
-          detail={
-            indexing.googleIndexing.attempted
-              ? `${indexing.googleIndexing.submitted} URLs`
-              : "Skipped"
-          }
-        />
+        <IndexStat label="Google Index API" ok={indexingApiOk} detail={indexApiDetail} />
       </div>
       {indexing.health && (
         <div className="rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 space-y-1">
@@ -1734,7 +1747,13 @@ function GoogleIndexingCard({
           your sitemap and requests indexing via Search Console (not via an LLM).
         </p>
       )}
-      {indexing.googleIndexing.errorsSample.length > 0 && (
+      {quotaHit && discoveryOk && (
+        <p className="text-[9px] text-amber-400/90 leading-relaxed">
+          Google Indexing API daily quota used — IndexNow + GSC sitemap still cover discovery. Quota
+          resets tomorrow.
+        </p>
+      )}
+      {!quotaHit && indexing.googleIndexing.errorsSample.length > 0 && (
         <p className="text-[9px] text-amber-400/90 leading-relaxed">
           {dedupeErrorMessages(indexing.googleIndexing.errorsSample).slice(0, 1).join(" ")}
         </p>
