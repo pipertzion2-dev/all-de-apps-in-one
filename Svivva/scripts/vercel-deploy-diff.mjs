@@ -58,12 +58,78 @@ export function listChangedFiles(base, head, cwd = ".") {
   }
 }
 
+export function filesRequireProductionDeploy(files) {
+  if (!files?.length) return false;
+  return files.some(isProductionShipPath);
+}
+
 /** When unsure (missing git range), prefer building. */
 export function diffRequiresProductionDeploy(base, head, cwd = ".") {
   const files = listChangedFiles(base, head, cwd);
   if (files === null) return true;
-  if (files.length === 0) return false;
-  return files.some(isProductionShipPath);
+  return filesRequireProductionDeploy(files);
+}
+
+export async function fetchParentSha(sha) {
+  const repo = process.env.GITHUB_REPOSITORY?.trim();
+  const token = process.env.GITHUB_TOKEN?.trim();
+  if (!repo || !token || !sha) return null;
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.parents?.[0]?.sha ?? null;
+}
+
+export async function resolveDiffRangeAsync(cwd = ".") {
+  const current = process.env.VERCEL_GIT_COMMIT_SHA?.trim() || "HEAD";
+  const previous = process.env.VERCEL_GIT_PREVIOUS_SHA?.trim();
+  if (previous && previous !== current) {
+    return {
+      base: previous,
+      head: current,
+      label: `${previous.slice(0, 7)}..${current.slice(0, 7)}`,
+    };
+  }
+
+  const githubSha = process.env.GITHUB_SHA?.trim();
+  if (githubSha) {
+    try {
+      const parent = execSync(`git rev-parse ${githubSha}^`, {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+      return {
+        base: parent,
+        head: githubSha,
+        label: `${parent.slice(0, 7)}..${githubSha.slice(0, 7)}`,
+      };
+    } catch {
+      const parent = await fetchParentSha(githubSha);
+      if (parent) {
+        return {
+          base: parent,
+          head: githubSha,
+          label: `${parent.slice(0, 7)}..${githubSha.slice(0, 7)}`,
+        };
+      }
+      return { base: null, head: githubSha, label: githubSha.slice(0, 7) };
+    }
+  }
+
+  try {
+    execSync("git rev-parse HEAD^", { cwd, stdio: "ignore" });
+    return { base: "HEAD^", head: "HEAD", label: "HEAD^..HEAD" };
+  } catch {
+    return { base: null, head: current, label: current.slice(0, 7) };
+  }
 }
 
 export function resolveDiffRange(cwd = ".") {

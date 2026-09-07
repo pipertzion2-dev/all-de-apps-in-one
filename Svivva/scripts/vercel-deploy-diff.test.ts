@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diffRequiresProductionDeploy, isProductionShipPath } from "./vercel-deploy-diff.mjs";
+import { filesRequireProductionDeploy, isProductionShipPath } from "./vercel-deploy-diff.mjs";
 
 describe("isProductionShipPath", () => {
   it("treats app and lib sources as production", () => {
@@ -13,12 +13,17 @@ describe("isProductionShipPath", () => {
   });
 });
 
-describe("diffRequiresProductionDeploy", () => {
-  it("returns false for scripts-only prettier commit", () => {
-    expect(diffRequiresProductionDeploy("491bc5d1", "5eb00bef", "..")).toBe(false);
+describe("filesRequireProductionDeploy", () => {
+  it("returns false for scripts-only prettier commit files", () => {
+    expect(filesRequireProductionDeploy(["Svivva/scripts/attach-legacy-domain.mjs"])).toBe(false);
   });
 
   it("returns true for SEO automation app changes", () => {
-    expect(diffRequiresProductionDeploy("ced78206", "f6c1be64", "..")).toBe(true);
+    expect(
+      filesRequireProductionDeploy([
+        "Svivva/app/api/orbit/seo-weekly-routine/route.ts",
+        "Svivva/lib/orbit/seo-weekly-routine.ts",
+      ]),
+    ).toBe(true);
   });
 });
