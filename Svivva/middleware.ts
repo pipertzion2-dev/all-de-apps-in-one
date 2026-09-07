@@ -30,6 +30,9 @@ function isLikelyLocalDevHost(host: string): boolean {
   return false;
 }
 
+/** Hostnames that should 308 to the canonical apex (legacy brand domains). */
+export const LEGACY_REDIRECT_HOSTS = new Set(["svivva.com", "www.svivva.com"]);
+
 function canonicalSiteUrl(): URL | null {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://zzaizzai.com";
   try {
@@ -63,6 +66,10 @@ export function middleware(request: NextRequest) {
 
   if (host && canonical) {
     const apex = canonical.hostname.toLowerCase();
+    if (LEGACY_REDIRECT_HOSTS.has(host)) {
+      const dest = new URL(pathname + request.nextUrl.search, `${canonical.protocol}//${apex}`);
+      return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest, 308)));
+    }
     if (host === `www.${apex}`) {
       const dest = new URL(pathname + request.nextUrl.search, `${canonical.protocol}//${apex}`);
       return applyCrawlHeaders(request, withSecurityHeaders(NextResponse.redirect(dest, 308)));

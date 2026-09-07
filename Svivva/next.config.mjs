@@ -51,6 +51,18 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "svivva.com" }],
+        destination: "https://zzaizzai.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.svivva.com" }],
+        destination: "https://zzaizzai.com/:path*",
+        permanent: true,
+      },
       { source: "/clutety", destination: "/cyber-security-mini-apps", permanent: true },
       { source: "/clutety/:path*", destination: "/cyber-security-mini-apps", permanent: true },
       { source: "/pyracrypt", destination: "/cyber-security-mini-apps", permanent: true },

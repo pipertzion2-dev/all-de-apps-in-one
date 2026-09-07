@@ -89,7 +89,10 @@ async function godaddyFetch(
   return { ok: res.ok, status: res.status, body };
 }
 
-async function addVercelDomains(domain: string): Promise<{
+async function addVercelDomains(
+  domain: string,
+  options?: { redirect?: string },
+): Promise<{
   ok: boolean;
   detail: string;
   domains: string[];
@@ -112,13 +115,17 @@ async function addVercelDomains(domain: string): Promise<{
   const errors: string[] = [];
 
   for (const name of [domain, `www.${domain}`]) {
+    const body: { name: string; redirect?: string } = { name };
+    if (options?.redirect && name === domain) {
+      body.redirect = options.redirect;
+    }
     const res = await fetch(`${VERCEL_API}/v10/projects/${projectId}/domains${qs}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(20000),
     });
     const body = (await res.json().catch(() => ({}))) as {
@@ -395,4 +402,12 @@ export async function runDomainCutover(
     platformSiteUrlUpdated,
     nextSteps,
   };
+}
+
+/** Attach a legacy hostname on Vercel and redirect it to the canonical production domain. */
+export async function attachLegacyDomainRedirect(
+  legacyDomain = "svivva.com",
+  redirectTarget = "zzaizzai.com",
+): Promise<{ ok: boolean; detail: string; domains: string[] }> {
+  return addVercelDomains(legacyDomain, { redirect: redirectTarget });
 }

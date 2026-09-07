@@ -34,7 +34,8 @@
     "orbit:ingest": "node scripts/orbit.mjs ingest",
     "orbit:research": "node scripts/orbit.mjs research",
     "marketing:execute": "node scripts/marketing-execute.mjs",
-    "domain:cutover": "node scripts/domain-cutover.mjs"
+    "domain:cutover": "node scripts/domain-cutover.mjs",
+    "domain:legacy-alias": "tsx scripts/attach-legacy-domain.mjs"
   },
   "engines": {
     "node": "22.x"
