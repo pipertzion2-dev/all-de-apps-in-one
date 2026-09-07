@@ -19,10 +19,11 @@ const vercelCanonical = JSON.parse(
 
 const VERCEL_API = "https://api.vercel.com";
 const legacy = (process.env.LEGACY_DOMAIN || "svivva.com").replace(/^www\./, "");
-const canonical = (process.env.CANONICAL_DOMAIN || vercelCanonical.productionDomain || "zzaizzai.com").replace(
-  /^www\./,
-  "",
-);
+const canonical = (
+  process.env.CANONICAL_DOMAIN ||
+  vercelCanonical.productionDomain ||
+  "zzaizzai.com"
+).replace(/^www\./, "");
 
 async function attachLegacyDomainRedirect(legacyDomain, redirectTarget) {
   const token = process.env.VERCEL_TOKEN?.trim();
@@ -83,7 +84,9 @@ async function attachLegacyDomainRedirect(legacyDomain, redirectTarget) {
 }
 
 async function main() {
-  console.log(`\n▶ Attach ${legacy} → redirect to ${canonical} on Vercel (${vercelCanonical.projectName})\n`);
+  console.log(
+    `\n▶ Attach ${legacy} → redirect to ${canonical} on Vercel (${vercelCanonical.projectName})\n`,
+  );
   const result = await attachLegacyDomainRedirect(legacy, canonical);
   console.log(result.detail);
   if (result.domains.length) console.log(`Domains: ${result.domains.join(", ")}`);
