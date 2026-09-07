@@ -3,21 +3,17 @@ import { db } from "@/server/db";
 import { seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { nativeToolsAsIndexCards } from "@/lib/orbit/mini-app-curation";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 import ToolsIndexContent from "./tools-index-content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Tools",
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Tools | ZZAI",
   description:
     "Free tools for developers and creators — calculators, validators, and playgrounds. Most need no signup.",
-  openGraph: {
-    title: "ZZAI tools",
-    description:
-      "Free tools for developers and creators — explore calculators, validators, and playgrounds on ZZAI.",
-    type: "website",
-  },
-};
+  path: "/tools",
+});
 
 export default async function ToolsIndexPage() {
   let tools: (typeof seoLandingPages.$inferSelect)[] = [];
