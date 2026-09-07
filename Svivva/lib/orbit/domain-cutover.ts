@@ -115,9 +115,9 @@ async function addVercelDomains(
   const errors: string[] = [];
 
   for (const name of [domain, `www.${domain}`]) {
-    const body: { name: string; redirect?: string } = { name };
+    const requestBody: { name: string; redirect?: string } = { name };
     if (options?.redirect && name === domain) {
-      body.redirect = options.redirect;
+      requestBody.redirect = options.redirect;
     }
     const res = await fetch(`${VERCEL_API}/v10/projects/${projectId}/domains${qs}`, {
       method: "POST",
@@ -125,22 +125,22 @@ async function addVercelDomains(
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
       signal: AbortSignal.timeout(20000),
     });
-    const body = (await res.json().catch(() => ({}))) as {
+    const responseBody = (await res.json().catch(() => ({}))) as {
       error?: { code?: string; message?: string };
     };
 
-    if (res.ok || res.status === 409 || body.error?.code === "domain_already_in_use") {
+    if (res.ok || res.status === 409 || responseBody.error?.code === "domain_already_in_use") {
       added.push(name);
       continue;
     }
-    if (/already/i.test(body.error?.message || "")) {
+    if (/already/i.test(responseBody.error?.message || "")) {
       added.push(name);
       continue;
     }
-    errors.push(`${name}: ${body.error?.message || res.status}`);
+    errors.push(`${name}: ${responseBody.error?.message || res.status}`);
   }
 
   if (added.length === 0) {
