@@ -6,7 +6,7 @@
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { diffRequiresProductionDeploy, resolveDiffRangeAsync } from "./vercel-deploy-diff.mjs";
+import { diffRequiresProductionDeployAsync, resolveDiffRangeAsync } from "./vercel-deploy-diff.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
@@ -46,7 +46,7 @@ async function ignoredBuildAcceptable() {
     console.log("Could not resolve parent commit for diff — treating ignored build as failure.");
     return false;
   }
-  const requiresDeploy = diffRequiresProductionDeploy(base, head, repoRoot);
+  const requiresDeploy = await diffRequiresProductionDeployAsync(base, head, repoRoot);
   if (!requiresDeploy) {
     console.log(`Ignored build is OK — non-production paths only (${label}).`);
     return true;

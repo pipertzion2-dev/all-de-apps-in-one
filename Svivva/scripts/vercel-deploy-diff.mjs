@@ -63,6 +63,32 @@ export function filesRequireProductionDeploy(files) {
   return files.some(isProductionShipPath);
 }
 
+export async function listChangedFilesAsync(base, head, cwd = ".") {
+  const local = listChangedFiles(base, head, cwd);
+  if (local !== null) return local;
+
+  const repo = process.env.GITHUB_REPOSITORY?.trim();
+  const token = process.env.GITHUB_TOKEN?.trim();
+  if (!repo || !token || !base || !head) return null;
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/compare/${base}...${head}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return (data.files || []).map((file) => file.filename).filter(Boolean);
+}
+
+export async function diffRequiresProductionDeployAsync(base, head, cwd = ".") {
+  const files = await listChangedFilesAsync(base, head, cwd);
+  if (files === null) return true;
+  return filesRequireProductionDeploy(files);
+}
+
 /** When unsure (missing git range), prefer building. */
 export function diffRequiresProductionDeploy(base, head, cwd = ".") {
   const files = listChangedFiles(base, head, cwd);
