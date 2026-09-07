@@ -5,9 +5,10 @@
  * Skips when:
  * - branch is not main (no preview deploys from cursor/* or PR branches)
  * - commit message contains [skip vercel]
+ * - diff only touches non-production paths (scripts/, tests, docs, workflows)
  * - Svivva/ has no changes vs previous commit (monorepo noise)
  */
-import { execSync } from "child_process";
+import { diffRequiresProductionDeploy, resolveDiffRange } from "./vercel-deploy-diff.mjs";
 
 const ref = process.env.VERCEL_GIT_COMMIT_REF || "";
 if (ref && ref !== "main") {
@@ -25,38 +26,17 @@ if (/\[(vercel )?deploy\]/i.test(msg)) {
   process.exit(1);
 }
 
-const current = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
-const previous = process.env.VERCEL_GIT_PREVIOUS_SHA?.trim();
+const { base, head, label } = resolveDiffRange(".");
 
-function diffQuiet(base, head) {
-  execSync(`git diff ${base} ${head} --quiet -- .`, { stdio: "ignore" });
-}
-
-if (current && previous && previous !== current) {
-  try {
-    diffQuiet(previous, current);
-    console.log(
-      `Skip: no file changes under Svivva (${previous.slice(0, 7)}..${current.slice(0, 7)})`,
-    );
-    process.exit(0);
-  } catch {
-    console.log(`Build: Svivva changes detected (${previous.slice(0, 7)}..${current.slice(0, 7)})`);
-    process.exit(1);
-  }
-}
-
-try {
-  execSync("git rev-parse HEAD^", { stdio: "ignore" });
-} catch {
+if (!base) {
   console.log("Build: first commit or shallow clone (no previous SHA)");
   process.exit(1);
 }
 
-try {
-  diffQuiet("HEAD^", "HEAD");
-  console.log("Skip: no file changes under Svivva (Root Directory)");
+if (!diffRequiresProductionDeploy(base, head, ".")) {
+  console.log(`Skip: non-production paths only (${label})`);
   process.exit(0);
-} catch {
-  console.log("Build: Svivva changes detected on main");
-  process.exit(1);
 }
+
+console.log(`Build: production paths changed (${label})`);
+process.exit(1);

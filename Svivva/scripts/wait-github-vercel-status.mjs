@@ -6,8 +6,10 @@
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { diffRequiresProductionDeploy, resolveDiffRange } from "./vercel-deploy-diff.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(__dirname, "../..");
 const canonical = JSON.parse(readFileSync(resolve(__dirname, "../vercel-canonical.json"), "utf8"));
 const required = canonical.githubStatusCheck?.required || "Vercel – all-de-apps-in-one";
 
@@ -38,6 +40,17 @@ async function fetchStatus() {
   return res.json();
 }
 
+function ignoredBuildAcceptable() {
+  const { base, head, label } = resolveDiffRange(repoRoot);
+  if (!base) return false;
+  const requiresDeploy = diffRequiresProductionDeploy(base, head, repoRoot);
+  if (!requiresDeploy) {
+    console.log(`Ignored build is OK — non-production paths only (${label}).`);
+    return true;
+  }
+  return false;
+}
+
 console.log(`Waiting for "${required}" on ${sha.slice(0, 7)} (timeout ${timeoutMs / 1000}s)…`);
 
 while (Date.now() - started < timeoutMs) {
@@ -47,8 +60,12 @@ while (Date.now() - started < timeoutMs) {
     console.log(`  ${required}: ${match.state} — ${match.description || ""}`);
     const ignored = /ignored build step/i.test(match.description || "");
     if (match.state === "success" && ignored) {
+      if (ignoredBuildAcceptable()) {
+        console.log("Vercel skipped deploy intentionally; production unchanged.");
+        process.exit(0);
+      }
       console.error(
-        `Vercel skipped the build (${match.description}). Production was not updated — set VERCEL_TOKEN or VERCEL_DEPLOY_HOOK, or fix ignoreCommand.`,
+        `Vercel skipped the build (${match.description}) but production paths changed — set VERCEL_TOKEN or VERCEL_DEPLOY_HOOK, or push with [deploy].`,
       );
       process.exit(1);
     }
